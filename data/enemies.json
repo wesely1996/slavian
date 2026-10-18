@@ -1,57 +1,64 @@
 {
-  "version": 1,
-  "_comment": "Enemy forces per front. weight sets how common a unit is in a wave; minWave is the first wave index it can appear in. speed is hexes per hour on plains, like player units. family drives counters in battle; stances weights how often a wave of this front takes each battle stance.",
+  "version": 2,
+  "_comment": "Enemy forces per front. weight sets how common a unit is in a wave; minWave is the first wave index it can appear in, minPlayers the smallest group that sees it. speed is hexes per hour on plains, like player units. family drives counters in battle; stances weights how often a wave of this front takes each battle stance. personality: lootFactor scales what a raid carries off, raidReach is how far from its road a horde burns outposts, nerve scales its stance's retreat threshold (higher holds longer, capped at never breaking before 95%).",
   "fronts": {
     "north": {
       "faction": "Monsters of the North",
-      "spawnTerrain": [
-        "dark_forest",
-        "ice"
-      ],
+      "signature": "Beasts and creatures of the old forests. Erratic and savage; they fight on past reason.",
+      "spawnTerrain": ["dark_forest", "ice"],
+      "personality": { "lootFactor": 0.6, "raidReach": 1, "nerve": 1.15 },
       "units": {
-        "grey_wolf": {
-          "name": "Grey Wolf",
-          "weight": 6,
-          "minWave": 0,
-          "attack": 15,
-          "defense": 10,
-          "speed": 8,
-          "family": "cavalry"
-        },
-        "leshy_thrall": {
-          "name": "Leshy's Thrall",
-          "weight": 3,
-          "minWave": 0,
-          "attack": 25,
-          "defense": 25,
-          "speed": 5,
-          "family": "infantry"
-        },
-        "cave_bear": {
-          "name": "Cave Bear",
-          "weight": 2,
-          "minWave": 1,
-          "attack": 40,
-          "defense": 35,
-          "speed": 4,
-          "family": "infantry"
-        },
-        "likho": {
-          "name": "Likho",
-          "weight": 0.4,
-          "minWave": 3,
-          "attack": 90,
-          "defense": 60,
-          "speed": 4,
-          "family": "infantry"
-        }
+        "grey_wolf": { "name": "Grey Wolf", "weight": 6, "minWave": 0, "attack": 15, "defense": 10, "speed": 8, "family": "cavalry" },
+        "leshy_thrall": { "name": "Leshy's Thrall", "weight": 3, "minWave": 0, "attack": 25, "defense": 25, "speed": 5, "family": "infantry" },
+        "cave_bear": { "name": "Cave Bear", "weight": 2, "minWave": 1, "attack": 40, "defense": 35, "speed": 4, "family": "infantry" },
+        "volkolak": { "name": "Volkolak", "weight": 1.5, "minWave": 2, "attack": 45, "defense": 25, "speed": 8, "family": "cavalry" },
+        "upyr": { "name": "Upyr", "weight": 1, "minWave": 2, "attack": 35, "defense": 30, "speed": 5, "family": "archers" },
+        "likho": { "name": "Likho", "weight": 0.4, "minWave": 3, "attack": 90, "defense": 60, "speed": 4, "family": "infantry" },
+        "zmey_whelp": { "name": "Zmey Whelp", "weight": 0.2, "minWave": 5, "minPlayers": 3, "attack": 140, "defense": 90, "speed": 6, "family": "cavalry" }
       },
-      "stances": {
-        "offensive": 5,
-        "balanced": 3,
-        "hold_the_line": 1,
-        "defensive": 1
-      }
+      "stances": { "offensive": 5, "balanced": 3, "hold_the_line": 1, "defensive": 1 }
+    },
+    "east": {
+      "faction": "Nomad Horde",
+      "signature": "Fast horse archers out of the steppe. They raid rather than stay, burn outposts far from their road and carry off more.",
+      "spawnTerrain": ["steppe"],
+      "personality": { "lootFactor": 1.5, "raidReach": 2, "nerve": 0.85 },
+      "units": {
+        "steppe_raider": { "name": "Steppe Raider", "weight": 5, "minWave": 0, "attack": 20, "defense": 10, "speed": 10, "family": "cavalry" },
+        "horse_archer": { "name": "Horse Archer", "weight": 4, "minWave": 0, "attack": 30, "defense": 12, "speed": 10, "family": "archers" },
+        "lancer": { "name": "Lancer", "weight": 2, "minWave": 1, "attack": 45, "defense": 25, "speed": 9, "family": "cavalry" },
+        "shaman": { "name": "Steppe Shaman", "weight": 0.5, "minWave": 2, "attack": 25, "defense": 20, "speed": 7, "family": "infantry" },
+        "khans_guard": { "name": "Khan's Guard", "weight": 0.6, "minWave": 3, "attack": 70, "defense": 45, "speed": 9, "family": "cavalry" }
+      },
+      "stances": { "offensive": 4, "balanced": 3, "defensive": 2, "hold_the_line": 0.5 }
+    },
+    "south": {
+      "faction": "Order of the One Throne",
+      "signature": "Disciplined zealots in heavy ranks with crossbows. Slow, and they do not break easily.",
+      "spawnTerrain": ["hallowed"],
+      "personality": { "lootFactor": 0.8, "raidReach": 1, "nerve": 1.25 },
+      "units": {
+        "zealot": { "name": "Zealot", "weight": 5, "minWave": 0, "attack": 20, "defense": 30, "speed": 5, "family": "infantry" },
+        "crossbowman": { "name": "Crossbowman", "weight": 3, "minWave": 0, "attack": 35, "defense": 20, "speed": 5, "family": "archers" },
+        "knight_brother": { "name": "Knight-Brother", "weight": 1.5, "minWave": 1, "attack": 50, "defense": 45, "speed": 7, "family": "cavalry" },
+        "inquisitor": { "name": "Inquisitor", "weight": 0.5, "minWave": 2, "attack": 40, "defense": 35, "speed": 5, "family": "infantry" },
+        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "minPlayers": 3, "attack": 80, "defense": 70, "speed": 3, "family": "infantry" }
+      },
+      "stances": { "hold_the_line": 4, "defensive": 2, "balanced": 3, "offensive": 1 }
+    },
+    "west": {
+      "faction": "Order of the One Throne",
+      "signature": "The Order's western host: knights and crossbows. Slow, and they do not break easily.",
+      "spawnTerrain": ["hallowed"],
+      "personality": { "lootFactor": 0.8, "raidReach": 1, "nerve": 1.25 },
+      "units": {
+        "zealot": { "name": "Zealot", "weight": 4, "minWave": 0, "attack": 20, "defense": 30, "speed": 5, "family": "infantry" },
+        "crossbowman": { "name": "Crossbowman", "weight": 3, "minWave": 0, "attack": 35, "defense": 20, "speed": 5, "family": "archers" },
+        "knight_brother": { "name": "Knight-Brother", "weight": 2.5, "minWave": 0, "attack": 50, "defense": 45, "speed": 7, "family": "cavalry" },
+        "inquisitor": { "name": "Inquisitor", "weight": 0.5, "minWave": 2, "attack": 40, "defense": 35, "speed": 5, "family": "infantry" },
+        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "attack": 80, "defense": 70, "speed": 3, "family": "infantry" }
+      },
+      "stances": { "hold_the_line": 3, "defensive": 2, "balanced": 3, "offensive": 2 }
     }
   }
 }

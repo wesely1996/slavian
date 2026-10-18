@@ -1,19 +1,38 @@
 {
   "version": 1,
-  "_comment": "Hours are game hours (divided by world speed). Fronts take turns among the world's active fronts that are also enabled here; only the North front is enabled during M1. A marching horde burns every outpost within `raidReach` hexes of its route down a level.",
-  "enabledFronts": ["north"],
+  "_comment": "Hours are game hours (divided by world speed). Fronts take turns among the world's active fronts that are also enabled here. A marching horde burns every outpost within its front's raidReach (data/enemies.json personality) of its route down a level.",
+  "enabledFronts": [
+    "north",
+    "east",
+    "south",
+    "west"
+  ],
   "graceHours": 168,
-  "intervalHours": [48, 72],
+  "intervalHours": [
+    48,
+    72
+  ],
   "upcoming": 2,
   "rampageHours": 18,
-  "raidReach": 1,
   "baseUnits": 8,
   "growthPerWave": 1.25,
   "perExtraPlayer": 0.5,
   "threatLevels": [
-    { "name": "Low", "maxUnits": 12 },
-    { "name": "Moderate", "maxUnits": 25 },
-    { "name": "High", "maxUnits": 50 },
-    { "name": "Severe", "maxUnits": null }
+    {
+      "name": "Low",
+      "maxUnits": 12
+    },
+    {
+      "name": "Moderate",
+      "maxUnits": 25
+    },
+    {
+      "name": "High",
+      "maxUnits": 50
+    },
+    {
+      "name": "Severe",
+      "maxUnits": null
+    }
   ]
 }

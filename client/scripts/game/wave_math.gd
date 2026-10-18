@@ -3,6 +3,15 @@ extends RefCounted
 ## Where a marching horde is, from the path the server sent: each step is
 ## [q, r, ms after spawnAt when the horde enters that hex].
 
+## Each front's horde colour on the map: monsters red, nomads ochre, the
+## Order violet.
+const FRONT_COLORS := {
+	"north": Color("#c8372d"),
+	"east": Color("#d0862c"),
+	"south": Color("#7b5aa6"),
+	"west": Color("#7b5aa6"),
+}
+
 
 ## {"from": Vector2i, "to": Vector2i, "t": 0..1} for the leg the horde is on,
 ## or {} when the wave has no path yet.
@@ -41,3 +50,19 @@ static func current_hex(wave: Dictionary, at_unix: float) -> Vector2i:
 ## Hordes on the map: marching, or at their target (camped or fighting).
 static func visible_waves(waves: Array) -> Array:
 	return waves.filter(func(w: Dictionary) -> bool: return w.status in ["marching", "arrived", "battling"])
+
+
+static func front_color(front: String) -> Color:
+	return FRONT_COLORS.get(front, Color("#c8372d"))
+
+
+## "Monsters of the North (North): Beasts and creatures…" for each active
+## front, from data/enemies.json.
+static func front_lines(data: Dictionary, active_fronts: Array) -> PackedStringArray:
+	var lines := PackedStringArray()
+	var fronts: Dictionary = data.get("enemies", {}).get("fronts", {})
+	for front in active_fronts:
+		var def: Dictionary = fronts.get(front, {})
+		if not def.is_empty():
+			lines.append("%s (%s): %s" % [def.faction, String(front).capitalize(), def.get("signature", "")])
+	return lines

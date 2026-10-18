@@ -30,6 +30,7 @@ func _initialize() -> void:
 	_test_inbox()
 	_test_armies()
 	_test_field()
+	_test_fronts()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -373,3 +374,10 @@ func _test_field() -> void:
 	var battle := {"villageId": null, "q": 2, "r": -1, "status": "raided", "rounds": [], "setup": {"ambush": true, "fort": true}}
 	_check(BattleText.setup_text(battle) == "Ambush, Fort", "setup text: %s" % BattleText.setup_text(battle))
 	_check(BattleText.outcome(battle, "(2, -1)").begins_with("Our army fell back from (2, -1)"), "field battle lost")
+
+
+func _test_fronts() -> void:
+	var data := {"enemies": {"fronts": {"east": {"faction": "Nomad Horde", "signature": "Fast."}}}}
+	var lines := WaveMath.front_lines(data, ["east", "west"])
+	_check(lines.size() == 1 and lines[0] == "Nomad Horde (East): Fast.", "front lines: %s" % lines)
+	_check(WaveMath.front_color("south") == WaveMath.front_color("west") and WaveMath.front_color("east") != WaveMath.front_color("north"), "front colours")
