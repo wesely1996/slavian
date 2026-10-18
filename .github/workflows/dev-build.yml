@@ -1,0 +1,49 @@
+name: Dev build
+
+# Every merge to main runs CI, then publishes the debug APK as a dev
+# pre-release. Dev builds older than 7 days are removed by
+# cleanup-dev-builds.yml.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: dev-build
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  publish:
+    name: Publish dev pre-release
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.ci.outputs.apk_artifact }}
+          path: dist
+
+      - name: Create pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ needs.ci.outputs.version_name }}
+        run: |
+          tag="dev-$(date -u +%Y%m%d-%H%M)-${GITHUB_SHA::7}"
+          notes="Automatic dev build of \`${GITHUB_SHA::7}\` from \`${GITHUB_REF_NAME}\` (version ${VERSION_NAME}).
+          Install the APK on an Android phone to test. Dev builds are deleted after 7 days."
+          gh release create "$tag" dist/*.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "Dev build ${VERSION_NAME}" \
+            --notes "$notes"
+          echo "Published [$tag]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$tag)" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,56 @@
+name: Clean up dev builds
+
+# Deletes dev pre-releases (tags starting with "dev-") older than
+# max_age_days, together with their tags. The newest dev build is always
+# kept so there is something to install even after a quiet week.
+# APK artifacts from CI runs expire on their own (retention-days: 7).
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: Delete dev builds older than this many days
+        default: "7"
+      dry_run:
+        description: Only list what would be deleted
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old dev releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAX_AGE_DAYS: ${{ inputs.max_age_days || '7' }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        run: |
+          cutoff=$(date -u -d "-${MAX_AGE_DAYS} days" +%s)
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.prerelease and (.tag_name | startswith("dev-"))) | "\(.created_at) \(.tag_name)"' \
+            | sort -r > dev-releases.txt
+          echo "Found $(wc -l < dev-releases.txt) dev release(s); cutoff $(date -u -d "@$cutoff" +%FT%TZ)"
+
+          newest=$(head -n 1 dev-releases.txt | cut -d ' ' -f 2)
+          deleted=0
+          while read -r created tag; do
+            if [ "$tag" = "$newest" ]; then
+              echo "Keeping newest: $tag ($created)"
+              continue
+            fi
+            if [ "$(date -u -d "$created" +%s)" -ge "$cutoff" ]; then
+              echo "Keeping: $tag ($created)"
+              continue
+            fi
+            echo "Deleting: $tag ($created)"
+            if [ "$DRY_RUN" != "true" ]; then
+              gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes
+            fi
+            deleted=$((deleted + 1))
+          done < dev-releases.txt
+          echo "Deleted $deleted dev release(s) older than $MAX_AGE_DAYS days (dry run: $DRY_RUN)" | tee -a "$GITHUB_STEP_SUMMARY"

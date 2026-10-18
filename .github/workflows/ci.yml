@@ -1,11 +1,28 @@
 name: CI
 
+# Runs on every pull request. The dev-build workflow calls it for pushes to
+# main, so main is never built twice.
 on:
-  push:
   pull_request:
+  workflow_dispatch:
+  workflow_call:
+    outputs:
+      apk_artifact:
+        description: Name of the uploaded debug APK artifact
+        value: ${{ jobs.android.outputs.artifact }}
+      version_name:
+        description: Version name baked into the APK
+        value: ${{ jobs.android.outputs.version_name }}
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: 4.5.1
 
 jobs:
   server:
+    name: Server tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -38,19 +55,83 @@ jobs:
           TEST_DATABASE_URL: postgres://slavian:slavian@localhost:5432/slavian_test
 
   client:
+    name: Client tests
     runs-on: ubuntu-latest
-    env:
-      GODOT_VERSION: 4.5.1
     steps:
       - uses: actions/checkout@v4
-      - name: Install Godot
-        run: |
-          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          unzip -q godot.zip
-          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot
+      - uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}
+      - run: ops/ci/install-godot.sh
       - name: Import project
-        run: ./godot --headless --path client --import
+        run: godot --headless --path client --import
       - name: Run tests
-        run: ./godot --headless --path client --script res://tests/test_runner.gd
+        run: godot --headless --path client --script res://tests/test_runner.gd
       - name: Smoke-run main scene
-        run: ./godot --headless --path client --quit-after 30
+        run: godot --headless --path client --quit-after 30
+
+  android:
+    name: Android debug APK
+    needs: [server, client]
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.version.outputs.artifact }}
+      version_name: ${{ steps.version.outputs.version_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-templates-android-${{ env.GODOT_VERSION }}
+      - run: ops/ci/install-godot.sh --android
+
+      - name: Version
+        id: version
+        run: |
+          base=$(sed -n 's/^config\/version="\(.*\)"/\1/p' client/project.godot)
+          sha=$(git rev-parse --short HEAD)
+          # Minutes since 2026-01-01: always increasing, so every build installs over the last one.
+          code=$(( ($(date +%s) - 1767225600) / 60 ))
+          name="${base}-dev.${sha}"
+          echo "version_name=$name" >> "$GITHUB_OUTPUT"
+          echo "version_code=$code" >> "$GITHUB_OUTPUT"
+          echo "artifact=slavian-${name}" >> "$GITHUB_OUTPUT"
+
+      - name: Signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+          KEYSTORE_USER: ${{ secrets.ANDROID_DEBUG_KEYSTORE_USER }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_DEBUG_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_DEBUG_KEYSTORE_BASE64 is not set; using a throwaway key. Builds signed with different keys cannot be installed over each other."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/debug.keystore"
+          {
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$RUNNER_TEMP/debug.keystore"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=${KEYSTORE_USER:-androiddebugkey}"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=${KEYSTORE_PASSWORD:-android}"
+          } >> "$GITHUB_ENV"
+
+      - name: Export APK
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: ops/export-android.sh "build/${{ steps.version.outputs.artifact }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.artifact }}
+          path: build/${{ steps.version.outputs.artifact }}.apk
+          retention-days: 7
+          if-no-files-found: error
