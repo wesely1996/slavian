@@ -3,6 +3,7 @@ import { notifyWorld } from '../db/notify.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
+import { battleHandlers } from './battles.js';
 import { scoutingHandlers } from './scouting.js';
 import { waveHandlers } from './waves.js';
 
@@ -35,4 +36,5 @@ export const handlers: HandlerRegistry = {
 
   ...waveHandlers,
   ...scoutingHandlers,
+  ...battleHandlers,
 };

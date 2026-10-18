@@ -2,7 +2,7 @@
 // survivors' report is as precise as their number allows. Everything is
 // seeded by the world seed and mission id, so a mission resolves the same
 // way every time.
-import type { GameData, TerrainId } from '../data/index.js';
+import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { createRng } from './rng.js';
@@ -26,6 +26,8 @@ export interface ScoutReport {
   readonly size: { readonly min: number; readonly max: number } | null;
   // Rough reports name only the most numerous unit; better ones list all.
   readonly units: readonly ScoutedUnit[];
+  // Revealed by good enough reports; null otherwise.
+  readonly stance: Stance | null;
   // The horde had scattered before the scouts arrived.
   readonly dispersed: boolean;
 }
@@ -105,6 +107,7 @@ export function scoutReport(
   input: {
     front: Front;
     composition: Composition;
+    stance: Stance;
     sent: number;
     survivors: number;
     dispersed: boolean;
@@ -114,7 +117,7 @@ export function scoutReport(
 ): ScoutReport {
   const base = { sent: input.sent, survivors: input.survivors, dispersed: input.dispersed };
   const tier = [...data.scouting.tiers].reverse().find((t) => input.survivors >= t.minSurvivors);
-  if (!tier || input.dispersed) return { ...base, tier: 'none', size: null, units: [] };
+  if (!tier || input.dispersed) return { ...base, tier: 'none', size: null, units: [], stance: null };
 
   const names = data.enemies.fronts[input.front]!.units;
   const rng = rngFor(input.seed, input.missionId, 0x2e);
@@ -127,5 +130,5 @@ export function scoutReport(
     unitError === null
       ? entries.slice(0, 1).map(([unit]) => ({ unit, name: names[unit]?.name ?? unit, min: null, max: null }))
       : entries.map(([unit, count]) => ({ unit, name: names[unit]?.name ?? unit, ...range(count, unitError, rng) }));
-  return { ...base, tier: tier.name, size, units };
+  return { ...base, tier: tier.name, size, units, stance: tier.revealsStance ? input.stance : null };
 }

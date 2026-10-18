@@ -5,7 +5,8 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to the
 // nearest village by path cost. Until battles exist (M1 step 5) it camps at
 // its target for the rampage time and then disperses.
-import type { GameData, TerrainId } from '../data/index.js';
+import type { GameData, Stance, TerrainId } from '../data/index.js';
+import { waveStance } from './battle.js';
 import { findPath, hex, hexKey, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { createRng } from './rng.js';
@@ -22,6 +23,7 @@ export interface PlannedWave {
   readonly spawnAt: Date;
   readonly composition: Composition;
   readonly threat: string;
+  readonly stance: Stance;
 }
 
 export interface PathStep {
@@ -120,6 +122,7 @@ export function planWave(data: GameData, ctx: WaveContext, index: number, previo
     spawnAt: spawnTime(data, ctx, index, previousSpawnAt),
     composition,
     threat: threatOf(data, composition),
+    stance: waveStance(data, front, ctx.seed, index),
   };
 }
 

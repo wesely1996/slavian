@@ -1,8 +1,9 @@
-import type { BuildingDef, GameData } from '../data/index.js';
+import type { BuildingDef, GameData, Stance } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import {
   mapResources,
   spend,
+  take,
   withRates,
   type ResourceLedger,
   type Resources,
@@ -33,6 +34,8 @@ export interface VillageState {
   readonly training: readonly TrainingBatch[];
   // Units away from home on a mission (scouts). They still eat.
   readonly away: Units;
+  // How the garrison fights when the village is attacked.
+  readonly stance: Stance;
 }
 
 const MS_PER_SECOND = 1000;
@@ -91,6 +94,7 @@ export function newVillage(data: GameData, at: Date, worldSpeed: number): Villag
     garrison: {},
     training: [],
     away: {},
+    stance: 'balanced',
     ledger: {
       amounts: { ...data.buildings.village.startingResources },
       ratesPerHour: productionPerHour(data, levels, worldSpeed),
@@ -218,4 +222,16 @@ export function returnHome(state: VillageState, unit: string, count: number): Vi
     away: { ...state.away, [unit]: Math.max(0, (state.away[unit] ?? 0) - count) },
     garrison: addUnits(state.garrison, { [unit]: count }),
   };
+}
+
+// Garrison losses in battle: the dead stop eating from `at`.
+export function loseGarrison(data: GameData, state: VillageState, losses: Units, at: Date, worldSpeed: number): VillageState {
+  const garrison: Record<string, number> = { ...state.garrison };
+  for (const [unit, count] of Object.entries(losses)) garrison[unit] = Math.max(0, (garrison[unit] ?? 0) - count);
+  const next = { ...state, garrison };
+  return { ...next, ledger: withRates(state.ledger, at, ratesPerHour(data, state.levels, unitsFed(next), worldSpeed)) };
+}
+
+export function plunder(state: VillageState, loot: Resources, at: Date): VillageState {
+  return { ...state, ledger: take(state.ledger, at, loot) };
 }

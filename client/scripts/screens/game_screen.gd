@@ -41,8 +41,10 @@ func _ready() -> void:
 	Live.connection_changed.connect(_on_live_connection)
 	Live.waves_updated.connect(Game.set_waves)
 	Live.scouting_updated.connect(Game.set_scouting)
+	Live.battles_updated.connect(Game.set_battles)
 	Game.waves_changed.connect(_on_waves_changed)
 	Game.scouting_changed.connect(_on_waves_changed)
+	Game.battles_changed.connect(_on_waves_changed)
 	Live.watch(Game.world_id())
 
 	hex_map.refresh()
@@ -62,6 +64,7 @@ func _exit_tree() -> void:
 	Live.connection_changed.disconnect(_on_live_connection)
 	Live.waves_updated.disconnect(Game.set_waves)
 	Live.scouting_updated.disconnect(Game.set_scouting)
+	Live.battles_updated.disconnect(Game.set_battles)
 
 
 func _process(delta: float) -> void:
@@ -273,6 +276,7 @@ func _buildings_section(village: Dictionary) -> void:
 
 func _troops_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
+	_stance_picker(village)
 	_panel_body.add_child(UI.label("At home", UI.SMALL_SIZE, UI.MUTED))
 	var home := UI.label()
 	_panel_body.add_child(home)
@@ -349,6 +353,34 @@ func _troops_section(village: Dictionary) -> void:
 			return cost_text + ("  (queue full)" if queue_full else ""))
 
 
+func _stance_picker(village: Dictionary) -> void:
+	var stances: Dictionary = Game.data.battle.stances
+	var current: String = village.get("stance", "balanced")
+	_panel_body.add_child(UI.label("Stance when attacked", UI.SMALL_SIZE, UI.MUTED))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	_panel_body.add_child(grid)
+	for stance in stances:
+		var button := UI.button(stances[stance].name, func() -> void: _set_stance(int(village.id), stance))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = stance == current
+		grid.add_child(button)
+	var def: Dictionary = stances[current]
+	var breaks := "never breaks" if def.retreatAt == null else "breaks at %d%% losses" % roundi(float(def.retreatAt) * 100.0)
+	_panel_body.add_child(UI.label("%s: attack ×%.2f, defense ×%.2f, %s." % [def.name, def.attack, def.defense, breaks], UI.SMALL_SIZE, UI.MUTED))
+
+
+func _set_stance(village_id: int, stance: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/stance" % village_id, {"stance": stance})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.update_village(response.data.village)
+
+
 func _units_text(units: Dictionary) -> String:
 	if units.is_empty():
 		return "No troops yet."
@@ -380,6 +412,10 @@ func _threat_summary() -> String:
 		if wave.status == "marching":
 			return "Horde marching on %s · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 	for wave in Game.waves:
+		if wave.status == "battling":
+			var battle := Game.battle_for(int(wave.id))
+			return "Battle at %s · round %d" % [Game.village_name(wave.targetVillageId), int(battle.get("round", 0))]
+	for wave in Game.waves:
 		if wave.status == "arrived":
 			return "Horde at %s" % Game.village_name(wave.targetVillageId)
 	var next: Dictionary = Game.waves[0]
@@ -392,6 +428,12 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label("No waves announced.", UI.SMALL_SIZE, UI.MUTED))
 	for wave in Game.waves:
 		_wave_entry(wave)
+	var finished := Game.battles.filter(func(b: Dictionary) -> bool: return b.status != "ongoing")
+	if not finished.is_empty():
+		_panel_body.add_child(UI.label("Battle reports", UI.HEADING_SIZE))
+	for battle in finished:
+		_panel_body.add_child(UI.label(BattleText.outcome(battle, Game.village_name(battle.villageId)), UI.SMALL_SIZE))
+		_panel_body.add_child(UI.label("%s horde, %d rounds" % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)], UI.SMALL_SIZE, UI.MUTED))
 
 
 func _wave_entry(wave: Dictionary) -> void:
@@ -410,6 +452,9 @@ func _wave_entry(wave: Dictionary) -> void:
 				return "Marching on %s · arrives in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 			"arrived":
 				return "At the gates of %s · leaves in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
+			"battling":
+				var battle := Game.battle_for(int(wave.id))
+				return "Fighting at %s · round %d of %d · %d of them left" % [Game.village_name(wave.targetVillageId), int(battle.get("round", 0)), int(Game.data.battle.maxRounds), BattleText.total(battle.get("attackerNow", {}))]
 		return String(wave.status).capitalize())
 	_scouting_section(wave)
 

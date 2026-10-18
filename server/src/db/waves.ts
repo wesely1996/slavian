@@ -1,9 +1,10 @@
 import { NotFoundError } from '../errors.js';
+import type { Stance } from '../data/index.js';
 import type { Front } from '../sim/mapgen.js';
 import type { Composition, March, PathStep, PlannedWave } from '../sim/waves.js';
 import type { DbClient } from './pool.js';
 
-export type WaveStatus = 'scheduled' | 'marching' | 'arrived' | 'dispersed';
+export type WaveStatus = 'scheduled' | 'marching' | 'arrived' | 'battling' | 'defeated' | 'dispersed';
 
 export interface Wave {
   id: number;
@@ -12,6 +13,8 @@ export interface Wave {
   front: Front;
   status: WaveStatus;
   threat: string;
+  stance: Stance;
+  // Current strength: shrinks as the horde takes losses in battle.
   composition: Composition;
   spawnAt: Date;
   spawn: { q: number; r: number } | null;
@@ -28,6 +31,7 @@ interface WaveRow {
   front: Front;
   status: WaveStatus;
   threat: string;
+  stance: Stance;
   composition: Composition;
   spawn_at: Date;
   spawn_q: number | null;
@@ -46,6 +50,7 @@ function fromRow(row: WaveRow): Wave {
     front: row.front,
     status: row.status,
     threat: row.threat,
+    stance: row.stance,
     composition: row.composition,
     spawnAt: row.spawn_at,
     spawn: row.spawn_q === null || row.spawn_r === null ? null : { q: row.spawn_q, r: row.spawn_r },
@@ -58,9 +63,9 @@ function fromRow(row: WaveRow): Wave {
 
 export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave): Promise<Wave> {
   const { rows } = await client.query<WaveRow>(
-    `INSERT INTO waves (world_id, index, front, threat, composition, spawn_at)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [worldId, wave.index, wave.front, wave.threat, JSON.stringify(wave.composition), wave.spawnAt],
+    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt],
   );
   return fromRow(rows[0]!);
 }
@@ -79,10 +84,10 @@ export async function lastWave(client: DbClient, worldId: number): Promise<Wave 
   return rows[0] ? fromRow(rows[0]) : null;
 }
 
-// Waves players should know about: everything not yet dispersed.
+// Waves players should know about: everything still on the board.
 export async function listActiveWaves(client: DbClient, worldId: number): Promise<Wave[]> {
   const { rows } = await client.query<WaveRow>(
-    "SELECT * FROM waves WHERE world_id = $1 AND status <> 'dispersed' ORDER BY index",
+    "SELECT * FROM waves WHERE world_id = $1 AND status NOT IN ('dispersed', 'defeated') ORDER BY index",
     [worldId],
   );
   return rows.map(fromRow);
@@ -102,4 +107,17 @@ export async function markArrived(client: DbClient, id: number, endsAt: Date): P
 
 export async function markDispersed(client: DbClient, id: number): Promise<void> {
   await client.query("UPDATE waves SET status = 'dispersed' WHERE id = $1", [id]);
+}
+
+export async function markBattling(client: DbClient, id: number): Promise<void> {
+  await client.query("UPDATE waves SET status = 'battling' WHERE id = $1", [id]);
+}
+
+export async function setWaveStrength(client: DbClient, id: number, composition: Composition): Promise<void> {
+  await client.query('UPDATE waves SET composition = $2 WHERE id = $1', [id, JSON.stringify(composition)]);
+}
+
+// Battle over: beaten ('defeated') or done raiding ('dispersed').
+export async function endWave(client: DbClient, id: number, status: 'defeated' | 'dispersed', at: Date): Promise<void> {
+  await client.query('UPDATE waves SET status = $2, ends_at = $3 WHERE id = $1', [id, status, at]);
 }

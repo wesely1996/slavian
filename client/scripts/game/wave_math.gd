@@ -38,6 +38,6 @@ static func current_hex(wave: Dictionary, at_unix: float) -> Vector2i:
 	return p.to if p.t >= 0.5 else p.from
 
 
-## Hordes on the map: marching or camped at their target.
+## Hordes on the map: marching, or at their target (camped or fighting).
 static func visible_waves(waves: Array) -> Array:
-	return waves.filter(func(w: Dictionary) -> bool: return w.status == "marching" or w.status == "arrived")
+	return waves.filter(func(w: Dictionary) -> bool: return w.status in ["marching", "arrived", "battling"])

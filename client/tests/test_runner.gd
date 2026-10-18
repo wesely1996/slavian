@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_test_training()
 	_test_wave_math()
 	_test_scout_text()
+	_test_battle_text()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -149,3 +150,17 @@ func _test_scout_text() -> void:
 		{"unit": "cave_bear", "name": "Cave Bear", "min": 4, "max": 4}]})
 	_check(ScoutText.describe(detailed) == "23–28 units: Grey Wolf 11–17, Cave Bear 4", "detailed report: %s" % ScoutText.describe(detailed))
 	_check(ScoutText.survivors(base) == "3 of 6 scouts returned", "survivor count")
+
+
+func _test_battle_text() -> void:
+	var rounds := [
+		{"attackerLosses": {"grey_wolf": 2}, "defenderLosses": {}},
+		{"attackerLosses": {"grey_wolf": 3, "leshy_thrall": 1}, "defenderLosses": {"spearman": 1}},
+	]
+	var defended := {"status": "defended", "round": 2, "rounds": rounds, "loot": null}
+	_check(BattleText.losses(defended) == {"attacker": 6, "defender": 1}, "losses add up over rounds")
+	_check(BattleText.outcome(defended, "Vesna's village") == "Defended Vesna's village: 6 of the horde fell, we lost 1.", "defended text: %s" % BattleText.outcome(defended, "Vesna's village"))
+	var raided := {"status": "raided", "round": 2, "rounds": rounds, "loot": {"wood": 120, "stone": 0, "grain": 30, "iron": 0}}
+	_check(BattleText.outcome(raided, "Mila's village").ends_with("Taken: Wood 120, Grain 30."), "raided text: %s" % BattleText.outcome(raided, "Mila's village"))
+	var stanced := {"sent": 4, "survivors": 4, "dispersed": false, "tier": "detailed", "stance": "hold_the_line", "size": {"min": 9, "max": 11}, "units": [{"unit": "grey_wolf", "name": "Grey Wolf", "min": 5, "max": 7}]}
+	_check(ScoutText.describe(stanced) == "9–11 units, hold the line stance: Grey Wolf 5–7", "scout report shows stance: %s" % ScoutText.describe(stanced))

@@ -1,0 +1,121 @@
+import type { Stance } from '../data/index.js';
+import { NotFoundError } from '../errors.js';
+import type { Resources } from '../sim/resources.js';
+import type { Units } from '../sim/training.js';
+import type { DbClient } from './pool.js';
+
+export type BattleStatus = 'ongoing' | 'defended' | 'raided';
+
+export interface RoundLog {
+  round: number;
+  at: string;
+  attackerLosses: Record<string, number>;
+  defenderLosses: Record<string, number>;
+  attackerLeft: number;
+  defenderLeft: number;
+}
+
+export interface Battle {
+  id: number;
+  worldId: number;
+  waveId: number;
+  villageId: number;
+  status: BattleStatus;
+  round: number;
+  attackerStance: Stance;
+  attackerInitial: Units;
+  defenderInitial: Units;
+  rounds: RoundLog[];
+  loot: Resources | null;
+  startedAt: Date;
+  endedAt: Date | null;
+}
+
+interface BattleRow {
+  id: number;
+  world_id: number;
+  wave_id: number;
+  village_id: number;
+  status: BattleStatus;
+  round: number;
+  attacker_stance: Stance;
+  attacker_initial: Units;
+  defender_initial: Units;
+  rounds: RoundLog[];
+  loot: Resources | null;
+  started_at: Date;
+  ended_at: Date | null;
+}
+
+function fromRow(row: BattleRow): Battle {
+  return {
+    id: row.id,
+    worldId: row.world_id,
+    waveId: row.wave_id,
+    villageId: row.village_id,
+    status: row.status,
+    round: row.round,
+    attackerStance: row.attacker_stance,
+    attackerInitial: row.attacker_initial,
+    defenderInitial: row.defender_initial,
+    rounds: row.rounds,
+    loot: row.loot,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+  };
+}
+
+export async function insertBattle(
+  client: DbClient,
+  battle: Pick<Battle, 'worldId' | 'waveId' | 'villageId' | 'attackerStance' | 'attackerInitial' | 'defenderInitial' | 'startedAt'>,
+): Promise<Battle> {
+  const { rows } = await client.query<BattleRow>(
+    `INSERT INTO battles (world_id, wave_id, village_id, attacker_stance, attacker_initial, defender_initial, started_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [
+      battle.worldId,
+      battle.waveId,
+      battle.villageId,
+      battle.attackerStance,
+      JSON.stringify(battle.attackerInitial),
+      JSON.stringify(battle.defenderInitial),
+      battle.startedAt,
+    ],
+  );
+  return fromRow(rows[0]!);
+}
+
+export async function loadBattle(client: DbClient, id: number): Promise<Battle> {
+  const { rows } = await client.query<BattleRow>('SELECT * FROM battles WHERE id = $1', [id]);
+  if (!rows[0]) throw new NotFoundError(`Battle ${id} not found`);
+  return fromRow(rows[0]);
+}
+
+export async function recordRound(
+  client: DbClient,
+  id: number,
+  log: RoundLog,
+  end: { status: Exclude<BattleStatus, 'ongoing'>; at: Date; loot: Resources | null } | null,
+): Promise<void> {
+  await client.query(
+    `UPDATE battles SET round = $2, rounds = rounds || $3::jsonb, status = $4, ended_at = $5, loot = $6 WHERE id = $1`,
+    [
+      id,
+      log.round,
+      JSON.stringify([log]),
+      end?.status ?? 'ongoing',
+      end?.at ?? null,
+      end?.loot ? JSON.stringify(end.loot) : null,
+    ],
+  );
+}
+
+// Ongoing battles and the most recent finished ones, newest first.
+export async function listRecentBattles(client: DbClient, worldId: number, limit = 10): Promise<Battle[]> {
+  const { rows } = await client.query<BattleRow>(
+    `SELECT * FROM battles WHERE world_id = $1
+     ORDER BY (status = 'ongoing') DESC, started_at DESC, id DESC LIMIT $2`,
+    [worldId, limit],
+  );
+  return rows.map(fromRow);
+}

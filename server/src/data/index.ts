@@ -70,9 +70,14 @@ const terrainFileSchema = z.object({
   terrain: z.record(z.enum(TERRAIN_IDS), terrainSchema),
 });
 
+export const UNIT_FAMILIES = ['infantry', 'archers', 'cavalry', 'scout'] as const;
+export type UnitFamily = (typeof UNIT_FAMILIES)[number];
+export const STANCES = ['defensive', 'balanced', 'offensive', 'hold_the_line'] as const;
+export type Stance = (typeof STANCES)[number];
+
 const unitSchema = z.object({
   name: z.string(),
-  family: z.enum(['infantry', 'archers', 'cavalry', 'scout']),
+  family: z.enum(UNIT_FAMILIES),
   building: z.string(),
   requiresLevel: z.number().int().positive(),
   cost: resourcesSchema,
@@ -94,6 +99,7 @@ const unitsFileSchema = z.object({
 
 const enemyUnitSchema = z.object({
   name: z.string(),
+  family: z.enum(UNIT_FAMILIES),
   weight: z.number().positive(),
   minWave: z.number().int().nonnegative(),
   attack: z.number().nonnegative(),
@@ -109,6 +115,7 @@ const enemiesFileSchema = z.object({
       faction: z.string(),
       spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       units: z.record(z.string(), enemyUnitSchema),
+      stances: z.partialRecord(z.enum(STANCES), z.number().positive()),
     }),
   ),
 });
@@ -138,12 +145,38 @@ const scoutingFileSchema = z.object({
         minSurvivors: z.number().int().positive(),
         sizeError: z.number().min(0),
         unitError: z.number().min(0).nullable(),
+        revealsStance: z.boolean(),
       }),
     )
     .min(1),
 });
 
+const familyMultipliers = z.partialRecord(z.enum(UNIT_FAMILIES), z.number().positive());
+const stanceMultipliers = z.partialRecord(z.enum(STANCES), z.number().positive());
+
+const battleFileSchema = z.object({
+  version: z.number().int(),
+  roundMinutes: z.number().positive(),
+  maxRounds: z.number().int().positive(),
+  casualtyScale: z.number().positive(),
+  homeBonus: z.number().positive(),
+  variance: z.number().min(0).max(1),
+  raidShare: z.number().min(0).max(1),
+  counters: z.partialRecord(z.enum(UNIT_FAMILIES), familyMultipliers),
+  stances: z.record(
+    z.enum(STANCES),
+    z.object({
+      name: z.string(),
+      attack: z.number().positive(),
+      defense: z.number().positive(),
+      retreatAt: z.number().positive().max(1).nullable(),
+    }),
+  ),
+  matchups: z.partialRecord(z.enum(STANCES), stanceMultipliers),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type BattleData = z.infer<typeof battleFileSchema>;
 export type ScoutingData = z.infer<typeof scoutingFileSchema>;
 export type EnemiesData = z.infer<typeof enemiesFileSchema>;
 export type WavesData = z.infer<typeof wavesFileSchema>;
@@ -160,6 +193,7 @@ export interface GameData {
   enemies: EnemiesData;
   waves: WavesData;
   scouting: ScoutingData;
+  battle: BattleData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -171,6 +205,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     enemies: enemiesFileSchema.parse(read('enemies.json')),
     waves: wavesFileSchema.parse(read('waves.json')),
     scouting: scoutingFileSchema.parse(read('scouting.json')),
+    battle: battleFileSchema.parse(read('battle.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

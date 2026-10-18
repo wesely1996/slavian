@@ -18,11 +18,12 @@ export const scoutingHandlers: HandlerRegistry = {
     if (mission.status !== 'outbound') return;
     const wave = await loadWave(client, mission.waveId);
     // A horde that already scattered can't hurt anyone.
-    const dispersed = wave.status === 'dispersed';
+    const dispersed = wave.status === 'dispersed' || wave.status === 'defeated';
     const survivors = dispersed ? mission.sent : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id);
     const report = scoutReport(data, {
       front: wave.front,
       composition: wave.composition,
+      stance: wave.stance,
       sent: mission.sent,
       survivors,
       dispersed,

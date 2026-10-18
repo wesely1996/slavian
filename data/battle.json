@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "_comment": "Rounds are game minutes (divided by world speed). Damage = count × attack × stance attack × matchup × counter × target share × variance; kills = damage × casualtyScale / (target defense × stance defense × home bonus). A side breaks once it has lost retreatAt of its starting units (null: never).",
+  "roundMinutes": 15,
+  "maxRounds": 12,
+  "casualtyScale": 0.1,
+  "homeBonus": 1.2,
+  "variance": 0.1,
+  "raidShare": 0.3,
+  "counters": {
+    "infantry": { "cavalry": 1.5 },
+    "archers": { "infantry": 1.5 },
+    "cavalry": { "archers": 1.5 }
+  },
+  "stances": {
+    "defensive": { "name": "Defensive", "attack": 0.8, "defense": 1.25, "retreatAt": 0.5 },
+    "balanced": { "name": "Balanced", "attack": 1.0, "defense": 1.0, "retreatAt": 0.6 },
+    "offensive": { "name": "Offensive", "attack": 1.25, "defense": 0.85, "retreatAt": 0.75 },
+    "hold_the_line": { "name": "Hold the Line", "attack": 0.9, "defense": 1.15, "retreatAt": null }
+  },
+  "matchups": {
+    "defensive": { "offensive": 1.15 },
+    "offensive": { "balanced": 1.1, "hold_the_line": 0.9 },
+    "balanced": { "defensive": 1.1 },
+    "hold_the_line": { "offensive": 1.1, "defensive": 0.9 }
+  }
+}

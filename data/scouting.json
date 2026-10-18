@@ -1,12 +1,32 @@
 {
   "version": 1,
-  "_comment": "Chance that each scout survives reaching a wave, per front. Report tiers by surviving scouts: sizeError / unitError are the relative width of the ranges reported (0 = exact).",
-  "survival": { "north": 0.75 },
+  "_comment": "Chance that each scout survives reaching a wave, per front. Report tiers by surviving scouts: sizeError / unitError are the relative width of the ranges reported (0 = exact). revealsStance: the report includes the wave's battle stance.",
+  "survival": {
+    "north": 0.75
+  },
   "defaultSurvival": 0.8,
   "maxScouts": 20,
   "tiers": [
-    { "name": "rough", "minSurvivors": 1, "sizeError": 0.3, "unitError": null },
-    { "name": "detailed", "minSurvivors": 3, "sizeError": 0.1, "unitError": 0.25 },
-    { "name": "exact", "minSurvivors": 6, "sizeError": 0, "unitError": 0 }
+    {
+      "name": "rough",
+      "minSurvivors": 1,
+      "sizeError": 0.3,
+      "unitError": null,
+      "revealsStance": false
+    },
+    {
+      "name": "detailed",
+      "minSurvivors": 3,
+      "sizeError": 0.1,
+      "unitError": 0.25,
+      "revealsStance": true
+    },
+    {
+      "name": "exact",
+      "minSurvivors": 6,
+      "sizeError": 0,
+      "unitError": 0,
+      "revealsStance": true
+    }
   ]
 }

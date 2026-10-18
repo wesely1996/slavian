@@ -1,6 +1,8 @@
 // Wave lifecycle on the scheduler: scheduled → (wave_spawn) marching →
-// (wave_arrive) arrived → (wave_disperse) dispersed. A spawn also plans the
-// next wave, so `waves.upcoming` waves are always announced ahead.
+// (wave_arrive) battling → defeated or (after raiding) dispersed; see
+// battles.ts. A horde with no village to strike camps (arrived) and then
+// disperses. A spawn also plans the next wave, so `waves.upcoming` waves are
+// always announced ahead.
 import { z } from 'zod';
 import type { GameData, TerrainId } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
@@ -9,6 +11,7 @@ import { listVillages } from '../db/villages.js';
 import { insertWave, lastWave, loadWave, markArrived, markDispersed, markMarching, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
 import { planMarch, planWave, type PlannedWave, type WaveContext } from '../sim/waves.js';
+import { startBattle } from './battles.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -51,7 +54,14 @@ export async function announceFirstWaves(client: DbClient, data: GameData, world
 }
 
 function asPlanned(wave: Wave): PlannedWave {
-  return { index: wave.index, front: wave.front, spawnAt: wave.spawnAt, composition: wave.composition, threat: wave.threat };
+  return {
+    index: wave.index,
+    front: wave.front,
+    spawnAt: wave.spawnAt,
+    composition: wave.composition,
+    threat: wave.threat,
+    stance: wave.stance,
+  };
 }
 
 export const waveHandlers: HandlerRegistry = {
@@ -79,10 +89,16 @@ export const waveHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'waves' });
   },
 
-  // Battles arrive in M1 step 5; until then the horde camps at its target.
+  // At a village the horde fights its garrison. With no village to strike
+  // (the Holy City, until it has defenses) it camps for the rampage time.
   async wave_arrive({ client, data, world }, event) {
     const wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'marching') return;
+    if (wave.targetVillageId !== null) {
+      await startBattle(client, data, world, wave, wave.targetVillageId, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'waves' });
+      return;
+    }
     const endsAt = new Date(event.dueAt.getTime() + (data.waves.rampageHours * MS_PER_HOUR) / world.speed);
     await markArrived(client, wave.id, endsAt);
     const payload: WavePayload = { waveId: wave.id };
