@@ -29,8 +29,10 @@ import {
 export interface Plot {
   readonly building: string | null;
   readonly level: number;
-  // Outposts: the terrain of their hex, which decides what they gather.
+  // Outposts: the terrain of their hex, which decides what they gather,
+  // and the best level they ever reached (what a rebuild order restores).
   readonly terrain?: TerrainId;
+  readonly peak?: number;
 }
 export type Plots = Readonly<Record<string, Plot>>;
 
@@ -341,7 +343,11 @@ export function completeBuild(
   if (!head || head.plot !== plot || head.targetLevel !== targetLevel) {
     throw new RuleError(`Build on ${plot} to level ${targetLevel} is not at the head of the queue`);
   }
-  const plots = { ...state.plots, [plot]: { ...state.plots[plot], building: head.building, level: targetLevel } };
+  const before = state.plots[plot];
+  const built: Plot = outpostHex(plot)
+    ? { ...before, building: head.building, level: targetLevel, peak: Math.max(before?.peak ?? 0, targetLevel) }
+    : { ...before, building: head.building, level: targetLevel };
+  const plots = { ...state.plots, [plot]: built };
   const levels = levelsOf(plots);
   const next = { ...state, plots, levels, queue: rest };
   return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels, state.bonuses)) };

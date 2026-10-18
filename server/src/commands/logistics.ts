@@ -1,4 +1,4 @@
-import type { TerrainId } from '../data/index.js';
+import type { GameData, TerrainId } from '../data/index.js';
 import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
@@ -26,14 +26,14 @@ import type { VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
 // Where a caravan goes: an allied village, or the vault when null.
-interface CaravanOrder {
+export interface CaravanOrder {
   destinationVillageId: number | null;
   load: Resources;
 }
 
-async function dispatch(
+export async function dispatchCaravan(
   client: DbClient,
-  deps: SchedulerDeps,
+  data: GameData,
   world: World,
   village: Village,
   kind: Caravan['kind'],
@@ -42,9 +42,9 @@ async function dispatch(
 ): Promise<Caravan> {
   const yard = village.state.levels[CARAVAN_YARD] ?? 0;
   if (yard < 1) throw new RuleError('Build a Caravan Yard first');
-  const bonuses = await effectiveBonuses(client, deps.data, village);
-  const needed = caravansFor(deps.data, order.load, bonuses);
-  const free = caravansAt(deps.data, yard) - (await caravansOut(client, village.id));
+  const bonuses = await effectiveBonuses(client, data, village);
+  const needed = caravansFor(data, order.load, bonuses);
+  const free = caravansAt(data, yard) - (await caravansOut(client, village.id));
   if (needed > free) {
     throw new RuleError(`That takes ${needed} caravan${needed === 1 ? '' : 's'}; ${Math.max(0, free)} at home`);
   }
@@ -57,7 +57,7 @@ async function dispatch(
     to = hex(destination.q, destination.r);
   }
   const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
-  const path = caravanRoute(deps.data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
+  const path = caravanRoute(data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
   const travelMs = path.at(-1)!.atMs;
   const arrivesAt = new Date(now.getTime() + travelMs);
   const caravan = await insertCaravan(client, {
@@ -86,7 +86,7 @@ export async function sendCaravanCommand(
   input: VillageCommandInput & CaravanOrder,
 ): Promise<{ village: Village; caravan: Caravan }> {
   const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
-    const caravan = await dispatch(client, deps, world, village, 'deliver', input, input.now);
+    const caravan = await dispatchCaravan(client, deps.data, world, village, 'deliver', input, input.now);
     const state: VillageState = { ...village.state, ledger: spend(village.state.ledger, input.now, input.load) };
     return { state, result: caravan };
   });
@@ -101,7 +101,7 @@ export async function fetchFromVaultCommand(
   input: VillageCommandInput & { load: Resources },
 ): Promise<{ village: Village; caravan: Caravan }> {
   const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
-    const caravan = await dispatch(client, deps, world, village, 'fetch', { destinationVillageId: null, load: input.load }, input.now);
+    const caravan = await dispatchCaravan(client, deps.data, world, village, 'fetch', { destinationVillageId: null, load: input.load }, input.now);
     return { state: village.state, result: caravan };
   });
   return { village, caravan: result };

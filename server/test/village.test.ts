@@ -238,7 +238,7 @@ describe('outposts', () => {
   it('a raid burns it down a level, to ruins that can be rebuilt', () => {
     let v = build(built(rich(newVillage(data, T0, 1)), site(3, 0)), { plot: 'o3,0' });
     v = raidOutpost(data, v, 'o3,0', v.ledger.settledAt, 1);
-    expect(v.plots['o3,0']).toEqual({ building: 'outpost', level: 1, terrain: 'forest' });
+    expect(v.plots['o3,0']).toEqual({ building: 'outpost', level: 1, terrain: 'forest', peak: 2 });
     v = raidOutpost(data, v, 'o3,0', v.ledger.settledAt, 1);
     expect(v.plots['o3,0']!.level).toBe(0);
     expect(v.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, newVillage(data, T0, 1).plots, 1).wood);

@@ -12,6 +12,7 @@ signal caravans_changed
 signal expeditions_changed
 signal research_changed
 signal heroes_changed
+signal orders_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -33,6 +34,8 @@ var vault: Dictionary = {}
 var expeditions: Array = []
 ## Everyone's research: {accountId, tech, status, completesAt, ...}.
 var research: Array = []
+## Standing orders of every village (see server orderView).
+var orders: Array = []
 ## Every player's hero (see server heroView).
 var heroes: Array = []
 ## Which of your villages the screens show (0: the first).
@@ -84,6 +87,7 @@ func set_world(new_world: Dictionary) -> void:
 	expeditions = new_world.get("expeditions", [])
 	research = new_world.get("research", [])
 	heroes = new_world.get("heroes", [])
+	orders = new_world.get("orders", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -120,6 +124,17 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_orders(world_id_: int, new_orders: Array) -> void:
+	if world_id_ != world_id():
+		return
+	orders = new_orders
+	orders_changed.emit()
+
+
+func orders_of(village_id: int, kind: String) -> Array:
+	return orders.filter(func(o: Dictionary) -> bool: return int(o.villageId) == village_id and o.kind == kind)
 
 
 func set_heroes(world_id_: int, new_heroes: Array) -> void:

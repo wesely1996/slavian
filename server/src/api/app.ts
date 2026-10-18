@@ -1,6 +1,7 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
+import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -27,6 +28,7 @@ import {
   caravanView,
   expeditionView,
   heroView,
+  orderView,
   researchView,
   missionView,
   vaultView,
@@ -76,6 +78,12 @@ const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
 const heroUnequipBody = z.object({ slot: z.enum(HERO_SLOTS) });
 const heroRenameBody = z.object({ name: displayName });
+const orderBody = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('train'), unit: z.string().min(1).max(64), batch: z.number().int(), target: z.number().int() }),
+  z.object({ kind: z.literal('rebuild') }),
+  z.object({ kind: z.literal('surplus'), share: z.number() }),
+]);
+const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -138,6 +146,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     expansion: scheduler.data.expansion,
     research: scheduler.data.research,
     heroes: scheduler.data.heroes,
+    orders: scheduler.data.orders,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -271,6 +280,21 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.post('/v1/worlds/:id/hero/equip', (request) => heroRoute(request, heroEquipBody, (input) => equipCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/unequip', (request) => heroRoute(request, heroUnequipBody, (input) => unequipCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/rename', (request) => heroRoute(request, heroRenameBody, (input) => renameHeroCommand(db, scheduler, input)));
+
+  app.post('/v1/villages/:id/orders', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const spec = orderBody.parse(request.body);
+    const { village, order } = await placeOrderCommand(db, scheduler, { accountId: account.id, villageId: id, spec, now: clock() });
+    return { village: villageView(village), order: orderView(order), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/orders/:orderId/cancel', async (request) => {
+    const account = await authenticate(db, request);
+    const { id, orderId } = orderParams.parse(request.params);
+    await cancelOrderCommand(db, scheduler, { accountId: account.id, villageId: id, orderId, now: clock() });
+    return { ok: true, serverTime: clock().toISOString() };
+  });
 
   app.post('/v1/villages/:id/research', async (request) => {
     const account = await authenticate(db, request);

@@ -10,6 +10,7 @@ import { listCaravans, type Caravan } from '../db/caravans.js';
 import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
+import { listOrders, type StoredOrder } from '../db/orders.js';
 import { heroBonuses, xpToNext } from '../sim/heroes.js';
 import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
@@ -285,6 +286,20 @@ export async function heroesView(client: DbClient, data: GameData, worldId: numb
   return (await listHeroes(client, worldId)).map((hero) => heroView(data, hero));
 }
 
+export function orderView(order: StoredOrder) {
+  return {
+    id: order.id,
+    villageId: order.villageId,
+    ...order.spec,
+    lastResult: order.lastResult,
+    lastRunAt: order.lastRunAt?.toISOString() ?? null,
+  };
+}
+
+export async function ordersView(client: DbClient, worldId: number) {
+  return (await listOrders(client, { worldId })).map(orderView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -310,6 +325,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const expeditions = await expeditionsView(client, world.id);
   const research = await researchListView(client, world.id);
   const heroes = await heroesView(client, data, world.id);
+  const orders = await ordersView(client, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -326,6 +342,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     expeditions,
     research,
     heroes,
+    orders,
     ...logistics,
     map,
   };

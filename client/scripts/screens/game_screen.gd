@@ -29,6 +29,11 @@ var _tab := "village"
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+## Standing order forms: repeat training and the surplus share.
+var _repeat_unit := "spearman"
+var _repeat_target := 20
+var _repeat_batch := 5
+var _surplus_share := 80
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
 var _threat_button: Button
@@ -59,6 +64,8 @@ func _ready() -> void:
 	Live.expeditions_updated.connect(Game.set_expeditions)
 	Live.research_updated.connect(Game.set_research)
 	Live.heroes_updated.connect(Game.set_heroes)
+	Live.orders_updated.connect(Game.set_orders)
+	Game.orders_changed.connect(_on_waves_changed)
 	Game.heroes_changed.connect(_on_waves_changed)
 	Game.research_changed.connect(_on_waves_changed)
 	Game.expeditions_changed.connect(_on_waves_changed)
@@ -92,6 +99,7 @@ func _exit_tree() -> void:
 	Live.expeditions_updated.disconnect(Game.set_expeditions)
 	Live.research_updated.disconnect(Game.set_research)
 	Live.heroes_updated.disconnect(Game.set_heroes)
+	Live.orders_updated.disconnect(Game.set_orders)
 
 
 func _process(delta: float) -> void:
@@ -374,6 +382,7 @@ func _caravans_section(village: Dictionary) -> void:
 		_panel_body.add_child(UI.label("%d of %d caravans at home · %d each" % [free, total, capacity], UI.SMALL_SIZE, UI.MUTED))
 		_caravan_form(village, free)
 	_caravan_trips(village_id)
+	_surplus_order(village_id)
 
 
 func _caravan_form(village: Dictionary, free: int) -> void:
@@ -534,6 +543,110 @@ func _start_research(village_id: int, tech: String) -> void:
 		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+
+
+# --- Standing orders ----------------------------------------------------------
+
+## One standing order: what it does, what it last did, and a cancel button.
+func _order_row(order: Dictionary) -> void:
+	var row := UI.hbox()
+	var info := UI.vbox(2)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_child(UI.label(OrderText.describe(order, Game.data.units.units), UI.SMALL_SIZE))
+	if order.lastResult != null:
+		info.add_child(UI.label("Last: %s" % order.lastResult, UI.SMALL_SIZE, UI.MUTED))
+	row.add_child(info)
+	var village_id := int(order.villageId)
+	var order_id := int(order.id)
+	var cancel := UI.button("Stop", func() -> void: _cancel_order(village_id, order_id))
+	cancel.custom_minimum_size.x = 110
+	row.add_child(cancel)
+	_panel_body.add_child(row)
+
+
+## Repeat training: one order per unit, keeping a target count.
+func _repeat_order(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.label("Repeat training (checked every %d game minutes)" % int(Game.data.orders.checkMinutes), UI.SMALL_SIZE, UI.MUTED))
+	for order in Game.orders_of(village_id, "train"):
+		_order_row(order)
+	var units: Dictionary = Game.data.units.units
+	var names := units.keys()
+	var picker := UI.options(names.map(func(u: String) -> String: return units[u].name), maxi(0, names.find(_repeat_unit)))
+	picker.item_selected.connect(func(i: int) -> void:
+		_repeat_unit = names[i]
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	var row := UI.hbox(8)
+	var text := UI.label("Keep %d, %d at a time" % [_repeat_target, _repeat_batch], UI.SMALL_SIZE)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	for step in [[-5, 0], [5, 0], [0, -1], [0, 1]]:
+		var label := ("%+d" % step[0]) if step[0] != 0 else ("batch %+d" % step[1])
+		var stepper := UI.button(label.replace("-", "−"), func() -> void:
+			_repeat_target = clampi(_repeat_target + step[0], 1, 999)
+			_repeat_batch = clampi(_repeat_batch + step[1], 1, mini(_repeat_target, int(Game.data.units.maxBatch)))
+			_rebuild_panel())
+		stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		row.add_child(stepper)
+	_panel_body.add_child(row)
+	var unit := _repeat_unit
+	var target := _repeat_target
+	var batch := mini(_repeat_batch, _repeat_target)
+	var place := UI.button("Keep %s topped up" % units[unit].name, func() -> void:
+		_place_order(village_id, {"kind": "train", "unit": unit, "batch": batch, "target": target}))
+	place.disabled = not Game.orders_of(village_id, "train").filter(func(o: Dictionary) -> bool: return o.unit == unit).is_empty()
+	_panel_body.add_child(place)
+
+
+func _rebuild_order(village_id: int) -> void:
+	var existing := Game.orders_of(village_id, "rebuild")
+	if existing.is_empty():
+		_panel_body.add_child(UI.button("Rebuild raided outposts automatically", func() -> void: _place_order(village_id, {"kind": "rebuild"})))
+	for order in existing:
+		_order_row(order)
+
+
+func _surplus_order(village_id: int) -> void:
+	var existing := Game.orders_of(village_id, "surplus")
+	_panel_body.add_child(UI.label("Surplus to the vault", UI.SMALL_SIZE, UI.MUTED))
+	for order in existing:
+		_order_row(order)
+	if not existing.is_empty():
+		return
+	var limits: Dictionary = Game.data.orders.surplusShare
+	var row := UI.hbox(8)
+	var text := UI.label("Above %d%% of storage" % _surplus_share, UI.SMALL_SIZE)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	for step in [-5, 5]:
+		var stepper := UI.button(("%+d%%" % step).replace("-", "−"), func() -> void:
+			_surplus_share = clampi(_surplus_share + step, roundi(float(limits.min) * 100.0), roundi(float(limits.max) * 100.0))
+			_rebuild_panel())
+		stepper.custom_minimum_size.x = 100
+		row.add_child(stepper)
+	var share := _surplus_share
+	var place := UI.button("Start", func() -> void: _place_order(village_id, {"kind": "surplus", "share": share / 100.0}))
+	place.custom_minimum_size.x = 110
+	row.add_child(place)
+	_panel_body.add_child(row)
+
+
+func _place_order(village_id: int, spec: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/orders" % village_id, spec)
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+func _cancel_order(village_id: int, order_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/orders/%d/cancel" % [village_id, order_id], {})
+	if not response.ok:
+		_status.text = response.error
 
 
 ## Where your hero is, seen from a village, with the way to its panel.
@@ -868,6 +981,8 @@ func _outposts_section(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label("Outposts (%d/%d)" % [plots.size(), limit], UI.SMALL_SIZE, UI.MUTED))
 	if village.get("besieged", false):
 		_panel_body.add_child(UI.label("Under siege: outposts produce nothing until the battle ends.", UI.SMALL_SIZE, UI.ERROR))
+	if not plots.is_empty():
+		_rebuild_order(int(village.id))
 	if plots.is_empty():
 		_panel_body.add_child(UI.label("None yet. Tap a forest, plains, hills, mountain or lake hex within %d of the village on the map to claim one." % int(Game.data.buildings.village.outpostRange), UI.SMALL_SIZE, UI.MUTED))
 	var speed := float(Game.world.speed)
@@ -1025,6 +1140,7 @@ func _troops_section(village: Dictionary) -> void:
 			return "%s %d/%d   next %s · all %s" % [unit_name, done, batch.count,
 				TimeUtil.format_duration(next_at - now), TimeUtil.format_duration(done_at - now)])
 
+	_repeat_order(village)
 	_panel_body.add_child(UI.label("Train", UI.SMALL_SIZE, UI.MUTED))
 	var queue_full := training.size() >= limit
 	var max_batch := int(Game.data.units.maxBatch)

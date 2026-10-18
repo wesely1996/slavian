@@ -26,6 +26,7 @@ func _initialize() -> void:
 	_test_expansion()
 	_test_research()
 	_test_heroes()
+	_test_orders()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -313,3 +314,10 @@ func _test_heroes() -> void:
 	var hero := {"name": "Vasilisa", "level": 3, "status": "home", "villageId": 4}
 	_check(HeroText.whereabouts(hero, 4, "Vesna", 0.0) == "Hero Vasilisa (Lv 3) leads this garrison", "hero at home")
 	_check(HeroText.whereabouts(hero, 5, "Vesna", 0.0) == "Hero Vasilisa (Lv 3) stands in Vesna", "hero elsewhere")
+
+
+func _test_orders() -> void:
+	var units := {"spearman": {"name": "Spearman"}}
+	_check(OrderText.describe({"kind": "train", "unit": "spearman", "target": 20, "batch": 5}, units) == "Keep 20 Spearman, 5 at a time", "train order")
+	_check(OrderText.describe({"kind": "rebuild"}, units) == "Rebuild raided outposts", "rebuild order")
+	_check(OrderText.describe({"kind": "surplus", "share": 0.8}, units) == "Send all above 80% of storage to the vault", "surplus order")
