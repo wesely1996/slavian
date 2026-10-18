@@ -95,7 +95,7 @@ export async function markMissionDone(client: DbClient, id: number): Promise<voi
 export async function listMissions(client: DbClient, worldId: number): Promise<ScoutMission[]> {
   const { rows } = await client.query<MissionRow>(
     `SELECT m.* FROM scout_missions m JOIN waves w ON w.id = m.wave_id
-     WHERE m.world_id = $1 AND (w.status <> 'dispersed' OR m.status <> 'done')
+     WHERE m.world_id = $1 AND (w.status NOT IN ('dispersed', 'defeated') OR m.status <> 'done')
      ORDER BY m.departs_at DESC, m.id DESC`,
     [worldId],
   );

@@ -7,6 +7,7 @@ import { loadGameData } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
 import { tick } from '../src/scheduler/worker.js';
+import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
@@ -200,16 +201,29 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(marching.path.at(-1).slice(0, 2)).toEqual([village.q, village.r]);
     expect(new Date(marching.arrivesAt).getTime()).toBe(now.getTime() + marching.path.at(-1)[2]);
 
+    // Arriving opens a battle against the (empty) garrison.
     now = new Date(marching.arrivesAt);
     await tick(db, now, scheduler);
-    waves = await getWaves();
-    expect(waves[0]).toMatchObject({ index: 0, status: 'arrived' });
-    expect(new Date(waves[0].endsAt).getTime()).toBe(now.getTime() + (18 * 3_600_000) / 10);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body;
+    expect(world.waves[0]).toMatchObject({ index: 0, status: 'battling' });
+    const battle = world.battles[0];
+    expect(battle).toMatchObject({ waveId: marching.id, villageId: village.id, status: 'ongoing', round: 0, defenderInitial: {} });
+    expect(battle.attackerStance).toBeTruthy();
 
-    now = new Date(waves[0].endsAt);
+    // No defenders: the first round ends in a raid.
+    now = new Date(now.getTime() + (15 * 60_000) / 10);
     await tick(db, now, scheduler);
-    waves = await getWaves();
-    expect(waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
+    world = (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body;
+    const raided = world.battles[0];
+    expect(raided).toMatchObject({ status: 'raided', round: 1 });
+    // The whole horde survived, so it carried off 30% of what was stored.
+    const left = world.villages[0].resources;
+    expect(left.settledAt).toBe(now.toISOString());
+    for (const kind of ['wood', 'stone', 'grain', 'iron']) {
+      const stored = left.amounts[kind] + raided.loot[kind];
+      expect(raided.loot[kind]).toBe(Math.floor(stored * 0.3));
+    }
+    expect(world.waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
   });
 
   it('sends scouts at a wave and shares their report', async () => {
@@ -260,6 +274,57 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.scouting.find((m: { id: number }) => m.id === mission.id).status).toBe('done');
     expect(world.villages[0].garrison.scout).toBe(report.survivors);
     expect(world.villages[0].away.scout).toBe(0);
+  });
+
+  it('a garrison fights off a wave, round by round, with its stance', async () => {
+    const dobran = await guest('Dobran');
+    const created = await call('POST', '/v1/worlds', dobran.token, { name: 'Battle', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, dobran.token);
+    const villageId: number = started.body.villages[0].id;
+    const wave = started.body.waves[0];
+    expect(started.body.villages[0].stance).toBe('balanced');
+
+    expect((await call('POST', `/v1/villages/${villageId}/stance`, dobran.token, { stance: 'reckless' })).status).toBe(400);
+    const stance = await call('POST', `/v1/villages/${villageId}/stance`, dobran.token, { stance: 'hold_the_line' });
+    expect(stance.body.village.stance).toBe('hold_the_line');
+
+    // Fill the stores so we can afford a proper garrison.
+    await db.query(`UPDATE villages SET amounts = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`, [villageId]);
+    const barracks = await call('POST', `/v1/villages/${villageId}/build`, dobran.token, { building: 'barracks' });
+    now = new Date(barracks.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    await call('POST', `/v1/villages/${villageId}/train`, dobran.token, { unit: 'spearman', count: 20 });
+
+    now = new Date(wave.spawnAt);
+    await tick(db, now, scheduler);
+    const marching = (await call('GET', `/v1/worlds/${worldId}`, dobran.token)).body.waves[0];
+    now = new Date(marching.arrivesAt);
+    await tick(db, now, scheduler);
+
+    let world = (await call('GET', `/v1/worlds/${worldId}`, dobran.token)).body;
+    let battle = world.battles[0];
+    expect(battle.defenderInitial).toEqual({ spearman: 20 });
+    expect(battle.attackerNow).toEqual(battle.attackerInitial);
+
+    const roundMs = (15 * 60_000) / 10;
+    for (let round = 1; round <= 12 && battle.status === 'ongoing'; round++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+      world = (await call('GET', `/v1/worlds/${worldId}`, dobran.token)).body;
+      battle = world.battles[0];
+      expect(battle.round).toBe(round);
+    }
+    expect(battle.status).toBe('defended');
+    expect(battle.loot).toBeNull();
+    const last = battle.rounds.at(-1);
+    expect(last.defenderLeft).toBe(world.villages[0].garrison.spearman ?? 0);
+    expect(total(battle.attackerNow)).toBe(last.attackerLeft);
+    // The beaten wave leaves the board; the next ones remain.
+    expect(world.waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
+    // Fallen spearmen stop eating.
+    const fallen = 20 - (world.villages[0].garrison.spearman ?? 0);
+    expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * 10);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

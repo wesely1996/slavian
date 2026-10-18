@@ -78,3 +78,9 @@ export function spend(ledger: ResourceLedger, at: Date, cost: Resources): Resour
     amounts: mapResources((kind) => settled.amounts[kind] - cost[kind]),
   };
 }
+
+// Takes up to `amounts` (e.g. raiders' loot); never goes below zero.
+export function take(ledger: ResourceLedger, at: Date, amounts: Resources): ResourceLedger {
+  const settled = settle(ledger, at);
+  return { ...settled, amounts: mapResources((kind) => Math.max(0, settled.amounts[kind] - amounts[kind])) };
+}

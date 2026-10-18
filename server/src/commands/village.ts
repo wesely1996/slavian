@@ -1,4 +1,4 @@
-import type { TerrainId } from '../data/index.js';
+import type { Stance, TerrainId } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
@@ -92,7 +92,7 @@ export async function sendScoutsCommand(
     }
     const wave = await loadWave(client, input.waveId);
     if (wave.worldId !== world.id) throw new NotFoundError(`Wave ${input.waveId} not found`);
-    if (wave.status === 'dispersed') throw new RuleError('That horde has already scattered');
+    if (wave.status === 'dispersed' || wave.status === 'defeated') throw new RuleError('That horde has already scattered');
 
     const state = sendAway(village.state, SCOUT_UNIT, input.count, input.now);
     const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
@@ -116,4 +116,17 @@ export async function sendScoutsCommand(
     return { state, result: mission };
   });
   return { village, mission: result };
+}
+
+// Sets how the village's garrison fights; takes effect from the next round.
+export async function setStanceCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { stance: Stance },
+): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, input, async ({ village }) => ({
+    state: { ...village.state, stance: input.stance },
+    result: null,
+  }));
+  return { village };
 }

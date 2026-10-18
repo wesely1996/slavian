@@ -10,7 +10,7 @@ const data = loadGameData();
 const composition = { grey_wolf: 14, leshy_thrall: 7, cave_bear: 4 };
 const total = 25;
 const report = (survivors: number, missionId = 1, dispersed = false) =>
-  scoutReport(data, { front: 'north', composition, sent: 8, survivors, dispersed, seed: 77, missionId });
+  scoutReport(data, { front: 'north', composition, stance: 'offensive', sent: 8, survivors, dispersed, seed: 77, missionId });
 
 describe('scout survival', () => {
   it('is deterministic per mission and roughly matches the front survival chance', () => {
@@ -44,6 +44,12 @@ describe('scout reports', () => {
       expect(u.min!).toBeLessThanOrEqual(actual);
       expect(u.max!).toBeGreaterThanOrEqual(actual);
     }
+  });
+
+  it('reveals the stance only in detailed and exact reports', () => {
+    expect(report(2).stance).toBeNull();
+    expect(report(4).stance).toBe('offensive');
+    expect(report(6).stance).toBe('offensive');
   });
 
   it('exact: the true roster', () => {

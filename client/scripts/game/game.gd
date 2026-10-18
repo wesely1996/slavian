@@ -6,6 +6,7 @@ signal world_changed
 signal village_changed(village_id: int)
 signal waves_changed
 signal scouting_changed
+signal battles_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -15,6 +16,8 @@ var terrain: Dictionary[Vector2i, String] = {}
 var waves: Array = []
 ## Scout missions with their shared reports, newest first.
 var scouting: Array = []
+## Ongoing battles first, then the most recent finished ones.
+var battles: Array = []
 
 ## Server clock minus local clock, in seconds.
 var _clock_offset := 0.0
@@ -56,6 +59,7 @@ func set_world(new_world: Dictionary) -> void:
 		villages[int(village.id)] = village
 	waves = new_world.get("waves", [])
 	scouting = new_world.get("scouting", [])
+	battles = new_world.get("battles", [])
 	terrain.clear()
 	var map: Variant = new_world.get("map")
 	if map is Dictionary:
@@ -76,6 +80,20 @@ func set_scouting(world_id_: int, missions: Array) -> void:
 		return
 	scouting = missions
 	scouting_changed.emit()
+
+
+func set_battles(world_id_: int, new_battles: Array) -> void:
+	if world_id_ != world_id():
+		return
+	battles = new_battles
+	battles_changed.emit()
+
+
+func battle_for(wave_id: int) -> Dictionary:
+	for battle in battles:
+		if int(battle.waveId) == wave_id:
+			return battle
+	return {}
 
 
 func missions_for(wave_id: int) -> Array:

@@ -4,6 +4,7 @@ import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
+import { listRecentBattles, type Battle } from '../db/battles.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
@@ -21,6 +22,7 @@ export interface VillageView {
   // from `training` (each batch trains one unit every perUnitMs).
   garrison: Record<string, number>;
   away: Record<string, number>;
+  stance: string;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -48,6 +50,7 @@ export function villageView(village: Village): VillageView {
     })),
     garrison: { ...garrison },
     away: { ...village.state.away },
+    stance: village.state.stance,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -107,6 +110,38 @@ export async function scoutingView(client: DbClient, worldId: number) {
   return (await listMissions(client, worldId)).map(missionView);
 }
 
+// Battles are fought in the open: both sides' numbers are visible.
+export function battleView(battle: Battle, attackerNow: Record<string, number>) {
+  return {
+    id: battle.id,
+    waveId: battle.waveId,
+    villageId: battle.villageId,
+    status: battle.status,
+    round: battle.round,
+    attackerStance: battle.attackerStance,
+    attackerInitial: battle.attackerInitial,
+    attackerNow,
+    defenderInitial: battle.defenderInitial,
+    rounds: battle.rounds,
+    loot: battle.loot,
+    startedAt: battle.startedAt.toISOString(),
+    endedAt: battle.endedAt?.toISOString() ?? null,
+  };
+}
+
+export async function battlesView(client: DbClient, worldId: number) {
+  const battles = await listRecentBattles(client, worldId);
+  const waves = new Map<number, Record<string, number>>();
+  if (battles.length) {
+    const { rows } = await client.query<{ id: number; composition: Record<string, number> }>(
+      'SELECT id, composition FROM waves WHERE id = ANY($1)',
+      [battles.map((b) => b.waveId)],
+    );
+    for (const row of rows) waves.set(row.id, row.composition);
+  }
+  return battles.map((battle) => battleView(battle, waves.get(battle.waveId) ?? {}));
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -127,6 +162,7 @@ export async function worldView(client: DbClient, world: World) {
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, world.id);
   const scouting = await scoutingView(client, world.id);
+  const battles = await battlesView(client, world.id);
   const map =
     world.status === 'lobby'
       ? null
@@ -137,6 +173,7 @@ export async function worldView(client: DbClient, world: World) {
     villages: villages.map(villageView),
     waves,
     scouting,
+    battles,
     map,
   };
 }

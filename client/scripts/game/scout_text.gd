@@ -11,6 +11,8 @@ static func describe(report: Dictionary) -> String:
 	var size: Dictionary = report.size
 	var units: Array = report.units
 	var head := "%s units" % _range(size)
+	if report.get("stance") != null:
+		head = "%s, %s stance" % [head, String(report.stance).replace("_", " ")]
 	if report.tier == "rough" or units.is_empty() or units[0].min == null:
 		return "%s, mostly %s" % [head, units[0].name] if not units.is_empty() else head
 	var parts := PackedStringArray()
