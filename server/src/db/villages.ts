@@ -13,6 +13,8 @@ export interface Village {
   q: number;
   r: number;
   state: VillageState;
+  // Share of its troops sent to battles within `range` hexes (0: never).
+  reinforce?: { share: number; range: number };
 }
 
 interface VillageRow {
@@ -35,6 +37,8 @@ interface VillageRow {
   away: Record<string, number>;
   stance: Stance;
   besieged: boolean;
+  reinforce_share: number;
+  reinforce_range: number;
   admin_upkeep: number;
   bonuses: Record<string, number>;
 }
@@ -60,6 +64,7 @@ function fromRow(row: VillageRow): Village {
     name: row.name,
     q: row.q,
     r: row.r,
+    reinforce: { share: Number(row.reinforce_share), range: row.reinforce_range },
     state: {
       plots: row.plots ?? {},
       levels: row.levels,

@@ -28,6 +28,7 @@ func _initialize() -> void:
 	_test_heroes()
 	_test_orders()
 	_test_inbox()
+	_test_armies()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -330,3 +331,13 @@ func _test_inbox() -> void:
 	_check(InboxText.ago(1000.0, 1000.0 + 3 * 3600) == "3h ago", "hours ago")
 	_check(InboxText.ago(1000.0, 1000.0 + 2 * 86400) == "2d ago", "days ago")
 	_check(InboxText.clock(22 * 60) == "22:00" and InboxText.clock(-60) == "23:00" and InboxText.clock(7 * 60 + 5) == "07:05", "clock")
+
+
+func _test_armies() -> void:
+	var defs := {"spearman": {"name": "Spearman"}, "horseman": {"name": "Horseman"}}
+	_check(ArmyText.units_text({"spearman": 20, "horseman": 0}, defs) == "Spearman ×20", "army units text")
+	var army := {"orders": "support", "status": "stationed", "arrivesAt": "2026-01-01T00:00:00.000Z"}
+	_check(ArmyText.status(army, "Vesna", 0.0) == "Standing guard at Vesna", "army status")
+	var battle := {"rounds": [{"joined": [{"villageId": 3, "orders": "reinforce", "bonus": 0.18}]}, {}]}
+	var names := func(id: Variant) -> String: return "Ola's village" if int(id) == 3 else "?"
+	_check(ArmyText.reinforcements(battle, names) == "Ola's village (+18% pincer)", "reinforcements: %s" % ArmyText.reinforcements(battle, names))

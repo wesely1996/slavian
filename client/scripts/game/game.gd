@@ -14,6 +14,7 @@ signal research_changed
 signal heroes_changed
 signal orders_changed
 signal inbox_changed
+signal armies_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -38,6 +39,8 @@ var research: Array = []
 ## Your notifications in this world, newest first, and how many are unread.
 var inbox: Array = []
 var unread := 0
+## Armies on the road or abroad, then the latest that came home.
+var armies: Array = []
 ## Standing orders of every village (see server orderView).
 var orders: Array = []
 ## Every player's hero (see server heroView).
@@ -92,6 +95,7 @@ func set_world(new_world: Dictionary) -> void:
 	research = new_world.get("research", [])
 	heroes = new_world.get("heroes", [])
 	orders = new_world.get("orders", [])
+	armies = new_world.get("armies", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -128,6 +132,13 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_armies(world_id_: int, new_armies: Array) -> void:
+	if world_id_ != world_id():
+		return
+	armies = new_armies
+	armies_changed.emit()
 
 
 func set_inbox(world_id_: int, notifications: Array, unread_count: int) -> void:

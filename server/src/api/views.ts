@@ -11,6 +11,7 @@ import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
 import { listOrders, type StoredOrder } from '../db/orders.js';
+import { listArmies, type Army } from '../db/armies.js';
 import { listNotifications, unreadCount, type Notification } from '../db/notifications.js';
 import { heroBonuses, xpToNext } from '../sim/heroes.js';
 import { loadVault, type Vault } from '../db/vaults.js';
@@ -43,6 +44,8 @@ export interface VillageView {
   adminUpkeep: number;
   // The owner's research effects.
   bonuses: Record<string, number>;
+  // Troops sent to battles nearby: this share, within this many hexes.
+  reinforce: { share: number; range: number } | null;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -76,6 +79,7 @@ export function villageView(village: Village): VillageView {
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
+    reinforce: village.reinforce ?? null,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -321,6 +325,29 @@ export async function inboxView(client: DbClient, accountId: number, worldId: nu
   };
 }
 
+export function armyView(army: Army) {
+  return {
+    id: army.id,
+    ownerAccountId: army.ownerAccountId,
+    homeVillageId: army.homeVillageId,
+    targetVillageId: army.targetVillageId,
+    orders: army.orders,
+    units: army.units,
+    status: army.status,
+    battleId: army.battleId,
+    // [q, r, ms after departsAt]; home is the same road backwards from leavesAt.
+    path: army.path.map((step) => [step.q, step.r, step.atMs]),
+    departsAt: army.departsAt.toISOString(),
+    arrivesAt: army.arrivesAt.toISOString(),
+    leavesAt: army.leavesAt?.toISOString() ?? null,
+    returnsAt: army.returnsAt?.toISOString() ?? null,
+  };
+}
+
+export async function armiesView(client: DbClient, worldId: number) {
+  return (await listArmies(client, worldId)).map(armyView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -347,6 +374,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const research = await researchListView(client, world.id);
   const heroes = await heroesView(client, data, world.id);
   const orders = await ordersView(client, world.id);
+  const armies = await armiesView(client, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -364,6 +392,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     research,
     heroes,
     orders,
+    armies,
     ...logistics,
     map,
   };

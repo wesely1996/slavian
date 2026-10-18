@@ -32,6 +32,10 @@ var _tab := "village"
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+## Army form: destination, troops and orders.
+var _army_to := 0
+var _army_units: Dictionary[String, int] = {}
+var _army_orders := "support"
 ## Standing order forms: repeat training and the surplus share.
 var _repeat_unit := "spearman"
 var _repeat_target := 20
@@ -69,6 +73,8 @@ func _ready() -> void:
 	Live.heroes_updated.connect(Game.set_heroes)
 	Live.orders_updated.connect(Game.set_orders)
 	Live.inbox_updated.connect(Game.set_inbox)
+	Live.armies_updated.connect(Game.set_armies)
+	Game.armies_changed.connect(_on_waves_changed)
 	Game.inbox_changed.connect(_on_inbox_changed)
 	Game.orders_changed.connect(_on_waves_changed)
 	Game.heroes_changed.connect(_on_waves_changed)
@@ -106,6 +112,7 @@ func _exit_tree() -> void:
 	Live.heroes_updated.disconnect(Game.set_heroes)
 	Live.orders_updated.disconnect(Game.set_orders)
 	Live.inbox_updated.disconnect(Game.set_inbox)
+	Live.armies_updated.disconnect(Game.set_armies)
 
 
 func _process(delta: float) -> void:
@@ -554,6 +561,142 @@ func _start_research(village_id: int, tech: String) -> void:
 		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+
+
+# --- Armies ------------------------------------------------------------------
+
+func _armies_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var defs: Dictionary = Game.data.units.units
+	# Armies from this village, and allies' troops standing guard here.
+	for army in Game.armies:
+		var mine: bool = int(army.homeVillageId) == village_id and army.status != "done"
+		var guarding: bool = int(army.targetVillageId) == village_id and army.status in ["stationed", "engaged"] and int(army.homeVillageId) != village_id
+		if not mine and not guarding:
+			continue
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label(ArmyText.units_text(army.units, defs), UI.SMALL_SIZE))
+		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		info.add_child(line)
+		var target_name := Game.village_name(army.targetVillageId)
+		var from_name := Game.village_name(army.homeVillageId)
+		if mine:
+			_tick(line, func() -> String: return ArmyText.status(army, target_name, Game.server_now()))
+		else:
+			line.text = "From %s, standing guard here" % from_name
+		row.add_child(info)
+		if mine and army.status == "stationed":
+			var army_id := int(army.id)
+			var recall := UI.button("Call home", func() -> void: _recall_army(army_id))
+			recall.custom_minimum_size.x = 150
+			row.add_child(recall)
+		_panel_body.add_child(row)
+
+	var home_units := Rules.garrison_at(village, Game.server_now())
+	var targets := Game.villages.values().filter(func(v: Dictionary) -> bool: return int(v.id) != village_id)
+	if targets.is_empty():
+		return
+	_panel_body.add_child(UI.label("Send troops", UI.SMALL_SIZE, UI.MUTED))
+	var labels := targets.map(func(v: Dictionary) -> String: return "%s (%s)" % [v.name, Game.member_name(int(v.ownerAccountId))])
+	var selected := 0
+	for i in targets.size():
+		if int(targets[i].id) == _army_to:
+			selected = i
+	_army_to = int(targets[selected].id)
+	var picker := UI.options(labels, selected)
+	picker.item_selected.connect(func(i: int) -> void:
+		_army_to = int(targets[i].id)
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	var kinds := ["support", "reinforce", "harass"]
+	var kind_row := UI.hbox(8)
+	for kind in kinds:
+		var b := UI.button(String(kind).capitalize(), func() -> void:
+			_army_orders = kind
+			_rebuild_panel())
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.disabled = _army_orders == kind
+		kind_row.add_child(b)
+	_panel_body.add_child(kind_row)
+	_panel_body.add_child(UI.label(ArmyText.ORDERS[_army_orders], UI.SMALL_SIZE, UI.MUTED))
+	for unit in home_units:
+		var def: Dictionary = defs.get(unit, {})
+		if def.is_empty() or not def.family in ["infantry", "archers", "cavalry"] or unit == "settler":
+			continue
+		var have := int(home_units[unit])
+		var count := clampi(int(_army_units.get(unit, 0)), 0, have)
+		var row := UI.hbox(8)
+		var label := UI.label("%s %d / %d" % [def.name, count, have], UI.SMALL_SIZE)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		for step in [-10, -1, 1, 10]:
+			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
+				_army_units[unit] = clampi(count + step, 0, have)
+				_rebuild_panel())
+			stepper.custom_minimum_size.x = 80
+			stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+			row.add_child(stepper)
+		var all := UI.button("All", func() -> void:
+			_army_units[unit] = have
+			_rebuild_panel())
+		all.custom_minimum_size.x = 80
+		all.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		row.add_child(all)
+		_panel_body.add_child(row)
+	var chosen := {}
+	for unit in _army_units:
+		if int(_army_units[unit]) > 0 and home_units.has(unit):
+			chosen[unit] = mini(int(_army_units[unit]), int(home_units[unit]))
+	var target := _army_to
+	var orders := _army_orders
+	var go := UI.button("Send", func() -> void: _send_army(village_id, target, chosen, orders))
+	go.disabled = chosen.is_empty()
+	_panel_body.add_child(go)
+
+	var rule: Dictionary = village.get("reinforce", {}) if village.get("reinforce") != null else {}
+	if rule.is_empty():
+		return
+	var share := roundi(float(rule.share) * 100.0)
+	var range_ := int(rule.range)
+	_panel_body.add_child(UI.label("When a battle starts within %d hexes, send %d%% of the troops here to help." % [range_, share] if share > 0 else "This village doesn't send help to battles nearby.", UI.SMALL_SIZE, UI.MUTED))
+	var rule_row := UI.hbox(8)
+	for option in [0, 25, 50, 75]:
+		var b := UI.button("%d%%" % option, func() -> void: _set_reinforce(village_id, option / 100.0, range_))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.disabled = option == share
+		rule_row.add_child(b)
+	for step in [-1, 1]:
+		var b := UI.button(("%+d hex" % step).replace("-", "−"), func() -> void:
+			_set_reinforce(village_id, share / 100.0, clampi(range_ + step, 0, int(Game.data.armies.reinforce.maxRange))))
+		b.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		rule_row.add_child(b)
+	_panel_body.add_child(rule_row)
+
+
+func _send_army(village_id: int, target: int, units: Dictionary, orders: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/armies" % village_id, {"targetVillageId": target, "units": units, "orders": orders})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_army_units.clear()
+	Game.note_server_time(response.data.serverTime)
+
+
+func _recall_army(army_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/armies/%d/recall" % army_id, {})
+	if not response.ok:
+		_status.text = response.error
+
+
+func _set_reinforce(village_id: int, share: float, range_: int) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/villages/%d/reinforce" % village_id, {"share": share, "range": range_})
+	if not response.ok:
+		_status.text = response.error
 
 
 # --- Standing orders ----------------------------------------------------------
@@ -1151,6 +1294,7 @@ func _troops_section(village: Dictionary) -> void:
 			return "%s %d/%d   next %s · all %s" % [unit_name, done, batch.count,
 				TimeUtil.format_duration(next_at - now), TimeUtil.format_duration(done_at - now)])
 
+	_armies_section(village)
 	_repeat_order(village)
 	_panel_body.add_child(UI.label("Train", UI.SMALL_SIZE, UI.MUTED))
 	var queue_full := training.size() >= limit
@@ -1275,6 +1419,9 @@ func _threats_panel() -> void:
 	for battle in finished:
 		_panel_body.add_child(UI.label(BattleText.outcome(battle, Game.village_name(battle.villageId)), UI.SMALL_SIZE))
 		_panel_body.add_child(UI.label("%s horde, %d rounds" % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)], UI.SMALL_SIZE, UI.MUTED))
+		var helpers := ArmyText.reinforcements(battle, Game.village_name)
+		if helpers != "":
+			_panel_body.add_child(UI.label("Help came from " + helpers, UI.SMALL_SIZE, UI.MUTED))
 	if not Game.raids.is_empty():
 		_panel_body.add_child(UI.label("Outposts burned", UI.HEADING_SIZE))
 	for raid in Game.raids:

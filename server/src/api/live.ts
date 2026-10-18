@@ -15,6 +15,7 @@
 //                   { "type": "research", "worldId", "research", "serverTime" }
 //                   { "type": "heroes", "worldId", "heroes", "serverTime" }
 //                   { "type": "orders", "worldId", "orders", "serverTime" }
+//                   { "type": "armies", "worldId", "armies", "serverTime" }
 //                   { "type": "notifications", "worldId", "notifications", "unread", "serverTime" } (yours only)
 //                   { "type": "error", "message" }
 import type { WebSocket } from 'ws';
@@ -25,7 +26,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, isMember } from '../db/worlds.js';
 import type { GameData } from '../data/index.js';
-import { battlesView, expeditionsView, heroesView, inboxView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
+import { armiesView, battlesView, expeditionsView, heroesView, inboxView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
 
 const clientMessage = z.object({ type: z.literal('subscribe'), worldId: z.number().int().positive() });
 const RECONNECT_MS = 2000;
@@ -116,6 +117,9 @@ export class LiveHub {
         }
         if (event.type === 'battles') {
           return { type: 'battles', worldId: event.worldId, battles: await battlesView(client, event.worldId), serverTime };
+        }
+        if (event.type === 'armies') {
+          return { type: 'armies', worldId: event.worldId, armies: await armiesView(client, event.worldId), serverTime };
         }
         if (event.type === 'orders') {
           return { type: 'orders', worldId: event.worldId, orders: await ordersView(client, event.worldId), serverTime };

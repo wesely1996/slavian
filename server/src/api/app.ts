@@ -4,6 +4,7 @@ import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
+import { recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -27,6 +28,7 @@ import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
 import {
+  armyView,
   caravanView,
   expeditionView,
   heroView,
@@ -95,6 +97,12 @@ const prefsBody = z.object({
   digestHour: z.number().int().min(0).max(23).optional(),
 });
 const deviceBody = z.object({ token: z.string().min(10).max(4096), platform: z.enum(['android', 'ios', 'web']) });
+const armyBody = z.object({
+  targetVillageId: z.number().int().positive(),
+  units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
+  orders: z.enum(['support', 'reinforce', 'harass']),
+});
+const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -158,6 +166,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     research: scheduler.data.research,
     heroes: scheduler.data.heroes,
     orders: scheduler.data.orders,
+    armies: scheduler.data.armies,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -355,6 +364,29 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id, orderId } = orderParams.parse(request.params);
     await cancelOrderCommand(db, scheduler, { accountId: account.id, villageId: id, orderId, now: clock() });
     return { ok: true, serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/armies', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = armyBody.parse(request.body);
+    const army = await sendArmyCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/recall', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const army = await recallArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.put('/v1/villages/:id/reinforce', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = reinforceBody.parse(request.body);
+    await setReinforceCommand(db, scheduler.data, { accountId: account.id, villageId: id, ...body });
+    return { reinforce: body };
   });
 
   app.post('/v1/villages/:id/research', async (request) => {

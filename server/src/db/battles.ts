@@ -13,6 +13,8 @@ export interface RoundLog {
   defenderLosses: Record<string, number>;
   attackerLeft: number;
   defenderLeft: number;
+  // Armies that fought for the first time this round, with their bonus.
+  joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number }[];
 }
 
 export interface Battle {
@@ -118,4 +120,12 @@ export async function listRecentBattles(client: DbClient, worldId: number, limit
     [worldId, limit],
   );
   return rows.map(fromRow);
+}
+
+// An army joined: its troops count towards the defenders' starting strength.
+export async function addDefenders(client: DbClient, id: number, units: Units): Promise<void> {
+  const battle = await loadBattle(client, id);
+  const sum: Record<string, number> = { ...battle.defenderInitial };
+  for (const [unit, n] of Object.entries(units)) sum[unit] = (sum[unit] ?? 0) + n;
+  await client.query('UPDATE battles SET defender_initial = $2 WHERE id = $1', [id, JSON.stringify(sum)]);
 }

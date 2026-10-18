@@ -16,6 +16,7 @@ signal research_updated(world_id: int, research: Array)
 signal heroes_updated(world_id: int, heroes: Array)
 signal orders_updated(world_id: int, orders: Array)
 signal inbox_updated(world_id: int, notifications: Array, unread: int)
+signal armies_updated(world_id: int, armies: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -97,6 +98,8 @@ func _handle(text: String) -> void:
 			battles_updated.emit(int(message.worldId), message.battles)
 		"raids":
 			raids_updated.emit(int(message.worldId), message.raids)
+		"armies":
+			armies_updated.emit(int(message.worldId), message.armies)
 		"notifications":
 			inbox_updated.emit(int(message.worldId), message.notifications, int(message.unread))
 		"orders":
