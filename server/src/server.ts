@@ -23,7 +23,7 @@ const scheduler = { data: loadGameData(), handlers };
 const upgraded = await upgradeLegacyVillages(db, scheduler.data);
 if (upgraded) console.log(`Laid out ${upgraded} older village(s) on plots`);
 const clock = () => new Date();
-const live = new LiveHub(db, clock);
+const live = new LiveHub(db, scheduler.data, clock);
 await live.start();
 const app = await buildApp({ db, scheduler, clock, live, logger: true });
 await app.listen({ port, host });

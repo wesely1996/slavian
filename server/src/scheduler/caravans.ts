@@ -1,0 +1,63 @@
+// Caravans on the scheduler: caravan_arrive unloads (or loads, when
+// fetching from the vault) at the far end; caravan_return brings home
+// whatever the caravan carries back. vault_upgrade finishes a vault level.
+import { z } from 'zod';
+import { loadCaravan, markCaravanDone, markReturning } from '../db/caravans.js';
+import { notifyWorld } from '../db/notify.js';
+import { loadVault, saveVault } from '../db/vaults.js';
+import { loadVillage, saveVillageState } from '../db/villages.js';
+import { receive, store, vaultCapacity, withdraw } from '../sim/logistics.js';
+import { emptyResources } from '../sim/resources.js';
+import { scheduleEvent, type HandlerRegistry } from './events.js';
+
+export const caravanPayload = z.object({ caravanId: z.number().int() });
+export type CaravanPayload = z.infer<typeof caravanPayload>;
+
+export const caravanHandlers: HandlerRegistry = {
+  async caravan_arrive({ client, data, world }, event) {
+    const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
+    if (caravan.status !== 'outbound') return;
+    let carriedBack = emptyResources();
+    if (caravan.destinationVillageId === null) {
+      const vault = await loadVault(client, world.id);
+      if (caravan.kind === 'deliver') {
+        const stored = store(vault.amounts, vaultCapacity(data, vault.level), caravan.cargo);
+        await saveVault(client, { ...vault, amounts: stored.amounts });
+        carriedBack = stored.leftover;
+      } else {
+        const taken = withdraw(vault.amounts, caravan.cargo);
+        await saveVault(client, { ...vault, amounts: taken.amounts });
+        carriedBack = taken.taken;
+      }
+    } else {
+      const village = await loadVillage(client, caravan.destinationVillageId);
+      const received = receive(village.state.ledger, event.dueAt, caravan.cargo);
+      await saveVillageState(client, village.id, { ...village.state, ledger: received.ledger });
+      await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+      carriedBack = received.leftover;
+    }
+    await markReturning(client, caravan.id, carriedBack);
+    const payload: CaravanPayload = { caravanId: caravan.id };
+    await scheduleEvent(client, world.id, caravan.returnsAt, 'caravan_return', payload);
+    await notifyWorld(client, { worldId: world.id, type: 'caravans' });
+  },
+
+  // Home again. What doesn't fit in a full storehouse is lost.
+  async caravan_return({ client, world }, event) {
+    const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
+    if (caravan.status !== 'returning') return;
+    const village = await loadVillage(client, caravan.villageId);
+    const received = receive(village.state.ledger, event.dueAt, caravan.carriedBack ?? emptyResources());
+    await saveVillageState(client, village.id, { ...village.state, ledger: received.ledger });
+    await markCaravanDone(client, caravan.id);
+    await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+    await notifyWorld(client, { worldId: world.id, type: 'caravans' });
+  },
+
+  async vault_upgrade({ client, world }) {
+    const vault = await loadVault(client, world.id);
+    if (vault.upgradingTo === null) return;
+    await saveVault(client, { ...vault, level: vault.upgradingTo, upgradingTo: null, upgradeCompletesAt: null });
+    await notifyWorld(client, { worldId: world.id, type: 'caravans' });
+  },
+};

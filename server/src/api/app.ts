@@ -1,6 +1,7 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
+import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
 import {
   abandonOutpostCommand,
   claimOutpostCommand,
@@ -18,7 +19,7 @@ import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
-import { missionView, villageView, worldSummary, worldView } from './views.js';
+import { caravanView, missionView, vaultView, villageView, worldSummary, worldView } from './views.js';
 
 export interface AppDeps {
   db: Db;
@@ -50,6 +51,11 @@ const buildBody = z
   .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
+const amount = z.number().int().min(0).max(1_000_000);
+const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
+// No destination: the Holy City vault.
+const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
+const fetchBody = z.object({ load: loadSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
 
@@ -92,7 +98,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   async function fullWorldView(worldId: number) {
     return inTransaction(db, async (client) => ({
-      ...(await worldView(client, await getWorld(client, worldId))),
+      ...(await worldView(client, scheduler.data, await getWorld(client, worldId))),
       serverTime: clock().toISOString(),
     }));
   }
@@ -107,6 +113,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     waves: scheduler.data.waves,
     scouting: scheduler.data.scouting,
     battle: scheduler.data.battle,
+    logistics: scheduler.data.logistics,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -221,6 +228,30 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = hexBody.parse(request.body);
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/caravans', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = caravanBody.parse(request.body);
+    const { village, caravan } = await sendCaravanCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), caravan: caravanView(caravan), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/caravans/fetch', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = fetchBody.parse(request.body);
+    const { village, caravan } = await fetchFromVaultCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), caravan: caravanView(caravan), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/worlds/:id/vault/upgrade', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await requireMember(account, id);
+    const vault = await upgradeVaultCommand(db, scheduler, { worldId: id, now: clock() });
+    return { vault: vaultView(scheduler.data, vault), serverTime: clock().toISOString() };
   });
 
   if (deps.live) {

@@ -8,6 +8,7 @@ signal waves_changed
 signal scouting_changed
 signal battles_changed
 signal raids_changed
+signal caravans_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -21,6 +22,10 @@ var scouting: Array = []
 var battles: Array = []
 ## Outposts burned by passing hordes, newest first.
 var raids: Array = []
+## Caravan trips on the road, then the latest finished ones.
+var caravans: Array = []
+## The Holy City vault (see server vaultView).
+var vault: Dictionary = {}
 
 ## Server clock minus local clock, in seconds.
 var _clock_offset := 0.0
@@ -64,6 +69,9 @@ func set_world(new_world: Dictionary) -> void:
 	scouting = new_world.get("scouting", [])
 	battles = new_world.get("battles", [])
 	raids = new_world.get("raids", [])
+	caravans = new_world.get("caravans", [])
+	var new_vault: Variant = new_world.get("vault")
+	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
 	var map: Variant = new_world.get("map")
 	if map is Dictionary:
@@ -98,6 +106,14 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_logistics(world_id_: int, new_caravans: Array, new_vault: Dictionary) -> void:
+	if world_id_ != world_id():
+		return
+	caravans = new_caravans
+	vault = new_vault
+	caravans_changed.emit()
 
 
 ## The village whose outpost stands on `cell`, if any.

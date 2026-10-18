@@ -27,7 +27,7 @@ import {
   type VillageState,
 } from '../sim/village.js';
 
-interface VillageCommandInput {
+export interface VillageCommandInput {
   accountId: number;
   villageId: number;
   now: Date;
@@ -35,7 +35,7 @@ interface VillageCommandInput {
 
 // Runs a command on the caller's own village with the world locked and
 // caught up to `now`, then saves the village and announces the change.
-async function ownVillageCommand<T>(
+export async function ownVillageCommand<T>(
   db: Db,
   deps: SchedulerDeps,
   input: VillageCommandInput,

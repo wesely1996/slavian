@@ -173,6 +173,20 @@
       "timeGrowth": 1.55,
       "kind": "center"
     },
+    "caravan_yard": {
+      "name": "Caravan Yard",
+      "kind": "center",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 120,
+        "stone": 100,
+        "grain": 60,
+        "iron": 40
+      },
+      "costGrowth": 1.55,
+      "buildSeconds": 150,
+      "timeGrowth": 1.5
+    },
     "outpost": {
       "name": "Outpost",
       "kind": "outpost",

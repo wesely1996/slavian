@@ -4,6 +4,7 @@ import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining, outpostHex } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
 import { battleHandlers } from './battles.js';
+import { caravanHandlers } from './caravans.js';
 import { outpostHandlers, outpostStanding } from './outposts.js';
 import { scoutingHandlers } from './scouting.js';
 import { waveHandlers } from './waves.js';
@@ -46,4 +47,5 @@ export const handlers: HandlerRegistry = {
   ...scoutingHandlers,
   ...battleHandlers,
   ...outpostHandlers,
+  ...caravanHandlers,
 };

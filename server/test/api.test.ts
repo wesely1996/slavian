@@ -24,7 +24,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
   beforeAll(async () => {
     ({ db, cleanup } = await createTestDb());
-    live = new LiveHub(db, clock);
+    live = new LiveHub(db, scheduler.data, clock);
     await live.start();
     app = await buildApp({ db, scheduler, clock, live });
     await app.listen({ port: 0, host: '127.0.0.1' });
@@ -416,6 +416,77 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Ruins can be abandoned.
     const abandoned = await call('POST', `/v1/villages/${village.id}/outposts/abandon`, zora.token, { q: q1, r: r1 });
     expect(abandoned.body.village.plots[`o${q1},${r1}`]).toBeUndefined();
+  });
+
+  it('sends caravans to an ally and to the vault, fetches from it and enlarges it', async () => {
+    const vid = await guest('Vid');
+    const ola = await guest('Ola');
+    const created = await call('POST', '/v1/worlds', vid.token, { name: 'Caravans', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', ola.token, { inviteCode: created.body.inviteCode });
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, vid.token);
+    expect(started.body.vault).toMatchObject({ level: 1, amounts: { wood: 0, stone: 0, grain: 0, iron: 0 }, capacity: 3000 });
+    const mine = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vid.accountId);
+    const theirs = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ola.accountId);
+    const send = (body: object) => call('POST', `/v1/villages/${mine.id}/caravans`, vid.token, body);
+    const load = (wood = 0, stone = 0, grain = 0, iron = 0) => ({ wood, stone, grain, iron });
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
+
+    expect((await send({ destinationVillageId: theirs.id, load: load(100) })).body.message).toMatch(/Caravan Yard first/);
+    const yard = await call('POST', `/v1/villages/${mine.id}/build`, vid.token, { building: 'caravan_yard' });
+    now = new Date(yard.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    await db.query(`UPDATE villages SET amounts = '{"wood": 2000, "stone": 2000, "grain": 2000, "iron": 2000}', capacity = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [mine.id]);
+
+    expect((await send({ destinationVillageId: theirs.id, load: load(400, 200) })).body.message).toMatch(/takes 2 caravans; 1 at home/);
+    expect((await send({ destinationVillageId: mine.id, load: load(100) })).body.message).toMatch(/another village/);
+    expect((await send({ destinationVillageId: theirs.id, load: load() })).body.message).toMatch(/Nothing to carry/);
+    expect((await send({ load: load(-1) })).status).toBe(400);
+
+    // 400 wood and 100 iron to Ola: she has room for 500 more of each.
+    const trip = await send({ destinationVillageId: theirs.id, load: load(400, 0, 0, 100) });
+    expect(trip.status).toBe(200);
+    expect(trip.body.caravan).toMatchObject({ kind: 'deliver', caravans: 1, status: 'outbound', destinationVillageId: theirs.id });
+    expect(trip.body.village.resources.amounts.wood).toBeLessThanOrEqual(1600 + 1);
+    expect((await send({ load: load(10) })).body.message).toMatch(/0 at home/);
+    now = new Date(trip.body.caravan.arrivesAt);
+    await tick(db, now, scheduler);
+    let w = await world();
+    const ola1 = w.villages.find((v: { id: number }) => v.id === theirs.id);
+    expect(ola1.resources.amounts.wood).toBeGreaterThanOrEqual(900);
+    expect(w.caravans[0]).toMatchObject({ status: 'returning', carriedBack: load() });
+    now = new Date(trip.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    expect((await world()).caravans[0].status).toBe('done');
+
+    // To the vault, and back out again.
+    const deposit = await send({ load: load(500) });
+    expect(deposit.body.caravan.destinationVillageId).toBeNull();
+    now = new Date(deposit.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    expect((await world()).vault.amounts.wood).toBe(500);
+    const fetch = await call('POST', `/v1/villages/${mine.id}/caravans/fetch`, vid.token, { load: load(300, 100) });
+    expect(fetch.body.caravan).toMatchObject({ kind: 'fetch', cargo: load(300, 100) });
+    const woodBefore = fetch.body.village.resources.amounts.wood;
+    now = new Date(fetch.body.caravan.arrivesAt);
+    await tick(db, now, scheduler);
+    w = await world();
+    expect(w.vault.amounts).toEqual(load(200));
+    expect(w.caravans[0].carriedBack).toEqual(load(300));
+    now = new Date(fetch.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    const home = (await world()).villages.find((v: { id: number }) => v.id === mine.id);
+    expect(home.resources.amounts.wood).toBeGreaterThanOrEqual(woodBefore + 300);
+
+    // Enlarging the vault is paid from the vault.
+    expect((await call('POST', `/v1/worlds/${worldId}/vault/upgrade`, ola.token)).body.message).toMatch(/needs more wood, stone, grain, iron/);
+    await db.query(`UPDATE vaults SET amounts = '{"wood": 3000, "stone": 3000, "grain": 3000, "iron": 3000}' WHERE world_id = $1`, [worldId]);
+    const upgrade = await call('POST', `/v1/worlds/${worldId}/vault/upgrade`, ola.token);
+    expect(upgrade.body.vault).toMatchObject({ level: 1, upgradingTo: 2, amounts: load(2200, 2000, 2600, 2600) });
+    expect((await call('POST', `/v1/worlds/${worldId}/vault/upgrade`, ola.token)).body.message).toMatch(/already being enlarged/);
+    now = new Date(upgrade.body.vault.upgradeCompletesAt);
+    await tick(db, now, scheduler);
+    expect((await world()).vault).toMatchObject({ level: 2, upgradingTo: null, capacity: 4500 });
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {
