@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_scout_text()
 	_test_battle_text()
 	_test_caravans()
+	_test_expansion()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -125,7 +126,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
+	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard", "settlers_lodge"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
 	var farm: Dictionary = data.buildings.buildings.farm
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
 	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
@@ -263,3 +264,23 @@ func _test_caravans() -> void:
 	_check(back.from == Vector2i(0, 0) and back.to == Vector2i(1, 0) and is_equal_approx(back.t, 0.5), "heading home the same road backwards: %s" % back)
 	caravan.status = "done"
 	_check(CaravanMath.progress(caravan, t0).is_empty(), "finished trips are off the map")
+
+
+func _test_expansion() -> void:
+	var root := ProjectSettings.globalize_path("res://")
+	var data := {
+		"expansion": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("../data/expansion.json"))),
+		"terrain": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("../data/terrain.json"))),
+	}
+	var units: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("../data/units.json")))
+	var home := Vector2i(2, 0)
+	var villages := [home, Vector2i(-2, 0)]
+	_check(Rules.settle_problem(data, Vector2i(5, 0), "plains", home, villages, false) == "", "a free plains hex can be settled")
+	_check(Rules.settle_problem(data, Vector2i(5, 0), "swamp", home, villages, false).begins_with("Villages can't be founded on Swamp"), "swamp")
+	_check(Rules.settle_problem(data, Vector2i(9, 0), "plains", home, villages, false).begins_with("Settlers walk at most 6"), "too far")
+	_check(Rules.settle_problem(data, Vector2i(4, 0), "plains", home, villages, false).begins_with("Villages stand at least 3"), "too close")
+	_check(Rules.settle_problem(data, Vector2i(5, 0), "plains", home, villages, true) == "An outpost stands there.", "outpost")
+	var settler: Dictionary = units.units.settler
+	_check(Rules.unit_cost(settler, 1, 3).wood == roundi(float(settler.cost.wood) * 2.25), "settlers get dearer per village")
+	_check(Rules.unit_cost(units.units.spearman, 2, 3) == Rules.unit_cost(units.units.spearman, 2), "other units don't")
+	_check(Rules.recommended_garrison(data, 1) == 10 and Rules.recommended_garrison(data, 3) == 20, "recommended garrison")

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Combat stats (attack, defense) are used by battles from M1 step 5. speed is hexes per hour on plains; upkeepPerHour is grain. Training time shrinks by trainingSpeedup per level of the training building above its first.",
+  "_comment": "A unit's cost is multiplied by costGrowthPerVillage for each village its owner has beyond the first (settlers). Combat stats (attack, defense) are used by battles from M1 step 5. speed is hexes per hour on plains; upkeepPerHour is grain. Training time shrinks by trainingSpeedup per level of the training building above its first.",
   "trainingQueueLimit": 3,
   "maxBatch": 50,
   "trainingSpeedup": 0.9,
@@ -55,6 +55,20 @@
       "speed": 12,
       "attack": 0,
       "defense": 2,
+      "carry": 0
+    },
+    "settler": {
+      "name": "Settler",
+      "family": "infantry",
+      "building": "settlers_lodge",
+      "requiresLevel": 1,
+      "cost": { "wood": 300, "stone": 250, "grain": 300, "iron": 150 },
+      "costGrowthPerVillage": 1.5,
+      "trainSeconds": 900,
+      "upkeepPerHour": 2,
+      "speed": 4,
+      "attack": 0,
+      "defense": 5,
       "carry": 0
     }
   }

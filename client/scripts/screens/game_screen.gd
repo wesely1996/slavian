@@ -56,6 +56,8 @@ func _ready() -> void:
 	Live.battles_updated.connect(Game.set_battles)
 	Live.raids_updated.connect(Game.set_raids)
 	Live.caravans_updated.connect(Game.set_logistics)
+	Live.expeditions_updated.connect(Game.set_expeditions)
+	Game.expeditions_changed.connect(_on_waves_changed)
 	Game.caravans_changed.connect(_on_waves_changed)
 	Game.waves_changed.connect(_on_waves_changed)
 	Game.raids_changed.connect(_on_waves_changed)
@@ -83,6 +85,7 @@ func _exit_tree() -> void:
 	Live.battles_updated.disconnect(Game.set_battles)
 	Live.raids_updated.disconnect(Game.set_raids)
 	Live.caravans_updated.disconnect(Game.set_logistics)
+	Live.expeditions_updated.disconnect(Game.set_expeditions)
 
 
 func _process(delta: float) -> void:
@@ -186,6 +189,9 @@ func _build_ui() -> void:
 
 func _select(cell: Vector2i) -> void:
 	_selected = cell
+	var village := Game.village_at(cell)
+	if not village.is_empty() and Game.is_mine(village):
+		Game.current_village_id = int(village.id)
 	_panel_mode = "hex"
 	hex_map.select(cell)
 	_rebuild_panel()
@@ -246,7 +252,7 @@ func _terrain_panel() -> void:
 	var id: String = Game.terrain.get(_selected, "")
 	_panel_body.add_child(UI.label(Terrain.display_name(id, Game.data), UI.HEADING_SIZE))
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
-	var where := "The Holy City." if distance == 0 else "%d hexes from the Holy City." % distance
+	var where := "The Holy City." if distance == 0 else "%d hex%s from the Holy City." % [distance, "" if distance == 1 else "es"]
 	_panel_body.add_child(UI.label(where, UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
 		_vault_panel()
@@ -256,6 +262,7 @@ func _terrain_panel() -> void:
 		_outpost_panel(holder, Rules.outpost_plot(_selected))
 	else:
 		_claim_panel(id)
+		_found_panel(id)
 
 
 ## An outpost on the selected hex: what it gathers; yours can be upgraded,
@@ -445,6 +452,62 @@ func _fetch_from_vault(village_id: int, cargo: Dictionary) -> void:
 	Game.update_village(response.data.village)
 
 
+## Settlers from `village_id` on the road, and how recent ones ended.
+func _expeditions_list(village_id: int) -> void:
+	var mine := Game.expeditions.filter(func(e: Dictionary) -> bool: return int(e.villageId) == village_id)
+	for expedition in mine:
+		var line := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String:
+			var now := Game.server_now()
+			match expedition.status:
+				"outbound":
+					return "Settlers on their way to found %s · %s" % [expedition.name, TimeUtil.format_duration(TimeUtil.parse_iso(expedition.arrivesAt) - now)]
+				"returning":
+					return "Settlers coming home (%s) · %s" % [String(expedition.failure).trim_suffix("."), TimeUtil.format_duration(TimeUtil.parse_iso(expedition.returnsAt) - now)]
+				"founded":
+					return "Founded %s" % expedition.name
+			return "Settlers came home from (%d, %d)" % [int(expedition.q), int(expedition.r)])
+
+
+## An empty settleable hex: can your village send settlers here?
+func _found_panel(terrain: String) -> void:
+	var home := _my_village()
+	var def: Dictionary = Game.data.terrain.terrain.get(terrain, {})
+	if home.is_empty() or not def.get("settleable", false):
+		return
+	var home_cell := Vector2i(int(home.q), int(home.r))
+	var others := Game.villages.values().map(func(v: Dictionary) -> Vector2i: return Vector2i(int(v.q), int(v.r)))
+	var problem := Rules.settle_problem(Game.data, _selected, terrain, home_cell, others, not Game.outpost_owner(_selected).is_empty())
+	_panel_body.add_child(UI.label("Found a village", UI.HEADING_SIZE))
+	if problem != "":
+		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
+		return
+	var needed := int(Game.data.expansion.settlersNeeded)
+	var at_home := int(Rules.garrison_at(home, Game.server_now()).get("settler", 0))
+	_panel_body.add_child(UI.label("%d settlers from %s walk here and found it (%d at home). Train them in a Settlers' Lodge." % [needed, home.name, at_home], UI.SMALL_SIZE, UI.MUTED))
+	var name_edit := UI.line_edit("Name (optional)")
+	_panel_body.add_child(name_edit)
+	var village_id := int(home.id)
+	var cell := _selected
+	var send := UI.button("Send settlers", func() -> void: _send_settlers(village_id, cell, name_edit.text))
+	send.disabled = at_home < needed
+	_panel_body.add_child(send)
+
+
+func _send_settlers(village_id: int, cell: Vector2i, village_name: String) -> void:
+	_status.text = ""
+	var body := {"q": cell.x, "r": cell.y}
+	if village_name.strip_edges() != "":
+		body.name = village_name.strip_edges()
+	var response := await Api.post_json("/v1/villages/%d/found" % village_id, body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
 ## An empty hex: can your village put an outpost here?
 func _claim_panel(terrain: String) -> void:
 	var home := _my_village()
@@ -546,6 +609,19 @@ func _village_panel() -> void:
 	if village.is_empty():
 		return
 	_village_view.show_village(Game.data, village, _plot)
+	var mine := Game.my_villages()
+	if mine.size() > 1:
+		var names := mine.map(func(v: Dictionary) -> String: return v.name)
+		var index := 0
+		for i in mine.size():
+			if int(mine[i].id) == int(village.id):
+				index = i
+		var picker := UI.options(names, index)
+		picker.item_selected.connect(func(i: int) -> void:
+			Game.current_village_id = int(mine[i].id)
+			_plot = Rules.HALL_PLOT
+			_rebuild_panel())
+		_panel_body.add_child(picker)
 	var tabs := UI.hbox()
 	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"]]:
 		var button := UI.button(tab[1], func() -> void:
@@ -701,6 +777,13 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 func _troops_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_stance_picker(village)
+	var recommended := Rules.recommended_garrison(Game.data, Game.my_villages().size())
+	var guard := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(guard)
+	_tick(guard, func() -> String:
+		var home_now := BattleText.total(Rules.garrison_at(Game.villages.get(village_id, village), Game.server_now()))
+		return "Recommended garrison: %d (%d at home)" % [recommended, home_now])
+	_expeditions_list(village_id)
 	_panel_body.add_child(UI.label("At home", UI.SMALL_SIZE, UI.MUTED))
 	var home := UI.label()
 	_panel_body.add_child(home)
@@ -753,7 +836,7 @@ func _troops_section(village: Dictionary) -> void:
 		if not unlocked:
 			info.add_child(UI.label("Needs %s level %d" % [_building_def(def.building).name, def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
 			continue
-		var cost := Rules.unit_cost(def, count)
+		var cost := Rules.unit_cost(def, count, Game.my_villages().size())
 		var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		info.add_child(cost_line)
 
@@ -1002,11 +1085,9 @@ func _leave() -> void:
 	get_tree().change_scene_to_file(START_SCENE)
 
 
+## The village of yours the screens show (see Game.current_village).
 func _my_village() -> Dictionary:
-	for village in Game.villages.values():
-		if Game.is_mine(village):
-			return village
-	return {}
+	return Game.current_village()
 
 
 func _building_def(building: String) -> Dictionary:

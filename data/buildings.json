@@ -187,6 +187,20 @@
       "buildSeconds": 150,
       "timeGrowth": 1.5
     },
+    "settlers_lodge": {
+      "name": "Settlers' Lodge",
+      "kind": "center",
+      "maxLevel": 5,
+      "cost": {
+        "wood": 300,
+        "stone": 250,
+        "grain": 200,
+        "iron": 100
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 300,
+      "timeGrowth": 1.5
+    },
     "outpost": {
       "name": "Outpost",
       "kind": "outpost",

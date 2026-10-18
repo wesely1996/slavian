@@ -9,6 +9,7 @@ signal scouting_changed
 signal battles_changed
 signal raids_changed
 signal caravans_changed
+signal expeditions_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -26,6 +27,10 @@ var raids: Array = []
 var caravans: Array = []
 ## The Holy City vault (see server vaultView).
 var vault: Dictionary = {}
+## Settlers on the road to found villages, then the latest that ended.
+var expeditions: Array = []
+## Which of your villages the screens show (0: the first).
+var current_village_id := 0
 
 ## Server clock minus local clock, in seconds.
 var _clock_offset := 0.0
@@ -70,6 +75,7 @@ func set_world(new_world: Dictionary) -> void:
 	battles = new_world.get("battles", [])
 	raids = new_world.get("raids", [])
 	caravans = new_world.get("caravans", [])
+	expeditions = new_world.get("expeditions", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -106,6 +112,29 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_expeditions(world_id_: int, new_expeditions: Array) -> void:
+	if world_id_ != world_id():
+		return
+	expeditions = new_expeditions
+	expeditions_changed.emit()
+
+
+## Your villages, oldest first.
+func my_villages() -> Array:
+	var mine := villages.values().filter(func(v: Dictionary) -> bool: return is_mine(v))
+	mine.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+	return mine
+
+
+## The village the screens show: the one picked, else your first.
+func current_village() -> Dictionary:
+	var mine := my_villages()
+	for village in mine:
+		if int(village.id) == current_village_id:
+			return village
+	return mine[0] if not mine.is_empty() else {}
 
 
 func set_logistics(world_id_: int, new_caravans: Array, new_vault: Dictionary) -> void:

@@ -11,6 +11,7 @@ signal scouting_updated(world_id: int, missions: Array)
 signal battles_updated(world_id: int, battles: Array)
 signal raids_updated(world_id: int, raids: Array)
 signal caravans_updated(world_id: int, caravans: Array, vault: Dictionary)
+signal expeditions_updated(world_id: int, expeditions: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -92,6 +93,8 @@ func _handle(text: String) -> void:
 			battles_updated.emit(int(message.worldId), message.battles)
 		"raids":
 			raids_updated.emit(int(message.worldId), message.raids)
+		"expeditions":
+			expeditions_updated.emit(int(message.worldId), message.expeditions)
 		"caravans":
 			caravans_updated.emit(int(message.worldId), message.caravans, message.vault)
 		"error":

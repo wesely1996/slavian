@@ -7,6 +7,7 @@ import { listVillages } from '../db/villages.js';
 import { listRecentBattles, type Battle } from '../db/battles.js';
 import { listRecentRaids, type Raid } from '../db/raids.js';
 import { listCaravans, type Caravan } from '../db/caravans.js';
+import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
@@ -33,6 +34,8 @@ export interface VillageView {
   stance: string;
   // A battle at the gates: outposts produce nothing until it ends.
   besieged: boolean;
+  // Grain per hour (world speed 1) for administration (founded villages).
+  adminUpkeep: number;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -64,6 +67,7 @@ export function villageView(village: Village): VillageView {
     away: { ...village.state.away },
     stance: village.state.stance,
     besieged: village.state.besieged,
+    adminUpkeep: village.state.adminUpkeep,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -208,6 +212,29 @@ export async function logisticsView(client: DbClient, data: GameData, worldId: n
   };
 }
 
+export function expeditionView(expedition: Expedition) {
+  return {
+    id: expedition.id,
+    villageId: expedition.villageId,
+    q: expedition.q,
+    r: expedition.r,
+    name: expedition.name,
+    settlers: expedition.settlers,
+    status: expedition.status,
+    failure: expedition.failure,
+    foundedVillageId: expedition.foundedVillageId,
+    // Like caravans: [q, r, ms after departsAt]; home is the road backwards.
+    path: expedition.path.map((step) => [step.q, step.r, step.atMs]),
+    departsAt: expedition.departsAt.toISOString(),
+    arrivesAt: expedition.arrivesAt.toISOString(),
+    returnsAt: expedition.returnsAt.toISOString(),
+  };
+}
+
+export async function expeditionsView(client: DbClient, worldId: number) {
+  return (await listExpeditions(client, worldId)).map(expeditionView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -230,6 +257,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const scouting = await scoutingView(client, world.id);
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);
+  const expeditions = await expeditionsView(client, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -243,6 +271,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     scouting,
     battles,
     raids,
+    expeditions,
     ...logistics,
     map,
   };

@@ -29,13 +29,15 @@ export function caravansFor(data: GameData, load: Resources): number {
   return Math.ceil(amount / data.logistics.caravan.capacity);
 }
 
-// The road between two hexes, timed at caravan pace: each step is the
-// hex and the ms after departure the caravan enters it.
-export function caravanRoute(
+// The road between two hexes at `hexesPerHour` on plains (terrain move
+// cost slows it): each step is the hex and the ms after departure it is
+// entered.
+export function roadRoute(
   data: GameData,
   terrain: ReadonlyMap<string, TerrainId>,
   from: Hex,
   to: Hex,
+  hexesPerHour: number,
   worldSpeed: number,
 ): PathStep[] {
   const moveCost = (_: Hex, cell: Hex): number | null => {
@@ -44,12 +46,22 @@ export function caravanRoute(
   };
   const path = findPath(from, to, moveCost);
   if (!path) throw new RuleError('No road leads there');
-  const msPerCost = MS_PER_HOUR / data.logistics.caravan.speed / worldSpeed;
+  const msPerCost = MS_PER_HOUR / hexesPerHour / worldSpeed;
   let atMs = 0;
   return path.map((cell, i) => {
     if (i > 0) atMs += moveCost(cell, cell)! * msPerCost;
     return { q: cell.q, r: cell.r, atMs: Math.max(i, Math.round(atMs)) };
   });
+}
+
+export function caravanRoute(
+  data: GameData,
+  terrain: ReadonlyMap<string, TerrainId>,
+  from: Hex,
+  to: Hex,
+  worldSpeed: number,
+): PathStep[] {
+  return roadRoute(data, terrain, from, to, data.logistics.caravan.speed, worldSpeed);
 }
 
 export function vaultCapacity(data: GameData, level: number): number {
