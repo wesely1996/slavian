@@ -1,0 +1,27 @@
+{
+  "name": "@slavian/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc -p . --noEmit",
+    "test": "vitest run",
+    "migrate": "tsx src/db/migrate.ts",
+    "worker": "tsx src/scheduler/run-worker.ts",
+    "demo": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

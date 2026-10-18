@@ -498,6 +498,13 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 | **M5 — Beta** | Ready for friends | Closed test, balance passes, English + Serbian (Latin) localization, accessibility pass, final-ish art, donation button + cost slider, privacy policy, backups/monitoring. |
 | **M6 — Launch** | Play Store | Android release. iOS and desktop afterwards. |
 
+### M0 status
+- [x] Repo skeleton: `server/`, `client/`, `data/`, `ops/`, CI workflow.
+- [x] Hex math in TypeScript and GDScript, both checked against `data/fixtures/hex-vectors.json`. A* pathfinding on the server.
+- [x] Scheduler prototype: `scheduled_events`, one writer per world (Postgres advisory locks), lazy resource ledger, build queue command that catches the world up before acting, failed events isolated. Integration tests cover concurrency, late workers and failures.
+- [x] Godot map spike: placeholder world generator (fronts per group size, edge belt, start ring), hex rendering, touch pan / pinch zoom / tap select, Android export preset.
+- [ ] Run the spike on a physical Android phone and measure frame rate. If drawing ~800 hexes with `_draw()` is slow, switch to a batched mesh or `TileMapLayer`.
+
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
 2. Hex math library (axial coords, distance, neighbours, A*) in the server; matching rendering helpers in Godot.

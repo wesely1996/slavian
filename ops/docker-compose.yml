@@ -1,0 +1,17 @@
+# Local development database.
+#   docker compose -f ops/docker-compose.yml up -d
+#   DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: slavian
+      POSTGRES_PASSWORD: slavian
+      POSTGRES_DB: slavian
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
