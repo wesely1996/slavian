@@ -945,7 +945,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(first.spawnAt);
     await tick(db, now, scheduler);
     const marching = (await world()).waves.find((x: { id: number }) => x.id === first.id);
-    const [q, r, atMs] = marching.path.at(-3) as [number, number, number];
+    // A hex on the road a few steps short of the village: in fort range,
+    // not the Holy City (no forts there).
+    const holdable = (path: [number, number, number][]) =>
+      path.slice(0, -1).reverse().find(([pq, pr]) => {
+        const d = hexDistance(hex(pq, pr), hex(home.q, home.r));
+        return d >= 2 && d <= 4 && (pq !== 0 || pr !== 0);
+      })!;
+    const [q, r, atMs] = holdable(marching.path);
     const meetAt = new Date(new Date(marching.spawnAt).getTime() + atMs);
 
     // A fort first: not on the village, not too far, then on the hex.
@@ -1013,7 +1020,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(second.spawnAt);
     await tick(db, now, scheduler);
     const next = (await world()).waves.find((x: { id: number }) => x.id === second.id);
-    const [q2, r2, atMs2] = next.path.at(-3) as [number, number, number];
+    const [q2, r2, atMs2] = holdable(next.path);
     const lone = await send({ target: { q: q2, r: r2 }, units: { spearman: 1 }, orders: 'hold' });
     await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type = 'army_arrive' AND status = 'pending' AND world_id = $1`, [worldId, new Date(now.getTime() + 1)]);
     now = new Date(new Date(next.spawnAt).getTime() + atMs2);
