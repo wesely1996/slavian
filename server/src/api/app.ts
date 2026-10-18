@@ -1,6 +1,8 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
+import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
+import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
 import {
   abandonOutpostCommand,
@@ -12,7 +14,7 @@ import {
   startResearchCommand,
   trainUnitsCommand,
 } from '../commands/village.js';
-import { STANCES } from '../data/index.js';
+import { HERO_SLOTS, STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -24,6 +26,7 @@ import type { LiveHub } from './live.js';
 import {
   caravanView,
   expeditionView,
+  heroView,
   researchView,
   missionView,
   vaultView,
@@ -68,6 +71,11 @@ const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: 
 const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
 const fetchBody = z.object({ load: loadSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
+const heroMoveBody = z.object({ villageId: z.number().int().positive() });
+const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
+const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
+const heroUnequipBody = z.object({ slot: z.enum(HERO_SLOTS) });
+const heroRenameBody = z.object({ name: displayName });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -129,6 +137,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     logistics: scheduler.data.logistics,
     expansion: scheduler.data.expansion,
     research: scheduler.data.research,
+    heroes: scheduler.data.heroes,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -244,6 +253,24 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
+
+  // The caller's hero in a world.
+  async function heroRoute<B>(
+    request: FastifyRequest,
+    schema: z.ZodType<B>,
+    run: (input: { accountId: number; worldId: number; now: Date } & B) => Promise<Hero>,
+  ) {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await requireMember(account, id);
+    const hero = await run({ accountId: account.id, worldId: id, now: clock(), ...schema.parse(request.body) });
+    return { hero: heroView(scheduler.data, hero), serverTime: clock().toISOString() };
+  }
+  app.post('/v1/worlds/:id/hero/move', (request) => heroRoute(request, heroMoveBody, (input) => moveHeroCommand(db, scheduler, input)));
+  app.post('/v1/worlds/:id/hero/skills', (request) => heroRoute(request, heroSkillBody, (input) => learnSkillCommand(db, scheduler, input)));
+  app.post('/v1/worlds/:id/hero/equip', (request) => heroRoute(request, heroEquipBody, (input) => equipCommand(db, scheduler, input)));
+  app.post('/v1/worlds/:id/hero/unequip', (request) => heroRoute(request, heroUnequipBody, (input) => unequipCommand(db, scheduler, input)));
+  app.post('/v1/worlds/:id/hero/rename', (request) => heroRoute(request, heroRenameBody, (input) => renameHeroCommand(db, scheduler, input)));
 
   app.post('/v1/villages/:id/research', async (request) => {
     const account = await authenticate(db, request);

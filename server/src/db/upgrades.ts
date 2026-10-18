@@ -2,6 +2,7 @@
 // migrations. Each is idempotent.
 import type { GameData } from '../data/index.js';
 import { HALL_PLOT, plotsFromLegacyLevels, type Plot } from '../sim/village.js';
+import { ensureHeroes } from './heroes.js';
 import { inTransaction, type Db } from './pool.js';
 
 interface LegacyRow {
@@ -37,5 +38,15 @@ export async function upgradeLegacyVillages(db: Db, data: GameData): Promise<num
       ]);
     }
     return rows.length;
+  });
+}
+
+// Worlds started before heroes existed: give every player theirs.
+export async function upgradeHeroes(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number; seed: number }>(`SELECT id, seed FROM worlds WHERE status <> 'lobby'`);
+    let created = 0;
+    for (const world of rows) created += await ensureHeroes(client, data, world.id, world.seed);
+    return created;
   });
 }

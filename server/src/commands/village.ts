@@ -1,5 +1,6 @@
 import type { Stance, TerrainId } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { effectiveBonuses } from '../db/heroes.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
 import { listResearch, startResearch, type ResearchEntry } from '../db/research.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
@@ -125,7 +126,7 @@ export async function sendScoutsCommand(
     const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
-    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, village.state.bonuses);
+    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, await effectiveBonuses(client, deps.data, village));
     const arrivesAt = new Date(input.now.getTime() + travelMs);
     const mission = await insertMission(client, {
       worldId: world.id,

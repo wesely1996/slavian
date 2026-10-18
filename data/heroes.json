@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "_comment": "One hero per player. The hero leads the garrison of the village it stands in: its skills and gear add to that village's research effects (same keys as research.json) for battles there, and for scouts and caravans sent from there. XP comes from enemies killed in battles the hero fights in; level L needs `levelXp.base` x `levelXp.growth`^(L-1) more XP to reach L+1 and gives one skill point. A beaten horde may drop gear (`dropChance`); losing a battle wounds the hero for `woundHours` game hours. `speed` is hexes per hour on plains.",
+  "speed": 6,
+  "woundHours": 8,
+  "maxLevel": 20,
+  "levelXp": {
+    "base": 30,
+    "growth": 1.35
+  },
+  "dropChance": 0.4,
+  "names": [
+    "Dobrynya",
+    "Ilya",
+    "Alyosha",
+    "Mstislav",
+    "Svetozar",
+    "Zoryana",
+    "Vasilisa",
+    "Lyudmila",
+    "Bogdana",
+    "Radomir",
+    "Yaromir",
+    "Milava"
+  ],
+  "branches": {
+    "warlord": "Warlord",
+    "warden": "Warden",
+    "wayfinder": "Wayfinder"
+  },
+  "skills": {
+    "battle_fury": {
+      "name": "Battle Fury",
+      "branch": "warlord",
+      "maxRank": 5,
+      "effectsPerRank": {
+        "attack.all": 0.04
+      },
+      "description": "+4% attack for every troop per rank."
+    },
+    "spearhead": {
+      "name": "Spearhead",
+      "branch": "warlord",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "attack.infantry": 0.06
+      },
+      "description": "+6% infantry attack per rank."
+    },
+    "horse_lord": {
+      "name": "Horse Lord",
+      "branch": "warlord",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "attack.cavalry": 0.06
+      },
+      "description": "+6% cavalry attack per rank."
+    },
+    "shield_bearer": {
+      "name": "Shield Bearer",
+      "branch": "warden",
+      "maxRank": 5,
+      "effectsPerRank": {
+        "defense.all": 0.04
+      },
+      "description": "+4% defense for every troop per rank."
+    },
+    "hold_fast": {
+      "name": "Hold Fast",
+      "branch": "warden",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "homeDefense": 0.05
+      },
+      "description": "+5% for defenders at home per rank."
+    },
+    "iron_will": {
+      "name": "Iron Will",
+      "branch": "warden",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "lootTaken": -0.08
+      },
+      "description": "Raiders take 8% less per rank."
+    },
+    "pathfinder": {
+      "name": "Pathfinder",
+      "branch": "wayfinder",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "scoutSpeed": 0.1
+      },
+      "description": "Scouts from the hero's village travel 10% faster per rank."
+    },
+    "keen_eyes": {
+      "name": "Keen Eyes",
+      "branch": "wayfinder",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "scoutSurvival": 0.05
+      },
+      "description": "Scouts from the hero's village are 5 points likelier to return per rank."
+    },
+    "quartermaster": {
+      "name": "Quartermaster",
+      "branch": "wayfinder",
+      "maxRank": 3,
+      "effectsPerRank": {
+        "caravanCapacity": 0.1
+      },
+      "description": "Caravans from the hero's village carry 10% more per rank."
+    }
+  },
+  "slots": [
+    "weapon",
+    "armor",
+    "amulet",
+    "banner",
+    "mount"
+  ],
+  "items": {
+    "perun_axe": {
+      "name": "Axe of Perun",
+      "slot": "weapon",
+      "effects": {
+        "attack.all": 0.08
+      },
+      "set": "thunder",
+      "description": "Thunder rides its edge."
+    },
+    "thunder_banner": {
+      "name": "Thunder Banner",
+      "slot": "banner",
+      "effects": {
+        "attack.all": 0.04,
+        "defense.all": 0.02
+      },
+      "set": "thunder",
+      "description": "Woven with Perun's sign."
+    },
+    "bear_cloak": {
+      "name": "Bear-hide Cloak",
+      "slot": "armor",
+      "effects": {
+        "defense.all": 0.08
+      },
+      "set": "bear",
+      "description": "From a cave bear of the north."
+    },
+    "bear_tooth": {
+      "name": "Bear-tooth Amulet",
+      "slot": "amulet",
+      "effects": {
+        "homeDefense": 0.06
+      },
+      "set": "bear",
+      "description": "Old as the forest."
+    },
+    "ash_spear": {
+      "name": "Ash Spear",
+      "slot": "weapon",
+      "effects": {
+        "attack.infantry": 0.1
+      },
+      "description": "Light and true."
+    },
+    "mail_shirt": {
+      "name": "Mail Shirt",
+      "slot": "armor",
+      "effects": {
+        "defense.infantry": 0.1
+      },
+      "description": "Ring after ring."
+    },
+    "mokosh_thread": {
+      "name": "Thread of Mokosh",
+      "slot": "amulet",
+      "effects": {
+        "lootTaken": -0.15
+      },
+      "description": "The spinner hides what is yours."
+    },
+    "wolf_banner": {
+      "name": "Wolf Banner",
+      "slot": "banner",
+      "effects": {
+        "homeDefense": 0.05
+      },
+      "description": "The pack defends its own."
+    },
+    "steppe_horse": {
+      "name": "Steppe Horse",
+      "slot": "mount",
+      "effects": {
+        "scoutSpeed": 0.2,
+        "caravanSpeed": 0.1
+      },
+      "description": "Never tires."
+    },
+    "grey_stallion": {
+      "name": "Grey Stallion",
+      "slot": "mount",
+      "effects": {
+        "attack.cavalry": 0.08
+      },
+      "description": "A warhorse of the old princes."
+    }
+  },
+  "sets": {
+    "thunder": {
+      "name": "Perun's Thunder",
+      "items": [
+        "perun_axe",
+        "thunder_banner"
+      ],
+      "effects": {
+        "attack.all": 0.05
+      }
+    },
+    "bear": {
+      "name": "Bear Clan",
+      "items": [
+        "bear_cloak",
+        "bear_tooth"
+      ],
+      "effects": {
+        "defense.all": 0.05
+      }
+    }
+  }
+}

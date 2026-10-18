@@ -242,7 +242,45 @@ const researchFileSchema = z.object({
   ),
 });
 
+export const HERO_SLOTS = ['weapon', 'armor', 'amulet', 'banner', 'mount'] as const;
+export type HeroSlot = (typeof HERO_SLOTS)[number];
+const effectsSchema = z.record(z.string(), z.number());
+
+const heroesFileSchema = z.object({
+  version: z.number().int(),
+  speed: z.number().positive(),
+  woundHours: z.number().positive(),
+  maxLevel: z.number().int().positive(),
+  levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
+  dropChance: z.number().min(0).max(1),
+  names: z.array(z.string()).min(1),
+  branches: z.record(z.string(), z.string()),
+  skills: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      branch: z.string(),
+      maxRank: z.number().int().positive(),
+      effectsPerRank: effectsSchema,
+      description: z.string(),
+    }),
+  ),
+  slots: z.array(z.enum(HERO_SLOTS)),
+  items: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      slot: z.enum(HERO_SLOTS),
+      effects: effectsSchema,
+      set: z.string().optional(),
+      description: z.string(),
+    }),
+  ),
+  sets: z.record(z.string(), z.object({ name: z.string(), items: z.array(z.string()).min(2), effects: effectsSchema })),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type HeroesData = z.infer<typeof heroesFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
@@ -267,6 +305,7 @@ export interface GameData {
   logistics: LogisticsData;
   expansion: ExpansionData;
   research: ResearchData;
+  heroes: HeroesData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -282,12 +321,19 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     logistics: logisticsFileSchema.parse(read('logistics.json')),
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
+    heroes: heroesFileSchema.parse(read('heroes.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  for (const [id, skill] of Object.entries(data.heroes.skills)) {
+    if (!data.heroes.branches[skill.branch]) throw new Error(`Hero skill "${id}" is in unknown branch "${skill.branch}"`);
+  }
+  for (const [id, set] of Object.entries(data.heroes.sets)) {
+    for (const item of set.items) if (data.heroes.items[item]?.set !== id) throw new Error(`Set "${id}" lists "${item}"`);
+  }
   if (buildings.academy?.kind !== 'center') throw new Error('buildings.json needs a center building "academy"');
   for (const [id, tech] of Object.entries(data.research.techs)) {
     for (const required of tech.requires) {
