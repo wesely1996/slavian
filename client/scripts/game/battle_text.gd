@@ -40,3 +40,10 @@ static func loot_text(loot: Variant) -> String:
 		if int(loot.get(kind, 0)) > 0:
 			parts.append("%s %d" % [kind.capitalize(), loot[kind]])
 	return ", ".join(parts) if not parts.is_empty() else "nothing"
+
+
+## "A horde burned Vesna's village's outpost at (3, -2) to ruins."
+static func raid(raid: Dictionary, village_name: String) -> String:
+	var after := int(raid.levelAfter)
+	var result := "to ruins" if after <= 0 else "down to level %d" % after
+	return "A horde burned the outpost of %s at (%d, %d) %s." % [village_name, int(raid.q), int(raid.r), result]

@@ -50,7 +50,9 @@ func _ready() -> void:
 	Live.waves_updated.connect(Game.set_waves)
 	Live.scouting_updated.connect(Game.set_scouting)
 	Live.battles_updated.connect(Game.set_battles)
+	Live.raids_updated.connect(Game.set_raids)
 	Game.waves_changed.connect(_on_waves_changed)
+	Game.raids_changed.connect(_on_waves_changed)
 	Game.scouting_changed.connect(_on_waves_changed)
 	Game.battles_changed.connect(_on_waves_changed)
 	Live.watch(Game.world_id())
@@ -73,6 +75,7 @@ func _exit_tree() -> void:
 	Live.waves_updated.disconnect(Game.set_waves)
 	Live.scouting_updated.disconnect(Game.set_scouting)
 	Live.battles_updated.disconnect(Game.set_battles)
+	Live.raids_updated.disconnect(Game.set_raids)
 
 
 func _process(delta: float) -> void:
@@ -238,6 +241,112 @@ func _terrain_panel() -> void:
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
 	var where := "The Holy City." if distance == 0 else "%d hexes from the Holy City." % distance
 	_panel_body.add_child(UI.label(where, UI.SMALL_SIZE, UI.MUTED))
+	var holder := Game.outpost_owner(_selected)
+	if not holder.is_empty():
+		_outpost_panel(holder, Rules.outpost_plot(_selected))
+	else:
+		_claim_panel(id)
+
+
+## An outpost on the selected hex: what it gathers; yours can be upgraded,
+## rebuilt from ruins or abandoned.
+func _outpost_panel(holder: Dictionary, plot: String) -> void:
+	var holds: Dictionary = holder.plots[plot]
+	var level := int(holds.level)
+	var mine := Game.is_mine(holder)
+	var who := "Yours" if mine else Game.member_name(int(holder.ownerAccountId))
+	var planned := Rules.planned_plot(holder, plot)
+	var state := "Lv %d" % level
+	if level == 0:
+		state = "being built" if int(planned.level) > 0 else "in ruins"
+	_panel_body.add_child(UI.label("Outpost  %s" % state, UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label("%s · supplies %s" % [who, holder.name], UI.SMALL_SIZE, UI.MUTED))
+	var speed := float(Game.world.speed)
+	var terrain: String = holds.get("terrain", "")
+	var gathering := _yield_text(Rules.outpost_yield(Game.data, terrain, level, speed))
+	var line := "Gathers %s" % gathering if level > 0 else "Gathers nothing until built"
+	if holder.get("besieged", false) and level > 0:
+		line += " (not while %s is under siege)" % holder.name
+	_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+	if not mine:
+		return
+	var def := _building_def(Rules.OUTPOST)
+	var target := int(planned.level) + 1
+	if target <= int(def.maxLevel):
+		_panel_body.add_child(UI.label("At level %d: %s" % [target, _yield_text(Rules.outpost_yield(Game.data, terrain, target, speed))], UI.SMALL_SIZE, UI.MUTED))
+		_build_row(holder, plot, Rules.OUTPOST, target, "Rebuild" if level == 0 and int(planned.level) == 0 else "Upgrade")
+	else:
+		_panel_body.add_child(UI.label("Max level", UI.SMALL_SIZE, UI.MUTED))
+	if int(planned.level) == level:
+		var cell := _selected
+		var village_id := int(holder.id)
+		_panel_body.add_child(UI.button("Abandon outpost", func() -> void: _abandon_outpost(village_id, cell)))
+
+
+## An empty hex: can your village put an outpost here?
+func _claim_panel(terrain: String) -> void:
+	var home := _my_village()
+	if home.is_empty() or not Game.data.buildings.buildings[Rules.OUTPOST].yields.has(terrain):
+		return
+	var taken := not Game.village_at(_selected).is_empty()
+	var problem := Rules.claim_problem(Game.data, home, _selected, terrain, taken)
+	var speed := float(Game.world.speed)
+	_panel_body.add_child(UI.label("An outpost here would gather %s." % _yield_text(Rules.outpost_yield(Game.data, terrain, 1, speed)), UI.SMALL_SIZE, UI.MUTED))
+	if problem != "":
+		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
+		return
+	var def := _building_def(Rules.OUTPOST)
+	var hall := Rules.hall_level(home)
+	var queue_full: bool = home.queue.size() >= Rules.queue_limit(Game.data, hall)
+	var cost := Rules.level_cost(def, 1)
+	var seconds := Rules.build_seconds(def, 1, speed, Rules.hall_speedup(Game.data, hall))
+	var village_id := int(home.id)
+	var cell := _selected
+	var row := UI.hbox()
+	var info := UI.vbox(2)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_child(UI.label("Build an outpost"))
+	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	info.add_child(cost_line)
+	row.add_child(info)
+	var button := UI.button("Claim", func() -> void: _claim_outpost(village_id, cell))
+	button.custom_minimum_size.x = 160
+	row.add_child(button)
+	_panel_body.add_child(row)
+	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	_tick(cost_line, func() -> String:
+		var current: Dictionary = Game.villages.get(village_id, home)
+		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
+		button.disabled = queue_full or not affordable
+		return cost_text + ("  (queue full)" if queue_full else ""))
+
+
+func _yield_text(amounts: Dictionary) -> String:
+	var parts := PackedStringArray()
+	for kind in Ledger.KINDS:
+		if float(amounts[kind]) > 0.0:
+			parts.append("%s +%d/h" % [kind.capitalize(), roundi(float(amounts[kind]))])
+	return ", ".join(parts) if not parts.is_empty() else "nothing"
+
+
+func _claim_outpost(village_id: int, cell: Vector2i) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/outposts" % village_id, {"q": cell.x, "r": cell.y})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+func _abandon_outpost(village_id: int, cell: Vector2i) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/outposts/abandon" % village_id, {"q": cell.x, "r": cell.y})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _ally_village_panel(village: Dictionary) -> void:
@@ -255,7 +364,10 @@ func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
 	var hall := Rules.hall_level(village)
 	var queue: Array = village.queue
-	_panel_body.add_child(UI.label("Elder's Hall Lv %d · building %d of %d" % [hall, queue.size(), Rules.queue_limit(Game.data, hall)], UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label("Elder's Hall Lv %d · building %d of %d · outposts %d of %d" % [hall, queue.size(), Rules.queue_limit(Game.data, hall),
+		Rules.outpost_plots(village).size(), Rules.outpost_limit(Game.data, hall)], UI.SMALL_SIZE, UI.MUTED))
+	if village.get("besieged", false):
+		_panel_body.add_child(UI.label("Under siege: outposts produce nothing until the battle ends.", UI.SMALL_SIZE, UI.ERROR))
 	var village_id := int(village.id)
 	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(troops)
@@ -283,6 +395,7 @@ func _village_panel() -> void:
 	else:
 		_queue_section(village)
 		_plot_section(village)
+		_outposts_section(village)
 
 
 func _queue_section(village: Dictionary) -> void:
@@ -299,6 +412,34 @@ func _queue_section(village: Dictionary) -> void:
 		_tick(line, func() -> String:
 			var left := done_at - Game.server_now()
 			return "%s   %s" % [text, TimeUtil.format_duration(left) if left > 0 else "finishing…"])
+
+
+func _outposts_section(village: Dictionary) -> void:
+	var plots := Rules.outpost_plots(village)
+	var limit := Rules.outpost_limit(Game.data, Rules.hall_level(village))
+	_panel_body.add_child(UI.label("Outposts (%d/%d)" % [plots.size(), limit], UI.SMALL_SIZE, UI.MUTED))
+	if village.get("besieged", false):
+		_panel_body.add_child(UI.label("Under siege: outposts produce nothing until the battle ends.", UI.SMALL_SIZE, UI.ERROR))
+	if plots.is_empty():
+		_panel_body.add_child(UI.label("None yet. Tap a forest, plains, hills, mountain or lake hex within %d of the village on the map to claim one." % int(Game.data.buildings.village.outpostRange), UI.SMALL_SIZE, UI.MUTED))
+	var speed := float(Game.world.speed)
+	for plot in plots:
+		var holds: Dictionary = village.plots[plot]
+		var cell := Rules.outpost_hex(plot)
+		var level := int(holds.level)
+		var terrain: String = holds.get("terrain", "")
+		var row := UI.hbox()
+		var text := UI.label("%s (%d, %d)  %s" % [Terrain.display_name(terrain, Game.data), cell.x, cell.y,
+			"Lv %d · %s" % [level, _yield_text(Rules.outpost_yield(Game.data, terrain, level, speed))] if level > 0 else "Lv 0"], UI.SMALL_SIZE)
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		var show_button := UI.button("Show", func() -> void:
+			_set_view("map")
+			camera.position = hex_map.hex_to_local(cell)
+			_select(cell))
+		show_button.custom_minimum_size.x = 120
+		row.add_child(show_button)
+		_panel_body.add_child(row)
 
 
 ## The picked plot: what stands there and what it would cost to upgrade, or
@@ -319,7 +460,7 @@ func _plot_section(village: Dictionary) -> void:
 		if options.is_empty():
 			_panel_body.add_child(UI.label("Every building already stands in this village.", UI.SMALL_SIZE, UI.MUTED))
 		for building in options:
-			_build_row(village, building, 1, "Build")
+			_build_row(village, _plot, building, 1, "Build")
 		return
 
 	var building: String = planned.building
@@ -336,14 +477,13 @@ func _plot_section(village: Dictionary) -> void:
 	if target > int(def.maxLevel):
 		_panel_body.add_child(UI.label("Max level", UI.SMALL_SIZE, UI.MUTED))
 		return
-	_build_row(village, building, target, "Build" if level == 0 and int(planned.level) == 0 else "Upgrade")
+	_build_row(village, _plot, building, target, "Build" if level == 0 and int(planned.level) == 0 else "Upgrade")
 
 
-## One "build `building` to `target` on the picked plot" row with its cost,
-## time and button.
-func _build_row(village: Dictionary, building: String, target: int, verb: String) -> void:
+## One "build `building` to `target` on `plot`" row with its cost, time
+## and button.
+func _build_row(village: Dictionary, plot: String, building: String, target: int, verb: String) -> void:
 	var village_id := int(village.id)
-	var plot := _plot
 	var def := _building_def(building)
 	var hall := Rules.hall_level(village)
 	var queue_full: bool = village.queue.size() >= Rules.queue_limit(Game.data, hall)
@@ -551,6 +691,10 @@ func _threats_panel() -> void:
 	for battle in finished:
 		_panel_body.add_child(UI.label(BattleText.outcome(battle, Game.village_name(battle.villageId)), UI.SMALL_SIZE))
 		_panel_body.add_child(UI.label("%s horde, %d rounds" % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)], UI.SMALL_SIZE, UI.MUTED))
+	if not Game.raids.is_empty():
+		_panel_body.add_child(UI.label("Outposts burned", UI.HEADING_SIZE))
+	for raid in Game.raids:
+		_panel_body.add_child(UI.label(BattleText.raid(raid, Game.village_name(raid.villageId)), UI.SMALL_SIZE))
 
 
 func _wave_entry(wave: Dictionary) -> void:

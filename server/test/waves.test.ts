@@ -7,6 +7,7 @@ import {
   marchSpeed,
   planMarch,
   planWave,
+  raidsAlong,
   spawnTime,
   threatOf,
   waveFronts,
@@ -124,5 +125,31 @@ describe('wave march', () => {
     });
     expect(empty.targetVillageId).toBeNull();
     expect(empty.path.at(-1)).toMatchObject({ q: 0, r: 0 });
+  });
+});
+
+describe('outpost raids', () => {
+  const path = [
+    { q: 0, r: -6, atMs: 0 },
+    { q: 0, r: -5, atMs: 1000 },
+    { q: 0, r: -4, atMs: 2000 },
+    { q: 1, r: -4, atMs: 3000 },
+  ];
+  const outpost = (q: number, r: number) => ({ villageId: 7, plot: `o${q},${r}`, cell: hex(q, r) });
+
+  it('hits outposts within reach of the route when the horde first comes close', () => {
+    const raids = raidsAlong(path, [outpost(1, -6), outpost(2, -4), outpost(3, -4), outpost(0, -4)], 1);
+    expect(raids.map((r) => [r.plot, r.atMs])).toEqual([
+      ['o1,-6', 0],
+      ['o2,-4', 3000],
+      ['o0,-4', 1000],
+    ]);
+    expect(raidsAlong(path, [outpost(3, -4)], 2)).toHaveLength(1);
+    expect(raidsAlong(path, [outpost(1, -6)], 0)).toHaveLength(0);
+  });
+
+  it('ignores the part of the route already behind the horde', () => {
+    expect(raidsAlong(path, [outpost(1, -6)], 1, 500)).toEqual([{ ...outpost(1, -6), atMs: 1000 }]);
+    expect(raidsAlong(path, [outpost(1, -6)], 1, 1500)).toEqual([]);
   });
 });

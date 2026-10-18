@@ -59,12 +59,13 @@ static func plot_index(plot: String) -> int:
 	return int(plot.substr(1))
 
 
-## Plot ids in layout order (the server's JSON keeps no order): fields
-## first, then center slots, each by number.
+## Village plot ids in layout order (the server's JSON keeps no order):
+## fields first, then center slots, each by number. Outposts aside.
 static func plot_ids(village: Dictionary) -> Array[String]:
 	var ids: Array[String] = []
 	for id in village.get("plots", {}):
-		ids.append(id)
+		if not is_outpost(id):
+			ids.append(id)
 	ids.sort_custom(func(a: String, b: String) -> bool:
 		if is_field(a) != is_field(b):
 			return is_field(a)
@@ -100,6 +101,66 @@ static func constructible(data: Dictionary, village: Dictionary) -> Array[String
 		if buildings[building].kind == "center" and not taken.has(building):
 			result.append(building)
 	return result
+
+
+# --- Outposts: plots "o<q>,<r>" on map hexes near the village.
+
+const OUTPOST := "outpost"
+
+
+static func outpost_plot(cell: Vector2i) -> String:
+	return "o%d,%d" % [cell.x, cell.y]
+
+
+static func is_outpost(plot: String) -> bool:
+	return plot.begins_with("o")
+
+
+static func outpost_hex(plot: String) -> Vector2i:
+	var parts := plot.substr(1).split(",")
+	return Vector2i(int(parts[0]), int(parts[1]))
+
+
+static func outpost_plots(village: Dictionary) -> Array[String]:
+	var ids: Array[String] = []
+	for id in village.get("plots", {}):
+		if is_outpost(id):
+			ids.append(id)
+	ids.sort()
+	return ids
+
+
+static func outpost_limit(data: Dictionary, level: int) -> int:
+	var v: Dictionary = data.buildings.village
+	return int(v.baseOutposts) + level / int(v.hallLevelsPerOutpost)
+
+
+## Resources per hour an outpost gathers on `terrain` (world speed applied).
+static func outpost_yield(data: Dictionary, terrain: String, level: int, world_speed: float) -> Dictionary:
+	var def: Dictionary = data.buildings.buildings[OUTPOST]
+	var base: Dictionary = def.yields.get(terrain, {})
+	var factor := pow(float(def.yieldGrowth), level - 1) * world_speed if level > 0 else 0.0
+	var result := {}
+	for kind in Ledger.KINDS:
+		result[kind] = float(base.get(kind, 0)) * factor
+	return result
+
+
+## Why `village` can't claim `cell` ("" when it can). `taken` says whether
+## a village or outpost already stands there.
+static func claim_problem(data: Dictionary, village: Dictionary, cell: Vector2i, terrain: String, taken: bool) -> String:
+	var range_ := int(data.buildings.village.outpostRange)
+	var distance := HexMath.distance(cell, Vector2i(int(village.q), int(village.r)))
+	if distance == 0 or distance > range_:
+		return "Outposts go within %d hexes of your village." % range_
+	if not data.buildings.buildings[OUTPOST].yields.has(terrain):
+		return "Nothing to gather here."
+	if taken:
+		return "Already taken."
+	var limit := outpost_limit(data, hall_level(village))
+	if outpost_plots(village).size() >= limit:
+		return "Your village can hold %d outpost%s; upgrade the Elder's Hall for more." % [limit, "" if limit == 1 else "s"]
+	return ""
 
 
 ## Production per hour of one field plot at a level (world speed applied).

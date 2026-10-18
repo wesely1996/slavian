@@ -4,16 +4,28 @@ import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
-import { loadVillage, saveVillageState, type Village } from '../db/villages.js';
+import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
 import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { MissionPayload } from '../scheduler/scouting.js';
-import { hex } from '../sim/hex.js';
+import { hex, hexKey, type Hex } from '../sim/hex.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
-import { queueBuild, queueTraining, sendAway, type BuildOrder, type QueuedBuild, type VillageState } from '../sim/village.js';
+import {
+  abandonOutpost,
+  claimOutpost,
+  outpostHex,
+  outpostPlot,
+  outpostPlots,
+  queueBuild,
+  queueTraining,
+  sendAway,
+  type BuildOrder,
+  type QueuedBuild,
+  type VillageState,
+} from '../sim/village.js';
 
 interface VillageCommandInput {
   accountId: number;
@@ -131,6 +143,49 @@ export async function setStanceCommand(
 ): Promise<{ village: Village }> {
   const { village } = await ownVillageCommand(db, deps, input, async ({ village }) => ({
     state: { ...village.state, stance: input.stance },
+    result: null,
+  }));
+  return { village };
+}
+
+// Claims a resource hex near the caller's village and starts building an
+// outpost there. Upgrades go through the build queue like any plot.
+export async function claimOutpostCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { q: number; r: number },
+): Promise<{ village: Village; queued: QueuedBuild }> {
+  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+    const cell = hex(input.q, input.r);
+    const terrain = (await loadHexes(client, world.id)).find(([q, r]) => q === cell.q && r === cell.r)?.[2];
+    if (!terrain) throw new RuleError('That hex is not on the map');
+    const taken = new Set<string>();
+    for (const other of await listVillages(client, world.id)) {
+      taken.add(hexKey(hex(other.q, other.r)));
+      for (const plot of outpostPlots(other.state.plots)) taken.add(hexKey(outpostHex(plot)!));
+    }
+    const site = { cell, terrain, home: hex(village.q, village.r), taken };
+    const { state, queued } = claimOutpost(deps.data, village.state, site, input.now, world.speed);
+    const payload: BuildCompletePayload = {
+      villageId: village.id,
+      plot: queued.plot,
+      building: queued.building,
+      targetLevel: queued.targetLevel,
+    };
+    await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', payload);
+    return { state, result: queued };
+  });
+  return { village, queued: result };
+}
+
+export async function abandonOutpostCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { q: number; r: number },
+): Promise<{ village: Village }> {
+  const cell: Hex = hex(input.q, input.r);
+  const { village } = await ownVillageCommand(db, deps, input, async ({ world, village }) => ({
+    state: abandonOutpost(deps.data, village.state, outpostPlot(cell), input.now, world.speed),
     result: null,
   }));
   return { village };

@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { loadGameData } from '../src/data/index.js';
+import { loadGameData, type TerrainId } from '../src/data/index.js';
 import { RuleError } from '../src/errors.js';
-import { amountsAt } from '../src/sim/resources.js';
+import { hex } from '../src/sim/hex.js';
+import { amountsAt, mapResources } from '../src/sim/resources.js';
 import {
+  abandonOutpost,
+  claimOutpost,
+  outpostHex,
+  outpostLimit,
+  outpostPlots,
+  outpostYield,
+  raidOutpost,
+  setBesieged,
   buildQueueLimit,
   buildSeconds,
   capacity,
@@ -159,5 +168,100 @@ describe('legacy villages', () => {
     expect(plots[HALL_PLOT]).toEqual({ building: 'elder_hall', level: 1 });
     expect(plots.c1).toEqual({ building: 'storehouse', level: 2 });
     expect(plots.c2).toEqual({ building: 'barracks', level: 1 });
+  });
+});
+
+describe('outposts', () => {
+  const outpost = data.buildings.buildings.outpost!;
+  const home = hex(2, 0);
+  const site = (q: number, r: number, terrain: TerrainId = 'forest', taken: string[] = []) => ({
+    cell: hex(q, r),
+    terrain,
+    home,
+    taken: new Set(taken),
+  });
+  const claim = (state: VillageState, s: ReturnType<typeof site>) => claimOutpost(data, state, s, state.ledger.settledAt, 1);
+  // Claims and finishes the first level.
+  const built = (state: VillageState, s: ReturnType<typeof site>) => {
+    const { state: claimed, queued } = claim(state, s);
+    return completeBuild(data, claimed, queued.plot, 1, queued.completesAt, 1);
+  };
+
+  it('claims a resource hex in range and builds it through the queue', () => {
+    const v = rich(newVillage(data, T0, 1));
+    const { state, queued } = claim(v, site(3, -2));
+    expect(queued).toMatchObject({ plot: 'o3,-2', building: 'outpost', targetLevel: 1 });
+    expect(state.plots['o3,-2']).toEqual({ building: 'outpost', level: 0, terrain: 'forest' });
+    expect(outpostPlots(state.plots)).toEqual(['o3,-2']);
+    expect(outpostHex('o3,-2')).toEqual(hex(3, -2));
+    expect(outpostHex('c1')).toBeNull();
+    expect(amountsAt(state.ledger, T0).wood).toBe(9e6 - outpost.cost.wood);
+  });
+
+  it('refuses hexes out of range, without a yield, taken, or past the limit', () => {
+    const v = rich(newVillage(data, T0, 1));
+    expect(() => claim(v, site(2, 0))).toThrow(/within 2 hexes/);
+    expect(() => claim(v, site(5, 0))).toThrow(/within 2 hexes/);
+    expect(() => claim(v, site(3, 0, 'swamp'))).toThrow(/Nothing to gather on Swamp/);
+    expect(() => claim(v, site(3, 0, 'forest', ['3,0']))).toThrow(/already taken/);
+    const one = claim(v, site(3, 0)).state;
+    expect(() => claim(one, site(1, 0))).toThrow(/can hold 1 outpost;/);
+    expect(() => queueBuild(data, v, 'outpost', T0, 1)).toThrow(/Pick a hex/);
+  });
+
+  it('a bigger Elder\'s Hall allows more outposts', () => {
+    expect(outpostLimit(data, 1)).toBe(village.baseOutposts);
+    expect(outpostLimit(data, 2)).toBe(village.baseOutposts + 1);
+    let v = rich(newVillage(data, T0, 1));
+    v = build(v, { plot: HALL_PLOT });
+    v = claim(v, site(3, 0)).state;
+    expect(claim(v, site(1, 0)).state.plots['o1,0']).toMatchObject({ level: 0 });
+  });
+
+  it('gathers by terrain, growing with its level, and stays out of village levels', () => {
+    const base = newVillage(data, T0, 1);
+    const forest = built(rich(base), site(3, 0, 'forest'));
+    const gain = (state: VillageState) => {
+      const before = productionPerHour(data, base.plots, 1);
+      return mapResources((kind) => Math.round((state.ledger.ratesPerHour[kind] - before[kind]) * 100) / 100);
+    };
+    expect(gain(forest)).toEqual({ wood: 10, stone: 0, grain: 0, iron: 0 });
+    expect(forest.levels).toEqual({ elder_hall: 1 });
+    const hills = built(rich(base), site(3, -1, 'hills'));
+    expect(gain(hills)).toEqual({ wood: 0, stone: 6, grain: 0, iron: 4 });
+    const upgraded = build(hills, { plot: 'o3,-1' });
+    expect(upgraded.plots['o3,-1']!.level).toBe(2);
+    expect(gain(upgraded).stone).toBeCloseTo(6 * outpost.yieldGrowth!);
+    expect(outpostYield(outpost, 'lake', 1, 10).grain).toBe(80);
+  });
+
+  it('a raid burns it down a level, to ruins that can be rebuilt', () => {
+    let v = build(built(rich(newVillage(data, T0, 1)), site(3, 0)), { plot: 'o3,0' });
+    v = raidOutpost(data, v, 'o3,0', v.ledger.settledAt, 1);
+    expect(v.plots['o3,0']).toEqual({ building: 'outpost', level: 1, terrain: 'forest' });
+    v = raidOutpost(data, v, 'o3,0', v.ledger.settledAt, 1);
+    expect(v.plots['o3,0']!.level).toBe(0);
+    expect(v.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, newVillage(data, T0, 1).plots, 1).wood);
+    expect(raidOutpost(data, v, 'o3,0', v.ledger.settledAt, 1)).toBe(v);
+    expect(build(v, { plot: 'o3,0' }).plots['o3,0']!.level).toBe(1);
+  });
+
+  it('can be abandoned, but not while it is being built', () => {
+    const v = rich(newVillage(data, T0, 1));
+    const { state } = claim(v, site(3, 0));
+    expect(() => abandonOutpost(data, state, 'o3,0', state.ledger.settledAt, 1)).toThrow(/being built/);
+    const done = built(v, site(3, 0));
+    const gone = abandonOutpost(data, done, 'o3,0', done.ledger.settledAt, 1);
+    expect(gone.plots['o3,0']).toBeUndefined();
+    expect(gone.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, v.plots, 1).wood);
+    expect(() => abandonOutpost(data, v, 'f0', v.ledger.settledAt, 1)).toThrow(/No outpost/);
+  });
+
+  it('produces nothing while the village is besieged', () => {
+    const v = built(rich(newVillage(data, T0, 1)), site(3, 0));
+    const sieged = setBesieged(data, v, true, v.ledger.settledAt, 1);
+    expect(sieged.besieged).toBe(true);
+    expect(sieged.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, newVillage(data, T0, 1).plots, 1).wood);
+    expect(setBesieged(data, sieged, false, sieged.ledger.settledAt, 1).ledger.ratesPerHour).toEqual(v.ledger.ratesPerHour);
   });
 });

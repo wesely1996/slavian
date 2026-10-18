@@ -7,7 +7,7 @@
 // its target for the rampage time and then disperses.
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
-import { findPath, hex, hexKey, type Hex } from './hex.js';
+import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { createRng } from './rng.js';
 
@@ -197,4 +197,27 @@ export function planMarch(
     };
   }
   throw new Error(`Wave ${wave.index} found no path from the ${wave.front} front`);
+}
+
+export interface OutpostTarget {
+  readonly villageId: number;
+  readonly plot: string;
+  readonly cell: Hex;
+}
+
+// Outposts within `reach` hexes of a route, each with the time (ms after
+// departure) the horde first comes that close. Steps before `fromMs` are
+// already behind it.
+export function raidsAlong(
+  path: readonly PathStep[],
+  outposts: readonly OutpostTarget[],
+  reach: number,
+  fromMs = 0,
+): (OutpostTarget & { atMs: number })[] {
+  const raids: (OutpostTarget & { atMs: number })[] = [];
+  for (const outpost of outposts) {
+    const step = path.find((s) => s.atMs >= fromMs && hexDistance(hex(s.q, s.r), outpost.cell) <= reach);
+    if (step) raids.push({ ...outpost, atMs: step.atMs });
+  }
+  return raids;
 }

@@ -21,7 +21,7 @@ import {
   total,
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
-import { completeTraining, loseGarrison, plunder } from '../sim/village.js';
+import { completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const battlePayload = z.object({ battleId: z.number().int() });
@@ -36,8 +36,9 @@ export async function startBattle(
   at: Date,
 ): Promise<void> {
   const village = await loadVillage(client, villageId);
-  // Units that finished training by now stand with the garrison.
-  const state = completeTraining(village.state, at);
+  // Units that finished training by now stand with the garrison; the
+  // village's outposts stop producing while the battle lasts.
+  const state = setBesieged(data, completeTraining(village.state, at), true, at, world.speed);
   await saveVillageState(client, village.id, state);
   await markBattling(client, wave.id);
   const battle = await insertBattle(client, {
@@ -51,6 +52,7 @@ export async function startBattle(
   });
   const payload: BattlePayload = { battleId: battle.id };
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
 }
 
@@ -99,9 +101,11 @@ export const battleHandlers: HandlerRegistry = {
     } else if (outcome === 'raided') {
       const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow);
       villageState = plunder(villageState, loot, at);
+      villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'raided', at, loot });
       await endWave(client, wave.id, 'dispersed', at);
     } else {
+      villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
       await endWave(client, wave.id, 'defeated', at);
     }

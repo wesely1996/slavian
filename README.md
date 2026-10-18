@@ -56,15 +56,17 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/worlds/join` | Join by invite code. |
 | `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, recent battles, map. |
 | `POST` | `/v1/worlds/:id/start` | Host only: generate the map and found everyone's village. |
-| `POST` | `/v1/villages/:id/build` | Build on a plot: `{ plot }` upgrades what stands there (fields `f0`…`f11`, center slots `c0`…`c11`), `{ plot, building }` constructs in an empty slot. `{ building }` alone picks the plot. |
+| `POST` | `/v1/villages/:id/build` | Build on a plot: `{ plot }` upgrades what stands there (fields `f0`…`f11`, center slots `c0`…`c11`, outposts `o<q>,<r>`), `{ plot, building }` constructs in an empty slot. `{ building }` alone picks the plot. |
+| `POST` | `/v1/villages/:id/outposts` | Claim the resource hex `{ q, r }` (within 2 hexes) and start building an outpost there. |
+| `POST` | `/v1/villages/:id/outposts/abandon` | Give up the outpost on `{ q, r }`. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` updates. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` updates. |
 
 ## Client
 
-Open `client/` in Godot 4.5 and run it with a server running (see above). On the map: drag to pan, pinch or mouse wheel to zoom, tap a hex to inspect it. **Village** (top bar) opens your village: tap a field or slot to build or upgrade it.
+Open `client/` in Godot 4.5 and run it with a server running (see above). On the map: drag to pan, pinch or mouse wheel to zoom, tap a hex to inspect it. **Village** (top bar) opens your village: tap a field or slot to build or upgrade it. Tap a forest, plains, hills, mountain or lake hex near your village to claim an outpost.
 
 Headless tests:
 
