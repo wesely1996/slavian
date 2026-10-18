@@ -1,7 +1,7 @@
 // End-to-end smoke run of the M0 scheduler: creates a fast world, queues
 // builds through the command path and lets a worker loop finish them.
 //   DATABASE_URL=postgres://... npm run demo
-import { queueBuildCommand } from './commands/queue-build.js';
+import { queueBuildCommand } from './commands/village.js';
 import { loadGameData } from './data/index.js';
 import { migrate } from './db/migrate.js';
 import { createPool, inTransaction } from './db/pool.js';

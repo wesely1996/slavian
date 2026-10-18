@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { queueBuildCommand } from '../src/commands/queue-build.js';
+import { queueBuildCommand } from '../src/commands/village.js';
 import { loadGameData } from '../src/data/index.js';
 import { inTransaction, type Db } from '../src/db/pool.js';
 import { createGuestAccount } from '../src/db/accounts.js';

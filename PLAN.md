@@ -507,7 +507,7 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 
 ### M1 breakdown (each step is its own PR)
 1. [x] **Online foundation:** HTTP + WebSocket API, guest accounts, worlds with invite codes and a lobby, server-side map generation on start (player count decides size and fronts), a village per player, build queue over the API, live updates (Postgres NOTIFY → WebSocket). Client: sign-in, worlds list, create/join, lobby, map from the server, village panel with live resources and build queue. Docker image + compose.
-2. [ ] **Units:** barracks, training queue, garrison (infantry, archers, cavalry, scouts).
+2. [x] **Units:** barracks and scout lodge, training queue (batches train one unit after another, counted lazily), garrison, grain upkeep from the moment units are drafted. Spearman, archer, horseman, scout (`data/units.json`). Starving troops deserting comes later; for now grain just floors at zero.
 3. [ ] **North front waves:** public wave schedule, spawn in the dark forest, march toward the nearest village, timeline UI.
 4. [ ] **Scouting:** send scouts at a wave; report precision by surviving scouts.
 5. [ ] **Battles:** round-based resolution with stances, battle reports.

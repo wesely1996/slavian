@@ -74,6 +74,10 @@ static func clear(node: Node) -> void:
 		child.queue_free()
 
 
+static func signed(value: float) -> String:
+	return ("+%d" if value >= 0 else "−%d") % absi(roundi(value))
+
+
 static func resource_text(amounts: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:

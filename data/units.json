@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "_comment": "Combat stats (attack, defense) are used by battles from M1 step 5. speed is hexes per hour on plains; upkeepPerHour is grain. Training time shrinks by trainingSpeedup per level of the training building above its first.",
+  "trainingQueueLimit": 3,
+  "maxBatch": 50,
+  "trainingSpeedup": 0.9,
+  "units": {
+    "spearman": {
+      "name": "Spearman",
+      "family": "infantry",
+      "building": "barracks",
+      "requiresLevel": 1,
+      "cost": { "wood": 50, "stone": 20, "grain": 30, "iron": 30 },
+      "trainSeconds": 60,
+      "upkeepPerHour": 1,
+      "speed": 5,
+      "attack": 20,
+      "defense": 40,
+      "carry": 40
+    },
+    "archer": {
+      "name": "Archer",
+      "family": "archers",
+      "building": "barracks",
+      "requiresLevel": 1,
+      "cost": { "wood": 70, "stone": 10, "grain": 30, "iron": 40 },
+      "trainSeconds": 75,
+      "upkeepPerHour": 1,
+      "speed": 5,
+      "attack": 35,
+      "defense": 20,
+      "carry": 30
+    },
+    "horseman": {
+      "name": "Horseman",
+      "family": "cavalry",
+      "building": "barracks",
+      "requiresLevel": 2,
+      "cost": { "wood": 60, "stone": 30, "grain": 60, "iron": 80 },
+      "trainSeconds": 120,
+      "upkeepPerHour": 2,
+      "speed": 10,
+      "attack": 45,
+      "defense": 25,
+      "carry": 80
+    },
+    "scout": {
+      "name": "Scout",
+      "family": "scout",
+      "building": "scout_lodge",
+      "requiresLevel": 1,
+      "cost": { "wood": 40, "stone": 20, "grain": 20, "iron": 10 },
+      "trainSeconds": 45,
+      "upkeepPerHour": 1,
+      "speed": 12,
+      "attack": 0,
+      "defense": 2,
+      "carry": 0
+    }
+  }
+}

@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_resource_vectors()
 	_test_time_util()
 	_test_rules()
+	_test_training()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -92,10 +93,29 @@ func _test_rules() -> void:
 	_check(Rules.planned_level(village, "quarry") == 0, "unbuilt building is level 0")
 
 
+func _test_training() -> void:
+	var batch := {"unit": "spearman", "count": 5, "startsAt": "2026-02-01T12:00:00.000Z", "perUnitMs": 1000}
+	var t0 := TimeUtil.parse_iso(batch.startsAt)
+	_check(Rules.finished_by(batch, t0 - 1.0) == 0, "nothing finished before the start")
+	_check(Rules.finished_by(batch, t0 + 0.999) == 0, "first unit not done before its interval")
+	_check(Rules.finished_by(batch, t0 + 3.5) == 3, "one unit per interval")
+	_check(Rules.finished_by(batch, t0 + 99.0) == 5, "capped at the batch size")
+	var village := {"garrison": {"spearman": 2, "scout": 1}, "training": [batch]}
+	_check(Rules.garrison_at(village, t0 + 2.0) == {"spearman": 4, "scout": 1}, "garrison counts finished units")
+	_check(Rules.unit_cost({"cost": {"wood": 50, "stone": 20, "grain": 30, "iron": 30}}, 3) == {"wood": 150, "stone": 60, "grain": 90, "iron": 90}, "batch cost")
+
+
 ## Catches parse errors in scripts and scenes the other tests don't touch.
+## load() still returns a Script when it fails to parse, so check that it
+## can actually be instantiated.
 func _test_everything_loads(dir_path: String) -> void:
 	for file in DirAccess.get_files_at(dir_path):
-		if file.ends_with(".gd") or file.ends_with(".tscn"):
-			_check(load(dir_path.path_join(file)) != null, "%s loads" % dir_path.path_join(file))
+		var path := dir_path.path_join(file)
+		if file.ends_with(".gd"):
+			var script := load(path) as Script
+			_check(script != null and script.can_instantiate(), "%s compiles" % path)
+		elif file.ends_with(".tscn"):
+			var scene := load(path) as PackedScene
+			_check(scene != null and scene.can_instantiate(), "%s loads" % path)
 	for sub in DirAccess.get_directories_at(dir_path):
 		_test_everything_loads(dir_path.path_join(sub))

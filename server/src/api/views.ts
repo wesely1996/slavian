@@ -2,6 +2,7 @@
 // current resources from the ledger and their offset to `serverTime`.
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
+import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
 
@@ -14,6 +15,10 @@ export interface VillageView {
   r: number;
   levels: Record<string, number>;
   queue: { building: string; targetLevel: number; startsAt: string; completesAt: string }[];
+  // Units at home as of the last settle; units finished since are counted
+  // from `training` (each batch trains one unit every perUnitMs).
+  garrison: Record<string, number>;
+  training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
     ratesPerHour: Record<string, number>;
@@ -23,7 +28,7 @@ export interface VillageView {
 }
 
 export function villageView(village: Village): VillageView {
-  const { levels, queue, ledger } = village.state;
+  const { levels, queue, ledger, garrison, training } = village.state;
   return {
     id: village.id,
     worldId: village.worldId,
@@ -37,6 +42,14 @@ export function villageView(village: Village): VillageView {
       targetLevel: item.targetLevel,
       startsAt: item.startsAt.toISOString(),
       completesAt: item.completesAt.toISOString(),
+    })),
+    garrison: { ...garrison },
+    training: training.map((batch) => ({
+      unit: batch.unit,
+      count: batch.count,
+      startsAt: batch.startsAt.toISOString(),
+      perUnitMs: batch.perUnitMs,
+      completesAt: batchCompletesAt(batch).toISOString(),
     })),
     resources: {
       amounts: ledger.amounts,

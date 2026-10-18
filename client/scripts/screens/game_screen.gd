@@ -1,9 +1,11 @@
 extends Node2D
 ## In-world screen: the map from the server, your resources, and a panel
-## for the selected hex. Your own village's panel queues buildings.
+## for the selected hex. Your own village's panel queues buildings and
+## trains troops.
 
 const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
+const NEGATIVE := Color("#ff8a7a")
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: MapCamera = $MapCamera
@@ -12,7 +14,11 @@ var _selected := Vector2i.MAX
 var _since_refresh := 0.0
 
 var _live_label: Label
-var _resources_label: Label
+var _resource_labels: Dictionary[String, Label] = {}
+## Which part of your village panel is open: "buildings" or "troops".
+var _tab := "buildings"
+## Chosen batch size per unit, kept while the panel rebuilds.
+var _train_counts: Dictionary[String, int] = {}
 var _status: Label
 var _panel: PanelContainer
 var _panel_body: VBoxContainer
@@ -54,7 +60,12 @@ func _process(delta: float) -> void:
 	_since_refresh = 0.0
 	var home := _my_village()
 	if not home.is_empty():
-		_resources_label.text = UI.resource_text(Ledger.amounts_at(home.resources, Game.server_now()))
+		var amounts := Ledger.amounts_at(home.resources, Game.server_now())
+		for kind in Ledger.KINDS:
+			var rate: float = home.resources.ratesPerHour[kind]
+			var label := _resource_labels[kind]
+			label.text = "%s %d  %s/h" % [kind.capitalize(), amounts[kind], UI.signed(rate)]
+			label.add_theme_color_override("font_color", NEGATIVE if rate < 0 else Color.WHITE)
 	for entry in _ticking:
 		(entry[0] as Label).text = (entry[1] as Callable).call()
 
@@ -91,8 +102,16 @@ func _build_ui() -> void:
 	_live_label = UI.label("", UI.SMALL_SIZE)
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	bar.add_child(_live_label)
-	_resources_label = UI.label("", UI.SMALL_SIZE)
-	top_rows.add_child(_resources_label)
+	var resources := GridContainer.new()
+	resources.columns = 2
+	resources.add_theme_constant_override("h_separation", 24)
+	top_rows.add_child(resources)
+	for kind in Ledger.KINDS:
+		var label := UI.label("", UI.SMALL_SIZE)
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		resources.add_child(label)
+		_resource_labels[kind] = label
 	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	top_rows.add_child(_status)
 	_on_live_connection(Live.connected)
@@ -146,10 +165,29 @@ func _ally_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label("Ally: %s" % Game.member_name(int(village.ownerAccountId)), UI.SMALL_SIZE, UI.MUTED))
 	for building in village.levels:
 		_panel_body.add_child(UI.label("%s  Lv %d" % [_building_def(building).name, village.levels[building]]))
+	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(troops)
+	_tick(troops, func() -> String: return _units_text(Rules.garrison_at(village, Game.server_now())))
 
 
 func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
+	var tabs := UI.hbox()
+	for tab in [["buildings", "Buildings"], ["troops", "Troops"]]:
+		var button := UI.button(tab[1], func() -> void:
+			_tab = tab[0]
+			_rebuild_panel())
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = _tab == tab[0]
+		tabs.add_child(button)
+	_panel_body.add_child(tabs)
+	if _tab == "troops":
+		_troops_section(village)
+	else:
+		_buildings_section(village)
+
+
+func _buildings_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 
 	var queue: Array = village.queue
@@ -198,6 +236,97 @@ func _own_village_panel(village: Dictionary) -> void:
 			var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
 			build.disabled = queue_full or not affordable
 			return cost_text + ("  (queue full)" if queue_full else ""))
+
+
+func _troops_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.label("At home", UI.SMALL_SIZE, UI.MUTED))
+	var home := UI.label()
+	_panel_body.add_child(home)
+	_tick(home, func() -> String:
+		return _units_text(Rules.garrison_at(Game.villages.get(village_id, village), Game.server_now())))
+
+	var units: Dictionary = Game.data.units.units
+	var training: Array = village.training
+	var limit := int(Game.data.units.trainingQueueLimit)
+	_panel_body.add_child(UI.label("Training (%d/%d)" % [training.size(), limit], UI.SMALL_SIZE, UI.MUTED))
+	if training.is_empty():
+		_panel_body.add_child(UI.label("Nobody in training.", UI.SMALL_SIZE, UI.MUTED))
+	for batch in training:
+		var line := UI.label()
+		_panel_body.add_child(line)
+		var unit_name: String = units.get(batch.unit, {"name": batch.unit}).name
+		var done_at := TimeUtil.parse_iso(batch.completesAt)
+		var start := TimeUtil.parse_iso(batch.startsAt)
+		var per_unit := float(batch.perUnitMs) / 1000.0
+		_tick(line, func() -> String:
+			var now := Game.server_now()
+			var done := Rules.finished_by(batch, now)
+			if done >= int(batch.count):
+				return "%s %d/%d   finishing…" % [unit_name, done, batch.count]
+			var next_at := start + (done + 1) * per_unit
+			return "%s %d/%d   next %s · all %s" % [unit_name, done, batch.count,
+				TimeUtil.format_duration(next_at - now), TimeUtil.format_duration(done_at - now)])
+
+	_panel_body.add_child(UI.label("Train", UI.SMALL_SIZE, UI.MUTED))
+	var queue_full := training.size() >= limit
+	var max_batch := int(Game.data.units.maxBatch)
+	for unit in units:
+		var def: Dictionary = units[unit]
+		var building_level := int(village.levels.get(def.building, 0))
+		var unlocked := building_level >= int(def.requiresLevel)
+		var count: int = _train_counts.get(unit, 1)
+
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label("%s  ×%d" % [def.name, count]))
+		info.add_child(UI.label("%s · atk %d · def %d · %d grain/h" % [def.family.capitalize(), def.attack, def.defense, def.upkeepPerHour], UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(info)
+		if not unlocked:
+			info.add_child(UI.label("Needs %s level %d" % [_building_def(def.building).name, def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
+			continue
+		var cost := Rules.unit_cost(def, count)
+		var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		info.add_child(cost_line)
+
+		var row := UI.hbox()
+		_panel_body.add_child(row)
+		for step in [-5, -1, 1, 5]:
+			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
+				_train_counts[unit] = clampi(count + step, 1, max_batch)
+				_rebuild_panel())
+			stepper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(stepper)
+		var train := UI.button("Train", func() -> void: _train(village_id, unit, count))
+		train.custom_minimum_size.x = 140
+		row.add_child(train)
+		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) / float(Game.world.speed)
+		var cost_text := "%s · %s each" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+		_tick(cost_line, func() -> String:
+			var current: Dictionary = Game.villages.get(village_id, village)
+			var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
+			train.disabled = queue_full or not affordable
+			return cost_text + ("  (queue full)" if queue_full else ""))
+
+
+func _units_text(units: Dictionary) -> String:
+	if units.is_empty():
+		return "No troops yet."
+	var parts := PackedStringArray()
+	for unit in units:
+		var def: Dictionary = Game.data.units.units.get(unit, {"name": unit})
+		parts.append("%s ×%d" % [def.name, units[unit]])
+	return ", ".join(parts)
+
+
+func _train(village_id: int, unit: String, count: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/train" % village_id, {"unit": unit, "count": count})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _tick(label: Label, text: Callable) -> void:

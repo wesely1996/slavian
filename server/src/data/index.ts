@@ -69,7 +69,31 @@ const terrainFileSchema = z.object({
   terrain: z.record(z.enum(TERRAIN_IDS), terrainSchema),
 });
 
+const unitSchema = z.object({
+  name: z.string(),
+  family: z.enum(['infantry', 'archers', 'cavalry', 'scout']),
+  building: z.string(),
+  requiresLevel: z.number().int().positive(),
+  cost: resourcesSchema,
+  trainSeconds: z.number().positive(),
+  upkeepPerHour: z.number().nonnegative(),
+  speed: z.number().positive(),
+  attack: z.number().nonnegative(),
+  defense: z.number().nonnegative(),
+  carry: z.number().nonnegative(),
+});
+
+const unitsFileSchema = z.object({
+  version: z.number().int(),
+  trainingQueueLimit: z.number().int().positive(),
+  maxBatch: z.number().int().positive(),
+  trainingSpeedup: z.number().positive().max(1),
+  units: z.record(z.string(), unitSchema),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type UnitDef = z.infer<typeof unitSchema>;
+export type UnitsData = z.infer<typeof unitsFileSchema>;
 export type BuildingsData = z.infer<typeof buildingsFileSchema>;
 export type TerrainDef = z.infer<typeof terrainSchema>;
 export type TerrainData = z.infer<typeof terrainFileSchema>;
@@ -77,12 +101,20 @@ export type TerrainData = z.infer<typeof terrainFileSchema>;
 export interface GameData {
   buildings: BuildingsData;
   terrain: TerrainData;
+  units: UnitsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
   const read = (file: string): unknown => JSON.parse(readFileSync(`${dir}/${file}`, 'utf8'));
-  return {
+  const data: GameData = {
     buildings: buildingsFileSchema.parse(read('buildings.json')),
     terrain: terrainFileSchema.parse(read('terrain.json')),
+    units: unitsFileSchema.parse(read('units.json')),
   };
+  for (const [id, unit] of Object.entries(data.units.units)) {
+    if (!data.buildings.buildings[unit.building]) {
+      throw new Error(`Unit "${id}" is trained in unknown building "${unit.building}"`);
+    }
+  }
+  return data;
 }

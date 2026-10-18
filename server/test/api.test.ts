@@ -138,6 +138,40 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     socket.close();
   });
 
+  it('trains units once a barracks stands and moves them home when done', async () => {
+    const mila = await guest('Mila');
+    const created = await call('POST', '/v1/worlds', mila.token, { name: 'Solo', maxPlayers: 1, speed: 10 });
+    const started = await call('POST', `/v1/worlds/${created.body.id}/start`, mila.token);
+    const villageId: number = started.body.villages[0].id;
+    expect(started.body.villages[0].garrison).toEqual({});
+
+    const noBarracks = await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'spearman', count: 2 });
+    expect(noBarracks.status).toBe(400);
+    expect(noBarracks.body.message).toMatch(/Barracks level 1/);
+
+    const built = await call('POST', `/v1/villages/${villageId}/build`, mila.token, { building: 'barracks' });
+    now = new Date(built.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+
+    const trained = await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'spearman', count: 3 });
+    expect(trained.status).toBe(200);
+    const batch = trained.body.village.training[0];
+    expect(batch).toMatchObject({ unit: 'spearman', count: 3, perUnitMs: 6000 });
+    expect(trained.body.village.resources.ratesPerHour.grain).toBeCloseTo(
+      started.body.villages[0].resources.ratesPerHour.grain - 3 * 10,
+    );
+    expect((await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'horseman', count: 1 })).body.message).toMatch(
+      /Barracks level 2/,
+    );
+    expect((await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'spearman', count: 0 })).status).toBe(400);
+
+    now = new Date(batch.completesAt);
+    await tick(db, now, scheduler);
+    const world = await call('GET', `/v1/worlds/${created.body.id}`, mila.token);
+    expect(world.body.villages[0].garrison).toEqual({ spearman: 3 });
+    expect(world.body.villages[0].training).toEqual([]);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

@@ -1,7 +1,7 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
-import { queueBuildCommand } from '../commands/queue-build.js';
+import { queueBuildCommand, trainUnitsCommand } from '../commands/village.js';
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -32,6 +32,7 @@ const createWorldBody = z.object({
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
 const buildBody = z.object({ building: z.string().min(1).max(64) });
+const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
   const header = request.headers.authorization ?? '';
@@ -82,6 +83,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.get('/v1/data', async () => ({
     buildings: scheduler.data.buildings,
     terrain: scheduler.data.terrain,
+    units: scheduler.data.units,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -140,6 +142,20 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       accountId: account.id,
       villageId: id,
       building: body.building,
+      now: clock(),
+    });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/train', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = trainBody.parse(request.body);
+    const { village } = await trainUnitsCommand(db, scheduler, {
+      accountId: account.id,
+      villageId: id,
+      unit: body.unit,
+      count: body.count,
       now: clock(),
     });
     return { village: villageView(village), serverTime: clock().toISOString() };

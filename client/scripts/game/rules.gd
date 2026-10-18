@@ -23,3 +23,28 @@ static func planned_level(village: Dictionary, building: String) -> int:
 		if item.building == building:
 			level = int(item.targetLevel)
 	return level
+
+
+## Units of a training batch finished by `at` (server/src/sim/training.ts).
+static func finished_by(batch: Dictionary, at_unix: float) -> int:
+	var elapsed_ms := (at_unix - TimeUtil.parse_iso(batch.startsAt)) * 1000.0
+	return clampi(floori(elapsed_ms / float(batch.perUnitMs)), 0, int(batch.count))
+
+
+## Units at home now: the settled garrison plus everything trained since.
+static func garrison_at(village: Dictionary, at_unix: float) -> Dictionary:
+	var units := {}
+	for unit in village.get("garrison", {}):
+		units[unit] = int(village.garrison[unit])
+	for batch in village.get("training", []):
+		var done := finished_by(batch, at_unix)
+		if done > 0:
+			units[batch.unit] = int(units.get(batch.unit, 0)) + done
+	return units
+
+
+static func unit_cost(def: Dictionary, count: int) -> Dictionary:
+	var cost := {}
+	for kind in Ledger.KINDS:
+		cost[kind] = int(def.cost[kind]) * count
+	return cost
