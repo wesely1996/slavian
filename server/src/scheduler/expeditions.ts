@@ -50,6 +50,7 @@ export const expeditionHandlers: HandlerRegistry = {
       state: newVillage(data, event.dueAt, world.speed, {
         startingResources: data.expansion.startingResources,
         adminUpkeep: adminUpkeepFor(data, owned),
+        bonuses: home.state.bonuses,
       }),
     });
     // The settlers become the new village's people: they stop eating at home.

@@ -69,7 +69,7 @@ export const battleHandlers: HandlerRegistry = {
     const result = resolveRound(
       data,
       { units: wave.composition, stance: battle.attackerStance, stats: enemyStats(data, wave.front), home: false },
-      { units: state.garrison, stance: state.stance, stats: playerStats(data), home: true },
+      { units: state.garrison, stance: state.stance, stats: playerStats(data, state.bonuses, true), home: true },
       battleRng(world.seed, battle.id, round),
     );
     const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
@@ -99,7 +99,7 @@ export const battleHandlers: HandlerRegistry = {
       const payload: BattlePayload = { battleId: battle.id };
       await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
     } else if (outcome === 'raided') {
-      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow);
+      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, villageState.bonuses);
       villageState = plunder(villageState, loot, at);
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'raided', at, loot });

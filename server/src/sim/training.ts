@@ -23,9 +23,9 @@ export function finishedBy(batch: TrainingBatch, at: Date): number {
 
 // Real-time milliseconds per unit; the training building's level and the
 // world speed both shorten it.
-export function perUnitMs(data: GameData, unit: string, buildingLevel: number, worldSpeed: number): number {
+export function perUnitMs(data: GameData, unit: string, buildingLevel: number, worldSpeed: number, factor = 1): number {
   const def = data.units.units[unit]!;
-  const speedup = data.units.trainingSpeedup ** Math.max(0, buildingLevel - 1);
+  const speedup = data.units.trainingSpeedup ** Math.max(0, buildingLevel - 1) * factor;
   return Math.max(1, Math.round((def.trainSeconds * 1000 * speedup) / worldSpeed));
 }
 

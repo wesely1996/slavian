@@ -201,6 +201,20 @@
       "buildSeconds": 300,
       "timeGrowth": 1.5
     },
+    "academy": {
+      "name": "Academy",
+      "kind": "center",
+      "maxLevel": 5,
+      "cost": {
+        "wood": 250,
+        "stone": 300,
+        "grain": 150,
+        "iron": 150
+      },
+      "costGrowth": 1.7,
+      "buildSeconds": 300,
+      "timeGrowth": 1.6
+    },
     "outpost": {
       "name": "Outpost",
       "kind": "outpost",

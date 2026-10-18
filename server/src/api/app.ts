@@ -9,6 +9,7 @@ import {
   queueBuildCommand,
   sendScoutsCommand,
   setStanceCommand,
+  startResearchCommand,
   trainUnitsCommand,
 } from '../commands/village.js';
 import { STANCES } from '../data/index.js';
@@ -23,6 +24,7 @@ import type { LiveHub } from './live.js';
 import {
   caravanView,
   expeditionView,
+  researchView,
   missionView,
   vaultView,
   villageView,
@@ -66,6 +68,7 @@ const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: 
 const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
 const fetchBody = z.object({ load: loadSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
+const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
 
@@ -125,6 +128,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     battle: scheduler.data.battle,
     logistics: scheduler.data.logistics,
     expansion: scheduler.data.expansion,
+    research: scheduler.data.research,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -239,6 +243,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = hexBody.parse(request.body);
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/research', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = researchBody.parse(request.body);
+    const { village, research } = await startResearchCommand(db, scheduler, { accountId: account.id, villageId: id, tech: body.tech, now: clock() });
+    return { village: villageView(village), research: researchView(research), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/found', async (request) => {

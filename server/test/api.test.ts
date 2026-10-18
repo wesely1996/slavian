@@ -572,6 +572,36 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.expeditions[0].status).toBe('done');
   });
 
+  it('researches in the Academy; a finished tech helps every village of its player', async () => {
+    const jarik = await guest('Jarik');
+    const created = await call('POST', '/v1/worlds', jarik.token, { name: 'Research', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, jarik.token);
+    const village = started.body.villages[0];
+    const research = (tech: string) => call('POST', `/v1/villages/${village.id}/research`, jarik.token, { tech });
+    await db.query(`UPDATE villages SET amounts = '{"wood": 900, "stone": 900, "grain": 900, "iron": 900}' WHERE id = $1`, [village.id]);
+
+    expect((await research('felling_axes')).body.message).toMatch(/Academy of level 1/);
+    const academy = await call('POST', `/v1/villages/${village.id}/build`, jarik.token, { building: 'academy' });
+    now = new Date(academy.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+
+    expect((await research('shield_wall')).body.message).toMatch(/Academy of level 2/);
+    const started1 = await research('felling_axes');
+    expect(started1.status).toBe(200);
+    expect(started1.body.research).toMatchObject({ accountId: jarik.accountId, tech: 'felling_axes', status: 'researching' });
+    expect((await research('spear_drill')).body.message).toMatch(/one tech at a time/);
+    const woodBefore = started1.body.village.resources.ratesPerHour.wood;
+
+    now = new Date(started1.body.research.completesAt);
+    await tick(db, now, scheduler);
+    const world = (await call('GET', `/v1/worlds/${worldId}`, jarik.token)).body;
+    expect(world.research).toEqual([expect.objectContaining({ accountId: jarik.accountId, tech: 'felling_axes', status: 'done' })]);
+    expect(world.villages[0].bonuses).toEqual({ 'production.wood': 0.1 });
+    expect(world.villages[0].resources.ratesPerHour.wood).toBeCloseTo(woodBefore * 1.1);
+    expect((await research('felling_axes')).body.message).toMatch(/already known/);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

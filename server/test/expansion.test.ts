@@ -39,7 +39,7 @@ describe('founding villages', () => {
 
   it('a founded village starts with its own stores and pays its upkeep in grain', () => {
     const first = newVillage(data, T0, 2);
-    const founded = newVillage(data, T0, 2, { startingResources: data.expansion.startingResources, adminUpkeep: 12 });
+    const founded = newVillage(data, T0, 2, { startingResources: data.expansion.startingResources, adminUpkeep: 12, bonuses: {} });
     expect(founded.ledger.amounts).toEqual(data.expansion.startingResources);
     expect(founded.adminUpkeep).toBe(12);
     expect(founded.ledger.ratesPerHour.grain).toBeCloseTo(first.ledger.ratesPerHour.grain - 24);

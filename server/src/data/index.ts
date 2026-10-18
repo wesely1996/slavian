@@ -222,7 +222,28 @@ const expansionFileSchema = z.object({
   recommendedGarrison: z.object({ base: z.number().int().nonnegative(), perVillage: z.number().int().nonnegative() }),
 });
 
+export const RESEARCH_BRANCHES = ['economy', 'military', 'fortification', 'scouting', 'faith'] as const;
+
+const researchFileSchema = z.object({
+  version: z.number().int(),
+  branches: z.record(z.enum(RESEARCH_BRANCHES), z.string()),
+  techs: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      branch: z.enum(RESEARCH_BRANCHES),
+      academyLevel: z.number().int().positive(),
+      requires: z.array(z.string()),
+      cost: resourcesSchema,
+      seconds: z.number().positive(),
+      effects: z.record(z.string(), z.number()),
+      description: z.string(),
+    }),
+  ),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
 export type BattleData = z.infer<typeof battleFileSchema>;
@@ -245,6 +266,7 @@ export interface GameData {
   battle: BattleData;
   logistics: LogisticsData;
   expansion: ExpansionData;
+  research: ResearchData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -259,12 +281,19 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     battle: battleFileSchema.parse(read('battle.json')),
     logistics: logisticsFileSchema.parse(read('logistics.json')),
     expansion: expansionFileSchema.parse(read('expansion.json')),
+    research: researchFileSchema.parse(read('research.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  if (buildings.academy?.kind !== 'center') throw new Error('buildings.json needs a center building "academy"');
+  for (const [id, tech] of Object.entries(data.research.techs)) {
+    for (const required of tech.requires) {
+      if (!data.research.techs[required]) throw new Error(`Tech "${id}" requires unknown tech "${required}"`);
+    }
+  }
   if (data.units.units.settler?.building !== 'settlers_lodge') throw new Error('units.json needs a "settler" trained in the settlers_lodge');
   if (buildings.caravan_yard?.kind !== 'center') throw new Error('buildings.json needs a center building "caravan_yard"');
   if (buildings.outpost?.kind !== 'outpost' || !buildings.outpost.yields) {

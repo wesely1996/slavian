@@ -8,6 +8,7 @@ import { listRecentBattles, type Battle } from '../db/battles.js';
 import { listRecentRaids, type Raid } from '../db/raids.js';
 import { listCaravans, type Caravan } from '../db/caravans.js';
 import { listExpeditions, type Expedition } from '../db/expeditions.js';
+import { listResearch, type ResearchEntry } from '../db/research.js';
 import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
@@ -36,6 +37,8 @@ export interface VillageView {
   besieged: boolean;
   // Grain per hour (world speed 1) for administration (founded villages).
   adminUpkeep: number;
+  // The owner's research effects.
+  bonuses: Record<string, number>;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -68,6 +71,7 @@ export function villageView(village: Village): VillageView {
     stance: village.state.stance,
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
+    bonuses: { ...village.state.bonuses },
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -235,6 +239,22 @@ export async function expeditionsView(client: DbClient, worldId: number) {
   return (await listExpeditions(client, worldId)).map(expeditionView);
 }
 
+// Everyone's research is visible to the group (co-op specialization).
+export function researchView(entry: ResearchEntry) {
+  return {
+    accountId: entry.accountId,
+    tech: entry.tech,
+    status: entry.status,
+    villageId: entry.villageId,
+    startedAt: entry.startedAt.toISOString(),
+    completesAt: entry.completesAt.toISOString(),
+  };
+}
+
+export async function researchListView(client: DbClient, worldId: number) {
+  return (await listResearch(client, worldId)).map(researchView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -258,6 +278,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);
   const expeditions = await expeditionsView(client, world.id);
+  const research = await researchListView(client, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -272,6 +293,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     battles,
     raids,
     expeditions,
+    research,
     ...logistics,
     map,
   };

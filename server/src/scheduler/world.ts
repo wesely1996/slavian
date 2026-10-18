@@ -3,19 +3,21 @@ import { getWorld } from '../db/worlds.js';
 import type { ScheduledEvent, SchedulerDeps } from './events.js';
 
 // Advisory locks use the two-key form; the first key namespaces world locks.
-const WORLD_LOCK_NAMESPACE = 1;
+// Locks are database-wide while world ids are per schema, so the namespace
+// includes the schema (tests run side by side in separate schemas).
+const WORLD_LOCK_NAMESPACE = "hashtext('world:' || current_schema())";
 
 // Safety valve against handlers that keep scheduling already-due events.
 const MAX_EVENTS_PER_DRAIN = 10_000;
 
 export async function lockWorld(client: DbClient, worldId: number): Promise<void> {
-  await client.query('SELECT pg_advisory_xact_lock($1, $2)', [WORLD_LOCK_NAMESPACE, worldId]);
+  await client.query(`SELECT pg_advisory_xact_lock(${WORLD_LOCK_NAMESPACE}, $1)`, [worldId]);
 }
 
 export async function tryLockWorld(client: DbClient, worldId: number): Promise<boolean> {
   const { rows } = await client.query<{ locked: boolean }>(
-    'SELECT pg_try_advisory_xact_lock($1, $2) AS locked',
-    [WORLD_LOCK_NAMESPACE, worldId],
+    `SELECT pg_try_advisory_xact_lock(${WORLD_LOCK_NAMESPACE}, $1) AS locked`,
+    [worldId],
   );
   return rows[0]!.locked;
 }

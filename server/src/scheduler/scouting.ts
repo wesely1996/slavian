@@ -19,7 +19,10 @@ export const scoutingHandlers: HandlerRegistry = {
     const wave = await loadWave(client, mission.waveId);
     // A horde that already scattered can't hurt anyone.
     const dispersed = wave.status === 'dispersed' || wave.status === 'defeated';
-    const survivors = dispersed ? mission.sent : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id);
+    const village = await loadVillage(client, mission.villageId);
+    const survivors = dispersed
+      ? mission.sent
+      : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id, village.state.bonuses);
     const report = scoutReport(data, {
       front: wave.front,
       composition: wave.composition,
@@ -32,7 +35,6 @@ export const scoutingHandlers: HandlerRegistry = {
     });
     await recordReport(client, mission.id, report);
 
-    const village = await loadVillage(client, mission.villageId);
     const lost = mission.sent - survivors;
     if (lost > 0) {
       await saveVillageState(client, village.id, loseAway(data, village.state, SCOUT_UNIT, lost, event.dueAt, world.speed));

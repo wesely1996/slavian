@@ -24,6 +24,7 @@ func _initialize() -> void:
 	_test_battle_text()
 	_test_caravans()
 	_test_expansion()
+	_test_research()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -126,7 +127,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard", "settlers_lodge"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
+	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard", "settlers_lodge", "academy"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
 	var farm: Dictionary = data.buildings.buildings.farm
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
 	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
@@ -284,3 +285,22 @@ func _test_expansion() -> void:
 	_check(Rules.unit_cost(settler, 1, 3).wood == roundi(float(settler.cost.wood) * 2.25), "settlers get dearer per village")
 	_check(Rules.unit_cost(units.units.spearman, 2, 3) == Rules.unit_cost(units.units.spearman, 2), "other units don't")
 	_check(Rules.recommended_garrison(data, 1) == 10 and Rules.recommended_garrison(data, 3) == 20, "recommended garrison")
+
+
+func _test_research() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../data/research.json")
+	var data := {"research": JSON.parse_string(FileAccess.get_file_as_string(path))}
+	var research := [
+		{"accountId": 1, "tech": "spear_drill", "status": "done"},
+		{"accountId": 1, "tech": "felling_axes", "status": "researching", "completesAt": "2026-01-01T00:00:00.000Z"},
+		{"accountId": 2, "tech": "pathfinders", "status": "done"},
+	]
+	var mine := ResearchRules.progress(research, 1)
+	_check(mine.done.keys() == ["spear_drill"] and mine.current.tech == "felling_axes", "my research")
+	_check(ResearchRules.problem(data, "shield_wall", 2, mine.done, false) == "", "prerequisite known")
+	_check(ResearchRules.problem(data, "shield_wall", 1, mine.done, false) == "Needs an Academy of level 2.", "academy level")
+	_check(ResearchRules.problem(data, "shield_wall", 2, {}, false) == "Needs Spear Drill first.", "prerequisite missing")
+	_check(ResearchRules.problem(data, "shield_wall", 2, mine.done, true) == "One tech at a time.", "one at a time")
+	_check(ResearchRules.problem(data, "spear_drill", 2, mine.done, false) == "Known.", "known")
+	_check(is_equal_approx(ResearchRules.time_factor({"buildTime": -0.1}, "buildTime"), 0.9) and ResearchRules.time_factor({"buildTime": -3.0}, "buildTime") == 0.1, "time factor")
+	_check(CaravanMath.needed({"logistics": {"caravan": {"capacity": 500}}}, {"wood": 600}, {"caravanCapacity": 0.25}) == 1, "pack harnesses")
