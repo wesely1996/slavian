@@ -35,11 +35,15 @@ static func available(data: Dictionary, village: Dictionary, caravans: Array) ->
 	return yard * int(data.logistics.caravan.caravansPerYardLevel) - out(caravans, int(village.id))
 
 
-static func needed(data: Dictionary, cargo: Dictionary) -> int:
+static func capacity(data: Dictionary, bonuses: Dictionary = {}) -> int:
+	return floori(float(data.logistics.caravan.capacity) * (1.0 + ResearchRules.bonus(bonuses, "caravanCapacity")))
+
+
+static func needed(data: Dictionary, cargo: Dictionary, bonuses: Dictionary = {}) -> int:
 	var total := 0
 	for kind in Ledger.KINDS:
 		total += int(cargo.get(kind, 0))
-	return ceili(float(total) / float(data.logistics.caravan.capacity))
+	return ceili(float(total) / float(capacity(data, bonuses)))
 
 
 static func vault_upgrade_cost(data: Dictionary, target_level: int) -> Dictionary:

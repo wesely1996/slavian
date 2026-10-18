@@ -5,6 +5,7 @@ import type { GameData, TerrainId } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { findPath, hex, hexKey, type Hex } from './hex.js';
 import { mapResources, RESOURCE_KINDS, settle, type ResourceLedger, type Resources } from './resources.js';
+import { bonus, type Bonuses } from './research.js';
 import type { PathStep } from './waves.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -19,14 +20,18 @@ export function total(amounts: Resources): number {
   return RESOURCE_KINDS.reduce((sum, kind) => sum + amounts[kind], 0);
 }
 
+export function caravanCapacity(data: GameData, bonuses: Bonuses = {}): number {
+  return Math.floor(data.logistics.caravan.capacity * (1 + bonus(bonuses, 'caravanCapacity')));
+}
+
 // Caravans needed to carry `load`; refuses empty or negative loads.
-export function caravansFor(data: GameData, load: Resources): number {
+export function caravansFor(data: GameData, load: Resources, bonuses: Bonuses = {}): number {
   if (RESOURCE_KINDS.some((kind) => !Number.isInteger(load[kind]) || load[kind] < 0)) {
     throw new RuleError('Loads are whole, non-negative amounts');
   }
   const amount = total(load);
   if (amount <= 0) throw new RuleError('Nothing to carry');
-  return Math.ceil(amount / data.logistics.caravan.capacity);
+  return Math.ceil(amount / caravanCapacity(data, bonuses));
 }
 
 // The road between two hexes at `hexesPerHour` on plains (terrain move
@@ -60,8 +65,9 @@ export function caravanRoute(
   from: Hex,
   to: Hex,
   worldSpeed: number,
+  bonuses: Bonuses = {},
 ): PathStep[] {
-  return roadRoute(data, terrain, from, to, data.logistics.caravan.speed, worldSpeed);
+  return roadRoute(data, terrain, from, to, data.logistics.caravan.speed * (1 + bonus(bonuses, 'caravanSpeed')), worldSpeed);
 }
 
 export function vaultCapacity(data: GameData, level: number): number {

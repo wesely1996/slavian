@@ -10,6 +10,7 @@ signal battles_changed
 signal raids_changed
 signal caravans_changed
 signal expeditions_changed
+signal research_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -29,6 +30,8 @@ var caravans: Array = []
 var vault: Dictionary = {}
 ## Settlers on the road to found villages, then the latest that ended.
 var expeditions: Array = []
+## Everyone's research: {accountId, tech, status, completesAt, ...}.
+var research: Array = []
 ## Which of your villages the screens show (0: the first).
 var current_village_id := 0
 
@@ -76,6 +79,7 @@ func set_world(new_world: Dictionary) -> void:
 	raids = new_world.get("raids", [])
 	caravans = new_world.get("caravans", [])
 	expeditions = new_world.get("expeditions", [])
+	research = new_world.get("research", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -112,6 +116,13 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_research(world_id_: int, new_research: Array) -> void:
+	if world_id_ != world_id():
+		return
+	research = new_research
+	research_changed.emit()
 
 
 func set_expeditions(world_id_: int, new_expeditions: Array) -> void:

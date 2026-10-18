@@ -1,6 +1,7 @@
 import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { hex, hexDistance, hexKey, type Hex } from './hex.js';
+import { bonus, productionFactor, timeFactor, type Bonuses } from './research.js';
 import {
   mapResources,
   spend,
@@ -59,6 +60,8 @@ export interface VillageState {
   // Grain per hour (at world speed 1) every village after an owner's
   // first pays for its administration.
   readonly adminUpkeep: number;
+  // The owner's research effects (see research.ts).
+  readonly bonuses: Bonuses;
 }
 
 const MS_PER_SECOND = 1000;
@@ -152,10 +155,17 @@ export function hallSpeedup(data: GameData, hallLevel: number): number {
   return data.buildings.village.hallBuildSpeedup ** Math.max(0, hallLevel - 1);
 }
 
-// Real-time rates; world speed multiplies production. Outposts produce
-// nothing while the village is besieged.
-export function productionPerHour(data: GameData, plots: Plots, worldSpeed: number, besieged = false): Resources {
+// Real-time rates; world speed multiplies production, research raises it.
+// Outposts produce nothing while the village is besieged.
+export function productionPerHour(
+  data: GameData,
+  plots: Plots,
+  worldSpeed: number,
+  besieged = false,
+  bonuses: Bonuses = {},
+): Resources {
   const rates = mapResources((kind) => data.buildings.village.baseProductionPerHour[kind] * worldSpeed);
+  const outpostFactor = 1 + bonus(bonuses, 'outpostYield');
   for (const plot of Object.values(plots)) {
     if (!plot.building || plot.level <= 0) continue;
     const def = buildingDef(data, plot.building);
@@ -163,10 +173,10 @@ export function productionPerHour(data: GameData, plots: Plots, worldSpeed: numb
       rates[def.production.resource] += def.production.basePerHour * def.production.growth ** (plot.level - 1) * worldSpeed;
     } else if (def.yields && !besieged) {
       const gathered = outpostYield(def, plot.terrain, plot.level, worldSpeed);
-      for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind];
+      for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind] * outpostFactor;
     }
   }
-  return rates;
+  return mapResources((kind) => rates[kind] * productionFactor(bonuses, kind));
 }
 
 // Every unit the village feeds: at home, in training and away.
@@ -178,18 +188,19 @@ export function unitsFed(state: Pick<VillageState, 'garrison' | 'training' | 'aw
 // feeds. Grain can go negative; the ledger floors amounts at zero.
 export function villageRates(
   data: GameData,
-  state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away' | 'adminUpkeep'>,
+  state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away' | 'adminUpkeep' | 'bonuses'>,
   worldSpeed: number,
 ): Resources {
-  const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged);
-  const upkeep = upkeepPerHour(data, unitsFed(state), worldSpeed) + state.adminUpkeep * worldSpeed;
+  const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged, state.bonuses);
+  const troops = upkeepPerHour(data, unitsFed(state), worldSpeed) * Math.max(0, 1 + bonus(state.bonuses, 'upkeep'));
+  const upkeep = troops + state.adminUpkeep * worldSpeed;
   return { ...rates, grain: rates.grain - upkeep };
 }
 
-export function capacity(data: GameData, levels: VillageState['levels']): Resources {
+export function capacity(data: GameData, levels: VillageState['levels'], bonuses: Bonuses = {}): Resources {
   const storehouse = data.buildings.buildings.storehouse;
   const level = levels.storehouse ?? 0;
-  const cap = data.buildings.village.baseCapacity * (storehouse?.capacityGrowth ?? 1) ** level;
+  const cap = data.buildings.village.baseCapacity * (storehouse?.capacityGrowth ?? 1) ** level * (1 + bonus(bonuses, 'storage'));
   return mapResources(() => cap);
 }
 
@@ -199,7 +210,7 @@ export function newVillage(
   data: GameData,
   at: Date,
   worldSpeed: number,
-  founded: { startingResources: Resources; adminUpkeep: number } | null = null,
+  founded: { startingResources: Resources; adminUpkeep: number; bonuses: Bonuses } | null = null,
 ): VillageState {
   const plots = initialPlots(data);
   const levels = levelsOf(plots);
@@ -213,16 +224,23 @@ export function newVillage(
     stance: 'balanced',
     besieged: false,
     adminUpkeep: founded?.adminUpkeep ?? 0,
+    bonuses: founded?.bonuses ?? {},
   };
   return {
     ...state,
     ledger: {
       amounts: { ...(founded?.startingResources ?? data.buildings.village.startingResources) },
       ratesPerHour: villageRates(data, state, worldSpeed),
-      capacity: capacity(data, levels),
+      capacity: capacity(data, levels, state.bonuses),
       settledAt: at,
     },
   };
+}
+
+// The owner's research changed: new rates and capacity from `at`.
+export function withBonuses(data: GameData, state: VillageState, bonuses: Bonuses, at: Date, worldSpeed: number): VillageState {
+  const next = { ...state, bonuses };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, state.levels, bonuses)) };
 }
 
 // What a plot will hold once everything already queued completes.
@@ -303,7 +321,7 @@ export function queueBuild(
 
   const ledger = spend(state.ledger, at, levelCost(def, targetLevel));
   const startsAt = state.queue.at(-1)?.completesAt ?? at;
-  const seconds = buildSeconds(def, targetLevel, worldSpeed, hallSpeedup(data, hallLevel));
+  const seconds = buildSeconds(def, targetLevel, worldSpeed, hallSpeedup(data, hallLevel) * timeFactor(state.bonuses, 'buildTime'));
   const completesAt = new Date(startsAt.getTime() + seconds * MS_PER_SECOND);
   const queued: QueuedBuild = { plot, building, targetLevel, startsAt, completesAt };
   return { state: { ...state, ledger, queue: [...state.queue, queued] }, queued };
@@ -326,7 +344,7 @@ export function completeBuild(
   const plots = { ...state.plots, [plot]: { ...state.plots[plot], building: head.building, level: targetLevel } };
   const levels = levelsOf(plots);
   const next = { ...state, plots, levels, queue: rest };
-  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels)) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels, state.bonuses)) };
 }
 
 export interface OutpostSite {
@@ -436,7 +454,12 @@ export function queueTraining(
   const paid = spend(state.ledger, at, cost);
   const last = state.training.at(-1);
   const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
-  const batch: TrainingBatch = { unit, count, startsAt, perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed) };
+  const batch: TrainingBatch = {
+    unit,
+    count,
+    startsAt,
+    perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed, timeFactor(state.bonuses, 'trainTime')),
+  };
   const training = [...state.training, batch];
   const ledger = withRates(paid, at, villageRates(data, { ...state, training }, worldSpeed));
   return { state: { ...state, ledger, training }, batch };

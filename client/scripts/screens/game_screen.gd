@@ -57,6 +57,8 @@ func _ready() -> void:
 	Live.raids_updated.connect(Game.set_raids)
 	Live.caravans_updated.connect(Game.set_logistics)
 	Live.expeditions_updated.connect(Game.set_expeditions)
+	Live.research_updated.connect(Game.set_research)
+	Game.research_changed.connect(_on_waves_changed)
 	Game.expeditions_changed.connect(_on_waves_changed)
 	Game.caravans_changed.connect(_on_waves_changed)
 	Game.waves_changed.connect(_on_waves_changed)
@@ -86,6 +88,7 @@ func _exit_tree() -> void:
 	Live.raids_updated.disconnect(Game.set_raids)
 	Live.caravans_updated.disconnect(Game.set_logistics)
 	Live.expeditions_updated.disconnect(Game.set_expeditions)
+	Live.research_updated.disconnect(Game.set_research)
 
 
 func _process(delta: float) -> void:
@@ -356,7 +359,7 @@ func _open_caravans(destination: int) -> void:
 func _caravans_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	var yard := int(village.levels.get("caravan_yard", 0))
-	var capacity := int(Game.data.logistics.caravan.capacity)
+	var capacity := CaravanMath.capacity(Game.data, village.get("bonuses", {}))
 	if yard < 1:
 		_panel_body.add_child(UI.label("Build a Caravan Yard in the village to send caravans to allies and the Holy City vault.", UI.SMALL_SIZE, UI.MUTED))
 	else:
@@ -399,7 +402,7 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 			row.add_child(stepper)
 		_panel_body.add_child(row)
 
-	var needed := CaravanMath.needed(Game.data, _caravan_load)
+	var needed := CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {}))
 	var summary := "Needs %d caravan%s" % [needed, "" if needed == 1 else "s"] if needed > 0 else "Pick what to carry"
 	_panel_body.add_child(UI.label(summary, UI.SMALL_SIZE, UI.MUTED))
 	var buttons := UI.hbox()
@@ -448,6 +451,81 @@ func _fetch_from_vault(village_id: int, cargo: Dictionary) -> void:
 		_status.text = response.error
 		return
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+## Your research: what you study now, then every branch of the tree. Shows
+## which teammates know each tech, so the group can specialize.
+func _research_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var academy := int(village.levels.get("academy", 0))
+	var mine := ResearchRules.progress(Game.research, Game.my_account_id())
+	var done: Dictionary = mine.done
+	var current: Dictionary = mine.current
+	var techs: Dictionary = Game.data.research.techs
+	if academy < 1:
+		_panel_body.add_child(UI.label("Build an Academy to research. Research belongs to you and helps all your villages.", UI.SMALL_SIZE, UI.MUTED))
+	else:
+		_panel_body.add_child(UI.label("Academy Lv %d · %d of %d techs known" % [academy, done.size(), techs.size()], UI.SMALL_SIZE, UI.MUTED))
+	if not current.is_empty():
+		var done_at := TimeUtil.parse_iso(current.completesAt)
+		var line := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(line)
+		var tech_name: String = techs[current.tech].name
+		_tick(line, func() -> String: return "Researching %s · %s" % [tech_name, TimeUtil.format_duration(done_at - Game.server_now())])
+	var speed := float(Game.world.speed)
+	for branch in Game.data.research.branches:
+		_panel_body.add_child(UI.label(Game.data.research.branches[branch], UI.HEADING_SIZE))
+		for tech in techs:
+			var def: Dictionary = techs[tech]
+			if def.branch != branch:
+				continue
+			var info := UI.vbox(2)
+			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var known := done.has(tech)
+			info.add_child(UI.label(("✓ " if known else "") + String(def.name)))
+			info.add_child(UI.label(def.description, UI.SMALL_SIZE, UI.MUTED))
+			var others := _who_knows(tech)
+			if not others.is_empty():
+				info.add_child(UI.label("Known by %s" % ", ".join(others), UI.SMALL_SIZE, UI.MUTED))
+			var row := UI.hbox()
+			row.add_child(info)
+			_panel_body.add_child(row)
+			if known or (not current.is_empty() and current.tech == tech):
+				continue
+			var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty())
+			var cost: Dictionary = def.cost
+			var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+			info.add_child(cost_line)
+			var duration := TimeUtil.format_duration(float(def.seconds) / speed)
+			var cost_text := "%s · %s" % [UI.resource_text(cost), duration]
+			if problem != "":
+				cost_line.text = "%s  (%s)" % [cost_text, problem.trim_suffix(".").to_lower()]
+				continue
+			var button := UI.button("Research", func() -> void: _start_research(village_id, tech))
+			button.custom_minimum_size.x = 160
+			row.add_child(button)
+			_tick(cost_line, func() -> String:
+				var home: Dictionary = Game.villages.get(village_id, village)
+				button.disabled = not Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+				return cost_text)
+
+
+func _who_knows(tech: String) -> PackedStringArray:
+	var names := PackedStringArray()
+	for entry in Game.research:
+		if entry.tech == tech and entry.status == "done" and int(entry.accountId) != Game.my_account_id():
+			names.append(Game.member_name(int(entry.accountId)))
+	return names
+
+
+func _start_research(village_id: int, tech: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/research" % village_id, {"tech": tech})
+	if not response.ok:
+		_status.text = response.error
+		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -524,7 +602,7 @@ func _claim_panel(terrain: String) -> void:
 	var hall := Rules.hall_level(home)
 	var queue_full: bool = home.queue.size() >= Rules.queue_limit(Game.data, hall)
 	var cost := Rules.level_cost(def, 1)
-	var seconds := Rules.build_seconds(def, 1, speed, Rules.hall_speedup(Game.data, hall))
+	var seconds := Rules.build_seconds(def, 1, speed, Rules.hall_speedup(Game.data, hall) * ResearchRules.time_factor(home.get("bonuses", {}), "buildTime"))
 	var village_id := int(home.id)
 	var cell := _selected
 	var row := UI.hbox()
@@ -623,7 +701,7 @@ func _village_panel() -> void:
 			_rebuild_panel())
 		_panel_body.add_child(picker)
 	var tabs := UI.hbox()
-	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"]]:
+	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"], ["research", "Research"]]:
 		var button := UI.button(tab[1], func() -> void:
 			_tab = tab[0]
 			_rebuild_panel())
@@ -635,6 +713,8 @@ func _village_panel() -> void:
 		_troops_section(village)
 	elif _tab == "caravans":
 		_caravans_section(village)
+	elif _tab == "research":
+		_research_section(village)
 	else:
 		_queue_section(village)
 		_plot_section(village)
@@ -731,7 +811,7 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var hall := Rules.hall_level(village)
 	var queue_full: bool = village.queue.size() >= Rules.queue_limit(Game.data, hall)
 	var cost := Rules.level_cost(def, target)
-	var seconds := Rules.build_seconds(def, target, float(Game.world.speed), Rules.hall_speedup(Game.data, hall))
+	var seconds := Rules.build_seconds(def, target, float(Game.world.speed), Rules.hall_speedup(Game.data, hall) * ResearchRules.time_factor(village.get("bonuses", {}), "buildTime"))
 
 	var row := UI.hbox()
 	var info := UI.vbox(2)
@@ -851,7 +931,8 @@ func _troops_section(village: Dictionary) -> void:
 		var train := UI.button("Train", func() -> void: _train(village_id, unit, count))
 		train.custom_minimum_size.x = 140
 		row.add_child(train)
-		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) / float(Game.world.speed)
+		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) \
+			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)
 		var cost_text := "%s · %s each" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
 		_tick(cost_line, func() -> String:
 			var current: Dictionary = Game.villages.get(village_id, village)

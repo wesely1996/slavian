@@ -1,6 +1,7 @@
 import type { Stance, TerrainId } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
+import { listResearch, startResearch, type ResearchEntry } from '../db/research.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
@@ -10,10 +11,13 @@ import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { ExpeditionPayload } from '../scheduler/expeditions.js';
+import type { ResearchPayload } from '../scheduler/research.js';
 import type { MissionPayload } from '../scheduler/scouting.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
 import { SETTLER, settleProblem } from '../sim/expansion.js';
 import { roadRoute } from '../sim/logistics.js';
+import { ACADEMY, researchMs, researchProblem } from '../sim/research.js';
+import { spend } from '../sim/resources.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
@@ -121,7 +125,7 @@ export async function sendScoutsCommand(
     const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
-    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed);
+    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, village.state.bonuses);
     const arrivesAt = new Date(input.now.getTime() + travelMs);
     const mission = await insertMission(client, {
       worldId: world.id,
@@ -254,4 +258,39 @@ export async function foundVillageCommand(
     return { state, result: expedition };
   });
   return { village, expedition: result };
+}
+
+// Starts researching `tech` in the caller's village Academy, paid by the
+// village. Research belongs to the player: its effects reach all their
+// villages when it completes.
+export async function startResearchCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { tech: string },
+): Promise<{ village: Village; research: ResearchEntry }> {
+  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+    const accountId = village.ownerAccountId!;
+    const entries = await listResearch(client, world.id, accountId);
+    const problem = researchProblem(deps.data, input.tech, {
+      academyLevel: village.state.levels[ACADEMY] ?? 0,
+      done: new Set(entries.filter((e) => e.status === 'done').map((e) => e.tech)),
+      researching: entries.some((e) => e.status === 'researching'),
+    });
+    if (problem) throw new RuleError(problem);
+    const ledger = spend(village.state.ledger, input.now, deps.data.research.techs[input.tech]!.cost);
+    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed));
+    const research = await startResearch(client, {
+      worldId: world.id,
+      accountId,
+      tech: input.tech,
+      villageId: village.id,
+      startedAt: input.now,
+      completesAt,
+    });
+    const payload: ResearchPayload = { accountId, tech: input.tech };
+    await scheduleEvent(client, world.id, completesAt, 'research_complete', payload);
+    await notifyWorld(client, { worldId: world.id, type: 'research' });
+    return { state: { ...village.state, ledger }, result: research };
+  });
+  return { village, research: result };
 }

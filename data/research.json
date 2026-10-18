@@ -1,0 +1,481 @@
+{
+  "version": 1,
+  "_comment": "Per-player research in the Academy. A tech needs an Academy of `academyLevel` in the village that starts it and every tech in `requires`; its cost is paid by that village. One tech at a time per player. Effects add up across a player's techs and apply to all their villages: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance). Seconds are game seconds (divided by world speed).",
+  "branches": {
+    "economy": "Economy",
+    "military": "Military",
+    "fortification": "Fortification",
+    "scouting": "Scouting",
+    "faith": "Faith"
+  },
+  "techs": {
+    "felling_axes": {
+      "name": "Felling Axes",
+      "branch": "economy",
+      "academyLevel": 1,
+      "requires": [],
+      "cost": {
+        "wood": 150,
+        "stone": 100,
+        "grain": 80,
+        "iron": 60
+      },
+      "seconds": 1200,
+      "effects": {
+        "production.wood": 0.1
+      },
+      "description": "Woodcutters and forest outposts cut 10% more wood."
+    },
+    "two_field_rotation": {
+      "name": "Two-Field Rotation",
+      "branch": "economy",
+      "academyLevel": 1,
+      "requires": [],
+      "cost": {
+        "wood": 120,
+        "stone": 100,
+        "grain": 150,
+        "iron": 40
+      },
+      "seconds": 1200,
+      "effects": {
+        "production.grain": 0.1
+      },
+      "description": "Farms and grain outposts grow 10% more grain."
+    },
+    "stone_splitting": {
+      "name": "Stone Splitting",
+      "branch": "economy",
+      "academyLevel": 2,
+      "requires": [
+        "felling_axes"
+      ],
+      "cost": {
+        "wood": 200,
+        "stone": 150,
+        "grain": 100,
+        "iron": 80
+      },
+      "seconds": 2400,
+      "effects": {
+        "production.stone": 0.1
+      },
+      "description": "Quarries and hill outposts cut 10% more stone."
+    },
+    "bog_iron": {
+      "name": "Bog Iron Smelting",
+      "branch": "economy",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 200,
+        "stone": 200,
+        "grain": 100,
+        "iron": 60
+      },
+      "seconds": 2400,
+      "effects": {
+        "production.iron": 0.1
+      },
+      "description": "Iron mines and outposts smelt 10% more iron."
+    },
+    "granary_lofts": {
+      "name": "Granary Lofts",
+      "branch": "economy",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 250,
+        "stone": 250,
+        "grain": 100,
+        "iron": 80
+      },
+      "seconds": 2400,
+      "effects": {
+        "storage": 0.25
+      },
+      "description": "Every storehouse holds 25% more."
+    },
+    "master_builders": {
+      "name": "Master Builders",
+      "branch": "economy",
+      "academyLevel": 3,
+      "requires": [
+        "granary_lofts"
+      ],
+      "cost": {
+        "wood": 400,
+        "stone": 400,
+        "grain": 200,
+        "iron": 200
+      },
+      "seconds": 4800,
+      "effects": {
+        "buildTime": -0.1
+      },
+      "description": "Everything builds 10% faster."
+    },
+    "frontier_steadings": {
+      "name": "Frontier Steadings",
+      "branch": "economy",
+      "academyLevel": 3,
+      "requires": [
+        "two_field_rotation"
+      ],
+      "cost": {
+        "wood": 350,
+        "stone": 300,
+        "grain": 250,
+        "iron": 150
+      },
+      "seconds": 4800,
+      "effects": {
+        "outpostYield": 0.2
+      },
+      "description": "Outposts gather 20% more."
+    },
+    "three_field_rotation": {
+      "name": "Three-Field Rotation",
+      "branch": "economy",
+      "academyLevel": 4,
+      "requires": [
+        "two_field_rotation",
+        "master_builders"
+      ],
+      "cost": {
+        "wood": 500,
+        "stone": 400,
+        "grain": 600,
+        "iron": 200
+      },
+      "seconds": 7200,
+      "effects": {
+        "production.grain": 0.15
+      },
+      "description": "A third field rests each year: 15% more grain."
+    },
+    "spear_drill": {
+      "name": "Spear Drill",
+      "branch": "military",
+      "academyLevel": 1,
+      "requires": [],
+      "cost": {
+        "wood": 150,
+        "stone": 80,
+        "grain": 100,
+        "iron": 120
+      },
+      "seconds": 1200,
+      "effects": {
+        "attack.infantry": 0.1
+      },
+      "description": "Infantry strike 10% harder."
+    },
+    "shield_wall": {
+      "name": "Shield Wall",
+      "branch": "military",
+      "academyLevel": 2,
+      "requires": [
+        "spear_drill"
+      ],
+      "cost": {
+        "wood": 250,
+        "stone": 150,
+        "grain": 150,
+        "iron": 200
+      },
+      "seconds": 2400,
+      "effects": {
+        "defense.infantry": 0.1
+      },
+      "description": "Infantry hold 10% better."
+    },
+    "composite_bows": {
+      "name": "Composite Bows",
+      "branch": "military",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 300,
+        "stone": 100,
+        "grain": 150,
+        "iron": 200
+      },
+      "seconds": 2400,
+      "effects": {
+        "attack.archers": 0.1
+      },
+      "description": "Archers shoot 10% harder."
+    },
+    "drill_yards": {
+      "name": "Drill Yards",
+      "branch": "military",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 300,
+        "stone": 250,
+        "grain": 200,
+        "iron": 150
+      },
+      "seconds": 2400,
+      "effects": {
+        "trainTime": -0.1
+      },
+      "description": "Troops train 10% faster."
+    },
+    "horse_breeding": {
+      "name": "Horse Breeding",
+      "branch": "military",
+      "academyLevel": 3,
+      "requires": [
+        "composite_bows"
+      ],
+      "cost": {
+        "wood": 300,
+        "stone": 200,
+        "grain": 400,
+        "iron": 300
+      },
+      "seconds": 4800,
+      "effects": {
+        "attack.cavalry": 0.1
+      },
+      "description": "Horsemen charge 10% harder."
+    },
+    "field_kitchens": {
+      "name": "Field Kitchens",
+      "branch": "military",
+      "academyLevel": 3,
+      "requires": [],
+      "cost": {
+        "wood": 300,
+        "stone": 300,
+        "grain": 400,
+        "iron": 150
+      },
+      "seconds": 4800,
+      "effects": {
+        "upkeep": -0.1
+      },
+      "description": "Troops eat 10% less grain."
+    },
+    "palisade_stakes": {
+      "name": "Palisade Stakes",
+      "branch": "fortification",
+      "academyLevel": 1,
+      "requires": [],
+      "cost": {
+        "wood": 200,
+        "stone": 150,
+        "grain": 80,
+        "iron": 60
+      },
+      "seconds": 1200,
+      "effects": {
+        "homeDefense": 0.1
+      },
+      "description": "Troops defending their own village fight 10% better."
+    },
+    "hidden_cellars": {
+      "name": "Hidden Cellars",
+      "branch": "fortification",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 200,
+        "stone": 300,
+        "grain": 100,
+        "iron": 100
+      },
+      "seconds": 2400,
+      "effects": {
+        "lootTaken": -0.25
+      },
+      "description": "Raiders find 25% less to carry off."
+    },
+    "watchtowers": {
+      "name": "Watchtowers",
+      "branch": "fortification",
+      "academyLevel": 3,
+      "requires": [
+        "palisade_stakes"
+      ],
+      "cost": {
+        "wood": 350,
+        "stone": 450,
+        "grain": 150,
+        "iron": 150
+      },
+      "seconds": 4800,
+      "effects": {
+        "homeDefense": 0.1
+      },
+      "description": "Another 10% for defenders at home."
+    },
+    "earthworks": {
+      "name": "Earthworks",
+      "branch": "fortification",
+      "academyLevel": 4,
+      "requires": [
+        "watchtowers"
+      ],
+      "cost": {
+        "wood": 500,
+        "stone": 700,
+        "grain": 250,
+        "iron": 250
+      },
+      "seconds": 7200,
+      "effects": {
+        "defense.all": 0.05
+      },
+      "description": "All troops defend 5% better."
+    },
+    "pathfinders": {
+      "name": "Pathfinders",
+      "branch": "scouting",
+      "academyLevel": 1,
+      "requires": [],
+      "cost": {
+        "wood": 120,
+        "stone": 80,
+        "grain": 100,
+        "iron": 80
+      },
+      "seconds": 1200,
+      "effects": {
+        "scoutSpeed": 0.2
+      },
+      "description": "Scouts travel 20% faster."
+    },
+    "woodcraft": {
+      "name": "Woodcraft",
+      "branch": "scouting",
+      "academyLevel": 2,
+      "requires": [
+        "pathfinders"
+      ],
+      "cost": {
+        "wood": 200,
+        "stone": 150,
+        "grain": 150,
+        "iron": 120
+      },
+      "seconds": 2400,
+      "effects": {
+        "scoutSurvival": 0.1
+      },
+      "description": "Scouts are 10 points likelier to come back."
+    },
+    "road_wardens": {
+      "name": "Road Wardens",
+      "branch": "scouting",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 250,
+        "stone": 250,
+        "grain": 150,
+        "iron": 100
+      },
+      "seconds": 2400,
+      "effects": {
+        "caravanSpeed": 0.2
+      },
+      "description": "Caravans travel 20% faster."
+    },
+    "pack_harnesses": {
+      "name": "Pack Harnesses",
+      "branch": "scouting",
+      "academyLevel": 3,
+      "requires": [
+        "road_wardens"
+      ],
+      "cost": {
+        "wood": 350,
+        "stone": 250,
+        "grain": 200,
+        "iron": 250
+      },
+      "seconds": 4800,
+      "effects": {
+        "caravanCapacity": 0.25
+      },
+      "description": "Caravans carry 25% more."
+    },
+    "rite_of_perun": {
+      "name": "Rite of Perun",
+      "branch": "faith",
+      "academyLevel": 2,
+      "requires": [],
+      "cost": {
+        "wood": 200,
+        "stone": 200,
+        "grain": 250,
+        "iron": 150
+      },
+      "seconds": 2400,
+      "effects": {
+        "attack.all": 0.05
+      },
+      "description": "Perun's thunder: all troops strike 5% harder."
+    },
+    "mokosh_blessing": {
+      "name": "Mokosh's Blessing",
+      "branch": "faith",
+      "academyLevel": 3,
+      "requires": [],
+      "cost": {
+        "wood": 300,
+        "stone": 300,
+        "grain": 400,
+        "iron": 150
+      },
+      "seconds": 4800,
+      "effects": {
+        "production.all": 0.05
+      },
+      "description": "Mokosh blesses the land: 5% more of everything."
+    },
+    "veles_ward": {
+      "name": "Veles's Ward",
+      "branch": "faith",
+      "academyLevel": 4,
+      "requires": [
+        "mokosh_blessing"
+      ],
+      "cost": {
+        "wood": 400,
+        "stone": 400,
+        "grain": 500,
+        "iron": 200
+      },
+      "seconds": 7200,
+      "effects": {
+        "upkeep": -0.1
+      },
+      "description": "Veles watches the herds: troops eat 10% less grain."
+    },
+    "svarog_forge": {
+      "name": "Svarog's Forge",
+      "branch": "faith",
+      "academyLevel": 5,
+      "requires": [
+        "drill_yards",
+        "rite_of_perun"
+      ],
+      "cost": {
+        "wood": 600,
+        "stone": 600,
+        "grain": 400,
+        "iron": 500
+      },
+      "seconds": 9600,
+      "effects": {
+        "trainTime": -0.1
+      },
+      "description": "Svarog's fire: troops train another 10% faster."
+    }
+  }
+}

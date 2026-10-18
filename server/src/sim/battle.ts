@@ -7,6 +7,7 @@ import type { Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
 import type { Units } from './training.js';
+import { attackFactor, bonus, defenseFactor, type Bonuses } from './research.js';
 
 export interface UnitStats {
   readonly attack: number;
@@ -33,8 +34,17 @@ export function total(units: Units): number {
   return Object.values(units).reduce((sum, n) => sum + n, 0);
 }
 
-export function playerStats(data: GameData): (unit: string) => UnitStats {
-  return (unit) => data.units.units[unit] ?? { attack: 0, defense: 1, family: 'infantry' };
+// The player's units, with their research: `home` adds the bonus for
+// defending one's own village.
+export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false): (unit: string) => UnitStats {
+  return (unit) => {
+    const def = data.units.units[unit] ?? { attack: 0, defense: 1, family: 'infantry' as const };
+    return {
+      family: def.family,
+      attack: def.attack * attackFactor(bonuses, def.family),
+      defense: def.defense * defenseFactor(bonuses, def.family, home),
+    };
+  };
 }
 
 export function enemyStats(data: GameData, front: Front): (unit: string) => UnitStats {
@@ -120,10 +130,19 @@ export function battleOutcome(
 
 // What a victorious horde carries off: a share of the stores, smaller the
 // more of the horde fell.
-export function raidLoot(data: GameData, amounts: Resources, attackerInitial: Units, attackerNow: Units): Resources {
+// What raiders carry off; `bonuses` are the raided player's (hidden
+// cellars).
+export function raidLoot(
+  data: GameData,
+  amounts: Resources,
+  attackerInitial: Units,
+  attackerNow: Units,
+  bonuses: Bonuses = {},
+): Resources {
   const start = total(attackerInitial);
   const surviving = start > 0 ? total(attackerNow) / start : 0;
-  return mapResources((kind) => Math.floor(amounts[kind] * data.battle.raidShare * surviving));
+  const share = data.battle.raidShare * Math.max(0, 1 + bonus(bonuses, 'lootTaken'));
+  return mapResources((kind) => Math.floor(amounts[kind] * share * surviving));
 }
 
 export function roundMs(data: GameData, worldSpeed: number): number {
