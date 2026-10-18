@@ -5,6 +5,7 @@ import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '
 import {
   abandonOutpostCommand,
   claimOutpostCommand,
+  foundVillageCommand,
   queueBuildCommand,
   sendScoutsCommand,
   setStanceCommand,
@@ -19,7 +20,15 @@ import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
-import { caravanView, missionView, vaultView, villageView, worldSummary, worldView } from './views.js';
+import {
+  caravanView,
+  expeditionView,
+  missionView,
+  vaultView,
+  villageView,
+  worldSummary,
+  worldView,
+} from './views.js';
 
 export interface AppDeps {
   db: Db;
@@ -57,6 +66,7 @@ const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: 
 const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
 const fetchBody = z.object({ load: loadSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
+const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
@@ -114,6 +124,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     scouting: scheduler.data.scouting,
     battle: scheduler.data.battle,
     logistics: scheduler.data.logistics,
+    expansion: scheduler.data.expansion,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -228,6 +239,21 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = hexBody.parse(request.body);
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/found', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = foundBody.parse(request.body);
+    const { village, expedition } = await foundVillageCommand(db, scheduler, {
+      accountId: account.id,
+      villageId: id,
+      q: body.q,
+      r: body.r,
+      ...(body.name ? { name: body.name } : {}),
+      now: clock(),
+    });
+    return { village: villageView(village), expedition: expeditionView(expedition), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/caravans', async (request) => {

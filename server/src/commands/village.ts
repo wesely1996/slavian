@@ -1,5 +1,6 @@
 import type { Stance, TerrainId } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
@@ -8,14 +9,18 @@ import { listVillages, loadVillage, saveVillageState, type Village } from '../db
 import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
+import type { ExpeditionPayload } from '../scheduler/expeditions.js';
 import type { MissionPayload } from '../scheduler/scouting.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
+import { SETTLER, settleProblem } from '../sim/expansion.js';
+import { roadRoute } from '../sim/logistics.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
 import {
   abandonOutpost,
   claimOutpost,
+  NotEnoughUnitsError,
   outpostHex,
   outpostPlot,
   outpostPlots,
@@ -87,7 +92,8 @@ export async function trainUnitsCommand(
   input: VillageCommandInput & { unit: string; count: number },
 ): Promise<{ village: Village; batch: TrainingBatch }> {
   const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
-    const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed);
+    const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
+    const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned);
     const payload: TrainingCompletePayload = { villageId: village.id };
     await scheduleEvent(client, world.id, batchCompletesAt(batch), 'training_complete', payload);
     return { state, result: batch };
@@ -189,4 +195,63 @@ export async function abandonOutpostCommand(
     result: null,
   }));
   return { village };
+}
+
+// Sends settlers from the caller's village to found a new one on a free
+// hex. The site is checked again when they arrive.
+export async function foundVillageCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { q: number; r: number; name?: string },
+): Promise<{ village: Village; expedition: Expedition }> {
+  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+    const cell = hex(input.q, input.r);
+    const hexes = await loadHexes(client, world.id);
+    const terrain = new Map<string, TerrainId>(hexes.map(([q, r, t]) => [`${q},${r}`, t]));
+    const villages = await listVillages(client, world.id);
+    const outposts = new Set(villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => hexKey(outpostHex(plot)!))));
+    const home = hex(village.q, village.r);
+    const problem = settleProblem(deps.data, {
+      cell,
+      terrain: terrain.get(hexKey(cell)),
+      home,
+      villages: villages.map((v) => hex(v.q, v.r)),
+      outposts,
+    });
+    if (problem) throw new RuleError(problem);
+    if (await outboundTo(client, world.id, cell.q, cell.r)) throw new RuleError('Settlers are already on their way there');
+
+    const settlers = deps.data.expansion.settlersNeeded;
+    let state: VillageState;
+    try {
+      state = sendAway(village.state, SETTLER, settlers, input.now);
+    } catch (error) {
+      if (error instanceof NotEnoughUnitsError) throw new RuleError(`Founding a village takes ${settlers} settlers at home`);
+      throw error;
+    }
+    const path = roadRoute(deps.data, terrain, home, cell, deps.data.units.units[SETTLER]!.speed, world.speed);
+    const travelMs = path.at(-1)!.atMs;
+    const arrivesAt = new Date(input.now.getTime() + travelMs);
+    const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
+    const { rows } = await client.query<{ display_name: string }>('SELECT display_name FROM accounts WHERE id = $1', [
+      village.ownerAccountId,
+    ]);
+    const expedition = await insertExpedition(client, {
+      worldId: world.id,
+      villageId: village.id,
+      q: cell.q,
+      r: cell.r,
+      name: input.name?.trim() || `${rows[0]?.display_name ?? 'New'}'s village ${owned + 1}`,
+      settlers,
+      path,
+      departsAt: input.now,
+      arrivesAt,
+      returnsAt: new Date(arrivesAt.getTime() + travelMs),
+    });
+    const payload: ExpeditionPayload = { expeditionId: expedition.id };
+    await scheduleEvent(client, world.id, arrivesAt, 'settlers_arrive', payload);
+    await notifyWorld(client, { worldId: world.id, type: 'expeditions' });
+    return { state, result: expedition };
+  });
+  return { village, expedition: result };
 }

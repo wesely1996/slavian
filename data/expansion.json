@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "_comment": "Founding villages: `settlersNeeded` settlers walk (at the settler's speed) to a settleable hex at most `maxDistance` from their village, at least `minVillageDistance` from every village and `minHolyCityDistance` from the Holy City, with no outpost on it. The new village starts with `startingResources`. Each village after the first pays grain upkeep: the n-th village founded pays (n - 1) x `adminUpkeepPerVillage` per hour. A garrison of `recommendedGarrison.base` + `perVillage` for each village after the first is suggested.",
+  "settlersNeeded": 3,
+  "maxDistance": 6,
+  "minVillageDistance": 3,
+  "minHolyCityDistance": 2,
+  "startingResources": {
+    "wood": 300,
+    "stone": 300,
+    "grain": 300,
+    "iron": 150
+  },
+  "adminUpkeepPerVillage": 3,
+  "recommendedGarrison": {
+    "base": 10,
+    "perVillage": 5
+  }
+}

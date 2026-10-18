@@ -14,6 +14,7 @@ const HORDE_COLOR := Color("#c8372d")
 const HORDE_PATH_COLOR := Color(0.78, 0.22, 0.18, 0.6)
 const RUINS_COLOR := Color("#6d655a")
 const CARAVAN_COLOR := Color("#c99a5b")
+const SETTLERS_COLOR := Color("#e8e2d0")
 
 @export var hex_size := 48.0
 
@@ -75,6 +76,15 @@ func _draw() -> void:
 			var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
 			draw_circle(pos, hex_size * 0.2, CARAVAN_COLOR)
 			draw_arc(pos, hex_size * 0.2, 0.0, TAU, 16, VILLAGE_OUTLINE_COLOR, 2.0)
+	for expedition in Game.expeditions:
+		var p := CaravanMath.progress(expedition, now)
+		if not p.is_empty():
+			var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+			var r := hex_size * 0.22
+			var tri := PackedVector2Array([pos + Vector2(0, -r), pos + Vector2(r, r * 0.8), pos + Vector2(-r, r * 0.8)])
+			draw_colored_polygon(tri, SETTLERS_COLOR)
+			tri.append(tri[0])
+			draw_polyline(tri, VILLAGE_OUTLINE_COLOR, 2.0)
 	for wave in WaveMath.visible_waves(Game.waves):
 		_draw_horde(wave, now)
 
@@ -98,7 +108,8 @@ func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
 
 func has_moving_hordes() -> bool:
 	return Game.waves.any(func(w: Dictionary) -> bool: return w.status == "marching") \
-		or Game.caravans.any(func(c: Dictionary) -> bool: return c.status != "done")
+		or Game.caravans.any(func(c: Dictionary) -> bool: return c.status != "done") \
+		or Game.expeditions.any(func(e: Dictionary) -> bool: return e.status in ["outbound", "returning"])
 
 
 func _draw_horde(wave: Dictionary, now: float) -> void:

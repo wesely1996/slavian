@@ -97,6 +97,7 @@ const unitSchema = z.object({
   building: z.string(),
   requiresLevel: z.number().int().positive(),
   cost: resourcesSchema,
+  costGrowthPerVillage: z.number().min(1).optional(),
   trainSeconds: z.number().positive(),
   upkeepPerHour: z.number().nonnegative(),
   speed: z.number().positive(),
@@ -210,7 +211,19 @@ const logisticsFileSchema = z.object({
   }),
 });
 
+const expansionFileSchema = z.object({
+  version: z.number().int(),
+  settlersNeeded: z.number().int().positive(),
+  maxDistance: z.number().int().positive(),
+  minVillageDistance: z.number().int().positive(),
+  minHolyCityDistance: z.number().int().nonnegative(),
+  startingResources: resourcesSchema,
+  adminUpkeepPerVillage: z.number().nonnegative(),
+  recommendedGarrison: z.object({ base: z.number().int().nonnegative(), perVillage: z.number().int().nonnegative() }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
 export type BattleData = z.infer<typeof battleFileSchema>;
 export type ScoutingData = z.infer<typeof scoutingFileSchema>;
@@ -231,6 +244,7 @@ export interface GameData {
   scouting: ScoutingData;
   battle: BattleData;
   logistics: LogisticsData;
+  expansion: ExpansionData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -244,12 +258,14 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     scouting: scoutingFileSchema.parse(read('scouting.json')),
     battle: battleFileSchema.parse(read('battle.json')),
     logistics: logisticsFileSchema.parse(read('logistics.json')),
+    expansion: expansionFileSchema.parse(read('expansion.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  if (data.units.units.settler?.building !== 'settlers_lodge') throw new Error('units.json needs a "settler" trained in the settlers_lodge');
   if (buildings.caravan_yard?.kind !== 'center') throw new Error('buildings.json needs a center building "caravan_yard"');
   if (buildings.outpost?.kind !== 'outpost' || !buildings.outpost.yields) {
     throw new Error('buildings.json needs an outpost building "outpost" with yields');

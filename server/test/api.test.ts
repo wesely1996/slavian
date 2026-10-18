@@ -489,6 +489,89 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await world()).vault).toMatchObject({ level: 2, upgradingTo: null, capacity: 4500 });
   });
 
+  it('sends settlers to found a second village, which pays upkeep and makes settlers dearer', async () => {
+    const mila = await guest('Mila');
+    const created = await call('POST', '/v1/worlds', mila.token, { name: 'Expansion', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, mila.token);
+    const home = started.body.villages[0];
+    const homeCell = hex(home.q, home.r);
+    const rich = () =>
+      db.query(
+        `UPDATE villages SET amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}', capacity = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`,
+        [home.id],
+      );
+    const found = (q: number, r: number, name?: string) =>
+      call('POST', `/v1/villages/${home.id}/found`, mila.token, { q, r, ...(name ? { name } : {}) });
+
+    const settleable = new Set(['plains', 'forest', 'hills']);
+    const site = (started.body.map.hexes as [number, number, string][]).find(
+      ([q, r, t]) => settleable.has(t) && hexDistance(hex(q, r), homeCell) === 4 && hexDistance(hex(q, r), hex(0, 0)) >= 3,
+    )!;
+    expect(site).toBeDefined();
+    expect((await found(site[0], site[1])).body.message).toMatch(/takes 3 settlers/);
+    expect((await found(home.q + 1, home.r)).body.message).toMatch(/apart/);
+
+    const lodge = await call('POST', `/v1/villages/${home.id}/build`, mila.token, { building: 'settlers_lodge' });
+    now = new Date(lodge.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    await rich();
+    const trained = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 3 });
+    expect(trained.status).toBe(200);
+    now = new Date(trained.body.village.training[0].completesAt);
+    await tick(db, now, scheduler);
+
+    const sent = await found(site[0], site[1], 'Vesna');
+    expect(sent.status).toBe(200);
+    expect(sent.body.expedition).toMatchObject({ q: site[0], r: site[1], name: 'Vesna', settlers: 3, status: 'outbound' });
+    expect(sent.body.village.away.settler).toBe(3);
+    expect((await found(site[0], site[1])).body.message).toMatch(/takes 3 settlers|already on their way/);
+
+    now = new Date(sent.body.expedition.arrivesAt);
+    await tick(db, now, scheduler);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body;
+    expect(world.villages).toHaveLength(2);
+    const second = world.villages.find((v: { name: string }) => v.name === 'Vesna');
+    expect(second).toMatchObject({ q: site[0], r: site[1], ownerAccountId: mila.accountId, adminUpkeep: scheduler.data.expansion.adminUpkeepPerVillage });
+    expect(second.resources.amounts).toEqual(scheduler.data.expansion.startingResources);
+    expect(world.villages.find((v: { id: number }) => v.id === home.id).away.settler ?? 0).toBe(0);
+    expect(world.expeditions[0]).toMatchObject({ status: 'founded', foundedVillageId: second.id });
+
+    // A second village makes the next settlers dearer.
+    await rich();
+    const before = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.villages.find((v: { id: number }) => v.id === home.id);
+    const dearer = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
+    const spentWood = before.resources.amounts.wood - dearer.body.village.resources.amounts.wood;
+    expect(spentWood).toBeGreaterThan(scheduler.data.units.units.settler!.cost.wood * 1.4);
+
+    // Settlers find their site taken: they come home.
+    now = new Date(dearer.body.village.training.at(-1).completesAt);
+    await tick(db, now, scheduler);
+    await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 2 });
+    now = new Date(now.getTime() + 3_600_000);
+    await tick(db, now, scheduler);
+    const other = (started.body.map.hexes as [number, number, string][]).find(
+      ([q, r, t]) =>
+        settleable.has(t) &&
+        hexDistance(hex(q, r), homeCell) >= 3 &&
+        hexDistance(hex(q, r), homeCell) <= 6 &&
+        hexDistance(hex(q, r), hex(site[0], site[1])) >= 4 &&
+        hexDistance(hex(q, r), hex(0, 0)) >= 3,
+    )!;
+    const doomed = await found(other[0], other[1]);
+    expect(doomed.status).toBe(200);
+    await db.query(`UPDATE villages SET q = $2, r = $3 WHERE id = $1`, [second.id, other[0], other[1] + 1]);
+    now = new Date(doomed.body.expedition.arrivesAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body;
+    expect(world.expeditions[0]).toMatchObject({ status: 'returning', failure: expect.stringMatching(/apart/) });
+    now = new Date(doomed.body.expedition.returnsAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body;
+    expect(world.villages.find((v: { id: number }) => v.id === home.id).away.settler ?? 0).toBe(0);
+    expect(world.expeditions[0].status).toBe('done');
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

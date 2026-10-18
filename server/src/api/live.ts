@@ -11,6 +11,7 @@
 //                   { "type": "battles", "worldId", "battles", "serverTime" }
 //                   { "type": "raids", "worldId", "raids", "serverTime" }
 //                   { "type": "caravans", "worldId", "caravans", "vault", "serverTime" }
+//                   { "type": "expeditions", "worldId", "expeditions", "serverTime" }
 //                   { "type": "error", "message" }
 import type { WebSocket } from 'ws';
 import { z } from 'zod';
@@ -20,7 +21,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, isMember } from '../db/worlds.js';
 import type { GameData } from '../data/index.js';
-import { battlesView, logisticsView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
+import { battlesView, expeditionsView, logisticsView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
 
 const clientMessage = z.object({ type: z.literal('subscribe'), worldId: z.number().int().positive() });
 const RECONNECT_MS = 2000;
@@ -108,6 +109,9 @@ export class LiveHub {
         }
         if (event.type === 'battles') {
           return { type: 'battles', worldId: event.worldId, battles: await battlesView(client, event.worldId), serverTime };
+        }
+        if (event.type === 'expeditions') {
+          return { type: 'expeditions', worldId: event.worldId, expeditions: await expeditionsView(client, event.worldId), serverTime };
         }
         if (event.type === 'caravans') {
           return { type: 'caravans', worldId: event.worldId, ...(await logisticsView(client, this.data, event.worldId)), serverTime };

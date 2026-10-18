@@ -51,7 +51,7 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 |---|---|---|
 | `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
 | `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename. |
-| `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle and logistics settings). |
+| `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle, logistics and expansion settings). |
 | `POST` | `/v1/worlds` | Create a world (lobby) with an invite code. |
 | `POST` | `/v1/worlds/join` | Join by invite code. |
 | `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, recent battles, map. |
@@ -59,13 +59,14 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/villages/:id/build` | Build on a plot: `{ plot }` upgrades what stands there (fields `f0`…`f11`, center slots `c0`…`c11`, outposts `o<q>,<r>`), `{ plot, building }` constructs in an empty slot. `{ building }` alone picks the plot. |
 | `POST` | `/v1/villages/:id/outposts` | Claim the resource hex `{ q, r }` (within 2 hexes) and start building an outpost there. |
 | `POST` | `/v1/villages/:id/outposts/abandon` | Give up the outpost on `{ q, r }`. |
+| `POST` | `/v1/villages/:id/found` | Send 3 settlers to found a village on `{ q, r, name? }`: settleable, within 6 hexes, at least 3 from every village and 2 from the Holy City. |
 | `POST` | `/v1/villages/:id/caravans` | Send `{ destinationVillageId, load: { wood, stone, grain, iron } }` by caravan; `destinationVillageId: null` is the Holy City vault. Needs a Caravan Yard (1 caravan per level, 500 each). |
 | `POST` | `/v1/villages/:id/caravans/fetch` | Send empty caravans to bring `{ load }` back from the vault. |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) updates. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) updates. |
 
 ## Client
 

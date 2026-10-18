@@ -188,8 +188,38 @@ static func garrison_at(village: Dictionary, at_unix: float) -> Dictionary:
 	return units
 
 
-static func unit_cost(def: Dictionary, count: int) -> Dictionary:
+## What `count` units cost an owner of `villages_owned` villages: settlers
+## get dearer with every village (server unitCost).
+static func unit_cost(def: Dictionary, count: int, villages_owned := 1) -> Dictionary:
+	var factor := pow(float(def.get("costGrowthPerVillage", 1.0)), maxi(0, villages_owned - 1))
 	var cost := {}
 	for kind in Ledger.KINDS:
-		cost[kind] = int(def.cost[kind]) * count
+		cost[kind] = roundi(float(def.cost[kind]) * factor) * count
 	return cost
+
+
+# --- Founding villages (server/src/sim/expansion.ts).
+
+## Why a village can't be founded on `cell` ("" when it can).
+static func settle_problem(data: Dictionary, cell: Vector2i, terrain: String, home: Vector2i, villages: Array, outpost_here: bool) -> String:
+	var rules: Dictionary = data.expansion
+	var def: Dictionary = data.terrain.terrain.get(terrain, {})
+	if def.is_empty():
+		return "That hex is not on the map."
+	if not def.settleable:
+		return "Villages can't be founded on %s." % def.name
+	if HexMath.distance(cell, home) > int(rules.maxDistance):
+		return "Settlers walk at most %d hexes from their village." % int(rules.maxDistance)
+	if HexMath.distance(cell, Vector2i.ZERO) < int(rules.minHolyCityDistance):
+		return "Too close to the Holy City."
+	for other in villages:
+		if HexMath.distance(other, cell) < int(rules.minVillageDistance):
+			return "Villages stand at least %d hexes apart." % int(rules.minVillageDistance)
+	if outpost_here:
+		return "An outpost stands there."
+	return ""
+
+
+static func recommended_garrison(data: Dictionary, villages_owned: int) -> int:
+	var g: Dictionary = data.expansion.recommendedGarrison
+	return int(g.base) + int(g.perVillage) * maxi(0, villages_owned - 1)

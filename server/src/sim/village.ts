@@ -56,6 +56,9 @@ export interface VillageState {
   readonly stance: Stance;
   // A horde is fighting at the gates: outposts stop producing.
   readonly besieged: boolean;
+  // Grain per hour (at world speed 1) every village after an owner's
+  // first pays for its administration.
+  readonly adminUpkeep: number;
 }
 
 const MS_PER_SECOND = 1000;
@@ -175,11 +178,12 @@ export function unitsFed(state: Pick<VillageState, 'garrison' | 'training' | 'aw
 // feeds. Grain can go negative; the ledger floors amounts at zero.
 export function villageRates(
   data: GameData,
-  state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away'>,
+  state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away' | 'adminUpkeep'>,
   worldSpeed: number,
 ): Resources {
   const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged);
-  return { ...rates, grain: rates.grain - upkeepPerHour(data, unitsFed(state), worldSpeed) };
+  const upkeep = upkeepPerHour(data, unitsFed(state), worldSpeed) + state.adminUpkeep * worldSpeed;
+  return { ...rates, grain: rates.grain - upkeep };
 }
 
 export function capacity(data: GameData, levels: VillageState['levels']): Resources {
@@ -189,10 +193,17 @@ export function capacity(data: GameData, levels: VillageState['levels']): Resour
   return mapResources(() => cap);
 }
 
-export function newVillage(data: GameData, at: Date, worldSpeed: number): VillageState {
+// A fresh village. Founded ones (after the first) bring their own
+// starting stores and pay administration upkeep.
+export function newVillage(
+  data: GameData,
+  at: Date,
+  worldSpeed: number,
+  founded: { startingResources: Resources; adminUpkeep: number } | null = null,
+): VillageState {
   const plots = initialPlots(data);
   const levels = levelsOf(plots);
-  return {
+  const state: Omit<VillageState, 'ledger'> = {
     plots,
     levels,
     queue: [],
@@ -201,9 +212,13 @@ export function newVillage(data: GameData, at: Date, worldSpeed: number): Villag
     away: {},
     stance: 'balanced',
     besieged: false,
+    adminUpkeep: founded?.adminUpkeep ?? 0,
+  };
+  return {
+    ...state,
     ledger: {
-      amounts: { ...data.buildings.village.startingResources },
-      ratesPerHour: productionPerHour(data, plots, worldSpeed),
+      amounts: { ...(founded?.startingResources ?? data.buildings.village.startingResources) },
+      ratesPerHour: villageRates(data, state, worldSpeed),
       capacity: capacity(data, levels),
       settledAt: at,
     },
@@ -404,6 +419,7 @@ export function queueTraining(
   count: number,
   at: Date,
   worldSpeed: number,
+  villagesOwned = 1,
 ): { state: VillageState; batch: TrainingBatch } {
   const def = data.units.units[unit];
   if (!def) throw new RuleError(`Unknown unit "${unit}"`);
@@ -416,7 +432,7 @@ export function queueTraining(
   }
   if (state.training.length >= data.units.trainingQueueLimit) throw new RuleError('Training queue is full');
 
-  const cost = mapResources((kind) => def.cost[kind] * count);
+  const cost = unitCost(data, unit, count, villagesOwned);
   const paid = spend(state.ledger, at, cost);
   const last = state.training.at(-1);
   const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
@@ -424,6 +440,15 @@ export function queueTraining(
   const training = [...state.training, batch];
   const ledger = withRates(paid, at, villageRates(data, { ...state, training }, worldSpeed));
   return { state: { ...state, ledger, training }, batch };
+}
+
+// What `count` units cost an owner of `villagesOwned` villages: settlers
+// get dearer with every village.
+export function unitCost(data: GameData, unit: string, count: number, villagesOwned = 1): Resources {
+  const def = data.units.units[unit];
+  if (!def) throw new RuleError(`Unknown unit "${unit}"`);
+  const factor = (def.costGrowthPerVillage ?? 1) ** Math.max(0, villagesOwned - 1);
+  return mapResources((kind) => Math.round(def.cost[kind] * factor) * count);
 }
 
 // Moves units trained by `at` into the garrison. Idempotent.
