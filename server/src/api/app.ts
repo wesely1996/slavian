@@ -4,7 +4,7 @@ import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
-import { recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
+import { buildFortCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -40,6 +40,7 @@ import {
   villageView,
   worldSummary,
   worldView,
+  fortView,
 } from './views.js';
 
 export interface AppDeps {
@@ -97,10 +98,13 @@ const prefsBody = z.object({
   digestHour: z.number().int().min(0).max(23).optional(),
 });
 const deviceBody = z.object({ token: z.string().min(10).max(4096), platform: z.enum(['android', 'ios', 'web']) });
+// A village to go to, or (orders 'hold') a hex to hold.
 const armyBody = z.object({
-  targetVillageId: z.number().int().positive(),
+  targetVillageId: z.number().int().positive().nullable().default(null),
+  target: hexBody.optional(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
-  orders: z.enum(['support', 'reinforce', 'harass']),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold']),
+  withHero: z.boolean().optional(),
 });
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
@@ -167,6 +171,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     heroes: scheduler.data.heroes,
     orders: scheduler.data.orders,
     armies: scheduler.data.armies,
+    field: scheduler.data.field,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -379,6 +384,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const army = await recallArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/forts', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = hexBody.parse(request.body);
+    const fort = await buildFortCommand(db, scheduler, { accountId: account.id, villageId: id, cell: body, now: clock() });
+    return { fort: fortView(fort), serverTime: clock().toISOString() };
   });
 
   app.put('/v1/villages/:id/reinforce', async (request) => {

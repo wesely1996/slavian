@@ -44,6 +44,7 @@ export async function moveHeroCommand(
   return heroCommand(db, deps, input, async ({ client, world, hero }) => {
     if (hero.status === 'wounded') throw new RuleError(`${hero.name} is wounded`);
     if (hero.status === 'traveling') throw new RuleError(`${hero.name} is already on the road`);
+    if (hero.status === 'with_army') throw new RuleError(`${hero.name} is leading an army`);
     if (hero.villageId === input.villageId) throw new RuleError(`${hero.name} is already there`);
     const destination = await loadVillage(client, input.villageId).catch(() => null);
     if (!destination || destination.worldId !== world.id || destination.ownerAccountId !== input.accountId) {

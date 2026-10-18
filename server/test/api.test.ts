@@ -927,6 +927,117 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(['returning', 'done']).toContain(after.status);
   });
 
+  it('holds a hex: field battles with a fort and a hero, and a horde that breaks through', async () => {
+    const mira = await guest('Mira');
+    const created = await call('POST', '/v1/worlds', mira.token, { name: 'Field', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, mira.token);
+    const home = started.body.villages[0];
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
+    const roundMs = (15 * 60_000) / 10;
+    const terrain = new Map<string, TerrainId>(started.body.map.hexes.map(([q, r, t]: [number, number, TerrainId]) => [`${q},${r}`, t]));
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 400, "archer": 200}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
+
+    // The first horde sets out; Mira picks a hex on its road two steps short of her village.
+    const first = started.body.waves[0];
+    now = new Date(first.spawnAt);
+    await tick(db, now, scheduler);
+    const marching = (await world()).waves.find((x: { id: number }) => x.id === first.id);
+    const [q, r, atMs] = marching.path.at(-3) as [number, number, number];
+    const meetAt = new Date(new Date(marching.spawnAt).getTime() + atMs);
+
+    // A fort first: not on the village, not too far, then on the hex.
+    const fort = (body: object) => call('POST', `/v1/villages/${home.id}/forts`, mira.token, body);
+    expect((await fort({ q: home.q, r: home.r })).body.message).toMatch(/within/);
+    expect((await fort({ q: home.q + 9, r: home.r })).body.message).toMatch(/within/);
+    const built = await fort({ q, r });
+    expect(built.body.fort).toMatchObject({ q, r, status: 'building' });
+    expect((await fort({ q, r })).body.message).toMatch(/already/);
+    const cost = scheduler.data.field.fort.cost;
+    const village = (await world()).villages[0];
+    expect(village.resources.amounts.stone).toBeLessThanOrEqual(5000 - cost.stone + 1);
+
+    // The hold army, led by Mira's hero.
+    const send = (body: object) => call('POST', `/v1/villages/${home.id}/armies`, mira.token, body);
+    expect((await send({ units: { spearman: 1 }, orders: 'hold' })).body.message).toMatch(/which hex/);
+    const held = await send({ target: { q, r }, units: { spearman: 300, archer: 150 }, orders: 'hold', withHero: true });
+    expect(held.body.army).toMatchObject({ status: 'marching', orders: 'hold', target: [q, r], targetVillageId: null });
+    let w = await world();
+    expect(w.heroes[0]).toMatchObject({ status: 'with_army' });
+    // Let the army dig in well before the horde (time for an ambush) and the fort finish.
+    const early = new Date(now.getTime() + 1);
+    await db.query(`UPDATE armies SET arrives_at = $2 WHERE id = $1`, [held.body.army.id, early]);
+    await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type IN ('army_arrive', 'fort_complete') AND status = 'pending' AND world_id = $1`, [worldId, early]);
+    now = early;
+    await tick(db, now, scheduler);
+    w = await world();
+    expect(w.armies[0].status).toBe('stationed');
+    expect(w.forts[0]).toMatchObject({ q, r, status: 'standing' });
+    const xpBefore = w.heroes[0].xp;
+
+    now = meetAt;
+    await tick(db, now, scheduler);
+    w = await world();
+    let battle = w.battles[0];
+    const cover = scheduler.data.field.ambush.terrain.includes(terrain.get(`${q},${r}`)!);
+    expect(battle).toMatchObject({ villageId: null, q, r, status: 'ongoing', setup: { fort: true, ambush: cover } });
+    expect(battle.defenderInitial).toEqual({ spearman: 300, archer: 150 });
+    expect(w.waves.find((x: { id: number }) => x.id === first.id).status).toBe('battling');
+    for (let i = 0; i < 12 && battle.status === 'ongoing'; i++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+      battle = (await world()).battles.find((x: { id: number }) => x.id === battle.id);
+    }
+    expect(battle.status).toBe('defended');
+    w = await world();
+    expect(w.waves.some((x: { id: number }) => x.id === first.id)).toBe(false);
+    expect(w.armies[0].status).toBe('stationed');
+    expect(w.heroes[0].status).toBe('with_army');
+    expect(w.heroes[0].level > 1 || w.heroes[0].xp > xpBefore).toBe(true);
+    // The village never saw a battle.
+    expect(w.battles.filter((x: { villageId: number | null }) => x.villageId !== null)).toEqual([]);
+
+    // Called home, the army brings the hero back.
+    const recalled = await call('POST', `/v1/armies/${held.body.army.id}/recall`, mira.token);
+    expect(recalled.body.army.status).toBe('returning');
+    now = new Date(recalled.body.army.returnsAt);
+    await tick(db, now, scheduler);
+    w = await world();
+    expect(w.heroes[0]).toMatchObject({ status: 'home', villageId: home.id });
+    expect(w.villages[0].away.spearman ?? 0).toBe(0);
+
+    // The next horde meets a lone spearman, breaks through, and reaches the village late.
+    const second = w.waves.find((x: { status: string }) => x.status === 'scheduled');
+    now = new Date(second.spawnAt);
+    await tick(db, now, scheduler);
+    const next = (await world()).waves.find((x: { id: number }) => x.id === second.id);
+    const [q2, r2, atMs2] = next.path.at(-3) as [number, number, number];
+    const lone = await send({ target: { q: q2, r: r2 }, units: { spearman: 1 }, orders: 'hold' });
+    await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type = 'army_arrive' AND status = 'pending' AND world_id = $1`, [worldId, new Date(now.getTime() + 1)]);
+    now = new Date(new Date(next.spawnAt).getTime() + atMs2);
+    await tick(db, now, scheduler);
+    let fight = (await world()).battles.find((x: { q: number; r: number; status: string }) => x.q === q2 && x.r === r2 && x.status === 'ongoing');
+    expect(fight).toBeTruthy();
+    for (let i = 0; i < 12 && fight.status === 'ongoing'; i++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+      fight = (await world()).battles.find((x: { id: number }) => x.id === fight.id);
+    }
+    expect(fight.status).toBe('raided');
+    w = await world();
+    const late = w.waves.find((x: { id: number }) => x.id === second.id);
+    expect(late.status).toBe('marching');
+    expect(new Date(late.arrivesAt).getTime()).toBe(new Date(next.arrivesAt).getTime() + (now.getTime() - (new Date(next.spawnAt).getTime() + atMs2)));
+    expect(['returning', 'done']).toContain(w.armies.find((x: { id: number }) => x.id === lone.body.army.id).status);
+    // The old arrival time passes quietly; the new one starts the village battle.
+    now = new Date(next.arrivesAt);
+    await tick(db, now, scheduler);
+    expect((await world()).battles.some((x: { villageId: number | null }) => x.villageId === home.id)).toBe(false);
+    now = new Date(late.arrivesAt);
+    await tick(db, now, scheduler);
+    expect((await world()).battles.some((x: { villageId: number | null }) => x.villageId === home.id)).toBe(true);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

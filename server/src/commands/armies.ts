@@ -9,6 +9,9 @@ import { dispatchArmy, sendHome } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
+import type { Hex } from '../sim/hex.js';
+import type { Fort } from '../db/forts.js';
+import { buildFort } from '../scheduler/field.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [villageId]);
@@ -16,21 +19,48 @@ async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   return rows[0].world_id;
 }
 
-// Sends troops from the caller's village to another village.
+// Sends troops from the caller's village to another village, or to hold a hex.
 export async function sendArmyCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { accountId: number; villageId: number; targetVillageId: number; units: Record<string, number>; orders: ArmyOrders; now: Date },
+  input: {
+    accountId: number;
+    villageId: number;
+    targetVillageId: number | null;
+    target?: Hex | undefined;
+    units: Record<string, number>;
+    orders: ArmyOrders;
+    withHero?: boolean | undefined;
+    now: Date;
+  },
 ): Promise<Army> {
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client) => {
     const home = await loadVillage(client, input.villageId);
     if (home.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
-    return dispatchArmy(client, deps.data, await getWorld(client, worldId), { homeVillageId: home.id, ...input, at: input.now });
+    return dispatchArmy(client, deps.data, await getWorld(client, worldId), {
+      homeVillageId: home.id,
+      targetVillageId: input.targetVillageId,
+      targetHex: input.target,
+      units: input.units,
+      orders: input.orders,
+      withHero: input.withHero,
+      at: input.now,
+    });
   });
 }
 
-// Calls a supporting army home (not in the middle of a battle).
+// Builds a fort near the caller's village.
+export async function buildFortCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; villageId: number; cell: Hex; now: Date }): Promise<Fort> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const village = await loadVillage(client, input.villageId);
+    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now);
+  });
+}
+
+// Calls an army standing guard or holding a hex home (not in the middle of a battle).
 export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM armies WHERE id = $1', [input.armyId]);
   if (!rows[0]) throw new NotFoundError('No such army');
@@ -39,7 +69,7 @@ export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { ac
     if (army.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your army');
     if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
     if (army.status !== 'stationed') throw new RuleError('Only armies standing guard can be called home');
-    const back = await sendHome(client, await getWorld(client, army.worldId), army, input.now);
+    const back = await sendHome(client, await getWorld(client, army.worldId), army, input.now, deps.data);
     await notifyWorld(client, { worldId: army.worldId, type: 'armies' });
     return back;
   });

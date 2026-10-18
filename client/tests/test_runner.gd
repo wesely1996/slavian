@@ -29,6 +29,7 @@ func _initialize() -> void:
 	_test_orders()
 	_test_inbox()
 	_test_armies()
+	_test_field()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -341,3 +342,34 @@ func _test_armies() -> void:
 	var battle := {"rounds": [{"joined": [{"villageId": 3, "orders": "reinforce", "bonus": 0.18}]}, {}]}
 	var names := func(id: Variant) -> String: return "Ola's village" if int(id) == 3 else "?"
 	_check(ArmyText.reinforcements(battle, names) == "Ola's village (+18% pincer)", "reinforcements: %s" % ArmyText.reinforcements(battle, names))
+
+
+func _test_field() -> void:
+	var data := {
+		"terrain": {"terrain": {"plains": {"moveCost": 1}, "forest": {"moveCost": 2}, "mountain": {"moveCost": null}}},
+		"field": {
+			"ambush": {"terrain": ["forest"], "prepMinutes": 60, "bonus": 0.3},
+			"choke": {"minBlockedNeighbors": 3, "attackerFactor": 0.7, "holdTheLineDefense": 0.3},
+			"fort": {"range": 4, "defenseBonus": 0.3},
+		},
+	}
+	var terrain := {Vector2i.ZERO: "forest"}
+	for i in 6:
+		terrain[HexMath.neighbors(Vector2i.ZERO)[i]] = "mountain" if i < 3 else "plains"
+	_check(FieldRules.is_choke_point(data, terrain, Vector2i.ZERO), "choke point between three mountains")
+	var open := {}
+	for cell in HexMath.spiral(Vector2i.ZERO, 1):
+		open[cell] = "plains"
+	_check(not FieldRules.is_choke_point(data, open, Vector2i.ZERO), "open plains are no choke point")
+	var lines := FieldRules.ground(data, terrain, Vector2i.ZERO, {"status": "standing"}, 10.0)
+	_check(lines.size() == 3 and lines[0].begins_with("Ambush ground: +30%") and lines[2] == "Fort: +30% defense.", "ground: %s" % lines)
+	var village := {"q": 0, "r": 3, "name": "Vesna"}
+	_check(FieldRules.fort_problem(data, village, Vector2i(0, 3), "plains", false).begins_with("Forts go within 4"), "no fort on the village")
+	_check(FieldRules.fort_problem(data, village, Vector2i.ZERO, "mountain", false) == "No fort can stand here.", "no fort on a mountain")
+	_check(FieldRules.fort_problem(data, village, Vector2i.ZERO, "forest", false) == "", "fort in the forest")
+	var hold := {"orders": "hold", "status": "stationed", "targetVillageId": null, "target": [2, -1]}
+	_check(ArmyText.held_hex(hold) == Vector2i(2, -1), "held hex")
+	_check(ArmyText.status(hold, ArmyText.target_name(hold, func(_id: Variant) -> String: return "?"), 0.0) == "Holding (2, -1)", "hold status")
+	var battle := {"villageId": null, "q": 2, "r": -1, "status": "raided", "rounds": [], "setup": {"ambush": true, "fort": true}}
+	_check(BattleText.setup_text(battle) == "Ambush, Fort", "setup text: %s" % BattleText.setup_text(battle))
+	_check(BattleText.outcome(battle, "(2, -1)").begins_with("Our army fell back from (2, -1)"), "field battle lost")

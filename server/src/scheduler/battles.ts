@@ -30,6 +30,7 @@ import { heroAfterBattle } from './heroes.js';
 import { armyLosses, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
+import { fieldRound } from './field.js';
 
 export const battlePayload = z.object({ battleId: z.number().int() });
 export type BattlePayload = z.infer<typeof battlePayload>;
@@ -52,6 +53,8 @@ export async function startBattle(
     worldId: world.id,
     waveId: wave.id,
     villageId,
+    q: village.q,
+    r: village.r,
     attackerStance: wave.stance,
     attackerInitial: wave.composition,
     defenderInitial: state.garrison,
@@ -74,6 +77,10 @@ export const battleHandlers: HandlerRegistry = {
   async battle_round({ client, data, world }, event) {
     const battle = await loadBattle(client, battlePayload.parse(event.payload).battleId);
     if (battle.status !== 'ongoing') return;
+    if (battle.villageId === null) {
+      await fieldRound(client, data, world, battle, event.dueAt);
+      return;
+    }
     const wave = await loadWave(client, battle.waveId);
     const village = await loadVillage(client, battle.villageId);
     const at = event.dueAt;
@@ -146,7 +153,7 @@ export const battleHandlers: HandlerRegistry = {
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard and reinforcements go home.
     for (const army of armies) {
-      if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at);
+      if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
       else if (outcome !== 'ongoing') {
         await saveArmy(client, total(army.units) ? { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 } : { ...army, status: 'done' });
       } else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });

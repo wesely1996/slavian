@@ -28,8 +28,20 @@ static func outcome(battle: Dictionary, village_name: String) -> String:
 		"defended":
 			return "Defended %s: %s." % [village_name, tally]
 		"raided":
+			if battle.has("q") and battle.get("villageId") == null:
+				return "Our army fell back from %s: %s. The horde marched on." % [village_name, tally]
 			return "%s was raided: %s. Taken: %s." % [village_name, tally, loot_text(battle.loot)]
 	return "Battle at %s, round %d: %s." % [village_name, battle.round, tally]
+
+
+## "Ambush, fort" — what the ground gave a field battle's holders.
+static func setup_text(battle: Dictionary) -> String:
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	var parts := PackedStringArray()
+	for key in ["ambush", "choke", "fort"]:
+		if setup.get(key, false):
+			parts.append({"ambush": "ambush", "choke": "choke point", "fort": "fort"}[key])
+	return ", ".join(parts).capitalize() if not parts.is_empty() else ""
 
 
 static func loot_text(loot: Variant) -> String:

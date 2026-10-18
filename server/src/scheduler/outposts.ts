@@ -50,10 +50,11 @@ async function scheduleRaids(
   }
 }
 
-// A horde has just set out: plan raids on every standing outpost near its route.
-export async function planRaids(client: DbClient, data: GameData, world: World, waveId: number): Promise<void> {
+// A horde has just set out (or set out again `fromMs` into its march): plan
+// raids on every standing outpost near the rest of its route.
+export async function planRaids(client: DbClient, data: GameData, world: World, waveId: number, fromMs = 0): Promise<void> {
   const wave = await loadWave(client, waveId);
-  await scheduleRaids(client, data, world, wave, standingOutposts(await listVillages(client, world.id)), 0);
+  await scheduleRaids(client, data, world, wave, standingOutposts(await listVillages(client, world.id)), fromMs);
 }
 
 // An outpost has just been (re)built: hordes still on the march may pass it.

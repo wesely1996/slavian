@@ -14,6 +14,8 @@ export interface Hero extends HeroState {
   departsAt: Date | null;
   arrivesAt: Date | null;
   woundedUntil: Date | null;
+  // Leading this army (status 'with_army').
+  armyId: number | null;
 }
 
 interface HeroRow {
@@ -32,6 +34,7 @@ interface HeroRow {
   departs_at: Date | null;
   arrives_at: Date | null;
   wounded_until: Date | null;
+  army_id: number | null;
 }
 
 function fromRow(row: HeroRow): Hero {
@@ -51,6 +54,7 @@ function fromRow(row: HeroRow): Hero {
     departsAt: row.departs_at,
     arrivesAt: row.arrives_at,
     woundedUntil: row.wounded_until,
+    armyId: row.army_id,
   };
 }
 
@@ -89,6 +93,11 @@ export async function heroAt(client: DbClient, villageId: number): Promise<Hero 
   return rows[0] ? fromRow(rows[0]) : null;
 }
 
+export async function heroWithArmy(client: DbClient, armyId: number): Promise<Hero | null> {
+  const { rows } = await client.query<HeroRow>(`SELECT * FROM heroes WHERE army_id = $1 AND status = 'with_army'`, [armyId]);
+  return rows[0] ? fromRow(rows[0]) : null;
+}
+
 export async function listHeroes(client: DbClient, worldId: number): Promise<Hero[]> {
   const { rows } = await client.query<HeroRow>('SELECT * FROM heroes WHERE world_id = $1 ORDER BY account_id', [worldId]);
   return rows.map(fromRow);
@@ -97,7 +106,7 @@ export async function listHeroes(client: DbClient, worldId: number): Promise<Her
 export async function saveHero(client: DbClient, hero: Hero): Promise<void> {
   await client.query(
     `UPDATE heroes SET name = $3, status = $4, village_id = $5, level = $6, xp = $7, skill_points = $8, skills = $9,
-       gear = $10, inventory = $11, path = $12, departs_at = $13, arrives_at = $14, wounded_until = $15
+       gear = $10, inventory = $11, path = $12, departs_at = $13, arrives_at = $14, wounded_until = $15, army_id = $16
      WHERE world_id = $1 AND account_id = $2`,
     [
       hero.worldId,
@@ -115,6 +124,7 @@ export async function saveHero(client: DbClient, hero: Hero): Promise<void> {
       hero.departsAt,
       hero.arrivesAt,
       hero.woundedUntil,
+      hero.armyId,
     ],
   );
 }
