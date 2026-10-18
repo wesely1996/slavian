@@ -54,6 +54,21 @@ jobs:
         env:
           TEST_DATABASE_URL: postgres://slavian:slavian@localhost:5432/slavian_test
 
+  server-image:
+    name: Server image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start server + database
+        run: docker compose -f ops/docker-compose.yml up -d --build --wait --wait-timeout 180
+      - name: Smoke test
+        run: |
+          curl -fsS http://localhost:8080/health
+          curl -fsS -X POST -H 'content-type: application/json' -d '{"displayName":"CI"}' http://localhost:8080/v1/auth/guest
+      - name: Server logs
+        if: always()
+        run: docker compose -f ops/docker-compose.yml logs server
+
   client:
     name: Client tests
     runs-on: ubuntu-latest

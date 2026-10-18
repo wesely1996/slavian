@@ -1,6 +1,7 @@
-# Local development database.
-#   docker compose -f ops/docker-compose.yml up -d
-#   DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian
+# Runs the game server with its database.
+#   docker compose -f ops/docker-compose.yml up -d --build
+# The server listens on port 8080; point the app at http://<this machine's IP>:8080.
+# For development without the server container: docker compose -f ops/docker-compose.yml up -d postgres
 services:
   postgres:
     image: postgres:16
@@ -12,6 +13,25 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "slavian"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://slavian:slavian@postgres:5432/slavian
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata:

@@ -4,6 +4,7 @@ extends SceneTree
 ##   godot --headless --path client --script res://tests/test_runner.gd
 
 const VECTORS_PATH := "../data/fixtures/hex-vectors.json"
+const RESOURCE_VECTORS_PATH := "../data/fixtures/resource-vectors.json"
 
 var _failures := 0
 var _checks := 0
@@ -12,7 +13,11 @@ var _checks := 0
 func _initialize() -> void:
 	_test_hex_vectors()
 	_test_hex_round_trip()
-	_test_map_generator()
+	_test_resource_vectors()
+	_test_time_util()
+	_test_rules()
+	_test_everything_loads("res://scripts")
+	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -59,29 +64,38 @@ func _test_hex_round_trip() -> void:
 		_check(HexMath.from_pixel(HexMath.to_pixel(cell, 37.0), 37.0) == cell, "pixel round trip %s" % cell)
 
 
-func _test_map_generator() -> void:
-	for players in range(1, 7):
-		var map := MapGenerator.generate(42, players)
-		var radius := MapGenerator.radius_for(players)
-		_check(map.terrain.size() == HexMath.spiral(Vector2i.ZERO, radius).size(), "map %dp covers radius %d" % [players, radius])
-		_check(map.terrain[Vector2i.ZERO] == Terrain.Type.HOLY_CITY, "map %dp has the Holy City at the centre" % players)
-		_check(map.start_sites.size() == players, "map %dp has one start per player" % players)
-		var unique := {}
-		for site in map.start_sites:
-			unique[site] = true
-			_check(HexMath.distance(site, Vector2i.ZERO) == MapGenerator.START_RING, "start %s on ring 2" % site)
-			_check(map.terrain[site] in [Terrain.Type.PLAINS, Terrain.Type.FOREST, Terrain.Type.HILLS], "start %s settleable" % site)
-		_check(unique.size() == players, "map %dp starts are distinct" % players)
-		# Every edge hex of an inactive front is ocean; active fronts have spawn terrain.
-		for cell in HexMath.ring(Vector2i.ZERO, radius):
-			var front := MapGenerator.front_of(cell)
-			var is_ocean := map.terrain[cell] == Terrain.Type.OCEAN
-			_check(is_ocean == (front not in map.active_fronts), "map %dp edge %s matches front activity" % [players, cell])
+func _test_resource_vectors() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join(RESOURCE_VECTORS_PATH)
+	var vectors: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	for case in vectors.cases:
+		var amounts := Ledger.amounts_at(case.ledger, TimeUtil.parse_iso(case.at))
+		for kind in case.expected:
+			_check(absf(amounts[kind] - case.expected[kind]) < 1e-6, "%s: %s = %s, got %s" % [case.name, kind, case.expected[kind], amounts[kind]])
 
-	_check(MapGenerator.active_fronts_for(1) == [MapGenerator.Front.NORTH, MapGenerator.Front.SOUTH], "solo fronts are N+S")
-	_check(MapGenerator.active_fronts_for(2).size() == 3 and MapGenerator.Front.EAST in MapGenerator.active_fronts_for(2), "2 players add East")
-	_check(MapGenerator.active_fronts_for(3).size() == 4, "3+ players face all four fronts")
 
-	var a := MapGenerator.generate(7, 4)
-	var b := MapGenerator.generate(7, 4)
-	_check(a.terrain == b.terrain, "generation is deterministic for a seed")
+func _test_time_util() -> void:
+	_check(TimeUtil.parse_iso("1970-01-01T00:00:00.000Z") == 0.0, "epoch parses to 0")
+	_check(absf(TimeUtil.parse_iso("2026-10-18T11:43:21.456Z") - 1792323801.456) < 1e-3, "ISO with millis parses")
+	_check(TimeUtil.format_duration(45) == "45s", "45s")
+	_check(TimeUtil.format_duration(125) == "2m 05s", "2m 05s")
+	_check(TimeUtil.format_duration(3 * 3600 + 20 * 60) == "3h 20m", "3h 20m")
+	_check(TimeUtil.format_duration(-5) == "0s", "negative clamps to 0s")
+
+
+func _test_rules() -> void:
+	var def := {"cost": {"wood": 40, "stone": 60, "grain": 30, "iron": 20}, "costGrowth": 1.6, "buildSeconds": 90, "timeGrowth": 1.55}
+	_check(Rules.level_cost(def, 1) == {"wood": 40, "stone": 60, "grain": 30, "iron": 20}, "level 1 costs base")
+	_check(Rules.level_cost(def, 2).wood == 64, "level 2 cost grows")
+	_check(is_equal_approx(Rules.build_seconds(def, 1, 10.0), 9.0), "world speed divides build time")
+	var village := {"levels": {"farm": 2}, "queue": [{"building": "farm", "targetLevel": 3}, {"building": "farm", "targetLevel": 4}]}
+	_check(Rules.planned_level(village, "farm") == 4, "planned level counts the queue")
+	_check(Rules.planned_level(village, "quarry") == 0, "unbuilt building is level 0")
+
+
+## Catches parse errors in scripts and scenes the other tests don't touch.
+func _test_everything_loads(dir_path: String) -> void:
+	for file in DirAccess.get_files_at(dir_path):
+		if file.ends_with(".gd") or file.ends_with(".tscn"):
+			_check(load(dir_path.path_join(file)) != null, "%s loads" % dir_path.path_join(file))
+	for sub in DirAccess.get_directories_at(dir_path):
+		_test_everything_loads(dir_path.path_join(sub))

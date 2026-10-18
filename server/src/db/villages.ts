@@ -1,10 +1,12 @@
 import type { Resources } from '../sim/resources.js';
 import type { QueuedBuild, VillageState } from '../sim/village.js';
+import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
 
 export interface Village {
   id: number;
   worldId: number;
+  ownerAccountId: number | null;
   name: string;
   q: number;
   r: number;
@@ -14,6 +16,7 @@ export interface Village {
 interface VillageRow {
   id: number;
   world_id: number;
+  owner_account_id: number | null;
   name: string;
   q: number;
   r: number;
@@ -35,6 +38,7 @@ function fromRow(row: VillageRow): Village {
   return {
     id: row.id,
     worldId: row.world_id,
+    ownerAccountId: row.owner_account_id,
     name: row.name,
     q: row.q,
     r: row.r,
@@ -57,11 +61,12 @@ export async function insertVillage(
 ): Promise<Village> {
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
-    `INSERT INTO villages (world_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `INSERT INTO villages (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *`,
     [
       village.worldId,
+      village.ownerAccountId,
       village.name,
       village.q,
       village.r,
@@ -78,8 +83,13 @@ export async function insertVillage(
 
 export async function loadVillage(client: DbClient, id: number): Promise<Village> {
   const { rows } = await client.query<VillageRow>('SELECT * FROM villages WHERE id = $1', [id]);
-  if (!rows[0]) throw new Error(`Village ${id} not found`);
+  if (!rows[0]) throw new NotFoundError(`Village ${id} not found`);
   return fromRow(rows[0]);
+}
+
+export async function listVillages(client: DbClient, worldId: number): Promise<Village[]> {
+  const { rows } = await client.query<VillageRow>('SELECT * FROM villages WHERE world_id = $1 ORDER BY id', [worldId]);
+  return rows.map(fromRow);
 }
 
 export async function saveVillageState(client: DbClient, id: number, state: VillageState): Promise<void> {

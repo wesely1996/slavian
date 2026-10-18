@@ -1,0 +1,49 @@
+// Game server: HTTP + WebSocket API, plus an inline scheduler worker so a
+// single process is enough on a small VPS (set INLINE_WORKER=0 to run
+// workers separately with `npm run worker`).
+import { buildApp } from './api/app.js';
+import { LiveHub } from './api/live.js';
+import { loadGameData } from './data/index.js';
+import { migrate } from './db/migrate.js';
+import { createPool } from './db/pool.js';
+import { handlers } from './scheduler/handlers.js';
+import { runWorkerLoop } from './scheduler/loop.js';
+
+const port = Number(process.env.PORT ?? 8080);
+const host = process.env.HOST ?? '0.0.0.0';
+
+const db = createPool();
+const applied = await migrate(db);
+if (applied.length) console.log(`Applied migrations: ${applied.join(', ')}`);
+
+const scheduler = { data: loadGameData(), handlers };
+const clock = () => new Date();
+const live = new LiveHub(db, clock);
+await live.start();
+const app = await buildApp({ db, scheduler, clock, live, logger: true });
+await app.listen({ port, host });
+
+const abort = new AbortController();
+const worker =
+  process.env.INLINE_WORKER === '0'
+    ? Promise.resolve()
+    : runWorkerLoop(db, scheduler, { pollMs: Number(process.env.WORKER_POLL_MS ?? 500), signal: abort.signal });
+
+async function shutdown(): Promise<void> {
+  abort.abort();
+  await app.close();
+  await live.stop();
+  await worker;
+  await db.end();
+}
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.once(signal, () => {
+    shutdown().then(
+      () => process.exit(0),
+      (error) => {
+        console.error(error);
+        process.exit(1);
+      },
+    );
+  });
+}

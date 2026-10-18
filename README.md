@@ -7,13 +7,25 @@ A cooperative PvE hex-map strategy game for small groups of busy adults: defend 
 | Path | What |
 |---|---|
 | `client/` | Godot 4.5 project (Android first) |
-| `server/` | Node + TypeScript simulation, scheduler and (later) API |
+| `server/` | Node + TypeScript game server: API, live updates, simulation, scheduler |
 | `data/` | Shared game data (JSON) and cross-language test fixtures |
 | `ops/` | Local dev / deployment config |
 
+## Play it
+
+1. Run the server and its database on a computer your phone can reach (same Wi-Fi):
+   ```sh
+   docker compose -f ops/docker-compose.yml up -d --build
+   ```
+2. Install the latest dev build APK (see Releases) on your phone.
+3. In the app, set **Server address** to `http://<that computer's LAN IP>:8080`, enter a name and tap **Play as guest**.
+4. Create a world and share its invite code; teammates tap **Join**. The host taps **Start the world**.
+
+Pick **Test (10×)** speed to see builds finish quickly.
+
 ## Server
 
-Requires Node 22+ and PostgreSQL 16 (`docker compose -f ops/docker-compose.yml up -d` gives you one).
+Requires Node 22+ and PostgreSQL 16 (`docker compose -f ops/docker-compose.yml up -d postgres` gives you one).
 
 ```sh
 cd server
@@ -24,13 +36,28 @@ TEST_DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian npm test
 
 export DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian
 npm run migrate
+npm start        # API + live updates + scheduler worker on :8080 (runs migrations on start)
 npm run demo     # creates a 100x-speed world, queues builds, lets the scheduler finish them
-npm run worker   # long-running scheduler worker
+npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 ```
+
+### API (v1)
+
+| Method | Path | |
+|---|---|---|
+| `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
+| `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename. |
+| `GET` | `/v1/data` | Game data (buildings, terrain). |
+| `POST` | `/v1/worlds` | Create a world (lobby) with an invite code. |
+| `POST` | `/v1/worlds/join` | Join by invite code. |
+| `GET` | `/v1/worlds/:id` | Full world: members, villages, map. |
+| `POST` | `/v1/worlds/:id/start` | Host only: generate the map and found everyone's village. |
+| `POST` | `/v1/villages/:id/build` | Queue a building upgrade. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` updates. |
 
 ## Client
 
-Open `client/` in Godot 4.5. The main scene is the M0 map spike: drag to pan, pinch or mouse wheel to zoom, tap a hex to inspect it, and use the top buttons to preview maps for 1–6 players.
+Open `client/` in Godot 4.5 and run it with a server running (see above). On the map: drag to pan, pinch or mouse wheel to zoom, tap a hex to inspect it; tap your village (gold) to build.
 
 Headless tests:
 
@@ -51,7 +78,7 @@ All changes go on a feature branch and are merged into `main` through a pull req
 
 | Workflow | When | What |
 |---|---|---|
-| `ci.yml` | Every pull request | Server typecheck + tests (with Postgres), client tests + smoke run, then a debug APK uploaded as a run artifact (kept 7 days). |
+| `ci.yml` | Every pull request | Server typecheck + tests (with Postgres), server Docker image smoke test, client tests + smoke run, then a debug APK uploaded as a run artifact (kept 7 days). |
 | `dev-build.yml` | Every push to `main` (i.e. merged PRs), or manually | Runs CI, then publishes the APK as a **dev pre-release** tagged `dev-<date>-<sha>`. |
 | `cleanup-dev-builds.yml` | Daily at 03:17 UTC, or manually | Deletes dev pre-releases (and their tags) older than 7 days, always keeping the newest one. A manual run can change the age or do a dry run. |
 
@@ -60,7 +87,7 @@ To test a build on a phone, open the latest **Dev build** under Releases and ins
 ### One-time repository setup
 
 1. **Default branch:** `main` (scheduled workflows only run from the default branch).
-2. **Branch protection on `main`:** require a pull request and the `Server tests`, `Client tests` and `Android debug APK` checks.
+2. **Branch protection on `main`:** require a pull request and the `Server tests`, `Server image`, `Client tests` and `Android debug APK` checks.
 3. **Signing key secret** (so each dev build installs over the previous one). Create a keystore once and keep a copy safe:
    ```sh
    keytool -genkeypair -keystore slavian-debug.keystore -storepass android -keypass android \

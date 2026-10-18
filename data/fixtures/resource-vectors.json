@@ -1,0 +1,38 @@
+{
+  "_comment": "Lazy resource ledger reference cases shared by the server (TypeScript) and client (GDScript) test suites.",
+  "cases": [
+    {
+      "name": "linear accrual, starvation floor and capacity",
+      "ledger": {
+        "amounts": { "wood": 100, "stone": 100, "grain": 100, "iron": 100 },
+        "ratesPerHour": { "wood": 10, "stone": 0, "grain": -20, "iron": 50 },
+        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 200 },
+        "settledAt": "2026-01-01T00:00:00.000Z"
+      },
+      "at": "2026-01-01T02:30:00.000Z",
+      "expected": { "wood": 125, "stone": 100, "grain": 50, "iron": 200 }
+    },
+    {
+      "name": "long idle: capped and floored",
+      "ledger": {
+        "amounts": { "wood": 100, "stone": 100, "grain": 100, "iron": 100 },
+        "ratesPerHour": { "wood": 10, "stone": 0, "grain": -20, "iron": 50 },
+        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 200 },
+        "settledAt": "2026-01-01T00:00:00.000Z"
+      },
+      "at": "2026-01-01T10:00:00.000Z",
+      "expected": { "wood": 200, "stone": 100, "grain": 0, "iron": 200 }
+    },
+    {
+      "name": "surplus above capacity is kept, not clamped",
+      "ledger": {
+        "amounts": { "wood": 1500, "stone": 0, "grain": 0, "iron": 0 },
+        "ratesPerHour": { "wood": 30, "stone": 36, "grain": 0, "iron": 0 },
+        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 1000 },
+        "settledAt": "2026-01-01T00:00:00.000Z"
+      },
+      "at": "2026-01-01T00:10:00.500Z",
+      "expected": { "wood": 1500, "stone": 6.005, "grain": 0, "iron": 0 }
+    }
+  ]
+}

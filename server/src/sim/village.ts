@@ -1,4 +1,5 @@
 import type { BuildingDef, GameData } from '../data/index.js';
+import { RuleError } from '../errors.js';
 import {
   mapResources,
   spend,
@@ -19,8 +20,6 @@ export interface VillageState {
   readonly ledger: ResourceLedger;
   readonly queue: readonly QueuedBuild[];
 }
-
-export class RuleError extends Error {}
 
 const MS_PER_SECOND = 1000;
 

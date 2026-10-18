@@ -9,8 +9,8 @@ import {
   newVillage,
   productionPerHour,
   queueBuild,
-  RuleError,
 } from '../src/sim/village.js';
+import { RuleError } from '../src/errors.js';
 
 const data = loadGameData();
 const T0 = new Date('2026-01-01T00:00:00Z');

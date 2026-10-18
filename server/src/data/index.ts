@@ -41,16 +41,48 @@ const buildingsFileSchema = z.object({
   buildings: z.record(z.string(), buildingSchema),
 });
 
+export const TERRAIN_IDS = [
+  'plains',
+  'forest',
+  'hills',
+  'mountain',
+  'swamp',
+  'lake',
+  'holy_city',
+  'ocean',
+  'dark_forest',
+  'ice',
+  'steppe',
+  'hallowed',
+] as const;
+export type TerrainId = (typeof TERRAIN_IDS)[number];
+
+const terrainSchema = z.object({
+  name: z.string(),
+  moveCost: z.number().positive().nullable(),
+  settleable: z.boolean(),
+  edge: z.boolean(),
+});
+
+const terrainFileSchema = z.object({
+  version: z.number().int(),
+  terrain: z.record(z.enum(TERRAIN_IDS), terrainSchema),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
 export type BuildingsData = z.infer<typeof buildingsFileSchema>;
+export type TerrainDef = z.infer<typeof terrainSchema>;
+export type TerrainData = z.infer<typeof terrainFileSchema>;
 
 export interface GameData {
   buildings: BuildingsData;
+  terrain: TerrainData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
   const read = (file: string): unknown => JSON.parse(readFileSync(`${dir}/${file}`, 'utf8'));
   return {
     buildings: buildingsFileSchema.parse(read('buildings.json')),
+    terrain: terrainFileSchema.parse(read('terrain.json')),
   };
 }
