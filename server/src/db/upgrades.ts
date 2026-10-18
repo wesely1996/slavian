@@ -2,7 +2,9 @@
 // migrations. Each is idempotent.
 import type { GameData } from '../data/index.js';
 import { HALL_PLOT, plotsFromLegacyLevels, type Plot } from '../sim/village.js';
+import { ensureDigests } from '../scheduler/notices.js';
 import { ensureHeroes } from './heroes.js';
+import { getWorld } from './worlds.js';
 import { inTransaction, type Db } from './pool.js';
 
 interface LegacyRow {
@@ -48,5 +50,13 @@ export async function upgradeHeroes(db: Db, data: GameData): Promise<number> {
     let created = 0;
     for (const world of rows) created += await ensureHeroes(client, data, world.id, world.seed);
     return created;
+  });
+}
+
+// Worlds started before the daily digest: schedule everyone's.
+export async function upgradeDigests(db: Db, now: Date): Promise<void> {
+  await inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number }>(`SELECT id FROM worlds WHERE status <> 'lobby'`);
+    for (const { id } of rows) await ensureDigests(client, await getWorld(client, id), now);
   });
 }

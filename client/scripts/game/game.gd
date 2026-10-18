@@ -13,6 +13,7 @@ signal expeditions_changed
 signal research_changed
 signal heroes_changed
 signal orders_changed
+signal inbox_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -34,6 +35,9 @@ var vault: Dictionary = {}
 var expeditions: Array = []
 ## Everyone's research: {accountId, tech, status, completesAt, ...}.
 var research: Array = []
+## Your notifications in this world, newest first, and how many are unread.
+var inbox: Array = []
+var unread := 0
 ## Standing orders of every village (see server orderView).
 var orders: Array = []
 ## Every player's hero (see server heroView).
@@ -124,6 +128,14 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_inbox(world_id_: int, notifications: Array, unread_count: int) -> void:
+	if world_id_ != world_id():
+		return
+	inbox = notifications
+	unread = unread_count
+	inbox_changed.emit()
 
 
 func set_orders(world_id_: int, new_orders: Array) -> void:

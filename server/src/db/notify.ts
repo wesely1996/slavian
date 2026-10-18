@@ -17,7 +17,9 @@ export type WorldEvent =
   | { worldId: number; type: 'expeditions' }
   | { worldId: number; type: 'research' }
   | { worldId: number; type: 'heroes' }
-  | { worldId: number; type: 'orders' };
+  | { worldId: number; type: 'orders' }
+  // For one player only (their inbox).
+  | { worldId: number; type: 'notifications'; accountId: number };
 
 export async function notifyWorld(client: DbClient, event: WorldEvent): Promise<void> {
   await client.query('SELECT pg_notify($1 || current_schema(), $2)', [CHANNEL_PREFIX, JSON.stringify(event)]);

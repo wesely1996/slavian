@@ -27,6 +27,7 @@ func _initialize() -> void:
 	_test_research()
 	_test_heroes()
 	_test_orders()
+	_test_inbox()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -321,3 +322,11 @@ func _test_orders() -> void:
 	_check(OrderText.describe({"kind": "train", "unit": "spearman", "target": 20, "batch": 5}, units) == "Keep 20 Spearman, 5 at a time", "train order")
 	_check(OrderText.describe({"kind": "rebuild"}, units) == "Rebuild raided outposts", "rebuild order")
 	_check(OrderText.describe({"kind": "surplus", "share": 0.8}, units) == "Send all above 80% of storage to the vault", "surplus order")
+
+
+func _test_inbox() -> void:
+	_check(InboxText.ago(1000.0, 1030.0) == "just now", "just now")
+	_check(InboxText.ago(1000.0, 1000.0 + 5 * 60) == "5m ago", "minutes ago")
+	_check(InboxText.ago(1000.0, 1000.0 + 3 * 3600) == "3h ago", "hours ago")
+	_check(InboxText.ago(1000.0, 1000.0 + 2 * 86400) == "2d ago", "days ago")
+	_check(InboxText.clock(22 * 60) == "22:00" and InboxText.clock(-60) == "23:00" and InboxText.clock(7 * 60 + 5) == "07:05", "clock")

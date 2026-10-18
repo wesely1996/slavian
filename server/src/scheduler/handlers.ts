@@ -7,9 +7,11 @@ import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
 import { expeditionHandlers } from './expeditions.js';
 import { heroHandlers } from './heroes.js';
+import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
 import { researchHandlers } from './research.js';
 import { outpostHandlers, outpostStanding } from './outposts.js';
+import { tell } from './notices.js';
 import { scoutingHandlers } from './scouting.js';
 import { waveHandlers } from './waves.js';
 
@@ -32,6 +34,14 @@ export const handlers: HandlerRegistry = {
     const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
     const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
+    const def = data.buildings.buildings[payload.building];
+    const big = payload.building === 'elder_hall' || payload.targetLevel >= data.notifications.bigBuildLevel;
+    await tell(client, world, village.ownerAccountId, {
+      kind: 'build_done',
+      tier: big ? 'push' : 'digest',
+      title: `${def?.name ?? payload.building} level ${payload.targetLevel} in ${village.name}`,
+      body: big ? 'Finished. Your build queue may have room for more.' : 'Finished.',
+    }, event.dueAt);
     const cell = outpostHex(plot);
     if (cell && payload.targetLevel === 1) {
       await outpostStanding(client, data, world, { villageId: village.id, plot, cell }, event.dueAt);
@@ -56,4 +66,5 @@ export const handlers: HandlerRegistry = {
   ...researchHandlers,
   ...heroHandlers,
   ...orderHandlers,
+  ...noticeHandlers,
 };

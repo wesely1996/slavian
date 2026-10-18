@@ -6,8 +6,9 @@ import { loadCaravan, markCaravanDone, markReturning } from '../db/caravans.js';
 import { notifyWorld } from '../db/notify.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import { receive, store, vaultCapacity, withdraw } from '../sim/logistics.js';
+import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
 import { emptyResources } from '../sim/resources.js';
+import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const caravanPayload = z.object({ caravanId: z.number().int() });
@@ -35,6 +36,15 @@ export const caravanHandlers: HandlerRegistry = {
       await saveVillageState(client, village.id, { ...village.state, ledger: received.ledger });
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
       carriedBack = received.leftover;
+      const sender = await loadVillage(client, caravan.villageId);
+      if (sender.ownerAccountId !== village.ownerAccountId) {
+        await tell(client, world, village.ownerAccountId, {
+          kind: 'caravan_delivered',
+          tier: 'digest',
+          title: `A caravan from ${sender.name} reached ${village.name}`,
+          body: `It brought ${total(caravan.cargo) - total(received.leftover)} resources.`,
+        }, event.dueAt);
+      }
     }
     await markReturning(client, caravan.id, carriedBack);
     const payload: CaravanPayload = { caravanId: caravan.id };

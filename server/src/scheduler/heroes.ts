@@ -7,6 +7,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import type { World } from '../db/worlds.js';
 import { gainXp, rollDrop, woundMs } from '../sim/heroes.js';
+import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const heroPayload = z.object({ accountId: z.number().int() });
@@ -33,6 +34,11 @@ export async function heroAfterBattle(
   }
   await saveHero(client, next);
   await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  if (!result.won) {
+    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: `${hero.name} is wounded`, body: 'Back on their feet in a few hours.' }, result.at);
+  } else if (next.level > hero.level) {
+    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: `${hero.name} reached level ${next.level}`, body: 'A new skill point to spend.' }, result.at);
+  }
 }
 
 export const heroHandlers: HandlerRegistry = {

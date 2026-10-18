@@ -7,6 +7,7 @@ import { loadGameData, type TerrainId } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
 import { tick } from '../src/scheduler/worker.js';
+import { pushPending } from '../src/push/worker.js';
 import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { roadRoute } from '../src/sim/logistics.js';
@@ -754,6 +755,77 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const cancel = await call('POST', `/v1/villages/${village.id}/orders/${train.body.order.id}/cancel`, lada.token);
     expect(cancel.status).toBe(200);
     expect((await world()).orders.map((o: { kind: string }) => o.kind).sort()).toEqual(['rebuild', 'surplus']);
+  });
+
+  it('tells players what happened: pushes for danger, a daily digest for the rest', async () => {
+    const mira = await guest('Mira');
+    const created = await call('POST', '/v1/worlds', mira.token, { name: 'Notices', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, mira.token);
+    const village = started.body.villages[0];
+    const inbox = async () => (await call('GET', `/v1/worlds/${worldId}/notifications`, mira.token)).body;
+
+    // Preferences and a device.
+    const prefs = await call('PATCH', '/v1/me/notifications', mira.token, { quietStart: 1320, quietEnd: 420, digestHour: 20 });
+    expect(prefs.body.prefs).toEqual({ quietStart: 1320, quietEnd: 420, utcOffsetMinutes: 0, digestHour: 20 });
+    expect((await call('POST', '/v1/me/devices', mira.token, { token: 'phone-token-123', platform: 'android' })).status).toBe(200);
+
+    // A small build goes to the digest.
+    const build = await call('POST', `/v1/villages/${village.id}/build`, mira.token, { plot: 'f0' });
+    now = new Date(build.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    let box = await inbox();
+    expect(box.notifications[0]).toMatchObject({ kind: 'build_done', tier: 'digest', read: false });
+    expect(box.unread).toBe(1);
+
+    // The horde: a warning, then the attack, both pushed.
+    now = new Date(started.body.waves[0].spawnAt);
+    await tick(db, now, scheduler);
+    const wave = (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body.waves[0];
+    now = new Date(wave.arrivesAt);
+    await tick(db, now, scheduler);
+    box = await inbox();
+    const kinds = box.notifications.map((n: { kind: string }) => n.kind);
+    expect(kinds).toContain('wave_soon');
+    expect(kinds).toContain('under_attack');
+    expect(box.notifications.find((n: { kind: string }) => n.kind === 'wave_soon').title).toMatch(/A horde is coming to/);
+
+    // Pushes go to the phone, except in quiet hours.
+    const sent: string[] = [];
+    const sender = { send: async (tokens: readonly string[], message: { title: string }) => (sent.push(`${tokens[0]}: ${message.title}`), []) };
+    const noon = new Date('2026-07-01T12:00:00Z');
+    // Older tests' notifications are long sent; only hers are pending.
+    await db.query(`UPDATE notifications SET pushed_at = now() WHERE account_id <> $1`, [mira.accountId]);
+    await db.query(`UPDATE notifications SET created_at = $1 WHERE account_id = $2`, [new Date(noon.getTime() - 60_000), mira.accountId]);
+    expect(await pushPending(db, scheduler.data, null, new Date('2026-07-01T23:00:00Z'))).toBe(0);
+    await db.query(`UPDATE notifications SET pushed_at = NULL WHERE account_id = $1`, [mira.accountId]);
+    expect(await pushPending(db, scheduler.data, sender, new Date('2026-07-01T23:00:00Z'))).toBe(0);
+    expect(await pushPending(db, scheduler.data, sender, noon)).toBeGreaterThanOrEqual(2);
+    expect(sent.some((line) => line.startsWith('phone-token-123: A horde is coming'))).toBe(true);
+    expect(sent.some((line) => /build/i.test(line))).toBe(false);
+
+    // The digest at 20:00 sums up the rest.
+    const { rows } = await db.query<{ due_at: Date }>(
+      `SELECT due_at FROM scheduled_events WHERE world_id = $1 AND type = 'daily_digest' AND status = 'pending'`,
+      [worldId],
+    );
+    expect(rows).toHaveLength(1);
+    // After the first one, digests come at her digest hour (20:00).
+    expect(rows[0]!.due_at.getUTCHours()).toBe(20);
+    now = new Date(Math.max(rows[0]!.due_at.getTime(), now.getTime()));
+    await tick(db, now, scheduler);
+    box = await inbox();
+    const digests = box.notifications.filter((n: { kind: string }) => n.kind === 'digest');
+    expect(digests[0]).toMatchObject({ tier: 'push', title: 'Today in Notices' });
+    expect(digests.some((d: { body: string }) => /1 build finished/.test(d.body))).toBe(true);
+    const { rows: left } = await db.query(
+      `SELECT 1 FROM notifications WHERE account_id = $1 AND tier = 'digest' AND digest_id IS NULL AND created_at <= $2`,
+      [mira.accountId, now],
+    );
+    expect(left).toHaveLength(0);
+
+    expect((await call('POST', `/v1/worlds/${worldId}/notifications/read`, mira.token)).status).toBe(200);
+    expect((await inbox()).unread).toBe(0);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

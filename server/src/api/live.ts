@@ -15,6 +15,7 @@
 //                   { "type": "research", "worldId", "research", "serverTime" }
 //                   { "type": "heroes", "worldId", "heroes", "serverTime" }
 //                   { "type": "orders", "worldId", "orders", "serverTime" }
+//                   { "type": "notifications", "worldId", "notifications", "unread", "serverTime" } (yours only)
 //                   { "type": "error", "message" }
 import type { WebSocket } from 'ws';
 import { z } from 'zod';
@@ -24,13 +25,14 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, isMember } from '../db/worlds.js';
 import type { GameData } from '../data/index.js';
-import { battlesView, expeditionsView, heroesView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
+import { battlesView, expeditionsView, heroesView, inboxView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, wavesView, worldView } from './views.js';
 
 const clientMessage = z.object({ type: z.literal('subscribe'), worldId: z.number().int().positive() });
 const RECONNECT_MS = 2000;
 
 export class LiveHub {
   private readonly subscribers = new Map<number, Set<WebSocket>>();
+  private readonly owners = new WeakMap<WebSocket, number>();
   private listener: DbClient | null = null;
   private channel = '';
   private stopped = false;
@@ -72,6 +74,7 @@ export class LiveHub {
 
   attach(socket: WebSocket, account: Account): void {
     const worlds = new Set<number>();
+    this.owners.set(socket, account.id);
     socket.on('message', (raw) => {
       void (async () => {
         const parsed = clientMessage.safeParse(safeJson(raw.toString()));
@@ -104,6 +107,7 @@ export class LiveHub {
   private async dispatch(event: WorldEvent): Promise<void> {
     const sockets = this.subscribers.get(event.worldId);
     if (!sockets || sockets.size === 0) return;
+    if (event.type === 'notifications') return this.dispatchInbox(event.worldId, event.accountId, sockets);
     try {
       const message = await inTransaction(this.db, async (client) => {
         const serverTime = this.clock().toISOString();
@@ -144,6 +148,27 @@ export class LiveHub {
       console.error('Live dispatch failed:', error);
     }
   }
+
+  private async dispatchInbox(worldId: number, accountId: number, sockets: Set<WebSocket>): Promise<void> {
+    const mine = [...sockets].filter((socket) => this.owners.get(socket) === accountId);
+    if (!mine.length) return;
+    try {
+      const message = await inboxMessage(this.db, worldId, accountId, this.clock().toISOString());
+      for (const socket of mine) send(socket, message);
+    } catch (error) {
+      console.error('Live inbox dispatch failed:', error);
+    }
+  }
+}
+
+// A player's inbox goes to their own sockets only.
+async function inboxMessage(db: Db, worldId: number, accountId: number, serverTime: string) {
+  return inTransaction(db, async (client) => ({
+    type: 'notifications',
+    worldId,
+    ...(await inboxView(client, accountId, worldId)),
+    serverTime,
+  }));
 }
 
 function send(socket: WebSocket, message: unknown): void {
