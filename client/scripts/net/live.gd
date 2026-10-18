@@ -6,6 +6,7 @@ extends Node
 signal connection_changed(connected: bool)
 signal village_updated(village: Dictionary)
 signal world_updated(world: Dictionary)
+signal waves_updated(world_id: int, waves: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -79,6 +80,8 @@ func _handle(text: String) -> void:
 			village_updated.emit(message.village)
 		"world":
 			world_updated.emit(message.world)
+		"waves":
+			waves_updated.emit(int(message.worldId), message.waves)
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
 

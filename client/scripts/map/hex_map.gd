@@ -1,7 +1,8 @@
 class_name HexMap
 extends Node2D
-## Draws the current world's map (Game.terrain) and villages with
-## placeholder flat colours. Redraws only when something changes.
+## Draws the current world's map (Game.terrain), villages and enemy hordes
+## with placeholder flat colours. Redraws when something changes, and on
+## every UI tick while a horde is on the move.
 
 const OUTLINE_COLOR := Color(0, 0, 0, 0.25)
 const SELECTION_COLOR := Color("#ffd75e")
@@ -9,6 +10,8 @@ const HOLY_CITY_COLOR := Color("#8a2b2b")
 const MY_VILLAGE_COLOR := Color("#ffd75e")
 const ALLY_VILLAGE_COLOR := Color("#f4efe1")
 const VILLAGE_OUTLINE_COLOR := Color("#2b2118")
+const HORDE_COLOR := Color("#c8372d")
+const HORDE_PATH_COLOR := Color(0.78, 0.22, 0.18, 0.6)
 
 @export var hex_size := 48.0
 
@@ -61,7 +64,38 @@ func _draw() -> void:
 		draw_rect(rect, MY_VILLAGE_COLOR if Game.is_mine(village) else ALLY_VILLAGE_COLOR)
 		draw_rect(rect, VILLAGE_OUTLINE_COLOR, false, 2.0)
 
+	var now := Game.server_now()
+	for wave in WaveMath.visible_waves(Game.waves):
+		_draw_horde(wave, now)
+
 	if has_hex(selected):
 		var outline := HexMath.corners(HexMath.to_pixel(selected, hex_size), hex_size * 0.92)
 		outline.append(outline[0])
 		draw_polyline(outline, SELECTION_COLOR, 4.0)
+
+
+func has_moving_hordes() -> bool:
+	return Game.waves.any(func(w: Dictionary) -> bool: return w.status == "marching")
+
+
+func _draw_horde(wave: Dictionary, now: float) -> void:
+	var p := WaveMath.progress(wave, now)
+	if p.is_empty():
+		return
+	var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	if wave.status == "marching":
+		# The road still ahead, from the horde to its target.
+		var trail := PackedVector2Array([pos])
+		var ahead := false
+		for step in wave.path:
+			var cell := Vector2i(int(step[0]), int(step[1]))
+			ahead = ahead or cell == p.to
+			if ahead:
+				trail.append(HexMath.to_pixel(cell, hex_size))
+		if trail.size() >= 2:
+			draw_polyline(trail, HORDE_PATH_COLOR, 5.0)
+	else:
+		# Camped at the gates: sit beside the village so both stay visible.
+		pos += Vector2(hex_size * 0.42, -hex_size * 0.42)
+	draw_circle(pos, hex_size * 0.34, HORDE_COLOR)
+	draw_arc(pos, hex_size * 0.34, 0.0, TAU, 24, VILLAGE_OUTLINE_COLOR, 2.0)

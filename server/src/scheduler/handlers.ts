@@ -3,6 +3,7 @@ import { notifyWorld } from '../db/notify.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
+import { waveHandlers } from './waves.js';
 
 export const buildCompletePayload = z.object({
   villageId: z.number().int(),
@@ -30,4 +31,6 @@ export const handlers: HandlerRegistry = {
     await saveVillageState(client, village.id, completeTraining(village.state, event.dueAt));
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   },
+
+  ...waveHandlers,
 };

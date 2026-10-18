@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "_comment": "Hours are game hours (divided by world speed). Fronts take turns among the world's active fronts that are also enabled here; only the North front is enabled during M1.",
+  "enabledFronts": ["north"],
+  "graceHours": 168,
+  "intervalHours": [48, 72],
+  "upcoming": 2,
+  "rampageHours": 18,
+  "baseUnits": 8,
+  "growthPerWave": 1.25,
+  "perExtraPlayer": 0.5,
+  "threatLevels": [
+    { "name": "Low", "maxUnits": 12 },
+    { "name": "Moderate", "maxUnits": 25 },
+    { "name": "High", "maxUnits": 50 },
+    { "name": "Severe", "maxUnits": null }
+  ]
+}

@@ -1,7 +1,7 @@
 extends Node2D
-## In-world screen: the map from the server, your resources, and a panel
-## for the selected hex. Your own village's panel queues buildings and
-## trains troops.
+## In-world screen: the map from the server, your resources, a threat
+## banner, and a panel for the selected hex (or the threats timeline). Your
+## own village's panel queues buildings and trains troops.
 
 const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
@@ -17,6 +17,9 @@ var _live_label: Label
 var _resource_labels: Dictionary[String, Label] = {}
 ## Which part of your village panel is open: "buildings" or "troops".
 var _tab := "buildings"
+## What the bottom panel shows: "hex" (the selected hex) or "threats".
+var _panel_mode := "hex"
+var _threat_button: Button
 ## Chosen batch size per unit, kept while the panel rebuilds.
 var _train_counts: Dictionary[String, int] = {}
 var _status: Label
@@ -34,6 +37,8 @@ func _ready() -> void:
 	Live.village_updated.connect(Game.update_village)
 	Live.world_updated.connect(Game.set_world)
 	Live.connection_changed.connect(_on_live_connection)
+	Live.waves_updated.connect(Game.set_waves)
+	Game.waves_changed.connect(_on_waves_changed)
 	Live.watch(Game.world_id())
 
 	hex_map.refresh()
@@ -51,6 +56,7 @@ func _exit_tree() -> void:
 	Live.village_updated.disconnect(Game.update_village)
 	Live.world_updated.disconnect(Game.set_world)
 	Live.connection_changed.disconnect(_on_live_connection)
+	Live.waves_updated.disconnect(Game.set_waves)
 
 
 func _process(delta: float) -> void:
@@ -66,6 +72,9 @@ func _process(delta: float) -> void:
 			var label := _resource_labels[kind]
 			label.text = "%s %d  %s/h" % [kind.capitalize(), amounts[kind], UI.signed(rate)]
 			label.add_theme_color_override("font_color", NEGATIVE if rate < 0 else Color.WHITE)
+	_threat_button.text = _threat_summary()
+	if hex_map.has_moving_hordes():
+		hex_map.queue_redraw()
 	for entry in _ticking:
 		(entry[0] as Label).text = (entry[1] as Callable).call()
 
@@ -112,6 +121,13 @@ func _build_ui() -> void:
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		resources.add_child(label)
 		_resource_labels[kind] = label
+	_threat_button = UI.button("", _show_threats)
+	_threat_button.custom_minimum_size.y = 56
+	_threat_button.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+	_threat_button.add_theme_color_override("font_color", Color("#ffb4a8"))
+	_threat_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_threat_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	top_rows.add_child(_threat_button)
 	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	top_rows.add_child(_status)
 	_on_live_connection(Live.connected)
@@ -136,13 +152,25 @@ func _build_ui() -> void:
 
 func _select(cell: Vector2i) -> void:
 	_selected = cell
+	_panel_mode = "hex"
 	hex_map.select(cell)
+	_rebuild_panel()
+
+
+func _show_threats() -> void:
+	_panel_mode = "threats"
 	_rebuild_panel()
 
 
 func _rebuild_panel() -> void:
 	UI.clear(_panel_body)
 	_ticking.clear()
+	if _panel_mode == "threats":
+		_threats_panel()
+		return
+	for wave in WaveMath.visible_waves(Game.waves):
+		if WaveMath.current_hex(wave, Game.server_now()) == _selected:
+			_wave_entry(wave)
 	var village := Game.village_at(_selected)
 	if village.is_empty():
 		_terrain_panel()
@@ -327,6 +355,53 @@ func _train(village_id: int, unit: String, count: int) -> void:
 		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+
+
+# --- Threats -----------------------------------------------------------------
+
+## One line for the top banner: what needs attention first.
+func _threat_summary() -> String:
+	if Game.waves.is_empty():
+		return "No threats known"
+	var now := Game.server_now()
+	for wave in Game.waves:
+		if wave.status == "marching":
+			return "Horde marching on %s · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
+	for wave in Game.waves:
+		if wave.status == "arrived":
+			return "Horde at %s" % Game.village_name(wave.targetVillageId)
+	var next: Dictionary = Game.waves[0]
+	return "Next wave: %s · %s · in %s" % [String(next.front).capitalize(), next.threat, TimeUtil.format_duration(TimeUtil.parse_iso(next.spawnAt) - now)]
+
+
+func _threats_panel() -> void:
+	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
+	if Game.waves.is_empty():
+		_panel_body.add_child(UI.label("No waves announced.", UI.SMALL_SIZE, UI.MUTED))
+	for wave in Game.waves:
+		_wave_entry(wave)
+
+
+func _wave_entry(wave: Dictionary) -> void:
+	_panel_body.add_child(UI.label("Wave %d · %s" % [int(wave.index) + 1, Game.front_faction(wave.front)]))
+	_panel_body.add_child(UI.label("%s front · %s threat · composition unknown" % [String(wave.front).capitalize(), wave.threat], UI.SMALL_SIZE, UI.MUTED))
+	var line := UI.label("", UI.SMALL_SIZE, Color("#ffb4a8"))
+	_panel_body.add_child(line)
+	_tick(line, func() -> String:
+		var now := Game.server_now()
+		match wave.status:
+			"scheduled":
+				return "Appears in %s" % TimeUtil.format_duration(TimeUtil.parse_iso(wave.spawnAt) - now)
+			"marching":
+				return "Marching on %s · arrives in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
+			"arrived":
+				return "At the gates of %s · leaves in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
+		return String(wave.status).capitalize())
+
+
+func _on_waves_changed() -> void:
+	hex_map.queue_redraw()
+	_rebuild_panel()
 
 
 func _tick(label: Label, text: Callable) -> void:

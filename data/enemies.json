@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "_comment": "Enemy forces per front. weight sets how common a unit is in a wave; minWave is the first wave index it can appear in. speed is hexes per hour on plains, like player units.",
+  "fronts": {
+    "north": {
+      "faction": "Monsters of the North",
+      "spawnTerrain": ["dark_forest", "ice"],
+      "units": {
+        "grey_wolf": { "name": "Grey Wolf", "weight": 6, "minWave": 0, "attack": 15, "defense": 10, "speed": 8 },
+        "leshy_thrall": { "name": "Leshy's Thrall", "weight": 3, "minWave": 0, "attack": 25, "defense": 25, "speed": 5 },
+        "cave_bear": { "name": "Cave Bear", "weight": 2, "minWave": 1, "attack": 40, "defense": 35, "speed": 4 },
+        "likho": { "name": "Likho", "weight": 0.4, "minWave": 3, "attack": 90, "defense": 60, "speed": 4 }
+      }
+    }
+  }
+}
