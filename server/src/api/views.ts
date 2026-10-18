@@ -16,8 +16,9 @@ export interface VillageView {
   name: string;
   q: number;
   r: number;
+  plots: Record<string, { building: string | null; level: number }>;
   levels: Record<string, number>;
-  queue: { building: string; targetLevel: number; startsAt: string; completesAt: string }[];
+  queue: { plot: string; building: string; targetLevel: number; startsAt: string; completesAt: string }[];
   // Units at home as of the last settle; units finished since are counted
   // from `training` (each batch trains one unit every perUnitMs).
   garrison: Record<string, number>;
@@ -41,8 +42,10 @@ export function villageView(village: Village): VillageView {
     name: village.name,
     q: village.q,
     r: village.r,
+    plots: { ...village.state.plots },
     levels: { ...levels },
     queue: queue.map((item) => ({
+      plot: item.plot,
       building: item.building,
       targetLevel: item.targetLevel,
       startsAt: item.startsAt.toISOString(),

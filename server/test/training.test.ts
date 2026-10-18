@@ -27,7 +27,7 @@ function withBarracks(level = 1) {
   let state = rich;
   for (let target = 1; target <= level; target++) {
     const { state: queued, queued: item } = queueBuild(data, state, 'barracks', state.ledger.settledAt, 1);
-    state = completeBuild(data, queued, 'barracks', target, item.completesAt, 1);
+    state = completeBuild(data, queued, item.plot, target, item.completesAt, 1);
   }
   return state;
 }
@@ -114,7 +114,7 @@ describe('queueTraining', () => {
     const at = state.ledger.settledAt;
     const trained = queueTraining(data, state, 'spearman', 4, at, 1).state;
     const { state: building, queued } = queueBuild(data, trained, 'farm', at, 1);
-    const built = completeBuild(data, building, 'farm', 1, queued.completesAt, 1);
+    const built = completeBuild(data, building, queued.plot, 1, queued.completesAt, 1);
     const farm = data.buildings.buildings.farm!.production!.basePerHour;
     expect(built.ledger.ratesPerHour.grain).toBeCloseTo(trained.ledger.ratesPerHour.grain + farm);
   });

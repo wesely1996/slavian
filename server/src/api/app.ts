@@ -32,7 +32,11 @@ const createWorldBody = z.object({
   speed: z.number().min(1).max(100).default(1),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
-const buildBody = z.object({ building: z.string().min(1).max(64) });
+// `plot` targets a field or center slot; `building` names what to construct
+// in an empty slot. Older clients send only `building`.
+const buildBody = z
+  .object({ plot: z.string().regex(/^[fc]\d{1,2}$/).optional(), building: z.string().min(1).max(64).optional() })
+  .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -148,7 +152,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { village } = await queueBuildCommand(db, scheduler, {
       accountId: account.id,
       villageId: id,
-      building: body.building,
+      ...(body.plot ? { plot: body.plot } : {}),
+      ...(body.building ? { building: body.building } : {}),
       now: clock(),
     });
     return { village: villageView(village), serverTime: clock().toISOString() };

@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "_comment": "Village layout: `fields` are the resource plots around the village (one building type each, upgraded individually); the center has `centerSlots` building slots, the first holding the Elder's Hall. Each Hall level above 1 unlocks `slotsPerHallLevel` more slots, every `hallLevelsPerQueueSlot` levels add a build-queue place, and each level speeds construction by `hallBuildSpeedup`.",
   "village": {
     "startingResources": {
       "wood": 500,
@@ -14,9 +15,42 @@
       "iron": 3
     },
     "baseCapacity": 1000,
-    "queueLimit": 2
+    "fields": [
+      "woodcutter",
+      "woodcutter",
+      "woodcutter",
+      "quarry",
+      "quarry",
+      "quarry",
+      "farm",
+      "farm",
+      "farm",
+      "farm",
+      "iron_mine",
+      "iron_mine"
+    ],
+    "centerSlots": 12,
+    "slotsUnlockedAtStart": 4,
+    "slotsPerHallLevel": 1,
+    "baseQueueLimit": 2,
+    "hallLevelsPerQueueSlot": 3,
+    "hallBuildSpeedup": 0.96
   },
   "buildings": {
+    "elder_hall": {
+      "name": "Elder's Hall",
+      "kind": "center",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 200,
+        "stone": 200,
+        "grain": 100,
+        "iron": 80
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 180,
+      "timeGrowth": 1.5
+    },
     "woodcutter": {
       "name": "Woodcutter",
       "maxLevel": 10,
@@ -33,7 +67,8 @@
         "resource": "wood",
         "basePerHour": 12,
         "growth": 1.35
-      }
+      },
+      "kind": "field"
     },
     "quarry": {
       "name": "Quarry",
@@ -51,7 +86,8 @@
         "resource": "stone",
         "basePerHour": 12,
         "growth": 1.35
-      }
+      },
+      "kind": "field"
     },
     "farm": {
       "name": "Farm",
@@ -69,7 +105,8 @@
         "resource": "grain",
         "basePerHour": 15,
         "growth": 1.35
-      }
+      },
+      "kind": "field"
     },
     "iron_mine": {
       "name": "Iron Mine",
@@ -87,7 +124,8 @@
         "resource": "iron",
         "basePerHour": 8,
         "growth": 1.35
-      }
+      },
+      "kind": "field"
     },
     "storehouse": {
       "name": "Storehouse",
@@ -101,7 +139,8 @@
       "costGrowth": 1.5,
       "buildSeconds": 100,
       "timeGrowth": 1.5,
-      "capacityGrowth": 1.3
+      "capacityGrowth": 1.3,
+      "kind": "center"
     },
     "barracks": {
       "name": "Barracks",
@@ -114,7 +153,8 @@
       },
       "costGrowth": 1.6,
       "buildSeconds": 150,
-      "timeGrowth": 1.55
+      "timeGrowth": 1.55,
+      "kind": "center"
     },
     "scout_lodge": {
       "name": "Scout Lodge",
@@ -127,7 +167,8 @@
       },
       "costGrowth": 1.6,
       "buildSeconds": 120,
-      "timeGrowth": 1.55
+      "timeGrowth": 1.55,
+      "kind": "center"
     }
   }
 }

@@ -1,7 +1,7 @@
 import type { Stance } from '../data/index.js';
 import type { Resources } from '../sim/resources.js';
 import type { TrainingBatch } from '../sim/training.js';
-import type { QueuedBuild, VillageState } from '../sim/village.js';
+import type { Plot, QueuedBuild, VillageState } from '../sim/village.js';
 import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
 
@@ -23,11 +23,13 @@ interface VillageRow {
   q: number;
   r: number;
   levels: Record<string, number>;
+  // Null only for villages saved before plots existed (see upgrades.ts).
+  plots: Record<string, Plot> | null;
   amounts: Resources;
   rates_per_hour: Resources;
   capacity: Resources;
   settled_at: Date;
-  queue: { building: string; targetLevel: number; startsAt: string; completesAt: string }[];
+  queue: { plot?: string; building: string; targetLevel: number; startsAt: string; completesAt: string }[];
   garrison: Record<string, number>;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number }[];
   away: Record<string, number>;
@@ -36,6 +38,7 @@ interface VillageRow {
 
 function fromRow(row: VillageRow): Village {
   const queue: QueuedBuild[] = row.queue.map((item) => ({
+    plot: item.plot ?? '',
     building: item.building,
     targetLevel: item.targetLevel,
     startsAt: new Date(item.startsAt),
@@ -55,6 +58,7 @@ function fromRow(row: VillageRow): Village {
     q: row.q,
     r: row.r,
     state: {
+      plots: row.plots ?? {},
       levels: row.levels,
       queue,
       garrison: row.garrison,
@@ -78,8 +82,8 @@ export async function insertVillage(
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
     `INSERT INTO villages
-       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
      RETURNING *`,
     [
       village.worldId,
@@ -97,6 +101,7 @@ export async function insertVillage(
       JSON.stringify(state.training),
       JSON.stringify(state.away),
       state.stance,
+      JSON.stringify(state.plots),
     ],
   );
   return fromRow(rows[0]!);
@@ -117,7 +122,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
   await client.query(
     `UPDATE villages
      SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7,
-         garrison = $8, training = $9, away = $10, stance = $11
+         garrison = $8, training = $9, away = $10, stance = $11, plots = $12
      WHERE id = $1`,
     [
       id,
@@ -131,6 +136,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       JSON.stringify(state.training),
       JSON.stringify(state.away),
       state.stance,
+      JSON.stringify(state.plots),
     ],
   );
 }

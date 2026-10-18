@@ -513,6 +513,16 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 5. [x] **Battles:** a horde reaching a village fights its garrison in rounds (every 15 game-minutes, up to 12). Damage uses attack, defense, family counters (infantry > cavalry > archers > infantry), stances (Defensive / Balanced / Offensive / Hold the Line with attack, defense and retreat thresholds), stance matchups and a home bonus, with seeded variance (`data/battle.json`). A side breaks at its stance's loss share; undecided after the last round, the horde withdraws. Defended → the wave is beaten; raided → the horde takes up to 30% of stores (scaled by its survivors) and leaves. Waves have a stance by front temperament, revealed by detailed/exact scout reports. Battle reports are shared with the group. Reinforcements, field setups, raid-vs-raze and walls come in M3.
 6. [ ] **Playtest:** 2 players at 10× for a few days. Setup ready (`docs/playtest.md`): server in Docker on the host's computer, database on Neon, public HTTPS through a Cloudflare quick tunnel; the app can change server address without signing out. A VPS replaces the computer later (M5).
 
+### M2 breakdown (each step is its own PR)
+1. [x] **Village interior:** a Travian-style village screen (the **Village** button on the map). 12 resource fields around the outside (3 woodcutters, 3 quarries, 4 farms, 2 iron mines), each upgraded on its own; 12 building slots in the center, the first holding the Elder's Hall. Hall level 1 opens 4 slots, each further level one more; every 3 Hall levels add a build-queue place (2 at the start); each level builds 4% faster. Build orders name a plot (`{ plot, building? }`); older villages are laid out on plots when the server starts.
+2. [ ] **Outposts** on resource hexes.
+3. [ ] **Caravans and the Holy City vault.**
+4. [ ] **Expansion:** settlers, founding, rising cost, upkeep.
+5. [ ] **Research** (Academy).
+6. [ ] **Heroes.**
+7. [ ] **Standing orders.**
+8. [ ] **Push notifications and digest.**
+
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
 2. Hex math library (axial coords, distance, neighbours, A*) in the server; matching rendering helpers in Godot.

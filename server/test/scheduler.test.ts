@@ -47,8 +47,10 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
 
   const village = (id: number) => inTransaction(db, (client) => loadVillage(client, id));
 
+  // A building name upgrades its first field; 'f0' is the first woodcutter.
   async function build(ids: { villageId: number; accountId: number }, building: string, now: Date) {
-    const { queued } = await queueBuildCommand(db, deps, { ...ids, building, now });
+    const order = building.startsWith('f') && /^f\d+$/.test(building) ? { plot: building } : { building };
+    const { queued } = await queueBuildCommand(db, deps, { ...ids, ...order, now });
     return queued;
   }
 
@@ -93,10 +95,10 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   it('commands catch the world up before acting', async () => {
     const ids = await setup();
     const { villageId } = ids;
-    const first = await build(ids, 'woodcutter', T0);
+    const first = await build(ids, 'f0', T0);
     // No worker ran, but the first build is already due when the next command arrives.
     const later = new Date(first.completesAt.getTime() + 1000);
-    const second = await build(ids, 'woodcutter', later);
+    const second = await build(ids, 'f0', later);
 
     expect(second.targetLevel).toBe(2);
     expect(second.startsAt).toEqual(later);
@@ -136,7 +138,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
 
     for (const { worldId, villageId } of worlds) {
       const v = await village(villageId);
-      expect(v.state.levels).toEqual({ woodcutter: 1, farm: 1 });
+      expect(v.state.levels).toEqual({ elder_hall: 1, woodcutter: 1, farm: 1 });
       expect(await eventStatuses(worldId)).toEqual([
         { type: 'build_complete', status: 'done' },
         { type: 'build_complete', status: 'done' },

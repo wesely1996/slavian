@@ -100,7 +100,7 @@ describe('units away', () => {
     const fresh = newVillage(data, T0, 1);
     let state = { ...fresh, ledger: { ...fresh.ledger, amounts: { wood: 9e4, stone: 9e4, grain: 9e4, iron: 9e4 }, capacity: { wood: 9e9, stone: 9e9, grain: 9e9, iron: 9e9 } } };
     const built = queueBuild(data, state, 'scout_lodge', T0, 1);
-    state = completeBuild(data, built.state, 'scout_lodge', 1, built.queued.completesAt, 1);
+    state = completeBuild(data, built.state, built.queued.plot, 1, built.queued.completesAt, 1);
     const trained = queueTraining(data, state, 'scout', count, built.queued.completesAt, 1);
     return { state: trained.state, ready: new Date(built.queued.completesAt.getTime() + count * trained.batch.perUnitMs) };
   }

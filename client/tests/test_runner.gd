@@ -5,6 +5,7 @@ extends SceneTree
 
 const VECTORS_PATH := "../data/fixtures/hex-vectors.json"
 const RESOURCE_VECTORS_PATH := "../data/fixtures/resource-vectors.json"
+const BUILDINGS_PATH := "../data/buildings.json"
 
 var _failures := 0
 var _checks := 0
@@ -16,6 +17,7 @@ func _initialize() -> void:
 	_test_resource_vectors()
 	_test_time_util()
 	_test_rules()
+	_test_village_layout()
 	_test_training()
 	_test_wave_math()
 	_test_scout_text()
@@ -92,9 +94,49 @@ func _test_rules() -> void:
 	_check(Rules.level_cost(def, 1) == {"wood": 40, "stone": 60, "grain": 30, "iron": 20}, "level 1 costs base")
 	_check(Rules.level_cost(def, 2).wood == 64, "level 2 cost grows")
 	_check(is_equal_approx(Rules.build_seconds(def, 1, 10.0), 9.0), "world speed divides build time")
-	var village := {"levels": {"farm": 2}, "queue": [{"building": "farm", "targetLevel": 3}, {"building": "farm", "targetLevel": 4}]}
-	_check(Rules.planned_level(village, "farm") == 4, "planned level counts the queue")
-	_check(Rules.planned_level(village, "quarry") == 0, "unbuilt building is level 0")
+	_check(is_equal_approx(Rules.build_seconds(def, 1, 10.0, 0.5), 4.5), "a bigger Elder's Hall builds faster")
+
+
+func _test_village_layout() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join(BUILDINGS_PATH)
+	var data := {"buildings": JSON.parse_string(FileAccess.get_file_as_string(path))}
+	_check(Rules.unlocked_slots(data, 1) == 4, "4 slots open at Hall 1")
+	_check(Rules.unlocked_slots(data, 3) == 6, "one more slot per Hall level")
+	_check(Rules.unlocked_slots(data, 10) == 12, "capped at the slot count")
+	_check(Rules.slot_unlock_level(data, 3) == 1 and Rules.slot_unlock_level(data, 4) == 2 and Rules.slot_unlock_level(data, 11) == 9, "slot unlock levels")
+	for index in 12:
+		var level := Rules.slot_unlock_level(data, index)
+		_check(Rules.unlocked_slots(data, level) > index and (level == 1 or Rules.unlocked_slots(data, level - 1) <= index), "slot %d opens exactly at Hall %d" % [index, level])
+	_check(Rules.queue_limit(data, 1) == 2 and Rules.queue_limit(data, 3) == 3 and Rules.queue_limit(data, 9) == 5, "queue grows every 3 Hall levels")
+	_check(is_equal_approx(Rules.hall_speedup(data, 1), 1.0) and Rules.hall_speedup(data, 2) < 1.0, "Hall speeds up building")
+
+	var village := {
+		"levels": {"elder_hall": 1, "farm": 2, "storehouse": 1},
+		"plots": {"c10": {"building": null, "level": 0}, "f6": {"building": "farm", "level": 2}, "c0": {"building": "elder_hall", "level": 1},
+			"f10": {"building": "iron_mine", "level": 0}, "c1": {"building": "storehouse", "level": 1}, "c2": {"building": null, "level": 0},
+			"f2": {"building": "woodcutter", "level": 0}, "c3": {"building": null, "level": 0}},
+		"queue": [{"plot": "f6", "building": "farm", "targetLevel": 3}, {"plot": "f6", "building": "farm", "targetLevel": 4},
+			{"plot": "c2", "building": "barracks", "targetLevel": 1}],
+	}
+	_check(Rules.plot_ids(village) == ["f2", "f6", "f10", "c0", "c1", "c2", "c3", "c10"], "plots in layout order: %s" % [Rules.plot_ids(village)])
+	_check(Rules.planned_plot(village, "f6") == {"building": "farm", "level": 4}, "planned level counts the queue")
+	_check(Rules.planned_plot(village, "c2") == {"building": "barracks", "level": 1}, "queued construction fills the slot")
+	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
+	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
+	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
+	_check(Rules.constructible(data, village) == ["scout_lodge"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
+	var farm: Dictionary = data.buildings.buildings.farm
+	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
+	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
+
+	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12)
+	_check(rects.size() == 24, "a rect per plot")
+	for a in rects:
+		_check(VillageView.plot_at(rects, (rects[a] as Rect2).get_center()) == a, "tapping %s picks it" % a)
+		for b in rects:
+			if a < b:
+				_check(not (rects[a] as Rect2).intersects(rects[b]), "%s and %s do not overlap" % [a, b])
+	_check(VillageView.plot_at(rects, Vector2(2, 2)) == "", "a tap on open ground picks nothing")
 
 
 func _test_training() -> void:

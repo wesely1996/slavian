@@ -16,6 +16,8 @@ const resourcesSchema = z.object({
 
 const buildingSchema = z.object({
   name: z.string(),
+  // 'field': a resource plot around the village; 'center': a building slot.
+  kind: z.enum(['field', 'center']),
   maxLevel: z.number().int().positive(),
   cost: resourcesSchema,
   costGrowth: z.number().min(1),
@@ -37,7 +39,13 @@ const buildingsFileSchema = z.object({
     startingResources: resourcesSchema,
     baseProductionPerHour: resourcesSchema,
     baseCapacity: z.number().positive(),
-    queueLimit: z.number().int().positive(),
+    fields: z.array(z.string()).min(1),
+    centerSlots: z.number().int().positive(),
+    slotsUnlockedAtStart: z.number().int().positive(),
+    slotsPerHallLevel: z.number().int().nonnegative(),
+    baseQueueLimit: z.number().int().positive(),
+    hallLevelsPerQueueSlot: z.number().int().positive(),
+    hallBuildSpeedup: z.number().positive().max(1),
   }),
   buildings: z.record(z.string(), buildingSchema),
 });
@@ -209,6 +217,11 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
+  }
+  const { buildings } = data.buildings;
+  if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  for (const field of data.buildings.village.fields) {
+    if (buildings[field]?.kind !== 'field') throw new Error(`Village field "${field}" is not a field building`);
   }
   for (const [id, unit] of Object.entries(data.units.units)) {
     if (!data.buildings.buildings[unit.building]) {

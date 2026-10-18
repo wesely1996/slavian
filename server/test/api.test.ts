@@ -327,6 +327,31 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * 10);
   });
 
+  it('builds on plots: fields, free slots and the Elder\'s Hall', async () => {
+    const lada = await guest('Lada');
+    const created = await call('POST', '/v1/worlds', lada.token, { name: 'Plots', maxPlayers: 1, speed: 10 });
+    const started = await call('POST', `/v1/worlds/${created.body.id}/start`, lada.token);
+    const village = started.body.villages[0];
+    expect(village.plots.c0).toEqual({ building: 'elder_hall', level: 1 });
+    expect(village.plots.f0.level).toBe(0);
+    const build = (body: object) => call('POST', `/v1/villages/${village.id}/build`, lada.token, body);
+
+    expect((await build({})).status).toBe(400);
+    expect((await build({ plot: 'zz' })).status).toBe(400);
+    expect((await build({ plot: 'c9', building: 'barracks' })).body.message).toMatch(/locked/);
+    const field = await build({ plot: 'f4' });
+    expect(field.status).toBe(200);
+    expect(field.body.village.queue[0]).toMatchObject({ plot: 'f4', building: 'quarry', targetLevel: 1 });
+    const slot = await build({ plot: 'c3', building: 'barracks' });
+    expect(slot.body.village.queue[1]).toMatchObject({ plot: 'c3', building: 'barracks', targetLevel: 1 });
+
+    now = new Date(slot.body.village.queue[1].completesAt);
+    await tick(db, now, scheduler);
+    const world = await call('GET', `/v1/worlds/${created.body.id}`, lada.token);
+    expect(world.body.villages[0].plots.f4).toEqual({ building: 'quarry', level: 1 });
+    expect(world.body.villages[0].plots.c3).toEqual({ building: 'barracks', level: 1 });
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');
