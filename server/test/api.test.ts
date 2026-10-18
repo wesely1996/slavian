@@ -172,6 +172,46 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.body.villages[0].training).toEqual([]);
   });
 
+  it('announces waves when a world starts and runs them through the scheduler', async () => {
+    const ratimir = await guest('Ratimir');
+    const created = await call('POST', '/v1/worlds', ratimir.token, { name: 'Waves', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, ratimir.token);
+    const village = started.body.villages[0];
+
+    const announced = started.body.waves;
+    expect(announced.map((w: { index: number }) => w.index)).toEqual([0, 1]);
+    expect(announced[0]).toMatchObject({ front: 'north', status: 'scheduled', path: null, targetVillageId: null });
+    expect(['Low', 'Moderate', 'High', 'Severe']).toContain(announced[0].threat);
+    // Composition stays secret.
+    expect(JSON.stringify(started.body)).not.toMatch(/composition|grey_wolf|leshy/);
+    // Grace period: one week of game time, at 10x speed.
+    expect(new Date(announced[0].spawnAt).getTime() - new Date(started.body.startedAt).getTime()).toBe((168 * 3_600_000) / 10);
+
+    const getWaves = async () => (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body.waves;
+
+    now = new Date(announced[0].spawnAt);
+    await tick(db, now, scheduler);
+    let waves = await getWaves();
+    expect(waves.map((w: { index: number }) => w.index)).toEqual([0, 1, 2]);
+    const marching = waves[0];
+    expect(marching.status).toBe('marching');
+    expect(marching.targetVillageId).toBe(village.id);
+    expect(marching.path.at(-1).slice(0, 2)).toEqual([village.q, village.r]);
+    expect(new Date(marching.arrivesAt).getTime()).toBe(now.getTime() + marching.path.at(-1)[2]);
+
+    now = new Date(marching.arrivesAt);
+    await tick(db, now, scheduler);
+    waves = await getWaves();
+    expect(waves[0]).toMatchObject({ index: 0, status: 'arrived' });
+    expect(new Date(waves[0].endsAt).getTime()).toBe(now.getTime() + (18 * 3_600_000) / 10);
+
+    now = new Date(waves[0].endsAt);
+    await tick(db, now, scheduler);
+    waves = await getWaves();
+    expect(waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

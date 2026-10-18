@@ -8,7 +8,8 @@ const CHANNEL_PREFIX = 'world_events.';
 
 export type WorldEvent =
   | { worldId: number; type: 'world' }
-  | { worldId: number; type: 'village'; villageId: number };
+  | { worldId: number; type: 'village'; villageId: number }
+  | { worldId: number; type: 'waves' };
 
 export async function notifyWorld(client: DbClient, event: WorldEvent): Promise<void> {
   await client.query('SELECT pg_notify($1 || current_schema(), $2)', [CHANNEL_PREFIX, JSON.stringify(event)]);

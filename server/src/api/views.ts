@@ -4,6 +4,7 @@ import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
+import { listActiveWaves, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
 
 export interface VillageView {
@@ -60,6 +61,29 @@ export function villageView(village: Village): VillageView {
   };
 }
 
+// What everyone knows about a wave. Its composition stays hidden until
+// scouted (M1 step 4).
+export function waveView(wave: Wave) {
+  return {
+    id: wave.id,
+    index: wave.index,
+    front: wave.front,
+    status: wave.status,
+    threat: wave.threat,
+    spawnAt: wave.spawnAt.toISOString(),
+    spawn: wave.spawn,
+    targetVillageId: wave.targetVillageId,
+    // Each step: [q, r, ms after spawnAt when the horde enters that hex].
+    path: wave.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
+    arrivesAt: wave.arrivesAt?.toISOString() ?? null,
+    endsAt: wave.endsAt?.toISOString() ?? null,
+  };
+}
+
+export async function wavesView(client: DbClient, worldId: number) {
+  return (await listActiveWaves(client, worldId)).map(waveView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -76,7 +100,9 @@ export function worldSummary(world: World) {
 // Everything a member needs to render the world. Co-op: every member sees
 // every village in full.
 export async function worldView(client: DbClient, world: World) {
-  const [members, villages] = await Promise.all([listMembers(client, world.id), listVillages(client, world.id)]);
+  const members = await listMembers(client, world.id);
+  const villages = await listVillages(client, world.id);
+  const waves = await wavesView(client, world.id);
   const map =
     world.status === 'lobby'
       ? null
@@ -85,6 +111,7 @@ export async function worldView(client: DbClient, world: World) {
     ...worldSummary(world),
     members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName })),
     villages: villages.map(villageView),
+    waves,
     map,
   };
 }

@@ -16,6 +16,7 @@ import {
   type World,
 } from '../db/worlds.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
+import { announceFirstWaves } from '../scheduler/waves.js';
 import { lockWorld } from '../scheduler/world.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
@@ -102,7 +103,9 @@ export async function startWorldCommand(
         state: newVillage(deps.data, input.now, world.speed),
       });
     }
+    const started = await getWorld(client, world.id);
+    await announceFirstWaves(client, deps.data, started);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
-    return getWorld(client, world.id);
+    return started;
   });
 }

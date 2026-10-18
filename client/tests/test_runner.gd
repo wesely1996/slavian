@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_time_util()
 	_test_rules()
 	_test_training()
+	_test_wave_math()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -119,3 +120,18 @@ func _test_everything_loads(dir_path: String) -> void:
 			_check(scene != null and scene.can_instantiate(), "%s loads" % path)
 	for sub in DirAccess.get_directories_at(dir_path):
 		_test_everything_loads(dir_path.path_join(sub))
+
+
+func _test_wave_math() -> void:
+	var wave := {"status": "marching", "spawnAt": "2026-03-01T00:00:00.000Z", "path": [[0, -8, 0], [0, -7, 1000], [1, -7, 3000]]}
+	var t0 := TimeUtil.parse_iso(wave.spawnAt)
+	var start := WaveMath.progress(wave, t0)
+	_check(start.from == Vector2i(0, -8) and start.to == Vector2i(0, -7) and is_equal_approx(start.t, 0.0), "starts at the spawn hex")
+	var mid := WaveMath.progress(wave, t0 + 2.0)
+	_check(mid.from == Vector2i(0, -7) and mid.to == Vector2i(1, -7) and is_equal_approx(mid.t, 0.5), "halfway along the second leg")
+	_check(WaveMath.current_hex(wave, t0 + 1.8) == Vector2i(0, -7), "still on the hex it is leaving")
+	_check(WaveMath.current_hex(wave, t0 + 2.6) == Vector2i(1, -7), "on the next hex past the midpoint")
+	var done := WaveMath.progress(wave, t0 + 10.0)
+	_check(done.to == Vector2i(1, -7) and is_equal_approx(done.t, 1.0), "stops at the target")
+	_check(WaveMath.progress({"status": "scheduled", "spawnAt": wave.spawnAt, "path": null}, t0).is_empty(), "no position before spawning")
+	_check(WaveMath.visible_waves([{"status": "scheduled"}, wave, {"status": "arrived"}]).size() == 2, "scheduled waves are not on the map")

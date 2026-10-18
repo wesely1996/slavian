@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import { FRONTS } from '../sim/mapgen.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
 
 // Shared game data lives in /data at the repository root.
@@ -91,7 +92,43 @@ const unitsFileSchema = z.object({
   units: z.record(z.string(), unitSchema),
 });
 
+const enemyUnitSchema = z.object({
+  name: z.string(),
+  weight: z.number().positive(),
+  minWave: z.number().int().nonnegative(),
+  attack: z.number().nonnegative(),
+  defense: z.number().nonnegative(),
+  speed: z.number().positive(),
+});
+
+const enemiesFileSchema = z.object({
+  version: z.number().int(),
+  fronts: z.partialRecord(
+    z.enum(FRONTS),
+    z.object({
+      faction: z.string(),
+      spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
+      units: z.record(z.string(), enemyUnitSchema),
+    }),
+  ),
+});
+
+const wavesFileSchema = z.object({
+  version: z.number().int(),
+  enabledFronts: z.array(z.enum(FRONTS)).min(1),
+  graceHours: z.number().nonnegative(),
+  intervalHours: z.tuple([z.number().positive(), z.number().positive()]),
+  upcoming: z.number().int().positive(),
+  rampageHours: z.number().positive(),
+  baseUnits: z.number().positive(),
+  growthPerWave: z.number().min(1),
+  perExtraPlayer: z.number().nonnegative(),
+  threatLevels: z.array(z.object({ name: z.string(), maxUnits: z.number().int().positive().nullable() })).min(1),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type EnemiesData = z.infer<typeof enemiesFileSchema>;
+export type WavesData = z.infer<typeof wavesFileSchema>;
 export type UnitDef = z.infer<typeof unitSchema>;
 export type UnitsData = z.infer<typeof unitsFileSchema>;
 export type BuildingsData = z.infer<typeof buildingsFileSchema>;
@@ -102,6 +139,8 @@ export interface GameData {
   buildings: BuildingsData;
   terrain: TerrainData;
   units: UnitsData;
+  enemies: EnemiesData;
+  waves: WavesData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -110,7 +149,12 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     buildings: buildingsFileSchema.parse(read('buildings.json')),
     terrain: terrainFileSchema.parse(read('terrain.json')),
     units: unitsFileSchema.parse(read('units.json')),
+    enemies: enemiesFileSchema.parse(read('enemies.json')),
+    waves: wavesFileSchema.parse(read('waves.json')),
   };
+  for (const front of data.waves.enabledFronts) {
+    if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
+  }
   for (const [id, unit] of Object.entries(data.units.units)) {
     if (!data.buildings.buildings[unit.building]) {
       throw new Error(`Unit "${id}" is trained in unknown building "${unit.building}"`);

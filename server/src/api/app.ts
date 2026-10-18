@@ -84,6 +84,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     buildings: scheduler.data.buildings,
     terrain: scheduler.data.terrain,
     units: scheduler.data.units,
+    enemies: scheduler.data.enemies,
+    waves: scheduler.data.waves,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
