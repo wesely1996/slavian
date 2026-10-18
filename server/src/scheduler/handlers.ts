@@ -7,6 +7,7 @@ import { armyHandlers } from './armies.js';
 import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
 import { expeditionHandlers } from './expeditions.js';
+import { fieldHandlers } from './field.js';
 import { heroHandlers } from './heroes.js';
 import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
@@ -69,4 +70,5 @@ export const handlers: HandlerRegistry = {
   ...orderHandlers,
   ...noticeHandlers,
   ...armyHandlers,
+  ...fieldHandlers,
 };

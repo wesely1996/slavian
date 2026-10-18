@@ -14,6 +14,7 @@ import { planMarch, planWave, type PlannedWave, type WaveContext } from '../sim/
 import { startBattle } from './battles.js';
 import { planWaveWarning } from './notices.js';
 import { planRaids } from './outposts.js';
+import { planIntercepts } from './field.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -86,6 +87,7 @@ export const waveHandlers: HandlerRegistry = {
     const payload: WavePayload = { waveId: wave.id };
     await scheduleEvent(client, world.id, march.arrivesAt, 'wave_arrive', payload);
     await planRaids(client, data, world, wave.id);
+    await planIntercepts(client, world, wave.id);
     await planWaveWarning(client, data, world, wave.id, event.dueAt);
 
     const last = (await lastWave(client, world.id))!;
@@ -97,7 +99,8 @@ export const waveHandlers: HandlerRegistry = {
   // (the Holy City, until it has defenses) it camps for the rampage time.
   async wave_arrive({ client, data, world }, event) {
     const wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
-    if (wave.status !== 'marching') return;
+    // A horde held up in a field battle arrives later than first planned.
+    if (wave.status !== 'marching' || (wave.arrivesAt && event.dueAt < wave.arrivesAt)) return;
     if (wave.targetVillageId !== null) {
       await startBattle(client, data, world, wave, wave.targetVillageId, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'waves' });

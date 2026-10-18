@@ -310,7 +310,24 @@ const armiesFileSchema = z.object({
   }),
 });
 
+const fieldFileSchema = z.object({
+  version: z.number().int(),
+  ambush: z.object({ terrain: z.array(z.enum(TERRAIN_IDS)), prepMinutes: z.number().nonnegative(), bonus: z.number().nonnegative() }),
+  choke: z.object({
+    minBlockedNeighbors: z.number().int().min(1).max(6),
+    attackerFactor: z.number().positive().max(1),
+    holdTheLineDefense: z.number().nonnegative(),
+  }),
+  fort: z.object({
+    range: z.number().int().positive(),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+    defenseBonus: z.number().nonnegative(),
+  }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type FieldData = z.infer<typeof fieldFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -343,6 +360,7 @@ export interface GameData {
   orders: OrdersData;
   notifications: NotificationsData;
   armies: ArmiesData;
+  field: FieldData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -362,6 +380,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
     armies: armiesFileSchema.parse(read('armies.json')),
+    field: fieldFileSchema.parse(read('field.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

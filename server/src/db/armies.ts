@@ -10,7 +10,11 @@ export interface Army {
   worldId: number;
   ownerAccountId: number | null;
   homeVillageId: number;
-  targetVillageId: number;
+  // null: holding the hex (targetQ, targetR).
+  targetVillageId: number | null;
+  targetQ: number;
+  targetR: number;
+  heroAccountId: number | null;
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
@@ -29,7 +33,10 @@ interface ArmyRow {
   world_id: number;
   owner_account_id: number | null;
   home_village_id: number;
-  target_village_id: number;
+  target_village_id: number | null;
+  target_q: number;
+  target_r: number;
+  hero_account_id: number | null;
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
@@ -50,6 +57,9 @@ function fromRow(row: ArmyRow): Army {
     ownerAccountId: row.owner_account_id,
     homeVillageId: row.home_village_id,
     targetVillageId: row.target_village_id,
+    targetQ: row.target_q,
+    targetR: row.target_r,
+    heroAccountId: row.hero_account_id,
     orders: row.orders,
     units: row.units,
     status: row.status,
@@ -66,12 +76,29 @@ function fromRow(row: ArmyRow): Army {
 
 export async function insertArmy(
   client: DbClient,
-  a: Pick<Army, 'worldId' | 'ownerAccountId' | 'homeVillageId' | 'targetVillageId' | 'orders' | 'units' | 'path' | 'departsAt' | 'arrivesAt'>,
+  a: Pick<
+    Army,
+    'worldId' | 'ownerAccountId' | 'homeVillageId' | 'targetVillageId' | 'targetQ' | 'targetR' | 'heroAccountId' | 'orders' | 'units' | 'path' | 'departsAt' | 'arrivesAt'
+  >,
 ): Promise<Army> {
   const { rows } = await client.query<ArmyRow>(
-    `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [a.worldId, a.ownerAccountId, a.homeVillageId, a.targetVillageId, a.orders, JSON.stringify(a.units), JSON.stringify(a.path), a.departsAt, a.arrivesAt],
+    `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at,
+       target_q, target_r, hero_account_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+    [
+      a.worldId,
+      a.ownerAccountId,
+      a.homeVillageId,
+      a.targetVillageId,
+      a.orders,
+      JSON.stringify(a.units),
+      JSON.stringify(a.path),
+      a.departsAt,
+      a.arrivesAt,
+      a.targetQ,
+      a.targetR,
+      a.heroAccountId,
+    ],
   );
   return fromRow(rows[0]!);
 }
@@ -95,6 +122,16 @@ export async function armiesAt(client: DbClient, villageId: number, status: Army
   const { rows } = await client.query<ArmyRow>(
     'SELECT * FROM armies WHERE target_village_id = $1 AND status = ANY($2) ORDER BY id',
     [villageId, status],
+  );
+  return rows.map(fromRow);
+}
+
+// Armies holding a hex (not at a village).
+export async function armiesHolding(client: DbClient, worldId: number, q: number, r: number, status: ArmyStatus[]): Promise<Army[]> {
+  const { rows } = await client.query<ArmyRow>(
+    `SELECT * FROM armies WHERE world_id = $1 AND target_q = $2 AND target_r = $3 AND target_village_id IS NULL
+       AND status = ANY($4) ORDER BY id`,
+    [worldId, q, r, status],
   );
   return rows.map(fromRow);
 }

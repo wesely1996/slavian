@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { listForts, type Fort } from '../db/forts.js';
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
@@ -145,6 +146,9 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
     id: battle.id,
     waveId: battle.waveId,
     villageId: battle.villageId,
+    q: battle.q,
+    r: battle.r,
+    setup: battle.setup,
     status: battle.status,
     round: battle.round,
     attackerStance: battle.attackerStance,
@@ -271,6 +275,8 @@ export function heroView(data: GameData, hero: Hero) {
     status: hero.status,
     // Where it stands (or, travelling, where it is heading).
     villageId: hero.villageId,
+    // Leading this army (status 'with_army').
+    armyId: hero.armyId,
     level: hero.level,
     xp: hero.xp,
     xpToNext: hero.level >= data.heroes.maxLevel ? null : xpToNext(data, hero.level),
@@ -331,6 +337,8 @@ export function armyView(army: Army) {
     ownerAccountId: army.ownerAccountId,
     homeVillageId: army.homeVillageId,
     targetVillageId: army.targetVillageId,
+    target: [army.targetQ, army.targetR],
+    heroAccountId: army.heroAccountId,
     orders: army.orders,
     units: army.units,
     status: army.status,
@@ -346,6 +354,22 @@ export function armyView(army: Army) {
 
 export async function armiesView(client: DbClient, worldId: number) {
   return (await listArmies(client, worldId)).map(armyView);
+}
+
+export function fortView(fort: Fort) {
+  return {
+    id: fort.id,
+    ownerAccountId: fort.ownerAccountId,
+    villageId: fort.villageId,
+    q: fort.q,
+    r: fort.r,
+    status: fort.status,
+    completesAt: fort.completesAt.toISOString(),
+  };
+}
+
+export async function fortsView(client: DbClient, worldId: number) {
+  return (await listForts(client, worldId)).map(fortView);
 }
 
 export function worldSummary(world: World) {
@@ -375,6 +399,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const heroes = await heroesView(client, data, world.id);
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
+  const forts = await fortsView(client, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -393,6 +418,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     heroes,
     orders,
     armies,
+    forts,
     ...logistics,
     map,
   };

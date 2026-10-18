@@ -121,3 +121,12 @@ export async function setWaveStrength(client: DbClient, id: number, composition:
 export async function endWave(client: DbClient, id: number, status: 'defeated' | 'dispersed', at: Date): Promise<void> {
   await client.query('UPDATE waves SET status = $2, ends_at = $3 WHERE id = $1', [id, status, at]);
 }
+
+// After a field battle the horde won: back on the road, later than planned.
+export async function resumeMarch(client: DbClient, id: number, path: PathStep[], arrivesAt: Date): Promise<void> {
+  await client.query(`UPDATE waves SET status = 'marching', path = $2, arrives_at = $3 WHERE id = $1`, [
+    id,
+    JSON.stringify(path),
+    arrivesAt,
+  ]);
+}

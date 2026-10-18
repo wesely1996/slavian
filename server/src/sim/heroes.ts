@@ -5,7 +5,7 @@ import { RuleError } from '../errors.js';
 import { createRng } from './rng.js';
 import type { Bonuses } from './research.js';
 
-export type HeroStatus = 'home' | 'traveling' | 'wounded';
+export type HeroStatus = 'home' | 'traveling' | 'wounded' | 'with_army';
 
 export interface HeroState {
   readonly name: string;
