@@ -58,16 +58,25 @@ if [[ ! -f "$client/android/.build_version" ]]; then
   echo "${version}.stable" > "$client/android/.build_version"
 fi
 
+# Godot's template uses the plugins DSL (no buildscript block): declare the
+# Google Services plugin's version in settings.gradle and apply it in the
+# app's plugins block.
+settings="$build/settings.gradle"
 gradle="$build/build.gradle"
-if ! grep -q 'com.google.gms:google-services' "$gradle"; then
-  awk -v dep="        classpath 'com.google.gms:google-services:${google_services_plugin}'" '
-    !done && /^[[:space:]]*dependencies[[:space:]]*\{/ { print; print dep; done = 1; next }
+# Adds a line at the end of the first plugins { } block (after the Android
+# plugin, which Google Services needs applied first).
+add_to_plugins() { # file, line to add, marker that it is already there
+  grep -q "$3" "$1" && return
+  awk -v line="$2" '
+    !done && /^[[:space:]]*plugins[[:space:]]*\{/ { inside = 1 }
+    inside && /^[[:space:]]*\}/ { print line; inside = 0; done = 1 }
     { print }
-  ' "$gradle" > "$gradle.new"
-  mv "$gradle.new" "$gradle"
-  printf "\napply plugin: 'com.google.gms.google-services'\n" >> "$gradle"
-fi
-grep -q "classpath 'com.google.gms:google-services" "$gradle" \
-  || { echo "Could not add the Google Services plugin to $gradle" >&2; exit 1; }
+  ' "$1" > "$1.new"
+  mv "$1.new" "$1"
+}
+add_to_plugins "$settings" "        id 'com.google.gms.google-services' version '${google_services_plugin}'" "com.google.gms.google-services"
+add_to_plugins "$gradle" "    id 'com.google.gms.google-services'" "com.google.gms.google-services"
+grep -q "id 'com.google.gms.google-services' version" "$settings" && grep -q "id 'com.google.gms.google-services'" "$gradle" \
+  || { echo "Could not add the Google Services plugin to the Gradle template in $build" >&2; exit 1; }
 
 echo "Firebase plugin ${plugin_version} and the Gradle template are ready in client/"
