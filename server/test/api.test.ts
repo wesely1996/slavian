@@ -696,6 +696,66 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.heroes[0]).toMatchObject({ status: 'home', woundedUntil: null });
   });
 
+  it('runs standing orders: repeat training, rebuilding raided outposts, surplus to the vault', async () => {
+    const lada = await guest('Ivo');
+    const created = await call('POST', '/v1/worlds', lada.token, { name: 'Orders', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, lada.token);
+    const village = started.body.villages[0];
+    const order = (body: object) => call('POST', `/v1/villages/${village.id}/orders`, lada.token, body);
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, lada.token)).body;
+    const checkMs = (scheduler.data.orders.checkMinutes * 60_000) / 10;
+
+    // Repeat training: waits for a barracks, then keeps 8 spearmen, 3 at a time.
+    const train = await order({ kind: 'train', unit: 'spearman', batch: 3, target: 8 });
+    expect(train.body.order).toMatchObject({ kind: 'train', unit: 'spearman', lastResult: expect.stringMatching(/Waiting: Spearman needs Barracks/) });
+    expect((await order({ kind: 'train', unit: 'spearman', batch: 2, target: 4 })).body.message).toMatch(/already has that order/);
+    const barracks = await call('POST', `/v1/villages/${village.id}/build`, lada.token, { building: 'barracks' });
+    now = new Date(barracks.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    await db.query(
+      `UPDATE villages SET amounts = '{"wood": 900, "stone": 900, "grain": 900, "iron": 900}', settled_at = $2 WHERE id = $1`,
+      [village.id, now],
+    );
+    for (let i = 0; i < 6; i++) {
+      now = new Date(now.getTime() + checkMs);
+      await tick(db, now, scheduler);
+    }
+    let w = await world();
+    const fed = (w.villages[0].garrison.spearman ?? 0) + w.villages[0].training.reduce((n: number, b: { count: number }) => n + b.count, 0);
+    expect(fed).toBe(8);
+    expect(w.orders[0].lastResult).toMatch(/8 Spearman kept|Training/);
+
+    // Surplus: everything above 50% of storage goes to the vault.
+    const yard = await call('POST', `/v1/villages/${village.id}/build`, lada.token, { building: 'caravan_yard' });
+    now = new Date(yard.body.village.queue.at(-1).completesAt);
+    await tick(db, now, scheduler);
+    await db.query(
+      `UPDATE villages SET amounts = '{"wood": 900, "stone": 200, "grain": 200, "iron": 200}', settled_at = $2 WHERE id = $1`,
+      [village.id, now],
+    );
+    const surplus = await order({ kind: 'surplus', share: 0.5 });
+    expect(surplus.body.order.lastResult).toMatch(/Sent \d+ to the vault/);
+    w = await world();
+    const trip = w.caravans.find((c: { destinationVillageId: number | null; status: string }) => c.destinationVillageId === null && c.status === 'outbound');
+    expect(trip.cargo.wood).toBeGreaterThan(350);
+
+    // Rebuild: a raided outpost goes back up to its best level.
+    await db.query(
+      `UPDATE villages SET plots = plots || jsonb_build_object('o9,9', jsonb_build_object('building', 'outpost', 'level', 0, 'terrain', 'plains', 'peak', 1)),
+         amounts = '{"wood": 900, "stone": 900, "grain": 900, "iron": 900}', settled_at = $2 WHERE id = $1`,
+      [village.id, now],
+    );
+    const rebuild = await order({ kind: 'rebuild' });
+    expect(rebuild.body.order.lastResult).toBe('Rebuilding the outpost at (9, 9)');
+    expect(rebuild.body.village.queue.some((q: { plot: string }) => q.plot === 'o9,9')).toBe(true);
+
+    // Cancelled orders stop.
+    const cancel = await call('POST', `/v1/villages/${village.id}/orders/${train.body.order.id}/cancel`, lada.token);
+    expect(cancel.status).toBe(200);
+    expect((await world()).orders.map((o: { kind: string }) => o.kind).sort()).toEqual(['rebuild', 'surplus']);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

@@ -279,7 +279,16 @@ const heroesFileSchema = z.object({
   sets: z.record(z.string(), z.object({ name: z.string(), items: z.array(z.string()).min(2), effects: effectsSchema })),
 });
 
+const ordersFileSchema = z.object({
+  version: z.number().int(),
+  checkMinutes: z.number().positive(),
+  maxPerVillage: z.number().int().positive(),
+  minSurplus: z.number().nonnegative(),
+  surplusShare: z.object({ min: z.number().min(0).max(1), max: z.number().min(0).max(1) }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
@@ -306,6 +315,7 @@ export interface GameData {
   expansion: ExpansionData;
   research: ResearchData;
   heroes: HeroesData;
+  orders: OrdersData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -322,6 +332,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
+    orders: ordersFileSchema.parse(read('orders.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
