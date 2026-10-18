@@ -22,7 +22,10 @@ import {
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
 import { completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
+import { heroAt } from '../db/heroes.js';
+import { combine, heroBonuses } from '../sim/heroes.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
+import { heroAfterBattle } from './heroes.js';
 
 export const battlePayload = z.object({ battleId: z.number().int() });
 export type BattlePayload = z.infer<typeof battlePayload>;
@@ -66,10 +69,13 @@ export const battleHandlers: HandlerRegistry = {
     const state = completeTraining(village.state, at);
 
     const round = battle.round + 1;
+    // The hero standing in the village leads its garrison.
+    const hero = await heroAt(client, village.id);
+    const bonuses = hero ? combine(state.bonuses, heroBonuses(data, hero)) : state.bonuses;
     const result = resolveRound(
       data,
       { units: wave.composition, stance: battle.attackerStance, stats: enemyStats(data, wave.front), home: false },
-      { units: state.garrison, stance: state.stance, stats: playerStats(data, state.bonuses, true), home: true },
+      { units: state.garrison, stance: state.stance, stats: playerStats(data, bonuses, true), home: true },
       battleRng(world.seed, battle.id, round),
     );
     const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
@@ -99,7 +105,7 @@ export const battleHandlers: HandlerRegistry = {
       const payload: BattlePayload = { battleId: battle.id };
       await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
     } else if (outcome === 'raided') {
-      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, villageState.bonuses);
+      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses);
       villageState = plunder(villageState, loot, at);
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'raided', at, loot });
@@ -111,6 +117,10 @@ export const battleHandlers: HandlerRegistry = {
     }
 
     await saveVillageState(client, village.id, villageState);
+    if (hero && outcome !== 'ongoing') {
+      const kills = total(battle.attackerInitial) - total(attackerNow);
+      await heroAfterBattle(client, data, world, hero, { kills, won: outcome !== 'raided', battleId: battle.id, at });
+    }
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'battles' });
     if (outcome !== 'ongoing') await notifyWorld(client, { worldId: world.id, type: 'waves' });

@@ -11,6 +11,7 @@ signal raids_changed
 signal caravans_changed
 signal expeditions_changed
 signal research_changed
+signal heroes_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -32,6 +33,8 @@ var vault: Dictionary = {}
 var expeditions: Array = []
 ## Everyone's research: {accountId, tech, status, completesAt, ...}.
 var research: Array = []
+## Every player's hero (see server heroView).
+var heroes: Array = []
 ## Which of your villages the screens show (0: the first).
 var current_village_id := 0
 
@@ -80,6 +83,7 @@ func set_world(new_world: Dictionary) -> void:
 	caravans = new_world.get("caravans", [])
 	expeditions = new_world.get("expeditions", [])
 	research = new_world.get("research", [])
+	heroes = new_world.get("heroes", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -116,6 +120,32 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_heroes(world_id_: int, new_heroes: Array) -> void:
+	if world_id_ != world_id():
+		return
+	heroes = new_heroes
+	heroes_changed.emit()
+
+
+func my_hero() -> Dictionary:
+	return hero_of(my_account_id())
+
+
+func hero_of(account_id: int) -> Dictionary:
+	for hero in heroes:
+		if int(hero.accountId) == account_id:
+			return hero
+	return {}
+
+
+## The hero standing in a village (home or wounded), if any.
+func hero_at(village_id: int) -> Dictionary:
+	for hero in heroes:
+		if hero.villageId != null and int(hero.villageId) == village_id and hero.status != "traveling":
+			return hero
+	return {}
 
 
 func set_research(world_id_: int, new_research: Array) -> void:

@@ -25,6 +25,7 @@ func _initialize() -> void:
 	_test_caravans()
 	_test_expansion()
 	_test_research()
+	_test_heroes()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -304,3 +305,11 @@ func _test_research() -> void:
 	_check(ResearchRules.problem(data, "spear_drill", 2, mine.done, false) == "Known.", "known")
 	_check(is_equal_approx(ResearchRules.time_factor({"buildTime": -0.1}, "buildTime"), 0.9) and ResearchRules.time_factor({"buildTime": -3.0}, "buildTime") == 0.1, "time factor")
 	_check(CaravanMath.needed({"logistics": {"caravan": {"capacity": 500}}}, {"wood": 600}, {"caravanCapacity": 0.25}) == 1, "pack harnesses")
+
+
+func _test_heroes() -> void:
+	_check(HeroText.effects({"attack.all": 0.08, "lootTaken": -0.15}) == "+8% attack, −15% loot taken", "hero effects: %s" % HeroText.effects({"attack.all": 0.08, "lootTaken": -0.15}))
+	_check(HeroText.effects({}) == "", "no effects")
+	var hero := {"name": "Vasilisa", "level": 3, "status": "home", "villageId": 4}
+	_check(HeroText.whereabouts(hero, 4, "Vesna", 0.0) == "Hero Vasilisa (Lv 3) leads this garrison", "hero at home")
+	_check(HeroText.whereabouts(hero, 5, "Vesna", 0.0) == "Hero Vasilisa (Lv 3) stands in Vesna", "hero elsewhere")

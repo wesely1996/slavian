@@ -2,6 +2,7 @@
 // writes the shared report; scout_return brings the survivors home.
 import { z } from 'zod';
 import { notifyWorld } from '../db/notify.js';
+import { effectiveBonuses } from '../db/heroes.js';
 import { loadMission, markMissionDone, recordReport } from '../db/scouting.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { loadWave } from '../db/waves.js';
@@ -22,7 +23,7 @@ export const scoutingHandlers: HandlerRegistry = {
     const village = await loadVillage(client, mission.villageId);
     const survivors = dispersed
       ? mission.sent
-      : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id, village.state.bonuses);
+      : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id, await effectiveBonuses(client, data, village));
     const report = scoutReport(data, {
       front: wave.front,
       composition: wave.composition,

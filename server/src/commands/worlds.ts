@@ -3,6 +3,7 @@ import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import type { Account } from '../db/accounts.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db } from '../db/pool.js';
+import { ensureHeroes } from '../db/heroes.js';
 import { insertVillage } from '../db/villages.js';
 import {
   addMember,
@@ -103,6 +104,7 @@ export async function startWorldCommand(
         state: newVillage(deps.data, input.now, world.speed),
       });
     }
+    await ensureHeroes(client, deps.data, world.id, world.seed);
     const started = await getWorld(client, world.id);
     await announceFirstWaves(client, deps.data, started);
     await notifyWorld(client, { worldId: world.id, type: 'world' });

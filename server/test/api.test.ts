@@ -602,6 +602,88 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await research('felling_axes')).body.message).toMatch(/already known/);
   });
 
+  it('gives each player a hero who levels up, wears gear, travels and gets wounded', async () => {
+    const rada = await guest('Rada');
+    const created = await call('POST', '/v1/worlds', rada.token, { name: 'Heroes', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, rada.token);
+    const village = started.body.villages[0];
+    expect(started.body.heroes).toEqual([
+      expect.objectContaining({ accountId: rada.accountId, status: 'home', villageId: village.id, level: 1, skillPoints: 0 }),
+    ]);
+    const hero = (path: string, body: object) => call('POST', `/v1/worlds/${worldId}/hero/${path}`, rada.token, body);
+    expect((await hero('rename', { name: 'Vasilisa' })).body.hero.name).toBe('Vasilisa');
+    expect((await hero('skills', { skill: 'shield_bearer' })).body.message).toMatch(/No skill points/);
+    expect((await hero('move', { villageId: village.id })).body.message).toMatch(/already there/);
+
+    // A garrison led by the hero beats the first horde: XP, maybe gear.
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 60}' WHERE id = $1`, [village.id]);
+    now = new Date(started.body.waves[0].spawnAt);
+    await tick(db, now, scheduler);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
+    now = new Date(world.waves[0].arrivesAt);
+    await tick(db, now, scheduler);
+    for (let round = 0; round < 12; round++) {
+      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      await tick(db, now, scheduler);
+    }
+    world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
+    expect(world.battles[0].status).toBe('defended');
+    const veteran = world.heroes[0];
+    const kills = Object.values(world.battles[0].attackerInitial as Record<string, number>).reduce((a, b) => a + b, 0)
+      - Object.values(world.battles[0].attackerNow as Record<string, number>).reduce((a, b) => a + b, 0);
+    expect(veteran.level > 1 || veteran.xp === kills).toBe(true);
+    expect(veteran.status).toBe('home');
+
+    // Skills and gear.
+    await db.query(`UPDATE heroes SET skill_points = 2, inventory = '["bear_cloak", "bear_tooth"]' WHERE world_id = $1`, [worldId]);
+    expect((await hero('skills', { skill: 'shield_bearer' })).body.hero.skills).toEqual({ shield_bearer: 1 });
+    await hero('equip', { item: 'bear_cloak' });
+    const geared = (await hero('equip', { item: 'bear_tooth' })).body.hero;
+    expect(geared.gear).toEqual({ armor: 'bear_cloak', amulet: 'bear_tooth' });
+    expect(geared.bonuses['defense.all']).toBeCloseTo(0.04 + 0.08 + 0.05);
+    expect((await hero('unequip', { slot: 'mount' })).body.message).toMatch(/Nothing in that slot/);
+
+    // Travel to a second village of hers.
+    const { rows } = await db.query<{ id: number }>(
+      `INSERT INTO villages (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, plots)
+       SELECT world_id, owner_account_id, 'Second', q + 4, r, levels, amounts, rates_per_hour, capacity, settled_at, '[]', '{}', '[]', '{}', plots
+       FROM villages WHERE id = $1 RETURNING id`,
+      [village.id],
+    );
+    const second = rows[0]!.id;
+    const moving = (await hero('move', { villageId: second })).body.hero;
+    expect(moving).toMatchObject({ status: 'traveling', villageId: second });
+    expect((await hero('move', { villageId: village.id })).body.message).toMatch(/already on the road/);
+    now = new Date(moving.arrivesAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
+    expect(world.heroes[0]).toMatchObject({ status: 'home', villageId: second, path: null });
+
+    // Raided with the hero at hand: wounded, then healed.
+    await db.query(`UPDATE villages SET garrison = '{}' WHERE id = $1`, [second]);
+    const next = world.waves.find((w: { status: string }) => w.status === 'scheduled');
+    now = new Date(next.spawnAt);
+    await tick(db, now, scheduler);
+    // Whichever village it marched on, make it strike hers.
+    const { rows: marching } = await db.query<{ arrives_at: Date }>(
+      `UPDATE waves SET target_village_id = $2 WHERE id = $1 RETURNING arrives_at`,
+      [next.id, second],
+    );
+    now = new Date(marching[0]!.arrives_at);
+    await tick(db, now, scheduler);
+    now = new Date(now.getTime() + (15 * 60_000) / 10);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
+    expect(world.battles[0]).toMatchObject({ villageId: second, status: 'raided' });
+    expect(world.heroes[0].status).toBe('wounded');
+    expect((await hero('move', { villageId: village.id })).body.message).toMatch(/wounded/);
+    now = new Date(world.heroes[0].woundedUntil);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
+    expect(world.heroes[0]).toMatchObject({ status: 'home', woundedUntil: null });
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

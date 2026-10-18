@@ -58,6 +58,8 @@ func _ready() -> void:
 	Live.caravans_updated.connect(Game.set_logistics)
 	Live.expeditions_updated.connect(Game.set_expeditions)
 	Live.research_updated.connect(Game.set_research)
+	Live.heroes_updated.connect(Game.set_heroes)
+	Game.heroes_changed.connect(_on_waves_changed)
 	Game.research_changed.connect(_on_waves_changed)
 	Game.expeditions_changed.connect(_on_waves_changed)
 	Game.caravans_changed.connect(_on_waves_changed)
@@ -89,6 +91,7 @@ func _exit_tree() -> void:
 	Live.caravans_updated.disconnect(Game.set_logistics)
 	Live.expeditions_updated.disconnect(Game.set_expeditions)
 	Live.research_updated.disconnect(Game.set_research)
+	Live.heroes_updated.disconnect(Game.set_heroes)
 
 
 func _process(delta: float) -> void:
@@ -235,6 +238,9 @@ func _rebuild_panel() -> void:
 	_ticking.clear()
 	if _panel_mode == "threats":
 		_threats_panel()
+		return
+	if _panel_mode == "hero":
+		_hero_panel()
 		return
 	if _view == "village":
 		_village_panel()
@@ -530,6 +536,121 @@ func _start_research(village_id: int, tech: String) -> void:
 	Game.update_village(response.data.village)
 
 
+## Where your hero is, seen from a village, with the way to its panel.
+func _hero_line(village_id: int) -> void:
+	var hero := Game.my_hero()
+	if hero.is_empty():
+		return
+	var row := UI.hbox()
+	var text := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var open := UI.button("Hero", func() -> void:
+		_panel_mode = "hero"
+		_rebuild_panel())
+	open.custom_minimum_size.x = 120
+	row.add_child(open)
+	_panel_body.add_child(row)
+	_tick(text, func() -> String: return HeroText.whereabouts(hero, village_id, Game.village_name(hero.villageId), Game.server_now()))
+
+
+## Your hero: level, skills, gear and journeys.
+func _hero_panel() -> void:
+	var hero := Game.my_hero()
+	if hero.is_empty():
+		return
+	var top := UI.hbox()
+	var title := UI.label("%s  Lv %d" % [hero.name, int(hero.level)], UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UI.button("Close", func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	var status := UI.label("", UI.SMALL_SIZE)
+	_panel_body.add_child(status)
+	_tick(status, func() -> String: return HeroText.whereabouts(hero, -1, Game.village_name(hero.villageId), Game.server_now()))
+	var xp_text := "XP %d / %d" % [int(hero.xp), int(hero.xpToNext)] if hero.xpToNext != null else "Highest level"
+	_panel_body.add_child(UI.label("%s · %d skill point%s · XP comes from enemies slain while leading a garrison" % [xp_text, int(hero.skillPoints), "" if int(hero.skillPoints) == 1 else "s"], UI.SMALL_SIZE, UI.MUTED))
+	var effects := HeroText.effects(hero.bonuses)
+	if effects != "":
+		_panel_body.add_child(UI.label("Adds where it stands: " + effects, UI.SMALL_SIZE, UI.MUTED))
+
+	var data: Dictionary = Game.data.heroes
+	for branch in data.branches:
+		_panel_body.add_child(UI.label(data.branches[branch], UI.HEADING_SIZE))
+		for skill in data.skills:
+			var def: Dictionary = data.skills[skill]
+			if def.branch != branch:
+				continue
+			var rank := int(hero.skills.get(skill, 0))
+			var row := UI.hbox()
+			var info := UI.vbox(2)
+			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			info.add_child(UI.label("%s  %d/%d" % [def.name, rank, int(def.maxRank)]))
+			info.add_child(UI.label(def.description, UI.SMALL_SIZE, UI.MUTED))
+			row.add_child(info)
+			if rank < int(def.maxRank) and int(hero.skillPoints) > 0:
+				var learn := UI.button("+", func() -> void: _hero_action("skills", {"skill": skill}))
+				learn.custom_minimum_size.x = 90
+				row.add_child(learn)
+			_panel_body.add_child(row)
+
+	_panel_body.add_child(UI.label("Gear", UI.HEADING_SIZE))
+	for slot in data.slots:
+		var item: Variant = hero.gear.get(slot)
+		var row := UI.hbox()
+		var label := UI.label("%s: %s" % [String(slot).capitalize(), data.items[item].name if item != null else "—"], UI.SMALL_SIZE)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		if item != null:
+			var off := UI.button("Take off", func() -> void: _hero_action("unequip", {"slot": slot}))
+			off.custom_minimum_size.x = 150
+			row.add_child(off)
+		_panel_body.add_child(row)
+	if hero.inventory.is_empty():
+		_panel_body.add_child(UI.label("Beaten hordes sometimes leave gear behind for a hero who fought them.", UI.SMALL_SIZE, UI.MUTED))
+	for item in hero.inventory:
+		var def: Dictionary = data.items[item]
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label("%s (%s)" % [def.name, def.slot]))
+		info.add_child(UI.label(HeroText.effects(def.effects), UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(info)
+		var wear := UI.button("Wear", func() -> void: _hero_action("equip", {"item": item}))
+		wear.custom_minimum_size.x = 120
+		row.add_child(wear)
+		_panel_body.add_child(row)
+
+	var mine := Game.my_villages()
+	if mine.size() > 1:
+		_panel_body.add_child(UI.label("Send to", UI.HEADING_SIZE))
+		for village in mine:
+			if hero.villageId != null and int(hero.villageId) == int(village.id):
+				continue
+			var target := int(village.id)
+			var go := UI.button(village.name, func() -> void: _hero_action("move", {"villageId": target}))
+			go.disabled = hero.status != "home"
+			_panel_body.add_child(go)
+	var name_edit := UI.line_edit("New name", hero.name)
+	_panel_body.add_child(name_edit)
+	_panel_body.add_child(UI.button("Rename", func() -> void: _hero_action("rename", {"name": name_edit.text.strip_edges()})))
+
+
+func _hero_action(action: String, body: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/worlds/%d/hero/%s" % [Game.world_id(), action], body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	var updated: Dictionary = response.data.hero
+	var heroes := Game.heroes.filter(func(h: Dictionary) -> bool: return int(h.accountId) != int(updated.accountId))
+	heroes.append(updated)
+	Game.set_heroes(Game.world_id(), heroes)
+
+
 ## Settlers from `village_id` on the road, and how recent ones ended.
 func _expeditions_list(village_id: int) -> void:
 	var mine := Game.expeditions.filter(func(e: Dictionary) -> bool: return int(e.villageId) == village_id)
@@ -660,6 +781,9 @@ func _ally_village_panel(village: Dictionary) -> void:
 	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(troops)
 	_tick(troops, func() -> String: return _units_text(Rules.garrison_at(village, Game.server_now())))
+	var their_hero := Game.hero_at(int(village.id))
+	if not their_hero.is_empty():
+		_panel_body.add_child(UI.label("Hero %s (Lv %d) leads the garrison" % [their_hero.name, int(their_hero.level)], UI.SMALL_SIZE, UI.MUTED))
 	if not _my_village().is_empty():
 		var ally_id := int(village.id)
 		_panel_body.add_child(UI.button("Send resources", func() -> void: _open_caravans(ally_id)))
@@ -680,6 +804,7 @@ func _own_village_panel(village: Dictionary) -> void:
 	_tick(troops, func() -> String:
 		return _units_text(Rules.garrison_at(Game.villages.get(village_id, village), Game.server_now())))
 	_panel_body.add_child(UI.button("Enter village", func() -> void: _set_view("village")))
+	_hero_line(village_id)
 
 
 func _village_panel() -> void:
@@ -857,6 +982,7 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 func _troops_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_stance_picker(village)
+	_hero_line(village_id)
 	var recommended := Rules.recommended_garrison(Game.data, Game.my_villages().size())
 	var guard := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(guard)

@@ -1,5 +1,6 @@
 import type { TerrainId } from '../data/index.js';
 import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
+import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { loadVault, saveVault, type Vault } from '../db/vaults.js';
@@ -41,7 +42,8 @@ async function dispatch(
 ): Promise<Caravan> {
   const yard = village.state.levels[CARAVAN_YARD] ?? 0;
   if (yard < 1) throw new RuleError('Build a Caravan Yard first');
-  const needed = caravansFor(deps.data, order.load, village.state.bonuses);
+  const bonuses = await effectiveBonuses(client, deps.data, village);
+  const needed = caravansFor(deps.data, order.load, bonuses);
   const free = caravansAt(deps.data, yard) - (await caravansOut(client, village.id));
   if (needed > free) {
     throw new RuleError(`That takes ${needed} caravan${needed === 1 ? '' : 's'}; ${Math.max(0, free)} at home`);
@@ -55,7 +57,7 @@ async function dispatch(
     to = hex(destination.q, destination.r);
   }
   const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
-  const path = caravanRoute(deps.data, terrain, hex(village.q, village.r), to, world.speed, village.state.bonuses);
+  const path = caravanRoute(deps.data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
   const travelMs = path.at(-1)!.atMs;
   const arrivesAt = new Date(now.getTime() + travelMs);
   const caravan = await insertCaravan(client, {

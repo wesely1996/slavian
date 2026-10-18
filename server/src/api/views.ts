@@ -9,6 +9,8 @@ import { listRecentRaids, type Raid } from '../db/raids.js';
 import { listCaravans, type Caravan } from '../db/caravans.js';
 import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
+import { listHeroes, type Hero } from '../db/heroes.js';
+import { heroBonuses, xpToNext } from '../sim/heroes.js';
 import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
@@ -255,6 +257,34 @@ export async function researchListView(client: DbClient, worldId: number) {
   return (await listResearch(client, worldId)).map(researchView);
 }
 
+// Heroes are visible to the whole group.
+export function heroView(data: GameData, hero: Hero) {
+  return {
+    accountId: hero.accountId,
+    name: hero.name,
+    status: hero.status,
+    // Where it stands (or, travelling, where it is heading).
+    villageId: hero.villageId,
+    level: hero.level,
+    xp: hero.xp,
+    xpToNext: hero.level >= data.heroes.maxLevel ? null : xpToNext(data, hero.level),
+    skillPoints: hero.skillPoints,
+    skills: hero.skills,
+    gear: hero.gear,
+    inventory: hero.inventory,
+    // What it adds to the village it stands in.
+    bonuses: heroBonuses(data, hero),
+    path: hero.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
+    departsAt: hero.departsAt?.toISOString() ?? null,
+    arrivesAt: hero.arrivesAt?.toISOString() ?? null,
+    woundedUntil: hero.woundedUntil?.toISOString() ?? null,
+  };
+}
+
+export async function heroesView(client: DbClient, data: GameData, worldId: number) {
+  return (await listHeroes(client, worldId)).map((hero) => heroView(data, hero));
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -279,6 +309,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const raids = await raidsView(client, world.id);
   const expeditions = await expeditionsView(client, world.id);
   const research = await researchListView(client, world.id);
+  const heroes = await heroesView(client, data, world.id);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -294,6 +325,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     raids,
     expeditions,
     research,
+    heroes,
     ...logistics,
     map,
   };
