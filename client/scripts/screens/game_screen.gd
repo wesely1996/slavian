@@ -23,8 +23,12 @@ var _spacer: Control
 var _village_view: VillageView
 ## The plot picked in the village view.
 var _plot := Rules.HALL_PLOT
-## Which part of the village panel is open: "village" or "troops".
+## Which part of the village panel is open: "village", "troops" or
+## "caravans".
 var _tab := "village"
+## Caravan form: destination village id (0: the Holy City vault) and load.
+var _caravan_to := 0
+var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
 var _threat_button: Button
@@ -51,6 +55,8 @@ func _ready() -> void:
 	Live.scouting_updated.connect(Game.set_scouting)
 	Live.battles_updated.connect(Game.set_battles)
 	Live.raids_updated.connect(Game.set_raids)
+	Live.caravans_updated.connect(Game.set_logistics)
+	Game.caravans_changed.connect(_on_waves_changed)
 	Game.waves_changed.connect(_on_waves_changed)
 	Game.raids_changed.connect(_on_waves_changed)
 	Game.scouting_changed.connect(_on_waves_changed)
@@ -76,6 +82,7 @@ func _exit_tree() -> void:
 	Live.scouting_updated.disconnect(Game.set_scouting)
 	Live.battles_updated.disconnect(Game.set_battles)
 	Live.raids_updated.disconnect(Game.set_raids)
+	Live.caravans_updated.disconnect(Game.set_logistics)
 
 
 func _process(delta: float) -> void:
@@ -241,6 +248,9 @@ func _terrain_panel() -> void:
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
 	var where := "The Holy City." if distance == 0 else "%d hexes from the Holy City." % distance
 	_panel_body.add_child(UI.label(where, UI.SMALL_SIZE, UI.MUTED))
+	if id == "holy_city":
+		_vault_panel()
+		return
 	var holder := Game.outpost_owner(_selected)
 	if not holder.is_empty():
 		_outpost_panel(holder, Rules.outpost_plot(_selected))
@@ -281,6 +291,158 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 		var cell := _selected
 		var village_id := int(holder.id)
 		_panel_body.add_child(UI.button("Abandon outpost", func() -> void: _abandon_outpost(village_id, cell)))
+
+
+## The group's vault in the Holy City: what it holds, and enlarging it.
+func _vault_panel() -> void:
+	if Game.vault.is_empty():
+		return
+	var vault := Game.vault
+	var level := int(vault.level)
+	var capacity := roundi(float(vault.capacity))
+	_panel_body.add_child(UI.label("Vault  Lv %d" % level, UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label("Shared by the group. Caravans bring resources in and out.", UI.SMALL_SIZE, UI.MUTED))
+	var parts := PackedStringArray()
+	for kind in Ledger.KINDS:
+		parts.append("%s %d" % [kind.capitalize(), int(vault.amounts[kind])])
+	_panel_body.add_child(UI.label("  ".join(parts) + "   (of %d each)" % capacity, UI.SMALL_SIZE))
+	if vault.upgradingTo != null:
+		var done_at := TimeUtil.parse_iso(vault.upgradeCompletesAt)
+		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String:
+			return "Growing to level %d · %s" % [int(vault.upgradingTo), TimeUtil.format_duration(done_at - Game.server_now())])
+	elif level < int(Game.data.logistics.vault.maxLevel):
+		var cost := CaravanMath.vault_upgrade_cost(Game.data, level + 1)
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label("Vault → Lv %d (paid from the vault)" % (level + 1)))
+		var seconds := CaravanMath.vault_upgrade_seconds(Game.data, level + 1, float(Game.world.speed))
+		info.add_child(UI.label("%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)], UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(info)
+		var button := UI.button("Enlarge", _upgrade_vault)
+		button.custom_minimum_size.x = 160
+		button.disabled = not Ledger.can_afford(vault.amounts, cost)
+		row.add_child(button)
+		_panel_body.add_child(row)
+	if not _my_village().is_empty():
+		_panel_body.add_child(UI.button("Send or fetch by caravan", func() -> void: _open_caravans(0)))
+
+
+func _upgrade_vault() -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/worlds/%d/vault/upgrade" % Game.world_id(), {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+
+
+## Opens your village's caravan tab, headed for `destination` (0: vault).
+func _open_caravans(destination: int) -> void:
+	_caravan_to = destination
+	_tab = "caravans"
+	_set_view("village")
+
+
+func _caravans_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var yard := int(village.levels.get("caravan_yard", 0))
+	var capacity := int(Game.data.logistics.caravan.capacity)
+	if yard < 1:
+		_panel_body.add_child(UI.label("Build a Caravan Yard in the village to send caravans to allies and the Holy City vault.", UI.SMALL_SIZE, UI.MUTED))
+	else:
+		var free := CaravanMath.available(Game.data, village, Game.caravans)
+		var total := yard * int(Game.data.logistics.caravan.caravansPerYardLevel)
+		_panel_body.add_child(UI.label("%d of %d caravans at home · %d each" % [free, total, capacity], UI.SMALL_SIZE, UI.MUTED))
+		_caravan_form(village, free)
+	_caravan_trips(village_id)
+
+
+func _caravan_form(village: Dictionary, free: int) -> void:
+	var village_id := int(village.id)
+	var destinations := [[0, "Holy City vault"]]
+	for other in Game.villages.values():
+		if int(other.id) != village_id:
+			destinations.append([int(other.id), "%s (%s)" % [other.name, Game.member_name(int(other.ownerAccountId))]])
+	var labels := destinations.map(func(d: Array) -> String: return d[1])
+	var selected := 0
+	for i in destinations.size():
+		if destinations[i][0] == _caravan_to:
+			selected = i
+	var picker := UI.options(labels, selected)
+	picker.item_selected.connect(func(index: int) -> void:
+		_caravan_to = destinations[index][0]
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+
+	var amounts := Ledger.amounts_at(village.resources, Game.server_now())
+	for kind in Ledger.KINDS:
+		var row := UI.hbox(8)
+		var amount_label := UI.label("%s %d" % [kind.capitalize(), _caravan_load[kind]])
+		amount_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(amount_label)
+		for step in [-500, -100, 100, 500]:
+			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
+				_caravan_load[kind] = clampi(_caravan_load[kind] + step, 0, 1_000_000)
+				_rebuild_panel())
+			stepper.custom_minimum_size.x = 84
+			stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+			row.add_child(stepper)
+		_panel_body.add_child(row)
+
+	var needed := CaravanMath.needed(Game.data, _caravan_load)
+	var summary := "Needs %d caravan%s" % [needed, "" if needed == 1 else "s"] if needed > 0 else "Pick what to carry"
+	_panel_body.add_child(UI.label(summary, UI.SMALL_SIZE, UI.MUTED))
+	var buttons := UI.hbox()
+	var cargo := _caravan_load.duplicate()
+	var send := UI.button("Send", func() -> void: _send_caravan(village_id, _caravan_to, cargo))
+	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	send.disabled = needed == 0 or needed > free or not Ledger.can_afford(amounts, cargo)
+	buttons.add_child(send)
+	if _caravan_to == 0:
+		var fetch := UI.button("Fetch from vault", func() -> void: _fetch_from_vault(village_id, cargo))
+		fetch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fetch.disabled = needed == 0 or needed > free
+		buttons.add_child(fetch)
+	_panel_body.add_child(buttons)
+
+
+## Trips from this village, and deliveries on their way to it.
+func _caravan_trips(village_id: int) -> void:
+	var trips := Game.caravans.filter(func(c: Dictionary) -> bool:
+		return int(c.villageId) == village_id or (c.destinationVillageId != null and int(c.destinationVillageId) == village_id))
+	if trips.is_empty():
+		return
+	_panel_body.add_child(UI.label("On the road", UI.SMALL_SIZE, UI.MUTED))
+	for caravan in trips:
+		var line := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String: return CaravanText.describe(caravan, village_id, Game.server_now()))
+
+
+func _send_caravan(village_id: int, destination: int, cargo: Dictionary) -> void:
+	_status.text = ""
+	var body := {"destinationVillageId": destination if destination != 0 else null, "load": cargo}
+	var response := await Api.post_json("/v1/villages/%d/caravans" % village_id, body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+func _fetch_from_vault(village_id: int, cargo: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/caravans/fetch" % village_id, {"load": cargo})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 ## An empty hex: can your village put an outpost here?
@@ -357,6 +519,9 @@ func _ally_village_panel(village: Dictionary) -> void:
 	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(troops)
 	_tick(troops, func() -> String: return _units_text(Rules.garrison_at(village, Game.server_now())))
+	if not _my_village().is_empty():
+		var ally_id := int(village.id)
+		_panel_body.add_child(UI.button("Send resources", func() -> void: _open_caravans(ally_id)))
 
 
 ## Your village as seen on the map: a summary and the way in.
@@ -382,7 +547,7 @@ func _village_panel() -> void:
 		return
 	_village_view.show_village(Game.data, village, _plot)
 	var tabs := UI.hbox()
-	for tab in [["village", "Buildings"], ["troops", "Troops"]]:
+	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"]]:
 		var button := UI.button(tab[1], func() -> void:
 			_tab = tab[0]
 			_rebuild_panel())
@@ -392,6 +557,8 @@ func _village_panel() -> void:
 	_panel_body.add_child(tabs)
 	if _tab == "troops":
 		_troops_section(village)
+	elif _tab == "caravans":
+		_caravans_section(village)
 	else:
 		_queue_section(village)
 		_plot_section(village)

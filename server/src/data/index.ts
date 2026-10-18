@@ -192,7 +192,26 @@ const battleFileSchema = z.object({
   matchups: z.partialRecord(z.enum(STANCES), stanceMultipliers),
 });
 
+const logisticsFileSchema = z.object({
+  version: z.number().int(),
+  caravan: z.object({
+    capacity: z.number().int().positive(),
+    speed: z.number().positive(),
+    caravansPerYardLevel: z.number().int().positive(),
+  }),
+  vault: z.object({
+    baseCapacity: z.number().positive(),
+    capacityGrowth: z.number().min(1),
+    maxLevel: z.number().int().positive(),
+    upgradeCost: resourcesSchema,
+    costGrowth: z.number().min(1),
+    upgradeSeconds: z.number().positive(),
+    timeGrowth: z.number().min(1),
+  }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type LogisticsData = z.infer<typeof logisticsFileSchema>;
 export type BattleData = z.infer<typeof battleFileSchema>;
 export type ScoutingData = z.infer<typeof scoutingFileSchema>;
 export type EnemiesData = z.infer<typeof enemiesFileSchema>;
@@ -211,6 +230,7 @@ export interface GameData {
   waves: WavesData;
   scouting: ScoutingData;
   battle: BattleData;
+  logistics: LogisticsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -223,12 +243,14 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     waves: wavesFileSchema.parse(read('waves.json')),
     scouting: scoutingFileSchema.parse(read('scouting.json')),
     battle: battleFileSchema.parse(read('battle.json')),
+    logistics: logisticsFileSchema.parse(read('logistics.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  if (buildings.caravan_yard?.kind !== 'center') throw new Error('buildings.json needs a center building "caravan_yard"');
   if (buildings.outpost?.kind !== 'outpost' || !buildings.outpost.yields) {
     throw new Error('buildings.json needs an outpost building "outpost" with yields');
   }

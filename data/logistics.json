@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "_comment": "Caravans: each Caravan Yard level adds `caravansPerYardLevel` caravans; each carries `capacity` of resources in total and travels `speed` hexes per hour on plains (terrain move cost slows it; world speed divides time). The Holy City vault is shared by the group: level 1 holds `baseCapacity` of each resource, each level multiplies that by `capacityGrowth`; upgrades are paid from the vault itself.",
+  "caravan": {
+    "capacity": 500,
+    "speed": 5,
+    "caravansPerYardLevel": 1
+  },
+  "vault": {
+    "baseCapacity": 3000,
+    "capacityGrowth": 1.5,
+    "maxLevel": 10,
+    "upgradeCost": {
+      "wood": 800,
+      "stone": 1000,
+      "grain": 400,
+      "iron": 400
+    },
+    "costGrowth": 1.6,
+    "upgradeSeconds": 3600,
+    "timeGrowth": 1.35
+  }
+}

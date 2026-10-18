@@ -22,6 +22,7 @@ func _initialize() -> void:
 	_test_wave_math()
 	_test_scout_text()
 	_test_battle_text()
+	_test_caravans()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -124,7 +125,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["scout_lodge"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
+	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
 	var farm: Dictionary = data.buildings.buildings.farm
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
 	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
@@ -235,3 +236,30 @@ func _test_server_url() -> void:
 	_check(session.normalize_url("localhost:8080") == "http://localhost:8080", "localhost gets http")
 	_check(session.normalize_url("affects-taken-marble-serial.trycloudflare.com") == "https://affects-taken-marble-serial.trycloudflare.com", "domain gets https")
 	_check(session.normalize_url("http://example.com") == "http://example.com", "explicit scheme kept")
+
+
+func _test_caravans() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../data/logistics.json")
+	var data := {"logistics": JSON.parse_string(FileAccess.get_file_as_string(path))}
+	_check(CaravanMath.needed(data, {"wood": 500}) == 1 and CaravanMath.needed(data, {"wood": 400, "iron": 101}) == 2, "caravans needed per 500")
+	_check(CaravanMath.needed(data, {"wood": 0}) == 0, "nothing to carry")
+	var trips := [
+		{"villageId": 1, "caravans": 2, "status": "outbound"},
+		{"villageId": 1, "caravans": 1, "status": "done"},
+		{"villageId": 2, "caravans": 1, "status": "returning"},
+	]
+	_check(CaravanMath.out(trips, 1) == 2, "caravans still on the road")
+	_check(CaravanMath.available(data, {"id": 1, "levels": {"caravan_yard": 3}}, trips) == 1, "yard level minus caravans out")
+	_check(CaravanMath.vault_upgrade_cost(data, 2) == {"wood": 800, "stone": 1000, "grain": 400, "iron": 400}, "vault level 2 cost")
+	_check(is_equal_approx(CaravanMath.vault_upgrade_seconds(data, 2, 10.0), 360.0), "vault upgrade time")
+
+	var caravan := {"status": "outbound", "departsAt": "2026-03-01T00:00:00.000Z", "arrivesAt": "2026-03-01T00:00:02.000Z",
+		"path": [[2, 0, 0], [1, 0, 1000], [0, 0, 2000]]}
+	var t0 := TimeUtil.parse_iso(caravan.departsAt)
+	var out := CaravanMath.progress(caravan, t0 + 0.5)
+	_check(out.from == Vector2i(2, 0) and out.to == Vector2i(1, 0) and is_equal_approx(out.t, 0.5), "outbound on the first leg")
+	caravan.status = "returning"
+	var back := CaravanMath.progress(caravan, t0 + 2.5)
+	_check(back.from == Vector2i(0, 0) and back.to == Vector2i(1, 0) and is_equal_approx(back.t, 0.5), "heading home the same road backwards: %s" % back)
+	caravan.status = "done"
+	_check(CaravanMath.progress(caravan, t0).is_empty(), "finished trips are off the map")

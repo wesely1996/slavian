@@ -6,6 +6,10 @@ import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
 import { listRecentBattles, type Battle } from '../db/battles.js';
 import { listRecentRaids, type Raid } from '../db/raids.js';
+import { listCaravans, type Caravan } from '../db/caravans.js';
+import { loadVault, type Vault } from '../db/vaults.js';
+import type { GameData } from '../data/index.js';
+import { vaultCapacity } from '../sim/logistics.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
@@ -167,6 +171,43 @@ export async function raidsView(client: DbClient, worldId: number) {
   return (await listRecentRaids(client, worldId)).map(raidView);
 }
 
+export function caravanView(caravan: Caravan) {
+  return {
+    id: caravan.id,
+    villageId: caravan.villageId,
+    // null: the Holy City vault.
+    destinationVillageId: caravan.destinationVillageId,
+    kind: caravan.kind,
+    caravans: caravan.caravans,
+    cargo: caravan.cargo,
+    carriedBack: caravan.carriedBack,
+    status: caravan.status,
+    // Each step: [q, r, ms after departsAt]; the way home is the same road
+    // backwards, starting at arrivesAt.
+    path: caravan.path.map((step) => [step.q, step.r, step.atMs]),
+    departsAt: caravan.departsAt.toISOString(),
+    arrivesAt: caravan.arrivesAt.toISOString(),
+    returnsAt: caravan.returnsAt.toISOString(),
+  };
+}
+
+export function vaultView(data: GameData, vault: Vault) {
+  return {
+    level: vault.level,
+    amounts: vault.amounts,
+    capacity: vaultCapacity(data, vault.level),
+    upgradingTo: vault.upgradingTo,
+    upgradeCompletesAt: vault.upgradeCompletesAt?.toISOString() ?? null,
+  };
+}
+
+export async function logisticsView(client: DbClient, data: GameData, worldId: number) {
+  return {
+    caravans: (await listCaravans(client, worldId)).map(caravanView),
+    vault: vaultView(data, await loadVault(client, worldId)),
+  };
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -182,13 +223,14 @@ export function worldSummary(world: World) {
 
 // Everything a member needs to render the world. Co-op: every member sees
 // every village in full.
-export async function worldView(client: DbClient, world: World) {
+export async function worldView(client: DbClient, data: GameData, world: World) {
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, world.id);
   const scouting = await scoutingView(client, world.id);
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);
+  const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
       ? null
@@ -201,6 +243,7 @@ export async function worldView(client: DbClient, world: World) {
     scouting,
     battles,
     raids,
+    ...logistics,
     map,
   };
 }
