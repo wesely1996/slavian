@@ -6,6 +6,7 @@ import { LiveHub } from './api/live.js';
 import { loadGameData } from './data/index.js';
 import { migrate } from './db/migrate.js';
 import { createPool, pooledEndpointWarning } from './db/pool.js';
+import { upgradeLegacyVillages } from './db/upgrades.js';
 import { handlers } from './scheduler/handlers.js';
 import { runWorkerLoop } from './scheduler/loop.js';
 
@@ -19,6 +20,8 @@ const applied = await migrate(db);
 if (applied.length) console.log(`Applied migrations: ${applied.join(', ')}`);
 
 const scheduler = { data: loadGameData(), handlers };
+const upgraded = await upgradeLegacyVillages(db, scheduler.data);
+if (upgraded) console.log(`Laid out ${upgraded} older village(s) on plots`);
 const clock = () => new Date();
 const live = new LiveHub(db, clock);
 await live.start();

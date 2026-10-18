@@ -9,6 +9,8 @@ import { waveHandlers } from './waves.js';
 
 export const buildCompletePayload = z.object({
   villageId: z.number().int(),
+  // Older events have no plot; the queue head for the building is used.
+  plot: z.string().optional(),
   building: z.string(),
   targetLevel: z.number().int().positive(),
 });
@@ -21,7 +23,8 @@ export const handlers: HandlerRegistry = {
   async build_complete({ client, data, world }, event) {
     const payload = buildCompletePayload.parse(event.payload);
     const village = await loadVillage(client, payload.villageId);
-    const state = completeBuild(data, village.state, payload.building, payload.targetLevel, event.dueAt, world.speed);
+    const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
+    const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   },

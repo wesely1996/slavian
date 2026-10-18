@@ -1,7 +1,8 @@
 extends Node2D
 ## In-world screen: the map from the server, your resources, a threat
-## banner, and a panel for the selected hex (or the threats timeline). Your
-## own village's panel queues buildings and trains troops.
+## banner, and a panel for the selected hex (or the threats timeline). The
+## Village button swaps the map for the inside of your village, where you
+## build on its plots and train troops.
 
 const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
@@ -15,8 +16,15 @@ var _since_refresh := 0.0
 
 var _live_label: Label
 var _resource_labels: Dictionary[String, Label] = {}
-## Which part of your village panel is open: "buildings" or "troops".
-var _tab := "buildings"
+## "map" or "village" (the inside of your own village).
+var _view := "map"
+var _view_button: Button
+var _spacer: Control
+var _village_view: VillageView
+## The plot picked in the village view.
+var _plot := Rules.HALL_PLOT
+## Which part of the village panel is open: "village" or "troops".
+var _tab := "village"
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
 var _threat_button: Button
@@ -111,6 +119,9 @@ func _build_ui() -> void:
 	var bar := UI.hbox()
 	top_rows.add_child(bar)
 	bar.add_child(UI.button("‹ Worlds", _leave))
+	_view_button = UI.button("Village", _toggle_view)
+	_view_button.visible = not _my_village().is_empty()
+	bar.add_child(_view_button)
 	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -140,10 +151,15 @@ func _build_ui() -> void:
 	top_rows.add_child(_status)
 	_on_live_connection(Live.connected)
 
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(spacer)
+	_spacer = Control.new()
+	_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(_spacer)
+	_village_view = VillageView.new()
+	_village_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_village_view.visible = false
+	_village_view.plot_tapped.connect(_on_plot_tapped)
+	column.add_child(_village_view)
 
 	_panel = UI.panel()
 	column.add_child(_panel)
@@ -165,6 +181,31 @@ func _select(cell: Vector2i) -> void:
 	_rebuild_panel()
 
 
+func _toggle_view() -> void:
+	_set_view("map" if _view == "village" else "village")
+
+
+func _set_view(view: String) -> void:
+	_view = view
+	var inside := view == "village"
+	_view_button.text = "Map" if inside else "Village"
+	hex_map.visible = not inside
+	_spacer.visible = not inside
+	_village_view.visible = inside
+	# The map camera listens for unhandled input; keep it still while the
+	# village is open.
+	camera.set_process_unhandled_input(not inside)
+	_panel_mode = "hex"
+	_rebuild_panel()
+
+
+func _on_plot_tapped(plot: String) -> void:
+	_plot = plot
+	_tab = "village"
+	_panel_mode = "hex"
+	_rebuild_panel()
+
+
 func _show_threats() -> void:
 	_panel_mode = "threats"
 	_rebuild_panel()
@@ -175,6 +216,9 @@ func _rebuild_panel() -> void:
 	_ticking.clear()
 	if _panel_mode == "threats":
 		_threats_panel()
+		return
+	if _view == "village":
+		_village_panel()
 		return
 	for wave in WaveMath.visible_waves(Game.waves):
 		if WaveMath.current_hex(wave, Game.server_now()) == _selected:
@@ -206,10 +250,27 @@ func _ally_village_panel(village: Dictionary) -> void:
 	_tick(troops, func() -> String: return _units_text(Rules.garrison_at(village, Game.server_now())))
 
 
+## Your village as seen on the map: a summary and the way in.
 func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
+	var hall := Rules.hall_level(village)
+	var queue: Array = village.queue
+	_panel_body.add_child(UI.label("Elder's Hall Lv %d · building %d of %d" % [hall, queue.size(), Rules.queue_limit(Game.data, hall)], UI.SMALL_SIZE, UI.MUTED))
+	var village_id := int(village.id)
+	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(troops)
+	_tick(troops, func() -> String:
+		return _units_text(Rules.garrison_at(Game.villages.get(village_id, village), Game.server_now())))
+	_panel_body.add_child(UI.button("Enter village", func() -> void: _set_view("village")))
+
+
+func _village_panel() -> void:
+	var village := _my_village()
+	if village.is_empty():
+		return
+	_village_view.show_village(Game.data, village, _plot)
 	var tabs := UI.hbox()
-	for tab in [["buildings", "Buildings"], ["troops", "Troops"]]:
+	for tab in [["village", "Buildings"], ["troops", "Troops"]]:
 		var button := UI.button(tab[1], func() -> void:
 			_tab = tab[0]
 			_rebuild_panel())
@@ -220,14 +281,13 @@ func _own_village_panel(village: Dictionary) -> void:
 	if _tab == "troops":
 		_troops_section(village)
 	else:
-		_buildings_section(village)
+		_queue_section(village)
+		_plot_section(village)
 
 
-func _buildings_section(village: Dictionary) -> void:
-	var village_id := int(village.id)
-
+func _queue_section(village: Dictionary) -> void:
 	var queue: Array = village.queue
-	var limit := int(Game.data.buildings.village.queueLimit)
+	var limit := Rules.queue_limit(Game.data, Rules.hall_level(village))
 	_panel_body.add_child(UI.label("Build queue (%d/%d)" % [queue.size(), limit], UI.SMALL_SIZE, UI.MUTED))
 	if queue.is_empty():
 		_panel_body.add_child(UI.label("Nothing under construction.", UI.SMALL_SIZE, UI.MUTED))
@@ -240,38 +300,95 @@ func _buildings_section(village: Dictionary) -> void:
 			var left := done_at - Game.server_now()
 			return "%s   %s" % [text, TimeUtil.format_duration(left) if left > 0 else "finishing…"])
 
-	_panel_body.add_child(UI.label("Buildings", UI.SMALL_SIZE, UI.MUTED))
+
+## The picked plot: what stands there and what it would cost to upgrade, or
+## for an empty slot, the buildings that could go there.
+func _plot_section(village: Dictionary) -> void:
+	if not village.plots.has(_plot):
+		_plot = Rules.HALL_PLOT
+	var holds: Dictionary = village.plots[_plot]
+	var planned := Rules.planned_plot(village, _plot)
+	if Rules.is_locked(Game.data, village, _plot):
+		_panel_body.add_child(UI.label("Locked slot", UI.HEADING_SIZE))
+		var needed := Rules.slot_unlock_level(Game.data, Rules.plot_index(_plot))
+		_panel_body.add_child(UI.label("Upgrade the Elder's Hall to level %d to build here." % needed, UI.SMALL_SIZE, UI.MUTED))
+		return
+	if planned.building == null:
+		_panel_body.add_child(UI.label("Empty slot", UI.HEADING_SIZE))
+		var options := Rules.constructible(Game.data, village)
+		if options.is_empty():
+			_panel_body.add_child(UI.label("Every building already stands in this village.", UI.SMALL_SIZE, UI.MUTED))
+		for building in options:
+			_build_row(village, building, 1, "Build")
+		return
+
+	var building: String = planned.building
+	var def := _building_def(building)
+	var level := int(holds.level)
+	var title := "%s  Lv %d" % [def.name, level]
+	if int(planned.level) > level:
+		title += "  (→ %d queued)" % int(planned.level)
+	_panel_body.add_child(UI.label(title, UI.HEADING_SIZE))
+	var effect := _effect_text(village, building, level)
+	if effect != "":
+		_panel_body.add_child(UI.label(effect, UI.SMALL_SIZE, UI.MUTED))
+	var target := int(planned.level) + 1
+	if target > int(def.maxLevel):
+		_panel_body.add_child(UI.label("Max level", UI.SMALL_SIZE, UI.MUTED))
+		return
+	_build_row(village, building, target, "Build" if level == 0 and int(planned.level) == 0 else "Upgrade")
+
+
+## One "build `building` to `target` on the picked plot" row with its cost,
+## time and button.
+func _build_row(village: Dictionary, building: String, target: int, verb: String) -> void:
+	var village_id := int(village.id)
+	var plot := _plot
+	var def := _building_def(building)
+	var hall := Rules.hall_level(village)
+	var queue_full: bool = village.queue.size() >= Rules.queue_limit(Game.data, hall)
+	var cost := Rules.level_cost(def, target)
+	var seconds := Rules.build_seconds(def, target, float(Game.world.speed), Rules.hall_speedup(Game.data, hall))
+
+	var row := UI.hbox()
+	var info := UI.vbox(2)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_child(UI.label("%s → Lv %d" % [def.name, target]))
+	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	info.add_child(cost_line)
+	row.add_child(info)
+	var button := UI.button(verb, func() -> void: _queue_build(village_id, plot, building))
+	button.custom_minimum_size.x = 160
+	row.add_child(button)
+	_panel_body.add_child(row)
+	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	_tick(cost_line, func() -> String:
+		var home: Dictionary = Game.villages.get(village_id, village)
+		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+		button.disabled = queue_full or not affordable
+		return cost_text + ("  (queue full)" if queue_full else ""))
+
+
+## What a building does at its level, and at the next one.
+func _effect_text(village: Dictionary, building: String, level: int) -> String:
+	var def := _building_def(building)
 	var speed := float(Game.world.speed)
-	var buildings: Dictionary = Game.data.buildings.buildings
-	for building in buildings:
-		var def: Dictionary = buildings[building]
-		var level := int(village.levels.get(building, 0))
-		var target := Rules.planned_level(village, building) + 1
-		var row := UI.hbox()
-		var info := UI.vbox(2)
-		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label("%s  Lv %d" % [def.name, level]))
-		if target > int(def.maxLevel):
-			info.add_child(UI.label("Max level", UI.SMALL_SIZE, UI.MUTED))
-			row.add_child(info)
-			_panel_body.add_child(row)
-			continue
-		var cost := Rules.level_cost(def, target)
-		var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
-		info.add_child(cost_line)
-		row.add_child(info)
-		var build := UI.button("Build", func() -> void: _queue_build(village_id, building))
-		build.custom_minimum_size.x = 140
-		row.add_child(build)
-		_panel_body.add_child(row)
-		var duration := TimeUtil.format_duration(Rules.build_seconds(def, target, speed))
-		var cost_text := "→ Lv %d · %s · %s" % [target, UI.resource_text(cost), duration]
-		var queue_full := queue.size() >= limit
-		_tick(cost_line, func() -> String:
-			var home: Dictionary = Game.villages.get(village_id, {})
-			var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
-			build.disabled = queue_full or not affordable
-			return cost_text + ("  (queue full)" if queue_full else ""))
+	if def.has("production"):
+		var resource: String = def.production.resource
+		return "%s +%d/h now, +%d/h at level %d" % [resource.capitalize(),
+			roundi(Rules.field_production(def, level, speed)), roundi(Rules.field_production(def, level + 1, speed)), level + 1]
+	if building == Rules.HALL:
+		var total := int(Game.data.buildings.village.centerSlots)
+		var text := "%d of %d building slots open, build queue %d." % [Rules.unlocked_slots(Game.data, level), total, Rules.queue_limit(Game.data, level)]
+		if level < int(def.maxLevel):
+			text += " Level %d: %d slots, queue %d, builds %d%% faster than level 1." % [level + 1,
+				Rules.unlocked_slots(Game.data, level + 1), Rules.queue_limit(Game.data, level + 1),
+				roundi((1.0 - Rules.hall_speedup(Game.data, level + 1)) * 100.0)]
+		return text
+	if def.has("capacityGrowth"):
+		var base := float(Game.data.buildings.village.baseCapacity)
+		return "Stores %d of each resource" % roundi(base * pow(float(def.capacityGrowth), level))
+	return ""
 
 
 func _troops_section(village: Dictionary) -> void:
@@ -524,9 +641,9 @@ func _tick(label: Label, text: Callable) -> void:
 	_ticking.append([label, text])
 
 
-func _queue_build(village_id: int, building: String) -> void:
+func _queue_build(village_id: int, plot: String, building: String) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/build" % village_id, {"building": building})
+	var response := await Api.post_json("/v1/villages/%d/build" % village_id, {"plot": plot, "building": building})
 	if not response.ok:
 		_status.text = response.error
 		return
@@ -544,6 +661,10 @@ func _on_map_tapped(world_position: Vector2) -> void:
 
 func _on_world_changed() -> void:
 	hex_map.refresh()
+	_view_button.visible = not _my_village().is_empty()
+	if _view == "village" and _my_village().is_empty():
+		_set_view("map")
+		return
 	_rebuild_panel()
 
 

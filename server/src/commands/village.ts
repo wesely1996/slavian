@@ -13,7 +13,7 @@ import { hex } from '../sim/hex.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
-import { queueBuild, queueTraining, sendAway, type QueuedBuild, type VillageState } from '../sim/village.js';
+import { queueBuild, queueTraining, sendAway, type BuildOrder, type QueuedBuild, type VillageState } from '../sim/village.js';
 
 interface VillageCommandInput {
   accountId: number;
@@ -49,12 +49,17 @@ async function ownVillageCommand<T>(
 export async function queueBuildCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: VillageCommandInput & { building: string },
+  input: VillageCommandInput & BuildOrder,
 ): Promise<{ village: Village; queued: QueuedBuild }> {
   const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
-    const { state, queued } = queueBuild(deps.data, village.state, input.building, input.now, world.speed);
+    const order: BuildOrder = {
+      ...(input.plot ? { plot: input.plot } : {}),
+      ...(input.building ? { building: input.building } : {}),
+    };
+    const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed);
     const payload: BuildCompletePayload = {
       villageId: village.id,
+      plot: queued.plot,
       building: queued.building,
       targetLevel: queued.targetLevel,
     };
