@@ -17,6 +17,7 @@ const CARAVAN_COLOR := Color("#c99a5b")
 const SETTLERS_COLOR := Color("#e8e2d0")
 const HERO_COLOR := Color("#9b7bd4")
 const ARMY_COLOR := Color("#5b8fd6")
+const FORT_COLOR := Color("#8b6a45")
 
 @export var hex_size := 48.0
 
@@ -87,6 +88,8 @@ func _draw() -> void:
 			draw_colored_polygon(tri, SETTLERS_COLOR)
 			tri.append(tri[0])
 			draw_polyline(tri, VILLAGE_OUTLINE_COLOR, 2.0)
+	for fort in Game.forts:
+		_draw_fort(fort)
 	for army in Game.armies:
 		_draw_army(army, now)
 	for hero in Game.heroes:
@@ -118,6 +121,8 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	var p := ArmyText.progress(army, now)
 	if not p.is_empty():
 		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	elif army.status in ["stationed", "engaged"] and ArmyText.held_hex(army) != Vector2i.MAX:
+		pos = HexMath.to_pixel(ArmyText.held_hex(army), hex_size) + Vector2(hex_size * 0.36, hex_size * 0.3)
 	elif army.status in ["stationed", "engaged"]:
 		var village: Dictionary = Game.villages.get(int(army.targetVillageId), {})
 		if not village.is_empty():
@@ -129,6 +134,20 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	draw_colored_polygon(shield, ARMY_COLOR)
 	shield.append(shield[0])
 	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## A fort: a squat tower with battlements, faded while being built.
+func _draw_fort(fort: Dictionary) -> void:
+	var c := HexMath.to_pixel(Vector2i(int(fort.q), int(fort.r)), hex_size)
+	var w := hex_size * 0.3
+	var h := hex_size * 0.26
+	var tower := PackedVector2Array([
+		c + Vector2(-w, h), c + Vector2(-w, -h), c + Vector2(-w * 0.5, -h), c + Vector2(-w * 0.5, -h * 0.6),
+		c + Vector2(-w * 0.1, -h * 0.6), c + Vector2(-w * 0.1, -h), c + Vector2(w * 0.1, -h), c + Vector2(w * 0.1, -h * 0.6),
+		c + Vector2(w * 0.5, -h * 0.6), c + Vector2(w * 0.5, -h), c + Vector2(w, -h), c + Vector2(w, h)])
+	draw_colored_polygon(tower, FORT_COLOR if fort.status == "standing" else RUINS_COLOR)
+	tower.append(tower[0])
+	draw_polyline(tower, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
 ## A hero: a small banner by its village, or on the road between two.

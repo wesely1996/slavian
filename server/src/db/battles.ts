@@ -21,7 +21,11 @@ export interface Battle {
   id: number;
   worldId: number;
   waveId: number;
-  villageId: number;
+  // null: a field battle at (q, r).
+  villageId: number | null;
+  q: number;
+  r: number;
+  setup: { ambush?: boolean; choke?: boolean; fort?: boolean };
   status: BattleStatus;
   round: number;
   attackerStance: Stance;
@@ -37,7 +41,10 @@ interface BattleRow {
   id: number;
   world_id: number;
   wave_id: number;
-  village_id: number;
+  village_id: number | null;
+  q: number;
+  r: number;
+  setup: { ambush?: boolean; choke?: boolean; fort?: boolean };
   status: BattleStatus;
   round: number;
   attacker_stance: Stance;
@@ -55,6 +62,9 @@ function fromRow(row: BattleRow): Battle {
     worldId: row.world_id,
     waveId: row.wave_id,
     villageId: row.village_id,
+    q: row.q,
+    r: row.r,
+    setup: row.setup,
     status: row.status,
     round: row.round,
     attackerStance: row.attacker_stance,
@@ -69,11 +79,12 @@ function fromRow(row: BattleRow): Battle {
 
 export async function insertBattle(
   client: DbClient,
-  battle: Pick<Battle, 'worldId' | 'waveId' | 'villageId' | 'attackerStance' | 'attackerInitial' | 'defenderInitial' | 'startedAt'>,
+  battle: Pick<Battle, 'worldId' | 'waveId' | 'villageId' | 'q' | 'r' | 'attackerStance' | 'attackerInitial' | 'defenderInitial' | 'startedAt'> &
+    Partial<Pick<Battle, 'setup'>>,
 ): Promise<Battle> {
   const { rows } = await client.query<BattleRow>(
-    `INSERT INTO battles (world_id, wave_id, village_id, attacker_stance, attacker_initial, defender_initial, started_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    `INSERT INTO battles (world_id, wave_id, village_id, q, r, setup, attacker_stance, attacker_initial, defender_initial, started_at)
+     VALUES ($1, $2, $3, $8, $9, $10, $4, $5, $6, $7) RETURNING *`,
     [
       battle.worldId,
       battle.waveId,
@@ -82,6 +93,9 @@ export async function insertBattle(
       JSON.stringify(battle.attackerInitial),
       JSON.stringify(battle.defenderInitial),
       battle.startedAt,
+      battle.q,
+      battle.r,
+      JSON.stringify(battle.setup ?? {}),
     ],
   );
   return fromRow(rows[0]!);

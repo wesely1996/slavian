@@ -60,7 +60,8 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/villages/:id/outposts` | Claim the resource hex `{ q, r }` (within 2 hexes) and start building an outpost there. |
 | `POST` | `/v1/villages/:id/outposts/abandon` | Give up the outpost on `{ q, r }`. |
 | `POST` | `/v1/villages/:id/orders` | Place a standing order: `{ kind: "train", unit, batch, target }`, `{ kind: "rebuild" }` or `{ kind: "surplus", share }`. It runs at once, then every 20 game minutes. `POST /v1/villages/:id/orders/:orderId/cancel` stops it. |
-| `POST` | `/v1/villages/:id/armies` | Send `{ targetVillageId, units, orders }` (`support`, `reinforce` or `harass`) as an army. `POST /v1/armies/:id/recall` calls a supporting army home. |
+| `POST` | `/v1/villages/:id/armies` | Send `{ targetVillageId, units, orders }` (`support`, `reinforce` or `harass`) as an army, or `{ target: { q, r }, units, orders: "hold", withHero? }` to hold a hex (field battles). `POST /v1/armies/:id/recall` calls a supporting or holding army home. |
+| `POST` | `/v1/villages/:id/forts` | Build a fort `{ q, r }` within range of the village, paid from its stores. |
 | `PUT` | `/v1/villages/:id/reinforce` | How the village answers battles nearby: `{ share, range }` (share 0 stays out). |
 | `POST` | `/v1/villages/:id/research` | Start researching `{ tech }` in the village's Academy (one tech at a time per player; effects reach all your villages). |
 | `POST` | `/v1/villages/:id/found` | Send 3 settlers to found a village on `{ q, r, name? }`: settleable, within 6 hexes, at least 3 from every village and 2 from the Holy City. |
@@ -74,7 +75,7 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` / `armies` updates, and your own `notifications`. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` / `armies` (armies and forts) updates, and your own `notifications`. |
 
 ## Client
 

@@ -5,7 +5,7 @@ import { RuleError } from '../errors.js';
 import { hexToPixel, type Hex } from './hex.js';
 import type { Units } from './training.js';
 
-export type ArmyOrders = 'support' | 'reinforce' | 'harass';
+export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold';
 const FIGHTERS = new Set(['infantry', 'archers', 'cavalry']);
 
 export function total(units: Units): number {

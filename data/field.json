@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "_comment": "Field battles: an army holding a hex fights any horde whose route crosses it. Ambush: on `ambush.terrain`, with the army in place `ambush.prepMinutes` game minutes before the horde arrives, the defenders' first round hits `ambush.bonus` harder and the horde fights it without its stance. Choke point: a passable hex with at least `choke.minBlockedNeighbors` impassable neighbours; attackers hit `choke.attackerFactor` as hard there, and Hold the Line gains `choke.holdTheLineDefense` defense. Forts are built within `fort.range` hexes of a village and give armies holding them `fort.defenseBonus` defense.",
+  "ambush": { "terrain": ["forest", "hills", "swamp"], "prepMinutes": 60, "bonus": 0.3 },
+  "choke": { "minBlockedNeighbors": 3, "attackerFactor": 0.7, "holdTheLineDefense": 0.3 },
+  "fort": {
+    "range": 4,
+    "cost": { "wood": 600, "stone": 900, "grain": 200, "iron": 200 },
+    "buildSeconds": 3600,
+    "defenseBonus": 0.3
+  }
+}

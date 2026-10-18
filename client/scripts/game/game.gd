@@ -15,6 +15,7 @@ signal heroes_changed
 signal orders_changed
 signal inbox_changed
 signal armies_changed
+signal forts_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -41,6 +42,8 @@ var inbox: Array = []
 var unread := 0
 ## Armies on the road or abroad, then the latest that came home.
 var armies: Array = []
+## Forts, built or being built (see server fortView).
+var forts: Array = []
 ## Standing orders of every village (see server orderView).
 var orders: Array = []
 ## Every player's hero (see server heroView).
@@ -96,6 +99,7 @@ func set_world(new_world: Dictionary) -> void:
 	heroes = new_world.get("heroes", [])
 	orders = new_world.get("orders", [])
 	armies = new_world.get("armies", [])
+	forts = new_world.get("forts", [])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -139,6 +143,27 @@ func set_armies(world_id_: int, new_armies: Array) -> void:
 		return
 	armies = new_armies
 	armies_changed.emit()
+
+
+func set_forts(world_id_: int, new_forts: Array) -> void:
+	if world_id_ != world_id():
+		return
+	forts = new_forts
+	forts_changed.emit()
+
+
+func fort_at(cell: Vector2i) -> Dictionary:
+	for fort in forts:
+		if Vector2i(int(fort.q), int(fort.r)) == cell:
+			return fort
+	return {}
+
+
+## Where a battle is fought: the village, or the hex of a field battle.
+func battle_place(battle: Dictionary) -> String:
+	if battle.get("villageId") == null and battle.has("q"):
+		return "(%d, %d)" % [int(battle.q), int(battle.r)]
+	return village_name(battle.villageId)
 
 
 func set_inbox(world_id_: int, notifications: Array, unread_count: int) -> void:
