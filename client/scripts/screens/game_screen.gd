@@ -1528,6 +1528,11 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label("Outposts burned", UI.HEADING_SIZE))
 	for raid in Game.raids:
 		_panel_body.add_child(UI.label(BattleText.raid(raid, Game.village_name(raid.villageId)), UI.SMALL_SIZE))
+	var map: Variant = Game.world.get("map")
+	if map is Dictionary:
+		_panel_body.add_child(UI.label("Fronts", UI.HEADING_SIZE))
+		for line in WaveMath.front_lines(Game.data, map.activeFronts):
+			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
 
 
 func _wave_entry(wave: Dictionary) -> void:

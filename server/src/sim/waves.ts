@@ -87,8 +87,10 @@ export function waveSize(data: GameData, index: number, playerCount: number): nu
 
 // Splits the wave size between the front's units by weight. Whole units by
 // weight first; the remainder is drawn at random, weighted.
-export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number): Composition {
-  const units = Object.entries(data.enemies.fronts[front]!.units).filter(([, def]) => def.minWave <= index);
+export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number, playerCount = 1): Composition {
+  const units = Object.entries(data.enemies.fronts[front]!.units).filter(
+    ([, def]) => def.minWave <= index && (def.minPlayers ?? 1) <= playerCount,
+  );
   const totalWeight = units.reduce((sum, [, def]) => sum + def.weight, 0);
   const composition: Composition = {};
   let assigned = 0;
@@ -115,7 +117,7 @@ export function threatOf(data: GameData, composition: Composition): string {
 export function planWave(data: GameData, ctx: WaveContext, index: number, previousSpawnAt: Date | null): PlannedWave {
   const fronts = waveFronts(data, ctx.activeFronts);
   const front = fronts[index % fronts.length]!;
-  const composition = composeWave(data, front, index, waveSize(data, index, ctx.playerCount), ctx.seed);
+  const composition = composeWave(data, front, index, waveSize(data, index, ctx.playerCount), ctx.seed, ctx.playerCount);
   return {
     index,
     front,

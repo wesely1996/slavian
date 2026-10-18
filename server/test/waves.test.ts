@@ -22,8 +22,11 @@ const ctx: WaveContext = { seed: 4242, activeFronts: ['north', 'south', 'east'],
 
 describe('wave schedule', () => {
   it('only uses fronts that are both enabled and active', () => {
-    expect(waveFronts(data, ['north', 'south'])).toEqual(['north']);
-    expect(() => waveFronts(data, ['south'])).toThrow();
+    expect(waveFronts(data, ['north', 'south'])).toEqual(['north', 'south']);
+    expect(waveFronts(data, ['west', 'north', 'east', 'south'])).toEqual(['north', 'east', 'south', 'west']);
+    const northOnly = { ...data, waves: { ...data.waves, enabledFronts: ['north' as const] } };
+    expect(waveFronts(northOnly, ['north', 'south'])).toEqual(['north']);
+    expect(() => waveFronts(northOnly, ['south'])).toThrow();
   });
 
   it('starts after the grace period, then every 2-3 days', () => {
@@ -63,6 +66,28 @@ describe('wave schedule', () => {
     expect(composeWave(data, 'north', 0, 50, 1).likho).toBeUndefined();
   });
 
+  it('gives every front its own roster, some units only for bigger groups', () => {
+    for (const front of ['north', 'east', 'south', 'west'] as const) {
+      const roster = data.enemies.fronts[front]!;
+      const composition = composeWave(data, front, 9, 200, 5, 6);
+      expect(Object.keys(composition).every((unit) => unit in roster.units)).toBe(true);
+      expect(roster.personality.nerve).toBeGreaterThan(0);
+    }
+    // The zmey and the Order's southern siege rams wait for groups of three.
+    expect(composeWave(data, 'north', 9, 500, 5, 2).zmey_whelp).toBeUndefined();
+    expect(composeWave(data, 'north', 9, 500, 5, 3).zmey_whelp).toBeGreaterThan(0);
+    expect(composeWave(data, 'south', 9, 500, 5, 1).siege_ram).toBeUndefined();
+    // Nomads ride: their slowest unit outpaces the Order's.
+    expect(marchSpeed(data, 'east', composeWave(data, 'east', 9, 200, 5, 6))).toBeGreaterThan(
+      marchSpeed(data, 'south', composeWave(data, 'south', 9, 200, 5, 6)),
+    );
+  });
+
+  it('rotates the active fronts', () => {
+    const fronts = [0, 1, 2, 3, 4].map((index) => planWave(data, { ...ctx, activeFronts: ['north', 'east', 'south', 'west'] }, index, T0).front);
+    expect(fronts).toEqual(['north', 'east', 'south', 'west', 'north']);
+  });
+
   it('labels threat by size', () => {
     expect(threatOf(data, { grey_wolf: 8 })).toBe('Low');
     expect(threatOf(data, { grey_wolf: 20 })).toBe('Moderate');
@@ -87,6 +112,18 @@ describe('wave march', () => {
     seed: ctx.seed,
     departAt: wave.spawnAt,
     worldSpeed: 1,
+  });
+
+  it('marches from every active front of a full map', () => {
+    const big = generateMap(data, 2026, 4);
+    const sites = big.startSites.map((site, i) => ({ id: i + 1, q: site.q, r: site.r }));
+    for (const [index, front] of (['north', 'east', 'south', 'west'] as const).entries()) {
+      const planned = planWave(data, { ...ctx, activeFronts: big.activeFronts, playerCount: 4 }, index, T0);
+      expect(planned.front).toBe(front);
+      const m = planMarch(data, { terrain: big.terrain, radius: big.radius, wave: planned, villages: sites, seed: 2026, departAt: T0, worldSpeed: 1 });
+      expect(frontOf(m.spawn)).toBe(front);
+      expect(data.enemies.fronts[front]!.spawnTerrain).toContain(big.terrain.get(hexKey(m.spawn)));
+    }
   });
 
   it('spawns in the north spawn zone', () => {

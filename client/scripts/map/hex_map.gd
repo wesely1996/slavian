@@ -10,7 +10,6 @@ const HOLY_CITY_COLOR := Color("#8a2b2b")
 const MY_VILLAGE_COLOR := Color("#ffd75e")
 const ALLY_VILLAGE_COLOR := Color("#f4efe1")
 const VILLAGE_OUTLINE_COLOR := Color("#2b2118")
-const HORDE_COLOR := Color("#c8372d")
 const HORDE_PATH_COLOR := Color(0.78, 0.22, 0.18, 0.6)
 const RUINS_COLOR := Color("#6d655a")
 const CARAVAN_COLOR := Color("#c99a5b")
@@ -195,5 +194,5 @@ func _draw_horde(wave: Dictionary, now: float) -> void:
 	else:
 		# Camped at the gates: sit beside the village so both stay visible.
 		pos += Vector2(hex_size * 0.42, -hex_size * 0.42)
-	draw_circle(pos, hex_size * 0.34, HORDE_COLOR)
+	draw_circle(pos, hex_size * 0.34, WaveMath.front_color(String(wave.get("front", "north"))))
 	draw_arc(pos, hex_size * 0.34, 0.0, TAU, 24, VILLAGE_OUTLINE_COLOR, 2.0)

@@ -38,7 +38,7 @@ async function scheduleRaids(
   fromMs: number,
 ): Promise<void> {
   if (!wave.path) return;
-  for (const raid of raidsAlong(wave.path, outposts, data.waves.raidReach, fromMs)) {
+  for (const raid of raidsAlong(wave.path, outposts, data.enemies.fronts[wave.front]!.personality.raidReach, fromMs)) {
     const payload: OutpostRaidPayload = { waveId: wave.id, villageId: raid.villageId, plot: raid.plot };
     const { rows } = await client.query(
       `SELECT 1 FROM scheduled_events
