@@ -32,6 +32,10 @@ import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
 import { fieldRound } from './field.js';
 
+export function personality(data: GameData, wave: Wave) {
+  return data.enemies.fronts[wave.front]!.personality;
+}
+
 export const battlePayload = z.object({ battleId: z.number().int() });
 export type BattlePayload = z.infer<typeof battlePayload>;
 
@@ -136,6 +140,7 @@ export const battleHandlers: HandlerRegistry = {
       defenderStance: state.stance,
       defenderInitial: battle.defenderInitial,
       defenderNow: defendersNow,
+      attackerNerve: personality(data, wave).nerve,
     });
     const log: RoundLog = {
       round,
@@ -165,7 +170,7 @@ export const battleHandlers: HandlerRegistry = {
       const payload: BattlePayload = { battleId: battle.id };
       await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
     } else if (outcome === 'raided') {
-      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses);
+      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor);
       villageState = plunder(villageState, loot, at);
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'raided', at, loot });

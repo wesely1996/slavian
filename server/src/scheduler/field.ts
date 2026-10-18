@@ -26,6 +26,7 @@ import { outpostHex, outpostPlots } from '../sim/village.js';
 import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { personality } from './battles.js';
 import { tell } from './notices.js';
 import { planRaids } from './outposts.js';
 
@@ -187,6 +188,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderStance: stance,
     defenderInitial: battle.defenderInitial,
     defenderNow: defendersNow,
+    attackerNerve: personality(data, wave).nerve,
   });
   const log: RoundLog = {
     round,

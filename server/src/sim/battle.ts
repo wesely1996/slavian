@@ -30,6 +30,9 @@ export interface RoundResult {
 
 export type Outcome = 'ongoing' | 'defended' | 'raided';
 
+// However steady a faction, a horde breaks once this share of it has fallen.
+const MAX_RETREAT_AT = 0.95;
+
 export function total(units: Units): number {
   return Object.values(units).reduce((sum, n) => sum + n, 0);
 }
@@ -102,8 +105,10 @@ export function subtractUnits(units: Units, losses: Units): Record<string, numbe
   return left;
 }
 
-function broken(data: GameData, stance: Stance, initial: Units, now: Units): boolean {
-  const retreatAt = data.battle.stances[stance].retreatAt;
+// `nerve` scales the stance's retreat threshold (a faction's discipline).
+function broken(data: GameData, stance: Stance, initial: Units, now: Units, nerve = 1): boolean {
+  const base = data.battle.stances[stance].retreatAt;
+  const retreatAt = base === null ? null : Math.min(MAX_RETREAT_AT, base * nerve);
   const start = total(initial);
   return retreatAt !== null && start > 0 && (start - total(now)) / start >= retreatAt;
 }
@@ -119,30 +124,31 @@ export function battleOutcome(
     defenderStance: Stance;
     defenderInitial: Units;
     defenderNow: Units;
+    attackerNerve?: number;
   },
 ): Outcome {
   if (total(input.attackerNow) === 0) return 'defended';
   if (total(input.defenderNow) === 0) return 'raided';
-  if (broken(data, input.attackerStance, input.attackerInitial, input.attackerNow)) return 'defended';
+  if (broken(data, input.attackerStance, input.attackerInitial, input.attackerNow, input.attackerNerve)) return 'defended';
   if (broken(data, input.defenderStance, input.defenderInitial, input.defenderNow)) return 'raided';
   return input.round >= data.battle.maxRounds ? 'defended' : 'ongoing';
 }
 
 // What a victorious horde carries off: a share of the stores, smaller the
-// more of the horde fell.
-// What raiders carry off; `bonuses` are the raided player's (hidden
-// cellars).
+// more of the horde fell. `bonuses` are the raided player's (hidden
+// cellars); `lootFactor` is the horde's faction's greed.
 export function raidLoot(
   data: GameData,
   amounts: Resources,
   attackerInitial: Units,
   attackerNow: Units,
   bonuses: Bonuses = {},
+  lootFactor = 1,
 ): Resources {
   const start = total(attackerInitial);
   const surviving = start > 0 ? total(attackerNow) / start : 0;
-  const share = data.battle.raidShare * Math.max(0, 1 + bonus(bonuses, 'lootTaken'));
-  return mapResources((kind) => Math.floor(amounts[kind] * share * surviving));
+  const share = Math.min(1, data.battle.raidShare * lootFactor * Math.max(0, 1 + bonus(bonuses, 'lootTaken')));
+  return mapResources((kind) => Math.floor(amounts[kind] * share * surviving + 1e-9));
 }
 
 export function roundMs(data: GameData, worldSpeed: number): number {

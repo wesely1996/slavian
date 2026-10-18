@@ -119,6 +119,8 @@ const enemyUnitSchema = z.object({
   family: z.enum(UNIT_FAMILIES),
   weight: z.number().positive(),
   minWave: z.number().int().nonnegative(),
+  // Only groups of at least this many players see it.
+  minPlayers: z.number().int().positive().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   speed: z.number().positive(),
@@ -130,6 +132,12 @@ const enemiesFileSchema = z.object({
     z.enum(FRONTS),
     z.object({
       faction: z.string(),
+      signature: z.string(),
+      personality: z.object({
+        lootFactor: z.number().nonnegative(),
+        raidReach: z.number().int().nonnegative(),
+        nerve: z.number().positive(),
+      }),
       spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       units: z.record(z.string(), enemyUnitSchema),
       stances: z.partialRecord(z.enum(STANCES), z.number().positive()),
@@ -144,7 +152,6 @@ const wavesFileSchema = z.object({
   intervalHours: z.tuple([z.number().positive(), z.number().positive()]),
   upcoming: z.number().int().positive(),
   rampageHours: z.number().positive(),
-  raidReach: z.number().int().nonnegative(),
   baseUnits: z.number().positive(),
   growthPerWave: z.number().min(1),
   perExtraPlayer: z.number().nonnegative(),

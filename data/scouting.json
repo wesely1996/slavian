@@ -2,7 +2,10 @@
   "version": 1,
   "_comment": "Chance that each scout survives reaching a wave, per front. Report tiers by surviving scouts: sizeError / unitError are the relative width of the ranges reported (0 = exact). revealsStance: the report includes the wave's battle stance.",
   "survival": {
-    "north": 0.75
+    "north": 0.75,
+    "east": 0.65,
+    "south": 0.8,
+    "west": 0.8
   },
   "defaultSurvival": 0.8,
   "maxScouts": 20,
