@@ -3,12 +3,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import { buildApp } from '../src/api/app.js';
 import { LiveHub } from '../src/api/live.js';
-import { loadGameData } from '../src/data/index.js';
+import { loadGameData, type TerrainId } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
 import { tick } from '../src/scheduler/worker.js';
 import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
+import { roadRoute } from '../src/sim/logistics.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
@@ -644,12 +645,23 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(geared.bonuses['defense.all']).toBeCloseTo(0.04 + 0.08 + 0.05);
     expect((await hero('unequip', { slot: 'mount' })).body.message).toMatch(/Nothing in that slot/);
 
-    // Travel to a second village of hers.
+    // Travel to a second village of hers, on open ground a few hexes away.
+    const home = hex(village.q, village.r);
+    const hexes = started.body.map.hexes as [number, number, TerrainId][];
+    const terrain = new Map(hexes.map(([q, r, t]) => [`${q},${r}`, t]));
+    const site = hexes.find(([q, r, t]) => {
+      if (!['plains', 'forest', 'hills'].includes(t) || hexDistance(hex(q, r), home) !== 4) return false;
+      try {
+        return roadRoute(scheduler.data, terrain, home, hex(q, r), 6, 1).length > 0;
+      } catch {
+        return false;
+      }
+    })!;
     const { rows } = await db.query<{ id: number }>(
       `INSERT INTO villages (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, plots)
-       SELECT world_id, owner_account_id, 'Second', q + 4, r, levels, amounts, rates_per_hour, capacity, settled_at, '[]', '{}', '[]', '{}', plots
+       SELECT world_id, owner_account_id, 'Second', $2, $3, levels, amounts, rates_per_hour, capacity, settled_at, '[]', '{}', '[]', '{}', plots
        FROM villages WHERE id = $1 RETURNING id`,
-      [village.id],
+      [village.id, site[0], site[1]],
     );
     const second = rows[0]!.id;
     const moving = (await hero('move', { villageId: second })).body.hero;
