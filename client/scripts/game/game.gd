@@ -5,6 +5,7 @@ extends Node
 signal world_changed
 signal village_changed(village_id: int)
 signal waves_changed
+signal scouting_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -12,6 +13,8 @@ var villages: Dictionary[int, Dictionary] = {}
 var terrain: Dictionary[Vector2i, String] = {}
 ## Waves not yet dispersed, oldest first (see server waveView).
 var waves: Array = []
+## Scout missions with their shared reports, newest first.
+var scouting: Array = []
 
 ## Server clock minus local clock, in seconds.
 var _clock_offset := 0.0
@@ -52,6 +55,7 @@ func set_world(new_world: Dictionary) -> void:
 	for village in new_world.get("villages", []):
 		villages[int(village.id)] = village
 	waves = new_world.get("waves", [])
+	scouting = new_world.get("scouting", [])
 	terrain.clear()
 	var map: Variant = new_world.get("map")
 	if map is Dictionary:
@@ -65,6 +69,17 @@ func set_waves(world_id_: int, new_waves: Array) -> void:
 		return
 	waves = new_waves
 	waves_changed.emit()
+
+
+func set_scouting(world_id_: int, missions: Array) -> void:
+	if world_id_ != world_id():
+		return
+	scouting = missions
+	scouting_changed.emit()
+
+
+func missions_for(wave_id: int) -> Array:
+	return scouting.filter(func(m: Dictionary) -> bool: return int(m.waveId) == wave_id)
 
 
 func village_name(village_id: Variant) -> String:

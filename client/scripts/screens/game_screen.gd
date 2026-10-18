@@ -20,6 +20,8 @@ var _tab := "buildings"
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
 var _threat_button: Button
+## Chosen number of scouts to send, per wave id.
+var _scout_counts: Dictionary[int, int] = {}
 ## Chosen batch size per unit, kept while the panel rebuilds.
 var _train_counts: Dictionary[String, int] = {}
 var _status: Label
@@ -38,7 +40,9 @@ func _ready() -> void:
 	Live.world_updated.connect(Game.set_world)
 	Live.connection_changed.connect(_on_live_connection)
 	Live.waves_updated.connect(Game.set_waves)
+	Live.scouting_updated.connect(Game.set_scouting)
 	Game.waves_changed.connect(_on_waves_changed)
+	Game.scouting_changed.connect(_on_waves_changed)
 	Live.watch(Game.world_id())
 
 	hex_map.refresh()
@@ -57,6 +61,7 @@ func _exit_tree() -> void:
 	Live.world_updated.disconnect(Game.set_world)
 	Live.connection_changed.disconnect(_on_live_connection)
 	Live.waves_updated.disconnect(Game.set_waves)
+	Live.scouting_updated.disconnect(Game.set_scouting)
 
 
 func _process(delta: float) -> void:
@@ -274,6 +279,13 @@ func _troops_section(village: Dictionary) -> void:
 	_tick(home, func() -> String:
 		return _units_text(Rules.garrison_at(Game.villages.get(village_id, village), Game.server_now())))
 
+	var away: Dictionary = village.get("away", {}).duplicate()
+	for unit in away.keys():
+		if int(away[unit]) <= 0:
+			away.erase(unit)
+	if not away.is_empty():
+		_panel_body.add_child(UI.label("Away: %s" % _units_text(away), UI.SMALL_SIZE, UI.MUTED))
+
 	var units: Dictionary = Game.data.units.units
 	var training: Array = village.training
 	var limit := int(Game.data.units.trainingQueueLimit)
@@ -384,7 +396,9 @@ func _threats_panel() -> void:
 
 func _wave_entry(wave: Dictionary) -> void:
 	_panel_body.add_child(UI.label("Wave %d · %s" % [int(wave.index) + 1, Game.front_faction(wave.front)]))
-	_panel_body.add_child(UI.label("%s front · %s threat · composition unknown" % [String(wave.front).capitalize(), wave.threat], UI.SMALL_SIZE, UI.MUTED))
+	var scouted := Game.missions_for(int(wave.id)).any(func(m: Dictionary) -> bool: return m.report != null)
+	var known := "" if scouted else " · composition unknown"
+	_panel_body.add_child(UI.label("%s front · %s threat%s" % [String(wave.front).capitalize(), wave.threat, known], UI.SMALL_SIZE, UI.MUTED))
 	var line := UI.label("", UI.SMALL_SIZE, Color("#ffb4a8"))
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:
@@ -397,6 +411,62 @@ func _wave_entry(wave: Dictionary) -> void:
 			"arrived":
 				return "At the gates of %s · leaves in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
 		return String(wave.status).capitalize())
+	_scouting_section(wave)
+
+
+func _scouting_section(wave: Dictionary) -> void:
+	var wave_id := int(wave.id)
+	var missions := Game.missions_for(wave_id)
+	var latest: Dictionary = {}
+	for mission in missions:
+		if mission.report != null:
+			latest = mission
+			break
+	if not latest.is_empty():
+		var by := Game.village_name(latest.villageId)
+		_panel_body.add_child(UI.label("Scouts from %s: %s" % [by, ScoutText.survivors(latest.report)], UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(UI.label(ScoutText.describe(latest.report), UI.SMALL_SIZE))
+	for mission in missions:
+		if mission.status == "done":
+			continue
+		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String:
+			var now := Game.server_now()
+			if mission.status == "outbound":
+				return "%d scouts en route · report in %s" % [mission.sent, TimeUtil.format_duration(TimeUtil.parse_iso(mission.arrivesAt) - now)]
+			return "Scouts heading home · back in %s" % TimeUtil.format_duration(TimeUtil.parse_iso(mission.returnsAt) - now))
+
+	var home := _my_village()
+	if home.is_empty() or int(home.levels.get("scout_lodge", 0)) < 1:
+		return
+	var village_id := int(home.id)
+	var at_home := int(Rules.garrison_at(home, Game.server_now()).get("scout", 0))
+	var max_scouts := mini(int(Game.data.scouting.maxScouts), maxi(at_home, 1))
+	var count := clampi(_scout_counts.get(wave_id, mini(at_home, 3)), 1, max_scouts)
+	var row := UI.hbox()
+	_panel_body.add_child(row)
+	for step in [-1, 1]:
+		var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
+			_scout_counts[wave_id] = clampi(count + step, 1, max_scouts)
+			_rebuild_panel())
+		stepper.custom_minimum_size.x = 80
+		row.add_child(stepper)
+	var send := UI.button("Send %d scout%s (%d home)" % [count, "" if count == 1 else "s", at_home], func() -> void:
+		_send_scouts(village_id, wave_id, count))
+	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	send.disabled = at_home < count
+	row.add_child(send)
+
+
+func _send_scouts(village_id: int, wave_id: int, count: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/scout" % village_id, {"waveId": wave_id, "count": count})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _on_waves_changed() -> void:

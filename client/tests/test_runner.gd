@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_rules()
 	_test_training()
 	_test_wave_math()
+	_test_scout_text()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -135,3 +136,16 @@ func _test_wave_math() -> void:
 	_check(done.to == Vector2i(1, -7) and is_equal_approx(done.t, 1.0), "stops at the target")
 	_check(WaveMath.progress({"status": "scheduled", "spawnAt": wave.spawnAt, "path": null}, t0).is_empty(), "no position before spawning")
 	_check(WaveMath.visible_waves([{"status": "scheduled"}, wave, {"status": "arrived"}]).size() == 2, "scheduled waves are not on the map")
+
+
+func _test_scout_text() -> void:
+	var base := {"sent": 6, "survivors": 3, "dispersed": false}
+	_check(ScoutText.describe(base.merged({"tier": "none", "size": null, "units": []})) == "None of the 6 scouts came back.", "no survivors")
+	_check(ScoutText.describe(base.merged({"dispersed": true, "tier": "none", "size": null, "units": []}, true)) == "The horde had already scattered.", "scattered")
+	var rough := base.merged({"tier": "rough", "size": {"min": 18, "max": 33}, "units": [{"unit": "grey_wolf", "name": "Grey Wolf", "min": null, "max": null}]})
+	_check(ScoutText.describe(rough) == "18–33 units, mostly Grey Wolf", "rough report: %s" % ScoutText.describe(rough))
+	var detailed := base.merged({"tier": "detailed", "size": {"min": 23, "max": 28}, "units": [
+		{"unit": "grey_wolf", "name": "Grey Wolf", "min": 11, "max": 17},
+		{"unit": "cave_bear", "name": "Cave Bear", "min": 4, "max": 4}]})
+	_check(ScoutText.describe(detailed) == "23–28 units: Grey Wolf 11–17, Cave Bear 4", "detailed report: %s" % ScoutText.describe(detailed))
+	_check(ScoutText.survivors(base) == "3 of 6 scouts returned", "survivor count")

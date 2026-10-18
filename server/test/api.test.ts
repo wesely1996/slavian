@@ -212,6 +212,56 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
   });
 
+  it('sends scouts at a wave and shares their report', async () => {
+    const zora = await guest('Zora');
+    const created = await call('POST', '/v1/worlds', zora.token, { name: 'Scouts', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, zora.token);
+    const villageId: number = started.body.villages[0].id;
+    const waveId: number = started.body.waves[0].id;
+
+    expect((await call('POST', `/v1/villages/${villageId}/scout`, zora.token, { waveId, count: 1 })).body.message).toMatch(/Only 0 scout/);
+
+    const lodge = await call('POST', `/v1/villages/${villageId}/build`, zora.token, { building: 'scout_lodge' });
+    now = new Date(lodge.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    const trained = await call('POST', `/v1/villages/${villageId}/train`, zora.token, { unit: 'scout', count: 6 });
+    now = new Date(trained.body.village.training[0].completesAt);
+    await tick(db, now, scheduler);
+
+    expect((await call('POST', `/v1/villages/${villageId}/scout`, zora.token, { waveId, count: 0 })).status).toBe(400);
+    expect((await call('POST', `/v1/villages/${villageId}/scout`, zora.token, { waveId: 999999, count: 1 })).status).toBe(404);
+
+    const sent = await call('POST', `/v1/villages/${villageId}/scout`, zora.token, { waveId, count: 6 });
+    expect(sent.status).toBe(200);
+    expect(sent.body.village.garrison.scout).toBe(0);
+    expect(sent.body.village.away.scout).toBe(6);
+    const mission = sent.body.mission;
+    expect(mission).toMatchObject({ waveId, sent: 6, status: 'outbound', report: null });
+
+    now = new Date(mission.arrivesAt);
+    await tick(db, now, scheduler);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const reported = world.scouting.find((m: { id: number }) => m.id === mission.id);
+    expect(reported.status).toBe('returning');
+    const report = reported.report;
+    expect(report.sent).toBe(6);
+    expect(report.survivors).toBeLessThanOrEqual(6);
+    if (report.survivors >= 6) expect(report.tier).toBe('exact');
+    if (report.survivors > 0) expect(report.size.min).toBeLessThanOrEqual(report.size.max);
+    // Dead scouts are gone from the village.
+    expect(world.villages[0].away.scout).toBe(report.survivors);
+    // The wave itself still doesn't leak its composition.
+    expect(JSON.stringify(world.waves)).not.toMatch(/composition|grey_wolf/);
+
+    now = new Date(mission.returnsAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    expect(world.scouting.find((m: { id: number }) => m.id === mission.id).status).toBe('done');
+    expect(world.villages[0].garrison.scout).toBe(report.survivors);
+    expect(world.villages[0].away.scout).toBe(0);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

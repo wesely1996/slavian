@@ -4,6 +4,7 @@ import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
+import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
 
@@ -19,6 +20,7 @@ export interface VillageView {
   // Units at home as of the last settle; units finished since are counted
   // from `training` (each batch trains one unit every perUnitMs).
   garrison: Record<string, number>;
+  away: Record<string, number>;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -45,6 +47,7 @@ export function villageView(village: Village): VillageView {
       completesAt: item.completesAt.toISOString(),
     })),
     garrison: { ...garrison },
+    away: { ...village.state.away },
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -84,6 +87,26 @@ export async function wavesView(client: DbClient, worldId: number) {
   return (await listActiveWaves(client, worldId)).map(waveView);
 }
 
+// Scout missions and their reports are shared with the whole group.
+export function missionView(mission: ScoutMission) {
+  return {
+    id: mission.id,
+    villageId: mission.villageId,
+    waveId: mission.waveId,
+    sent: mission.sent,
+    status: mission.status,
+    target: mission.target,
+    departsAt: mission.departsAt.toISOString(),
+    arrivesAt: mission.arrivesAt.toISOString(),
+    returnsAt: mission.returnsAt.toISOString(),
+    report: mission.report,
+  };
+}
+
+export async function scoutingView(client: DbClient, worldId: number) {
+  return (await listMissions(client, worldId)).map(missionView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -103,6 +126,7 @@ export async function worldView(client: DbClient, world: World) {
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, world.id);
+  const scouting = await scoutingView(client, world.id);
   const map =
     world.status === 'lobby'
       ? null
@@ -112,6 +136,7 @@ export async function worldView(client: DbClient, world: World) {
     members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName })),
     villages: villages.map(villageView),
     waves,
+    scouting,
     map,
   };
 }

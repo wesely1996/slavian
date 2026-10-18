@@ -7,6 +7,7 @@ signal connection_changed(connected: bool)
 signal village_updated(village: Dictionary)
 signal world_updated(world: Dictionary)
 signal waves_updated(world_id: int, waves: Array)
+signal scouting_updated(world_id: int, missions: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -82,6 +83,8 @@ func _handle(text: String) -> void:
 			world_updated.emit(message.world)
 		"waves":
 			waves_updated.emit(int(message.worldId), message.waves)
+		"scouting":
+			scouting_updated.emit(int(message.worldId), message.missions)
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
 

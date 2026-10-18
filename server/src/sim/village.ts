@@ -8,6 +8,7 @@ import {
   type Resources,
 } from './resources.js';
 import {
+  addUnits,
   allUnits,
   batchCompletesAt,
   perUnitMs,
@@ -30,6 +31,8 @@ export interface VillageState {
   readonly queue: readonly QueuedBuild[];
   readonly garrison: Units;
   readonly training: readonly TrainingBatch[];
+  // Units away from home on a mission (scouts). They still eat.
+  readonly away: Units;
 }
 
 const MS_PER_SECOND = 1000;
@@ -61,8 +64,13 @@ export function productionPerHour(data: GameData, levels: VillageState['levels']
   return mapResources((kind) => rates[kind] * worldSpeed);
 }
 
-// Net rates: production minus grain upkeep for every unit, trained or in
-// training. Grain can go negative; the ledger floors amounts at zero.
+// Every unit the village feeds: at home, in training and away.
+export function unitsFed(state: Pick<VillageState, 'garrison' | 'training' | 'away'>): Record<string, number> {
+  return addUnits(allUnits(state.garrison, state.training), state.away);
+}
+
+// Net rates: production minus grain upkeep for every unit the village
+// feeds. Grain can go negative; the ledger floors amounts at zero.
 export function ratesPerHour(data: GameData, levels: VillageState['levels'], units: Units, worldSpeed: number): Resources {
   const rates = productionPerHour(data, levels, worldSpeed);
   return { ...rates, grain: rates.grain - upkeepPerHour(data, units, worldSpeed) };
@@ -82,6 +90,7 @@ export function newVillage(data: GameData, at: Date, worldSpeed: number): Villag
     queue: [],
     garrison: {},
     training: [],
+    away: {},
     ledger: {
       amounts: { ...data.buildings.village.startingResources },
       ratesPerHour: productionPerHour(data, levels, worldSpeed),
@@ -135,7 +144,7 @@ export function completeBuild(
     throw new RuleError(`Build ${building}@${targetLevel} is not at the head of the queue`);
   }
   const levels = { ...state.levels, [building]: targetLevel };
-  const units = allUnits(state.garrison, state.training);
+  const units = unitsFed(state);
   return {
     ...state,
     levels,
@@ -171,11 +180,42 @@ export function queueTraining(
   const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
   const batch: TrainingBatch = { unit, count, startsAt, perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed) };
   const training = [...state.training, batch];
-  const ledger = withRates(paid, at, ratesPerHour(data, state.levels, allUnits(state.garrison, training), worldSpeed));
+  const ledger = withRates(paid, at, ratesPerHour(data, state.levels, unitsFed({ ...state, training }), worldSpeed));
   return { state: { ...state, ledger, training }, batch };
 }
 
 // Moves units trained by `at` into the garrison. Idempotent.
 export function completeTraining(state: VillageState, at: Date): VillageState {
   return { ...state, ...settleTraining(state.garrison, state.training, at) };
+}
+
+export class NotEnoughUnitsError extends RuleError {}
+
+// Sends `count` units of `unit` away from home. Units finished training by
+// `at` count as home.
+export function sendAway(state: VillageState, unit: string, count: number, at: Date): VillageState {
+  const settled = completeTraining(state, at);
+  const home = settled.garrison[unit] ?? 0;
+  if (home < count) throw new NotEnoughUnitsError(`Only ${home} ${unit} at home`);
+  return {
+    ...settled,
+    garrison: { ...settled.garrison, [unit]: home - count },
+    away: addUnits(settled.away, { [unit]: count }),
+  };
+}
+
+// Units away that will never come back (killed): they stop eating now.
+export function loseAway(data: GameData, state: VillageState, unit: string, count: number, at: Date, worldSpeed: number): VillageState {
+  const away = { ...state.away, [unit]: Math.max(0, (state.away[unit] ?? 0) - count) };
+  const next = { ...state, away };
+  return { ...next, ledger: withRates(state.ledger, at, ratesPerHour(data, state.levels, unitsFed(next), worldSpeed)) };
+}
+
+// Units coming home from a mission.
+export function returnHome(state: VillageState, unit: string, count: number): VillageState {
+  return {
+    ...state,
+    away: { ...state.away, [unit]: Math.max(0, (state.away[unit] ?? 0) - count) },
+    garrison: addUnits(state.garrison, { [unit]: count }),
+  };
 }
