@@ -30,9 +30,17 @@ if [[ ! -f "$client/addons/godotx_firebase/plugin.cfg" ]]; then
   curl -sSfL -o "$tmp/godotx_firebase.zip" \
     "https://github.com/godot-x/firebase/releases/download/${plugin_version}/godotx_firebase.zip"
   echo "${plugin_sha256}  $tmp/godotx_firebase.zip" | sha256sum -c -
-  # The zip holds addons/, android/ and ios/; only the first two are used.
-  unzip -q -o "$tmp/godotx_firebase.zip" 'addons/*' 'android/*' -d "$client"
-  rm "$tmp/godotx_firebase.zip"
+  # The zip holds addons/, android/ and ios/ (possibly inside a top folder);
+  # only the first two are used.
+  extracted="$tmp/godotx_firebase"
+  rm -rf "$extracted"
+  unzip -q -o "$tmp/godotx_firebase.zip" -d "$extracted"
+  src=$(dirname "$(find "$extracted" -type d -name addons -print -quit)")
+  [[ -d "$src/addons/godotx_firebase" && -d "$src/android" ]]     || { echo "Unexpected layout in the Firebase plugin zip" >&2; find "$extracted" -maxdepth 3 >&2; exit 1; }
+  mkdir -p "$client/android"
+  cp -r "$src/addons" "$client/"
+  cp -r "$src/android/." "$client/android/"
+  rm -rf "$extracted" "$tmp/godotx_firebase.zip"
 fi
 
 if ! grep -q '^\[editor_plugins\]' "$client/project.godot"; then
