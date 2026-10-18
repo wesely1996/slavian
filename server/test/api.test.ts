@@ -754,7 +754,11 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Cancelled orders stop.
     const cancel = await call('POST', `/v1/villages/${village.id}/orders/${train.body.order.id}/cancel`, lada.token);
     expect(cancel.status).toBe(200);
-    expect((await world()).orders.map((o: { kind: string }) => o.kind).sort()).toEqual(['rebuild', 'surplus']);
+    const left = (await world()).orders;
+    expect(left.map((o: { kind: string }) => o.kind).sort()).toEqual(['rebuild', 'surplus']);
+    // Stop the rest too: later tests move the clock days ahead, and every
+    // world in the schema catches up on each tick.
+    for (const o of left) await call('POST', `/v1/villages/${village.id}/orders/${o.id}/cancel`, lada.token);
   });
 
   it('tells players what happened: pushes for danger, a daily digest for the rest', async () => {
