@@ -5,13 +5,15 @@ import { buildApp } from './api/app.js';
 import { LiveHub } from './api/live.js';
 import { loadGameData } from './data/index.js';
 import { migrate } from './db/migrate.js';
-import { createPool } from './db/pool.js';
+import { createPool, pooledEndpointWarning } from './db/pool.js';
 import { handlers } from './scheduler/handlers.js';
 import { runWorkerLoop } from './scheduler/loop.js';
 
 const port = Number(process.env.PORT ?? 8080);
 const host = process.env.HOST ?? '0.0.0.0';
 
+const warning = process.env.DATABASE_URL ? pooledEndpointWarning(process.env.DATABASE_URL) : null;
+if (warning) console.warn(`WARNING: ${warning}`);
 const db = createPool();
 const applied = await migrate(db);
 if (applied.length) console.log(`Applied migrations: ${applied.join(', ')}`);

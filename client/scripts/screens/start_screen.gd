@@ -98,8 +98,9 @@ func _show_home() -> void:
 	if not response.ok:
 		UI.clear(_content)
 		_set_status(response.error)
+		_content.add_child(UI.label("Server: %s" % Session.server_url, UI.SMALL_SIZE, UI.MUTED))
 		_content.add_child(UI.button("Retry", _show_home))
-		_content.add_child(UI.button("Change server", _show_login))
+		_content.add_child(UI.button("Change server address", _show_server_editor))
 		return
 	_set_status("")
 	Session.account = response.data.account
@@ -113,6 +114,12 @@ func _show_home() -> void:
 		Session.log_out()
 		_show_login()))
 	_content.add_child(who)
+	var server := UI.hbox()
+	var server_label := UI.label("Server: %s" % Session.server_url, UI.SMALL_SIZE, UI.MUTED)
+	server_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	server.add_child(server_label)
+	server.add_child(UI.button("Change", _show_server_editor))
+	_content.add_child(server)
 
 	_content.add_child(UI.label("Your worlds", UI.HEADING_SIZE))
 	if response.data.worlds.is_empty():
@@ -140,6 +147,23 @@ func _show_home() -> void:
 	var code := UI.line_edit("Invite code")
 	_content.add_child(code)
 	_content.add_child(UI.button("Join", func() -> void: _join_world(code.text)))
+
+
+## Changes the server address but stays signed in: a playtest server behind
+## a quick tunnel gets a new address on every restart, while the account
+## lives in its database.
+func _show_server_editor() -> void:
+	_set_status("")
+	UI.clear(_content)
+	_content.add_child(UI.label("Server address", UI.HEADING_SIZE))
+	_content.add_child(UI.label("You stay signed in; your account lives on the server.", UI.SMALL_SIZE, UI.MUTED))
+	var address := UI.line_edit("https://example.trycloudflare.com", Session.server_url)
+	_content.add_child(address)
+	_content.add_child(UI.button("Save", func() -> void:
+		Session.set_server_url(address.text)
+		Session.save()
+		_show_home()))
+	_content.add_child(UI.button("Cancel", _show_home))
 
 
 func _create_world(world_name: String, max_players: int, speed: int) -> void:

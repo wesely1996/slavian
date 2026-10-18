@@ -34,9 +34,18 @@ func log_out() -> void:
 
 
 func set_server_url(url: String) -> void:
-	server_url = url.strip_edges().trim_suffix("/")
-	if not server_url.contains("://"):
-		server_url = "http://" + server_url
+	server_url = normalize_url(url)
+
+
+## Adds a scheme when missing: http for IPs and localhost (a server on your
+## Wi-Fi), https for domain names (e.g. a trycloudflare.com tunnel).
+static func normalize_url(url: String) -> String:
+	var clean := url.strip_edges().trim_suffix("/")
+	if clean.contains("://"):
+		return clean
+	var host := clean.split("/")[0].split(":")[0]
+	var local := host == "localhost" or host.is_valid_ip_address()
+	return ("http://" if local else "https://") + clean
 
 
 func live_url() -> String:

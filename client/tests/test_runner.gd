@@ -20,6 +20,7 @@ func _initialize() -> void:
 	_test_wave_math()
 	_test_scout_text()
 	_test_battle_text()
+	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -164,3 +165,11 @@ func _test_battle_text() -> void:
 	_check(BattleText.outcome(raided, "Mila's village").ends_with("Taken: Wood 120, Grain 30."), "raided text: %s" % BattleText.outcome(raided, "Mila's village"))
 	var stanced := {"sent": 4, "survivors": 4, "dispersed": false, "tier": "detailed", "stance": "hold_the_line", "size": {"min": 9, "max": 11}, "units": [{"unit": "grey_wolf", "name": "Grey Wolf", "min": 5, "max": 7}]}
 	_check(ScoutText.describe(stanced) == "9–11 units, hold the line stance: Grey Wolf 5–7", "scout report shows stance: %s" % ScoutText.describe(stanced))
+
+
+func _test_server_url() -> void:
+	var session := load("res://scripts/net/session.gd")
+	_check(session.normalize_url(" 192.168.1.10:8080/ ") == "http://192.168.1.10:8080", "LAN IP gets http")
+	_check(session.normalize_url("localhost:8080") == "http://localhost:8080", "localhost gets http")
+	_check(session.normalize_url("affects-taken-marble-serial.trycloudflare.com") == "https://affects-taken-marble-serial.trycloudflare.com", "domain gets https")
+	_check(session.normalize_url("http://example.com") == "http://example.com", "explicit scheme kept")

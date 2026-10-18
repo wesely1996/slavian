@@ -1,0 +1,30 @@
+# Playtest: the game server runs on this computer, the database on Neon, and
+# a Cloudflare quick tunnel gives it a public HTTPS address. See
+# docs/playtest.md.
+#   docker compose -f ops/playtest/docker-compose.yml up -d --build
+name: slavian-playtest
+
+services:
+  server:
+    build:
+      context: ../..
+      dockerfile: server/Dockerfile
+    # DATABASE_URL: Neon's *direct* connection string (see .env.example).
+    env_file: .env
+    environment:
+      PORT: "8080"
+    # Also reachable on this computer and its Wi-Fi at http://<IP>:8080.
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.1
+    # A quick tunnel: no Cloudflare account or domain needed. Its address
+    # (https://<random words>.trycloudflare.com) is printed in the logs and
+    # changes every time the tunnel restarts.
+    command: tunnel --no-autoupdate --url http://server:8080
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
