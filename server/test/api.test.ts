@@ -352,6 +352,72 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.body.villages[0].plots.c3).toEqual({ building: 'barracks', level: 1 });
   });
 
+  it('claims outposts, which hordes burn as they pass and sieges cut off', async () => {
+    const zora = await guest('Zora');
+    const created = await call('POST', '/v1/worlds', zora.token, { name: 'Outposts', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, zora.token);
+    const village = started.body.villages[0];
+    const home = hex(village.q, village.r);
+    const yields = scheduler.data.buildings.buildings.outpost!.yields!;
+    const sites = (started.body.map.hexes as [number, number, string][]).filter(
+      ([q, r, terrain]) => hexDistance(hex(q, r), home) === 1 && terrain in yields,
+    );
+    expect(sites.length).toBeGreaterThanOrEqual(2);
+    const [[q1, r1, t1], [q2, r2]] = sites as [[number, number, string], [number, number, string]];
+    const claim = (q: number, r: number) => call('POST', `/v1/villages/${village.id}/outposts`, zora.token, { q, r });
+    await db.query(`UPDATE villages SET amounts = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`, [village.id]);
+
+    expect((await claim(village.q, village.r)).body.message).toMatch(/within 2 hexes/);
+    expect((await claim(village.q + 5, village.r)).body.message).toMatch(/within 2 hexes|not on the map/);
+    // A bigger Elder's Hall allows a second outpost.
+    const hall = await call('POST', `/v1/villages/${village.id}/build`, zora.token, { plot: 'c0' });
+    now = new Date(hall.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+
+    const first = await claim(q1, r1);
+    expect(first.status).toBe(200);
+    expect(first.body.village.plots[`o${q1},${r1}`]).toEqual({ building: 'outpost', level: 0, terrain: t1 });
+    expect((await claim(q1, r1)).body.message).toMatch(/already taken/);
+    now = new Date(first.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    expect(world.villages[0].plots[`o${q1},${r1}`].level).toBe(1);
+    expect(world.villages[0].levels.outpost).toBeUndefined();
+
+    // The first horde sets out; a second outpost goes up while it marches.
+    now = new Date(world.waves[0].spawnAt);
+    await tick(db, now, scheduler);
+    const second = await claim(q2, r2);
+    now = new Date(second.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const rates = world.villages[0].resources.ratesPerHour;
+    expect(world.villages[0].plots[`o${q2},${r2}`].level).toBe(1);
+
+    // It burns both as it reaches the village, then lays siege.
+    now = new Date(world.waves[0].arrivesAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    expect(world.villages[0].plots[`o${q1},${r1}`].level).toBe(0);
+    expect(world.villages[0].plots[`o${q2},${r2}`].level).toBe(0);
+    expect(world.raids.map((r: { q: number; r: number }) => `${r.q},${r.r}`).sort()).toEqual([`${q1},${r1}`, `${q2},${r2}`].sort());
+    expect(world.raids[0]).toMatchObject({ villageId: village.id, waveId: world.waves[0].id, levelAfter: 0 });
+    expect(world.villages[0].besieged).toBe(true);
+    expect(world.villages[0].resources.ratesPerHour.grain).toBeLessThanOrEqual(rates.grain);
+
+    while (world.battles[0]?.status === 'ongoing') {
+      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      await tick(db, now, scheduler);
+      world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    }
+    expect(world.villages[0].besieged).toBe(false);
+
+    // Ruins can be abandoned.
+    const abandoned = await call('POST', `/v1/villages/${village.id}/outposts/abandon`, zora.token, { q: q1, r: r1 });
+    expect(abandoned.body.village.plots[`o${q1},${r1}`]).toBeUndefined();
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

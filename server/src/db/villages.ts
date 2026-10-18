@@ -34,6 +34,7 @@ interface VillageRow {
   training: { unit: string; count: number; startsAt: string; perUnitMs: number }[];
   away: Record<string, number>;
   stance: Stance;
+  besieged: boolean;
 }
 
 function fromRow(row: VillageRow): Village {
@@ -65,6 +66,7 @@ function fromRow(row: VillageRow): Village {
       training,
       away: row.away,
       stance: row.stance,
+      besieged: row.besieged,
       ledger: {
         amounts: row.amounts,
         ratesPerHour: row.rates_per_hour,
@@ -82,8 +84,8 @@ export async function insertVillage(
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
     `INSERT INTO villages
-       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
      RETURNING *`,
     [
       village.worldId,
@@ -102,6 +104,7 @@ export async function insertVillage(
       JSON.stringify(state.away),
       state.stance,
       JSON.stringify(state.plots),
+      state.besieged,
     ],
   );
   return fromRow(rows[0]!);
@@ -122,7 +125,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
   await client.query(
     `UPDATE villages
      SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7,
-         garrison = $8, training = $9, away = $10, stance = $11, plots = $12
+         garrison = $8, training = $9, away = $10, stance = $11, plots = $12, besieged = $13
      WHERE id = $1`,
     [
       id,
@@ -137,6 +140,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       JSON.stringify(state.away),
       state.stance,
       JSON.stringify(state.plots),
+      state.besieged,
     ],
   );
 }

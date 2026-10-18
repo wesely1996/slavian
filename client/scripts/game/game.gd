@@ -7,6 +7,7 @@ signal village_changed(village_id: int)
 signal waves_changed
 signal scouting_changed
 signal battles_changed
+signal raids_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -18,6 +19,8 @@ var waves: Array = []
 var scouting: Array = []
 ## Ongoing battles first, then the most recent finished ones.
 var battles: Array = []
+## Outposts burned by passing hordes, newest first.
+var raids: Array = []
 
 ## Server clock minus local clock, in seconds.
 var _clock_offset := 0.0
@@ -60,6 +63,7 @@ func set_world(new_world: Dictionary) -> void:
 	waves = new_world.get("waves", [])
 	scouting = new_world.get("scouting", [])
 	battles = new_world.get("battles", [])
+	raids = new_world.get("raids", [])
 	terrain.clear()
 	var map: Variant = new_world.get("map")
 	if map is Dictionary:
@@ -87,6 +91,22 @@ func set_battles(world_id_: int, new_battles: Array) -> void:
 		return
 	battles = new_battles
 	battles_changed.emit()
+
+
+func set_raids(world_id_: int, new_raids: Array) -> void:
+	if world_id_ != world_id():
+		return
+	raids = new_raids
+	raids_changed.emit()
+
+
+## The village whose outpost stands on `cell`, if any.
+func outpost_owner(cell: Vector2i) -> Dictionary:
+	var plot := Rules.outpost_plot(cell)
+	for village in villages.values():
+		if village.get("plots", {}).has(plot):
+			return village
+	return {}
 
 
 func battle_for(wave_id: int) -> Dictionary:

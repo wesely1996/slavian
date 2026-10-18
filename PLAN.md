@@ -515,7 +515,7 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 
 ### M2 breakdown (each step is its own PR)
 1. [x] **Village interior:** a Travian-style village screen (the **Village** button on the map). 12 resource fields around the outside (3 woodcutters, 3 quarries, 4 farms, 2 iron mines), each upgraded on its own; 12 building slots in the center, the first holding the Elder's Hall. Hall level 1 opens 4 slots, each further level one more; every 3 Hall levels add a build-queue place (2 at the start); each level builds 4% faster. Build orders name a plot (`{ plot, building? }`); older villages are laid out on plots when the server starts.
-2. [ ] **Outposts** on resource hexes.
+2. [x] **Outposts:** claim a forest, plains, hills, mountain or lake hex within 2 of the village; the outpost is built and upgraded (to level 5) through the village's build queue, and what it gathers depends on the terrain (`buildings.json` → `outpost.yields`). A village holds 1 outpost, plus 1 per 2 Elder's Hall levels. A marching horde burns every outpost within 1 hex of its route down a level (to ruins at 0, which can be rebuilt or abandoned); raids are shared with the group. While a battle rages at a village, its outposts produce nothing.
 3. [ ] **Caravans and the Holy City vault.**
 4. [ ] **Expansion:** settlers, founding, rising cost, upkeep.
 5. [ ] **Research** (Academy).

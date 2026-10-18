@@ -12,6 +12,7 @@ const ALLY_VILLAGE_COLOR := Color("#f4efe1")
 const VILLAGE_OUTLINE_COLOR := Color("#2b2118")
 const HORDE_COLOR := Color("#c8372d")
 const HORDE_PATH_COLOR := Color(0.78, 0.22, 0.18, 0.6)
+const RUINS_COLOR := Color("#6d655a")
 
 @export var hex_size := 48.0
 
@@ -63,6 +64,8 @@ func _draw() -> void:
 		var rect := Rect2(c - Vector2(half, half), Vector2(half, half) * 2.0)
 		draw_rect(rect, MY_VILLAGE_COLOR if Game.is_mine(village) else ALLY_VILLAGE_COLOR)
 		draw_rect(rect, VILLAGE_OUTLINE_COLOR, false, 2.0)
+		for plot in Rules.outpost_plots(village):
+			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village))
 
 	var now := Game.server_now()
 	for wave in WaveMath.visible_waves(Game.waves):
@@ -72,6 +75,18 @@ func _draw() -> void:
 		var outline := HexMath.corners(HexMath.to_pixel(selected, hex_size), hex_size * 0.92)
 		outline.append(outline[0])
 		draw_polyline(outline, SELECTION_COLOR, 4.0)
+
+
+## A small watchtower: a diamond in the owner's colour, grey while in ruins
+## or under construction.
+func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
+	var c := HexMath.to_pixel(cell, hex_size)
+	var r := hex_size * 0.26
+	var diamond := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, 0), c + Vector2(0, r), c + Vector2(-r, 0)])
+	var fill := RUINS_COLOR if level <= 0 else (MY_VILLAGE_COLOR if mine else ALLY_VILLAGE_COLOR)
+	draw_colored_polygon(diamond, fill)
+	diamond.append(diamond[0])
+	draw_polyline(diamond, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
 func has_moving_hordes() -> bool:

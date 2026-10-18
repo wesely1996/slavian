@@ -9,6 +9,7 @@ signal world_updated(world: Dictionary)
 signal waves_updated(world_id: int, waves: Array)
 signal scouting_updated(world_id: int, missions: Array)
 signal battles_updated(world_id: int, battles: Array)
+signal raids_updated(world_id: int, raids: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -88,6 +89,8 @@ func _handle(text: String) -> void:
 			scouting_updated.emit(int(message.worldId), message.missions)
 		"battles":
 			battles_updated.emit(int(message.worldId), message.battles)
+		"raids":
+			raids_updated.emit(int(message.worldId), message.raids)
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
 

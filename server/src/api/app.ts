@@ -1,7 +1,14 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
-import { queueBuildCommand, sendScoutsCommand, setStanceCommand, trainUnitsCommand } from '../commands/village.js';
+import {
+  abandonOutpostCommand,
+  claimOutpostCommand,
+  queueBuildCommand,
+  sendScoutsCommand,
+  setStanceCommand,
+  trainUnitsCommand,
+} from '../commands/village.js';
 import { STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
@@ -32,13 +39,18 @@ const createWorldBody = z.object({
   speed: z.number().min(1).max(100).default(1),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
-// `plot` targets a field or center slot; `building` names what to construct
-// in an empty slot. Older clients send only `building`.
+// `plot` targets a field, center slot or outpost ("o3,-2"); `building`
+// names what to construct in an empty slot. Older clients send only
+// `building`.
 const buildBody = z
-  .object({ plot: z.string().regex(/^[fc]\d{1,2}$/).optional(), building: z.string().min(1).max(64).optional() })
+  .object({
+    plot: z.string().regex(/^([fc]\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
+    building: z.string().min(1).max(64).optional(),
+  })
   .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
+const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
@@ -192,6 +204,22 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = stanceBody.parse(request.body);
     const { village } = await setStanceCommand(db, scheduler, { accountId: account.id, villageId: id, stance: body.stance, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/outposts', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = hexBody.parse(request.body);
+    const { village } = await claimOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/outposts/abandon', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = hexBody.parse(request.body);
+    const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 

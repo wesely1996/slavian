@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Village layout: `fields` are the resource plots around the village (one building type each, upgraded individually); the center has `centerSlots` building slots, the first holding the Elder's Hall. Each Hall level above 1 unlocks `slotsPerHallLevel` more slots, every `hallLevelsPerQueueSlot` levels add a build-queue place, and each level speeds construction by `hallBuildSpeedup`.",
+  "_comment": "Village layout: `fields` are the resource plots around the village (one building type each, upgraded individually); the center has `centerSlots` building slots, the first holding the Elder's Hall. Each Hall level above 1 unlocks `slotsPerHallLevel` more slots, every `hallLevelsPerQueueSlot` levels add a build-queue place, and each level speeds construction by `hallBuildSpeedup`. Outposts are claimed on resource hexes within `outpostRange` of the village; a village may hold `baseOutposts` plus one per `hallLevelsPerOutpost` Hall levels. An outpost's yield per hour depends on its hex's terrain (`yields`), multiplied by `yieldGrowth` per level above 1.",
   "village": {
     "startingResources": {
       "wood": 500,
@@ -34,7 +34,10 @@
     "slotsPerHallLevel": 1,
     "baseQueueLimit": 2,
     "hallLevelsPerQueueSlot": 3,
-    "hallBuildSpeedup": 0.96
+    "hallBuildSpeedup": 0.96,
+    "outpostRange": 2,
+    "baseOutposts": 1,
+    "hallLevelsPerOutpost": 2
   },
   "buildings": {
     "elder_hall": {
@@ -169,6 +172,40 @@
       "buildSeconds": 120,
       "timeGrowth": 1.55,
       "kind": "center"
+    },
+    "outpost": {
+      "name": "Outpost",
+      "kind": "outpost",
+      "maxLevel": 5,
+      "cost": {
+        "wood": 150,
+        "stone": 100,
+        "grain": 80,
+        "iron": 40
+      },
+      "costGrowth": 1.7,
+      "buildSeconds": 900,
+      "timeGrowth": 1.6,
+      "yields": {
+        "plains": {
+          "grain": 10
+        },
+        "forest": {
+          "wood": 10
+        },
+        "hills": {
+          "stone": 6,
+          "iron": 4
+        },
+        "mountain": {
+          "stone": 6,
+          "iron": 6
+        },
+        "lake": {
+          "grain": 8
+        }
+      },
+      "yieldGrowth": 1.35
     }
   }
 }

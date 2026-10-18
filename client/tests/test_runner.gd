@@ -129,6 +129,24 @@ func _test_village_layout() -> void:
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
 	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
 
+	var with_outposts := village.duplicate(true)
+	with_outposts.q = 2
+	with_outposts.r = 0
+	with_outposts.plots["o3,-2"] = {"building": "outpost", "level": 2, "terrain": "forest"}
+	_check(Rules.plot_ids(with_outposts) == Rules.plot_ids(village), "outposts are not village plots")
+	_check(Rules.outpost_plots(with_outposts) == ["o3,-2"] and Rules.outpost_hex("o3,-2") == Vector2i(3, -2), "outpost plots")
+	_check(Rules.outpost_plot(Vector2i(-1, 4)) == "o-1,4" and Rules.outpost_hex("o-1,4") == Vector2i(-1, 4), "outpost plot ids round-trip")
+	_check(Rules.outpost_limit(data, 1) == 1 and Rules.outpost_limit(data, 2) == 2 and Rules.outpost_limit(data, 5) == 3, "outposts per Hall level")
+	var forest_yield := Rules.outpost_yield(data, "forest", 2, 10.0)
+	_check(is_equal_approx(forest_yield.wood, 10.0 * 1.35 * 10.0) and forest_yield.stone == 0.0, "outpost yield by terrain and level: %s" % forest_yield)
+	_check(Rules.outpost_yield(data, "hills", 1, 1.0) == {"wood": 0.0, "stone": 6.0, "grain": 0.0, "iron": 4.0}, "hills yield stone and iron")
+	_check(Rules.outpost_yield(data, "forest", 0, 1.0).wood == 0.0, "an outpost in ruins gathers nothing")
+	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, -1), "plains", false) == "", "a free plains hex in range can be claimed")
+	_check(Rules.claim_problem(data, with_outposts, Vector2i(3, -1), "plains", false).begins_with("Your village can hold 1 outpost;"), "the Hall limits outposts")
+	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(5, 0), "plains", false).begins_with("Outposts go within 2"), "out of range")
+	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, 0), "swamp", false) == "Nothing to gather here.", "no yield")
+	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, 0), "forest", true) == "Already taken.", "taken")
+
 	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12)
 	_check(rects.size() == 24, "a rect per plot")
 	for a in rects:
@@ -205,6 +223,8 @@ func _test_battle_text() -> void:
 	_check(BattleText.outcome(defended, "Vesna's village") == "Defended Vesna's village: 6 of the horde fell, we lost 1.", "defended text: %s" % BattleText.outcome(defended, "Vesna's village"))
 	var raided := {"status": "raided", "round": 2, "rounds": rounds, "loot": {"wood": 120, "stone": 0, "grain": 30, "iron": 0}}
 	_check(BattleText.outcome(raided, "Mila's village").ends_with("Taken: Wood 120, Grain 30."), "raided text: %s" % BattleText.outcome(raided, "Mila's village"))
+	_check(BattleText.raid({"q": 3, "r": -2, "levelAfter": 0}, "Vesna's village") == "A horde burned the outpost of Vesna's village at (3, -2) to ruins.", "raid to ruins")
+	_check(BattleText.raid({"q": 3, "r": -2, "levelAfter": 2}, "Vesna's village").ends_with("down to level 2."), "raid down a level")
 	var stanced := {"sent": 4, "survivors": 4, "dispersed": false, "tier": "detailed", "stance": "hold_the_line", "size": {"min": 9, "max": 11}, "units": [{"unit": "grey_wolf", "name": "Grey Wolf", "min": 5, "max": 7}]}
 	_check(ScoutText.describe(stanced) == "9–11 units, hold the line stance: Grey Wolf 5–7", "scout report shows stance: %s" % ScoutText.describe(stanced))
 

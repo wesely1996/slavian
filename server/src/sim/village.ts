@@ -1,5 +1,6 @@
-import type { BuildingDef, GameData, Stance } from '../data/index.js';
+import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js';
 import { RuleError } from '../errors.js';
+import { hex, hexDistance, hexKey, type Hex } from './hex.js';
 import {
   mapResources,
   spend,
@@ -19,12 +20,16 @@ import {
   type Units,
 } from './training.js';
 
-// A village is laid out as plots: resource fields around it ("f0"…) and
-// building slots in its center ("c0"…, the first holding the Elder's Hall).
-// Each plot holds one building at some level; fields never change type.
+// A village is laid out as plots: resource fields around it ("f0"…),
+// building slots in its center ("c0"…, the first holding the Elder's Hall)
+// and outposts on map hexes near it ("o3,-2"). Each plot holds one building
+// at some level; fields never change type. An outpost at level 0 is being
+// built or lies in ruins.
 export interface Plot {
   readonly building: string | null;
   readonly level: number;
+  // Outposts: the terrain of their hex, which decides what they gather.
+  readonly terrain?: TerrainId;
 }
 export type Plots = Readonly<Record<string, Plot>>;
 
@@ -49,11 +54,14 @@ export interface VillageState {
   readonly away: Units;
   // How the garrison fights when the village is attacked.
   readonly stance: Stance;
+  // A horde is fighting at the gates: outposts stop producing.
+  readonly besieged: boolean;
 }
 
 const MS_PER_SECOND = 1000;
 export const HALL = 'elder_hall';
 export const HALL_PLOT = 'c0';
+export const OUTPOST = 'outpost';
 
 function buildingDef(data: GameData, building: string): BuildingDef {
   const def = data.buildings.buildings[building];
@@ -69,6 +77,20 @@ export function centerPlot(index: number): string {
   return `c${index}`;
 }
 
+export function outpostPlot(cell: Hex): string {
+  return `o${cell.q},${cell.r}`;
+}
+
+// The hex of an outpost plot id, or null for other plots.
+export function outpostHex(plot: string): Hex | null {
+  const match = /^o(-?\d+),(-?\d+)$/.exec(plot);
+  return match ? hex(Number(match[1]), Number(match[2])) : null;
+}
+
+export function outpostPlots(plots: Plots): string[] {
+  return Object.keys(plots).filter((id) => outpostHex(id) !== null);
+}
+
 export function initialPlots(data: GameData): Record<string, Plot> {
   const { fields, centerSlots } = data.buildings.village;
   const plots: Record<string, Plot> = {};
@@ -78,10 +100,12 @@ export function initialPlots(data: GameData): Record<string, Plot> {
   return plots;
 }
 
+// Highest level of each building in the village itself (outposts aside).
 export function levelsOf(plots: Plots): Record<string, number> {
   const levels: Record<string, number> = {};
-  for (const plot of Object.values(plots)) {
-    if (plot.building && plot.level > 0) levels[plot.building] = Math.max(levels[plot.building] ?? 0, plot.level);
+  for (const [id, plot] of Object.entries(plots)) {
+    if (outpostHex(id) || !plot.building || plot.level <= 0) continue;
+    levels[plot.building] = Math.max(levels[plot.building] ?? 0, plot.level);
   }
   return levels;
 }
@@ -95,6 +119,19 @@ export function unlockedSlots(data: GameData, hallLevel: number): number {
 export function buildQueueLimit(data: GameData, hallLevel: number): number {
   const v = data.buildings.village;
   return v.baseQueueLimit + Math.floor(hallLevel / v.hallLevelsPerQueueSlot);
+}
+
+export function outpostLimit(data: GameData, hallLevel: number): number {
+  const v = data.buildings.village;
+  return v.baseOutposts + Math.floor(hallLevel / v.hallLevelsPerOutpost);
+}
+
+// What an outpost gathers per hour (world speed applied); nothing at
+// level 0 or on terrain without a yield.
+export function outpostYield(def: BuildingDef, terrain: TerrainId | undefined, level: number, worldSpeed: number): Resources {
+  const base = terrain ? def.yields?.[terrain] : undefined;
+  const factor = level > 0 ? (def.yieldGrowth ?? 1) ** (level - 1) * worldSpeed : 0;
+  return mapResources((kind) => (base?.[kind] ?? 0) * factor);
 }
 
 export function levelCost(def: BuildingDef, targetLevel: number): Resources {
@@ -112,15 +149,21 @@ export function hallSpeedup(data: GameData, hallLevel: number): number {
   return data.buildings.village.hallBuildSpeedup ** Math.max(0, hallLevel - 1);
 }
 
-// Real-time rates; world speed multiplies production.
-export function productionPerHour(data: GameData, plots: Plots, worldSpeed: number): Resources {
-  const rates = { ...data.buildings.village.baseProductionPerHour };
+// Real-time rates; world speed multiplies production. Outposts produce
+// nothing while the village is besieged.
+export function productionPerHour(data: GameData, plots: Plots, worldSpeed: number, besieged = false): Resources {
+  const rates = mapResources((kind) => data.buildings.village.baseProductionPerHour[kind] * worldSpeed);
   for (const plot of Object.values(plots)) {
     if (!plot.building || plot.level <= 0) continue;
-    const production = buildingDef(data, plot.building).production;
-    if (production) rates[production.resource] += production.basePerHour * production.growth ** (plot.level - 1);
+    const def = buildingDef(data, plot.building);
+    if (def.production) {
+      rates[def.production.resource] += def.production.basePerHour * def.production.growth ** (plot.level - 1) * worldSpeed;
+    } else if (def.yields && !besieged) {
+      const gathered = outpostYield(def, plot.terrain, plot.level, worldSpeed);
+      for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind];
+    }
   }
-  return mapResources((kind) => rates[kind] * worldSpeed);
+  return rates;
 }
 
 // Every unit the village feeds: at home, in training and away.
@@ -130,9 +173,13 @@ export function unitsFed(state: Pick<VillageState, 'garrison' | 'training' | 'aw
 
 // Net rates: production minus grain upkeep for every unit the village
 // feeds. Grain can go negative; the ledger floors amounts at zero.
-export function ratesPerHour(data: GameData, plots: Plots, units: Units, worldSpeed: number): Resources {
-  const rates = productionPerHour(data, plots, worldSpeed);
-  return { ...rates, grain: rates.grain - upkeepPerHour(data, units, worldSpeed) };
+export function villageRates(
+  data: GameData,
+  state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away'>,
+  worldSpeed: number,
+): Resources {
+  const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged);
+  return { ...rates, grain: rates.grain - upkeepPerHour(data, unitsFed(state), worldSpeed) };
 }
 
 export function capacity(data: GameData, levels: VillageState['levels']): Resources {
@@ -153,6 +200,7 @@ export function newVillage(data: GameData, at: Date, worldSpeed: number): Villag
     training: [],
     away: {},
     stance: 'balanced',
+    besieged: false,
     ledger: {
       amounts: { ...data.buildings.village.startingResources },
       ratesPerHour: productionPerHour(data, plots, worldSpeed),
@@ -182,6 +230,7 @@ function resolvePlot(data: GameData, state: VillageState, order: BuildOrder, hal
   if (order.plot) return order.plot;
   if (!order.building) throw new RuleError('Say which plot or building to build');
   const def = buildingDef(data, order.building);
+  if (def.kind === 'outpost') throw new RuleError('Pick a hex for the outpost');
   const ids = Object.keys(state.plots);
   if (def.kind === 'field') {
     const fields = ids.filter((id) => plannedPlot(state, id).building === order.building);
@@ -259,15 +308,71 @@ export function completeBuild(
   if (!head || head.plot !== plot || head.targetLevel !== targetLevel) {
     throw new RuleError(`Build on ${plot} to level ${targetLevel} is not at the head of the queue`);
   }
-  const plots = { ...state.plots, [plot]: { building: head.building, level: targetLevel } };
+  const plots = { ...state.plots, [plot]: { ...state.plots[plot], building: head.building, level: targetLevel } };
   const levels = levelsOf(plots);
-  return {
-    ...state,
-    plots,
-    levels,
-    queue: rest,
-    ledger: withRates(state.ledger, at, ratesPerHour(data, plots, unitsFed(state), worldSpeed), capacity(data, levels)),
-  };
+  const next = { ...state, plots, levels, queue: rest };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels)) };
+}
+
+export interface OutpostSite {
+  readonly cell: Hex;
+  readonly terrain: TerrainId;
+  // The owning village's hex.
+  readonly home: Hex;
+  // Hexes that already hold a village or anyone's outpost ("q,r" keys).
+  readonly taken: ReadonlySet<string>;
+}
+
+// Claims a resource hex near the village and queues its outpost's first
+// level, paid like any other build.
+export function claimOutpost(
+  data: GameData,
+  state: VillageState,
+  site: OutpostSite,
+  at: Date,
+  worldSpeed: number,
+): { state: VillageState; queued: QueuedBuild } {
+  const def = buildingDef(data, OUTPOST);
+  const range = data.buildings.village.outpostRange;
+  const distance = hexDistance(site.cell, site.home);
+  if (distance === 0 || distance > range) throw new RuleError(`Outposts go within ${range} hexes of the village`);
+  if (!def.yields?.[site.terrain]) {
+    throw new RuleError(`Nothing to gather on ${data.terrain.terrain[site.terrain].name}`);
+  }
+  if (site.taken.has(hexKey(site.cell))) throw new RuleError('That hex is already taken');
+  const limit = outpostLimit(data, state.levels[HALL] ?? 0);
+  if (outpostPlots(state.plots).length >= limit) {
+    throw new RuleError(`This village can hold ${limit} outpost${limit === 1 ? '' : 's'}; upgrade the Elder's Hall for more`);
+  }
+  const plot = outpostPlot(site.cell);
+  const claimed = { ...state, plots: { ...state.plots, [plot]: { building: OUTPOST, level: 0, terrain: site.terrain } } };
+  return queueBuild(data, claimed, { plot }, at, worldSpeed);
+}
+
+// Gives up an outpost (or its ruins). Not while it is being built.
+export function abandonOutpost(data: GameData, state: VillageState, plot: string, at: Date, worldSpeed: number): VillageState {
+  if (!outpostHex(plot) || !state.plots[plot]) throw new RuleError('No outpost there');
+  if (state.queue.some((item) => item.plot === plot)) throw new RuleError('The outpost is being built; wait for it to finish');
+  const plots = { ...state.plots };
+  delete plots[plot];
+  const next = { ...state, plots };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
+}
+
+// A passing horde burns an outpost down a level; at level 0 it lies in
+// ruins until rebuilt.
+export function raidOutpost(data: GameData, state: VillageState, plot: string, at: Date, worldSpeed: number): VillageState {
+  const current = state.plots[plot];
+  if (!outpostHex(plot) || !current || current.level <= 0) return state;
+  const plots = { ...state.plots, [plot]: { ...current, level: current.level - 1 } };
+  const next = { ...state, plots };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
+}
+
+export function setBesieged(data: GameData, state: VillageState, besieged: boolean, at: Date, worldSpeed: number): VillageState {
+  if (state.besieged === besieged) return state;
+  const next = { ...state, besieged };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
 }
 
 // Villages saved before plots existed only had a level per building:
@@ -317,7 +422,7 @@ export function queueTraining(
   const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
   const batch: TrainingBatch = { unit, count, startsAt, perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed) };
   const training = [...state.training, batch];
-  const ledger = withRates(paid, at, ratesPerHour(data, state.plots, unitsFed({ ...state, training }), worldSpeed));
+  const ledger = withRates(paid, at, villageRates(data, { ...state, training }, worldSpeed));
   return { state: { ...state, ledger, training }, batch };
 }
 
@@ -345,7 +450,7 @@ export function sendAway(state: VillageState, unit: string, count: number, at: D
 export function loseAway(data: GameData, state: VillageState, unit: string, count: number, at: Date, worldSpeed: number): VillageState {
   const away = { ...state.away, [unit]: Math.max(0, (state.away[unit] ?? 0) - count) };
   const next = { ...state, away };
-  return { ...next, ledger: withRates(state.ledger, at, ratesPerHour(data, state.plots, unitsFed(next), worldSpeed)) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
 }
 
 // Units coming home from a mission.
@@ -362,7 +467,7 @@ export function loseGarrison(data: GameData, state: VillageState, losses: Units,
   const garrison: Record<string, number> = { ...state.garrison };
   for (const [unit, count] of Object.entries(losses)) garrison[unit] = Math.max(0, (garrison[unit] ?? 0) - count);
   const next = { ...state, garrison };
-  return { ...next, ledger: withRates(state.ledger, at, ratesPerHour(data, state.plots, unitsFed(next), worldSpeed)) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
 }
 
 export function plunder(state: VillageState, loot: Resources, at: Date): VillageState {

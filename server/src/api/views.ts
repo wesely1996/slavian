@@ -5,6 +5,7 @@ import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
 import { listRecentBattles, type Battle } from '../db/battles.js';
+import { listRecentRaids, type Raid } from '../db/raids.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
@@ -16,7 +17,9 @@ export interface VillageView {
   name: string;
   q: number;
   r: number;
-  plots: Record<string, { building: string | null; level: number }>;
+  // Fields "f0"…, center slots "c0"… and outposts "o<q>,<r>" (with the
+  // terrain of their hex).
+  plots: Record<string, { building: string | null; level: number; terrain?: string }>;
   levels: Record<string, number>;
   queue: { plot: string; building: string; targetLevel: number; startsAt: string; completesAt: string }[];
   // Units at home as of the last settle; units finished since are counted
@@ -24,6 +27,8 @@ export interface VillageView {
   garrison: Record<string, number>;
   away: Record<string, number>;
   stance: string;
+  // A battle at the gates: outposts produce nothing until it ends.
+  besieged: boolean;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -54,6 +59,7 @@ export function villageView(village: Village): VillageView {
     garrison: { ...garrison },
     away: { ...village.state.away },
     stance: village.state.stance,
+    besieged: village.state.besieged,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -145,6 +151,22 @@ export async function battlesView(client: DbClient, worldId: number) {
   return battles.map((battle) => battleView(battle, waves.get(battle.waveId) ?? {}));
 }
 
+export function raidView(raid: Raid) {
+  return {
+    id: raid.id,
+    waveId: raid.waveId,
+    villageId: raid.villageId,
+    q: raid.q,
+    r: raid.r,
+    levelAfter: raid.levelAfter,
+    at: raid.at.toISOString(),
+  };
+}
+
+export async function raidsView(client: DbClient, worldId: number) {
+  return (await listRecentRaids(client, worldId)).map(raidView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -166,6 +188,7 @@ export async function worldView(client: DbClient, world: World) {
   const waves = await wavesView(client, world.id);
   const scouting = await scoutingView(client, world.id);
   const battles = await battlesView(client, world.id);
+  const raids = await raidsView(client, world.id);
   const map =
     world.status === 'lobby'
       ? null
@@ -177,6 +200,7 @@ export async function worldView(client: DbClient, world: World) {
     waves,
     scouting,
     battles,
+    raids,
     map,
   };
 }

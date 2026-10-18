@@ -7,49 +7,6 @@ import { RESOURCE_KINDS } from '../sim/resources.js';
 // Shared game data lives in /data at the repository root.
 export const DATA_DIR = fileURLToPath(new URL('../../../data/', import.meta.url));
 
-const resourcesSchema = z.object({
-  wood: z.number().nonnegative(),
-  stone: z.number().nonnegative(),
-  grain: z.number().nonnegative(),
-  iron: z.number().nonnegative(),
-});
-
-const buildingSchema = z.object({
-  name: z.string(),
-  // 'field': a resource plot around the village; 'center': a building slot.
-  kind: z.enum(['field', 'center']),
-  maxLevel: z.number().int().positive(),
-  cost: resourcesSchema,
-  costGrowth: z.number().min(1),
-  buildSeconds: z.number().positive(),
-  timeGrowth: z.number().min(1),
-  production: z
-    .object({
-      resource: z.enum(RESOURCE_KINDS),
-      basePerHour: z.number().positive(),
-      growth: z.number().min(1),
-    })
-    .optional(),
-  capacityGrowth: z.number().min(1).optional(),
-});
-
-const buildingsFileSchema = z.object({
-  version: z.number().int(),
-  village: z.object({
-    startingResources: resourcesSchema,
-    baseProductionPerHour: resourcesSchema,
-    baseCapacity: z.number().positive(),
-    fields: z.array(z.string()).min(1),
-    centerSlots: z.number().int().positive(),
-    slotsUnlockedAtStart: z.number().int().positive(),
-    slotsPerHallLevel: z.number().int().nonnegative(),
-    baseQueueLimit: z.number().int().positive(),
-    hallLevelsPerQueueSlot: z.number().int().positive(),
-    hallBuildSpeedup: z.number().positive().max(1),
-  }),
-  buildings: z.record(z.string(), buildingSchema),
-});
-
 export const TERRAIN_IDS = [
   'plains',
   'forest',
@@ -65,6 +22,57 @@ export const TERRAIN_IDS = [
   'hallowed',
 ] as const;
 export type TerrainId = (typeof TERRAIN_IDS)[number];
+
+const resourcesSchema = z.object({
+  wood: z.number().nonnegative(),
+  stone: z.number().nonnegative(),
+  grain: z.number().nonnegative(),
+  iron: z.number().nonnegative(),
+});
+
+const buildingSchema = z.object({
+  name: z.string(),
+  // 'field': a resource plot around the village; 'center': a building slot;
+  // 'outpost': built on a resource hex near the village.
+  kind: z.enum(['field', 'center', 'outpost']),
+  maxLevel: z.number().int().positive(),
+  cost: resourcesSchema,
+  costGrowth: z.number().min(1),
+  buildSeconds: z.number().positive(),
+  timeGrowth: z.number().min(1),
+  production: z
+    .object({
+      resource: z.enum(RESOURCE_KINDS),
+      basePerHour: z.number().positive(),
+      growth: z.number().min(1),
+    })
+    .optional(),
+  capacityGrowth: z.number().min(1).optional(),
+  // Outposts: resources per hour at level 1, by the terrain they stand on.
+  yields: z.partialRecord(z.enum(TERRAIN_IDS), resourcesSchema.partial()).optional(),
+  yieldGrowth: z.number().min(1).optional(),
+});
+
+const buildingsFileSchema = z.object({
+  version: z.number().int(),
+  village: z.object({
+    startingResources: resourcesSchema,
+    baseProductionPerHour: resourcesSchema,
+    baseCapacity: z.number().positive(),
+    fields: z.array(z.string()).min(1),
+    centerSlots: z.number().int().positive(),
+    slotsUnlockedAtStart: z.number().int().positive(),
+    slotsPerHallLevel: z.number().int().nonnegative(),
+    baseQueueLimit: z.number().int().positive(),
+    hallLevelsPerQueueSlot: z.number().int().positive(),
+    hallBuildSpeedup: z.number().positive().max(1),
+    outpostRange: z.number().int().positive(),
+    baseOutposts: z.number().int().nonnegative(),
+    hallLevelsPerOutpost: z.number().int().positive(),
+  }),
+  buildings: z.record(z.string(), buildingSchema),
+});
+
 
 const terrainSchema = z.object({
   name: z.string(),
@@ -135,6 +143,7 @@ const wavesFileSchema = z.object({
   intervalHours: z.tuple([z.number().positive(), z.number().positive()]),
   upcoming: z.number().int().positive(),
   rampageHours: z.number().positive(),
+  raidReach: z.number().int().nonnegative(),
   baseUnits: z.number().positive(),
   growthPerWave: z.number().min(1),
   perExtraPlayer: z.number().nonnegative(),
@@ -220,6 +229,9 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  if (buildings.outpost?.kind !== 'outpost' || !buildings.outpost.yields) {
+    throw new Error('buildings.json needs an outpost building "outpost" with yields');
+  }
   for (const field of data.buildings.village.fields) {
     if (buildings[field]?.kind !== 'field') throw new Error(`Village field "${field}" is not a field building`);
   }
