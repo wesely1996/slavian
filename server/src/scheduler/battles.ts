@@ -27,6 +27,9 @@ import { combine, heroBonuses } from '../sim/heroes.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { armyLosses, rallyToBattle, sendHome } from './armies.js';
+import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
+import { addUnits, splitLosses } from '../sim/armies.js';
 
 export const battlePayload = z.object({ battleId: z.number().int() });
 export type BattlePayload = z.infer<typeof battlePayload>;
@@ -56,6 +59,7 @@ export async function startBattle(
   });
   const payload: BattlePayload = { battleId: battle.id };
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
+  await rallyToBattle(client, data, world, battle, { ...village, state }, at);
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
   await tell(client, world, village.ownerAccountId, {
@@ -79,14 +83,42 @@ export const battleHandlers: HandlerRegistry = {
     // The hero standing in the village leads its garrison.
     const hero = await heroAt(client, village.id);
     const bonuses = hero ? combine(state.bonuses, heroBonuses(data, hero)) : state.bonuses;
+    // The garrison fights alongside armies sent to help; armies joining this
+    // round bring their pincer or harassment bonus.
+    const engaged = await armiesInBattle(client, battle.id);
+    const forces = [state.garrison, ...engaged.map((a) => a.units)];
+    const joining = engaged.filter((a) => a.joinsRound === round);
+    const surge = 1 + joining.reduce((sum, a) => sum + a.joinBonus, 0);
+    const baseStats = playerStats(data, bonuses, true);
     const result = resolveRound(
       data,
       { units: wave.composition, stance: battle.attackerStance, stats: enemyStats(data, wave.front), home: false },
-      { units: state.garrison, stance: state.stance, stats: playerStats(data, bonuses, true), home: true },
+      {
+        units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
+        stance: state.stance,
+        stats: surge === 1 ? baseStats : (unit) => ({ ...baseStats(unit), attack: baseStats(unit).attack * surge }),
+        home: true,
+      },
       battleRng(world.seed, battle.id, round),
     );
     const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
-    let villageState = loseGarrison(data, state, result.defenderLosses, at, world.speed);
+    const shares = splitLosses(result.defenderLosses, forces);
+    let villageState = loseGarrison(data, state, shares[0]!, at, world.speed);
+    let defenderLosses: Record<string, number> = { ...shares[0]! };
+    const armies: Army[] = [];
+    for (const [i, army] of engaged.entries()) {
+      let losses = shares[i + 1]!;
+      // Harassers strike and ride off before the horde can close.
+      if (army.orders === 'harass' && army.joinsRound === round) {
+        losses = Object.fromEntries(Object.entries(losses).map(([u, n]) => [u, Math.floor(n * data.armies.harass.lossFactor)]));
+      }
+      defenderLosses = addUnits(defenderLosses, losses);
+      armies.push(await armyLosses(client, data, world, army, losses, at));
+    }
+    const leaving = (a: Army) => a.orders === 'harass' && a.joinsRound === round;
+    const defendersNow = armies
+      .filter((a) => !leaving(a))
+      .reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...villageState.garrison });
     await setWaveStrength(client, wave.id, attackerNow);
 
     const outcome = battleOutcome(data, {
@@ -96,16 +128,30 @@ export const battleHandlers: HandlerRegistry = {
       attackerNow,
       defenderStance: state.stance,
       defenderInitial: battle.defenderInitial,
-      defenderNow: villageState.garrison,
+      defenderNow: defendersNow,
     });
     const log: RoundLog = {
       round,
       at: at.toISOString(),
       attackerLosses: result.attackerLosses,
-      defenderLosses: result.defenderLosses,
+      defenderLosses,
       attackerLeft: total(attackerNow),
-      defenderLeft: total(villageState.garrison),
+      defenderLeft: total(defendersNow),
+      ...(joining.length
+        ? {
+            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: a.units, bonus: a.joinBonus })),
+          }
+        : {}),
     };
+    // Armies after the round: harassers ride home; when the battle is over,
+    // support stays on guard and reinforcements go home.
+    for (const army of armies) {
+      if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at);
+      else if (outcome !== 'ongoing') {
+        await saveArmy(client, total(army.units) ? { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 } : { ...army, status: 'done' });
+      } else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
+    }
+    if (engaged.length) await notifyWorld(client, { worldId: world.id, type: 'armies' });
 
     if (outcome === 'ongoing') {
       await recordRound(client, battle.id, log, null);

@@ -16,6 +16,7 @@ const RUINS_COLOR := Color("#6d655a")
 const CARAVAN_COLOR := Color("#c99a5b")
 const SETTLERS_COLOR := Color("#e8e2d0")
 const HERO_COLOR := Color("#9b7bd4")
+const ARMY_COLOR := Color("#5b8fd6")
 
 @export var hex_size := 48.0
 
@@ -86,6 +87,8 @@ func _draw() -> void:
 			draw_colored_polygon(tri, SETTLERS_COLOR)
 			tri.append(tri[0])
 			draw_polyline(tri, VILLAGE_OUTLINE_COLOR, 2.0)
+	for army in Game.armies:
+		_draw_army(army, now)
 	for hero in Game.heroes:
 		_draw_hero(hero, now)
 	for wave in WaveMath.visible_waves(Game.waves):
@@ -107,6 +110,25 @@ func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
 	draw_colored_polygon(diamond, fill)
 	diamond.append(diamond[0])
 	draw_polyline(diamond, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## An army: a blue shield on the road, or beside the village it guards.
+func _draw_army(army: Dictionary, now: float) -> void:
+	var pos := Vector2.INF
+	var p := ArmyText.progress(army, now)
+	if not p.is_empty():
+		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	elif army.status in ["stationed", "engaged"]:
+		var village: Dictionary = Game.villages.get(int(army.targetVillageId), {})
+		if not village.is_empty():
+			pos = HexMath.to_pixel(Vector2i(int(village.q), int(village.r)), hex_size) + Vector2(-hex_size * 0.42, hex_size * 0.38)
+	if pos == Vector2.INF:
+		return
+	var r := hex_size * 0.2
+	var shield := PackedVector2Array([pos + Vector2(-r, -r), pos + Vector2(r, -r), pos + Vector2(r, r * 0.3), pos + Vector2(0, r * 1.2), pos + Vector2(-r, r * 0.3)])
+	draw_colored_polygon(shield, ARMY_COLOR)
+	shield.append(shield[0])
+	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
 ## A hero: a small banner by its village, or on the road between two.
@@ -131,7 +153,8 @@ func has_moving_hordes() -> bool:
 	return Game.waves.any(func(w: Dictionary) -> bool: return w.status == "marching") \
 		or Game.caravans.any(func(c: Dictionary) -> bool: return c.status != "done") \
 		or Game.expeditions.any(func(e: Dictionary) -> bool: return e.status in ["outbound", "returning"]) \
-		or Game.heroes.any(func(h: Dictionary) -> bool: return h.status == "traveling")
+		or Game.heroes.any(func(h: Dictionary) -> bool: return h.status == "traveling") \
+		or Game.armies.any(func(a: Dictionary) -> bool: return a.status in ["marching", "returning"])
 
 
 func _draw_horde(wave: Dictionary, now: float) -> void:

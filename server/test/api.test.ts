@@ -832,6 +832,101 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await inbox()).unread).toBe(0);
   });
 
+  it('sends armies: support that guards an ally, reinforcements that rally to battles', async () => {
+    const vid = await guest('Vid');
+    const ola = await guest('Ola');
+    const created = await call('POST', '/v1/worlds', vid.token, { name: 'Armies', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', ola.token, { inviteCode: created.body.inviteCode });
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, vid.token);
+    const a = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vid.accountId);
+    const b = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ola.accountId);
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
+    const village = async (id: number) => (await world()).villages.find((v: { id: number }) => v.id === id);
+    const roundMs = (15 * 60_000) / 10;
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}' WHERE id = $1`, [a.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 10, "archer": 10}' WHERE id = $1`, [b.id]);
+    expect(a.reinforce).toEqual({ share: 0.5, range: 4 });
+    expect((await call('PUT', `/v1/villages/${a.id}/reinforce`, vid.token, { share: 0, range: 4 })).status).toBe(200);
+    expect((await call('PUT', `/v1/villages/${a.id}/reinforce`, ola.token, { share: 0, range: 4 })).status).toBe(403);
+
+    // Vid sends 20 spearmen to stand guard at Ola's village.
+    const send = (body: object) => call('POST', `/v1/villages/${a.id}/armies`, vid.token, body);
+    expect((await send({ targetVillageId: b.id, units: { scout: 1 }, orders: 'support' })).body.message).toMatch(/don't march/);
+    expect((await send({ targetVillageId: a.id, units: { spearman: 1 }, orders: 'support' })).body.message).toMatch(/another village/);
+    expect((await send({ targetVillageId: b.id, units: { spearman: 99 }, orders: 'support' })).body.message).toMatch(/Only 30/);
+    const sent = await send({ targetVillageId: b.id, units: { spearman: 20 }, orders: 'support' });
+    expect(sent.body.army).toMatchObject({ status: 'marching', orders: 'support', units: { spearman: 20 } });
+    expect((await village(a.id)).away.spearman).toBe(20);
+    now = new Date(sent.body.army.arrivesAt);
+    await tick(db, now, scheduler);
+    expect((await world()).armies[0]).toMatchObject({ id: sent.body.army.id, status: 'stationed' });
+
+    // A horde strikes Ola's village: the guard fights beside her garrison.
+    now = new Date(started.body.waves[0].spawnAt);
+    await tick(db, now, scheduler);
+    const { rows: first } = await db.query<{ arrives_at: Date }>(
+      `UPDATE waves SET target_village_id = $2 WHERE id = $1 RETURNING arrives_at`,
+      [started.body.waves[0].id, b.id],
+    );
+    now = new Date(first[0]!.arrives_at);
+    await tick(db, now, scheduler);
+    let w = await world();
+    expect(w.battles[0]).toMatchObject({ villageId: b.id, defenderInitial: { spearman: 30, archer: 10 } });
+    expect(w.armies.find((x: { id: number }) => x.id === sent.body.army.id).status).toBe('engaged');
+    for (let i = 0; i < 12 && (await world()).battles[0].status === 'ongoing'; i++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+    }
+    w = await world();
+    const guard = w.armies.find((x: { id: number }) => x.id === sent.body.army.id);
+    expect(['stationed', 'done']).toContain(guard.status);
+    if (guard.status === 'stationed') {
+      const recalled = await call('POST', `/v1/armies/${guard.id}/recall`, vid.token);
+      expect(recalled.body.army.status).toBe('returning');
+      expect((await call('POST', `/v1/armies/${guard.id}/recall`, vid.token)).body.message).toMatch(/standing guard/);
+      now = new Date(recalled.body.army.returnsAt);
+      await tick(db, now, scheduler);
+      const home = await village(a.id);
+      expect(home.away.spearman ?? 0).toBe(0);
+      expect(home.garrison.spearman).toBe(10 + guard.units.spearman);
+    }
+
+    // Next horde hits Vid: Ola's village sends half its troops (auto-reinforce).
+    await call('PUT', `/v1/villages/${b.id}/reinforce`, ola.token, { share: 0.5, range: 8 });
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 20}' WHERE id = $1`, [b.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}' WHERE id = $1`, [a.id]);
+    const second = (await world()).waves.find((x: { status: string }) => x.status === 'scheduled');
+    now = new Date(second.spawnAt);
+    await tick(db, now, scheduler);
+    const { rows: next } = await db.query<{ arrives_at: Date }>(
+      `UPDATE waves SET target_village_id = $2, composition = '{"grey_wolf": 60}' WHERE id = $1 RETURNING arrives_at`,
+      [second.id, a.id],
+    );
+    now = new Date(next[0]!.arrives_at);
+    await tick(db, now, scheduler);
+    w = await world();
+    const help = w.armies.find((x: { homeVillageId: number; status: string }) => x.homeVillageId === b.id && x.status === 'marching');
+    expect(help).toMatchObject({ orders: 'reinforce', targetVillageId: a.id, units: { spearman: 10 } });
+    // Let it arrive in time for the first round.
+    await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type = 'army_arrive' AND payload @> $1::jsonb AND status = 'pending'`, [
+      JSON.stringify({ armyId: help.id }),
+      new Date(now.getTime() + 1),
+    ]);
+    now = new Date(now.getTime() + roundMs);
+    await tick(db, now, scheduler);
+    w = await world();
+    const battle = w.battles.find((x: { villageId: number }) => x.villageId === a.id);
+    expect(battle.rounds[0].joined).toEqual([expect.objectContaining({ armyId: help.id, villageId: b.id, orders: 'reinforce' })]);
+    expect(battle.defenderInitial.spearman).toBe(40);
+    for (let i = 0; i < 12 && battle.status === 'ongoing' && (await world()).battles.find((x: { id: number }) => x.id === battle.id).status === 'ongoing'; i++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+    }
+    const after = (await world()).armies.find((x: { id: number }) => x.id === help.id);
+    expect(['returning', 'done']).toContain(after.status);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

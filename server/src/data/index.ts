@@ -294,7 +294,24 @@ const notificationsFileSchema = z.object({
   pushExpiryHours: z.number().positive(),
 });
 
+const armiesFileSchema = z.object({
+  version: z.number().int(),
+  pincer: z.object({ minAngle: z.number().min(0).max(180), maxBonus: z.number().nonnegative(), scale: z.number().nonnegative() }),
+  harass: z.object({
+    minCavalryShare: z.number().min(0).max(1),
+    maxBonus: z.number().nonnegative(),
+    scale: z.number().nonnegative(),
+    lossFactor: z.number().min(0).max(1),
+  }),
+  reinforce: z.object({
+    defaultShare: z.number().min(0).max(1),
+    defaultRange: z.number().int().nonnegative(),
+    maxRange: z.number().int().positive(),
+  }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
@@ -325,6 +342,7 @@ export interface GameData {
   heroes: HeroesData;
   orders: OrdersData;
   notifications: NotificationsData;
+  armies: ArmiesData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -343,6 +361,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     heroes: heroesFileSchema.parse(read('heroes.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
+    armies: armiesFileSchema.parse(read('armies.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
