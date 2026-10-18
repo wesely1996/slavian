@@ -1,0 +1,94 @@
+extends Node
+## Live updates for the current world over WebSocket. Reconnects with
+## backoff; after every (re)connect listeners should refetch the world,
+## since updates may have been missed while disconnected.
+
+signal connection_changed(connected: bool)
+signal village_updated(village: Dictionary)
+signal world_updated(world: Dictionary)
+
+const RETRY_MIN_SEC := 1.0
+const RETRY_MAX_SEC := 30.0
+
+var connected := false
+
+var _socket: WebSocketPeer
+var _subscribe_sent := false
+var _world_id := 0
+var _retry_in := 0.0
+var _backoff := RETRY_MIN_SEC
+
+
+func watch(world_id: int) -> void:
+	stop()
+	_world_id = world_id
+	_open()
+
+
+func stop() -> void:
+	_world_id = 0
+	if _socket:
+		_socket.close()
+		_socket = null
+	_set_connected(false)
+
+
+func _open() -> void:
+	_socket = WebSocketPeer.new()
+	_subscribe_sent = false
+	_socket.handshake_headers = PackedStringArray(["Authorization: Bearer " + Session.token])
+	if _socket.connect_to_url(Session.live_url()) != OK:
+		_socket = null
+		_schedule_retry()
+
+
+func _process(delta: float) -> void:
+	if _world_id == 0:
+		return
+	if _socket == null:
+		_retry_in -= delta
+		if _retry_in <= 0.0:
+			_open()
+		return
+
+	_socket.poll()
+	match _socket.get_ready_state():
+		WebSocketPeer.STATE_OPEN:
+			if not _subscribe_sent:
+				_subscribe_sent = true
+				_backoff = RETRY_MIN_SEC
+				_socket.send_text(JSON.stringify({"type": "subscribe", "worldId": _world_id}))
+			while _socket.get_available_packet_count() > 0:
+				_handle(_socket.get_packet().get_string_from_utf8())
+		WebSocketPeer.STATE_CLOSED:
+			_socket = null
+			_set_connected(false)
+			_schedule_retry()
+
+
+func _handle(text: String) -> void:
+	var message: Variant = JSON.parse_string(text)
+	if not message is Dictionary:
+		return
+	if message.has("serverTime"):
+		Game.note_server_time(message.serverTime)
+	match message.get("type", ""):
+		"subscribed":
+			_set_connected(true)
+		"village":
+			village_updated.emit(message.village)
+		"world":
+			world_updated.emit(message.world)
+		"error":
+			push_warning("Live: %s" % message.get("message", ""))
+
+
+func _schedule_retry() -> void:
+	_retry_in = _backoff
+	_backoff = minf(_backoff * 2.0, RETRY_MAX_SEC)
+
+
+func _set_connected(value: bool) -> void:
+	if connected != value:
+		connected = value
+		connection_changed.emit(value)

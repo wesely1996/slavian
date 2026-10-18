@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { queueBuildCommand } from '../src/commands/queue-build.js';
+import { queueBuildCommand } from '../src/commands/village.js';
 import { loadGameData } from '../src/data/index.js';
 import { inTransaction, type Db } from '../src/db/pool.js';
+import { createGuestAccount } from '../src/db/accounts.js';
 import { insertVillage, loadVillage } from '../src/db/villages.js';
 import { createWorld } from '../src/db/worlds.js';
 import { scheduleEvent, type HandlerRegistry, type SchedulerDeps } from '../src/scheduler/events.js';
@@ -30,19 +31,26 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
 
   async function setup(speed = 1) {
     return inTransaction(db, async (client) => {
+      const { account } = await createGuestAccount(client, 'tester');
       const world = await createWorld(client, { name: 'test', seed: 1, speed });
       const village = await insertVillage(client, {
         worldId: world.id,
+        ownerAccountId: account.id,
         name: 'v',
         q: 2,
         r: 0,
         state: newVillage(data, T0, speed),
       });
-      return { worldId: world.id, villageId: village.id };
+      return { worldId: world.id, villageId: village.id, accountId: account.id };
     });
   }
 
   const village = (id: number) => inTransaction(db, (client) => loadVillage(client, id));
+
+  async function build(ids: { villageId: number; accountId: number }, building: string, now: Date) {
+    const { queued } = await queueBuildCommand(db, deps, { ...ids, building, now });
+    return queued;
+  }
 
   async function eventStatuses(worldId: number) {
     const { rows } = await db.query<{ type: string; status: string }>(
@@ -53,8 +61,9 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   }
 
   it('completes a build when it is due, not before', async () => {
-    const { villageId } = await setup();
-    const queued = await queueBuildCommand(db, deps, { villageId, building: 'woodcutter', now: T0 });
+    const ids = await setup();
+    const { villageId } = ids;
+    const queued = await build(ids, 'woodcutter', T0);
 
     await tick(db, new Date(queued.completesAt.getTime() - 1), deps);
     expect((await village(villageId)).state.levels.woodcutter).toBeUndefined();
@@ -68,8 +77,8 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   it('gives the same result whether the worker is on time or an hour late', async () => {
     const onTime = await setup();
     const late = await setup();
-    const queued = await queueBuildCommand(db, deps, { villageId: onTime.villageId, building: 'farm', now: T0 });
-    await queueBuildCommand(db, deps, { villageId: late.villageId, building: 'farm', now: T0 });
+    const queued = await build(onTime, 'farm', T0);
+    await build(late, 'farm', T0);
 
     await tick(db, queued.completesAt, deps);
     await tick(db, seconds(3600), deps);
@@ -82,11 +91,12 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   });
 
   it('commands catch the world up before acting', async () => {
-    const { villageId } = await setup();
-    const first = await queueBuildCommand(db, deps, { villageId, building: 'woodcutter', now: T0 });
+    const ids = await setup();
+    const { villageId } = ids;
+    const first = await build(ids, 'woodcutter', T0);
     // No worker ran, but the first build is already due when the next command arrives.
     const later = new Date(first.completesAt.getTime() + 1000);
-    const second = await queueBuildCommand(db, deps, { villageId, building: 'woodcutter', now: later });
+    const second = await build(ids, 'woodcutter', later);
 
     expect(second.targetLevel).toBe(2);
     expect(second.startsAt).toEqual(later);
@@ -96,8 +106,9 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   });
 
   it('skips a world that someone else holds, then processes it later', async () => {
-    const { worldId, villageId } = await setup();
-    const queued = await queueBuildCommand(db, deps, { villageId, building: 'quarry', now: T0 });
+    const ids = await setup();
+    const { worldId, villageId } = ids;
+    const queued = await build(ids, 'quarry', T0);
 
     const holder = await db.connect();
     try {
@@ -114,9 +125,9 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
 
   it('processes each event exactly once under concurrent workers', async () => {
     const worlds = await Promise.all([setup(), setup(), setup()]);
-    for (const { villageId } of worlds) {
-      await queueBuildCommand(db, deps, { villageId, building: 'woodcutter', now: T0 });
-      await queueBuildCommand(db, deps, { villageId, building: 'farm', now: T0 });
+    for (const ids of worlds) {
+      await build(ids, 'woodcutter', T0);
+      await build(ids, 'farm', T0);
     }
     const until = seconds(3600);
     await Promise.all(Array.from({ length: 6 }, () => tick(db, until, deps)));

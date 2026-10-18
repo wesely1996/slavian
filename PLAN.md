@@ -505,6 +505,14 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 - [x] Godot map spike: placeholder world generator (fronts per group size, edge belt, start ring), hex rendering, touch pan / pinch zoom / tap select, Android export preset.
 - [ ] Run the spike on a physical Android phone and measure frame rate. If drawing ~800 hexes with `_draw()` is slow, switch to a batched mesh or `TileMapLayer`.
 
+### M1 breakdown (each step is its own PR)
+1. [x] **Online foundation:** HTTP + WebSocket API, guest accounts, worlds with invite codes and a lobby, server-side map generation on start (player count decides size and fronts), a village per player, build queue over the API, live updates (Postgres NOTIFY → WebSocket). Client: sign-in, worlds list, create/join, lobby, map from the server, village panel with live resources and build queue. Docker image + compose.
+2. [x] **Units:** barracks and scout lodge, training queue (batches train one unit after another, counted lazily), garrison, grain upkeep from the moment units are drafted. Spearman, archer, horseman, scout (`data/units.json`). Starving troops deserting comes later; for now grain just floors at zero.
+3. [ ] **North front waves:** public wave schedule, spawn in the dark forest, march toward the nearest village, timeline UI.
+4. [ ] **Scouting:** send scouts at a wave; report precision by surviving scouts.
+5. [ ] **Battles:** round-based resolution with stances, battle reports.
+6. [ ] **Playtest:** deploy to a VPS, 2 players at 10× for a few days.
+
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
 2. Hex math library (axial coords, distance, neighbours, A*) in the server; matching rendering helpers in Godot.

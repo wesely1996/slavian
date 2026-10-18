@@ -5,8 +5,15 @@ config_version=5
 
 config/name="Slavian"
 config/version="0.0.1"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/start.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
+
+[autoload]
+
+Session="*res://scripts/net/session.gd"
+Api="*res://scripts/net/api.gd"
+Game="*res://scripts/game/game.gd"
+Live="*res://scripts/net/live.gd"
 
 [display]
 
@@ -17,6 +24,10 @@ window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
+
+[gui]
+
+theme/custom="res://ui/theme.tres"
 
 [input_devices]
 

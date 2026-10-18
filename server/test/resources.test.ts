@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { DATA_DIR } from '../src/data/index.js';
 import {
   amountsAt,
   InsufficientResourcesError,
@@ -65,6 +67,24 @@ describe('resource ledger', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(InsufficientResourcesError);
       expect((error as InsufficientResourcesError).missing.wood).toBe(50);
+    }
+  });
+});
+
+describe('resource ledger (shared vectors)', () => {
+  const vectors = JSON.parse(readFileSync(`${DATA_DIR}/fixtures/resource-vectors.json`, 'utf8')) as {
+    cases: {
+      name: string;
+      ledger: Omit<ResourceLedger, 'settledAt'> & { settledAt: string };
+      at: string;
+      expected: Record<string, number>;
+    }[];
+  };
+
+  it.each(vectors.cases)('$name', ({ ledger, at, expected }) => {
+    const amounts = amountsAt({ ...ledger, settledAt: new Date(ledger.settledAt) }, new Date(at));
+    for (const [kind, value] of Object.entries(expected)) {
+      expect(amounts[kind as keyof typeof amounts]).toBeCloseTo(value, 6);
     }
   });
 });

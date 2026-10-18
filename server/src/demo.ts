@@ -1,10 +1,11 @@
 // End-to-end smoke run of the M0 scheduler: creates a fast world, queues
 // builds through the command path and lets a worker loop finish them.
 //   DATABASE_URL=postgres://... npm run demo
-import { queueBuildCommand } from './commands/queue-build.js';
+import { queueBuildCommand } from './commands/village.js';
 import { loadGameData } from './data/index.js';
 import { migrate } from './db/migrate.js';
 import { createPool, inTransaction } from './db/pool.js';
+import { createGuestAccount } from './db/accounts.js';
 import { insertVillage, loadVillage } from './db/villages.js';
 import { createWorld } from './db/worlds.js';
 import { handlers } from './scheduler/handlers.js';
@@ -18,16 +19,18 @@ const db = createPool();
 await migrate(db);
 const deps = { data: loadGameData(), handlers };
 
-const villageId = await inTransaction(db, async (client) => {
+const { villageId, accountId } = await inTransaction(db, async (client) => {
+  const { account } = await createGuestAccount(client, 'Demo player');
   const world = await createWorld(client, { name: 'Demo', seed: Date.now(), speed: SPEED });
   const village = await insertVillage(client, {
     worldId: world.id,
+    ownerAccountId: account.id,
     name: 'Demo village',
     q: 2,
     r: 0,
     state: newVillage(deps.data, new Date(), world.speed),
   });
-  return village.id;
+  return { villageId: village.id, accountId: account.id };
 });
 
 async function report(label: string): Promise<void> {
@@ -39,7 +42,7 @@ async function report(label: string): Promise<void> {
 
 await report('start');
 for (const building of ['woodcutter', 'farm']) {
-  const queued = await queueBuildCommand(db, deps, { villageId, building, now: new Date() });
+  const { queued } = await queueBuildCommand(db, deps, { accountId, villageId, building, now: new Date() });
   console.log(`queued ${building} -> level ${queued.targetLevel}, done at ${queued.completesAt.toISOString()}`);
 }
 await report('after queueing');

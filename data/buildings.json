@@ -1,8 +1,18 @@
 {
   "version": 1,
   "village": {
-    "startingResources": { "wood": 500, "stone": 500, "grain": 500, "iron": 300 },
-    "baseProductionPerHour": { "wood": 6, "stone": 6, "grain": 8, "iron": 3 },
+    "startingResources": {
+      "wood": 500,
+      "stone": 500,
+      "grain": 500,
+      "iron": 300
+    },
+    "baseProductionPerHour": {
+      "wood": 6,
+      "stone": 6,
+      "grain": 8,
+      "iron": 3
+    },
     "baseCapacity": 1000,
     "queueLimit": 2
   },
@@ -10,47 +20,114 @@
     "woodcutter": {
       "name": "Woodcutter",
       "maxLevel": 10,
-      "cost": { "wood": 40, "stone": 60, "grain": 30, "iron": 20 },
+      "cost": {
+        "wood": 40,
+        "stone": 60,
+        "grain": 30,
+        "iron": 20
+      },
       "costGrowth": 1.6,
       "buildSeconds": 90,
       "timeGrowth": 1.55,
-      "production": { "resource": "wood", "basePerHour": 12, "growth": 1.35 }
+      "production": {
+        "resource": "wood",
+        "basePerHour": 12,
+        "growth": 1.35
+      }
     },
     "quarry": {
       "name": "Quarry",
       "maxLevel": 10,
-      "cost": { "wood": 70, "stone": 30, "grain": 30, "iron": 20 },
+      "cost": {
+        "wood": 70,
+        "stone": 30,
+        "grain": 30,
+        "iron": 20
+      },
       "costGrowth": 1.6,
       "buildSeconds": 90,
       "timeGrowth": 1.55,
-      "production": { "resource": "stone", "basePerHour": 12, "growth": 1.35 }
+      "production": {
+        "resource": "stone",
+        "basePerHour": 12,
+        "growth": 1.35
+      }
     },
     "farm": {
       "name": "Farm",
       "maxLevel": 10,
-      "cost": { "wood": 50, "stone": 40, "grain": 20, "iron": 10 },
+      "cost": {
+        "wood": 50,
+        "stone": 40,
+        "grain": 20,
+        "iron": 10
+      },
       "costGrowth": 1.6,
       "buildSeconds": 75,
       "timeGrowth": 1.55,
-      "production": { "resource": "grain", "basePerHour": 15, "growth": 1.35 }
+      "production": {
+        "resource": "grain",
+        "basePerHour": 15,
+        "growth": 1.35
+      }
     },
     "iron_mine": {
       "name": "Iron Mine",
       "maxLevel": 10,
-      "cost": { "wood": 80, "stone": 80, "grain": 40, "iron": 0 },
+      "cost": {
+        "wood": 80,
+        "stone": 80,
+        "grain": 40,
+        "iron": 0
+      },
       "costGrowth": 1.65,
       "buildSeconds": 120,
       "timeGrowth": 1.6,
-      "production": { "resource": "iron", "basePerHour": 8, "growth": 1.35 }
+      "production": {
+        "resource": "iron",
+        "basePerHour": 8,
+        "growth": 1.35
+      }
     },
     "storehouse": {
       "name": "Storehouse",
       "maxLevel": 10,
-      "cost": { "wood": 120, "stone": 100, "grain": 40, "iron": 20 },
+      "cost": {
+        "wood": 120,
+        "stone": 100,
+        "grain": 40,
+        "iron": 20
+      },
       "costGrowth": 1.5,
       "buildSeconds": 100,
       "timeGrowth": 1.5,
       "capacityGrowth": 1.3
+    },
+    "barracks": {
+      "name": "Barracks",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 150,
+        "stone": 120,
+        "grain": 60,
+        "iron": 60
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 150,
+      "timeGrowth": 1.55
+    },
+    "scout_lodge": {
+      "name": "Scout Lodge",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 100,
+        "stone": 80,
+        "grain": 40,
+        "iron": 20
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 120,
+      "timeGrowth": 1.55
     }
   }
 }

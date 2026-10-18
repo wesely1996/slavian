@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "_comment": "moveCost is the cost of entering the hex; null means impassable. Edge types form the unsettleable belt around the map.",
+  "terrain": {
+    "plains":      { "name": "Plains",         "moveCost": 1,    "settleable": true,  "edge": false },
+    "forest":      { "name": "Forest",         "moveCost": 2,    "settleable": true,  "edge": false },
+    "hills":       { "name": "Hills",          "moveCost": 2,    "settleable": true,  "edge": false },
+    "mountain":    { "name": "Mountain",       "moveCost": null, "settleable": false, "edge": false },
+    "swamp":       { "name": "Swamp",          "moveCost": 3,    "settleable": false, "edge": false },
+    "lake":        { "name": "Lake",           "moveCost": null, "settleable": false, "edge": false },
+    "holy_city":   { "name": "Holy City",      "moveCost": 1,    "settleable": false, "edge": false },
+    "ocean":       { "name": "Ocean",          "moveCost": null, "settleable": false, "edge": true },
+    "dark_forest": { "name": "Dark Forest",    "moveCost": 3,    "settleable": false, "edge": true },
+    "ice":         { "name": "Ice",            "moveCost": 3,    "settleable": false, "edge": true },
+    "steppe":      { "name": "Steppe",         "moveCost": 1,    "settleable": false, "edge": true },
+    "hallowed":    { "name": "Hallowed Lands", "moveCost": 2,    "settleable": false, "edge": true }
+  }
+}

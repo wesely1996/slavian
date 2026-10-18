@@ -1,10 +1,13 @@
 import type { Resources } from '../sim/resources.js';
+import type { TrainingBatch } from '../sim/training.js';
 import type { QueuedBuild, VillageState } from '../sim/village.js';
+import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
 
 export interface Village {
   id: number;
   worldId: number;
+  ownerAccountId: number | null;
   name: string;
   q: number;
   r: number;
@@ -14,6 +17,7 @@ export interface Village {
 interface VillageRow {
   id: number;
   world_id: number;
+  owner_account_id: number | null;
   name: string;
   q: number;
   r: number;
@@ -23,6 +27,8 @@ interface VillageRow {
   capacity: Resources;
   settled_at: Date;
   queue: { building: string; targetLevel: number; startsAt: string; completesAt: string }[];
+  garrison: Record<string, number>;
+  training: { unit: string; count: number; startsAt: string; perUnitMs: number }[];
 }
 
 function fromRow(row: VillageRow): Village {
@@ -32,15 +38,24 @@ function fromRow(row: VillageRow): Village {
     startsAt: new Date(item.startsAt),
     completesAt: new Date(item.completesAt),
   }));
+  const training: TrainingBatch[] = row.training.map((batch) => ({
+    unit: batch.unit,
+    count: batch.count,
+    startsAt: new Date(batch.startsAt),
+    perUnitMs: batch.perUnitMs,
+  }));
   return {
     id: row.id,
     worldId: row.world_id,
+    ownerAccountId: row.owner_account_id,
     name: row.name,
     q: row.q,
     r: row.r,
     state: {
       levels: row.levels,
       queue,
+      garrison: row.garrison,
+      training,
       ledger: {
         amounts: row.amounts,
         ratesPerHour: row.rates_per_hour,
@@ -57,11 +72,13 @@ export async function insertVillage(
 ): Promise<Village> {
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
-    `INSERT INTO villages (world_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `INSERT INTO villages
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
      RETURNING *`,
     [
       village.worldId,
+      village.ownerAccountId,
       village.name,
       village.q,
       village.r,
@@ -71,6 +88,8 @@ export async function insertVillage(
       JSON.stringify(state.ledger.capacity),
       state.ledger.settledAt,
       JSON.stringify(state.queue),
+      JSON.stringify(state.garrison),
+      JSON.stringify(state.training),
     ],
   );
   return fromRow(rows[0]!);
@@ -78,14 +97,20 @@ export async function insertVillage(
 
 export async function loadVillage(client: DbClient, id: number): Promise<Village> {
   const { rows } = await client.query<VillageRow>('SELECT * FROM villages WHERE id = $1', [id]);
-  if (!rows[0]) throw new Error(`Village ${id} not found`);
+  if (!rows[0]) throw new NotFoundError(`Village ${id} not found`);
   return fromRow(rows[0]);
+}
+
+export async function listVillages(client: DbClient, worldId: number): Promise<Village[]> {
+  const { rows } = await client.query<VillageRow>('SELECT * FROM villages WHERE world_id = $1 ORDER BY id', [worldId]);
+  return rows.map(fromRow);
 }
 
 export async function saveVillageState(client: DbClient, id: number, state: VillageState): Promise<void> {
   await client.query(
     `UPDATE villages
-     SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7
+     SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7,
+         garrison = $8, training = $9
      WHERE id = $1`,
     [
       id,
@@ -95,6 +120,8 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       JSON.stringify(state.ledger.capacity),
       state.ledger.settledAt,
       JSON.stringify(state.queue),
+      JSON.stringify(state.garrison),
+      JSON.stringify(state.training),
     ],
   );
 }

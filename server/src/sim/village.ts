@@ -1,4 +1,5 @@
 import type { BuildingDef, GameData } from '../data/index.js';
+import { RuleError } from '../errors.js';
 import {
   mapResources,
   spend,
@@ -6,6 +7,15 @@ import {
   type ResourceLedger,
   type Resources,
 } from './resources.js';
+import {
+  allUnits,
+  batchCompletesAt,
+  perUnitMs,
+  settleTraining,
+  upkeepPerHour,
+  type TrainingBatch,
+  type Units,
+} from './training.js';
 
 export interface QueuedBuild {
   readonly building: string;
@@ -18,9 +28,9 @@ export interface VillageState {
   readonly levels: Readonly<Record<string, number>>;
   readonly ledger: ResourceLedger;
   readonly queue: readonly QueuedBuild[];
+  readonly garrison: Units;
+  readonly training: readonly TrainingBatch[];
 }
-
-export class RuleError extends Error {}
 
 const MS_PER_SECOND = 1000;
 
@@ -51,6 +61,13 @@ export function productionPerHour(data: GameData, levels: VillageState['levels']
   return mapResources((kind) => rates[kind] * worldSpeed);
 }
 
+// Net rates: production minus grain upkeep for every unit, trained or in
+// training. Grain can go negative; the ledger floors amounts at zero.
+export function ratesPerHour(data: GameData, levels: VillageState['levels'], units: Units, worldSpeed: number): Resources {
+  const rates = productionPerHour(data, levels, worldSpeed);
+  return { ...rates, grain: rates.grain - upkeepPerHour(data, units, worldSpeed) };
+}
+
 export function capacity(data: GameData, levels: VillageState['levels']): Resources {
   const storehouse = data.buildings.buildings.storehouse;
   const level = levels.storehouse ?? 0;
@@ -63,6 +80,8 @@ export function newVillage(data: GameData, at: Date, worldSpeed: number): Villag
   return {
     levels,
     queue: [],
+    garrison: {},
+    training: [],
     ledger: {
       amounts: { ...data.buildings.village.startingResources },
       ratesPerHour: productionPerHour(data, levels, worldSpeed),
@@ -116,9 +135,47 @@ export function completeBuild(
     throw new RuleError(`Build ${building}@${targetLevel} is not at the head of the queue`);
   }
   const levels = { ...state.levels, [building]: targetLevel };
+  const units = allUnits(state.garrison, state.training);
   return {
+    ...state,
     levels,
     queue: rest,
-    ledger: withRates(state.ledger, at, productionPerHour(data, levels, worldSpeed), capacity(data, levels)),
+    ledger: withRates(state.ledger, at, ratesPerHour(data, levels, units, worldSpeed), capacity(data, levels)),
   };
+}
+
+// Pays for and queues `count` units. Batches train one after another; the
+// new units start eating as soon as they are drafted.
+export function queueTraining(
+  data: GameData,
+  state: VillageState,
+  unit: string,
+  count: number,
+  at: Date,
+  worldSpeed: number,
+): { state: VillageState; batch: TrainingBatch } {
+  const def = data.units.units[unit];
+  if (!def) throw new RuleError(`Unknown unit "${unit}"`);
+  if (!Number.isInteger(count) || count < 1 || count > data.units.maxBatch) {
+    throw new RuleError(`Train between 1 and ${data.units.maxBatch} at a time`);
+  }
+  const buildingLevel = state.levels[def.building] ?? 0;
+  if (buildingLevel < def.requiresLevel) {
+    throw new RuleError(`${def.name} needs ${buildingDef(data, def.building).name} level ${def.requiresLevel}`);
+  }
+  if (state.training.length >= data.units.trainingQueueLimit) throw new RuleError('Training queue is full');
+
+  const cost = mapResources((kind) => def.cost[kind] * count);
+  const paid = spend(state.ledger, at, cost);
+  const last = state.training.at(-1);
+  const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
+  const batch: TrainingBatch = { unit, count, startsAt, perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed) };
+  const training = [...state.training, batch];
+  const ledger = withRates(paid, at, ratesPerHour(data, state.levels, allUnits(state.garrison, training), worldSpeed));
+  return { state: { ...state, ledger, training }, batch };
+}
+
+// Moves units trained by `at` into the garrison. Idempotent.
+export function completeTraining(state: VillageState, at: Date): VillageState {
+  return { ...state, ...settleTraining(state.garrison, state.training, at) };
 }

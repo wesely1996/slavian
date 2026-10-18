@@ -11,17 +11,23 @@
     "test": "vitest run",
     "migrate": "tsx src/db/migrate.ts",
     "worker": "tsx src/scheduler/run-worker.ts",
-    "demo": "tsx src/demo.ts"
+    "demo": "tsx src/demo.ts",
+    "start": "tsx src/server.ts"
   },
   "dependencies": {
+    "@fastify/websocket": "^11.3.4",
+    "fastify": "^5.12.7",
     "pg": "^8.23.1",
+    "simplex-noise": "^4.0.3",
+    "tsx": "^4.23.15",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
-    "tsx": "^4.23.15",
+    "@types/ws": "^8.18.2",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "ws": "^8.22.0"
   }
 }
