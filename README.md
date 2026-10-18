@@ -75,7 +75,7 @@ From the command line: `ops/export-android.sh build/slavian-debug.apk` (see the 
 
 ## Workflow and CI/CD
 
-All changes go on a feature branch and are merged into `main` through a pull request.
+All changes go on a feature branch and are merged into `main` through a pull request, which is squash-merged; the branch is deleted after merging.
 
 | Workflow | When | What |
 |---|---|---|
@@ -88,8 +88,9 @@ To test a build on a phone, open the latest **Dev build** under Releases and ins
 ### One-time repository setup
 
 1. **Default branch:** `main` (scheduled workflows only run from the default branch).
-2. **Branch protection on `main`:** require a pull request and the `Server tests`, `Server image`, `Client tests` and `Android debug APK` checks.
-3. **Signing key secret** (so each dev build installs over the previous one). Create a keystore once and keep a copy safe:
+2. **Merging** (*Settings → General → Pull Requests*): allow only **squash merging** and turn on **Automatically delete head branches**.
+3. **Branch protection on `main`:** require a pull request and the `Server tests`, `Server image`, `Client tests` and `Android debug APK` checks.
+4. **Signing key secret** (so each dev build installs over the previous one). Create a keystore once and keep a copy safe:
    ```sh
    keytool -genkeypair -keystore slavian-debug.keystore -storepass android -keypass android \
      -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Slavian Debug"
