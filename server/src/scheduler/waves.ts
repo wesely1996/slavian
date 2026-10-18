@@ -12,6 +12,7 @@ import { insertWave, lastWave, loadWave, markArrived, markDispersed, markMarchin
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
 import { planMarch, planWave, type PlannedWave, type WaveContext } from '../sim/waves.js';
 import { startBattle } from './battles.js';
+import { planWaveWarning } from './notices.js';
 import { planRaids } from './outposts.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
@@ -85,6 +86,7 @@ export const waveHandlers: HandlerRegistry = {
     const payload: WavePayload = { waveId: wave.id };
     await scheduleEvent(client, world.id, march.arrivesAt, 'wave_arrive', payload);
     await planRaids(client, data, world, wave.id);
+    await planWaveWarning(client, data, world, wave.id, event.dueAt);
 
     const last = (await lastWave(client, world.id))!;
     await announceWave(client, data, world, await waveContext(client, world), last.index + 1, last.spawnAt);

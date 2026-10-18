@@ -24,6 +24,7 @@ import { amountsAt } from '../sim/resources.js';
 import { completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { heroAt } from '../db/heroes.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
+import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 
@@ -57,6 +58,12 @@ export async function startBattle(
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
+  await tell(client, world, village.ownerAccountId, {
+    kind: 'under_attack',
+    tier: 'push',
+    title: `${village.name} is under attack`,
+    body: `A horde of ${total(wave.composition)} is fighting your garrison of ${total(state.garrison)}.`,
+  }, at);
 }
 
 export const battleHandlers: HandlerRegistry = {
@@ -109,10 +116,22 @@ export const battleHandlers: HandlerRegistry = {
       villageState = plunder(villageState, loot, at);
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'raided', at, loot });
+      await tell(client, world, village.ownerAccountId, {
+        kind: 'battle_result',
+        tier: 'digest',
+        title: `${village.name} was raided`,
+        body: `The horde carried off ${total(loot)} resources after ${round} rounds.`,
+      }, at);
       await endWave(client, wave.id, 'dispersed', at);
     } else {
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
+      await tell(client, world, village.ownerAccountId, {
+        kind: 'battle_result',
+        tier: 'digest',
+        title: `${village.name} held`,
+        body: `The horde was beaten after ${round} rounds.`,
+      }, at);
       await endWave(client, wave.id, 'defeated', at);
     }
 

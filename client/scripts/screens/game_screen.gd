@@ -19,6 +19,9 @@ var _resource_labels: Dictionary[String, Label] = {}
 ## "map" or "village" (the inside of your own village).
 var _view := "map"
 var _view_button: Button
+var _inbox_button: Button
+## Notification settings as the server last sent them.
+var _prefs: Dictionary = {}
 var _spacer: Control
 var _village_view: VillageView
 ## The plot picked in the village view.
@@ -65,6 +68,8 @@ func _ready() -> void:
 	Live.research_updated.connect(Game.set_research)
 	Live.heroes_updated.connect(Game.set_heroes)
 	Live.orders_updated.connect(Game.set_orders)
+	Live.inbox_updated.connect(Game.set_inbox)
+	Game.inbox_changed.connect(_on_inbox_changed)
 	Game.orders_changed.connect(_on_waves_changed)
 	Game.heroes_changed.connect(_on_waves_changed)
 	Game.research_changed.connect(_on_waves_changed)
@@ -100,6 +105,7 @@ func _exit_tree() -> void:
 	Live.research_updated.disconnect(Game.set_research)
 	Live.heroes_updated.disconnect(Game.set_heroes)
 	Live.orders_updated.disconnect(Game.set_orders)
+	Live.inbox_updated.disconnect(Game.set_inbox)
 
 
 func _process(delta: float) -> void:
@@ -149,6 +155,8 @@ func _build_ui() -> void:
 	_view_button = UI.button("Village", _toggle_view)
 	_view_button.visible = not _my_village().is_empty()
 	bar.add_child(_view_button)
+	_inbox_button = UI.button("Inbox", _show_inbox)
+	bar.add_child(_inbox_button)
 	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -249,6 +257,9 @@ func _rebuild_panel() -> void:
 		return
 	if _panel_mode == "hero":
 		_hero_panel()
+		return
+	if _panel_mode == "inbox":
+		_inbox_panel()
 		return
 	if _view == "village":
 		_village_panel()
@@ -1401,6 +1412,102 @@ func _refetch_world() -> void:
 	var response := await Api.get_json("/v1/worlds/%d" % Game.world_id())
 	if response.ok:
 		Game.set_world(response.data)
+	_refetch_inbox()
+
+
+func _refetch_inbox() -> void:
+	var response := await Api.get_json("/v1/worlds/%d/notifications" % Game.world_id())
+	if response.ok:
+		Game.set_inbox(Game.world_id(), response.data.notifications, int(response.data.unread))
+
+
+func _on_inbox_changed() -> void:
+	_inbox_button.text = "Inbox %d" % Game.unread if Game.unread > 0 else "Inbox"
+	if _panel_mode == "inbox":
+		_rebuild_panel()
+
+
+# --- Inbox -------------------------------------------------------------------
+
+## Opens the inbox: everything is read once seen.
+func _show_inbox() -> void:
+	_panel_mode = "inbox"
+	_rebuild_panel()
+	if Game.unread > 0:
+		await Api.post_json("/v1/worlds/%d/notifications/read" % Game.world_id(), {})
+	var response := await Api.get_json("/v1/me/notifications")
+	if response.ok:
+		_prefs = response.data.prefs
+		if _panel_mode == "inbox":
+			_rebuild_panel()
+
+
+func _inbox_panel() -> void:
+	var top := UI.hbox()
+	var title := UI.label("Inbox", UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UI.button("Close", func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	_panel_body.add_child(UI.label("Danger is pushed to your phone; everything else waits for the daily digest.", UI.SMALL_SIZE, UI.MUTED))
+	if Game.inbox.is_empty():
+		_panel_body.add_child(UI.label("Nothing yet.", UI.SMALL_SIZE, UI.MUTED))
+	var now := Game.server_now()
+	for n in Game.inbox:
+		var head := UI.label(("● " if not n.read else "") + String(n.title))
+		_panel_body.add_child(head)
+		var body := "%s · %s" % [InboxText.ago(TimeUtil.parse_iso(n.createdAt), now), n.body] if String(n.body) != "" else InboxText.ago(TimeUtil.parse_iso(n.createdAt), now)
+		_panel_body.add_child(UI.label(body, UI.SMALL_SIZE, UI.MUTED))
+	_notification_settings()
+
+
+func _notification_settings() -> void:
+	if _prefs.is_empty():
+		return
+	_panel_body.add_child(UI.label("Settings", UI.HEADING_SIZE))
+	var quiet: bool = _prefs.quietStart != null and _prefs.quietEnd != null
+	var start := int(_prefs.quietStart) if quiet else 22 * 60
+	var end := int(_prefs.quietEnd) if quiet else 7 * 60
+	var quiet_row := UI.hbox(8)
+	var quiet_text := UI.label("Quiet hours %s–%s" % [InboxText.clock(start), InboxText.clock(end)] if quiet else "No quiet hours", UI.SMALL_SIZE)
+	quiet_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	quiet_row.add_child(quiet_text)
+	quiet_row.add_child(UI.button("Off" if quiet else "On", func() -> void:
+		_save_prefs({"quietStart": null, "quietEnd": null} if quiet else {"quietStart": start, "quietEnd": end})))
+	_panel_body.add_child(quiet_row)
+	if quiet:
+		var adjust := UI.hbox(8)
+		for spec in [["From −1h", -60, 0], ["From +1h", 60, 0], ["Until −1h", 0, -60], ["Until +1h", 0, 60]]:
+			var button := UI.button(spec[0], func() -> void:
+				_save_prefs({"quietStart": posmod(start + spec[1], 1440), "quietEnd": posmod(end + spec[2], 1440)}))
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+			adjust.add_child(button)
+		_panel_body.add_child(adjust)
+	var digest := int(_prefs.digestHour)
+	var digest_row := UI.hbox(8)
+	var digest_text := UI.label("Daily digest at %s" % InboxText.clock(digest * 60), UI.SMALL_SIZE)
+	digest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	digest_row.add_child(digest_text)
+	for step in [-1, 1]:
+		var button := UI.button(("%+dh" % step).replace("-", "−"), func() -> void: _save_prefs({"digestHour": posmod(digest + step, 24)}))
+		button.custom_minimum_size.x = 100
+		digest_row.add_child(button)
+	_panel_body.add_child(digest_row)
+
+
+## Saves settings, always with this phone's time zone.
+func _save_prefs(changes: Dictionary) -> void:
+	var body := changes.duplicate()
+	body.utcOffsetMinutes = int(Time.get_time_zone_from_system().bias)
+	var response := await Api.patch_json("/v1/me/notifications", body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	_prefs = response.data.prefs
+	_rebuild_panel()
 
 
 func _leave() -> void:

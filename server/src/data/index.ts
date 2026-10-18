@@ -287,7 +287,15 @@ const ordersFileSchema = z.object({
   surplusShare: z.object({ min: z.number().min(0).max(1), max: z.number().min(0).max(1) }),
 });
 
+const notificationsFileSchema = z.object({
+  version: z.number().int(),
+  waveWarningHours: z.number().positive(),
+  bigBuildLevel: z.number().int().positive(),
+  pushExpiryHours: z.number().positive(),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
@@ -316,6 +324,7 @@ export interface GameData {
   research: ResearchData;
   heroes: HeroesData;
   orders: OrdersData;
+  notifications: NotificationsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -333,6 +342,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
+    notifications: notificationsFileSchema.parse(read('notifications.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

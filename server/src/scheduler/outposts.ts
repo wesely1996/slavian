@@ -11,6 +11,7 @@ import { listActiveWaves, loadWave, type Wave } from '../db/waves.js';
 import type { World } from '../db/worlds.js';
 import { outpostHex, outpostPlots, raidOutpost } from '../sim/village.js';
 import { raidsAlong, type OutpostTarget } from '../sim/waves.js';
+import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const outpostRaidPayload = z.object({ waveId: z.number().int(), villageId: z.number().int(), plot: z.string() });
@@ -92,5 +93,11 @@ export const outpostHandlers: HandlerRegistry = {
     });
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'raids' });
+    await tell(client, world, village.ownerAccountId, {
+      kind: 'outpost_raided',
+      tier: 'push',
+      title: `A horde burned an outpost of ${village.name}`,
+      body: after.level > 0 ? `The outpost at (${cell.q}, ${cell.r}) is down to level ${after.level}.` : `The outpost at (${cell.q}, ${cell.r}) lies in ruins.`,
+    }, event.dueAt);
   },
 };

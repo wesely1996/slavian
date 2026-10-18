@@ -65,11 +65,14 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/villages/:id/caravans` | Send `{ destinationVillageId, load: { wood, stone, grain, iron } }` by caravan; `destinationVillageId: null` is the Holy City vault. Needs a Caravan Yard (1 caravan per level, 500 each). |
 | `POST` | `/v1/villages/:id/caravans/fetch` | Send empty caravans to bring `{ load }` back from the vault. |
 | `POST` | `/v1/worlds/:id/hero/move` · `/skills` · `/equip` · `/unequip` · `/rename` | Your hero: travel to `{ villageId }` (one of yours), learn `{ skill }`, wear `{ item }`, take off `{ slot }`, rename `{ name }`. |
+| `GET` · `POST` | `/v1/worlds/:id/notifications` · `/notifications/read` | Your inbox in a world (newest first, unread count) / mark it read. |
+| `GET` · `PATCH` | `/v1/me/notifications` | Quiet hours `{ quietStart, quietEnd }` (minutes after local midnight, or null), `utcOffsetMinutes`, `digestHour`. |
+| `POST` | `/v1/me/devices` | Register a phone's push token `{ token, platform }` (see [docs/push.md](docs/push.md)). |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` updates. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` updates, and your own `notifications`. |
 
 ## Client
 

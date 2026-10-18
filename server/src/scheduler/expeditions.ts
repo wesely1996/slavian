@@ -10,6 +10,7 @@ import { loadHexes } from '../db/worlds.js';
 import { adminUpkeepFor, SETTLER, settleProblem } from '../sim/expansion.js';
 import { hex, hexKey } from '../sim/hex.js';
 import { loseAway, newVillage, outpostHex, outpostPlots, returnHome } from '../sim/village.js';
+import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const expeditionPayload = z.object({ expeditionId: z.number().int() });
@@ -33,6 +34,12 @@ export const expeditionHandlers: HandlerRegistry = {
     });
     if (problem) {
       await markTurnedBack(client, expedition.id, problem);
+      await tell(client, world, home.ownerAccountId, {
+        kind: 'settlers',
+        tier: 'digest',
+        title: `Settlers turned back from (${expedition.q}, ${expedition.r})`,
+        body: `${problem}. They are walking home to ${home.name}.`,
+      }, event.dueAt);
       const payload: ExpeditionPayload = { expeditionId: expedition.id };
       await scheduleEvent(client, world.id, expedition.returnsAt, 'settlers_return', payload);
       await notifyWorld(client, { worldId: world.id, type: 'expeditions' });
@@ -56,6 +63,7 @@ export const expeditionHandlers: HandlerRegistry = {
     // The settlers become the new village's people: they stop eating at home.
     await saveVillageState(client, home.id, loseAway(data, home.state, SETTLER, expedition.settlers, event.dueAt, world.speed));
     await markFounded(client, expedition.id, founded.id);
+    await tell(client, world, owner, { kind: 'settlers', tier: 'digest', title: `${expedition.name} founded`, body: 'Your settlers built a new village.' }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 

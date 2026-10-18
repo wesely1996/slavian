@@ -11,6 +11,7 @@ import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
 import { listOrders, type StoredOrder } from '../db/orders.js';
+import { listNotifications, unreadCount, type Notification } from '../db/notifications.js';
 import { heroBonuses, xpToNext } from '../sim/heroes.js';
 import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
@@ -298,6 +299,26 @@ export function orderView(order: StoredOrder) {
 
 export async function ordersView(client: DbClient, worldId: number) {
   return (await listOrders(client, { worldId })).map(orderView);
+}
+
+export function notificationView(n: Notification) {
+  return {
+    id: n.id,
+    kind: n.kind,
+    tier: n.tier,
+    title: n.title,
+    body: n.body,
+    createdAt: n.createdAt.toISOString(),
+    read: n.readAt !== null,
+  };
+}
+
+// A player's own notifications in a world, newest first.
+export async function inboxView(client: DbClient, accountId: number, worldId: number) {
+  return {
+    notifications: (await listNotifications(client, accountId, worldId)).map(notificationView),
+    unread: await unreadCount(client, accountId, worldId),
+  };
 }
 
 export function worldSummary(world: World) {

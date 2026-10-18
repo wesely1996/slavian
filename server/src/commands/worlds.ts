@@ -4,6 +4,7 @@ import type { Account } from '../db/accounts.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { ensureHeroes } from '../db/heroes.js';
+import { ensureDigests } from '../scheduler/notices.js';
 import { insertVillage } from '../db/villages.js';
 import {
   addMember,
@@ -107,6 +108,7 @@ export async function startWorldCommand(
     await ensureHeroes(client, deps.data, world.id, world.seed);
     const started = await getWorld(client, world.id);
     await announceFirstWaves(client, deps.data, started);
+    await ensureDigests(client, started, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     return started;
   });

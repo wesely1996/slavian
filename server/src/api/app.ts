@@ -1,6 +1,8 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
+import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
+import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
@@ -28,6 +30,7 @@ import {
   caravanView,
   expeditionView,
   heroView,
+  inboxView,
   orderView,
   researchView,
   missionView,
@@ -84,6 +87,14 @@ const orderBody = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('surplus'), share: z.number() }),
 ]);
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
+const minuteOfDay = z.number().int().min(0).max(1439);
+const prefsBody = z.object({
+  quietStart: minuteOfDay.nullable().optional(),
+  quietEnd: minuteOfDay.nullable().optional(),
+  utcOffsetMinutes: z.number().int().min(-14 * 60).max(14 * 60).optional(),
+  digestHour: z.number().int().min(0).max(23).optional(),
+});
+const deviceBody = z.object({ token: z.string().min(10).max(4096), platform: z.enum(['android', 'ios', 'web']) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -166,6 +177,56 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const account = await authenticate(db, request);
     const body = renameBody.parse(request.body);
     return { account: await inTransaction(db, (client) => renameAccount(client, account.id, body.displayName)) };
+  });
+
+  // When to be bothered: quiet hours (local minutes, may wrap midnight),
+  // the device's UTC offset and the daily digest hour.
+  app.get('/v1/me/notifications', async (request) => {
+    const account = await authenticate(db, request);
+    return { prefs: await inTransaction(db, (client) => loadPrefs(client, account.id)) };
+  });
+
+  app.patch('/v1/me/notifications', async (request) => {
+    const account = await authenticate(db, request);
+    const body = prefsBody.parse(request.body);
+    const prefs = await inTransaction(db, async (client) => {
+      const current = await loadPrefs(client, account.id);
+      const next = {
+        quietStart: body.quietStart === undefined ? current.quietStart : body.quietStart,
+        quietEnd: body.quietEnd === undefined ? current.quietEnd : body.quietEnd,
+        utcOffsetMinutes: body.utcOffsetMinutes ?? current.utcOffsetMinutes,
+        digestHour: body.digestHour ?? current.digestHour,
+      };
+      await savePrefs(client, account.id, next);
+      return next;
+    });
+    return { prefs };
+  });
+
+  // A phone's push token (FCM registration token).
+  app.post('/v1/me/devices', async (request) => {
+    const account = await authenticate(db, request);
+    const body = deviceBody.parse(request.body);
+    await inTransaction(db, (client) => registerDevice(client, account.id, body.token, body.platform));
+    return { ok: true };
+  });
+
+  app.get('/v1/worlds/:id/notifications', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await requireMember(account, id);
+    return { ...(await inTransaction(db, (client) => inboxView(client, account.id, id))), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/worlds/:id/notifications/read', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await requireMember(account, id);
+    await inTransaction(db, async (client) => {
+      await markAllRead(client, account.id, id, clock());
+      await notifyWorld(client, { worldId: id, type: 'notifications', accountId: account.id });
+    });
+    return { ok: true };
   });
 
   app.post('/v1/worlds', async (request) => {
