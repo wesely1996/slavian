@@ -3,6 +3,10 @@
 #
 #   ops/export-android.sh build/slavian-debug.apk
 #
+# Push notifications need client/google-services.json and run
+# ops/ci/setup-firebase-android.sh first (done here), which needs
+# GODOT_VERSION set to the installed Godot's version, e.g. 4.5.1.
+#
 # Needs `godot` on the PATH (or $GODOT), Godot's Android export templates, an
 # Android SDK and JDK 17 (from Godot's editor settings, or ANDROID_HOME and
 # JAVA_HOME when the editor settings are fresh, as on CI).
@@ -42,6 +46,8 @@ if [[ -n "${VERSION_CODE:-}" || -n "${VERSION_NAME:-}" ]]; then
     sed -i "s|^version/name=.*|version/name=\"$VERSION_NAME\"|" "$preset"
   fi
 fi
+
+"$root/ops/ci/setup-firebase-android.sh"
 
 mkdir -p "$(dirname "$out")"
 rm -f "$out"

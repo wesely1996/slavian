@@ -39,6 +39,7 @@ func _ready() -> void:
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)
 	if Session.is_logged_in():
+		Push.register()
 		_show_home()
 	else:
 		_show_login()
@@ -80,6 +81,7 @@ func _login(server_url: String, display_name: String) -> void:
 	Session.token = response.data.token
 	Session.account = response.data.account
 	Session.save()
+	Push.register()
 	_show_home()
 
 
