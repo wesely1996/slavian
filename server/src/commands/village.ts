@@ -1,13 +1,19 @@
-import { ForbiddenError, NotFoundError } from '../errors.js';
+import type { TerrainId } from '../data/index.js';
+import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { insertMission, type ScoutMission } from '../db/scouting.js';
+import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { getWorld, type World } from '../db/worlds.js';
+import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
+import type { MissionPayload } from '../scheduler/scouting.js';
+import { hex } from '../sim/hex.js';
+import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
-import { queueBuild, queueTraining, type QueuedBuild, type VillageState } from '../sim/village.js';
+import { queueBuild, queueTraining, sendAway, type QueuedBuild, type VillageState } from '../sim/village.js';
 
 interface VillageCommandInput {
   accountId: number;
@@ -70,4 +76,44 @@ export async function trainUnitsCommand(
     return { state, result: batch };
   });
   return { village, batch: result };
+}
+
+// Sends scouts from the caller's village to a wave. They report on arrival
+// and walk back the same way.
+export async function sendScoutsCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { waveId: number; count: number },
+): Promise<{ village: Village; mission: ScoutMission }> {
+  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+    const max = deps.data.scouting.maxScouts;
+    if (!Number.isInteger(input.count) || input.count < 1 || input.count > max) {
+      throw new RuleError(`Send between 1 and ${max} scouts`);
+    }
+    const wave = await loadWave(client, input.waveId);
+    if (wave.worldId !== world.id) throw new NotFoundError(`Wave ${input.waveId} not found`);
+    if (wave.status === 'dispersed') throw new RuleError('That horde has already scattered');
+
+    const state = sendAway(village.state, SCOUT_UNIT, input.count, input.now);
+    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+    const home = hex(village.q, village.r);
+    const target = scoutTarget(deps.data, terrain, wave, home, input.now);
+    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed);
+    const arrivesAt = new Date(input.now.getTime() + travelMs);
+    const mission = await insertMission(client, {
+      worldId: world.id,
+      villageId: village.id,
+      waveId: wave.id,
+      sent: input.count,
+      target,
+      departsAt: input.now,
+      arrivesAt,
+      returnsAt: new Date(arrivesAt.getTime() + travelMs),
+    });
+    const payload: MissionPayload = { missionId: mission.id };
+    await scheduleEvent(client, world.id, arrivesAt, 'scout_arrive', payload);
+    await notifyWorld(client, { worldId: world.id, type: 'scouting' });
+    return { state, result: mission };
+  });
+  return { village, mission: result };
 }

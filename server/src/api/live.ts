@@ -7,6 +7,7 @@
 //                   { "type": "village", "village", "serverTime" }
 //                   { "type": "world", "world", "serverTime" }
 //                   { "type": "waves", "worldId", "waves", "serverTime" }
+//                   { "type": "scouting", "worldId", "missions", "serverTime" }
 //                   { "type": "error", "message" }
 import type { WebSocket } from 'ws';
 import { z } from 'zod';
@@ -15,7 +16,7 @@ import { worldEventsChannel, type WorldEvent } from '../db/notify.js';
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, isMember } from '../db/worlds.js';
-import { villageView, wavesView, worldView } from './views.js';
+import { scoutingView, villageView, wavesView, worldView } from './views.js';
 
 const clientMessage = z.object({ type: z.literal('subscribe'), worldId: z.number().int().positive() });
 const RECONNECT_MS = 2000;
@@ -99,6 +100,9 @@ export class LiveHub {
         const serverTime = this.clock().toISOString();
         if (event.type === 'village') {
           return { type: 'village', village: villageView(await loadVillage(client, event.villageId)), serverTime };
+        }
+        if (event.type === 'scouting') {
+          return { type: 'scouting', worldId: event.worldId, missions: await scoutingView(client, event.worldId), serverTime };
         }
         if (event.type === 'waves') {
           return { type: 'waves', worldId: event.worldId, waves: await wavesView(client, event.worldId), serverTime };

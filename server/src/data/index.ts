@@ -126,7 +126,25 @@ const wavesFileSchema = z.object({
   threatLevels: z.array(z.object({ name: z.string(), maxUnits: z.number().int().positive().nullable() })).min(1),
 });
 
+const scoutingFileSchema = z.object({
+  version: z.number().int(),
+  survival: z.partialRecord(z.enum(FRONTS), z.number().min(0).max(1)),
+  defaultSurvival: z.number().min(0).max(1),
+  maxScouts: z.number().int().positive(),
+  tiers: z
+    .array(
+      z.object({
+        name: z.string(),
+        minSurvivors: z.number().int().positive(),
+        sizeError: z.number().min(0),
+        unitError: z.number().min(0).nullable(),
+      }),
+    )
+    .min(1),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type ScoutingData = z.infer<typeof scoutingFileSchema>;
 export type EnemiesData = z.infer<typeof enemiesFileSchema>;
 export type WavesData = z.infer<typeof wavesFileSchema>;
 export type UnitDef = z.infer<typeof unitSchema>;
@@ -141,6 +159,7 @@ export interface GameData {
   units: UnitsData;
   enemies: EnemiesData;
   waves: WavesData;
+  scouting: ScoutingData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -151,6 +170,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     units: unitsFileSchema.parse(read('units.json')),
     enemies: enemiesFileSchema.parse(read('enemies.json')),
     waves: wavesFileSchema.parse(read('waves.json')),
+    scouting: scoutingFileSchema.parse(read('scouting.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

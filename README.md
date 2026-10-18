@@ -47,14 +47,15 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 |---|---|---|
 | `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
 | `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename. |
-| `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave settings). |
+| `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave and scouting settings). |
 | `POST` | `/v1/worlds` | Create a world (lobby) with an invite code. |
 | `POST` | `/v1/worlds/join` | Join by invite code. |
-| `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, map. |
+| `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, map. |
 | `POST` | `/v1/worlds/:id/start` | Host only: generate the map and found everyone's village. |
 | `POST` | `/v1/villages/:id/build` | Queue a building upgrade. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` updates. |
+| `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` updates. |
 
 ## Client
 
@@ -75,7 +76,7 @@ From the command line: `ops/export-android.sh build/slavian-debug.apk` (see the 
 
 ## Workflow and CI/CD
 
-All changes go on a feature branch and are merged into `main` through a pull request.
+All changes go on a feature branch and are merged into `main` through a pull request, which is squash-merged; the branch is deleted after merging.
 
 | Workflow | When | What |
 |---|---|---|
@@ -88,8 +89,9 @@ To test a build on a phone, open the latest **Dev build** under Releases and ins
 ### One-time repository setup
 
 1. **Default branch:** `main` (scheduled workflows only run from the default branch).
-2. **Branch protection on `main`:** require a pull request and the `Server tests`, `Server image`, `Client tests` and `Android debug APK` checks.
-3. **Signing key secret** (so each dev build installs over the previous one). Create a keystore once and keep a copy safe:
+2. **Merging** (*Settings → General → Pull Requests*): allow only **squash merging** and turn on **Automatically delete head branches**.
+3. **Branch protection on `main`:** require a pull request and the `Server tests`, `Server image`, `Client tests` and `Android debug APK` checks.
+4. **Signing key secret** (so each dev build installs over the previous one). Create a keystore once and keep a copy safe:
    ```sh
    keytool -genkeypair -keystore slavian-debug.keystore -storepass android -keypass android \
      -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Slavian Debug"

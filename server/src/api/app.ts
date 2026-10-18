@@ -1,7 +1,7 @@
 import websocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
-import { queueBuildCommand, trainUnitsCommand } from '../commands/village.js';
+import { queueBuildCommand, sendScoutsCommand, trainUnitsCommand } from '../commands/village.js';
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -10,7 +10,7 @@ import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
-import { villageView, worldSummary, worldView } from './views.js';
+import { missionView, villageView, worldSummary, worldView } from './views.js';
 
 export interface AppDeps {
   db: Db;
@@ -33,6 +33,7 @@ const createWorldBody = z.object({
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
 const buildBody = z.object({ building: z.string().min(1).max(64) });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
+const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
   const header = request.headers.authorization ?? '';
@@ -86,6 +87,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     units: scheduler.data.units,
     enemies: scheduler.data.enemies,
     waves: scheduler.data.waves,
+    scouting: scheduler.data.scouting,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -161,6 +163,20 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       now: clock(),
     });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/scout', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = scoutBody.parse(request.body);
+    const { village, mission } = await sendScoutsCommand(db, scheduler, {
+      accountId: account.id,
+      villageId: id,
+      waveId: body.waveId,
+      count: body.count,
+      now: clock(),
+    });
+    return { village: villageView(village), mission: missionView(mission), serverTime: clock().toISOString() };
   });
 
   if (deps.live) {
