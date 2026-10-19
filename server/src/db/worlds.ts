@@ -89,6 +89,8 @@ export interface Member {
   joinedAt: Date;
   // Their clan (data/clans.json); null until they pick one.
   clan: string | null;
+  // Getting-started steps done: step -> when.
+  onboarding: Record<string, string>;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -100,7 +102,7 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
-    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan
+    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.onboarding
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1
      ORDER BY m.joined_at, m.account_id`,
@@ -111,6 +113,16 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
 
 export async function setClan(client: DbClient, worldId: number, accountId: number, clan: string): Promise<void> {
   await client.query('UPDATE world_members SET clan = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, clan]);
+}
+
+// Marks a getting-started step done; false if it already was.
+export async function markOnboarding(client: DbClient, worldId: number, accountId: number, step: string, at: Date): Promise<boolean> {
+  const { rowCount } = await client.query(
+    `UPDATE world_members SET onboarding = onboarding || jsonb_build_object($3::text, $4::text)
+     WHERE world_id = $1 AND account_id = $2 AND NOT onboarding ? $3`,
+    [worldId, accountId, step, at.toISOString()],
+  );
+  return rowCount === 1;
 }
 
 export async function isMember(client: DbClient, worldId: number, accountId: number): Promise<boolean> {

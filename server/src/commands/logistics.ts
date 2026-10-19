@@ -106,7 +106,10 @@ export async function sendCaravanCommand(
     const escorted = withEscort(deps.data, village.state, input.escort, input.now);
     const caravan = await dispatchCaravan(client, deps.data, world, village, 'deliver', input, input.now);
     const state: VillageState = { ...escorted, ledger: spend(escorted.ledger, input.now, input.load) };
-    return { state, result: caravan };
+    // A gift: to the vault or a teammate's village, not one's own.
+    const destination = input.destinationVillageId === null ? null : await loadVillage(client, input.destinationVillageId);
+    const gift = destination === null || destination.ownerAccountId !== village.ownerAccountId;
+    return { state, result: caravan, onboarding: gift ? ('gift' as const) : null };
   });
   return { village, caravan: result };
 }

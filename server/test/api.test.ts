@@ -465,7 +465,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const trip = await send({ destinationVillageId: theirs.id, load: load(400, 0, 0, 100) });
     expect(trip.status).toBe(200);
     expect(trip.body.caravan).toMatchObject({ kind: 'deliver', caravans: 1, status: 'outbound', destinationVillageId: theirs.id });
-    expect(trip.body.village.resources.amounts.wood).toBeLessThanOrEqual(1600 + 1);
+    // Less the load, plus the first-gift reward (data/onboarding.json).
+    const gift = scheduler.data.onboarding.steps.find((s) => s.id === 'gift')!.reward;
+    expect(trip.body.village.resources.amounts.wood).toBeLessThanOrEqual(1600 + gift.wood + 1);
     expect((await send({ load: load(10) })).body.message).toMatch(/0 at home/);
     now = new Date(trip.body.caravan.arrivesAt);
     await tick(db, now, scheduler);
@@ -569,13 +571,17 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 2 });
     now = new Date(now.getTime() + 3_600_000);
     await tick(db, now, scheduler);
+    // Not on an ancient site or a camp, where no village can be founded.
+    const camps = new Set((await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.camps.map((c: { q: number; r: number }) => `${c.q},${c.r}`));
     const other = (started.body.map.hexes as [number, number, string][]).find(
       ([q, r, t]) =>
         settleable.has(t) &&
         hexDistance(hex(q, r), homeCell) >= 3 &&
         hexDistance(hex(q, r), homeCell) <= 6 &&
         hexDistance(hex(q, r), hex(site[0], site[1])) >= 4 &&
-        hexDistance(hex(q, r), hex(0, 0)) >= 3,
+        hexDistance(hex(q, r), hex(0, 0)) >= 3 &&
+        !ancient.has(`${q},${r}`) &&
+        !camps.has(`${q},${r}`),
     )!;
     const doomed = await found(other[0], other[1]);
     expect(doomed.status).toBe(200);
@@ -791,7 +797,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(prefs.body.prefs).toEqual({ quietStart: 1320, quietEnd: 420, utcOffsetMinutes: 0, digestHour: 20 });
     expect((await call('POST', '/v1/me/devices', mira.token, { token: 'phone-token-123', platform: 'android' })).status).toBe(200);
 
-    // A small build goes to the digest.
+    // A small build goes to the digest (its getting-started notice is not what this test is about).
+    await db.query(`UPDATE world_members SET onboarding = '{"build": "done"}' WHERE world_id = $1`, [worldId]);
     const build = await call('POST', `/v1/villages/${village.id}/build`, mira.token, { plot: 'f0' });
     now = new Date(build.body.village.queue[0].completesAt);
     await tick(db, now, scheduler);
@@ -1518,6 +1525,28 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(now.getTime() + 86_400_000 + 1000);
     expect((await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.delegations).toEqual([]);
     expect((await build()).status).toBe(403);
+  });
+
+  it('rewards the first time a player does each getting-started step', async () => {
+    const vesna = await guest('Vesna');
+    const created = await call('POST', '/v1/worlds', vesna.token, { name: 'First days', maxPlayers: 1 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, vesna.token)).body;
+    const home = started.villages[0];
+    const before = home.resources.amounts;
+    const reward = scheduler.data.onboarding.steps.find((s) => s.id === 'build')!.reward;
+    const built = (await call('POST', `/v1/villages/${home.id}/build`, vesna.token, { plot: 'c2', building: 'barracks' })).body;
+    const cost = scheduler.data.buildings.buildings.barracks!.cost;
+    for (const kind of ['wood', 'stone', 'grain', 'iron'] as const) {
+      expect(Math.round(built.village.resources.amounts[kind])).toBe(Math.round(before[kind] - cost[kind] + reward[kind]));
+    }
+    let w = (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
+    expect(w.members[0].onboarding).toEqual({ build: now.toISOString() });
+    // Only once.
+    const again = (await call('POST', `/v1/villages/${home.id}/build`, vesna.token, { plot: 'f1' })).body;
+    expect(again.village.resources.amounts.wood).toBeLessThan(built.village.resources.amounts.wood);
+    w = (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
+    expect(Object.keys(w.members[0].onboarding)).toEqual(['build']);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

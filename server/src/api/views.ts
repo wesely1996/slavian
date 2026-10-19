@@ -464,7 +464,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
       : { radius: world.radius, activeFronts: world.activeFronts, hexes: await loadHexes(client, world.id) };
   return {
     ...worldSummary(world),
-    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan })),
+    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, onboarding: m.onboarding })),
     villages: villages.map(villageView),
     waves,
     scouting,

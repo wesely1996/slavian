@@ -270,6 +270,40 @@ func _open_run_once() -> void:
 		_panel_mode = "run"
 
 
+## The next getting-started step, on your own villages.
+func _onboarding_card(village: Dictionary) -> void:
+	if not Game.is_mine(village) or Game.world.get("status") != "running":
+		return
+	for member in Game.world.get("members", []):
+		if int(member.accountId) != Game.my_account_id():
+			continue
+		var step := OnboardingText.next_step(Game.data, member)
+		if step.is_empty():
+			return
+		_panel_body.add_child(UI.label("%s: %s" % [OnboardingText.progress(Game.data, member), step.title], 0, Color("#e8d9a8")))
+		_panel_body.add_child(UI.label(step.story, UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(UI.label("%s %s" % [step.hint, OnboardingText.reward(step)], UI.SMALL_SIZE))
+
+
+var _almanac_section := "Units"
+
+
+## The almanac: units, buildings, stances, hordes, clans, terrain and the run.
+func _almanac_panel() -> void:
+	_panel_body.add_child(UI.label("Almanac", UI.HEADING_SIZE))
+	var picker := UI.options(AlmanacText.SECTIONS, AlmanacText.SECTIONS.find(_almanac_section))
+	picker.item_selected.connect(func(i: int) -> void:
+		_almanac_section = AlmanacText.SECTIONS[i]
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	for entry in AlmanacText.entries(Game.data, _almanac_section):
+		_panel_body.add_child(UI.label(entry[0]))
+		_panel_body.add_child(UI.label(entry[1], UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.button("Back", func() -> void:
+		_panel_mode = "threats"
+		_rebuild_panel()))
+
+
 ## "You command this for Mila until …" on a village handed to you.
 func _handed_line(village: Dictionary) -> void:
 	if Game.is_mine(village):
@@ -394,6 +428,9 @@ func _rebuild_panel() -> void:
 	_ticking.clear()
 	if _panel_mode == "run":
 		_run_panel()
+		return
+	if _panel_mode == "almanac":
+		_almanac_panel()
 		return
 	if _panel_mode == "threats":
 		_threats_panel()
@@ -1390,6 +1427,7 @@ func _ally_village_panel(village: Dictionary) -> void:
 func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
 	_handed_line(village)
+	_onboarding_card(village)
 	var hall := Rules.hall_level(village)
 	var queue: Array = village.queue
 	_panel_body.add_child(UI.label("Elder's Hall Lv %d · building %d of %d · outposts %d of %d" % [hall, queue.size(), Rules.queue_limit(Game.data, hall),
@@ -1797,6 +1835,9 @@ func _threat_summary() -> String:
 
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
+	_panel_body.add_child(UI.button("Open the almanac", func() -> void:
+		_panel_mode = "almanac"
+		_rebuild_panel()))
 	_clan_section()
 	_delegation_section()
 	var ritual := RunText.ritual_line(Game.world, Game.server_now())
