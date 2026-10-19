@@ -552,6 +552,199 @@ def app_icon():
     return s
 
 
+# --- Village interior: buildings and fields in three stages --------------------
+# Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
+
+def plot_ground(s):
+    s.ellipse(64, 104, 56, 18, P["mud"][0] if False else "#8a7a5a", stroke="none", sw=0, opacity=0.55)
+
+
+def stone_base(s, x0, x1, y, h=10):
+    s.rect(x0, y - h, x1 - x0, h, P["stone"][0], sw=3)
+    for x in range(int(x0) + 10, int(x1), 14):
+        s.line(x, y - h, x, y, sw=1.5, opacity=0.5)
+
+
+def sign(s, x, y, color="red", emblem=None):
+    s.rect(x - 11, y - 11, 22, 22, P[color][0], sw=2.5, rx=3)
+    if emblem == "spears":
+        s.line(x - 7, y + 7, x + 7, y - 7, sw=2.5)
+        s.line(x + 7, y + 7, x - 7, y - 7, sw=2.5)
+    elif emblem == "scroll":
+        s.rect(x - 7, y - 5, 14, 10, P["bone"][0], sw=2)
+    elif emblem == "sheaf":
+        s.line(x, y + 7, x - 5, y - 6, stroke=P["thatch"][1], sw=2.5)
+        s.line(x, y + 7, x, y - 7, stroke=P["thatch"][1], sw=2.5)
+        s.line(x, y + 7, x + 5, y - 6, stroke=P["thatch"][1], sw=2.5)
+
+
+def cart(s, x, y, w=34, covered=False):
+    if covered:
+        s.path(f"M{x - w / 2},{y - 10} Q{x},{y - 34} {x + w / 2},{y - 10} Z", P["cloth"][0], sw=3)
+    s.rect(x - w / 2, y - 12, w, 10, P["wood"][0], sw=3)
+    for dx in (-w / 3, w / 3):
+        s.circle(x + dx, y, 6, P["wood"][1], sw=2.5)
+
+
+def building(kind, stage):
+    s = Svg()
+    plot_ground(s)
+    s.shadow(64, 110, 50, 10)
+    big = [0, 0.8, 0.95, 1.08][stage]
+    if kind == "elder_hall":
+        if stage == 3:
+            stone_base(s, 14, 114, 112)
+        hall(s, 64, 112 - (10 if stage == 3 else 0), 74 * big)
+        if stage >= 2:
+            s.line(100, 98, 100, 46, sw=3)
+            s.poly([(100, 46), (118, 52), (100, 58)], P["red"][0], sw=2.5)
+        if stage == 3:
+            onion(s, 64, 50, 8)
+    elif kind == "storehouse":
+        w = 70 * big
+        s.rect(64 - w / 2, 112 - w * 0.55, w, w * 0.55, P["wood"][0], sw=3.5)
+        s.poly([(64 - w * 0.6, 112 - w * 0.55), (64, 112 - w * 1.05), (64 + w * 0.6, 112 - w * 0.55)], P["thatch" if stage < 3 else "roof"][0], sw=3.5)
+        s.rect(52, 84, 24, 28, P["wood"][1], sw=3)
+        s.line(52, 84, 76, 112, sw=2)
+        s.line(76, 84, 52, 112, sw=2)
+        for i in range(stage):
+            s.ellipse(22 + i * 10, 108, 8, 6, P["bone"][0], sw=2.5)
+    elif kind == "barracks":
+        if stage == 1:
+            for x in (40, 84):
+                s.poly([(x - 22, 110), (x, 70), (x + 22, 110)], P["sand"][0], sw=3.5)
+                s.poly([(x - 4, 110), (x, 96), (x + 4, 110)], INK, sw=0)
+        else:
+            w = 80 * big
+            s.rect(64 - w / 2, 112 - 32, w, 32, P["wood" if stage == 2 else "stone"][0], sw=3.5)
+            s.poly([(64 - w * 0.55, 80), (64, 52), (64 + w * 0.55, 80)], P["roof"][0], sw=3.5)
+            s.rect(56, 92, 16, 20, INK, sw=0)
+            if stage == 3:
+                tower(s, 112, 112, 16, 54)
+        sign(s, 64, 66 if stage > 1 else 56, "red", "spears")
+    elif kind == "scout_lodge":
+        h = [0, 34, 46, 56][stage]
+        for x in (50, 78):
+            s.line(x, 112, x + (8 if x < 64 else -8), 112 - h, stroke=P["wood"][0], sw=6)
+        s.line(52, 112 - h * 0.4, 76, 112 - h * 0.6, stroke=P["wood"][1], sw=3)
+        s.rect(46, 112 - h - 14, 36, 14, P["wood"][1], sw=3)
+        s.poly([(42, 112 - h - 14), (64, 112 - h - 34), (86, 112 - h - 14)], P["thatch"][0], sw=3)
+        if stage == 3:
+            s.line(64, 112 - h - 34, 64, 112 - h - 52, sw=2.5)
+            s.poly([(64, 112 - h - 52), (80, 112 - h - 47), (64, 112 - h - 42)], P["red"][0], sw=2)
+    elif kind == "caravan_yard":
+        s.rect(14, 74, 48, 38, P["wood"][0], sw=3.5)
+        s.poly([(10, 74), (38, 54), (66, 74)], P["thatch"][0], sw=3.5)
+        for i in range(stage):
+            cart(s, 84, 112 - i * 14, covered=i == stage - 1)
+    elif kind == "settlers_lodge":
+        hut(s, 46, 112, 44 * big)
+        cart(s, 92, 112, covered=True)
+        if stage >= 2:
+            s.circle(92, 72, 4, P["thatch"][1], sw=2)
+        if stage == 3:
+            hut(s, 96, 84, 24)
+    elif kind == "academy":
+        w = 72 * big
+        s.rect(64 - w / 2, 112 - 40, w, 40, P["wall"][0], sw=3.5)
+        s.poly([(64 - w * 0.58, 72), (64, 44), (64 + w * 0.58, 72)], P["roof"][0], sw=3.5)
+        for x in (44, 84):
+            s.rect(x - 5, 84, 10, 14, P["water"][0], sw=2)
+        sign(s, 64, 96, "wood", "scroll")
+        if stage == 3:
+            onion(s, 64, 44, 9, color="water")
+    elif kind == "granary_temple":
+        w = 74 * big
+        stone_base(s, 64 - w / 2, 64 + w / 2, 112)
+        s.rect(64 - w / 2 + 6, 70, w - 12, 32, P["wood"][1], sw=3.5)
+        s.poly([(64 - w * 0.58, 70), (64, 34), (64 + w * 0.58, 70)], P["thatch"][0], sw=3.5)
+        sign(s, 64, 86, "gold", "sheaf")
+        if stage >= 2:
+            onion(s, 64, 34, 6)
+    elif kind == "stone_redoubt":
+        w = 80 * big
+        s.rect(64 - w / 2, 70, w, 42, P["stone"][0], sw=4)
+        for i in range(6):
+            s.rect(64 - w / 2 + i * w / 6, 62, w / 12, 8, P["stone"][0], sw=2.5)
+        s.path("M54,112 L54,94 Q64,84 74,94 L74,112 Z", INK, sw=0)
+        if stage >= 2:
+            tower(s, 64 - w / 2, 112, 18, 58)
+        if stage == 3:
+            tower(s, 64 + w / 2, 112, 18, 58)
+    elif kind == "longhouse_hall":
+        w = 104 * big
+        s.rect(64 - w / 2, 84, w, 28, P["wood"][0], sw=3.5)
+        s.path(f"M{64 - w / 2 - 4},84 Q64,{54 - stage * 4} {64 + w / 2 + 4},84 Z", P["thatch"][0], sw=3.5)
+        s.rect(58, 94, 12, 18, INK, sw=0)
+        for i in range(stage):
+            s.circle(64 - w / 3 + i * w / 3, 98, 4, P["gold"][0], sw=2)
+    return s
+
+
+def field(kind, stage):
+    s = Svg()
+    s.ellipse(64, 72, 56, 50, {"woodcutter": P["grass"][0], "quarry": P["hill"][0], "farm": P["meadow"][0], "iron_mine": P["rock"][0]}[kind], sw=4)
+    if kind == "woodcutter":
+        for x, y in [(36, 66), (64, 54), (92, 66)][: stage + 0]:
+            tree(s, x, y, 30 + stage * 3)
+        for i in range(stage):
+            s.rect(40 + i * 8, 96 - i * 6, 46, 10, P["wood"][0], sw=2.5, rx=5)
+        s.ellipse(92, 100, 9, 5, P["wood"][1], sw=2.5)
+    elif kind == "quarry":
+        s.path("M24,98 L36,66 L58,58 L70,80 L60,100 Z", P["rock"][0], sw=3)
+        for i in range(stage):
+            s.rect(70 + (i % 2) * 14, 92 - (i // 2) * 12 - i * 4, 18, 12, P["stone"][1], sw=2.5)
+        if stage == 3:
+            s.line(96, 100, 96, 44, stroke=P["wood"][0], sw=4)
+            s.line(96, 44, 70, 52, stroke=P["wood"][0], sw=3)
+            s.line(72, 52, 72, 66, sw=1.5)
+    elif kind == "farm":
+        rows = stage + 1
+        for i in range(rows):
+            y = 52 + i * (52 / rows)
+            s.line(24, y, 104, y, stroke=P["thatch"][1], sw=5)
+            s.line(24, y, 104, y, stroke=P["thatch"][0], sw=2)
+        if stage >= 2:
+            s.rect(84, 84, 20, 22, P["wood"][1], sw=2.5)
+            s.poly([(80, 84), (94, 72), (108, 84)], P["thatch"][0], sw=2.5)
+    else:  # iron_mine
+        s.path("M34,100 Q36,56 64,52 Q92,56 94,100 Z", P["rock"][1], sw=3.5)
+        s.path("M48,100 Q50,72 64,70 Q78,72 80,100 Z", INK, sw=0)
+        s.line(48, 72, 80, 72, stroke=P["wood"][0], sw=5)
+        if stage >= 2:
+            s.rect(84, 90, 22, 12, P["iron"][0], sw=2.5)
+            s.circle(88, 104, 4, P["wood"][1], sw=2)
+            s.circle(102, 104, 4, P["wood"][1], sw=2)
+        if stage == 3:
+            s.rect(18, 70, 16, 30, P["stone"][0], sw=2.5)
+            s.circle(26, 60, 7, "#6d655a", stroke="none", sw=0, opacity=0.6)
+            s.circle(26, 64, 4, P["ember"][1], sw=1.5)
+    return s
+
+
+def plot(kind):
+    s = Svg()
+    if kind == "empty":
+        s.ellipse(64, 84, 54, 30, "#8a7a5a", sw=3)
+        for x, y in [(18, 84), (110, 84), (64, 56), (64, 112)]:
+            s.line(x, y, x, y - 14, stroke=P["wood"][0], sw=4)
+        s.line(18, 76, 64, 50, stroke=P["cloth"][0], sw=1.5, opacity=0.8)
+        s.line(64, 50, 110, 76, stroke=P["cloth"][0], sw=1.5, opacity=0.8)
+    else:  # locked: dark, bramble-grown ground under a padlock
+        s.ellipse(64, 84, 54, 30, "#5a4e3c", sw=3)
+        for x, y in [(30, 86), (98, 86), (48, 102), (82, 102)]:
+            tuft(s, x, y, color="#3d4a26", size=9)
+        s.path("M 54 66 L 54 56 A 10 10 0 0 1 74 56 L 74 66", fill="none", stroke=INK, sw=4)
+        s.rect(48, 64, 32, 24, "#8f8678", sw=3)
+        s.circle(64, 74, 3.5, INK, stroke="none", sw=0)
+        s.line(64, 76, 64, 82, stroke=INK, sw=3)
+    return s
+
+
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
+FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
+
+
 # --- Build everything --------------------------------------------------------
 
 def assets():
@@ -577,6 +770,14 @@ def assets():
     for kind in ["wood", "stone", "grain", "iron", "ember"]:
         out[f"resource/{kind}"] = resource(kind)
     out["app/icon"] = app_icon()
+    for kind in VILLAGE_BUILDINGS:
+        for stage in (1, 2, 3):
+            out[f"building/{kind}_{stage}"] = building(kind, stage)
+    for kind in FIELDS:
+        for stage in (1, 2, 3):
+            out[f"field/{kind}_{stage}"] = field(kind, stage)
+    out["plot/empty"] = plot("empty")
+    out["plot/locked"] = plot("locked")
     return out
 
 

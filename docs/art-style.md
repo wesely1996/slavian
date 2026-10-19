@@ -31,6 +31,9 @@ glance on a phone, and still look good.
 - **Owners by colour:** a settlement's banner cloth (`banner/cloth`, drawn
   white) and its outline take the owner's colour: green for yours, blue for
   allies', red for enemies'.
+- **Village buildings and fields** come in three stages each (levels 1–3,
+  4–7, 8+): tents become a longhouse, a palisade a stone keep. Open plots are
+  staked out; locked ones are dark and overgrown under a padlock.
 - **Units** sit in a gold-ringed medallion; **hordes** have an emblem per
   faction.
 

@@ -47,3 +47,10 @@ static func texture(id: String) -> Texture2D:
 ## The look of a settlement by its Elder's Hall level (five stages).
 static func settlement_id(hall_level: int) -> String:
 	return "settlement/village_%d" % clampi(ceili(maxi(hall_level, 1) / 2.0), 1, 5)
+
+
+## A building's or field's look by level (three stages: 1-3, 4-7, 8+):
+## "building/barracks_2", "field/farm_3".
+static func building_id(building: String, level: int, field := false) -> String:
+	var stage := 1 if level <= 3 else (2 if level <= 7 else 3)
+	return "%s/%s_%d" % ["field" if field else "building", building, stage]
