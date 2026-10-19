@@ -526,3 +526,5 @@ func _test_art() -> void:
 	_check(Art.settlement_id(1) == "settlement/village_1" and Art.settlement_id(2) == "settlement/village_1", "hall 1-2: stage 1")
 	_check(Art.settlement_id(5) == "settlement/village_3" and Art.settlement_id(10) == "settlement/village_5", "hall 5: stage 3, hall 10: stage 5")
 	_check(Art.settlement_id(0) == "settlement/village_1" and Art.settlement_id(14) == "settlement/village_5", "stages clamp")
+	_check(ArmyText.main_unit({"units": {"spearman": 4, "archer": 9, "scout": 1}}) == "archer", "army's main unit")
+	_check(ArmyText.main_unit({"units": {}}) == "", "empty army")

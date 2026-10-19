@@ -72,3 +72,14 @@ static func reinforcements(battle: Dictionary, village_name: Callable) -> String
 				text += " (+%d%% %s)" % [bonus, "harassment" if joined.orders == "harass" else "pincer"]
 			parts.append(text)
 	return ", ".join(parts)
+
+
+## The kind most of the army is made of (its icon on the map).
+static func main_unit(army: Dictionary) -> String:
+	var best := ""
+	var most := 0
+	for unit in army.get("units", {}):
+		if int(army.units[unit]) > most:
+			most = int(army.units[unit])
+			best = unit
+	return best

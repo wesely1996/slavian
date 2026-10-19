@@ -50,6 +50,8 @@ P = {
     "bone": ("#e6dcc2", "#f6efdc"),
 }
 STROKE = 4
+# SVGs are imported at twice their size, so the map stays sharp when zoomed in.
+IMPORT_SCALE = 2.0
 
 
 def fmt(v):
@@ -194,7 +196,6 @@ def medallion(s, color="cloth", ring="gold"):
 def terrain(base, motif):
     s = Svg(HEX_W, HEX_H)
     s.poly(hex_points(), P[base][0], stroke="none", sw=0)
-    s.poly(hex_points(inset=10), P[base][1], stroke="none", sw=0, opacity=0.35)
     motif(s)
     return s
 
@@ -579,12 +580,25 @@ def assets():
     return out
 
 
+def set_import_scale(svg_path):
+    """Godot reads its import settings from <file>.import; a minimal one is
+    completed by Godot on the next import."""
+    imp = svg_path.with_name(svg_path.name + ".import")
+    if not imp.exists():
+        imp.write_text(f'[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n[params]\n\nsvg/scale={IMPORT_SCALE}\n')
+        return
+    lines = imp.read_text().splitlines()
+    lines = [f"svg/scale={IMPORT_SCALE}" if line.startswith("svg/scale=") else line for line in lines]
+    imp.write_text("\n".join(lines) + "\n")
+
+
 def main():
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     for art_id, svg in assets().items():
         path = OUT_DIR / f"{art_id}.svg"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(svg.text())
+        set_import_scale(path)
         res = f"{RES}/{art_id}.svg"
         # Your own art (a path outside generated/) is never replaced.
         if not manifest.get(art_id, res).startswith(RES):
