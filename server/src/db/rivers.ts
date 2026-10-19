@@ -1,4 +1,5 @@
 import type { RiverEdge } from '../sim/mapgen.js';
+import { listRoadEdges } from './roads.js';
 import { edgeKey, landOf, type Land } from '../sim/land.js';
 import { hex, type Hex } from '../sim/hex.js';
 import type { DbClient } from './pool.js';
@@ -71,9 +72,10 @@ export async function setCrossing(
   );
 }
 
-// The world's terrain, and its rivers without a standing bridge.
+// The world's terrain, its rivers without a standing bridge, and its roads.
 export async function loadLand(client: DbClient, worldId: number): Promise<Land> {
   const terrain = new Map((await loadHexes(client, worldId)).map(([q, r, t]) => [`${q},${r}`, t] as const));
   const blocked = (await listRiverEdges(client, worldId)).filter((e) => e.crossing !== 'standing').map((e) => edgeKey(e.a, e.b));
-  return landOf(terrain, blocked);
+  const roads = (await listRoadEdges(client, worldId)).filter((e) => e.status === 'standing').map((e) => edgeKey(e.a, e.b));
+  return landOf(terrain, blocked, roads);
 }

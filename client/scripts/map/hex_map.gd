@@ -28,6 +28,7 @@ const ENEMY_COLOR := Color("#d0453a")
 const SHORE_COLOR := Color(0.17, 0.13, 0.09, 0.35)
 const RIVER_COLOR := Color("#4f8fb0")
 const PLANK_COLOR := Color("#b07a45")
+const ROAD_COLOR := Color("#c9a77a")
 ## Each front's emblem (art id "faction/<emblem>").
 const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "order"}
 
@@ -71,6 +72,8 @@ func _draw() -> void:
 		_draw_terrain(cell)
 	for cell in Game.terrain:
 		_draw_shores(cell)
+	for road in Game.roads:
+		_draw_road(road)
 	for edge in Game.rivers:
 		_draw_river(edge)
 
@@ -151,6 +154,17 @@ func _draw_shores(cell: Vector2i) -> void:
 			continue
 		var edge := _edge(points, i)
 		draw_line(edge[0], edge[1], SHORE_COLOR, 2.0)
+
+
+## A road between two hex centres: a dirt track, faded while being built.
+func _draw_road(road: Array) -> void:
+	var a := HexMath.to_pixel(Vector2i(int(road[0]), int(road[1])), hex_size)
+	var b := HexMath.to_pixel(Vector2i(int(road[2]), int(road[3])), hex_size)
+	var tint := Color.WHITE if String(road[4]) == "standing" else Color(1, 1, 1, 0.45)
+	draw_line(a, b, VILLAGE_OUTLINE_COLOR * Color(1, 1, 1, 0.55 * tint.a), hex_size * 0.2, true)
+	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.13, true)
+	draw_circle(a, hex_size * 0.065, ROAD_COLOR * tint)
+	draw_circle(b, hex_size * 0.065, ROAD_COLOR * tint)
 
 
 ## A river along the edge between two hexes, and its bridge if one stands

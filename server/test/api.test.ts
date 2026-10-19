@@ -1643,6 +1643,38 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await hold()).body.army.path).toHaveLength(2);
   });
 
+  it('builds roads that speed up the march', async () => {
+    const mira = await guest('Mira');
+    const created = await call('POST', '/v1/worlds', mira.token, { name: 'Roads', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, mira.token)).body;
+    const home = started.villages[0];
+    const terrain = new Map<string, string>((started.map.hexes as [number, number, string][]).map(([q, r, t]) => [`${q},${r}`, t]));
+    const passable = (q: number, r: number) => ['plains', 'forest', 'hills', 'steppe'].includes(terrain.get(`${q},${r}`) ?? '');
+    const dir = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]].find(([dq, dr]) => passable(home.q + dq!, home.r + dr!))!;
+    const next = { q: home.q + dir[0]!, r: home.r + dir[1]! };
+    await db.query('DELETE FROM river_edges WHERE world_id = $1', [worldId]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 20}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
+    const march = async () => {
+      const army = (await call('POST', `/v1/villages/${home.id}/armies`, mira.token, { target: next, units: { spearman: 1 }, orders: 'hold' })).body.army;
+      return new Date(army.arrivesAt).getTime() - now.getTime();
+    };
+    const offRoad = await march();
+
+    const road = (body: object) => call('POST', `/v1/villages/${home.id}/roads`, mira.token, body);
+    expect((await road({ a: home, b: { q: home.q + 2, r: home.r } })).body.message).toMatch(/neighbouring/);
+    expect((await road({ a: { q: home.q + 8, r: home.r }, b: { q: home.q + 9, r: home.r } })).body.message).toMatch(/within/);
+    let w = (await road({ a: home, b: next })).body;
+    expect(w.map.roads).toHaveLength(1);
+    expect(w.map.roads[0][4]).toBe('building');
+    expect((await road({ a: next, b: home })).body.message).toMatch(/already/);
+    now = new Date(now.getTime() + (scheduler.data.field.road.buildSeconds * 1000) / 10);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
+    expect(w.map.roads[0][4]).toBe('standing');
+    expect(await march()).toBe(Math.round(offRoad * scheduler.data.field.road.factor));
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

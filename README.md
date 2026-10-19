@@ -85,6 +85,7 @@ Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled ove
 | `POST` | `/v1/me/devices` | Register a phone's push token `{ token, platform }` (see [docs/push.md](docs/push.md)). |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |
 | `POST` | `/v1/villages/:id/crossings` | Build a bridge `{ a: { q, r }, b: { q, r } }` over the river between two neighbouring hexes, within `field.bridge.range` of the village; paid from its stores, standing after `buildSeconds`. The world view's `map.rivers` lists `[aq, ar, bq, br, crossing]` (`none`, `building` or `standing`). |
+| `POST` | `/v1/villages/:id/roads` | Build a road `{ a: { q, r }, b: { q, r } }` between two neighbouring hexes within `field.road.range` of the village; moving along it costs `field.road.factor` of the terrain (not for the Monsters of the North). `map.roads` lists `[aq, ar, bq, br, status]`. |
 | `PUT` | `/v1/worlds/:id/clan` | Pick your clan `{ clan }` (`data/clans.json`): freely in the lobby; once the run has started, only if you have none yet. |
 | `PUT` | `/v1/worlds/:id/delegation` | Hand your villages to a teammate `{ to: accountId, days: 1–7 }`; they command them as their own, and what they do is logged (`delegations` and `delegationLog` in the world view). |
 | `DELETE` | `/v1/worlds/:id/delegation` | End a hand-over: your own, or `{ owner }` to hand a teammate's villages back. |
