@@ -23,7 +23,7 @@ import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
-import { listMembers, loadHexes, type World } from '../db/worlds.js';
+import { listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 
 export interface VillageView {
   id: number;
@@ -410,6 +410,9 @@ export function worldSummary(world: World) {
     startedAt: world.startedAt?.toISOString() ?? null,
     sanctity: world.sanctity,
     embers: world.embers,
+    difficulty: world.difficulty,
+    // Hordes don't arrive in the group's quiet hours (minutes after local midnight).
+    quietHours: quietWindow(world),
   };
 }
 

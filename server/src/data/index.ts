@@ -392,6 +392,28 @@ const campsFileSchema = z.object({
   fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
 });
 export type CampsData = z.infer<typeof campsFileSchema>;
+
+export const DIFFICULTIES = ['story', 'normal', 'hard', 'nightmare'] as const;
+export type Difficulty = (typeof DIFFICULTIES)[number];
+const presetSchema = z.object({
+  name: z.string(),
+  waveScale: z.number().positive(),
+  floor: z.number().positive(),
+  maxFactor: z.number().positive(),
+  powerWeight: z.number().nonnegative(),
+  campRate: z.number().nonnegative(),
+  fearWeight: z.number().nonnegative(),
+  razeThreshold: z.number(),
+  graceWaves: z.number().int().nonnegative(),
+});
+export type DifficultyPreset = z.infer<typeof presetSchema>;
+const difficultyFileSchema = z.object({
+  version: z.number().int(),
+  default: z.enum(DIFFICULTIES),
+  presets: z.record(z.enum(DIFFICULTIES), presetSchema),
+  power: z.object({ attackPerPlayer: z.number().positive(), growthPerWave: z.number().nonnegative() }),
+});
+export type DifficultyData = z.infer<typeof difficultyFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -427,6 +449,7 @@ export interface GameData {
   field: FieldData;
   horde: HordeData;
   camps: CampsData;
+  difficulty: DifficultyData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -449,6 +472,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     field: fieldFileSchema.parse(read('field.json')),
     horde: hordeFileSchema.parse(read('horde.json')),
     camps: campsFileSchema.parse(read('camps.json')),
+    difficulty: difficultyFileSchema.parse(read('difficulty.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

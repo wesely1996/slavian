@@ -1260,6 +1260,44 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.camps).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bandit', q: site.q, r: site.r })]));
   });
 
+  it('difficulty sets wave sizes; quiet hours set by the host hold hordes back', async () => {
+    const yara = await guest('Yara');
+    const stranger = await guest('Stranger');
+    const created = await call('POST', '/v1/worlds', yara.token, { name: 'Gentle', maxPlayers: 1, speed: 10, difficulty: 'story' });
+    expect(created.body.difficulty).toBe('story');
+    expect((await call('POST', '/v1/worlds', yara.token, { name: 'Bad', difficulty: 'impossible' })).status).toBe(400);
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, yara.token);
+    const home = started.body.villages[0];
+    // Story waves come at 70% of their base size.
+    const { rows: sizes } = await db.query<{ composition: Record<string, number> }>('SELECT composition FROM waves WHERE world_id = $1 AND index = 0', [worldId]);
+    expect(Object.values(sizes[0]!.composition).reduce((a, b) => a + b, 0)).toBe(Math.round(scheduler.data.waves.baseUnits * 0.7));
+
+    // Quiet hours: nearly the whole day from the moment the first horde sets out.
+    const first = started.body.waves[0];
+    const spawnAt = new Date(first.spawnAt);
+    const minute = spawnAt.getUTCHours() * 60 + spawnAt.getUTCMinutes();
+    const quiet = { start: minute, end: (minute + 1439) % 1440, utcOffsetMinutes: 0 };
+    expect((await call('PUT', `/v1/worlds/${worldId}/quiet`, stranger.token, quiet)).status).toBe(403);
+    const set = await call('PUT', `/v1/worlds/${worldId}/quiet`, yara.token, quiet);
+    expect(set.body.quietHours).toEqual(quiet);
+    now = spawnAt;
+    await tick(db, now, scheduler);
+    const marching = (await call('GET', `/v1/worlds/${worldId}`, yara.token)).body.waves[0];
+    const end = new Date(Math.floor(spawnAt.getTime() / 60_000) * 60_000 + 1439 * 60_000);
+    expect(marching.arrivesAt).toBe(end.toISOString());
+    expect(marching.path.at(-1)[2]).toBe(end.getTime() - spawnAt.getTime());
+    // It waits outside until the window ends, then attacks.
+    now = new Date(end.getTime() - 60_000);
+    await tick(db, now, scheduler);
+    expect((await call('GET', `/v1/worlds/${worldId}`, yara.token)).body.battles).toEqual([]);
+    now = end;
+    await tick(db, now, scheduler);
+    expect((await call('GET', `/v1/worlds/${worldId}`, yara.token)).body.battles[0]).toMatchObject({ villageId: home.id });
+    // Cleared quiet hours.
+    expect((await call('PUT', `/v1/worlds/${worldId}/quiet`, yara.token, { start: null, end: null })).body.quietHours).toBeNull();
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

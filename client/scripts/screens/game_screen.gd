@@ -1578,6 +1578,19 @@ func _threat_summary() -> String:
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
 	_panel_body.add_child(UI.label("The Holy City: " + HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label("%s difficulty · %s" % [GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))), GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
+	if Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id():
+		var quiet_row := UI.hbox(8)
+		var off := UI.button("Off", func() -> void: _set_quiet(null, null))
+		off.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		quiet_row.add_child(off)
+		for choice in GroupText.QUIET_CHOICES:
+			var start: int = choice[0] * 60
+			var end: int = choice[1] * 60
+			var b := UI.button("%02d–%02d" % [choice[0], choice[1]], func() -> void: _set_quiet(start, end))
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			quiet_row.add_child(b)
+		_panel_body.add_child(quiet_row)
 	if Game.waves.is_empty():
 		_panel_body.add_child(UI.label("No waves announced.", UI.SMALL_SIZE, UI.MUTED))
 	for wave in Game.waves:
@@ -1612,6 +1625,17 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label("Fronts", UI.HEADING_SIZE))
 		for line in WaveMath.front_lines(Game.data, map.activeFronts):
 			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+
+
+## The host sets the group's quiet hours, in this device's time zone.
+func _set_quiet(start: Variant, end: Variant) -> void:
+	_status.text = ""
+	var offset := int(Time.get_time_zone_from_system().get("bias", 0))
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/quiet" % Game.world_id(), {"start": start, "end": end, "utcOffsetMinutes": offset})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 func _wave_entry(wave: Dictionary) -> void:

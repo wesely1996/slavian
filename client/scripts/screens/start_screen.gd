@@ -142,8 +142,10 @@ func _show_home() -> void:
 	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(speed)
 	_content.add_child(row)
+	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS, 1)
+	_content.add_child(difficulty)
 	_content.add_child(UI.button("Create world", func() -> void:
-		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected])))
+		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
 
 	_content.add_child(UI.label("Join a world", UI.HEADING_SIZE))
 	var code := UI.line_edit("Invite code")
@@ -168,8 +170,8 @@ func _show_server_editor() -> void:
 	_content.add_child(UI.button("Cancel", _show_home))
 
 
-func _create_world(world_name: String, max_players: int, speed: int) -> void:
-	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed})
+func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
+	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
 	_handle_world_response(response)
 
 

@@ -52,7 +52,8 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
 | `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename. |
 | `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle, logistics, expansion, research, hero and standing-order settings). |
-| `POST` | `/v1/worlds` | Create a world (lobby) with an invite code. |
+| `POST` | `/v1/worlds` | Create a world (lobby) with an invite code: `{ name, maxPlayers, speed, difficulty }` (`story`, `normal`, `hard` or `nightmare`). |
+| `PUT` | `/v1/worlds/:id/quiet` | Host only: the group's quiet hours `{ start, end, utcOffsetMinutes }` (minutes after local midnight; `null` start/end: none). Hordes arriving inside them wait until they end. |
 | `POST` | `/v1/worlds/join` | Join by invite code. |
 | `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, recent battles, map. |
 | `POST` | `/v1/worlds/:id/start` | Host only: generate the map and found everyone's village. |

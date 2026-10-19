@@ -1,4 +1,5 @@
-import type { TerrainId } from '../data/index.js';
+import type { Difficulty, TerrainId } from '../data/index.js';
+import type { QuietWindow } from '../sim/difficulty.js';
 import type { Front, WorldMap } from '../sim/mapgen.js';
 import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
@@ -21,6 +22,16 @@ export interface World {
   sanctity: number;
   // The group's Svarog's Ember.
   embers: number;
+  difficulty: Difficulty;
+  // The group's quiet hours for horde arrivals (null: none).
+  quietStart: number | null;
+  quietEnd: number | null;
+  quietUtcOffset: number;
+}
+
+export function quietWindow(world: World): QuietWindow | null {
+  if (world.quietStart === null || world.quietEnd === null || world.quietStart === world.quietEnd) return null;
+  return { start: world.quietStart, end: world.quietEnd, utcOffsetMinutes: world.quietUtcOffset };
 }
 
 export interface NewWorld {
@@ -30,16 +41,18 @@ export interface NewWorld {
   hostAccountId?: number;
   maxPlayers?: number;
   inviteCode?: string;
+  difficulty?: Difficulty;
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
-  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers`;
+  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers,
+  difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset"`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
-    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${COLUMNS}`,
-    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null],
+    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code, difficulty)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${COLUMNS}`,
+    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'normal'],
   );
   return rows[0]!;
 }
@@ -142,4 +155,13 @@ export async function loadHexes(client: DbClient, worldId: number): Promise<[num
 
 export async function addEmbers(client: DbClient, worldId: number, n: number): Promise<void> {
   await client.query('UPDATE worlds SET embers = embers + $2 WHERE id = $1', [worldId, n]);
+}
+
+export async function setQuietHours(client: DbClient, worldId: number, window: QuietWindow | null): Promise<void> {
+  await client.query('UPDATE worlds SET quiet_start = $2, quiet_end = $3, quiet_utc_offset = $4 WHERE id = $1', [
+    worldId,
+    window?.start ?? null,
+    window?.end ?? null,
+    window?.utcOffsetMinutes ?? 0,
+  ]);
 }

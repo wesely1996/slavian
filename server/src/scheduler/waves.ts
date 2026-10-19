@@ -9,9 +9,12 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
 import { insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, type Wave } from '../db/waves.js';
-import { listMembers, loadHexes, type World } from '../db/worlds.js';
-import { planMarch, planWave, type PlannedWave, type WaveContext } from '../sim/waves.js';
+import { listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
+import { planMarch, planWave, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
+import { fighters } from '../sim/armies.js';
+import { afterQuiet, presetOf, waveFactor, type GroupPower } from '../sim/difficulty.js';
+import { unitsFed } from '../sim/village.js';
 import { hex } from '../sim/hex.js';
 import { startBattle } from './battles.js';
 import { beginRampage, moveOn, startHolyCityBattle } from './horde.js';
@@ -37,6 +40,16 @@ async function waveContext(client: DbClient, world: World): Promise<WaveContext>
   };
 }
 
+// What the group has built up, for wave sizes (difficulty.ts).
+export async function groupPower(client: DbClient, data: GameData, world: World, waveIndex: number): Promise<GroupPower> {
+  const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin);
+  let armyAttack = 0;
+  for (const village of villages) {
+    for (const [unit, n] of Object.entries(fighters(data, unitsFed(village.state)))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
+  }
+  return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyAttack, waveIndex };
+}
+
 async function announceWave(
   client: DbClient,
   data: GameData,
@@ -45,7 +58,8 @@ async function announceWave(
   index: number,
   previousSpawnAt: Date | null,
 ): Promise<Wave> {
-  const wave = await insertWave(client, world.id, planWave(data, ctx, index, previousSpawnAt));
+  const sizeFactor = waveFactor(data, world.difficulty, await groupPower(client, data, world, index));
+  const wave = await insertWave(client, world.id, planWave(data, { ...ctx, sizeFactor }, index, previousSpawnAt));
   const payload: WavePayload = { waveId: wave.id };
   await scheduleEvent(client, world.id, wave.spawnAt, 'wave_spawn', payload);
   return wave;
@@ -71,6 +85,21 @@ function asPlanned(wave: Wave): PlannedWave {
   };
 }
 
+// Fear as this world's hordes heed it (Story hordes don't learn).
+export async function fearOf(client: DbClient, data: GameData, world: World): Promise<Map<string, number>> {
+  const weight = presetOf(data, world.difficulty).fearWeight;
+  return new Map([...(await loadFear(client, world.id)).entries()].map(([key, value]) => [key, value * weight]));
+}
+
+// A march arriving in the group's quiet hours waits outside until they end.
+export function holdForQuiet<M extends { path: readonly PathStep[]; arrivesAt: Date }>(world: World, spawnAt: Date, march: M): M {
+  const at = afterQuiet(quietWindow(world), march.arrivesAt);
+  const delay = at.getTime() - march.arrivesAt.getTime();
+  if (delay <= 0) return march;
+  const path = march.path.map((s, i) => (i === march.path.length - 1 ? { ...s, atMs: at.getTime() - spawnAt.getTime() } : s));
+  return { ...march, path, arrivesAt: at };
+}
+
 export const waveHandlers: HandlerRegistry = {
   async wave_spawn({ client, data, world }, event) {
     let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
@@ -91,11 +120,11 @@ export const waveHandlers: HandlerRegistry = {
       seed: world.seed,
       departAt: event.dueAt,
       worldSpeed: world.speed,
-      fear: await loadFear(client, world.id),
+      fear: await fearOf(client, data, world),
     });
-    await markMarching(client, wave.id, march);
+    await markMarching(client, wave.id, holdForQuiet(world, wave.spawnAt, march));
     const payload: WavePayload = { waveId: wave.id };
-    await scheduleEvent(client, world.id, march.arrivesAt, 'wave_arrive', payload);
+    await scheduleEvent(client, world.id, (await loadWave(client, wave.id)).arrivesAt!, 'wave_arrive', payload);
     await planRaids(client, data, world, wave.id);
     await planIntercepts(client, world, wave.id);
     await planWaveWarning(client, data, world, wave.id, event.dueAt);

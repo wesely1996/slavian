@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import type { Difficulty } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import type { Account } from '../db/accounts.js';
 import { notifyWorld } from '../db/notify.js';
@@ -15,6 +16,7 @@ import {
   isMember,
   listMembers,
   markStarted,
+  setQuietHours,
   type World,
 } from '../db/worlds.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
@@ -38,7 +40,7 @@ export function normalizeInviteCode(code: string): string {
 
 export async function createWorldCommand(
   db: Db,
-  input: { account: Account; name: string; maxPlayers: number; speed: number },
+  input: { account: Account; name: string; maxPlayers: number; speed: number; difficulty?: Difficulty },
 ): Promise<World> {
   for (let attempt = 0; ; attempt++) {
     try {
@@ -50,6 +52,7 @@ export async function createWorldCommand(
           hostAccountId: input.account.id,
           maxPlayers: input.maxPlayers,
           inviteCode: newInviteCode(),
+          difficulty: input.difficulty ?? 'normal',
         });
         await addMember(client, world.id, input.account.id);
         return world;
@@ -111,5 +114,19 @@ export async function startWorldCommand(
     await ensureDigests(client, started, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     return started;
+  });
+}
+
+// The host sets when hordes may not arrive (the group's night).
+export async function setQuietHoursCommand(
+  db: Db,
+  input: { account: Account; worldId: number; start: number | null; end: number | null; utcOffsetMinutes: number },
+): Promise<void> {
+  await inTransaction(db, async (client) => {
+    const world = await getWorld(client, input.worldId);
+    if (world.hostAccountId !== input.account.id) throw new ForbiddenError('Only the host sets the quiet hours');
+    const none = input.start === null || input.end === null || input.start === input.end;
+    await setQuietHours(client, world.id, none ? null : { start: input.start!, end: input.end!, utcOffsetMinutes: input.utcOffsetMinutes });
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
 }

@@ -46,6 +46,8 @@ export interface WaveContext {
   readonly playerCount: number;
   readonly startedAt: Date;
   readonly worldSpeed: number;
+  // Difficulty and group power (difficulty.ts): base size × this.
+  readonly sizeFactor?: number;
 }
 
 export function rngFor(seed: number, index: number, salt: number): () => number {
@@ -117,7 +119,8 @@ export function threatOf(data: GameData, composition: Composition): string {
 export function planWave(data: GameData, ctx: WaveContext, index: number, previousSpawnAt: Date | null): PlannedWave {
   const fronts = waveFronts(data, ctx.activeFronts);
   const front = fronts[index % fronts.length]!;
-  const composition = composeWave(data, front, index, waveSize(data, index, ctx.playerCount), ctx.seed, ctx.playerCount);
+  const size = Math.max(1, Math.round(waveSize(data, index, ctx.playerCount) * (ctx.sizeFactor ?? 1)));
+  const composition = composeWave(data, front, index, size, ctx.seed, ctx.playerCount);
   return {
     index,
     front,
