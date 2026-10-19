@@ -17,7 +17,7 @@ const SECTIONS := [
 	["Interface icons", "icon/"],
 ]
 const SIDES := [["Yours", Color("#4caf50")], ["Allies'", Color("#3f7fd6")], ["Enemies'", Color("#d0453a")]]
-const INK := Color("#2b2118")
+const TEXT := Color("#e9e4d8")
 
 
 func _initialize() -> void:
@@ -29,7 +29,7 @@ func _run() -> void:
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var out: String = OS.get_cmdline_user_args()[0] if OS.get_cmdline_user_args().size() > 0 else "user://style-sample.png"
 	var page := ColorRect.new()
-	page.color = Color("#efe2c1")
+	page.color = Color("#1b2027")
 	page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(page)
 	var margin := MarginContainer.new()
@@ -59,7 +59,7 @@ func _run() -> void:
 		owners.add_child(_owned(side[0], side[1]))
 	owners.add_child(_tile("app/icon"))
 	column.add_child(owners)
-	column.add_child(_label("Interface: framed panels, wooden buttons, tabs (ui/...), Kurale and Alegreya Sans", 24))
+	column.add_child(_label("Interface: slate panels, flat and gold buttons, underlined tabs, Cinzel and Inter", 24))
 	column.add_child(_interface())
 	for i in 6:
 		await process_frame
@@ -72,7 +72,7 @@ func _label(text: String, size: int) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", INK)
+	label.add_theme_color_override("font_color", TEXT)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
 
@@ -104,7 +104,7 @@ func _interface() -> Control:
 	body.add_child(UI.label("Elder's Hall  Lv 3", UI.HEADING_SIZE))
 	body.add_child(UI.label("6 of 12 building slots open, build queue 3. Čuvari, šuma, žito, đak."))
 	var row := UI.hbox()
-	row.add_child(UI.button("Upgrade", func() -> void: pass, "icon/build"))
+	row.add_child(UI.primary("Upgrade", func() -> void: pass, "icon/build"))
 	row.add_child(UI.button("Map", func() -> void: pass, "icon/map"))
 	var off := UI.button("Not enough wood", func() -> void: pass)
 	off.disabled = true

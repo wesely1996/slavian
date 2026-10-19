@@ -6,8 +6,8 @@ const TITLE_SIZE := 56
 const HEADING_SIZE := 34
 const SMALL_SIZE := 22
 const BUTTON_HEIGHT := 76.0
-const MUTED := Color("#b8ae9c")
-const ERROR := Color("#ff8a7a")
+const MUTED := Color("#9aa3ad")
+const ERROR := Color("#e07a62")
 
 
 ## The current language's version of `text` (English source text; see
@@ -27,7 +27,9 @@ static func label(text := "", font_size := 0, color := Color.WHITE) -> Label:
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if font_size > 0:
 		node.add_theme_font_size_override("font_size", font_size)
-	if font_size >= HEADING_SIZE:
+	if font_size >= TITLE_SIZE:
+		node.theme_type_variation = "Title"
+	elif font_size >= HEADING_SIZE:
 		node.theme_type_variation = "Heading"
 	if color != Color.WHITE:
 		node.add_theme_color_override("font_color", color)
@@ -42,6 +44,13 @@ static func button(text: String, on_pressed: Callable, icon_id := "") -> Button:
 		node.expand_icon = false
 	node.custom_minimum_size.y = BUTTON_HEIGHT
 	node.pressed.connect(on_pressed)
+	return node
+
+
+## The main action of a panel, in gold.
+static func primary(text: String, on_pressed: Callable, icon_id := "") -> Button:
+	var node := button(text, on_pressed, icon_id)
+	node.theme_type_variation = "Primary"
 	return node
 
 
@@ -74,10 +83,10 @@ static func hbox(separation := 12) -> HBoxContainer:
 	return node
 
 
-## A framed panel (ui/panel from the art), or a flat box of `color`.
-static func panel(color := Color(0.13, 0.11, 0.09, 0.9), padding := 20) -> PanelContainer:
+## A panel of slate glass (or ui/panel from the art), `alpha` see-through.
+static func panel(alpha := 0.94, padding := 20) -> PanelContainer:
 	var node := PanelContainer.new()
-	node.add_theme_stylebox_override("panel", UiTheme.frame("ui/panel", 96, 24, padding + 6, color))
+	node.add_theme_stylebox_override("panel", UiTheme.frame("ui/panel", 96, 24, padding + 6, UiTheme.panel_style(padding + 6, alpha)))
 	return node
 
 
