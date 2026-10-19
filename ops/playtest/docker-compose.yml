@@ -19,8 +19,8 @@ services:
     # Push notifications (docs/push.md): save the Firebase service account
     # key as ops/playtest/fcm.json, set FCM_SERVICE_ACCOUNT_FILE in .env and
     # uncomment:
-    # volumes:
-    #   - ./fcm.json:/run/secrets/fcm.json:ro
+    volumes:
+      - ./fcm.json:/run/secrets/fcm.json:ro
     restart: unless-stopped
 
   tunnel:
