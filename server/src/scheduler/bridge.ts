@@ -14,6 +14,7 @@ import type { Resources } from '../sim/resources.js';
 import { scheduleEvent, type HandlerRegistry, type SchedulerDeps } from './events.js';
 import { tell } from './notices.js';
 import { callRitualNight } from './ritual.js';
+import { revealSite } from './sites.js';
 import { withWorld } from './world.js';
 
 // Saves the bridge, and starts raising the stage once nothing is missing.
@@ -120,5 +121,17 @@ export const bridgeHandlers: HandlerRegistry = {
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     if (next.status === 'complete') await callRitualNight(client, data, world, event.dueAt);
+    // A relic is wanted and every ruin has been searched: one more is remembered.
+    const stage = currentStage(data, next);
+    if (stage?.quests.some((q) => q.kind === 'site') && (await revealSite(client, data, world))) {
+      for (const member of await listMembers(client, world.id)) {
+        await tell(client, world, member.accountId, {
+          kind: 'bridge',
+          tier: 'digest',
+          title: 'A forgotten ruin',
+          body: `The builders of ${stage.name} remember a ruin nobody has searched yet. It is marked on the map.`,
+        }, event.dueAt);
+      }
+    }
   },
 };

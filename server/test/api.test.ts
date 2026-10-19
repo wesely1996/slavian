@@ -1582,6 +1582,33 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(Object.keys(w.members[0].onboarding)).toEqual(['build']);
   });
 
+  it('reveals a forgotten ruin when the bridge wants a relic and every site was searched', async () => {
+    const rusa = await guest('Rusa');
+    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Ruins', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, rusa.token)).body;
+    const stages = scheduler.data.bridge.stages;
+    const before = stages.findIndex((st, i) => i > 0 && stages[i + 1]?.quests.some((q) => q.kind === 'site'));
+    const stage = stages[before]!;
+    // Everything but one wood in place for the stage before the one that wants a relic.
+    const donated = { ...stage.cost, wood: stage.cost.wood - 1 };
+    const quests = Object.fromEntries(stage.quests.map((q) => [q.kind, now.toISOString()]));
+    await db.query(
+      `UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int, 'donated', $3::jsonb, 'embers', $4::int, 'quests', $5::jsonb) WHERE world_id = $1`,
+      [worldId, before, JSON.stringify(donated), stage.embers, JSON.stringify(quests)],
+    );
+    await db.query(`UPDATE vaults SET amounts = '{"wood": 1, "stone": 0, "grain": 0, "iron": 0}' WHERE world_id = $1`, [worldId]);
+    await db.query(`UPDATE sites SET status = 'explored' WHERE world_id = $1`, [worldId]);
+    const raising = (await call('POST', `/v1/worlds/${worldId}/bridge/donate`, rusa.token, { resources: { wood: 1, stone: 0, grain: 0, iron: 0 }, embers: 0 })).body;
+    expect(raising.bridge.status).toBe('raising');
+    now = new Date(raising.bridge.raisedAt);
+    await tick(db, now, scheduler);
+    const w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge.stage).toBe(before + 1);
+    expect(w.sites).toHaveLength(started.sites.length + 1);
+    expect(w.sites.filter((x: { status: string }) => x.status === 'unexplored')).toHaveLength(1);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

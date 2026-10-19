@@ -376,7 +376,8 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   }
   // Clear a lair when the stage asks for it (or any camp close to home).
   const camps = (await read(db, (c) => listCamps(c, world.id))).sort((a, b) => hexDistance(hex(a.q, a.r), from) - hexDistance(hex(b.q, b.r), from));
-  const lair = open.includes('lair') ? camps.find((c) => c.kind === 'lair') : camps.find((c) => hexDistance(hex(c.q, c.r), from) <= 4);
+  const embersShort = world.embers < deps.data.bridge.ritualEmbers + Math.max(0, stage.embers - bridge.embers);
+  const lair = open.includes('lair') || embersShort ? camps.find((c) => c.kind === 'lair') : camps.find((c) => hexDistance(hex(c.q, c.r), from) <= 4);
   if (lair) {
     const army = fighters(0.7);
     const campPower = Object.entries(lair.units).reduce((n, [, c]) => n + c, 0) * 25;
