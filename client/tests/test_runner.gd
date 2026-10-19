@@ -34,6 +34,7 @@ func _initialize() -> void:
 	_test_horde()
 	_test_group()
 	_test_sites()
+	_test_bridge()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -425,3 +426,16 @@ func _test_sites() -> void:
 	_check(ResearchRules.problem(data, "wind_riders", 5, {}, false) == "Needs the Winds of Stribog scroll.", "rare tech locked")
 	_check(ResearchRules.problem(data, "wind_riders", 5, {}, false, {"stribog_winds": true}) == "", "rare tech open")
 	_check(ArmyText.status({"orders": "explore", "status": "stationed"}, "(4, -2)", 0.0) == "Searching the site at (4, -2)", "exploring army")
+
+
+func _test_bridge() -> void:
+	var data := {"bridge": {
+		"stages": [{"name": "Foundation Stones", "story": "Old stones.", "cost": {"wood": 100, "stone": 200, "grain": 0, "iron": 0}, "embers": 1, "quests": [{"kind": "site", "story": "Bring a relic."}]}],
+		"quests": {"site": {"name": "Bring back a relic"}},
+	}}
+	var bridge := {"stage": 0, "status": "open", "donated": {"wood": 100, "stone": 50}, "embers": 0, "quests": {}}
+	_check(BridgeText.title(data, bridge) == "Stage 1 of 1: Foundation Stones", "bridge title")
+	_check(BridgeText.progress(data, bridge) == "Wood 100 / 100, Stone 50 / 200, Ember 0 / 1", "bridge progress: %s" % BridgeText.progress(data, bridge))
+	_check(BridgeText.missing(data, bridge).stone == 150 and BridgeText.embers_missing(data, bridge) == 1, "bridge missing")
+	_check(BridgeText.quests(data, bridge) == [[false, "Bring back a relic", "Bring a relic."]], "bridge quests")
+	_check(BridgeText.title(data, {"status": "complete", "stage": 1}) == "The Kalinov Bridge stands", "bridge done")

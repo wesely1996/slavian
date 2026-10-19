@@ -4,6 +4,8 @@ import { listForts, type Fort } from '../db/forts.js';
 import { listCamps } from '../db/camps.js';
 import { loadFear } from '../db/fear.js';
 import { listScrolls, listSites } from '../db/sites.js';
+import { findBridge } from '../db/bridges.js';
+import { newBridge } from '../sim/bridge.js';
 import { total } from '../sim/battle.js';
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
@@ -447,6 +449,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     exploredAt: s.exploredAt?.toISOString() ?? null,
   }));
   const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
+  const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
@@ -471,6 +474,8 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     // Ancient sites, and the group's lore scrolls.
     sites,
     lore,
+    // The Kalinov Bridge (see sim/bridge.ts).
+    bridge,
     // [q, r, fear]: where hordes were beaten, and how much they remember it.
     fear,
     ...logistics,

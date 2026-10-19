@@ -1360,6 +1360,50 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
   });
 
+  it('builds the Kalinov Bridge from the vault, with quests, stage by stage', async () => {
+    const rusa = await guest('Rusa');
+    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Bridge', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, rusa.token);
+    const home = started.body.villages[0];
+    const stage0 = scheduler.data.bridge.stages[0]!;
+    expect(started.body.bridge).toMatchObject({ stage: 0, status: 'open', embers: 0, quests: {} });
+    const donate = (resources: object, embers = 0) =>
+      call('POST', `/v1/worlds/${worldId}/bridge/donate`, rusa.token, { resources: { wood: 0, stone: 0, grain: 0, iron: 0, ...resources }, embers });
+    expect((await donate({ stone: 100 })).body.message).toMatch(/needs none/);
+    expect((await call('POST', `/v1/worlds/${worldId}/bridge/ritual`, rusa.token)).body.message).toMatch(/No stage needs/);
+
+    // Donations come out of the vault, as much as the stage needs.
+    await db.query(`UPDATE vaults SET amounts = '{"wood": 3000, "stone": 3000, "grain": 3000, "iron": 3000}' WHERE world_id = $1`, [worldId]);
+    let w = (await donate({ wood: 3000, stone: 3000, grain: 3000, iron: 3000 })).body;
+    expect(w.bridge.donated).toEqual({ wood: stage0.cost.wood, stone: 3000, grain: stage0.cost.grain, iron: stage0.cost.iron });
+    expect(w.vault.amounts).toEqual({ wood: 3000 - stage0.cost.wood, stone: 0, grain: 3000 - stage0.cost.grain, iron: 3000 - stage0.cost.iron });
+    await db.query(`UPDATE vaults SET amounts = '{"wood": 0, "stone": 3000, "grain": 0, "iron": 0}' WHERE world_id = $1`, [worldId]);
+    w = (await donate({ stone: 3000 })).body;
+    expect(w.bridge.donated.stone).toBe(stage0.cost.stone);
+    expect(w.bridge.status).toBe('open');
+
+    // Its quest: bring back a relic from an ancient site.
+    const site = started.body.sites[0];
+    await db.query(`UPDATE sites SET guardians = '{}' WHERE id = $1`, [site.id]);
+    await db.query(`UPDATE villages SET garrison = '{"scout": 3}' WHERE id = $1`, [home.id]);
+    const scouts = await call('POST', `/v1/villages/${home.id}/armies`, rusa.token, { target: { q: site.q, r: site.r }, units: { scout: 3 }, orders: 'explore' });
+    now = new Date(scouts.body.army.arrivesAt);
+    await tick(db, now, scheduler);
+    now = new Date(now.getTime() + (scheduler.data.sites.kinds[site.kind]!.exploreHours * 3_600_000) / 10);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge.quests.site).toBe(now.toISOString());
+    expect(w.bridge.status).toBe('raising');
+
+    // Raised: the next stage opens.
+    now = new Date(w.bridge.raisedAt);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge).toMatchObject({ stage: 1, status: 'open', quests: {}, embers: 0 });
+    expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

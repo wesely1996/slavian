@@ -21,6 +21,7 @@ import {
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { getWorld, isMember, listWorldsForAccount } from '../db/worlds.js';
@@ -94,6 +95,8 @@ const orderBody = z.discriminatedUnion('kind', [
 ]);
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const minuteOfDay = z.number().int().min(0).max(1439);
+// From the vault into the bridge's open stage.
+const donateBody = z.object({ resources: loadSchema, embers: z.number().int().min(0).max(100).default(0) });
 // The group's quiet hours (null start/end: none), set by the host.
 const quietBody = z.object({
   start: minuteOfDay.nullable(),
@@ -186,6 +189,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     difficulty: scheduler.data.difficulty,
     sites: scheduler.data.sites,
     lore: scheduler.data.lore,
+    bridge: scheduler.data.bridge,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -269,6 +273,21 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = quietBody.parse(request.body);
     await setQuietHoursCommand(db, { account, worldId: id, ...body });
+    return fullWorldView(id);
+  });
+
+  app.post('/v1/worlds/:id/bridge/donate', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = donateBody.parse(request.body);
+    await donateCommand(db, scheduler, { accountId: account.id, worldId: id, resources: body.resources, embers: body.embers, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.post('/v1/worlds/:id/bridge/ritual', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await craftRitualCommand(db, scheduler, { accountId: account.id, worldId: id, now: clock() });
     return fullWorldView(id);
   });
 

@@ -33,6 +33,7 @@ import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
 import { finishWave, planFortCheck } from './camps.js';
 import { holdForQuiet } from './waves.js';
+import { bridgeQuest } from './bridge.js';
 import { tell } from './notices.js';
 import { planRaids } from './outposts.js';
 
@@ -235,6 +236,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     if (won) {
       await hordeBeaten(client, data, world, hex(battle.q, battle.r), kills);
       await finishWave(client, data, world, wave.id, 'defeated', at);
+      if (battle.setup.choke) await bridgeQuest(client, data, world, 'choke', at);
     } else if (holy) {
       await holyCityFalls(client, data, world, wave, attackerNow, at);
     } else {

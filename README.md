@@ -74,6 +74,8 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `GET` · `PATCH` | `/v1/me/notifications` | Quiet hours `{ quietStart, quietEnd }` (minutes after local midnight, or null), `utcOffsetMinutes`, `digestHour`. |
 | `POST` | `/v1/me/devices` | Register a phone's push token `{ token, platform }` (see [docs/push.md](docs/push.md)). |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |
+| `POST` | `/v1/worlds/:id/bridge/donate` | Give `{ resources: { wood, stone, grain, iron }, embers }` from the vault and the group's Embers to the Kalinov Bridge stage being built; capped at what it still needs. |
+| `POST` | `/v1/worlds/:id/bridge/ritual` | Forge the ritual torc (spends Embers) for a stage whose quest asks for it. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |

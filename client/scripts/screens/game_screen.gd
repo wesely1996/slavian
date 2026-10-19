@@ -301,6 +301,7 @@ func _terrain_panel() -> void:
 		_panel_body.add_child(UI.label("Hordes fear this place: they were beaten here (%.0f)." % Game.fear[_selected], UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
 		_panel_body.add_child(UI.label(HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
+		_bridge_panel()
 		_vault_panel()
 		return
 	var holder := Game.outpost_owner(_selected)
@@ -345,6 +346,69 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 		var cell := _selected
 		var village_id := int(holder.id)
 		_panel_body.add_child(UI.button("Abandon outpost", func() -> void: _abandon_outpost(village_id, cell)))
+
+
+## The Kalinov Bridge: the stage being built, its story, what it still
+## needs and its quests; donations come from the vault.
+func _bridge_panel() -> void:
+	var bridge := Game.bridge
+	if bridge.is_empty():
+		return
+	_panel_body.add_child(UI.label("Kalinov Bridge", UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label(Game.data.bridge.story, UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(BridgeText.title(Game.data, bridge)))
+	var stage := BridgeText.stage_def(Game.data, bridge)
+	if stage.is_empty():
+		return
+	_panel_body.add_child(UI.label(stage.story, UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(BridgeText.progress(Game.data, bridge), UI.SMALL_SIZE))
+	for quest in BridgeText.quests(Game.data, bridge):
+		_panel_body.add_child(UI.label(("✓ " if quest[0] else "○ ") + String(quest[1]), UI.SMALL_SIZE, UI.MUTED if quest[0] else Color("#e8d9a8")))
+		_panel_body.add_child(UI.label(quest[2], UI.SMALL_SIZE, UI.MUTED))
+	if bridge.status == "raising":
+		var line := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(line)
+		var done_at := TimeUtil.parse_iso(bridge.raisedAt)
+		_tick(line, func() -> String: return "Being raised · stands in %s" % TimeUtil.format_duration(done_at - Game.server_now()))
+		return
+	var row := UI.hbox(8)
+	var give := UI.button("Give from the vault", func() -> void: _donate_bridge(Game.vault.get("amounts", {}), 0))
+	give.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(give)
+	if BridgeText.embers_missing(Game.data, bridge) > 0 and int(Game.world.get("embers", 0)) > 0:
+		var ember := UI.button("Give an Ember", func() -> void: _donate_bridge({}, 1))
+		ember.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(ember)
+	var ritual_open := false
+	for quest in stage.quests:
+		ritual_open = ritual_open or (quest.kind == "ritual" and not bridge.quests.has("ritual"))
+	if ritual_open:
+		var forge := UI.button("Forge the torc", func() -> void: _forge_torc())
+		forge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		forge.disabled = int(Game.world.get("embers", 0)) < int(Game.data.bridge.ritualEmbers)
+		row.add_child(forge)
+	_panel_body.add_child(row)
+
+
+func _donate_bridge(amounts: Dictionary, embers: int) -> void:
+	_status.text = ""
+	var resources := {}
+	for kind in BridgeText.KINDS:
+		resources[kind] = int(amounts.get(kind, 0))
+	var response := await Api.post_json("/v1/worlds/%d/bridge/donate" % Game.world_id(), {"resources": resources, "embers": embers})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+
+
+func _forge_torc() -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/worlds/%d/bridge/ritual" % Game.world_id(), {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 ## The group's vault in the Holy City: what it holds, and enlarging it.

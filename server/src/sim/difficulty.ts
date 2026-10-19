@@ -16,6 +16,8 @@ export interface GroupPower {
   // Total attack of every fighting unit the group has (home, away, training).
   readonly armyAttack: number;
   readonly waveIndex: number;
+  // Stages of the Kalinov Bridge standing.
+  readonly bridgeStages?: number;
 }
 
 // How much bigger than its base size a wave comes: the preset's scale,
@@ -27,7 +29,8 @@ export function waveFactor(data: GameData, difficulty: Difficulty, power: GroupP
   const extraVillages = Math.max(0, power.villages / players - 1);
   const expected = players * data.difficulty.power.attackPerPlayer * (1 + data.difficulty.power.growthPerWave * power.waveIndex);
   const extraArmy = Math.max(0, power.armyAttack / expected - 1);
-  const factor = p.waveScale * (1 + p.powerWeight * (extraVillages + extraArmy));
+  const bridge = 1 + data.bridge.powerPerStage * (power.bridgeStages ?? 0);
+  const factor = p.waveScale * (1 + p.powerWeight * (extraVillages + extraArmy)) * bridge;
   return Math.min(p.maxFactor, Math.max(p.floor, factor));
 }
 
