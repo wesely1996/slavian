@@ -121,5 +121,21 @@
       "name": "Craft the ritual torc",
       "description": "Forge the ritual torc from a Svarog's Ember."
     }
+  },
+  "ritualNight": {
+    "delayHours": 6,
+    "sizeFactor": 1.5,
+    "checkHours": 1,
+    "story": "With the arch sealed, the volkhvs begin the rite that will close the crossing for good. Every horde in Nav feels it. Tonight they all come at once, from every front, to break the city before the last words are spoken."
+  },
+  "endings": {
+    "won": {
+      "title": "The Kalinov Bridge holds",
+      "story": "The last horde broke against the walls and the rite was finished. The bridge over the Smorodina is sealed, Nav is shut, and the bells of the Holy City ring for the first time in a generation. The old faith lives on, because you held."
+    },
+    "lost": {
+      "title": "The Holy City has fallen",
+      "story": "The walls are breached and the sanctuary fires are out. The hordes pour across the Smorodina unopposed. Some of the people escaped into the forests, carrying the songs with them; perhaps one day they will try again."
+    }
   }
 }

@@ -9,7 +9,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
 import { insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, type Wave } from '../db/waves.js';
-import { listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
+import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { planMarch, planWave, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
 import { findBridge } from '../db/bridges.js';
@@ -31,7 +31,7 @@ const MS_PER_HOUR = 3_600_000;
 export const wavePayload = z.object({ waveId: z.number().int() });
 export type WavePayload = z.infer<typeof wavePayload>;
 
-async function waveContext(client: DbClient, world: World): Promise<WaveContext> {
+export async function waveContext(client: DbClient, world: World): Promise<WaveContext> {
   if (!world.startedAt) throw new Error(`World ${world.id} has not started`);
   return {
     seed: world.seed,
@@ -132,8 +132,11 @@ export const waveHandlers: HandlerRegistry = {
     await planIntercepts(client, world, wave.id);
     await planWaveWarning(client, data, world, wave.id, event.dueAt);
 
-    const last = (await lastWave(client, world.id))!;
-    await announceWave(client, data, world, await waveContext(client, world), last.index + 1, last.spawnAt);
+    // After Ritual Night is called, no more waves are announced.
+    if (!wave.ritual && !(await getWorld(client, world.id)).ritualAt) {
+      const last = (await lastWave(client, world.id))!;
+      await announceWave(client, data, world, await waveContext(client, world), last.index + 1, last.spawnAt);
+    }
     await notifyWorld(client, { worldId: world.id, type: 'waves' });
   },
 

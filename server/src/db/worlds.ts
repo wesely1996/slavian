@@ -27,6 +27,10 @@ export interface World {
   quietStart: number | null;
   quietEnd: number | null;
   quietUtcOffset: number;
+  // When Ritual Night's hordes set out (null: not called yet).
+  ritualAt: Date | null;
+  // When the run was won or lost.
+  endedAt: Date | null;
 }
 
 export function quietWindow(world: World): QuietWindow | null {
@@ -46,7 +50,8 @@ export interface NewWorld {
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
   max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers,
-  difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset"`;
+  difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
+  ritual_at AS "ritualAt", ended_at AS "endedAt"`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
@@ -118,14 +123,28 @@ export async function markStarted(client: DbClient, worldId: number, map: WorldM
 }
 
 // A horde struck the Holy City: Sanctity falls, and at 0 the run is lost.
-export async function damageSanctity(client: DbClient, worldId: number, damage: number): Promise<number> {
+export async function damageSanctity(client: DbClient, worldId: number, damage: number, at: Date): Promise<number> {
   const { rows } = await client.query<{ sanctity: number }>(
     `UPDATE worlds SET sanctity = GREATEST(0, sanctity - $2),
-       status = CASE WHEN sanctity - $2 <= 0 THEN 'lost' ELSE status END
+       status = CASE WHEN sanctity - $2 <= 0 THEN 'lost' ELSE status END,
+       ended_at = CASE WHEN sanctity - $2 <= 0 THEN $3 ELSE ended_at END
      WHERE id = $1 RETURNING sanctity`,
-    [worldId, damage],
+    [worldId, damage, at],
   );
   return rows[0]!.sanctity;
+}
+
+export async function markRitual(client: DbClient, worldId: number, at: Date): Promise<void> {
+  await client.query('UPDATE worlds SET ritual_at = $2 WHERE id = $1', [worldId, at]);
+}
+
+// The Holy City outlasted Ritual Night.
+export async function markWon(client: DbClient, worldId: number, at: Date): Promise<void> {
+  await client.query("UPDATE worlds SET status = 'won', ended_at = $2 WHERE id = $1 AND status = 'running'", [worldId, at]);
+}
+
+export function isOver(world: World): boolean {
+  return world.status === 'won' || world.status === 'lost';
 }
 
 export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {

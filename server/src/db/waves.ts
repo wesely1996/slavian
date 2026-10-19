@@ -28,6 +28,8 @@ export interface Wave {
   struck: number[];
   // Its numbers when it spawned.
   initial: Composition;
+  // One of Ritual Night's hordes.
+  ritual: boolean;
 }
 
 interface WaveRow {
@@ -49,6 +51,7 @@ interface WaveRow {
   rampage_ends_at: Date | null;
   struck: (string | number)[];
   initial: Composition | null;
+  ritual: boolean;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -70,14 +73,15 @@ function fromRow(row: WaveRow): Wave {
     rampageEndsAt: row.rampage_ends_at,
     struck: row.struck.map(Number),
     initial: row.initial ?? row.composition,
+    ritual: row.ritual,
   };
 }
 
-export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave): Promise<Wave> {
+export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave, ritual = false): Promise<Wave> {
   const { rows } = await client.query<WaveRow>(
-    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $6) RETURNING *`,
-    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt],
+    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial, ritual)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $6, $8) RETURNING *`,
+    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt, ritual],
   );
   return fromRow(rows[0]!);
 }
@@ -115,6 +119,20 @@ export async function markMarching(client: DbClient, id: number, march: March): 
 
 export async function markArrived(client: DbClient, id: number, endsAt: Date): Promise<void> {
   await client.query("UPDATE waves SET status = 'arrived', ends_at = $2 WHERE id = $1", [id, endsAt]);
+}
+
+// Ritual Night replaces the waves still to come.
+export async function cancelScheduledWaves(client: DbClient, worldId: number): Promise<void> {
+  await client.query("UPDATE waves SET status = 'dispersed' WHERE world_id = $1 AND status = 'scheduled'", [worldId]);
+}
+
+// Ritual Night's hordes still on the board.
+export async function ritualWavesLeft(client: DbClient, worldId: number): Promise<number> {
+  const { rows } = await client.query<{ n: number }>(
+    "SELECT count(*)::int AS n FROM waves WHERE world_id = $1 AND ritual AND status NOT IN ('dispersed', 'defeated', 'settled')",
+    [worldId],
+  );
+  return rows[0]!.n;
 }
 
 export async function markDispersed(client: DbClient, id: number): Promise<void> {

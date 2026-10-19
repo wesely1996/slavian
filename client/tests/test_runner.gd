@@ -35,6 +35,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_bridge()
+	_test_run()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -439,3 +440,20 @@ func _test_bridge() -> void:
 	_check(BridgeText.missing(data, bridge).stone == 150 and BridgeText.embers_missing(data, bridge) == 1, "bridge missing")
 	_check(BridgeText.quests(data, bridge) == [[false, "Bring back a relic", "Bring a relic."]], "bridge quests")
 	_check(BridgeText.title(data, {"status": "complete", "stage": 1}) == "The Kalinov Bridge stands", "bridge done")
+
+
+func _test_run() -> void:
+	var data := {"bridge": {"endings": {"won": {"title": "The Kalinov Bridge holds", "story": "…"}, "lost": {"title": "The Holy City has fallen", "story": "…"}}}}
+	_check(not RunText.is_over({"status": "running"}) and RunText.is_over({"status": "lost"}), "run over")
+	_check(RunText.ending(data, {"status": "won"}).title == "The Kalinov Bridge holds", "run ending")
+	_check(RunText.ending(data, {"status": "running"}).is_empty(), "no ending while running")
+	var now := TimeUtil.parse_iso("2026-01-01T00:00:00.000Z")
+	_check(RunText.ritual_line({"status": "running", "ritualAt": null}, now) == "", "no ritual yet")
+	_check(RunText.ritual_line({"status": "running", "ritualAt": "2026-01-01T02:00:00.000Z"}, now).begins_with("Ritual Night · in"), "ritual countdown: %s" % RunText.ritual_line({"status": "running", "ritualAt": "2026-01-01T02:00:00.000Z"}, now))
+	_check(RunText.ritual_line({"status": "running", "ritualAt": "2025-12-31T23:00:00.000Z"}, now) == "Ritual Night", "ritual under way")
+	var run := {"days": 12.5, "wavesBeaten": 9, "wavesFaced": 11, "battlesWon": 14, "campsCleared": 3, "sitesExplored": 4, "scrolls": 2, "villagesFounded": 5, "villagesLost": 1}
+	var lines := RunText.stats(run)
+	_check(lines[0] == "12.5 days" and lines[1] == "Hordes beaten: 9 of 11", "run stats: %s" % lines)
+	_check(RunText.stats({"days": 3.0, "wavesBeaten": 0, "wavesFaced": 0, "battlesWon": 0, "campsCleared": 0, "sitesExplored": 0, "scrolls": 0, "villagesFounded": 1, "villagesLost": 0})[0] == "3 days", "whole days")
+	_check(RunText.member_line({"displayName": "Mila", "villages": 3, "villagesLost": 1}) == "Mila: 3 villages, 1 lost", "member line")
+	_check(RunText.member_line({"displayName": "Rusa", "villages": 1, "villagesLost": 0}) == "Rusa: 1 village", "member line one")

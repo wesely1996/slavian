@@ -16,6 +16,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, type Wave } from '../db/waves.js';
+import { runLost } from './ritual.js';
 import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
@@ -269,8 +270,9 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
 // A horde beat the Holy City's defenders: Sanctity falls by its survivors,
 // and the horde, its rampage done, scatters.
 async function holyCityFalls(client: DbClient, data: GameData, world: World, wave: Wave, survivors: Record<string, number>, at: Date): Promise<void> {
-  await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)));
+  const sanctity = await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)), at);
   await finishWave(client, data, world, wave.id, 'dispersed', at);
+  if (sanctity <= 0) await runLost(client, data, world, at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 

@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { runSummary } from '../db/runs.js';
 import { listForts, type Fort } from '../db/forts.js';
 import { listCamps } from '../db/camps.js';
 import { loadFear } from '../db/fear.js';
@@ -129,6 +130,7 @@ export function waveView(wave: Wave) {
     // Its rampage clock (from its first target) and the villages it struck.
     rampageEndsAt: wave.rampageEndsAt?.toISOString() ?? null,
     struck: wave.struck,
+    ritual: wave.ritual,
   };
 }
 
@@ -417,6 +419,9 @@ export function worldSummary(world: World) {
     difficulty: world.difficulty,
     // Hordes don't arrive in the group's quiet hours (minutes after local midnight).
     quietHours: quietWindow(world),
+    // When Ritual Night's hordes set out, and when the run ended.
+    ritualAt: world.ritualAt?.toISOString() ?? null,
+    endedAt: world.endedAt?.toISOString() ?? null,
   };
 }
 
@@ -478,6 +483,8 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     bridge,
     // [q, r, fear]: where hordes were beaten, and how much they remember it.
     fear,
+    // How a finished run went (null while it goes on).
+    run: await runSummary(client, world),
     ...logistics,
     map,
   };

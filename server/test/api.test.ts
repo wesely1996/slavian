@@ -1404,6 +1404,61 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
   });
 
+  it('calls Ritual Night when the bridge is whole, and the run is won when the city outlasts it', async () => {
+    const rusa = await guest('Rusa');
+    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Ritual', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, rusa.token);
+    const stages = scheduler.data.bridge.stages;
+    const last = stages[stages.length - 1]!;
+    // The last stage paid for, only its ritual torc missing.
+    await db.query(
+      `UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int, 'donated', $3::jsonb, 'embers', $4::int) WHERE world_id = $1`,
+      [worldId, stages.length - 1, JSON.stringify(last.cost), last.embers],
+    );
+    await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
+    let w = (await call('POST', `/v1/worlds/${worldId}/bridge/ritual`, rusa.token)).body;
+    expect(w.bridge.status).toBe('raising');
+    const scheduled = started.body.waves.filter((x: { status: string }) => x.status === 'scheduled').length;
+    expect(scheduled).toBeGreaterThan(0);
+
+    // Raised: every active front sends a horde at once; the waves to come are called off.
+    now = new Date(w.bridge.raisedAt);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge.status).toBe('complete');
+    const ritualAt = new Date(w.ritualAt).getTime();
+    expect(ritualAt).toBeGreaterThanOrEqual(now.getTime() + (scheduler.data.bridge.ritualNight.delayHours * 3_600_000) / 10);
+    const ritual = w.waves.filter((x: { ritual: boolean }) => x.ritual);
+    expect(ritual.map((x: { front: string }) => x.front).sort()).toEqual([...w.map.activeFronts].sort());
+    expect(w.waves.every((x: { ritual: boolean }) => x.ritual)).toBe(true);
+    expect(ritual.every((x: { spawnAt: string }) => new Date(x.spawnAt).getTime() === ritualAt)).toBe(true);
+    expect(w.run).toBeNull();
+
+    // They set out; no new wave is announced behind them.
+    now = new Date(ritualAt);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.status).toBe('running');
+    expect(w.waves.every((x: { ritual: boolean; status: string }) => x.ritual && x.status !== 'scheduled')).toBe(true);
+
+    // The last horde is beaten and the city stands: the run is won.
+    await db.query("UPDATE waves SET status = 'defeated' WHERE world_id = $1 AND ritual", [worldId]);
+    now = new Date(ritualAt + (2 * scheduler.data.bridge.ritualNight.checkHours * 3_600_000) / 10);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.status).toBe('won');
+    expect(w.endedAt).not.toBeNull();
+    expect(w.run).toMatchObject({ outcome: 'won', wavesBeaten: ritual.length, villagesFounded: 1, villagesLost: 0 });
+    expect(w.run.members).toEqual([{ accountId: rusa.accountId, displayName: 'Rusa', villages: 1, villagesLost: 0 }]);
+
+    // A finished run stays readable, but nothing more can be done in it.
+    const home = started.body.villages[0];
+    const refused = await call('POST', `/v1/villages/${home.id}/build`, rusa.token, { plot: 'c2', building: 'barracks' });
+    expect(refused.body.message).toMatch(/run is over/);
+    expect((await call('GET', `/v1/worlds/${worldId}/notifications`, rusa.token)).status).toBe(200);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');
