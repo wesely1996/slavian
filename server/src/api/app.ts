@@ -23,8 +23,10 @@ import {
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
-import { accountForToken, createGuestAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
+import { accountForToken, createGuestAccount, deleteAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
+import { saveReport } from '../db/reports.js';
+import { loadCosts } from '../site.js';
 import { getWorld, isMember, listWorldsForAccount } from '../db/worlds.js';
 import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../errors.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
@@ -59,6 +61,11 @@ const idParams = z.object({ id: z.coerce.number().int().positive() });
 
 const guestBody = z.object({ displayName: displayName.optional() }).default({});
 const meBody = z.object({ displayName: displayName.optional(), language: z.string().max(16).optional() });
+const reportBody = z.object({
+  message: z.string().trim().min(1).max(4000),
+  worldId: z.number().int().positive().nullable().default(null),
+  state: z.unknown().default({}),
+});
 const createWorldBody = z.object({
   name: z.string().trim().min(1).max(48),
   maxPlayers: z.number().int().min(1).max(6).default(6),
@@ -255,6 +262,31 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = deviceBody.parse(request.body);
     await inTransaction(db, (client) => registerDevice(client, account.id, body.token, body.platform));
     return { ok: true };
+  });
+
+  // The hand-updated server costs and donations (§11.8), shown in the app.
+  app.get('/v1/costs', async () => loadCosts());
+
+  // Download everything the team keeps about you.
+  app.get('/v1/me/export', async (request) => {
+    const account = await authenticate(db, request);
+    const worlds = await inTransaction(db, (client) => listWorldsForAccount(client, account.id));
+    return { account, worlds, exportedAt: clock().toISOString() };
+  });
+
+  // Delete the account and its data (sessions, memberships, devices cascade).
+  app.delete('/v1/me', async (request) => {
+    const account = await authenticate(db, request);
+    await inTransaction(db, (client) => deleteAccount(client, account.id));
+    return { ok: true };
+  });
+
+  // A bug report: the player's message plus the game state the app captured.
+  app.post('/v1/reports', async (request) => {
+    const account = await authenticate(db, request);
+    const body = reportBody.parse(request.body);
+    const id = await inTransaction(db, (client) => saveReport(client, account.id, body));
+    return { id };
   });
 
   app.get('/v1/worlds/:id/notifications', async (request) => {

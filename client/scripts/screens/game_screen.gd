@@ -2234,6 +2234,47 @@ func _threats_panel() -> void:
 			row.add_child(UI.icon(WaveMath.front_icon(String(front)), 28))
 			row.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
 			_panel_body.add_child(row)
+	# A bug report carries the current game state with the player's message.
+	_panel_body.add_child(UI.button(tr("Report a bug"), _report_bug))
+
+
+## Opens a short form; the report is saved as a file and sent to the server.
+func _report_bug() -> void:
+	var dialog := ConfirmationDialog.new()
+	dialog.title = tr("Report a bug")
+	dialog.ok_button_text = tr("Send")
+	var box := UI.vbox(12)
+	var edit := TextEdit.new()
+	edit.custom_minimum_size = Vector2(540, 240)
+	edit.placeholder_text = tr("What went wrong?")
+	edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	box.add_child(edit)
+	box.add_child(UI.label(tr("The current game state is attached to the report."), UI.SMALL_SIZE, UI.MUTED))
+	dialog.add_child(box)
+	dialog.confirmed.connect(func() -> void: _send_report(edit.text))
+	add_child(dialog)
+	dialog.popup_centered()
+
+
+func _send_report(message: String) -> void:
+	var clean := message.strip_edges()
+	if clean == "":
+		_status.text = tr("Write what went wrong first.")
+		return
+	var report := {"message": clean, "worldId": Game.world_id(), "state": Game.world}
+	DirAccess.make_dir_recursive_absolute("user://bug_reports")
+	var path := "user://bug_reports/report_%d.json" % int(Time.get_unix_time_from_system())
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(report, "\t"))
+		file.close()
+	_status.text = tr("Sending the report…")
+	var response := await Api.post_json("/v1/reports", report)
+	if response.ok:
+		_status.text = tr("Report sent. Saved to %s") % ProjectSettings.globalize_path(path)
+	else:
+		_status.text = tr("Report saved to %s (the server did not take it: %s)") % [
+			ProjectSettings.globalize_path(path), response.error]
 
 
 ## The host sets the group's quiet hours, in this device's time zone.

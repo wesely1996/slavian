@@ -2033,121 +2033,149 @@ msgstr ""
 msgid "Fronts"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2245
-msgid "Enemy leaders"
+#: client/scripts/screens/game_screen.gd:2238
+msgid "Report a bug"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2251
-msgid "%s · %s front"
+#: client/scripts/screens/game_screen.gd:2249
+msgid "What went wrong?"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2260
-msgid "Fallen: %s"
+#: client/scripts/screens/game_screen.gd:2252
+msgid "The current game state is attached to the report."
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2262
+msgid "Write what went wrong first."
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2271
+msgid "Sending the report…"
 msgstr ""
 
 #: client/scripts/screens/game_screen.gd:2274
-msgid "Wave %d · %s"
+msgid "Report sent. Saved to %s"
 msgstr ""
 
 #: client/scripts/screens/game_screen.gd:2276
+msgid "Report saved to %s (the server did not take it: %s)"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2286
+msgid "Enemy leaders"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2292
+msgid "%s · %s front"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2301
+msgid "Fallen: %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2315
+msgid "Wave %d · %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:2317
 msgid " · composition unknown"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2281
+#: client/scripts/screens/game_screen.gd:2322
 msgid "%s front · %s threat%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2289
+#: client/scripts/screens/game_screen.gd:2330
 msgid "Appears in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2291
+#: client/scripts/screens/game_screen.gd:2332
 msgid "Marching on %s · arrives in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2293
+#: client/scripts/screens/game_screen.gd:2334
 msgid "At the gates of %s · leaves in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2295
+#: client/scripts/screens/game_screen.gd:2336
 msgid "Burning %s · done in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2298
+#: client/scripts/screens/game_screen.gd:2339
 msgid "Fighting at %s · round %d of %d · %d of them left"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2302
+#: client/scripts/screens/game_screen.gd:2343
 msgid "Led by %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2319
+#: client/scripts/screens/game_screen.gd:2360
 msgid "Scouts from %s: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2329
+#: client/scripts/screens/game_screen.gd:2370
 msgid "%d scouts en route · report in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2330
+#: client/scripts/screens/game_screen.gd:2371
 msgid "Scouts heading home · back in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2347
+#: client/scripts/screens/game_screen.gd:2388
 msgid "Send %d scout (%d home)"
 msgid_plural "Send %d scouts (%d home)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/game_screen.gd:2409
+#: client/scripts/screens/game_screen.gd:2450
 msgid "● live"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2409
+#: client/scripts/screens/game_screen.gd:2450
 msgid "○ offline"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2458
+#: client/scripts/screens/game_screen.gd:2499
 msgid "Danger is pushed to your phone; everything else waits for the daily digest."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2460
+#: client/scripts/screens/game_screen.gd:2501
 msgid "Nothing yet."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2473
+#: client/scripts/screens/game_screen.gd:2514
 msgid "Settings"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2478
+#: client/scripts/screens/game_screen.gd:2519
 msgid "Quiet hours %s–%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2478
+#: client/scripts/screens/game_screen.gd:2519
 msgid "No quiet hours"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2481
+#: client/scripts/screens/game_screen.gd:2522
 msgid "On"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2486
+#: client/scripts/screens/game_screen.gd:2527
 msgid "From −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2486
+#: client/scripts/screens/game_screen.gd:2527
 msgid "From +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2486
+#: client/scripts/screens/game_screen.gd:2527
 msgid "Until −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2486
+#: client/scripts/screens/game_screen.gd:2527
 msgid "Until +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:2495
+#: client/scripts/screens/game_screen.gd:2536
 msgid "Daily digest at %s"
 msgstr ""
 
@@ -2285,35 +2313,83 @@ msgstr ""
 msgid "Join"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:207
-msgid "You stay signed in; your account lives on the server."
+#: client/scripts/screens/start_screen.gd:200
+msgid "Support and privacy"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:210
-msgid "Save"
+#: client/scripts/screens/start_screen.gd:205
+msgid "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:214
-msgid "Cancel"
+#: client/scripts/screens/start_screen.gd:219
+msgid "Could not load the server costs."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:225
+msgid "This month (%s): server costs %s, donations %s."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:234
+msgid "Carried to next month: %s"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:237
+msgid "Buy me a coffee"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:238
+msgid "Privacy policy"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:240
+msgid "Export my data"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:241
+msgid "Delete my account"
 msgstr ""
 
 #: client/scripts/screens/start_screen.gd:253
+msgid "Could not write the export file."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:257
+msgid "Your data is saved to %s"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:263
+msgid "Tap again to delete your account and all its data."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:281
+msgid "You stay signed in; your account lives on the server."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:284
+msgid "Save"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:288
+msgid "Cancel"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:327
 msgid "Share it with your group. %d of %d players joined."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:255
+#: client/scripts/screens/start_screen.gd:329
 msgid " (host)"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:259
+#: client/scripts/screens/start_screen.gd:333
 msgid "Start the world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:261
+#: client/scripts/screens/start_screen.gd:335
 msgid "Waiting for the host to start…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:277
+#: client/scripts/screens/start_screen.gd:351
 msgid "Your clan: %s"
 msgstr ""
 

@@ -53,3 +53,8 @@ export async function accountLanguage(client: DbClient, accountId: number): Prom
   const { rows } = await client.query<{ language: string }>('SELECT language FROM accounts WHERE id = $1', [accountId]);
   return rows[0]?.language ?? 'en';
 }
+
+/** Deletes an account and everything cascading from it (sessions, memberships, devices). */
+export async function deleteAccount(client: DbClient, accountId: number): Promise<void> {
+  await client.query('DELETE FROM accounts WHERE id = $1', [accountId]);
+}
