@@ -529,6 +529,17 @@ func _test_art() -> void:
 	_check(Art.settlement_id(0) == "settlement/village_1" and Art.settlement_id(14) == "settlement/village_5", "stages clamp")
 	_check(ArmyText.main_unit({"units": {"spearman": 4, "archer": 9, "scout": 1}}) == "archer", "army's main unit")
 	_check(ArmyText.main_unit({"units": {}}) == "", "empty army")
+	_check(Art.building_id("barracks", 1) == "building/barracks_1" and Art.building_id("barracks", 4) == "building/barracks_2" and Art.building_id("barracks", 8) == "building/barracks_3", "building stages")
+	_check(Art.building_id("farm", 10, true) == "field/farm_3", "field stages")
+	var missing_art := []
+	for b in ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]:
+		for level in [1, 5, 10]:
+			if not Art.has(Art.building_id(b, level)):
+				missing_art.append(Art.building_id(b, level))
+	for f in ["woodcutter", "quarry", "farm", "iron_mine"]:
+		if not Art.has(Art.building_id(f, 2, true)):
+			missing_art.append(f)
+	_check(missing_art.is_empty(), "art for every village building: %s" % [missing_art])
 
 
 func _test_rivers() -> void:

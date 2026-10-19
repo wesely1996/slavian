@@ -1,7 +1,9 @@
 class_name VillageView
 extends Control
 ## The inside of a village, Travian style: resource fields on a ring around
-## the outside, building slots in a grid in the middle. Tap a plot to pick it.
+## the outside, building slots in a grid in the middle, each drawn from the
+## art (client/art/art.json) by its stage, with a level badge. Tap a plot to
+## pick it. Without art the plots fall back to plain shapes.
 
 signal plot_tapped(plot: String)
 
@@ -19,6 +21,10 @@ const SLOT_LOCKED := Color("#2a241c")
 const BUILDING := Color("#8f6d45")
 const BUILDING_ACTIVE := Color("#e2b04a")
 const SELECTED := Color.WHITE
+const MEADOW := Color("#7fa04a")
+const SQUARE_EARTH := Color("#a08a62")
+const PALISADE := Color("#8b5a2b")
+const INK := Color("#2b2118")
 
 ## Game data (buildings), the village as the server sent it, the picked plot.
 var data: Dictionary = {}
@@ -91,8 +97,17 @@ func _draw() -> void:
 	var rects := _rects()
 	var middle := size / 2.0
 	var radius := minf(size.x, size.y) * 0.4
-	draw_circle(middle, radius * 1.22, GROUND)
-	draw_circle(middle, radius * 0.72, SQUARE)
+	var art := Art.has("plot/empty")
+	if art:
+		# Meadow around, the village square inside its palisade.
+		draw_circle(middle, radius * 1.22, INK)
+		draw_circle(middle, radius * 1.2, MEADOW)
+		draw_circle(middle, radius * 0.74, SQUARE_EARTH)
+		draw_arc(middle, radius * 0.74, 0.0, TAU, 96, PALISADE, radius * 0.05)
+		draw_arc(middle, radius * 0.77, 0.0, TAU, 96, INK, 2.0)
+	else:
+		draw_circle(middle, radius * 1.22, GROUND)
+		draw_circle(middle, radius * 0.72, SQUARE)
 
 	var building_plots := {}
 	for item in village.queue:
@@ -106,6 +121,8 @@ func _draw() -> void:
 		var level := int(holds.level)
 		var def: Dictionary = data.buildings.buildings.get(holds.building, {}) if holds.building != null else {}
 		var under_way := building_plots.has(plot)
+		if art and _draw_plot_art(plot, rect, holds, level, under_way, font):
+			continue
 		if Rules.is_field(plot):
 			var center := rect.get_center()
 			var r := rect.size.x / 2.0
@@ -134,6 +151,40 @@ func _draw() -> void:
 		else:
 			_text(font, rect.get_center() - Vector2(0, font_size * 0.6), _short_name(def.name), font_size)
 			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
+
+
+## A plot from the art: the field or building by stage (faded before its
+## first level), an empty or locked plot, a level badge, a gold ring while
+## being built and a white one when picked. False when its art is missing.
+func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, under_way: bool, font: Font) -> bool:
+	var field := Rules.is_field(plot)
+	var id := ""
+	if field or holds.building != null:
+		id = Art.building_id(String(holds.building), maxi(level, 1), field)
+	elif Rules.is_locked(data, village, plot):
+		id = "plot/locked"
+	else:
+		id = "plot/empty"
+	var tex := Art.texture(id)
+	if tex == null:
+		return false
+	var tint := Color.WHITE if level > 0 or id.begins_with("plot/") else Color(1, 1, 1, 0.8)
+	var box := rect.grow(rect.size.x * (0.12 if field else 0.24))
+	draw_texture_rect(tex, box, false, tint)
+	if plot == selected:
+		draw_arc(rect.get_center(), rect.size.x * 0.62, 0.0, TAU, 48, SELECTED, 4.0)
+	if under_way:
+		draw_arc(rect.get_center(), rect.size.x * 0.56, 0.0, TAU, 48, BUILDING_ACTIVE, 5.0)
+	if id == "plot/locked":
+		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), "Hall %d" % Rules.slot_unlock_level(data, Rules.plot_index(plot)), rect.size.y * 0.18, Color.WHITE)
+	elif id != "plot/empty":
+		# The level in a dark badge at the plot's lower right.
+		var at := rect.position + rect.size * Vector2(0.86, 0.84)
+		var r := rect.size.x * 0.16
+		draw_circle(at, r, INK)
+		draw_circle(at, r * 0.82, BUILDING_ACTIVE if under_way else Color("#4a3f30"))
+		_text(font, at, str(level), r * 1.2)
+	return true
 
 
 func _text(font: Font, center: Vector2, text: String, font_size: float, color := Color.WHITE) -> void:
