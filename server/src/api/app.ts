@@ -19,8 +19,8 @@ import {
   startResearchCommand,
   trainUnitsCommand,
 } from '../commands/village.js';
-import { HERO_SLOTS, STANCES } from '../data/index.js';
-import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
+import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
+import { createWorldCommand, joinWorldCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { getWorld, isMember, listWorldsForAccount } from '../db/worlds.js';
@@ -61,6 +61,7 @@ const createWorldBody = z.object({
   name: z.string().trim().min(1).max(48),
   maxPlayers: z.number().int().min(1).max(6).default(6),
   speed: z.number().min(1).max(100).default(1),
+  difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
 // `plot` targets a field, center slot or outpost ("o3,-2"); `building`
@@ -93,6 +94,12 @@ const orderBody = z.discriminatedUnion('kind', [
 ]);
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const minuteOfDay = z.number().int().min(0).max(1439);
+// The group's quiet hours (null start/end: none), set by the host.
+const quietBody = z.object({
+  start: minuteOfDay.nullable(),
+  end: minuteOfDay.nullable(),
+  utcOffsetMinutes: z.number().int().min(-14 * 60).max(14 * 60).default(0),
+});
 const prefsBody = z.object({
   quietStart: minuteOfDay.nullable().optional(),
   quietEnd: minuteOfDay.nullable().optional(),
@@ -176,6 +183,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     field: scheduler.data.field,
     horde: scheduler.data.horde,
     camps: scheduler.data.camps,
+    difficulty: scheduler.data.difficulty,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -252,6 +260,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = createWorldBody.parse(request.body);
     const world = await createWorldCommand(db, { account, ...body });
     return fullWorldView(world.id);
+  });
+
+  app.put('/v1/worlds/:id/quiet', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = quietBody.parse(request.body);
+    await setQuietHoursCommand(db, { account, worldId: id, ...body });
+    return fullWorldView(id);
   });
 
   app.post('/v1/worlds/join', async (request) => {

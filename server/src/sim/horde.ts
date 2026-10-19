@@ -13,6 +13,9 @@ const MS_PER_HOUR = 3_600_000;
 export interface RazeInput {
   readonly front: Front;
   readonly waveIndex: number;
+  // From the difficulty preset (defaults: data/horde.json).
+  readonly graceWaves?: number;
+  readonly thresholdOffset?: number;
   // A refugee camp: never razed.
   readonly refuge?: boolean;
   // Units left now, and when it spawned.
@@ -39,7 +42,7 @@ export function razeMs(data: GameData, worldSpeed: number): number {
 export function decideRaze(data: GameData, input: RazeInput): Decision {
   const rules = data.horde.raze;
   // The first hordes are raiding parties, testing the land.
-  if (input.waveIndex < rules.graceWaves) return { choice: 'raid', reasons: ['an early raiding party'] };
+  if (input.waveIndex < (input.graceWaves ?? rules.graceWaves)) return { choice: 'raid', reasons: ['an early raiding party'] };
   if (input.refuge) return { choice: 'raid', reasons: ['refugees have nothing left to burn'] };
   if (input.rampageLeftMs < razeMs(data, input.worldSpeed)) return { choice: 'raid', reasons: ['no time to raze'] };
   const strength = input.hordeNow / Math.max(1, input.helpNearby);
@@ -54,7 +57,7 @@ export function decideRaze(data: GameData, input: RazeInput): Decision {
     reasons.push('it is weakened');
   }
   reasons.push(strength >= 4 ? 'nothing nearby can stop it' : 'it outnumbers the help nearby');
-  return score >= rules.threshold ? { choice: 'raze', reasons } : { choice: 'raid', reasons };
+  return score >= rules.threshold + (input.thresholdOffset ?? 0) ? { choice: 'raze', reasons } : { choice: 'raid', reasons };
 }
 
 // After a raid the horde swells with recruits (or beasts drawn to the kill).

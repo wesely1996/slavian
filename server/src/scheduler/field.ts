@@ -31,6 +31,7 @@ import { heroAfterBattle } from './heroes.js';
 import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
 import { finishWave, planFortCheck } from './camps.js';
+import { holdForQuiet } from './waves.js';
 import { tell } from './notices.js';
 import { planRaids } from './outposts.js';
 
@@ -277,9 +278,12 @@ async function marchOn(client: DbClient, data: GameData, world: World, wave: Wav
   const sinceSpawn = at.getTime() - wave.spawnAt.getTime();
   const step = [...path].reverse().find((s) => s.q === cell.q && s.r === cell.r && s.atMs <= sinceSpawn);
   const delay = step ? Math.max(0, sinceSpawn - step.atMs) : 0;
-  const shifted = path.map((s) => (step && s.atMs > step.atMs ? { ...s, atMs: s.atMs + delay } : s));
-  const arrivesAt = new Date((wave.arrivesAt ?? at).getTime() + delay);
-  await resumeMarch(client, wave.id, shifted, arrivesAt);
+  const late = holdForQuiet(world, wave.spawnAt, {
+    path: path.map((s) => (step && s.atMs > step.atMs ? { ...s, atMs: s.atMs + delay } : s)),
+    arrivesAt: new Date((wave.arrivesAt ?? at).getTime() + delay),
+  });
+  const arrivesAt = late.arrivesAt;
+  await resumeMarch(client, wave.id, [...late.path], arrivesAt);
   await cancelPlans(client, world.id, wave.id);
   await scheduleEvent(client, world.id, arrivesAt, 'wave_arrive', { waveId: wave.id });
   await planRaids(client, data, world, wave.id, sinceSpawn);

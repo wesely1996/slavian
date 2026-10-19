@@ -18,6 +18,7 @@ import { endWave, loadWave, reinforceWave, type Wave } from '../db/waves.js';
 import { addEmbers, listMembers, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
 import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, addUnits } from '../sim/camps.js';
+import { campsPerWave } from '../sim/difficulty.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
 import { frontOf, type Front } from '../sim/mapgen.js';
@@ -73,7 +74,7 @@ export async function createCamp(
 async function spawnAfterWave(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const rules = data.camps.spawn;
   const active = (await listCamps(client, world.id)).length;
-  const count = Math.min(rules.perWave, rules.max - active);
+  const count = Math.min(campsPerWave(data, world.difficulty, rngFor(world.seed, wave.index, 0xcb)()), rules.max - active);
   if (count <= 0 || !wave.path) return;
   const villages = (await listVillages(client, world.id)).map((v) => hex(v.q, v.r));
   const sites = spawnSites(data, {

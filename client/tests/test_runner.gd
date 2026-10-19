@@ -32,6 +32,7 @@ func _initialize() -> void:
 	_test_field()
 	_test_fronts()
 	_test_horde()
+	_test_group()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -400,3 +401,10 @@ func _test_horde() -> void:
 	_check(HordeText.ambush({"q": 2, "r": -1, "beatenOff": true, "lost": {}}) == "Its escort beat off an ambush near (2, -1)", "beaten off text")
 	_check(HordeText.assault({"q": 3, "r": 1, "status": "cleared"}, {"attacker": 9, "defender": 2}) == "Cleared the camp at (3, 1): 9 fell, we lost 2.", "assault text")
 	_check(ArmyText.status({"orders": "clear", "status": "returning", "loot": {"wood": 5}, "returnsAt": "2026-01-01T00:00:00.000Z"}, "(3, 1)", TimeUtil.parse_iso("2026-01-01T00:00:00.000Z")).begins_with("Coming home from (3, 1) with loot"), "clear army status")
+
+
+func _test_group() -> void:
+	_check(GroupText.quiet(null) == "No quiet hours: hordes may arrive any time", "no quiet hours")
+	_check(GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}) == "Hordes hold off 22:00–06:00 (UTC+02:00)", "quiet hours: %s" % GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}))
+	_check(GroupText.offset_text(-300) == "UTC−05:00", "negative offset")
+	_check(GroupText.difficulty({"difficulty": {"presets": {"hard": {"name": "Hard"}}}}, "hard") == "Hard", "difficulty name")

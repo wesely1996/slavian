@@ -10,7 +10,9 @@ import { listArmies, loadReinforceRule, saveArmy } from '../db/armies.js';
 import { insertBattle, type Battle } from '../db/battles.js';
 import { listCamps } from '../db/camps.js';
 import { afterSettling, createCamp, finishWave } from './camps.js';
-import { addFear, loadFear } from '../db/fear.js';
+import { addFear } from '../db/fear.js';
+import { presetOf } from '../sim/difficulty.js';
+import { fearOf, holdForQuiet } from './waves.js';
 import { listForts } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -94,9 +96,12 @@ export async function hordeWins(
 ): Promise<Decision> {
   const fresh = await loadWave(client, wave.id);
   const rampageLeftMs = (fresh.rampageEndsAt?.getTime() ?? at.getTime()) - at.getTime();
+  const preset = presetOf(data, world.difficulty);
   const decision = decideRaze(data, {
     front: wave.front,
     waveIndex: wave.index,
+    graceWaves: preset.graceWaves,
+    thresholdOffset: preset.razeThreshold,
     refuge: village.refuge === true,
     hordeNow: total(attackerNow),
     hordeInitial: total(fresh.initial),
@@ -170,14 +175,16 @@ export async function moveOn(client: DbClient, data: GameData, world: World, wav
     targets: targetsOf(villages).filter((t) => t.cell.q !== from.q || t.cell.r !== from.r),
     front: wave.front,
     composition: wave.composition,
-    fear: await loadFear(client, world.id),
+    fear: await fearOf(client, data, world),
     rng: rngFor(world.seed, wave.index, 0x90 + wave.struck.length),
     startMs: sinceSpawn,
     worldSpeed: world.speed,
   });
-  const arrivesAt = route ? new Date(wave.spawnAt.getTime() + route.arrivesMs) : null;
-  if (!route || !arrivesAt || arrivesAt > endsAt) return settle(client, data, world, wave, from, at);
-  await marchOnward(client, wave.id, route.targetVillageId, route.path, arrivesAt);
+  if (!route) return settle(client, data, world, wave, from, at);
+  const march = holdForQuiet(world, wave.spawnAt, { path: route.path, arrivesAt: new Date(wave.spawnAt.getTime() + route.arrivesMs) });
+  const arrivesAt = march.arrivesAt;
+  if (arrivesAt > endsAt) return settle(client, data, world, wave, from, at);
+  await marchOnward(client, wave.id, route.targetVillageId, march.path, arrivesAt);
   await cancelPlans(client, world.id, wave.id);
   await scheduleEvent(client, world.id, arrivesAt, 'wave_arrive', { waveId: wave.id });
   await planRaids(client, data, world, wave.id, sinceSpawn + 1);
