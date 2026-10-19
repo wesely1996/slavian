@@ -202,14 +202,15 @@ function buildChoices(
   };
   const fieldAvg = FIELDS.reduce((n, f) => n + fieldLevel(village, f), 0) / FIELDS.length;
   // Storage when something is near full.
-  if (KINDS.some((k) => amounts[k] > capacity[k] * 0.8) && (levels.storehouse ?? 0) > 0) add('storehouse');
+  const storeMax = data.buildings.buildings.storehouse!.maxLevel;
+  if (KINDS.some((k) => amounts[k] > capacity[k] * 0.8) && (levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < storeMax) add('storehouse');
   // Economy first in the opening.
   if (fieldAvg < 2) for (const f of fieldsByNeed(data, village, amounts)) add(f);
   if (freeSlots > 0) for (const b of style.buildings) if ((levels[b] ?? 0) === 0) add(b);
   if (freeSlots <= 0 || hall < 2 + Math.floor(fieldAvg / 2)) add('elder_hall');
   if ((levels.barracks ?? 0) > 0 && (levels.barracks ?? 0) < Math.min(8, 1 + Math.floor(day / 3))) add('barracks');
   if ((levels.caravan_yard ?? 0) > 0 && (levels.caravan_yard ?? 0) < Math.min(5, 1 + Math.floor(day / 5))) add('caravan_yard');
-  if ((levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < Math.min(10, 1 + Math.floor(fieldAvg))) add('storehouse');
+  if ((levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < Math.min(storeMax, 1 + Math.floor(fieldAvg))) add('storehouse');
   for (const f of fieldsByNeed(data, village, amounts)) add(f);
   return out.slice(0, 4);
 }
@@ -310,7 +311,10 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   if (open.includes('ritual') && world.embers >= deps.data.bridge.ritualEmbers) {
     await go(() => craftRitualCommand(db, deps, { accountId: bot.accountId, worldId: world.id, now }));
   }
-  const armies = (await read(db, (c) => listArmies(c, world.id))).filter((a) => a.homeVillageId === home.id && a.status !== 'done');
+  const all = (await read(db, (c) => listArmies(c, world.id))).filter((a) => a.homeVillageId === home.id && a.status !== 'done');
+  const guardsCity = (a: (typeof all)[number]) => a.orders === 'hold' && a.targetQ === 0 && a.targetR === 0;
+  // Armies out on errands (the Holy City's guard stays put).
+  const armies = all.filter((a) => !guardsCity(a));
   const garrison = home.state.garrison;
   const fighters = (share: number): Record<string, number> => {
     const out: Record<string, number> = {};
@@ -324,8 +328,14 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   const base = { accountId: bot.accountId, villageId: home.id, targetVillageId: null, now };
   const from = hex(home.q, home.r);
 
+  // Once the hordes grow, part of the army stands with the Holy City's guard.
+  if (ctx.day >= 15 && !all.some(guardsCity)) {
+    const army = fighters(0.35);
+    if (strength(army) > 0) await go(() => sendArmyCommand(db, deps, { ...base, target: hex(0, 0), units: army, orders: 'hold' }));
+  }
   // Hold a strong point on a horde's road: a choke, or a fort built there.
   if (open.includes('choke') && !armies.some((a) => a.orders === 'hold')) {
+    // Most of the army: late hordes are strong.
     const forts = await read(db, (c) => listForts(c, world.id));
     const taken = await takenHexes(ctx);
     const range = deps.data.field.fort.range;
@@ -344,7 +354,7 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
       }
       if (!step) continue;
       const target = step;
-      const army = fighters(0.6);
+      const army = fighters(0.9);
       if (strength(army) > 0 && (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(target.q, target.r), units: army, orders: 'hold' })))) return;
     }
   }
