@@ -2,6 +2,8 @@
 // or turn back), army_return (home again). Battles (battles.ts, field.ts)
 // use the helpers here to fold armies into the defenders and to call in
 // reinforcements.
+import { loadLand } from '../db/rivers.js';
+import type { Land } from '../sim/land.js';
 import { z } from 'zod';
 import type { GameData, TerrainId } from '../data/index.js';
 import { armiesAt, insertArmy, loadArmy, loadReinforceRule, saveArmy, type Army } from '../db/armies.js';
@@ -29,8 +31,9 @@ import { fortAt, markFortManned } from '../db/forts.js';
 export const armyPayload = z.object({ armyId: z.number().int() });
 export type ArmyPayload = z.infer<typeof armyPayload>;
 
-export async function terrainOf(client: DbClient, worldId: number): Promise<Map<string, TerrainId>> {
-  return new Map((await loadHexes(client, worldId)).map(([q, r, t]) => [`${q},${r}`, t]));
+// The world's land: terrain, and the rivers no one can cross yet.
+export async function terrainOf(client: DbClient, worldId: number): Promise<Land> {
+  return loadLand(client, worldId);
 }
 
 export interface ArmyOrder {

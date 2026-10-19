@@ -1,4 +1,5 @@
 import { loadArmy, saveReinforceRule, type Army } from '../db/armies.js';
+import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
 import type { GameData } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
@@ -12,7 +13,7 @@ import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
 import type { Hex } from '../sim/hex.js';
 import type { Fort } from '../db/forts.js';
-import { buildFort } from '../scheduler/field.js';
+import { buildCrossing, buildFort } from '../scheduler/field.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [villageId]);
@@ -58,6 +59,20 @@ export async function buildFortCommand(db: Db, deps: SchedulerDeps, input: { acc
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a fort', villageId: village.id });
     return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now);
+  });
+}
+
+// Builds a bridge over a river edge near the caller's village.
+export async function buildCrossingCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
+): Promise<StoredRiverEdge> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a bridge', villageId: village.id });
+    return buildCrossing(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
   });
 }
 

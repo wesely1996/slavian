@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { listRiverEdges } from '../db/rivers.js';
 import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
 import { runSummary } from '../db/runs.js';
 import { listForts, type Fort } from '../db/forts.js';
@@ -461,7 +462,13 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const map =
     world.status === 'lobby'
       ? null
-      : { radius: world.radius, activeFronts: world.activeFronts, hexes: await loadHexes(client, world.id) };
+      : {
+          radius: world.radius,
+          activeFronts: world.activeFronts,
+          hexes: await loadHexes(client, world.id),
+          // [aq, ar, bq, br, crossing]: river edges, and their bridges ('standing', 'building' or 'none').
+          rivers: (await listRiverEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.crossing]),
+        };
   return {
     ...worldSummary(world),
     members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, onboarding: m.onboarding })),

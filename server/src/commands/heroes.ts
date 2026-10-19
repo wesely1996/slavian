@@ -1,4 +1,5 @@
 import type { HeroSlot, TerrainId } from '../data/index.js';
+import { loadLand } from '../db/rivers.js';
 import { loadHero, saveHero, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
@@ -53,7 +54,7 @@ export async function moveHeroCommand(
     const from = hero.villageId === null ? null : await loadVillage(client, hero.villageId);
     if (!from) throw new RuleError(`${hero.name} has no village to leave from`);
     if (from.state.besieged) throw new RuleError(`${hero.name} won't leave ${from.name} in the middle of a battle`);
-    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const path = roadRoute(deps.data, terrain, hex(from.q, from.r), hex(destination.q, destination.r), deps.data.heroes.speed, world.speed);
     const arrivesAt = new Date(input.now.getTime() + path.at(-1)!.atMs);
     const payload: HeroPayload = { accountId: input.accountId };

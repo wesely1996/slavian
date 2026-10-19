@@ -5,7 +5,7 @@ import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
-import { buildFortCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
+import { buildCrossingCommand, buildFortCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -84,6 +84,7 @@ const escortSchema = z.record(z.string().max(64), z.number().int().min(0).max(10
 const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema, escort: escortSchema });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
+const crossingBody = z.object({ a: hexBody, b: hexBody });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
 const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
@@ -470,6 +471,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = hexBody.parse(request.body);
     const fort = await buildFortCommand(db, scheduler, { accountId: account.id, villageId: id, cell: body, now: clock() });
     return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/crossings', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = crossingBody.parse(request.body);
+    await buildCrossingCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
   });
 
   app.put('/v1/villages/:id/reinforce', async (request) => {

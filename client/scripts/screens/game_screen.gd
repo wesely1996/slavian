@@ -454,6 +454,7 @@ func _rebuild_panel() -> void:
 		_own_village_panel(village)
 	else:
 		_ally_village_panel(village)
+	_river_section(_selected)
 
 
 func _terrain_panel() -> void:
@@ -1050,6 +1051,52 @@ func _build_fort(village_id: int, cell: Vector2i) -> void:
 		_status.text = response.error
 		return
 	Game.note_server_time(response.data.serverTime)
+
+
+## Rivers along the selected hex: where bridges stand, and building more.
+func _river_section(cell: Vector2i) -> void:
+	var edges := RiverText.edges_at(Game.rivers, cell)
+	if edges.is_empty():
+		return
+	_panel_body.add_child(UI.label("Rivers", UI.HEADING_SIZE))
+	var home := _my_village()
+	for e in edges:
+		var other: Vector2i = e.other
+		var text := "Towards (%d, %d): " % [other.x, other.y]
+		match String(e.crossing):
+			"standing":
+				_panel_body.add_child(UI.label(text + "a bridge crosses here.", UI.SMALL_SIZE, UI.MUTED))
+				continue
+			"building":
+				_panel_body.add_child(UI.label(text + "a bridge is being built.", UI.SMALL_SIZE, UI.MUTED))
+				continue
+		_panel_body.add_child(UI.label(text + "no way across. Hordes can't cross either.", UI.SMALL_SIZE, UI.MUTED))
+		if home.is_empty():
+			continue
+		var problem := RiverText.bridge_problem(Game.data, Vector2i(int(home.q), int(home.r)), cell, other)
+		if problem != "":
+			_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
+			continue
+		var cost: Dictionary = Game.data.field.bridge.cost
+		var row := UI.hbox()
+		var info := UI.label("Build a bridge: %s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(info)
+		var village_id := int(home.id)
+		var target := other
+		var button := UI.button("Build bridge", func() -> void: _build_crossing(village_id, cell, target))
+		button.custom_minimum_size.x = 160
+		row.add_child(button)
+		_panel_body.add_child(row)
+
+
+func _build_crossing(village_id: int, a: Vector2i, b: Vector2i) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/crossings" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 func _recall_army(army_id: int) -> void:

@@ -40,6 +40,7 @@ func _initialize() -> void:
 	_test_delegation()
 	_test_onboarding_almanac()
 	_test_art()
+	_test_rivers()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -528,3 +529,15 @@ func _test_art() -> void:
 	_check(Art.settlement_id(0) == "settlement/village_1" and Art.settlement_id(14) == "settlement/village_5", "stages clamp")
 	_check(ArmyText.main_unit({"units": {"spearman": 4, "archer": 9, "scout": 1}}) == "archer", "army's main unit")
 	_check(ArmyText.main_unit({"units": {}}) == "", "empty army")
+
+
+func _test_rivers() -> void:
+	var rivers := [[0, 1, 1, 1, "none"], [1, 0, 1, 1, "standing"]]
+	var at := RiverText.edges_at(rivers, Vector2i(1, 1))
+	_check(at.size() == 2 and at[0].other == Vector2i(0, 1) and at[1].crossing == "standing", "river edges at a hex")
+	_check(RiverText.edges_at(rivers, Vector2i(5, 5)).is_empty(), "no river here")
+	_check(RiverText.direction(Vector2i(0, 0), Vector2i(1, 0)) == 0 and RiverText.direction(Vector2i(0, 0), Vector2i(0, 1)) == 5, "edge directions")
+	_check(RiverText.direction(Vector2i(0, 0), Vector2i(2, 0)) == -1, "not neighbours")
+	var data := {"field": {"bridge": {"range": 4}}}
+	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0)) == "", "bridge in range")
+	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(5, 0), Vector2i(6, 0)) != "", "bridge out of range")

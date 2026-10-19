@@ -26,6 +26,8 @@ const MINE_COLOR := Color("#4caf50")
 const ALLY_COLOR := Color("#3f7fd6")
 const ENEMY_COLOR := Color("#d0453a")
 const SHORE_COLOR := Color(0.17, 0.13, 0.09, 0.35)
+const RIVER_COLOR := Color("#4f8fb0")
+const PLANK_COLOR := Color("#b07a45")
 ## Each front's emblem (art id "faction/<emblem>").
 const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "order"}
 
@@ -69,6 +71,8 @@ func _draw() -> void:
 		_draw_terrain(cell)
 	for cell in Game.terrain:
 		_draw_shores(cell)
+	for edge in Game.rivers:
+		_draw_river(edge)
 
 	if Game.terrain.has(Vector2i.ZERO):
 		if not _draw_art("settlement/holy_city", Vector2.ZERO, hex_size * 1.5):
@@ -147,6 +151,28 @@ func _draw_shores(cell: Vector2i) -> void:
 			continue
 		var edge := _edge(points, i)
 		draw_line(edge[0], edge[1], SHORE_COLOR, 2.0)
+
+
+## A river along the edge between two hexes, and its bridge if one stands
+## (faded while being built).
+func _draw_river(edge: Array) -> void:
+	var a := Vector2i(int(edge[0]), int(edge[1]))
+	var b := Vector2i(int(edge[2]), int(edge[3]))
+	var dir := RiverText.direction(a, b)
+	if dir < 0:
+		return
+	var ends := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
+	draw_line(ends[0], ends[1], VILLAGE_OUTLINE_COLOR, hex_size * 0.2, true)
+	draw_line(ends[0], ends[1], RIVER_COLOR, hex_size * 0.12, true)
+	draw_circle(ends[0], hex_size * 0.06, RIVER_COLOR)
+	draw_circle(ends[1], hex_size * 0.06, RIVER_COLOR)
+	if String(edge[4]) == "none":
+		return
+	var mid: Vector2 = (ends[0] + ends[1]) / 2.0
+	var across := (HexMath.to_pixel(b, hex_size) - HexMath.to_pixel(a, hex_size)).normalized()
+	var tint := Color.WHITE if String(edge[4]) == "standing" else Color(1, 1, 1, 0.5)
+	draw_line(mid - across * hex_size * 0.3, mid + across * hex_size * 0.3, VILLAGE_OUTLINE_COLOR * tint, hex_size * 0.3)
+	draw_line(mid - across * hex_size * 0.27, mid + across * hex_size * 0.27, PLANK_COLOR * tint, hex_size * 0.22)
 
 
 ## The corners shared with the neighbour in direction i (E, NE, NW, W, SW, SE).

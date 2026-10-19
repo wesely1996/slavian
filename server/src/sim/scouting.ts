@@ -2,6 +2,7 @@
 // survivors' report is as precise as their number allows. Everything is
 // seeded by the world seed and mission id, so a mission resolves the same
 // way every time.
+import { moveCostOn, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
@@ -62,20 +63,17 @@ export function scoutTarget(
 // Real-time milliseconds for scouts to walk from `from` to `to`.
 export function scoutTravelMs(
   data: GameData,
-  terrain: ReadonlyMap<string, TerrainId>,
+  terrain: Land,
   from: Hex,
   to: Hex,
   worldSpeed: number,
   bonuses: Bonuses = {},
 ): number {
-  const moveCost = (_: Hex, cell: Hex): number | null => {
-    const type = terrain.get(hexKey(cell));
-    return type === undefined ? null : data.terrain.terrain[type].moveCost;
-  };
+  const moveCost = moveCostOn(data, terrain);
   const path = findPath(from, to, moveCost);
   // Off-road targets (e.g. a horde standing in impassable terrain): count
   // straight-line distance over rough ground.
-  const cost = path ? path.slice(1).reduce((sum, cell) => sum + moveCost(cell, cell)!, 0) : hexDistance(from, to) * 2;
+  const cost = path ? path.slice(1).reduce((sum, cell, i) => sum + moveCost(path[i]!, cell)!, 0) : hexDistance(from, to) * 2;
   const speed = data.units.units[SCOUT_UNIT]!.speed * (1 + bonus(bonuses, 'scoutSpeed'));
   return Math.max(1, Math.round(((cost / speed) * MS_PER_HOUR) / worldSpeed));
 }
