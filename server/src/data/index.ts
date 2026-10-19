@@ -452,6 +452,30 @@ const loreFileSchema = z.object({
   ),
 });
 export type LoreData = z.infer<typeof loreFileSchema>;
+
+export const BRIDGE_QUESTS = ['site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
+export type BridgeQuest = (typeof BRIDGE_QUESTS)[number];
+const bridgeFileSchema = z.object({
+  version: z.number().int(),
+  story: z.string(),
+  buildHours: z.number().positive(),
+  powerPerStage: z.number().nonnegative(),
+  ritualEmbers: z.number().int().nonnegative(),
+  stages: z
+    .array(
+      z.object({
+        name: z.string(),
+        // Why the bridge needs this stage, and each quest of it.
+        story: z.string(),
+        cost: resourcesSchema,
+        embers: z.number().int().nonnegative(),
+        quests: z.array(z.object({ kind: z.enum(BRIDGE_QUESTS), story: z.string() })),
+      }),
+    )
+    .min(1),
+  quests: z.record(z.enum(BRIDGE_QUESTS), z.object({ name: z.string(), description: z.string() })),
+});
+export type BridgeData = z.infer<typeof bridgeFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -490,6 +514,7 @@ export interface GameData {
   difficulty: DifficultyData;
   sites: SitesData;
   lore: LoreData;
+  bridge: BridgeData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -515,6 +540,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     difficulty: difficultyFileSchema.parse(read('difficulty.json')),
     sites: sitesFileSchema.parse(read('sites.json')),
     lore: loreFileSchema.parse(read('lore.json')),
+    bridge: bridgeFileSchema.parse(read('bridge.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

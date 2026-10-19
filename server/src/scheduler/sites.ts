@@ -22,6 +22,7 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
+import { bridgeQuest } from './bridge.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -163,6 +164,7 @@ export const siteHandlers: HandlerRegistry = {
       await notifyWorld(client, { worldId: world.id, type: 'research' });
     }
     await markExplored(client, site.id, army.ownerAccountId, find, event.dueAt);
+    await bridgeQuest(client, data, world, 'site', event.dueAt);
     if (after !== army) await saveArmy(client, after);
     await sendHome(client, world, after, event.dueAt, data);
     const name = data.sites.kinds[site.kind]?.name ?? 'site';

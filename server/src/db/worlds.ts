@@ -165,3 +165,9 @@ export async function setQuietHours(client: DbClient, worldId: number, window: Q
     window?.utcOffsetMinutes ?? 0,
   ]);
 }
+
+// Spends the group's Svarog's Ember; false if there isn't enough.
+export async function spendEmbers(client: DbClient, worldId: number, n: number): Promise<boolean> {
+  const { rowCount } = await client.query('UPDATE worlds SET embers = embers - $2 WHERE id = $1 AND embers >= $2', [worldId, n]);
+  return rowCount === 1;
+}

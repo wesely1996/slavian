@@ -31,6 +31,7 @@ import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
+import { bridgeQuest } from './bridge.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -105,10 +106,12 @@ export async function finishWave(
 ): Promise<void> {
   await endWave(client, waveId, status, at);
   await spawnAfterWave(client, data, world, await loadWave(client, waveId), at);
+  await bridgeQuest(client, data, world, 'unscathed', at);
 }
 
 export async function afterSettling(client: DbClient, data: GameData, world: World, waveId: number, at: Date): Promise<void> {
   await spawnAfterWave(client, data, world, await loadWave(client, waveId), at);
+  await bridgeQuest(client, data, world, 'unscathed', at);
 }
 
 // A wave sets out: camps of its front send part of themselves along.
@@ -182,6 +185,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     after = { ...after, loot: campLoot(data, camp.units) };
     ember = camp.kind === 'lair' && rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
     if (ember) await addEmbers(client, world.id, 1);
+    if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
   } else {
     await saveCampUnits(client, camp.id, result.campNow);
   }

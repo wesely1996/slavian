@@ -49,6 +49,8 @@ var camps: Array = []
 ## Ancient sites (see server worldView) and the group's lore scrolls.
 var sites: Array = []
 var lore: Array = []
+## The Kalinov Bridge (see server sim/bridge.ts).
+var bridge: Dictionary = {}
 ## How much hordes fear each hex where they were beaten.
 var fear: Dictionary[Vector2i, float] = {}
 ## Standing orders of every village (see server orderView).
@@ -110,6 +112,8 @@ func set_world(new_world: Dictionary) -> void:
 	camps = new_world.get("camps", [])
 	sites = new_world.get("sites", [])
 	lore = new_world.get("lore", [])
+	var new_bridge: Variant = new_world.get("bridge")
+	bridge = new_bridge if new_bridge is Dictionary else {}
 	fear.clear()
 	for entry in new_world.get("fear", []):
 		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])

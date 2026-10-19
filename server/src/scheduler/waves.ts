@@ -12,6 +12,8 @@ import { insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck
 import { listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { planMarch, planWave, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
+import { findBridge } from '../db/bridges.js';
+import { stagesStanding } from '../sim/bridge.js';
 import { fighters } from '../sim/armies.js';
 import { afterQuiet, presetOf, waveFactor, type GroupPower } from '../sim/difficulty.js';
 import { unitsFed } from '../sim/village.js';
@@ -47,7 +49,8 @@ export async function groupPower(client: DbClient, data: GameData, world: World,
   for (const village of villages) {
     for (const [unit, n] of Object.entries(fighters(data, unitsFed(village.state)))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
   }
-  return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyAttack, waveIndex };
+  const bridgeStages = stagesStanding(await findBridge(client, world.id));
+  return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyAttack, waveIndex, bridgeStages };
 }
 
 async function announceWave(
