@@ -8,14 +8,14 @@ import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { listArmies, loadReinforceRule, saveArmy } from '../db/armies.js';
 import { insertBattle, type Battle } from '../db/battles.js';
-import { insertCamp, listCamps } from '../db/camps.js';
+import { listCamps } from '../db/camps.js';
+import { afterSettling, createCamp, finishWave } from './camps.js';
 import { addFear, loadFear } from '../db/fear.js';
 import { listForts } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { insertVillage, listVillages, loadVillage, markRefuge, saveRuin, saveVillageState, type Village } from '../db/villages.js';
 import {
-  endWave,
   loadWave,
   markBattling,
   markRazing,
@@ -132,19 +132,17 @@ async function settle(client: DbClient, data: GameData, world: World, wave: Wave
   const units = wave.composition;
   const site = total(units) > 0 ? campSite(data, await terrainOf(client, world.id), from, await takenHexes(client, world.id)) : null;
   if (!site) {
-    await endWave(client, wave.id, 'dispersed', at);
+    await finishWave(client, data, world, wave.id, 'dispersed', at);
   } else {
-    await insertCamp(client, {
-      worldId: world.id,
-      kind: wave.front === 'north' ? 'lair' : 'bandit',
-      front: wave.front,
-      q: site.q,
-      r: site.r,
-      units,
-      waveId: wave.id,
-      createdAt: at,
-    });
+    await createCamp(
+      client,
+      data,
+      world,
+      { kind: wave.front === 'north' ? 'lair' : 'bandit', front: wave.front, q: site.q, r: site.r, units, waveId: wave.id },
+      at,
+    );
     await markSettled(client, wave.id, at);
+    await afterSettling(client, data, world, wave.id, at);
     for (const member of await listMembers(client, world.id)) {
       await tell(client, world, member.accountId, {
         kind: 'camp',

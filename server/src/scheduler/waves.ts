@@ -15,6 +15,7 @@ import { decayFear, loadFear } from '../db/fear.js';
 import { hex } from '../sim/hex.js';
 import { startBattle } from './battles.js';
 import { beginRampage, moveOn, startHolyCityBattle } from './horde.js';
+import { campsJoin } from './camps.js';
 import { planWaveWarning } from './notices.js';
 import { planRaids } from './outposts.js';
 import { planIntercepts } from './field.js';
@@ -72,8 +73,11 @@ function asPlanned(wave: Wave): PlannedWave {
 
 export const waveHandlers: HandlerRegistry = {
   async wave_spawn({ client, data, world }, event) {
-    const wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
+    let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'scheduled') return;
+    // Camps of its front send part of themselves along.
+    await campsJoin(client, data, world, wave);
+    wave = await loadWave(client, wave.id);
 
     // Old memories fade as a new horde sets out.
     await decayFear(client, world.id, data.horde.fear.decayPerWave, data.horde.fear.minimum);

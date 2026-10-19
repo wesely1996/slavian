@@ -167,3 +167,8 @@ export async function marchOnward(client: DbClient, id: number, targetVillageId:
     [id, targetVillageId, JSON.stringify(path), arrivesAt],
   );
 }
+
+// Camps of its front joined it as it set out.
+export async function reinforceWave(client: DbClient, id: number, composition: Composition): Promise<void> {
+  await client.query('UPDATE waves SET composition = $2, initial = $2 WHERE id = $1', [id, JSON.stringify(composition)]);
+}

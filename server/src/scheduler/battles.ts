@@ -7,7 +7,8 @@ import { insertBattle, loadBattle, recordRound, setDecision, type RoundLog } fro
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import { endWave, loadWave, markBattling, setWaveStrength, type Wave } from '../db/waves.js';
+import { loadWave, markBattling, setWaveStrength, type Wave } from '../db/waves.js';
+import { finishWave } from './camps.js';
 import type { World } from '../db/worlds.js';
 import {
   battleOutcome,
@@ -83,6 +84,7 @@ export const battleHandlers: HandlerRegistry = {
   async battle_round({ client, data, world }, event) {
     const battle = await loadBattle(client, battlePayload.parse(event.payload).battleId);
     if (battle.status !== 'ongoing') return;
+    if (battle.waveId === null) return;
     if (battle.villageId === null) {
       await fieldRound(client, data, world, battle, event.dueAt);
       return;
@@ -206,7 +208,7 @@ export const battleHandlers: HandlerRegistry = {
         title: `${village.name} held`,
         body: `The horde was beaten after ${round} rounds.`,
       }, at);
-      await endWave(client, wave.id, 'defeated', at);
+      await finishWave(client, data, world, wave.id, 'defeated', at);
     }
 
     await saveVillageState(client, village.id, villageState);

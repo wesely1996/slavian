@@ -43,3 +43,25 @@ static func camp(camp_: Dictionary, faction: String) -> String:
 ## "Sanctity 87 / 100"
 static func sanctity(world: Dictionary, data: Dictionary) -> String:
 	return "Sanctity %d / %d" % [int(world.get("sanctity", 0)), int(data.horde.holyCity.sanctity)]
+
+
+## "Ambushed near (2, -1): lost Wood 200" / "Beat off an ambush near (2, -1)".
+static func ambush(report: Variant) -> String:
+	if not report is Dictionary:
+		return ""
+	var where := "(%d, %d)" % [int(report.q), int(report.r)]
+	if report.beatenOff:
+		return "Its escort beat off an ambush near %s" % where
+	var parts := PackedStringArray()
+	for kind in ["wood", "stone", "grain", "iron"]:
+		if int(report.lost.get(kind, 0)) > 0:
+			parts.append("%s %d" % [kind.capitalize(), int(report.lost[kind])])
+	return "Ambushed near %s: lost %s" % [where, ", ".join(parts) if not parts.is_empty() else "nothing"]
+
+
+## "Cleared the lair at (3, 1): 9 fell, we lost 2." for an army storming a camp.
+static func assault(battle: Dictionary, lost: Dictionary) -> String:
+	var where := "the camp at (%d, %d)" % [int(battle.q), int(battle.r)]
+	if battle.status == "cleared":
+		return "Cleared %s: %d fell, we lost %d." % [where, int(lost.attacker), int(lost.defender)]
+	return "Driven off from %s: %d of them fell, we lost %d." % [where, int(lost.attacker), int(lost.defender)]

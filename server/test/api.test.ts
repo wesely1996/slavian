@@ -1135,8 +1135,10 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle.decision).toEqual({ choice: 'raid', reasons: ['an early raiding party'] });
     w = await world();
     expect(w.waves.some((x: { id: number }) => x.id === second.id)).toBe(false);
-    expect(w.camps).toEqual([expect.objectContaining({ front: second.front, kind: second.front === 'north' ? 'lair' : 'bandit' })]);
-    expect(w.camps[0].size).toBeGreaterThan(0);
+    const settled = w.camps.filter((c: { waveId: number }) => c.waveId === second.id);
+    expect(settled.length).toBeGreaterThanOrEqual(1);
+    expect(settled[0]).toMatchObject({ front: second.front, kind: second.front === 'north' ? 'lair' : 'bandit' });
+    expect(settled[0].size).toBeGreaterThan(0);
 
     // A horde at the Holy City fights its guard; winning costs Sanctity.
     const third = w.waves.find((x: { status: string }) => x.status === 'scheduled');
@@ -1155,6 +1157,107 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle.status).toBe('raided');
     w = await world();
     expect(w.sanctity).toBeLessThan(scheduler.data.horde.holyCity.sanctity);
+  });
+
+  it('camps rise after waves and grow, ambush caravans, fall to armies; empty forts turn bandit', async () => {
+    const bogdan = await guest('Bogdan');
+    const created = await call('POST', '/v1/worlds', bogdan.token, { name: 'Camps', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, bogdan.token);
+    const home = started.body.villages[0];
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, bogdan.token)).body;
+    const village = async () => (await world()).villages.find((v: { id: number }) => v.id === home.id);
+    const roundMs = (15 * 60_000) / 10;
+    const hourMs = 3_600_000 / 10;
+    await db.query(
+      `UPDATE villages SET garrison = '{"spearman": 200, "archer": 120}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}',
+         plots = plots || '{"c1": {"building": "caravan_yard", "level": 3}}', levels = levels || '{"caravan_yard": 3}' WHERE id = $1`,
+      [home.id],
+    );
+
+    // The garrison beats the first horde; a camp of its front rises near its road.
+    const first = started.body.waves[0];
+    now = new Date(first.spawnAt);
+    await tick(db, now, scheduler);
+    await db.query('UPDATE waves SET target_village_id = $2 WHERE id = $1', [first.id, home.id]);
+    now = new Date((await world()).waves.find((w: { id: number }) => w.id === first.id).arrivesAt);
+    await tick(db, now, scheduler);
+    for (let i = 0; i < 12; i++) {
+      now = new Date(now.getTime() + roundMs);
+      await tick(db, now, scheduler);
+    }
+    let w = await world();
+    expect(w.battles[0]).toMatchObject({ villageId: home.id, status: 'defended' });
+    const camp = w.camps.find((c: { waveId: number }) => c.waveId === first.id);
+    expect(camp).toMatchObject({ front: first.front, kind: first.front === 'north' ? 'lair' : 'bandit' });
+    const size = camp.size;
+
+    // A day later it has grown.
+    now = new Date(now.getTime() + 24 * hourMs);
+    await tick(db, now, scheduler);
+    expect((await world()).camps.find((c: { id: number }) => c.id === camp.id).size).toBeGreaterThan(size);
+
+    // A camp on the road to the Holy City robs an unguarded caravan; an escort beats it off.
+    const terrain = new Map<string, TerrainId>(started.body.map.hexes.map(([q, r, t]: [number, number, TerrainId]) => [`${q},${r}`, t]));
+    const road = roadRoute(scheduler.data, terrain, hex(home.q, home.r), hex(0, 0), scheduler.data.logistics.caravan.speed, 10);
+    const mid = road[Math.floor(road.length / 2)]!;
+    const { rows: bandits } = await db.query<{ id: number }>(
+      `INSERT INTO camps (world_id, kind, front, q, r, units, created_at) VALUES ($1, 'bandit', 'south', $2, $3, '{"zealot": 12}', $4) RETURNING id`,
+      [worldId, mid.q, mid.r, now],
+    );
+    const load = { wood: 400, stone: 0, grain: 0, iron: 0 };
+    const send = (escort?: object) => call('POST', `/v1/villages/${home.id}/caravans`, bogdan.token, { destinationVillageId: null, load, ...(escort ? { escort } : {}) });
+    const robbed = await send();
+    const guarded = await send({ archer: 40 });
+    expect(guarded.body.caravan.escort).toEqual({ archer: 40 });
+    expect((await village()).away.archer).toBe(40);
+    now = new Date(guarded.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    w = await world();
+    const trips = (id: number) => w.caravans.find((c: { id: number }) => c.id === id);
+    expect(trips(robbed.body.caravan.id).ambush).toMatchObject({ campId: bandits[0]!.id, beatenOff: false, lost: { wood: 200 } });
+    expect(trips(guarded.body.caravan.id).ambush).toMatchObject({ beatenOff: true, lost: { wood: 0 } });
+    expect(w.vault.amounts.wood).toBe(600);
+    expect((await village()).away.archer ?? 0).toBe(0);
+
+    // An army clears the camp and carries its loot home.
+    const target = w.camps.find((c: { id: number }) => c.id === camp.id);
+    const army = await call('POST', `/v1/villages/${home.id}/armies`, bogdan.token, {
+      target: { q: target.q, r: target.r },
+      units: { spearman: 150, archer: 60 },
+      orders: 'clear',
+    });
+    expect(army.body.army).toMatchObject({ orders: 'clear', target: [target.q, target.r] });
+    expect((await call('POST', `/v1/villages/${home.id}/armies`, bogdan.token, { target: { q: home.q, r: home.r }, units: { spearman: 1 }, orders: 'clear' })).body.message).toMatch(/no camp/);
+    now = new Date(army.body.army.arrivesAt);
+    await tick(db, now, scheduler);
+    w = await world();
+    const storm = w.battles.find((b: { campId: number }) => b.campId === camp.id);
+    expect(storm).toMatchObject({ status: 'cleared', waveId: null, q: target.q, r: target.r });
+    expect(storm.loot.wood).toBeGreaterThan(0);
+    expect(w.camps.some((c: { id: number }) => c.id === camp.id)).toBe(false);
+    const marching = w.armies.find((a: { id: number }) => a.id === army.body.army.id);
+    expect(marching).toMatchObject({ status: 'returning', loot: storm.loot });
+    expect([0, 1]).toContain(w.embers);
+    const before = (await village()).resources.amounts.iron;
+    now = new Date(marching.returnsAt);
+    await tick(db, now, scheduler);
+    expect((await village()).resources.amounts.iron).toBeGreaterThanOrEqual(Math.min(before + storm.loot.iron, (await village()).resources.capacity.iron) - 1);
+
+    // A fort nobody holds falls to bandits.
+    const taken = new Set(w.camps.map((c: { q: number; r: number }) => `${c.q},${c.r}`));
+    const [sq, sr] = [...terrain.entries()]
+      .map(([key, t]) => [...key.split(',').map(Number), t] as [number, number, TerrainId])
+      .find(([q, r, t]) => ['plains', 'forest', 'hills'].includes(t) && hexDistance(hex(q, r), hex(home.q, home.r)) === 2 && !taken.has(`${q},${r}`))!;
+    const site = { q: sq, r: sr };
+    await db.query(`UPDATE villages SET amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
+    const fort = await call('POST', `/v1/villages/${home.id}/forts`, bogdan.token, { q: site.q, r: site.r });
+    expect(fort.body.fort.status).toBe('building');
+    now = new Date(new Date(fort.body.fort.completesAt).getTime() + scheduler.data.camps.fort.abandonHours * hourMs + 1);
+    await tick(db, now, scheduler);
+    w = await world();
+    expect(w.forts.some((f: { q: number; r: number }) => f.q === site.q && f.r === site.r)).toBe(false);
+    expect(w.camps).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bandit', q: site.q, r: site.r })]));
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

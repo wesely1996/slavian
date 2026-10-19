@@ -368,6 +368,30 @@ const hordeFileSchema = z.object({
   }),
 });
 export type HordeData = z.infer<typeof hordeFileSchema>;
+
+const campsFileSchema = z.object({
+  version: z.number().int(),
+  spawn: z.object({
+    perWave: z.number().int().nonnegative(),
+    max: z.number().int().nonnegative(),
+    nearRoad: z.number().int().nonnegative(),
+    minVillageDistance: z.number().int().nonnegative(),
+    baseUnits: z.number().positive(),
+    growthPerWave: z.number().min(1),
+  }),
+  growth: z.object({ everyHours: z.number().positive(), share: z.number().nonnegative(), maxUnits: z.number().int().positive() }),
+  feed: z.object({ share: z.number().min(0).max(1) }),
+  assault: z.object({ stance: z.enum(STANCES) }),
+  loot: z.object({ perUnit: resourcesSchema, gearChance: z.number().min(0).max(1), emberChance: z.number().min(0).max(1) }),
+  ambush: z.object({
+    reach: z.number().int().nonnegative(),
+    escortRatio: z.number().nonnegative(),
+    cargoShare: z.number().min(0).max(1),
+    escortLoss: z.number().min(0).max(1),
+  }),
+  fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
+});
+export type CampsData = z.infer<typeof campsFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -402,6 +426,7 @@ export interface GameData {
   armies: ArmiesData;
   field: FieldData;
   horde: HordeData;
+  camps: CampsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -423,6 +448,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     armies: armiesFileSchema.parse(read('armies.json')),
     field: fieldFileSchema.parse(read('field.json')),
     horde: hordeFileSchema.parse(read('horde.json')),
+    camps: campsFileSchema.parse(read('camps.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

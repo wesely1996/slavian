@@ -9,6 +9,8 @@ export interface Fort {
   r: number;
   status: 'building' | 'standing';
   completesAt: Date;
+  // The last time an army held it.
+  mannedAt: Date | null;
 }
 
 interface FortRow {
@@ -20,6 +22,7 @@ interface FortRow {
   r: number;
   status: 'building' | 'standing';
   completes_at: Date;
+  manned_at: Date | null;
 }
 
 function fromRow(row: FortRow): Fort {
@@ -32,12 +35,13 @@ function fromRow(row: FortRow): Fort {
     r: row.r,
     status: row.status,
     completesAt: row.completes_at,
+    mannedAt: row.manned_at,
   };
 }
 
 export async function insertFort(client: DbClient, f: Pick<Fort, 'worldId' | 'ownerAccountId' | 'villageId' | 'q' | 'r' | 'completesAt'>): Promise<Fort> {
   const { rows } = await client.query<FortRow>(
-    `INSERT INTO forts (world_id, owner_account_id, village_id, q, r, completes_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    `INSERT INTO forts (world_id, owner_account_id, village_id, q, r, completes_at, manned_at) VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING *`,
     [f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt],
   );
   return fromRow(rows[0]!);
@@ -60,4 +64,12 @@ export async function listForts(client: DbClient, worldId: number): Promise<Fort
 
 export async function markFortStanding(client: DbClient, id: number): Promise<void> {
   await client.query(`UPDATE forts SET status = 'standing' WHERE id = $1`, [id]);
+}
+
+export async function markFortManned(client: DbClient, id: number, at: Date): Promise<void> {
+  await client.query('UPDATE forts SET manned_at = $2 WHERE id = $1', [id, at]);
+}
+
+export async function deleteFort(client: DbClient, id: number): Promise<void> {
+  await client.query('DELETE FROM forts WHERE id = $1', [id]);
 }

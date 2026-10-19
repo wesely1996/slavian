@@ -20,6 +20,9 @@ import { roadRoute } from '../sim/logistics.js';
 import { completeTraining, loseAway, returnHome, sendAway } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { interceptAt } from './field.js';
+import { deliverLoot, stormCamp } from './camps.js';
+import { campAt } from '../db/camps.js';
+import { fortAt, markFortManned } from '../db/forts.js';
 
 export const armyPayload = z.object({ armyId: z.number().int() });
 export type ArmyPayload = z.infer<typeof armyPayload>;
@@ -30,7 +33,8 @@ export async function terrainOf(client: DbClient, worldId: number): Promise<Map<
 
 export interface ArmyOrder {
   homeVillageId: number;
-  // A village to go to, or (with orders 'hold') a hex to hold.
+  // A village to go to, or (with orders 'hold' or 'clear') a hex to hold or
+  // a camp to clear.
   targetVillageId: number | null;
   targetHex?: Hex | undefined;
   units: Record<string, number>;
@@ -45,7 +49,11 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   const units = validateArmy(data, input.units, input.orders);
   const home = await loadVillage(client, input.homeVillageId);
   let to: Hex;
-  if (input.orders === 'hold') {
+  if (input.orders === 'clear') {
+    if (!input.targetHex) throw new RuleError('Say which camp to clear');
+    to = input.targetHex;
+    if (!(await campAt(client, world.id, to.q, to.r))) throw new RuleError('There is no camp there');
+  } else if (input.orders === 'hold') {
     if (!input.targetHex) throw new RuleError('Say which hex to hold');
     to = input.targetHex;
     const terrain = (await terrainOf(client, world.id)).get(`${to.q},${to.r}`);
@@ -72,7 +80,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     worldId: world.id,
     ownerAccountId: home.ownerAccountId,
     homeVillageId: home.id,
-    targetVillageId: input.orders === 'hold' ? null : input.targetVillageId,
+    targetVillageId: input.orders === 'hold' || input.orders === 'clear' ? null : input.targetVillageId,
     targetQ: to.q,
     targetR: to.r,
     heroAccountId,
@@ -183,8 +191,15 @@ export const armyHandlers: HandlerRegistry = {
   async army_arrive({ client, data, world }, event) {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
     if (army.status !== 'marching') return;
+    if (army.orders === 'clear') {
+      await stormCamp(client, data, world, army, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      return;
+    }
     if (army.orders === 'hold') {
       await saveArmy(client, { ...army, status: 'stationed' });
+      const fort = await fortAt(client, world.id, army.targetQ, army.targetR);
+      if (fort) await markFortManned(client, fort.id, event.dueAt);
       await interceptAt(client, data, world, hex(army.targetQ, army.targetR), event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
@@ -193,9 +208,9 @@ export const armyHandlers: HandlerRegistry = {
       `SELECT id FROM battles WHERE village_id = $1 AND status = 'ongoing' LIMIT 1`,
       [army.targetVillageId],
     );
-    if (rows[0]) {
-      const battle = await loadBattle(client, rows[0].id);
-      await joinBattle(client, data, army, battle, await loadWave(client, battle.waveId));
+    const ongoing = rows[0] ? await loadBattle(client, rows[0].id) : null;
+    if (ongoing?.waveId) {
+      await joinBattle(client, data, army, ongoing, await loadWave(client, ongoing.waveId));
     } else if (army.orders === 'support') {
       await saveArmy(client, { ...army, status: 'stationed' });
     } else {
@@ -212,6 +227,8 @@ export const armyHandlers: HandlerRegistry = {
     for (const [unit, n] of Object.entries(army.units)) state = returnHome(state, unit, n);
     await saveVillageState(client, home.id, state);
     await saveArmy(client, { ...army, status: 'done' });
+    // Loot from a cleared camp goes into the stores.
+    await deliverLoot(client, world, { ...army, status: 'done' }, event.dueAt);
     const hero = await heroWithArmy(client, army.id);
     if (hero) {
       await saveHero(client, { ...hero, status: 'home', villageId: home.id, armyId: null });

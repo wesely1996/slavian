@@ -53,3 +53,21 @@ export async function listCamps(client: DbClient, worldId: number): Promise<Camp
   const { rows } = await client.query<CampRow>(`SELECT * FROM camps WHERE world_id = $1 AND status = 'active' ORDER BY id`, [worldId]);
   return rows.map(fromRow);
 }
+
+export async function loadCamp(client: DbClient, id: number): Promise<Camp | null> {
+  const { rows } = await client.query<CampRow>('SELECT * FROM camps WHERE id = $1', [id]);
+  return rows[0] ? fromRow(rows[0]) : null;
+}
+
+export async function campAt(client: DbClient, worldId: number, q: number, r: number): Promise<Camp | null> {
+  const { rows } = await client.query<CampRow>(`SELECT * FROM camps WHERE world_id = $1 AND q = $2 AND r = $3 AND status = 'active'`, [worldId, q, r]);
+  return rows[0] ? fromRow(rows[0]) : null;
+}
+
+export async function saveCampUnits(client: DbClient, id: number, units: Record<string, number>): Promise<void> {
+  await client.query('UPDATE camps SET units = $2 WHERE id = $1', [id, JSON.stringify(units)]);
+}
+
+export async function markCleared(client: DbClient, id: number): Promise<void> {
+  await client.query(`UPDATE camps SET status = 'cleared' WHERE id = $1`, [id]);
+}

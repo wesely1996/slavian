@@ -158,6 +158,7 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
   return {
     id: battle.id,
     waveId: battle.waveId,
+    campId: battle.campId,
     villageId: battle.villageId,
     q: battle.q,
     r: battle.r,
@@ -182,11 +183,17 @@ export async function battlesView(client: DbClient, worldId: number) {
   if (battles.length) {
     const { rows } = await client.query<{ id: number; composition: Record<string, number> }>(
       'SELECT id, composition FROM waves WHERE id = ANY($1)',
-      [battles.map((b) => b.waveId)],
+      [battles.map((b) => b.waveId).filter((id) => id !== null)],
     );
     for (const row of rows) waves.set(row.id, row.composition);
   }
-  return battles.map((battle) => battleView(battle, waves.get(battle.waveId) ?? {}));
+  // A camp's numbers after the assault: its start minus what fell.
+  const after = (battle: Battle) => {
+    const left: Record<string, number> = { ...battle.attackerInitial };
+    for (const round of battle.rounds) for (const [unit, n] of Object.entries(round.attackerLosses)) left[unit] = (left[unit] ?? 0) - n;
+    return Object.fromEntries(Object.entries(left).filter(([, n]) => n > 0));
+  };
+  return battles.map((battle) => battleView(battle, battle.waveId === null ? after(battle) : (waves.get(battle.waveId) ?? {})));
 }
 
 export function raidView(raid: Raid) {
@@ -222,6 +229,9 @@ export function caravanView(caravan: Caravan) {
     departsAt: caravan.departsAt.toISOString(),
     arrivesAt: caravan.arrivesAt.toISOString(),
     returnsAt: caravan.returnsAt.toISOString(),
+    // Troops guarding it, and what happened if a camp ambushed it.
+    escort: caravan.escort,
+    ambush: caravan.ambush,
   };
 }
 
@@ -354,6 +364,8 @@ export function armyView(army: Army) {
     target: [army.targetQ, army.targetR],
     heroAccountId: army.heroAccountId,
     orders: army.orders,
+    // Carried home from a cleared camp.
+    loot: army.loot,
     units: army.units,
     status: army.status,
     battleId: army.battleId,
@@ -397,6 +409,7 @@ export function worldSummary(world: World) {
     hostAccountId: world.hostAccountId,
     startedAt: world.startedAt?.toISOString() ?? null,
     sanctity: world.sanctity,
+    embers: world.embers,
   };
 }
 
@@ -415,7 +428,7 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
-  const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units) }));
+  const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units), waveId: c.waveId }));
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =

@@ -77,8 +77,9 @@ const stanceBody = z.object({ stance: z.enum(STANCES) });
 const amount = z.number().int().min(0).max(1_000_000);
 const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
 // No destination: the Holy City vault.
-const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
-const fetchBody = z.object({ load: loadSchema });
+const escortSchema = z.record(z.string().max(64), z.number().int().min(0).max(100_000)).optional();
+const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema, escort: escortSchema });
+const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
 const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
@@ -104,7 +105,7 @@ const armyBody = z.object({
   targetVillageId: z.number().int().positive().nullable().default(null),
   target: hexBody.optional(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
-  orders: z.enum(['support', 'reinforce', 'harass', 'hold']),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear']),
   withHero: z.boolean().optional(),
 });
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
@@ -174,6 +175,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     armies: scheduler.data.armies,
     field: scheduler.data.field,
     horde: scheduler.data.horde,
+    camps: scheduler.data.camps,
   }));
 
   app.post('/v1/auth/guest', async (request) => {

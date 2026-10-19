@@ -306,7 +306,7 @@ func _terrain_panel() -> void:
 	var holder := Game.outpost_owner(_selected)
 	if not holder.is_empty():
 		_outpost_panel(holder, Rules.outpost_plot(_selected))
-	else:
+	elif camp.is_empty():
 		_claim_panel(id)
 		_found_panel(id)
 	_hold_panel(id)
@@ -360,6 +360,7 @@ func _vault_panel() -> void:
 	for kind in Ledger.KINDS:
 		parts.append("%s %d" % [kind.capitalize(), int(vault.amounts[kind])])
 	_panel_body.add_child(UI.label("  ".join(parts) + "   (of %d each)" % capacity, UI.SMALL_SIZE))
+	_panel_body.add_child(UI.label("Svarog's Ember: %d (from lairs)" % int(Game.world.get("embers", 0)), UI.SMALL_SIZE, UI.MUTED))
 	if vault.upgradingTo != null:
 		var done_at := TimeUtil.parse_iso(vault.upgradeCompletesAt)
 		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
@@ -450,14 +451,17 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 	var needed := CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {}))
 	var summary := "Needs %d caravan%s" % [needed, "" if needed == 1 else "s"] if needed > 0 else "Pick what to carry"
 	_panel_body.add_child(UI.label(summary, UI.SMALL_SIZE, UI.MUTED))
+	if not Game.camps.is_empty():
+		_panel_body.add_child(UI.label("Camps ambush caravans passing close. Escort (optional):", UI.SMALL_SIZE, UI.MUTED))
+	var escort := _unit_pickers(Rules.garrison_at(village, Game.server_now())) if not Game.camps.is_empty() else {}
 	var buttons := UI.hbox()
 	var cargo := _caravan_load.duplicate()
-	var send := UI.button("Send", func() -> void: _send_caravan(village_id, _caravan_to, cargo))
+	var send := UI.button("Send", func() -> void: _send_caravan(village_id, _caravan_to, cargo, escort))
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	send.disabled = needed == 0 or needed > free or not Ledger.can_afford(amounts, cargo)
 	buttons.add_child(send)
 	if _caravan_to == 0:
-		var fetch := UI.button("Fetch from vault", func() -> void: _fetch_from_vault(village_id, cargo))
+		var fetch := UI.button("Fetch from vault", func() -> void: _fetch_from_vault(village_id, cargo, escort))
 		fetch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fetch.disabled = needed == 0 or needed > free
 		buttons.add_child(fetch)
@@ -475,23 +479,27 @@ func _caravan_trips(village_id: int) -> void:
 		var line := UI.label("", UI.SMALL_SIZE)
 		_panel_body.add_child(line)
 		_tick(line, func() -> String: return CaravanText.describe(caravan, village_id, Game.server_now()))
+		var ambushed := HordeText.ambush(caravan.get("ambush"))
+		if ambushed != "":
+			_panel_body.add_child(UI.label(ambushed, UI.SMALL_SIZE, Color("#ffb4a8")))
 
 
-func _send_caravan(village_id: int, destination: int, cargo: Dictionary) -> void:
+func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort: Dictionary) -> void:
 	_status.text = ""
-	var body := {"destinationVillageId": destination if destination != 0 else null, "load": cargo}
+	var body := {"destinationVillageId": destination if destination != 0 else null, "load": cargo, "escort": escort}
 	var response := await Api.post_json("/v1/villages/%d/caravans" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
 		return
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	_army_units.clear()
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
 
-func _fetch_from_vault(village_id: int, cargo: Dictionary) -> void:
+func _fetch_from_vault(village_id: int, cargo: Dictionary, escort: Dictionary) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/caravans/fetch" % village_id, {"load": cargo})
+	var response := await Api.post_json("/v1/villages/%d/caravans/fetch" % village_id, {"load": cargo, "escort": escort})
 	if not response.ok:
 		_status.text = response.error
 		return
@@ -714,8 +722,12 @@ func _hold_panel(terrain_id: String) -> void:
 		return
 	var cell := _selected
 	var fort := Game.fort_at(cell)
-	_panel_body.add_child(UI.label("Hold this hex", UI.HEADING_SIZE))
-	for line in FieldRules.ground(Game.data, Game.terrain, cell, fort, float(Game.world.speed)):
+	var camp := Game.camp_at(cell)
+	var orders := "hold" if camp.is_empty() else "clear"
+	_panel_body.add_child(UI.label("Hold this hex" if camp.is_empty() else "Clear this camp", UI.HEADING_SIZE))
+	if not camp.is_empty():
+		_panel_body.add_child(UI.label(ArmyText.ORDERS.clear, UI.SMALL_SIZE, UI.MUTED))
+	for line in FieldRules.ground(Game.data, Game.terrain, cell, fort, float(Game.world.speed)) if camp.is_empty() else PackedStringArray():
 		_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
 	var defs: Dictionary = Game.data.units.units
 	for army in Game.armies:
@@ -748,12 +760,12 @@ func _hold_panel(terrain_id: String) -> void:
 			_army_hero = not _army_hero
 			_rebuild_panel())
 		_panel_body.add_child(lead)
-	var body := {"target": {"q": cell.x, "r": cell.y}, "units": chosen, "orders": "hold", "withHero": _army_hero and hero_ready}
-	var go := UI.button("Hold this hex", func() -> void: _send_army(village_id, body))
+	var body := {"target": {"q": cell.x, "r": cell.y}, "units": chosen, "orders": orders, "withHero": _army_hero and hero_ready}
+	var go := UI.button("Hold this hex" if camp.is_empty() else "Storm it", func() -> void: _send_army(village_id, body))
 	go.disabled = chosen.is_empty()
 	_panel_body.add_child(go)
 
-	if not fort.is_empty():
+	if not fort.is_empty() or not camp.is_empty():
 		return
 	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty()
 	var problem := FieldRules.fort_problem(Game.data, home, cell, terrain_id, taken)
@@ -1574,7 +1586,8 @@ func _threats_panel() -> void:
 	if not finished.is_empty():
 		_panel_body.add_child(UI.label("Battle reports", UI.HEADING_SIZE))
 	for battle in finished:
-		_panel_body.add_child(UI.label(BattleText.outcome(battle, Game.battle_place(battle)), UI.SMALL_SIZE))
+		var report := HordeText.assault(battle, BattleText.losses(battle)) if battle.get("campId") != null else BattleText.outcome(battle, Game.battle_place(battle))
+		_panel_body.add_child(UI.label(report, UI.SMALL_SIZE))
 		var details := "%s horde, %d rounds" % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)]
 		var ground := BattleText.setup_text(battle)
 		if ground != "":
