@@ -109,6 +109,6 @@ drawing.
 
 - `python3 tools/art/generate.py` writes `client/art/generated/` and adds new
   ids to `art.json`.
-- `godot --path client --resolution 1400x3400 --script res://tests/art_sheet.gd -- out.png`
+- `godot --path client --resolution 1400x3700 --script res://tests/art_sheet.gd -- out.png`
   (with a display, e.g. `xvfb-run`) renders the style sample sheet with the
   game's own renderer.

@@ -4,7 +4,7 @@
 import { againstFront, villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
-import { insertBattle, loadBattle, recordRound, setDecision, type RoundLog } from '../db/battles.js';
+import { insertBattle, loadBattle, recordRound, saveSetup, setDecision, type BattleSetup, type RoundLog } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
@@ -23,7 +23,7 @@ import {
   total,
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
-import { completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
+import { breachWalls, completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { heroAt } from '../db/heroes.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { tell } from './notices.js';
@@ -36,6 +36,7 @@ import { addUnits, splitLosses } from '../sim/armies.js';
 import { fieldRound } from './field.js';
 import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
+import { ballistaKills, siegeDamage, siegeWorks, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -58,19 +59,36 @@ export async function startBattle(
   const state = setBesieged(data, completeTraining(village.state, at), true, at, world.speed);
   await saveVillageState(client, village.id, state);
   await markBattling(client, wave.id);
+  // Walls must be battered down; a horde without the siege to do it in time
+  // builds engines first, and the assault waits for them.
+  const setup: BattleSetup = {};
+  let composition = wave.composition;
+  let firstRound = at.getTime() + roundMs(data, world.speed);
+  const integrity = wallIntegrity(data, state.plots);
+  if (integrity > 0) {
+    setup.wall = { level: wallLevel(state.plots), integrity, max: integrity };
+    const works = siegeWorks(data, wave.front, composition, integrity, state.plots, world.speed);
+    if (works) {
+      firstRound += works.setupMs;
+      composition = addUnits(composition, { [works.engine]: works.count });
+      setup.siege = { engine: works.engine, count: works.count, readyAt: new Date(at.getTime() + works.setupMs).toISOString() };
+      await setWaveStrength(client, wave.id, composition);
+    }
+  }
   const battle = await insertBattle(client, {
     worldId: world.id,
     waveId: wave.id,
     villageId,
     q: village.q,
     r: village.r,
+    setup,
     attackerStance: wave.stance,
-    attackerInitial: wave.composition,
+    attackerInitial: composition,
     defenderInitial: state.garrison,
     startedAt: at,
   });
   const payload: BattlePayload = { battleId: battle.id };
-  await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
+  await scheduleEvent(client, world.id, new Date(firstRound), 'battle_round', payload);
   await rallyToBattle(client, data, world, battle, { ...village, state }, at);
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
@@ -110,18 +128,33 @@ export const battleHandlers: HandlerRegistry = {
     const joining = engaged.filter((a) => a.joinsRound === round);
     const surge = 1 + joining.reduce((sum, a) => sum + a.joinBonus, 0);
     const baseStats = playerStats(data, bonuses, true);
+    // While the walls stand they toughen the garrison and its towers shoot;
+    // ballistae smash engines before the horde closes.
+    const rng = battleRng(world.seed, battle.id, round);
+    const wall = battle.setup.wall;
+    const standing = !!wall && wall.integrity > 0;
+    const walls = standing ? wallFactors(data, state.plots) : { defense: 1, attack: 1 };
+    const smashed = standing ? ballistaKills(data, wave.front, wave.composition, state.plots, rng) : {};
+    const assault = subtractUnits(wave.composition, smashed);
     const result = resolveRound(
       data,
-      { units: wave.composition, stance: battle.attackerStance, stats: led.stats, home: false },
+      { units: assault, stance: battle.attackerStance, stats: led.stats, home: false },
       {
         units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
         stance: state.stance,
-        stats: surge === 1 ? baseStats : (unit) => ({ ...baseStats(unit), attack: baseStats(unit).attack * surge }),
+        stats: (unit) => ({ ...baseStats(unit), attack: baseStats(unit).attack * surge * walls.attack, defense: baseStats(unit).defense * walls.defense }),
         home: true,
       },
-      battleRng(world.seed, battle.id, round),
+      rng,
     );
-    const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
+    const attackerLosses = addUnits(result.attackerLosses, smashed);
+    const attackerNow = subtractUnits(wave.composition, attackerLosses);
+    // The horde batters the walls with what came at them this round.
+    let wallLeft: number | undefined;
+    if (standing) {
+      wallLeft = Math.max(0, Math.round(wall.integrity - siegeDamage(data, wave.front, assault, state.plots)));
+      await saveSetup(client, battle.id, { ...battle.setup, wall: { ...wall, integrity: wallLeft } });
+    }
     const shares = splitLosses(result.defenderLosses, forces);
     let villageState = loseGarrison(data, state, shares[0]!, at, world.speed);
     let defenderLosses: Record<string, number> = { ...shares[0]! };
@@ -154,7 +187,7 @@ export const battleHandlers: HandlerRegistry = {
     const log: RoundLog = {
       round,
       at: at.toISOString(),
-      attackerLosses: result.attackerLosses,
+      attackerLosses,
       defenderLosses,
       attackerLeft: total(attackerNow),
       defenderLeft: total(defendersNow),
@@ -163,6 +196,8 @@ export const battleHandlers: HandlerRegistry = {
             joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: a.units, bonus: a.joinBonus })),
           }
         : {}),
+      ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
+      ...(total(smashed) ? { smashed } : {}),
     };
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard and reinforcements go home.
@@ -220,6 +255,8 @@ export const battleHandlers: HandlerRegistry = {
       await finishWave(client, data, world, wave.id, 'defeated', at);
     }
 
+    // A breach knocks the walls down a level.
+    if (outcome !== 'ongoing' && wall && (wallLeft ?? wall.integrity) === 0) villageState = breachWalls(data, villageState);
     await saveVillageState(client, village.id, villageState);
     if (outcome !== 'ongoing') {
       const kills = total(defenderLosses) + battle.rounds.reduce((n, r) => n + total(r.defenderLosses), 0);

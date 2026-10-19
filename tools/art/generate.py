@@ -657,6 +657,7 @@ def faction(front):
 
 VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
 FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
+WALL_TOWERS = ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]
 
 
 def plot_ground(s, color=("#a08f6a", "#7a6a4b")):
@@ -765,6 +766,74 @@ def building(kind, stage):
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):
             s.circle(26 + i * 12, 112, 3.5, GLOW, stroke="none", sw=0)
+    return s
+
+
+def wall_gate(stage):
+    """The walls' plot: their gate, as a palisade, a stone wall or a fortress."""
+    s = Svg()
+    plot_ground(s, ("#9a8a68", "#6e5f45"))
+    if stage == 1:
+        stakes(s, 14, 50, 108, 26, gap=6)
+        stakes(s, 78, 114, 108, 26, gap=6)
+        s.rect(50, 74, 28, 34, s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.line(50, 90, 78, 90, stroke="#3a2a1c", sw=2.5)
+    else:
+        wall(s, 12, 116, 110, 30 if stage == 2 else 38)
+        s.path("M50,110 L50,84 Q64,70 78,84 L78,110 Z", "#2b211a", stroke="none", sw=0)
+        for x in (44, 84):
+            round_tower(s, x, 112, 16 if stage == 2 else 20, 50 if stage == 2 else 62, roof="slate" if stage == 3 else "red")
+    return s
+
+
+def tower_art(kind, stage):
+    """A wall slot's defensive work in three stages."""
+    s = Svg()
+    plot_ground(s, ("#9a8a68", "#6e5f45"))
+    big = [0, 0.8, 0.95, 1.1][stage]
+    stone = "stone" if stage > 1 else "wood"
+    if kind == "archer_tower":
+        round_tower(s, 64, 112, 34 * big, 66 * big, roof="red" if stage < 3 else "slate", wall_kind=stone)
+        for dx in (-8, 4):
+            s.line(64 + dx, 112 - 60 * big, 64 + dx + 10, 112 - 70 * big, stroke="#3a2a1c", sw=2)
+    elif kind == "gate_tower":
+        w = 52 * big
+        soft_shadow(s, 66, 112, w * 0.7, 10, 0.35)
+        s.rect(64 - w / 2, 112 - 70 * big, w, 70 * big, s.lin([(0, "#cfc9bd"), (1, "#7d776d")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path(f"M{64 - w * 0.22},112 L{64 - w * 0.22},{112 - 30 * big} Q64,{112 - 42 * big} {64 + w * 0.22},{112 - 30 * big} L{64 + w * 0.22},112 Z", "#2b211a", stroke="none", sw=0)
+        for i in range(4):
+            s.line(64 - w * 0.18 + i * w * 0.12, 112 - 34 * big, 64 - w * 0.18 + i * w * 0.12, 112, stroke="#6b665f", sw=1.6)
+        for i in range(4):
+            s.rect(64 - w / 2 + i * w / 3.5, 112 - 78 * big, w / 7, 8, "#b8b2a6", stroke="none", sw=0)
+    elif kind == "ballista":
+        soft_shadow(s, 66, 112, 40, 9, 0.35)
+        s.rect(26, 92, 76, 18, s.lin([(0, "#cfc9bd"), (1, "#8a847a")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.path("M34,70 Q64,52 94,70", "none", stroke="#6e4b2c", sw=5 * big)
+        s.line(64, 90, 64, 64, stroke="#5b3f25", sw=5)
+        s.line(30, 74, 98, 62, stroke="#c9c3b7", sw=3)
+        s.poly([(98, 62), (88, 58), (90, 68)], "#8d98a6", stroke="none", sw=0)
+        s.line(34, 70, 64, 76, stroke="#efe6d2", sw=1.2)
+        s.line(94, 70, 64, 76, stroke="#efe6d2", sw=1.2)
+    elif kind == "murder_holes":
+        wall(s, 16, 112, 112, 40 * big)
+        for x in (36, 64, 92):
+            s.rect(x - 7, 112 - 46 * big, 14, 8, "#3a3631", stroke="none", sw=0)
+            s.circle(x, 112 - 54 * big, 7, s.rad([(0, "#ffffff", 0.6), (1, "#ffffff", 0)]), stroke="none", sw=0)
+    elif kind == "ditch":
+        s.ellipse(64, 100, 52, 14, s.rad([(0, "#3e3428"), (1, "#5d4e3a")]), stroke="none", sw=0)
+        if stage == 3:
+            s.ellipse(64, 101, 44, 9, s.rad([(0, "#5f95ad"), (1, "#2c5571")]), stroke="none", sw=0)
+        for i in range(4 + stage * 2):
+            x = 18 + i * (92 / (3 + stage * 2))
+            s.line(x, 92, x + 6, 74, stroke="#7a5636", sw=3)
+    elif kind == "watchtower":
+        h = 70 * big
+        soft_shadow(s, 66, 112, 22, 6, 0.35)
+        for x0, x1 in ((52, 58), (76, 70)):
+            s.line(x0, 112, x1, 112 - h, stroke="#6e4b2c", sw=5)
+        s.line(54, 112 - h * 0.45, 74, 112 - h * 0.62, stroke="#5b3f25", sw=3)
+        house(s, 64, 112 - h, 28, 10, roof="thatch" if stage < 3 else "red", wall="wood", door=False)
+        banner_pole(s, 64, 112 - h - 22, 20)
     return s
 
 
@@ -896,6 +965,10 @@ def assets():
     for kind in VILLAGE_BUILDINGS:
         for stage in (1, 2, 3):
             out[f"building/{kind}_{stage}"] = building(kind, stage)
+    for stage in (1, 2, 3):
+        out[f"building/wall_{stage}"] = wall_gate(stage)
+        for kind in WALL_TOWERS:
+            out[f"building/{kind}_{stage}"] = tower_art(kind, stage)
     for kind in FIELDS:
         for stage in (1, 2, 3):
             out[f"field/{kind}_{stage}"] = field(kind, stage)

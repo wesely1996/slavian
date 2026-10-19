@@ -92,7 +92,8 @@ export function waveSize(data: GameData, index: number, playerCount: number): nu
 // weight first; the remainder is drawn at random, weighted.
 export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number, playerCount = 1): Composition {
   const units = Object.entries(data.enemies.fronts[front]!.units).filter(
-    ([, def]) => def.minWave <= index && (def.minPlayers ?? 1) <= playerCount,
+    // Engines built on site (weight 0) never set out with a wave.
+    ([, def]) => def.weight > 0 && def.minWave <= index && (def.minPlayers ?? 1) <= playerCount,
   );
   const totalWeight = units.reduce((sum, [, def]) => sum + def.weight, 0);
   const composition: Composition = {};

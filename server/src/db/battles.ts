@@ -16,16 +16,25 @@ export interface RoundLog {
   defenderLeft: number;
   // Armies that fought for the first time this round, with their bonus.
   joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number }[];
+  // At walls: what is left of them after the round, whether it fell this
+  // round, and the engines the ballistae smashed (also in attackerLosses).
+  wallLeft?: number;
+  breach?: boolean;
+  smashed?: Record<string, number>;
 }
 
 // What the ground gave the defenders of a field battle; at the Holy City,
-// its guard (what is left of it).
+// its guard (what is left of it). At a village's walls: their level and
+// integrity (what is left, and in full), and the engines the horde built
+// on site before its assault (sim/walls.ts).
 export interface BattleSetup {
   ambush?: boolean;
   choke?: boolean;
   fort?: boolean;
   holyCity?: boolean;
   guard?: Record<string, number>;
+  wall?: { level: number; integrity: number; max: number };
+  siege?: { engine: string; count: number; readyAt: string };
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

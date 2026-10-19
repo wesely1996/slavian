@@ -112,6 +112,12 @@ static func opening(data: Dictionary, battle: Dictionary, ctx: Dictionary) -> St
 		_sentence(ctx.get("place", "the village")), units_text(data, battle.get("defenderInitial", {}))]
 	if ctx.get("led_by", "") != "":
 		text += " %s led them." % ctx.led_by
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	if setup.has("wall"):
+		text += " Our %s stood between them (%d to batter down)." % [WallText.tier(data, int(setup.wall.level)).to_lower(), int(setup.wall.max)]
+	if setup.has("siege"):
+		var engine: String = setup.siege.engine
+		text += " They built %s before the assault." % units_text(data, {engine: int(setup.siege.count)})
 	var ground := BattleText.setup_text(battle)
 	if ground != "":
 		text += " The ground favoured us: %s." % ground.to_lower()
@@ -136,6 +142,11 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 	var before := units_at(battle, round - 1)
 	var share_theirs := theirs / maxf(1.0, BattleText.total(before.attacker))
 	var share_ours := ours / maxf(1.0, BattleText.total(before.defender))
+	if entry.has("smashed"):
+		lines.append("Our ballistae smashed %s." % units_text(data, entry.smashed))
+	var walls := WallText.round_text(battle, entry)
+	if walls != "":
+		lines.append(walls)
 	lines.append(_mood(share_theirs, share_ours))
 	if round == rounds.size() and battle.get("status", "ongoing") != "ongoing":
 		lines.append(ending(battle, ctx))

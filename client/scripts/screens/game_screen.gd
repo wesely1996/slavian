@@ -1828,17 +1828,24 @@ func _plot_section(village: Dictionary) -> void:
 		_plot = Rules.HALL_PLOT
 	var holds: Dictionary = village.plots[_plot]
 	var planned := Rules.planned_plot(village, _plot)
+	var on_walls := Rules.is_tower_slot(_plot)
 	if Rules.is_locked(Game.data, village, _plot):
+		if on_walls:
+			_panel_body.add_child(UI.label("Wall slot", UI.HEADING_SIZE))
+			_panel_body.add_child(UI.label("Raise the walls to level %d to build a tower here." % Rules.tower_unlock_level(Game.data, Rules.plot_index(_plot)), UI.SMALL_SIZE, UI.MUTED))
+			return
 		_panel_body.add_child(UI.label("Locked slot", UI.HEADING_SIZE))
 		var needed := Rules.slot_unlock_level(Game.data, Rules.plot_index(_plot))
 		_panel_body.add_child(UI.label("Upgrade the Elder's Hall to level %d to build here." % needed, UI.SMALL_SIZE, UI.MUTED))
 		return
 	if planned.building == null:
-		_panel_body.add_child(UI.label("Empty slot", UI.HEADING_SIZE))
-		var options := Rules.constructible(Game.data, village)
+		_panel_body.add_child(UI.label("Empty wall slot" if on_walls else "Empty slot", UI.HEADING_SIZE))
+		var options := Rules.constructible(Game.data, village, "tower" if on_walls else "center")
 		if options.is_empty():
-			_panel_body.add_child(UI.label("Every building already stands in this village.", UI.SMALL_SIZE, UI.MUTED))
+			_panel_body.add_child(UI.label("Every tower already stands on these walls." if on_walls else "Every building already stands in this village.", UI.SMALL_SIZE, UI.MUTED))
 		for building in options:
+			if on_walls:
+				_panel_body.add_child(UI.label(WallText.tower_effect(Game.data, building, 0), UI.SMALL_SIZE, UI.MUTED))
 			_build_row(village, _plot, building, 1, "Build")
 		return
 
@@ -1904,6 +1911,10 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 				Rules.unlocked_slots(Game.data, level + 1), Rules.queue_limit(Game.data, level + 1),
 				roundi((1.0 - Rules.hall_speedup(Game.data, level + 1)) * 100.0)]
 		return text
+	if def.get("kind") == "wall":
+		return WallText.wall_effect(Game.data, level)
+	if def.get("kind") == "tower":
+		return WallText.tower_effect(Game.data, building, level)
 	if def.has("capacityGrowth"):
 		var base := float(Game.data.buildings.village.baseCapacity)
 		return "Stores %d of each resource" % roundi(base * pow(float(def.capacityGrowth), level))

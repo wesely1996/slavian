@@ -17,10 +17,14 @@ static func build_seconds(def: Dictionary, target_level: int, world_speed: float
 
 
 # --- Village layout: fields "f0"… around the outside, slots "c0"… in the
-# center ("c0" holds the Elder's Hall). See server/src/sim/village.ts.
+# center ("c0" holds the Elder's Hall), the walls "w" and their slots "t0"…
+# for towers. See server/src/sim/village.ts and walls.ts.
 
 const HALL := "elder_hall"
 const HALL_PLOT := "c0"
+const WALL_PLOT := "w"
+## Layout order of plot kinds.
+const KIND_ORDER := {"f": 0, "c": 1, "w": 2, "t": 3}
 
 
 static func hall_level(village: Dictionary) -> int:
@@ -55,6 +59,29 @@ static func is_field(plot: String) -> bool:
 	return plot.begins_with("f")
 
 
+static func is_wall(plot: String) -> bool:
+	return plot == WALL_PLOT
+
+
+static func is_tower_slot(plot: String) -> bool:
+	return plot.begins_with("t")
+
+
+static func wall_level(village: Dictionary) -> int:
+	return int(village.get("plots", {}).get(WALL_PLOT, {}).get("level", 0))
+
+
+## Wall slots open at a walls level (walls.json slotsAt).
+static func open_tower_slots(data: Dictionary, level: int) -> int:
+	return data.get("walls", {}).get("slotsAt", []).filter(func(at: Variant) -> bool: return level >= int(at)).size()
+
+
+## The walls level that opens wall slot `index`.
+static func tower_unlock_level(data: Dictionary, index: int) -> int:
+	var at: Array = data.get("walls", {}).get("slotsAt", [])
+	return int(at[index]) if index < at.size() else 99
+
+
 static func plot_index(plot: String) -> int:
 	return int(plot.substr(1))
 
@@ -67,14 +94,18 @@ static func plot_ids(village: Dictionary) -> Array[String]:
 		if not is_outpost(id):
 			ids.append(id)
 	ids.sort_custom(func(a: String, b: String) -> bool:
-		if is_field(a) != is_field(b):
-			return is_field(a)
+		var ka: int = KIND_ORDER.get(a.left(1), 9)
+		var kb: int = KIND_ORDER.get(b.left(1), 9)
+		if ka != kb:
+			return ka < kb
 		return plot_index(a) < plot_index(b))
 	return ids
 
 
 static func is_locked(data: Dictionary, village: Dictionary, plot: String) -> bool:
-	return not is_field(plot) and plot_index(plot) >= unlocked_slots(data, hall_level(village))
+	if is_tower_slot(plot):
+		return plot_index(plot) >= open_tower_slots(data, wall_level(village))
+	return plot.begins_with("c") and plot_index(plot) >= unlocked_slots(data, hall_level(village))
 
 
 ## What a plot will hold once everything already queued completes.
@@ -87,9 +118,9 @@ static func planned_plot(village: Dictionary, plot: String) -> Dictionary:
 	return planned
 
 
-## Center buildings that could go in an empty slot: not built or queued
-## anywhere in the village yet.
-static func constructible(data: Dictionary, village: Dictionary) -> Array[String]:
+## Buildings of `kind` ("center", or "tower" for a wall slot) that could go
+## in an empty slot: not built or queued anywhere in the village yet.
+static func constructible(data: Dictionary, village: Dictionary, kind := "center") -> Array[String]:
 	var taken := {}
 	for id in village.get("plots", {}):
 		var building: Variant = planned_plot(village, id).building
@@ -98,7 +129,7 @@ static func constructible(data: Dictionary, village: Dictionary) -> Array[String
 	var result: Array[String] = []
 	var buildings: Dictionary = data.buildings.buildings
 	for building in buildings:
-		if buildings[building].kind == "center" and not taken.has(building) and ClanText.allowed(buildings[building], village.get("bonuses", {})):
+		if buildings[building].kind == kind and not taken.has(building) and ClanText.allowed(buildings[building], village.get("bonuses", {})):
 			result.append(building)
 	return result
 

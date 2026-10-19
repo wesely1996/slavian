@@ -1,6 +1,6 @@
 extends SceneTree
 ## Renders every piece of art in client/art/art.json onto one sheet:
-##   godot --path client --resolution 1400x3400 --script res://tests/art_sheet.gd -- <out.png>
+##   godot --path client --resolution 1400x3700 --script res://tests/art_sheet.gd -- <out.png>
 ## (needs a display; under CI use xvfb-run). docs/art/style-sample.png is made with it.
 
 const SECTIONS := [

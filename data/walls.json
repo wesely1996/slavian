@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "_comment": "Walls and siege (PLAN.md M5 step 10). The wall (building `wall`, plot `w`) rises in levels through three tiers; while it stands it toughens the garrison and must be battered down: its integrity is `integrityPerLevel` per level. Wall slots (plots t0-t4) open at the wall levels in `slotsAt` and hold the towers (kind `tower` in buildings.json); their effects are per level. A breach knocks the wall down `breachLevelsLost` levels. Siege: every enemy unit batters walls with `siege` from enemies.json, or `unitSiegeShare` of its attack when it has none. A horde that couldn't breach within `breachRounds` rounds builds engines (its front's `engine`) on site first, taking `setupHours` x its front's `siegeCraft` (a front with siegeCraft 0 builds none).",
+  "tiers": [
+    { "minLevel": 1, "name": "Palisade" },
+    { "minLevel": 4, "name": "Stone Wall" },
+    { "minLevel": 8, "name": "Fortress Walls" }
+  ],
+  "integrityPerLevel": 120,
+  "defensePerLevel": 0.03,
+  "slotsAt": [1, 3, 5, 7, 9],
+  "breachLevelsLost": 1,
+  "towers": {
+    "archer_tower": { "attackPerLevel": 0.05 },
+    "gate_tower": { "integrityPerLevel": 0.08 },
+    "ballista": { "enginesPerLevel": 0.35 },
+    "murder_holes": { "defensePerLevel": 0.04 },
+    "ditch": { "siegeCutPerLevel": 0.05, "setupPerLevel": 0.1 },
+    "watchtower": { "warningHoursPerLevel": 1 }
+  },
+  "siege": {
+    "unitSiegeShare": 0.02,
+    "breachRounds": 6,
+    "setupHours": 3
+  }
+}

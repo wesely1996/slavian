@@ -1,7 +1,8 @@
 // Data upgrades that need game rules, run on server start after the SQL
 // migrations. Each is idempotent.
 import type { GameData } from '../data/index.js';
-import { HALL_PLOT, plotsFromLegacyLevels, type Plot } from '../sim/village.js';
+import { HALL_PLOT, plotsFromLegacyLevels, withWallPlots, type Plot } from '../sim/village.js';
+import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { ensureHeroes } from './heroes.js';
@@ -39,6 +40,20 @@ export async function upgradeLegacyVillages(db: Db, data: GameData): Promise<num
         JSON.stringify(plots),
         JSON.stringify(queue),
       ]);
+    }
+    return rows.length;
+  });
+}
+
+// Villages laid out before walls: add the walls (unbuilt) and their slots.
+export async function upgradeWallPlots(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number; plots: Record<string, Plot> }>(
+      'SELECT id, plots FROM villages WHERE plots IS NOT NULL AND NOT plots ? $1 FOR UPDATE',
+      [WALL_PLOT],
+    );
+    for (const row of rows) {
+      await client.query('UPDATE villages SET plots = $2 WHERE id = $1', [row.id, JSON.stringify(withWallPlots(data, row.plots))]);
     }
     return rows.length;
   });
