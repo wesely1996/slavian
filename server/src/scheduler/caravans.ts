@@ -9,6 +9,8 @@ import { loadVillage, saveVillageState } from '../db/villages.js';
 import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
 import { emptyResources } from '../sim/resources.js';
 import { tell } from './notices.js';
+import { planAmbushes } from './camps.js';
+import { returnHome } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 export const caravanPayload = z.object({ caravanId: z.number().int() });
@@ -47,6 +49,7 @@ export const caravanHandlers: HandlerRegistry = {
       }
     }
     await markReturning(client, caravan.id, carriedBack);
+    await planAmbushes(client, data, world, { ...caravan, status: 'returning', carriedBack }, 'back', event.dueAt);
     const payload: CaravanPayload = { caravanId: caravan.id };
     await scheduleEvent(client, world.id, caravan.returnsAt, 'caravan_return', payload);
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
@@ -58,7 +61,10 @@ export const caravanHandlers: HandlerRegistry = {
     if (caravan.status !== 'returning') return;
     const village = await loadVillage(client, caravan.villageId);
     const received = receive(village.state.ledger, event.dueAt, caravan.carriedBack ?? emptyResources());
-    await saveVillageState(client, village.id, { ...village.state, ledger: received.ledger });
+    // Its escort is home too.
+    let state = village.state;
+    for (const [unit, n] of Object.entries(caravan.escort)) state = returnHome(state, unit, n);
+    await saveVillageState(client, village.id, { ...state, ledger: received.ledger });
     await markCaravanDone(client, caravan.id);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });

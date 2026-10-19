@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "_comment": "Walls and siege (PLAN.md M5 step 10). The wall (building `wall`, plot `w`) rises in levels through tiers of sturdier material (each tier's `toughness` multiplies its integrity); while it stands it toughens the garrison and must be battered down: its integrity is `integrityPerLevel` per level. Wall slots (plots t0-t4) open at the wall levels in `slotsAt` and hold the towers (kind `tower` in buildings.json); their effects are per level. The walls hold `manning.menPerLevel` men a level, archers first; archers on them shoot `archerAttackPerLevel` harder a wall level. Escalade: while the walls stand, the horde's fighters (not archers) strike at `escalade.meleeHeld` of their attack, except the share carried over the walls by climbing engines (`escalade` men a round each, in enemies.json); a horde building climbers builds enough to carry `climbShare` of its fighters. The ditch (shown as the moat, dry until level `waterAt`) cuts battering, slows engine building and keeps climbers off by its per-level shares. A breach knocks the wall down `breachLevelsLost` levels. Siege: every enemy unit batters walls with `siege` from enemies.json, or `unitSiegeShare` of its attack when it has none. A horde that couldn't breach within `breachRounds` rounds builds engines (its front's `engine`) on site first, taking `setupHours` x its front's `siegeCraft` x the engine's `setupFactor` (a front with siegeCraft 0 builds none).",
+  "tiers": [
+    { "minLevel": 1, "name": "Palisade", "material": "wood", "toughness": 1 },
+    { "minLevel": 3, "name": "Timber Rampart", "material": "timber", "toughness": 1.15 },
+    { "minLevel": 5, "name": "Stone Wall", "material": "stone", "toughness": 1.35 },
+    { "minLevel": 8, "name": "Fortress Walls", "material": "fortress", "toughness": 1.6 }
+  ],
+  "integrityPerLevel": 120,
+  "defensePerLevel": 0.03,
+  "slotsAt": [1, 3, 5, 7, 9],
+  "breachLevelsLost": 1,
+  "towers": {
+    "archer_tower": { "attackPerLevel": 0.05 },
+    "gate_tower": { "integrityPerLevel": 0.08 },
+    "ballista": { "enginesPerLevel": 0.35 },
+    "murder_holes": { "defensePerLevel": 0.04 },
+    "ditch": { "siegeCutPerLevel": 0.05, "setupPerLevel": 0.1, "escaladeCutPerLevel": 0.06, "waterAt": 4 },
+    "watchtower": { "warningHoursPerLevel": 1 }
+  },
+  "manning": { "menPerLevel": 30, "archerAttackPerLevel": 0.04 },
+  "escalade": { "meleeHeld": 0.5, "climbShare": 0.6 },
+  "siege": {
+    "unitSiegeShare": 0.02,
+    "breachRounds": 6,
+    "setupHours": 3
+  }
+}

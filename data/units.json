@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "A unit's cost is multiplied by costGrowthPerVillage for each village its owner has beyond the first (settlers). Combat stats (attack, defense) are used by battles from M1 step 5. speed is hexes per hour on plains; upkeepPerHour is grain. Training time shrinks by trainingSpeedup per level of the training building above its first.",
+  "_comment": "A unit's cost is multiplied by costGrowthPerVillage for each village its owner has beyond the first (settlers). Combat stats (attack, defense) are used by battles from M1 step 5. speed is hexes per hour on plains; upkeepPerHour is grain. Training time shrinks by trainingSpeedup per level of the training building above its first. A unit with `clan` is that clan's own: only its members train it.",
   "trainingQueueLimit": 3,
   "maxBatch": 50,
   "trainingSpeedup": 0.9,
@@ -70,6 +70,48 @@
       "attack": 0,
       "defense": 5,
       "carry": 0
+    },
+    "forest_archer": {
+      "name": "Forest Archer",
+      "clan": "rys",
+      "family": "archers",
+      "building": "barracks",
+      "requiresLevel": 2,
+      "cost": { "wood": 110, "stone": 10, "grain": 40, "iron": 40 },
+      "trainSeconds": 90,
+      "upkeepPerHour": 1,
+      "speed": 6,
+      "attack": 45,
+      "defense": 28,
+      "carry": 30
+    },
+    "river_barge": {
+      "name": "River Barge",
+      "clan": "bobr",
+      "family": "infantry",
+      "building": "barracks",
+      "requiresLevel": 2,
+      "cost": { "wood": 140, "stone": 20, "grain": 40, "iron": 40 },
+      "trainSeconds": 100,
+      "upkeepPerHour": 1,
+      "speed": 7,
+      "attack": 15,
+      "defense": 45,
+      "carry": 200
+    },
+    "border_rider": {
+      "name": "Border Rider",
+      "clan": "sokol",
+      "family": "cavalry",
+      "building": "barracks",
+      "requiresLevel": 3,
+      "cost": { "wood": 60, "stone": 30, "grain": 70, "iron": 90 },
+      "trainSeconds": 110,
+      "upkeepPerHour": 2,
+      "speed": 14,
+      "attack": 50,
+      "defense": 32,
+      "carry": 60
     }
   }
 }

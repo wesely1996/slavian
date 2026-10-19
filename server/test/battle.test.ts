@@ -115,6 +115,16 @@ describe('battle outcome', () => {
     expect(battleOutcome(data, { ...base, attackerNow: { grey_wolf: 10 }, defenderNow: { spearman: 4 } })).toBe('raided');
   });
 
+  it('a disciplined faction holds longer, a skittish one breaks sooner', () => {
+    // Balanced breaks at 60% losses; nerve scales that.
+    const lost = (n: number, nerve: number) => battleOutcome(data, { ...base, attackerNow: { grey_wolf: n }, defenderNow: { spearman: 10 }, attackerNerve: nerve });
+    expect(lost(4, 1.25)).toBe('ongoing');
+    expect(lost(2, 1.25)).toBe('defended');
+    expect(lost(5, 0.8)).toBe('defended');
+    // Even the steadiest breaks before the last man.
+    expect(battleOutcome(data, { ...base, attackerInitial: { grey_wolf: 100 }, attackerNow: { grey_wolf: 4 }, defenderNow: { spearman: 10 }, attackerNerve: 9 })).toBe('defended');
+  });
+
   it('hold the line never breaks', () => {
     expect(
       battleOutcome(data, { ...base, defenderStance: 'hold_the_line', attackerNow: { grey_wolf: 10 }, defenderNow: { spearman: 1 } }),
@@ -150,6 +160,12 @@ describe('raids and stances', () => {
     const stores = { wood: 1000, stone: 500, grain: 100, iron: 0 };
     expect(raidLoot(data, stores, { grey_wolf: 10 }, { grey_wolf: 10 })).toEqual({ wood: 300, stone: 150, grain: 30, iron: 0 });
     expect(raidLoot(data, stores, { grey_wolf: 10 }, { grey_wolf: 5 })).toEqual({ wood: 150, stone: 75, grain: 15, iron: 0 });
+  });
+
+  it('greedy factions carry off more', () => {
+    const stores = { wood: 1000, stone: 500, grain: 100, iron: 0 };
+    expect(raidLoot(data, stores, { steppe_raider: 10 }, { steppe_raider: 10 }, {}, 1.5)).toEqual({ wood: 450, stone: 225, grain: 45, iron: 0 });
+    expect(raidLoot(data, stores, { steppe_raider: 10 }, { steppe_raider: 10 }, {}, 10).wood).toBe(1000);
   });
 
   it('wave stances follow the front temperament', () => {

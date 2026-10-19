@@ -33,15 +33,17 @@ Pushes go through **Firebase Cloud Messaging** (free). Two halves:
    ```
 4. Restart the server. It logs `Push notifications: Firebase Cloud Messaging`.
 
-### 2. App (needs the Firebase project first)
+### 2. App
 
 The app registers its push token with `POST /v1/me/devices`
-`{ token, platform: "android" }`. Getting that token on Android needs:
+`{ token, platform: "android" }` (`client/scripts/net/push.gd`, after login).
+Android exports use the [godot-x/firebase](https://github.com/godot-x/firebase)
+plugin (release 1.8.0, built for Godot 4.5) with Gradle builds:
 
-1. In the same Firebase project, *Add app → Android*, package name
-   `com.slavian.game`, then download `google-services.json`.
-2. A Godot Firebase Cloud Messaging plugin built into the Android export,
-   configured with that file.
-
-Send me `google-services.json` (it is not secret; it ships inside the app)
-and I'll wire the plugin into the client and the CI build.
+- `client/google-services.json` is the Firebase Android app config for
+  `com.slavian.game`. It is not secret; it ships inside the app.
+- `ops/ci/setup-firebase-android.sh` downloads the plugin (checksum-pinned),
+  enables it, installs Godot's Gradle template and adds the Google Services
+  plugin. `ops/export-android.sh` runs it, so CI and local exports match. All
+  it creates is git-ignored.
+- Without the plugin (editor, desktop, tests) `Push` does nothing.

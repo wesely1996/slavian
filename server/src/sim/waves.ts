@@ -2,9 +2,10 @@
 // and the wave index, so a wave is the same whenever it is (re)computed.
 //
 // A wave is planned ahead (front, spawn time, composition, threat level).
-// When it spawns it picks a hex in its front's spawn zone and marches to the
-// nearest village by path cost. Until battles exist (M1 step 5) it camps at
-// its target for the rampage time and then disperses.
+// When it spawns it picks a hex in its front's spawn zone and marches to its
+// target: the cheapest by road, fear and faction (routeFrom; the Holy City
+// is always one). What it does there is the horde AI (horde.ts).
+import { canCross, onRoad, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -46,9 +47,11 @@ export interface WaveContext {
   readonly playerCount: number;
   readonly startedAt: Date;
   readonly worldSpeed: number;
+  // Difficulty and group power (difficulty.ts): base size × this.
+  readonly sizeFactor?: number;
 }
 
-function rngFor(seed: number, index: number, salt: number): () => number {
+export function rngFor(seed: number, index: number, salt: number): () => number {
   return createRng((seed ^ Math.imul(index + 1, 0x9e3779b1) ^ salt) >>> 0);
 }
 
@@ -87,8 +90,11 @@ export function waveSize(data: GameData, index: number, playerCount: number): nu
 
 // Splits the wave size between the front's units by weight. Whole units by
 // weight first; the remainder is drawn at random, weighted.
-export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number): Composition {
-  const units = Object.entries(data.enemies.fronts[front]!.units).filter(([, def]) => def.minWave <= index);
+export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number, playerCount = 1): Composition {
+  const units = Object.entries(data.enemies.fronts[front]!.units).filter(
+    // Engines built on site (weight 0) never set out with a wave.
+    ([, def]) => def.weight > 0 && def.minWave <= index && (def.minPlayers ?? 1) <= playerCount,
+  );
   const totalWeight = units.reduce((sum, [, def]) => sum + def.weight, 0);
   const composition: Composition = {};
   let assigned = 0;
@@ -115,7 +121,8 @@ export function threatOf(data: GameData, composition: Composition): string {
 export function planWave(data: GameData, ctx: WaveContext, index: number, previousSpawnAt: Date | null): PlannedWave {
   const fronts = waveFronts(data, ctx.activeFronts);
   const front = fronts[index % fronts.length]!;
-  const composition = composeWave(data, front, index, waveSize(data, index, ctx.playerCount), ctx.seed);
+  const size = Math.max(1, Math.round(waveSize(data, index, ctx.playerCount) * (ctx.sizeFactor ?? 1)));
+  const composition = composeWave(data, front, index, size, ctx.seed, ctx.playerCount);
   return {
     index,
     front,
@@ -132,24 +139,96 @@ export function marchSpeed(data: GameData, front: Front, composition: Compositio
   return Math.min(...Object.keys(composition).map((id) => units[id]!.speed));
 }
 
+export interface Target {
+  readonly id: number | null;
+  readonly cell: Hex;
+}
+
+// The cheapest target from `from` for this horde: road cost (terrain plus
+// fear along the way) plus fear at the target, plus extra for the Holy City
+// (always a target, taken when it is cheaper than every village). Erratic
+// factions jitter the costs of villages against each other. Steps are timed
+// by terrain alone, from `startMs` (ms after spawn).
+export function routeFrom(
+  data: GameData,
+  input: {
+    terrain: Land;
+    from: Hex;
+    targets: readonly Target[];
+    front: Front;
+    composition: Composition;
+    fear?: ReadonlyMap<string, number>;
+    rng: () => number;
+    startMs: number;
+    worldSpeed: number;
+  },
+): { targetVillageId: number | null; path: PathStep[]; arrivesMs: number } | null {
+  const { terrain, fear } = input;
+  const rules = data.horde;
+  const moveCost = (to: Hex): number | null => {
+    const type = terrain.get(hexKey(to));
+    return type === undefined ? null : data.terrain.terrain[type].moveCost;
+  };
+  // Human hordes take the roads; the Monsters of the North keep off them.
+  const roads = input.front !== 'north';
+  const stepCost = (from: Hex, to: Hex): number | null => {
+    const cost = canCross(terrain, from, to) ? moveCost(to) : null;
+    return cost !== null && roads && onRoad(terrain, from, to) ? cost * data.field.road.factor : cost;
+  };
+  const searchCost = (from: Hex, to: Hex): number | null => {
+    const cost = stepCost(from, to);
+    return cost === null ? null : cost + rules.fear.pathWeight * (fear?.get(hexKey(to)) ?? 0);
+  };
+  const erratic = data.enemies.fronts[input.front]!.personality.erratic;
+  let best: { id: number | null; path: Hex[]; score: number } | null = null;
+  let holy: { path: Hex[]; cost: number } | null = null;
+  let cheapestVillage = Infinity;
+  for (const target of input.targets) {
+    const path = findPath(input.from, target.cell, searchCost, roads ? data.field.road.factor : 1);
+    if (!path) continue;
+    const road = path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
+    const cost = road + rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0);
+    if (target.id === null) {
+      holy = { path, cost: cost + rules.holyCityExtraCost };
+      continue;
+    }
+    cheapestVillage = Math.min(cheapestVillage, cost);
+    const score = cost * (1 + erratic * input.rng());
+    if (!best || score < best.score || (score === best.score && (target.id ?? 0) < (best.id ?? 0))) {
+      best = { id: target.id, path, score };
+    }
+  }
+  if (holy && holy.cost < cheapestVillage) best = { id: null, path: holy.path, score: holy.cost };
+  if (!best) return null;
+  const hoursPerCost = 1 / marchSpeed(data, input.front, input.composition);
+  let atMs = input.startMs;
+  const path = best.path.map((cell, i) => {
+    if (i > 0) atMs += (stepCost(best!.path[i - 1]!, cell)! * hoursPerCost * MS_PER_HOUR) / input.worldSpeed;
+    return { q: cell.q, r: cell.r, atMs: Math.round(atMs) };
+  });
+  return { targetVillageId: best.id, path, arrivesMs: path.at(-1)!.atMs };
+}
+
+// Every village it may strike, and the Holy City.
+export function targetsOf(villages: readonly { id: number; q: number; r: number }[]): Target[] {
+  return [...villages.map((v) => ({ id: v.id as number | null, cell: hex(v.q, v.r) })), { id: null, cell: hex(0, 0) }];
+}
+
 export function planMarch(
   data: GameData,
   input: {
-    terrain: ReadonlyMap<string, TerrainId>;
+    terrain: Land;
     radius: number;
     wave: PlannedWave;
     villages: readonly { id: number; q: number; r: number }[];
     seed: number;
     departAt: Date;
     worldSpeed: number;
+    fear?: ReadonlyMap<string, number>;
   },
 ): March {
   const { terrain, wave } = input;
   const spawnTerrain = data.enemies.fronts[wave.front]!.spawnTerrain;
-  const moveCost = (_: Hex, to: Hex): number | null => {
-    const type = terrain.get(hexKey(to));
-    return type === undefined ? null : data.terrain.terrain[type].moveCost;
-  };
 
   // Spawn hexes: the front's spawn terrain on its side of the map.
   const candidates = [...terrain.entries()]
@@ -166,34 +245,25 @@ export function planMarch(
     [candidates[i], candidates[j]] = [candidates[j]!, candidates[i]!];
   }
 
-  // Targets: every village, or the Holy City when there are none.
-  const targets = input.villages.length
-    ? input.villages.map((v) => ({ id: v.id as number | null, cell: hex(v.q, v.r) }))
-    : [{ id: null, cell: hex(0, 0) }];
-
+  const targets = targetsOf(input.villages);
   for (const spawn of candidates.slice(0, MAX_SPAWN_CANDIDATES)) {
-    let best: { id: number | null; path: Hex[]; cost: number } | null = null;
-    for (const target of targets) {
-      const path = findPath(spawn, target.cell, moveCost);
-      if (!path) continue;
-      const cost = path.slice(1).reduce((sum, cell) => sum + moveCost(cell, cell)!, 0);
-      if (!best || cost < best.cost || (cost === best.cost && (target.id ?? 0) < (best.id ?? 0))) {
-        best = { id: target.id, path, cost };
-      }
-    }
-    if (!best) continue;
-
-    const hoursPerCost = 1 / marchSpeed(data, wave.front, wave.composition);
-    let atMs = 0;
-    const path = best.path.map((cell, i) => {
-      if (i > 0) atMs += (moveCost(cell, cell)! * hoursPerCost * MS_PER_HOUR) / input.worldSpeed;
-      return { q: cell.q, r: cell.r, atMs: Math.round(atMs) };
+    const route = routeFrom(data, {
+      terrain,
+      from: spawn,
+      targets,
+      front: wave.front,
+      composition: wave.composition,
+      ...(input.fear ? { fear: input.fear } : {}),
+      rng: rngFor(input.seed, wave.index, 0x7a),
+      startMs: 0,
+      worldSpeed: input.worldSpeed,
     });
+    if (!route) continue;
     return {
       spawn,
-      targetVillageId: best.id,
-      path,
-      arrivesAt: new Date(input.departAt.getTime() + path.at(-1)!.atMs),
+      targetVillageId: route.targetVillageId,
+      path: route.path,
+      arrivesAt: new Date(input.departAt.getTime() + route.arrivesMs),
     };
   }
   throw new Error(`Wave ${wave.index} found no path from the ${wave.front} front`);

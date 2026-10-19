@@ -1,6 +1,7 @@
 // Caravans and the Holy City vault. A caravan leaves its village with a
 // load (or empty, to fetch from the vault), unloads at the other end and
 // walks home; whatever didn't fit rides back with it.
+import { moveCostOn, type Land } from './land.js';
 import type { GameData, TerrainId } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { findPath, hex, hexKey, type Hex } from './hex.js';
@@ -39,29 +40,26 @@ export function caravansFor(data: GameData, load: Resources, bonuses: Bonuses = 
 // entered.
 export function roadRoute(
   data: GameData,
-  terrain: ReadonlyMap<string, TerrainId>,
+  terrain: Land,
   from: Hex,
   to: Hex,
   hexesPerHour: number,
   worldSpeed: number,
 ): PathStep[] {
-  const moveCost = (_: Hex, cell: Hex): number | null => {
-    const type = terrain.get(hexKey(cell));
-    return type === undefined ? null : data.terrain.terrain[type].moveCost;
-  };
-  const path = findPath(from, to, moveCost);
+  const moveCost = moveCostOn(data, terrain);
+  const path = findPath(from, to, moveCost, data.field.road.factor);
   if (!path) throw new RuleError('No road leads there');
   const msPerCost = MS_PER_HOUR / hexesPerHour / worldSpeed;
   let atMs = 0;
   return path.map((cell, i) => {
-    if (i > 0) atMs += moveCost(cell, cell)! * msPerCost;
+    if (i > 0) atMs += moveCost(path[i - 1]!, cell)! * msPerCost;
     return { q: cell.q, r: cell.r, atMs: Math.max(i, Math.round(atMs)) };
   });
 }
 
 export function caravanRoute(
   data: GameData,
-  terrain: ReadonlyMap<string, TerrainId>,
+  terrain: Land,
   from: Hex,
   to: Hex,
   worldSpeed: number,

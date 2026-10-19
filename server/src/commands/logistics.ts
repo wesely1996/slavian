@@ -1,4 +1,5 @@
 import type { GameData, TerrainId } from '../data/index.js';
+import { loadLand } from '../db/rivers.js';
 import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
@@ -9,6 +10,8 @@ import { loadHexes, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { CaravanPayload } from '../scheduler/caravans.js';
+import { planAmbushes } from '../scheduler/camps.js';
+import { fighters } from '../sim/armies.js';
 import { withWorld } from '../scheduler/world.js';
 import { hex, type Hex } from '../sim/hex.js';
 import {
@@ -22,13 +25,26 @@ import {
   withdraw,
 } from '../sim/logistics.js';
 import { RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
-import type { VillageState } from '../sim/village.js';
+import { sendAway, type VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
 // Where a caravan goes: an allied village, or the vault when null.
 export interface CaravanOrder {
   destinationVillageId: number | null;
   load: Resources;
+  // Troops guarding it against camps on the road.
+  escort?: Record<string, number> | undefined;
+}
+
+// Sends the escort away with the caravan (they come back with it).
+function withEscort(data: GameData, state: VillageState, escort: Record<string, number> | undefined, at: Date): VillageState {
+  let next = state;
+  for (const [unit, n] of Object.entries(escort ?? {})) {
+    if (n <= 0) continue;
+    if (!fighters(data, { [unit]: 1 })[unit]) throw new RuleError(`${data.units.units[unit]?.name ?? unit} can't guard caravans`);
+    next = sendAway(next, unit, n, at);
+  }
+  return next;
 }
 
 export async function dispatchCaravan(
@@ -56,7 +72,7 @@ export async function dispatchCaravan(
     if (!destination || destination.worldId !== world.id) throw new NotFoundError('No such village in this world');
     to = hex(destination.q, destination.r);
   }
-  const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+  const terrain = await loadLand(client, world.id);
   const path = caravanRoute(data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
   const travelMs = path.at(-1)!.atMs;
   const arrivesAt = new Date(now.getTime() + travelMs);
@@ -71,9 +87,11 @@ export async function dispatchCaravan(
     departsAt: now,
     arrivesAt,
     returnsAt: new Date(arrivesAt.getTime() + travelMs),
+    escort: Object.fromEntries(Object.entries(order.escort ?? {}).filter(([, n]) => n > 0)),
   });
   const payload: CaravanPayload = { caravanId: caravan.id };
   await scheduleEvent(client, world.id, arrivesAt, 'caravan_arrive', payload);
+  await planAmbushes(client, data, world, caravan, 'out', now);
   await notifyWorld(client, { worldId: world.id, type: 'caravans' });
   return caravan;
 }
@@ -85,10 +103,14 @@ export async function sendCaravanCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & CaravanOrder,
 ): Promise<{ village: Village; caravan: Caravan }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent a caravan' }, async ({ client, world, village }) => {
+    const escorted = withEscort(deps.data, village.state, input.escort, input.now);
     const caravan = await dispatchCaravan(client, deps.data, world, village, 'deliver', input, input.now);
-    const state: VillageState = { ...village.state, ledger: spend(village.state.ledger, input.now, input.load) };
-    return { state, result: caravan };
+    const state: VillageState = { ...escorted, ledger: spend(escorted.ledger, input.now, input.load) };
+    // A gift: to the vault or a teammate's village, not one's own.
+    const destination = input.destinationVillageId === null ? null : await loadVillage(client, input.destinationVillageId);
+    const gift = destination === null || destination.ownerAccountId !== village.ownerAccountId;
+    return { state, result: caravan, onboarding: gift ? ('gift' as const) : null };
   });
   return { village, caravan: result };
 }
@@ -98,11 +120,20 @@ export async function sendCaravanCommand(
 export async function fetchFromVaultCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: VillageCommandInput & { load: Resources },
+  input: VillageCommandInput & { load: Resources; escort?: Record<string, number> | undefined },
 ): Promise<{ village: Village; caravan: Caravan }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
-    const caravan = await dispatchCaravan(client, deps.data, world, village, 'fetch', { destinationVillageId: null, load: input.load }, input.now);
-    return { state: village.state, result: caravan };
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent caravans to the vault' }, async ({ client, world, village }) => {
+    const state = withEscort(deps.data, village.state, input.escort, input.now);
+    const caravan = await dispatchCaravan(
+      client,
+      deps.data,
+      world,
+      village,
+      'fetch',
+      { destinationVillageId: null, load: input.load, escort: input.escort },
+      input.now,
+    );
+    return { state, result: caravan };
   });
   return { village, caravan: result };
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Per-player research in the Academy. A tech needs an Academy of `academyLevel` in the village that starts it and every tech in `requires`; its cost is paid by that village. One tech at a time per player. Effects add up across a player's techs and apply to all their villages: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance). Seconds are game seconds (divided by world speed).",
+  "_comment": "Per-player research in the Academy. A tech needs an Academy of `academyLevel` in the village that starts it and every tech in `requires`; its cost is paid by that village. One tech at a time per player. Effects add up across a player's techs and apply to all their villages: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance). Seconds are game seconds (divided by world speed). A tech with requiresScroll can only be researched once the group has found that lore scroll (data/lore.json).",
   "branches": {
     "economy": "Economy",
     "military": "Military",
@@ -476,6 +476,44 @@
         "trainTime": -0.1
       },
       "description": "Svarog's fire: troops train another 10% faster."
+    },
+    "wind_riders": {
+      "name": "Wind Riders",
+      "branch": "military",
+      "academyLevel": 3,
+      "requires": [],
+      "requiresScroll": "stribog_winds",
+      "cost": {
+        "wood": 600,
+        "stone": 400,
+        "grain": 600,
+        "iron": 500
+      },
+      "seconds": 7200,
+      "effects": {
+        "attack.cavalry": 0.15,
+        "scoutSpeed": 0.2
+      },
+      "description": "Cavalry strikes 15% harder and scouts ride 20% faster. Needs the Winds of Stribog scroll."
+    },
+    "ember_forged_arms": {
+      "name": "Ember-Forged Arms",
+      "branch": "military",
+      "academyLevel": 4,
+      "requires": [],
+      "requiresScroll": "svarog_rite",
+      "cost": {
+        "wood": 500,
+        "stone": 600,
+        "grain": 400,
+        "iron": 900
+      },
+      "seconds": 9000,
+      "effects": {
+        "attack.infantry": 0.1,
+        "defense.infantry": 0.1
+      },
+      "description": "Infantry strikes and holds 10% better. Needs the Rite of Svarog's Forge scroll."
     }
   }
 }

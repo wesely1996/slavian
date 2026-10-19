@@ -1,9 +1,11 @@
 import websocket from '@fastify/websocket';
+import { delegateCommand, endDelegationCommand } from '../commands/delegation.js';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
+import { buildCrossingCommand, buildFortCommand, buildRoadCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -12,13 +14,15 @@ import {
   claimOutpostCommand,
   foundVillageCommand,
   queueBuildCommand,
+  rebuildCommand,
   sendScoutsCommand,
   setStanceCommand,
   startResearchCommand,
   trainUnitsCommand,
 } from '../commands/village.js';
-import { HERO_SLOTS, STANCES } from '../data/index.js';
-import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
+import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
+import { createWorldCommand, joinWorldCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { getWorld, isMember, listWorldsForAccount } from '../db/worlds.js';
@@ -27,6 +31,7 @@ import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
 import {
+  armyView,
   caravanView,
   expeditionView,
   heroView,
@@ -38,6 +43,7 @@ import {
   villageView,
   worldSummary,
   worldView,
+  fortView,
 } from './views.js';
 
 export interface AppDeps {
@@ -57,6 +63,7 @@ const createWorldBody = z.object({
   name: z.string().trim().min(1).max(48),
   maxPlayers: z.number().int().min(1).max(6).default(6),
   speed: z.number().min(1).max(100).default(1),
+  difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
 // `plot` targets a field, center slot or outpost ("o3,-2"); `building`
@@ -73,9 +80,11 @@ const stanceBody = z.object({ stance: z.enum(STANCES) });
 const amount = z.number().int().min(0).max(1_000_000);
 const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
 // No destination: the Holy City vault.
-const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema });
-const fetchBody = z.object({ load: loadSchema });
+const escortSchema = z.record(z.string().max(64), z.number().int().min(0).max(100_000)).optional();
+const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema, escort: escortSchema });
+const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
+const crossingBody = z.object({ a: hexBody, b: hexBody });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
 const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
@@ -88,6 +97,17 @@ const orderBody = z.discriminatedUnion('kind', [
 ]);
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const minuteOfDay = z.number().int().min(0).max(1439);
+// From the vault into the bridge's open stage.
+const donateBody = z.object({ resources: loadSchema, embers: z.number().int().min(0).max(100).default(0) });
+const clanBody = z.object({ clan: z.string().min(1).max(32) });
+const delegateBody = z.object({ to: z.number().int().positive(), days: z.number().int() });
+const endDelegationBody = z.object({ owner: z.number().int().positive().optional() });
+// The group's quiet hours (null start/end: none), set by the host.
+const quietBody = z.object({
+  start: minuteOfDay.nullable(),
+  end: minuteOfDay.nullable(),
+  utcOffsetMinutes: z.number().int().min(-14 * 60).max(14 * 60).default(0),
+});
 const prefsBody = z.object({
   quietStart: minuteOfDay.nullable().optional(),
   quietEnd: minuteOfDay.nullable().optional(),
@@ -95,6 +115,15 @@ const prefsBody = z.object({
   digestHour: z.number().int().min(0).max(23).optional(),
 });
 const deviceBody = z.object({ token: z.string().min(10).max(4096), platform: z.enum(['android', 'ios', 'web']) });
+// A village to go to, or (orders 'hold') a hex to hold.
+const armyBody = z.object({
+  targetVillageId: z.number().int().positive().nullable().default(null),
+  target: hexBody.optional(),
+  units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore']),
+  withHero: z.boolean().optional(),
+});
+const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
@@ -138,7 +167,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   async function fullWorldView(worldId: number) {
     return inTransaction(db, async (client) => ({
-      ...(await worldView(client, scheduler.data, await getWorld(client, worldId))),
+      ...(await worldView(client, scheduler.data, await getWorld(client, worldId), clock())),
       serverTime: clock().toISOString(),
     }));
   }
@@ -157,7 +186,19 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     expansion: scheduler.data.expansion,
     research: scheduler.data.research,
     heroes: scheduler.data.heroes,
+    leaders: scheduler.data.leaders,
+    walls: scheduler.data.walls,
     orders: scheduler.data.orders,
+    armies: scheduler.data.armies,
+    field: scheduler.data.field,
+    horde: scheduler.data.horde,
+    camps: scheduler.data.camps,
+    difficulty: scheduler.data.difficulty,
+    sites: scheduler.data.sites,
+    lore: scheduler.data.lore,
+    bridge: scheduler.data.bridge,
+    clans: scheduler.data.clans,
+    onboarding: scheduler.data.onboarding,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -234,6 +275,53 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = createWorldBody.parse(request.body);
     const world = await createWorldCommand(db, { account, ...body });
     return fullWorldView(world.id);
+  });
+
+  app.put('/v1/worlds/:id/quiet', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = quietBody.parse(request.body);
+    await setQuietHoursCommand(db, { account, worldId: id, ...body });
+    return fullWorldView(id);
+  });
+
+  app.put('/v1/worlds/:id/clan', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { clan } = clanBody.parse(request.body);
+    await setClanCommand(db, scheduler, { account, worldId: id, clan, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.put('/v1/worlds/:id/delegation', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = delegateBody.parse(request.body);
+    await delegateCommand(db, scheduler, { accountId: account.id, worldId: id, ...body, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.delete('/v1/worlds/:id/delegation', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = endDelegationBody.parse(request.body ?? {});
+    await endDelegationCommand(db, scheduler, { accountId: account.id, worldId: id, owner: body.owner, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.post('/v1/worlds/:id/bridge/donate', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = donateBody.parse(request.body);
+    await donateCommand(db, scheduler, { accountId: account.id, worldId: id, resources: body.resources, embers: body.embers, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.post('/v1/worlds/:id/bridge/ritual', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await craftRitualCommand(db, scheduler, { accountId: account.id, worldId: id, now: clock() });
+    return fullWorldView(id);
   });
 
   app.post('/v1/worlds/join', async (request) => {
@@ -324,6 +412,13 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 
+  app.post('/v1/villages/:id/rebuild', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { village } = await rebuildCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
   // The caller's hero in a world.
   async function heroRoute<B>(
     request: FastifyRequest,
@@ -355,6 +450,55 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id, orderId } = orderParams.parse(request.params);
     await cancelOrderCommand(db, scheduler, { accountId: account.id, villageId: id, orderId, now: clock() });
     return { ok: true, serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/armies', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = armyBody.parse(request.body);
+    const army = await sendArmyCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/recall', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const army = await recallArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/forts', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = hexBody.parse(request.body);
+    const fort = await buildFortCommand(db, scheduler, { accountId: account.id, villageId: id, cell: body, now: clock() });
+    return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/crossings', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = crossingBody.parse(request.body);
+    await buildCrossingCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  app.post('/v1/villages/:id/roads', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = crossingBody.parse(request.body);
+    await buildRoadCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  app.put('/v1/villages/:id/reinforce', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = reinforceBody.parse(request.body);
+    await setReinforceCommand(db, scheduler.data, { accountId: account.id, villageId: id, ...body });
+    return { reinforce: body };
   });
 
   app.post('/v1/villages/:id/research', async (request) => {

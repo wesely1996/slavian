@@ -3,9 +3,16 @@ import { notifyWorld } from '../db/notify.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining, outpostHex } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
+import { armyHandlers } from './armies.js';
 import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
 import { expeditionHandlers } from './expeditions.js';
+import { fieldHandlers } from './field.js';
+import { hordeHandlers } from './horde.js';
+import { campHandlers } from './camps.js';
+import { siteHandlers } from './sites.js';
+import { bridgeHandlers } from './bridge.js';
+import { ritualHandlers } from './ritual.js';
 import { heroHandlers } from './heroes.js';
 import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
@@ -31,7 +38,11 @@ export const handlers: HandlerRegistry = {
   async build_complete({ client, data, world }, event) {
     const payload = buildCompletePayload.parse(event.payload);
     const village = await loadVillage(client, payload.villageId);
+    // Razed before it was finished.
+    if (village.ruin) return;
     const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
+    // A raid or raze cleared the queue before it was finished.
+    if (!village.state.queue.some((item) => item.plot === plot && item.targetLevel === payload.targetLevel)) return;
     const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
     const def = data.buildings.buildings[payload.building];
@@ -67,4 +78,11 @@ export const handlers: HandlerRegistry = {
   ...heroHandlers,
   ...orderHandlers,
   ...noticeHandlers,
+  ...armyHandlers,
+  ...fieldHandlers,
+  ...hordeHandlers,
+  ...campHandlers,
+  ...siteHandlers,
+  ...bridgeHandlers,
+  ...ritualHandlers,
 };

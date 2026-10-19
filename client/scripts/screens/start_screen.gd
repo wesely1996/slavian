@@ -4,7 +4,10 @@ extends Control
 
 const GAME_SCENE := "res://scenes/game.tscn"
 const SPEEDS := [1, 2, 10]
-const SPEED_LABELS := ["Normal (1×)", "Fast (2×)", "Test (10×)"]
+const SPEED_LABELS := ["Normal (1×)", "Fast (2×)", "Test (10×)"]  # tr
+const WORLD_STATUSES := ["Running", "Won", "Lost"]  # tr
+## Languages by their own names, never translated.
+const LANGUAGES := [["en", "English"], ["sr_Latn", "Srpski"]]
 
 var _status: Label
 var _content: VBoxContainer
@@ -17,7 +20,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 32)
+		margin.add_theme_constant_override("margin_" + side, 24)
 	for side in ["top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
 	add_child(margin)
@@ -25,20 +28,49 @@ func _ready() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	margin.add_child(scroll)
+	# One column, as wide as a phone, in the middle of any screen.
 	var root := UI.vbox(24)
-	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.size_flags_horizontal = Control.SIZE_SHRINK_CENTER | Control.SIZE_EXPAND
+	root.custom_minimum_size.x = minf(720.0, get_viewport_rect().size.x - 48.0)
 	scroll.add_child(root)
 
-	root.add_child(UI.label("Slavian", UI.TITLE_SIZE))
-	root.add_child(UI.label("Defend the Holy City. Build the Kalinov Bridge.", UI.SMALL_SIZE, UI.MUTED))
-	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
+	var picture := UI.icon("ui/title", 0)
+	picture.custom_minimum_size.y = 328
+	root.add_child(picture)
+	var title := UI.label(tr("Slavian"), 96)
+	title.theme_type_variation = "Logo"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(title)
+	var tagline := UI.label(tr("Defend the Holy City. Build the Kalinov Bridge."), UI.SMALL_SIZE + 4)
+	tagline.theme_type_variation = "OnWoodMuted"
+	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(tagline)
+	_status = UI.label("", UI.SMALL_SIZE, Color("#e58a7d"))
+	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_status)
+	var frame := UI.panel()
+	root.add_child(frame)
+	var sheet := UI.vbox(20)
+	frame.add_child(sheet)
+	# The language, by its own name, at the head of the sheet.
+	var languages := UI.hbox(8)
+	for language in LANGUAGES:
+		var code: String = language[0]
+		var pick := UI.button(language[1], func() -> void:
+			Session.set_language(code)
+			get_tree().reload_current_scene())
+		pick.theme_type_variation = "TabButton"
+		pick.disabled = Session.language == code
+		pick.custom_minimum_size.x = 160
+		languages.add_child(pick)
+	sheet.add_child(languages)
 	_content = UI.vbox(20)
-	root.add_child(_content)
+	sheet.add_child(_content)
 
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)
 	if Session.is_logged_in():
+		Push.register()
 		_show_home()
 	else:
 		_show_login()
@@ -57,13 +89,13 @@ func _set_status(text: String) -> void:
 
 func _show_login() -> void:
 	UI.clear(_content)
-	_content.add_child(UI.label("Server address", UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Server address"), UI.SMALL_SIZE, UI.MUTED))
 	var server := UI.line_edit("http://192.168.1.10:8080", Session.server_url)
 	_content.add_child(server)
-	_content.add_child(UI.label("Your name", UI.SMALL_SIZE, UI.MUTED))
-	var name_edit := UI.line_edit("e.g. Vesna")
+	_content.add_child(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED))
+	var name_edit := UI.line_edit(tr("e.g. Vesna"))
 	_content.add_child(name_edit)
-	_content.add_child(UI.button("Play as guest", func() -> void:
+	_content.add_child(UI.primary(tr("Play as guest"), func() -> void:
 		_login(server.text, name_edit.text)))
 
 
@@ -80,6 +112,7 @@ func _login(server_url: String, display_name: String) -> void:
 	Session.token = response.data.token
 	Session.account = response.data.account
 	Session.save()
+	Push.register()
 	_show_home()
 
 
@@ -89,7 +122,7 @@ func _show_home() -> void:
 	Live.stop()
 	_lobby_world_id = 0
 	UI.clear(_content)
-	_content.add_child(UI.label("Loading…", UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Loading…"), UI.SMALL_SIZE, UI.MUTED))
 	var response := await Api.get_json("/v1/me")
 	if response.status == 401:
 		Session.log_out()
@@ -98,55 +131,57 @@ func _show_home() -> void:
 	if not response.ok:
 		UI.clear(_content)
 		_set_status(response.error)
-		_content.add_child(UI.label("Server: %s" % Session.server_url, UI.SMALL_SIZE, UI.MUTED))
-		_content.add_child(UI.button("Retry", _show_home))
-		_content.add_child(UI.button("Change server address", _show_server_editor))
+		_content.add_child(UI.label(tr("Server: %s") % Session.server_url, UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.button(tr("Retry"), _show_home))
+		_content.add_child(UI.button(tr("Change server address"), _show_server_editor))
 		return
 	_set_status("")
 	Session.account = response.data.account
 	UI.clear(_content)
 
 	var who := UI.hbox()
-	var signed_in := UI.label("Signed in as %s" % Session.account.displayName, UI.SMALL_SIZE, UI.MUTED)
+	var signed_in := UI.label(tr("Signed in as %s") % Session.account.displayName, UI.SMALL_SIZE, UI.MUTED)
 	signed_in.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.add_child(signed_in)
-	who.add_child(UI.button("Sign out", func() -> void:
+	who.add_child(UI.button(tr("Sign out"), func() -> void:
 		Session.log_out()
 		_show_login()))
 	_content.add_child(who)
 	var server := UI.hbox()
-	var server_label := UI.label("Server: %s" % Session.server_url, UI.SMALL_SIZE, UI.MUTED)
+	var server_label := UI.label(tr("Server: %s") % Session.server_url, UI.SMALL_SIZE, UI.MUTED)
 	server_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	server.add_child(server_label)
-	server.add_child(UI.button("Change", _show_server_editor))
+	server.add_child(UI.button(tr("Change"), _show_server_editor))
 	_content.add_child(server)
 
-	_content.add_child(UI.label("Your worlds", UI.HEADING_SIZE))
+	_content.add_child(UI.label(tr("Your worlds"), UI.HEADING_SIZE))
 	if response.data.worlds.is_empty():
-		_content.add_child(UI.label("None yet. Create one or join with a code.", UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
 	for world in response.data.worlds:
-		var text := "%s  ·  %s" % [world.name, "in lobby" if world.status == "lobby" else world.status]
+		var text := "%s  ·  %s" % [world.name, tr("in lobby") if world.status == "lobby" else tr(String(world.status).capitalize())]
 		var world_id := int(world.id)
 		_content.add_child(UI.button(text, func() -> void: _open_world(world_id)))
 
-	_content.add_child(UI.label("New world", UI.HEADING_SIZE))
-	var world_name := UI.line_edit("World name", "%s's world" % Session.account.displayName)
+	_content.add_child(UI.label(tr("New world"), UI.HEADING_SIZE))
+	var world_name := UI.line_edit(tr("World name"), tr("%s's world") % Session.account.displayName)
 	_content.add_child(world_name)
 	var row := UI.hbox()
-	var players := UI.options(["1 player", "2 players", "3 players", "4 players", "5 players", "6 players"], 1)
+	var players := UI.options(range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1)
 	players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(players)
-	var speed := UI.options(SPEED_LABELS, 0)
+	var speed := UI.options(SPEED_LABELS.map(tr), 0)
 	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(speed)
 	_content.add_child(row)
-	_content.add_child(UI.button("Create world", func() -> void:
-		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected])))
+	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
+	_content.add_child(difficulty)
+	_content.add_child(UI.primary(tr("Create world"), func() -> void:
+		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
 
-	_content.add_child(UI.label("Join a world", UI.HEADING_SIZE))
-	var code := UI.line_edit("Invite code")
+	_content.add_child(UI.label(tr("Join a world"), UI.HEADING_SIZE))
+	var code := UI.line_edit(tr("Invite code"))
 	_content.add_child(code)
-	_content.add_child(UI.button("Join", func() -> void: _join_world(code.text)))
+	_content.add_child(UI.button(tr("Join"), func() -> void: _join_world(code.text)))
 
 
 ## Changes the server address but stays signed in: a playtest server behind
@@ -155,19 +190,19 @@ func _show_home() -> void:
 func _show_server_editor() -> void:
 	_set_status("")
 	UI.clear(_content)
-	_content.add_child(UI.label("Server address", UI.HEADING_SIZE))
-	_content.add_child(UI.label("You stay signed in; your account lives on the server.", UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Server address"), UI.HEADING_SIZE))
+	_content.add_child(UI.label(tr("You stay signed in; your account lives on the server."), UI.SMALL_SIZE, UI.MUTED))
 	var address := UI.line_edit("https://example.trycloudflare.com", Session.server_url)
 	_content.add_child(address)
-	_content.add_child(UI.button("Save", func() -> void:
+	_content.add_child(UI.button(tr("Save"), func() -> void:
 		Session.set_server_url(address.text)
 		Session.save()
 		_show_home()))
-	_content.add_child(UI.button("Cancel", _show_home))
+	_content.add_child(UI.button(tr("Cancel"), _show_home))
 
 
-func _create_world(world_name: String, max_players: int, speed: int) -> void:
-	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed})
+func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
+	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
 	_handle_world_response(response)
 
 
@@ -200,17 +235,48 @@ func _show_lobby(world: Dictionary) -> void:
 		Live.watch(_lobby_world_id)
 	UI.clear(_content)
 	_content.add_child(UI.label(world.name, UI.HEADING_SIZE))
-	_content.add_child(UI.label("Invite code", UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Invite code"), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.label(world.inviteCode, UI.TITLE_SIZE))
-	_content.add_child(UI.label("Share it with your group. %d of %d players joined." % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Share it with your group. %d of %d players joined.") % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED))
 	for member in world.members:
-		var host := " (host)" if int(member.accountId) == int(world.hostAccountId) else ""
-		_content.add_child(UI.label("• %s%s" % [member.displayName, host]))
+		var host := tr(" (host)") if int(member.accountId) == int(world.hostAccountId) else ""
+		var clan := " · %s" % ClanText.title(Game.data, member.get("clan")) if not Game.data.is_empty() else ""
+		_content.add_child(UI.label("• %s%s%s" % [member.displayName, host, clan]))
 	if int(world.hostAccountId) == int(Session.account.id):
-		_content.add_child(UI.button("Start the world", func() -> void: _start_world(int(world.id))))
+		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id))))
 	else:
-		_content.add_child(UI.label("Waiting for the host to start…", UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.button("Back", _show_home))
+		_content.add_child(UI.label(tr("Waiting for the host to start…"), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.button(tr("Back"), _show_home))
+	_clan_picker(world)
+
+
+## Each member picks their clan in the lobby (and may change it until the start).
+func _clan_picker(world: Dictionary) -> void:
+	if Game.data.is_empty():
+		var error := await Game.ensure_data()
+		if error == "" and _lobby_world_id == int(world.id):
+			_show_lobby(world)
+		return
+	var mine: Variant = null
+	for member in world.members:
+		if int(member.accountId) == int(Session.account.id):
+			mine = member.get("clan")
+	_content.add_child(UI.label(tr("Your clan: %s") % ClanText.title(Game.data, mine), UI.HEADING_SIZE))
+	for clan in ClanText.ids(Game.data):
+		var def: Dictionary = Game.data.clans.clans[clan]
+		var pick := UI.button(("✓ " if clan == mine else "") + ClanText.title(Game.data, clan), func() -> void: _pick_clan(int(world.id), clan))
+		_content.add_child(pick)
+		_content.add_child(UI.label(tr(def.story), UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.label(ClanText.perks(Game.data, clan), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _pick_clan(world_id: int, clan: String) -> void:
+	_set_status("")
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/clan" % world_id, {"clan": clan})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	_show_lobby(response.data)
 
 
 func _start_world(world_id: int) -> void:

@@ -1,9 +1,10 @@
 import { deleteOrder, insertOrder, listOrders, type StoredOrder } from '../db/orders.js';
+import { authorize } from '../db/delegations.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db } from '../db/pool.js';
 import { loadVillage, type Village } from '../db/villages.js';
 import { getWorld } from '../db/worlds.js';
-import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { NotFoundError, RuleError } from '../errors.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { ensureOrdersCheck, runOrders } from '../scheduler/orders.js';
 import { withWorld } from '../scheduler/world.js';
@@ -32,7 +33,7 @@ export async function placeOrderCommand(
   return withWorld(db, worldId, input.now, deps, async (client) => {
     const world = await getWorld(client, worldId);
     const village = await loadVillage(client, input.villageId);
-    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'placed a standing order', villageId: village.id });
     const spec = validateOrder(deps.data, input.spec);
     const existing = await listOrders(client, { villageId: village.id });
     if (existing.length >= deps.data.orders.maxPerVillage) {
@@ -54,7 +55,7 @@ export async function cancelOrderCommand(db: Db, deps: SchedulerDeps, input: Ord
   const worldId = await worldOf(db, input.villageId);
   await withWorld(db, worldId, input.now, deps, async (client) => {
     const village = await loadVillage(client, input.villageId);
-    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'cancelled a standing order', villageId: village.id });
     if (!(await deleteOrder(client, village.id, input.orderId))) throw new NotFoundError('No such order');
     await notifyWorld(client, { worldId, type: 'orders' });
   });

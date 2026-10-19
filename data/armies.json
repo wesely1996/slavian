@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "_comment": "Armies are troops sent out of a village. `support` armies stay at the destination and fight in its battles until recalled; `reinforce` armies join the battle there and go home after; `harass` armies (at least `harass.minCavalryShare` cavalry) strike for one round with a bonus, take only `harass.lossFactor` of their losses, and ride home. A reinforcement arriving from a different side than the horde (at least `pincer.minAngle` degrees apart) gets a pincer bonus on its first round: `scale` x its size / the horde's size, at most `maxBonus`. Villages send `reinforce.defaultShare` of their troops to any battle within `reinforce.defaultRange` hexes unless set otherwise.",
+  "pincer": { "minAngle": 100, "maxBonus": 0.3, "scale": 0.6 },
+  "harass": { "minCavalryShare": 0.6, "maxBonus": 0.4, "scale": 1.0, "lossFactor": 0.3 },
+  "reinforce": { "defaultShare": 0.5, "defaultRange": 4, "maxRange": 8 }
+}

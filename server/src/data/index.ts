@@ -33,8 +33,9 @@ const resourcesSchema = z.object({
 const buildingSchema = z.object({
   name: z.string(),
   // 'field': a resource plot around the village; 'center': a building slot;
-  // 'outpost': built on a resource hex near the village.
-  kind: z.enum(['field', 'center', 'outpost']),
+  // 'outpost': built on a resource hex near the village; 'wall': the walls
+  // (plot "w"); 'tower': a wall slot's defensive work (plots "t0"...).
+  kind: z.enum(['field', 'center', 'outpost', 'wall', 'tower']),
   maxLevel: z.number().int().positive(),
   cost: resourcesSchema,
   costGrowth: z.number().min(1),
@@ -51,6 +52,10 @@ const buildingSchema = z.object({
   // Outposts: resources per hour at level 1, by the terrain they stand on.
   yields: z.partialRecord(z.enum(TERRAIN_IDS), resourcesSchema.partial()).optional(),
   yieldGrowth: z.number().min(1).optional(),
+  // A clan's own building: only that clan builds it; its effects add to the
+  // village's bonuses per level.
+  clan: z.string().optional(),
+  effects: z.record(z.string(), z.number()).optional(),
 });
 
 const buildingsFileSchema = z.object({
@@ -104,6 +109,8 @@ const unitSchema = z.object({
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   carry: z.number().nonnegative(),
+  // A clan's own unit: only that clan trains it.
+  clan: z.string().optional(),
 });
 
 const unitsFileSchema = z.object({
@@ -117,11 +124,20 @@ const unitsFileSchema = z.object({
 const enemyUnitSchema = z.object({
   name: z.string(),
   family: z.enum(UNIT_FAMILIES),
-  weight: z.number().positive(),
+  // 0: never in a wave of its own (an engine built on site).
+  weight: z.number().nonnegative(),
   minWave: z.number().int().nonnegative(),
+  // Only groups of at least this many players see it.
+  minPlayers: z.number().int().positive().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   speed: z.number().positive(),
+  // How hard it batters walls each round (walls.json).
+  siege: z.number().nonnegative().optional(),
+  // A climbing engine: how many men it carries over the walls a round.
+  escalade: z.number().nonnegative().optional(),
+  // How long building it on site takes (x walls.siege.setupHours x siegeCraft).
+  setupFactor: z.number().positive().default(1),
 });
 
 const enemiesFileSchema = z.object({
@@ -130,6 +146,18 @@ const enemiesFileSchema = z.object({
     z.enum(FRONTS),
     z.object({
       faction: z.string(),
+      signature: z.string(),
+      personality: z.object({
+        lootFactor: z.number().nonnegative(),
+        raidReach: z.number().int().nonnegative(),
+        nerve: z.number().positive(),
+        razeBias: z.number(),
+        erratic: z.number().min(0).max(1),
+        // How long it takes to build siege engines on site (x walls.siege.setupHours); 0: never.
+        siegeCraft: z.number().nonnegative().default(1),
+      }),
+      // The engine it builds on site, one of its units.
+      engine: z.string().optional(),
       spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       units: z.record(z.string(), enemyUnitSchema),
       stances: z.partialRecord(z.enum(STANCES), z.number().positive()),
@@ -143,8 +171,6 @@ const wavesFileSchema = z.object({
   graceHours: z.number().nonnegative(),
   intervalHours: z.tuple([z.number().positive(), z.number().positive()]),
   upcoming: z.number().int().positive(),
-  rampageHours: z.number().positive(),
-  raidReach: z.number().int().nonnegative(),
   baseUnits: z.number().positive(),
   growthPerWave: z.number().min(1),
   perExtraPlayer: z.number().nonnegative(),
@@ -238,6 +264,8 @@ const researchFileSchema = z.object({
       seconds: z.number().positive(),
       effects: z.record(z.string(), z.number()),
       description: z.string(),
+      // A rare tech: only once the group has found this lore scroll.
+      requiresScroll: z.string().optional(),
     }),
   ),
 });
@@ -245,6 +273,70 @@ const researchFileSchema = z.object({
 export const HERO_SLOTS = ['weapon', 'armor', 'amulet', 'banner', 'mount'] as const;
 export type HeroSlot = (typeof HERO_SLOTS)[number];
 const effectsSchema = z.record(z.string(), z.number());
+
+// Walls and siege (sim/walls.ts).
+const wallsFileSchema = z.object({
+  version: z.number().int(),
+  tiers: z
+    .array(
+      z.object({
+        minLevel: z.number().int().positive(),
+        name: z.string(),
+        material: z.enum(['wood', 'timber', 'stone', 'fortress']),
+        // Multiplies the integrity of walls of this tier.
+        toughness: z.number().positive(),
+      }),
+    )
+    .min(1),
+  integrityPerLevel: z.number().positive(),
+  defensePerLevel: z.number().nonnegative(),
+  slotsAt: z.array(z.number().int().positive()),
+  breachLevelsLost: z.number().int().nonnegative(),
+  towers: z.object({
+    archer_tower: z.object({ attackPerLevel: z.number().nonnegative() }),
+    gate_tower: z.object({ integrityPerLevel: z.number().nonnegative() }),
+    ballista: z.object({ enginesPerLevel: z.number().nonnegative() }),
+    murder_holes: z.object({ defensePerLevel: z.number().nonnegative() }),
+    ditch: z.object({
+      siegeCutPerLevel: z.number().min(0).max(0.1),
+      setupPerLevel: z.number().nonnegative(),
+      escaladeCutPerLevel: z.number().min(0).max(0.1),
+      // The moat holds water from this level.
+      waterAt: z.number().int().positive(),
+    }),
+    watchtower: z.object({ warningHoursPerLevel: z.number().nonnegative() }),
+  }),
+  manning: z.object({ menPerLevel: z.number().positive(), archerAttackPerLevel: z.number().nonnegative() }),
+  escalade: z.object({ meleeHeld: z.number().min(0).max(1), climbShare: z.number().positive().max(1) }),
+  siege: z.object({
+    unitSiegeShare: z.number().nonnegative(),
+    breachRounds: z.number().int().positive(),
+    setupHours: z.number().nonnegative(),
+  }),
+});
+
+// Enemy heroes: one named leader per front (sim/leaders.ts).
+const leadersFileSchema = z.object({
+  version: z.number().int(),
+  maxLevel: z.number().int().positive(),
+  levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
+  xp: z.object({ battle: z.number().min(0), win: z.number().min(0), raze: z.number().min(0), perKill: z.number().min(0), escape: z.number().min(0) }),
+  woundHours: z.number().positive(),
+  grudge: z.object({ attack: z.number().min(0) }),
+  riseShare: z.number().min(0).max(1),
+  skills: z.record(
+    z.string(),
+    z.object({ name: z.string(), maxRank: z.number().int().positive(), effectsPerRank: effectsSchema, description: z.string() }),
+  ),
+  fronts: z.record(
+    z.string(),
+    z.object({
+      names: z.array(z.string()).min(1),
+      ranks: z.array(z.object({ minLevel: z.number().int().positive(), title: z.string() })).min(1),
+      skills: z.array(z.string()).min(1),
+    }),
+  ),
+});
 
 const heroesFileSchema = z.object({
   version: z.number().int(),
@@ -294,10 +386,238 @@ const notificationsFileSchema = z.object({
   pushExpiryHours: z.number().positive(),
 });
 
+const armiesFileSchema = z.object({
+  version: z.number().int(),
+  pincer: z.object({ minAngle: z.number().min(0).max(180), maxBonus: z.number().nonnegative(), scale: z.number().nonnegative() }),
+  harass: z.object({
+    minCavalryShare: z.number().min(0).max(1),
+    maxBonus: z.number().nonnegative(),
+    scale: z.number().nonnegative(),
+    lossFactor: z.number().min(0).max(1),
+  }),
+  reinforce: z.object({
+    defaultShare: z.number().min(0).max(1),
+    defaultRange: z.number().int().nonnegative(),
+    maxRange: z.number().int().positive(),
+  }),
+});
+
+const fieldFileSchema = z.object({
+  version: z.number().int(),
+  ambush: z.object({ terrain: z.array(z.enum(TERRAIN_IDS)), prepMinutes: z.number().nonnegative(), bonus: z.number().nonnegative() }),
+  choke: z.object({
+    minBlockedNeighbors: z.number().int().min(1).max(6),
+    attackerFactor: z.number().positive().max(1),
+    holdTheLineDefense: z.number().nonnegative(),
+  }),
+  // A horde that crossed a river (over a bridge) into the fight.
+  river: z.object({ attackerFactor: z.number().positive().max(1) }),
+  fort: z.object({
+    range: z.number().int().positive(),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+    defenseBonus: z.number().nonnegative(),
+  }),
+  // Bridges players build over river edges (M5 step 3).
+  bridge: z.object({
+    range: z.number().int().positive(),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+  }),
+  // Roads between neighbouring hexes (M5 step 4): `factor` of the move cost.
+  road: z.object({
+    range: z.number().int().positive(),
+    factor: z.number().positive().max(1),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+  }),
+});
+
 export type BuildingDef = z.infer<typeof buildingSchema>;
+export type FieldData = z.infer<typeof fieldFileSchema>;
+
+const hordeFileSchema = z.object({
+  version: z.number().int(),
+  fear: z.object({
+    perDefeat: z.number().nonnegative(),
+    perUnitLost: z.number().nonnegative(),
+    decayPerWave: z.number().min(0).max(1),
+    minimum: z.number().nonnegative(),
+    targetWeight: z.number().nonnegative(),
+    pathWeight: z.number().nonnegative(),
+  }),
+  holyCityExtraCost: z.number().nonnegative(),
+  rampageHours: z.number().positive(),
+  raid: z.object({ recruitShare: z.number().nonnegative() }),
+  raze: z.object({
+    graceWaves: z.number().int().nonnegative(),
+    hours: z.number().positive(),
+    minStrength: z.number().positive(),
+    threshold: z.number(),
+    weakenedPenalty: z.number().nonnegative(),
+  }),
+  ruins: z.object({ rebuildCostShare: z.number().nonnegative(), rebuildHours: z.number().positive() }),
+  refugeeCamp: z.object({ minDistance: z.number().int().positive(), name: z.string() }),
+  holyCity: z.object({
+    sanctity: z.number().int().positive(),
+    guard: z.record(z.string(), z.number().int().nonnegative()),
+    guardGrowthPerWave: z.number().min(1),
+    stance: z.enum(STANCES),
+    damagePerUnit: z.number().nonnegative(),
+  }),
+});
+export type HordeData = z.infer<typeof hordeFileSchema>;
+
+const campsFileSchema = z.object({
+  version: z.number().int(),
+  spawn: z.object({
+    perWave: z.number().int().nonnegative(),
+    max: z.number().int().nonnegative(),
+    nearRoad: z.number().int().nonnegative(),
+    minVillageDistance: z.number().int().nonnegative(),
+    baseUnits: z.number().positive(),
+    growthPerWave: z.number().min(1),
+  }),
+  growth: z.object({ everyHours: z.number().positive(), share: z.number().nonnegative(), maxUnits: z.number().int().positive() }),
+  feed: z.object({ share: z.number().min(0).max(1) }),
+  assault: z.object({ stance: z.enum(STANCES) }),
+  loot: z.object({ perUnit: resourcesSchema, gearChance: z.number().min(0).max(1), emberChance: z.number().min(0).max(1) }),
+  ambush: z.object({
+    reach: z.number().int().nonnegative(),
+    escortRatio: z.number().nonnegative(),
+    cargoShare: z.number().min(0).max(1),
+    escortLoss: z.number().min(0).max(1),
+  }),
+  fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
+});
+export type CampsData = z.infer<typeof campsFileSchema>;
+
+export const DIFFICULTIES = ['story', 'normal', 'hard', 'nightmare'] as const;
+export type Difficulty = (typeof DIFFICULTIES)[number];
+const presetSchema = z.object({
+  name: z.string(),
+  waveScale: z.number().positive(),
+  floor: z.number().positive(),
+  maxFactor: z.number().positive(),
+  powerWeight: z.number().nonnegative(),
+  campRate: z.number().nonnegative(),
+  fearWeight: z.number().nonnegative(),
+  razeThreshold: z.number(),
+  graceWaves: z.number().int().nonnegative(),
+});
+export type DifficultyPreset = z.infer<typeof presetSchema>;
+const difficultyFileSchema = z.object({
+  version: z.number().int(),
+  default: z.enum(DIFFICULTIES),
+  presets: z.record(z.enum(DIFFICULTIES), presetSchema),
+  power: z.object({ attackPerPlayer: z.number().positive(), growthPerWave: z.number().nonnegative() }),
+});
+export type DifficultyData = z.infer<typeof difficultyFileSchema>;
+
+const sitesFileSchema = z.object({
+  version: z.number().int(),
+  placement: z.object({
+    perPlayer: z.number().int().nonnegative(),
+    min: z.number().int().nonnegative(),
+    borderBand: z.number().int().nonnegative(),
+    midShare: z.number().min(0).max(1),
+    midRange: z.tuple([z.number().min(0), z.number().max(1)]),
+    spacing: z.number().int().positive(),
+    keepAway: z.number().int().nonnegative(),
+  }),
+  kinds: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      terrain: z.array(z.enum(TERRAIN_IDS)).min(1),
+      exploreHours: z.number().positive(),
+      guardianChance: z.number().min(0).max(1),
+      finds: z.object({ resources: z.number().nonnegative(), gear: z.number().nonnegative(), scroll: z.number().nonnegative(), ember: z.number().nonnegative() }),
+      description: z.string(),
+    }),
+  ),
+  guardians: z.object({ baseUnits: z.number().positive(), distanceGrowth: z.number().nonnegative(), waveIndex: z.number().int().nonnegative() }),
+  loot: resourcesSchema,
+});
+export type SitesData = z.infer<typeof sitesFileSchema>;
+
+const loreFileSchema = z.object({
+  version: z.number().int(),
+  scrolls: z.record(
+    z.string(),
+    z.object({ name: z.string(), effects: z.record(z.string(), z.number()), unlocks: z.string().optional(), description: z.string() }),
+  ),
+});
+export type LoreData = z.infer<typeof loreFileSchema>;
+
+const clansFileSchema = z.object({
+  version: z.number().int(),
+  clans: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      animal: z.string(),
+      story: z.string(),
+      best: z.string(),
+      weakness: z.string(),
+      effects: z.record(z.string(), z.number()),
+      unique: z.union([z.object({ unit: z.string() }), z.object({ building: z.string() })]),
+    }),
+  ),
+});
+export type ClansData = z.infer<typeof clansFileSchema>;
+
+export const ONBOARDING_STEPS = ['build', 'train', 'outpost', 'scout', 'camp', 'gift'] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
+const onboardingFileSchema = z.object({
+  version: z.number().int(),
+  steps: z.array(
+    z.object({ id: z.enum(ONBOARDING_STEPS), title: z.string(), hint: z.string(), story: z.string(), reward: resourcesSchema }),
+  ),
+});
+export type OnboardingData = z.infer<typeof onboardingFileSchema>;
+
+export const BRIDGE_QUESTS = ['site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
+export type BridgeQuest = (typeof BRIDGE_QUESTS)[number];
+const bridgeFileSchema = z.object({
+  version: z.number().int(),
+  story: z.string(),
+  buildHours: z.number().positive(),
+  powerPerStage: z.number().nonnegative(),
+  ritualEmbers: z.number().int().nonnegative(),
+  stages: z
+    .array(
+      z.object({
+        name: z.string(),
+        // Why the bridge needs this stage, and each quest of it.
+        story: z.string(),
+        cost: resourcesSchema,
+        embers: z.number().int().nonnegative(),
+        quests: z.array(z.object({ kind: z.enum(BRIDGE_QUESTS), story: z.string() })),
+      }),
+    )
+    .min(1),
+  quests: z.record(z.enum(BRIDGE_QUESTS), z.object({ name: z.string(), description: z.string() })),
+  // When the last stage stands: every active front attacks at once, after
+  // delayHours (game hours), sizeFactor times its usual strength.
+  ritualNight: z.object({
+    delayHours: z.number().nonnegative(),
+    sizeFactor: z.number().positive(),
+    checkHours: z.number().positive(),
+    story: z.string(),
+  }),
+  endings: z.object({
+    won: z.object({ title: z.string(), story: z.string() }),
+    lost: z.object({ title: z.string(), story: z.string() }),
+  }),
+});
+export type BridgeData = z.infer<typeof bridgeFileSchema>;
+export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
+export type LeadersData = z.infer<typeof leadersFileSchema>;
+export type WallsData = z.infer<typeof wallsFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
@@ -323,8 +643,20 @@ export interface GameData {
   expansion: ExpansionData;
   research: ResearchData;
   heroes: HeroesData;
+  leaders: LeadersData;
+  walls: WallsData;
   orders: OrdersData;
   notifications: NotificationsData;
+  armies: ArmiesData;
+  field: FieldData;
+  horde: HordeData;
+  camps: CampsData;
+  difficulty: DifficultyData;
+  sites: SitesData;
+  lore: LoreData;
+  bridge: BridgeData;
+  clans: ClansData;
+  onboarding: OnboardingData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -341,14 +673,39 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
+    leaders: leadersFileSchema.parse(read('leaders.json')),
+    walls: wallsFileSchema.parse(read('walls.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
+    armies: armiesFileSchema.parse(read('armies.json')),
+    field: fieldFileSchema.parse(read('field.json')),
+    horde: hordeFileSchema.parse(read('horde.json')),
+    camps: campsFileSchema.parse(read('camps.json')),
+    difficulty: difficultyFileSchema.parse(read('difficulty.json')),
+    sites: sitesFileSchema.parse(read('sites.json')),
+    lore: loreFileSchema.parse(read('lore.json')),
+    bridge: bridgeFileSchema.parse(read('bridge.json')),
+    clans: clansFileSchema.parse(read('clans.json')),
+    onboarding: onboardingFileSchema.parse(read('onboarding.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  for (const [front, def] of Object.entries(data.enemies.fronts)) {
+    const engine = def.engine ? def.units[def.engine] : undefined;
+    if (def.engine && !engine?.siege && !engine?.escalade) throw new Error(`Front "${front}" builds "${def.engine}", which is not one of its siege units`);
+  }
+  for (const tower of Object.keys(data.walls.towers)) {
+    if (data.buildings.buildings[tower]?.kind !== 'tower') throw new Error(`walls.json tower "${tower}" needs a tower in buildings.json`);
+  }
+  if (data.buildings.buildings.wall?.kind !== 'wall') throw new Error('buildings.json needs the walls ("wall", kind wall)');
+  for (const front of Object.keys(data.enemies.fronts)) {
+    const leaders = data.leaders.fronts[front];
+    if (!leaders) throw new Error(`leaders.json has no leaders for front "${front}"`);
+    for (const skill of leaders.skills) if (!data.leaders.skills[skill]) throw new Error(`Leader skill "${skill}" (front ${front}) is unknown`);
+  }
   for (const [id, skill] of Object.entries(data.heroes.skills)) {
     if (!data.heroes.branches[skill.branch]) throw new Error(`Hero skill "${id}" is in unknown branch "${skill.branch}"`);
   }
@@ -360,6 +717,12 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     for (const required of tech.requires) {
       if (!data.research.techs[required]) throw new Error(`Tech "${id}" requires unknown tech "${required}"`);
     }
+    if (tech.requiresScroll && data.lore.scrolls[tech.requiresScroll]?.unlocks !== id) {
+      throw new Error(`Tech "${id}" needs scroll "${tech.requiresScroll}", which doesn't unlock it`);
+    }
+  }
+  for (const [id, scroll] of Object.entries(data.lore.scrolls)) {
+    if (scroll.unlocks && data.research.techs[scroll.unlocks]?.requiresScroll !== id) throw new Error(`Scroll "${id}" unlocks "${scroll.unlocks}"`);
   }
   if (data.units.units.settler?.building !== 'settlers_lodge') throw new Error('units.json needs a "settler" trained in the settlers_lodge');
   if (buildings.caravan_yard?.kind !== 'center') throw new Error('buildings.json needs a center building "caravan_yard"');
@@ -373,6 +736,14 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     if (!data.buildings.buildings[unit.building]) {
       throw new Error(`Unit "${id}" is trained in unknown building "${unit.building}"`);
     }
+    if (unit.clan && !data.clans.clans[unit.clan]) throw new Error(`Unit "${id}" belongs to unknown clan "${unit.clan}"`);
+  }
+  for (const [id, building] of Object.entries(buildings)) {
+    if (building.clan && !data.clans.clans[building.clan]) throw new Error(`Building "${id}" belongs to unknown clan "${building.clan}"`);
+  }
+  for (const [id, clan] of Object.entries(data.clans.clans)) {
+    const unique = 'unit' in clan.unique ? data.units.units[clan.unique.unit] : buildings[clan.unique.building];
+    if (unique?.clan !== id) throw new Error(`Clan "${id}" names a unique that isn't its own`);
   }
   return data;
 }

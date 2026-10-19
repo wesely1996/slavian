@@ -14,6 +14,8 @@ signal research_changed
 signal heroes_changed
 signal orders_changed
 signal inbox_changed
+signal armies_changed
+signal forts_changed
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -38,10 +40,32 @@ var research: Array = []
 ## Your notifications in this world, newest first, and how many are unread.
 var inbox: Array = []
 var unread := 0
+## Armies on the road or abroad, then the latest that came home.
+var armies: Array = []
+## Forts, built or being built (see server fortView).
+var forts: Array = []
+## Bandit camps and monster lairs: {id, kind, front, q, r, size}.
+var camps: Array = []
+## Ancient sites (see server worldView) and the group's lore scrolls.
+var sites: Array = []
+var lore: Array = []
+## The Kalinov Bridge (see server sim/bridge.ts).
+var bridge: Dictionary = {}
+## Hand-overs still running, and what delegates did lately.
+## River edges: [aq, ar, bq, br, crossing] (see RiverText).
+var rivers: Array = []
+## Roads: [aq, ar, bq, br, status] (see RiverText.roads_at).
+var roads: Array = []
+var delegations: Array = []
+var delegation_log: Array = []
+## How much hordes fear each hex where they were beaten.
+var fear: Dictionary[Vector2i, float] = {}
 ## Standing orders of every village (see server orderView).
 var orders: Array = []
 ## Every player's hero (see server heroView).
 var heroes: Array = []
+## Enemy leaders, living and fallen, one alive per front (server leaderView).
+var leaders: Array = []
 ## Which of your villages the screens show (0: the first).
 var current_village_id := 0
 
@@ -80,6 +104,9 @@ func set_world(new_world: Dictionary) -> void:
 	world = new_world
 	if new_world.has("serverTime"):
 		note_server_time(new_world.serverTime)
+	var world_map: Variant = new_world.get("map")
+	rivers = world_map.get("rivers", []) if world_map is Dictionary else []
+	roads = world_map.get("roads", []) if world_map is Dictionary else []
 	villages.clear()
 	for village in new_world.get("villages", []):
 		villages[int(village.id)] = village
@@ -91,7 +118,20 @@ func set_world(new_world: Dictionary) -> void:
 	expeditions = new_world.get("expeditions", [])
 	research = new_world.get("research", [])
 	heroes = new_world.get("heroes", [])
+	leaders = new_world.get("leaders", [])
 	orders = new_world.get("orders", [])
+	armies = new_world.get("armies", [])
+	forts = new_world.get("forts", [])
+	camps = new_world.get("camps", [])
+	sites = new_world.get("sites", [])
+	lore = new_world.get("lore", [])
+	var new_bridge: Variant = new_world.get("bridge")
+	bridge = new_bridge if new_bridge is Dictionary else {}
+	delegations = new_world.get("delegations", [])
+	delegation_log = new_world.get("delegationLog", [])
+	fear.clear()
+	for entry in new_world.get("fear", []):
+		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -102,10 +142,13 @@ func set_world(new_world: Dictionary) -> void:
 	world_changed.emit()
 
 
-func set_waves(world_id_: int, new_waves: Array) -> void:
+## Waves, and the enemy leaders with them when the server sends those.
+func set_waves(world_id_: int, new_waves: Array, new_leaders: Variant = null) -> void:
 	if world_id_ != world_id():
 		return
 	waves = new_waves
+	if new_leaders is Array:
+		leaders = new_leaders
 	waves_changed.emit()
 
 
@@ -128,6 +171,59 @@ func set_raids(world_id_: int, new_raids: Array) -> void:
 		return
 	raids = new_raids
 	raids_changed.emit()
+
+
+func set_armies(world_id_: int, new_armies: Array) -> void:
+	if world_id_ != world_id():
+		return
+	armies = new_armies
+	armies_changed.emit()
+
+
+func set_forts(world_id_: int, new_forts: Array) -> void:
+	if world_id_ != world_id():
+		return
+	forts = new_forts
+	forts_changed.emit()
+
+
+func site_at(cell: Vector2i) -> Dictionary:
+	for site in sites:
+		if Vector2i(int(site.q), int(site.r)) == cell:
+			return site
+	return {}
+
+
+## Scrolls the group has, as a set.
+func scrolls() -> Dictionary:
+	var found := {}
+	for entry in lore:
+		found[entry.scroll] = true
+	return found
+
+
+func camp_at(cell: Vector2i) -> Dictionary:
+	for camp in camps:
+		if Vector2i(int(camp.q), int(camp.r)) == cell:
+			return camp
+	return {}
+
+
+func fort_at(cell: Vector2i) -> Dictionary:
+	for fort in forts:
+		if Vector2i(int(fort.q), int(fort.r)) == cell:
+			return fort
+	return {}
+
+
+## Where a battle is fought: the village, or the hex of a field battle.
+func battle_place(battle: Dictionary) -> String:
+	var setup: Variant = battle.get("setup")
+	if setup is Dictionary and setup.get("holyCity", false):
+		return "the Holy City"
+	if battle.get("villageId") == null and battle.has("q"):
+		return "(%d, %d)" % [int(battle.q), int(battle.r)]
+	return village_name(battle.villageId)
 
 
 func set_inbox(world_id_: int, notifications: Array, unread_count: int) -> void:
@@ -189,11 +285,16 @@ func set_expeditions(world_id_: int, new_expeditions: Array) -> void:
 	expeditions_changed.emit()
 
 
-## Your villages, oldest first.
+## The villages you command (yours, and any a teammate handed you), oldest first.
 func my_villages() -> Array:
-	var mine := villages.values().filter(func(v: Dictionary) -> bool: return is_mine(v))
+	var mine := villages.values().filter(func(v: Dictionary) -> bool: return commands(v))
 	mine.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
 	return mine
+
+
+## How many villages `owner` has (costs and garrisons scale with it).
+func villages_owned(owner: int) -> int:
+	return villages.values().filter(func(v: Dictionary) -> bool: return v.get("ownerAccountId") != null and int(v.ownerAccountId) == owner).size()
 
 
 ## The village the screens show: the one picked, else your first.
@@ -219,6 +320,15 @@ func outpost_owner(cell: Vector2i) -> Dictionary:
 	for village in villages.values():
 		if village.get("plots", {}).has(plot):
 			return village
+	return {}
+
+
+func leader(leader_id: Variant) -> Dictionary:
+	if leader_id == null:
+		return {}
+	for entry in leaders:
+		if int(entry.id) == int(leader_id):
+			return entry
 	return {}
 
 
@@ -257,6 +367,13 @@ func village_at(cell: Vector2i) -> Dictionary:
 
 func is_mine(village: Dictionary) -> bool:
 	return int(village.get("ownerAccountId", -1)) == my_account_id()
+
+
+## Yours, or handed to you by a teammate for now.
+func commands(village: Dictionary) -> bool:
+	if village.get("ownerAccountId") == null:
+		return false
+	return DelegationText.commands(delegations, int(village.ownerAccountId), my_account_id(), server_now())
 
 
 func member_name(account_id: int) -> String:

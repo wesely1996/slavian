@@ -18,6 +18,7 @@ export type WorldEvent =
   | { worldId: number; type: 'research' }
   | { worldId: number; type: 'heroes' }
   | { worldId: number; type: 'orders' }
+  | { worldId: number; type: 'armies' }
   // For one player only (their inbox).
   | { worldId: number; type: 'notifications'; accountId: number };
 

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "_comment": "Bandit camps and monster lairs (PLAN.md §7.5). Hours are game hours (divided by world speed). When a wave ends, spawn.perWave camps of its front appear near its road (within spawn.nearRoad hexes, at least spawn.minVillageDistance from any village), up to spawn.max active camps per front; monster camps are lairs. A camp starts with baseUnits × growthPerWave^waveIndex units of its front's roster and grows by growth.share every growth.everyHours, up to growth.maxUnits. When a wave of its front sets out, a camp sends feed.share of its units with it. Armies clear camps (orders 'clear'): the fight is resolved on arrival, round by round, with the camp fighting from behind its palisade (home bonus, assault.stance). Clearing gives loot.perUnit resources for every camp unit, carried home by the army, a gear drop chance for a hero leading it, and for lairs an emberChance of Svarog's Ember for the group. Caravans passing within ambush.reach of a camp are ambushed: unless their escort's attack reaches ambush.escortRatio × the camp's, they lose ambush.cargoShare of their load and the escort ambush.escortLoss of its troops. A fort no army has held for fort.abandonHours turns into a bandit camp of fort.units.",
+  "spawn": { "perWave": 1, "max": 4, "nearRoad": 1, "minVillageDistance": 3, "baseUnits": 6, "growthPerWave": 1.15 },
+  "growth": { "everyHours": 24, "share": 0.1, "maxUnits": 150 },
+  "feed": { "share": 0.5 },
+  "assault": { "stance": "defensive" },
+  "loot": { "perUnit": { "wood": 15, "stone": 15, "grain": 15, "iron": 8 }, "gearChance": 0.35, "emberChance": 0.75 },
+  "ambush": { "reach": 1, "escortRatio": 1, "cargoShare": 0.5, "escortLoss": 0.3 },
+  "fort": { "abandonHours": 48, "units": 8 }
+}

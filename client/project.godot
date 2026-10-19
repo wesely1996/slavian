@@ -7,6 +7,7 @@ config/name="Slavian"
 config/version="0.0.1"
 run/main_scene="res://scenes/start.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
+config/icon="res://art/generated/app/icon.svg"
 
 [autoload]
 
@@ -14,6 +15,7 @@ Session="*res://scripts/net/session.gd"
 Api="*res://scripts/net/api.gd"
 Game="*res://scripts/game/game.gd"
 Live="*res://scripts/net/live.gd"
+Push="*res://scripts/net/push.gd"
 
 [display]
 
@@ -35,7 +37,12 @@ pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
-environment/defaults/default_clear_color=Color(0.12, 0.11, 0.1, 1)
+environment/defaults/default_clear_color=Color(0.114, 0.086, 0.071, 1)
 
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://i18n/sr_Latn.po")
+locale/fallback="en"

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "_comment": "Difficulty presets (PLAN.md §7.6), chosen when a world is created. Wave size = base size (waves.json) × waveScale × group power, kept between floor and maxFactor. Group power grows with powerWeight for every village beyond one per player, and for army strength (total attack of every fighting unit) above power.attackPerPlayer per player, which itself grows by power.growthPerWave each wave. campRate scales camps per wave (camps.json). fearWeight scales how much hordes heed fear (0: they don't learn). razeThreshold is added to the raze decision's threshold (lower razes sooner); graceWaves is how many waves only raid.",
+  "default": "normal",
+  "presets": {
+    "story":     { "name": "Story",     "waveScale": 0.7,  "floor": 0.6, "maxFactor": 1.4, "powerWeight": 0.25, "campRate": 0.5, "fearWeight": 0,   "razeThreshold": 1.5,  "graceWaves": 3 },
+    "normal":    { "name": "Normal",    "waveScale": 1,    "floor": 0.8, "maxFactor": 2,   "powerWeight": 0.5,  "campRate": 1,   "fearWeight": 1,   "razeThreshold": 0,    "graceWaves": 2 },
+    "hard":      { "name": "Hard",      "waveScale": 1.25, "floor": 1,   "maxFactor": 2.5, "powerWeight": 0.75, "campRate": 1.5, "fearWeight": 1.25, "razeThreshold": -0.5, "graceWaves": 1 },
+    "nightmare": { "name": "Nightmare", "waveScale": 1.5,  "floor": 1.2, "maxFactor": 3,   "powerWeight": 1,    "campRate": 2,   "fearWeight": 1.5, "razeThreshold": -1,   "graceWaves": 0 }
+  },
+  "power": { "attackPerPlayer": 600, "growthPerWave": 0.15 }
+}

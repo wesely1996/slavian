@@ -1,4 +1,5 @@
-import type { TerrainId } from '../data/index.js';
+import type { Difficulty, TerrainId } from '../data/index.js';
+import type { QuietWindow } from '../sim/difficulty.js';
 import type { Front, WorldMap } from '../sim/mapgen.js';
 import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
@@ -17,6 +18,24 @@ export interface World {
   radius: number | null;
   activeFronts: Front[];
   startedAt: Date | null;
+  // The Holy City's health: the run is lost at 0.
+  sanctity: number;
+  // The group's Svarog's Ember.
+  embers: number;
+  difficulty: Difficulty;
+  // The group's quiet hours for horde arrivals (null: none).
+  quietStart: number | null;
+  quietEnd: number | null;
+  quietUtcOffset: number;
+  // When Ritual Night's hordes set out (null: not called yet).
+  ritualAt: Date | null;
+  // When the run was won or lost.
+  endedAt: Date | null;
+}
+
+export function quietWindow(world: World): QuietWindow | null {
+  if (world.quietStart === null || world.quietEnd === null || world.quietStart === world.quietEnd) return null;
+  return { start: world.quietStart, end: world.quietEnd, utcOffsetMinutes: world.quietUtcOffset };
 }
 
 export interface NewWorld {
@@ -26,16 +45,19 @@ export interface NewWorld {
   hostAccountId?: number;
   maxPlayers?: number;
   inviteCode?: string;
+  difficulty?: Difficulty;
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
-  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt"`;
+  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers,
+  difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
+  ritual_at AS "ritualAt", ended_at AS "endedAt"`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
-    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${COLUMNS}`,
-    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null],
+    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code, difficulty)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${COLUMNS}`,
+    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'normal'],
   );
   return rows[0]!;
 }
@@ -65,6 +87,10 @@ export interface Member {
   accountId: number;
   displayName: string;
   joinedAt: Date;
+  // Their clan (data/clans.json); null until they pick one.
+  clan: string | null;
+  // Getting-started steps done: step -> when.
+  onboarding: Record<string, string>;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -76,13 +102,27 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
-    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt"
+    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.onboarding
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1
      ORDER BY m.joined_at, m.account_id`,
     [worldId],
   );
   return rows;
+}
+
+export async function setClan(client: DbClient, worldId: number, accountId: number, clan: string): Promise<void> {
+  await client.query('UPDATE world_members SET clan = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, clan]);
+}
+
+// Marks a getting-started step done; false if it already was.
+export async function markOnboarding(client: DbClient, worldId: number, accountId: number, step: string, at: Date): Promise<boolean> {
+  const { rowCount } = await client.query(
+    `UPDATE world_members SET onboarding = onboarding || jsonb_build_object($3::text, $4::text)
+     WHERE world_id = $1 AND account_id = $2 AND NOT onboarding ? $3`,
+    [worldId, accountId, step, at.toISOString()],
+  );
+  return rowCount === 1;
 }
 
 export async function isMember(client: DbClient, worldId: number, accountId: number): Promise<boolean> {
@@ -93,11 +133,36 @@ export async function isMember(client: DbClient, worldId: number, accountId: num
   return rowCount === 1;
 }
 
-export async function markStarted(client: DbClient, worldId: number, map: WorldMap, at: Date): Promise<void> {
+export async function markStarted(client: DbClient, worldId: number, map: WorldMap, at: Date, sanctity: number): Promise<void> {
   await client.query(
-    `UPDATE worlds SET status = 'running', seed = $2, radius = $3, active_fronts = $4, started_at = $5 WHERE id = $1`,
-    [worldId, map.seed, map.radius, map.activeFronts, at],
+    `UPDATE worlds SET status = 'running', seed = $2, radius = $3, active_fronts = $4, started_at = $5, sanctity = $6 WHERE id = $1`,
+    [worldId, map.seed, map.radius, map.activeFronts, at, sanctity],
   );
+}
+
+// A horde struck the Holy City: Sanctity falls, and at 0 the run is lost.
+export async function damageSanctity(client: DbClient, worldId: number, damage: number, at: Date): Promise<number> {
+  const { rows } = await client.query<{ sanctity: number }>(
+    `UPDATE worlds SET sanctity = GREATEST(0, sanctity - $2),
+       status = CASE WHEN sanctity - $2 <= 0 THEN 'lost' ELSE status END,
+       ended_at = CASE WHEN sanctity - $2 <= 0 THEN $3 ELSE ended_at END
+     WHERE id = $1 RETURNING sanctity`,
+    [worldId, damage, at],
+  );
+  return rows[0]!.sanctity;
+}
+
+export async function markRitual(client: DbClient, worldId: number, at: Date): Promise<void> {
+  await client.query('UPDATE worlds SET ritual_at = $2 WHERE id = $1', [worldId, at]);
+}
+
+// The Holy City outlasted Ritual Night.
+export async function markWon(client: DbClient, worldId: number, at: Date): Promise<void> {
+  await client.query("UPDATE worlds SET status = 'won', ended_at = $2 WHERE id = $1 AND status = 'running'", [worldId, at]);
+}
+
+export function isOver(world: World): boolean {
+  return world.status === 'won' || world.status === 'lost';
 }
 
 export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {
@@ -123,4 +188,23 @@ export async function loadHexes(client: DbClient, worldId: number): Promise<[num
     [worldId],
   );
   return rows.map((row) => [row.q, row.r, row.terrain]);
+}
+
+export async function addEmbers(client: DbClient, worldId: number, n: number): Promise<void> {
+  await client.query('UPDATE worlds SET embers = embers + $2 WHERE id = $1', [worldId, n]);
+}
+
+export async function setQuietHours(client: DbClient, worldId: number, window: QuietWindow | null): Promise<void> {
+  await client.query('UPDATE worlds SET quiet_start = $2, quiet_end = $3, quiet_utc_offset = $4 WHERE id = $1', [
+    worldId,
+    window?.start ?? null,
+    window?.end ?? null,
+    window?.utcOffsetMinutes ?? 0,
+  ]);
+}
+
+// Spends the group's Svarog's Ember; false if there isn't enough.
+export async function spendEmbers(client: DbClient, worldId: number, n: number): Promise<boolean> {
+  const { rowCount } = await client.query('UPDATE worlds SET embers = embers - $2 WHERE id = $1 AND embers >= $2', [worldId, n]);
+  return rowCount === 1;
 }

@@ -31,6 +31,8 @@ static func whereabouts(hero: Dictionary, village_id: int, place: String, now: f
 			return "%s is on the road to %s · %s" % [hero.name, place, TimeUtil.format_duration(TimeUtil.parse_iso(hero.arrivesAt) - now)]
 		"wounded":
 			return "%s lies wounded in %s · %s" % [hero.name, place, TimeUtil.format_duration(TimeUtil.parse_iso(hero.woundedUntil) - now)]
+		"with_army":
+			return "%s (Lv %d) leads an army in the field" % [hero.name, int(hero.level)]
 	if here:
 		return "Hero %s (Lv %d) leads this garrison" % [hero.name, int(hero.level)]
 	return "Hero %s (Lv %d) stands in %s" % [hero.name, int(hero.level), place]

@@ -6,7 +6,7 @@ extends Node
 signal connection_changed(connected: bool)
 signal village_updated(village: Dictionary)
 signal world_updated(world: Dictionary)
-signal waves_updated(world_id: int, waves: Array)
+signal waves_updated(world_id: int, waves: Array, leaders: Variant)
 signal scouting_updated(world_id: int, missions: Array)
 signal battles_updated(world_id: int, battles: Array)
 signal raids_updated(world_id: int, raids: Array)
@@ -16,6 +16,8 @@ signal research_updated(world_id: int, research: Array)
 signal heroes_updated(world_id: int, heroes: Array)
 signal orders_updated(world_id: int, orders: Array)
 signal inbox_updated(world_id: int, notifications: Array, unread: int)
+signal armies_updated(world_id: int, armies: Array)
+signal forts_updated(world_id: int, forts: Array)
 
 const RETRY_MIN_SEC := 1.0
 const RETRY_MAX_SEC := 30.0
@@ -90,13 +92,16 @@ func _handle(text: String) -> void:
 		"world":
 			world_updated.emit(message.world)
 		"waves":
-			waves_updated.emit(int(message.worldId), message.waves)
+			waves_updated.emit(int(message.worldId), message.waves, message.get("leaders"))
 		"scouting":
 			scouting_updated.emit(int(message.worldId), message.missions)
 		"battles":
 			battles_updated.emit(int(message.worldId), message.battles)
 		"raids":
 			raids_updated.emit(int(message.worldId), message.raids)
+		"armies":
+			armies_updated.emit(int(message.worldId), message.armies)
+			forts_updated.emit(int(message.worldId), message.get("forts", []))
 		"notifications":
 			inbox_updated.emit(int(message.worldId), message.notifications, int(message.unread))
 		"orders":

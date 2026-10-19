@@ -16,6 +16,7 @@ import { loadVillage } from '../db/villages.js';
 import { loadWave } from '../db/waves.js';
 import { listMembers, type World } from '../db/worlds.js';
 import { digestSummary, nextDigestAt } from '../sim/notifications.js';
+import { warningHours } from '../sim/walls.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -50,7 +51,10 @@ export const digestPayload = z.object({ accountId: z.number().int() });
 export async function planWaveWarning(client: DbClient, data: GameData, world: World, waveId: number, at: Date): Promise<void> {
   const wave = await loadWave(client, waveId);
   if (wave.targetVillageId === null || !wave.arrivesAt) return;
-  const warnAt = new Date(wave.arrivesAt.getTime() - (data.notifications.waveWarningHours * MS_PER_HOUR) / world.speed);
+  // A watchtower sees the horde coming sooner.
+  const target = await loadVillage(client, wave.targetVillageId);
+  const hours = data.notifications.waveWarningHours + warningHours(data, target.state.plots);
+  const warnAt = new Date(wave.arrivesAt.getTime() - (hours * MS_PER_HOUR) / world.speed);
   await scheduleEvent(client, world.id, warnAt > at ? warnAt : at, 'wave_warning', { waveId });
 }
 

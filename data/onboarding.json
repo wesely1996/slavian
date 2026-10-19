@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6). Each step is done by doing it once, in any order; its reward goes to the player's first village. The `story` is the elder's reason for asking.",
+  "steps": [
+    {
+      "id": "build",
+      "title": "Raise a building",
+      "hint": "Open your village and queue any building or field upgrade.",
+      "story": "The elder looks at the thin palisade and the half-empty fields. \"Walls and bread first, child. Everything else grows from them.\"",
+      "reward": { "wood": 150, "stone": 150, "grain": 100, "iron": 50 }
+    },
+    {
+      "id": "train",
+      "title": "Train defenders",
+      "hint": "Build a Barracks and train any unit there.",
+      "story": "\"The hordes do not wait for the harvest. Put spears in the hands of those who can hold them.\"",
+      "reward": { "wood": 100, "stone": 50, "grain": 150, "iron": 100 }
+    },
+    {
+      "id": "outpost",
+      "title": "Claim an outpost",
+      "hint": "Tap a forest, hill, field or mine hex near your village and claim it.",
+      "story": "\"The land around us is rich, and nobody tends it. Set a camp there before the beasts do.\"",
+      "reward": { "wood": 200, "stone": 200, "grain": 100, "iron": 100 }
+    },
+    {
+      "id": "scout",
+      "title": "Send scouts",
+      "hint": "Build a Scout Lodge and send scouts at a horde, a camp or an ancient site.",
+      "story": "\"Fear is what you feel about a thing you have not seen. Go and see it.\"",
+      "reward": { "wood": 100, "stone": 100, "grain": 100, "iron": 50 }
+    },
+    {
+      "id": "camp",
+      "title": "Clear your first camp",
+      "hint": "Send an army to storm a monster camp or a lair (order: storm it).",
+      "story": "\"A camp of beasts in the woods is a wave that has not yet happened. Burn it out.\"",
+      "reward": { "wood": 300, "stone": 300, "grain": 300, "iron": 200 }
+    },
+    {
+      "id": "gift",
+      "title": "Gift a teammate",
+      "hint": "Send a caravan to a teammate's village or to the Holy City vault.",
+      "story": "\"No village stands alone. What you share now comes back to you on the night the walls shake.\"",
+      "reward": { "wood": 200, "stone": 200, "grain": 200, "iron": 200 }
+    }
+  ]
+}

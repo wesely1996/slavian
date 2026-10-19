@@ -21,6 +21,20 @@ export interface Caravan {
   departsAt: Date;
   arrivesAt: Date;
   returnsAt: Date;
+  // Troops guarding it (away from their village until it is home).
+  escort: Record<string, number>;
+  // Set when a camp ambushed it.
+  ambush: CaravanAmbush | null;
+}
+
+export interface CaravanAmbush {
+  campId: number;
+  q: number;
+  r: number;
+  at: string;
+  beatenOff: boolean;
+  lost: Resources;
+  escortLosses: Record<string, number>;
 }
 
 interface CaravanRow {
@@ -37,6 +51,8 @@ interface CaravanRow {
   departs_at: Date;
   arrives_at: Date;
   returns_at: Date;
+  escort: Record<string, number>;
+  ambush: CaravanAmbush | null;
 }
 
 function fromRow(row: CaravanRow): Caravan {
@@ -54,17 +70,19 @@ function fromRow(row: CaravanRow): Caravan {
     departsAt: row.departs_at,
     arrivesAt: row.arrives_at,
     returnsAt: row.returns_at,
+    escort: row.escort,
+    ambush: row.ambush,
   };
 }
 
 export async function insertCaravan(
   client: DbClient,
-  caravan: Omit<Caravan, 'id' | 'carriedBack' | 'status'>,
+  caravan: Omit<Caravan, 'id' | 'carriedBack' | 'status' | 'ambush'>,
 ): Promise<Caravan> {
   const { rows } = await client.query<CaravanRow>(
     `INSERT INTO caravans
-       (world_id, village_id, destination_village_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+       (world_id, village_id, destination_village_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
     [
       caravan.worldId,
       caravan.villageId,
@@ -76,6 +94,7 @@ export async function insertCaravan(
       caravan.departsAt,
       caravan.arrivesAt,
       caravan.returnsAt,
+      JSON.stringify(caravan.escort),
     ],
   );
   return fromRow(rows[0]!);
@@ -117,4 +136,23 @@ export async function listCaravans(client: DbClient, worldId: number, recentDone
     [worldId, recentDone],
   );
   return rows.map(fromRow);
+}
+
+// A camp ambushed it: the cargo (or what it carries back) and its escort
+// shrink accordingly.
+export async function recordAmbush(
+  client: DbClient,
+  id: number,
+  ambush: CaravanAmbush,
+  cargo: Resources,
+  carriedBack: Resources | null,
+  escort: Record<string, number>,
+): Promise<void> {
+  await client.query('UPDATE caravans SET ambush = $2, cargo = $3, carried_back = $4, escort = $5 WHERE id = $1', [
+    id,
+    JSON.stringify(ambush),
+    JSON.stringify(cargo),
+    carriedBack ? JSON.stringify(carriedBack) : null,
+    JSON.stringify(escort),
+  ]);
 }

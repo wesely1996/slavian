@@ -1,5 +1,18 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { listLeaders, type EnemyLeader } from '../db/leaders.js';
+import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
+import { listRoadEdges } from '../db/roads.js';
+import { listRiverEdges } from '../db/rivers.js';
+import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
+import { runSummary } from '../db/runs.js';
+import { listForts, type Fort } from '../db/forts.js';
+import { listCamps } from '../db/camps.js';
+import { loadFear } from '../db/fear.js';
+import { listScrolls, listSites } from '../db/sites.js';
+import { findBridge } from '../db/bridges.js';
+import { newBridge } from '../sim/bridge.js';
+import { total } from '../sim/battle.js';
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
@@ -11,6 +24,7 @@ import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
 import { listOrders, type StoredOrder } from '../db/orders.js';
+import { listArmies, type Army } from '../db/armies.js';
 import { listNotifications, unreadCount, type Notification } from '../db/notifications.js';
 import { heroBonuses, xpToNext } from '../sim/heroes.js';
 import { loadVault, type Vault } from '../db/vaults.js';
@@ -18,7 +32,7 @@ import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
-import { listMembers, loadHexes, type World } from '../db/worlds.js';
+import { listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 
 export interface VillageView {
   id: number;
@@ -43,6 +57,13 @@ export interface VillageView {
   adminUpkeep: number;
   // The owner's research effects.
   bonuses: Record<string, number>;
+  // Troops sent to battles nearby: this share, within this many hexes.
+  reinforce: { share: number; range: number } | null;
+  // Razed: what stood (plots), since when, and while rebuilding when it
+  // stands again; with what rebuilding costs.
+  // A refugee camp: hordes raid it but never raze it.
+  refuge: boolean;
+  ruin: { plots: Record<string, { building: string | null; level: number }>; since: string; rebuildingUntil: string | null } | null;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -76,6 +97,9 @@ export function villageView(village: Village): VillageView {
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
+    reinforce: village.reinforce ?? null,
+    ruin: village.ruin ?? null,
+    refuge: village.refuge === true,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -108,7 +132,41 @@ export function waveView(wave: Wave) {
     path: wave.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
     arrivesAt: wave.arrivesAt?.toISOString() ?? null,
     endsAt: wave.endsAt?.toISOString() ?? null,
+    // Its rampage clock (from its first target) and the villages it struck.
+    rampageEndsAt: wave.rampageEndsAt?.toISOString() ?? null,
+    struck: wave.struck,
+    ritual: wave.ritual,
+    // The enemy leader at its head (see leaders), if any.
+    leaderId: wave.leaderId,
   };
+}
+
+// Enemy leaders, living and fallen: who they are, how strong, their record.
+export function leaderView(data: GameData, leader: EnemyLeader) {
+  return {
+    id: leader.id,
+    front: leader.front,
+    name: leader.name,
+    title: leaderTitle(data, leader.front, leader),
+    level: leader.level,
+    xp: leader.xp,
+    xpToNext: leader.level >= data.leaders.maxLevel ? null : leaderXpToNext(data, leader.level),
+    skills: leader.skills,
+    effects: leaderEffects(data, leader),
+    status: leader.status,
+    woundedUntil: leader.woundedUntil?.toISOString() ?? null,
+    battles: leader.battles,
+    wins: leader.wins,
+    losses: leader.losses,
+    razed: leader.razed,
+    kills: leader.kills,
+    grudgeVillageId: leader.grudgeVillageId,
+    diedAt: leader.diedAt?.toISOString() ?? null,
+  };
+}
+
+export async function leadersView(client: DbClient, data: GameData, worldId: number) {
+  return (await listLeaders(client, worldId)).map((l) => leaderView(data, l));
 }
 
 export async function wavesView(client: DbClient, worldId: number) {
@@ -136,11 +194,19 @@ export async function scoutingView(client: DbClient, worldId: number) {
 }
 
 // Battles are fought in the open: both sides' numbers are visible.
-export function battleView(battle: Battle, attackerNow: Record<string, number>) {
+// `front`: whose horde or camp the enemy came from (null when unknown).
+export function battleView(battle: Battle, attackerNow: Record<string, number>, front: string | null = null, leaderId: number | null = null) {
   return {
     id: battle.id,
+    front,
+    leaderId,
     waveId: battle.waveId,
+    campId: battle.campId,
+    siteId: battle.siteId,
     villageId: battle.villageId,
+    q: battle.q,
+    r: battle.r,
+    setup: battle.setup,
     status: battle.status,
     round: battle.round,
     attackerStance: battle.attackerStance,
@@ -149,6 +215,7 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
     defenderInitial: battle.defenderInitial,
     rounds: battle.rounds,
     loot: battle.loot,
+    decision: battle.decision,
     startedAt: battle.startedAt.toISOString(),
     endedAt: battle.endedAt?.toISOString() ?? null,
   };
@@ -156,15 +223,33 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
 
 export async function battlesView(client: DbClient, worldId: number) {
   const battles = await listRecentBattles(client, worldId);
-  const waves = new Map<number, Record<string, number>>();
+  const waves = new Map<number, { composition: Record<string, number>; front: string; leader_id: number | null }>();
+  const camps = new Map<number, string>();
   if (battles.length) {
-    const { rows } = await client.query<{ id: number; composition: Record<string, number> }>(
-      'SELECT id, composition FROM waves WHERE id = ANY($1)',
-      [battles.map((b) => b.waveId)],
+    const { rows } = await client.query<{ id: number; composition: Record<string, number>; front: string; leader_id: number | null }>(
+      'SELECT id, composition, front, leader_id FROM waves WHERE id = ANY($1)',
+      [battles.map((b) => b.waveId).filter((id) => id !== null)],
     );
-    for (const row of rows) waves.set(row.id, row.composition);
+    for (const row of rows) waves.set(row.id, row);
+    const campRows = await client.query<{ id: number; front: string }>('SELECT id, front FROM camps WHERE id = ANY($1)', [
+      battles.map((b) => b.campId).filter((id) => id !== null),
+    ]);
+    for (const row of campRows.rows) camps.set(row.id, row.front);
   }
-  return battles.map((battle) => battleView(battle, waves.get(battle.waveId) ?? {}));
+  // A camp's numbers after the assault: its start minus what fell.
+  const after = (battle: Battle) => {
+    const left: Record<string, number> = { ...battle.attackerInitial };
+    for (const round of battle.rounds) for (const [unit, n] of Object.entries(round.attackerLosses)) left[unit] = (left[unit] ?? 0) - n;
+    return Object.fromEntries(Object.entries(left).filter(([, n]) => n > 0));
+  };
+  return battles.map((battle) =>
+    battleView(
+      battle,
+      battle.waveId === null ? after(battle) : (waves.get(battle.waveId)?.composition ?? {}),
+      battle.waveId !== null ? (waves.get(battle.waveId)?.front ?? null) : battle.campId !== null ? (camps.get(battle.campId) ?? null) : null,
+      battle.waveId !== null ? (waves.get(battle.waveId)?.leader_id ?? null) : null,
+    ),
+  );
 }
 
 export function raidView(raid: Raid) {
@@ -200,6 +285,9 @@ export function caravanView(caravan: Caravan) {
     departsAt: caravan.departsAt.toISOString(),
     arrivesAt: caravan.arrivesAt.toISOString(),
     returnsAt: caravan.returnsAt.toISOString(),
+    // Troops guarding it, and what happened if a camp ambushed it.
+    escort: caravan.escort,
+    ambush: caravan.ambush,
   };
 }
 
@@ -267,6 +355,8 @@ export function heroView(data: GameData, hero: Hero) {
     status: hero.status,
     // Where it stands (or, travelling, where it is heading).
     villageId: hero.villageId,
+    // Leading this army (status 'with_army').
+    armyId: hero.armyId,
     level: hero.level,
     xp: hero.xp,
     xpToNext: hero.level >= data.heroes.maxLevel ? null : xpToNext(data, hero.level),
@@ -321,6 +411,49 @@ export async function inboxView(client: DbClient, accountId: number, worldId: nu
   };
 }
 
+export function armyView(army: Army) {
+  return {
+    id: army.id,
+    ownerAccountId: army.ownerAccountId,
+    homeVillageId: army.homeVillageId,
+    targetVillageId: army.targetVillageId,
+    target: [army.targetQ, army.targetR],
+    heroAccountId: army.heroAccountId,
+    orders: army.orders,
+    // Carried home from a cleared camp.
+    loot: army.loot,
+    units: army.units,
+    status: army.status,
+    battleId: army.battleId,
+    // [q, r, ms after departsAt]; home is the same road backwards from leavesAt.
+    path: army.path.map((step) => [step.q, step.r, step.atMs]),
+    departsAt: army.departsAt.toISOString(),
+    arrivesAt: army.arrivesAt.toISOString(),
+    leavesAt: army.leavesAt?.toISOString() ?? null,
+    returnsAt: army.returnsAt?.toISOString() ?? null,
+  };
+}
+
+export async function armiesView(client: DbClient, worldId: number) {
+  return (await listArmies(client, worldId)).map(armyView);
+}
+
+export function fortView(fort: Fort) {
+  return {
+    id: fort.id,
+    ownerAccountId: fort.ownerAccountId,
+    villageId: fort.villageId,
+    q: fort.q,
+    r: fort.r,
+    status: fort.status,
+    completesAt: fort.completesAt.toISOString(),
+  };
+}
+
+export async function fortsView(client: DbClient, worldId: number) {
+  return (await listForts(client, worldId)).map(fortView);
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -331,12 +464,20 @@ export function worldSummary(world: World) {
     maxPlayers: world.maxPlayers,
     hostAccountId: world.hostAccountId,
     startedAt: world.startedAt?.toISOString() ?? null,
+    sanctity: world.sanctity,
+    embers: world.embers,
+    difficulty: world.difficulty,
+    // Hordes don't arrive in the group's quiet hours (minutes after local midnight).
+    quietHours: quietWindow(world),
+    // When Ritual Night's hordes set out, and when the run ended.
+    ritualAt: world.ritualAt?.toISOString() ?? null,
+    endedAt: world.endedAt?.toISOString() ?? null,
   };
 }
 
 // Everything a member needs to render the world. Co-op: every member sees
 // every village in full.
-export async function worldView(client: DbClient, data: GameData, world: World) {
+export async function worldView(client: DbClient, data: GameData, world: World, at: Date = new Date()) {
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, world.id);
@@ -346,15 +487,42 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const expeditions = await expeditionsView(client, world.id);
   const research = await researchListView(client, world.id);
   const heroes = await heroesView(client, data, world.id);
+  const leaders = await leadersView(client, data, world.id);
   const orders = await ordersView(client, world.id);
+  const armies = await armiesView(client, world.id);
+  const forts = await fortsView(client, world.id);
+  const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units), waveId: c.waveId }));
+  const sites = (await listSites(client, world.id)).map((s) => ({
+    id: s.id,
+    kind: s.kind,
+    q: s.q,
+    r: s.r,
+    status: s.status,
+    // How many guard it, once someone has fought them (null: unknown).
+    guardians: s.guardiansSeen ? total(s.guardians) : null,
+    exploredBy: s.exploredBy,
+    find: s.find,
+    exploredAt: s.exploredAt?.toISOString() ?? null,
+  }));
+  const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
+  const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);
+  const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
       ? null
-      : { radius: world.radius, activeFronts: world.activeFronts, hexes: await loadHexes(client, world.id) };
+      : {
+          radius: world.radius,
+          activeFronts: world.activeFronts,
+          hexes: await loadHexes(client, world.id),
+          // [aq, ar, bq, br, crossing]: river edges, and their bridges ('standing', 'building' or 'none').
+          rivers: (await listRiverEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.crossing]),
+          // [aq, ar, bq, br, status]: roads ('standing' or 'building').
+          roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status]),
+        };
   return {
     ...worldSummary(world),
-    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName })),
+    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, onboarding: m.onboarding })),
     villages: villages.map(villageView),
     waves,
     scouting,
@@ -363,7 +531,23 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     expeditions,
     research,
     heroes,
+    leaders,
     orders,
+    armies,
+    forts,
+    camps,
+    // Ancient sites, and the group's lore scrolls.
+    sites,
+    lore,
+    // The Kalinov Bridge (see sim/bridge.ts).
+    bridge,
+    // [q, r, fear]: where hordes were beaten, and how much they remember it.
+    fear,
+    // Hand-overs still running, and what delegates did lately.
+    delegations: (await activeDelegations(client, world.id, at)).map((d) => ({ ...d, since: d.since.toISOString(), until: d.until.toISOString() })),
+    delegationLog: (await recentDelegationLog(client, world.id)).map((e) => ({ ...e, at: e.at.toISOString() })),
+    // How a finished run went (null while it goes on).
+    run: await runSummary(client, world),
     ...logistics,
     map,
   };

@@ -1,5 +1,9 @@
 import type { Stance, TerrainId } from '../data/index.js';
-import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { loadLand } from '../db/rivers.js';
+import type { OnboardingStep } from '../data/index.js';
+import { onboardingStep } from '../scheduler/onboarding.js';
+import { authorize } from '../db/delegations.js';
+import { NotFoundError, RuleError } from '../errors.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
 import { listResearch, startResearch, type ResearchEntry } from '../db/research.js';
@@ -21,6 +25,10 @@ import { ACADEMY, researchMs, researchProblem } from '../sim/research.js';
 import { spend } from '../sim/resources.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
+import { startRebuild } from '../scheduler/horde.js';
+import { campAt } from '../db/camps.js';
+import { listScrolls, siteAt } from '../db/sites.js';
+import { rebuildCost } from '../sim/horde.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
 import {
   abandonOutpost,
@@ -41,6 +49,10 @@ export interface VillageCommandInput {
   accountId: number;
   villageId: number;
   now: Date;
+  // Commands that work on a razed village (rebuilding it).
+  allowRuin?: boolean;
+  // What the command does, for the delegation log ("queued a build").
+  action?: string;
 }
 
 // Runs a command on the caller's own village with the world locked and
@@ -49,7 +61,7 @@ export async function ownVillageCommand<T>(
   db: Db,
   deps: SchedulerDeps,
   input: VillageCommandInput,
-  apply: (ctx: { client: DbClient; world: World; village: Village }) => Promise<{ state: VillageState; result: T }>,
+  apply: (ctx: { client: DbClient; world: World; village: Village }) => Promise<{ state: VillageState; result: T; onboarding?: OnboardingStep | null }>,
 ): Promise<{ village: Village; result: T }> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [
     input.villageId,
@@ -60,11 +72,22 @@ export async function ownVillageCommand<T>(
   return withWorld(db, worldId, input.now, deps, async (client) => {
     const world = await getWorld(client, worldId);
     const village = await loadVillage(client, input.villageId);
-    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
-    const { state, result } = await apply({ client, world, village });
+    await authorize(client, {
+      worldId,
+      ownerAccountId: village.ownerAccountId,
+      actorAccountId: input.accountId,
+      at: input.now,
+      action: input.action ?? 'gave orders',
+      villageId: village.id,
+    });
+    if (village.ruin && !input.allowRuin) throw new RuleError(`${village.name} lies in ruins; rebuild it first`);
+    const { state, result, onboarding } = await apply({ client, world, village });
     await saveVillageState(client, village.id, state);
     await notifyWorld(client, { worldId, type: 'village', villageId: village.id });
-    return { village: { ...village, state }, result };
+    if (!onboarding) return { village: { ...village, state }, result };
+    // A getting-started step's reward may land in this very village.
+    await onboardingStep(client, deps.data, world, village.ownerAccountId, onboarding, input.now);
+    return { village: await loadVillage(client, village.id), result };
   });
 }
 
@@ -73,7 +96,7 @@ export async function queueBuildCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & BuildOrder,
 ): Promise<{ village: Village; queued: QueuedBuild }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'queued a build' }, async ({ client, world, village }) => {
     const order: BuildOrder = {
       ...(input.plot ? { plot: input.plot } : {}),
       ...(input.building ? { building: input.building } : {}),
@@ -86,7 +109,7 @@ export async function queueBuildCommand(
       targetLevel: queued.targetLevel,
     };
     await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', payload);
-    return { state, result: queued };
+    return { state, result: queued, onboarding: 'build' };
   });
   return { village, queued: result };
 }
@@ -96,12 +119,12 @@ export async function trainUnitsCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { unit: string; count: number },
 ): Promise<{ village: Village; batch: TrainingBatch }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'queued training' }, async ({ client, world, village }) => {
     const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
     const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned);
     const payload: TrainingCompletePayload = { villageId: village.id };
     await scheduleEvent(client, world.id, batchCompletesAt(batch), 'training_complete', payload);
-    return { state, result: batch };
+    return { state, result: batch, onboarding: 'train' };
   });
   return { village, batch: result };
 }
@@ -113,7 +136,7 @@ export async function sendScoutsCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { waveId: number; count: number },
 ): Promise<{ village: Village; mission: ScoutMission }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent scouts' }, async ({ client, world, village }) => {
     const max = deps.data.scouting.maxScouts;
     if (!Number.isInteger(input.count) || input.count < 1 || input.count > max) {
       throw new RuleError(`Send between 1 and ${max} scouts`);
@@ -123,7 +146,7 @@ export async function sendScoutsCommand(
     if (wave.status === 'dispersed' || wave.status === 'defeated') throw new RuleError('That horde has already scattered');
 
     const state = sendAway(village.state, SCOUT_UNIT, input.count, input.now);
-    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
     const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, await effectiveBonuses(client, deps.data, village));
@@ -141,7 +164,7 @@ export async function sendScoutsCommand(
     const payload: MissionPayload = { missionId: mission.id };
     await scheduleEvent(client, world.id, arrivesAt, 'scout_arrive', payload);
     await notifyWorld(client, { worldId: world.id, type: 'scouting' });
-    return { state, result: mission };
+    return { state, result: mission, onboarding: 'scout' };
   });
   return { village, mission: result };
 }
@@ -152,7 +175,7 @@ export async function setStanceCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { stance: Stance },
 ): Promise<{ village: Village }> {
-  const { village } = await ownVillageCommand(db, deps, input, async ({ village }) => ({
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'changed the stance' }, async ({ village }) => ({
     state: { ...village.state, stance: input.stance },
     result: null,
   }));
@@ -166,10 +189,12 @@ export async function claimOutpostCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { q: number; r: number },
 ): Promise<{ village: Village; queued: QueuedBuild }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'claimed an outpost' }, async ({ client, world, village }) => {
     const cell = hex(input.q, input.r);
     const terrain = (await loadHexes(client, world.id)).find(([q, r]) => q === cell.q && r === cell.r)?.[2];
     if (!terrain) throw new RuleError('That hex is not on the map');
+    if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
+    if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
     const taken = new Set<string>();
     for (const other of await listVillages(client, world.id)) {
       taken.add(hexKey(hex(other.q, other.r)));
@@ -184,7 +209,7 @@ export async function claimOutpostCommand(
       targetLevel: queued.targetLevel,
     };
     await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', payload);
-    return { state, result: queued };
+    return { state, result: queued, onboarding: 'outpost' };
   });
   return { village, queued: result };
 }
@@ -195,7 +220,7 @@ export async function abandonOutpostCommand(
   input: VillageCommandInput & { q: number; r: number },
 ): Promise<{ village: Village }> {
   const cell: Hex = hex(input.q, input.r);
-  const { village } = await ownVillageCommand(db, deps, input, async ({ world, village }) => ({
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'abandoned an outpost' }, async ({ world, village }) => ({
     state: abandonOutpost(deps.data, village.state, outpostPlot(cell), input.now, world.speed),
     result: null,
   }));
@@ -209,10 +234,9 @@ export async function foundVillageCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { q: number; r: number; name?: string },
 ): Promise<{ village: Village; expedition: Expedition }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent settlers' }, async ({ client, world, village }) => {
     const cell = hex(input.q, input.r);
-    const hexes = await loadHexes(client, world.id);
-    const terrain = new Map<string, TerrainId>(hexes.map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const villages = await listVillages(client, world.id);
     const outposts = new Set(villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => hexKey(outpostHex(plot)!))));
     const home = hex(village.q, village.r);
@@ -224,6 +248,8 @@ export async function foundVillageCommand(
       outposts,
     });
     if (problem) throw new RuleError(problem);
+    if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
+    if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
     if (await outboundTo(client, world.id, cell.q, cell.r)) throw new RuleError('Settlers are already on their way there');
 
     const settlers = deps.data.expansion.settlersNeeded;
@@ -269,17 +295,18 @@ export async function startResearchCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { tech: string },
 ): Promise<{ village: Village; research: ResearchEntry }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'started research' }, async ({ client, world, village }) => {
     const accountId = village.ownerAccountId!;
     const entries = await listResearch(client, world.id, accountId);
     const problem = researchProblem(deps.data, input.tech, {
       academyLevel: village.state.levels[ACADEMY] ?? 0,
       done: new Set(entries.filter((e) => e.status === 'done').map((e) => e.tech)),
       researching: entries.some((e) => e.status === 'researching'),
+      scrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
     });
     if (problem) throw new RuleError(problem);
     const ledger = spend(village.state.ledger, input.now, deps.data.research.techs[input.tech]!.cost);
-    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed));
+    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed, village.state.bonuses));
     const research = await startResearch(client, {
       worldId: world.id,
       accountId,
@@ -294,4 +321,19 @@ export async function startResearchCommand(
     return { state: { ...village.state, ledger }, result: research };
   });
   return { village, research: result };
+}
+
+// Rebuilds a razed village: pays a share of what stood, and it stands again
+// after the rebuild time.
+export async function rebuildCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput): Promise<{ village: Village; result: Date }> {
+  const done = await ownVillageCommand(db, deps, { ...input, allowRuin: true, action: 'began rebuilding' }, async ({ client, world, village }) => {
+    if (!village.ruin) throw new RuleError(`${village.name} is not in ruins`);
+    if (village.ruin.rebuildingUntil) throw new RuleError(`${village.name} is already being rebuilt`);
+    const state = { ...village.state, ledger: spend(village.state.ledger, input.now, rebuildCost(deps.data, village.ruin.plots)) };
+    const until = await startRebuild(client, deps.data, world, village, input.now);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    return { state, result: until };
+  });
+  const { village } = done;
+  return { ...done, village: { ...village, ruin: { ...village.ruin!, rebuildingUntil: done.result.toISOString() } } };
 }
