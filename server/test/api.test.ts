@@ -214,7 +214,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     let world = (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body;
     expect(world.waves[0]).toMatchObject({ index: 0, status: 'battling' });
     const battle = world.battles[0];
-    expect(battle).toMatchObject({ waveId: marching.id, villageId: village.id, status: 'ongoing', round: 0, defenderInitial: {} });
+    expect(battle).toMatchObject({ waveId: marching.id, front: marching.front, villageId: village.id, status: 'ongoing', round: 0, defenderInitial: {} });
     expect(battle.attackerStance).toBeTruthy();
 
     // Work started just before the round; the raid will burn it.
