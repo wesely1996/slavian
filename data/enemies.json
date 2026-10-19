@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "_comment": "Enemy forces per front. siege: how hard a unit batters walls (walls.json); engine: what the front builds on site to breach them, siegeCraft how long that takes (0: never). weight sets how common a unit is in a wave; minWave is the first wave index it can appear in, minPlayers the smallest group that sees it. speed is hexes per hour on plains, like player units. family drives counters in battle; stances weights how often a wave of this front takes each battle stance. personality: lootFactor scales what a raid carries off, raidReach is how far from its road a horde burns outposts, nerve scales its stance's retreat threshold (higher holds longer, capped at never breaking before 95%). razeBias and erratic feed the horde AI (data/horde.json).",
+  "_comment": "Enemy forces per front. siege: how hard a unit batters walls (walls.json); escalade: how many men a climbing engine (ladders, siege towers) carries over the walls a round, setupFactor how long it takes to build (x the front's siegeCraft); engine: what the front builds on site to breach them, siegeCraft how long that takes (0: never). weight sets how common a unit is in a wave; minWave is the first wave index it can appear in, minPlayers the smallest group that sees it. speed is hexes per hour on plains, like player units. family drives counters in battle; stances weights how often a wave of this front takes each battle stance. personality: lootFactor scales what a raid carries off, raidReach is how far from its road a horde burns outposts, nerve scales its stance's retreat threshold (higher holds longer, capped at never breaking before 95%). razeBias and erratic feed the horde AI (data/horde.json).",
   "fronts": {
     "north": {
       "faction": "Monsters of the North",
@@ -30,7 +30,7 @@
         "lancer": { "name": "Lancer", "weight": 2, "minWave": 1, "attack": 45, "defense": 25, "speed": 9, "family": "cavalry" },
         "shaman": { "name": "Steppe Shaman", "weight": 0.5, "minWave": 2, "attack": 25, "defense": 20, "speed": 7, "family": "infantry" },
         "khans_guard": { "name": "Khan's Guard", "weight": 0.6, "minWave": 3, "attack": 70, "defense": 45, "speed": 9, "family": "cavalry" },
-        "scaling_ladders": { "name": "Scaling Ladders", "weight": 0, "minWave": 0, "attack": 0, "defense": 8, "speed": 6, "family": "infantry", "siege": 6 }
+        "scaling_ladders": { "name": "Scaling Ladder", "weight": 0, "minWave": 0, "attack": 0, "defense": 8, "speed": 6, "family": "infantry", "escalade": 8, "setupFactor": 0.6 }
       },
       "stances": { "offensive": 4, "balanced": 3, "defensive": 2, "hold_the_line": 0.5 }
     },
@@ -46,7 +46,8 @@
         "knight_brother": { "name": "Knight-Brother", "weight": 1.5, "minWave": 1, "attack": 50, "defense": 45, "speed": 7, "family": "cavalry" },
         "inquisitor": { "name": "Inquisitor", "weight": 0.5, "minWave": 2, "attack": 40, "defense": 35, "speed": 5, "family": "infantry" },
         "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "minPlayers": 3, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
-        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 }
+        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
+        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 5, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
       },
       "stances": { "hold_the_line": 4, "defensive": 2, "balanced": 3, "offensive": 1 }
     },
@@ -55,14 +56,15 @@
       "signature": "The Order's western host: knights and crossbows. Slow, and they do not break easily.",
       "spawnTerrain": ["hallowed"],
       "personality": { "lootFactor": 0.8, "raidReach": 1, "nerve": 1.25, "razeBias": 1, "erratic": 0.05, "siegeCraft": 0.8 },
-      "engine": "siege_ram",
+      "engine": "siege_tower",
       "units": {
         "zealot": { "name": "Zealot", "weight": 4, "minWave": 0, "attack": 20, "defense": 30, "speed": 5, "family": "infantry" },
         "crossbowman": { "name": "Crossbowman", "weight": 3, "minWave": 0, "attack": 35, "defense": 20, "speed": 5, "family": "archers" },
         "knight_brother": { "name": "Knight-Brother", "weight": 2.5, "minWave": 0, "attack": 50, "defense": 45, "speed": 7, "family": "cavalry" },
         "inquisitor": { "name": "Inquisitor", "weight": 0.5, "minWave": 2, "attack": 40, "defense": 35, "speed": 5, "family": "infantry" },
         "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
-        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 }
+        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
+        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 5, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
       },
       "stances": { "hold_the_line": 3, "defensive": 2, "balanced": 3, "offensive": 2 }
     }

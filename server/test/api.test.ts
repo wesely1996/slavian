@@ -1705,7 +1705,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
     const battle = world.battles[0];
-    const integrity = Math.round(120 * 6);
+    // Stone walls: toughness 1.35.
+    const integrity = Math.round(120 * 6 * 1.35);
     expect(battle.setup.wall).toEqual({ level: 6, integrity, max: integrity });
     // A front that builds engines sets them up first; the assault waits.
     const front = scheduler.data.enemies.fronts[battle.front as 'north']!;

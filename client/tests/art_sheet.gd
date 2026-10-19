@@ -59,7 +59,7 @@ func _run() -> void:
 		owners.add_child(_owned(side[0], side[1]))
 	owners.add_child(_tile("app/icon"))
 	column.add_child(owners)
-	column.add_child(_label("Interface: slate panels, flat and gold buttons, underlined tabs, Cinzel and Inter", 24))
+	column.add_child(_label("Interface: wood band, flax sheets, malachite actions, madder tabs; PT Sans and Old Standard", 24))
 	column.add_child(_interface())
 	for i in 6:
 		await process_frame

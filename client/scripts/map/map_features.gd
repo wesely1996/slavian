@@ -18,7 +18,7 @@ const FEATURES := {
 	"steppe": [["feature/grass", 3, 0.26, 0.75]],
 	"plains": [["feature/bush", 1, 0.26, 0.7], ["feature/grass", 2, 0.24, 0.75]],
 	"ice": [["feature/ice", 2, 0.5, 0.55]],
-	"hallowed": [["feature/menhir", 3, 0.3, 0.6]],
+	"hallowed": [["feature/blossom", 4, 0.3, 0.6]],
 }
 
 var hex_size := 48.0

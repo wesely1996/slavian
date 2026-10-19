@@ -172,6 +172,11 @@ func _test_village_layout() -> void:
 
 	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12)
 	_check(rects.size() == 25, "a rect per plot (12 fields, 12 slots, the gate)")
+	_check((rects["c0"] as Rect2).get_center().is_equal_approx(Vector2(500, 500)), "the Hall stands in the middle")
+	var ring := []
+	for i in range(1, 12):
+		ring.append(snappedf((rects["c%d" % i] as Rect2).get_center().distance_to(Vector2(500, 500)), 0.01))
+	_check(ring.min() > 150.0 and ring.max() < 200.0, "the other slots stand in a ring around it: %s" % [ring])
 	for a in rects:
 		_check(VillageView.plot_at(rects, (rects[a] as Rect2).get_center()) == a, "tapping %s picks it" % a)
 		for b in rects:
@@ -545,16 +550,26 @@ func _test_art() -> void:
 	for f in ["woodcutter", "quarry", "farm", "iron_mine"]:
 		if not Art.has(Art.building_id(f, 2, true)):
 			missing_art.append(f)
-	for b in ["wall", "archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]:
+	for material in ["wood", "timber", "stone", "fortress"]:
+		if not Art.has(Art.building_id("wall", 1, false, material)):
+			missing_art.append(material)
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var fronts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("enemies.json"))).fronts
+	for front in fronts:
+		for unit in fronts[front].units:
+			if not Art.has("unit/" + unit):
+				missing_art.append("unit/" + unit)
+	for b in ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]:
 		for level in [1, 5, 10]:
 			if not Art.has(Art.building_id(b, level)):
 				missing_art.append(Art.building_id(b, level))
-	_check(missing_art.is_empty(), "art for every village building: %s" % [missing_art])
+	_check(missing_art.is_empty(), "art for every village building, wall material and enemy unit: %s" % [missing_art])
 	var theme := UiTheme.build()
 	var panel := theme.get_stylebox("panel", "PanelContainer")
-	_check(panel is StyleBoxFlat and (panel as StyleBoxFlat).shadow_size > 0, "panels are slate glass with a shadow")
+	_check(panel is StyleBoxFlat and (panel as StyleBoxFlat).bg_color.is_equal_approx(UiTheme.FLAX) and (panel as StyleBoxFlat).shadow_size == 0, "sheets are flat flax")
 	var open_tab := theme.get_stylebox("disabled", "TabButton")
-	_check(open_tab is StyleBoxFlat and (open_tab as StyleBoxFlat).border_width_bottom == 3, "open tab underlined")
+	_check(open_tab is StyleBoxFlat and (open_tab as StyleBoxFlat).border_width_bottom == 4 and (open_tab as StyleBoxFlat).border_color == UiTheme.MADDER, "open tab underlined in madder")
+	_check(theme.get_stylebox("focus", "Button") is StyleBoxFlat, "keyboard focus is visible")
 	_check(theme.get_stylebox("normal", "Primary") is StyleBoxFlat, "a gold primary button")
 	_check(theme.get_font("font", "Heading") != null and theme.default_font != null, "fonts loaded")
 	var heading_font := theme.get_font("font", "Heading")
@@ -643,26 +658,37 @@ func _test_translation() -> void:
 
 
 func _test_walls() -> void:
-	var data := {"walls": {"slotsAt": [1, 3, 5, 7, 9], "tiers": [{"minLevel": 1, "name": "Palisade"}, {"minLevel": 4, "name": "Stone Wall"}, {"minLevel": 8, "name": "Fortress Walls"}],
-		"integrityPerLevel": 120, "defensePerLevel": 0.03,
-		"towers": {"gate_tower": {"integrityPerLevel": 0.08}, "archer_tower": {"attackPerLevel": 0.05}, "ditch": {"siegeCutPerLevel": 0.05, "setupPerLevel": 0.1}, "watchtower": {"warningHoursPerLevel": 1}}},
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var data := {"walls": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("walls.json"))),
+		"enemies": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("enemies.json"))),
 		"buildings": {"village": {"centerSlots": 12, "slotsUnlockedAtStart": 4, "slotsPerHallLevel": 1}}}
 	var village := {"levels": {"elder_hall": 1}, "plots": {"w": {"building": "wall", "level": 3}, "t0": {"building": null, "level": 0}, "t1": {"building": null, "level": 0}, "t2": {"building": null, "level": 0}, "c5": {"building": null, "level": 0}, "f0": {"building": "farm", "level": 0}}}
 	_check(Rules.open_tower_slots(data, 3) == 2 and Rules.tower_unlock_level(data, 2) == 5, "wall slots open with the walls")
 	_check(not Rules.is_locked(data, village, "t1") and Rules.is_locked(data, village, "t2"), "wall slot locks")
 	_check(Rules.is_locked(data, village, "c5") and not Rules.is_locked(data, village, "w") and not Rules.is_locked(data, village, "f0"), "other plots lock as before")
 	_check(Rules.plot_ids(village) == ["f0", "c5", "w", "t0", "t1", "t2"], "plots in layout order: %s" % [Rules.plot_ids(village)])
-	_check(WallText.tier(data, 3) == "Palisade" and WallText.tier(data, 8) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
-	_check(WallText.integrity(data, 5, 2) == 696, "wall integrity with a gate tower")
+	_check(WallText.tier(data, 2) == "Palisade" and WallText.tier(data, 3) == "Timber Rampart" and WallText.tier(data, 8) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
+	_check(WallText.material(data, 1) == "wood" and WallText.material(data, 6) == "stone" and WallText.material(data, 0) == "", "wall materials")
+	_check(WallText.integrity(data, 5, 2) == roundi(120 * 5 * 1.35 * 1.16), "wall integrity by material, with a gate tower: %d" % WallText.integrity(data, 5, 2))
+	_check(WallText.capacity(data, 4) == 120, "the walls hold 30 men a level")
+	_check(not WallText.moat_water(data, 3) and WallText.moat_water(data, 4), "the moat holds water from level 4")
+	_check(WallText.tower_effect(data, "ditch", 1).begins_with("A dry moat with stakes keeps off 5% of the battering and 6% of the climbers"), "moat effect: %s" % WallText.tower_effect(data, "ditch", 1))
+	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
+	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
 	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2 hours earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")
-	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12, 5)
-	var keys := rects.keys()
+	# Every village's own outline keeps its plots clear of each other.
 	var clear := true
-	for i in keys.size():
-		for j in range(i + 1, keys.size()):
-			if (rects[keys[i]] as Rect2).intersects(rects[keys[j]]):
-				clear = false
-				printerr("overlap ", keys[i], " ", keys[j])
-	_check(clear and rects.has("w") and rects.has("t4"), "walls and slots laid out clear of the rest")
+	var differ := false
+	for seed in range(0, 200, 7):
+		var rects := VillageView.layout(Vector2(1000, 1000), 12, 12, 5, seed)
+		var keys := rects.keys()
+		for i in keys.size():
+			for j in range(i + 1, keys.size()):
+				if (rects[keys[i]] as Rect2).intersects(rects[keys[j]]):
+					clear = false
+					printerr("overlap at seed ", seed, ": ", keys[i], " ", keys[j])
+		differ = differ or not (rects["f3"] as Rect2).is_equal_approx(VillageView.layout(Vector2(1000, 1000), 12, 12, 5, 0)["f3"])
+	_check(clear, "walls and slots laid out clear of the rest, for any village")
+	_check(differ, "each village has its own outline")
 

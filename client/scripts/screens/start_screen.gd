@@ -28,21 +28,32 @@ func _ready() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	margin.add_child(scroll)
+	# One column, as wide as a phone, in the middle of any screen.
 	var root := UI.vbox(24)
-	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.size_flags_horizontal = Control.SIZE_SHRINK_CENTER | Control.SIZE_EXPAND
+	root.custom_minimum_size.x = minf(720.0, get_viewport_rect().size.x - 48.0)
 	scroll.add_child(root)
 
 	var picture := UI.icon("ui/title", 0)
 	picture.custom_minimum_size.y = 328
 	root.add_child(picture)
-	var title := UI.label(tr("Slavian"), UI.TITLE_SIZE)
+	var title := UI.label(tr("Slavian"), 96)
+	title.theme_type_variation = "Logo"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(title)
-	var tagline := UI.label(tr("Defend the Holy City. Build the Kalinov Bridge."), UI.SMALL_SIZE, UI.MUTED)
+	var tagline := UI.label(tr("Defend the Holy City. Build the Kalinov Bridge."), UI.SMALL_SIZE + 4)
+	tagline.theme_type_variation = "OnWoodMuted"
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(tagline)
+	_status = UI.label("", UI.SMALL_SIZE, Color("#e58a7d"))
+	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(_status)
+	var frame := UI.panel()
+	root.add_child(frame)
+	var sheet := UI.vbox(20)
+	frame.add_child(sheet)
+	# The language, by its own name, at the head of the sheet.
 	var languages := UI.hbox(8)
-	languages.alignment = BoxContainer.ALIGNMENT_CENTER
 	for language in LANGUAGES:
 		var code: String = language[0]
 		var pick := UI.button(language[1], func() -> void:
@@ -50,15 +61,11 @@ func _ready() -> void:
 			get_tree().reload_current_scene())
 		pick.theme_type_variation = "TabButton"
 		pick.disabled = Session.language == code
-		pick.custom_minimum_size.x = 180
+		pick.custom_minimum_size.x = 160
 		languages.add_child(pick)
-	root.add_child(languages)
-	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
-	root.add_child(_status)
-	var frame := UI.panel()
-	root.add_child(frame)
+	sheet.add_child(languages)
 	_content = UI.vbox(20)
-	frame.add_child(_content)
+	sheet.add_child(_content)
 
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)

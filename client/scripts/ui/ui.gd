@@ -6,8 +6,11 @@ const TITLE_SIZE := 56
 const HEADING_SIZE := 34
 const SMALL_SIZE := 22
 const BUTTON_HEIGHT := 76.0
-const MUTED := Color("#9aa3ad")
-const ERROR := Color("#e07a62")
+const MUTED := UiTheme.MUTED
+const ERROR := UiTheme.MADDER
+## Ours and done (malachite); resources and levels (wheat).
+const GOOD := UiTheme.MALACHITE
+const ACCENT := UiTheme.WHEAT
 
 
 ## The current language's version of `text` (English source text; see
@@ -47,7 +50,7 @@ static func button(text: String, on_pressed: Callable, icon_id := "") -> Button:
 	return node
 
 
-## The main action of a panel, in gold.
+## The main action of a sheet, in malachite.
 static func primary(text: String, on_pressed: Callable, icon_id := "") -> Button:
 	var node := button(text, on_pressed, icon_id)
 	node.theme_type_variation = "Primary"
@@ -83,15 +86,22 @@ static func hbox(separation := 12) -> HBoxContainer:
 	return node
 
 
-## A panel of slate glass (or ui/panel from the art), `alpha` see-through.
-static func panel(alpha := 0.94, padding := 20) -> PanelContainer:
+## A sheet of flax (or ui/panel from the art), `alpha` see-through.
+static func panel(alpha := 1.0, padding := 20) -> PanelContainer:
 	var node := PanelContainer.new()
-	node.add_theme_stylebox_override("panel", UiTheme.frame("ui/panel", 96, 24, padding + 6, UiTheme.panel_style(padding + 6, alpha)))
+	node.add_theme_stylebox_override("panel", UiTheme.frame("ui/panel", 96, 24, padding + 6, UiTheme.sheet_style(padding + 6, alpha)))
+	return node
+
+
+## A band of dark wood, for the top of the screen.
+static func wood(padding := 14) -> PanelContainer:
+	var node := PanelContainer.new()
+	node.add_theme_stylebox_override("panel", UiTheme.wood_style(padding))
 	return node
 
 
 ## A row of tabs: `tabs` is [[key, text, icon id], ...]; the open one is
-## trimmed in gold.
+## underlined in madder.
 static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer:
 	var row := hbox(8)
 	for tab in tabs_:

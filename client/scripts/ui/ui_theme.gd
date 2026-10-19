@@ -1,26 +1,41 @@
 class_name UiTheme
 extends RefCounted
-## The game's look, in the manner of modern grand strategy games: dark slate
-## glass panels with a thin bronze trim and a soft shadow, flat buttons with
-## a gold primary, underlined tabs, Cinzel for headings and Inter for text
-## (docs/art-style.md). All vector styles, sharp at any scale; a panel or
+## The game's look (docs/art-style.md, "Interface"): the map is the hero and
+## the chrome sits at its edges, as dark wood (the top band) and unbleached
+## flax (the sheets) with ink lettering, sentence case. Colour carries side:
+## malachite is ours and the main action, madder the hordes and danger,
+## wheat resources and levels. The one ornament is the embroidered band
+## under the top band (Rushnyk). PT Sans for text, Old Standard for
+## headings, Ruslan Display for the name of the game alone; all three cover
+## Serbian Latin and Cyrillic. Vector styles, sharp at any scale; a panel or
 ## button drawn as art ("ui/panel", "ui/button"... in client/art/art.json)
 ## replaces its style. Merged into the project theme at start-up.
 
-const TEXT := Color("#e9e4d8")
-const MUTED := Color("#9aa3ad")
-const GOLD := Color("#e3c27a")
-const BRONZE := Color("#b8914f")
-const INK := Color("#14110c")
-const PANEL := Color("#141920")
-const RAISED := Color("#1f2630")
-const LINE := Color("#3a4552")
-const DANGER := Color("#e07a62")
-const HEADING_FONT := "res://ui/fonts/Cinzel-SemiBold.ttf"
-const TITLE_FONT := "res://ui/fonts/Cinzel-Bold.ttf"
-const BODY_FONT := "res://ui/fonts/Inter-Regular.otf"
-const MEDIUM_FONT := "res://ui/fonts/Inter-Medium.otf"
-const STRONG_FONT := "res://ui/fonts/Inter-SemiBold.otf"
+const WOOD := Color("#2b211b")
+const WOOD_DEEP := Color("#1d1612")
+const FLAX := Color("#e4dfd2")
+const FLAX_DEEP := Color("#d5cdbb")
+const PAGE := Color("#f1ede3")
+const INK := Color("#2a221c")
+const MUTED := Color("#6b5f52")
+const MADDER := Color("#a8322b")
+const MALACHITE := Color("#2f6e55")
+const WHEAT := Color("#9a7424")
+## Lettering on the wood.
+const ON_WOOD := Color("#ece6d8")
+const ON_WOOD_MUTED := Color("#b5a994")
+## Older names, kept for the screens that use them.
+const TEXT := INK
+const GOLD := WHEAT
+const DANGER := MADDER
+const LINE := Color(0.165, 0.133, 0.11, 0.22)
+
+const LOGO_FONT := "res://ui/fonts/RuslanDisplay-Regular.ttf"
+const HEADING_FONT := "res://ui/fonts/OldStandard-Bold.ttf"
+const TITLE_FONT := HEADING_FONT
+const BODY_FONT := "res://ui/fonts/PTSans-Regular.ttf"
+const MEDIUM_FONT := BODY_FONT
+const STRONG_FONT := "res://ui/fonts/PTSans-Bold.ttf"
 
 
 ## Merges the look into the project theme (ui/theme.tres), which every
@@ -31,113 +46,170 @@ static func apply() -> void:
 		project.merge_with(build())
 
 
+## The screen's design size, by orientation: phones are laid out on
+## 720×1280, landscape screens on 1600×1100 (the same sizes then read about
+## as large on a desktop as on a phone, instead of shrinking to 70%).
+const PORTRAIT_SIZE := Vector2i(720, 1280)
+const LANDSCAPE_SIZE := Vector2i(1600, 1100)
+
+
+## Picks the design size for the window's shape; call on resize.
+static func fit(window: Window) -> void:
+	var landscape := window.size.x > window.size.y * 1.05
+	var wanted := LANDSCAPE_SIZE if landscape else PORTRAIT_SIZE
+	if window.content_scale_size != wanted:
+		window.content_scale_size = wanted
+
+
 static func build() -> Theme:
 	var theme := Theme.new()
 	theme.default_font = _font(BODY_FONT)
-	theme.default_font_size = 27
-	theme.set_color("font_color", "Label", TEXT)
-	theme.set_color("font_shadow_color", "Label", Color(0, 0, 0, 0.35))
-	theme.set_constant("shadow_offset_y", "Label", 1)
+	theme.default_font_size = 28
+	theme.set_color("font_color", "Label", INK)
+	theme.set_color("font_shadow_color", "Label", Color(0, 0, 0, 0))
 
 	theme.set_type_variation("Heading", "Label")
-	theme.set_font("font", "Heading", _spaced(HEADING_FONT, 1))
-	theme.set_color("font_color", "Heading", GOLD)
-	theme.set_color("font_shadow_color", "Heading", Color(0, 0, 0, 0.6))
-	theme.set_constant("shadow_offset_y", "Heading", 2)
+	theme.set_font("font", "Heading", _font(HEADING_FONT))
+	theme.set_color("font_color", "Heading", INK)
 
 	theme.set_type_variation("Title", "Label")
-	theme.set_font("font", "Title", _spaced(TITLE_FONT, 3))
-	theme.set_color("font_color", "Title", GOLD)
-	theme.set_color("font_shadow_color", "Title", Color(0, 0, 0, 0.7))
-	theme.set_constant("shadow_offset_y", "Title", 3)
+	theme.set_font("font", "Title", _font(TITLE_FONT))
+	theme.set_color("font_color", "Title", INK)
 
 	theme.set_type_variation("Strong", "Label")
 	theme.set_font("font", "Strong", _font(STRONG_FONT))
 
-	theme.set_stylebox("panel", "PanelContainer", frame("ui/panel", 96, 24, 22, panel_style()))
-	theme.set_stylebox("panel", "PopupMenu", frame("ui/panel", 96, 24, 16, panel_style(14)))
-	theme.set_stylebox("panel", "TooltipPanel", panel_style(10))
-	theme.set_color("font_color", "TooltipLabel", TEXT)
+	# The name of the game, on the dark.
+	theme.set_type_variation("Logo", "Label")
+	theme.set_font("font", "Logo", _spaced(LOGO_FONT, 2))
+	theme.set_color("font_color", "Logo", ON_WOOD)
+	theme.set_color("font_shadow_color", "Logo", Color(0, 0, 0, 0.5))
+	theme.set_constant("shadow_offset_y", "Logo", 3)
 
+	# Lettering on the wood of the top band.
+	for type in ["OnWood", "OnWoodStrong", "OnWoodHeading"]:
+		theme.set_type_variation(type, "Label")
+		theme.set_color("font_color", type, ON_WOOD)
+	theme.set_font("font", "OnWoodStrong", _font(STRONG_FONT))
+	theme.set_font("font", "OnWoodHeading", _font(HEADING_FONT))
+	theme.set_type_variation("OnWoodMuted", "Label")
+	theme.set_color("font_color", "OnWoodMuted", ON_WOOD_MUTED)
+
+	theme.set_stylebox("panel", "PanelContainer", frame("ui/panel", 96, 24, 22, sheet_style()))
+	theme.set_type_variation("WoodPanel", "PanelContainer")
+	theme.set_stylebox("panel", "WoodPanel", wood_style())
+	theme.set_stylebox("panel", "PopupMenu", frame("ui/panel", 96, 24, 16, sheet_style(14)))
+	theme.set_color("font_color", "PopupMenu", INK)
+	theme.set_color("font_hover_color", "PopupMenu", INK)
+	var hover_row := StyleBoxFlat.new()
+	hover_row.bg_color = Color(MALACHITE, 0.16)
+	theme.set_stylebox("hover", "PopupMenu", hover_row)
+	theme.set_stylebox("panel", "TooltipPanel", wood_style(10))
+	theme.set_color("font_color", "TooltipLabel", ON_WOOD)
+	theme.set_color("default_color", "RichTextLabel", INK)
+
+	var focus := StyleBoxFlat.new()
+	focus.draw_center = false
+	focus.border_color = MALACHITE
+	focus.set_border_width_all(3)
+	focus.set_corner_radius_all(8)
+	focus.set_expand_margin_all(3)
 	for type in ["Button", "OptionButton"]:
 		theme.set_font("font", type, _font(STRONG_FONT))
-		theme.set_font_size("font_size", type, 26)
-		theme.set_stylebox("normal", type, frame("ui/button", 64, 16, 14, _box(RAISED, LINE)))
-		theme.set_stylebox("hover", type, frame("ui/button_hover", 64, 16, 14, _box(RAISED.lightened(0.08), BRONZE)))
-		theme.set_stylebox("pressed", type, frame("ui/button_pressed", 64, 16, 14, _box(PANEL, GOLD)))
-		theme.set_stylebox("hover_pressed", type, frame("ui/button_pressed", 64, 16, 14, _box(PANEL, GOLD)))
-		theme.set_stylebox("disabled", type, frame("ui/button_disabled", 64, 16, 14, _box(Color(RAISED, 0.5), Color(LINE, 0.5))))
-		theme.set_stylebox("focus", type, StyleBoxEmpty.new())
-		for state in ["font_color", "font_hover_color", "font_focus_color"]:
-			theme.set_color(state, type, TEXT)
-		theme.set_color("font_pressed_color", type, GOLD)
-		theme.set_color("font_hover_pressed_color", type, GOLD)
-		theme.set_color("font_disabled_color", type, Color(MUTED, 0.7))
-		theme.set_color("icon_normal_color", type, TEXT)
-		theme.set_color("icon_hover_color", type, GOLD)
-		theme.set_color("icon_pressed_color", type, GOLD)
-		theme.set_color("icon_disabled_color", type, Color(MUTED, 0.5))
+		theme.set_font_size("font_size", type, 27)
+		theme.set_stylebox("normal", type, frame("ui/button", 64, 16, 14, _box(FLAX_DEEP, Color(INK, 0.28))))
+		theme.set_stylebox("hover", type, frame("ui/button_hover", 64, 16, 14, _box(FLAX_DEEP.lightened(0.18), Color(INK, 0.55))))
+		theme.set_stylebox("pressed", type, frame("ui/button_pressed", 64, 16, 14, _box(FLAX_DEEP.darkened(0.08), INK)))
+		theme.set_stylebox("hover_pressed", type, frame("ui/button_pressed", 64, 16, 14, _box(FLAX_DEEP.darkened(0.08), INK)))
+		theme.set_stylebox("disabled", type, frame("ui/button_disabled", 64, 16, 14, _box(Color(FLAX_DEEP, 0.35), Color(INK, 0.12))))
+		theme.set_stylebox("focus", type, focus)
+		for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
+			theme.set_color(state, type, INK)
+		theme.set_color("font_disabled_color", type, Color(MUTED, 0.75))
+		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+			theme.set_color(state, type, INK)
+		theme.set_color("icon_disabled_color", type, Color(MUTED, 0.6))
 		theme.set_constant("h_separation", type, 12)
 		theme.set_constant("icon_max_width", type, 36)
 
-	# The main action of a panel: gold, dark lettering.
+	# The main action of a sheet: malachite, flax lettering.
 	theme.set_type_variation("Primary", "Button")
-	theme.set_stylebox("normal", "Primary", _box(BRONZE, GOLD))
-	theme.set_stylebox("hover", "Primary", _box(BRONZE.lightened(0.12), GOLD.lightened(0.2)))
-	theme.set_stylebox("pressed", "Primary", _box(BRONZE.darkened(0.15), GOLD))
-	theme.set_stylebox("hover_pressed", "Primary", _box(BRONZE.darkened(0.15), GOLD))
+	theme.set_stylebox("normal", "Primary", _box(MALACHITE, MALACHITE.darkened(0.25)))
+	theme.set_stylebox("hover", "Primary", _box(MALACHITE.lightened(0.1), MALACHITE.darkened(0.25)))
+	theme.set_stylebox("pressed", "Primary", _box(MALACHITE.darkened(0.15), MALACHITE.darkened(0.4)))
+	theme.set_stylebox("hover_pressed", "Primary", _box(MALACHITE.darkened(0.15), MALACHITE.darkened(0.4)))
+	theme.set_stylebox("disabled", "Primary", _box(Color(MALACHITE, 0.3), Color(0, 0, 0, 0)))
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
-		theme.set_color(state, "Primary", INK)
-	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color"]:
-		theme.set_color(state, "Primary", INK)
+		theme.set_color(state, "Primary", PAGE)
+	theme.set_color("font_disabled_color", "Primary", Color(PAGE, 0.7))
+	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color"]:
+		theme.set_color(state, "Primary", PAGE)
 
-	# A row of tabs: quiet until open, then underlined in gold.
+	# A row of tabs: quiet until open, then underlined in madder.
 	theme.set_type_variation("TabButton", "Button")
 	var tab := _box(Color(0, 0, 0, 0), Color(0, 0, 0, 0))
 	theme.set_stylebox("normal", "TabButton", tab)
-	var tab_hover := _box(Color(1, 1, 1, 0.04), Color(0, 0, 0, 0))
+	var tab_hover := _box(Color(INK, 0.05), Color(0, 0, 0, 0))
 	theme.set_stylebox("hover", "TabButton", tab_hover)
 	theme.set_stylebox("pressed", "TabButton", tab_hover)
-	var open := _box(Color(1, 1, 1, 0.06), GOLD)
+	var open := _box(Color(INK, 0.04), MADDER)
 	open.set_border_width_all(0)
-	open.border_width_bottom = 3
+	open.border_width_bottom = 4
+	open.set_corner_radius_all(0)
 	theme.set_stylebox("disabled", "TabButton", frame("ui/button_selected", 64, 16, 14, open))
 	theme.set_color("font_color", "TabButton", MUTED)
+	theme.set_color("font_hover_color", "TabButton", INK)
 	theme.set_color("icon_normal_color", "TabButton", MUTED)
-	theme.set_color("font_disabled_color", "TabButton", GOLD)
-	theme.set_color("icon_disabled_color", "TabButton", GOLD)
+	theme.set_color("icon_hover_color", "TabButton", INK)
+	theme.set_color("font_disabled_color", "TabButton", INK)
+	theme.set_color("icon_disabled_color", "TabButton", INK)
 	theme.set_constant("icon_max_width", "TabButton", 44)
 
-	# Icon-only buttons on the top bar: no box until touched.
+	# Icon-only buttons on a sheet: no box until touched.
 	theme.set_type_variation("IconButton", "Button")
 	theme.set_stylebox("normal", "IconButton", _box(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
-	theme.set_stylebox("hover", "IconButton", _box(Color(1, 1, 1, 0.06), Color(0, 0, 0, 0)))
-	theme.set_stylebox("pressed", "IconButton", _box(Color(1, 1, 1, 0.1), GOLD))
+	theme.set_stylebox("hover", "IconButton", _box(Color(INK, 0.06), Color(0, 0, 0, 0)))
+	theme.set_stylebox("pressed", "IconButton", _box(Color(INK, 0.12), Color(0, 0, 0, 0)))
+
+	# Buttons on the wood: flax lettering, a faint outline (none for icons).
+	for type in ["WoodButton", "WoodIconButton"]:
+		theme.set_type_variation(type, "Button")
+		var line := Color(ON_WOOD, 0.3) if type == "WoodButton" else Color(0, 0, 0, 0)
+		theme.set_stylebox("normal", type, _box(Color(0, 0, 0, 0), line))
+		theme.set_stylebox("hover", type, _box(Color(ON_WOOD, 0.08), Color(ON_WOOD, 0.5)))
+		theme.set_stylebox("pressed", type, _box(Color(ON_WOOD, 0.16), ON_WOOD))
+		theme.set_stylebox("hover_pressed", type, _box(Color(ON_WOOD, 0.16), ON_WOOD))
+		for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
+			theme.set_color(state, type, ON_WOOD)
+		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+			theme.set_color(state, type, ON_WOOD)
 
 	for type in ["LineEdit", "TextEdit"]:
-		var field := _box(Color("#0e1217"), LINE)
+		var field := _box(PAGE, Color(INK, 0.3))
 		field.set_content_margin_all(16)
 		theme.set_stylebox("normal", type, frame("ui/field", 48, 12, 16, field))
 		var focused := field.duplicate()
-		focused.border_color = BRONZE
+		focused.border_color = MALACHITE
+		focused.set_border_width_all(2)
 		theme.set_stylebox("focus", type, focused)
-		theme.set_color("font_color", type, TEXT)
-		theme.set_color("font_placeholder_color", type, Color(MUTED, 0.7))
-		theme.set_color("caret_color", type, GOLD)
-		theme.set_font("font", type, _font(MEDIUM_FONT))
+		theme.set_color("font_color", type, INK)
+		theme.set_color("font_placeholder_color", type, Color(MUTED, 0.75))
+		theme.set_color("caret_color", type, MALACHITE)
+		theme.set_color("selection_color", type, Color(MALACHITE, 0.3))
+		theme.set_font("font", type, _font(BODY_FONT))
 
 	var grabber := StyleBoxFlat.new()
-	grabber.bg_color = LINE
+	grabber.bg_color = Color(INK, 0.3)
 	grabber.set_corner_radius_all(4)
 	grabber.content_margin_left = 4
 	grabber.content_margin_right = 4
 	theme.set_stylebox("grabber", "VScrollBar", grabber)
 	var grabber_hot := grabber.duplicate()
-	grabber_hot.bg_color = BRONZE
+	grabber_hot.bg_color = Color(INK, 0.55)
 	theme.set_stylebox("grabber_highlight", "VScrollBar", grabber_hot)
 	theme.set_stylebox("grabber_pressed", "VScrollBar", grabber_hot)
 	var track := StyleBoxFlat.new()
-	track.bg_color = Color(0, 0, 0, 0.2)
+	track.bg_color = Color(INK, 0.06)
 	track.set_corner_radius_all(4)
 	track.content_margin_left = 4
 	track.content_margin_right = 4
@@ -145,21 +217,29 @@ static func build() -> Theme:
 	return theme
 
 
-## Dark slate glass with a bronze trim, brighter along the top, and a soft
-## shadow under it.
-static func panel_style(padding := 22, alpha := 0.94) -> StyleBoxFlat:
+## A sheet of flax: flat, square-cornered, an ink hairline round it.
+static func sheet_style(padding := 22, alpha := 1.0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(PANEL, alpha)
-	style.border_color = Color(BRONZE, 0.55)
+	style.bg_color = Color(FLAX, alpha)
+	style.border_color = Color(INK, 0.35)
 	style.set_border_width_all(1)
-	style.border_width_top = 2
-	style.set_corner_radius_all(8)
-	style.shadow_color = Color(0, 0, 0, 0.45)
-	style.shadow_size = 14
-	style.shadow_offset = Vector2(0, 4)
+	style.set_corner_radius_all(2)
 	style.set_content_margin_all(padding)
 	style.anti_aliasing = true
 	return style
+
+
+## The dark wood of the top band.
+static func wood_style(padding := 14) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = WOOD
+	style.set_content_margin_all(padding)
+	return style
+
+
+## Older name for the sheet.
+static func panel_style(padding := 22, alpha := 1.0) -> StyleBoxFlat:
+	return sheet_style(padding, alpha)
 
 
 ## A frame from the art (FrameStyle) when there is one, else `flat`.
@@ -177,7 +257,7 @@ static func _box(fill: Color, border: Color) -> StyleBoxFlat:
 	style.bg_color = fill
 	style.border_color = border
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(5)
+	style.set_corner_radius_all(6)
 	style.content_margin_left = 18
 	style.content_margin_right = 18
 	style.content_margin_top = 10
@@ -195,7 +275,6 @@ static func _font(path: String) -> Font:
 	return font
 
 
-## Roman capitals read better a little apart.
 static func _spaced(path: String, spacing: int) -> Font:
 	var variation := FontVariation.new()
 	variation.base_font = _font(path)

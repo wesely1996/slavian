@@ -6,6 +6,8 @@ import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { insertBattle, loadBattle, recordRound, saveSetup, setDecision, type BattleSetup, type RoundLog } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
+import { riverKeys } from '../db/rivers.js';
+import { cameOverRiver } from '../sim/field.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { loadWave, markBattling, setWaveStrength, type Wave } from '../db/waves.js';
@@ -36,7 +38,7 @@ import { addUnits, splitLosses } from '../sim/armies.js';
 import { fieldRound } from './field.js';
 import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
-import { ballistaKills, siegeDamage, siegeWorks, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
+import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -62,11 +64,13 @@ export async function startBattle(
   // Walls must be battered down; a horde without the siege to do it in time
   // builds engines first, and the assault waits for them.
   const setup: BattleSetup = {};
+  if (cameOverRiver(wave.path ?? [], { q: village.q, r: village.r }, await riverKeys(client, world.id))) setup.river = true;
   let composition = wave.composition;
   let firstRound = at.getTime() + roundMs(data, world.speed);
   const integrity = wallIntegrity(data, state.plots);
   if (integrity > 0) {
-    setup.wall = { level: wallLevel(state.plots), integrity, max: integrity };
+    const moat = towerLevel(state.plots, 'ditch');
+    setup.wall = { level: wallLevel(state.plots), integrity, max: integrity, ...(moat > 0 ? { moat } : {}) };
     const works = siegeWorks(data, wave.front, composition, integrity, state.plots, world.speed);
     if (works) {
       firstRound += works.setupMs;
@@ -128,21 +132,41 @@ export const battleHandlers: HandlerRegistry = {
     const joining = engaged.filter((a) => a.joinsRound === round);
     const surge = 1 + joining.reduce((sum, a) => sum + a.joinBonus, 0);
     const baseStats = playerStats(data, bonuses, true);
-    // While the walls stand they toughen the garrison and its towers shoot;
-    // ballistae smash engines before the horde closes.
+    // While the walls stand they toughen the garrison, its archers shoot
+    // from them and its towers with them; ballistae smash engines before
+    // the horde closes, and its fighters can't come to grips but where
+    // climbers carry them over.
     const rng = battleRng(world.seed, battle.id, round);
     const wall = battle.setup.wall;
     const standing = !!wall && wall.integrity > 0;
-    const walls = standing ? wallFactors(data, state.plots) : { defense: 1, attack: 1 };
     const smashed = standing ? ballistaKills(data, wave.front, wave.composition, state.plots, rng) : {};
     const assault = subtractUnits(wave.composition, smashed);
+    const defenders = forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {});
+    const archers = Object.entries(defenders).reduce((sum, [unit, n]) => sum + (data.units.units[unit]?.family === 'archers' ? n : 0), 0);
+    const over = standing ? overTheWalls(data, wave.front, assault, state.plots) : 0;
+    const walls = standing ? wallFactors(data, state.plots, archers, over) : { defense: 1, attack: 1, archers: 1 };
+    const held = standing ? heldBack(data, over) : 1;
+    // A horde that came over a river into the fight strikes weaker.
+    const river = battle.setup.river ? data.field.river.attackerFactor : 1;
     const result = resolveRound(
       data,
-      { units: assault, stance: battle.attackerStance, stats: led.stats, home: false },
       {
-        units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
+        units: assault,
+        stance: battle.attackerStance,
+        stats: (unit) => {
+          const base = led.stats(unit);
+          return { ...base, attack: base.attack * river * (base.family === 'archers' ? 1 : held) };
+        },
+        home: false,
+      },
+      {
+        units: defenders,
         stance: state.stance,
-        stats: (unit) => ({ ...baseStats(unit), attack: baseStats(unit).attack * surge * walls.attack, defense: baseStats(unit).defense * walls.defense }),
+        stats: (unit) => {
+          const base = baseStats(unit);
+          const shooting = base.family === 'archers' ? walls.archers : 1;
+          return { ...base, attack: base.attack * surge * walls.attack * shooting, defense: base.defense * walls.defense };
+        },
         home: true,
       },
       rng,
@@ -198,6 +222,7 @@ export const battleHandlers: HandlerRegistry = {
         : {}),
       ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
       ...(total(smashed) ? { smashed } : {}),
+      ...(over > 0 ? { over: Math.round(over * 100) / 100 } : {}),
     };
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard and reinforcements go home.

@@ -21,6 +21,8 @@ export interface RoundLog {
   wallLeft?: number;
   breach?: boolean;
   smashed?: Record<string, number>;
+  // The share of the horde's fighters its climbers carried over the walls.
+  over?: number;
 }
 
 // What the ground gave the defenders of a field battle; at the Holy City,
@@ -33,8 +35,11 @@ export interface BattleSetup {
   fort?: boolean;
   holyCity?: boolean;
   guard?: Record<string, number>;
-  wall?: { level: number; integrity: number; max: number };
+  // The walls (and the level of the moat before them) and what is left of them.
+  wall?: { level: number; integrity: number; max: number; moat?: number };
   siege?: { engine: string; count: number; readyAt: string };
+  // The horde crossed a river (over a bridge) into the fight.
+  river?: boolean;
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

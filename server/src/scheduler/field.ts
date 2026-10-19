@@ -6,7 +6,7 @@
 // from a village (fort_complete).
 import { insertRoad, markRoadStanding, roadEdge, type RoadEdge } from '../db/roads.js';
 import { canCross } from '../sim/land.js';
-import { riverEdge, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
+import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
 import { againstFront } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
 import { z } from 'zod';
@@ -26,7 +26,7 @@ import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.
 import { RuleError } from '../errors.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
 import { battleOutcome, battleRng, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total } from '../sim/battle.js';
-import { setupAt, setupFactors, stepInto, type Setup } from '../sim/field.js';
+import { cameOverRiver, setupAt, setupFactors, stepInto, type Setup } from '../sim/field.js';
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
@@ -120,6 +120,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     hordeArrives: at,
     worldSpeed: world.speed,
     fort: (await standingFort(client, world.id, cell)) !== null,
+    river: cameOverRiver(wave.path ?? [], cell, await riverKeys(client, world.id)),
   });
   await markBattling(client, wave.id);
   const battle = await insertBattle(client, {
@@ -136,7 +137,9 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0 });
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
-  const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort'].filter(Boolean).join(', ');
+  const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort', setup.river && 'a river crossing']
+    .filter(Boolean)
+    .join(', ');
   for (const owner of await owners(holders)) {
     await tell(client, world, owner, {
       kind: 'under_attack',
@@ -167,7 +170,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   for (const army of engaged) hero ??= await heroWithArmy(client, army.id);
   const research = againstFront(leader?.state.bonuses ?? {}, wave.front);
   const bonuses = hero ? combine(research, heroBonuses(data, hero)) : research;
-  const ground: Setup = { ambush: !!battle.setup.ambush, choke: !!battle.setup.choke, fort: !!battle.setup.fort };
+  const ground: Setup = { ambush: !!battle.setup.ambush, choke: !!battle.setup.choke, fort: !!battle.setup.fort, river: !!battle.setup.river };
   const factors = setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
   const holderBase = playerStats(data, bonuses, false);
