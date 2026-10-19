@@ -1,13 +1,13 @@
 class_name HexMap
 extends Node2D
-## Draws the current world's map (Game.terrain), villages and enemy hordes,
-## from the art in client/art/art.json (docs/art-style.md), falling back to
-## plain shapes where a piece is missing. Neighbouring hexes of one terrain
-## merge: lines are drawn only where the terrain changes. Owners show by
-## colour: green yours, blue allies', red enemies'. Redraws when something
-## changes, and on every UI tick while a horde is on the move.
+## Draws the current world's map: the ground (MapGround, a shaded mesh where
+## terrains blend into each other) and what stands on it (MapFeatures: woods,
+## peaks, hills), both behind; then rivers, roads, villages, armies and enemy
+## hordes from the art in client/art/art.json (docs/art-style.md), falling
+## back to plain shapes where a piece is missing. Owners show by colour:
+## green yours, blue allies', red enemies'. Redraws when something changes,
+## and on every UI tick while a horde is on the move.
 
-const OUTLINE_COLOR := Color(0, 0, 0, 0.25)
 const SELECTION_COLOR := Color("#ffd75e")
 const HOLY_CITY_COLOR := Color("#8a2b2b")
 const MY_VILLAGE_COLOR := Color("#ffd75e")
@@ -25,10 +25,12 @@ const SITE_COLOR := Color("#d9b85c")
 const MINE_COLOR := Color("#4caf50")
 const ALLY_COLOR := Color("#3f7fd6")
 const ENEMY_COLOR := Color("#d0453a")
-const SHORE_COLOR := Color(0.17, 0.13, 0.09, 0.35)
-const RIVER_COLOR := Color("#4f8fb0")
+const RIVER_COLOR := Color("#4a86a3")
+const RIVER_BANK := Color(0.1, 0.16, 0.12, 0.45)
+const RIVER_GLINT := Color(0.75, 0.88, 0.92, 0.45)
 const PLANK_COLOR := Color("#b07a45")
-const ROAD_COLOR := Color("#c9a77a")
+const ROAD_COLOR := Color("#a8906a")
+const ROAD_EDGE := Color(0.18, 0.14, 0.09, 0.35)
 ## Each front's emblem (art id "faction/<emblem>").
 const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "order"}
 
@@ -36,12 +38,37 @@ const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "o
 
 var radius := 0
 var selected := Vector2i.MAX
+var _ground: MapGround
+var _features: MapFeatures
+
+
+func _ready() -> void:
+	_ground = MapGround.new()
+	_ground.show_behind_parent = true
+	add_child(_ground)
+	_features = MapFeatures.new()
+	_features.show_behind_parent = true
+	add_child(_features)
 
 
 func refresh() -> void:
 	var map: Variant = Game.world.get("map")
 	radius = int(map.radius) if map is Dictionary else 0
+	if _ground != null:
+		_ground.build(Game.terrain, hex_size)
+		_features.build(Game.terrain, hex_size, _occupied())
 	queue_redraw()
+
+
+## Hexes kept clear of trees and peaks: settlements, camps, sites and forts.
+func _occupied() -> Dictionary:
+	var cells := {Vector2i.ZERO: true}
+	for village in Game.villages.values():
+		cells[Vector2i(int(village.q), int(village.r))] = true
+	for list in [Game.camps, Game.sites, Game.forts]:
+		for entry in list:
+			cells[Vector2i(int(entry.q), int(entry.r))] = true
+	return cells
 
 
 func has_hex(cell: Vector2i) -> bool:
@@ -68,10 +95,6 @@ func get_bounds() -> Rect2:
 
 
 func _draw() -> void:
-	for cell in Game.terrain:
-		_draw_terrain(cell)
-	for cell in Game.terrain:
-		_draw_shores(cell)
 	for road in Game.roads:
 		_draw_road(road)
 	for edge in Game.rivers:
@@ -123,48 +146,15 @@ func _draw() -> void:
 		draw_polyline(outline, SELECTION_COLOR, 4.0)
 
 
-## A hex in its terrain's art, mirrored on every other hex so neighbours
-## don't repeat in step; a flat colour without art.
-func _draw_terrain(cell: Vector2i) -> void:
-	var c := HexMath.to_pixel(cell, hex_size)
-	var points := HexMath.corners(c, hex_size)
-	var tex := Art.texture("terrain/" + Game.terrain[cell])
-	if tex == null:
-		draw_colored_polygon(points, Terrain.color(Game.terrain[cell]))
-		return
-	var flip := posmod(cell.x + cell.y * 2, 2) == 1
-	var uvs := PackedVector2Array()
-	for p in points:
-		var u := (p.x - c.x) / (sqrt(3.0) * hex_size) + 0.5
-		var v := (p.y - c.y) / (2.0 * hex_size) + 0.5
-		uvs.append(Vector2(1.0 - u if flip else u, v))
-	draw_polygon(points, PackedColorArray([Color.WHITE]), uvs, tex)
-
-
-## Lines only where the terrain changes, so forests, ranges and lakes read as
-## one region. Each edge is drawn once, from the cell with the smaller key.
-func _draw_shores(cell: Vector2i) -> void:
-	var points := HexMath.corners(HexMath.to_pixel(cell, hex_size), hex_size)
-	var kind: String = Game.terrain[cell]
-	for i in 6:
-		var other := cell + HexMath.DIRECTIONS[i]
-		if not Game.terrain.has(other):
-			continue
-		if Game.terrain[other] == kind or (other.x < cell.x or (other.x == cell.x and other.y < cell.y)):
-			continue
-		var edge := _edge(points, i)
-		draw_line(edge[0], edge[1], SHORE_COLOR, 2.0)
-
-
 ## A road between two hex centres: a dirt track, faded while being built.
 func _draw_road(road: Array) -> void:
 	var a := HexMath.to_pixel(Vector2i(int(road[0]), int(road[1])), hex_size)
 	var b := HexMath.to_pixel(Vector2i(int(road[2]), int(road[3])), hex_size)
 	var tint := Color.WHITE if String(road[4]) == "standing" else Color(1, 1, 1, 0.45)
-	draw_line(a, b, VILLAGE_OUTLINE_COLOR * Color(1, 1, 1, 0.55 * tint.a), hex_size * 0.2, true)
-	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.13, true)
-	draw_circle(a, hex_size * 0.065, ROAD_COLOR * tint)
-	draw_circle(b, hex_size * 0.065, ROAD_COLOR * tint)
+	draw_line(a, b, ROAD_EDGE * Color(1, 1, 1, tint.a), hex_size * 0.15, true)
+	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.09, true)
+	draw_circle(a, hex_size * 0.045, ROAD_COLOR * tint)
+	draw_circle(b, hex_size * 0.045, ROAD_COLOR * tint)
 
 
 ## A river along the edge between two hexes, and its bridge if one stands
@@ -176,10 +166,11 @@ func _draw_river(edge: Array) -> void:
 	if dir < 0:
 		return
 	var ends := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
-	draw_line(ends[0], ends[1], VILLAGE_OUTLINE_COLOR, hex_size * 0.2, true)
-	draw_line(ends[0], ends[1], RIVER_COLOR, hex_size * 0.12, true)
-	draw_circle(ends[0], hex_size * 0.06, RIVER_COLOR)
-	draw_circle(ends[1], hex_size * 0.06, RIVER_COLOR)
+	draw_line(ends[0], ends[1], RIVER_BANK, hex_size * 0.2, true)
+	draw_line(ends[0], ends[1], RIVER_COLOR, hex_size * 0.13, true)
+	draw_line(ends[0].lerp(ends[1], 0.15), ends[0].lerp(ends[1], 0.85), RIVER_GLINT, hex_size * 0.03, true)
+	draw_circle(ends[0], hex_size * 0.065, RIVER_COLOR)
+	draw_circle(ends[1], hex_size * 0.065, RIVER_COLOR)
 	if String(edge[4]) == "none":
 		return
 	var mid: Vector2 = (ends[0] + ends[1]) / 2.0

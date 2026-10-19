@@ -525,7 +525,9 @@ func _test_art() -> void:
 			missing.append(id)
 	_check(missing.is_empty(), "every art id loads: %s" % [missing])
 	for terrain in ["plains", "forest", "hills", "mountain", "swamp", "lake", "holy_city", "ocean", "dark_forest", "ice", "steppe", "hallowed"]:
-		_check(Art.has("terrain/" + terrain), "terrain art for %s" % terrain)
+		_check(Terrain.COLORS.has(terrain) and Terrain.HEIGHTS.has(terrain), "ground for %s" % terrain)
+		for kind in MapFeatures.FEATURES.get(terrain, []):
+			_check(Art.has(kind[0]), "%s on %s" % [kind[0], terrain])
 	_check(Art.texture("no/such") == null, "missing art is null")
 	_check(Art.settlement_id(1) == "settlement/village_1" and Art.settlement_id(2) == "settlement/village_1", "hall 1-2: stage 1")
 	_check(Art.settlement_id(5) == "settlement/village_3" and Art.settlement_id(10) == "settlement/village_5", "hall 5: stage 3, hall 10: stage 5")

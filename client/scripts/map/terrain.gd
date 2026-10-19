@@ -1,27 +1,50 @@
 class_name Terrain
 extends RefCounted
-## Placeholder look for terrain ids from data/terrain.json. Colours are a
-## muted earth palette (PLAN.md §11.7); final art replaces them later.
+## How terrain ids from data/terrain.json look on the map: a natural ground
+## colour and a height (0 water, 1 peaks) the ground shader lights as relief
+## (MapGround). Features (trees, peaks) are drawn over it by MapFeatures.
 
 const COLORS := {
-	"plains": Color("#c2b86f"),
-	"forest": Color("#4f6b3a"),
-	"hills": Color("#9a8455"),
-	"mountain": Color("#6e675f"),
-	"swamp": Color("#5d6a4f"),
-	"lake": Color("#4f7c8c"),
-	"holy_city": Color("#e8d9a8"),
-	"ocean": Color("#2f4f66"),
-	"dark_forest": Color("#26372a"),
-	"ice": Color("#d6e2e6"),
-	"steppe": Color("#b59a62"),
-	"hallowed": Color("#a58d86"),
+	"plains": Color("#87924f"),
+	"forest": Color("#56683a"),
+	"hills": Color("#8e8657"),
+	"mountain": Color("#7b766c"),
+	"swamp": Color("#5b6447"),
+	"lake": Color("#3d6f86"),
+	"holy_city": Color("#a69a72"),
+	"ocean": Color("#2c5571"),
+	"dark_forest": Color("#33412e"),
+	"ice": Color("#c4ced2"),
+	"steppe": Color("#ad9d67"),
+	"hallowed": Color("#8d8174"),
+}
+const HEIGHTS := {
+	"ocean": 0.0,
+	"lake": 0.02,
+	"swamp": 0.16,
+	"plains": 0.25,
+	"steppe": 0.28,
+	"holy_city": 0.3,
+	"forest": 0.32,
+	"dark_forest": 0.36,
+	"hallowed": 0.38,
+	"ice": 0.5,
+	"hills": 0.6,
+	"mountain": 1.0,
 }
 const UNKNOWN_COLOR := Color("#ff00ff")
 
 
 static func color(id: String) -> Color:
 	return COLORS.get(id, UNKNOWN_COLOR)
+
+
+static func height(id: String) -> float:
+	return HEIGHTS.get(id, 0.3)
+
+
+static func is_water(id: String) -> bool:
+	return id == "lake" or id == "ocean"
 
 
 ## Name from the server's terrain data when loaded, else derived from the id.
