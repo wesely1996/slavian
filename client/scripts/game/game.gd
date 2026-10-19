@@ -44,6 +44,10 @@ var unread := 0
 var armies: Array = []
 ## Forts, built or being built (see server fortView).
 var forts: Array = []
+## Bandit camps and monster lairs: {id, kind, front, q, r, size}.
+var camps: Array = []
+## How much hordes fear each hex where they were beaten.
+var fear: Dictionary[Vector2i, float] = {}
 ## Standing orders of every village (see server orderView).
 var orders: Array = []
 ## Every player's hero (see server heroView).
@@ -100,6 +104,10 @@ func set_world(new_world: Dictionary) -> void:
 	orders = new_world.get("orders", [])
 	armies = new_world.get("armies", [])
 	forts = new_world.get("forts", [])
+	camps = new_world.get("camps", [])
+	fear.clear()
+	for entry in new_world.get("fear", []):
+		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
 	terrain.clear()
@@ -152,6 +160,13 @@ func set_forts(world_id_: int, new_forts: Array) -> void:
 	forts_changed.emit()
 
 
+func camp_at(cell: Vector2i) -> Dictionary:
+	for camp in camps:
+		if Vector2i(int(camp.q), int(camp.r)) == cell:
+			return camp
+	return {}
+
+
 func fort_at(cell: Vector2i) -> Dictionary:
 	for fort in forts:
 		if Vector2i(int(fort.q), int(fort.r)) == cell:
@@ -161,6 +176,9 @@ func fort_at(cell: Vector2i) -> Dictionary:
 
 ## Where a battle is fought: the village, or the hex of a field battle.
 func battle_place(battle: Dictionary) -> String:
+	var setup: Variant = battle.get("setup")
+	if setup is Dictionary and setup.get("holyCity", false):
+		return "the Holy City"
 	if battle.get("villageId") == null and battle.has("q"):
 		return "(%d, %d)" % [int(battle.q), int(battle.r)]
 	return village_name(battle.villageId)

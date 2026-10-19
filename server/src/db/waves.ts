@@ -4,7 +4,7 @@ import type { Front } from '../sim/mapgen.js';
 import type { Composition, March, PathStep, PlannedWave } from '../sim/waves.js';
 import type { DbClient } from './pool.js';
 
-export type WaveStatus = 'scheduled' | 'marching' | 'arrived' | 'battling' | 'defeated' | 'dispersed';
+export type WaveStatus = 'scheduled' | 'marching' | 'arrived' | 'battling' | 'razing' | 'defeated' | 'dispersed' | 'settled';
 
 export interface Wave {
   id: number;
@@ -22,6 +22,12 @@ export interface Wave {
   path: PathStep[] | null;
   arrivesAt: Date | null;
   endsAt: Date | null;
+  // Set when it first reaches a target: it roams on until then.
+  rampageEndsAt: Date | null;
+  // Villages it has already struck.
+  struck: number[];
+  // Its numbers when it spawned.
+  initial: Composition;
 }
 
 interface WaveRow {
@@ -40,6 +46,9 @@ interface WaveRow {
   path: PathStep[] | null;
   arrives_at: Date | null;
   ends_at: Date | null;
+  rampage_ends_at: Date | null;
+  struck: (string | number)[];
+  initial: Composition | null;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -58,13 +67,16 @@ function fromRow(row: WaveRow): Wave {
     path: row.path,
     arrivesAt: row.arrives_at,
     endsAt: row.ends_at,
+    rampageEndsAt: row.rampage_ends_at,
+    struck: row.struck.map(Number),
+    initial: row.initial ?? row.composition,
   };
 }
 
 export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave): Promise<Wave> {
   const { rows } = await client.query<WaveRow>(
-    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $6) RETURNING *`,
     [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt],
   );
   return fromRow(rows[0]!);
@@ -87,7 +99,7 @@ export async function lastWave(client: DbClient, worldId: number): Promise<Wave 
 // Waves players should know about: everything still on the board.
 export async function listActiveWaves(client: DbClient, worldId: number): Promise<Wave[]> {
   const { rows } = await client.query<WaveRow>(
-    "SELECT * FROM waves WHERE world_id = $1 AND status NOT IN ('dispersed', 'defeated') ORDER BY index",
+    "SELECT * FROM waves WHERE world_id = $1 AND status NOT IN ('dispersed', 'defeated', 'settled') ORDER BY index",
     [worldId],
   );
   return rows.map(fromRow);
@@ -129,4 +141,29 @@ export async function resumeMarch(client: DbClient, id: number, path: PathStep[]
     JSON.stringify(path),
     arrivesAt,
   ]);
+}
+
+// The horde reached its first target: the rampage clock starts.
+export async function startRampage(client: DbClient, id: number, endsAt: Date): Promise<void> {
+  await client.query('UPDATE waves SET rampage_ends_at = COALESCE(rampage_ends_at, $2) WHERE id = $1', [id, endsAt]);
+}
+
+export async function markStruck(client: DbClient, id: number, villageId: number): Promise<void> {
+  await client.query('UPDATE waves SET struck = array_append(struck, $2::bigint) WHERE id = $1 AND NOT ($2 = ANY(struck))', [id, villageId]);
+}
+
+export async function markRazing(client: DbClient, id: number, endsAt: Date): Promise<void> {
+  await client.query("UPDATE waves SET status = 'razing', ends_at = $2 WHERE id = $1", [id, endsAt]);
+}
+
+export async function markSettled(client: DbClient, id: number, at: Date): Promise<void> {
+  await client.query("UPDATE waves SET status = 'settled', ends_at = $2 WHERE id = $1", [id, at]);
+}
+
+// Onward to another target, along a new road (steps timed from spawn).
+export async function marchOnward(client: DbClient, id: number, targetVillageId: number | null, path: PathStep[], arrivesAt: Date): Promise<void> {
+  await client.query(
+    `UPDATE waves SET status = 'marching', target_village_id = $2, path = $3, arrives_at = $4, ends_at = NULL WHERE id = $1`,
+    [id, targetVillageId, JSON.stringify(path), arrivesAt],
+  );
 }

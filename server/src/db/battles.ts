@@ -17,6 +17,22 @@ export interface RoundLog {
   joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number }[];
 }
 
+// What the ground gave the defenders of a field battle; at the Holy City,
+// its guard (what is left of it).
+export interface BattleSetup {
+  ambush?: boolean;
+  choke?: boolean;
+  fort?: boolean;
+  holyCity?: boolean;
+  guard?: Record<string, number>;
+}
+
+// What a horde that won decided to do (see sim/horde.ts).
+export interface BattleDecision {
+  choice: 'raid' | 'raze';
+  reasons: string[];
+}
+
 export interface Battle {
   id: number;
   worldId: number;
@@ -25,7 +41,7 @@ export interface Battle {
   villageId: number | null;
   q: number;
   r: number;
-  setup: { ambush?: boolean; choke?: boolean; fort?: boolean };
+  setup: BattleSetup;
   status: BattleStatus;
   round: number;
   attackerStance: Stance;
@@ -33,6 +49,7 @@ export interface Battle {
   defenderInitial: Units;
   rounds: RoundLog[];
   loot: Resources | null;
+  decision: BattleDecision | null;
   startedAt: Date;
   endedAt: Date | null;
 }
@@ -44,7 +61,7 @@ interface BattleRow {
   village_id: number | null;
   q: number;
   r: number;
-  setup: { ambush?: boolean; choke?: boolean; fort?: boolean };
+  setup: BattleSetup;
   status: BattleStatus;
   round: number;
   attacker_stance: Stance;
@@ -52,6 +69,7 @@ interface BattleRow {
   defender_initial: Units;
   rounds: RoundLog[];
   loot: Resources | null;
+  decision: BattleDecision | null;
   started_at: Date;
   ended_at: Date | null;
 }
@@ -72,6 +90,7 @@ function fromRow(row: BattleRow): Battle {
     defenderInitial: row.defender_initial,
     rounds: row.rounds,
     loot: row.loot,
+    decision: row.decision,
     startedAt: row.started_at,
     endedAt: row.ended_at,
   };
@@ -142,4 +161,12 @@ export async function addDefenders(client: DbClient, id: number, units: Units): 
   const sum: Record<string, number> = { ...battle.defenderInitial };
   for (const [unit, n] of Object.entries(units)) sum[unit] = (sum[unit] ?? 0) + n;
   await client.query('UPDATE battles SET defender_initial = $2 WHERE id = $1', [id, JSON.stringify(sum)]);
+}
+
+export async function setDecision(client: DbClient, id: number, decision: BattleDecision): Promise<void> {
+  await client.query('UPDATE battles SET decision = $2 WHERE id = $1', [id, JSON.stringify(decision)]);
+}
+
+export async function saveSetup(client: DbClient, id: number, setup: BattleSetup): Promise<void> {
+  await client.query('UPDATE battles SET setup = $2 WHERE id = $1', [id, JSON.stringify(setup)]);
 }

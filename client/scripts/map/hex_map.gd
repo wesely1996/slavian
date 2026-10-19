@@ -66,8 +66,12 @@ func _draw() -> void:
 		var c := HexMath.to_pixel(Vector2i(int(village.q), int(village.r)), hex_size)
 		var half := hex_size * 0.3
 		var rect := Rect2(c - Vector2(half, half), Vector2(half, half) * 2.0)
-		draw_rect(rect, MY_VILLAGE_COLOR if Game.is_mine(village) else ALLY_VILLAGE_COLOR)
+		var ruined: bool = village.get("ruin") is Dictionary
+		draw_rect(rect, RUINS_COLOR if ruined else (MY_VILLAGE_COLOR if Game.is_mine(village) else ALLY_VILLAGE_COLOR))
 		draw_rect(rect, VILLAGE_OUTLINE_COLOR, false, 2.0)
+		if ruined:
+			draw_line(rect.position, rect.end, VILLAGE_OUTLINE_COLOR, 3.0)
+			draw_line(Vector2(rect.position.x, rect.end.y), Vector2(rect.end.x, rect.position.y), VILLAGE_OUTLINE_COLOR, 3.0)
 		for plot in Rules.outpost_plots(village):
 			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village))
 
@@ -89,6 +93,8 @@ func _draw() -> void:
 			draw_polyline(tri, VILLAGE_OUTLINE_COLOR, 2.0)
 	for fort in Game.forts:
 		_draw_fort(fort)
+	for camp in Game.camps:
+		_draw_camp(camp)
 	for army in Game.armies:
 		_draw_army(army, now)
 	for hero in Game.heroes:
@@ -133,6 +139,17 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	draw_colored_polygon(shield, ARMY_COLOR)
 	shield.append(shield[0])
 	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## A bandit camp or monster lair: a tent in its faction's colour.
+func _draw_camp(camp: Dictionary) -> void:
+	var c := HexMath.to_pixel(Vector2i(int(camp.q), int(camp.r)), hex_size)
+	var r := hex_size * 0.32
+	var tent := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, r * 0.7), c + Vector2(-r, r * 0.7)])
+	draw_colored_polygon(tent, WaveMath.front_color(String(camp.front)).darkened(0.25))
+	tent.append(tent[0])
+	draw_polyline(tent, VILLAGE_OUTLINE_COLOR, 2.0)
+	draw_line(c + Vector2(0, -r * 0.1), c + Vector2(0, r * 0.7), VILLAGE_OUTLINE_COLOR, 2.0)
 
 
 ## A fort: a squat tower with battlements, faded while being built.

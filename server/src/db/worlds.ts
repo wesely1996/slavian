@@ -17,6 +17,8 @@ export interface World {
   radius: number | null;
   activeFronts: Front[];
   startedAt: Date | null;
+  // The Holy City's health: the run is lost at 0.
+  sanctity: number;
 }
 
 export interface NewWorld {
@@ -29,7 +31,7 @@ export interface NewWorld {
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
-  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt"`;
+  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
@@ -93,11 +95,22 @@ export async function isMember(client: DbClient, worldId: number, accountId: num
   return rowCount === 1;
 }
 
-export async function markStarted(client: DbClient, worldId: number, map: WorldMap, at: Date): Promise<void> {
+export async function markStarted(client: DbClient, worldId: number, map: WorldMap, at: Date, sanctity: number): Promise<void> {
   await client.query(
-    `UPDATE worlds SET status = 'running', seed = $2, radius = $3, active_fronts = $4, started_at = $5 WHERE id = $1`,
-    [worldId, map.seed, map.radius, map.activeFronts, at],
+    `UPDATE worlds SET status = 'running', seed = $2, radius = $3, active_fronts = $4, started_at = $5, sanctity = $6 WHERE id = $1`,
+    [worldId, map.seed, map.radius, map.activeFronts, at, sanctity],
   );
+}
+
+// A horde struck the Holy City: Sanctity falls, and at 0 the run is lost.
+export async function damageSanctity(client: DbClient, worldId: number, damage: number): Promise<number> {
+  const { rows } = await client.query<{ sanctity: number }>(
+    `UPDATE worlds SET sanctity = GREATEST(0, sanctity - $2),
+       status = CASE WHEN sanctity - $2 <= 0 THEN 'lost' ELSE status END
+     WHERE id = $1 RETURNING sanctity`,
+    [worldId, damage],
+  );
+  return rows[0]!.sanctity;
 }
 
 export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {

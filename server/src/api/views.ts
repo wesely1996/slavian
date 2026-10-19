@@ -1,6 +1,9 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
 import { listForts, type Fort } from '../db/forts.js';
+import { listCamps } from '../db/camps.js';
+import { loadFear } from '../db/fear.js';
+import { total } from '../sim/battle.js';
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
@@ -47,6 +50,11 @@ export interface VillageView {
   bonuses: Record<string, number>;
   // Troops sent to battles nearby: this share, within this many hexes.
   reinforce: { share: number; range: number } | null;
+  // Razed: what stood (plots), since when, and while rebuilding when it
+  // stands again; with what rebuilding costs.
+  // A refugee camp: hordes raid it but never raze it.
+  refuge: boolean;
+  ruin: { plots: Record<string, { building: string | null; level: number }>; since: string; rebuildingUntil: string | null } | null;
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; completesAt: string }[];
   resources: {
     amounts: Record<string, number>;
@@ -81,6 +89,8 @@ export function villageView(village: Village): VillageView {
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
     reinforce: village.reinforce ?? null,
+    ruin: village.ruin ?? null,
+    refuge: village.refuge === true,
     training: training.map((batch) => ({
       unit: batch.unit,
       count: batch.count,
@@ -113,6 +123,9 @@ export function waveView(wave: Wave) {
     path: wave.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
     arrivesAt: wave.arrivesAt?.toISOString() ?? null,
     endsAt: wave.endsAt?.toISOString() ?? null,
+    // Its rampage clock (from its first target) and the villages it struck.
+    rampageEndsAt: wave.rampageEndsAt?.toISOString() ?? null,
+    struck: wave.struck,
   };
 }
 
@@ -157,6 +170,7 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
     defenderInitial: battle.defenderInitial,
     rounds: battle.rounds,
     loot: battle.loot,
+    decision: battle.decision,
     startedAt: battle.startedAt.toISOString(),
     endedAt: battle.endedAt?.toISOString() ?? null,
   };
@@ -382,6 +396,7 @@ export function worldSummary(world: World) {
     maxPlayers: world.maxPlayers,
     hostAccountId: world.hostAccountId,
     startedAt: world.startedAt?.toISOString() ?? null,
+    sanctity: world.sanctity,
   };
 }
 
@@ -400,6 +415,8 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
+  const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units) }));
+  const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
@@ -419,6 +436,9 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     orders,
     armies,
     forts,
+    camps,
+    // [q, r, fear]: where hordes were beaten, and how much they remember it.
+    fear,
     ...logistics,
     map,
   };

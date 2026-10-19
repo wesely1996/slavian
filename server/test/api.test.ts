@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import { buildApp } from '../src/api/app.js';
 import { LiveHub } from '../src/api/live.js';
@@ -32,6 +32,11 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await app.listen({ port: 0, host: '127.0.0.1' });
     const address = app.server.address();
     baseUrl = `127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+  });
+  // Each test plays its own world; once it is done, end it so later ticks
+  // don't keep playing it out.
+  afterEach(async () => {
+    await db.query("UPDATE worlds SET status = 'won' WHERE status = 'running'");
   });
   afterAll(async () => {
     await app?.close();
@@ -227,7 +232,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       const stored = left.amounts[kind] + raided.loot[kind];
       expect(Math.abs(raided.loot[kind] - Math.floor(stored * share))).toBeLessThanOrEqual(1);
     }
-    expect(world.waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
+    // Its first raid done, the horde moves on (or makes camp) and remembers
+    // where it struck; early hordes only raid.
+    const after = world.waves.find((w: { index: number }) => w.index === 0);
+    expect(raided.decision).toEqual({ choice: 'raid', reasons: ['an early raiding party'] });
+    if (after) {
+      expect(after.struck).toEqual([village.id]);
+      expect(after.status).toBe('marching');
+    }
   });
 
   it('sends scouts at a wave and shares their report', async () => {
@@ -321,6 +333,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     expect(battle.status).toBe('defended');
     expect(battle.loot).toBeNull();
+    // Hordes remember where they were beaten.
+    expect(world.fear).toEqual([[world.villages[0].q, world.villages[0].r, expect.any(Number)]]);
     const last = battle.rounds.at(-1);
     expect(last.defenderLeft).toBe(world.villages[0].garrison.spearman ?? 0);
     expect(total(battle.attackerNow)).toBe(last.attackerLeft);
@@ -1045,6 +1059,97 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(late.arrivesAt);
     await tick(db, now, scheduler);
     expect((await world()).battles.some((x: { villageId: number | null }) => x.villageId === home.id)).toBe(true);
+  });
+
+  it('hordes raid or raze, roam on, settle into camps and strike the Holy City', async () => {
+    const lada = await guest('Lada');
+    const created = await call('POST', '/v1/worlds', lada.token, { name: 'Horde', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, lada.token);
+    const home = started.body.villages[0];
+    expect(started.body.sanctity).toBe(scheduler.data.horde.holyCity.sanctity);
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, lada.token)).body;
+    const roundMs = (15 * 60_000) / 10;
+    const fight = async (battleId: number) => {
+      let battle = (await world()).battles.find((b: { id: number }) => b.id === battleId);
+      for (let i = 0; i < 12 && battle.status === 'ongoing'; i++) {
+        now = new Date(now.getTime() + roundMs);
+        await tick(db, now, scheduler);
+        battle = (await world()).battles.find((b: { id: number }) => b.id === battleId);
+      }
+      return battle;
+    };
+
+    // A later horde (past the early raiding parties) breaks the empty village and burns it.
+    const first = started.body.waves[0];
+    await db.query('UPDATE waves SET index = 7 WHERE id = $1', [first.id]);
+    now = new Date(first.spawnAt);
+    await tick(db, now, scheduler);
+    now = new Date((await world()).waves.find((w: { id: number }) => w.id === first.id).arrivesAt);
+    await tick(db, now, scheduler);
+    let battle = await fight((await world()).battles[0].id);
+    expect(battle).toMatchObject({ villageId: home.id, status: 'raided', loot: null, decision: { choice: 'raze' } });
+    let wave = (await world()).waves.find((w: { id: number }) => w.id === first.id);
+    expect(wave.status).toBe('razing');
+    now = new Date(wave.endsAt);
+    await tick(db, now, scheduler);
+    let w = await world();
+    const ruin = w.villages.find((v: { id: number }) => v.id === home.id);
+    expect(ruin.ruin).toMatchObject({ since: now.toISOString(), rebuildingUntil: null });
+    expect(ruin.plots.c0.level).toBe(0);
+    // Nothing left standing: a refugee camp near the Holy City, which hordes never raze.
+    const refuge = w.villages.find((v: { refuge: boolean }) => v.refuge);
+    expect(refuge).toMatchObject({ ownerAccountId: lada.accountId });
+    expect(Math.max(Math.abs(refuge.q), Math.abs(refuge.r), Math.abs(refuge.q + refuge.r))).toBeGreaterThanOrEqual(2);
+    const moved = w.waves.find((x: { id: number }) => x.id === first.id);
+    if (moved) expect(moved.struck).toEqual([home.id]);
+    expect((await call('POST', `/v1/villages/${home.id}/build`, lada.token, { building: 'barracks' })).body.message).toMatch(/ruins/);
+
+    // Rebuilding costs a share of what stood and takes a while.
+    expect((await call('POST', `/v1/villages/${home.id}/rebuild`, lada.token)).body.message).toMatch(/Missing|Not enough|resources/i);
+    await db.query(`UPDATE villages SET amounts = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`, [home.id]);
+    const rebuilt = await call('POST', `/v1/villages/${home.id}/rebuild`, lada.token);
+    expect(rebuilt.body.village.ruin.rebuildingUntil).toBeTruthy();
+    expect((await call('POST', `/v1/villages/${home.id}/rebuild`, lada.token)).body.message).toMatch(/already/);
+    now = new Date(rebuilt.body.village.ruin.rebuildingUntil);
+    await tick(db, now, scheduler);
+    const standing = (await world()).villages.find((v: { id: number }) => v.id === home.id);
+    expect(standing.ruin).toBeNull();
+    expect(standing.plots.c0.level).toBe(1);
+
+    // Out of time on its rampage clock, a horde makes camp after its raid.
+    w = await world();
+    const second = w.waves.find((x: { status: string }) => x.status === 'scheduled');
+    now = new Date(second.spawnAt);
+    await tick(db, now, scheduler);
+    const marching = (await world()).waves.find((x: { id: number }) => x.id === second.id);
+    now = new Date(marching.arrivesAt);
+    await tick(db, now, scheduler);
+    await db.query('UPDATE waves SET rampage_ends_at = $2 WHERE id = $1', [second.id, now]);
+    battle = await fight((await world()).battles.find((b: { waveId: number }) => b.waveId === second.id).id);
+    expect(battle.decision).toEqual({ choice: 'raid', reasons: ['an early raiding party'] });
+    w = await world();
+    expect(w.waves.some((x: { id: number }) => x.id === second.id)).toBe(false);
+    expect(w.camps).toEqual([expect.objectContaining({ front: second.front, kind: second.front === 'north' ? 'lair' : 'bandit' })]);
+    expect(w.camps[0].size).toBeGreaterThan(0);
+
+    // A horde at the Holy City fights its guard; winning costs Sanctity.
+    const third = w.waves.find((x: { status: string }) => x.status === 'scheduled');
+    now = new Date(third.spawnAt);
+    await tick(db, now, scheduler);
+    const { rows } = await db.query<{ arrives_at: Date }>(
+      `UPDATE waves SET target_village_id = NULL, composition = '{"cave_bear": 400, "zealot": 400}' WHERE id = $1 RETURNING arrives_at`,
+      [third.id],
+    );
+    now = new Date(rows[0]!.arrives_at);
+    await tick(db, now, scheduler);
+    w = await world();
+    const siege = w.battles.find((b: { waveId: number }) => b.waveId === third.id);
+    expect(siege).toMatchObject({ villageId: null, q: 0, r: 0, setup: { holyCity: true } });
+    battle = await fight(siege.id);
+    expect(battle.status).toBe('raided');
+    w = await world();
+    expect(w.sanctity).toBeLessThan(scheduler.data.horde.holyCity.sanctity);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

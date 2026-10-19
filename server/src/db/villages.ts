@@ -15,6 +15,18 @@ export interface Village {
   state: VillageState;
   // Share of its troops sent to battles within `range` hexes (0: never).
   reinforce?: { share: number; range: number };
+  // Razed by a horde (see sim/horde.ts).
+  ruin?: Ruin | null;
+  // A refugee camp: raided, never razed.
+  refuge?: boolean;
+}
+
+export interface Ruin {
+  // What stood before the horde came.
+  plots: Record<string, Plot>;
+  since: string;
+  // While rebuilding: when it stands again.
+  rebuildingUntil: string | null;
 }
 
 interface VillageRow {
@@ -41,6 +53,8 @@ interface VillageRow {
   reinforce_range: number;
   admin_upkeep: number;
   bonuses: Record<string, number>;
+  ruin: Ruin | null;
+  refuge: boolean;
 }
 
 function fromRow(row: VillageRow): Village {
@@ -65,6 +79,8 @@ function fromRow(row: VillageRow): Village {
     q: row.q,
     r: row.r,
     reinforce: { share: Number(row.reinforce_share), range: row.reinforce_range },
+    ruin: row.ruin,
+    refuge: row.refuge,
     state: {
       plots: row.plots ?? {},
       levels: row.levels,
@@ -156,4 +172,12 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       JSON.stringify(state.bonuses),
     ],
   );
+}
+
+export async function saveRuin(client: DbClient, id: number, ruin: Ruin | null): Promise<void> {
+  await client.query('UPDATE villages SET ruin = $2 WHERE id = $1', [id, ruin === null ? null : JSON.stringify(ruin)]);
+}
+
+export async function markRefuge(client: DbClient, id: number): Promise<void> {
+  await client.query('UPDATE villages SET refuge = true WHERE id = $1', [id]);
 }
