@@ -1,6 +1,7 @@
 // Field battles (PLAN.md §6.3): what a hex gives the army holding it.
 import type { GameData, TerrainId } from '../data/index.js';
 import { hexKey, neighbors, type Hex } from './hex.js';
+import { edgeKey } from './land.js';
 
 export interface Setup {
   // Surprise on the first round (army in place early, on cover).
@@ -9,6 +10,8 @@ export interface Setup {
   readonly choke: boolean;
   // A fort on the hex.
   readonly fort: boolean;
+  // The horde came over a river (by a bridge) into the hex.
+  readonly river?: boolean;
 }
 
 export function isChokePoint(data: GameData, terrain: ReadonlyMap<string, TerrainId>, cell: Hex): boolean {
@@ -30,6 +33,7 @@ export function setupAt(
     hordeArrives: Date;
     worldSpeed: number;
     fort: boolean;
+    river?: boolean;
   },
 ): Setup {
   const type = input.terrain.get(hexKey(input.cell));
@@ -38,6 +42,7 @@ export function setupAt(
     ambush: type !== undefined && data.field.ambush.terrain.includes(type) && input.hordeArrives.getTime() - input.readySince.getTime() >= prepMs,
     choke: isChokePoint(data, input.terrain, input.cell),
     fort: input.fort,
+    river: input.river ?? false,
   };
 }
 
@@ -55,7 +60,7 @@ export function setupFactors(
   return {
     holderAttack: setup.ambush && first ? 1 + data.field.ambush.bonus + (input.ambushBonus ?? 0) : 1,
     holderDefense,
-    hordeAttack: setup.choke ? data.field.choke.attackerFactor : 1,
+    hordeAttack: (setup.choke ? data.field.choke.attackerFactor : 1) * (setup.river ? data.field.river.attackerFactor : 1),
     hordeStanceless: setup.ambush && first,
   };
 }
@@ -63,4 +68,11 @@ export function setupFactors(
 // The step of a route that enters `cell`, if it passes there.
 export function stepInto(path: readonly { q: number; r: number; atMs: number }[], cell: Hex, fromMs = 0) {
   return path.find((s) => s.q === cell.q && s.r === cell.r && s.atMs >= fromMs) ?? null;
+}
+
+// Whether a route came into `cell` over a river: the edge from the step
+// before it is one of `rivers` (edgeKey). Only bridged edges can be crossed.
+export function cameOverRiver(path: readonly { q: number; r: number }[], cell: Hex, rivers: ReadonlySet<string>): boolean {
+  const i = path.findIndex((s) => s.q === cell.q && s.r === cell.r);
+  return i > 0 && rivers.has(edgeKey(path[i - 1]!, cell));
 }

@@ -1,15 +1,20 @@
 class_name VillageView
 extends Control
-## The inside of a village, Travian style: resource fields on a ring around
-## the outside, building slots in a grid in the middle, each drawn from the
+## The inside of a village: resource fields on a ring around the outside,
+## the walls inside them, and the building slots in a circle around the
+## Elder's Hall in the middle, each drawn from the
 ## art (client/art/art.json) by its stage, with a level badge. Tap a plot to
 ## pick it. Without art the plots fall back to plain shapes.
 
 signal plot_tapped(plot: String)
 
-const CENTER_COLUMNS := 4
 ## The wall ring's radius, of the fields' ring.
 const WALL_RING := 0.66
+## The ring of building slots around the Hall, its slots' size and the
+## Hall's, of the fields' ring.
+const SLOT_RING := 0.435
+const SLOT_SIZE := 0.185
+const HALL_SIZE := 0.38
 const FIELD_COLORS := {
 	"wood": Color("#5e7d3a"),
 	"stone": Color("#7d7a72"),
@@ -28,6 +33,13 @@ const MEADOW_EDGE := Color("#4c5e33")
 const SQUARE_EARTH := Color("#9c8a66")
 const SQUARE_EDGE := Color("#6e5f45")
 const PALISADE := Color("#6e4b2c")
+const WALL_COLORS := {
+	"wood": Color("#6e4b2c"),
+	"timber": Color("#7a5a36"),
+	"stone": Color("#9d978c"),
+	"fortress": Color("#b9b2a4"),
+}
+const MOAT_WATER := Color("#3d6f86")
 const INK := Color("#1d1813")
 
 ## Game data (buildings), the village as the server sent it, the picked plot.
@@ -49,7 +61,8 @@ func show_village(game_data: Dictionary, new_village: Dictionary, new_selected: 
 
 
 ## Where each plot sits inside a `size` rectangle: fields evenly on a ring,
-## center slots in a grid inside it. Each rect is the plot's tap area.
+## the Hall's slot (c0) in the middle and the other center slots in a circle
+## around it. Each rect is the plot's tap area.
 static func layout(area: Vector2, field_count: int, slot_count: int, tower_count := 0) -> Dictionary:
 	var rects := {}
 	var middle := area / 2.0
@@ -70,15 +83,17 @@ static func layout(area: Vector2, field_count: int, slot_count: int, tower_count
 		var angle := deg_to_rad(-165.0 + 60.0 * i)
 		var at := middle + Vector2(cos(angle), sin(angle)) * ring
 		rects["t%d" % i] = Rect2(at - Vector2.ONE * tower / 2.0, Vector2.ONE * tower)
-	var rows := ceili(float(slot_count) / CENTER_COLUMNS)
-	# The grid's corners stay inside the wall ring.
-	var inner := radius * 0.62
-	var cell := inner * 2.0 / sqrt(CENTER_COLUMNS * CENTER_COLUMNS + rows * rows)
-	var origin := middle - Vector2(CENTER_COLUMNS, rows) * cell / 2.0
-	var gap := cell * 0.08
-	for i in slot_count:
-		var at := origin + Vector2(i % CENTER_COLUMNS, i / CENTER_COLUMNS) * cell
-		rects["c%d" % i] = Rect2(at + Vector2.ONE * gap, Vector2.ONE * (cell - gap * 2.0))
+	if slot_count <= 0:
+		return rects
+	var hall := radius * HALL_SIZE
+	rects["c0"] = Rect2(middle - Vector2.ONE * hall / 2.0, Vector2.ONE * hall)
+	var around := slot_count - 1
+	var ring_r := radius * SLOT_RING
+	var slot := minf(radius * SLOT_SIZE, 2.0 * ring_r * sin(PI / maxf(around, 1)) * 0.76)
+	for i in around:
+		var angle := TAU * i / around - PI / 2.0
+		var at := middle + Vector2(cos(angle), sin(angle)) * ring_r
+		rects["c%d" % (i + 1)] = Rect2(at - Vector2.ONE * slot / 2.0, Vector2.ONE * slot)
 	return rects
 
 
@@ -119,7 +134,9 @@ func _draw() -> void:
 		for i in 6:
 			draw_circle(middle + Vector2(0, radius * 0.04), radius * (1.32 - i * 0.02), Color(0, 0, 0, 0.08))
 		_shaded_disc(middle, radius * 1.2, MEADOW_EDGE, MEADOW)
+		_draw_moat(middle, radius * WALL_RING, _moat_level())
 		_shaded_disc(middle, radius * WALL_RING, SQUARE_EDGE, SQUARE_EARTH)
+		_draw_paths(middle, rects)
 		_draw_wall_ring(middle, radius * WALL_RING, Rules.wall_level(village))
 	else:
 		draw_circle(middle, radius * 1.22, GROUND)
@@ -169,26 +186,87 @@ func _draw() -> void:
 			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
 
 
-## The walls around the square by their tier: a pegged line where none
-## stand yet, a wooden palisade, a stone wall, fortress walls.
+## The walls around the square by their material: a pegged line where none
+## stand yet, a palisade of sharpened logs, a timber rampart on an earth
+## bank, a stone wall with merlons, fortress walls with round bastions.
 func _draw_wall_ring(center: Vector2, r: float, level: int) -> void:
 	if level <= 0:
 		for i in 48:
 			var a := TAU * i / 48.0
 			draw_arc(center, r, a, a + TAU / 96.0, 3, Color(PALISADE, 0.6), r * 0.012, true)
 		return
-	var tier := 0 if level < 4 else (1 if level < 8 else 2)
-	var width: float = r * [0.05, 0.07, 0.09][tier]
-	var body: Color = [PALISADE, Color("#9d978c"), Color("#b5afa3")][tier]
+	var material := WallText.material(data, level)
+	var width: float = r * {"wood": 0.05, "timber": 0.065, "stone": 0.075, "fortress": 0.095}.get(material, 0.05)
+	var body: Color = WALL_COLORS.get(material, PALISADE)
 	draw_arc(center + Vector2(0, width * 0.35), r, 0.0, TAU, 128, Color(0, 0, 0, 0.35), width * 1.15, true)
+	if material == "timber":
+		# The earth bank under the breastwork.
+		draw_arc(center, r, 0.0, TAU, 128, Color("#6f5a3c"), width * 1.5, true)
 	draw_arc(center, r, 0.0, TAU, 128, body, width, true)
 	draw_arc(center, r + width * 0.3, PI * 0.9, PI * 1.7, 64, Color(1, 0.95, 0.85, 0.25), width * 0.3, true)
-	# Stakes or merlons along the top.
-	var count := 72 if tier == 0 else 56
-	for i in count:
-		var a := TAU * i / count
-		var dir := Vector2(cos(a), sin(a))
-		draw_line(center + dir * (r - width * 0.5), center + dir * (r + width * 0.5), body.darkened(0.35), 1.5, true)
+	match material:
+		"wood", "timber":
+			# Log ends along the top, the palisade's sharpened.
+			var count := 96 if material == "wood" else 72
+			for i in count:
+				var a := TAU * i / count
+				var dir := Vector2(cos(a), sin(a))
+				draw_line(center + dir * (r - width * 0.5), center + dir * (r + width * (0.65 if material == "wood" else 0.5)), body.darkened(0.4), 1.5, true)
+		_:
+			# Coursed stone: a joint ring and merlons on the outer face.
+			draw_arc(center, r, 0.0, TAU, 128, body.darkened(0.2), 1.0, true)
+			var count := 64
+			for i in count:
+				var a := TAU * (i + 0.25) / count
+				draw_arc(center, r + width * 0.5, a, a + TAU / count * 0.5, 3, body.lightened(0.12), width * 0.35, true)
+			if material == "fortress":
+				# Round bastions between the wall slots, clear of the gate.
+				for deg in [45.0, 165.0, 225.0, 285.0, 345.0]:
+					var a := deg_to_rad(deg)
+					var at := center + Vector2(cos(a), sin(a)) * r
+					draw_circle(at + Vector2(0, width * 0.3), width * 1.05, Color(0, 0, 0, 0.3))
+					draw_circle(at, width * 1.0, body)
+					draw_arc(at, width * 1.0, 0.0, TAU, 24, body.darkened(0.35), 1.5, true)
+
+
+## The moat outside the walls (the ditch tower): a dry ditch with stakes,
+## water from walls.towers.ditch.waterAt.
+func _draw_moat(center: Vector2, r: float, level: int) -> void:
+	if level <= 0:
+		return
+	var at := r * 1.13
+	var width := r * (0.06 + 0.004 * level)
+	draw_arc(center, at, 0.0, TAU, 128, Color("#3e3324"), width * 1.25, true)
+	if WallText.moat_water(data, level):
+		draw_arc(center, at, 0.0, TAU, 128, MOAT_WATER, width, true)
+		draw_arc(center, at - width * 0.15, PI * 1.0, PI * 1.6, 64, Color(1, 1, 1, 0.18), width * 0.18, true)
+	else:
+		draw_arc(center, at, 0.0, TAU, 128, Color("#5a4a33"), width * 0.8, true)
+		for i in 60:
+			var a := TAU * i / 60.0
+			var dir := Vector2(cos(a), sin(a))
+			draw_line(center + dir * (at + width * 0.55), center + dir * (at + width * 0.95), PALISADE.darkened(0.3), 1.5, true)
+
+
+## Beaten-earth paths from the Hall out to each slot around it and to the
+## gate.
+func _draw_paths(center: Vector2, rects: Dictionary) -> void:
+	for plot in rects:
+		var p := String(plot)
+		if p == "c0" or not (p.begins_with("c") or p == "w"):
+			continue
+		var to: Vector2 = (rects[p] as Rect2).get_center()
+		draw_line(center, to, Color(SQUARE_EDGE, 0.55), (rects[p] as Rect2).size.x * 0.16, true)
+
+
+## The best level of the moat (ditch) in the wall slots; 0: none.
+func _moat_level() -> int:
+	var best := 0
+	for plot in village.get("plots", {}):
+		var holds: Dictionary = village.plots[plot]
+		if Rules.is_tower_slot(String(plot)) and holds.get("building") == "ditch":
+			best = maxi(best, int(holds.level))
+	return best
 
 
 ## A disc shaded from `edge` at its rim to `middle_color` towards its lit

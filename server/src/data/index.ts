@@ -134,6 +134,10 @@ const enemyUnitSchema = z.object({
   speed: z.number().positive(),
   // How hard it batters walls each round (walls.json).
   siege: z.number().nonnegative().optional(),
+  // A climbing engine: how many men it carries over the walls a round.
+  escalade: z.number().nonnegative().optional(),
+  // How long building it on site takes (x walls.siege.setupHours x siegeCraft).
+  setupFactor: z.number().positive().default(1),
 });
 
 const enemiesFileSchema = z.object({
@@ -273,7 +277,17 @@ const effectsSchema = z.record(z.string(), z.number());
 // Walls and siege (sim/walls.ts).
 const wallsFileSchema = z.object({
   version: z.number().int(),
-  tiers: z.array(z.object({ minLevel: z.number().int().positive(), name: z.string() })).min(1),
+  tiers: z
+    .array(
+      z.object({
+        minLevel: z.number().int().positive(),
+        name: z.string(),
+        material: z.enum(['wood', 'timber', 'stone', 'fortress']),
+        // Multiplies the integrity of walls of this tier.
+        toughness: z.number().positive(),
+      }),
+    )
+    .min(1),
   integrityPerLevel: z.number().positive(),
   defensePerLevel: z.number().nonnegative(),
   slotsAt: z.array(z.number().int().positive()),
@@ -283,9 +297,17 @@ const wallsFileSchema = z.object({
     gate_tower: z.object({ integrityPerLevel: z.number().nonnegative() }),
     ballista: z.object({ enginesPerLevel: z.number().nonnegative() }),
     murder_holes: z.object({ defensePerLevel: z.number().nonnegative() }),
-    ditch: z.object({ siegeCutPerLevel: z.number().min(0).max(0.1), setupPerLevel: z.number().nonnegative() }),
+    ditch: z.object({
+      siegeCutPerLevel: z.number().min(0).max(0.1),
+      setupPerLevel: z.number().nonnegative(),
+      escaladeCutPerLevel: z.number().min(0).max(0.1),
+      // The moat holds water from this level.
+      waterAt: z.number().int().positive(),
+    }),
     watchtower: z.object({ warningHoursPerLevel: z.number().nonnegative() }),
   }),
+  manning: z.object({ menPerLevel: z.number().positive(), archerAttackPerLevel: z.number().nonnegative() }),
+  escalade: z.object({ meleeHeld: z.number().min(0).max(1), climbShare: z.number().positive().max(1) }),
   siege: z.object({
     unitSiegeShare: z.number().nonnegative(),
     breachRounds: z.number().int().positive(),
@@ -388,6 +410,8 @@ const fieldFileSchema = z.object({
     attackerFactor: z.number().positive().max(1),
     holdTheLineDefense: z.number().nonnegative(),
   }),
+  // A horde that crossed a river (over a bridge) into the fight.
+  river: z.object({ attackerFactor: z.number().positive().max(1) }),
   fort: z.object({
     range: z.number().int().positive(),
     cost: resourcesSchema,
@@ -670,7 +694,8 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
   for (const [front, def] of Object.entries(data.enemies.fronts)) {
-    if (def.engine && !def.units[def.engine]?.siege) throw new Error(`Front "${front}" builds "${def.engine}", which is not one of its siege units`);
+    const engine = def.engine ? def.units[def.engine] : undefined;
+    if (def.engine && !engine?.siege && !engine?.escalade) throw new Error(`Front "${front}" builds "${def.engine}", which is not one of its siege units`);
   }
   for (const tower of Object.keys(data.walls.towers)) {
     if (data.buildings.buildings[tower]?.kind !== 'tower') throw new Error(`walls.json tower "${tower}" needs a tower in buildings.json`);

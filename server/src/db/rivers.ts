@@ -51,6 +51,11 @@ export async function listRiverEdges(client: DbClient, worldId: number): Promise
   }));
 }
 
+// Every river edge (edgeKey), bridged or not.
+export async function riverKeys(client: DbClient, worldId: number): Promise<Set<string>> {
+  return new Set((await listRiverEdges(client, worldId)).map((e) => edgeKey(e.a, e.b)));
+}
+
 export async function riverEdge(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<StoredRiverEdge | null> {
   const key = edgeKey(a, b);
   return (await listRiverEdges(client, worldId)).find((e) => edgeKey(e.a, e.b) === key) ?? null;

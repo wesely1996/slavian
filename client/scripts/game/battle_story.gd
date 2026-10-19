@@ -71,6 +71,19 @@ static func unit_name(data: Dictionary, unit: String) -> String:
 	return String(def.get("name", unit.replace("_", " ").capitalize()))
 
 
+## A siege engine (rams, catapults, ladders, siege towers), as
+## server/src/sim/walls.ts isEngine sees it.
+static func is_engine(data: Dictionary, unit: String) -> bool:
+	var def := _unit_def(data, unit)
+	return float(def.get("siege", 0.0)) >= 6.0 or float(def.get("escalade", 0.0)) > 0.0
+
+
+## How many men a climbing engine (ladders, siege towers) carries over
+## walls a round; 0 for anything else.
+static func escalade(data: Dictionary, unit: String) -> float:
+	return float(_unit_def(data, unit).get("escalade", 0.0))
+
+
 static func unit_family(data: Dictionary, unit: String) -> String:
 	return String(_unit_def(data, unit).get("family", "infantry"))
 

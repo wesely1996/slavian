@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, type TerrainId } from '../src/data/index.js';
-import { isChokePoint, setupAt, setupFactors, stepInto } from '../src/sim/field.js';
+import { cameOverRiver, isChokePoint, setupAt, setupFactors, stepInto } from '../src/sim/field.js';
+import { edgeKey } from '../src/sim/land.js';
 import { hex, hexKey, neighbors } from '../src/sim/hex.js';
 
 const data = loadGameData();
@@ -24,7 +25,7 @@ describe('field battles', () => {
     const at = new Date('2026-05-01T12:00:00Z');
     const setup = (center: TerrainId, readyMsBefore: number, fort = false) =>
       setupAt(data, { terrain: ground(center, 0), cell: hex(0, 0), readySince: new Date(at.getTime() - readyMsBefore), hordeArrives: at, worldSpeed: 10, fort });
-    expect(setup('forest', prepMs)).toEqual({ ambush: true, choke: false, fort: false });
+    expect(setup('forest', prepMs)).toEqual({ ambush: true, choke: false, fort: false, river: false });
     expect(setup('forest', prepMs - 1).ambush).toBe(false);
     expect(setup('plains', prepMs * 2).ambush).toBe(false);
     expect(setup('plains', 0, true).fort).toBe(true);
@@ -63,5 +64,19 @@ describe('field battles', () => {
     expect(stepInto(path, hex(1, 0))).toEqual({ q: 1, r: 0, atMs: 100 });
     expect(stepInto(path, hex(1, 0), 101)).toBeNull();
     expect(stepInto(path, hex(5, 5))).toBeNull();
+  });
+
+  it('weaken a horde that came over a river', () => {
+    const path = [
+      { q: 0, r: 0, atMs: 0 },
+      { q: 1, r: 0, atMs: 100 },
+      { q: 2, r: 0, atMs: 200 },
+    ];
+    const rivers = new Set([edgeKey(hex(1, 0), hex(2, 0))]);
+    expect(cameOverRiver(path, hex(2, 0), rivers)).toBe(true);
+    expect(cameOverRiver(path, hex(1, 0), rivers)).toBe(false);
+    expect(cameOverRiver(path, hex(0, 0), rivers)).toBe(false);
+    const river = setupFactors(data, { ambush: false, choke: false, fort: false, river: true }, { round: 1, holdersStance: 'balanced' });
+    expect(river.hordeAttack).toBeCloseTo(data.field.river.attackerFactor);
   });
 });

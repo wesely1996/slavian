@@ -172,6 +172,11 @@ func _test_village_layout() -> void:
 
 	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12)
 	_check(rects.size() == 25, "a rect per plot (12 fields, 12 slots, the gate)")
+	_check((rects["c0"] as Rect2).get_center().is_equal_approx(Vector2(500, 500)), "the Hall stands in the middle")
+	var ring := []
+	for i in range(1, 12):
+		ring.append(snappedf((rects["c%d" % i] as Rect2).get_center().distance_to(Vector2(500, 500)), 0.01))
+	_check(ring.min() == ring.max(), "the other slots stand in a circle around it")
 	for a in rects:
 		_check(VillageView.plot_at(rects, (rects[a] as Rect2).get_center()) == a, "tapping %s picks it" % a)
 		for b in rects:
@@ -643,17 +648,23 @@ func _test_translation() -> void:
 
 
 func _test_walls() -> void:
-	var data := {"walls": {"slotsAt": [1, 3, 5, 7, 9], "tiers": [{"minLevel": 1, "name": "Palisade"}, {"minLevel": 4, "name": "Stone Wall"}, {"minLevel": 8, "name": "Fortress Walls"}],
-		"integrityPerLevel": 120, "defensePerLevel": 0.03,
-		"towers": {"gate_tower": {"integrityPerLevel": 0.08}, "archer_tower": {"attackPerLevel": 0.05}, "ditch": {"siegeCutPerLevel": 0.05, "setupPerLevel": 0.1}, "watchtower": {"warningHoursPerLevel": 1}}},
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var data := {"walls": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("walls.json"))),
+		"enemies": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("enemies.json"))),
 		"buildings": {"village": {"centerSlots": 12, "slotsUnlockedAtStart": 4, "slotsPerHallLevel": 1}}}
 	var village := {"levels": {"elder_hall": 1}, "plots": {"w": {"building": "wall", "level": 3}, "t0": {"building": null, "level": 0}, "t1": {"building": null, "level": 0}, "t2": {"building": null, "level": 0}, "c5": {"building": null, "level": 0}, "f0": {"building": "farm", "level": 0}}}
 	_check(Rules.open_tower_slots(data, 3) == 2 and Rules.tower_unlock_level(data, 2) == 5, "wall slots open with the walls")
 	_check(not Rules.is_locked(data, village, "t1") and Rules.is_locked(data, village, "t2"), "wall slot locks")
 	_check(Rules.is_locked(data, village, "c5") and not Rules.is_locked(data, village, "w") and not Rules.is_locked(data, village, "f0"), "other plots lock as before")
 	_check(Rules.plot_ids(village) == ["f0", "c5", "w", "t0", "t1", "t2"], "plots in layout order: %s" % [Rules.plot_ids(village)])
-	_check(WallText.tier(data, 3) == "Palisade" and WallText.tier(data, 8) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
-	_check(WallText.integrity(data, 5, 2) == 696, "wall integrity with a gate tower")
+	_check(WallText.tier(data, 2) == "Palisade" and WallText.tier(data, 3) == "Timber Rampart" and WallText.tier(data, 8) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
+	_check(WallText.material(data, 1) == "wood" and WallText.material(data, 6) == "stone" and WallText.material(data, 0) == "", "wall materials")
+	_check(WallText.integrity(data, 5, 2) == roundi(120 * 5 * 1.35 * 1.16), "wall integrity by material, with a gate tower: %d" % WallText.integrity(data, 5, 2))
+	_check(WallText.capacity(data, 4) == 120, "the walls hold 30 men a level")
+	_check(not WallText.moat_water(data, 3) and WallText.moat_water(data, 4), "the moat holds water from level 4")
+	_check(WallText.tower_effect(data, "ditch", 1).begins_with("A dry moat with stakes keeps off 5% of the battering and 6% of the climbers"), "moat effect: %s" % WallText.tower_effect(data, "ditch", 1))
+	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
+	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
 	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2 hours earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")
 	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12, 5)
