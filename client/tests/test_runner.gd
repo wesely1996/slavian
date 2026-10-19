@@ -33,6 +33,7 @@ func _initialize() -> void:
 	_test_fronts()
 	_test_horde()
 	_test_group()
+	_test_sites()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -408,3 +409,19 @@ func _test_group() -> void:
 	_check(GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}) == "Hordes hold off 22:00–06:00 (UTC+02:00)", "quiet hours: %s" % GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}))
 	_check(GroupText.offset_text(-300) == "UTC−05:00", "negative offset")
 	_check(GroupText.difficulty({"difficulty": {"presets": {"hard": {"name": "Hard"}}}}, "hard") == "Hard", "difficulty name")
+
+
+func _test_sites() -> void:
+	var data := {
+		"heroes": {"items": {"perun_axe": {"name": "Axe of Perun"}}},
+		"lore": {"scrolls": {"stribog_winds": {"name": "Winds of Stribog", "description": "Teaches the Wind Riders."}}},
+		"research": {"techs": {"wind_riders": {"name": "Wind Riders", "academyLevel": 3, "requires": [], "requiresScroll": "stribog_winds"}}},
+	}
+	_check(SiteText.find(data, {"type": "gear", "item": "perun_axe"}) == "Axe of Perun", "gear find")
+	_check(SiteText.find(data, {"type": "scroll", "scroll": "stribog_winds"}) == "the scroll “Winds of Stribog”", "scroll find")
+	_check(SiteText.find(data, {"type": "resources", "resources": {"wood": 600, "iron": 0}}) == "Wood 600", "resource find")
+	_check(SiteText.status(data, {"status": "unexplored", "guardians": null}, "?") == "Unexplored · Whether anything guards it is unknown", "unexplored site")
+	_check(SiteText.status(data, {"status": "explored", "find": {"type": "ember"}}, "Vesna") == "Explored by Vesna: found a Svarog's Ember", "explored site")
+	_check(ResearchRules.problem(data, "wind_riders", 5, {}, false) == "Needs the Winds of Stribog scroll.", "rare tech locked")
+	_check(ResearchRules.problem(data, "wind_riders", 5, {}, false, {"stribog_winds": true}) == "", "rare tech open")
+	_check(ArmyText.status({"orders": "explore", "status": "stationed"}, "(4, -2)", 0.0) == "Searching the site at (4, -2)", "exploring army")

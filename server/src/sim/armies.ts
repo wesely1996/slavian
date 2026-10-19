@@ -5,7 +5,7 @@ import { RuleError } from '../errors.js';
 import { hexToPixel, type Hex } from './hex.js';
 import type { Units } from './training.js';
 
-export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear';
+export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear' | 'explore';
 const FIGHTERS = new Set(['infantry', 'archers', 'cavalry']);
 
 export function total(units: Units): number {
@@ -35,13 +35,18 @@ export function cavalryShare(data: GameData, units: Units): number {
   return cavalry / all;
 }
 
+// Who may go: fighters, and scouts too when exploring a site.
+function marches(data: GameData, unit: string, orders: ArmyOrders): boolean {
+  return !!fighters(data, { [unit]: 1 })[unit] || (orders === 'explore' && data.units.units[unit]?.family === 'scout');
+}
+
 // Checks an army about to set out.
 export function validateArmy(data: GameData, units: Units, orders: ArmyOrders): Record<string, number> {
   for (const [unit, n] of Object.entries(units)) {
     if (!Number.isInteger(n) || n < 0) throw new RuleError('Troop counts are whole numbers');
-    if (n > 0 && !fighters(data, { [unit]: 1 })[unit]) throw new RuleError(`${data.units.units[unit]?.name ?? unit} don't march with armies`);
+    if (n > 0 && !marches(data, unit, orders)) throw new RuleError(`${data.units.units[unit]?.name ?? unit} don't march with armies`);
   }
-  const army = fighters(data, units);
+  const army = Object.fromEntries(Object.entries(units).filter(([unit, n]) => n > 0 && marches(data, unit, orders)));
   if (total(army) === 0) throw new RuleError('Send at least one soldier');
   if (orders === 'harass' && cavalryShare(data, army) < data.armies.harass.minCavalryShare) {
     throw new RuleError(`Harassing takes mostly cavalry (${Math.round(data.armies.harass.minCavalryShare * 100)}% or more)`);

@@ -17,6 +17,7 @@ const SETTLERS_COLOR := Color("#e8e2d0")
 const HERO_COLOR := Color("#9b7bd4")
 const ARMY_COLOR := Color("#5b8fd6")
 const FORT_COLOR := Color("#8b6a45")
+const SITE_COLOR := Color("#d9b85c")
 
 @export var hex_size := 48.0
 
@@ -95,6 +96,8 @@ func _draw() -> void:
 		_draw_fort(fort)
 	for camp in Game.camps:
 		_draw_camp(camp)
+	for site in Game.sites:
+		_draw_site(site)
 	for army in Game.armies:
 		_draw_army(army, now)
 	for hero in Game.heroes:
@@ -139,6 +142,17 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	draw_colored_polygon(shield, ARMY_COLOR)
 	shield.append(shield[0])
 	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## An ancient site: a standing stone, gold until explored.
+func _draw_site(site: Dictionary) -> void:
+	var c := HexMath.to_pixel(Vector2i(int(site.q), int(site.r)), hex_size)
+	var w := hex_size * 0.13
+	var h := hex_size * 0.34
+	var stone := PackedVector2Array([c + Vector2(-w, h * 0.7), c + Vector2(-w * 1.2, -h * 0.4), c + Vector2(0, -h), c + Vector2(w * 1.2, -h * 0.4), c + Vector2(w, h * 0.7)])
+	draw_colored_polygon(stone, SITE_COLOR if site.status == "unexplored" else RUINS_COLOR)
+	stone.append(stone[0])
+	draw_polyline(stone, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
 ## A bandit camp or monster lair: a tent in its faction's colour.

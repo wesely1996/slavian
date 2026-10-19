@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "_comment": "Lore scrolls found at ancient sites (data/sites.json). Each scroll is found once per world and serves the whole group: its effects (same keys as research) add to every player's bonuses, and a scroll may unlock a rare tech (research.json, requiresScroll) for everyone in the group to research.",
+  "scrolls": {
+    "song_of_the_sowers": { "name": "Song of the Sowers", "effects": { "production.grain": 0.05 }, "description": "Every field yields 5% more grain." },
+    "veles_ledger": { "name": "Ledger of Veles", "effects": { "caravanCapacity": 0.15 }, "description": "Caravans carry 15% more." },
+    "perun_oath": { "name": "Oath of Perun", "effects": { "attack.all": 0.05 }, "description": "All troops strike 5% harder." },
+    "mokosh_weave": { "name": "Weave of Mokosh", "effects": { "storage": 0.1 }, "description": "Storehouses hold 10% more." },
+    "dazhbog_hymn": { "name": "Hymn of Dazhbog", "effects": { "defense.all": 0.05 }, "description": "All troops hold 5% better." },
+    "stribog_winds": { "name": "Winds of Stribog", "effects": {}, "unlocks": "wind_riders", "description": "Teaches the Wind Riders' craft (a rare tech)." },
+    "svarog_rite": { "name": "Rite of Svarog's Forge", "effects": {}, "unlocks": "ember_forged_arms", "description": "Teaches forging with Svarog's Ember (a rare tech)." }
+  }
+}

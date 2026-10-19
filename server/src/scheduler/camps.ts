@@ -11,6 +11,7 @@ import { campAt, insertCamp, listCamps, loadCamp, markCleared, saveCampUnits, ty
 import { loadCaravan, recordAmbush, type Caravan } from '../db/caravans.js';
 import { deleteFort, listForts, loadFort, markFortManned } from '../db/forts.js';
 import { heroWithArmy } from '../db/heroes.js';
+import { listSites } from '../db/sites.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
@@ -51,6 +52,7 @@ export async function occupiedHexes(client: DbClient, worldId: number): Promise<
   }
   for (const f of await listForts(client, worldId)) taken.add(hexKey(hex(f.q, f.r)));
   for (const c of await listCamps(client, worldId)) taken.add(hexKey(hex(c.q, c.r)));
+  for (const s of await listSites(client, worldId)) taken.add(hexKey(hex(s.q, s.r)));
   return taken;
 }
 

@@ -46,6 +46,9 @@ var armies: Array = []
 var forts: Array = []
 ## Bandit camps and monster lairs: {id, kind, front, q, r, size}.
 var camps: Array = []
+## Ancient sites (see server worldView) and the group's lore scrolls.
+var sites: Array = []
+var lore: Array = []
 ## How much hordes fear each hex where they were beaten.
 var fear: Dictionary[Vector2i, float] = {}
 ## Standing orders of every village (see server orderView).
@@ -105,6 +108,8 @@ func set_world(new_world: Dictionary) -> void:
 	armies = new_world.get("armies", [])
 	forts = new_world.get("forts", [])
 	camps = new_world.get("camps", [])
+	sites = new_world.get("sites", [])
+	lore = new_world.get("lore", [])
 	fear.clear()
 	for entry in new_world.get("fear", []):
 		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])
@@ -158,6 +163,21 @@ func set_forts(world_id_: int, new_forts: Array) -> void:
 		return
 	forts = new_forts
 	forts_changed.emit()
+
+
+func site_at(cell: Vector2i) -> Dictionary:
+	for site in sites:
+		if Vector2i(int(site.q), int(site.r)) == cell:
+			return site
+	return {}
+
+
+## Scrolls the group has, as a set.
+func scrolls() -> Dictionary:
+	var found := {}
+	for entry in lore:
+		found[entry.scroll] = true
+	return found
 
 
 func camp_at(cell: Vector2i) -> Dictionary:
