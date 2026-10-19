@@ -64,6 +64,18 @@ func _ready() -> void:
 		pick.custom_minimum_size.x = 160
 		languages.add_child(pick)
 	sheet.add_child(languages)
+	# Text size for accessibility: small, normal, large.
+	var sizes := UI.hbox(8)
+	for entry in [["small", tr("Small")], ["normal", tr("Normal")], ["large", tr("Large")]]:
+		var size_code: String = entry[0]
+		var size_pick := UI.button(entry[1], func() -> void:
+			Session.set_text_size(size_code)
+			get_tree().reload_current_scene())
+		size_pick.theme_type_variation = "TabButton"
+		size_pick.disabled = Session.text_size == size_code
+		size_pick.custom_minimum_size.x = 160
+		sizes.add_child(size_pick)
+	sheet.add_child(sizes)
 	_content = UI.vbox(20)
 	sheet.add_child(_content)
 

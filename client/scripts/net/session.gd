@@ -9,21 +9,25 @@ var token := ""
 var account: Dictionary = {}
 ## The game's language: "en" or "sr_Latn" (docs/localization.md).
 var language := ""
+## Text size for accessibility: "small", "normal" or "large" (M5 15).
+var text_size := "normal"
 
 
 func _ready() -> void:
-	UiTheme.apply()
-	var window := get_tree().root
-	UiTheme.fit(window)
-	window.size_changed.connect(func() -> void: UiTheme.fit(window))
 	var config := ConfigFile.new()
 	if config.load(PATH) == OK:
 		server_url = config.get_value("session", "server_url", DEFAULT_SERVER_URL)
 		token = config.get_value("session", "token", "")
 		language = config.get_value("session", "language", "")
+		text_size = config.get_value("session", "text_size", "normal")
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
+	UiTheme.set_text_size(text_size)
+	UiTheme.apply()
+	var window := get_tree().root
+	UiTheme.fit(window)
+	window.size_changed.connect(func() -> void: UiTheme.fit(window))
 	TranslationServer.set_locale(language)
 	# Only strings marked with tr() are translated, never names players chose.
 	get_tree().root.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
@@ -34,12 +38,19 @@ func save() -> void:
 	config.set_value("session", "server_url", server_url)
 	config.set_value("session", "token", token)
 	config.set_value("session", "language", language)
+	config.set_value("session", "text_size", text_size)
 	config.save(PATH)
 
 
 func set_language(code: String) -> void:
 	language = code
 	TranslationServer.set_locale(code)
+	save()
+
+
+func set_text_size(size: String) -> void:
+	text_size = size
+	UiTheme.set_text_size(size)
 	save()
 
 

@@ -12,6 +12,28 @@ const FRONT_COLORS := {
 	"west": Color("#7b5aa6"),
 }
 
+## Threat levels, a colour-blind-safe ramp (calm → grave), each with an icon
+## so the level never rests on colour alone (M5 accessibility).
+const THREAT_COLORS := {
+	"Low": Color("#2f6e55"),
+	"Moderate": Color("#c9a227"),
+	"High": Color("#d0862c"),
+	"Severe": Color("#a8322b"),
+}
+const THREAT_ICONS := {
+	"Low": "icon/threat_low",
+	"Moderate": "icon/threat_moderate",
+	"High": "icon/threat_high",
+	"Severe": "icon/threat_severe",
+}
+## Each front's faction emblem, so fronts are told apart by shape too.
+const FRONT_ICONS := {
+	"north": "faction/north",
+	"east": "faction/east",
+	"south": "faction/order",
+	"west": "faction/order",
+}
+
 
 ## {"from": Vector2i, "to": Vector2i, "t": 0..1} for the leg the horde is on,
 ## or {} when the wave has no path yet.
@@ -56,13 +78,32 @@ static func front_color(front: String) -> Color:
 	return FRONT_COLORS.get(front, Color("#c8372d"))
 
 
-## "Monsters of the North (North): Beasts and creatures…" for each active
-## front, from data/enemies.json.
+static func front_icon(front: String) -> String:
+	return FRONT_ICONS.get(front, "faction/north")
+
+
+static func threat_color(level: String) -> Color:
+	return THREAT_COLORS.get(level, UiTheme.MUTED)
+
+
+static func threat_icon(level: String) -> String:
+	return THREAT_ICONS.get(level, "icon/threat")
+
+
+## "Monsters of the North (North): Beasts and creatures…" for one front,
+## from data/enemies.json.
+static func front_line(data: Dictionary, front: String) -> String:
+	var def: Dictionary = data.get("enemies", {}).get("fronts", {}).get(front, {})
+	if def.is_empty():
+		return ""
+	return "%s (%s): %s" % [def.faction, String(front).capitalize(), def.get("signature", "")]
+
+
+## One line per active front, from data/enemies.json.
 static func front_lines(data: Dictionary, active_fronts: Array) -> PackedStringArray:
 	var lines := PackedStringArray()
-	var fronts: Dictionary = data.get("enemies", {}).get("fronts", {})
 	for front in active_fronts:
-		var def: Dictionary = fronts.get(front, {})
-		if not def.is_empty():
-			lines.append("%s (%s): %s" % [def.faction, String(front).capitalize(), def.get("signature", "")])
+		var line := front_line(data, String(front))
+		if line != "":
+			lines.append(line)
 	return lines

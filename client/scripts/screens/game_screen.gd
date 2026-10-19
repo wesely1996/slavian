@@ -2225,8 +2225,14 @@ func _threats_panel() -> void:
 	var map: Variant = Game.world.get("map")
 	if map is Dictionary:
 		_panel_body.add_child(UI.label("Fronts", UI.HEADING_SIZE))
-		for line in WaveMath.front_lines(Game.data, map.activeFronts):
-			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+		for front in map.activeFronts:
+			var line := WaveMath.front_line(Game.data, String(front))
+			if line == "":
+				continue
+			var row := UI.hbox(8)
+			row.add_child(UI.icon(WaveMath.front_icon(String(front)), 28))
+			row.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+			_panel_body.add_child(row)
 
 
 ## The host sets the group's quiet hours, in this device's time zone.
@@ -2267,7 +2273,12 @@ func _wave_entry(wave: Dictionary) -> void:
 	_panel_body.add_child(UI.label("Wave %d · %s" % [int(wave.index) + 1, Game.front_faction(wave.front)]))
 	var scouted := Game.missions_for(int(wave.id)).any(func(m: Dictionary) -> bool: return m.report != null)
 	var known := "" if scouted else " · composition unknown"
-	_panel_body.add_child(UI.label("%s front · %s threat%s" % [String(wave.front).capitalize(), wave.threat, known], UI.SMALL_SIZE, UI.MUTED))
+	var threat_row := UI.hbox(8)
+	var threat_ic := UI.icon(WaveMath.threat_icon(String(wave.threat)), 26)
+	threat_ic.self_modulate = WaveMath.threat_color(String(wave.threat))
+	threat_row.add_child(threat_ic)
+	threat_row.add_child(UI.label("%s front · %s threat%s" % [String(wave.front).capitalize(), wave.threat, known], UI.SMALL_SIZE, WaveMath.threat_color(String(wave.threat))))
+	_panel_body.add_child(threat_row)
 	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:

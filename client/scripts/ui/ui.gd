@@ -13,6 +13,11 @@ const GOOD := UiTheme.MALACHITE
 const ACCENT := UiTheme.WHEAT
 
 
+## Scales a size by the accessibility text size (M5 15).
+static func scaled(size: float) -> int:
+	return int(round(size * UiTheme.text_scale))
+
+
 ## The current language's version of `text` (English source text; see
 ## tools/i18n/extract.py). In nodes, tr() does the same.
 static func t(text: String) -> String:
@@ -29,7 +34,7 @@ static func label(text := "", font_size := 0, color := Color.WHITE) -> Label:
 	node.text = text
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if font_size > 0:
-		node.add_theme_font_size_override("font_size", font_size)
+		node.add_theme_font_size_override("font_size", scaled(font_size))
 	if font_size >= TITLE_SIZE:
 		node.theme_type_variation = "Title"
 	elif font_size >= HEADING_SIZE:
@@ -45,7 +50,8 @@ static func button(text: String, on_pressed: Callable, icon_id := "") -> Button:
 	if icon_id != "":
 		node.icon = Art.texture(icon_id)
 		node.expand_icon = false
-	node.custom_minimum_size.y = BUTTON_HEIGHT
+	node.custom_minimum_size.y = BUTTON_HEIGHT * UiTheme.text_scale
+	node.custom_minimum_size.x = 96.0
 	node.pressed.connect(on_pressed)
 	return node
 
@@ -61,7 +67,7 @@ static func line_edit(placeholder: String, text := "") -> LineEdit:
 	var node := LineEdit.new()
 	node.placeholder_text = placeholder
 	node.text = text
-	node.custom_minimum_size.y = BUTTON_HEIGHT
+	node.custom_minimum_size.y = BUTTON_HEIGHT * UiTheme.text_scale
 	return node
 
 
@@ -70,7 +76,7 @@ static func options(items: Array, selected := 0) -> OptionButton:
 	for item in items:
 		node.add_item(str(item))
 	node.select(selected)
-	node.custom_minimum_size.y = BUTTON_HEIGHT
+	node.custom_minimum_size.y = BUTTON_HEIGHT * UiTheme.text_scale
 	return node
 
 
@@ -110,8 +116,8 @@ static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer
 		node.theme_type_variation = "TabButton"
 		node.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		node.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		node.add_theme_font_size_override("font_size", SMALL_SIZE)
-		node.custom_minimum_size.y = 100
+		node.add_theme_font_size_override("font_size", scaled(SMALL_SIZE))
+		node.custom_minimum_size.y = 100 * UiTheme.text_scale
 		node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		node.disabled = key == open
 		row.add_child(node)
@@ -158,7 +164,7 @@ static func rich(text := "", font_size := SMALL_SIZE, color := MUTED) -> RichTex
 	node.scroll_active = false
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	node.add_theme_font_size_override("normal_font_size", font_size)
+	node.add_theme_font_size_override("normal_font_size", scaled(font_size))
 	node.add_theme_color_override("default_color", color)
 	node.text = text
 	return node

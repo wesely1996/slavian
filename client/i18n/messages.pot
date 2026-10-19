@@ -51,129 +51,141 @@ msgstr ""
 msgid "Defend the Holy City. Build the Kalinov Bridge."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:92
+#: client/scripts/screens/start_screen.gd:69
+msgid "Small"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:69
+msgid "Normal"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:69
+msgid "Large"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:104
 msgid "Server address"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:95
+#: client/scripts/screens/start_screen.gd:107
 msgid "Your name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:96
+#: client/scripts/screens/start_screen.gd:108
 msgid "e.g. Vesna"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:98
+#: client/scripts/screens/start_screen.gd:110
 msgid "Play as guest"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:125
+#: client/scripts/screens/start_screen.gd:137
 msgid "Loading…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:134
+#: client/scripts/screens/start_screen.gd:146
 msgid "Server: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:135
+#: client/scripts/screens/start_screen.gd:147
 msgid "Retry"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:136
+#: client/scripts/screens/start_screen.gd:148
 msgid "Change server address"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:143
+#: client/scripts/screens/start_screen.gd:155
 msgid "Signed in as %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:146
+#: client/scripts/screens/start_screen.gd:158
 msgid "Sign out"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:154
+#: client/scripts/screens/start_screen.gd:166
 msgid "Change"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:157
+#: client/scripts/screens/start_screen.gd:169
 msgid "Your worlds"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:159
+#: client/scripts/screens/start_screen.gd:171
 msgid "None yet. Create one or join with a code."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:161
+#: client/scripts/screens/start_screen.gd:173
 msgid "in lobby"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:165
+#: client/scripts/screens/start_screen.gd:177
 msgid "New world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:166
+#: client/scripts/screens/start_screen.gd:178
 msgid "World name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:166
+#: client/scripts/screens/start_screen.gd:178
 msgid "%s's world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:169
+#: client/scripts/screens/start_screen.gd:181
 msgid "%d player"
 msgid_plural "%d players"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/start_screen.gd:178
+#: client/scripts/screens/start_screen.gd:190
 msgid "Create world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:181
+#: client/scripts/screens/start_screen.gd:193
 msgid "Join a world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:182
+#: client/scripts/screens/start_screen.gd:194
 msgid "Invite code"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:184
+#: client/scripts/screens/start_screen.gd:196
 msgid "Join"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:194
+#: client/scripts/screens/start_screen.gd:206
 msgid "You stay signed in; your account lives on the server."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:197
+#: client/scripts/screens/start_screen.gd:209
 msgid "Save"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:201
+#: client/scripts/screens/start_screen.gd:213
 msgid "Cancel"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:240
+#: client/scripts/screens/start_screen.gd:252
 msgid "Share it with your group. %d of %d players joined."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:242
+#: client/scripts/screens/start_screen.gd:254
 msgid " (host)"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:246
+#: client/scripts/screens/start_screen.gd:258
 msgid "Start the world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:248
+#: client/scripts/screens/start_screen.gd:260
 msgid "Waiting for the host to start…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:249
+#: client/scripts/screens/start_screen.gd:261
 msgid "Back"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:264
+#: client/scripts/screens/start_screen.gd:276
 msgid "Your clan: %s"
 msgstr ""
 
@@ -463,10 +475,6 @@ msgstr ""
 
 #: data/difficulty.json
 msgid "Story"
-msgstr ""
-
-#: data/difficulty.json
-msgid "Normal"
 msgstr ""
 
 #: data/difficulty.json
