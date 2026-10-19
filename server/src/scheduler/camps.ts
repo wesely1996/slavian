@@ -77,7 +77,8 @@ export async function createCamp(
 // A wave is over: new camps of its front rise near its road.
 async function spawnAfterWave(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const rules = data.camps.spawn;
-  const active = (await listCamps(client, world.id)).length;
+  // The limit is per front, so one front's bandits never crowd out another's lairs.
+  const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front).length;
   const count = Math.min(campsPerWave(data, world.difficulty, rngFor(world.seed, wave.index, 0xcb)()), rules.max - active);
   if (count <= 0 || !wave.path) return;
   const villages = (await listVillages(client, world.id)).map((v) => hex(v.q, v.r));
