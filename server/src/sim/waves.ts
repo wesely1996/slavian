@@ -141,8 +141,9 @@ export interface Target {
 
 // The cheapest target from `from` for this horde: road cost (terrain plus
 // fear along the way) plus fear at the target, plus extra for the Holy City
-// (always a target); erratic factions jitter the costs. Steps are timed by
-// terrain alone, from `startMs` (ms after spawn).
+// (always a target, taken when it is cheaper than every village). Erratic
+// factions jitter the costs of villages against each other. Steps are timed
+// by terrain alone, from `startMs` (ms after spawn).
 export function routeFrom(
   data: GameData,
   input: {
@@ -169,16 +170,24 @@ export function routeFrom(
   };
   const erratic = data.enemies.fronts[input.front]!.personality.erratic;
   let best: { id: number | null; path: Hex[]; score: number } | null = null;
+  let holy: { path: Hex[]; cost: number } | null = null;
+  let cheapestVillage = Infinity;
   for (const target of input.targets) {
     const path = findPath(input.from, target.cell, searchCost);
     if (!path) continue;
     const road = path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
-    const extra = rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0) + (target.id === null ? rules.holyCityExtraCost : 0);
-    const score = (road + extra) * (1 + erratic * input.rng());
+    const cost = road + rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0);
+    if (target.id === null) {
+      holy = { path, cost: cost + rules.holyCityExtraCost };
+      continue;
+    }
+    cheapestVillage = Math.min(cheapestVillage, cost);
+    const score = cost * (1 + erratic * input.rng());
     if (!best || score < best.score || (score === best.score && (target.id ?? 0) < (best.id ?? 0))) {
       best = { id: target.id, path, score };
     }
   }
+  if (holy && holy.cost < cheapestVillage) best = { id: null, path: holy.path, score: holy.cost };
   if (!best) return null;
   const hoursPerCost = 1 / marchSpeed(data, input.front, input.composition);
   let atMs = input.startMs;
