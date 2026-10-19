@@ -13,6 +13,9 @@ import { migrate } from '../db/migrate.js';
 import { createPool, inTransaction, type Db } from '../db/pool.js';
 import { getWorld } from '../db/worlds.js';
 import { listVillages } from '../db/villages.js';
+import { loadVault } from '../db/vaults.js';
+
+const KINDS = ['wood', 'stone', 'grain', 'iron'] as const;
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { loadGameData, type Difficulty } from '../data/index.js';
 import { handlers } from '../scheduler/handlers.js';
@@ -84,8 +87,9 @@ export async function runOnce(
     const ctx = { db, deps, world, terrain, now, day };
     if (opts.verbose && (now.getTime() - start.getTime()) % ((24 * MS_PER_HOUR) / opts.speed) < step) await progress(db, world.id, day);
     for (const bot of bots) {
+      // A tithe for the bridge every six game hours, before anything else is spent.
+      if (Math.floor(((now.getTime() - start.getTime()) * opts.speed) / MS_PER_HOUR) % 6 === 0) await feedVault(ctx, bot, 0.4);
       await playTurn(ctx, bot);
-      if (day % 2 === 0) await feedVault(ctx, bot);
     }
   }
   return summarize(db, deps.data, world.id, opts, now, start, status);
@@ -100,9 +104,15 @@ async function progress(db: Db, worldId: number, day: number): Promise<void> {
     const parts = villages.map((v) => {
       const fighters = Object.entries(v.state.garrison).filter(([u]) => u !== 'scout' && u !== 'settler').reduce((n, [, k]) => n + k, 0);
       const fields = Object.values(v.state.plots).filter((p) => p.building && ['woodcutter', 'quarry', 'farm', 'iron_mine'].includes(p.building)).reduce((n, p) => n + p.level, 0);
-      return `${v.ruin ? 'RUIN ' : ''}hall ${v.state.levels.elder_hall ?? 0} fields ${fields} army ${fighters}`;
+      const stock = Object.values(v.state.ledger.amounts).map((n) => Math.round(n / 100)).join('/');
+      const center = Object.entries(v.state.levels).filter(([b]) => !['woodcutter', 'quarry', 'farm', 'iron_mine', 'outpost'].includes(b)).map(([b, l]) => `${b.slice(0, 4)}${l}`).join(' ');
+      return `${v.ruin ? 'RUIN ' : ''}fields ${fields} army ${fighters} q${v.state.queue.length} [${center}] stock ${stock}`;
     });
-    console.log(`day ${day}: sanctity ${world.sanctity} embers ${world.embers} bridge ${bridge?.stage ?? 0}/${bridge?.status ?? '-'} quests ${Object.keys(bridge?.quests ?? {}).join(',')} | ${parts.join(' | ')}`);
+    const donated = KINDS.map((k) => Math.round((bridge?.donated[k] ?? 0) / 100)).join('/');
+    const vault = (await loadVault(c, worldId)).amounts;
+    console.log(
+      `day ${day}: sanctity ${world.sanctity} embers ${world.embers} bridge ${bridge?.stage ?? 0}/${bridge?.status ?? '-'} given ${donated} vault ${KINDS.map((k) => Math.round(vault[k] / 100)).join('/')} quests ${Object.keys(bridge?.quests ?? {}).join(',')} | ${parts.join(' | ')}`,
+    );
   });
 }
 

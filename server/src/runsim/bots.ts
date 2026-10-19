@@ -13,6 +13,7 @@ import { listCamps } from '../db/camps.js';
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { listSites } from '../db/sites.js';
 import { loadVault } from '../db/vaults.js';
+import { caravanCapacity, caravansAt } from '../sim/logistics.js';
 import { listVillages, type Village } from '../db/villages.js';
 import { listActiveWaves } from '../db/waves.js';
 import { getWorld, loadHexes, type World } from '../db/worlds.js';
@@ -134,7 +135,11 @@ export async function playTurn(ctx: TurnContext, bot: Bot): Promise<void> {
     const missing = target - garrisonSize(village);
     if (missing > 0 && (levels.barracks ?? 0) > 0) {
       const unit = (levels.barracks ?? 0) >= 2 && ctx.day % 3 === 2 ? 'horseman' : ctx.day % 2 === 0 ? 'spearman' : 'archer';
-      await go(() => trainUnitsCommand(db, deps, { ...base, unit, count: Math.min(missing, deps.data.units.maxBatch, 20) }));
+      // As many as half the stores can pay for: building goes on too.
+      const cost = deps.data.units.units[unit]!.cost;
+      const affordable = Math.min(...KINDS.filter((k) => cost[k] > 0).map((k) => Math.floor((amounts[k] * 0.5) / cost[k])));
+      const count = Math.min(missing, deps.data.units.maxBatch, 20, affordable);
+      if (count > 0) await go(() => trainUnitsCommand(db, deps, { ...base, unit, count }));
     }
     if ((levels.scout_lodge ?? 0) > 0 && (village.state.garrison.scout ?? 0) < 4 && !village.state.training.some((b) => b.unit === 'scout')) {
       await go(() => trainUnitsCommand(db, deps, { ...base, unit: 'scout', count: 4 }));
@@ -208,11 +213,10 @@ function buildChoices(
   return out.slice(0, 4);
 }
 
-// Fields below max level, the lowest (and scarcest resource) first.
+// Fields below max level, the scarcest resource first (iron is needed less).
 function fieldsByNeed(data: GameData, village: Village, amounts: Resources): string[] {
-  return [...FIELDS]
-    .filter((f) => fieldLevel(village, f) < data.buildings.buildings[f]!.maxLevel)
-    .sort((a, b) => fieldLevel(village, a) - fieldLevel(village, b) || amounts[fieldKind(data, a)] - amounts[fieldKind(data, b)]);
+  const need = (f: string) => amounts[fieldKind(data, f)] * (fieldKind(data, f) === 'iron' ? 1.6 : 1) + fieldLevel(village, f) * 40;
+  return [...FIELDS].filter((f) => fieldLevel(village, f) < data.buildings.buildings[f]!.maxLevel).sort((a, b) => need(a) - need(b));
 }
 
 function fieldKind(data: GameData, field: string): (typeof KINDS)[number] {
@@ -365,14 +369,29 @@ export async function terrainOf(db: Db, worldId: number): Promise<Map<string, Te
   return new Map((await read(db, (c) => loadHexes(c, worldId))).map(([q, r, t]) => [`${q},${r}`, t]));
 }
 
-// Caravans: a bot with no surplus order yet still feeds the vault now and then.
-export async function feedVault(ctx: TurnContext, bot: Bot): Promise<void> {
+// Caravans: a tithe towards what the bridge stage still lacks (beyond what
+// the vault already holds), up to `share` of each village's stores.
+export async function feedVault(ctx: TurnContext, bot: Bot, share = 0.3): Promise<void> {
+  const bridge = await read(ctx.db, (c) => findBridge(c, ctx.world.id));
+  const stage = bridge && bridge.status !== 'complete' ? currentStage(ctx.deps.data, bridge) : null;
+  if (!bridge || !stage) return;
+  const vault = (await read(ctx.db, (c) => loadVault(c, ctx.world.id))).amounts;
+  const lacking: Resources = { wood: 0, stone: 0, grain: 0, iron: 0 };
+  for (const k of KINDS) lacking[k] = Math.max(0, stage.cost[k] - (bridge.donated[k] ?? 0) - Math.floor(vault[k]));
   for (const village of await ownVillages(ctx, bot)) {
     if ((village.state.levels.caravan_yard ?? 0) === 0 || village.ruin) continue;
     const amounts = amountsAt(village.state.ledger, ctx.now);
     const load: Resources = { wood: 0, stone: 0, grain: 0, iron: 0 };
-    for (const k of KINDS) load[k] = Math.max(0, Math.floor(amounts[k] - village.state.ledger.capacity[k] * 0.5));
-    if (KINDS.some((k) => load[k] > 0)) {
+    for (const k of KINDS) load[k] = Math.max(0, Math.min(lacking[k], Math.floor(amounts[k] * share)));
+    // No more than the caravans at home can carry.
+    const out = (await read(ctx.db, (c) => c.query<{ n: number }>("SELECT count(*)::int AS n FROM caravans WHERE village_id = $1 AND status <> 'done'", [village.id]))).rows[0]!.n;
+    const room = (caravansAt(ctx.deps.data, village.state.levels.caravan_yard ?? 0) - out) * caravanCapacity(ctx.deps.data, village.state.bonuses);
+    const total = KINDS.reduce((n, k) => n + load[k], 0);
+    if (total > room) for (const k of KINDS) load[k] = Math.floor((load[k] * Math.max(0, room)) / total);
+    // Not for a handful, unless it is all the stage still lacks.
+    const sent = KINDS.reduce((n, k) => n + load[k], 0);
+    if (sent >= Math.min(100, KINDS.reduce((n, k) => n + lacking[k], 0)) && sent > 0) {
+      for (const k of KINDS) lacking[k] -= load[k];
       stats.commands++;
       await attempt(stats, () => sendCaravanCommand(ctx.db, ctx.deps, { accountId: bot.accountId, villageId: village.id, now: ctx.now, destinationVillageId: null, load }));
     }

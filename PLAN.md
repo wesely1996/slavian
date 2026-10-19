@@ -372,11 +372,15 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 - Colorblind-safe threat colors **plus icons**. Adjustable text size. Large tap targets.
 
 ### 11.7 Art & UI (Q31)
-- Godot 2D, stylized flat illustration. Hex tiles and buildings as sprites.
+- Godot 2D, stylized flat illustration in the spirit of **Kingdom Rush** (UI and game art). Hex tiles and buildings as sprites.
 - Slavic ornament (embroidery patterns, carved-wood motifs) in UI frames.
 - Muted earth palette, bright accents only for threats and actions.
 - Placeholder (stock / AI-assisted) art until M5. Until then the UI stays minimal (code-built panels, flat hexes) so the rules can be built and tested first; the **UI design and art pass** (M5) replaces it before launch.
 - Portrait-first phone layout. Map pan/zoom with one-finger drag and pinch.
+- **Map art:** neighbouring tiles of the same kind merge into one shape (a big forest, a mountain range, a lake) instead of separate hexes.
+- **Settlements** look different at each level; **banners** show the owner. **Outlines** tell sides apart at a glance: green for yours, blue for allies' units and settlements, red for enemies.
+- **Village interior and its resource fields** look and work like Travian's.
+- **Battle screen:** a play-by-play of each round with narrative explanations, over a 2D top-down view of the battlefield: units as squares with unit icons, neighbouring squares of the same kind grouped into a squad with one big icon over the whole group.
 
 ### 11.8 Support & server costs (Q6, Q37)
 - **No ads, no in-app purchases, no speed-ups.**
@@ -540,6 +544,12 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
 5. [x] **Delegation:** a player hands a teammate temporary control (1–7 days) over their villages (no chains: someone who handed theirs over can't take on more). The delegate commands them as their own (building, training, research, scouts, outposts, settlers, caravans, armies, forts, standing orders); every action is logged and shown to the group. The owner can take them back and the delegate can hand them back early; heroes stay with their owner.
 6. [x] **Onboarding and almanac:** a getting-started chain (`data/onboarding.json`: raise a building, train defenders, claim an outpost, send scouts, clear a camp, gift a teammate or the vault), each step with the village elder's reason and a reward to the player's first village the first time it is done; the next step shows on your village. An in-game almanac (from the Threats panel) of units, buildings, stances and counters, hordes, clans, terrain and how a run is won or lost, written from `data/`.
 7. [ ] **Headless simulator and first balance pass:** `tools/runsim` plays whole worlds at accelerated time with scripted bots (turtle, expander, balanced) across player counts and presets, reports win rates and causes of loss, and the first tuning of `data/*.json` towards the targets in §13.
+
+### M5 breakdown (to plan in detail when M4 is done)
+- **UI design and art pass** (§11.7): Kingdom Rush–like art and UI; merged map art for connected tiles of one kind; settlement art per level, owner banners, green/blue/red outlines for yours/allies'/enemies'; a Travian-like village interior and resource fields.
+- **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon).
+- **Roads:** players build roads between hexes. Roads speed up movement for everyone on them, allies and the human hordes alike, but not monsters. (Terrain already sets movement cost.)
+- The rest of M5 as in the roadmap table (closed test, balance, localization, accessibility, donation button, privacy, backups/monitoring).
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
