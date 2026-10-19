@@ -87,6 +87,9 @@ async function attempt(counter: { refused: number }, fn: () => Promise<unknown>)
   }
 }
 
+// Strong points the group has picked, by world: teammates hold them together.
+const strongPoints = new Map<number, { q: number; r: number; until: number }>();
+
 export const stats = { refused: 0, commands: 0, reasons: {} as Record<string, number> };
 
 // Reads with a pooled client.
@@ -335,6 +338,12 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   }
   // Hold a strong point on a horde's road: a choke, or a fort built there.
   if (open.includes('choke') && !armies.some((a) => a.orders === 'hold')) {
+    // The group's strong point, if a teammate already picked one: join them there.
+    const shared = strongPoints.get(world.id);
+    if (shared && shared.until > now.getTime()) {
+      const army = fighters(0.9);
+      if (strength(army) > 0 && (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(shared.q, shared.r), units: army, orders: 'hold' })))) return;
+    }
     // Most of the army: late hordes are strong.
     const forts = await read(db, (c) => listForts(c, world.id));
     const taken = await takenHexes(ctx);
@@ -354,6 +363,7 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
       }
       if (!step) continue;
       const target = step;
+      strongPoints.set(world.id, { q: target.q, r: target.r, until: wave.spawnAt.getTime() + target.atMs });
       const army = fighters(0.9);
       if (strength(army) > 0 && (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(target.q, target.r), units: army, orders: 'hold' })))) return;
     }
