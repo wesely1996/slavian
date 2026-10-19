@@ -16,6 +16,7 @@ import {
   isMember,
   listMembers,
   markStarted,
+  setClan,
   setQuietHours,
   type World,
 } from '../db/worlds.js';
@@ -23,7 +24,8 @@ import type { SchedulerDeps } from '../scheduler/events.js';
 import { announceFirstWaves } from '../scheduler/waves.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { loadBridge } from '../db/bridges.js';
-import { lockWorld } from '../scheduler/world.js';
+import { lockWorld, withWorld } from '../scheduler/world.js';
+import { refreshBonuses } from '../scheduler/research.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
 
@@ -112,12 +114,33 @@ export async function startWorldCommand(
     }
     await ensureHeroes(client, deps.data, world.id, world.seed);
     const started = await getWorld(client, world.id);
+    // Each village carries its owner's clan.
+    await refreshBonuses(client, deps.data, started, members.map((m) => m.accountId), input.now);
     await ensureSites(client, deps.data, started);
     await loadBridge(client, started.id, input.now, started.sanctity);
     await announceFirstWaves(client, deps.data, started);
     await ensureDigests(client, started, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     return started;
+  });
+}
+
+// A member picks their clan: freely in the lobby, once a run has started
+// only if they have none yet.
+export async function setClanCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; worldId: number; clan: string; now: Date },
+): Promise<void> {
+  if (!deps.data.clans.clans[input.clan]) throw new RuleError(`Unknown clan "${input.clan}"`);
+  await withWorld(db, input.worldId, input.now, deps, async (client) => {
+    const world = await getWorld(client, input.worldId);
+    const member = (await listMembers(client, world.id)).find((m) => m.accountId === input.account.id);
+    if (!member) throw new ForbiddenError('You are not in this world');
+    if (world.status !== 'lobby' && member.clan !== null) throw new RuleError('Your clan is chosen for this run');
+    await setClan(client, world.id, input.account.id, input.clan);
+    if (world.status === 'running') await refreshBonuses(client, deps.data, world, [input.account.id], input.now);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
 }
 

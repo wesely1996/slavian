@@ -98,7 +98,7 @@ static func constructible(data: Dictionary, village: Dictionary) -> Array[String
 	var result: Array[String] = []
 	var buildings: Dictionary = data.buildings.buildings
 	for building in buildings:
-		if buildings[building].kind == "center" and not taken.has(building):
+		if buildings[building].kind == "center" and not taken.has(building) and ClanText.allowed(buildings[building], village.get("bonuses", {})):
 			result.append(building)
 	return result
 

@@ -36,6 +36,7 @@ func _initialize() -> void:
 	_test_sites()
 	_test_bridge()
 	_test_run()
+	_test_clans()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -457,3 +458,18 @@ func _test_run() -> void:
 	_check(RunText.stats({"days": 3.0, "wavesBeaten": 0, "wavesFaced": 0, "battlesWon": 0, "campsCleared": 0, "sitesExplored": 0, "scrolls": 0, "villagesFounded": 1, "villagesLost": 0})[0] == "3 days", "whole days")
 	_check(RunText.member_line({"displayName": "Mila", "villages": 3, "villagesLost": 1}) == "Mila: 3 villages, 1 lost", "member line")
 	_check(RunText.member_line({"displayName": "Rusa", "villages": 1, "villagesLost": 0}) == "Rusa: 1 village", "member line one")
+
+
+func _test_clans() -> void:
+	var data := {
+		"clans": {"clans": {"rys": {"name": "Rod Rysa", "animal": "Lynx", "best": "Wood", "weakness": "Slower research", "unique": {"unit": "forest_archer"}}}},
+		"units": {"units": {"forest_archer": {"name": "Forest Archer", "clan": "rys"}}},
+		"buildings": {"buildings": {}},
+	}
+	_check(ClanText.title(data, "rys") == "Rod Rysa (Lynx)", "clan title")
+	_check(ClanText.title(data, null) == "No clan", "no clan")
+	_check(ClanText.perks(data, "rys") == "Best at: Wood · Weakness: Slower research · Own: Forest Archer (unit)", "clan perks: %s" % ClanText.perks(data, "rys"))
+	_check(ClanText.allowed({"name": "Spearman"}, {}), "common unit allowed")
+	_check(not ClanText.allowed({"clan": "rys"}, {"clan.sokol": 1}), "other clan's unit hidden")
+	_check(ClanText.allowed({"clan": "rys"}, {"clan.rys": 1}), "own clan's unit allowed")
+	_check(FieldRules.fort_cost({"field": {"fort": {"cost": {"wood": 600, "stone": 900}}}}, {"fortCost": 0.3}) == {"wood": 780, "stone": 1170}, "fort cost by clan")

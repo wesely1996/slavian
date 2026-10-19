@@ -87,6 +87,8 @@ export interface Member {
   accountId: number;
   displayName: string;
   joinedAt: Date;
+  // Their clan (data/clans.json); null until they pick one.
+  clan: string | null;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -98,13 +100,17 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
-    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt"
+    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1
      ORDER BY m.joined_at, m.account_id`,
     [worldId],
   );
   return rows;
+}
+
+export async function setClan(client: DbClient, worldId: number, accountId: number, clan: string): Promise<void> {
+  await client.query('UPDATE world_members SET clan = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, clan]);
 }
 
 export async function isMember(client: DbClient, worldId: number, accountId: number): Promise<boolean> {

@@ -1,10 +1,11 @@
 // Research on the scheduler: research_complete marks the tech known and
 // gives every one of the player's villages its effects.
+import { clanBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import type { DbClient } from '../db/pool.js';
 import { listScrolls } from '../db/sites.js';
-import type { World } from '../db/worlds.js';
+import { listMembers, type World } from '../db/worlds.js';
 import { combine } from '../sim/heroes.js';
 import { loreBonuses } from '../sim/sites.js';
 import { notifyWorld } from '../db/notify.js';
@@ -22,7 +23,8 @@ export type ResearchPayload = z.infer<typeof researchPayload>;
 export async function playerBonuses(client: DbClient, data: GameData, worldId: number, accountId: number): Promise<Record<string, number>> {
   const known = (await listResearch(client, worldId, accountId)).filter((r) => r.status === 'done').map((r) => r.tech);
   const scrolls = (await listScrolls(client, worldId)).map((s) => s.scroll);
-  return combine(bonusesOf(data, known), loreBonuses(data, scrolls));
+  const clan = (await listMembers(client, worldId)).find((m) => m.accountId === accountId)?.clan ?? null;
+  return combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), clanBonuses(data, clan));
 }
 
 // Gives every village of `accountIds` its owner's current bonuses.

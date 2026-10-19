@@ -4,6 +4,8 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { againstFront } from '../sim/clans.js';
+import { bonus } from '../sim/research.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
@@ -25,7 +27,7 @@ import { setupAt, setupFactors, stepInto, type Setup } from '../sim/field.js';
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
-import { spend } from '../sim/resources.js';
+import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
 import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -159,10 +161,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   // The holders fight with their owner's research and the hero leading them.
   let hero: Hero | null = null;
   for (const army of engaged) hero ??= await heroWithArmy(client, army.id);
-  const research = leader?.state.bonuses ?? {};
+  const research = againstFront(leader?.state.bonuses ?? {}, wave.front);
   const bonuses = hero ? combine(research, heroBonuses(data, hero)) : research;
   const ground: Setup = { ambush: !!battle.setup.ambush, choke: !!battle.setup.choke, fort: !!battle.setup.fort };
-  const factors = setupFactors(data, ground, { round, holdersStance: stance });
+  const factors = setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
   const holderBase = playerStats(data, bonuses, false);
   const hordeBase = enemyStats(data, wave.front);
@@ -295,6 +297,12 @@ async function marchOn(client: DbClient, data: GameData, world: World, wave: Wav
   await planIntercepts(client, world, wave.id, sinceSpawn + 1);
 }
 
+// What a fort costs its builder (some clans pay more, some less).
+export function fortCost(data: GameData, bonuses: Record<string, number>): Resources {
+  const factor = Math.max(0.1, 1 + bonus(bonuses, 'fortCost'));
+  return mapResources((kind) => Math.round(data.field.fort.cost[kind] * factor));
+}
+
 // Builds a fort on a hex near the village, paid from its stores.
 export async function buildFort(client: DbClient, data: GameData, world: World, villageId: number, cell: Hex, at: Date): Promise<Fort> {
   const rules = data.field.fort;
@@ -310,7 +318,8 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   if (await fortAt(client, world.id, cell.q, cell.r)) throw new RuleError('There is a fort there already');
   if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
   if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
-  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
+  const cost = fortCost(data, village.state.bonuses);
+  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, cost) });
   const fort = await insertFort(client, {
     worldId: world.id,
     ownerAccountId: village.ownerAccountId,

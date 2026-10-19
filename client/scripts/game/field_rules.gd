@@ -53,3 +53,13 @@ static func fort_problem(data: Dictionary, village: Dictionary, cell: Vector2i, 
 	if taken:
 		return "Something already stands here."
 	return ""
+
+
+## What a fort costs a village with these bonuses (some clans pay more,
+## some less; see server scheduler/field.ts fortCost).
+static func fort_cost(data: Dictionary, bonuses: Dictionary) -> Dictionary:
+	var factor := maxf(0.1, 1.0 + float(bonuses.get("fortCost", 0)))
+	var cost := {}
+	for kind in data.field.fort.cost:
+		cost[kind] = roundi(float(data.field.fort.cost[kind]) * factor)
+	return cost

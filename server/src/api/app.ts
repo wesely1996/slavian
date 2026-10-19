@@ -20,7 +20,7 @@ import {
   trainUnitsCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
-import { createWorldCommand, joinWorldCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { createWorldCommand, joinWorldCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -97,6 +97,7 @@ const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: 
 const minuteOfDay = z.number().int().min(0).max(1439);
 // From the vault into the bridge's open stage.
 const donateBody = z.object({ resources: loadSchema, embers: z.number().int().min(0).max(100).default(0) });
+const clanBody = z.object({ clan: z.string().min(1).max(32) });
 // The group's quiet hours (null start/end: none), set by the host.
 const quietBody = z.object({
   start: minuteOfDay.nullable(),
@@ -190,6 +191,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     sites: scheduler.data.sites,
     lore: scheduler.data.lore,
     bridge: scheduler.data.bridge,
+    clans: scheduler.data.clans,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -273,6 +275,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = quietBody.parse(request.body);
     await setQuietHoursCommand(db, { account, worldId: id, ...body });
+    return fullWorldView(id);
+  });
+
+  app.put('/v1/worlds/:id/clan', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { clan } = clanBody.parse(request.body);
+    await setClanCommand(db, scheduler, { account, worldId: id, clan, now: clock() });
     return fullWorldView(id);
   });
 

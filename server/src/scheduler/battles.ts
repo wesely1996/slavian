@@ -1,6 +1,7 @@
 // Battles on the scheduler: a horde reaching a village starts a battle; each
 // battle_round event fights one round, applies losses to the horde and the
 // garrison, and either schedules the next round or settles the outcome.
+import { againstFront, villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { insertBattle, loadBattle, recordRound, setDecision, type RoundLog } from '../db/battles.js';
@@ -97,7 +98,8 @@ export const battleHandlers: HandlerRegistry = {
     const round = battle.round + 1;
     // The hero standing in the village leads its garrison.
     const hero = await heroAt(client, village.id);
-    const bonuses = hero ? combine(state.bonuses, heroBonuses(data, hero)) : state.bonuses;
+    const own = againstFront(villageBonuses(data, state), wave.front);
+    const bonuses = hero ? combine(own, heroBonuses(data, hero)) : own;
     // The garrison fights alongside armies sent to help; armies joining this
     // round bring their pincer or harassment bonus.
     const engaged = await armiesInBattle(client, battle.id);

@@ -51,6 +51,10 @@ const buildingSchema = z.object({
   // Outposts: resources per hour at level 1, by the terrain they stand on.
   yields: z.partialRecord(z.enum(TERRAIN_IDS), resourcesSchema.partial()).optional(),
   yieldGrowth: z.number().min(1).optional(),
+  // A clan's own building: only that clan builds it; its effects add to the
+  // village's bonuses per level.
+  clan: z.string().optional(),
+  effects: z.record(z.string(), z.number()).optional(),
 });
 
 const buildingsFileSchema = z.object({
@@ -104,6 +108,8 @@ const unitSchema = z.object({
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   carry: z.number().nonnegative(),
+  // A clan's own unit: only that clan trains it.
+  clan: z.string().optional(),
 });
 
 const unitsFileSchema = z.object({
@@ -453,6 +459,23 @@ const loreFileSchema = z.object({
 });
 export type LoreData = z.infer<typeof loreFileSchema>;
 
+const clansFileSchema = z.object({
+  version: z.number().int(),
+  clans: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      animal: z.string(),
+      story: z.string(),
+      best: z.string(),
+      weakness: z.string(),
+      effects: z.record(z.string(), z.number()),
+      unique: z.union([z.object({ unit: z.string() }), z.object({ building: z.string() })]),
+    }),
+  ),
+});
+export type ClansData = z.infer<typeof clansFileSchema>;
+
 export const BRIDGE_QUESTS = ['site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
 export type BridgeQuest = (typeof BRIDGE_QUESTS)[number];
 const bridgeFileSchema = z.object({
@@ -527,6 +550,7 @@ export interface GameData {
   sites: SitesData;
   lore: LoreData;
   bridge: BridgeData;
+  clans: ClansData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -553,6 +577,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     sites: sitesFileSchema.parse(read('sites.json')),
     lore: loreFileSchema.parse(read('lore.json')),
     bridge: bridgeFileSchema.parse(read('bridge.json')),
+    clans: clansFileSchema.parse(read('clans.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
@@ -589,6 +614,14 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     if (!data.buildings.buildings[unit.building]) {
       throw new Error(`Unit "${id}" is trained in unknown building "${unit.building}"`);
     }
+    if (unit.clan && !data.clans.clans[unit.clan]) throw new Error(`Unit "${id}" belongs to unknown clan "${unit.clan}"`);
+  }
+  for (const [id, building] of Object.entries(buildings)) {
+    if (building.clan && !data.clans.clans[building.clan]) throw new Error(`Building "${id}" belongs to unknown clan "${building.clan}"`);
+  }
+  for (const [id, clan] of Object.entries(data.clans.clans)) {
+    const unique = 'unit' in clan.unique ? data.units.units[clan.unique.unit] : buildings[clan.unique.building];
+    if (unique?.clan !== id) throw new Error(`Clan "${id}" names a unique that isn't its own`);
   }
   return data;
 }

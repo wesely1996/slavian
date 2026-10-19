@@ -209,12 +209,43 @@ func _show_lobby(world: Dictionary) -> void:
 	_content.add_child(UI.label("Share it with your group. %d of %d players joined." % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED))
 	for member in world.members:
 		var host := " (host)" if int(member.accountId) == int(world.hostAccountId) else ""
-		_content.add_child(UI.label("• %s%s" % [member.displayName, host]))
+		var clan := " · %s" % ClanText.title(Game.data, member.get("clan")) if not Game.data.is_empty() else ""
+		_content.add_child(UI.label("• %s%s%s" % [member.displayName, host, clan]))
 	if int(world.hostAccountId) == int(Session.account.id):
 		_content.add_child(UI.button("Start the world", func() -> void: _start_world(int(world.id))))
 	else:
 		_content.add_child(UI.label("Waiting for the host to start…", UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.button("Back", _show_home))
+	_clan_picker(world)
+
+
+## Each member picks their clan in the lobby (and may change it until the start).
+func _clan_picker(world: Dictionary) -> void:
+	if Game.data.is_empty():
+		var error := await Game.ensure_data()
+		if error == "" and _lobby_world_id == int(world.id):
+			_show_lobby(world)
+		return
+	var mine: Variant = null
+	for member in world.members:
+		if int(member.accountId) == int(Session.account.id):
+			mine = member.get("clan")
+	_content.add_child(UI.label("Your clan: %s" % ClanText.title(Game.data, mine), UI.HEADING_SIZE))
+	for clan in ClanText.ids(Game.data):
+		var def: Dictionary = Game.data.clans.clans[clan]
+		var pick := UI.button(("✓ " if clan == mine else "") + ClanText.title(Game.data, clan), func() -> void: _pick_clan(int(world.id), clan))
+		_content.add_child(pick)
+		_content.add_child(UI.label(def.story, UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.label(ClanText.perks(Game.data, clan), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _pick_clan(world_id: int, clan: String) -> void:
+	_set_status("")
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/clan" % world_id, {"clan": clan})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	_show_lobby(response.data)
 
 
 func _start_world(world_id: int) -> void:
