@@ -145,7 +145,7 @@ export class LiveHub {
         if (event.type === 'waves') {
           return { type: 'waves', worldId: event.worldId, waves: await wavesView(client, event.worldId), serverTime };
         }
-        return { type: 'world', world: await worldView(client, this.data, await getWorld(client, event.worldId)), serverTime };
+        return { type: 'world', world: await worldView(client, this.data, await getWorld(client, event.worldId), new Date(serverTime)), serverTime };
       });
       for (const socket of sockets) send(socket, message);
     } catch (error) {

@@ -1,4 +1,5 @@
 import websocket from '@fastify/websocket';
+import { delegateCommand, endDelegationCommand } from '../commands/delegation.js';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
@@ -98,6 +99,8 @@ const minuteOfDay = z.number().int().min(0).max(1439);
 // From the vault into the bridge's open stage.
 const donateBody = z.object({ resources: loadSchema, embers: z.number().int().min(0).max(100).default(0) });
 const clanBody = z.object({ clan: z.string().min(1).max(32) });
+const delegateBody = z.object({ to: z.number().int().positive(), days: z.number().int() });
+const endDelegationBody = z.object({ owner: z.number().int().positive().optional() });
 // The group's quiet hours (null start/end: none), set by the host.
 const quietBody = z.object({
   start: minuteOfDay.nullable(),
@@ -163,7 +166,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   async function fullWorldView(worldId: number) {
     return inTransaction(db, async (client) => ({
-      ...(await worldView(client, scheduler.data, await getWorld(client, worldId))),
+      ...(await worldView(client, scheduler.data, await getWorld(client, worldId), clock())),
       serverTime: clock().toISOString(),
     }));
   }
@@ -283,6 +286,22 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const { clan } = clanBody.parse(request.body);
     await setClanCommand(db, scheduler, { account, worldId: id, clan, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.put('/v1/worlds/:id/delegation', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = delegateBody.parse(request.body);
+    await delegateCommand(db, scheduler, { accountId: account.id, worldId: id, ...body, now: clock() });
+    return fullWorldView(id);
+  });
+
+  app.delete('/v1/worlds/:id/delegation', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = endDelegationBody.parse(request.body ?? {});
+    await endDelegationCommand(db, scheduler, { accountId: account.id, worldId: id, owner: body.owner, now: clock() });
     return fullWorldView(id);
   });
 

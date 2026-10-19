@@ -227,7 +227,7 @@ func _build_ui() -> void:
 func _select(cell: Vector2i) -> void:
 	_selected = cell
 	var village := Game.village_at(cell)
-	if not village.is_empty() and Game.is_mine(village):
+	if not village.is_empty() and Game.commands(village):
 		Game.current_village_id = int(village.id)
 	_panel_mode = "hex"
 	hex_map.select(cell)
@@ -268,6 +268,71 @@ func _open_run_once() -> void:
 	if RunText.is_over(Game.world) and not _run_seen:
 		_run_seen = true
 		_panel_mode = "run"
+
+
+## "You command this for Mila until …" on a village handed to you.
+func _handed_line(village: Dictionary) -> void:
+	if Game.is_mine(village):
+		return
+	var d := DelegationText.of_owner(Game.delegations, int(village.ownerAccountId), Game.server_now())
+	if d.is_empty():
+		return
+	_panel_body.add_child(UI.label("You command it for %s for %s more; they see what you do." % [Game.member_name(int(d.ownerAccountId)), TimeUtil.format_duration(TimeUtil.parse_iso(d.until) - Game.server_now())], UI.SMALL_SIZE, Color("#e8d9a8")))
+
+
+## Hand-overs: give your villages to a teammate while away, take them back,
+## and what delegates did lately.
+func _delegation_section() -> void:
+	if Game.world.get("status") != "running":
+		return
+	var me := Game.my_account_id()
+	var now := Game.server_now()
+	_panel_body.add_child(UI.label("Hand-overs", UI.HEADING_SIZE))
+	var mine := DelegationText.of_owner(Game.delegations, me, now)
+	if not mine.is_empty():
+		_panel_body.add_child(UI.label("%s commands your villages for %s more." % [Game.member_name(int(mine.delegateAccountId)), TimeUtil.format_duration(TimeUtil.parse_iso(mine.until) - now)], UI.SMALL_SIZE))
+		_panel_body.add_child(UI.button("Take them back", func() -> void: _end_delegation(me)))
+	for owner in DelegationText.owners_for(Game.delegations, me, now):
+		var d := DelegationText.of_owner(Game.delegations, owner, now)
+		_panel_body.add_child(UI.label("You command %s's villages for %s more." % [Game.member_name(owner), TimeUtil.format_duration(TimeUtil.parse_iso(d.until) - now)], UI.SMALL_SIZE))
+		_panel_body.add_child(UI.button("Hand them back", func() -> void: _end_delegation(owner)))
+	var others: Array = Game.world.get("members", []).filter(func(m: Dictionary) -> bool: return int(m.accountId) != me)
+	if mine.is_empty() and not others.is_empty():
+		_panel_body.add_child(UI.label("Away for a while? Hand your villages to a teammate for 1–7 days.", UI.SMALL_SIZE, UI.MUTED))
+		var row := UI.hbox(8)
+		var who := UI.options(others.map(func(m: Dictionary) -> String: return m.displayName), 0)
+		who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(who)
+		var days := UI.options(["1 day", "2 days", "3 days", "4 days", "5 days", "6 days", "7 days"], 1)
+		row.add_child(days)
+		_panel_body.add_child(row)
+		_panel_body.add_child(UI.button("Hand over", func() -> void: _delegate(int(others[who.selected].accountId), days.selected + 1)))
+	var names := {}
+	for m in Game.world.get("members", []):
+		names[int(m.accountId)] = m.displayName
+	var village_names := {}
+	for v in Game.villages.values():
+		village_names[int(v.id)] = v.name
+	for e in Game.delegation_log.slice(0, 8):
+		_panel_body.add_child(UI.label("%s · %s ago" % [DelegationText.entry(e, names, village_names), TimeUtil.format_duration(now - TimeUtil.parse_iso(e.at))], UI.SMALL_SIZE, UI.MUTED))
+
+
+func _delegate(to: int, days: int) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/delegation" % Game.world_id(), {"to": to, "days": days})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+
+
+func _end_delegation(owner: int) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_DELETE, "/v1/worlds/%d/delegation" % Game.world_id(), {"owner": owner})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 ## The group's clans; a member with none yet picks one here.
@@ -348,7 +413,7 @@ func _rebuild_panel() -> void:
 	var village := Game.village_at(_selected)
 	if village.is_empty():
 		_terrain_panel()
-	elif Game.is_mine(village):
+	elif Game.commands(village):
 		_own_village_panel(village)
 	else:
 		_ally_village_panel(village)
@@ -1155,7 +1220,7 @@ func _hero_panel() -> void:
 		row.add_child(wear)
 		_panel_body.add_child(row)
 
-	var mine := Game.my_villages()
+	var mine := Game.my_villages().filter(func(v: Dictionary) -> bool: return Game.is_mine(v))
 	if mine.size() > 1:
 		_panel_body.add_child(UI.label("Send to", UI.HEADING_SIZE))
 		for village in mine:
@@ -1324,6 +1389,7 @@ func _ally_village_panel(village: Dictionary) -> void:
 ## Your village as seen on the map: a summary and the way in.
 func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
+	_handed_line(village)
 	var hall := Rules.hall_level(village)
 	var queue: Array = village.queue
 	_panel_body.add_child(UI.label("Elder's Hall Lv %d · building %d of %d · outposts %d of %d" % [hall, queue.size(), Rules.queue_limit(Game.data, hall),
@@ -1350,7 +1416,7 @@ func _village_panel() -> void:
 	_village_view.show_village(Game.data, village, _plot)
 	var mine := Game.my_villages()
 	if mine.size() > 1:
-		var names := mine.map(func(v: Dictionary) -> String: return v.name)
+		var names := mine.map(func(v: Dictionary) -> String: return v.name if Game.is_mine(v) else "%s (for %s)" % [v.name, Game.member_name(int(v.ownerAccountId))])
 		var index := 0
 		for i in mine.size():
 			if int(mine[i].id) == int(village.id):
@@ -1563,7 +1629,7 @@ func _troops_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_stance_picker(village)
 	_hero_line(village_id)
-	var recommended := Rules.recommended_garrison(Game.data, Game.my_villages().size())
+	var recommended := Rules.recommended_garrison(Game.data, Game.villages_owned(int(village.ownerAccountId)))
 	var guard := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(guard)
 	_tick(guard, func() -> String:
@@ -1626,7 +1692,7 @@ func _troops_section(village: Dictionary) -> void:
 		if not unlocked:
 			info.add_child(UI.label("Needs %s level %d" % [_building_def(def.building).name, def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
 			continue
-		var cost := Rules.unit_cost(def, count, Game.my_villages().size())
+		var cost := Rules.unit_cost(def, count, Game.villages_owned(int(village.ownerAccountId)))
 		var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		info.add_child(cost_line)
 
@@ -1732,6 +1798,7 @@ func _threat_summary() -> String:
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
 	_clan_section()
+	_delegation_section()
 	var ritual := RunText.ritual_line(Game.world, Game.server_now())
 	if ritual != "":
 		_panel_body.add_child(UI.label(ritual, 0, Color("#ffb4a8")))

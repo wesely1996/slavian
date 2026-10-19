@@ -1,10 +1,11 @@
 import { loadArmy, saveReinforceRule, type Army } from '../db/armies.js';
+import { authorize } from '../db/delegations.js';
 import type { GameData } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld } from '../db/worlds.js';
-import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
+import { NotFoundError, RuleError } from '../errors.js';
 import { dispatchArmy, sendHome } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
@@ -37,7 +38,7 @@ export async function sendArmyCommand(
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client) => {
     const home = await loadVillage(client, input.villageId);
-    if (home.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    await authorize(client, { worldId, ownerAccountId: home.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent an army', villageId: home.id });
     return dispatchArmy(client, deps.data, await getWorld(client, worldId), {
       homeVillageId: home.id,
       targetVillageId: input.targetVillageId,
@@ -55,7 +56,7 @@ export async function buildFortCommand(db: Db, deps: SchedulerDeps, input: { acc
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client) => {
     const village = await loadVillage(client, input.villageId);
-    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a fort', villageId: village.id });
     return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now);
   });
 }
@@ -66,7 +67,15 @@ export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { ac
   if (!rows[0]) throw new NotFoundError('No such army');
   return withWorld(db, rows[0].world_id, input.now, deps, async (client) => {
     const army = await loadArmy(client, input.armyId);
-    if (army.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your army');
+    await authorize(client, {
+      worldId: army.worldId,
+      ownerAccountId: army.ownerAccountId,
+      actorAccountId: input.accountId,
+      at: input.now,
+      action: 'called an army home',
+      villageId: army.homeVillageId,
+      refusal: 'Not your army',
+    });
     if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
     if (army.status !== 'stationed') throw new RuleError('Only armies standing guard can be called home');
     const back = await sendHome(client, await getWorld(client, army.worldId), army, input.now, deps.data);
@@ -88,7 +97,7 @@ export async function setReinforceCommand(
   }
   await inTransaction(db, async (client) => {
     const village = await loadVillage(client, input.villageId);
-    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: new Date(), action: 'changed how it reinforces', villageId: village.id });
     await saveReinforceRule(client, input.villageId, { share: input.share, range: input.range });
     await notifyWorld(client, { worldId, type: 'village', villageId: input.villageId });
   });

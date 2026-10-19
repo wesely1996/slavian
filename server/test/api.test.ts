@@ -1401,6 +1401,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
     expect(w.bridge).toMatchObject({ stage: 1, status: 'open', quests: {}, embers: 0 });
+    // (The scouts' find may have been an Ember.)
+    await db.query('UPDATE worlds SET embers = 0 WHERE id = $1', [worldId]);
     expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
   });
 
@@ -1481,6 +1483,41 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(theirs.bonuses).toMatchObject({ 'clan.rys': 1, 'production.wood': 0.15 });
     const refused = await call('POST', `/v1/villages/${theirs.id}/build`, friend.token, { plot: 'c2', building: 'longhouse_hall' });
     expect(refused.body.message).toMatch(/Only Rod Volka/);
+  });
+
+  it('lets a player hand their villages to a teammate for a while, logging what the teammate does', async () => {
+    const mila = await guest('Mila');
+    const goran = await guest('Goran');
+    const created = await call('POST', '/v1/worlds', mila.token, { name: 'Away', maxPlayers: 2 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', goran.token, { inviteCode: created.body.inviteCode });
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, mila.token)).body;
+    const milas = started.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === mila.accountId);
+    const build = () => call('POST', `/v1/villages/${milas.id}/build`, goran.token, { plot: 'c2', building: 'barracks' });
+    expect((await build()).status).toBe(403);
+
+    expect((await call('PUT', `/v1/worlds/${worldId}/delegation`, mila.token, { to: goran.accountId, days: 9 })).body.message).toMatch(/1 to 7 days/);
+    expect((await call('PUT', `/v1/worlds/${worldId}/delegation`, mila.token, { to: mila.accountId, days: 2 })).body.message).toMatch(/not yourself/);
+    let w = (await call('PUT', `/v1/worlds/${worldId}/delegation`, mila.token, { to: goran.accountId, days: 2 })).body;
+    expect(w.delegations).toEqual([{ ownerAccountId: mila.accountId, delegateAccountId: goran.accountId, since: now.toISOString(), until: new Date(now.getTime() + 2 * 86_400_000).toISOString() }]);
+    // No chains: Goran can't hand his villages to Mila while he looks after hers.
+    expect((await call('PUT', `/v1/worlds/${worldId}/delegation`, goran.token, { to: mila.accountId, days: 1 })).body.message).toMatch(/handed over their own/);
+
+    expect((await build()).status).toBe(200);
+    w = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body;
+    expect(w.delegationLog).toEqual([
+      { ownerAccountId: mila.accountId, delegateAccountId: goran.accountId, villageId: milas.id, action: 'queued a build', at: now.toISOString() },
+    ]);
+    // Goran hands them back early; then he can't command them any more.
+    w = (await call('DELETE', `/v1/worlds/${worldId}/delegation`, goran.token, { owner: mila.accountId })).body;
+    expect(w.delegations).toEqual([]);
+    expect((await call('POST', `/v1/villages/${milas.id}/train`, goran.token, { unit: 'spearman', count: 1 })).status).toBe(403);
+
+    // A hand-over runs out by itself.
+    await call('PUT', `/v1/worlds/${worldId}/delegation`, mila.token, { to: goran.accountId, days: 1 });
+    now = new Date(now.getTime() + 86_400_000 + 1000);
+    expect((await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.delegations).toEqual([]);
+    expect((await build()).status).toBe(403);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

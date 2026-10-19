@@ -75,6 +75,8 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/me/devices` | Register a phone's push token `{ token, platform }` (see [docs/push.md](docs/push.md)). |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |
 | `PUT` | `/v1/worlds/:id/clan` | Pick your clan `{ clan }` (`data/clans.json`): freely in the lobby; once the run has started, only if you have none yet. |
+| `PUT` | `/v1/worlds/:id/delegation` | Hand your villages to a teammate `{ to: accountId, days: 1–7 }`; they command them as their own, and what they do is logged (`delegations` and `delegationLog` in the world view). |
+| `DELETE` | `/v1/worlds/:id/delegation` | End a hand-over: your own, or `{ owner }` to hand a teammate's villages back. |
 | `POST` | `/v1/worlds/:id/bridge/donate` | Give `{ resources: { wood, stone, grain, iron }, embers }` from the vault and the group's Embers to the Kalinov Bridge stage being built; capped at what it still needs. |
 | `POST` | `/v1/worlds/:id/bridge/ritual` | Forge the ritual torc (spends Embers) for a stage whose quest asks for it. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
