@@ -1,6 +1,6 @@
 class_name Art
 extends RefCounted
-## Art by id. client/art/art.json maps each id ("terrain/forest",
+## Art by id. client/art/art.json maps each id ("feature/pine",
 ## "settlement/village_3", "unit/archer") to a file; point an id at your own
 ## file (SVG or PNG) to replace that piece of art (docs/art-style.md).
 ## Missing art gives null, and callers draw their placeholder instead.

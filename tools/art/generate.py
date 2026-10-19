@@ -9,8 +9,8 @@ touched, so you can replace any asset by pointing its id at your file.
 
     python3 tools/art/generate.py
 """
+import itertools
 import json
-import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,10 +62,36 @@ def pts(points):
     return " ".join(f"{fmt(x)},{fmt(y)}" for x, y in points)
 
 
+# Gradient ids, unique across pieces so one can be drawn inside another.
+GRADIENT_IDS = itertools.count()
+
+
 class Svg:
     def __init__(self, w=128, h=128):
         self.w, self.h = w, h
         self.parts = []
+        self.defs = []
+
+    def lin(self, stops, x1=0, y1=0, x2=0, y2=1):
+        """A linear gradient (in the shape's own box, 0-1) to fill with:
+        stops are (offset, colour) or (offset, colour, opacity)."""
+        gid = f"g{next(GRADIENT_IDS)}"
+        self.defs.append(f'<linearGradient id="{gid}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}">{self._stops(stops)}</linearGradient>')
+        return f"url(#{gid})"
+
+    def rad(self, stops, cx=0.5, cy=0.5, r=0.5, fx=None, fy=None):
+        gid = f"g{next(GRADIENT_IDS)}"
+        focus = f' fx="{fx}" fy="{fy}"' if fx is not None else ""
+        self.defs.append(f'<radialGradient id="{gid}" cx="{cx}" cy="{cy}" r="{r}"{focus}>{self._stops(stops)}</radialGradient>')
+        return f"url(#{gid})"
+
+    @staticmethod
+    def _stops(stops):
+        out = []
+        for stop in stops:
+            opacity = f' stop-opacity="{stop[2]}"' if len(stop) > 2 else ""
+            out.append(f'<stop offset="{stop[0]}" stop-color="{stop[1]}"{opacity}/>')
+        return "".join(out)
 
     def add(self, s):
         self.parts.append(s)
@@ -94,23 +120,16 @@ class Svg:
 
     def embed(self, other, x, y, scale=1.0):
         """Draws another piece inside this one, its top left at (x, y)."""
+        self.defs.extend(other.defs)
         body = "".join(other.parts)
         return self.add(f'<g transform="translate({fmt(x)},{fmt(y)}) scale({scale})">{body}</g>')
 
     def text(self):
-        body = "\n  ".join(self.parts)
+        body = "\n  ".join(([f"<defs>{''.join(self.defs)}</defs>"] if self.defs else []) + self.parts)
         return f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" viewBox="0 0 {self.w} {self.h}">\n  {body}\n</svg>\n'
 
 
 # --- Shared pieces -----------------------------------------------------------
-HEX_W = 128
-HEX_H = round(128 * 2 / math.sqrt(3))  # pointy-top: 148
-
-
-def hex_points(w=HEX_W, h=HEX_H, inset=0):
-    cx, cy = w / 2, h / 2
-    r = h / 2 - inset
-    return [(cx + r * math.cos(math.radians(60 * i - 90)), cy + r * math.sin(math.radians(60 * i - 90))) for i in range(6)]
 
 
 def tree(s, x, y, size, kind="forest"):
@@ -118,12 +137,6 @@ def tree(s, x, y, size, kind="forest"):
     s.rect(x - size * 0.08, y - size * 0.1, size * 0.16, size * 0.3, P["wood"][0], sw=2.5)
     s.poly([(x, y - size), (x + size * 0.45, y), (x - size * 0.45, y)], base, sw=3)
     s.poly([(x, y - size * 0.92), (x + size * 0.18, y - size * 0.5), (x - size * 0.1, y - size * 0.55)], light, stroke="none", sw=0)
-
-
-def round_tree(s, x, y, size):
-    s.rect(x - size * 0.08, y, size * 0.16, size * 0.35, P["wood"][0], sw=2.5)
-    s.circle(x, y - size * 0.15, size * 0.42, P["forest"][0], sw=3)
-    s.circle(x - size * 0.12, y - size * 0.3, size * 0.15, P["forest"][1], stroke="none", sw=0)
 
 
 def tuft(s, x, y, color=INK, size=8):
@@ -197,103 +210,6 @@ def medallion(s, color="cloth", ring="gold"):
 
 
 # --- Terrain tiles (pointy-top hexes, no outline: the map draws the grid) --
-
-def terrain(base, motif):
-    s = Svg(HEX_W, HEX_H)
-    s.poly(hex_points(), P[base][0], stroke="none", sw=0)
-    motif(s)
-    return s
-
-
-def m_plains(s):
-    for x, y in [(40, 60), (82, 52), (64, 92), (30, 100), (96, 98)]:
-        tuft(s, x, y, color="#55702f", size=11)
-    for x, y, c in [(58, 66, "#f3d06a"), (90, 76, "#ffffff"), (44, 118, "#f3d06a"), (84, 122, "#ffffff")]:
-        s.circle(x, y, 3.5, c, sw=1.5)
-
-
-def m_forest(s):
-    for x, y, z in [(42, 72, 34), (84, 66, 38), (62, 108, 36), (100, 104, 28), (28, 108, 26)]:
-        tree(s, x, y, z)
-
-
-def m_dark_forest(s):
-    for x, y, z in [(40, 70, 38), (82, 62, 42), (60, 106, 40), (100, 104, 32), (26, 106, 30)]:
-        tree(s, x, y, z, kind="dark_forest")
-    for x, y in [(56, 84), (90, 86)]:
-        s.circle(x, y, 2.2, "#f3d06a", stroke="none", sw=0)
-        s.circle(x + 6, y, 2.2, "#f3d06a", stroke="none", sw=0)
-
-
-def m_hills(s):
-    for x, y, w in [(44, 80, 52), (86, 96, 56), (48, 118, 40)]:
-        s.path(f"M{fmt(x - w / 2)},{fmt(y)} Q{fmt(x)},{fmt(y - w * 0.7)} {fmt(x + w / 2)},{fmt(y)} Z", P["hill"][0], sw=3)
-        s.path(f"M{fmt(x - w * 0.2)},{fmt(y - w * 0.22)} Q{fmt(x)},{fmt(y - w * 0.36)} {fmt(x + w * 0.15)},{fmt(y - w * 0.26)}", "none", stroke=P["hill"][1], sw=3)
-
-
-def m_mountain(s):
-    peak(s, 50, 100, 64, 66)
-    peak(s, 88, 112, 56, 54)
-    peak(s, 70, 70, 40, 34, snow=False)
-
-
-def m_swamp(s):
-    for x, y, w in [(46, 76, 30), (86, 98, 34), (52, 112, 24)]:
-        s.ellipse(x, y, w / 2, w / 5, P["mud"][0], sw=2.5)
-    for x, y in [(70, 70), (30, 96), (100, 74), (78, 118)]:
-        s.path(f"M{x},{y} l-4,-16 M{x},{y} l0,-20 M{x},{y} l5,-15", "none", stroke="#3d4a2a", sw=2.5)
-        s.ellipse(x, y - 21, 2.5, 5, "#6b4a2a", stroke="none", sw=0)
-
-
-def m_lake(s):
-    for x, y in [(44, 64), (84, 80), (56, 100), (90, 112)]:
-        wave(s, x, y)
-
-
-def m_ocean(s):
-    for x, y in [(40, 56), (80, 68), (48, 92), (88, 104), (60, 124)]:
-        wave(s, x, y, w=26, opacity=0.55)
-
-
-def m_ice(s):
-    s.path("M30,70 L52,80 L48,96 L70,106 M80,56 L76,74 L96,86 M62,122 L72,110", "none", stroke="#9fb6c2", sw=2.5)
-    for x, y in [(90, 112), (38, 112)]:
-        s.poly([(x - 8, y), (x, y - 14), (x + 8, y)], P["snow"][0], sw=2.5)
-
-
-def m_steppe(s):
-    for x, y in [(36, 64), (76, 56), (96, 84), (56, 90), (34, 108), (84, 116)]:
-        tuft(s, x, y, color="#8f7440", size=7)
-
-
-def m_hallowed(s):
-    s.ellipse(64, 92, 38, 18, P["hallow"][1], stroke="none", sw=0, opacity=0.6)
-    for i in [3, 4, 5, 0, 2, 1]:  # back row first
-        a = math.radians(60 * i)
-        x, y = 64 + 34 * math.cos(a), 92 + 16 * math.sin(a)
-        s.rect(x - 6, y - 28, 12, 28, P["stone"][0], sw=3, rx=4)
-    s.circle(64, 90, 6, P["ember"][1], sw=2)
-
-
-def m_holy_city(s):
-    s.poly(hex_points(inset=26), P["wall"][1], stroke=P["stone"][0], sw=3, opacity=0.8)
-
-
-TERRAIN = {
-    "plains": ("grass", m_plains),
-    "forest": ("grass", m_forest),
-    "hills": ("hill", m_hills),
-    "mountain": ("rock", m_mountain),
-    "swamp": ("swamp", m_swamp),
-    "lake": ("water", m_lake),
-    "holy_city": ("meadow", m_holy_city),
-    "ocean": ("deep", m_ocean),
-    "dark_forest": ("dark_forest", m_dark_forest),
-    "ice": ("ice", m_ice),
-    "steppe": ("sand", m_steppe),
-    "hallowed": ("hallow", m_hallowed),
-}
-
 
 # --- Settlements -----------------------------------------------------------
 
@@ -822,12 +738,150 @@ def icon(kind):
 UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock"]
 
 
+# --- Map features: shaded, outline-free, lit from the upper left ------------------
+# Drawn over the ground by MapFeatures (client/scripts/map/map_features.gd),
+# several to a hex; each one's foot is at the bottom centre of its picture.
+
+def soft_shadow(s, cx, cy, rx, ry, strength=0.38):
+    s.ellipse(cx, cy, rx, ry, s.rad([(0, "#000000", strength), (1, "#000000", 0)]), stroke="none", sw=0)
+
+
+def conifer(s, x, foot, w, h, colors, tiers=3):
+    """A pine: tiers of needles, lit on the left."""
+    soft_shadow(s, x + w * 0.1, foot - 2, w * 0.42, w * 0.12)
+    s.rect(x - w * 0.06, foot - h * 0.22, w * 0.12, h * 0.2, s.lin([(0, "#7a5636"), (1, "#3b2817")], 0, 0, 1, 0), stroke="none", sw=0)
+    light, mid, dark = colors
+    for i in range(tiers):
+        top = foot - h + i * h * 0.24
+        bottom = foot - h * 0.18 - (tiers - 1 - i) * h * 0.16
+        half = w * (0.26 + 0.12 * i)
+        fill = s.lin([(0, light), (0.45, mid), (1, dark)], 0, 0, 1, 0)
+        s.path(f"M{fmt(x)},{fmt(top)} Q{fmt(x - half * 0.35)},{fmt((top + bottom) / 2)} {fmt(x - half)},{fmt(bottom)} "
+               f"Q{fmt(x)},{fmt(bottom + h * 0.05)} {fmt(x + half)},{fmt(bottom)} Q{fmt(x + half * 0.35)},{fmt((top + bottom) / 2)} {fmt(x)},{fmt(top)} Z",
+               fill, stroke="none", sw=0)
+        s.path(f"M{fmt(x - half * 0.92)},{fmt(bottom - 1)} Q{fmt(x)},{fmt(bottom + h * 0.035)} {fmt(x + half * 0.92)},{fmt(bottom - 1)}",
+               "none", stroke="#000000", sw=1.6, opacity=0.18)
+
+
+def f_pine():
+    s = Svg(64, 96)
+    conifer(s, 32, 92, 56, 88, ("#7f9a52", "#4f6b37", "#2b3f24"))
+    return s
+
+
+def f_dark_pine():
+    s = Svg(56, 100)
+    conifer(s, 28, 96, 46, 94, ("#56705a", "#2f4634", "#18251c"), tiers=4)
+    return s
+
+
+def f_oak():
+    s = Svg(72, 80)
+    soft_shadow(s, 40, 74, 28, 7)
+    s.path("M33,76 L35,52 L39,52 L41,76 Z", s.lin([(0, "#7a5636"), (1, "#3b2817")], 0, 0, 1, 0), stroke="none", sw=0)
+    for cx, cy, r, depth in [(48, 34, 17, 0.35), (24, 36, 16, 0.3), (36, 22, 18, 0), (34, 44, 17, 0.1)]:
+        fill = s.rad([(0, "#9cb468"), (0.55, "#5f7f3d"), (1, "#2f4526")], 0.36, 0.32, 0.75)
+        s.circle(cx, cy, r, fill, stroke="none", sw=0)
+        if depth:
+            s.circle(cx, cy, r, "#000000", stroke="none", sw=0, opacity=depth * 0.35)
+    return s
+
+
+def mountain_body(s, x, foot, w, h, snowline=0.42):
+    soft_shadow(s, x + w * 0.08, foot - 3, w * 0.5, w * 0.11, 0.42)
+    top = (x - w * 0.04, foot - h)
+    left, right = (x - w / 2, foot), (x + w / 2, foot)
+    ridge = (x + w * 0.06, foot - h * 0.25)
+    s.poly([left, top, ridge, (x, foot)], s.lin([(0, "#c4bdaf"), (1, "#8c867b")], 0, 0, 0, 1), stroke="none", sw=0)
+    s.poly([top, right, (x, foot), ridge], s.lin([(0, "#6f6a61"), (1, "#4a4640")], 0, 0, 1, 1), stroke="none", sw=0)
+    for f1, f2 in [(0.3, 0.7), (0.55, 0.45)]:
+        a = (top[0] + (left[0] - top[0]) * f1, top[1] + (left[1] - top[1]) * f1)
+        s.line(a[0], a[1], a[0] + w * 0.1, a[1] + h * 0.2 * f2, stroke="#5e5a52", sw=1.6, opacity=0.45)
+    snow_left = (top[0] + (left[0] - top[0]) * snowline, top[1] + (left[1] - top[1]) * snowline)
+    snow_right = (top[0] + (right[0] - top[0]) * snowline * 0.9, top[1] + (right[1] - top[1]) * snowline * 0.9)
+    snow_mid = (top[0] + (ridge[0] - top[0]) * snowline * 1.1, top[1] + (ridge[1] - top[1]) * snowline * 1.1)
+    s.poly([top, snow_left, (snow_left[0] + w * 0.07, snow_left[1] - h * 0.05), snow_mid], s.lin([(0, "#ffffff"), (1, "#dfe6ea")], 0, 0, 0, 1), stroke="none", sw=0)
+    s.poly([top, snow_mid, (snow_mid[0] + w * 0.08, snow_mid[1] - h * 0.03), snow_right], s.lin([(0, "#c7d1d8"), (1, "#a3b0b9")], 0, 0, 1, 1), stroke="none", sw=0)
+    # The foot fades into the ground.
+    s.rect(left[0], foot - h * 0.16, w, h * 0.16, s.lin([(0, "#7b766c", 0), (1, "#7b766c", 0.85)], 0, 0, 0, 1), stroke="none", sw=0)
+
+
+def f_mountain():
+    s = Svg(160, 128)
+    mountain_body(s, 76, 122, 150, 116)
+    return s
+
+
+def f_peak():
+    s = Svg(100, 80)
+    mountain_body(s, 50, 76, 92, 66, snowline=0.3)
+    return s
+
+
+def f_hill():
+    s = Svg(128, 64)
+    soft_shadow(s, 70, 56, 56, 8, 0.3)
+    s.path("M6,60 Q30,14 64,10 Q100,12 122,60 Z", s.rad([(0, "#b8ae76"), (0.5, "#8f875a"), (1, "#5d583c")], 0.38, 0.3, 0.8), stroke="none", sw=0)
+    s.path("M40,30 Q58,18 80,20", "none", stroke="#d6cd94", sw=2.5, opacity=0.35)
+    s.rect(0, 46, 128, 18, s.lin([(0, "#8e8657", 0), (1, "#8e8657", 0.9)], 0, 0, 0, 1), stroke="none", sw=0)
+    return s
+
+
+def f_reeds():
+    s = Svg(48, 48)
+    s.ellipse(24, 42, 18, 4, "#9cc0cc", stroke="none", sw=0, opacity=0.35)
+    for x0, lean, h, c in [(14, -6, 30, "#6e7b40"), (20, -2, 36, "#8a9a52"), (26, 3, 34, "#5c6a35"), (32, 7, 28, "#7d8a4a"), (23, 0, 24, "#9aa860")]:
+        s.path(f"M{x0},{42} Q{x0 + lean * 0.3},{42 - h * 0.6} {x0 + lean},{42 - h}", "none", stroke=c, sw=2)
+    for x0, y0 in [(19, 9), (28, 11)]:
+        s.ellipse(x0, y0, 2, 5, "#6b4a2e", stroke="none", sw=0)
+    return s
+
+
+def f_grass():
+    s = Svg(40, 28)
+    for x0, lean, h, c in [(12, -5, 18, "#7f8f48"), (17, -1, 24, "#a3ad62"), (22, 3, 20, "#8c9a50"), (27, 6, 15, "#b2b56a")]:
+        s.path(f"M{x0},26 Q{x0 + lean * 0.3},{26 - h * 0.6} {x0 + lean},{26 - h}", "none", stroke=c, sw=2.2)
+    return s
+
+
+def f_bush():
+    s = Svg(44, 32)
+    soft_shadow(s, 24, 28, 18, 4, 0.3)
+    for cx, cy, r in [(15, 20, 9), (29, 19, 10), (22, 13, 9)]:
+        s.circle(cx, cy, r, s.rad([(0, "#97ae63"), (0.6, "#5c7a3c"), (1, "#30462a")], 0.35, 0.3, 0.75), stroke="none", sw=0)
+    return s
+
+
+def f_ice():
+    s = Svg(72, 60)
+    soft_shadow(s, 38, 54, 28, 5, 0.25)
+    s.poly([(10, 54), (22, 18), (34, 30), (40, 54)], s.lin([(0, "#ffffff"), (1, "#c9d8df")], 0, 0, 1, 1), stroke="none", sw=0)
+    s.poly([(22, 18), (30, 6), (44, 28), (34, 30)], s.lin([(0, "#f4f8fa"), (1, "#b9cbd4")], 0, 0, 1, 1), stroke="none", sw=0)
+    s.poly([(34, 30), (44, 28), (62, 54), (40, 54)], s.lin([(0, "#a8bcc7"), (1, "#7f96a3")], 0, 0, 1, 1), stroke="none", sw=0)
+    return s
+
+
+def f_menhir():
+    s = Svg(36, 64)
+    soft_shadow(s, 20, 60, 13, 4, 0.35)
+    s.path("M8,60 L10,20 Q14,6 22,8 Q28,12 28,26 L28,60 Z", s.lin([(0, "#b3ab9e"), (0.6, "#857e72"), (1, "#5e584f")], 0, 0, 1, 0), stroke="none", sw=0)
+    for x0, y0, r in [(15, 30, 3), (21, 44, 2.5)]:
+        s.circle(x0, y0, r, "#7f8a52", stroke="none", sw=0, opacity=0.55)
+    return s
+
+
+FEATURES = {
+    "pine": f_pine, "dark_pine": f_dark_pine, "oak": f_oak, "mountain": f_mountain, "peak": f_peak,
+    "hill": f_hill, "reeds": f_reeds, "grass": f_grass, "bush": f_bush, "ice": f_ice, "menhir": f_menhir,
+}
+
+
 # --- Build everything --------------------------------------------------------
 
 def assets():
     out = {}
-    for tid, (base, motif) in TERRAIN.items():
-        out[f"terrain/{tid}"] = terrain(base, motif)
+    for kind, make in FEATURES.items():
+        out[f"feature/{kind}"] = make()
     for tier in range(1, 6):
         out[f"settlement/village_{tier}"] = settlement(tier)
     out["settlement/ruins"] = ruins()

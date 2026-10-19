@@ -4,7 +4,7 @@ extends SceneTree
 ## (needs a display; under CI use xvfb-run). docs/art/style-sample.png is made with it.
 
 const SECTIONS := [
-	["Terrain", "terrain/"],
+	["Map features: woods, peaks, hills, reeds, stones (over the shaded ground)", "feature/"],
 	["Settlements: by Elder's Hall level, ruins, the Holy City", "settlement/"],
 	["On the map: camps and lairs, forts, outposts", "map/"],
 	["Ancient sites", "site/"],
