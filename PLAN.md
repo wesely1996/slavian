@@ -381,6 +381,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 - **Settlements** look different at each level; **banners** show the owner. **Outlines** tell sides apart at a glance: green for yours, blue for allies' units and settlements, red for enemies.
 - **Village interior and its resource fields** look and work like Travian's.
 - **Battle screen:** a play-by-play of each round with narrative explanations, over a 2D top-down view of the battlefield: units as squares with unit icons, neighbouring squares of the same kind grouped into a squad with one big icon over the whole group.
+  - Look: a parchment campaign map like [`docs/reference/battle-map.jpg`](docs/reference/battle-map.jpg) (the Battle of Hastings): shaded hills and ground, roads, rivers and marsh, place names; each side's units as rectangles in its colour with a military-map style symbol for the unit kind, drawn in lines; a label over each group ("Archers", "Bretons"); the leader (a hero, or the horde's chief) as a marker of their own behind the lines.
 
 ### 11.8 Support & server costs (Q6, Q37)
 - **No ads, no in-app purchases, no speed-ups.**
@@ -547,7 +548,7 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
 
 ### M5 breakdown (to plan in detail when M4 is done)
 - **UI design and art pass** (§11.7): Kingdom Rush–like art and UI; merged map art for connected tiles of one kind; settlement art per level, owner banners, green/blue/red outlines for yours/allies'/enemies'; a Travian-like village interior and resource fields.
-- **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon).
+- **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon), drawn as a parchment campaign map (reference: `docs/reference/battle-map.jpg`).
 - **Roads:** players build roads between hexes. Roads speed up movement for everyone on them, allies and the human hordes alike, but not monsters. (Terrain already sets movement cost.)
 - The rest of M5 as in the roadmap table (closed test, balance, localization, accessibility, donation button, privacy, backups/monitoring).
 
