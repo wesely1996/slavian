@@ -523,8 +523,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       call('POST', `/v1/villages/${home.id}/found`, mila.token, { q, r, ...(name ? { name } : {}) });
 
     const settleable = new Set(['plains', 'forest', 'hills']);
+    const ancient = new Set(started.body.sites.map((s: { q: number; r: number }) => `${s.q},${s.r}`));
     const site = (started.body.map.hexes as [number, number, string][]).find(
-      ([q, r, t]) => settleable.has(t) && hexDistance(hex(q, r), homeCell) === 4 && hexDistance(hex(q, r), hex(0, 0)) >= 3,
+      ([q, r, t]) => settleable.has(t) && hexDistance(hex(q, r), homeCell) === 4 && hexDistance(hex(q, r), hex(0, 0)) >= 3 && !ancient.has(`${q},${r}`),
     )!;
     expect(site).toBeDefined();
     expect((await found(site[0], site[1])).body.message).toMatch(/takes 3 settlers/);
@@ -961,10 +962,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const marching = (await world()).waves.find((x: { id: number }) => x.id === first.id);
     // A hex on the road a few steps short of the village: in fort range,
     // not the Holy City (no forts there).
+    // (and no ancient site)
+    const ancient = new Set(started.body.sites.map((s: { q: number; r: number }) => `${s.q},${s.r}`));
     const holdable = (path: [number, number, number][]) =>
       path.slice(0, -1).reverse().find(([pq, pr]) => {
         const d = hexDistance(hex(pq, pr), hex(home.q, home.r));
-        return d >= 2 && d <= 4 && (pq !== 0 || pr !== 0);
+        return d >= 2 && d <= 4 && (pq !== 0 || pr !== 0) && !ancient.has(`${pq},${pr}`);
       })!;
     const [q, r, atMs] = holdable(marching.path);
     const meetAt = new Date(new Date(marching.spawnAt).getTime() + atMs);
@@ -1296,6 +1299,65 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await call('GET', `/v1/worlds/${worldId}`, yara.token)).body.battles[0]).toMatchObject({ villageId: home.id });
     // Cleared quiet hours.
     expect((await call('PUT', `/v1/worlds/${worldId}/quiet`, yara.token, { start: null, end: null })).body.quietHours).toBeNull();
+  });
+
+  it('explores ancient sites: guardians, a search, and finds such as lore scrolls for the whole group', async () => {
+    const vesna = await guest('Vesna');
+    const ilya = await guest('Ilya');
+    const created = await call('POST', '/v1/worlds', vesna.token, { name: 'Sites', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', ilya.token, { inviteCode: created.body.inviteCode });
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, vesna.token);
+    const home = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vesna.accountId);
+    const theirs = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ilya.accountId);
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
+    expect(started.body.sites.length).toBeGreaterThanOrEqual(scheduler.data.sites.placement.min);
+    expect(started.body.sites.every((s: { status: string; guardians: null }) => s.status === 'unexplored' && s.guardians === null)).toBe(true);
+    const [watched, idol] = started.body.sites as { id: number; q: number; r: number; kind: string }[];
+    await db.query(`UPDATE sites SET guardians = '{"cave_bear": 30}' WHERE id = $1`, [watched!.id]);
+    await db.query(`UPDATE sites SET guardians = '{"grey_wolf": 3}', kind = 'stone_idol' WHERE id = $1`, [idol!.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 80, "scout": 6}' WHERE id = $1`, [home.id]);
+    const send = (target: { q: number; r: number }, units: object, extra: object = {}) =>
+      call('POST', `/v1/villages/${home.id}/armies`, vesna.token, { target: { q: target.q, r: target.r }, units, orders: 'explore', ...extra });
+    expect((await send({ q: home.q, r: home.r }, { scout: 1 })).body.message).toMatch(/no ancient site/);
+
+    // Scouts alone can't get past the bears; now the group knows they are there.
+    const scouts = await send(watched!, { scout: 4 });
+    expect(scouts.body.army).toMatchObject({ orders: 'explore', units: { scout: 4 } });
+    now = new Date(scouts.body.army.arrivesAt);
+    await tick(db, now, scheduler);
+    let w = await world();
+    expect(w.battles.find((b: { siteId: number }) => b.siteId === watched!.id)).toMatchObject({ status: 'repelled' });
+    expect(w.sites.find((s: { id: number }) => s.id === watched!.id)).toMatchObject({ status: 'unexplored', guardians: 30 });
+
+    // An army led by the hero beats the wolves at the idol, searches it and finds a scroll.
+    const finds = scheduler.data.sites.kinds.stone_idol!.finds;
+    const saved = { ...finds };
+    Object.assign(finds, { resources: 0, gear: 0, scroll: 1, ember: 0 });
+    try {
+      const army = await send(idol!, { spearman: 40, scout: 2 }, { withHero: true });
+      now = new Date(army.body.army.arrivesAt);
+      await tick(db, now, scheduler);
+      w = await world();
+      expect(w.battles.find((b: { siteId: number }) => b.siteId === idol!.id)).toMatchObject({ status: 'cleared' });
+      expect(w.armies.find((a: { id: number }) => a.id === army.body.army.id).status).toBe('stationed');
+      now = new Date(now.getTime() + (scheduler.data.sites.kinds.stone_idol!.exploreHours * 3_600_000) / 10);
+      await tick(db, now, scheduler);
+      w = await world();
+      const site = w.sites.find((s: { id: number }) => s.id === idol!.id);
+      expect(site).toMatchObject({ status: 'explored', exploredBy: vesna.accountId, find: { type: 'scroll' } });
+      expect(w.lore).toEqual([expect.objectContaining({ scroll: site.find.scroll, accountId: vesna.accountId, siteId: idol!.id })]);
+      // Its effects reach every player's villages, not just the finder's.
+      const effects = scheduler.data.lore.scrolls[site.find.scroll]!.effects;
+      for (const v of [home, theirs]) {
+        const village = w.villages.find((x: { id: number }) => x.id === v.id);
+        for (const [key, value] of Object.entries(effects)) expect(village.bonuses[key]).toBeCloseTo(value);
+      }
+      expect(w.armies.find((a: { id: number }) => a.id === army.body.army.id).status).toBe('returning');
+      expect((await send(idol!, { scout: 1 })).body.message).toMatch(/already been explored/);
+    } finally {
+      Object.assign(finds, saved);
+    }
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

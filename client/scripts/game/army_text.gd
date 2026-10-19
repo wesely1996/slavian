@@ -8,6 +8,7 @@ const ORDERS := {
 	"harass": "Harass (mostly cavalry): strikes one round hard, takes few losses, rides home.",
 	"hold": "Hold: digs in on a hex and fights every horde whose road runs through it.",
 	"clear": "Clear: storms a camp or lair and carries its loot home.",
+	"explore": "Explore: fights any guardians, searches the site for some hours and brings home what it finds. Scouts may go too.",
 }
 
 
@@ -21,11 +22,13 @@ static func units_text(units: Dictionary, defs: Dictionary) -> String:
 
 ## "Supporting Vesna · arrives in 3m", from the point of view of its owner.
 static func status(army: Dictionary, target_name: String, now: float) -> String:
-	var verb: String = {"support": "Supporting", "reinforce": "Reinforcing", "harass": "Harassing", "hold": "Marching to hold", "clear": "Marching to clear the camp at"}.get(army.orders, "Marching to")
+	var verb: String = {"support": "Supporting", "reinforce": "Reinforcing", "harass": "Harassing", "hold": "Marching to hold", "clear": "Marching to clear the camp at", "explore": "Marching to explore"}.get(army.orders, "Marching to")
 	match army.status:
 		"marching":
 			return "%s %s · arrives in %s" % [verb, target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
 		"stationed":
+			if army.orders == "explore":
+				return "Searching the site at %s" % target_name
 			return ("Holding %s" if army.orders == "hold" else "Standing guard at %s") % target_name
 		"engaged":
 			return "Fighting at %s" % target_name

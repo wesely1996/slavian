@@ -246,6 +246,8 @@ const researchFileSchema = z.object({
       seconds: z.number().positive(),
       effects: z.record(z.string(), z.number()),
       description: z.string(),
+      // A rare tech: only once the group has found this lore scroll.
+      requiresScroll: z.string().optional(),
     }),
   ),
 });
@@ -414,6 +416,42 @@ const difficultyFileSchema = z.object({
   power: z.object({ attackPerPlayer: z.number().positive(), growthPerWave: z.number().nonnegative() }),
 });
 export type DifficultyData = z.infer<typeof difficultyFileSchema>;
+
+const sitesFileSchema = z.object({
+  version: z.number().int(),
+  placement: z.object({
+    perPlayer: z.number().int().nonnegative(),
+    min: z.number().int().nonnegative(),
+    borderBand: z.number().int().nonnegative(),
+    midShare: z.number().min(0).max(1),
+    midRange: z.tuple([z.number().min(0), z.number().max(1)]),
+    spacing: z.number().int().positive(),
+    keepAway: z.number().int().nonnegative(),
+  }),
+  kinds: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      terrain: z.array(z.enum(TERRAIN_IDS)).min(1),
+      exploreHours: z.number().positive(),
+      guardianChance: z.number().min(0).max(1),
+      finds: z.object({ resources: z.number().nonnegative(), gear: z.number().nonnegative(), scroll: z.number().nonnegative(), ember: z.number().nonnegative() }),
+      description: z.string(),
+    }),
+  ),
+  guardians: z.object({ baseUnits: z.number().positive(), distanceGrowth: z.number().nonnegative(), waveIndex: z.number().int().nonnegative() }),
+  loot: resourcesSchema,
+});
+export type SitesData = z.infer<typeof sitesFileSchema>;
+
+const loreFileSchema = z.object({
+  version: z.number().int(),
+  scrolls: z.record(
+    z.string(),
+    z.object({ name: z.string(), effects: z.record(z.string(), z.number()), unlocks: z.string().optional(), description: z.string() }),
+  ),
+});
+export type LoreData = z.infer<typeof loreFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -450,6 +488,8 @@ export interface GameData {
   horde: HordeData;
   camps: CampsData;
   difficulty: DifficultyData;
+  sites: SitesData;
+  lore: LoreData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -473,6 +513,8 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     horde: hordeFileSchema.parse(read('horde.json')),
     camps: campsFileSchema.parse(read('camps.json')),
     difficulty: difficultyFileSchema.parse(read('difficulty.json')),
+    sites: sitesFileSchema.parse(read('sites.json')),
+    lore: loreFileSchema.parse(read('lore.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
@@ -490,6 +532,12 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     for (const required of tech.requires) {
       if (!data.research.techs[required]) throw new Error(`Tech "${id}" requires unknown tech "${required}"`);
     }
+    if (tech.requiresScroll && data.lore.scrolls[tech.requiresScroll]?.unlocks !== id) {
+      throw new Error(`Tech "${id}" needs scroll "${tech.requiresScroll}", which doesn't unlock it`);
+    }
+  }
+  for (const [id, scroll] of Object.entries(data.lore.scrolls)) {
+    if (scroll.unlocks && data.research.techs[scroll.unlocks]?.requiresScroll !== id) throw new Error(`Scroll "${id}" unlocks "${scroll.unlocks}"`);
   }
   if (data.units.units.settler?.building !== 'settlers_lodge') throw new Error('units.json needs a "settler" trained in the settlers_lodge');
   if (buildings.caravan_yard?.kind !== 'center') throw new Error('buildings.json needs a center building "caravan_yard"');

@@ -21,6 +21,8 @@ import { completeTraining, loseAway, returnHome, sendAway } from '../sim/village
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { interceptAt } from './field.js';
 import { deliverLoot, stormCamp } from './camps.js';
+import { arriveAtSite } from './sites.js';
+import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
 import { fortAt, markFortManned } from '../db/forts.js';
 
@@ -49,7 +51,13 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   const units = validateArmy(data, input.units, input.orders);
   const home = await loadVillage(client, input.homeVillageId);
   let to: Hex;
-  if (input.orders === 'clear') {
+  if (input.orders === 'explore') {
+    if (!input.targetHex) throw new RuleError('Say which site to explore');
+    to = input.targetHex;
+    const site = await siteAt(client, world.id, to.q, to.r);
+    if (!site) throw new RuleError('There is no ancient site there');
+    if (site.status === 'explored') throw new RuleError('That site has already been explored');
+  } else if (input.orders === 'clear') {
     if (!input.targetHex) throw new RuleError('Say which camp to clear');
     to = input.targetHex;
     if (!(await campAt(client, world.id, to.q, to.r))) throw new RuleError('There is no camp there');
@@ -80,7 +88,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     worldId: world.id,
     ownerAccountId: home.ownerAccountId,
     homeVillageId: home.id,
-    targetVillageId: input.orders === 'hold' || input.orders === 'clear' ? null : input.targetVillageId,
+    targetVillageId: ['hold', 'clear', 'explore'].includes(input.orders) ? null : input.targetVillageId,
     targetQ: to.q,
     targetR: to.r,
     heroAccountId,
@@ -191,6 +199,11 @@ export const armyHandlers: HandlerRegistry = {
   async army_arrive({ client, data, world }, event) {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
     if (army.status !== 'marching') return;
+    if (army.orders === 'explore') {
+      await arriveAtSite(client, data, world, army, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      return;
+    }
     if (army.orders === 'clear') {
       await stormCamp(client, data, world, army, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });

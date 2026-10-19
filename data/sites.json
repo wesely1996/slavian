@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "_comment": "Ancient sites (PLAN.md §8.1). Hours are game hours (divided by world speed). When a world starts, perPlayer sites per player (at least min) are placed on passable land: most in the borderlands (within borderBand of the map's edge, the edge belt included), midShare of them mid-map (between midRange of the radius from the Holy City), at least spacing apart and keepAway from start sites. A site's kind is picked among those whose terrain matches. guardianChance of sites are watched by guardians: a band of the North's beasts of guardians.baseUnits, more the further out (up to ×(1 + guardians.distanceGrowth)). Armies (scouts allowed) sent to explore fight the guardians first, then search for exploreHours and come home with one find, weighted by the kind's finds: resources (loot × (1 + distance share)), a piece of hero gear, a Svarog's Ember, or a lore scroll (data/lore.json) the group hasn't found yet (otherwise resources).",
+  "placement": { "perPlayer": 3, "min": 5, "borderBand": 2, "midShare": 0.3, "midRange": [0.3, 0.6], "spacing": 3, "keepAway": 3 },
+  "kinds": {
+    "kurgan": { "name": "Kurgan", "terrain": ["plains", "hills", "steppe"], "exploreHours": 4, "guardianChance": 0.3, "finds": { "resources": 4, "gear": 3, "scroll": 2, "ember": 1 }, "description": "A burial mound of the old chieftains." },
+    "sunken_shrine": { "name": "Sunken Shrine", "terrain": ["swamp", "forest"], "exploreHours": 6, "guardianChance": 0.4, "finds": { "resources": 2, "gear": 2, "scroll": 4, "ember": 1 }, "description": "A shrine the marsh swallowed, its idols still dry inside." },
+    "old_hillfort": { "name": "Old Hillfort", "terrain": ["hills", "plains", "hallowed"], "exploreHours": 5, "guardianChance": 0.6, "finds": { "resources": 3, "gear": 4, "scroll": 1, "ember": 1 }, "description": "Earthworks of a forgotten clan." },
+    "stone_idol": { "name": "Stone Idol", "terrain": ["plains", "forest", "steppe"], "exploreHours": 3, "guardianChance": 0.2, "finds": { "resources": 2, "gear": 1, "scroll": 3, "ember": 2 }, "description": "A four-faced idol, worn smooth by centuries of rain." },
+    "frozen_ruin": { "name": "Frozen Ruin", "terrain": ["ice", "dark_forest"], "exploreHours": 8, "guardianChance": 0.7, "finds": { "resources": 2, "gear": 3, "scroll": 2, "ember": 4 }, "description": "Halls under the ice, warm at their heart." }
+  },
+  "guardians": { "baseUnits": 10, "distanceGrowth": 1.5, "waveIndex": 2 },
+  "loot": { "wood": 400, "stone": 400, "grain": 300, "iron": 250 }
+}

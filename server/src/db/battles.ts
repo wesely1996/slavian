@@ -37,9 +37,10 @@ export interface BattleDecision {
 export interface Battle {
   id: number;
   worldId: number;
-  // null: an army storming a camp (campId).
+  // null: an army storming a camp (campId) or a site's guardians (siteId).
   waveId: number | null;
   campId: number | null;
+  siteId: number | null;
   // null: a field battle at (q, r).
   villageId: number | null;
   q: number;
@@ -62,6 +63,7 @@ interface BattleRow {
   world_id: number;
   wave_id: number | null;
   camp_id: number | null;
+  site_id: number | null;
   village_id: number | null;
   q: number;
   r: number;
@@ -84,6 +86,7 @@ function fromRow(row: BattleRow): Battle {
     worldId: row.world_id,
     waveId: row.wave_id,
     campId: row.camp_id,
+    siteId: row.site_id,
     villageId: row.village_id,
     q: row.q,
     r: row.r,
@@ -104,11 +107,11 @@ function fromRow(row: BattleRow): Battle {
 export async function insertBattle(
   client: DbClient,
   battle: Pick<Battle, 'worldId' | 'waveId' | 'villageId' | 'q' | 'r' | 'attackerStance' | 'attackerInitial' | 'defenderInitial' | 'startedAt'> &
-    Partial<Pick<Battle, 'setup' | 'campId'>>,
+    Partial<Pick<Battle, 'setup' | 'campId' | 'siteId'>>,
 ): Promise<Battle> {
   const { rows } = await client.query<BattleRow>(
-    `INSERT INTO battles (world_id, wave_id, village_id, q, r, setup, attacker_stance, attacker_initial, defender_initial, started_at, camp_id)
-     VALUES ($1, $2, $3, $8, $9, $10, $4, $5, $6, $7, $11) RETURNING *`,
+    `INSERT INTO battles (world_id, wave_id, village_id, q, r, setup, attacker_stance, attacker_initial, defender_initial, started_at, camp_id, site_id)
+     VALUES ($1, $2, $3, $8, $9, $10, $4, $5, $6, $7, $11, $12) RETURNING *`,
     [
       battle.worldId,
       battle.waveId,
@@ -121,6 +124,7 @@ export async function insertBattle(
       battle.r,
       JSON.stringify(battle.setup ?? {}),
       battle.campId ?? null,
+      battle.siteId ?? null,
     ],
   );
   return fromRow(rows[0]!);

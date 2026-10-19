@@ -3,6 +3,7 @@
 import type { GameData } from '../data/index.js';
 import { HALL_PLOT, plotsFromLegacyLevels, type Plot } from '../sim/village.js';
 import { ensureDigests } from '../scheduler/notices.js';
+import { ensureSites } from '../scheduler/sites.js';
 import { ensureHeroes } from './heroes.js';
 import { getWorld } from './worlds.js';
 import { inTransaction, type Db } from './pool.js';
@@ -58,5 +59,16 @@ export async function upgradeDigests(db: Db, now: Date): Promise<void> {
   await inTransaction(db, async (client) => {
     const { rows } = await client.query<{ id: number }>(`SELECT id FROM worlds WHERE status <> 'lobby'`);
     for (const { id } of rows) await ensureDigests(client, await getWorld(client, id), now);
+  });
+}
+
+// Worlds started before ancient sites existed get theirs.
+export async function upgradeSites(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number }>(
+      `SELECT id FROM worlds w WHERE status = 'running' AND NOT EXISTS (SELECT 1 FROM sites s WHERE s.world_id = w.id)`,
+    );
+    for (const { id } of rows) await ensureSites(client, data, await getWorld(client, id));
+    return rows.length;
   });
 }

@@ -112,7 +112,7 @@ const armyBody = z.object({
   targetVillageId: z.number().int().positive().nullable().default(null),
   target: hexBody.optional(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
-  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear']),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore']),
   withHero: z.boolean().optional(),
 });
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
@@ -184,6 +184,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     horde: scheduler.data.horde,
     camps: scheduler.data.camps,
     difficulty: scheduler.data.difficulty,
+    sites: scheduler.data.sites,
+    lore: scheduler.data.lore,
   }));
 
   app.post('/v1/auth/guest', async (request) => {

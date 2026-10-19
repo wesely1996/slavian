@@ -3,6 +3,7 @@
 import { listForts, type Fort } from '../db/forts.js';
 import { listCamps } from '../db/camps.js';
 import { loadFear } from '../db/fear.js';
+import { listScrolls, listSites } from '../db/sites.js';
 import { total } from '../sim/battle.js';
 import type { DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
@@ -159,6 +160,7 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
     id: battle.id,
     waveId: battle.waveId,
     campId: battle.campId,
+    siteId: battle.siteId,
     villageId: battle.villageId,
     q: battle.q,
     r: battle.r,
@@ -432,6 +434,19 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
   const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units), waveId: c.waveId }));
+  const sites = (await listSites(client, world.id)).map((s) => ({
+    id: s.id,
+    kind: s.kind,
+    q: s.q,
+    r: s.r,
+    status: s.status,
+    // How many guard it, once someone has fought them (null: unknown).
+    guardians: s.guardiansSeen ? total(s.guardians) : null,
+    exploredBy: s.exploredBy,
+    find: s.find,
+    exploredAt: s.exploredAt?.toISOString() ?? null,
+  }));
+  const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
   const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
   const map =
@@ -453,6 +468,9 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     armies,
     forts,
     camps,
+    // Ancient sites, and the group's lore scrolls.
+    sites,
+    lore,
     // [q, r, fear]: where hordes were beaten, and how much they remember it.
     fear,
     ...logistics,

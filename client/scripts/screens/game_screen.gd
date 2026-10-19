@@ -306,7 +306,7 @@ func _terrain_panel() -> void:
 	var holder := Game.outpost_owner(_selected)
 	if not holder.is_empty():
 		_outpost_panel(holder, Rules.outpost_plot(_selected))
-	elif camp.is_empty():
+	elif camp.is_empty() and Game.site_at(_selected).is_empty():
 		_claim_panel(id)
 		_found_panel(id)
 	_hold_panel(id)
@@ -527,6 +527,13 @@ func _research_section(village: Dictionary) -> void:
 		_panel_body.add_child(line)
 		var tech_name: String = techs[current.tech].name
 		_tick(line, func() -> String: return "Researching %s · %s" % [tech_name, TimeUtil.format_duration(done_at - Game.server_now())])
+	if not Game.lore.is_empty():
+		_panel_body.add_child(UI.label("Lore scrolls of the group", UI.HEADING_SIZE))
+		for entry in Game.lore:
+			var def: Dictionary = Game.data.lore.scrolls.get(entry.scroll, {})
+			var finder := Game.member_name(int(entry.accountId)) if entry.get("accountId") != null else "?"
+			_panel_body.add_child(UI.label("%s (found by %s)" % [def.get("name", entry.scroll), finder]))
+			_panel_body.add_child(UI.label(SiteText.scroll_effect(Game.data, entry.scroll), UI.SMALL_SIZE, UI.MUTED))
 	var speed := float(Game.world.speed)
 	for branch in Game.data.research.branches:
 		_panel_body.add_child(UI.label(Game.data.research.branches[branch], UI.HEADING_SIZE))
@@ -547,7 +554,7 @@ func _research_section(village: Dictionary) -> void:
 			_panel_body.add_child(row)
 			if known or (not current.is_empty() and current.tech == tech):
 				continue
-			var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty())
+			var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty(), Game.scrolls())
 			var cost: Dictionary = def.cost
 			var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 			info.add_child(cost_line)
@@ -670,11 +677,12 @@ func _armies_section(village: Dictionary) -> void:
 
 
 ## Steppers for each fighting unit at home; returns the troops picked.
-func _unit_pickers(home_units: Dictionary) -> Dictionary:
+func _unit_pickers(home_units: Dictionary, with_scouts := false) -> Dictionary:
 	var defs: Dictionary = Game.data.units.units
+	var families := ["infantry", "archers", "cavalry", "scout"] if with_scouts else ["infantry", "archers", "cavalry"]
 	for unit in home_units:
 		var def: Dictionary = defs.get(unit, {})
-		if def.is_empty() or not def.family in ["infantry", "archers", "cavalry"] or unit == "settler":
+		if def.is_empty() or not def.family in families or unit == "settler":
 			continue
 		var have := int(home_units[unit])
 		var count := clampi(int(_army_units.get(unit, 0)), 0, have)
@@ -723,11 +731,22 @@ func _hold_panel(terrain_id: String) -> void:
 	var cell := _selected
 	var fort := Game.fort_at(cell)
 	var camp := Game.camp_at(cell)
-	var orders := "hold" if camp.is_empty() else "clear"
-	_panel_body.add_child(UI.label("Hold this hex" if camp.is_empty() else "Clear this camp", UI.HEADING_SIZE))
+	var site := Game.site_at(cell)
+	var exploring: bool = not site.is_empty() and site.status == "unexplored"
+	var orders := "explore" if exploring else ("hold" if camp.is_empty() else "clear")
+	if not site.is_empty():
+		var kind: Dictionary = Game.data.sites.kinds.get(site.kind, {})
+		_panel_body.add_child(UI.label(kind.get("name", "Ancient site"), UI.HEADING_SIZE))
+		_panel_body.add_child(UI.label(kind.get("description", ""), UI.SMALL_SIZE, UI.MUTED))
+		var explorer := Game.member_name(int(site.exploredBy)) if site.get("exploredBy") != null else "?"
+		_panel_body.add_child(UI.label(SiteText.status(Game.data, site, explorer), UI.SMALL_SIZE, Color("#e8d9a8")))
+	var title := "Explore it" if exploring else ("Hold this hex" if camp.is_empty() else "Clear this camp")
+	_panel_body.add_child(UI.label(title, UI.HEADING_SIZE))
+	if exploring:
+		_panel_body.add_child(UI.label(ArmyText.ORDERS.explore, UI.SMALL_SIZE, UI.MUTED))
 	if not camp.is_empty():
 		_panel_body.add_child(UI.label(ArmyText.ORDERS.clear, UI.SMALL_SIZE, UI.MUTED))
-	for line in FieldRules.ground(Game.data, Game.terrain, cell, fort, float(Game.world.speed)) if camp.is_empty() else PackedStringArray():
+	for line in FieldRules.ground(Game.data, Game.terrain, cell, fort, float(Game.world.speed)) if camp.is_empty() and not exploring else PackedStringArray():
 		_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
 	var defs: Dictionary = Game.data.units.units
 	for army in Game.armies:
@@ -752,7 +771,7 @@ func _hold_panel(terrain_id: String) -> void:
 
 	var village_id := int(home.id)
 	_panel_body.add_child(UI.label("Send from %s" % home.name, UI.SMALL_SIZE, UI.MUTED))
-	var chosen := _unit_pickers(Rules.garrison_at(home, Game.server_now()))
+	var chosen := _unit_pickers(Rules.garrison_at(home, Game.server_now()), exploring)
 	var hero := Game.my_hero()
 	var hero_ready: bool = not hero.is_empty() and hero.status == "home" and hero.villageId != null and int(hero.villageId) == village_id
 	if hero_ready:
@@ -761,11 +780,11 @@ func _hold_panel(terrain_id: String) -> void:
 			_rebuild_panel())
 		_panel_body.add_child(lead)
 	var body := {"target": {"q": cell.x, "r": cell.y}, "units": chosen, "orders": orders, "withHero": _army_hero and hero_ready}
-	var go := UI.button("Hold this hex" if camp.is_empty() else "Storm it", func() -> void: _send_army(village_id, body))
+	var go := UI.button({"explore": "Explore", "hold": "Hold this hex", "clear": "Storm it"}[orders], func() -> void: _send_army(village_id, body))
 	go.disabled = chosen.is_empty()
 	_panel_body.add_child(go)
 
-	if not fort.is_empty() or not camp.is_empty():
+	if not fort.is_empty() or not camp.is_empty() or not site.is_empty():
 		return
 	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty()
 	var problem := FieldRules.fort_problem(Game.data, home, cell, terrain_id, taken)
@@ -1599,7 +1618,7 @@ func _threats_panel() -> void:
 	if not finished.is_empty():
 		_panel_body.add_child(UI.label("Battle reports", UI.HEADING_SIZE))
 	for battle in finished:
-		var report := HordeText.assault(battle, BattleText.losses(battle)) if battle.get("campId") != null else BattleText.outcome(battle, Game.battle_place(battle))
+		var report := HordeText.assault(battle, BattleText.losses(battle)) if battle.get("campId") != null or battle.get("siteId") != null else BattleText.outcome(battle, Game.battle_place(battle))
 		_panel_body.add_child(UI.label(report, UI.SMALL_SIZE))
 		var details := "%s horde, %d rounds" % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)]
 		var ground := BattleText.setup_text(battle)

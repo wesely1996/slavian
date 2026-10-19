@@ -18,7 +18,7 @@ static func progress(research: Array, account_id: int) -> Dictionary:
 
 
 ## Why the tech can't be started ("" when it can).
-static func problem(data: Dictionary, tech: String, academy_level: int, done: Dictionary, researching: bool) -> String:
+static func problem(data: Dictionary, tech: String, academy_level: int, done: Dictionary, researching: bool, scrolls: Dictionary = {}) -> String:
 	var def: Dictionary = data.research.techs.get(tech, {})
 	if def.is_empty():
 		return "Unknown tech."
@@ -26,6 +26,9 @@ static func problem(data: Dictionary, tech: String, academy_level: int, done: Di
 		return "Known."
 	if researching:
 		return "One tech at a time."
+	var scroll: Variant = def.get("requiresScroll")
+	if scroll != null and not scrolls.has(scroll):
+		return "Needs the %s scroll." % data.lore.scrolls.get(scroll, {}).get("name", scroll)
 	if academy_level < int(def.academyLevel):
 		return "Needs an Academy of level %d." % int(def.academyLevel)
 	var missing := PackedStringArray()

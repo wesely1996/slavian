@@ -10,6 +10,7 @@ import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies
 import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
 import { fortAt, insertFort, loadFort, markFortStanding, type Fort } from '../db/forts.js';
 import { campAt } from '../db/camps.js';
+import { siteAt } from '../db/sites.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -304,6 +305,7 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   if (outposts.some((o) => o.q === cell.q && o.r === cell.r)) throw new RuleError('There is an outpost there');
   if (await fortAt(client, world.id, cell.q, cell.r)) throw new RuleError('There is a fort there already');
   if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
+  if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
   const fort = await insertFort(client, {
     worldId: world.id,

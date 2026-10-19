@@ -44,12 +44,15 @@ export function defenseFactor(bonuses: Bonuses, family: UnitFamily, home: boolea
 export function researchProblem(
   data: GameData,
   tech: string,
-  input: { academyLevel: number; done: ReadonlySet<string>; researching: boolean },
+  input: { academyLevel: number; done: ReadonlySet<string>; researching: boolean; scrolls?: ReadonlySet<string> },
 ): string | null {
   const def: ResearchData['techs'][string] | undefined = data.research.techs[tech];
   if (!def) return `Unknown tech "${tech}"`;
   if (input.done.has(tech)) return `${def.name} is already known`;
   if (input.researching) return 'Your scholars are busy; one tech at a time';
+  if (def.requiresScroll && !input.scrolls?.has(def.requiresScroll)) {
+    return `${def.name} needs the ${data.lore.scrolls[def.requiresScroll]?.name ?? def.requiresScroll} scroll`;
+  }
   if (input.academyLevel < def.academyLevel) return `${def.name} needs an Academy of level ${def.academyLevel}`;
   const missing = def.requires.filter((t) => !input.done.has(t)).map((t) => data.research.techs[t]!.name);
   if (missing.length) return `${def.name} needs ${missing.join(' and ')} first`;

@@ -9,10 +9,12 @@ import type { GameData } from '../data/index.js';
 import { listArmies, loadReinforceRule, saveArmy } from '../db/armies.js';
 import { insertBattle, type Battle } from '../db/battles.js';
 import { listCamps } from '../db/camps.js';
+import { listSites } from '../db/sites.js';
 import { afterSettling, createCamp, finishWave } from './camps.js';
 import { addFear } from '../db/fear.js';
 import { presetOf } from '../sim/difficulty.js';
 import { fearOf, holdForQuiet } from './waves.js';
+import { playerBonuses } from './research.js';
 import { listForts } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -129,6 +131,7 @@ async function takenHexes(client: DbClient, worldId: number): Promise<Set<string
   }
   for (const f of await listForts(client, worldId)) taken.add(hexKey(hex(f.q, f.r)));
   for (const c of await listCamps(client, worldId)) taken.add(hexKey(hex(c.q, c.r)));
+  for (const s of await listSites(client, worldId)) taken.add(hexKey(hex(s.q, s.r)));
   return taken;
 }
 
@@ -233,7 +236,11 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
         name: data.horde.refugeeCamp.name.replace('{owner}', member?.displayName ?? 'Refugees'),
         q: site.q,
         r: site.r,
-        state: newVillage(data, at, world.speed),
+        state: newVillage(data, at, world.speed, {
+          startingResources: data.buildings.village.startingResources,
+          adminUpkeep: 0,
+          bonuses: await playerBonuses(client, data, world.id, owner),
+        }),
       });
       await markRefuge(client, camp.id);
       await tell(client, world, owner, {

@@ -23,6 +23,7 @@ import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { startRebuild } from '../scheduler/horde.js';
 import { campAt } from '../db/camps.js';
+import { listScrolls, siteAt } from '../db/sites.js';
 import { rebuildCost } from '../sim/horde.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
 import {
@@ -177,6 +178,7 @@ export async function claimOutpostCommand(
     const terrain = (await loadHexes(client, world.id)).find(([q, r]) => q === cell.q && r === cell.r)?.[2];
     if (!terrain) throw new RuleError('That hex is not on the map');
     if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
+    if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
     const taken = new Set<string>();
     for (const other of await listVillages(client, world.id)) {
       taken.add(hexKey(hex(other.q, other.r)));
@@ -232,6 +234,7 @@ export async function foundVillageCommand(
     });
     if (problem) throw new RuleError(problem);
     if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
+    if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
     if (await outboundTo(client, world.id, cell.q, cell.r)) throw new RuleError('Settlers are already on their way there');
 
     const settlers = deps.data.expansion.settlersNeeded;
@@ -284,6 +287,7 @@ export async function startResearchCommand(
       academyLevel: village.state.levels[ACADEMY] ?? 0,
       done: new Set(entries.filter((e) => e.status === 'done').map((e) => e.tech)),
       researching: entries.some((e) => e.status === 'researching'),
+      scrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
     });
     if (problem) throw new RuleError(problem);
     const ledger = spend(village.state.ledger, input.now, deps.data.research.techs[input.tech]!.cost);
