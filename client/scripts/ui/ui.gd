@@ -10,6 +10,17 @@ const MUTED := Color("#b8ae9c")
 const ERROR := Color("#ff8a7a")
 
 
+## The current language's version of `text` (English source text; see
+## tools/i18n/extract.py). In nodes, tr() does the same.
+static func t(text: String) -> String:
+	return TranslationServer.translate(text)
+
+
+## `one` or `many` by `count`, in the current language's plural forms.
+static func tn(one: String, many: String, count: int) -> String:
+	return TranslationServer.translate_plural(one, many, count)
+
+
 static func label(text := "", font_size := 0, color := Color.WHITE) -> Label:
 	var node := Label.new()
 	node.text = text
