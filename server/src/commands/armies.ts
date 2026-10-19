@@ -13,7 +13,8 @@ import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
 import type { Hex } from '../sim/hex.js';
 import type { Fort } from '../db/forts.js';
-import { buildCrossing, buildFort } from '../scheduler/field.js';
+import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
+import type { RoadEdge } from '../db/roads.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [villageId]);
@@ -73,6 +74,20 @@ export async function buildCrossingCommand(
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a bridge', villageId: village.id });
     return buildCrossing(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
+  });
+}
+
+// Builds a road between two neighbouring hexes near the caller's village.
+export async function buildRoadCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
+): Promise<RoadEdge> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a road', villageId: village.id });
+    return buildRoad(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
   });
 }
 

@@ -5,7 +5,7 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to its
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
-import { canCross, type Land } from './land.js';
+import { canCross, onRoad, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -168,8 +168,14 @@ export function routeFrom(
     const type = terrain.get(hexKey(to));
     return type === undefined ? null : data.terrain.terrain[type].moveCost;
   };
-  const searchCost = (from: Hex, to: Hex): number | null => {
+  // Human hordes take the roads; the Monsters of the North keep off them.
+  const roads = input.front !== 'north';
+  const stepCost = (from: Hex, to: Hex): number | null => {
     const cost = canCross(terrain, from, to) ? moveCost(to) : null;
+    return cost !== null && roads && onRoad(terrain, from, to) ? cost * data.field.road.factor : cost;
+  };
+  const searchCost = (from: Hex, to: Hex): number | null => {
+    const cost = stepCost(from, to);
     return cost === null ? null : cost + rules.fear.pathWeight * (fear?.get(hexKey(to)) ?? 0);
   };
   const erratic = data.enemies.fronts[input.front]!.personality.erratic;
@@ -177,7 +183,7 @@ export function routeFrom(
   let holy: { path: Hex[]; cost: number } | null = null;
   let cheapestVillage = Infinity;
   for (const target of input.targets) {
-    const path = findPath(input.from, target.cell, searchCost);
+    const path = findPath(input.from, target.cell, searchCost, roads ? data.field.road.factor : 1);
     if (!path) continue;
     const road = path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
     const cost = road + rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0);
@@ -196,7 +202,7 @@ export function routeFrom(
   const hoursPerCost = 1 / marchSpeed(data, input.front, input.composition);
   let atMs = input.startMs;
   const path = best.path.map((cell, i) => {
-    if (i > 0) atMs += (moveCost(cell)! * hoursPerCost * MS_PER_HOUR) / input.worldSpeed;
+    if (i > 0) atMs += (stepCost(best!.path[i - 1]!, cell)! * hoursPerCost * MS_PER_HOUR) / input.worldSpeed;
     return { q: cell.q, r: cell.r, atMs: Math.round(atMs) };
   });
   return { targetVillageId: best.id, path, arrivesMs: path.at(-1)!.atMs };

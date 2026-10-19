@@ -70,7 +70,7 @@ export function scoutTravelMs(
   bonuses: Bonuses = {},
 ): number {
   const moveCost = moveCostOn(data, terrain);
-  const path = findPath(from, to, moveCost);
+  const path = findPath(from, to, moveCost, data.field.road.factor);
   // Off-road targets (e.g. a horde standing in impassable terrain): count
   // straight-line distance over rough ground.
   const cost = path ? path.slice(1).reduce((sum, cell, i) => sum + moveCost(path[i]!, cell)!, 0) : hexDistance(from, to) * 2;

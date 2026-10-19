@@ -5,7 +5,7 @@ import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
-import { buildCrossingCommand, buildFortCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
+import { buildCrossingCommand, buildFortCommand, buildRoadCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
@@ -478,6 +478,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = crossingBody.parse(request.body);
     await buildCrossingCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  app.post('/v1/villages/:id/roads', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = crossingBody.parse(request.body);
+    await buildRoadCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
     const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
     return fullWorldView(Number(worldId));
   });

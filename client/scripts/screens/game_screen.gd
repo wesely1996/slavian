@@ -455,6 +455,7 @@ func _rebuild_panel() -> void:
 	else:
 		_ally_village_panel(village)
 	_river_section(_selected)
+	_road_section(_selected)
 
 
 func _terrain_panel() -> void:
@@ -1088,6 +1089,50 @@ func _river_section(cell: Vector2i) -> void:
 		button.custom_minimum_size.x = 160
 		row.add_child(button)
 		_panel_body.add_child(row)
+
+
+## Roads from the selected hex: where they run, and building more.
+func _road_section(cell: Vector2i) -> void:
+	if not Game.terrain.has(cell):
+		return
+	var home := _my_village()
+	var roads := RiverText.roads_at(Game.roads, cell)
+	var names := ["E", "NE", "NW", "W", "SW", "SE"]
+	var open: Array[int] = []
+	var built := PackedStringArray()
+	for i in 6:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		if roads.has(other):
+			built.append("%s%s" % [names[i], "" if roads[other] == "standing" else " (being built)"])
+		elif not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other) == "":
+			open.append(i)
+	if built.is_empty() and open.is_empty():
+		return
+	_panel_body.add_child(UI.label("Roads", UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label("Roads halve the march for everyone on them, the human hordes too, but the beasts of the North keep off them.", UI.SMALL_SIZE, UI.MUTED))
+	if not built.is_empty():
+		_panel_body.add_child(UI.label("Roads run " + ", ".join(built) + ".", UI.SMALL_SIZE))
+	if open.is_empty():
+		return
+	var cost: Dictionary = Game.data.field.road.cost
+	_panel_body.add_child(UI.label("Build a road (%s · %s each) towards:" % [UI.resource_text(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE))
+	var row := UI.hbox(6)
+	var village_id := int(home.id)
+	for i in open:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		var button := UI.button(names[i], func() -> void: _build_road(village_id, cell, other))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(button)
+	_panel_body.add_child(row)
+
+
+func _build_road(village_id: int, a: Vector2i, b: Vector2i) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/roads" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 func _build_crossing(village_id: int, a: Vector2i, b: Vector2i) -> void:

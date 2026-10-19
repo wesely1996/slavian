@@ -346,6 +346,13 @@ const fieldFileSchema = z.object({
     cost: resourcesSchema,
     buildSeconds: z.number().positive(),
   }),
+  // Roads between neighbouring hexes (M5 step 4): `factor` of the move cost.
+  road: z.object({
+    range: z.number().int().positive(),
+    factor: z.number().positive().max(1),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+  }),
 });
 
 export type BuildingDef = z.infer<typeof buildingSchema>;

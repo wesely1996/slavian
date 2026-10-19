@@ -47,7 +47,7 @@ export function roadRoute(
   worldSpeed: number,
 ): PathStep[] {
   const moveCost = moveCostOn(data, terrain);
-  const path = findPath(from, to, moveCost);
+  const path = findPath(from, to, moveCost, data.field.road.factor);
   if (!path) throw new RuleError('No road leads there');
   const msPerCost = MS_PER_HOUR / hexesPerHour / worldSpeed;
   let atMs = 0;

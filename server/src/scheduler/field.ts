@@ -4,6 +4,8 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { insertRoad, markRoadStanding, roadEdge, type RoadEdge } from '../db/roads.js';
+import { canCross } from '../sim/land.js';
 import { riverEdge, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
 import { againstFront } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
@@ -357,7 +359,38 @@ export async function buildCrossing(client: DbClient, data: GameData, world: Wor
   return (await riverEdge(client, world.id, a, b))!;
 }
 
+// Builds a road between two neighbouring hexes near the village.
+export async function buildRoad(client: DbClient, data: GameData, world: World, villageId: number, a: Hex, b: Hex, at: Date): Promise<RoadEdge> {
+  const rules = data.field.road;
+  const village = await loadVillage(client, villageId);
+  const home = hex(village.q, village.r);
+  if (hexDistance(a, b) !== 1) throw new RuleError('A road joins two neighbouring hexes');
+  if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) throw new RuleError(`Roads go within ${rules.range} hexes of the village`);
+  const land = await terrainOf(client, world.id);
+  for (const end of [a, b]) {
+    const type = land.get(`${end.q},${end.r}`);
+    if (!type || data.terrain.terrain[type].moveCost === null) throw new RuleError('No road can run there');
+  }
+  if (!canCross(land, a, b)) throw new RuleError('A river lies between; build a bridge first');
+  if (await roadEdge(client, world.id, a, b)) throw new RuleError('A road already runs there');
+  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
+  const completesAt = new Date(at.getTime() + (rules.buildSeconds * 1000) / world.speed);
+  await insertRoad(client, world.id, a, b, village.id, completesAt);
+  await scheduleEvent(client, world.id, completesAt, 'road_built', { aq: a.q, ar: a.r, bq: b.q, br: b.r });
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
+  return (await roadEdge(client, world.id, a, b))!;
+}
+
 export const fieldHandlers: HandlerRegistry = {
+  async road_built({ client, world }, event) {
+    const { aq, ar, bq, br } = crossingPayload.parse(event.payload);
+    const road = await roadEdge(client, world.id, hex(aq, ar), hex(bq, br));
+    if (!road || road.status !== 'building') return;
+    await markRoadStanding(client, world.id, road.a, road.b);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+  },
+
   // A bridge stands: from now on, roads (and hordes) may cross there.
   async crossing_built({ client, world }, event) {
     const { aq, ar, bq, br } = crossingPayload.parse(event.payload);

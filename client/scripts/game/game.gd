@@ -54,6 +54,8 @@ var bridge: Dictionary = {}
 ## Hand-overs still running, and what delegates did lately.
 ## River edges: [aq, ar, bq, br, crossing] (see RiverText).
 var rivers: Array = []
+## Roads: [aq, ar, bq, br, status] (see RiverText.roads_at).
+var roads: Array = []
 var delegations: Array = []
 var delegation_log: Array = []
 ## How much hordes fear each hex where they were beaten.
@@ -102,6 +104,7 @@ func set_world(new_world: Dictionary) -> void:
 		note_server_time(new_world.serverTime)
 	var world_map: Variant = new_world.get("map")
 	rivers = world_map.get("rivers", []) if world_map is Dictionary else []
+	roads = world_map.get("roads", []) if world_map is Dictionary else []
 	villages.clear()
 	for village in new_world.get("villages", []):
 		villages[int(village.id)] = village
