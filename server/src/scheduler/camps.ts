@@ -96,6 +96,32 @@ async function spawnAfterWave(client: DbClient, data: GameData, world: World, wa
   }
 }
 
+// When the bridge wants a lair cleared and none stands, the North sends
+// one: a lair rises by the road of its latest horde (camp limits aside).
+// Returns whether one rose.
+export async function revealLair(client: DbClient, data: GameData, world: World, at: Date): Promise<boolean> {
+  if ((await listCamps(client, world.id)).some((c) => c.kind === 'lair')) return false;
+  const { rows } = await client.query<{ id: number }>(
+    "SELECT id FROM waves WHERE world_id = $1 AND front = 'north' AND path IS NOT NULL ORDER BY index DESC LIMIT 1",
+    [world.id],
+  );
+  if (!rows[0]) return false;
+  const wave = await loadWave(client, rows[0].id);
+  const [cell] = spawnSites(data, {
+    terrain: await terrainOf(client, world.id),
+    path: wave.path!,
+    villages: (await listVillages(client, world.id)).map((v) => hex(v.q, v.r)),
+    taken: await occupiedHexes(client, world.id),
+    rng: rngFor(world.seed, wave.index, 0x1a),
+    count: 1,
+  });
+  if (!cell) return false;
+  const players = (await listMembers(client, world.id)).length;
+  const units = composeWave(data, 'north', wave.index, campSize(data, wave.index), world.seed ^ 0x1a1, players);
+  await createCamp(client, data, world, { kind: 'lair', front: 'north', q: cell.q, r: cell.r, units, waveId: wave.id }, at);
+  return true;
+}
+
 // Ends a wave and lets its camps rise.
 export async function finishWave(
   client: DbClient,
