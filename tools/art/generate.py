@@ -113,6 +113,10 @@ class Svg:
         return self.add(f'<rect x="{fmt(x)}" y="{fmt(y)}" width="{fmt(w)}" height="{fmt(h)}" rx="{fmt(rx)}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}" stroke-linejoin="round" opacity="{opacity}"/>')
 
     def line(self, x1, y1, x2, y2, stroke=INK, sw=STROKE, opacity=1):
+        # A gradient sized to the shape's box has nothing to span on a level
+        # or upright line, and SVG then draws nothing: use its middle colour.
+        if stroke.startswith("url(") and (x1 == x2 or y1 == y2):
+            stroke = "#e6dcc2"
         return self.add(f'<line x1="{fmt(x1)}" y1="{fmt(y1)}" x2="{fmt(x2)}" y2="{fmt(y2)}" stroke="{stroke}" stroke-width="{sw}" stroke-linecap="round" opacity="{opacity}"/>')
 
     def shadow(self, cx, cy, rx, ry=None):
@@ -305,18 +309,21 @@ def f_ice():
     return s
 
 
-def f_menhir():
-    s = Svg(36, 64)
-    soft_shadow(s, 20, 60, 13, 4, 0.35)
-    s.path("M8,60 L10,20 Q14,6 22,8 Q28,12 28,26 L28,60 Z", s.lin([(0, "#b3ab9e"), (0.6, "#857e72"), (1, "#5e584f")], 0, 0, 1, 0), stroke="none", sw=0)
-    for x0, y0, r in [(15, 30, 3), (21, 44, 2.5)]:
-        s.circle(x0, y0, r, "#7f8a52", stroke="none", sw=0, opacity=0.55)
+def f_blossom():
+    """Hallowed meadow: pale grass starred with white and gold flowers (low,
+    so it never passes for a stone idol or anything else to act on)."""
+    s = Svg(48, 32)
+    soft_shadow(s, 24, 28, 18, 3, 0.25)
+    for x, h in ((10, 14), (18, 18), (26, 15), (34, 19), (40, 12)):
+        s.path(f"M{x},28 Q{x - 2},{28 - h * 0.6} {x + 1},{28 - h}", "none", stroke="#8fa45a", sw=2)
+    for x, y, c in ((12, 14, "#fbf6ea"), (24, 10, "#f6d572"), (35, 12, "#fbf6ea"), (30, 20, "#fbf6ea"), (18, 21, "#f6d572")):
+        s.circle(x, y, 2.6, c, stroke="none", sw=0)
     return s
 
 
 FEATURES = {
     "pine": f_pine, "dark_pine": f_dark_pine, "oak": f_oak, "mountain": f_mountain, "peak": f_peak,
-    "hill": f_hill, "reeds": f_reeds, "grass": f_grass, "bush": f_bush, "ice": f_ice, "menhir": f_menhir,
+    "hill": f_hill, "reeds": f_reeds, "grass": f_grass, "bush": f_bush, "ice": f_ice, "blossom": f_blossom,
 }
 
 
@@ -628,6 +635,122 @@ def unit(kind):
     return s
 
 
+# The enemy's units: the same enamel medallion in an iron rim run with
+# madder, so a glance tells theirs from ours (gold). Kinds that share a
+# shape share its drawing.
+ENEMY_UNITS = {
+    "north": ["grey_wolf", "leshy_thrall", "cave_bear", "volkolak", "upyr", "likho", "zmey_whelp"],
+    "east": ["steppe_raider", "horse_archer", "lancer", "shaman", "khans_guard", "scaling_ladders"],
+    "order": ["zealot", "crossbowman", "knight_brother", "inquisitor", "siege_ram", "catapult", "siege_tower"],
+}
+ENEMY_RIM = ("#d98a7a", "#8e2f26", "#3e1410")
+
+
+def horse_head(s, pale):
+    s.path("M44,100 L48,70 Q46,48 58,32 L66,22 L70,34 Q86,40 90,56 L84,62 L70,56 Q68,72 76,100 Z", pale, stroke="none", sw=0)
+    s.circle(70, 42, 2.5, "#1d232c", stroke="none", sw=0)
+
+
+def wolf_head(s, pale):
+    s.path("M30,86 L44,64 L40,30 L56,48 Q64,44 72,48 L88,30 L84,64 L100,86 L74,80 L64,96 L54,80 Z", pale, stroke="none", sw=0)
+    for x in (54, 74):
+        s.poly([(x - 5, 62), (x + 5, 62), (x, 66)], "#c9614a", stroke="none", sw=0)
+
+
+def enemy(kind):
+    s = Svg()
+    pale = enamel(s, ENEMY_RIM)
+    red = s.lin([(0, "#e07a62"), (1, "#8e2f26")], 0, 0, 1, 1)
+    if kind in ("grey_wolf", "volkolak"):
+        wolf_head(s, pale)
+        if kind == "volkolak":
+            s.path("M64,18 A9,9 0 1,0 64,36 A12,12 0 0,1 64,18 Z", "#e6dcc2", stroke="none", sw=0)
+    elif kind == "cave_bear":
+        s.circle(64, 66, 28, pale, stroke="none", sw=0)
+        for x in (42, 86):
+            s.circle(x, 42, 10, pale, stroke="none", sw=0)
+        s.ellipse(64, 78, 11, 8, "#bdb29b", stroke="none", sw=0)
+        s.circle(64, 74, 4, "#1d232c", stroke="none", sw=0)
+        for x in (54, 74):
+            s.circle(x, 60, 3, "#1d232c", stroke="none", sw=0)
+    elif kind == "leshy_thrall":
+        s.path("M50,100 Q48,70 64,56 Q80,70 78,100 Z", pale, stroke="none", sw=0)
+        for side in (-1, 1):
+            s.path(f"M{64 + side * 6},56 Q{64 + side * 22},40 {64 + side * 30},22 M{64 + side * 18},44 Q{64 + side * 30},42 {64 + side * 38},34", "none", stroke=pale, sw=4)
+        for x in (58, 70):
+            s.circle(x, 72, 3, "#9cbf6a", stroke="none", sw=0)
+    elif kind == "upyr":
+        s.path("M18,58 Q40,40 64,54 Q88,40 110,58 L98,62 L92,74 L80,66 L64,84 L48,66 L36,74 L30,62 Z", pale, stroke="none", sw=0)
+        for x in (58, 70):
+            s.poly([(x - 3, 84), (x + 3, 84), (x, 96)], pale, stroke="none", sw=0)
+    elif kind == "likho":
+        # One-eyed Likho: a single great eye.
+        s.path("M20,62 Q64,22 108,62 Q64,102 20,62 Z", pale, stroke="none", sw=0)
+        s.circle(64, 62, 18, red, stroke="none", sw=0)
+        s.circle(64, 62, 8, "#11151a", stroke="none", sw=0)
+        s.circle(59, 57, 3, "#ffffff", stroke="none", sw=0)
+    elif kind == "zmey_whelp":
+        s.path("M28,92 Q36,56 64,46 L80,30 L84,44 Q100,48 104,62 L90,66 Q78,64 72,72 Q60,84 64,100 Z", pale, stroke="none", sw=0)
+        s.circle(86, 52, 2.5, "#1d232c", stroke="none", sw=0)
+        s.path("M104,62 Q112,66 108,74 Q100,70 98,66 Z", s.lin([(0, "#ffd27a"), (1, "#e8642c")]), stroke="none", sw=0)
+    elif kind == "steppe_raider":
+        s.path("M34,96 Q50,52 96,26 Q66,58 44,100 Z", pale, stroke="none", sw=0)
+        s.line(34, 96, 46, 104, stroke="#c9a16e", sw=5)
+    elif kind == "horse_archer":
+        horse_head(s, pale)
+        s.path("M92,28 Q72,62 92,96", "none", stroke="#e6dcc2", sw=4)
+    elif kind == "lancer":
+        horse_head(s, pale)
+        s.line(98, 100, 98, 20, stroke="#e6dcc2", sw=3)
+        s.poly([(98, 20), (112, 26), (98, 32)], red, stroke="none", sw=0)
+    elif kind == "shaman":
+        s.circle(64, 62, 30, pale, stroke="none", sw=0)
+        s.circle(64, 62, 22, "none", stroke="#8e2f26", sw=2.5)
+        s.path("M64,44 L64,80 M48,62 L80,62 M54,50 L74,74 M74,50 L54,74", "none", stroke="#8e2f26", sw=2.5)
+    elif kind == "khans_guard":
+        s.path("M40,90 Q40,58 64,44 Q88,58 88,90 Z", pale, stroke="none", sw=0)
+        s.line(64, 44, 64, 22, stroke=pale, sw=4)
+        s.path("M64,22 Q80,26 84,40 Q72,32 64,30 Z", red, stroke="none", sw=0)
+        s.rect(40, 88, 48, 8, "#bdb29b", stroke="none", sw=0, rx=2)
+    elif kind == "zealot":
+        s.path("M40,30 L88,30 L88,64 Q88,92 64,104 Q40,92 40,64 Z", pale, stroke="none", sw=0)
+        s.path("M50,64 L54,46 L60,56 L64,42 L68,56 L74,46 L78,64 Z", "#b48a2e", stroke="none", sw=0)
+    elif kind == "crossbowman":
+        s.line(64, 28, 64, 100, stroke=pale, sw=6)
+        s.path("M30,52 Q64,36 98,52", "none", stroke=pale, sw=5)
+        s.line(30, 52, 64, 72, stroke="#d9cfb8", sw=1.5)
+        s.line(98, 52, 64, 72, stroke="#d9cfb8", sw=1.5)
+    elif kind == "knight_brother":
+        horse_head(s, pale)
+        s.path("M56,32 L60,18 L66,28 L72,16 L76,30 Z", "#b48a2e", stroke="none", sw=0)
+    elif kind == "inquisitor":
+        s.rect(58, 60, 12, 42, pale, stroke="none", sw=0, rx=3)
+        s.path("M64,20 Q84,40 74,58 L54,58 Q44,40 64,20 Z", s.lin([(0, "#ffd27a"), (0.6, "#e8642c"), (1, "#8e2f26")]), stroke="none", sw=0)
+    elif kind == "siege_ram":
+        s.path("M24,64 L64,36 L104,64 Z", pale, stroke="none", sw=0)
+        s.rect(20, 66, 88, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=4)
+        s.circle(20, 72, 8, "#8d98a6", stroke="none", sw=0)
+        for x in (38, 90):
+            s.circle(x, 90, 9, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+    elif kind == "catapult":
+        s.rect(26, 84, 76, 10, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+        s.line(44, 86, 92, 32, stroke=pale, sw=6)
+        s.circle(92, 32, 9, "none", stroke=pale, sw=4)
+        s.line(56, 86, 64, 60, stroke="#d9cfb8", sw=4)
+    elif kind == "siege_tower":
+        s.path("M42,104 L48,28 L80,28 L86,104 Z", pale, stroke="none", sw=0)
+        for y in (48, 68, 88):
+            s.line(46, y, 82, y, stroke="#8e2f26", sw=2)
+        s.path("M80,30 L104,48 L100,52 L80,38 Z", "#bdb29b", stroke="none", sw=0)
+    elif kind == "scaling_ladders":
+        s.line(44, 104, 70, 22, stroke=pale, sw=5)
+        s.line(64, 104, 90, 22, stroke=pale, sw=5)
+        for i in range(6):
+            t = (i + 0.6) / 6.4
+            s.line(44 + 26 * t, 104 - 82 * t, 64 + 26 * t, 104 - 82 * t, stroke=pale, sw=3.5)
+    return s
+
+
 def faction(front):
     """A horde's heraldic shield: its colour and its sign."""
     s = Svg()
@@ -769,21 +892,38 @@ def building(kind, stage):
     return s
 
 
-def wall_gate(stage):
-    """The walls' plot: their gate, as a palisade, a stone wall or a fortress."""
+def wall_gate(material):
+    """The walls' plot: their gate, in the walls' material (data/walls.json
+    tiers): a palisade of sharpened logs, a timber rampart on an earth bank,
+    a stone wall, fortress walls."""
     s = Svg()
     plot_ground(s, ("#9a8a68", "#6e5f45"))
-    if stage == 1:
+    if material == "wood":
         stakes(s, 14, 50, 108, 26, gap=6)
         stakes(s, 78, 114, 108, 26, gap=6)
         s.rect(50, 74, 28, 34, s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0)
         s.line(50, 90, 78, 90, stroke="#3a2a1c", sw=2.5)
+    elif material == "timber":
+        # The earth bank, lit from the upper left, and the breastwork on it.
+        s.path("M8,112 Q14,92 30,90 L98,90 Q114,92 120,112 Z", s.lin([(0, "#a88f62"), (1, "#5e4a2e")], 0, 0, 0.4, 1), stroke="none", sw=0)
+        for x0, x1 in ((16, 50), (78, 112)):
+            for i, x in enumerate(range(x0, x1, 7)):
+                s.rect(x, 66 + (i % 2) * 2, 6.5, 26, s.lin([(0, "#b8875a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0, rx=2)
+            s.line(x0, 74, x1, 74, stroke="#4a3320", sw=2)
+        # A timber gatehouse with a plank roof.
+        s.rect(48, 56, 32, 54, s.lin([(0, "#c08f60"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path("M44,58 L64,42 L84,58 Z", s.lin([(0, "#8c5a32"), (1, "#4a2e18")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.path("M54,110 L54,84 Q64,76 74,84 L74,110 Z", "#2b211a", stroke="none", sw=0)
     else:
-        wall(s, 12, 116, 110, 30 if stage == 2 else 38)
+        fortress = material == "fortress"
+        wall(s, 12, 116, 110, 38 if fortress else 30)
         s.path("M50,110 L50,84 Q64,70 78,84 L78,110 Z", "#2b211a", stroke="none", sw=0)
         for x in (44, 84):
-            round_tower(s, x, 112, 16 if stage == 2 else 20, 50 if stage == 2 else 62, roof="slate" if stage == 3 else "red")
+            round_tower(s, x, 112, 20 if fortress else 16, 62 if fortress else 50, roof="slate" if fortress else "red")
     return s
+
+
+WALL_MATERIALS = ["wood", "timber", "stone", "fortress"]
 
 
 def tower_art(kind, stage):
@@ -959,14 +1099,18 @@ def assets():
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)
+    for units in ENEMY_UNITS.values():
+        for kind in units:
+            out[f"unit/{kind}"] = enemy(kind)
     for kind in ["wood", "stone", "grain", "iron", "ember"]:
         out[f"resource/{kind}"] = resource(kind)
     out["app/icon"] = app_icon()
     for kind in VILLAGE_BUILDINGS:
         for stage in (1, 2, 3):
             out[f"building/{kind}_{stage}"] = building(kind, stage)
+    for material in WALL_MATERIALS:
+        out[f"building/wall_{material}"] = wall_gate(material)
     for stage in (1, 2, 3):
-        out[f"building/wall_{stage}"] = wall_gate(stage)
         for kind in WALL_TOWERS:
             out[f"building/{kind}_{stage}"] = tower_art(kind, stage)
     for kind in FIELDS:

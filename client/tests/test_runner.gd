@@ -550,11 +550,20 @@ func _test_art() -> void:
 	for f in ["woodcutter", "quarry", "farm", "iron_mine"]:
 		if not Art.has(Art.building_id(f, 2, true)):
 			missing_art.append(f)
-	for b in ["wall", "archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]:
+	for material in ["wood", "timber", "stone", "fortress"]:
+		if not Art.has(Art.building_id("wall", 1, false, material)):
+			missing_art.append(material)
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var fronts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("enemies.json"))).fronts
+	for front in fronts:
+		for unit in fronts[front].units:
+			if not Art.has("unit/" + unit):
+				missing_art.append("unit/" + unit)
+	for b in ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]:
 		for level in [1, 5, 10]:
 			if not Art.has(Art.building_id(b, level)):
 				missing_art.append(Art.building_id(b, level))
-	_check(missing_art.is_empty(), "art for every village building: %s" % [missing_art])
+	_check(missing_art.is_empty(), "art for every village building, wall material and enemy unit: %s" % [missing_art])
 	var theme := UiTheme.build()
 	var panel := theme.get_stylebox("panel", "PanelContainer")
 	_check(panel is StyleBoxFlat and (panel as StyleBoxFlat).bg_color.is_equal_approx(UiTheme.FLAX) and (panel as StyleBoxFlat).shadow_size == 0, "sheets are flat flax")

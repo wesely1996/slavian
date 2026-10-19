@@ -578,10 +578,17 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - The slate-and-gold frame and Cinzel capitals were the stock fantasy-strategy look. Now: a band of dark wood along the top, sheets of unbleached flax with ink lettering, and one ornament, a strip of rushnyk cross-stitch (`Rushnyk`) under the band.
     - Colour carries side: malachite for ours and the main action, madder for hordes and danger, wheat for resources and levels.
     - Type: PT Sans for text, Old Standard for headings (the battle map too), and Ruslan Display for the logotype alone. All are in sentence case and cover Serbian Latin and Cyrillic.
-    - The map is the hero. In landscape the sheet stands on the right, the resources ride in the title row and the camera centres on the uncovered map; in portrait the sheet sits below. Landscape screens are laid out on 1440×1000 instead of shrinking the phone layout to 70%.
+    - The map is the hero. In landscape the sheet stands on the right, the resources ride in the title row and the camera centres on the uncovered map; in portrait the sheet sits below. Landscape screens are laid out on 1600×1100 instead of shrinking the phone layout to 70%.
     - The start screen is one centred column, with the language picker on its sheet.
     - Keyboard focus shows, and the threat line reads as a sentence ("Next horde from the north (low threat) sets out in 1h 40m").
-13. [ ] **Asset pass** with the game-assets-enhancement skill (`.claude/skills/game-assets-enhancement`): an audit and sprite manifest, `STYLE.md` with its lighting rules (one light direction, shared warm undertone, aerial perspective), every piece redone to it, the map's depth layers and a code light grade.
+13. [x] **Asset pass** with the game-assets-enhancement skill (`.claude/skills/game-assets-enhancement`). The style guide, lighting rules, layer stack and sprite manifest are in `client/art/STYLE.md`.
+    - **Audit:** enemy units had no art at all, the siege engines had none, the walls had three level stages against four materials, and a map feature (the menhir) could pass for a stone idol site.
+    - **Enemy units:** all 21 have medallions (an iron rim run with madder, against our gold), with shapes reused where kinds share them. Engines are included: ladder, ram, catapult, siege tower.
+    - **Walls** are drawn by material (`building/wall_wood`, `_timber`, `_stone`, `_fortress`).
+    - **Hallowed ground** grows flowering grass in place of the menhir.
+    - **Light grade** (`MapGrade`): a code grade over the map with a warm wash from the upper left, slow cloud shadows that slide a little faster than the ground when it pans (parallax 1.15), and a vignette round the map in view.
+    - **Fix:** level and upright lines filled with a gradient drew nothing, which had cost the archer's arrow its shaft.
+    - **Still to do:** painting the manifest through the skill's fal.ai pipeline needs a fal.ai account, key and MCP server.
 14. [ ] **Localization:** English and Serbian (Latin); every string in translation files, server notices included. Groundwork done (`docs/localization.md`): gettext files, the extractor with a CI check, the language picker, the start screen and every data text in Serbian.
 15. [ ] **Accessibility:** colour-blind-safe threat colours plus icons, adjustable text size, large tap targets.
 16. [ ] **Support and privacy:** the donation button and the server-cost slider (§11.8), a privacy policy, account deletion and data export.

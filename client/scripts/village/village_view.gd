@@ -285,7 +285,8 @@ func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, un
 	var field := Rules.is_field(plot)
 	var id := ""
 	if field or holds.building != null:
-		id = Art.building_id(String(holds.building), maxi(level, 1), field)
+		var material := WallText.material(data, maxi(level, 1)) if Rules.is_wall(plot) else ""
+		id = Art.building_id(String(holds.building), maxi(level, 1), field, material)
 	elif Rules.is_locked(data, village, plot):
 		id = "plot/locked"
 	else:

@@ -51,6 +51,9 @@ static func settlement_id(hall_level: int) -> String:
 
 ## A building's or field's look by level (three stages: 1-3, 4-7, 8+):
 ## "building/barracks_2", "field/farm_3".
-static func building_id(building: String, level: int, field := false) -> String:
+## The walls go by their material instead ("building/wall_stone"; WallText).
+static func building_id(building: String, level: int, field := false, material := "") -> String:
+	if material != "":
+		return "building/%s_%s" % [building, material]
 	var stage := 1 if level <= 3 else (2 if level <= 7 else 3)
 	return "%s/%s_%d" % ["field" if field else "building", building, stage]

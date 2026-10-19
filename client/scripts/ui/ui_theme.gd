@@ -47,10 +47,10 @@ static func apply() -> void:
 
 
 ## The screen's design size, by orientation: phones are laid out on
-## 720×1280, landscape screens on 1440×1000 (the same sizes then read about
+## 720×1280, landscape screens on 1600×1100 (the same sizes then read about
 ## as large on a desktop as on a phone, instead of shrinking to 70%).
 const PORTRAIT_SIZE := Vector2i(720, 1280)
-const LANDSCAPE_SIZE := Vector2i(1440, 1000)
+const LANDSCAPE_SIZE := Vector2i(1600, 1100)
 
 
 ## Picks the design size for the window's shape; call on resize.

@@ -30,6 +30,7 @@ var _body: HBoxContainer
 var _scroll: ScrollContainer
 var _resources: HBoxContainer
 var _top_rows: VBoxContainer
+var _grade: MapGrade
 var _village_view: VillageView
 var _battle_view: BattleMap
 ## The battle on the battle map, the round shown, and whether it plays on.
@@ -173,7 +174,15 @@ func _process(delta: float) -> void:
 # --- Layout ----------------------------------------------------------------
 
 func _build_ui() -> void:
+	# The light grade lies over the map, under the interface.
+	var grade_layer := CanvasLayer.new()
+	grade_layer.layer = 1
+	add_child(grade_layer)
+	_grade = MapGrade.new()
+	_grade.camera = camera
+	grade_layer.add_child(_grade)
 	var layer := CanvasLayer.new()
+	layer.layer = 2
 	add_child(layer)
 	var root := UI.vbox(0)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -464,6 +473,7 @@ func _set_view(view: String) -> void:
 	_view_button.icon = Art.texture("icon/village" if on_map else "icon/map")
 	hex_map.visible = on_map
 	_spacer.visible = on_map
+	_grade.visible = on_map
 	_village_view.visible = view == "village"
 	_battle_view.visible = view == "battle"
 	_battle_playing = _battle_playing and view == "battle"
