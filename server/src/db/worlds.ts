@@ -19,6 +19,8 @@ export interface World {
   startedAt: Date | null;
   // The Holy City's health: the run is lost at 0.
   sanctity: number;
+  // The group's Svarog's Ember.
+  embers: number;
 }
 
 export interface NewWorld {
@@ -31,7 +33,7 @@ export interface NewWorld {
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
-  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity`;
+  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
@@ -136,4 +138,8 @@ export async function loadHexes(client: DbClient, worldId: number): Promise<[num
     [worldId],
   );
   return rows.map((row) => [row.q, row.r, row.terrain]);
+}
+
+export async function addEmbers(client: DbClient, worldId: number, n: number): Promise<void> {
+  await client.query('UPDATE worlds SET embers = embers + $2 WHERE id = $1', [worldId, n]);
 }

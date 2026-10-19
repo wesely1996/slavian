@@ -395,3 +395,8 @@ func _test_horde() -> void:
 	_check(HordeText.decision({"decision": null}) == "", "no decision")
 	_check(HordeText.camp({"kind": "lair", "size": 12}, "Monsters of the North") == "Monster lair of the Monsters of the North · 12 strong", "camp text")
 	_check(HordeText.sanctity({"sanctity": 87}, data) == "Sanctity 87 / 100", "sanctity text")
+
+	_check(HordeText.ambush({"q": 2, "r": -1, "beatenOff": false, "lost": {"wood": 200}}) == "Ambushed near (2, -1): lost Wood 200", "ambush text")
+	_check(HordeText.ambush({"q": 2, "r": -1, "beatenOff": true, "lost": {}}) == "Its escort beat off an ambush near (2, -1)", "beaten off text")
+	_check(HordeText.assault({"q": 3, "r": 1, "status": "cleared"}, {"attacker": 9, "defender": 2}) == "Cleared the camp at (3, 1): 9 fell, we lost 2.", "assault text")
+	_check(ArmyText.status({"orders": "clear", "status": "returning", "loot": {"wood": 5}, "returnsAt": "2026-01-01T00:00:00.000Z"}, "(3, 1)", TimeUtil.parse_iso("2026-01-01T00:00:00.000Z")).begins_with("Coming home from (3, 1) with loot"), "clear army status")

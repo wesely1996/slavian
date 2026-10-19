@@ -1,5 +1,6 @@
 import { NotFoundError } from '../errors.js';
 import type { ArmyOrders } from '../sim/armies.js';
+import type { Resources } from '../sim/resources.js';
 import type { PathStep } from '../sim/waves.js';
 import type { DbClient } from './pool.js';
 
@@ -18,6 +19,8 @@ export interface Army {
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
+  // Carried home from a cleared camp.
+  loot: Resources | null;
   battleId: number | null;
   joinsRound: number | null;
   joinBonus: number;
@@ -40,6 +43,7 @@ interface ArmyRow {
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
+  loot: Resources | null;
   battle_id: number | null;
   joins_round: number | null;
   join_bonus: number;
@@ -63,6 +67,7 @@ function fromRow(row: ArmyRow): Army {
     orders: row.orders,
     units: row.units,
     status: row.status,
+    loot: row.loot,
     battleId: row.battle_id,
     joinsRound: row.joins_round,
     joinBonus: Number(row.join_bonus),
@@ -111,9 +116,9 @@ export async function loadArmy(client: DbClient, id: number): Promise<Army> {
 
 export async function saveArmy(client: DbClient, a: Army): Promise<void> {
   await client.query(
-    `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8
+    `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9
      WHERE id = $1`,
-    [a.id, JSON.stringify(a.units), a.status, a.battleId, a.joinsRound, a.joinBonus, a.leavesAt, a.returnsAt],
+    [a.id, JSON.stringify(a.units), a.status, a.battleId, a.joinsRound, a.joinBonus, a.leavesAt, a.returnsAt, a.loot ? JSON.stringify(a.loot) : null],
   );
 }
 

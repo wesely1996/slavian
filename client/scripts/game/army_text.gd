@@ -7,6 +7,7 @@ const ORDERS := {
 	"reinforce": "Reinforce: joins the battle there, then comes home.",
 	"harass": "Harass (mostly cavalry): strikes one round hard, takes few losses, rides home.",
 	"hold": "Hold: digs in on a hex and fights every horde whose road runs through it.",
+	"clear": "Clear: storms a camp or lair and carries its loot home.",
 }
 
 
@@ -20,7 +21,7 @@ static func units_text(units: Dictionary, defs: Dictionary) -> String:
 
 ## "Supporting Vesna · arrives in 3m", from the point of view of its owner.
 static func status(army: Dictionary, target_name: String, now: float) -> String:
-	var verb: String = {"support": "Supporting", "reinforce": "Reinforcing", "harass": "Harassing", "hold": "Marching to hold"}.get(army.orders, "Marching to")
+	var verb: String = {"support": "Supporting", "reinforce": "Reinforcing", "harass": "Harassing", "hold": "Marching to hold", "clear": "Marching to clear the camp at"}.get(army.orders, "Marching to")
 	match army.status:
 		"marching":
 			return "%s %s · arrives in %s" % [verb, target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
@@ -29,7 +30,8 @@ static func status(army: Dictionary, target_name: String, now: float) -> String:
 		"engaged":
 			return "Fighting at %s" % target_name
 		"returning":
-			return "Coming home from %s · %s" % [target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)]
+			var loot := " with loot" if army.get("loot") is Dictionary else ""
+			return "Coming home from %s%s · %s" % [target_name, loot, TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)]
 	return "Back from %s" % target_name
 
 

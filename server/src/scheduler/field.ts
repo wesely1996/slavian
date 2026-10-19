@@ -9,11 +9,12 @@ import type { GameData } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
 import { fortAt, insertFort, loadFort, markFortStanding, type Fort } from '../db/forts.js';
+import { campAt } from '../db/camps.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
-import { endWave, listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, type Wave } from '../db/waves.js';
+import { listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, type Wave } from '../db/waves.js';
 import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
@@ -29,6 +30,7 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
+import { finishWave, planFortCheck } from './camps.js';
 import { tell } from './notices.js';
 import { planRaids } from './outposts.js';
 
@@ -143,7 +145,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
 // on open ground, or at the Holy City, whose guard fights beside any armies
 // holding it, behind its walls.
 export async function fieldRound(client: DbClient, data: GameData, world: World, battle: Battle, at: Date): Promise<void> {
-  const wave = await loadWave(client, battle.waveId);
+  const wave = await loadWave(client, battle.waveId!);
   const round = battle.round + 1;
   const engaged = await armiesInBattle(client, battle.id);
   const holy = battle.setup.holyCity === true;
@@ -230,7 +232,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });
     if (won) {
       await hordeBeaten(client, data, world, hex(battle.q, battle.r), kills);
-      await endWave(client, wave.id, 'defeated', at);
+      await finishWave(client, data, world, wave.id, 'defeated', at);
     } else if (holy) {
       await holyCityFalls(client, data, world, wave, attackerNow, at);
     } else {
@@ -264,7 +266,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
 // and the horde, its rampage done, scatters.
 async function holyCityFalls(client: DbClient, data: GameData, world: World, wave: Wave, survivors: Record<string, number>, at: Date): Promise<void> {
   await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)));
-  await endWave(client, wave.id, 'dispersed', at);
+  await finishWave(client, data, world, wave.id, 'dispersed', at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
@@ -297,6 +299,7 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   const outposts = villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => outpostHex(plot)!));
   if (outposts.some((o) => o.q === cell.q && o.r === cell.r)) throw new RuleError('There is an outpost there');
   if (await fortAt(client, world.id, cell.q, cell.r)) throw new RuleError('There is a fort there already');
+  if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
   const fort = await insertFort(client, {
     worldId: world.id,
@@ -321,10 +324,11 @@ export const fieldHandlers: HandlerRegistry = {
     await startFieldBattle(client, data, world, wave, hex(payload.q, payload.r), event.dueAt);
   },
 
-  async fort_complete({ client, world }, event) {
+  async fort_complete({ client, data, world }, event) {
     const fort = await loadFort(client, fortPayload.parse(event.payload).fortId);
     if (!fort || fort.status !== 'building') return;
     await markFortStanding(client, fort.id);
+    await planFortCheck(client, data, world, fort.id, event.dueAt);
     await tell(client, world, fort.ownerAccountId, {
       kind: 'build_done',
       tier: 'digest',
