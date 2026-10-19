@@ -1,7 +1,8 @@
 import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js';
+import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
 import { hex, hexDistance, hexKey, type Hex } from './hex.js';
-import { bonus, productionFactor, timeFactor, type Bonuses } from './research.js';
+import { bonus, productionFactor, timeFactor, trainFactor, type Bonuses } from './research.js';
 import {
   mapResources,
   spend,
@@ -193,8 +194,9 @@ export function villageRates(
   state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away' | 'adminUpkeep' | 'bonuses'>,
   worldSpeed: number,
 ): Resources {
-  const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged, state.bonuses);
-  const troops = upkeepPerHour(data, unitsFed(state), worldSpeed) * Math.max(0, 1 + bonus(state.bonuses, 'upkeep'));
+  const bonuses = villageBonuses(data, state);
+  const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged, bonuses);
+  const troops = upkeepPerHour(data, unitsFed(state), worldSpeed) * Math.max(0, 1 + bonus(bonuses, 'upkeep'));
   const upkeep = troops + state.adminUpkeep * worldSpeed;
   return { ...rates, grain: rates.grain - upkeep };
 }
@@ -313,6 +315,7 @@ export function queueBuild(
     building = request.building;
     const def = buildingDef(data, building);
     if (def.kind !== 'center') throw new RuleError(`${def.name} is built on fields, not in the village`);
+    if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can build a ${def.name}`);
     const taken = Object.keys(state.plots).some((id) => id !== plot && plannedPlot(state, id).building === building);
     if (taken) throw new RuleError(`This village already has a ${def.name}`);
   }
@@ -450,6 +453,7 @@ export function queueTraining(
   if (!Number.isInteger(count) || count < 1 || count > data.units.maxBatch) {
     throw new RuleError(`Train between 1 and ${data.units.maxBatch} at a time`);
   }
+  if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can train a ${def.name}`);
   const buildingLevel = state.levels[def.building] ?? 0;
   if (buildingLevel < def.requiresLevel) {
     throw new RuleError(`${def.name} needs ${buildingDef(data, def.building).name} level ${def.requiresLevel}`);
@@ -464,7 +468,7 @@ export function queueTraining(
     unit,
     count,
     startsAt,
-    perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed, timeFactor(state.bonuses, 'trainTime')),
+    perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed, trainFactor(villageBonuses(data, state), unit)),
   };
   const training = [...state.training, batch];
   const ledger = withRates(paid, at, villageRates(data, { ...state, training }, worldSpeed));

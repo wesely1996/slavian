@@ -32,6 +32,11 @@ export function timeFactor(bonuses: Bonuses, key: 'buildTime' | 'trainTime'): nu
   return Math.max(0.1, 1 + bonus(bonuses, key));
 }
 
+// Training time for `unit`: the general bonus and its own (trainTime.<unit>).
+export function trainFactor(bonuses: Bonuses, unit: string): number {
+  return Math.max(0.1, 1 + bonus(bonuses, 'trainTime') + bonus(bonuses, `trainTime.${unit}`));
+}
+
 export function attackFactor(bonuses: Bonuses, family: UnitFamily): number {
   return 1 + bonus(bonuses, `attack.${family}`) + bonus(bonuses, 'attack.all');
 }
@@ -59,8 +64,8 @@ export function researchProblem(
   return null;
 }
 
-export function researchMs(data: GameData, tech: string, worldSpeed: number): number {
+export function researchMs(data: GameData, tech: string, worldSpeed: number, bonuses: Bonuses = {}): number {
   const def = data.research.techs[tech];
   if (!def) throw new RuleError(`Unknown tech "${tech}"`);
-  return Math.round((def.seconds * 1000) / worldSpeed);
+  return Math.round((def.seconds * 1000 * Math.max(0.1, 1 + bonus(bonuses, 'researchTime'))) / worldSpeed);
 }

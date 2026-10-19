@@ -270,6 +270,32 @@ func _open_run_once() -> void:
 		_panel_mode = "run"
 
 
+## The group's clans; a member with none yet picks one here.
+func _clan_section() -> void:
+	for member in Game.world.get("members", []):
+		_panel_body.add_child(UI.label("%s: %s" % [member.displayName, ClanText.title(Game.data, member.get("clan"))], UI.SMALL_SIZE, UI.MUTED))
+	var me: Dictionary = {}
+	for member in Game.world.get("members", []):
+		if int(member.accountId) == Game.my_account_id():
+			me = member
+	if me.is_empty() or me.get("clan") != null or RunText.is_over(Game.world):
+		return
+	_panel_body.add_child(UI.label("Pick your clan: its perks go to all your villages, for the rest of this run.", UI.SMALL_SIZE))
+	for clan in ClanText.ids(Game.data):
+		var pick := UI.button(ClanText.title(Game.data, clan), func() -> void: _pick_clan(clan))
+		_panel_body.add_child(pick)
+		_panel_body.add_child(UI.label(ClanText.perks(Game.data, clan), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _pick_clan(clan: String) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/clan" % Game.world_id(), {"clan": clan})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+
+
 ## How the run ended: its story and what the group did.
 func _run_panel() -> void:
 	var ending := RunText.ending(Game.data, Game.world)
@@ -895,7 +921,7 @@ func _hold_panel(terrain_id: String) -> void:
 	if problem != "":
 		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
 		return
-	var cost: Dictionary = Game.data.field.fort.cost
+	var cost := FieldRules.fort_cost(Game.data, home.get("bonuses", {}))
 	var seconds := float(Game.data.field.fort.buildSeconds) / float(Game.world.speed)
 	var row := UI.hbox()
 	var info := UI.vbox(2)
@@ -1586,6 +1612,8 @@ func _troops_section(village: Dictionary) -> void:
 	var max_batch := int(Game.data.units.maxBatch)
 	for unit in units:
 		var def: Dictionary = units[unit]
+		if not ClanText.allowed(def, village.get("bonuses", {})):
+			continue
 		var building_level := int(village.levels.get(def.building, 0))
 		var unlocked := building_level >= int(def.requiresLevel)
 		var count: int = _train_counts.get(unit, 1)
@@ -1703,6 +1731,7 @@ func _threat_summary() -> String:
 
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
+	_clan_section()
 	var ritual := RunText.ritual_line(Game.world, Game.server_now())
 	if ritual != "":
 		_panel_body.add_child(UI.label(ritual, 0, Color("#ffb4a8")))

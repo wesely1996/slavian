@@ -1459,6 +1459,30 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await call('GET', `/v1/worlds/${worldId}/notifications`, rusa.token)).status).toBe(200);
   });
 
+  it('lets members pick a clan, whose perks every village carries', async () => {
+    const host = await guest('Ljuba');
+    const friend = await guest('Goran');
+    const created = await call('POST', '/v1/worlds', host.token, { name: 'Clans', maxPlayers: 2 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', friend.token, { inviteCode: created.body.inviteCode });
+    expect((await call('PUT', `/v1/worlds/${worldId}/clan`, host.token, { clan: 'lion' })).body.message).toMatch(/Unknown clan/);
+    await call('PUT', `/v1/worlds/${worldId}/clan`, host.token, { clan: 'sokol' });
+    const lobby = (await call('PUT', `/v1/worlds/${worldId}/clan`, host.token, { clan: 'volk' })).body;
+    expect(lobby.members.find((m: { accountId: number }) => m.accountId === host.accountId).clan).toBe('volk');
+
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, host.token)).body;
+    const village = (id: number) => started.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === id);
+    expect(village(host.accountId).bonuses).toMatchObject({ 'clan.volk': 1, 'production.stone': 0.15 });
+    expect(village(friend.accountId).bonuses['clan.volk']).toBeUndefined();
+    // Once the run is under way, the clan is set; a member without one may still pick.
+    expect((await call('PUT', `/v1/worlds/${worldId}/clan`, host.token, { clan: 'rys' })).body.message).toMatch(/chosen for this run/);
+    const picked = (await call('PUT', `/v1/worlds/${worldId}/clan`, friend.token, { clan: 'rys' })).body;
+    const theirs = picked.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === friend.accountId);
+    expect(theirs.bonuses).toMatchObject({ 'clan.rys': 1, 'production.wood': 0.15 });
+    const refused = await call('POST', `/v1/villages/${theirs.id}/build`, friend.token, { plot: 'c2', building: 'longhouse_hall' });
+    expect(refused.body.message).toMatch(/Only Rod Volka/);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

@@ -291,7 +291,7 @@ export async function startResearchCommand(
     });
     if (problem) throw new RuleError(problem);
     const ledger = spend(village.state.ledger, input.now, deps.data.research.techs[input.tech]!.cost);
-    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed));
+    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed, village.state.bonuses));
     const research = await startResearch(client, {
       worldId: world.id,
       accountId,

@@ -46,14 +46,14 @@ export function setupAt(
 export function setupFactors(
   data: GameData,
   setup: Setup,
-  input: { round: number; holdersStance: string },
+  input: { round: number; holdersStance: string; ambushBonus?: number },
 ): { holderAttack: number; holderDefense: number; hordeAttack: number; hordeStanceless: boolean } {
   const first = input.round === 1;
   let holderDefense = 1;
   if (setup.fort) holderDefense += data.field.fort.defenseBonus;
   if (setup.choke && input.holdersStance === 'hold_the_line') holderDefense += data.field.choke.holdTheLineDefense;
   return {
-    holderAttack: setup.ambush && first ? 1 + data.field.ambush.bonus : 1,
+    holderAttack: setup.ambush && first ? 1 + data.field.ambush.bonus + (input.ambushBonus ?? 0) : 1,
     holderDefense,
     hordeAttack: setup.choke ? data.field.choke.attackerFactor : 1,
     hordeStanceless: setup.ambush && first,
