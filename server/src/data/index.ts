@@ -476,6 +476,16 @@ const clansFileSchema = z.object({
 });
 export type ClansData = z.infer<typeof clansFileSchema>;
 
+export const ONBOARDING_STEPS = ['build', 'train', 'outpost', 'scout', 'camp', 'gift'] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
+const onboardingFileSchema = z.object({
+  version: z.number().int(),
+  steps: z.array(
+    z.object({ id: z.enum(ONBOARDING_STEPS), title: z.string(), hint: z.string(), story: z.string(), reward: resourcesSchema }),
+  ),
+});
+export type OnboardingData = z.infer<typeof onboardingFileSchema>;
+
 export const BRIDGE_QUESTS = ['site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
 export type BridgeQuest = (typeof BRIDGE_QUESTS)[number];
 const bridgeFileSchema = z.object({
@@ -551,6 +561,7 @@ export interface GameData {
   lore: LoreData;
   bridge: BridgeData;
   clans: ClansData;
+  onboarding: OnboardingData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -578,6 +589,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     lore: loreFileSchema.parse(read('lore.json')),
     bridge: bridgeFileSchema.parse(read('bridge.json')),
     clans: clansFileSchema.parse(read('clans.json')),
+    onboarding: onboardingFileSchema.parse(read('onboarding.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

@@ -3,6 +3,7 @@
 // send part of themselves with the next wave of their front, ambush
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
+import { onboardingStep } from './onboarding.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, saveArmy, type Army } from '../db/armies.js';
@@ -186,6 +187,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     ember = camp.kind === 'lair' && rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
     if (ember) await addEmbers(client, world.id, 1);
     if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
+    await onboardingStep(client, data, world, army.ownerAccountId, 'camp', at);
   } else {
     await saveCampUnits(client, camp.id, result.campNow);
   }

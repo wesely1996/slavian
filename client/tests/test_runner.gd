@@ -38,6 +38,7 @@ func _initialize() -> void:
 	_test_run()
 	_test_clans()
 	_test_delegation()
+	_test_onboarding_almanac()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -486,3 +487,26 @@ func _test_delegation() -> void:
 	_check(DelegationText.owners_for(delegations, 2, now) == [1], "owners for delegate")
 	var e := {"ownerAccountId": 1, "delegateAccountId": 2, "villageId": 7, "action": "queued a build", "at": "2026-01-01T00:00:00.000Z"}
 	_check(DelegationText.entry(e, {1: "Mila", 2: "Goran"}, {7: "Mila's village"}) == "Goran (for Mila) queued a build in Mila's village", "delegation entry")
+
+
+func _test_onboarding_almanac() -> void:
+	var data := {"onboarding": {"steps": [
+		{"id": "build", "title": "Raise a building", "reward": {"wood": 150, "stone": 0, "grain": 100, "iron": 0}},
+		{"id": "train", "title": "Train defenders", "reward": {"wood": 0, "stone": 0, "grain": 0, "iron": 50}},
+	]}}
+	_check(OnboardingText.next_step(data, {"onboarding": {}}).id == "build", "first step")
+	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x"}}).id == "train", "next step")
+	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x", "train": "y"}}).is_empty(), "all done")
+	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}}) == "Getting started 1 of 2", "progress")
+	_check(OnboardingText.reward(data.onboarding.steps[0]) == "Reward: Wood 150, Grain 100", "reward")
+	var full := {
+		"units": {"units": {"spearman": {"name": "Spearman", "family": "infantry", "building": "barracks", "requiresLevel": 1, "attack": 20, "defense": 40, "speed": 5, "carry": 40, "upkeepPerHour": 1}}},
+		"buildings": {"buildings": {"barracks": {"name": "Barracks", "kind": "center", "maxLevel": 10}}},
+		"battle": {"stances": {"hold_the_line": {"name": "Hold the Line", "attack": 0.9, "defense": 1.15, "retreatAt": null}}, "counters": {"infantry": {"cavalry": 1.5}}},
+	}
+	var units := AlmanacText.entries(full, "Units")
+	_check(units[0][0] == "Spearman" and units[0][1].begins_with("Infantry · attack 20 · defense 40"), "almanac unit: %s" % units[0][1])
+	_check(AlmanacText.entries(full, "Buildings")[0][1] == "Building in the village · up to level 10", "almanac building")
+	var stances := AlmanacText.entries(full, "Stances")
+	_check(stances[0][1] == "attack ×0.90 · defense ×1.15 · never breaks", "almanac stance: %s" % stances[0][1])
+	_check(stances[1][1] == "Infantry beat cavalry (×1.5)", "almanac counters")

@@ -1,4 +1,6 @@
 import type { Stance, TerrainId } from '../data/index.js';
+import type { OnboardingStep } from '../data/index.js';
+import { onboardingStep } from '../scheduler/onboarding.js';
 import { authorize } from '../db/delegations.js';
 import { NotFoundError, RuleError } from '../errors.js';
 import { effectiveBonuses } from '../db/heroes.js';
@@ -58,7 +60,7 @@ export async function ownVillageCommand<T>(
   db: Db,
   deps: SchedulerDeps,
   input: VillageCommandInput,
-  apply: (ctx: { client: DbClient; world: World; village: Village }) => Promise<{ state: VillageState; result: T }>,
+  apply: (ctx: { client: DbClient; world: World; village: Village }) => Promise<{ state: VillageState; result: T; onboarding?: OnboardingStep | null }>,
 ): Promise<{ village: Village; result: T }> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [
     input.villageId,
@@ -78,10 +80,13 @@ export async function ownVillageCommand<T>(
       villageId: village.id,
     });
     if (village.ruin && !input.allowRuin) throw new RuleError(`${village.name} lies in ruins; rebuild it first`);
-    const { state, result } = await apply({ client, world, village });
+    const { state, result, onboarding } = await apply({ client, world, village });
     await saveVillageState(client, village.id, state);
     await notifyWorld(client, { worldId, type: 'village', villageId: village.id });
-    return { village: { ...village, state }, result };
+    if (!onboarding) return { village: { ...village, state }, result };
+    // A getting-started step's reward may land in this very village.
+    await onboardingStep(client, deps.data, world, village.ownerAccountId, onboarding, input.now);
+    return { village: await loadVillage(client, village.id), result };
   });
 }
 
@@ -103,7 +108,7 @@ export async function queueBuildCommand(
       targetLevel: queued.targetLevel,
     };
     await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', payload);
-    return { state, result: queued };
+    return { state, result: queued, onboarding: 'build' };
   });
   return { village, queued: result };
 }
@@ -118,7 +123,7 @@ export async function trainUnitsCommand(
     const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned);
     const payload: TrainingCompletePayload = { villageId: village.id };
     await scheduleEvent(client, world.id, batchCompletesAt(batch), 'training_complete', payload);
-    return { state, result: batch };
+    return { state, result: batch, onboarding: 'train' };
   });
   return { village, batch: result };
 }
@@ -158,7 +163,7 @@ export async function sendScoutsCommand(
     const payload: MissionPayload = { missionId: mission.id };
     await scheduleEvent(client, world.id, arrivesAt, 'scout_arrive', payload);
     await notifyWorld(client, { worldId: world.id, type: 'scouting' });
-    return { state, result: mission };
+    return { state, result: mission, onboarding: 'scout' };
   });
   return { village, mission: result };
 }
@@ -203,7 +208,7 @@ export async function claimOutpostCommand(
       targetLevel: queued.targetLevel,
     };
     await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', payload);
-    return { state, result: queued };
+    return { state, result: queued, onboarding: 'outpost' };
   });
   return { village, queued: result };
 }

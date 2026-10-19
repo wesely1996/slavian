@@ -195,6 +195,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     lore: scheduler.data.lore,
     bridge: scheduler.data.bridge,
     clans: scheduler.data.clans,
+    onboarding: scheduler.data.onboarding,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
