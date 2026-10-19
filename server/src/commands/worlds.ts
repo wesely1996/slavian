@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import { insertRivers } from '../db/rivers.js';
 import type { Difficulty } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import type { Account } from '../db/accounts.js';
@@ -101,6 +102,7 @@ export async function startWorldCommand(
     const map = generateMap(deps.data, world.seed, members.length);
     await markStarted(client, world.id, map, input.now, deps.data.horde.holyCity.sanctity);
     await insertHexes(client, world.id, map);
+    await insertRivers(client, world.id, map.rivers);
     for (const [i, member] of members.entries()) {
       const site = map.startSites[i]!;
       await insertVillage(client, {

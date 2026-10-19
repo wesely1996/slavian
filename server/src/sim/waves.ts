@@ -5,6 +5,7 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to its
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
+import { canCross, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -150,7 +151,7 @@ export interface Target {
 export function routeFrom(
   data: GameData,
   input: {
-    terrain: ReadonlyMap<string, TerrainId>;
+    terrain: Land;
     from: Hex;
     targets: readonly Target[];
     front: Front;
@@ -167,8 +168,8 @@ export function routeFrom(
     const type = terrain.get(hexKey(to));
     return type === undefined ? null : data.terrain.terrain[type].moveCost;
   };
-  const searchCost = (_: Hex, to: Hex): number | null => {
-    const cost = moveCost(to);
+  const searchCost = (from: Hex, to: Hex): number | null => {
+    const cost = canCross(terrain, from, to) ? moveCost(to) : null;
     return cost === null ? null : cost + rules.fear.pathWeight * (fear?.get(hexKey(to)) ?? 0);
   };
   const erratic = data.enemies.fronts[input.front]!.personality.erratic;
@@ -209,7 +210,7 @@ export function targetsOf(villages: readonly { id: number; q: number; r: number 
 export function planMarch(
   data: GameData,
   input: {
-    terrain: ReadonlyMap<string, TerrainId>;
+    terrain: Land;
     radius: number;
     wave: PlannedWave;
     villages: readonly { id: number; q: number; r: number }[];

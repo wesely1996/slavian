@@ -1,4 +1,5 @@
 import type { Stance, TerrainId } from '../data/index.js';
+import { loadLand } from '../db/rivers.js';
 import type { OnboardingStep } from '../data/index.js';
 import { onboardingStep } from '../scheduler/onboarding.js';
 import { authorize } from '../db/delegations.js';
@@ -145,7 +146,7 @@ export async function sendScoutsCommand(
     if (wave.status === 'dispersed' || wave.status === 'defeated') throw new RuleError('That horde has already scattered');
 
     const state = sendAway(village.state, SCOUT_UNIT, input.count, input.now);
-    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
     const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, await effectiveBonuses(client, deps.data, village));
@@ -235,8 +236,7 @@ export async function foundVillageCommand(
 ): Promise<{ village: Village; expedition: Expedition }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent settlers' }, async ({ client, world, village }) => {
     const cell = hex(input.q, input.r);
-    const hexes = await loadHexes(client, world.id);
-    const terrain = new Map<string, TerrainId>(hexes.map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const villages = await listVillages(client, world.id);
     const outposts = new Set(villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => hexKey(outpostHex(plot)!))));
     const home = hex(village.q, village.r);

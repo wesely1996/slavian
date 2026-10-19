@@ -3,6 +3,7 @@
 // winning a raid or a raze (horde.ts) and onward until its rampage clock
 // runs out and it settles into a camp. A spawn also plans the next wave, so `waves.upcoming` waves are
 // always announced ahead.
+import { loadLand } from '../db/rivers.js';
 import { z } from 'zod';
 import type { GameData, TerrainId } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
@@ -113,7 +114,7 @@ export const waveHandlers: HandlerRegistry = {
 
     // Old memories fade as a new horde sets out.
     await decayFear(client, world.id, data.horde.fear.decayPerWave, data.horde.fear.minimum);
-    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+    const terrain = await loadLand(client, world.id);
     const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
     const march = planMarch(data, {
       terrain,

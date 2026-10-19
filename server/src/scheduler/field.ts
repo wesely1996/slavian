@@ -4,6 +4,7 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { riverEdge, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
 import { againstFront } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
 import { z } from 'zod';
@@ -37,7 +38,7 @@ import { hordeBeaten } from './horde.js';
 import { finishWave, planFortCheck } from './camps.js';
 import { holdForQuiet } from './waves.js';
 import { bridgeQuest } from './bridge.js';
-import { tell } from './notices.js';
+import { tell, tellOwner } from './notices.js';
 import { planRaids } from './outposts.js';
 
 export const interceptPayload = z.object({ waveId: z.number().int(), q: z.number().int(), r: z.number().int(), atMs: z.number() });
@@ -336,7 +337,44 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   return fort;
 }
 
+export const crossingPayload = z.object({ aq: z.number().int(), ar: z.number().int(), bq: z.number().int(), br: z.number().int() });
+
+// Builds a bridge over a river edge near the village, paid from its stores.
+export async function buildCrossing(client: DbClient, data: GameData, world: World, villageId: number, a: Hex, b: Hex, at: Date): Promise<StoredRiverEdge> {
+  const rules = data.field.bridge;
+  const village = await loadVillage(client, villageId);
+  const home = hex(village.q, village.r);
+  if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) throw new RuleError(`Bridges go within ${rules.range} hexes of the village`);
+  const edge = await riverEdge(client, world.id, a, b);
+  if (!edge) throw new RuleError('No river runs there');
+  if (edge.crossing !== 'none') throw new RuleError(edge.crossing === 'standing' ? 'A bridge already stands there' : 'A bridge is being built there');
+  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
+  const completesAt = new Date(at.getTime() + (rules.buildSeconds * 1000) / world.speed);
+  await setCrossing(client, world.id, a, b, 'building', village.id, completesAt);
+  await scheduleEvent(client, world.id, completesAt, 'crossing_built', { aq: a.q, ar: a.r, bq: b.q, br: b.r });
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
+  return (await riverEdge(client, world.id, a, b))!;
+}
+
 export const fieldHandlers: HandlerRegistry = {
+  // A bridge stands: from now on, roads (and hordes) may cross there.
+  async crossing_built({ client, world }, event) {
+    const { aq, ar, bq, br } = crossingPayload.parse(event.payload);
+    const edge = await riverEdge(client, world.id, hex(aq, ar), hex(bq, br));
+    if (!edge || edge.crossing !== 'building') return;
+    await setCrossing(client, world.id, edge.a, edge.b, 'standing', null, null);
+    if (edge.builtBy !== null) {
+      await tellOwner(client, world, edge.builtBy, (name) => ({
+        kind: 'build_done',
+        tier: 'digest',
+        title: `A bridge stands near ${name}`,
+        body: `Roads now cross the river between (${aq}, ${ar}) and (${bq}, ${br}), for friend and foe alike.`,
+      }), event.dueAt);
+    }
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+  },
+
   async field_intercept({ client, data, world }, event) {
     const payload = interceptPayload.parse(event.payload);
     const wave = await loadWave(client, payload.waveId);

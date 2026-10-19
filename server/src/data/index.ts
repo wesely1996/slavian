@@ -340,6 +340,12 @@ const fieldFileSchema = z.object({
     buildSeconds: z.number().positive(),
     defenseBonus: z.number().nonnegative(),
   }),
+  // Bridges players build over river edges (M5 step 3).
+  bridge: z.object({
+    range: z.number().int().positive(),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+  }),
 });
 
 export type BuildingDef = z.infer<typeof buildingSchema>;

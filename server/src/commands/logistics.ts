@@ -1,4 +1,5 @@
 import type { GameData, TerrainId } from '../data/index.js';
+import { loadLand } from '../db/rivers.js';
 import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
@@ -71,7 +72,7 @@ export async function dispatchCaravan(
     if (!destination || destination.worldId !== world.id) throw new NotFoundError('No such village in this world');
     to = hex(destination.q, destination.r);
   }
-  const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t]));
+  const terrain = await loadLand(client, world.id);
   const path = caravanRoute(data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
   const travelMs = path.at(-1)!.atMs;
   const arrivesAt = new Date(now.getTime() + travelMs);

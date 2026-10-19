@@ -1609,6 +1609,40 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.sites.filter((x: { status: string }) => x.status === 'unexplored')).toHaveLength(1);
   });
 
+  it('keeps armies to bridges over rivers, and lets players build more', async () => {
+    const mira = await guest('Mira');
+    const created = await call('POST', '/v1/worlds', mira.token, { name: 'Rivers', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, mira.token)).body;
+    expect(Array.isArray(started.map.rivers)).toBe(true);
+    const home = started.villages[0];
+    const terrain = new Map<string, string>((started.map.hexes as [number, number, string][]).map(([q, r, t]) => [`${q},${r}`, t]));
+    const passable = (q: number, r: number) => ['plains', 'forest', 'hills', 'steppe'].includes(terrain.get(`${q},${r}`) ?? '');
+    // A river right beside the village, between home and a passable neighbour.
+    const dir = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]].find(([dq, dr]) => passable(home.q + dq!, home.r + dr!))!;
+    const across = { q: home.q + dir[0]!, r: home.r + dir[1]! };
+    await db.query('DELETE FROM river_edges WHERE world_id = $1', [worldId]);
+    const [a, b] = `${home.q},${home.r}` < `${across.q},${across.r}` ? [home, across] : [across, home];
+    await db.query("INSERT INTO river_edges (world_id, aq, ar, bq, br, crossing) VALUES ($1, $2, $3, $4, $5, 'none')", [worldId, a.q, a.r, b.q, b.r]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 20}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
+
+    const hold = () => call('POST', `/v1/villages/${home.id}/armies`, mira.token, { target: across, units: { spearman: 5 }, orders: 'hold' });
+    const around = (await hold()).body.army;
+    expect(around.path.length).toBeGreaterThan(2);
+
+    const crossing = (body: object) => call('POST', `/v1/villages/${home.id}/crossings`, mira.token, body);
+    expect((await crossing({ a: home, b: { q: home.q + 9, r: home.r } })).body.message).toMatch(/within|No river/);
+    let w = (await crossing({ a: home, b: across })).body;
+    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'building']]);
+    expect((await crossing({ a: across, b: home })).body.message).toMatch(/being built/);
+    now = new Date(now.getTime() + (scheduler.data.field.bridge.buildSeconds * 1000) / 10);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
+    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'standing']]);
+    // Over the bridge: straight across.
+    expect((await hold()).body.army.path).toHaveLength(2);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');
