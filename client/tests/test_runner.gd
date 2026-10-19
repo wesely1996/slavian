@@ -39,6 +39,7 @@ func _initialize() -> void:
 	_test_clans()
 	_test_delegation()
 	_test_onboarding_almanac()
+	_test_art()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -510,3 +511,18 @@ func _test_onboarding_almanac() -> void:
 	var stances := AlmanacText.entries(full, "Stances")
 	_check(stances[0][1] == "attack ×0.90 · defense ×1.15 · never breaks", "almanac stance: %s" % stances[0][1])
 	_check(stances[1][1] == "Infantry beat cavalry (×1.5)", "almanac counters")
+
+
+func _test_art() -> void:
+	_check(Art.ids().size() >= 40, "art manifest read: %d ids" % Art.ids().size())
+	var missing := []
+	for id in Art.ids():
+		if Art.texture(id) == null:
+			missing.append(id)
+	_check(missing.is_empty(), "every art id loads: %s" % [missing])
+	for terrain in ["plains", "forest", "hills", "mountain", "swamp", "lake", "holy_city", "ocean", "dark_forest", "ice", "steppe", "hallowed"]:
+		_check(Art.has("terrain/" + terrain), "terrain art for %s" % terrain)
+	_check(Art.texture("no/such") == null, "missing art is null")
+	_check(Art.settlement_id(1) == "settlement/village_1" and Art.settlement_id(2) == "settlement/village_1", "hall 1-2: stage 1")
+	_check(Art.settlement_id(5) == "settlement/village_3" and Art.settlement_id(10) == "settlement/village_5", "hall 5: stage 3, hall 10: stage 5")
+	_check(Art.settlement_id(0) == "settlement/village_1" and Art.settlement_id(14) == "settlement/village_5", "stages clamp")
