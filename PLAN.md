@@ -377,7 +377,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 - Muted earth palette, bright accents only for threats and actions.
 - Placeholder (stock / AI-assisted) art until M5. Until then the UI stays minimal (code-built panels, flat hexes) so the rules can be built and tested first; the **UI design and art pass** (M5) replaces it before launch.
 - Portrait-first phone layout. Map pan/zoom with one-finger drag and pinch.
-- **Map art:** neighbouring tiles of the same kind merge into one shape (a big forest, a mountain range, a lake) instead of separate hexes.
+- **Map art:** neighbouring tiles of the same kind merge into one shape (a big forest, a mountain range, a lake) instead of separate hexes; rivers wind along hex edges, with bridges where they can be crossed.
 - **Settlements** look different at each level; **banners** show the owner. **Outlines** tell sides apart at a glance: green for yours, blue for allies' units and settlements, red for enemies.
 - **Village interior and its resource fields** look and work like Travian's.
 - **Battle screen:** a play-by-play of each round with narrative explanations, over a 2D top-down view of the battlefield: units as squares with unit icons, neighbouring squares of the same kind grouped into a squad with one big icon over the whole group.
@@ -550,6 +550,7 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
 - **UI design and art pass** (§11.7): Kingdom Rush–like art and UI; merged map art for connected tiles of one kind; settlement art per level, owner banners, green/blue/red outlines for yours/allies'/enemies'; a Travian-like village interior and resource fields.
 - **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon), drawn as a parchment campaign map (reference: `docs/reference/battle-map.jpg`).
 - **Roads:** players build roads between hexes. Roads speed up movement for everyone on them, allies and the human hordes alike, but not monsters. (Terrain already sets movement cost.)
+- **Rivers:** map generation lays rivers along hex edges, from the edge belt and hills towards the lowlands. Nothing crosses a river except at a **bridge**, hordes included: some bridges stand when the world is made (mapgen keeps every start able to reach the Holy City and every active front able to reach the starts), and players can build more. Rivers are drawn on the map, and bridges become natural choke points.
 - The rest of M5 as in the roadmap table (closed test, balance, localization, accessibility, donation button, privacy, backups/monitoring).
 
 ### M0/M1 first tasks
