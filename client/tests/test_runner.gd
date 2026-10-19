@@ -42,6 +42,7 @@ func _initialize() -> void:
 	_test_art()
 	_test_battle_story()
 	_test_leaders()
+	_test_translation()
 	_test_rivers()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
@@ -616,4 +617,15 @@ func _test_leaders() -> void:
 	dead.diedAt = "2030-01-01T10:00:00.000Z"
 	_check(LeaderText.after_battle(dead, battle, "x") == "Khan Konchak fell with the last of them.", "leader fell")
 	_check(LeaderText.after_battle(chief, {"status": "raided"}, "x") == "Khan Konchak rode on, prouder.", "leader won")
+
+
+func _test_translation() -> void:
+	var before := TranslationServer.get_locale()
+	TranslationServer.set_locale("sr_Latn")
+	_check(UI.t("Play as guest") == "Igraj kao gost", "Serbian: %s" % UI.t("Play as guest"))
+	_check(UI.tn("%d player", "%d players", 1) == "%d igrač" and UI.tn("%d player", "%d players", 3) == "%d igrača" and UI.tn("%d player", "%d players", 5) == "%d igrača", "Serbian plurals")
+	_check(UI.t("{name} the Hungry").replace("{name}", "Mara") == "Mara Gladni", "data strings translated")
+	TranslationServer.set_locale("en")
+	_check(UI.t("Play as guest") == "Play as guest", "English is the source")
+	TranslationServer.set_locale(before)
 

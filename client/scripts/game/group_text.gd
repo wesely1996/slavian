@@ -3,7 +3,7 @@ extends RefCounted
 ## Words for the group's world settings: difficulty and quiet hours.
 
 const DIFFICULTIES := ["story", "normal", "hard", "nightmare"]
-const DIFFICULTY_LABELS := ["Story difficulty", "Normal difficulty", "Hard difficulty", "Nightmare difficulty"]
+const DIFFICULTY_LABELS := ["Story difficulty", "Normal difficulty", "Hard difficulty", "Nightmare difficulty"]  # tr
 ## Quiet windows the host can pick from, in local hours: [start, end].
 const QUIET_CHOICES := [[22, 6], [23, 7], [0, 8]]
 
