@@ -68,6 +68,13 @@ Back to front, in one place: `HexMap` and `game_screen._build_ui`.
 5. **Light grade** (`MapGrade`, canvas layer 1): warm wash, cloud shadows (parallax 1.15) and the vignette.
 6. **Interface** (canvas layer 2).
 
+## The layer stack (the village view)
+
+1. **Ground** (`VillageGround`, the map's ground shader): beaten earth inside the walls, the meadow clearing, the road out of the gate, wild grass and woods beyond.
+2. **Woods:** trees and brush as single sprites, placed by the village's seed, back to front, clear of the road.
+3. **Moat, paths, walls:** all along the village's own outline.
+4. **Plots:** fields, buildings, the gate and the wall works.
+
 ## Sprite manifest
 
 Every object is its own file, with no text baked in; words are drawn by code.

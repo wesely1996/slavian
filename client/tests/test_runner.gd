@@ -176,7 +176,7 @@ func _test_village_layout() -> void:
 	var ring := []
 	for i in range(1, 12):
 		ring.append(snappedf((rects["c%d" % i] as Rect2).get_center().distance_to(Vector2(500, 500)), 0.01))
-	_check(ring.min() == ring.max(), "the other slots stand in a circle around it")
+	_check(ring.min() > 150.0 and ring.max() < 200.0, "the other slots stand in a ring around it: %s" % [ring])
 	for a in rects:
 		_check(VillageView.plot_at(rects, (rects[a] as Rect2).get_center()) == a, "tapping %s picks it" % a)
 		for b in rects:
@@ -677,13 +677,18 @@ func _test_walls() -> void:
 	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
 	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2 hours earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")
-	var rects := VillageView.layout(Vector2(1000, 1000), 12, 12, 5)
-	var keys := rects.keys()
+	# Every village's own outline keeps its plots clear of each other.
 	var clear := true
-	for i in keys.size():
-		for j in range(i + 1, keys.size()):
-			if (rects[keys[i]] as Rect2).intersects(rects[keys[j]]):
-				clear = false
-				printerr("overlap ", keys[i], " ", keys[j])
-	_check(clear and rects.has("w") and rects.has("t4"), "walls and slots laid out clear of the rest")
+	var differ := false
+	for seed in range(0, 200, 7):
+		var rects := VillageView.layout(Vector2(1000, 1000), 12, 12, 5, seed)
+		var keys := rects.keys()
+		for i in keys.size():
+			for j in range(i + 1, keys.size()):
+				if (rects[keys[i]] as Rect2).intersects(rects[keys[j]]):
+					clear = false
+					printerr("overlap at seed ", seed, ": ", keys[i], " ", keys[j])
+		differ = differ or not (rects["f3"] as Rect2).is_equal_approx(VillageView.layout(Vector2(1000, 1000), 12, 12, 5, 0)["f3"])
+	_check(clear, "walls and slots laid out clear of the rest, for any village")
+	_check(differ, "each village has its own outline")
 

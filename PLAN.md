@@ -588,6 +588,9 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Hallowed ground** grows flowering grass in place of the menhir.
     - **Light grade** (`MapGrade`): a code grade over the map with a warm wash from the upper left, slow cloud shadows that slide a little faster than the ground when it pans (parallax 1.15), and a vignette round the map in view.
     - **Fix:** level and upright lines filled with a gradient drew nothing, which had cost the archer's arrow its shaft.
+    - **Settlement view** (asked for on review):
+      - The land runs to the edges of the view with the map's own grain, relief and light (`VillageGround`, the ground shader): the square's beaten earth, a clearing of meadow, a road out of the gate, and beyond it wild grass and woods, each tree its own sprite placed by the village's seed.
+      - Nothing is a perfect circle. Fields, walls, moat, slots and towers follow each village's own outline (`VillageView.wobble`), and the clearing's edge swells further, where nothing stands. Plots stay clear of each other for any village (tested over many seeds).
     - **Still to do:** painting the manifest through the skill's fal.ai pipeline needs a fal.ai account, key and MCP server.
 14. [ ] **Localization:** English and Serbian (Latin); every string in translation files, server notices included. Groundwork done (`docs/localization.md`): gettext files, the extractor with a CI check, the language picker, the start screen and every data text in Serbian.
 15. [ ] **Accessibility:** colour-blind-safe threat colours plus icons, adjustable text size, large tap targets.
