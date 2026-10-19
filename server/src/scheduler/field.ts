@@ -37,6 +37,7 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
+import { hordeStats, leaderAfter } from './leaders.js';
 import { finishWave, planFortCheck } from './camps.js';
 import { holdForQuiet } from './waves.js';
 import { bridgeQuest } from './bridge.js';
@@ -170,7 +171,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const factors = setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
   const holderBase = playerStats(data, bonuses, false);
-  const hordeBase = enemyStats(data, wave.front);
+  const chief = await hordeStats(client, data, wave, enemyStats(data, wave.front), null);
+  const hordeBase = chief.stats;
   const result = resolveRound(
     data,
     {
@@ -210,7 +212,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderStance: stance,
     defenderInitial: battle.defenderInitial,
     defenderNow: defendersNow,
-    attackerNerve: personality(data, wave).nerve,
+    attackerNerve: personality(data, wave).nerve * (1 + chief.nerve),
   });
   const log: RoundLog = {
     round,
@@ -228,6 +230,9 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   } else {
     const won = outcome === 'defended';
     const kills = total(battle.attackerInitial) - total(attackerNow);
+    // Beaten in the field, the horde's leader blames the army's village.
+    const fallen = total(result.defenderLosses) + battle.rounds.reduce((n, r) => n + total(r.defenderLosses), 0);
+    await leaderAfter(client, data, world, wave, { hordeWon: !won, kills: fallen, wiped: total(attackerNow) === 0, villageId: leader?.id ?? null }, at);
     // Heroes first: a beaten hero is carried home wounded.
     for (const army of armies) {
       const led = await heroWithArmy(client, army.id);

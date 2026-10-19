@@ -1,5 +1,7 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { listLeaders, type EnemyLeader } from '../db/leaders.js';
+import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
 import { listRiverEdges } from '../db/rivers.js';
 import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
@@ -134,7 +136,37 @@ export function waveView(wave: Wave) {
     rampageEndsAt: wave.rampageEndsAt?.toISOString() ?? null,
     struck: wave.struck,
     ritual: wave.ritual,
+    // The enemy leader at its head (see leaders), if any.
+    leaderId: wave.leaderId,
   };
+}
+
+// Enemy leaders, living and fallen: who they are, how strong, their record.
+export function leaderView(data: GameData, leader: EnemyLeader) {
+  return {
+    id: leader.id,
+    front: leader.front,
+    name: leader.name,
+    title: leaderTitle(data, leader.front, leader),
+    level: leader.level,
+    xp: leader.xp,
+    xpToNext: leader.level >= data.leaders.maxLevel ? null : leaderXpToNext(data, leader.level),
+    skills: leader.skills,
+    effects: leaderEffects(data, leader),
+    status: leader.status,
+    woundedUntil: leader.woundedUntil?.toISOString() ?? null,
+    battles: leader.battles,
+    wins: leader.wins,
+    losses: leader.losses,
+    razed: leader.razed,
+    kills: leader.kills,
+    grudgeVillageId: leader.grudgeVillageId,
+    diedAt: leader.diedAt?.toISOString() ?? null,
+  };
+}
+
+export async function leadersView(client: DbClient, data: GameData, worldId: number) {
+  return (await listLeaders(client, worldId)).map((l) => leaderView(data, l));
 }
 
 export async function wavesView(client: DbClient, worldId: number) {
@@ -163,10 +195,11 @@ export async function scoutingView(client: DbClient, worldId: number) {
 
 // Battles are fought in the open: both sides' numbers are visible.
 // `front`: whose horde or camp the enemy came from (null when unknown).
-export function battleView(battle: Battle, attackerNow: Record<string, number>, front: string | null = null) {
+export function battleView(battle: Battle, attackerNow: Record<string, number>, front: string | null = null, leaderId: number | null = null) {
   return {
     id: battle.id,
     front,
+    leaderId,
     waveId: battle.waveId,
     campId: battle.campId,
     siteId: battle.siteId,
@@ -190,11 +223,11 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>, 
 
 export async function battlesView(client: DbClient, worldId: number) {
   const battles = await listRecentBattles(client, worldId);
-  const waves = new Map<number, { composition: Record<string, number>; front: string }>();
+  const waves = new Map<number, { composition: Record<string, number>; front: string; leader_id: number | null }>();
   const camps = new Map<number, string>();
   if (battles.length) {
-    const { rows } = await client.query<{ id: number; composition: Record<string, number>; front: string }>(
-      'SELECT id, composition, front FROM waves WHERE id = ANY($1)',
+    const { rows } = await client.query<{ id: number; composition: Record<string, number>; front: string; leader_id: number | null }>(
+      'SELECT id, composition, front, leader_id FROM waves WHERE id = ANY($1)',
       [battles.map((b) => b.waveId).filter((id) => id !== null)],
     );
     for (const row of rows) waves.set(row.id, row);
@@ -214,6 +247,7 @@ export async function battlesView(client: DbClient, worldId: number) {
       battle,
       battle.waveId === null ? after(battle) : (waves.get(battle.waveId)?.composition ?? {}),
       battle.waveId !== null ? (waves.get(battle.waveId)?.front ?? null) : battle.campId !== null ? (camps.get(battle.campId) ?? null) : null,
+      battle.waveId !== null ? (waves.get(battle.waveId)?.leader_id ?? null) : null,
     ),
   );
 }
@@ -453,6 +487,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const expeditions = await expeditionsView(client, world.id);
   const research = await researchListView(client, world.id);
   const heroes = await heroesView(client, data, world.id);
+  const leaders = await leadersView(client, data, world.id);
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
@@ -496,6 +531,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     expeditions,
     research,
     heroes,
+    leaders,
     orders,
     armies,
     forts,

@@ -29,6 +29,7 @@ import { combine, heroBonuses } from '../sim/heroes.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { hordeStats, leaderAfter } from './leaders.js';
 import { armyLosses, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
@@ -98,6 +99,8 @@ export const battleHandlers: HandlerRegistry = {
     const round = battle.round + 1;
     // The hero standing in the village leads its garrison.
     const hero = await heroAt(client, village.id);
+    // The horde's leader drives it on, hardest against a village they hate.
+    const led = await hordeStats(client, data, wave, enemyStats(data, wave.front), village.id);
     const own = againstFront(villageBonuses(data, state), wave.front);
     const bonuses = hero ? combine(own, heroBonuses(data, hero)) : own;
     // The garrison fights alongside armies sent to help; armies joining this
@@ -109,7 +112,7 @@ export const battleHandlers: HandlerRegistry = {
     const baseStats = playerStats(data, bonuses, true);
     const result = resolveRound(
       data,
-      { units: wave.composition, stance: battle.attackerStance, stats: enemyStats(data, wave.front), home: false },
+      { units: wave.composition, stance: battle.attackerStance, stats: led.stats, home: false },
       {
         units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
         stance: state.stance,
@@ -146,7 +149,7 @@ export const battleHandlers: HandlerRegistry = {
       defenderStance: state.stance,
       defenderInitial: battle.defenderInitial,
       defenderNow: defendersNow,
-      attackerNerve: personality(data, wave).nerve,
+      attackerNerve: personality(data, wave).nerve * (1 + led.nerve),
     });
     const log: RoundLog = {
       round,
@@ -171,6 +174,7 @@ export const battleHandlers: HandlerRegistry = {
     }
     if (engaged.length) await notifyWorld(client, { worldId: world.id, type: 'armies' });
 
+    let razed = false;
     if (outcome === 'ongoing') {
       await recordRound(client, battle.id, log, null);
       const payload: BattlePayload = { battleId: battle.id };
@@ -179,9 +183,10 @@ export const battleHandlers: HandlerRegistry = {
       // The horde decides: carry off what it can and move on, or stay and
       // burn the village to the ground (horde.ts).
       const decision = await hordeWins(client, data, world, wave, village, attackerNow, at);
+      razed = decision.choice === 'raze';
       await setDecision(client, battle.id, decision);
       if (decision.choice === 'raid') {
-        const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor);
+        const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor * (1 + led.loot));
         // A raid, like a raze, burns whatever was being built.
         const lostBuilds = villageState.queue.length;
         villageState = { ...plunder(villageState, loot, at), queue: [] };
@@ -216,6 +221,10 @@ export const battleHandlers: HandlerRegistry = {
     }
 
     await saveVillageState(client, village.id, villageState);
+    if (outcome !== 'ongoing') {
+      const kills = total(defenderLosses) + battle.rounds.reduce((n, r) => n + total(r.defenderLosses), 0);
+      await leaderAfter(client, data, world, wave, { hordeWon: outcome === 'raided', razed, kills, wiped: total(attackerNow) === 0, villageId: village.id }, at);
+    }
     // A raiding horde moves on once the village is saved.
     if (outcome === 'raided' && (await loadWave(client, wave.id)).status === 'battling') {
       await moveOn(client, data, world, wave.id, hex(village.q, village.r), at);

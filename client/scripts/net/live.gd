@@ -6,7 +6,7 @@ extends Node
 signal connection_changed(connected: bool)
 signal village_updated(village: Dictionary)
 signal world_updated(world: Dictionary)
-signal waves_updated(world_id: int, waves: Array)
+signal waves_updated(world_id: int, waves: Array, leaders: Variant)
 signal scouting_updated(world_id: int, missions: Array)
 signal battles_updated(world_id: int, battles: Array)
 signal raids_updated(world_id: int, raids: Array)
@@ -92,7 +92,7 @@ func _handle(text: String) -> void:
 		"world":
 			world_updated.emit(message.world)
 		"waves":
-			waves_updated.emit(int(message.worldId), message.waves)
+			waves_updated.emit(int(message.worldId), message.waves, message.get("leaders"))
 		"scouting":
 			scouting_updated.emit(int(message.worldId), message.missions)
 		"battles":
