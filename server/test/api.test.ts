@@ -1036,6 +1036,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.armies[0].status).toBe('stationed');
     expect(w.forts[0]).toMatchObject({ q, r, status: 'standing' });
     const xpBefore = w.heroes[0].xp;
+    // The Iron Span is being built: holding the fort answers its strong-point quest.
+    const ironSpan = scheduler.data.bridge.stages.findIndex((s) => s.quests.some((x) => x.kind === 'choke'));
+    await db.query(`UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int) WHERE world_id = $1`, [worldId, ironSpan]);
 
     now = meetAt;
     await tick(db, now, scheduler);
@@ -1052,6 +1055,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     expect(battle.status).toBe('defended');
     w = await world();
+    expect(w.bridge.quests.choke).toBeTruthy();
     expect(w.waves.some((x: { id: number }) => x.id === first.id)).toBe(false);
     expect(w.armies[0].status).toBe('stationed');
     expect(w.heroes[0].status).toBe('with_army');

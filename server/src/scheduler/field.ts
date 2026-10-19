@@ -239,7 +239,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     if (won) {
       await hordeBeaten(client, data, world, hex(battle.q, battle.r), kills);
       await finishWave(client, data, world, wave.id, 'defeated', at);
-      if (battle.setup.choke) await bridgeQuest(client, data, world, 'choke', at);
+      // A strong point held: a choke, or a fort built on the horde's road.
+      if (battle.setup.choke || battle.setup.fort) await bridgeQuest(client, data, world, 'choke', at);
     } else if (holy) {
       await holyCityFalls(client, data, world, wave, attackerNow, at);
     } else {

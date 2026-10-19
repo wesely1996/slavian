@@ -3,7 +3,8 @@
 // player of its kind would: keep building, keep a garrison, fill the vault
 // and the bridge, and go after the bridge's quests. Refused orders (not
 // enough resources, a full queue) are simply skipped.
-import { sendArmyCommand } from '../commands/armies.js';
+import { buildFortCommand, sendArmyCommand } from '../commands/armies.js';
+import { listForts } from '../db/forts.js';
 import { sendCaravanCommand } from '../commands/logistics.js';
 import { placeOrderCommand } from '../commands/orders.js';
 import { foundVillageCommand, queueBuildCommand, rebuildCommand, startResearchCommand, trainUnitsCommand } from '../commands/village.js';
@@ -310,7 +311,6 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
     await go(() => craftRitualCommand(db, deps, { accountId: bot.accountId, worldId: world.id, now }));
   }
   const armies = (await read(db, (c) => listArmies(c, world.id))).filter((a) => a.homeVillageId === home.id && a.status !== 'done');
-  if (armies.length > 0) return;
   const garrison = home.state.garrison;
   const fighters = (share: number): Record<string, number> => {
     const out: Record<string, number> = {};
@@ -324,6 +324,31 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   const base = { accountId: bot.accountId, villageId: home.id, targetVillageId: null, now };
   const from = hex(home.q, home.r);
 
+  // Hold a strong point on a horde's road: a choke, or a fort built there.
+  if (open.includes('choke') && !armies.some((a) => a.orders === 'hold')) {
+    const forts = await read(db, (c) => listForts(c, world.id));
+    const taken = await takenHexes(ctx);
+    const range = deps.data.field.fort.range;
+    for (const wave of await read(db, (c) => listActiveWaves(c, world.id))) {
+      if (wave.status !== 'marching' || !wave.path) continue;
+      const sinceSpawn = now.getTime() - wave.spawnAt.getTime();
+      // Far enough ahead to build a fort and march there.
+      const ahead = wave.path.filter((s) => s.atMs > sinceSpawn + (3 * 3_600_000) / world.speed);
+      const near = (s: { q: number; r: number }) => hexDistance(hex(s.q, s.r), from);
+      const choke = ahead.find((s) => near(s) <= 5 && isChokePoint(deps.data, ctx.terrain, hex(s.q, s.r)));
+      const fort = ahead.find((s) => forts.some((f) => f.q === s.q && f.r === s.r && f.villageId === home.id));
+      let step = choke ?? fort;
+      if (!step) {
+        const site = ahead.find((s) => near(s) >= 1 && near(s) <= range && !taken.has(`${s.q},${s.r}`) && ctx.terrain.get(`${s.q},${s.r}`) !== 'holy_city');
+        if (site && (await go(() => buildFortCommand(db, deps, { accountId: bot.accountId, villageId: home.id, cell: hex(site.q, site.r), now })))) step = site;
+      }
+      if (!step) continue;
+      const target = step;
+      const army = fighters(0.6);
+      if (strength(army) > 0 && (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(target.q, target.r), units: army, orders: 'hold' })))) return;
+    }
+  }
+  if (armies.length > 0) return;
   // Explore ancient sites (for the relic, Embers and scrolls): scouts where no
   // guardians are known, an army otherwise.
   const wantsSite = open.includes('site') || world.embers < deps.data.bridge.ritualEmbers + stage.embers;
@@ -349,19 +374,7 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
       if (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(lair.q, lair.r), units: army, orders: 'clear' }))) return;
     }
   }
-  // Hold a choke point on a horde's road.
-  if (open.includes('choke')) {
-    for (const wave of await read(db, (c) => listActiveWaves(c, world.id))) {
-      if (wave.status !== 'marching' || !wave.path) continue;
-      const sinceSpawn = now.getTime() - wave.spawnAt.getTime();
-      const step = wave.path.find(
-        (s) => s.atMs > sinceSpawn + 2 * 3_600_000 / world.speed && hexDistance(hex(s.q, s.r), from) <= 5 && isChokePoint(deps.data, ctx.terrain, hex(s.q, s.r)),
-      );
-      if (!step) continue;
-      const army = fighters(0.6);
-      if (strength(army) > 0 && (await go(() => sendArmyCommand(db, deps, { ...base, target: hex(step.q, step.r), units: army, orders: 'hold' })))) return;
-    }
-  }
+
 }
 
 // The terrain of a world, by "q,r".

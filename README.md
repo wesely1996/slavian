@@ -45,6 +45,16 @@ npm run demo     # creates a 100x-speed world, queues builds, lets the scheduler
 npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 ```
 
+### Headless simulator
+
+`npm run sim` plays whole worlds with scripted bots against the real rules, scheduler and database on a simulated clock (use a database of its own: it leaves its worlds behind), and reports how each run went: won, lost or unfinished, the bridge stage and the quests it waited on, Sanctity, villages, hordes beaten.
+
+```sh
+DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim -- --players 2 --bots balanced,turtle --difficulty normal --runs 3
+```
+
+Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled over the players), `--difficulty` (`story`, `normal`, `hard`, `nightmare`), `--runs`, `--speed` (world speed, default 20), `--days` (game days before giving up, default 45), `--json` (one JSON line per run), `--verbose` (a line per game day and the most common refused orders). Bots build, keep a garrison, explore sites, clear camps, found villages, tithe to the bridge and chase its quests; refused orders are normal and only counted.
+
 ### API (v1)
 
 | Method | Path | |
