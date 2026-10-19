@@ -1033,6 +1033,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const second = w.waves.find((x: { status: string }) => x.status === 'scheduled');
     now = new Date(second.spawnAt);
     await tick(db, now, scheduler);
+    await db.query('UPDATE waves SET target_village_id = $2 WHERE id = $1', [second.id, home.id]);
     const next = (await world()).waves.find((x: { id: number }) => x.id === second.id);
     const [q2, r2, atMs2] = holdable(next.path);
     const lone = await send({ target: { q: q2, r: r2 }, units: { spearman: 1 }, orders: 'hold' });
@@ -1082,15 +1083,18 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // A later horde (past the early raiding parties) breaks the empty village and burns it.
     const first = started.body.waves[0];
-    await db.query('UPDATE waves SET index = 7 WHERE id = $1', [first.id]);
     now = new Date(first.spawnAt);
     await tick(db, now, scheduler);
+    // Monsters pick their target erratically: make sure it is the village, and
+    // play a later wave (until it has decided).
+    await db.query('UPDATE waves SET target_village_id = $2, index = 7 WHERE id = $1', [first.id, home.id]);
     now = new Date((await world()).waves.find((w: { id: number }) => w.id === first.id).arrivesAt);
     await tick(db, now, scheduler);
     let battle = await fight((await world()).battles[0].id);
     expect(battle).toMatchObject({ villageId: home.id, status: 'raided', loot: null, decision: { choice: 'raze' } });
     let wave = (await world()).waves.find((w: { id: number }) => w.id === first.id);
     expect(wave.status).toBe('razing');
+    await db.query('UPDATE waves SET index = 0 WHERE id = $1', [first.id]);
     now = new Date(wave.endsAt);
     await tick(db, now, scheduler);
     let w = await world();
