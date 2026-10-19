@@ -43,8 +43,9 @@ export const caravanHandlers: HandlerRegistry = {
         await tell(client, world, village.ownerAccountId, {
           kind: 'caravan_delivered',
           tier: 'digest',
-          title: `A caravan from ${sender.name} reached ${village.name}`,
-          body: `It brought ${total(caravan.cargo) - total(received.leftover)} resources.`,
+          title: 'A caravan from {sender} reached {village}',
+          body: 'It brought {amount} resources.',
+          vars: { sender: sender.name, village: village.name, amount: total(caravan.cargo) - total(received.leftover) },
         }, event.dueAt);
       }
     }

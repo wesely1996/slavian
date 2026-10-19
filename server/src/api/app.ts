@@ -23,7 +23,7 @@ import {
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
-import { accountForToken, createGuestAccount, renameAccount, type Account } from '../db/accounts.js';
+import { accountForToken, createGuestAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { getWorld, isMember, listWorldsForAccount } from '../db/worlds.js';
 import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../errors.js';
@@ -58,7 +58,7 @@ const displayName = z.string().trim().min(1).max(32);
 const idParams = z.object({ id: z.coerce.number().int().positive() });
 
 const guestBody = z.object({ displayName: displayName.optional() }).default({});
-const renameBody = z.object({ displayName });
+const meBody = z.object({ displayName: displayName.optional(), language: z.string().max(16).optional() });
 const createWorldBody = z.object({
   name: z.string().trim().min(1).max(48),
   maxPlayers: z.number().int().min(1).max(6).default(6),
@@ -216,8 +216,13 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   app.patch('/v1/me', async (request) => {
     const account = await authenticate(db, request);
-    const body = renameBody.parse(request.body);
-    return { account: await inTransaction(db, (client) => renameAccount(client, account.id, body.displayName)) };
+    const body = meBody.parse(request.body);
+    const updated = await inTransaction(db, async (client) => {
+      if (body.language !== undefined) await setAccountLanguage(client, account.id, body.language);
+      if (body.displayName !== undefined) return renameAccount(client, account.id, body.displayName);
+      return account;
+    });
+    return { account: updated };
   });
 
   // When to be bothered: quiet hours (local minutes, may wrap midnight),

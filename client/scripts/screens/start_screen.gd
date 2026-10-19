@@ -124,6 +124,7 @@ func _login(server_url: String, display_name: String) -> void:
 	Session.token = response.data.token
 	Session.account = response.data.account
 	Session.save()
+	Session.report_language()
 	Push.register()
 	_show_home()
 

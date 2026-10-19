@@ -99,8 +99,9 @@ export async function startBattle(
   await tell(client, world, village.ownerAccountId, {
     kind: 'under_attack',
     tier: 'push',
-    title: `${village.name} is under attack`,
-    body: `A horde of ${total(wave.composition)} is fighting your garrison of ${total(state.garrison)}.`,
+    title: '{village} is under attack',
+    body: 'A horde of {enemy} is fighting your garrison of {defenders}.',
+    vars: { village: village.name, enemy: total(wave.composition), defenders: total(state.garrison) },
   }, at);
 }
 
@@ -255,16 +256,20 @@ export const battleHandlers: HandlerRegistry = {
         await tell(client, world, village.ownerAccountId, {
           kind: 'battle_result',
           tier: 'digest',
-          title: `${village.name} was raided`,
-          body: `The horde carried off ${total(loot)} resources after ${round} rounds.${lostBuilds ? ` The work on ${lostBuilds} building${lostBuilds === 1 ? '' : 's'} was lost.` : ''}`,
+          title: '{village} was raided',
+          body: lostBuilds
+            ? `The horde carried off {loot} resources after {rounds} rounds. The work on {buildings} building${lostBuilds === 1 ? '' : 's'} was lost.`
+            : 'The horde carried off {loot} resources after {rounds} rounds.',
+          vars: { village: village.name, loot: total(loot), rounds: round, buildings: lostBuilds },
         }, at);
       } else {
         await recordRound(client, battle.id, log, { status: 'raided', at, loot: null });
         await tell(client, world, village.ownerAccountId, {
           kind: 'razing',
           tier: 'push',
-          title: `${village.name} is being razed`,
-          body: `The horde broke the defenders after ${round} rounds and is burning the village.`,
+          title: '{village} is being razed',
+          body: 'The horde broke the defenders after {rounds} rounds and is burning the village.',
+          vars: { village: village.name, rounds: round },
         }, at);
       }
     } else {
@@ -274,8 +279,9 @@ export const battleHandlers: HandlerRegistry = {
       await tell(client, world, village.ownerAccountId, {
         kind: 'battle_result',
         tier: 'digest',
-        title: `${village.name} held`,
-        body: `The horde was beaten after ${round} rounds.`,
+        title: '{village} held',
+        body: 'The horde was beaten after {rounds} rounds.',
+        vars: { village: village.name, rounds: round },
       }, at);
       await finishWave(client, data, world, wave.id, 'defeated', at);
     }

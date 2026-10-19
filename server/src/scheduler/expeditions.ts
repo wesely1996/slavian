@@ -37,8 +37,9 @@ export const expeditionHandlers: HandlerRegistry = {
       await tell(client, world, home.ownerAccountId, {
         kind: 'settlers',
         tier: 'digest',
-        title: `Settlers turned back from (${expedition.q}, ${expedition.r})`,
-        body: `${problem}. They are walking home to ${home.name}.`,
+        title: 'Settlers turned back from ({q}, {r})',
+        body: '{problem}. They are walking home to {home}.',
+        vars: { q: expedition.q, r: expedition.r, problem, home: home.name },
       }, event.dueAt);
       const payload: ExpeditionPayload = { expeditionId: expedition.id };
       await scheduleEvent(client, world.id, expedition.returnsAt, 'settlers_return', payload);
@@ -63,7 +64,13 @@ export const expeditionHandlers: HandlerRegistry = {
     // The settlers become the new village's people: they stop eating at home.
     await saveVillageState(client, home.id, loseAway(data, home.state, SETTLER, expedition.settlers, event.dueAt, world.speed));
     await markFounded(client, expedition.id, founded.id);
-    await tell(client, world, owner, { kind: 'settlers', tier: 'digest', title: `${expedition.name} founded`, body: 'Your settlers built a new village.' }, event.dueAt);
+    await tell(client, world, owner, {
+      kind: 'settlers',
+      tier: 'digest',
+      title: '{name} founded',
+      body: 'Your settlers built a new village.',
+      vars: { name: expedition.name },
+    }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 

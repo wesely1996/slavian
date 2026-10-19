@@ -46,6 +46,13 @@ func set_language(code: String) -> void:
 	language = code
 	TranslationServer.set_locale(code)
 	save()
+	report_language()
+
+
+## Tells the server which language to write notices (push and inbox) in.
+func report_language() -> void:
+	if token != "":
+		Api.request(HTTPClient.METHOD_PATCH, "/v1/me", {"language": language})
 
 
 func set_text_size(size: String) -> void:

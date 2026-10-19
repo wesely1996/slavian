@@ -155,8 +155,9 @@ async function settle(client: DbClient, data: GameData, world: World, wave: Wave
       await tell(client, world, member.accountId, {
         kind: 'camp',
         tier: 'digest',
-        title: wave.front === 'north' ? `Monsters made a lair at (${site.q}, ${site.r})` : `Raiders made camp at (${site.q}, ${site.r})`,
-        body: `${total(units)} survivors of wave ${wave.index + 1} settled there.`,
+        title: wave.front === 'north' ? 'Monsters made a lair at ({q}, {r})' : 'Raiders made camp at ({q}, {r})',
+        body: '{count} survivors of wave {wave} settled there.',
+        vars: { q: site.q, r: site.r, count: total(units), wave: wave.index + 1 },
       }, at);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -220,8 +221,9 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
   await tell(client, world, village.ownerAccountId, {
     kind: 'razed',
     tier: 'push',
-    title: `${village.name} was razed`,
+    title: '{village} was razed',
     body: 'Only ruins are left. Rebuild them, or start over from what remains.',
+    vars: { village: village.name },
   }, at);
   // Nothing left standing: a refugee camp by the Holy City.
   const owner = village.ownerAccountId;
@@ -246,8 +248,9 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
       await tell(client, world, owner, {
         kind: 'refuge',
         tier: 'push',
-        title: `A refuge by the Holy City`,
-        body: `${camp.name} takes in your people at (${site.q}, ${site.r}).`,
+        title: 'A refuge by the Holy City',
+        body: '{camp} takes in your people at ({q}, {r}).',
+        vars: { camp: camp.name, q: site.q, r: site.r },
       }, at);
     }
   }
@@ -291,7 +294,8 @@ export async function startHolyCityBattle(client: DbClient, data: GameData, worl
       kind: 'under_attack',
       tier: 'push',
       title: 'A horde is at the Holy City',
-      body: `${total(wave.composition)} of them against its guard of ${total(defenders)}.`,
+      body: '{enemy} of them against its guard of {defenders}.',
+      vars: { enemy: total(wave.composition), defenders: total(defenders) },
     }, at);
   }
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
@@ -325,8 +329,9 @@ export const hordeHandlers: HandlerRegistry = {
     await tell(client, world, village.ownerAccountId, {
       kind: 'build_done',
       tier: 'push',
-      title: `${village.name} stands again`,
+      title: '{village} stands again',
       body: 'Its fields and buildings are rebuilt as they were.',
+      vars: { village: village.name },
     }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },

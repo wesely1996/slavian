@@ -1,8 +1,10 @@
 // What players are told, and when: game events become notifications (push
 // or digest); daily_digest sums up the rest once a day; wave_warning warns
-// of a horde a few hours out.
+// of a horde a few hours out. A notice carries English templates plus the
+// values to fill in, and is rendered in the recipient's language (i18n.ts).
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
+import { accountLanguage } from '../db/accounts.js';
 import {
   lastNotificationId,
   loadPrefs,
@@ -15,20 +17,39 @@ import type { DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { loadWave } from '../db/waves.js';
 import { listMembers, type World } from '../db/worlds.js';
+import { localize } from '../i18n.js';
 import { digestSummary, nextDigestAt } from '../sim/notifications.js';
 import { warningHours } from '../sim/walls.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
 const MS_PER_HOUR = 3_600_000;
 
+// A notice before rendering: English templates with {placeholder} values.
+export interface Notice {
+  kind: string;
+  tier: Tier;
+  title: string;
+  body: string;
+  vars?: Record<string, string | number>;
+}
+
 export async function tell(
   client: DbClient,
   world: World,
   accountId: number | null,
-  notice: { kind: string; tier: Tier; title: string; body: string },
+  notice: Notice,
   at: Date,
 ): Promise<void> {
-  await notifyPlayer(client, { worldId: world.id, accountId, ...notice, at });
+  const language = accountId === null ? 'en' : await accountLanguage(client, accountId);
+  await notifyPlayer(client, {
+    worldId: world.id,
+    accountId,
+    kind: notice.kind,
+    tier: notice.tier,
+    title: localize(language, notice.title, notice.vars),
+    body: localize(language, notice.body, notice.vars),
+    at,
+  });
 }
 
 // Tells the owner of a village.
@@ -36,7 +57,7 @@ export async function tellOwner(
   client: DbClient,
   world: World,
   villageId: number,
-  notice: (villageName: string) => { kind: string; tier: Tier; title: string; body: string },
+  notice: (villageName: string) => Notice,
   at: Date,
 ): Promise<void> {
   const village = await loadVillage(client, villageId);
@@ -80,8 +101,9 @@ export const noticeHandlers: HandlerRegistry = {
     await tellOwner(client, world, wave.targetVillageId, (name) => ({
       kind: 'wave_soon',
       tier: 'push',
-      title: `A horde is coming to ${name}`,
-      body: `The ${wave.threat.toLowerCase()} ${wave.front} horde arrives ${when}. Check the garrison and its stance.`,
+      title: 'A horde is coming to {village}',
+      body: 'The {threat} {front} horde arrives {when}. Check the garrison and its stance.',
+      vars: { village: name, threat: wave.threat.toLowerCase(), front: wave.front, when },
     }), event.dueAt);
   },
 
@@ -92,8 +114,9 @@ export const noticeHandlers: HandlerRegistry = {
       await tell(client, world, accountId, {
         kind: 'digest',
         tier: 'push',
-        title: `Today in ${world.name}`,
+        title: 'Today in {world}',
         body: digestSummary(pending.map((n) => n.kind)),
+        vars: { world: world.name },
       }, event.dueAt);
       const digestId = await lastNotificationId(client, accountId, world.id);
       await markDigested(client, pending.map((n) => n.id), digestId);

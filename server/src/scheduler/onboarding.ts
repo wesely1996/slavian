@@ -24,6 +24,12 @@ export async function onboardingStep(
     await saveVillageState(client, home.id, { ...home.state, ledger: receive(home.state.ledger, at, def.reward).ledger });
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: home.id });
   }
-  await tell(client, world, accountId, { kind: 'onboarding', tier: 'digest', title: `Done: ${def.title}`, body: `A reward has reached ${home?.name ?? 'your village'}.` }, at);
+  await tell(client, world, accountId, {
+    kind: 'onboarding',
+    tier: 'digest',
+    title: 'Done: {step}',
+    body: 'A reward has reached {home}.',
+    vars: { step: def.title, home: home?.name ?? 'your village' },
+  }, at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }

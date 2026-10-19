@@ -50,8 +50,9 @@ export const handlers: HandlerRegistry = {
     await tell(client, world, village.ownerAccountId, {
       kind: 'build_done',
       tier: big ? 'push' : 'digest',
-      title: `${def?.name ?? payload.building} level ${payload.targetLevel} in ${village.name}`,
+      title: '{building} level {level} in {village}',
       body: big ? 'Finished. Your build queue may have room for more.' : 'Finished.',
+      vars: { building: def?.name ?? payload.building, level: payload.targetLevel, village: village.name },
     }, event.dueAt);
     const cell = outpostHex(plot);
     if (cell && payload.targetLevel === 1) {

@@ -28,8 +28,9 @@ async function settleBridge(client: DbClient, data: GameData, world: World, brid
       await tell(client, world, member.accountId, {
         kind: 'bridge',
         tier: 'digest',
-        title: `Raising ${currentStage(data, next)!.name}`,
+        title: 'Raising {stage}',
         body: 'Everything it needs is in place; the builders are at work.',
+        vars: { stage: currentStage(data, next)!.name },
       }, at);
     }
   }
@@ -53,8 +54,9 @@ export async function bridgeQuest(client: DbClient, data: GameData, world: World
     await tell(client, world, member.accountId, {
       kind: 'bridge',
       tier: 'digest',
-      title: `${stage.name}: ${data.bridge.quests[quest].name}`,
+      title: '{stage}: {quest}',
       body: stage.quests.find((q) => q.kind === quest)?.story ?? '',
+      vars: { stage: stage.name, quest: data.bridge.quests[quest].name },
     }, at);
   }
   await settleBridge(client, data, world, done, at);
@@ -112,12 +114,14 @@ export const bridgeHandlers: HandlerRegistry = {
     const name = currentStage(data, bridge)!.name;
     const next = raised(data, bridge, event.dueAt, world.sanctity);
     await saveBridge(client, world.id, next);
+    const nextStage = currentStage(data, next);
     for (const member of await listMembers(client, world.id)) {
       await tell(client, world, member.accountId, {
         kind: 'bridge',
         tier: 'push',
-        title: `${name} stands`,
-        body: next.status === 'complete' ? 'The Kalinov Bridge is whole. Ritual Night is coming.' : `Next: ${currentStage(data, next)!.name}.`,
+        title: '{name} stands',
+        body: next.status === 'complete' ? 'The Kalinov Bridge is whole. Ritual Night is coming.' : 'Next: {stage}.',
+        vars: nextStage ? { name, stage: nextStage.name } : { name },
       }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -130,7 +134,8 @@ export const bridgeHandlers: HandlerRegistry = {
           kind: 'bridge',
           tier: 'digest',
           title: 'A lair in the woods',
-          body: `Beasts of the North have made a lair by the road their last horde took. ${stage.name} needs it cleared.`,
+          body: 'Beasts of the North have made a lair by the road their last horde took. {stage} needs it cleared.',
+          vars: { stage: stage.name },
         }, event.dueAt);
       }
     }
@@ -140,7 +145,8 @@ export const bridgeHandlers: HandlerRegistry = {
           kind: 'bridge',
           tier: 'digest',
           title: 'A forgotten ruin',
-          body: `The builders of ${stage.name} remember a ruin nobody has searched yet. It is marked on the map.`,
+          body: 'The builders of {stage} remember a ruin nobody has searched yet. It is marked on the map.',
+          vars: { stage: stage.name },
         }, event.dueAt);
       }
     }

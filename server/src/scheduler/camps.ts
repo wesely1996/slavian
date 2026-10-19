@@ -231,10 +231,13 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   await tell(client, world, army.ownerAccountId, {
     kind: 'battle_result',
     tier: 'digest',
-    title: result.cleared ? `Your army cleared the ${where}` : `Your army was driven off from the ${where}`,
+    title: result.cleared ? 'Your army cleared the {where}' : 'Your army was driven off from the {where}',
     body: result.cleared
-      ? `It carries home ${total(campLoot(data, camp.units))} resources${ember ? " and a Svarog's Ember for the group" : ''}.`
-      : `${kills} of them fell; ${total(result.campNow)} still hold it.`,
+      ? ember
+        ? "It carries home {loot} resources and a Svarog's Ember for the group."
+        : 'It carries home {loot} resources.'
+      : '{kills} of them fell; {defenders} still hold it.',
+    vars: { where, loot: total(campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -343,10 +346,17 @@ export const campHandlers: HandlerRegistry = {
     await tell(client, world, village.ownerAccountId, {
       kind: 'ambush',
       tier: result.beatenOff ? 'digest' : 'push',
-      title: result.beatenOff ? `A caravan from ${village.name} beat off an ambush` : `A caravan from ${village.name} was ambushed`,
+      title: result.beatenOff ? 'A caravan from {village} beat off an ambush' : 'A caravan from {village} was ambushed',
       body: result.beatenOff
-        ? `Its escort drove off the ${camp.kind === 'lair' ? 'beasts' : 'bandits'} at (${camp.q}, ${camp.r}).`
-        : `It lost ${total(result.lost)} of its load near (${camp.q}, ${camp.r}).`,
+        ? 'Its escort drove off the {enemy} at ({q}, {r}).'
+        : 'It lost {lost} of its load near ({q}, {r}).',
+      vars: {
+        village: village.name,
+        enemy: camp.kind === 'lair' ? 'beasts' : 'bandits',
+        q: camp.q,
+        r: camp.r,
+        lost: total(result.lost),
+      },
     }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
   },
@@ -375,8 +385,9 @@ export const campHandlers: HandlerRegistry = {
     await tell(client, world, fort.ownerAccountId, {
       kind: 'camp',
       tier: 'push',
-      title: `Bandits took the fort at (${fort.q}, ${fort.r})`,
+      title: 'Bandits took the fort at ({q}, {r})',
       body: 'No army held it, and now it is their camp. Send an army to clear it.',
+      vars: { q: fort.q, r: fort.r },
     }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },

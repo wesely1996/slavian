@@ -48,8 +48,9 @@ export const researchHandlers: HandlerRegistry = {
     await tell(client, world, accountId, {
       kind: 'research_done',
       tier: 'digest',
-      title: `${data.research.techs[tech]?.name ?? tech} researched`,
+      title: '{tech} researched',
       body: data.research.techs[tech]?.description ?? '',
+      vars: { tech: data.research.techs[tech]?.name ?? tech },
     }, event.dueAt);
   },
 };
