@@ -19,7 +19,7 @@ const KINDS = ['wood', 'stone', 'grain', 'iron'] as const;
 import { createWorldCommand, joinWorldCommand, startWorldCommand } from '../commands/worlds.js';
 import { loadGameData, type Difficulty } from '../data/index.js';
 import { handlers } from '../scheduler/handlers.js';
-import { tick } from '../scheduler/worker.js';
+import { processWorld } from '../scheduler/worker.js';
 import { BOT_KINDS, feedVault, playTurn, stats, terrainOf, type Bot, type BotKind } from './bots.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -80,7 +80,8 @@ export async function runOnce(
   let status = world.status;
   while (now.getTime() < end) {
     now = new Date(now.getTime() + step);
-    await tick(db, now, deps);
+    // Only this run's world: others in the database keep their own clocks.
+    await processWorld(db, world.id, now, deps);
     status = (await inTransaction(db, (c) => getWorld(c, world.id))).status;
     if (status === 'won' || status === 'lost') break;
     const day = Math.floor(((now.getTime() - start.getTime()) * opts.speed) / (24 * MS_PER_HOUR));
