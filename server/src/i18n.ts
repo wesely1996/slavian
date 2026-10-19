@@ -105,6 +105,7 @@ const SERBIAN: Record<string, string> = {
 	'Roads now cross the river between ({aq}, {ar}) and ({bq}, {br}), for friend and foe alike.':
 		'Putevi sada prelaze reku između ({aq}, {ar}) i ({bq}, {br}), za prijatelja i neprijatelja.',
 	'Fort at ({q}, {r}) finished': 'Utvrda na ({q}, {r}) je završena',
+	'Armies holding it fight from behind its walls.': 'Vojska koja ga drži bori se iza njegovih zidina.',
 	'The outpost at ({q}, {r}) is down to level {level}.': 'Ispostava na ({q}, {r}) je spala na nivo {level}.',
 	'The outpost at ({q}, {r}) lies in ruins.': 'Ispostava na ({q}, {r}) leži u ruševinama.',
 	// Bridge, settlers, sites, delegation
