@@ -282,6 +282,69 @@
       "buildSeconds": 160,
       "timeGrowth": 1.55,
       "effects": { "upkeep": -0.03, "trainTime": -0.02 }
+    },
+    "wall": {
+      "name": "Walls",
+      "kind": "wall",
+      "maxLevel": 10,
+      "cost": { "wood": 180, "stone": 300, "grain": 40, "iron": 40 },
+      "costGrowth": 1.5,
+      "buildSeconds": 240,
+      "timeGrowth": 1.45
+    },
+    "archer_tower": {
+      "name": "Archer Tower",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 160, "stone": 120, "grain": 30, "iron": 60 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
+    },
+    "gate_tower": {
+      "name": "Gate Tower",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 120, "stone": 260, "grain": 30, "iron": 80 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
+    },
+    "ballista": {
+      "name": "Ballista Platform",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 220, "stone": 80, "grain": 30, "iron": 140 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
+    },
+    "murder_holes": {
+      "name": "Murder Holes",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 100, "stone": 220, "grain": 40, "iron": 60 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
+    },
+    "ditch": {
+      "name": "Ditch and Stakes",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 80, "stone": 60, "grain": 80, "iron": 20 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
+    },
+    "watchtower": {
+      "name": "Watchtower",
+      "kind": "tower",
+      "maxLevel": 10,
+      "cost": { "wood": 180, "stone": 60, "grain": 30, "iron": 20 },
+      "costGrowth": 1.55,
+      "buildSeconds": 200,
+      "timeGrowth": 1.5
     }
   }
 }

@@ -8,6 +8,8 @@ extends Control
 signal plot_tapped(plot: String)
 
 const CENTER_COLUMNS := 4
+## The wall ring's radius, of the fields' ring.
+const WALL_RING := 0.66
 const FIELD_COLORS := {
 	"wood": Color("#5e7d3a"),
 	"stone": Color("#7d7a72"),
@@ -21,10 +23,12 @@ const SLOT_LOCKED := Color("#2a241c")
 const BUILDING := Color("#8f6d45")
 const BUILDING_ACTIVE := Color("#e2b04a")
 const SELECTED := Color.WHITE
-const MEADOW := Color("#7fa04a")
-const SQUARE_EARTH := Color("#a08a62")
-const PALISADE := Color("#8b5a2b")
-const INK := Color("#2b2118")
+const MEADOW := Color("#7d9150")
+const MEADOW_EDGE := Color("#4c5e33")
+const SQUARE_EARTH := Color("#9c8a66")
+const SQUARE_EDGE := Color("#6e5f45")
+const PALISADE := Color("#6e4b2c")
+const INK := Color("#1d1813")
 
 ## Game data (buildings), the village as the server sent it, the picked plot.
 var data: Dictionary = {}
@@ -46,7 +50,7 @@ func show_village(game_data: Dictionary, new_village: Dictionary, new_selected: 
 
 ## Where each plot sits inside a `size` rectangle: fields evenly on a ring,
 ## center slots in a grid inside it. Each rect is the plot's tap area.
-static func layout(area: Vector2, field_count: int, slot_count: int) -> Dictionary:
+static func layout(area: Vector2, field_count: int, slot_count: int, tower_count := 0) -> Dictionary:
 	var rects := {}
 	var middle := area / 2.0
 	var radius := minf(area.x, area.y) * 0.4
@@ -55,9 +59,20 @@ static func layout(area: Vector2, field_count: int, slot_count: int) -> Dictiona
 		var angle := TAU * i / field_count - PI / 2.0
 		var at := middle + Vector2(cos(angle), sin(angle)) * radius
 		rects["f%d" % i] = Rect2(at - Vector2.ONE * field_size / 2.0, Vector2.ONE * field_size)
+	# On the wall ring, between the fields: the gate (the walls' plot) at the
+	# bottom, the wall slots around the rest.
+	var ring := radius * WALL_RING
+	var gate := radius * 0.24
+	var gate_at := middle + Vector2(cos(deg_to_rad(105.0)), sin(deg_to_rad(105.0))) * ring
+	rects["w"] = Rect2(gate_at - Vector2.ONE * gate / 2.0, Vector2.ONE * gate)
+	var tower := radius * 0.2
+	for i in tower_count:
+		var angle := deg_to_rad(-165.0 + 60.0 * i)
+		var at := middle + Vector2(cos(angle), sin(angle)) * ring
+		rects["t%d" % i] = Rect2(at - Vector2.ONE * tower / 2.0, Vector2.ONE * tower)
 	var rows := ceili(float(slot_count) / CENTER_COLUMNS)
-	# The grid's corners stay inside the ring of fields.
-	var inner := radius - field_size * 0.6
+	# The grid's corners stay inside the wall ring.
+	var inner := radius * 0.62
 	var cell := inner * 2.0 / sqrt(CENTER_COLUMNS * CENTER_COLUMNS + rows * rows)
 	var origin := middle - Vector2(CENTER_COLUMNS, rows) * cell / 2.0
 	var gap := cell * 0.08
@@ -76,7 +91,7 @@ static func plot_at(rects: Dictionary, point: Vector2) -> String:
 
 func _rects() -> Dictionary:
 	var v: Dictionary = data.buildings.village
-	return layout(size, v.fields.size(), int(v.centerSlots))
+	return layout(size, v.fields.size(), int(v.centerSlots), data.get("walls", {}).get("slotsAt", []).size())
 
 
 ## Mouse events only: on phones taps arrive as emulated mouse clicks, and
@@ -99,12 +114,13 @@ func _draw() -> void:
 	var radius := minf(size.x, size.y) * 0.4
 	var art := Art.has("plot/empty")
 	if art:
-		# Meadow around, the village square inside its palisade.
-		draw_circle(middle, radius * 1.22, INK)
-		draw_circle(middle, radius * 1.2, MEADOW)
-		draw_circle(middle, radius * 0.74, SQUARE_EARTH)
-		draw_arc(middle, radius * 0.74, 0.0, TAU, 96, PALISADE, radius * 0.05)
-		draw_arc(middle, radius * 0.77, 0.0, TAU, 96, INK, 2.0)
+		# A soft shadow, the meadow around, the village square inside its
+		# palisade; each shaded lighter towards the upper left.
+		for i in 6:
+			draw_circle(middle + Vector2(0, radius * 0.04), radius * (1.32 - i * 0.02), Color(0, 0, 0, 0.08))
+		_shaded_disc(middle, radius * 1.2, MEADOW_EDGE, MEADOW)
+		_shaded_disc(middle, radius * WALL_RING, SQUARE_EDGE, SQUARE_EARTH)
+		_draw_wall_ring(middle, radius * WALL_RING, Rules.wall_level(village))
 	else:
 		draw_circle(middle, radius * 1.22, GROUND)
 		draw_circle(middle, radius * 0.72, SQUARE)
@@ -153,6 +169,37 @@ func _draw() -> void:
 			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
 
 
+## The walls around the square by their tier: a pegged line where none
+## stand yet, a wooden palisade, a stone wall, fortress walls.
+func _draw_wall_ring(center: Vector2, r: float, level: int) -> void:
+	if level <= 0:
+		for i in 48:
+			var a := TAU * i / 48.0
+			draw_arc(center, r, a, a + TAU / 96.0, 3, Color(PALISADE, 0.6), r * 0.012, true)
+		return
+	var tier := 0 if level < 4 else (1 if level < 8 else 2)
+	var width: float = r * [0.05, 0.07, 0.09][tier]
+	var body: Color = [PALISADE, Color("#9d978c"), Color("#b5afa3")][tier]
+	draw_arc(center + Vector2(0, width * 0.35), r, 0.0, TAU, 128, Color(0, 0, 0, 0.35), width * 1.15, true)
+	draw_arc(center, r, 0.0, TAU, 128, body, width, true)
+	draw_arc(center, r + width * 0.3, PI * 0.9, PI * 1.7, 64, Color(1, 0.95, 0.85, 0.25), width * 0.3, true)
+	# Stakes or merlons along the top.
+	var count := 72 if tier == 0 else 56
+	for i in count:
+		var a := TAU * i / count
+		var dir := Vector2(cos(a), sin(a))
+		draw_line(center + dir * (r - width * 0.5), center + dir * (r + width * 0.5), body.darkened(0.35), 1.5, true)
+
+
+## A disc shaded from `edge` at its rim to `middle_color` towards its lit
+## upper left.
+func _shaded_disc(center: Vector2, r: float, edge: Color, middle_color: Color) -> void:
+	var steps := 10
+	for i in steps:
+		var t := float(i) / float(steps - 1)
+		draw_circle(center - Vector2(r, r) * 0.12 * t, r * (1.0 - 0.55 * t), edge.lerp(middle_color, t))
+
+
 ## A plot from the art: the field or building by stage (faded before its
 ## first level), an empty or locked plot, a level badge, a gold ring while
 ## being built and a white one when picked. False when its art is missing.
@@ -169,14 +216,15 @@ func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, un
 	if tex == null:
 		return false
 	var tint := Color.WHITE if level > 0 or id.begins_with("plot/") else Color(1, 1, 1, 0.8)
-	var box := rect.grow(rect.size.x * (0.12 if field else 0.24))
+	var box := rect.grow(rect.size.x * (0.12 if field else (0.34 if Rules.is_tower_slot(plot) or Rules.is_wall(plot) else 0.24)))
 	draw_texture_rect(tex, box, false, tint)
 	if plot == selected:
 		draw_arc(rect.get_center(), rect.size.x * 0.62, 0.0, TAU, 48, SELECTED, 4.0)
 	if under_way:
 		draw_arc(rect.get_center(), rect.size.x * 0.56, 0.0, TAU, 48, BUILDING_ACTIVE, 5.0)
 	if id == "plot/locked":
-		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), "Hall %d" % Rules.slot_unlock_level(data, Rules.plot_index(plot)), rect.size.y * 0.18, Color.WHITE)
+		var needs := ("Walls %d" % Rules.tower_unlock_level(data, Rules.plot_index(plot))) if Rules.is_tower_slot(plot) else ("Hall %d" % Rules.slot_unlock_level(data, Rules.plot_index(plot)))
+		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), needs, rect.size.y * (0.24 if Rules.is_tower_slot(plot) else 0.18), Color.WHITE)
 	elif id != "plot/empty":
 		# The level in a dark badge at the plot's lower right.
 		var at := rect.position + rect.size * Vector2(0.86, 0.84)

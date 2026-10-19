@@ -33,8 +33,9 @@ const resourcesSchema = z.object({
 const buildingSchema = z.object({
   name: z.string(),
   // 'field': a resource plot around the village; 'center': a building slot;
-  // 'outpost': built on a resource hex near the village.
-  kind: z.enum(['field', 'center', 'outpost']),
+  // 'outpost': built on a resource hex near the village; 'wall': the walls
+  // (plot "w"); 'tower': a wall slot's defensive work (plots "t0"...).
+  kind: z.enum(['field', 'center', 'outpost', 'wall', 'tower']),
   maxLevel: z.number().int().positive(),
   cost: resourcesSchema,
   costGrowth: z.number().min(1),
@@ -123,13 +124,16 @@ const unitsFileSchema = z.object({
 const enemyUnitSchema = z.object({
   name: z.string(),
   family: z.enum(UNIT_FAMILIES),
-  weight: z.number().positive(),
+  // 0: never in a wave of its own (an engine built on site).
+  weight: z.number().nonnegative(),
   minWave: z.number().int().nonnegative(),
   // Only groups of at least this many players see it.
   minPlayers: z.number().int().positive().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   speed: z.number().positive(),
+  // How hard it batters walls each round (walls.json).
+  siege: z.number().nonnegative().optional(),
 });
 
 const enemiesFileSchema = z.object({
@@ -145,7 +149,11 @@ const enemiesFileSchema = z.object({
         nerve: z.number().positive(),
         razeBias: z.number(),
         erratic: z.number().min(0).max(1),
+        // How long it takes to build siege engines on site (x walls.siege.setupHours); 0: never.
+        siegeCraft: z.number().nonnegative().default(1),
       }),
+      // The engine it builds on site, one of its units.
+      engine: z.string().optional(),
       spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       units: z.record(z.string(), enemyUnitSchema),
       stances: z.partialRecord(z.enum(STANCES), z.number().positive()),
@@ -261,6 +269,29 @@ const researchFileSchema = z.object({
 export const HERO_SLOTS = ['weapon', 'armor', 'amulet', 'banner', 'mount'] as const;
 export type HeroSlot = (typeof HERO_SLOTS)[number];
 const effectsSchema = z.record(z.string(), z.number());
+
+// Walls and siege (sim/walls.ts).
+const wallsFileSchema = z.object({
+  version: z.number().int(),
+  tiers: z.array(z.object({ minLevel: z.number().int().positive(), name: z.string() })).min(1),
+  integrityPerLevel: z.number().positive(),
+  defensePerLevel: z.number().nonnegative(),
+  slotsAt: z.array(z.number().int().positive()),
+  breachLevelsLost: z.number().int().nonnegative(),
+  towers: z.object({
+    archer_tower: z.object({ attackPerLevel: z.number().nonnegative() }),
+    gate_tower: z.object({ integrityPerLevel: z.number().nonnegative() }),
+    ballista: z.object({ enginesPerLevel: z.number().nonnegative() }),
+    murder_holes: z.object({ defensePerLevel: z.number().nonnegative() }),
+    ditch: z.object({ siegeCutPerLevel: z.number().min(0).max(0.1), setupPerLevel: z.number().nonnegative() }),
+    watchtower: z.object({ warningHoursPerLevel: z.number().nonnegative() }),
+  }),
+  siege: z.object({
+    unitSiegeShare: z.number().nonnegative(),
+    breachRounds: z.number().int().positive(),
+    setupHours: z.number().nonnegative(),
+  }),
+});
 
 // Enemy heroes: one named leader per front (sim/leaders.ts).
 const leadersFileSchema = z.object({
@@ -562,6 +593,7 @@ export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
 export type LeadersData = z.infer<typeof leadersFileSchema>;
+export type WallsData = z.infer<typeof wallsFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
@@ -588,6 +620,7 @@ export interface GameData {
   research: ResearchData;
   heroes: HeroesData;
   leaders: LeadersData;
+  walls: WallsData;
   orders: OrdersData;
   notifications: NotificationsData;
   armies: ArmiesData;
@@ -617,6 +650,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
     leaders: leadersFileSchema.parse(read('leaders.json')),
+    walls: wallsFileSchema.parse(read('walls.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
     armies: armiesFileSchema.parse(read('armies.json')),
@@ -635,6 +669,13 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  for (const [front, def] of Object.entries(data.enemies.fronts)) {
+    if (def.engine && !def.units[def.engine]?.siege) throw new Error(`Front "${front}" builds "${def.engine}", which is not one of its siege units`);
+  }
+  for (const tower of Object.keys(data.walls.towers)) {
+    if (data.buildings.buildings[tower]?.kind !== 'tower') throw new Error(`walls.json tower "${tower}" needs a tower in buildings.json`);
+  }
+  if (data.buildings.buildings.wall?.kind !== 'wall') throw new Error('buildings.json needs the walls ("wall", kind wall)');
   for (const front of Object.keys(data.enemies.fronts)) {
     const leaders = data.leaders.fronts[front];
     if (!leaders) throw new Error(`leaders.json has no leaders for front "${front}"`);

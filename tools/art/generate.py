@@ -132,564 +132,8 @@ class Svg:
 # --- Shared pieces -----------------------------------------------------------
 
 
-def tree(s, x, y, size, kind="forest"):
-    base, light = P[kind]
-    s.rect(x - size * 0.08, y - size * 0.1, size * 0.16, size * 0.3, P["wood"][0], sw=2.5)
-    s.poly([(x, y - size), (x + size * 0.45, y), (x - size * 0.45, y)], base, sw=3)
-    s.poly([(x, y - size * 0.92), (x + size * 0.18, y - size * 0.5), (x - size * 0.1, y - size * 0.55)], light, stroke="none", sw=0)
-
-
 def tuft(s, x, y, color=INK, size=8):
     s.path(f"M{fmt(x - size * 0.6)},{fmt(y)} L{fmt(x - size * 0.3)},{fmt(y - size)} M{fmt(x)},{fmt(y)} L{fmt(x)},{fmt(y - size * 1.2)} M{fmt(x + size * 0.6)},{fmt(y)} L{fmt(x + size * 0.3)},{fmt(y - size)}", "none", stroke=color, sw=2.5)
-
-
-def wave(s, x, y, w=22, color="#ffffff", sw=3, opacity=0.8):
-    s.path(f"M{fmt(x - w / 2)},{fmt(y)} q{fmt(w / 4)},-6 {fmt(w / 2)},0 t{fmt(w / 2)},0", "none", stroke=color, sw=sw, opacity=opacity)
-
-
-def peak(s, x, y, w, h, snow=True, color="rock"):
-    base, light = P[color]
-    s.poly([(x - w / 2, y), (x, y - h), (x + w / 2, y)], base, sw=3.5)
-    s.poly([(x, y - h), (x + w * 0.12, y - h * 0.45), (x - w * 0.05, y - h * 0.55), (x - w * 0.18, y - h * 0.35)], light, stroke="none", sw=0)
-    if snow:
-        s.poly([(x - w * 0.16, y - h * 0.68), (x, y - h), (x + w * 0.16, y - h * 0.68), (x + w * 0.06, y - h * 0.74), (x - w * 0.04, y - h * 0.66)], P["snow"][0], sw=2.5)
-
-
-def hut(s, x, y, w, roof="thatch", wall="wood"):
-    """A hut whose base centre is (x, y)."""
-    h = w * 0.55
-    s.rect(x - w / 2, y - h, w, h, P[wall][0], sw=3)
-    s.rect(x - w * 0.12, y - h * 0.6, w * 0.24, h * 0.6, INK, sw=0)
-    s.poly([(x - w * 0.62, y - h), (x, y - h - w * 0.55), (x + w * 0.62, y - h)], P[roof][0], sw=3)
-    s.poly([(x, y - h - w * 0.5), (x + w * 0.45, y - h - 2), (x + w * 0.15, y - h - 2)], P[roof][1], stroke="none", sw=0)
-
-
-def hall(s, x, y, w, roof="roof"):
-    h = w * 0.5
-    s.rect(x - w / 2, y - h, w, h, P["wood"][0], sw=3.5)
-    s.rect(x - w * 0.1, y - h * 0.65, w * 0.2, h * 0.65, INK, sw=0)
-    s.poly([(x - w * 0.6, y - h), (x - w * 0.35, y - h - w * 0.42), (x + w * 0.35, y - h - w * 0.42), (x + w * 0.6, y - h)], P[roof][0], sw=3.5)
-    s.poly([(x - w * 0.3, y - h - w * 0.38), (x + w * 0.3, y - h - w * 0.38), (x + w * 0.45, y - h - 3), (x - w * 0.1, y - h - 3)], P[roof][1], stroke="none", sw=0)
-    # Carved gable horns.
-    s.path(f"M{fmt(x - w * 0.35)},{fmt(y - h - w * 0.42)} l-6,-8 M{fmt(x + w * 0.35)},{fmt(y - h - w * 0.42)} l6,-8", "none", sw=3)
-
-
-def palisade(s, x0, x1, y, h=16):
-    n = max(3, int((x1 - x0) / 8))
-    step = (x1 - x0) / n
-    for i in range(n + 1):
-        x = x0 + i * step
-        s.poly([(x - 3.5, y), (x - 3.5, y - h), (x, y - h - 5), (x + 3.5, y - h), (x + 3.5, y)], P["wood"][1], sw=2.5)
-
-
-def stone_wall(s, x0, x1, y, h=18):
-    s.rect(x0, y - h, x1 - x0, h, P["stone"][0], sw=3.5)
-    for i in range(int((x1 - x0) / 12) + 1):
-        x = x0 + i * 12
-        s.rect(x, y - h - 6, 7, 6, P["stone"][0], sw=2.5)
-    s.line(x0 + 3, y - h / 2, x1 - 3, y - h / 2, sw=1.5, opacity=0.5)
-
-
-def tower(s, x, y, w=18, h=40, roof="roof", wall="stone"):
-    s.rect(x - w / 2, y - h, w, h, P[wall][0], sw=3)
-    s.rect(x - w * 0.15, y - h * 0.7, w * 0.3, h * 0.2, INK, sw=0)
-    s.poly([(x - w * 0.7, y - h), (x, y - h - w * 1.1), (x + w * 0.7, y - h)], P[roof][0], sw=3)
-
-
-def onion(s, x, y, r, color="gold"):
-    base, light = P[color]
-    s.path(f"M{fmt(x - r)},{fmt(y)} C{fmt(x - r * 1.25)},{fmt(y - r * 1.2)} {fmt(x - r * 0.1)},{fmt(y - r * 1.5)} {fmt(x)},{fmt(y - r * 2.3)} C{fmt(x + r * 0.1)},{fmt(y - r * 1.5)} {fmt(x + r * 1.25)},{fmt(y - r * 1.2)} {fmt(x + r)},{fmt(y)} Z", base, sw=3)
-    s.path(f"M{fmt(x - r * 0.45)},{fmt(y - r * 0.4)} C{fmt(x - r * 0.6)},{fmt(y - r * 1.0)} {fmt(x - r * 0.2)},{fmt(y - r * 1.4)} {fmt(x - r * 0.05)},{fmt(y - r * 1.8)}", "none", stroke=light, sw=3)
-    s.line(x, y - r * 2.3, x, y - r * 2.9, sw=2.5)
-    s.line(x - r * 0.25, y - r * 2.7, x + r * 0.25, y - r * 2.7, sw=2.5)
-
-
-def medallion(s, color="cloth", ring="gold"):
-    s.circle(64, 64, 56, P[ring][0], sw=4)
-    s.circle(64, 64, 48, P[color][0], sw=3)
-
-
-# --- Terrain tiles (pointy-top hexes, no outline: the map draws the grid) --
-
-# --- Settlements -----------------------------------------------------------
-
-def settlement(tier):
-    """Five looks as a village grows (Elder's Hall levels 1-2, 3-4, 5-6, 7-8, 9-10)."""
-    s = Svg()
-    s.shadow(64, 112, 54, 12)
-    if tier == 1:
-        hut(s, 44, 104, 34)
-        hut(s, 84, 108, 28)
-        s.circle(66, 112, 4, P["ember"][0], sw=2)
-    elif tier == 2:
-        palisade(s, 14, 114, 116, 12)
-        hut(s, 40, 100, 32)
-        hut(s, 88, 102, 30)
-        hut(s, 64, 88, 30, roof="thatch")
-    elif tier == 3:
-        palisade(s, 10, 118, 118, 16)
-        hut(s, 30, 102, 26)
-        hut(s, 98, 104, 26)
-        hall(s, 64, 98, 48, roof="thatch")
-    elif tier == 4:
-        palisade(s, 8, 120, 120, 18)
-        tower(s, 18, 112, 16, 46, roof="thatch", wall="wood")
-        tower(s, 110, 112, 16, 46, roof="thatch", wall="wood")
-        hut(s, 38, 104, 24)
-        hall(s, 70, 100, 56)
-    else:
-        stone_wall(s, 8, 120, 122, 20)
-        tower(s, 16, 118, 20, 54)
-        tower(s, 112, 118, 20, 54)
-        hall(s, 64, 98, 62)
-        onion(s, 64, 52, 8, color="gold")
-    return s
-
-
-def ruins():
-    s = Svg()
-    s.shadow(64, 112, 52, 12)
-    s.poly([(24, 112), (24, 84), (32, 76), (40, 88), (40, 112)], P["wood"][0], sw=3)
-    s.poly([(70, 112), (70, 90), (80, 82), (86, 96), (96, 92), (96, 112)], P["stone"][0], sw=3)
-    s.line(44, 108, 64, 96, sw=4)
-    for x, y, r in [(52, 64, 10), (60, 48, 13), (72, 30, 16)]:
-        s.circle(x, y, r, "#6d655a", stroke="none", sw=0, opacity=0.55)
-    s.circle(54, 104, 5, P["ember"][0], sw=2)
-    return s
-
-
-def holy_city():
-    s = Svg(160, 160)
-    s.shadow(80, 142, 70, 14)
-    s.rect(14, 92, 132, 46, P["wall"][0], sw=4)
-    for i in range(12):
-        s.rect(14 + i * 11.6, 84, 7, 8, P["wall"][0], sw=2.5)
-    s.path("M66,138 L66,114 Q80,98 94,114 L94,138 Z", INK, sw=0)
-    for x in (28, 132):
-        s.rect(x - 13, 66, 26, 72, P["wall"][0], sw=4)
-        onion(s, x, 66, 12, color="gold")
-    s.rect(52, 48, 56, 44, P["wall"][1], sw=4)
-    onion(s, 80, 48, 22, color="gold")
-    for x in (60, 100):
-        onion(s, x, 50, 8, color="red")
-    s.line(10, 92, 150, 92, sw=0)
-    return s
-
-
-def banner(part):
-    """The owner's banner: the cloth is white so the game can tint it."""
-    s = Svg(64, 96)
-    if part == "pole":
-        s.line(14, 92, 14, 6, stroke=INK, sw=7)
-        s.line(14, 92, 14, 6, stroke=P["wood"][1], sw=3)
-        s.circle(14, 6, 5, P["gold"][0], sw=2.5)
-    else:
-        s.path("M17,12 L58,16 L50,30 L58,44 L17,48 Z", P["cloth"][0], sw=3.5)
-        s.path("M22,18 L50,20", "none", stroke="#d8d2c4", sw=3)
-    return s
-
-
-def camp(kind):
-    s = Svg()
-    s.shadow(64, 110, 52, 12)
-    if kind == "bandit":
-        for x, w, c in [(40, 44, "sand"), (88, 38, "red")]:
-            s.poly([(x - w / 2, 106), (x, 106 - w * 0.95), (x + w / 2, 106)], P[c][0], sw=3.5)
-            s.poly([(x - 5, 106), (x, 94), (x + 5, 106)], INK, sw=0)
-        s.line(64, 112, 64, 44, sw=3)
-        s.poly([(64, 44), (88, 50), (64, 58)], P["red"][0], sw=3)
-        for i in range(3):
-            s.line(56 + i * 7, 116, 62 + i * 3, 104, stroke=P["wood"][0], sw=3)
-        s.circle(64, 108, 6, P["ember"][1], sw=2)
-    else:
-        s.path("M14,112 Q20,40 64,36 Q108,40 114,112 Z", P["rock"][0], sw=4)
-        s.path("M36,112 Q40,62 64,60 Q88,62 92,112 Z", P["night"][0], sw=3)
-        for x in (54, 74):
-            s.ellipse(x, 84, 4.5, 3, "#f3d06a", stroke="none", sw=0)
-        for x in (40, 60, 80):
-            s.poly([(x, 112), (x + 4, 100), (x + 8, 112)], P["bone"][0], sw=2)
-    return s
-
-
-def fort():
-    s = Svg()
-    s.shadow(64, 112, 54, 12)
-    palisade(s, 14, 114, 112, 26)
-    tower(s, 64, 100, 22, 52, roof="thatch", wall="wood")
-    s.line(64, 34, 64, 14, sw=3)
-    s.poly([(64, 14), (84, 19), (64, 26)], P["cloth"][0], sw=3)
-    return s
-
-
-def outpost():
-    s = Svg()
-    s.shadow(64, 110, 44, 10)
-    hut(s, 56, 108, 40)
-    s.rect(84, 84, 22, 24, P["wood"][1], sw=3)
-    s.line(84, 92, 106, 92, sw=2)
-    s.line(84, 100, 106, 100, sw=2)
-    return s
-
-
-# --- Ancient sites ---------------------------------------------------------
-
-def site(kind):
-    s = Svg()
-    s.shadow(64, 110, 50, 12)
-    if kind == "kurgan":
-        s.path("M10,110 Q64,30 118,110 Z", P["grass"][0], sw=4)
-        s.path("M40,80 Q64,50 88,72", "none", stroke=P["grass"][1], sw=4)
-        s.rect(58, 36, 12, 24, P["stone"][0], sw=3, rx=2)
-    elif kind == "sunken_shrine":
-        s.ellipse(64, 104, 54, 14, P["water"][0], sw=3)
-        s.rect(40, 62, 48, 40, P["stone"][0], sw=3.5)
-        s.poly([(34, 62), (64, 34), (94, 62)], P["stone"][1], sw=3.5)
-        s.rect(58, 78, 12, 24, INK, sw=0)
-        wave(s, 30, 104, 16)
-        wave(s, 98, 106, 16)
-    elif kind == "old_hillfort":
-        s.ellipse(64, 92, 56, 24, P["hill"][0], sw=4)
-        s.ellipse(64, 86, 38, 14, P["grass"][0], sw=3)
-        for i in range(7):
-            x = 34 + i * 10
-            s.rect(x - 3, 66 + abs(i - 3) * 3, 6, 16, P["wood"][0], sw=2.5)
-    elif kind == "stone_idol":
-        s.rect(46, 18, 36, 92, P["stone"][0], sw=4, rx=4)
-        s.rect(46, 18, 36, 18, P["stone"][1], sw=3, rx=4)
-        for y in (46, 70, 92):
-            s.line(50, y, 78, y, sw=2.5)
-        for x in (56, 72):
-            s.circle(x, 58, 3, INK, stroke="none", sw=0)
-        s.path("M58,64 Q64,68 70,64", "none", sw=2.5)
-    else:  # frozen_ruin
-        s.ellipse(64, 104, 54, 12, P["ice"][0], sw=3)
-        for x, h in [(34, 64), (64, 84), (94, 52)]:
-            s.rect(x - 9, 104 - h, 18, h, P["ice"][1], sw=3.5)
-            s.poly([(x - 9, 104 - h), (x - 3, 96 - h), (x + 4, 104 - h)], P["snow"][0], sw=2.5)
-    return s
-
-
-# --- Units, factions, resources -----------------------------------------------
-
-def unit(kind):
-    s = Svg()
-    medallion(s)
-    if kind in ("spearman",):
-        s.line(40, 98, 92, 28, sw=7)
-        s.line(40, 98, 92, 28, stroke=P["wood"][1], sw=3)
-        s.poly([(92, 28), (98, 18), (86, 24)], P["iron"][1], sw=3)
-        s.circle(52, 74, 22, P["red"][0], sw=4)
-        s.circle(52, 74, 7, P["gold"][0], sw=3)
-    elif kind in ("archer", "forest_archer"):
-        s.path("M44,24 Q96,64 44,104", "none", stroke=INK, sw=8)
-        s.path("M44,24 Q96,64 44,104", "none", stroke=P["wood"][1], sw=4)
-        s.line(44, 24, 44, 104, sw=2)
-        s.line(30, 64, 92, 64, sw=4)
-        s.poly([(92, 64), (82, 58), (82, 70)], P["iron"][1], sw=3)
-        if kind == "forest_archer":
-            s.path("M86,30 Q104,26 100,46 Q84,48 86,30 Z", P["forest"][1], sw=3)
-    elif kind in ("horseman", "border_rider"):
-        s.path("M36,104 L44,64 Q46,36 70,30 L90,22 L86,36 Q98,46 96,62 L84,64 L80,54 L64,60 L62,104 Z", P["wood"][0], sw=4)
-        s.path("M60,34 Q48,44 46,64", "none", stroke=INK, sw=6)
-        s.circle(82, 40, 3, INK, stroke="none", sw=0)
-        if kind == "border_rider":
-            s.line(98, 100, 98, 26, sw=3)
-            s.poly([(98, 26), (114, 32), (98, 38)], P["red"][0], sw=2.5)
-    elif kind == "scout":
-        s.path("M24,64 Q64,24 104,64 Q64,104 24,64 Z", P["cloth"][1], sw=4)
-        s.circle(64, 64, 16, P["water"][0], sw=3)
-        s.circle(64, 64, 6, INK, stroke="none", sw=0)
-    elif kind == "settler":
-        s.path("M28,74 Q64,30 100,74 Z", P["cloth"][0], sw=4)
-        s.rect(28, 74, 72, 14, P["wood"][0], sw=3.5)
-        for x in (42, 86):
-            s.circle(x, 94, 11, P["wood"][1], sw=3.5)
-            s.circle(x, 94, 3, INK, stroke="none", sw=0)
-    elif kind == "river_barge":
-        s.path("M22,74 L106,74 L94,94 L34,94 Z", P["wood"][0], sw=4)
-        s.line(64, 74, 64, 30, sw=4)
-        s.poly([(64, 32), (92, 66), (64, 66)], P["cloth"][0], sw=3)
-        wave(s, 46, 104, 18, color=P["water"][0], sw=3.5, opacity=1)
-        wave(s, 82, 104, 18, color=P["water"][0], sw=3.5, opacity=1)
-    return s
-
-
-def faction(front):
-    s = Svg()
-    if front == "north":
-        medallion(s, color="dark_forest", ring="rock")
-        for dx in (-16, 0, 16):
-            s.path(f"M{64 + dx - 6},30 Q{64 + dx + 8},64 {64 + dx - 4},98", "none", stroke=P["bone"][0], sw=7)
-    elif front == "east":
-        medallion(s, color="sand", ring="red")
-        s.line(64, 104, 64, 34, sw=4)
-        s.circle(64, 30, 6, P["gold"][0], sw=3)
-        s.path("M64,40 Q40,60 46,92 M64,40 Q64,70 60,96 M64,40 Q88,60 82,92", "none", stroke=INK, sw=6)
-    else:  # the Order of the One Throne
-        medallion(s, color="wall", ring="iron")
-        s.path("M44,100 L44,52 Q44,36 64,30 Q84,36 84,52 L84,100", P["red"][0], sw=4)
-        s.rect(38, 76, 52, 12, P["iron"][1], sw=3.5)
-        s.poly([(50, 58), (50, 44), (57, 50), (64, 40), (71, 50), (78, 44), (78, 58)], P["gold"][0], sw=3)
-    return s
-
-
-def resource(kind):
-    s = Svg()
-    s.shadow(64, 110, 44, 10)
-    if kind == "wood":
-        for x, y in [(44, 96), (84, 96), (64, 70)]:
-            s.rect(x - 24, y - 12, 48, 24, P["wood"][0], sw=3.5, rx=12)
-            s.circle(x + 16, y, 9, P["wood"][1], sw=3)
-            s.circle(x + 16, y, 3, INK, stroke="none", sw=0)
-    elif kind == "stone":
-        s.path("M22,106 L30,74 L56,62 L72,84 L66,106 Z", P["stone"][0], sw=3.5)
-        s.path("M60,106 L68,58 L96,48 L108,80 L102,106 Z", P["stone"][1], sw=3.5)
-        s.line(80, 60, 90, 76, sw=2)
-    elif kind == "grain":
-        for dx in (-14, 0, 14):
-            s.line(64, 106, 64 + dx * 1.6, 30, stroke=P["thatch"][0], sw=6)
-            s.ellipse(64 + dx * 1.6, 34, 7, 14, P["thatch"][0], sw=3)
-        s.rect(46, 76, 36, 10, P["red"][0], sw=3, rx=3)
-    elif kind == "iron":
-        s.poly([(24, 98), (36, 72), (92, 72), (104, 98)], P["iron"][0], sw=4)
-        s.poly([(40, 76), (88, 76), (84, 82), (44, 82)], P["iron"][1], stroke="none", sw=0)
-    elif kind == "ember":
-        s.circle(64, 72, 40, P["gold"][0], sw=4)
-        s.path("M64,36 Q90,64 78,92 Q64,104 50,92 Q38,64 64,36 Z", P["ember"][0], sw=3.5)
-        s.path("M64,58 Q76,76 70,90 Q64,94 58,90 Q52,76 64,58 Z", P["ember"][1], stroke="none", sw=0)
-    return s
-
-
-def app_icon():
-    s = Svg(192, 192)
-    s.rect(4, 4, 184, 184, P["red"][0], sw=6, rx=36)
-    s.circle(96, 92, 66, P["red"][1], stroke="none", sw=0, opacity=0.5)
-    s.path("M24,150 Q96,96 168,150", "none", stroke=INK, sw=14)
-    s.path("M24,150 Q96,96 168,150", "none", stroke=P["stone"][1], sw=8)
-    for x in (54, 96, 138):
-        s.line(x, 150 - (40 if x == 96 else 26), x, 160, stroke=P["stone"][0], sw=6)
-    s.rect(70, 70, 52, 40, P["wall"][0], sw=5)
-    onion(s, 96, 70, 20, color="gold")
-    return s
-
-
-# --- Village interior: buildings and fields in three stages --------------------
-# Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
-
-def plot_ground(s):
-    s.ellipse(64, 104, 56, 18, P["mud"][0] if False else "#8a7a5a", stroke="none", sw=0, opacity=0.55)
-
-
-def stone_base(s, x0, x1, y, h=10):
-    s.rect(x0, y - h, x1 - x0, h, P["stone"][0], sw=3)
-    for x in range(int(x0) + 10, int(x1), 14):
-        s.line(x, y - h, x, y, sw=1.5, opacity=0.5)
-
-
-def sign(s, x, y, color="red", emblem=None):
-    s.rect(x - 11, y - 11, 22, 22, P[color][0], sw=2.5, rx=3)
-    if emblem == "spears":
-        s.line(x - 7, y + 7, x + 7, y - 7, sw=2.5)
-        s.line(x + 7, y + 7, x - 7, y - 7, sw=2.5)
-    elif emblem == "scroll":
-        s.rect(x - 7, y - 5, 14, 10, P["bone"][0], sw=2)
-    elif emblem == "sheaf":
-        s.line(x, y + 7, x - 5, y - 6, stroke=P["thatch"][1], sw=2.5)
-        s.line(x, y + 7, x, y - 7, stroke=P["thatch"][1], sw=2.5)
-        s.line(x, y + 7, x + 5, y - 6, stroke=P["thatch"][1], sw=2.5)
-
-
-def cart(s, x, y, w=34, covered=False):
-    if covered:
-        s.path(f"M{x - w / 2},{y - 10} Q{x},{y - 34} {x + w / 2},{y - 10} Z", P["cloth"][0], sw=3)
-    s.rect(x - w / 2, y - 12, w, 10, P["wood"][0], sw=3)
-    for dx in (-w / 3, w / 3):
-        s.circle(x + dx, y, 6, P["wood"][1], sw=2.5)
-
-
-def building(kind, stage):
-    s = Svg()
-    plot_ground(s)
-    s.shadow(64, 110, 50, 10)
-    big = [0, 0.8, 0.95, 1.08][stage]
-    if kind == "elder_hall":
-        if stage == 3:
-            stone_base(s, 14, 114, 112)
-        hall(s, 64, 112 - (10 if stage == 3 else 0), 74 * big)
-        if stage >= 2:
-            s.line(100, 98, 100, 46, sw=3)
-            s.poly([(100, 46), (118, 52), (100, 58)], P["red"][0], sw=2.5)
-        if stage == 3:
-            onion(s, 64, 50, 8)
-    elif kind == "storehouse":
-        w = 70 * big
-        s.rect(64 - w / 2, 112 - w * 0.55, w, w * 0.55, P["wood"][0], sw=3.5)
-        s.poly([(64 - w * 0.6, 112 - w * 0.55), (64, 112 - w * 1.05), (64 + w * 0.6, 112 - w * 0.55)], P["thatch" if stage < 3 else "roof"][0], sw=3.5)
-        s.rect(52, 84, 24, 28, P["wood"][1], sw=3)
-        s.line(52, 84, 76, 112, sw=2)
-        s.line(76, 84, 52, 112, sw=2)
-        for i in range(stage):
-            s.ellipse(22 + i * 10, 108, 8, 6, P["bone"][0], sw=2.5)
-    elif kind == "barracks":
-        if stage == 1:
-            for x in (40, 84):
-                s.poly([(x - 22, 110), (x, 70), (x + 22, 110)], P["sand"][0], sw=3.5)
-                s.poly([(x - 4, 110), (x, 96), (x + 4, 110)], INK, sw=0)
-        else:
-            w = 80 * big
-            s.rect(64 - w / 2, 112 - 32, w, 32, P["wood" if stage == 2 else "stone"][0], sw=3.5)
-            s.poly([(64 - w * 0.55, 80), (64, 52), (64 + w * 0.55, 80)], P["roof"][0], sw=3.5)
-            s.rect(56, 92, 16, 20, INK, sw=0)
-            if stage == 3:
-                tower(s, 112, 112, 16, 54)
-        sign(s, 64, 66 if stage > 1 else 56, "red", "spears")
-    elif kind == "scout_lodge":
-        h = [0, 34, 46, 56][stage]
-        for x in (50, 78):
-            s.line(x, 112, x + (8 if x < 64 else -8), 112 - h, stroke=P["wood"][0], sw=6)
-        s.line(52, 112 - h * 0.4, 76, 112 - h * 0.6, stroke=P["wood"][1], sw=3)
-        s.rect(46, 112 - h - 14, 36, 14, P["wood"][1], sw=3)
-        s.poly([(42, 112 - h - 14), (64, 112 - h - 34), (86, 112 - h - 14)], P["thatch"][0], sw=3)
-        if stage == 3:
-            s.line(64, 112 - h - 34, 64, 112 - h - 52, sw=2.5)
-            s.poly([(64, 112 - h - 52), (80, 112 - h - 47), (64, 112 - h - 42)], P["red"][0], sw=2)
-    elif kind == "caravan_yard":
-        s.rect(14, 74, 48, 38, P["wood"][0], sw=3.5)
-        s.poly([(10, 74), (38, 54), (66, 74)], P["thatch"][0], sw=3.5)
-        for i in range(stage):
-            cart(s, 84, 112 - i * 14, covered=i == stage - 1)
-    elif kind == "settlers_lodge":
-        hut(s, 46, 112, 44 * big)
-        cart(s, 92, 112, covered=True)
-        if stage >= 2:
-            s.circle(92, 72, 4, P["thatch"][1], sw=2)
-        if stage == 3:
-            hut(s, 96, 84, 24)
-    elif kind == "academy":
-        w = 72 * big
-        s.rect(64 - w / 2, 112 - 40, w, 40, P["wall"][0], sw=3.5)
-        s.poly([(64 - w * 0.58, 72), (64, 44), (64 + w * 0.58, 72)], P["roof"][0], sw=3.5)
-        for x in (44, 84):
-            s.rect(x - 5, 84, 10, 14, P["water"][0], sw=2)
-        sign(s, 64, 96, "wood", "scroll")
-        if stage == 3:
-            onion(s, 64, 44, 9, color="water")
-    elif kind == "granary_temple":
-        w = 74 * big
-        stone_base(s, 64 - w / 2, 64 + w / 2, 112)
-        s.rect(64 - w / 2 + 6, 70, w - 12, 32, P["wood"][1], sw=3.5)
-        s.poly([(64 - w * 0.58, 70), (64, 34), (64 + w * 0.58, 70)], P["thatch"][0], sw=3.5)
-        sign(s, 64, 86, "gold", "sheaf")
-        if stage >= 2:
-            onion(s, 64, 34, 6)
-    elif kind == "stone_redoubt":
-        w = 80 * big
-        s.rect(64 - w / 2, 70, w, 42, P["stone"][0], sw=4)
-        for i in range(6):
-            s.rect(64 - w / 2 + i * w / 6, 62, w / 12, 8, P["stone"][0], sw=2.5)
-        s.path("M54,112 L54,94 Q64,84 74,94 L74,112 Z", INK, sw=0)
-        if stage >= 2:
-            tower(s, 64 - w / 2, 112, 18, 58)
-        if stage == 3:
-            tower(s, 64 + w / 2, 112, 18, 58)
-    elif kind == "longhouse_hall":
-        w = 104 * big
-        s.rect(64 - w / 2, 84, w, 28, P["wood"][0], sw=3.5)
-        s.path(f"M{64 - w / 2 - 4},84 Q64,{54 - stage * 4} {64 + w / 2 + 4},84 Z", P["thatch"][0], sw=3.5)
-        s.rect(58, 94, 12, 18, INK, sw=0)
-        for i in range(stage):
-            s.circle(64 - w / 3 + i * w / 3, 98, 4, P["gold"][0], sw=2)
-    return s
-
-
-def field(kind, stage):
-    s = Svg()
-    s.ellipse(64, 72, 56, 50, {"woodcutter": P["grass"][0], "quarry": P["hill"][0], "farm": P["meadow"][0], "iron_mine": P["rock"][0]}[kind], sw=4)
-    if kind == "woodcutter":
-        for x, y in [(36, 66), (64, 54), (92, 66)][: stage + 0]:
-            tree(s, x, y, 30 + stage * 3)
-        for i in range(stage):
-            s.rect(40 + i * 8, 96 - i * 6, 46, 10, P["wood"][0], sw=2.5, rx=5)
-        s.ellipse(92, 100, 9, 5, P["wood"][1], sw=2.5)
-    elif kind == "quarry":
-        s.path("M24,98 L36,66 L58,58 L70,80 L60,100 Z", P["rock"][0], sw=3)
-        for i in range(stage):
-            s.rect(70 + (i % 2) * 14, 92 - (i // 2) * 12 - i * 4, 18, 12, P["stone"][1], sw=2.5)
-        if stage == 3:
-            s.line(96, 100, 96, 44, stroke=P["wood"][0], sw=4)
-            s.line(96, 44, 70, 52, stroke=P["wood"][0], sw=3)
-            s.line(72, 52, 72, 66, sw=1.5)
-    elif kind == "farm":
-        rows = stage + 1
-        for i in range(rows):
-            y = 52 + i * (52 / rows)
-            s.line(24, y, 104, y, stroke=P["thatch"][1], sw=5)
-            s.line(24, y, 104, y, stroke=P["thatch"][0], sw=2)
-        if stage >= 2:
-            s.rect(84, 84, 20, 22, P["wood"][1], sw=2.5)
-            s.poly([(80, 84), (94, 72), (108, 84)], P["thatch"][0], sw=2.5)
-    else:  # iron_mine
-        s.path("M34,100 Q36,56 64,52 Q92,56 94,100 Z", P["rock"][1], sw=3.5)
-        s.path("M48,100 Q50,72 64,70 Q78,72 80,100 Z", INK, sw=0)
-        s.line(48, 72, 80, 72, stroke=P["wood"][0], sw=5)
-        if stage >= 2:
-            s.rect(84, 90, 22, 12, P["iron"][0], sw=2.5)
-            s.circle(88, 104, 4, P["wood"][1], sw=2)
-            s.circle(102, 104, 4, P["wood"][1], sw=2)
-        if stage == 3:
-            s.rect(18, 70, 16, 30, P["stone"][0], sw=2.5)
-            s.circle(26, 60, 7, "#6d655a", stroke="none", sw=0, opacity=0.6)
-            s.circle(26, 64, 4, P["ember"][1], sw=1.5)
-    return s
-
-
-def plot(kind):
-    s = Svg()
-    if kind == "empty":
-        s.ellipse(64, 84, 54, 30, "#8a7a5a", sw=3)
-        for x, y in [(18, 84), (110, 84), (64, 56), (64, 112)]:
-            s.line(x, y, x, y - 14, stroke=P["wood"][0], sw=4)
-        s.line(18, 76, 64, 50, stroke=P["cloth"][0], sw=1.5, opacity=0.8)
-        s.line(64, 50, 110, 76, stroke=P["cloth"][0], sw=1.5, opacity=0.8)
-    else:  # locked: dark, bramble-grown ground under a padlock
-        s.ellipse(64, 84, 54, 30, "#5a4e3c", sw=3)
-        for x, y in [(30, 86), (98, 86), (48, 102), (82, 102)]:
-            tuft(s, x, y, color="#3d4a26", size=9)
-        s.path("M 54 66 L 54 56 A 10 10 0 0 1 74 56 L 74 66", fill="none", stroke=INK, sw=4)
-        s.rect(48, 64, 32, 24, "#8f8678", sw=3)
-        s.circle(64, 74, 3.5, INK, stroke="none", sw=0)
-        s.line(64, 76, 64, 82, stroke=INK, sw=3)
-    return s
-
-
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
-FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
-
-
-# --- Interface: the start screen's picture and line icons ------------------------
-# Panels and buttons are vector styles in the client (UiTheme); art with the
-# ids "ui/panel", "ui/button"... in art.json would replace them.
-
-
-def ui_title():
-    """The start screen's picture: the Holy City over the river and the
-    Kalinov Bridge, between forests."""
-    s = Svg(360, 180)
-    s.rect(0, 0, 360, 180, "#cfe0dc", stroke="none", sw=0)
-    s.circle(292, 40, 22, P["gold"][1], stroke="none", sw=0, opacity=0.7)
-    s.path("M0,100 Q60,60 130,86 Q200,52 260,80 Q320,58 360,84 L360,180 L0,180 Z", P["hill"][1], sw=3)
-    s.path("M0,124 Q90,92 180,108 Q270,90 360,118 L360,180 L0,180 Z", P["grass"][0], sw=3)
-    s.embed(holy_city(), 128, 22, 0.65)
-    for x, y, size in [(22, 128, 26), (46, 136, 30), (14, 150, 28), (318, 124, 26), (342, 138, 30), (300, 148, 26)]:
-        tree(s, x, y, size)
-    s.path("M0,160 Q100,146 180,156 Q260,166 360,150 L360,180 L0,180 Z", P["water"][0], sw=3)
-    s.path("M30,170 Q60,164 90,170 M220,168 Q250,162 280,168", "none", stroke="#ffffff", sw=2, opacity=0.7)
-    s.path("M120,160 Q180,122 240,160", "none", stroke=INK, sw=12)
-    s.path("M120,160 Q180,122 240,160", "none", stroke=P["stone"][1], sw=7)
-    for x in (150, 180, 210):
-        s.line(x, 160 - (24 if x == 180 else 16), x, 168, stroke=P["stone"][0], sw=4)
-    s.rect(1.5, 1.5, 357, 177, "none", sw=3)
-    return s
 
 
 def icon(kind):
@@ -876,6 +320,623 @@ FEATURES = {
 }
 
 
+# --- Shaded pieces: three-quarter view, lit from the upper left, no outlines ------
+
+ROOFS = {
+    "thatch": ("#d6b46e", "#a8854a", "#6b5229"),
+    "red": ("#c9714f", "#9a4733", "#5e281c"),
+    "slate": ("#7d8794", "#59626d", "#363d45"),
+    "wood": ("#9a6d43", "#6e4b2c", "#432c19"),
+}
+WALLS = {
+    "wood": ("#b78d5e", "#8c6640", "#594027"),
+    "plaster": ("#f0e8d5", "#d0c5ae", "#958a76"),
+    "stone": ("#c9c3b7", "#9d978c", "#6a655d"),
+}
+GLOW = "#f3c46a"
+EDGE = "#1d1813"
+
+
+def house(s, x, foot, w, h, roof="thatch", wall="wood", door=True, windows=1):
+    """A gabled house facing the viewer, its right side going back."""
+    d = w * 0.42
+    gable = w * 0.52
+    rl, rm, rd = ROOFS[roof]
+    wl, wm, wd = WALLS[wall]
+    soft_shadow(s, x + d * 0.6, foot - 1, w * 0.62 + d * 0.3, w * 0.16, 0.4)
+    # Side wall going back, in shadow.
+    s.poly([(x + w / 2, foot), (x + w / 2 + d, foot - d * 0.45), (x + w / 2 + d, foot - h - d * 0.45), (x + w / 2, foot - h)],
+           s.lin([(0, wm), (1, wd)], 0, 0, 1, 0), stroke="none", sw=0)
+    # Front wall and gable, lit.
+    s.poly([(x - w / 2, foot), (x - w / 2, foot - h), (x, foot - h - gable), (x + w / 2, foot - h), (x + w / 2, foot)],
+           s.lin([(0, wl), (1, wm)], 0, 0, 1, 0), stroke="none", sw=0)
+    # Roof plane over the side, eaves overhanging.
+    o = w * 0.06
+    s.poly([(x - o * 0.3, foot - h - gable - o), (x + d - o * 0.3, foot - h - gable - d * 0.45 - o),
+            (x + w / 2 + d + o, foot - h - d * 0.45 + o), (x + w / 2 + o, foot - h + o)],
+           s.lin([(0, rl), (0.55, rm), (1, rd)], 0, 0, 0.3, 1), stroke="none", sw=0)
+    # The roof's front edge along the gable.
+    s.path(f"M{fmt(x - w / 2 - o)},{fmt(foot - h + o)} L{fmt(x - o * 0.3)},{fmt(foot - h - gable - o)} L{fmt(x + w / 2 + o)},{fmt(foot - h + o)}",
+           "none", stroke=rm, sw=max(2.0, w * 0.08))
+    if door:
+        s.rect(x - w * 0.12, foot - h * 0.62, w * 0.24, h * 0.62, "#3a2a1c", stroke="none", sw=0)
+    for i in range(windows):
+        wx = x + (w * 0.26 if i == 0 else -w * 0.3)
+        s.rect(wx - w * 0.07, foot - h * 0.72, w * 0.14, h * 0.24, GLOW, stroke="none", sw=0, opacity=0.9)
+    s.line(x - w / 2, foot, x + w / 2 + d, foot - d * 0.45, stroke=EDGE, sw=1.2, opacity=0.35)
+
+
+def stakes(s, x0, x1, foot, h, gap=5.0):
+    """A palisade of pointed stakes."""
+    x = x0
+    while x < x1:
+        s.poly([(x, foot), (x, foot - h), (x + gap * 0.45, foot - h - gap * 0.7), (x + gap * 0.9, foot - h), (x + gap * 0.9, foot)],
+               s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0)
+        x += gap
+    s.rect(x0, foot - h * 0.55, x1 - x0, h * 0.1, "#4a3320", stroke="none", sw=0, opacity=0.7)
+
+
+def wall(s, x0, x1, foot, h):
+    """A crenellated stone wall."""
+    s.rect(x0, foot - h, x1 - x0, h, s.lin([(0, "#cfc9bd"), (1, "#8e887d")], 0, 0, 0, 1), stroke="none", sw=0)
+    step = 8.0
+    x = x0
+    while x < x1 - 2:
+        s.rect(x, foot - h - 5, step * 0.55, 5, "#c2bcb0", stroke="none", sw=0)
+        x += step
+    for row in (0.35, 0.7):
+        s.line(x0, foot - h * row, x1, foot - h * row, stroke="#6f6a61", sw=1, opacity=0.4)
+    s.rect(x0, foot - 3, x1 - x0, 3, "#000000", stroke="none", sw=0, opacity=0.18)
+
+
+def round_tower(s, x, foot, w, h, roof="red", wall_kind="stone"):
+    wl, wm, wd = WALLS[wall_kind]
+    rl, rm, rd = ROOFS[roof]
+    soft_shadow(s, x + w * 0.3, foot - 1, w * 0.8, w * 0.22, 0.4)
+    s.rect(x - w / 2, foot - h, w, h, s.lin([(0, wl), (0.5, wm), (1, wd)], 0, 0, 1, 0), stroke="none", sw=0)
+    s.ellipse(x, foot, w / 2, w * 0.14, wd, stroke="none", sw=0)
+    s.rect(x - w * 0.08, foot - h * 0.7, w * 0.16, h * 0.18, "#2b211a", stroke="none", sw=0)
+    s.poly([(x - w * 0.62, foot - h), (x, foot - h - w * 1.1), (x + w * 0.62, foot - h)], s.lin([(0, rl), (0.5, rm), (1, rd)], 0, 0, 1, 0), stroke="none", sw=0)
+
+
+def dome(s, x, base, r):
+    """A gilded onion dome with a cross."""
+    s.path(f"M{fmt(x - r)},{fmt(base)} Q{fmt(x - r * 1.25)},{fmt(base - r * 0.9)} {fmt(x)},{fmt(base - r * 1.9)} "
+           f"Q{fmt(x + r * 1.25)},{fmt(base - r * 0.9)} {fmt(x + r)},{fmt(base)} Z",
+           s.rad([(0, "#fff3b8"), (0.45, "#e2b33c"), (1, "#8a6212")], 0.35, 0.35, 0.8), stroke="none", sw=0)
+    s.line(x, base - r * 1.9, x, base - r * 2.6, stroke="#c99a2e", sw=1.6)
+    s.line(x - r * 0.3, base - r * 2.35, x + r * 0.3, base - r * 2.35, stroke="#c99a2e", sw=1.6)
+
+
+def settlement(tier):
+    """Five looks as a village grows (Elder's Hall levels 1-2, 3-4, 5-6, 7-8, 9-10)."""
+    s = Svg()
+    soft_shadow(s, 66, 114, 56, 12, 0.3)
+    if tier == 1:
+        house(s, 44, 108, 30, 18)
+        house(s, 82, 112, 24, 15)
+        s.circle(64, 116, 3, GLOW, stroke="none", sw=0)
+    elif tier == 2:
+        house(s, 64, 92, 28, 17)
+        house(s, 38, 104, 30, 18)
+        house(s, 88, 108, 26, 16)
+        stakes(s, 12, 116, 122, 10)
+    elif tier == 3:
+        house(s, 30, 96, 24, 15)
+        house(s, 98, 98, 22, 14)
+        house(s, 64, 98, 40, 24, roof="red", wall="wood", windows=2)
+        stakes(s, 8, 120, 122, 14)
+    elif tier == 4:
+        round_tower(s, 16, 114, 14, 40, roof="wood", wall_kind="wood")
+        round_tower(s, 112, 114, 14, 40, roof="wood", wall_kind="wood")
+        house(s, 36, 98, 24, 15)
+        house(s, 70, 96, 46, 26, roof="red", wall="plaster", windows=2)
+        stakes(s, 8, 120, 122, 16)
+    else:
+        house(s, 34, 96, 26, 16, roof="red", wall="plaster")
+        house(s, 94, 96, 26, 16, roof="red", wall="plaster")
+        house(s, 64, 92, 44, 30, roof="slate", wall="plaster", windows=2)
+        dome(s, 66, 44, 8)
+        wall(s, 10, 118, 122, 16)
+        round_tower(s, 12, 122, 16, 44)
+        round_tower(s, 116, 122, 16, 44)
+    return s
+
+
+def ruins():
+    s = Svg()
+    soft_shadow(s, 64, 112, 52, 11, 0.35)
+    s.poly([(26, 112), (26, 82), (34, 74), (40, 86), (40, 112)], s.lin([(0, "#6b5a48"), (1, "#3a3027")], 0, 0, 1, 0), stroke="none", sw=0)
+    s.poly([(70, 112), (70, 90), (80, 80), (88, 96), (98, 90), (98, 112)], s.lin([(0, "#9d978c"), (1, "#5d5850")], 0, 0, 1, 0), stroke="none", sw=0)
+    s.poly([(42, 112), (60, 96), (66, 100), (50, 114)], "#4a3a2c", stroke="none", sw=0)
+    for x, y, r, o in [(52, 64, 11, 0.45), (60, 46, 14, 0.35), (70, 26, 17, 0.25)]:
+        s.circle(x, y, r, s.rad([(0, "#4d4842", o), (1, "#4d4842", 0)]), stroke="none", sw=0)
+    s.circle(54, 106, 4, "#e8642c", stroke="none", sw=0, opacity=0.8)
+    return s
+
+
+def holy_city():
+    s = Svg(160, 160)
+    soft_shadow(s, 82, 146, 74, 14, 0.35)
+    house(s, 80, 104, 64, 34, roof="slate", wall="plaster", windows=2)
+    for x, r in [(56, 9), (104, 9)]:
+        s.rect(x - 7, 70, 14, 22, s.lin([(0, "#f5efe1"), (1, "#bfb6a1")], 0, 0, 1, 0), stroke="none", sw=0)
+        dome(s, x, 72, r)
+    s.rect(70, 46, 24, 30, s.lin([(0, "#f5efe1"), (1, "#bfb6a1")], 0, 0, 1, 0), stroke="none", sw=0)
+    dome(s, 82, 48, 14)
+    wall(s, 14, 148, 146, 20)
+    round_tower(s, 16, 146, 20, 52, roof="red")
+    round_tower(s, 146, 146, 20, 52, roof="red")
+    s.path("M70,146 L70,132 Q80,120 90,132 L90,146 Z", "#3a2a1c", stroke="none", sw=0)
+    return s
+
+
+def tent(s, x, foot, w, color=("#c9a77a", "#8c6a45", "#5a4129")):
+    light, mid, dark = color
+    soft_shadow(s, x + w * 0.2, foot - 1, w * 0.62, w * 0.16, 0.35)
+    s.poly([(x - w / 2, foot), (x, foot - w * 0.8), (x + w * 0.1, foot)], s.lin([(0, light), (1, mid)], 0, 0, 1, 0), stroke="none", sw=0)
+    s.poly([(x + w * 0.1, foot), (x, foot - w * 0.8), (x + w / 2 + w * 0.15, foot - w * 0.05)], s.lin([(0, mid), (1, dark)], 0, 0, 1, 0), stroke="none", sw=0)
+    s.poly([(x - w * 0.12, foot), (x, foot - w * 0.4), (x + w * 0.06, foot)], "#2b211a", stroke="none", sw=0)
+
+
+def camp(kind):
+    s = Svg()
+    if kind == "bandit":
+        soft_shadow(s, 64, 112, 50, 11, 0.3)
+        tent(s, 42, 104, 40, ("#b98a5e", "#8a5e3c", "#563821"))
+        tent(s, 86, 110, 34, ("#a8414b", "#7c2c34", "#4c1a20"))
+        s.circle(64, 114, 7, s.rad([(0, "#ffd27a", 0.95), (0.5, "#e8642c", 0.8), (1, "#e8642c", 0)]), stroke="none", sw=0)
+        s.line(98, 112, 98, 70, stroke="#5b3f25", sw=2.5)
+        s.poly([(98, 70), (116, 76), (98, 82)], "#a83a2c", stroke="none", sw=0)
+    else:
+        soft_shadow(s, 64, 114, 56, 12, 0.35)
+        s.path("M10,116 Q22,52 64,40 Q106,52 118,116 Z", s.rad([(0, "#8e8a7f"), (0.6, "#5f5b53"), (1, "#3a3732")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+        s.path("M40,116 Q44,76 64,70 Q84,76 88,116 Z", s.rad([(0, "#0d0b0a"), (1, "#26221e")], 0.5, 0.8, 0.7), stroke="none", sw=0)
+        for x in (56, 72):
+            s.circle(x, 94, 3, s.rad([(0, "#fff3a0"), (1, "#ff9a2e", 0)]), stroke="none", sw=0)
+        s.path("M18,112 Q30,104 40,108", "none", stroke="#d8d2c4", sw=3, opacity=0.6)
+    return s
+
+
+def fort():
+    s = Svg()
+    soft_shadow(s, 64, 114, 54, 12, 0.35)
+    stakes(s, 14, 114, 118, 18, gap=6)
+    round_tower(s, 64, 102, 22, 52, roof="wood", wall_kind="wood")
+    s.line(64, 42, 64, 26, stroke="#5b3f25", sw=2)
+    s.poly([(64, 26), (80, 31), (64, 36)], "#a83a2c", stroke="none", sw=0)
+    return s
+
+
+def outpost():
+    s = Svg()
+    house(s, 58, 108, 34, 20, roof="wood", wall="wood")
+    for i, x in enumerate((86, 94, 102)):
+        s.circle(x, 112 - (i % 2) * 6, 5, s.rad([(0, "#c49a6c"), (1, "#6b4a2c")]), stroke="none", sw=0)
+    return s
+
+
+def site(kind):
+    s = Svg()
+    soft_shadow(s, 64, 112, 52, 11, 0.3)
+    if kind == "kurgan":
+        s.path("M12,114 Q30,56 64,52 Q98,56 116,114 Z", s.rad([(0, "#a5b06a"), (0.6, "#76824a"), (1, "#4a5531")], 0.38, 0.3, 0.8), stroke="none", sw=0)
+        for x, h in [(48, 18), (64, 24), (80, 18)]:
+            s.poly([(x - 4, 60), (x - 3, 60 - h), (x + 3, 60 - h + 2), (x + 4, 60)], s.lin([(0, "#bdb6aa"), (1, "#6f695f")], 0, 0, 1, 0), stroke="none", sw=0)
+    elif kind == "sunken_shrine":
+        s.ellipse(64, 104, 52, 16, s.rad([(0, "#6aa0b4"), (1, "#2d5a6c")]), stroke="none", sw=0)
+        s.poly([(50, 104), (50, 60), (78, 60), (78, 104)], s.lin([(0, "#b5ae9f"), (1, "#6f695e")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.poly([(44, 62), (64, 44), (84, 62)], s.lin([(0, "#8c8578"), (1, "#4f4a42")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path("M24,104 Q40,98 56,104 M72,106 Q88,100 104,106", "none", stroke="#c8e0e8", sw=2, opacity=0.6)
+    elif kind == "old_hillfort":
+        s.ellipse(64, 96, 54, 24, s.rad([(0, "#9aa463"), (1, "#5b6638")]), stroke="none", sw=0)
+        s.ellipse(64, 92, 38, 15, "none", stroke="#4d5730", sw=6, opacity=0.8)
+        s.ellipse(64, 90, 38, 15, "none", stroke="#b2bb78", sw=2.5, opacity=0.6)
+        stakes(s, 46, 82, 92, 10, gap=6)
+    elif kind == "stone_idol":
+        s.path("M48,116 L50,46 Q64,30 78,46 L80,116 Z", s.lin([(0, "#c4bdb0"), (0.55, "#8e877b"), (1, "#5a554d")], 0, 0, 1, 0), stroke="none", sw=0)
+        for y in (58, 78, 98):
+            s.line(52, y, 76, y, stroke="#4f4a43", sw=2, opacity=0.6)
+            s.circle(58, y - 7, 2, "#3a3631", stroke="none", sw=0)
+            s.circle(70, y - 7, 2, "#3a3631", stroke="none", sw=0)
+    else:  # frozen_ruin
+        s.poly([(14, 116), (34, 70), (56, 116)], s.lin([(0, "#ffffff"), (1, "#b9cbd4")], 0, 0, 1, 1), stroke="none", sw=0)
+        for x in (60, 80, 100):
+            s.rect(x - 5, 66, 10, 50, s.lin([(0, "#dfe7eb"), (1, "#8fa4b0")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.rect(54, 60, 52, 8, s.lin([(0, "#eef3f5"), (1, "#a9bcc6")], 0, 0, 0, 1), stroke="none", sw=0)
+    return s
+
+
+def resource(kind):
+    s = Svg()
+    if kind == "wood":
+        soft_shadow(s, 64, 106, 46, 9, 0.35)
+        for x, y in [(42, 94), (86, 94), (64, 70)]:
+            s.rect(x - 26, y - 13, 52, 26, s.lin([(0, "#c08a55"), (0.5, "#8a5b31"), (1, "#5a3a1f")], 0, 0, 0, 1), stroke="none", sw=0, rx=12)
+            s.circle(x + 18, y, 11, s.rad([(0, "#e7c38f"), (0.7, "#c9975e"), (1, "#8a5b31")]), stroke="none", sw=0)
+            for r in (7, 3.5):
+                s.circle(x + 18, y, r, "none", stroke="#8a5b31", sw=1.2, opacity=0.6)
+    elif kind == "stone":
+        soft_shadow(s, 64, 108, 46, 9, 0.35)
+        s.poly([(20, 106), (30, 72), (58, 62), (72, 86), (64, 106)], s.lin([(0, "#cfc9bd"), (1, "#7d776d")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.poly([(58, 106), (68, 56), (98, 46), (110, 82), (102, 106)], s.lin([(0, "#e1dbd0"), (1, "#8c867b")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.poly([(68, 56), (98, 46), (92, 60), (72, 66)], "#f4f0e8", stroke="none", sw=0, opacity=0.6)
+    elif kind == "grain":
+        soft_shadow(s, 64, 110, 34, 8, 0.35)
+        for dx in (-16, -6, 6, 16):
+            s.line(64, 108, 64 + dx * 1.7, 34, stroke="#b48d3e", sw=4)
+            s.ellipse(64 + dx * 1.7, 36, 7, 15, s.rad([(0, "#f6dc8a"), (0.7, "#d9b14f"), (1, "#9c7a2a")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+        s.rect(44, 78, 40, 9, s.lin([(0, "#c9614a"), (1, "#7c2c22")], 0, 0, 0, 1), stroke="none", sw=0, rx=3)
+    elif kind == "iron":
+        soft_shadow(s, 64, 104, 46, 9, 0.35)
+        for y, x0 in [(98, 22), (76, 34)]:
+            s.poly([(x0, y), (x0 + 12, y - 22), (x0 + 72, y - 22), (x0 + 84, y)], s.lin([(0, "#a9b4c2"), (0.5, "#6c7684"), (1, "#3c434d")], 0, 0, 0, 1), stroke="none", sw=0)
+            s.poly([(x0 + 14, y - 20), (x0 + 70, y - 20), (x0 + 66, y - 14), (x0 + 18, y - 14)], "#d8e0ea", stroke="none", sw=0, opacity=0.55)
+    elif kind == "ember":
+        s.circle(64, 72, 42, s.rad([(0, "#ffd88a", 0.5), (1, "#e8642c", 0)]), stroke="none", sw=0)
+        s.path("M64,32 Q92,62 80,92 Q64,106 48,92 Q36,62 64,32 Z", s.rad([(0, "#fff1b0"), (0.4, "#ffb347"), (1, "#c2410c")], 0.5, 0.7, 0.7), stroke="none", sw=0)
+        s.path("M64,58 Q76,76 70,90 Q64,94 58,90 Q52,76 64,58 Z", "#fff6d6", stroke="none", sw=0, opacity=0.8)
+    return s
+
+def enamel(s, rim=("#f3d98f", "#b48a2e", "#7a5a17")):
+    """A dark enamel medallion in a gold rim."""
+    soft_shadow(s, 66, 116, 46, 8, 0.35)
+    s.circle(64, 62, 54, s.lin([(0, rim[0]), (0.5, rim[1]), (1, rim[2])], 0, 0, 1, 1), stroke="none", sw=0)
+    s.circle(64, 62, 47, s.rad([(0, "#3a4452"), (0.7, "#1d232c"), (1, "#11151a")], 0.4, 0.3, 0.8), stroke="none", sw=0)
+    s.circle(64, 62, 47, "none", stroke="#000000", sw=1.5, opacity=0.5)
+    return s.lin([(0, "#fbf5e6"), (1, "#bdb29b")], 0, 0, 1, 1)
+
+
+def unit(kind):
+    s = Svg()
+    pale = enamel(s)
+    if kind in ("spearman",):
+        s.line(42, 96, 86, 26, stroke=pale, sw=5)
+        s.poly([(86, 26), (92, 16), (90, 32)], pale, stroke="none", sw=0)
+        s.circle(54, 70, 18, s.rad([(0, "#c9614a"), (1, "#6e2a1f")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+        s.circle(54, 70, 18, "none", stroke=pale, sw=3)
+        s.circle(54, 70, 4, pale, stroke="none", sw=0)
+    elif kind in ("archer", "forest_archer"):
+        s.path("M48,22 Q86,62 48,102", "none", stroke=pale, sw=5)
+        s.line(48, 22, 48, 102, stroke="#d9cfb8", sw=1.5)
+        s.line(40, 62, 96, 62, stroke=pale, sw=3.5)
+        s.poly([(96, 62), (86, 56), (86, 68)], pale, stroke="none", sw=0)
+        if kind == "forest_archer":
+            s.path("M86,30 Q100,22 102,36 Q90,42 86,30 Z", s.lin([(0, "#9cbf6a"), (1, "#4f7a34")]), stroke="none", sw=0)
+    elif kind in ("horseman", "border_rider"):
+        s.path("M44,100 L48,70 Q46,48 58,32 L66,22 L70,34 Q86,40 90,56 L84,62 L70,56 Q68,72 76,100 Z", pale, stroke="none", sw=0)
+        s.circle(70, 42, 2.5, "#1d232c", stroke="none", sw=0)
+        if kind == "border_rider":
+            s.line(90, 98, 90, 24, stroke="#d9cfb8", sw=2.5)
+            s.poly([(90, 24), (106, 30), (90, 36)], "#c9614a", stroke="none", sw=0)
+    elif kind == "scout":
+        s.path("M24,62 Q64,28 104,62 Q64,96 24,62 Z", pale, stroke="none", sw=0)
+        s.circle(64, 62, 14, s.rad([(0, "#7fb6cf"), (1, "#2b5a70")]), stroke="none", sw=0)
+        s.circle(64, 62, 6, "#11151a", stroke="none", sw=0)
+        s.circle(60, 58, 2.5, "#ffffff", stroke="none", sw=0)
+    elif kind == "settler":
+        s.path("M28,74 Q64,30 100,74 Z", pale, stroke="none", sw=0)
+        s.rect(26, 74, 76, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+        for x in (40, 88):
+            s.circle(x, 92, 9, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+            s.circle(x, 92, 3, "#1d232c", stroke="none", sw=0)
+    elif kind == "river_barge":
+        s.path("M24,74 L104,74 L92,92 L36,92 Z", s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.line(62, 74, 62, 24, stroke=pale, sw=4)
+        s.poly([(66, 26), (92, 68), (66, 68)], pale, stroke="none", sw=0)
+        s.path("M28,100 Q38,94 48,100 Q58,106 68,100 Q78,94 88,100", "none", stroke="#7fb6cf", sw=3)
+    return s
+
+
+def faction(front):
+    """A horde's heraldic shield: its colour and its sign."""
+    s = Svg()
+    field = {
+        "north": ("#3d5a49", "#1f3328"),
+        "east": ("#b07a32", "#5e3c12"),
+        "order": ("#8c2a2f", "#43121a"),
+    }[front]
+    soft_shadow(s, 66, 120, 40, 7, 0.35)
+    shield = "M24,14 L104,14 L104,58 Q104,98 64,118 Q24,98 24,58 Z"
+    s.path(shield, s.lin([(0, "#f3d98f"), (0.5, "#b48a2e"), (1, "#7a5a17")], 0, 0, 1, 1), stroke="none", sw=0)
+    s.path("M30,20 L98,20 L98,58 Q98,94 64,111 Q30,94 30,58 Z", s.rad([(0, field[0]), (1, field[1])], 0.4, 0.3, 0.9), stroke="none", sw=0)
+    pale = s.lin([(0, "#fbf5e6"), (1, "#c9bea6")], 0, 0, 1, 1)
+    if front == "north":
+        for dx in (-16, 0, 16):
+            s.path(f"M{64 + dx - 4},{34} Q{64 + dx + 8},{64} {64 + dx - 2},{96} Q{64 + dx + 2},{64} {64 + dx - 4},{34} Z", pale, stroke="none", sw=0)
+    elif front == "east":
+        s.path("M78,34 A28,28 0 1,0 78,90 A22,22 0 1,1 78,34 Z", pale, stroke="none", sw=0)
+        s.path("M80,52 L84,62 L94,62 L86,68 L89,78 L80,72 L71,78 L74,68 L66,62 L76,62 Z", pale, stroke="none", sw=0)
+    else:
+        s.path("M40,82 L44,52 L54,66 L64,44 L74,66 L84,52 L88,82 Z", s.lin([(0, "#fff3b8"), (0.5, "#e2b33c"), (1, "#8a6212")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.rect(40, 82, 48, 8, "#c99a2e", stroke="none", sw=0)
+    return s
+
+# --- Village interior: buildings and fields in three stages --------------------
+# Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
+
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
+FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
+WALL_TOWERS = ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]
+
+
+def plot_ground(s, color=("#a08f6a", "#7a6a4b")):
+    s.ellipse(64, 104, 58, 19, s.rad([(0, color[0], 0.9), (0.75, color[1], 0.7), (1, color[1], 0)]), stroke="none", sw=0)
+
+
+def sign(s, x, y, emblem):
+    """A small painted board hung on a building: its trade."""
+    s.rect(x - 11, y - 11, 22, 22, s.lin([(0, "#c9614a"), (1, "#6e2a1f")], 0, 0, 1, 1), stroke="none", sw=0, rx=3)
+    pale = "#f4ead2"
+    if emblem == "spears":
+        s.line(x - 7, y + 7, x + 7, y - 7, stroke=pale, sw=2.5)
+        s.line(x + 7, y + 7, x - 7, y - 7, stroke=pale, sw=2.5)
+    elif emblem == "scroll":
+        s.rect(x - 7, y - 5, 14, 10, pale, stroke="none", sw=0, rx=2)
+    elif emblem == "sheaf":
+        for dx in (-5, 0, 5):
+            s.line(x, y + 7, x + dx, y - 6, stroke="#f2cf72", sw=2.5)
+
+
+def cart(s, x, foot, w=34, covered=False):
+    soft_shadow(s, x + 2, foot, w * 0.6, 4, 0.3)
+    if covered:
+        s.path(f"M{fmt(x - w / 2)},{fmt(foot - 10)} Q{fmt(x)},{fmt(foot - 36)} {fmt(x + w / 2)},{fmt(foot - 10)} Z",
+               s.lin([(0, "#f4eddc"), (1, "#b9ae96")], 0, 0, 1, 0), stroke="none", sw=0)
+    s.rect(x - w / 2, foot - 12, w, 9, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+    for dx in (-w / 3, w / 3):
+        s.circle(x + dx, foot - 2, 5.5, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+
+
+def barrel(s, x, foot, r=7):
+    s.rect(x - r, foot - r * 2, r * 2, r * 2, s.lin([(0, "#c49a6c"), (0.5, "#8a6440"), (1, "#4f3822")], 0, 0, 1, 0), stroke="none", sw=0, rx=r * 0.4)
+    for y in (foot - r * 1.5, foot - r * 0.5):
+        s.line(x - r, y, x + r, y, stroke="#3a2a1c", sw=1.4, opacity=0.6)
+
+
+def banner_pole(s, x, foot, h, color="#a83a2c"):
+    s.line(x, foot, x, foot - h, stroke="#5b3f25", sw=2.5)
+    s.path(f"M{x},{foot - h} L{x + 18},{foot - h + 4} L{x + 14},{foot - h + 10} L{x + 18},{foot - h + 16} L{x},{foot - h + 14} Z",
+           s.lin([(0, color), (1, "#4c1a20")], 0, 0, 1, 0), stroke="none", sw=0)
+
+
+def building(kind, stage):
+    s = Svg()
+    plot_ground(s)
+    big = [0, 0.82, 0.95, 1.08][stage]
+    if kind == "elder_hall":
+        wall_kind = ["", "wood", "plaster", "stone"][stage]
+        house(s, 58, 110, 64 * big, 34 * big, roof="red" if stage < 3 else "slate", wall=wall_kind, windows=2)
+        if stage >= 2:
+            banner_pole(s, 104, 108, 58)
+        if stage == 3:
+            dome(s, 60, 52, 8)
+    elif kind == "storehouse":
+        house(s, 56, 110, 58 * big, 30 * big, roof="thatch" if stage < 3 else "red", wall="wood", windows=0)
+        for i in range(stage):
+            barrel(s, 18 + i * 13, 112)
+    elif kind == "barracks":
+        if stage == 1:
+            tent(s, 40, 108, 40)
+            tent(s, 84, 110, 36, ("#b98a5e", "#8a5e3c", "#563821"))
+        else:
+            house(s, 56, 110, 66 * big, 30 * big, roof="slate", wall="wood" if stage == 2 else "stone", windows=2)
+            if stage == 3:
+                round_tower(s, 108, 112, 16, 50)
+        sign(s, 30 if stage > 1 else 64, 70 if stage > 1 else 58, "spears")
+    elif kind == "scout_lodge":
+        h = [0, 34, 46, 56][stage]
+        soft_shadow(s, 66, 112, 26, 6, 0.35)
+        for x0, x1 in ((48, 56), (80, 72)):
+            s.line(x0, 112, x1, 112 - h, stroke=s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), sw=6)
+        s.line(52, 112 - h * 0.4, 76, 112 - h * 0.62, stroke="#6e4b2c", sw=3)
+        house(s, 64, 112 - h, 32, 12, roof="thatch", wall="wood", door=False)
+        if stage == 3:
+            banner_pole(s, 64, 112 - h - 26, 22)
+    elif kind == "caravan_yard":
+        house(s, 40, 108, 46 * big, 24 * big, roof="thatch", wall="wood", windows=0)
+        for i in range(stage):
+            cart(s, 94, 114 - i * 14, covered=i == stage - 1)
+    elif kind == "settlers_lodge":
+        house(s, 44, 110, 44 * big, 24 * big, roof="thatch", wall="wood")
+        cart(s, 94, 112, covered=True)
+        if stage == 3:
+            house(s, 98, 86, 22, 12, roof="thatch", wall="wood", door=False)
+    elif kind == "academy":
+        house(s, 58, 110, 62 * big, 34 * big, roof="red", wall="plaster", windows=2)
+        sign(s, 26, 88, "scroll")
+        if stage == 3:
+            s.path("M50,54 Q62,30 74,54 Z", s.rad([(0, "#bfe3ef"), (0.5, "#4f8fb0"), (1, "#24485c")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+    elif kind == "granary_temple":
+        s.rect(20, 100, 78, 12, s.lin([(0, "#c9c3b7"), (1, "#8a847a")], 0, 0, 0, 1), stroke="none", sw=0)
+        house(s, 56, 100, 54 * big, 26 * big, roof="thatch", wall="wood", windows=0)
+        sign(s, 26, 82, "sheaf")
+        if stage >= 2:
+            dome(s, 58, 52 - stage * 3, 6 + stage)
+    elif kind == "stone_redoubt":
+        w = 76 * big
+        soft_shadow(s, 66, 112, w * 0.6, 10, 0.35)
+        wall(s, 64 - w / 2, 64 + w / 2, 112, 34)
+        s.path("M54,112 L54,94 Q64,84 74,94 L74,112 Z", "#2b211a", stroke="none", sw=0)
+        if stage >= 2:
+            round_tower(s, 64 - w / 2, 114, 18, 52)
+        if stage == 3:
+            round_tower(s, 64 + w / 2, 114, 18, 52)
+    elif kind == "longhouse_hall":
+        house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
+        for i in range(stage):
+            s.circle(26 + i * 12, 112, 3.5, GLOW, stroke="none", sw=0)
+    return s
+
+
+def wall_gate(stage):
+    """The walls' plot: their gate, as a palisade, a stone wall or a fortress."""
+    s = Svg()
+    plot_ground(s, ("#9a8a68", "#6e5f45"))
+    if stage == 1:
+        stakes(s, 14, 50, 108, 26, gap=6)
+        stakes(s, 78, 114, 108, 26, gap=6)
+        s.rect(50, 74, 28, 34, s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.line(50, 90, 78, 90, stroke="#3a2a1c", sw=2.5)
+    else:
+        wall(s, 12, 116, 110, 30 if stage == 2 else 38)
+        s.path("M50,110 L50,84 Q64,70 78,84 L78,110 Z", "#2b211a", stroke="none", sw=0)
+        for x in (44, 84):
+            round_tower(s, x, 112, 16 if stage == 2 else 20, 50 if stage == 2 else 62, roof="slate" if stage == 3 else "red")
+    return s
+
+
+def tower_art(kind, stage):
+    """A wall slot's defensive work in three stages."""
+    s = Svg()
+    plot_ground(s, ("#9a8a68", "#6e5f45"))
+    big = [0, 0.8, 0.95, 1.1][stage]
+    stone = "stone" if stage > 1 else "wood"
+    if kind == "archer_tower":
+        round_tower(s, 64, 112, 34 * big, 66 * big, roof="red" if stage < 3 else "slate", wall_kind=stone)
+        for dx in (-8, 4):
+            s.line(64 + dx, 112 - 60 * big, 64 + dx + 10, 112 - 70 * big, stroke="#3a2a1c", sw=2)
+    elif kind == "gate_tower":
+        w = 52 * big
+        soft_shadow(s, 66, 112, w * 0.7, 10, 0.35)
+        s.rect(64 - w / 2, 112 - 70 * big, w, 70 * big, s.lin([(0, "#cfc9bd"), (1, "#7d776d")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path(f"M{64 - w * 0.22},112 L{64 - w * 0.22},{112 - 30 * big} Q64,{112 - 42 * big} {64 + w * 0.22},{112 - 30 * big} L{64 + w * 0.22},112 Z", "#2b211a", stroke="none", sw=0)
+        for i in range(4):
+            s.line(64 - w * 0.18 + i * w * 0.12, 112 - 34 * big, 64 - w * 0.18 + i * w * 0.12, 112, stroke="#6b665f", sw=1.6)
+        for i in range(4):
+            s.rect(64 - w / 2 + i * w / 3.5, 112 - 78 * big, w / 7, 8, "#b8b2a6", stroke="none", sw=0)
+    elif kind == "ballista":
+        soft_shadow(s, 66, 112, 40, 9, 0.35)
+        s.rect(26, 92, 76, 18, s.lin([(0, "#cfc9bd"), (1, "#8a847a")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.path("M34,70 Q64,52 94,70", "none", stroke="#6e4b2c", sw=5 * big)
+        s.line(64, 90, 64, 64, stroke="#5b3f25", sw=5)
+        s.line(30, 74, 98, 62, stroke="#c9c3b7", sw=3)
+        s.poly([(98, 62), (88, 58), (90, 68)], "#8d98a6", stroke="none", sw=0)
+        s.line(34, 70, 64, 76, stroke="#efe6d2", sw=1.2)
+        s.line(94, 70, 64, 76, stroke="#efe6d2", sw=1.2)
+    elif kind == "murder_holes":
+        wall(s, 16, 112, 112, 40 * big)
+        for x in (36, 64, 92):
+            s.rect(x - 7, 112 - 46 * big, 14, 8, "#3a3631", stroke="none", sw=0)
+            s.circle(x, 112 - 54 * big, 7, s.rad([(0, "#ffffff", 0.6), (1, "#ffffff", 0)]), stroke="none", sw=0)
+    elif kind == "ditch":
+        s.ellipse(64, 100, 52, 14, s.rad([(0, "#3e3428"), (1, "#5d4e3a")]), stroke="none", sw=0)
+        if stage == 3:
+            s.ellipse(64, 101, 44, 9, s.rad([(0, "#5f95ad"), (1, "#2c5571")]), stroke="none", sw=0)
+        for i in range(4 + stage * 2):
+            x = 18 + i * (92 / (3 + stage * 2))
+            s.line(x, 92, x + 6, 74, stroke="#7a5636", sw=3)
+    elif kind == "watchtower":
+        h = 70 * big
+        soft_shadow(s, 66, 112, 22, 6, 0.35)
+        for x0, x1 in ((52, 58), (76, 70)):
+            s.line(x0, 112, x1, 112 - h, stroke="#6e4b2c", sw=5)
+        s.line(54, 112 - h * 0.45, 74, 112 - h * 0.62, stroke="#5b3f25", sw=3)
+        house(s, 64, 112 - h, 28, 10, roof="thatch" if stage < 3 else "red", wall="wood", door=False)
+        banner_pole(s, 64, 112 - h - 22, 20)
+    return s
+
+
+def field(kind, stage):
+    s = Svg()
+    ground = {"woodcutter": ("#7f9a52", "#4e6635"), "quarry": ("#b0a476", "#7e7350"), "farm": ("#b9b26a", "#857c43"), "iron_mine": ("#8f8a80", "#5f5b54")}[kind]
+    s.circle(64, 66, 58, s.rad([(0, ground[0]), (1, ground[1])], 0.4, 0.35, 0.75), stroke="none", sw=0)
+    if kind == "woodcutter":
+        for x, foot, size in [(40, 70, 40), (66, 58, 46), (90, 72, 40)][: stage]:
+            conifer(s, x, foot, size * 0.62, size, ("#7f9a52", "#4f6b37", "#2b3f24"))
+        for i in range(stage):
+            s.rect(34 + i * 8, 94 - i * 6, 46, 10, s.lin([(0, "#c08a55"), (1, "#5a3a1f")], 0, 0, 0, 1), stroke="none", sw=0, rx=5)
+    elif kind == "quarry":
+        s.poly([(22, 96), (34, 62), (60, 54), (72, 78), (62, 98)], s.lin([(0, "#d8d2c6"), (1, "#7d776d")], 0, 0, 1, 1), stroke="none", sw=0)
+        for i in range(stage):
+            x, y = 72 + (i % 2) * 16, 96 - (i // 2) * 12 - i * 4
+            s.rect(x, y - 12, 18, 12, s.lin([(0, "#e4ded3"), (1, "#9a948a")], 0, 0, 1, 1), stroke="none", sw=0)
+        if stage == 3:
+            s.line(98, 100, 98, 40, stroke="#6e4b2c", sw=4)
+            s.line(98, 40, 70, 48, stroke="#6e4b2c", sw=3)
+    elif kind == "farm":
+        rows = stage + 2
+        for i in range(rows):
+            y = 46 + i * (56 / rows)
+            s.rect(22, y, 84, 56 / rows * 0.6, s.lin([(0, "#f2d77e"), (1, "#b48d3e")], 0, 0, 0, 1), stroke="none", sw=0, rx=3)
+        if stage >= 2:
+            house(s, 94, 104, 22, 12, roof="thatch", wall="wood", door=False)
+    else:  # iron_mine
+        s.path("M28,104 Q34,48 64,44 Q94,48 100,104 Z", s.rad([(0, "#a49e94"), (1, "#57534c")], 0.38, 0.3, 0.8), stroke="none", sw=0)
+        s.path("M48,104 Q50,72 64,70 Q78,72 80,104 Z", "#141110", stroke="none", sw=0)
+        s.rect(44, 66, 40, 6, s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 0, 1), stroke="none", sw=0)
+        if stage >= 2:
+            cart(s, 100, 112, 26)
+        if stage == 3:
+            s.rect(14, 76, 16, 30, s.lin([(0, "#c9c3b7"), (1, "#6a655d")], 0, 0, 1, 0), stroke="none", sw=0)
+            s.circle(22, 66, 8, s.rad([(0, "#4d4842", 0.6), (1, "#4d4842", 0)]), stroke="none", sw=0)
+            s.circle(22, 72, 4, GLOW, stroke="none", sw=0)
+    return s
+
+
+def plot(kind):
+    s = Svg()
+    if kind == "empty":
+        plot_ground(s, ("#a8987a", "#7d6f53"))
+        for x, y in [(20, 100), (108, 100), (64, 86), (64, 118)]:
+            s.line(x, y, x, y - 14, stroke="#6e4b2c", sw=3.5)
+        s.path("M20,92 L64,78 L108,92", "none", stroke="#efe6d2", sw=1.2, opacity=0.8)
+    else:  # locked: dark, bramble-grown ground under a padlock
+        plot_ground(s, ("#4d4537", "#2f2a22"))
+        for x, y in [(30, 104), (98, 104), (48, 114), (82, 114)]:
+            tuft(s, x, y, color="#46552e", size=9)
+        s.path("M54,80 L54,70 A10 10 0 0 1 74,70 L74,80", "none", stroke="#d8d2c4", sw=4)
+        s.rect(48, 78, 32, 24, s.lin([(0, "#cfc9bd"), (1, "#7d776d")], 0, 0, 1, 1), stroke="none", sw=0, rx=3)
+        s.circle(64, 88, 3.5, "#1d1813", stroke="none", sw=0)
+        s.line(64, 90, 64, 96, stroke="#1d1813", sw=3)
+    return s
+
+def banner(part):
+    """The owner's banner: the cloth is white so the game can tint it."""
+    s = Svg(64, 96)
+    if part == "pole":
+        s.line(14, 92, 14, 8, stroke=s.lin([(0, "#a8794a"), (1, "#4f3822")], 0, 0, 1, 0), sw=4)
+        s.circle(14, 7, 4, s.rad([(0, "#fff3b8"), (1, "#a77a17")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+    else:
+        # White with soft folds, so the tint keeps its shading.
+        s.path("M16,12 L58,16 L50,30 L58,44 L16,48 Z", s.lin([(0, "#ffffff"), (0.5, "#e9e9e9"), (1, "#bdbdbd")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path("M28,13 L30,47", "none", stroke="#9a9a9a", sw=2, opacity=0.35)
+        s.path("M42,15 L40,46", "none", stroke="#9a9a9a", sw=2, opacity=0.25)
+    return s
+
+
+def app_icon():
+    s = Svg(192, 192)
+    s.rect(6, 6, 180, 180, s.lin([(0, "#e3c27a"), (1, "#8a6212")], 0, 0, 1, 1), stroke="none", sw=0, rx=38)
+    s.rect(14, 14, 164, 164, s.rad([(0, "#2c3644"), (1, "#10141a")], 0.45, 0.3, 0.85), stroke="none", sw=0, rx=32)
+    s.path("M30,150 Q96,96 162,150", "none", stroke="#6a655d", sw=14)
+    s.path("M30,150 Q96,96 162,150", "none", stroke="#c9c3b7", sw=8)
+    for x in (60, 96, 132):
+        s.line(x, 150 - (40 if x == 96 else 24), x, 162, stroke="#9d978c", sw=6)
+    s.rect(72, 74, 48, 36, s.lin([(0, "#f5efe1"), (1, "#bfb6a1")], 0, 0, 1, 0), stroke="none", sw=0)
+    dome(s, 96, 76, 18)
+    return s
+
+
+def ui_title():
+    """The start screen's picture: the Holy City over the Smorodina and the
+    Kalinov Bridge, between dark woods, at dusk."""
+    s = Svg(360, 180)
+    s.rect(0, 0, 360, 180, s.lin([(0, "#2a3446"), (0.55, "#b9805a"), (1, "#e7b46f")]), stroke="none", sw=0)
+    s.circle(282, 70, 26, s.rad([(0, "#fff1c4"), (0.4, "#f6c46e", 0.9), (1, "#f6c46e", 0)]), stroke="none", sw=0)
+    s.path("M0,104 Q60,70 130,90 Q200,60 260,84 Q320,66 360,88 L360,180 L0,180 Z", s.lin([(0, "#5c5a63"), (1, "#3b3a42")]), stroke="none", sw=0)
+    s.path("M0,126 Q90,98 180,112 Q270,96 360,122 L360,180 L0,180 Z", s.lin([(0, "#4d5b3a"), (1, "#2c3624")]), stroke="none", sw=0)
+    s.embed(holy_city(), 128, 18, 0.65)
+    for x, foot, size in [(18, 134, 34), (40, 142, 40), (10, 156, 36), (322, 130, 34), (344, 144, 40), (302, 154, 34)]:
+        conifer(s, x, foot, size * 0.6, size, ("#3e5240", "#26362a", "#141d17"))
+    s.path("M0,158 Q100,144 180,154 Q260,164 360,148 L360,180 L0,180 Z", s.lin([(0, "#c96d3c"), (1, "#7a2e18")]), stroke="none", sw=0)
+    s.path("M30,168 Q60,162 90,168 M220,166 Q250,160 280,166", "none", stroke="#ffd27a", sw=2, opacity=0.7)
+    s.path("M120,158 Q180,120 240,158", "none", stroke="#3b3a42", sw=12)
+    s.path("M120,158 Q180,120 240,158", "none", stroke="#a39d92", sw=7)
+    for x in (150, 180, 210):
+        s.line(x, 158 - (24 if x == 180 else 16), x, 168, stroke="#6a655d", sw=4)
+    return s
+
 # --- Build everything --------------------------------------------------------
 
 def assets():
@@ -904,6 +965,10 @@ def assets():
     for kind in VILLAGE_BUILDINGS:
         for stage in (1, 2, 3):
             out[f"building/{kind}_{stage}"] = building(kind, stage)
+    for stage in (1, 2, 3):
+        out[f"building/wall_{stage}"] = wall_gate(stage)
+        for kind in WALL_TOWERS:
+            out[f"building/{kind}_{stage}"] = tower_art(kind, stage)
     for kind in FIELDS:
         for stage in (1, 2, 3):
             out[f"field/{kind}_{stage}"] = field(kind, stage)

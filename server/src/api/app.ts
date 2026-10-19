@@ -187,6 +187,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     research: scheduler.data.research,
     heroes: scheduler.data.heroes,
     leaders: scheduler.data.leaders,
+    walls: scheduler.data.walls,
     orders: scheduler.data.orders,
     armies: scheduler.data.armies,
     field: scheduler.data.field,

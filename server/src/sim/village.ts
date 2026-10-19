@@ -1,4 +1,5 @@
 import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js';
+import { openTowerSlots, towerIndex, towerPlot, WALL, WALL_PLOT } from './walls.js';
 import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
 import { hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -23,8 +24,9 @@ import {
 } from './training.js';
 
 // A village is laid out as plots: resource fields around it ("f0"…),
-// building slots in its center ("c0"…, the first holding the Elder's Hall)
-// and outposts on map hexes near it ("o3,-2"). Each plot holds one building
+// building slots in its center ("c0"…, the first holding the Elder's Hall),
+// its walls ("w") and their slots for towers ("t0"…, see walls.ts), and
+// outposts on map hexes near it ("o3,-2"). Each plot holds one building
 // at some level; fields never change type. An outpost at level 0 is being
 // built or lies in ruins.
 export interface Plot {
@@ -106,7 +108,23 @@ export function initialPlots(data: GameData): Record<string, Plot> {
   fields.forEach((building, i) => (plots[fieldPlot(i)] = { building, level: 0 }));
   for (let i = 0; i < centerSlots; i++) plots[centerPlot(i)] = { building: null, level: 0 };
   plots[HALL_PLOT] = { building: HALL, level: 1 };
-  return plots;
+  return withWallPlots(data, plots);
+}
+
+// A breach knocks the walls down (walls.json breachLevelsLost).
+export function breachWalls(data: GameData, state: VillageState): VillageState {
+  const wall = state.plots[WALL_PLOT];
+  if (!wall || wall.level <= 0) return state;
+  const plots = { ...state.plots, [WALL_PLOT]: { ...wall, level: Math.max(0, wall.level - data.walls.breachLevelsLost) } };
+  return { ...state, plots, levels: levelsOf(plots) };
+}
+
+// The walls (unbuilt) and their slots, for villages laid out before walls.
+export function withWallPlots(data: GameData, plots: Plots): Record<string, Plot> {
+  const out: Record<string, Plot> = { ...plots };
+  out[WALL_PLOT] ??= { building: WALL, level: 0 };
+  data.walls.slotsAt.forEach((_, i) => (out[towerPlot(i)] ??= { building: null, level: 0 }));
+  return out;
 }
 
 // Highest level of each building in the village itself (outposts aside).
@@ -275,8 +293,15 @@ function resolvePlot(data: GameData, state: VillageState, order: BuildOrder, hal
     if (!fields[0]) throw new RuleError(`This village has no ${def.name} fields`);
     return fields[0];
   }
+  if (def.kind === 'wall') return WALL_PLOT;
   const existing = ids.find((id) => plannedPlot(state, id).building === order.building);
   if (existing) return existing;
+  if (def.kind === 'tower') {
+    const open = openTowerSlots(data, plannedPlot(state, WALL_PLOT)?.level ?? 0);
+    const slot = ids.find((id) => (towerIndex(id) ?? open) < open && plannedPlot(state, id).building === null);
+    if (!slot) throw new RuleError('No free wall slot; raise the walls');
+    return slot;
+  }
   const free = ids.find((id) => isUnlockedSlot(data, id, hallLevel) && plannedPlot(state, id).building === null);
   if (!free) throw new RuleError('No free building slot; upgrade the Elder\'s Hall');
   return free;
@@ -310,11 +335,17 @@ export function queueBuild(
       throw new RuleError(`That plot holds a ${buildingDef(data, building).name}`);
     }
   } else {
-    if (!isUnlockedSlot(data, plot, hallLevel)) throw new RuleError('That slot is locked; upgrade the Elder\'s Hall');
+    const slot = towerIndex(plot);
+    if (slot !== null && slot >= openTowerSlots(data, plannedPlot(state, WALL_PLOT)?.level ?? 0)) {
+      throw new RuleError('That wall slot is not open yet; raise the walls');
+    }
+    if (slot === null && !isUnlockedSlot(data, plot, hallLevel)) throw new RuleError('That slot is locked; upgrade the Elder\'s Hall');
     if (!request.building) throw new RuleError('Say which building to construct');
     building = request.building;
     const def = buildingDef(data, building);
-    if (def.kind !== 'center') throw new RuleError(`${def.name} is built on fields, not in the village`);
+    if (slot !== null && def.kind !== 'tower') throw new RuleError(`${def.name} is not built on the walls`);
+    if (slot === null && def.kind === 'tower') throw new RuleError(`${def.name} is built in a wall slot`);
+    if (slot === null && def.kind !== 'center') throw new RuleError(`${def.name} is built on fields, not in the village`);
     if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can build a ${def.name}`);
     const taken = Object.keys(state.plots).some((id) => id !== plot && plannedPlot(state, id).building === building);
     if (taken) throw new RuleError(`This village already has a ${def.name}`);

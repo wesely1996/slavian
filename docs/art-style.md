@@ -28,32 +28,30 @@ In the manner of modern grand strategy games ([`art/map-sample.png`](art/map-sam
 
 ## The style of the pieces
 
-(Being redrawn in the shaded style of the features: settlements, units and
-the rest still follow the first, flat style below.)
+Everything is drawn in one shaded style (`tools/art/generate.py`), so the set
+stays consistent and reads well on a phone:
 
-Clean and simple, but distinct: everything should be recognizable at a
-glance on a phone, and still look good.
-
-- **One outline for everything:** dark brown `#2b2118`, 4 px at 128 px, round
-  joins.
-- **Flat fills, one highlight:** each shape has a base colour and one lighter
-  highlight; no gradients, no textures.
-- **A soft ground shadow** under objects that stand on the map.
-- **A shared palette** (`P` in the generator): earth and wood tones, slate
-  stone, thatch and red roofs, gold for the sacred (the Holy City's domes,
-  Svarog's Ember), cold blues and white for the North.
+- **Shaded, not outlined:** gradients lit from the upper left (lit faces
+  light, the far side in shadow), no heavy outlines; at most a faint dark edge.
+- **A soft shadow** (a fading ellipse) at the foot of everything that stands.
+- **Three-quarter view** for buildings: the gabled front lit, the side going
+  back in shadow, the roof plane over it; warm lit windows.
+- **Natural materials:** thatch, red tile and slate roofs; wood, plaster and
+  stone walls; gilded onion domes for the sacred (the Holy City, a grown
+  village, the Granary-Temple).
 - **Distinct silhouettes:** a settlement grows from two huts to a walled town
   with a golden dome in five steps (Elder's Hall levels 1–2, 3–4, 5–6, 7–8,
-  9–10); camps are tents, lairs are caves with eyes, sites each have their own
+  9–10); camps are tents, lairs caves with glowing eyes, sites each their own
   shape.
-- **Owners by colour:** a settlement's banner cloth (`banner/cloth`, drawn
-  white) and its outline take the owner's colour: green for yours, blue for
-  allies', red for enemies'.
+- **Owners by colour:** a settlement's banner cloth (`banner/cloth`, white
+  with soft folds) and its ring take the owner's colour: green for yours,
+  blue for allies', red for enemies'.
 - **Village buildings and fields** come in three stages each (levels 1–3,
-  4–7, 8+): tents become a longhouse, a palisade a stone keep. Open plots are
+  4–7, 8+): tents become a hall, a palisade a stone keep. Open plots are
   staked out; locked ones are dark and overgrown under a padlock.
-- **Units** sit in a gold-ringed medallion; **hordes** have an emblem per
-  faction.
+- **Units** are pale glyphs on dark enamel medallions in a gold rim;
+  **hordes** have a heraldic shield per faction (the North's claw marks, the
+  Nomads' crescent and star, the Order's crown).
 
 ## The interface
 
@@ -111,6 +109,6 @@ drawing.
 
 - `python3 tools/art/generate.py` writes `client/art/generated/` and adds new
   ids to `art.json`.
-- `godot --path client --resolution 1400x3400 --script res://tests/art_sheet.gd -- out.png`
+- `godot --path client --resolution 1400x3700 --script res://tests/art_sheet.gd -- out.png`
   (with a display, e.g. `xvfb-run`) renders the style sample sheet with the
   game's own renderer.

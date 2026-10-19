@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <circle cx="64" cy="64" r="56" fill="#e2b33c" stroke="#2b2118" stroke-width="4" opacity="1"/>
-  <circle cx="64" cy="64" r="48" fill="#f4f1ea" stroke="#2b2118" stroke-width="3" opacity="1"/>
-  <path d="M36,104 L44,64 Q46,36 70,30 L90,22 L86,36 Q98,46 96,62 L84,64 L80,54 L64,60 L62,104 Z" fill="#8b5a2b" stroke="#2b2118" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
-  <path d="M60,34 Q48,44 46,64" fill="none" stroke="#2b2118" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
-  <circle cx="82" cy="40" r="3" fill="#2b2118" stroke="none" stroke-width="0" opacity="1"/>
-  <line x1="98" y1="100" x2="98" y2="26" stroke="#2b2118" stroke-width="3" stroke-linecap="round" opacity="1"/>
-  <polygon points="98,26 114,32 98,38" fill="#a83a2c" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round" opacity="1"/>
+  <defs><radialGradient id="g308" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.35"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient><linearGradient id="g309" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d98f"/><stop offset="0.5" stop-color="#b48a2e"/><stop offset="1" stop-color="#7a5a17"/></linearGradient><radialGradient id="g310" cx="0.4" cy="0.3" r="0.8"><stop offset="0" stop-color="#3a4452"/><stop offset="0.7" stop-color="#1d232c"/><stop offset="1" stop-color="#11151a"/></radialGradient><linearGradient id="g311" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf5e6"/><stop offset="1" stop-color="#bdb29b"/></linearGradient></defs>
+  <ellipse cx="66" cy="116" rx="46" ry="8" fill="url(#g308)" stroke="none" stroke-width="0" opacity="1"/>
+  <circle cx="64" cy="62" r="54" fill="url(#g309)" stroke="none" stroke-width="0" opacity="1"/>
+  <circle cx="64" cy="62" r="47" fill="url(#g310)" stroke="none" stroke-width="0" opacity="1"/>
+  <circle cx="64" cy="62" r="47" fill="none" stroke="#000000" stroke-width="1.5" opacity="0.5"/>
+  <path d="M44,100 L48,70 Q46,48 58,32 L66,22 L70,34 Q86,40 90,56 L84,62 L70,56 Q68,72 76,100 Z" fill="url(#g311)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+  <circle cx="70" cy="42" r="2.5" fill="#1d232c" stroke="none" stroke-width="0" opacity="1"/>
+  <line x1="90" y1="98" x2="90" y2="24" stroke="#d9cfb8" stroke-width="2.5" stroke-linecap="round" opacity="1"/>
+  <polygon points="90,24 106,30 90,36" fill="#c9614a" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
 </svg>

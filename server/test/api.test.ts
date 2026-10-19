@@ -1687,6 +1687,51 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(await march()).toBe(Math.round(offRoad * scheduler.data.field.road.factor));
   });
 
+  it('fights at the walls: siege works, battering, towers and a breach', async () => {
+    const zora = await guest('Zora');
+    const created = await call('POST', '/v1/worlds', zora.token, { name: 'Walls', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, zora.token);
+    const village = started.body.villages[0];
+    expect(village.plots.w).toEqual({ building: 'wall', level: 0 });
+    // Raise the walls at once (level 6), with an archer tower in the first slot.
+    const { rows } = await db.query<{ plots: Record<string, unknown> }>('SELECT plots FROM villages WHERE id = $1', [village.id]);
+    const plots = { ...rows[0]!.plots, w: { building: 'wall', level: 6 }, t0: { building: 'archer_tower', level: 3 } };
+    await db.query(`UPDATE villages SET plots = $2, garrison = '{"spearman": 25}' WHERE id = $1`, [village.id, JSON.stringify(plots)]);
+    now = new Date(started.body.waves[0].spawnAt);
+    await tick(db, now, scheduler);
+    let world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    now = new Date(world.waves[0].arrivesAt);
+    await tick(db, now, scheduler);
+    world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const battle = world.battles[0];
+    const integrity = Math.round(120 * 6);
+    expect(battle.setup.wall).toEqual({ level: 6, integrity, max: integrity });
+    // A front that builds engines sets them up first; the assault waits.
+    const front = scheduler.data.enemies.fronts[battle.front as 'north']!;
+    if (battle.setup.siege) {
+      expect(battle.setup.siege.engine).toBe(front.engine);
+      expect(battle.attackerInitial[front.engine!]).toBeGreaterThanOrEqual(battle.setup.siege.count);
+      now = new Date(battle.setup.siege.readyAt);
+    }
+    for (let round = 0; round < 12; round++) {
+      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      await tick(db, now, scheduler);
+    }
+    world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const fought = world.battles[0];
+    expect(fought.status).not.toBe('ongoing');
+    const lefts = fought.rounds.map((r: { wallLeft?: number }) => r.wallLeft).filter((n: number | undefined) => n !== undefined);
+    expect(lefts.length).toBeGreaterThan(0);
+    expect(lefts).toEqual([...lefts].sort((a: number, b: number) => b - a));
+    expect(lefts[0]).toBeLessThan(integrity);
+    // A breach knocks the walls down a level.
+    const after = world.villages.find((v: { id: number }) => v.id === village.id);
+    const breached = lefts.at(-1) === 0;
+    expect(after.plots.w.level).toBe(breached ? 5 : 6);
+    expect(fought.rounds.some((r: { breach?: boolean }) => r.breach)).toBe(breached);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

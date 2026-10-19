@@ -50,7 +50,9 @@ func _draw() -> void:
 	_draw_parchment(area, rng)
 	_draw_ground(area, rng)
 	var rounds := int(data.get("battle", {}).get("maxRounds", 12))
-	var closing := clampf(float(round) / float(maxi(1, rounds)) * 2.0, 0.0, 1.0)
+	# The lines close in round by round; at walls, only once they're breached.
+	var since := round - _breach_round()
+	var closing := clampf(float(since) / float(maxi(1, rounds)) * 2.0, 0.0, 1.0)
 	var start := BattleStory.units_at(battle, 0)
 	var now := BattleStory.units_at(battle, round)
 	# Armies that joined later hold their place from the start, as ghosts
@@ -60,6 +62,7 @@ func _draw() -> void:
 	var gap := size.y * lerpf(START_GAP, 0.04, closing)
 	var our_back := _draw_side(BattleStory.squads(data, ours_start, now.defender), ours, size.y / 2.0 - gap, -1)
 	var their_back := _draw_side(BattleStory.squads(data, start.attacker, now.attacker), ENEMY, size.y / 2.0 + gap, 1)
+	_draw_wall(size.y / 2.0 - gap * 0.2)
 	if round > 0:
 		_draw_clash(Vector2(size.x / 2.0, size.y / 2.0), size.x * 0.035)
 	# Leaders stand behind their lines.
@@ -213,6 +216,49 @@ func _draw_leader(at: Vector2, color: Color, name: String) -> void:
 	_label(at + Vector2(0, (rect.size.y * 0.5 + 12.0) * (-1.0 if at.y < size.y / 2.0 else 1.0)), name, 17.0)
 
 
+## Our walls between the lines, what is left of them after the round
+## shown: whole, battered (cracked, its strength under it), or breached (a
+## gap of rubble in the middle).
+func _draw_wall(y: float) -> void:
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	if not setup.has("wall"):
+		return
+	var wall: Dictionary = setup.wall
+	var left := int(wall.max)
+	for entry in battle.get("rounds", []):
+		if int(entry.round) <= round and entry.has("wallLeft"):
+			left = int(entry.wallLeft)
+	var h := size.y * 0.025
+	var x0 := size.x * 0.06
+	var x1 := size.x * 0.94
+	var stone := Color("#8f897e") if int(wall.level) >= 4 else Color("#8a5e3a")
+	var gap := Vector2(size.x * 0.44, size.x * 0.56) if left <= 0 else Vector2(size.x * 0.5, size.x * 0.5)
+	for span in [Vector2(x0, gap.x), Vector2(gap.y, x1)]:
+		if span.y <= span.x:
+			continue
+		draw_rect(Rect2(span.x, y - h, span.y - span.x, h * 2.0), Color(0, 0, 0, 0.25))
+		draw_rect(Rect2(span.x, y - h * 1.2, span.y - span.x, h * 2.0), stone)
+		var step := h * 1.6
+		var x: float = span.x
+		while x < span.y - step * 0.5:
+			draw_rect(Rect2(x, y - h * 1.9, step * 0.55, h * 0.7), stone.lightened(0.15))
+			x += step
+		draw_rect(Rect2(span.x, y - h * 1.2, span.y - span.x, h * 2.0), INK, false, 1.5)
+	if left <= 0:
+		for i in 7:
+			var p := Vector2(lerpf(gap.x, gap.y, (i + 0.5) / 7.0), y + (i % 3 - 1) * h * 0.5)
+			draw_circle(p, h * 0.55, stone.darkened(0.2))
+		_label(Vector2(size.x / 2.0, y + h * 3.0), "Breach!", 20.0)
+	else:
+		var share := float(left) / maxf(1.0, float(wall.max))
+		if share < 1.0:
+			for i in int((1.0 - share) * 6.0):
+				var cx := lerpf(x0, x1, (i * 0.37 + 0.11) - floor(i * 0.37 + 0.11))
+				draw_line(Vector2(cx, y - h), Vector2(cx + h * 0.6, y + h * 0.6), INK, 1.5, true)
+		var text := "%s  %d / %d" % [WallText.tier(data, int(wall.level)), left, int(wall.max)]
+		_label(Vector2(x0 + _width(text, 16.0) / 2.0 + 6.0, y + h * 2.4), text, 16.0)
+
+
 func _draw_clash(at: Vector2, r: float) -> void:
 	for dir in [Vector2(1, 1), Vector2(-1, 1)]:
 		draw_line(at - dir * r, at + dir * r, INK, 4.0, true)
@@ -263,6 +309,18 @@ func _tree(at: Vector2, s: float) -> void:
 func _tuft(at: Vector2, s: float) -> void:
 	for dx in [-0.6, 0.0, 0.6]:
 		draw_line(at + Vector2(dx * s, 0), at + Vector2(dx * s * 1.5, -s * (1.3 if dx == 0.0 else 0.9)), TREE, 2.0, true)
+
+
+## The round the walls fell in (the lines close from then on); 0 without
+## walls, beyond the last round while they stand.
+func _breach_round() -> int:
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	if not setup.has("wall"):
+		return 0
+	for entry in battle.get("rounds", []):
+		if entry.get("breach", false):
+			return int(entry.round)
+	return 9999
 
 
 ## Every army that ever joined, by unit, so the squads keep their place.
