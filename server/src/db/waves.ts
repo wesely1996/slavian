@@ -30,6 +30,8 @@ export interface Wave {
   initial: Composition;
   // One of Ritual Night's hordes.
   ritual: boolean;
+  // The front's leader at its head (db/leaders.ts), if any.
+  leaderId: number | null;
 }
 
 interface WaveRow {
@@ -52,6 +54,7 @@ interface WaveRow {
   struck: (string | number)[];
   initial: Composition | null;
   ritual: boolean;
+  leader_id: number | null;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -74,6 +77,7 @@ function fromRow(row: WaveRow): Wave {
     struck: row.struck.map(Number),
     initial: row.initial ?? row.composition,
     ritual: row.ritual,
+    leaderId: row.leader_id,
   };
 }
 

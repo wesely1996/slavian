@@ -43,6 +43,7 @@ export function digestSummary(kinds: readonly string[]): string {
     caravan_delivered: ['caravan delivery', 'caravan deliveries'],
     settlers: ['settlers report', 'settlers reports'],
     hero: ['hero report', 'hero reports'],
+    leader: ['word of an enemy leader', 'words of enemy leaders'],
   };
   const counts = new Map<string, number>();
   for (const kind of kinds) counts.set(kind, (counts.get(kind) ?? 0) + 1);

@@ -102,12 +102,16 @@ static func plural(name: String, count: int) -> String:
 
 
 ## What the battle looked like before the first blow. `ctx` names things:
-## {enemy: "The Northern horde", place: "Vesna's village", helpers: Callable}.
+## {enemy: "the Monsters of the North", place: "Vesna's village",
+## led_by: "Khan Konchak", leader_after: how the battle left them,
+## village_name: Callable}.
 static func opening(data: Dictionary, battle: Dictionary, ctx: Dictionary) -> String:
 	var stance := String(battle.get("attackerStance", "balanced")).replace("_", " ")
 	var text := "%s came on, %s, with %s. %s held with %s." % [
 		_sentence(ctx.get("enemy", "the horde")), stance, units_text(data, battle.get("attackerInitial", {})),
 		_sentence(ctx.get("place", "the village")), units_text(data, battle.get("defenderInitial", {}))]
+	if ctx.get("led_by", "") != "":
+		text += " %s led them." % ctx.led_by
 	var ground := BattleText.setup_text(battle)
 	if ground != "":
 		text += " The ground favoured us: %s." % ground.to_lower()
@@ -135,6 +139,8 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 	lines.append(_mood(share_theirs, share_ours))
 	if round == rounds.size() and battle.get("status", "ongoing") != "ongoing":
 		lines.append(ending(battle, ctx))
+		if ctx.get("leader_after", "") != "":
+			lines.append(ctx.leader_after)
 	return " ".join(lines)
 
 

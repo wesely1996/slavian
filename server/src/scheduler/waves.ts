@@ -3,6 +3,7 @@
 // winning a raid or a raze (horde.ts) and onward until its rampage clock
 // runs out and it settles into a camp. A spawn also plans the next wave, so `waves.upcoming` waves are
 // always announced ahead.
+import { assignLeader } from './leaders.js';
 import { loadLand } from '../db/rivers.js';
 import { z } from 'zod';
 import type { GameData, TerrainId } from '../data/index.js';
@@ -108,6 +109,8 @@ export const waveHandlers: HandlerRegistry = {
   async wave_spawn({ client, data, world }, event) {
     let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'scheduled') return;
+    // The front's leader takes its head, if free to.
+    await assignLeader(client, data, world, wave, event.dueAt);
     // Camps of its front send part of themselves along.
     await campsJoin(client, data, world, wave);
     wave = await loadWave(client, wave.id);

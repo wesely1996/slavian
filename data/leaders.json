@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "_comment": "Enemy heroes (PLAN.md M5 step 8): every front has one named leader at a time, who leads its hordes, grows from what they win, and comes back with a grudge when beaten. `ranks` name a leader by level ({name} is replaced); `skills` are taken in this order, one per level after the first, skipping any at its highest rank. Effects: attack and defense scale the horde's units, nerve its retreat threshold, loot what it carries off.",
+  "maxLevel": 15,
+  "levelXp": { "base": 20, "growth": 1.4 },
+  "xp": { "battle": 4, "win": 14, "raze": 18, "perKill": 0.25, "escape": 6 },
+  "woundHours": 30,
+  "grudge": { "attack": 0.15 },
+  "riseShare": 0.34,
+  "skills": {
+    "savagery": { "name": "Savagery", "maxRank": 5, "effectsPerRank": { "attack": 0.04 }, "description": "+4% attack for the horde per rank." },
+    "thick_hide": { "name": "Thick Hide", "maxRank": 5, "effectsPerRank": { "defense": 0.04 }, "description": "+4% defense for the horde per rank." },
+    "dread": { "name": "Dread", "maxRank": 4, "effectsPerRank": { "nerve": 0.06 }, "description": "The horde holds 6% longer before it breaks, per rank." },
+    "greed": { "name": "Greed", "maxRank": 4, "effectsPerRank": { "loot": 0.12 }, "description": "+12% carried off from a raid per rank." }
+  },
+  "fronts": {
+    "north": {
+      "names": ["Mara", "Likhoman", "Morok", "Chernokryl", "Vyrgan", "Zlydna", "Karachun", "Navka"],
+      "ranks": [
+        { "minLevel": 1, "title": "{name} the Hungry" },
+        { "minLevel": 5, "title": "{name} the Dread" },
+        { "minLevel": 10, "title": "{name} the Deathless" }
+      ],
+      "skills": ["savagery", "dread", "thick_hide", "savagery", "greed"]
+    },
+    "east": {
+      "names": ["Konchak", "Boniak", "Sharukan", "Kotyan", "Itlar", "Tugorkan", "Kuchum", "Altunopa"],
+      "ranks": [
+        { "minLevel": 1, "title": "Beg {name}" },
+        { "minLevel": 5, "title": "Khan {name}" },
+        { "minLevel": 10, "title": "Great Khan {name}" }
+      ],
+      "skills": ["greed", "savagery", "greed", "dread", "thick_hide"]
+    },
+    "south": {
+      "names": ["Anselm", "Konrad", "Ulrich", "Gerhard", "Bernhard", "Lothar", "Siegfried", "Hartwig"],
+      "ranks": [
+        { "minLevel": 1, "title": "Brother {name}" },
+        { "minLevel": 5, "title": "Commander {name}" },
+        { "minLevel": 10, "title": "Grand Master {name}" }
+      ],
+      "skills": ["thick_hide", "dread", "savagery", "thick_hide", "greed"]
+    },
+    "west": {
+      "names": ["Otto", "Heinrich", "Albrecht", "Dietrich", "Wilbrand", "Volkmar", "Eckhard", "Burchard"],
+      "ranks": [
+        { "minLevel": 1, "title": "Brother {name}" },
+        { "minLevel": 5, "title": "Commander {name}" },
+        { "minLevel": 10, "title": "Grand Master {name}" }
+      ],
+      "skills": ["thick_hide", "savagery", "dread", "thick_hide", "greed"]
+    }
+  }
+}

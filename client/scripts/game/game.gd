@@ -64,6 +64,8 @@ var fear: Dictionary[Vector2i, float] = {}
 var orders: Array = []
 ## Every player's hero (see server heroView).
 var heroes: Array = []
+## Enemy leaders, living and fallen, one alive per front (server leaderView).
+var leaders: Array = []
 ## Which of your villages the screens show (0: the first).
 var current_village_id := 0
 
@@ -116,6 +118,7 @@ func set_world(new_world: Dictionary) -> void:
 	expeditions = new_world.get("expeditions", [])
 	research = new_world.get("research", [])
 	heroes = new_world.get("heroes", [])
+	leaders = new_world.get("leaders", [])
 	orders = new_world.get("orders", [])
 	armies = new_world.get("armies", [])
 	forts = new_world.get("forts", [])
@@ -139,10 +142,13 @@ func set_world(new_world: Dictionary) -> void:
 	world_changed.emit()
 
 
-func set_waves(world_id_: int, new_waves: Array) -> void:
+## Waves, and the enemy leaders with them when the server sends those.
+func set_waves(world_id_: int, new_waves: Array, new_leaders: Variant = null) -> void:
 	if world_id_ != world_id():
 		return
 	waves = new_waves
+	if new_leaders is Array:
+		leaders = new_leaders
 	waves_changed.emit()
 
 
@@ -314,6 +320,15 @@ func outpost_owner(cell: Vector2i) -> Dictionary:
 	for village in villages.values():
 		if village.get("plots", {}).has(plot):
 			return village
+	return {}
+
+
+func leader(leader_id: Variant) -> Dictionary:
+	if leader_id == null:
+		return {}
+	for entry in leaders:
+		if int(entry.id) == int(leader_id):
+			return entry
 	return {}
 
 

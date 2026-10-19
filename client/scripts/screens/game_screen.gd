@@ -335,10 +335,14 @@ func _battle_ctx(battle: Dictionary) -> Dictionary:
 		if battle.get("campId") != null and int(camp.id) == int(battle.campId):
 			front = camp.front
 	var village: Dictionary = Game.villages.get(int(battle.villageId), {}) if battle.get("villageId") != null else {}
+	var chief := Game.leader(battle.get("leaderId"))
+	var place := Game.battle_place(battle)
 	var ctx := {
-		"place": Game.battle_place(battle),
+		"place": place,
 		"enemy": ("the " + Game.front_faction(front)) if front != "" else "the enemy",
-		"enemy_leader": "Their chief",
+		"enemy_leader": "%s · Lv %d" % [chief.title, int(chief.level)] if not chief.is_empty() else "Their chief",
+		"led_by": String(chief.get("title", "")),
+		"leader_after": LeaderText.after_battle(chief, battle, place),
 		"from": front.capitalize() if front != "" else "wilds",
 		"ours": HexMap.ALLY_COLOR if not village.is_empty() and not Game.is_mine(village) else HexMap.MINE_COLOR,
 		"terrain": Game.terrain.get(cell, "plains"),
@@ -2085,6 +2089,7 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label("No waves announced.", UI.SMALL_SIZE, UI.MUTED))
 	for wave in Game.waves:
 		_wave_entry(wave)
+	_leaders_section()
 	var finished := Game.battles.filter(func(b: Dictionary) -> bool: return b.status != "ongoing")
 	if not finished.is_empty():
 		_panel_body.add_child(UI.label("Battle reports", UI.HEADING_SIZE))
@@ -2119,6 +2124,29 @@ func _threats_panel() -> void:
 
 
 ## The host sets the group's quiet hours, in this device's time zone.
+## The enemy's leaders: who leads each front, how strong, what they've done,
+## who they hate; the fallen in one line.
+func _leaders_section() -> void:
+	if Game.leaders.is_empty():
+		return
+	_panel_body.add_child(UI.label("Enemy leaders", UI.HEADING_SIZE))
+	var fallen := PackedStringArray()
+	for chief in Game.leaders:
+		if chief.status == "dead":
+			fallen.append(LeaderText.name_line(chief))
+			continue
+		_panel_body.add_child(UI.label("%s · %s front" % [LeaderText.name_line(chief), String(chief.front).capitalize()], UI.SMALL_SIZE, UiTheme.GOLD))
+		var state := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(state)
+		_tick(state, func() -> String: return "%s · %s" % [LeaderText.state(chief, Game.server_now()), LeaderText.effects(chief)])
+		_panel_body.add_child(UI.label(LeaderText.record(chief), UI.SMALL_SIZE, UI.MUTED))
+		var grudge := LeaderText.grudge(Game.data, chief, Game.village_name)
+		if grudge != "":
+			_panel_body.add_child(UI.label(grudge, UI.SMALL_SIZE, Color("#ffb4a8")))
+	if not fallen.is_empty():
+		_panel_body.add_child(UI.label("Fallen: " + ", ".join(fallen), UI.SMALL_SIZE, UI.MUTED))
+
+
 func _set_quiet(start: Variant, end: Variant) -> void:
 	_status.text = ""
 	var offset := int(Time.get_time_zone_from_system().get("bias", 0))
@@ -2151,6 +2179,9 @@ func _wave_entry(wave: Dictionary) -> void:
 				var battle := Game.battle_for(int(wave.id))
 				return "Fighting at %s · round %d of %d · %d of them left" % [Game.battle_place(battle) if not battle.is_empty() else Game.village_name(wave.targetVillageId), int(battle.get("round", 0)), int(Game.data.battle.maxRounds), BattleText.total(battle.get("attackerNow", {}))]
 		return String(wave.status).capitalize())
+	var chief := Game.leader(wave.get("leaderId"))
+	if not chief.is_empty():
+		_panel_body.add_child(UI.label("Led by %s" % LeaderText.name_line(chief), UI.SMALL_SIZE, UiTheme.GOLD))
 	var fighting := Game.battle_for(int(wave.id))
 	if not fighting.is_empty() and fighting.status == "ongoing":
 		_panel_body.add_child(_battle_button(fighting))

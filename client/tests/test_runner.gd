@@ -41,6 +41,7 @@ func _initialize() -> void:
 	_test_onboarding_almanac()
 	_test_art()
 	_test_battle_story()
+	_test_leaders()
 	_test_rivers()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
@@ -596,4 +597,23 @@ func _test_battle_story() -> void:
 	var two := BattleStory.narrate(data, battle, 2, ctx)
 	_check(two.contains("Help from Mila's village struck from behind with 5 Spearmen (+20%)") and two.contains("20 Grey Wolves fell") and two.ends_with("The field is ours."), "round two told: %s" % two)
 	_check(BattleStory.narrate(data, battle, 3, ctx) == "", "no third round")
+
+
+func _test_leaders() -> void:
+	var chief := {"id": 4, "front": "east", "title": "Khan Konchak", "level": 5, "status": "alive", "woundedUntil": null,
+		"battles": 3, "wins": 2, "losses": 1, "razed": 1, "kills": 14, "grudgeVillageId": 7,
+		"effects": {"attack": 0.08, "defense": 0.0, "nerve": 0.06, "loot": 0.24}, "diedAt": null}
+	_check(LeaderText.name_line(chief) == "Khan Konchak · level 5", "leader name line")
+	_check(LeaderText.record(chief) == "3 battles: 2 won, 1 lost · 1 village razed · 14 of ours slain", "leader record")
+	_check(LeaderText.effects(chief) == "+8% attack, holds 6% longer, +24% plunder", "leader effects")
+	_check(LeaderText.state(chief, 0.0) == "Ready to ride", "leader ready")
+	var data := {"leaders": {"grudge": {"attack": 0.15}}}
+	_check(LeaderText.grudge(data, chief, func(_id: Variant) -> String: return "Vesna's village") == "Swore revenge on Vesna's village (+15% attack there)", "leader grudge")
+	var battle := {"status": "defended", "endedAt": "2030-01-01T10:00:00.000Z"}
+	_check(LeaderText.after_battle(chief, battle, "Vesna's village") == "Khan Konchak fled the field wounded, swearing revenge on Vesna's village.", "leader fled")
+	var dead := chief.duplicate()
+	dead.status = "dead"
+	dead.diedAt = "2030-01-01T10:00:00.000Z"
+	_check(LeaderText.after_battle(dead, battle, "x") == "Khan Konchak fell with the last of them.", "leader fell")
+	_check(LeaderText.after_battle(chief, {"status": "raided"}, "x") == "Khan Konchak rode on, prouder.", "leader won")
 

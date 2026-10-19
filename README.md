@@ -94,7 +94,7 @@ Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled ove
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
-| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` / `armies` (armies and forts) updates, and your own `notifications`. |
+| `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` (with the enemy leaders) / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` / `armies` (armies and forts) updates, and your own `notifications`. |
 
 ## Client
 

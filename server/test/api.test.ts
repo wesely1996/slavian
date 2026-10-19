@@ -667,6 +667,18 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
     expect(world.battles[0].status).toBe('defended');
+    // The horde's leader, named for its front, fled wounded with a grudge,
+    // or fell with the last of the horde.
+    const front = world.battles[0].front;
+    expect(world.leaders).toHaveLength(1);
+    const chief = world.leaders[0];
+    expect(world.battles[0].leaderId).toBe(chief.id);
+    expect(chief).toMatchObject({ front, battles: 1, wins: 0, losses: 1 });
+    expect(scheduler.data.leaders.fronts[front]!.names).toContain(chief.name);
+    expect(chief.title).toContain(chief.name);
+    const wiped = Object.values(world.battles[0].attackerNow as Record<string, number>).every((n) => n === 0);
+    if (wiped) expect(chief).toMatchObject({ status: 'dead', grudgeVillageId: null });
+    else expect(chief).toMatchObject({ status: 'alive', grudgeVillageId: village.id, woundedUntil: expect.any(String) });
     const veteran = world.heroes[0];
     const kills = Object.values(world.battles[0].attackerInitial as Record<string, number>).reduce((a, b) => a + b, 0)
       - Object.values(world.battles[0].attackerNow as Record<string, number>).reduce((a, b) => a + b, 0);

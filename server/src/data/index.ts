@@ -262,6 +262,29 @@ export const HERO_SLOTS = ['weapon', 'armor', 'amulet', 'banner', 'mount'] as co
 export type HeroSlot = (typeof HERO_SLOTS)[number];
 const effectsSchema = z.record(z.string(), z.number());
 
+// Enemy heroes: one named leader per front (sim/leaders.ts).
+const leadersFileSchema = z.object({
+  version: z.number().int(),
+  maxLevel: z.number().int().positive(),
+  levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
+  xp: z.object({ battle: z.number().min(0), win: z.number().min(0), raze: z.number().min(0), perKill: z.number().min(0), escape: z.number().min(0) }),
+  woundHours: z.number().positive(),
+  grudge: z.object({ attack: z.number().min(0) }),
+  riseShare: z.number().min(0).max(1),
+  skills: z.record(
+    z.string(),
+    z.object({ name: z.string(), maxRank: z.number().int().positive(), effectsPerRank: effectsSchema, description: z.string() }),
+  ),
+  fronts: z.record(
+    z.string(),
+    z.object({
+      names: z.array(z.string()).min(1),
+      ranks: z.array(z.object({ minLevel: z.number().int().positive(), title: z.string() })).min(1),
+      skills: z.array(z.string()).min(1),
+    }),
+  ),
+});
+
 const heroesFileSchema = z.object({
   version: z.number().int(),
   speed: z.number().positive(),
@@ -538,6 +561,7 @@ export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
+export type LeadersData = z.infer<typeof leadersFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
@@ -563,6 +587,7 @@ export interface GameData {
   expansion: ExpansionData;
   research: ResearchData;
   heroes: HeroesData;
+  leaders: LeadersData;
   orders: OrdersData;
   notifications: NotificationsData;
   armies: ArmiesData;
@@ -591,6 +616,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
+    leaders: leadersFileSchema.parse(read('leaders.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
     armies: armiesFileSchema.parse(read('armies.json')),
@@ -609,6 +635,11 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');
+  for (const front of Object.keys(data.enemies.fronts)) {
+    const leaders = data.leaders.fronts[front];
+    if (!leaders) throw new Error(`leaders.json has no leaders for front "${front}"`);
+    for (const skill of leaders.skills) if (!data.leaders.skills[skill]) throw new Error(`Leader skill "${skill}" (front ${front}) is unknown`);
+  }
   for (const [id, skill] of Object.entries(data.heroes.skills)) {
     if (!data.heroes.branches[skill.branch]) throw new Error(`Hero skill "${id}" is in unknown branch "${skill.branch}"`);
   }
