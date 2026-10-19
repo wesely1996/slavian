@@ -15,6 +15,12 @@ signal tapped(world_position: Vector2)
 
 ## World-space rectangle the camera centre is kept inside.
 var bounds := Rect2(-1e9, -1e9, 2e9, 2e9)
+## Where on screen the camera's position shows, from the screen's centre:
+## the middle of the part of the map not under a sheet.
+var view_offset := Vector2.ZERO:
+	set(value):
+		view_offset = value
+		_apply_offset()
 
 var _touches: Dictionary[int, Vector2] = {}
 var _tap_index := -1
@@ -24,13 +30,14 @@ var _tap_cancelled := false
 
 
 func screen_to_world(screen_position: Vector2) -> Vector2:
-	return position + (screen_position - get_viewport_rect().size / 2.0) / zoom
+	return position + (screen_position - get_viewport_rect().size / 2.0 - view_offset) / zoom
 
 
 func zoom_at(screen_position: Vector2, factor: float) -> void:
 	var before := screen_to_world(screen_position)
 	var z := clampf(zoom.x * factor, min_zoom, max_zoom)
 	zoom = Vector2(z, z)
+	_apply_offset()
 	position += before - screen_to_world(screen_position)
 	_clamp_position()
 
@@ -106,6 +113,10 @@ func _other_touch(index: int) -> Vector2:
 		if i != index:
 			return _touches[i]
 	return _touches[index]
+
+
+func _apply_offset() -> void:
+	offset = -view_offset / zoom.x
 
 
 func _clamp_position() -> void:

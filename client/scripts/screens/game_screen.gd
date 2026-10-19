@@ -6,7 +6,7 @@ extends Node2D
 
 const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
-const NEGATIVE := Color("#ff8a7a")
+const NEGATIVE := UiTheme.MADDER
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: MapCamera = $MapCamera
@@ -25,6 +25,11 @@ var _inbox_button: Button
 ## Notification settings as the server last sent them.
 var _prefs: Dictionary = {}
 var _spacer: Control
+var _root: VBoxContainer
+var _body: HBoxContainer
+var _scroll: ScrollContainer
+var _resources: HBoxContainer
+var _top_rows: VBoxContainer
 var _village_view: VillageView
 var _battle_view: BattleMap
 ## The battle on the battle map, the round shown, and whether it plays on.
@@ -170,29 +175,27 @@ func _process(delta: float) -> void:
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 16)
-	for side in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
-	layer.add_child(margin)
-	var column := UI.vbox(12)
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_child(column)
+	var root := UI.vbox(0)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(root)
 
-	var top := UI.panel(0.9, 6)
-	column.add_child(top)
-	var top_rows := UI.vbox(8)
+	# The top band of wood: the world and its buttons, the resources, the
+	# next threat.
+	var top := UI.wood(14)
+	top.add_theme_stylebox_override("panel", _top_style())
+	root.add_child(top)
+	var top_rows := UI.vbox(10)
 	top.add_child(top_rows)
+	_top_rows = top_rows
 	var bar := UI.hbox(6)
 	top_rows.add_child(bar)
 	var back := UI.button("", _leave, "icon/back")
-	back.theme_type_variation = "IconButton"
+	back.theme_type_variation = "WoodIconButton"
 	back.tooltip_text = "Worlds"
 	bar.add_child(back)
 	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
+	title.theme_type_variation = "OnWoodHeading"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -201,76 +204,138 @@ func _build_ui() -> void:
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	bar.add_child(_live_label)
 	_view_button = UI.button("Village", _toggle_view, "icon/village")
+	_view_button.theme_type_variation = "WoodButton"
 	_view_button.visible = not _my_village().is_empty()
 	bar.add_child(_view_button)
 	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
-	_inbox_button.theme_type_variation = "IconButton"
+	_inbox_button.theme_type_variation = "WoodIconButton"
 	_inbox_button.tooltip_text = "Inbox"
 	bar.add_child(_inbox_button)
-	# The resource strip: icon, stock, and the hourly rate under it.
-	var resources := UI.hbox(4)
-	top_rows.add_child(resources)
+	# The resource strip: icon, stock, and the hourly rate beside it.
+	_resources = UI.hbox(4)
+	top_rows.add_child(_resources)
 	for kind in Ledger.KINDS:
-		var cell := UI.hbox(8)
+		var cell := UI.hbox(10)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cell.add_child(UI.icon("resource/" + kind, 40))
 		var numbers := UI.vbox(0)
-		var label := UI.label("", 26)
-		label.theme_type_variation = "Strong"
+		var label := UI.label("", 28)
+		label.theme_type_variation = "OnWoodStrong"
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		numbers.add_child(label)
-		var rate := UI.label("", 19, UI.MUTED)
+		var rate := UI.label("", 20)
+		rate.theme_type_variation = "OnWoodMuted"
 		rate.autowrap_mode = TextServer.AUTOWRAP_OFF
 		numbers.add_child(rate)
 		cell.add_child(numbers)
-		resources.add_child(cell)
+		_resources.add_child(cell)
 		_resource_labels[kind] = label
 		_rate_labels[kind] = rate
+	# The next threat: madder on the wood, opens the threats sheet.
 	_threat_button = UI.button("", _show_threats, "icon/threat")
 	_threat_button.custom_minimum_size.y = 56
-	_threat_button.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-	_threat_button.add_theme_color_override("font_color", Color("#f3c2b6"))
-	_threat_button.add_theme_color_override("icon_normal_color", UiTheme.DANGER)
-	for state in ["normal", "hover", "pressed"]:
-		var style := UiTheme.panel_style(10, 1.0)
-		style.bg_color = Color("#2a1715") if state == "normal" else Color("#3a1f1b")
-		style.border_color = Color(UiTheme.DANGER, 0.6 if state == "normal" else 1.0)
-		style.set_border_width_all(1)
-		style.border_width_left = 4
-		style.shadow_size = 0
-		style.set_corner_radius_all(5)
-		style.content_margin_left = 14
+	_threat_button.add_theme_font_size_override("font_size", UI.SMALL_SIZE + 2)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		_threat_button.add_theme_color_override(state, UiTheme.ON_WOOD)
+	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color"]:
+		_threat_button.add_theme_color_override(state, Color("#e58a7d"))
+	for state in ["normal", "hover", "pressed", "hover_pressed"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(UiTheme.MADDER, 0.12 if state == "normal" else 0.3)
+		style.border_color = UiTheme.MADDER
+		style.border_width_left = 5
+		style.set_corner_radius_all(2)
+		style.content_margin_left = 16
+		style.content_margin_right = 12
 		_threat_button.add_theme_stylebox_override(state, style)
 	_threat_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_threat_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	top_rows.add_child(_threat_button)
-	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
+	_status = UI.label("", UI.SMALL_SIZE, Color("#e58a7d"))
 	top_rows.add_child(_status)
 	_on_live_connection(Live.connected)
+	root.add_child(Rushnyk.new())
 
+	# Under the band: the map (or the village, or a battle), and the sheet
+	# for what is picked, on the right in landscape and below in portrait.
+	_body = UI.hbox(0)
+	_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_body)
+	var main := UI.vbox(0)
+	main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_body.add_child(main)
 	_spacer = Control.new()
 	_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(_spacer)
+	main.add_child(_spacer)
 	_village_view = VillageView.new()
 	_village_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_village_view.visible = false
 	_village_view.plot_tapped.connect(_on_plot_tapped)
-	column.add_child(_village_view)
+	main.add_child(_village_view)
 	_battle_view = BattleMap.new()
 	_battle_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_battle_view.visible = false
-	column.add_child(_battle_view)
+	main.add_child(_battle_view)
 
-	_panel = UI.panel()
-	column.add_child(_panel)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size.y = 420
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_panel.add_child(scroll)
-	_panel_body = UI.vbox(12)
+	_panel = UI.panel(1.0, 18)
+	_panel.add_theme_stylebox_override("panel", UiTheme.sheet_style(26))
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_panel.add_child(_scroll)
+	_panel_body = UI.vbox(14)
 	_panel_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(_panel_body)
+	_scroll.add_child(_panel_body)
+	_root = root
+	get_viewport().size_changed.connect(_arrange)
+	_arrange()
+
+
+## The sheet beside the map in landscape, under it in portrait.
+func _arrange() -> void:
+	var area := get_viewport().get_visible_rect().size
+	var landscape := area.x > area.y * 1.05
+	if _panel.get_parent() != null:
+		_panel.get_parent().remove_child(_panel)
+	# In landscape the resources ride in the title row.
+	var bar := _view_button.get_parent()
+	_resources.get_parent().remove_child(_resources)
+	if landscape:
+		bar.add_child(_resources)
+		bar.move_child(_resources, 2)
+		_resources.size_flags_horizontal = Control.SIZE_SHRINK_END
+		_resources.add_theme_constant_override("separation", 28)
+	else:
+		_top_rows.add_child(_resources)
+		_top_rows.move_child(_resources, 1)
+		_resources.size_flags_horizontal = Control.SIZE_FILL
+		_resources.add_theme_constant_override("separation", 4)
+	for cell in _resources.get_children():
+		(cell as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if landscape else Control.SIZE_EXPAND_FILL
+	if landscape:
+		_body.add_child(_panel)
+		_panel.custom_minimum_size = Vector2(clampf(area.x * 0.34, 620.0, 900.0), 0)
+		_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_scroll.custom_minimum_size.y = 0
+	else:
+		_root.add_child(_panel)
+		_panel.custom_minimum_size = Vector2.ZERO
+		_panel.size_flags_vertical = Control.SIZE_FILL
+		_scroll.custom_minimum_size.y = area.y * 0.36
+	# Centre the map in the part the sheet leaves uncovered.
+	camera.view_offset = Vector2(-_panel.custom_minimum_size.x / 2.0, 0) if landscape else Vector2(0, -area.y * 0.1)
+
+
+## The wood band, with room at the top for a phone's status bar.
+func _top_style() -> StyleBoxFlat:
+	var style := UiTheme.wood_style(14)
+	style.content_margin_top = 26
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	return style
 
 
 # --- Battle map --------------------------------------------------------------
@@ -437,7 +502,7 @@ func _onboarding_card(village: Dictionary) -> void:
 		var step := OnboardingText.next_step(Game.data, member)
 		if step.is_empty():
 			return
-		_panel_body.add_child(UI.label("%s: %s" % [OnboardingText.progress(Game.data, member), step.title], 0, Color("#e8d9a8")))
+		_panel_body.add_child(UI.label("%s: %s" % [OnboardingText.progress(Game.data, member), step.title], 0, UI.ACCENT))
 		_panel_body.add_child(UI.label(step.story, UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(UI.label("%s %s" % [step.hint, OnboardingText.reward(step)], UI.SMALL_SIZE))
 
@@ -468,7 +533,7 @@ func _handed_line(village: Dictionary) -> void:
 	var d := DelegationText.of_owner(Game.delegations, int(village.ownerAccountId), Game.server_now())
 	if d.is_empty():
 		return
-	_panel_body.add_child(UI.label("You command it for %s for %s more; they see what you do." % [Game.member_name(int(d.ownerAccountId)), TimeUtil.format_duration(TimeUtil.parse_iso(d.until) - Game.server_now())], UI.SMALL_SIZE, Color("#e8d9a8")))
+	_panel_body.add_child(UI.label("You command it for %s for %s more; they see what you do." % [Game.member_name(int(d.ownerAccountId)), TimeUtil.format_duration(TimeUtil.parse_iso(d.until) - Game.server_now())], UI.SMALL_SIZE, UI.ACCENT))
 
 
 ## Hand-overs: give your villages to a teammate while away, take them back,
@@ -558,7 +623,7 @@ func _run_panel() -> void:
 	if ending.is_empty():
 		return
 	var won: bool = Game.world.status == "won"
-	_panel_body.add_child(UI.label(ending.title, UI.HEADING_SIZE, Color("#e8d9a8") if won else Color("#ffb4a8")))
+	_panel_body.add_child(UI.label(ending.title, UI.HEADING_SIZE, UI.ACCENT if won else UI.ERROR))
 	_panel_body.add_child(UI.label(ending.story, UI.SMALL_SIZE, UI.MUTED))
 	var run: Variant = Game.world.get("run")
 	if run is Dictionary:
@@ -626,7 +691,7 @@ func _terrain_panel() -> void:
 	_panel_body.add_child(UI.label(where, UI.SMALL_SIZE, UI.MUTED))
 	var camp := Game.camp_at(_selected)
 	if not camp.is_empty():
-		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, Color("#ffb4a8")))
+		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
 	if Game.fear.has(_selected):
 		_panel_body.add_child(UI.label("Hordes fear this place: they were beaten here (%.0f)." % Game.fear[_selected], UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
@@ -693,7 +758,7 @@ func _bridge_panel() -> void:
 	_panel_body.add_child(UI.label(stage.story, UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label(BridgeText.progress(Game.data, bridge), UI.SMALL_SIZE))
 	for quest in BridgeText.quests(Game.data, bridge):
-		_panel_body.add_child(UI.label(("✓ " if quest[0] else "○ ") + String(quest[1]), UI.SMALL_SIZE, UI.MUTED if quest[0] else Color("#e8d9a8")))
+		_panel_body.add_child(UI.label(("✓ " if quest[0] else "○ ") + String(quest[1]), UI.SMALL_SIZE, UI.MUTED if quest[0] else UI.ACCENT))
 		_panel_body.add_child(UI.label(quest[2], UI.SMALL_SIZE, UI.MUTED))
 	if bridge.status == "raising":
 		var line := UI.label("", UI.SMALL_SIZE)
@@ -875,7 +940,7 @@ func _caravan_trips(village_id: int) -> void:
 		_tick(line, func() -> String: return CaravanText.describe(caravan, village_id, Game.server_now()))
 		var ambushed := HordeText.ambush(caravan.get("ambush"))
 		if ambushed != "":
-			_panel_body.add_child(UI.label(ambushed, UI.SMALL_SIZE, Color("#ffb4a8")))
+			_panel_body.add_child(UI.label(ambushed, UI.SMALL_SIZE, UI.ERROR))
 
 
 func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort: Dictionary) -> void:
@@ -1133,7 +1198,7 @@ func _hold_panel(terrain_id: String) -> void:
 		_panel_body.add_child(UI.label(kind.get("name", "Ancient site"), UI.HEADING_SIZE))
 		_panel_body.add_child(UI.label(kind.get("description", ""), UI.SMALL_SIZE, UI.MUTED))
 		var explorer := Game.member_name(int(site.exploredBy)) if site.get("exploredBy") != null else "?"
-		_panel_body.add_child(UI.label(SiteText.status(Game.data, site, explorer), UI.SMALL_SIZE, Color("#e8d9a8")))
+		_panel_body.add_child(UI.label(SiteText.status(Game.data, site, explorer), UI.SMALL_SIZE, UI.ACCENT))
 	var title := "Explore it" if exploring else ("Hold this hex" if camp.is_empty() else "Clear this camp")
 	_panel_body.add_child(UI.label(title, UI.HEADING_SIZE))
 	if exploring:
@@ -2075,20 +2140,20 @@ func _threat_summary() -> String:
 	var now := Game.server_now()
 	for wave in Game.waves:
 		if wave.status == "razing":
-			return "%s is burning · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
+			return "%s is burning, %s left" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
 	for wave in Game.waves:
 		if wave.status == "marching":
-			return "Horde marching on %s · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
+			return "A horde reaches %s in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 	for wave in Game.waves:
 		if wave.status == "battling":
 			var battle := Game.battle_for(int(wave.id))
 			var place := Game.battle_place(battle) if not battle.is_empty() else Game.village_name(wave.targetVillageId)
-			return "Battle at %s · round %d" % [place, int(battle.get("round", 0))]
+			return "Battle at %s, round %d" % [place, int(battle.get("round", 0))]
 	for wave in Game.waves:
 		if wave.status == "arrived":
 			return "Horde at %s" % Game.village_name(wave.targetVillageId)
 	var next: Dictionary = Game.waves[0]
-	return "Next wave: %s · %s · in %s" % [String(next.front).capitalize(), next.threat, TimeUtil.format_duration(TimeUtil.parse_iso(next.spawnAt) - now)]
+	return "Next horde from the %s (%s threat) sets out in %s" % [String(next.front).to_lower(), String(next.threat).to_lower(), TimeUtil.format_duration(TimeUtil.parse_iso(next.spawnAt) - now)]
 
 
 func _threats_panel() -> void:
@@ -2100,7 +2165,7 @@ func _threats_panel() -> void:
 	_delegation_section()
 	var ritual := RunText.ritual_line(Game.world, Game.server_now())
 	if ritual != "":
-		_panel_body.add_child(UI.label(ritual, 0, Color("#ffb4a8")))
+		_panel_body.add_child(UI.label(ritual, 0, UI.ERROR))
 		_panel_body.add_child(UI.label(Game.data.bridge.ritualNight.story, UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label("The Holy City: " + HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label("%s difficulty · %s" % [GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))), GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
@@ -2134,7 +2199,7 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label(details, UI.SMALL_SIZE, UI.MUTED))
 		var choice := HordeText.decision(battle)
 		if choice != "":
-			_panel_body.add_child(UI.label(choice, UI.SMALL_SIZE, Color("#ffb4a8")))
+			_panel_body.add_child(UI.label(choice, UI.SMALL_SIZE, UI.ERROR))
 		var helpers := ArmyText.reinforcements(battle, Game.village_name)
 		if helpers != "":
 			_panel_body.add_child(UI.label("Help came from " + helpers, UI.SMALL_SIZE, UI.MUTED))
@@ -2173,7 +2238,7 @@ func _leaders_section() -> void:
 		_panel_body.add_child(UI.label(LeaderText.record(chief), UI.SMALL_SIZE, UI.MUTED))
 		var grudge := LeaderText.grudge(Game.data, chief, Game.village_name)
 		if grudge != "":
-			_panel_body.add_child(UI.label(grudge, UI.SMALL_SIZE, Color("#ffb4a8")))
+			_panel_body.add_child(UI.label(grudge, UI.SMALL_SIZE, UI.ERROR))
 	if not fallen.is_empty():
 		_panel_body.add_child(UI.label("Fallen: " + ", ".join(fallen), UI.SMALL_SIZE, UI.MUTED))
 
@@ -2193,7 +2258,7 @@ func _wave_entry(wave: Dictionary) -> void:
 	var scouted := Game.missions_for(int(wave.id)).any(func(m: Dictionary) -> bool: return m.report != null)
 	var known := "" if scouted else " · composition unknown"
 	_panel_body.add_child(UI.label("%s front · %s threat%s" % [String(wave.front).capitalize(), wave.threat, known], UI.SMALL_SIZE, UI.MUTED))
-	var line := UI.label("", UI.SMALL_SIZE, Color("#ffb4a8"))
+	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:
 		var now := Game.server_now()
@@ -2320,7 +2385,7 @@ func _on_village_changed(_village_id: int) -> void:
 
 func _on_live_connection(connected: bool) -> void:
 	_live_label.text = "● live" if connected else "○ offline"
-	_live_label.add_theme_color_override("font_color", Color("#9fd18b") if connected else UI.MUTED)
+	_live_label.add_theme_color_override("font_color", Color("#8fc4a6") if connected else UiTheme.ON_WOOD_MUTED)
 	if connected:
 		_refetch_world()
 

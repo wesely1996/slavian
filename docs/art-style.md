@@ -55,31 +55,64 @@ stays consistent and reads well on a phone:
 
 ## The interface
 
-In the manner of modern grand strategy games (Civilization VI, Old World,
-Crusader Kings III): the map is the picture, the interface a quiet frame
-around it.
+Reworked with the frontend-design skill (`.claude/skills/frontend-design`).
 
-- **Panels** are dark slate glass (`#141920`, slightly see-through) with a thin
-  bronze trim, brighter along the top, rounded 8 px, and a soft drop shadow.
-- **Buttons** are flat slate with a 1 px line that turns bronze under the
-  finger; the main action of a panel is **gold** with dark lettering
-  (`UI.primary`). Tabs stay quiet until open, then take a gold underline.
-  Icon-only buttons on the top bar have no box until touched.
-- **Type:** Cinzel (Roman capitals, a little apart) in gold for headings and
-  titles; Inter for everything else, semibold on buttons. Both cover Serbian
-  Latin; they live in `client/ui/fonts/` under the SIL Open Font License (the
-  licence files sit beside them).
-- **Colours:** text `#e9e4d8`, secondary `#9aa3ad`, gold `#e3c27a`, bronze
-  `#b8914f`, danger `#e07a62` (the threat line), green/blue/red for owners.
-- **Icons** (`icon/...`) are white line drawings, 4.5 px strokes at 64 px with
-  round ends; the theme tints them (gold when pressed, dark on gold buttons).
-  Resources (`resource/...`) stand in for their names on the top bar and in
-  every cost line.
+**Brief.** Friends defend a ring of Slavic villages together over weeks, on
+phones and desktops. The interface has one job: show your village and the
+next threat at a glance, then let you act on them.
+
+**Plan, as reviewed.** The first draft (a warm cream sheet, a serif display,
+a red accent) was the generic "generated" look the skill warns about, and the
+slate-and-gold pass before it was the stock fantasy-strategy frame with
+Cinzel capitals. What the subject gave instead: unbleached flax and dark
+carved wood, ink lettering from Russian book printing, and the embroidered
+towel (*rushnyk*) that hangs in every Slavic house.
+
+- **The map is the hero.** Chrome sits at the screen's edges, never floating
+  over it: a band of dark wood along the top (the world, the resources, the
+  next threat) and a sheet of flax for whatever is picked. In landscape the
+  sheet stands on the right and the map keeps the rest; in portrait it sits
+  below. The map camera centres on the part left uncovered.
+- **One ornament.** A strip of cross-stitch embroidery (`Rushnyk`: madder
+  lozenges and ink hooks on flax) runs under the top band, and nowhere else.
+  Everything around it stays plain.
+- **Colour carries side, never decoration.**
+
+  | Name | Hex | Job |
+  |---|---|---|
+  | Wood | `#2b211b` | the top band; the background |
+  | Flax | `#e4dfd2` | sheets (greyer than cream on purpose) |
+  | Ink | `#2a221c` | lettering; muted `#6b5f52` |
+  | Malachite | `#2f6e55` | ours, done, and the main action (`UI.primary`) |
+  | Madder | `#a8322b` | hordes, danger, the open tab, the embroidery |
+  | Wheat | `#9a7424` | resources, levels, leaders |
+
+- **Type.** PT Sans (ParaType, drawn for the languages of Russia) for
+  everything, bold on buttons. Old Standard (from Russian book printing of
+  around 1900) for headings. Ruslan Display (Old Russian lettering) for the
+  name of the game alone, as a logotype. Sentence case everywhere: no
+  capitals for labels, and no strings joined with middle dots in new copy.
+  All three fonts cover Serbian Latin and Cyrillic; they live in
+  `client/ui/fonts/` under the SIL Open Font License (the licence files sit
+  beside them).
+- **Controls.**
+  - Buttons are flax-deep with an ink hairline; the main action of a sheet
+    is malachite with flax lettering.
+  - Tabs stay quiet until open, then take a madder underline.
+  - Fields are a lighter page with a malachite caret.
+  - Keyboard focus shows a malachite ring.
+  - Buttons on the wood (`WoodButton`, `WoodIconButton`) have flax
+    lettering.
+  - Tap targets are at least 76 px.
+- **Icons** (`icon/...`) are white line drawings that the theme tints: ink on
+  flax, flax on wood and on malachite. Resources (`resource/...`) stand in
+  for their names on the top band and in every cost line.
 - All of this is vector styles in `client/scripts/ui/ui_theme.gd`, sharp at
   any scale. To draw them as art instead, add `ui/panel`, `ui/button`,
   `ui/button_hover`, `ui/button_pressed`, `ui/button_disabled`,
-  `ui/button_selected` (the open tab) or `ui/field` to `art.json`: they are
-  nine-sliced, corners kept (panel 24 of 96, buttons 16 of 64, field 12 of 48).
+  `ui/button_selected` (the open tab) or `ui/field` to `art.json`. They are
+  nine-sliced with their corners kept: panel 24 of 96, buttons 16 of 64,
+  field 12 of 48.
 - `ui/title` is the start screen's picture.
 
 ## Replacing a piece of art

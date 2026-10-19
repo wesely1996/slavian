@@ -13,6 +13,9 @@ var language := ""
 
 func _ready() -> void:
 	UiTheme.apply()
+	var window := get_tree().root
+	UiTheme.fit(window)
+	window.size_changed.connect(func() -> void: UiTheme.fit(window))
 	var config := ConfigFile.new()
 	if config.load(PATH) == OK:
 		server_url = config.get_value("session", "server_url", DEFAULT_SERVER_URL)
