@@ -37,6 +37,24 @@ glance on a phone, and still look good.
 - **Units** sit in a gold-ringed medallion; **hordes** have an emblem per
   faction.
 
+## The interface
+
+- **Frames and buttons** (`ui/panel`, `ui/button`, `ui/button_hover`,
+  `ui/button_pressed`, `ui/button_disabled`, `ui/button_selected` for the
+  open tab, `ui/field` for text inputs) are nine-sliced by `UiTheme`
+  (`client/scripts/ui/ui_theme.gd`): the corners keep their size, edges and
+  middle stretch, so put ornament only in the corners. The corner size is
+  given in the art's own units (panel 24 of 96, buttons 16 of 64, field 12
+  of 48), so a replacement at any resolution lines up as long as it keeps
+  those proportions.
+- **Icons** (`icon/...`) sit on buttons and tabs; resources (`resource/...`)
+  stand in for their names in the top bar and in every cost line.
+- **Type:** Kurale for headings and buttons (gold headings, an ink outline on
+  buttons), Alegreya Sans for text; both cover Serbian Latin and Cyrillic.
+  They live in `client/ui/fonts/` under the SIL Open Font License (the
+  licence files sit beside them).
+- `ui/title` is the start screen's picture.
+
 ## Replacing a piece of art
 
 `client/art/art.json` maps every art id to a file:
@@ -64,6 +82,6 @@ drawing.
 
 - `python3 tools/art/generate.py` writes `client/art/generated/` and adds new
   ids to `art.json`.
-- `godot --path client --resolution 1400x1760 --script res://tests/art_sheet.gd -- out.png`
+- `godot --path client --resolution 1400x3400 --script res://tests/art_sheet.gd -- out.png`
   (with a display, e.g. `xvfb-run`) renders the style sample sheet with the
   game's own renderer.

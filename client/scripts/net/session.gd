@@ -10,6 +10,7 @@ var account: Dictionary = {}
 
 
 func _ready() -> void:
+	UiTheme.apply()
 	var config := ConfigFile.new()
 	if config.load(PATH) == OK:
 		server_url = config.get_value("session", "server_url", DEFAULT_SERVER_URL)

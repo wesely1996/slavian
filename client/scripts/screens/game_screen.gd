@@ -134,13 +134,15 @@ func _process(delta: float) -> void:
 		for kind in Ledger.KINDS:
 			var rate: float = home.resources.ratesPerHour[kind]
 			var label := _resource_labels[kind]
-			label.text = "%s %d  %s/h" % [kind.capitalize(), amounts[kind], UI.signed(rate)]
-			label.add_theme_color_override("font_color", NEGATIVE if rate < 0 else Color.WHITE)
+			label.text = "%d  %s/h" % [amounts[kind], UI.signed(rate)]
+			label.tooltip_text = kind.capitalize()
+			label.add_theme_color_override("font_color", NEGATIVE if rate < 0 else UiTheme.TEXT)
 	_threat_button.text = _threat_summary()
+	_status.visible = _status.text != ""
 	if hex_map.has_moving_hordes():
 		hex_map.queue_redraw()
 	for entry in _ticking:
-		(entry[0] as Label).text = (entry[1] as Callable).call()
+		entry[0].text = (entry[1] as Callable).call()
 
 
 # --- Layout ----------------------------------------------------------------
@@ -160,17 +162,20 @@ func _build_ui() -> void:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(column)
 
-	var top := UI.panel(Color(0.13, 0.11, 0.09, 0.85), 12)
+	var top := UI.panel(Color(0.13, 0.11, 0.09, 0.85), 8)
 	column.add_child(top)
 	var top_rows := UI.vbox(6)
 	top.add_child(top_rows)
 	var bar := UI.hbox()
 	top_rows.add_child(bar)
-	bar.add_child(UI.button("‹ Worlds", _leave))
-	_view_button = UI.button("Village", _toggle_view)
+	var back := UI.button("", _leave, "icon/back")
+	back.tooltip_text = "Worlds"
+	bar.add_child(back)
+	_view_button = UI.button("Village", _toggle_view, "icon/village")
 	_view_button.visible = not _my_village().is_empty()
 	bar.add_child(_view_button)
-	_inbox_button = UI.button("Inbox", _show_inbox)
+	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
+	_inbox_button.tooltip_text = "Inbox"
 	bar.add_child(_inbox_button)
 	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -185,15 +190,19 @@ func _build_ui() -> void:
 	resources.add_theme_constant_override("h_separation", 24)
 	top_rows.add_child(resources)
 	for kind in Ledger.KINDS:
+		var cell := UI.hbox(6)
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.add_child(UI.icon("resource/" + kind, 40))
 		var label := UI.label("", UI.SMALL_SIZE)
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		resources.add_child(label)
+		cell.add_child(label)
+		resources.add_child(cell)
 		_resource_labels[kind] = label
-	_threat_button = UI.button("", _show_threats)
-	_threat_button.custom_minimum_size.y = 56
+	_threat_button = UI.button("", _show_threats, "icon/threat")
+	_threat_button.custom_minimum_size.y = 60
 	_threat_button.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-	_threat_button.add_theme_color_override("font_color", Color("#ffb4a8"))
+	_threat_button.add_theme_color_override("font_color", Color("#ffe0d8"))
 	_threat_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_threat_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	top_rows.add_child(_threat_button)
@@ -242,6 +251,7 @@ func _set_view(view: String) -> void:
 	_view = view
 	var inside := view == "village"
 	_view_button.text = "Map" if inside else "Village"
+	_view_button.icon = Art.texture("icon/map" if inside else "icon/village")
 	hex_map.visible = not inside
 	_spacer.visible = not inside
 	_village_view.visible = inside
@@ -608,7 +618,7 @@ func _vault_panel() -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.add_child(UI.label("Vault → Lv %d (paid from the vault)" % (level + 1)))
 		var seconds := CaravanMath.vault_upgrade_seconds(Game.data, level + 1, float(Game.world.speed))
-		info.add_child(UI.label("%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)], UI.SMALL_SIZE, UI.MUTED))
+		info.add_child(UI.rich("%s · %s" % [UI.costs(cost), TimeUtil.format_duration(seconds)]))
 		row.add_child(info)
 		var button := UI.button("Enlarge", _upgrade_vault)
 		button.custom_minimum_size.x = 160
@@ -790,10 +800,10 @@ func _research_section(village: Dictionary) -> void:
 				continue
 			var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty(), Game.scrolls())
 			var cost: Dictionary = def.cost
-			var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+			var cost_line := UI.rich()
 			info.add_child(cost_line)
 			var duration := TimeUtil.format_duration(float(def.seconds) / speed)
-			var cost_text := "%s · %s" % [UI.resource_text(cost), duration]
+			var cost_text := "%s · %s" % [UI.costs(cost), duration]
 			if problem != "":
 				cost_line.text = "%s  (%s)" % [cost_text, problem.trim_suffix(".").to_lower()]
 				continue
@@ -1031,14 +1041,14 @@ func _hold_panel(terrain_id: String) -> void:
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(UI.label("Build a fort (+%d%% defense here)" % roundi(float(Game.data.field.fort.defenseBonus) * 100.0)))
-	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
 	var button := UI.button("Build fort", func() -> void: _build_fort(village_id, cell))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	var cost_text := "%s · %s" % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
 		button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
@@ -1080,7 +1090,7 @@ func _river_section(cell: Vector2i) -> void:
 			continue
 		var cost: Dictionary = Game.data.field.bridge.cost
 		var row := UI.hbox()
-		var info := UI.label("Build a bridge: %s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE)
+		var info := UI.rich("Build a bridge: %s · %s" % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UiTheme.TEXT)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(info)
 		var village_id := int(home.id)
@@ -1115,7 +1125,7 @@ func _road_section(cell: Vector2i) -> void:
 	if open.is_empty():
 		return
 	var cost: Dictionary = Game.data.field.road.cost
-	_panel_body.add_child(UI.label("Build a road (%s · %s each) towards:" % [UI.resource_text(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE))
+	_panel_body.add_child(UI.rich("Build a road (%s · %s each) towards:" % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UiTheme.TEXT))
 	var row := UI.hbox(6)
 	var village_id := int(home.id)
 	for i in open:
@@ -1456,14 +1466,14 @@ func _claim_panel(terrain: String) -> void:
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(UI.label("Build an outpost"))
-	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
 	var button := UI.button("Claim", func() -> void: _claim_outpost(village_id, cell))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	var cost_text := "%s · %s" % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
 		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
@@ -1560,15 +1570,10 @@ func _village_panel() -> void:
 	if village.get("ruin") is Dictionary:
 		_ruin_section(village)
 		return
-	var tabs := UI.hbox()
-	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"], ["research", "Research"]]:
-		var button := UI.button(tab[1], func() -> void:
-			_tab = tab[0]
-			_rebuild_panel())
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = _tab == tab[0]
-		tabs.add_child(button)
-	_panel_body.add_child(tabs)
+	var tabs := [["village", "Buildings", "icon/build"], ["troops", "Troops", "icon/troops"], ["caravans", "Caravans", "icon/caravan"], ["research", "Research", "icon/research"]]
+	_panel_body.add_child(UI.tabs(tabs, _tab, func(key: String) -> void:
+		_tab = key
+		_rebuild_panel()))
 	if _tab == "troops":
 		_troops_section(village)
 	elif _tab == "caravans":
@@ -1596,14 +1601,14 @@ func _ruin_section(village: Dictionary) -> void:
 	var cost := HordeText.rebuild_cost(Game.data, ruin.plots)
 	var seconds := float(Game.data.horde.ruins.rebuildHours) * 3600.0 / float(Game.world.speed)
 	var row := UI.hbox()
-	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	var cost_line := UI.rich()
 	cost_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(cost_line)
 	var button := UI.button("Rebuild", func() -> void: _rebuild_village(village_id))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	var cost_text := "%s · %s" % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, village)
 		button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
@@ -1718,14 +1723,14 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(UI.label("%s → Lv %d" % [def.name, target]))
-	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
 	var button := UI.button(verb, func() -> void: _queue_build(village_id, plot, building))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	var cost_text := "%s · %s" % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
 		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
@@ -1823,7 +1828,7 @@ func _troops_section(village: Dictionary) -> void:
 			info.add_child(UI.label("Needs %s level %d" % [_building_def(def.building).name, def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
 			continue
 		var cost := Rules.unit_cost(def, count, Game.villages_owned(int(village.ownerAccountId)))
-		var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		var cost_line := UI.rich()
 		info.add_child(cost_line)
 
 		var row := UI.hbox()
@@ -1839,7 +1844,7 @@ func _troops_section(village: Dictionary) -> void:
 		row.add_child(train)
 		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) \
 			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)
-		var cost_text := "%s · %s each" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+		var cost_text := "%s · %s each" % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 		_tick(cost_line, func() -> String:
 			var current: Dictionary = Game.villages.get(village_id, village)
 			var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
@@ -2082,7 +2087,8 @@ func _on_waves_changed() -> void:
 	_rebuild_panel()
 
 
-func _tick(label: Label, text: Callable) -> void:
+## Keeps a label (or rich label) showing `text`'s result.
+func _tick(label: Control, text: Callable) -> void:
 	label.text = text.call()
 	_ticking.append([label, text])
 
@@ -2141,7 +2147,7 @@ func _refetch_inbox() -> void:
 
 
 func _on_inbox_changed() -> void:
-	_inbox_button.text = "Inbox %d" % Game.unread if Game.unread > 0 else "Inbox"
+	_inbox_button.text = str(Game.unread) if Game.unread > 0 else ""
 	if _panel_mode == "inbox":
 		_rebuild_panel()
 

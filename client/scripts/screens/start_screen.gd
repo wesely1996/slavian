@@ -17,7 +17,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 32)
+		margin.add_theme_constant_override("margin_" + side, 24)
 	for side in ["top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
 	add_child(margin)
@@ -29,12 +29,21 @@ func _ready() -> void:
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(root)
 
-	root.add_child(UI.label("Slavian", UI.TITLE_SIZE))
-	root.add_child(UI.label("Defend the Holy City. Build the Kalinov Bridge.", UI.SMALL_SIZE, UI.MUTED))
+	var picture := UI.icon("ui/title", 0)
+	picture.custom_minimum_size.y = 328
+	root.add_child(picture)
+	var title := UI.label("Slavian", UI.TITLE_SIZE)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(title)
+	var tagline := UI.label("Defend the Holy City. Build the Kalinov Bridge.", UI.SMALL_SIZE, UI.MUTED)
+	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(tagline)
 	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	root.add_child(_status)
+	var frame := UI.panel()
+	root.add_child(frame)
 	_content = UI.vbox(20)
-	root.add_child(_content)
+	frame.add_child(_content)
 
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)
