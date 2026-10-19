@@ -20,26 +20,26 @@ static func ritual_line(world: Dictionary, now: float) -> String:
 	if at == null or is_over(world):
 		return ""
 	var left := TimeUtil.parse_iso(at) - now
-	return "Ritual Night · in %s" % TimeUtil.format_duration(left) if left > 0 else "Ritual Night"
+	return UI.t("Ritual Night · in %s") % TimeUtil.format_duration(left) if left > 0 else UI.t("Ritual Night")
 
 
 ## The run's summary as lines for the end screen.
 static func stats(run: Dictionary) -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append("%s days" % _number(float(run.days)))
-	lines.append("Hordes beaten: %d of %d" % [int(run.wavesBeaten), int(run.wavesFaced)])
-	lines.append("Battles won: %d · camps cleared: %d" % [int(run.battlesWon), int(run.campsCleared)])
-	lines.append("Ancient sites explored: %d · lore scrolls: %d" % [int(run.sitesExplored), int(run.scrolls)])
-	lines.append("Villages founded: %d · lost: %d" % [int(run.villagesFounded), int(run.villagesLost)])
+	lines.append(UI.t("%s days") % _number(float(run.days)))
+	lines.append(UI.t("Hordes beaten: %d of %d") % [int(run.wavesBeaten), int(run.wavesFaced)])
+	lines.append(UI.t("Battles won: %d · camps cleared: %d") % [int(run.battlesWon), int(run.campsCleared)])
+	lines.append(UI.t("Ancient sites explored: %d · lore scrolls: %d") % [int(run.sitesExplored), int(run.scrolls)])
+	lines.append(UI.t("Villages founded: %d · lost: %d") % [int(run.villagesFounded), int(run.villagesLost)])
 	return lines
 
 
 ## "Mila: 3 villages, 1 lost".
 static func member_line(member: Dictionary) -> String:
 	var villages := int(member.villages)
-	var line := "%s: %d village%s" % [member.displayName, villages, "" if villages == 1 else "s"]
+	var line := UI.tn("%s: %d village", "%s: %d villages", villages) % [member.displayName, villages]
 	if int(member.villagesLost) > 0:
-		line += ", %d lost" % int(member.villagesLost)
+		line += UI.t(", %d lost") % int(member.villagesLost)
 	return line
 
 

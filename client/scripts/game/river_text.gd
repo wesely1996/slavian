@@ -27,7 +27,7 @@ static func direction(a: Vector2i, b: Vector2i) -> int:
 static func bridge_problem(data: Dictionary, home: Vector2i, a: Vector2i, b: Vector2i) -> String:
 	var range_ := int(data.field.bridge.range)
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > range_:
-		return "Bridges go within %d hexes of your village" % range_
+		return UI.t("Bridges go within %d hexes of your village") % range_
 	return ""
 
 
@@ -49,12 +49,12 @@ static func roads_at(roads: Array, cell: Vector2i) -> Dictionary:
 static func road_problem(data: Dictionary, terrain: Dictionary, rivers: Array, home: Vector2i, a: Vector2i, b: Vector2i) -> String:
 	var range_ := int(data.field.road.range)
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > range_:
-		return "Roads go within %d hexes of your village" % range_
+		return UI.t("Roads go within %d hexes of your village") % range_
 	for end in [a, b]:
 		var type: String = terrain.get(end, "")
 		if type == "" or data.terrain.terrain.get(type, {}).get("moveCost") == null:
-			return "No road can run there"
+			return UI.t("No road can run there")
 	for e in edges_at(rivers, a):
 		if e.other == b and e.crossing != "standing":
-			return "A river lies between; build a bridge first"
+			return UI.t("A river lies between; build a bridge first")
 	return ""

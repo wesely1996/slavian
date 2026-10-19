@@ -30,7 +30,7 @@ static func owners_for(delegations: Array, actor: int, now: float) -> Array:
 
 ## "Goran (for Mila) queued a build in Mila's village".
 static func entry(e: Dictionary, names: Dictionary, village_names: Dictionary) -> String:
-	var line := "%s (for %s) %s" % [names.get(int(e.delegateAccountId), "?"), names.get(int(e.ownerAccountId), "?"), e.action]
+	var line := UI.t("%s (for %s) %s") % [names.get(int(e.delegateAccountId), "?"), names.get(int(e.ownerAccountId), "?"), e.action]
 	if e.get("villageId") != null and village_names.has(int(e.villageId)):
-		line += " in %s" % village_names[int(e.villageId)]
+		line += UI.t(" in %s") % village_names[int(e.villageId)]
 	return line

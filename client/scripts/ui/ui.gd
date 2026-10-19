@@ -170,8 +170,18 @@ static func rich(text := "", font_size := SMALL_SIZE, color := MUTED) -> RichTex
 	return node
 
 
+## The name of a resource in the current language ("Wood", "Stone", …).
+static func resource_name(kind: String) -> String:
+	return {
+		"wood": UI.t("Wood"),
+		"stone": UI.t("Stone"),
+		"grain": UI.t("Grain"),
+		"iron": UI.t("Iron"),
+	}.get(kind, kind.capitalize())
+
+
 static func resource_text(amounts: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
-		parts.append("%s %d" % [kind.capitalize(), amounts[kind]])
+		parts.append("%s %d" % [resource_name(kind), amounts[kind]])
 	return "  ".join(parts)

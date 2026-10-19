@@ -2,40 +2,49 @@ class_name ArmyText
 extends RefCounted
 ## Words and positions for armies (see server armyView).
 
-const ORDERS := {
-	"support": "Support: stands guard there and fights its battles until called home.",
-	"reinforce": "Reinforce: joins the battle there, then comes home.",
-	"harass": "Harass (mostly cavalry): strikes one round hard, takes few losses, rides home.",
-	"hold": "Hold: digs in on a hex and fights every horde whose road runs through it.",
-	"clear": "Clear: storms a camp or lair and carries its loot home.",
-	"explore": "Explore: fights any guardians, searches the site for some hours and brings home what it finds. Scouts may go too.",
-}
+## The orders, translated (English source, Serbian via .po).
+static func order_text(order: String) -> String:
+	return {
+		"support": UI.t("Support: stands guard there and fights its battles until called home."),
+		"reinforce": UI.t("Reinforce: joins the battle there, then comes home."),
+		"harass": UI.t("Harass (mostly cavalry): strikes one round hard, takes few losses, rides home."),
+		"hold": UI.t("Hold: digs in on a hex and fights every horde whose road runs through it."),
+		"clear": UI.t("Clear: storms a camp or lair and carries its loot home."),
+		"explore": UI.t("Explore: fights any guardians, searches the site for some hours and brings home what it finds. Scouts may go too."),
+	}.get(order, order)
 
 
 static func units_text(units: Dictionary, defs: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for unit in units:
 		if int(units[unit]) > 0:
-			parts.append("%s ×%d" % [defs.get(unit, {"name": unit}).name, int(units[unit])])
-	return ", ".join(parts) if not parts.is_empty() else "no one"
+			parts.append(UI.t("%s ×%d") % [UI.t(defs.get(unit, {"name": unit}).name), int(units[unit])])
+	return ", ".join(parts) if not parts.is_empty() else UI.t("no one")
 
 
 ## "Supporting Vesna · arrives in 3m", from the point of view of its owner.
 static func status(army: Dictionary, target_name: String, now: float) -> String:
-	var verb: String = {"support": "Supporting", "reinforce": "Reinforcing", "harass": "Harassing", "hold": "Marching to hold", "clear": "Marching to clear the camp at", "explore": "Marching to explore"}.get(army.orders, "Marching to")
+	var verb: String = {
+		"support": UI.t("Supporting"),
+		"reinforce": UI.t("Reinforcing"),
+		"harass": UI.t("Harassing"),
+		"hold": UI.t("Marching to hold"),
+		"clear": UI.t("Marching to clear the camp at"),
+		"explore": UI.t("Marching to explore"),
+	}.get(army.orders, UI.t("Marching to"))
 	match army.status:
 		"marching":
-			return "%s %s · arrives in %s" % [verb, target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
+			return UI.t("%s %s · arrives in %s") % [verb, target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
 		"stationed":
 			if army.orders == "explore":
-				return "Searching the site at %s" % target_name
-			return ("Holding %s" if army.orders == "hold" else "Standing guard at %s") % target_name
+				return UI.t("Searching the site at %s") % target_name
+			return (UI.t("Holding %s") if army.orders == "hold" else UI.t("Standing guard at %s")) % target_name
 		"engaged":
-			return "Fighting at %s" % target_name
+			return UI.t("Fighting at %s") % target_name
 		"returning":
-			var loot := " with loot" if army.get("loot") is Dictionary else ""
-			return "Coming home from %s%s · %s" % [target_name, loot, TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)]
-	return "Back from %s" % target_name
+			var loot := UI.t(" with loot") if army.get("loot") is Dictionary else ""
+			return UI.t("Coming home from %s%s · %s") % [target_name, loot, TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)]
+	return UI.t("Back from %s") % target_name
 
 
 ## Where it is headed: a village's name, or the hex it holds.
@@ -69,7 +78,7 @@ static func reinforcements(battle: Dictionary, village_name: Callable) -> String
 			var text: String = village_name.call(joined.villageId)
 			var bonus := roundi(float(joined.bonus) * 100.0)
 			if bonus > 0:
-				text += " (+%d%% %s)" % [bonus, "harassment" if joined.orders == "harass" else "pincer"]
+				text += UI.t(" (+%d%% %s)") % [bonus, UI.t("harassment") if joined.orders == "harass" else UI.t("pincer")]
 			parts.append(text)
 	return ", ".join(parts)
 

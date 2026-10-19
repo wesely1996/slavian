@@ -200,7 +200,7 @@ func _draw() -> void:
 			if plot == selected:
 				draw_arc(center, r + 4.0, 0.0, TAU, 48, SELECTED, 4.0)
 			_text(font, center - Vector2(0, r * 0.12), str(level), r * 0.7)
-			_text(font, center + Vector2(0, r * 0.48), resource.capitalize(), r * 0.3)
+			_text(font, center + Vector2(0, r * 0.48), UI.resource_name(resource), r * 0.3)
 			continue
 		var locked := Rules.is_locked(data, village, plot)
 		var fill := SLOT_LOCKED if locked else (SLOT_EMPTY if def.is_empty() else BUILDING)
@@ -211,11 +211,11 @@ func _draw() -> void:
 			draw_rect(rect.grow(4.0), SELECTED, false, 4.0)
 		var font_size := rect.size.y * 0.2
 		if locked:
-			_text(font, rect.get_center(), "Hall %d" % Rules.slot_unlock_level(data, Rules.plot_index(plot)), font_size, UI.MUTED)
+			_text(font, rect.get_center(), tr("Hall %d") % Rules.slot_unlock_level(data, Rules.plot_index(plot)), font_size, UI.MUTED)
 		elif def.is_empty():
 			_text(font, rect.get_center(), "+", rect.size.y * 0.45, UI.MUTED)
 		else:
-			_text(font, rect.get_center() - Vector2(0, font_size * 0.6), _short_name(def.name), font_size)
+			_text(font, rect.get_center() - Vector2(0, font_size * 0.6), _short_name(tr(def.name)), font_size)
 			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
 
 
@@ -418,7 +418,7 @@ func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, un
 	if under_way:
 		draw_arc(rect.get_center(), rect.size.x * 0.56, 0.0, TAU, 48, BUILDING_ACTIVE, 5.0)
 	if id == "plot/locked":
-		var needs := ("Walls %d" % Rules.tower_unlock_level(data, Rules.plot_index(plot))) if Rules.is_tower_slot(plot) else ("Hall %d" % Rules.slot_unlock_level(data, Rules.plot_index(plot)))
+		var needs := (tr("Walls %d") % Rules.tower_unlock_level(data, Rules.plot_index(plot))) if Rules.is_tower_slot(plot) else (tr("Hall %d") % Rules.slot_unlock_level(data, Rules.plot_index(plot)))
 		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), needs, rect.size.y * (0.24 if Rules.is_tower_slot(plot) else 0.18), Color.WHITE)
 	elif id != "plot/empty":
 		# The level in a dark badge at the plot's lower right.

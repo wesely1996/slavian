@@ -20,11 +20,13 @@ const THREAT_COLORS := {
 	"High": Color("#d0862c"),
 	"Severe": Color("#a8322b"),
 }
+## Each threat level's skull: a plain skull for common threats, a horned
+## (devil) skull for elite ones and a spiked (demon) skull for the worst.
 const THREAT_ICONS := {
-	"Low": "icon/threat_low",
-	"Moderate": "icon/threat_moderate",
-	"High": "icon/threat_high",
-	"Severe": "icon/threat_severe",
+	"Low": "icon/threat_normal",
+	"Moderate": "icon/threat_normal",
+	"High": "icon/threat_elite",
+	"Severe": "icon/threat_boss",
 }
 ## Each front's faction emblem, so fronts are told apart by shape too.
 const FRONT_ICONS := {
@@ -96,7 +98,7 @@ static func front_line(data: Dictionary, front: String) -> String:
 	var def: Dictionary = data.get("enemies", {}).get("fronts", {}).get(front, {})
 	if def.is_empty():
 		return ""
-	return "%s (%s): %s" % [def.faction, String(front).capitalize(), def.get("signature", "")]
+	return UI.t("%s (%s): %s") % [UI.t(def.faction), String(front).capitalize(), UI.t(def.get("signature", ""))]
 
 
 ## One line per active front, from data/enemies.json.

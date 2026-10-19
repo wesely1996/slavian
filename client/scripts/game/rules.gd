@@ -183,14 +183,14 @@ static func claim_problem(data: Dictionary, village: Dictionary, cell: Vector2i,
 	var range_ := int(data.buildings.village.outpostRange)
 	var distance := HexMath.distance(cell, Vector2i(int(village.q), int(village.r)))
 	if distance == 0 or distance > range_:
-		return "Outposts go within %d hexes of your village." % range_
+		return UI.t("Outposts go within %d hexes of your village.") % range_
 	if not data.buildings.buildings[OUTPOST].yields.has(terrain):
-		return "Nothing to gather here."
+		return UI.t("Nothing to gather here.")
 	if taken:
-		return "Already taken."
+		return UI.t("Already taken.")
 	var limit := outpost_limit(data, hall_level(village))
 	if outpost_plots(village).size() >= limit:
-		return "Your village can hold %d outpost%s; upgrade the Elder's Hall for more." % [limit, "" if limit == 1 else "s"]
+		return UI.tn("Your village can hold %d outpost; upgrade the Elder's Hall for more.", "Your village can hold %d outposts; upgrade the Elder's Hall for more.", limit) % limit
 	return ""
 
 
@@ -236,18 +236,18 @@ static func settle_problem(data: Dictionary, cell: Vector2i, terrain: String, ho
 	var rules: Dictionary = data.expansion
 	var def: Dictionary = data.terrain.terrain.get(terrain, {})
 	if def.is_empty():
-		return "That hex is not on the map."
+		return UI.t("That hex is not on the map.")
 	if not def.settleable:
-		return "Villages can't be founded on %s." % def.name
+		return UI.t("Villages can't be founded on %s.") % UI.t(def.name)
 	if HexMath.distance(cell, home) > int(rules.maxDistance):
-		return "Settlers walk at most %d hexes from their village." % int(rules.maxDistance)
+		return UI.t("Settlers walk at most %d hexes from their village.") % int(rules.maxDistance)
 	if HexMath.distance(cell, Vector2i.ZERO) < int(rules.minHolyCityDistance):
-		return "Too close to the Holy City."
+		return UI.t("Too close to the Holy City.")
 	for other in villages:
 		if HexMath.distance(other, cell) < int(rules.minVillageDistance):
-			return "Villages stand at least %d hexes apart." % int(rules.minVillageDistance)
+			return UI.t("Villages stand at least %d hexes apart.") % int(rules.minVillageDistance)
 	if outpost_here:
-		return "An outpost stands there."
+		return UI.t("An outpost stands there.")
 	return ""
 
 

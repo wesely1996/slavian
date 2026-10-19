@@ -17,8 +17,8 @@ static func stage_def(data: Dictionary, bridge: Dictionary) -> Dictionary:
 static func title(data: Dictionary, bridge: Dictionary) -> String:
 	var stage := stage_def(data, bridge)
 	if stage.is_empty():
-		return "The Kalinov Bridge stands"
-	return "Stage %d of %d: %s" % [int(bridge.stage) + 1, data.bridge.stages.size(), stage.name]
+		return UI.t("The Kalinov Bridge stands")
+	return UI.t("Stage %d of %d: %s") % [int(bridge.stage) + 1, data.bridge.stages.size(), UI.t(stage.name)]
 
 
 ## What the stage still needs from the vault: {wood: n, …}.
@@ -44,9 +44,9 @@ static func progress(data: Dictionary, bridge: Dictionary) -> String:
 	for kind in KINDS:
 		var need := int(stage.cost[kind])
 		if need > 0:
-			parts.append("%s %d / %d" % [kind.capitalize(), mini(need, int(bridge.donated.get(kind, 0))), need])
+			parts.append(UI.t("%s %d / %d") % [UI.resource_name(kind), mini(need, int(bridge.donated.get(kind, 0))), need])
 	if int(stage.embers) > 0:
-		parts.append("Ember %d / %d" % [int(bridge.get("embers", 0)), int(stage.embers)])
+		parts.append(UI.t("Ember %d / %d") % [int(bridge.get("embers", 0)), int(stage.embers)])
 	return ", ".join(parts)
 
 
@@ -58,5 +58,5 @@ static func quests(data: Dictionary, bridge: Dictionary) -> Array:
 		return out
 	for quest in stage.quests:
 		var def: Dictionary = data.bridge.quests.get(quest.kind, {})
-		out.append([bridge.quests.has(quest.kind), def.get("name", quest.kind), quest.story])
+		out.append([bridge.quests.has(quest.kind), UI.t(def.get("name", quest.kind)), UI.t(quest.story)])
 	return out

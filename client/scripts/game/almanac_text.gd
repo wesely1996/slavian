@@ -2,7 +2,7 @@ class_name AlmanacText
 extends RefCounted
 ## The in-game almanac, written from the game data (data/*.json).
 
-const SECTIONS := ["Units", "Buildings", "Stances", "Hordes", "Clans", "Terrain", "The run"]
+const SECTIONS := ["Units", "Buildings", "Stances", "Hordes", "Clans", "Terrain", "The run"]  # tr
 
 
 ## [[title, text], …] for a section of the almanac.
@@ -30,12 +30,12 @@ static func _units(data: Dictionary) -> Array:
 	var units: Dictionary = data.units.units
 	for id in units:
 		var u: Dictionary = units[id]
-		var where := "%s level %d" % [data.buildings.buildings[u.building].name, int(u.requiresLevel)]
-		var text := "%s · attack %d · defense %d · speed %d hexes/h · carries %d · eats %d grain/h · trained at %s" % [
+		var where := UI.t("%s level %d") % [UI.t(data.buildings.buildings[u.building].name), int(u.requiresLevel)]
+		var text := UI.t("%s · attack %d · defense %d · speed %d hexes/h · carries %d · eats %d grain/h · trained at %s") % [
 			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.speed), int(u.carry), int(u.upkeepPerHour), where]
 		if u.get("clan") != null:
-			text += " · only %s" % data.clans.clans[u.clan].name
-		out.append([u.name, text])
+			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
+		out.append([UI.t(u.name), text])
 	return out
 
 
@@ -44,18 +44,18 @@ static func _buildings(data: Dictionary) -> Array:
 	var buildings: Dictionary = data.buildings.buildings
 	for id in buildings:
 		var b: Dictionary = buildings[id]
-		var kind: String = {"field": "Field around the village", "center": "Building in the village", "outpost": "Outpost on a nearby hex"}.get(b.kind, b.kind)
-		var text := "%s · up to level %d" % [kind, int(b.maxLevel)]
+		var kind: String = {"field": UI.t("Field around the village"), "center": UI.t("Building in the village"), "outpost": UI.t("Outpost on a nearby hex")}.get(b.kind, b.kind)
+		var text := UI.t("%s · up to level %d") % [kind, int(b.maxLevel)]
 		if b.has("production"):
-			text += " · makes %s" % String(b.production.resource)
+			text += UI.t(" · makes %s") % UI.resource_name(String(b.production.resource))
 		if b.has("effects"):
 			var parts := PackedStringArray()
 			for key in b.effects:
-				parts.append("%s %+d%%" % [key, roundi(float(b.effects[key]) * 100.0)])
-			text += " · per level: " + ", ".join(parts)
+				parts.append(UI.t("%s %+d%%") % [key, roundi(float(b.effects[key]) * 100.0)])
+			text += UI.t(" · per level: ") + ", ".join(parts)
 		if b.get("clan") != null:
-			text += " · only %s" % data.clans.clans[b.clan].name
-		out.append([b.name, text])
+			text += UI.t(" · only %s") % UI.t(data.clans.clans[b.clan].name)
+		out.append([UI.t(b.name), text])
 	return out
 
 
@@ -64,13 +64,13 @@ static func _stances(data: Dictionary) -> Array:
 	var stances: Dictionary = data.battle.stances
 	for id in stances:
 		var s: Dictionary = stances[id]
-		var retreat := "never breaks" if s.retreatAt == null else "breaks at %d%% losses" % roundi(float(s.retreatAt) * 100.0)
-		out.append([s.name, "attack ×%.2f · defense ×%.2f · %s" % [float(s.attack), float(s.defense), retreat]])
+		var retreat := UI.t("never breaks") if s.retreatAt == null else UI.t("breaks at %d%% losses") % roundi(float(s.retreatAt) * 100.0)
+		out.append([UI.t(s.name), UI.t("attack ×%.2f · defense ×%.2f · %s") % [float(s.attack), float(s.defense), retreat]])
 	var counters := PackedStringArray()
 	for family in data.battle.counters:
 		for target in data.battle.counters[family]:
-			counters.append("%s beat %s (×%.1f)" % [String(family).capitalize(), target, float(data.battle.counters[family][target])])
-	out.append(["Counters", ", ".join(counters)])
+			counters.append(UI.t("%s beat %s (×%.1f)") % [String(family).capitalize(), target, float(data.battle.counters[family][target])])
+	out.append([UI.t("Counters"), ", ".join(counters)])
 	return out
 
 
@@ -81,8 +81,8 @@ static func _hordes(data: Dictionary) -> Array:
 		var f: Dictionary = fronts[front]
 		var names := PackedStringArray()
 		for unit in f.units:
-			names.append(f.units[unit].name)
-		out.append(["%s (%s front)" % [f.faction, String(front).capitalize()], "%s Units: %s." % [f.signature, ", ".join(names)]])
+			names.append(UI.t(f.units[unit].name))
+		out.append([UI.t("%s (%s front)") % [UI.t(f.faction), String(front).capitalize()], UI.t("%s Units: %s.") % [UI.t(f.signature), ", ".join(names)]])
 	return out
 
 
@@ -90,7 +90,7 @@ static func _clans(data: Dictionary) -> Array:
 	var out := []
 	for clan in data.clans.clans:
 		var c: Dictionary = data.clans.clans[clan]
-		out.append(["%s (%s)" % [c.name, c.animal], "%s %s" % [c.story, ClanText.perks(data, clan)]])
+		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s") % [UI.t(c.story), ClanText.perks(data, clan)]])
 	return out
 
 
@@ -99,15 +99,15 @@ static func _terrain(data: Dictionary) -> Array:
 	var terrain: Dictionary = data.terrain.terrain
 	for id in terrain:
 		var t: Dictionary = terrain[id]
-		var move := "impassable" if t.moveCost == null else "move cost %s" % str(t.moveCost)
-		out.append([t.name, "%s · %s" % [move, "villages can be founded here" if t.settleable else "no villages"]])
+		var move := UI.t("impassable") if t.moveCost == null else UI.t("move cost %s") % str(t.moveCost)
+		out.append([UI.t(t.name), UI.t("%s · %s") % [move, UI.t("villages can be founded here") if t.settleable else UI.t("no villages")]])
 	return out
 
 
 static func _run(data: Dictionary) -> Array:
 	return [
-		["The Kalinov Bridge", data.bridge.story],
-		["Ritual Night", data.bridge.ritualNight.story],
-		["Winning", data.bridge.endings.won.title + ": the Holy City still stands when Ritual Night's last horde is done."],
-		["Losing", data.bridge.endings.lost.title + ": its Sanctity reaches 0."],
+		[UI.t("The Kalinov Bridge"), UI.t(data.bridge.story)],
+		[UI.t("Ritual Night"), UI.t(data.bridge.ritualNight.story)],
+		[UI.t("Winning"), UI.t("%s: the Holy City still stands when Ritual Night's last horde is done.") % UI.t(data.bridge.endings.won.title)],
+		[UI.t("Losing"), UI.t("%s: its Sanctity reaches 0.") % UI.t(data.bridge.endings.lost.title)],
 	]

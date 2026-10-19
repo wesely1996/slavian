@@ -220,7 +220,7 @@ func fort_at(cell: Vector2i) -> Dictionary:
 func battle_place(battle: Dictionary) -> String:
 	var setup: Variant = battle.get("setup")
 	if setup is Dictionary and setup.get("holyCity", false):
-		return "the Holy City"
+		return tr("the Holy City")
 	if battle.get("villageId") == null and battle.has("q"):
 		return "(%d, %d)" % [int(battle.q), int(battle.r)]
 	return village_name(battle.villageId)
@@ -345,8 +345,8 @@ func missions_for(wave_id: int) -> Array:
 
 func village_name(village_id: Variant) -> String:
 	if village_id == null:
-		return "the Holy City"
-	return villages.get(int(village_id), {}).get("name", "a village")
+		return tr("the Holy City")
+	return villages.get(int(village_id), {}).get("name", tr("a village"))
 
 
 func front_faction(front: String) -> String:

@@ -21,22 +21,22 @@ static func progress(research: Array, account_id: int) -> Dictionary:
 static func problem(data: Dictionary, tech: String, academy_level: int, done: Dictionary, researching: bool, scrolls: Dictionary = {}) -> String:
 	var def: Dictionary = data.research.techs.get(tech, {})
 	if def.is_empty():
-		return "Unknown tech."
+		return UI.t("Unknown tech.")
 	if done.has(tech):
-		return "Known."
+		return UI.t("Known.")
 	if researching:
-		return "One tech at a time."
+		return UI.t("One tech at a time.")
 	var scroll: Variant = def.get("requiresScroll")
 	if scroll != null and not scrolls.has(scroll):
-		return "Needs the %s scroll." % data.lore.scrolls.get(scroll, {}).get("name", scroll)
+		return UI.t("Needs the %s scroll.") % UI.t(data.lore.scrolls.get(scroll, {}).get("name", scroll))
 	if academy_level < int(def.academyLevel):
-		return "Needs an Academy of level %d." % int(def.academyLevel)
+		return UI.t("Needs an Academy of level %d.") % int(def.academyLevel)
 	var missing := PackedStringArray()
 	for required in def.requires:
 		if not done.has(required):
-			missing.append(data.research.techs[required].name)
+			missing.append(UI.t(data.research.techs[required].name))
 	if not missing.is_empty():
-		return "Needs %s first." % " and ".join(missing)
+		return UI.t("Needs %s first.") % " and ".join(missing)
 	return ""
 
 

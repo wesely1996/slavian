@@ -13,23 +13,23 @@ static func allowed(def: Dictionary, bonuses: Dictionary) -> bool:
 ## "Rod Volka (Wolf)".
 static func title(data: Dictionary, clan: Variant) -> String:
 	if clan == null or not data.clans.clans.has(clan):
-		return "No clan"
+		return UI.t("No clan")
 	var def: Dictionary = data.clans.clans[clan]
-	return "%s (%s)" % [def.name, def.animal]
+	return UI.t("%s (%s)") % [UI.t(def.name), UI.t(def.animal)]
 
 
 ## The clan's own unit or building, by name.
 static func unique_name(data: Dictionary, clan: String) -> String:
 	var unique: Dictionary = data.clans.clans[clan].unique
 	if unique.has("unit"):
-		return "%s (unit)" % data.units.units[unique.unit].name
-	return "%s (building)" % data.buildings.buildings[unique.building].name
+		return UI.t("%s (unit)") % UI.t(data.units.units[unique.unit].name)
+	return UI.t("%s (building)") % UI.t(data.buildings.buildings[unique.building].name)
 
 
 ## "Best at: … · Weakness: … · Own: …".
 static func perks(data: Dictionary, clan: String) -> String:
 	var def: Dictionary = data.clans.clans[clan]
-	return "Best at: %s · Weakness: %s · Own: %s" % [def.best, def.weakness, unique_name(data, clan)]
+	return UI.t("Best at: %s · Weakness: %s · Own: %s") % [UI.t(def.best), UI.t(def.weakness), unique_name(data, clan)]
 
 
 static func ids(data: Dictionary) -> Array:
