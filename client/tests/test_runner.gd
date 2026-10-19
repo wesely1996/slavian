@@ -40,6 +40,7 @@ func _initialize() -> void:
 	_test_delegation()
 	_test_onboarding_almanac()
 	_test_art()
+	_test_battle_story()
 	_test_rivers()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
@@ -566,3 +567,33 @@ func _test_rivers() -> void:
 	_check(RiverText.road_problem(rdata, rterrain, [], Vector2i(0, 0), Vector2i(0, 0), Vector2i(1, 0)) == "", "road can run")
 	_check(RiverText.road_problem(rdata, rterrain, [], Vector2i(0, 0), Vector2i(0, 0), Vector2i(0, 1)) != "", "no road into a lake")
 	_check(RiverText.road_problem(rdata, rterrain, [[0, 0, 1, 0, "none"]], Vector2i(0, 0), Vector2i(0, 0), Vector2i(1, 0)).begins_with("A river"), "no road over a river")
+
+
+func _test_battle_story() -> void:
+	var data := {
+		"units": {"units": {"spearman": {"name": "Spearman", "family": "infantry"}, "archer": {"name": "Archer", "family": "archers"}}},
+		"enemies": {"fronts": {"north": {"units": {"grey_wolf": {"name": "Grey Wolf", "family": "cavalry"}}}}},
+	}
+	var battle := {
+		"id": 3, "status": "defended", "attackerStance": "offensive", "villageId": 1,
+		"attackerInitial": {"grey_wolf": 40}, "defenderInitial": {"spearman": 20, "archer": 10},
+		"rounds": [
+			{"round": 1, "attackerLosses": {"grey_wolf": 12}, "defenderLosses": {"spearman": 3}},
+			{"round": 2, "attackerLosses": {"grey_wolf": 20}, "defenderLosses": {"archer": 1}, "joined": [{"armyId": 9, "villageId": 2, "orders": "pincer", "units": {"spearman": 5}, "bonus": 0.2}]},
+		],
+	}
+	var start := BattleStory.units_at(battle, 0)
+	var after := BattleStory.units_at(battle, 2)
+	_check(start.attacker.grey_wolf == 40 and start.defender.spearman == 20, "battle: the start")
+	_check(after.attacker.grey_wolf == 8 and after.defender.spearman == 22 and after.defender.archer == 9, "battle: losses and help after two rounds")
+	var squads := BattleStory.squads(data, start.defender, after.defender)
+	_check(squads.size() == 2 and squads[0].unit == "spearman" and squads[1].unit == "archer", "squads front to back by family")
+	_check(BattleStory.per_block({"grey_wolf": 40}) == 5 and BattleStory.squads(data, start.attacker, after.attacker)[0].alive == 2, "blocks of five wolves, two left")
+	_check(BattleStory.units_text(data, {"grey_wolf": 2, "spearman": 1}) == "2 Grey Wolves and 1 Spearman", "unit list in words")
+	_check(BattleStory.plural("Spearman", 3) == "Spearmen", "plural men")
+	var ctx := {"place": "Vesna's village", "enemy": "the Monsters of the North", "village_name": func(_id: Variant) -> String: return "Mila's village"}
+	_check(BattleStory.opening(data, battle, ctx).begins_with("The Monsters of the North came on, offensive, with 40 Grey Wolves."), "battle opening")
+	var two := BattleStory.narrate(data, battle, 2, ctx)
+	_check(two.contains("Help from Mila's village struck from behind with 5 Spearmen (+20%)") and two.contains("20 Grey Wolves fell") and two.ends_with("The field is ours."), "round two told: %s" % two)
+	_check(BattleStory.narrate(data, battle, 3, ctx) == "", "no third round")
+

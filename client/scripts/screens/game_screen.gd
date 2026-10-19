@@ -16,7 +16,8 @@ var _since_refresh := 0.0
 
 var _live_label: Label
 var _resource_labels: Dictionary[String, Label] = {}
-## "map" or "village" (the inside of your own village).
+## "map", "village" (the inside of your own village) or "battle" (a battle
+## on its campaign map).
 var _view := "map"
 var _view_button: Button
 var _inbox_button: Button
@@ -24,6 +25,12 @@ var _inbox_button: Button
 var _prefs: Dictionary = {}
 var _spacer: Control
 var _village_view: VillageView
+var _battle_view: BattleMap
+## The battle on the battle map, the round shown, and whether it plays on.
+var _battle_id := 0
+var _battle_round := 0
+var _battle_playing := false
+var _battle_clock := 0.0
 ## The plot picked in the village view.
 var _plot := Rules.HALL_PLOT
 ## Which part of the village panel is open: "village", "troops" or
@@ -123,7 +130,18 @@ func _exit_tree() -> void:
 	Live.forts_updated.disconnect(Game.set_forts)
 
 
+## Seconds a round stays on the battle map while it plays.
+const BATTLE_ROUND_SEC := 1.6
+
+
 func _process(delta: float) -> void:
+	if _view == "battle" and _battle_playing:
+		_battle_clock += delta
+		if _battle_clock >= BATTLE_ROUND_SEC:
+			_battle_clock = 0.0
+			_battle_round += 1
+			_battle_playing = _battle_round < _battle().get("rounds", []).size()
+			_rebuild_panel()
 	_since_refresh += delta
 	if _since_refresh < UI_REFRESH_SEC:
 		return
@@ -219,6 +237,10 @@ func _build_ui() -> void:
 	_village_view.visible = false
 	_village_view.plot_tapped.connect(_on_plot_tapped)
 	column.add_child(_village_view)
+	_battle_view = BattleMap.new()
+	_battle_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_battle_view.visible = false
+	column.add_child(_battle_view)
 
 	_panel = UI.panel()
 	column.add_child(_panel)
@@ -229,6 +251,105 @@ func _build_ui() -> void:
 	_panel_body = UI.vbox(12)
 	_panel_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_panel_body)
+
+
+# --- Battle map --------------------------------------------------------------
+
+func _battle_button(battle: Dictionary) -> Button:
+	var id := int(battle.id)
+	var button := UI.button("Battle map", func() -> void: _open_battle(id), "icon/troops")
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	return button
+
+
+## Opens a battle on its map: a finished one plays from the start, one
+## still being fought shows its latest round.
+func _open_battle(battle_id: int) -> void:
+	_battle_id = battle_id
+	var battle := _battle()
+	var finished: bool = battle.get("status", "ongoing") != "ongoing"
+	_battle_round = 0 if finished else battle.get("rounds", []).size()
+	_battle_playing = finished
+	_battle_clock = 0.0
+	_set_view("battle")
+
+
+func _battle() -> Dictionary:
+	for battle in Game.battles:
+		if int(battle.id) == _battle_id:
+			return battle
+	return {}
+
+
+func _battle_panel() -> void:
+	var battle := _battle()
+	if battle.is_empty():
+		_panel_body.add_child(UI.label("That battle is no longer in the reports.", UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(UI.button("Back to the map", func() -> void: _set_view("map"), "icon/map"))
+		return
+	var count: int = battle.rounds.size()
+	_battle_round = clampi(_battle_round, 0, count)
+	var ctx := _battle_ctx(battle)
+	_battle_view.show_battle(Game.data, battle, _battle_round, ctx)
+	_panel_body.add_child(UI.label("Battle at %s" % ctx.place, UI.HEADING_SIZE))
+	var row := UI.hbox(8)
+	var back := UI.button("◀", func() -> void:
+		_battle_playing = false
+		_battle_round -= 1
+		_rebuild_panel())
+	back.disabled = _battle_round <= 0
+	row.add_child(back)
+	var where := UI.label("Before the battle" if _battle_round == 0 else "Round %d of %d" % [_battle_round, count])
+	where.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	where.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(where)
+	var next := UI.button("▶", func() -> void:
+		_battle_playing = false
+		_battle_round += 1
+		_rebuild_panel())
+	next.disabled = _battle_round >= count
+	row.add_child(next)
+	var play := UI.button("Pause" if _battle_playing else "Play", func() -> void:
+		_battle_playing = not _battle_playing
+		if _battle_playing and _battle_round >= count:
+			_battle_round = 0
+		_battle_clock = 0.0
+		_rebuild_panel())
+	row.add_child(play)
+	_panel_body.add_child(row)
+	var story := BattleStory.opening(Game.data, battle, ctx) if _battle_round == 0 else BattleStory.narrate(Game.data, battle, _battle_round, ctx)
+	_panel_body.add_child(UI.label(story))
+	if battle.status == "ongoing" and _battle_round >= count:
+		_panel_body.add_child(UI.label("The fight goes on; the next round comes in %s." % TimeUtil.format_duration(float(Game.data.battle.roundMinutes) * 60.0 / float(Game.world.speed)), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.button("Back to the map", func() -> void: _set_view("map"), "icon/map"))
+
+
+## Names, colours and ground for the battle map and its story.
+func _battle_ctx(battle: Dictionary) -> Dictionary:
+	var cell := Vector2i(int(battle.q), int(battle.r))
+	var front := String(battle.front) if battle.get("front") != null else ""
+	for wave in Game.waves:
+		if battle.get("waveId") != null and int(wave.id) == int(battle.waveId):
+			front = wave.front
+	for camp in Game.camps:
+		if battle.get("campId") != null and int(camp.id) == int(battle.campId):
+			front = camp.front
+	var village: Dictionary = Game.villages.get(int(battle.villageId), {}) if battle.get("villageId") != null else {}
+	var ctx := {
+		"place": Game.battle_place(battle),
+		"enemy": ("the " + Game.front_faction(front)) if front != "" else "the enemy",
+		"enemy_leader": "Their chief",
+		"from": front.capitalize() if front != "" else "wilds",
+		"ours": HexMap.ALLY_COLOR if not village.is_empty() and not Game.is_mine(village) else HexMap.MINE_COLOR,
+		"terrain": Game.terrain.get(cell, "plains"),
+		"river": not RiverText.edges_at(Game.rivers, cell).is_empty(),
+		"road": not RiverText.roads_at(Game.roads, cell).is_empty(),
+		"village_name": Game.village_name,
+	}
+	for hero in Game.heroes:
+		if not village.is_empty() and hero.get("villageId") != null and int(hero.villageId) == int(village.id) and hero.status == "home":
+			ctx.leader = hero.name
+	return ctx
 
 
 # --- Selection panel ---------------------------------------------------------
@@ -244,20 +365,22 @@ func _select(cell: Vector2i) -> void:
 
 
 func _toggle_view() -> void:
-	_set_view("map" if _view == "village" else "village")
+	_set_view("village" if _view == "map" else "map")
 
 
 func _set_view(view: String) -> void:
 	_view = view
-	var inside := view == "village"
-	_view_button.text = "Map" if inside else "Village"
-	_view_button.icon = Art.texture("icon/map" if inside else "icon/village")
-	hex_map.visible = not inside
-	_spacer.visible = not inside
-	_village_view.visible = inside
+	var on_map := view == "map"
+	_view_button.text = "Village" if on_map else "Map"
+	_view_button.icon = Art.texture("icon/village" if on_map else "icon/map")
+	hex_map.visible = on_map
+	_spacer.visible = on_map
+	_village_view.visible = view == "village"
+	_battle_view.visible = view == "battle"
+	_battle_playing = _battle_playing and view == "battle"
 	# The map camera listens for unhandled input; keep it still while the
-	# village is open.
-	camera.set_process_unhandled_input(not inside)
+	# village or a battle is open.
+	camera.set_process_unhandled_input(on_map)
 	_panel_mode = "hex"
 	_rebuild_panel()
 
@@ -453,6 +576,9 @@ func _rebuild_panel() -> void:
 		return
 	if _view == "village":
 		_village_panel()
+		return
+	if _view == "battle":
+		_battle_panel()
 		return
 	for wave in WaveMath.visible_waves(Game.waves):
 		if WaveMath.current_hex(wave, Game.server_now()) == _selected:
@@ -1976,6 +2102,7 @@ func _threats_panel() -> void:
 		var helpers := ArmyText.reinforcements(battle, Game.village_name)
 		if helpers != "":
 			_panel_body.add_child(UI.label("Help came from " + helpers, UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(_battle_button(battle))
 	if not Game.camps.is_empty():
 		_panel_body.add_child(UI.label("Camps and lairs", UI.HEADING_SIZE))
 	for camp in Game.camps:
@@ -2024,6 +2151,9 @@ func _wave_entry(wave: Dictionary) -> void:
 				var battle := Game.battle_for(int(wave.id))
 				return "Fighting at %s · round %d of %d · %d of them left" % [Game.battle_place(battle) if not battle.is_empty() else Game.village_name(wave.targetVillageId), int(battle.get("round", 0)), int(Game.data.battle.maxRounds), BattleText.total(battle.get("attackerNow", {}))]
 		return String(wave.status).capitalize())
+	var fighting := Game.battle_for(int(wave.id))
+	if not fighting.is_empty() and fighting.status == "ongoing":
+		_panel_body.add_child(_battle_button(fighting))
 	_scouting_section(wave)
 
 

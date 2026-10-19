@@ -162,9 +162,11 @@ export async function scoutingView(client: DbClient, worldId: number) {
 }
 
 // Battles are fought in the open: both sides' numbers are visible.
-export function battleView(battle: Battle, attackerNow: Record<string, number>) {
+// `front`: whose horde or camp the enemy came from (null when unknown).
+export function battleView(battle: Battle, attackerNow: Record<string, number>, front: string | null = null) {
   return {
     id: battle.id,
+    front,
     waveId: battle.waveId,
     campId: battle.campId,
     siteId: battle.siteId,
@@ -188,13 +190,18 @@ export function battleView(battle: Battle, attackerNow: Record<string, number>) 
 
 export async function battlesView(client: DbClient, worldId: number) {
   const battles = await listRecentBattles(client, worldId);
-  const waves = new Map<number, Record<string, number>>();
+  const waves = new Map<number, { composition: Record<string, number>; front: string }>();
+  const camps = new Map<number, string>();
   if (battles.length) {
-    const { rows } = await client.query<{ id: number; composition: Record<string, number> }>(
-      'SELECT id, composition FROM waves WHERE id = ANY($1)',
+    const { rows } = await client.query<{ id: number; composition: Record<string, number>; front: string }>(
+      'SELECT id, composition, front FROM waves WHERE id = ANY($1)',
       [battles.map((b) => b.waveId).filter((id) => id !== null)],
     );
-    for (const row of rows) waves.set(row.id, row.composition);
+    for (const row of rows) waves.set(row.id, row);
+    const campRows = await client.query<{ id: number; front: string }>('SELECT id, front FROM camps WHERE id = ANY($1)', [
+      battles.map((b) => b.campId).filter((id) => id !== null),
+    ]);
+    for (const row of campRows.rows) camps.set(row.id, row.front);
   }
   // A camp's numbers after the assault: its start minus what fell.
   const after = (battle: Battle) => {
@@ -202,7 +209,13 @@ export async function battlesView(client: DbClient, worldId: number) {
     for (const round of battle.rounds) for (const [unit, n] of Object.entries(round.attackerLosses)) left[unit] = (left[unit] ?? 0) - n;
     return Object.fromEntries(Object.entries(left).filter(([, n]) => n > 0));
   };
-  return battles.map((battle) => battleView(battle, battle.waveId === null ? after(battle) : (waves.get(battle.waveId) ?? {})));
+  return battles.map((battle) =>
+    battleView(
+      battle,
+      battle.waveId === null ? after(battle) : (waves.get(battle.waveId)?.composition ?? {}),
+      battle.waveId !== null ? (waves.get(battle.waveId)?.front ?? null) : battle.campId !== null ? (camps.get(battle.campId) ?? null) : null,
+    ),
+  );
 }
 
 export function raidView(raid: Raid) {
