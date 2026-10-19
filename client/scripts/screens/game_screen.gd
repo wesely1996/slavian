@@ -16,6 +16,7 @@ var _since_refresh := 0.0
 
 var _live_label: Label
 var _resource_labels: Dictionary[String, Label] = {}
+var _rate_labels: Dictionary[String, Label] = {}
 ## "map", "village" (the inside of your own village) or "battle" (a battle
 ## on its campaign map).
 var _view := "map"
@@ -152,9 +153,10 @@ func _process(delta: float) -> void:
 		for kind in Ledger.KINDS:
 			var rate: float = home.resources.ratesPerHour[kind]
 			var label := _resource_labels[kind]
-			label.text = "%d  %s/h" % [amounts[kind], UI.signed(rate)]
+			label.text = str(int(amounts[kind]))
 			label.tooltip_text = kind.capitalize()
-			label.add_theme_color_override("font_color", NEGATIVE if rate < 0 else UiTheme.TEXT)
+			_rate_labels[kind].text = "%s/h" % UI.signed(rate)
+			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
 	if hex_map.has_moving_hordes():
@@ -180,21 +182,16 @@ func _build_ui() -> void:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(column)
 
-	var top := UI.panel(Color(0.13, 0.11, 0.09, 0.85), 8)
+	var top := UI.panel(0.9, 6)
 	column.add_child(top)
-	var top_rows := UI.vbox(6)
+	var top_rows := UI.vbox(8)
 	top.add_child(top_rows)
-	var bar := UI.hbox()
+	var bar := UI.hbox(6)
 	top_rows.add_child(bar)
 	var back := UI.button("", _leave, "icon/back")
+	back.theme_type_variation = "IconButton"
 	back.tooltip_text = "Worlds"
 	bar.add_child(back)
-	_view_button = UI.button("Village", _toggle_view, "icon/village")
-	_view_button.visible = not _my_village().is_empty()
-	bar.add_child(_view_button)
-	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
-	_inbox_button.tooltip_text = "Inbox"
-	bar.add_child(_inbox_button)
 	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -203,24 +200,47 @@ func _build_ui() -> void:
 	_live_label = UI.label("", UI.SMALL_SIZE)
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	bar.add_child(_live_label)
-	var resources := GridContainer.new()
-	resources.columns = 2
-	resources.add_theme_constant_override("h_separation", 24)
+	_view_button = UI.button("Village", _toggle_view, "icon/village")
+	_view_button.visible = not _my_village().is_empty()
+	bar.add_child(_view_button)
+	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
+	_inbox_button.theme_type_variation = "IconButton"
+	_inbox_button.tooltip_text = "Inbox"
+	bar.add_child(_inbox_button)
+	# The resource strip: icon, stock, and the hourly rate under it.
+	var resources := UI.hbox(4)
 	top_rows.add_child(resources)
 	for kind in Ledger.KINDS:
-		var cell := UI.hbox(6)
+		var cell := UI.hbox(8)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cell.add_child(UI.icon("resource/" + kind, 40))
-		var label := UI.label("", UI.SMALL_SIZE)
+		var numbers := UI.vbox(0)
+		var label := UI.label("", 26)
+		label.theme_type_variation = "Strong"
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cell.add_child(label)
+		numbers.add_child(label)
+		var rate := UI.label("", 19, UI.MUTED)
+		rate.autowrap_mode = TextServer.AUTOWRAP_OFF
+		numbers.add_child(rate)
+		cell.add_child(numbers)
 		resources.add_child(cell)
 		_resource_labels[kind] = label
+		_rate_labels[kind] = rate
 	_threat_button = UI.button("", _show_threats, "icon/threat")
-	_threat_button.custom_minimum_size.y = 60
+	_threat_button.custom_minimum_size.y = 56
 	_threat_button.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-	_threat_button.add_theme_color_override("font_color", Color("#ffe0d8"))
+	_threat_button.add_theme_color_override("font_color", Color("#f3c2b6"))
+	_threat_button.add_theme_color_override("icon_normal_color", UiTheme.DANGER)
+	for state in ["normal", "hover", "pressed"]:
+		var style := UiTheme.panel_style(10, 1.0)
+		style.bg_color = Color("#2a1715") if state == "normal" else Color("#3a1f1b")
+		style.border_color = Color(UiTheme.DANGER, 0.6 if state == "normal" else 1.0)
+		style.set_border_width_all(1)
+		style.border_width_left = 4
+		style.shadow_size = 0
+		style.set_corner_radius_all(5)
+		style.content_margin_left = 14
+		_threat_button.add_theme_stylebox_override(state, style)
 	_threat_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_threat_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	top_rows.add_child(_threat_button)
@@ -1856,7 +1876,7 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
-	var button := UI.button(verb, func() -> void: _queue_build(village_id, plot, building))
+	var button := UI.primary(verb, func() -> void: _queue_build(village_id, plot, building))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
@@ -1969,7 +1989,7 @@ func _troops_section(village: Dictionary) -> void:
 				_rebuild_panel())
 			stepper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(stepper)
-		var train := UI.button("Train", func() -> void: _train(village_id, unit, count))
+		var train := UI.primary("Train", func() -> void: _train(village_id, unit, count))
 		train.custom_minimum_size.x = 140
 		row.add_child(train)
 		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) \

@@ -39,20 +39,31 @@ glance on a phone, and still look good.
 
 ## The interface
 
-- **Frames and buttons** (`ui/panel`, `ui/button`, `ui/button_hover`,
-  `ui/button_pressed`, `ui/button_disabled`, `ui/button_selected` for the
-  open tab, `ui/field` for text inputs) are nine-sliced by `UiTheme`
-  (`client/scripts/ui/ui_theme.gd`): the corners keep their size, edges and
-  middle stretch, so put ornament only in the corners. The corner size is
-  given in the art's own units (panel 24 of 96, buttons 16 of 64, field 12
-  of 48), so a replacement at any resolution lines up as long as it keeps
-  those proportions.
-- **Icons** (`icon/...`) sit on buttons and tabs; resources (`resource/...`)
-  stand in for their names in the top bar and in every cost line.
-- **Type:** Kurale for headings and buttons (gold headings, an ink outline on
-  buttons), Alegreya Sans for text; both cover Serbian Latin and Cyrillic.
-  They live in `client/ui/fonts/` under the SIL Open Font License (the
+In the manner of modern grand strategy games (Civilization VI, Old World,
+Crusader Kings III): the map is the picture, the interface a quiet frame
+around it.
+
+- **Panels** are dark slate glass (`#141920`, slightly see-through) with a thin
+  bronze trim, brighter along the top, rounded 8 px, and a soft drop shadow.
+- **Buttons** are flat slate with a 1 px line that turns bronze under the
+  finger; the main action of a panel is **gold** with dark lettering
+  (`UI.primary`). Tabs stay quiet until open, then take a gold underline.
+  Icon-only buttons on the top bar have no box until touched.
+- **Type:** Cinzel (Roman capitals, a little apart) in gold for headings and
+  titles; Inter for everything else, semibold on buttons. Both cover Serbian
+  Latin; they live in `client/ui/fonts/` under the SIL Open Font License (the
   licence files sit beside them).
+- **Colours:** text `#e9e4d8`, secondary `#9aa3ad`, gold `#e3c27a`, bronze
+  `#b8914f`, danger `#e07a62` (the threat line), green/blue/red for owners.
+- **Icons** (`icon/...`) are white line drawings, 4.5 px strokes at 64 px with
+  round ends; the theme tints them (gold when pressed, dark on gold buttons).
+  Resources (`resource/...`) stand in for their names on the top bar and in
+  every cost line.
+- All of this is vector styles in `client/scripts/ui/ui_theme.gd`, sharp at
+  any scale. To draw them as art instead, add `ui/panel`, `ui/button`,
+  `ui/button_hover`, `ui/button_pressed`, `ui/button_disabled`,
+  `ui/button_selected` (the open tab) or `ui/field` to `art.json`: they are
+  nine-sliced, corners kept (panel 24 of 96, buttons 16 of 64, field 12 of 48).
 - `ui/title` is the start screen's picture.
 
 ## Replacing a piece of art

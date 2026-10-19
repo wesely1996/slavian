@@ -88,7 +88,7 @@ func _show_login() -> void:
 	_content.add_child(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED))
 	var name_edit := UI.line_edit(tr("e.g. Vesna"))
 	_content.add_child(name_edit)
-	_content.add_child(UI.button(tr("Play as guest"), func() -> void:
+	_content.add_child(UI.primary(tr("Play as guest"), func() -> void:
 		_login(server.text, name_edit.text)))
 
 
@@ -168,7 +168,7 @@ func _show_home() -> void:
 	_content.add_child(row)
 	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
 	_content.add_child(difficulty)
-	_content.add_child(UI.button(tr("Create world"), func() -> void:
+	_content.add_child(UI.primary(tr("Create world"), func() -> void:
 		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
 
 	_content.add_child(UI.label(tr("Join a world"), UI.HEADING_SIZE))
@@ -236,7 +236,7 @@ func _show_lobby(world: Dictionary) -> void:
 		var clan := " · %s" % ClanText.title(Game.data, member.get("clan")) if not Game.data.is_empty() else ""
 		_content.add_child(UI.label("• %s%s%s" % [member.displayName, host, clan]))
 	if int(world.hostAccountId) == int(Session.account.id):
-		_content.add_child(UI.button(tr("Start the world"), func() -> void: _start_world(int(world.id))))
+		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id))))
 	else:
 		_content.add_child(UI.label(tr("Waiting for the host to start…"), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.button(tr("Back"), _show_home))

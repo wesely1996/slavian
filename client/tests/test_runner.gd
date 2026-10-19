@@ -544,13 +544,18 @@ func _test_art() -> void:
 			missing_art.append(f)
 	_check(missing_art.is_empty(), "art for every village building: %s" % [missing_art])
 	var theme := UiTheme.build()
-	_check(theme.get_stylebox("panel", "PanelContainer") is FrameStyle, "panels framed from the art")
-	_check(theme.get_stylebox("disabled", "TabButton") is FrameStyle, "open tab trimmed")
+	var panel := theme.get_stylebox("panel", "PanelContainer")
+	_check(panel is StyleBoxFlat and (panel as StyleBoxFlat).shadow_size > 0, "panels are slate glass with a shadow")
+	var open_tab := theme.get_stylebox("disabled", "TabButton")
+	_check(open_tab is StyleBoxFlat and (open_tab as StyleBoxFlat).border_width_bottom == 3, "open tab underlined")
+	_check(theme.get_stylebox("normal", "Primary") is StyleBoxFlat, "a gold primary button")
 	_check(theme.get_font("font", "Heading") != null and theme.default_font != null, "fonts loaded")
 	var heading_font := theme.get_font("font", "Heading")
 	_check(heading_font.has_char("Č".unicode_at(0)) and heading_font.has_char("ђ".unicode_at(0)), "heading font covers Serbian")
 	_check(UI.costs({"wood": 320, "stone": 0, "grain": 5, "iron": 1}).contains("[img=30]res://art/generated/resource/wood.svg[/img] 320"), "costs with icons")
-	_check(UiTheme.frame("no/such", 64, 16, 10, Color.RED) is StyleBoxFlat, "flat frame without the art")
+	var flat := StyleBoxFlat.new()
+	_check(UiTheme.frame("no/such", 64, 16, 10, flat) == flat, "the vector style without the art")
+	_check(UiTheme.frame("icon/map", 64, 16, 10, flat) is FrameStyle, "art replaces the style")
 
 
 func _test_rivers() -> void:
