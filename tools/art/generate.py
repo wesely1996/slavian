@@ -92,6 +92,11 @@ class Svg:
     def shadow(self, cx, cy, rx, ry=None):
         return self.ellipse(cx, cy, rx, ry if ry is not None else rx * 0.28, SHADOW, stroke="none", sw=0, opacity=0.25)
 
+    def embed(self, other, x, y, scale=1.0):
+        """Draws another piece inside this one, its top left at (x, y)."""
+        body = "".join(other.parts)
+        return self.add(f'<g transform="translate({fmt(x)},{fmt(y)}) scale({scale})">{body}</g>')
+
     def text(self):
         body = "\n  ".join(self.parts)
         return f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" viewBox="0 0 {self.w} {self.h}">\n  {body}\n</svg>\n'
@@ -745,6 +750,146 @@ VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "car
 FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
 
 
+# --- Interface: frames, buttons and icons ---------------------------------------
+# Frames and buttons are nine-sliced by the client (UiTheme): the corners keep
+# their size, the edges and middle stretch, so nothing but the corners may
+# change along an edge.
+PANEL_BG = "#2a221b"
+PANEL_WOOD = ("#5a3a20", "#7a5230")
+TRIM = "#c9a13f"
+
+
+def ornament(s, x, y, r):
+    """A small carved rosette: a gold rhombus with a red heart."""
+    s.poly([(x, y - r), (x + r, y), (x, y + r), (x - r, y)], P["gold"][0], sw=2)
+    s.poly([(x, y - r * 0.45), (x + r * 0.45, y), (x, y + r * 0.45), (x - r * 0.45, y)], P["red"][0], stroke="none", sw=0)
+
+
+def ui_panel():
+    s = Svg(96, 96)
+    s.rect(2, 2, 92, 92, PANEL_WOOD[0], sw=3, rx=12)
+    s.line(14, 5.5, 82, 5.5, stroke=PANEL_WOOD[1], sw=2)
+    s.rect(9, 9, 78, 78, PANEL_BG, sw=2, rx=6)
+    s.rect(12.5, 12.5, 71, 71, "none", stroke=TRIM, sw=1.5, rx=4, opacity=0.8)
+    for x in (9, 87):
+        for y in (9, 87):
+            ornament(s, x, y, 7)
+    return s
+
+
+def ui_field():
+    s = Svg(48, 48)
+    s.rect(2, 2, 44, 44, "#1d1712", sw=3, rx=8)
+    s.rect(5.5, 5.5, 37, 37, "none", stroke=PANEL_WOOD[1], sw=1.5, rx=5)
+    return s
+
+
+BUTTON_LOOKS = {
+    "button": (P["wood"][0], P["wood"][1], "#6b4220"),
+    "button_hover": ("#a06a37", "#c48b55", "#7a4c26"),
+    "button_pressed": ("#6f4622", "#5a381b", "#8b5a2b"),
+    "button_disabled": ("#5b5048", "#6e625a", "#4a4039"),
+}
+
+
+def ui_button(look):
+    s = Svg(64, 64)
+    if look == "button_selected":
+        # The open tab: dark like the panel, trimmed in gold.
+        s.rect(2, 2, 60, 60, PANEL_BG, stroke=P["gold"][0], sw=3, rx=10)
+        s.rect(6, 54, 52, 4, P["gold"][0], stroke="none", sw=0, rx=2)
+        return s
+    base, light, dark = BUTTON_LOOKS[look]
+    s.rect(2, 2, 60, 60, base, sw=3, rx=10)
+    top, bottom = (light, dark) if look != "button_pressed" else (dark, light)
+    s.rect(7, 6, 50, 7, top, stroke="none", sw=0, rx=3.5, opacity=0.8)
+    s.rect(7, 51, 50, 7, bottom, stroke="none", sw=0, rx=3.5, opacity=0.8)
+    return s
+
+
+def ui_divider():
+    s = Svg(256, 24)
+    for x0, x1 in [(8, 108), (148, 248)]:
+        s.line(x0, 12, x1, 12, stroke=TRIM, sw=2.5)
+    for x in (100, 156):
+        s.circle(x, 12, 3, P["gold"][0], sw=1.5)
+    ornament(s, 128, 12, 10)
+    return s
+
+
+def icon(kind):
+    s = Svg(64, 64)
+    if kind == "back":
+        s.path("M40,10 L18,32 L40,54", "none", stroke=INK, sw=12)
+        s.path("M40,10 L18,32 L40,54", "none", stroke=P["gold"][0], sw=6)
+    elif kind == "map":
+        s.poly([(6, 14), (22, 8), (42, 14), (58, 8), (58, 50), (42, 56), (22, 50), (6, 56)], P["bone"][0], sw=3)
+        s.line(22, 8, 22, 50, sw=2)
+        s.line(42, 14, 42, 56, sw=2)
+        s.path("M12,44 Q22,30 32,36 T50,22", "none", stroke=P["red"][0], sw=3)
+        s.path("M46,18 L54,26 M54,18 L46,26", "none", stroke=P["red"][0], sw=3.5)
+    elif kind == "village":
+        s.shadow(32, 54, 26, 5)
+        hut(s, 22, 52, 24)
+        hut(s, 42, 54, 28, roof="roof")
+    elif kind == "inbox":
+        s.rect(10, 12, 44, 40, P["bone"][0], sw=3, rx=4)
+        s.path("M10,16 L32,34 L54,16", "none", sw=3)
+        s.circle(32, 40, 8, P["red"][0], sw=2.5)
+    elif kind == "threat":
+        # A war horn.
+        s.path("M8,40 Q20,12 52,10 L56,24 Q30,24 20,48 Z", P["bone"][0], sw=3)
+        s.path("M52,10 L56,24", "none", stroke=P["iron"][0], sw=5)
+        s.line(14, 46, 22, 52, stroke=P["wood"][0], sw=6)
+    elif kind == "build":
+        s.line(10, 58, 38, 26, stroke=INK, sw=13)
+        s.line(10, 58, 38, 26, stroke=P["wood"][0], sw=7)
+        s.poly([(22, 18), (44, 4), (60, 26), (38, 40)], P["iron"][0], sw=3.5)
+        s.line(28, 18, 44, 8, stroke=P["iron"][1], sw=3)
+    elif kind == "troops":
+        s.line(48, 6, 20, 58, stroke=P["wood"][0], sw=5)
+        s.poly([(48, 4), (54, 10), (46, 16)], P["iron"][1], sw=2.5)
+        s.path("M14,16 L44,16 L44,34 Q44,50 29,58 Q14,50 14,34 Z", P["red"][0], sw=3)
+        s.path("M29,20 L29,52 M18,32 L40,32", "none", stroke=P["gold"][0], sw=3)
+    elif kind == "caravan":
+        s.shadow(32, 54, 26, 5)
+        cart(s, 32, 50, w=44, covered=True)
+    elif kind == "research":
+        s.path("M6,18 Q20,12 32,18 Q44,12 58,18 L58,52 Q44,46 32,52 Q20,46 6,52 Z", P["bone"][0], sw=3)
+        s.line(32, 18, 32, 52, sw=2)
+        for y in (26, 33, 40):
+            s.line(12, y, 26, y - 2, stroke=P["wood"][0], sw=2)
+            s.line(38, y - 2, 52, y, stroke=P["wood"][0], sw=2)
+    elif kind == "clock":
+        s.circle(32, 32, 24, P["bone"][0], sw=3)
+        s.path("M32,16 L32,32 L44,38", "none", sw=4)
+    return s
+
+
+def ui_title():
+    """The start screen's picture: the Holy City over the river and the
+    Kalinov Bridge, between forests."""
+    s = Svg(360, 180)
+    s.rect(0, 0, 360, 180, "#cfe0dc", stroke="none", sw=0)
+    s.circle(292, 40, 22, P["gold"][1], stroke="none", sw=0, opacity=0.7)
+    s.path("M0,100 Q60,60 130,86 Q200,52 260,80 Q320,58 360,84 L360,180 L0,180 Z", P["hill"][1], sw=3)
+    s.path("M0,124 Q90,92 180,108 Q270,90 360,118 L360,180 L0,180 Z", P["grass"][0], sw=3)
+    s.embed(holy_city(), 128, 22, 0.65)
+    for x, y, size in [(22, 128, 26), (46, 136, 30), (14, 150, 28), (318, 124, 26), (342, 138, 30), (300, 148, 26)]:
+        tree(s, x, y, size)
+    s.path("M0,160 Q100,146 180,156 Q260,166 360,150 L360,180 L0,180 Z", P["water"][0], sw=3)
+    s.path("M30,170 Q60,164 90,170 M220,168 Q250,162 280,168", "none", stroke="#ffffff", sw=2, opacity=0.7)
+    s.path("M120,160 Q180,122 240,160", "none", stroke=INK, sw=12)
+    s.path("M120,160 Q180,122 240,160", "none", stroke=P["stone"][1], sw=7)
+    for x in (150, 180, 210):
+        s.line(x, 160 - (24 if x == 180 else 16), x, 168, stroke=P["stone"][0], sw=4)
+    s.rect(1.5, 1.5, 357, 177, "none", sw=3)
+    return s
+
+
+UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock"]
+
+
 # --- Build everything --------------------------------------------------------
 
 def assets():
@@ -778,6 +923,14 @@ def assets():
             out[f"field/{kind}_{stage}"] = field(kind, stage)
     out["plot/empty"] = plot("empty")
     out["plot/locked"] = plot("locked")
+    out["ui/panel"] = ui_panel()
+    out["ui/field"] = ui_field()
+    for look in [*BUTTON_LOOKS, "button_selected"]:
+        out[f"ui/{look}"] = ui_button(look)
+    out["ui/divider"] = ui_divider()
+    out["ui/title"] = ui_title()
+    for kind in UI_ICONS:
+        out[f"icon/{kind}"] = icon(kind)
     return out
 
 

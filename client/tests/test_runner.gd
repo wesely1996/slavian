@@ -540,6 +540,14 @@ func _test_art() -> void:
 		if not Art.has(Art.building_id(f, 2, true)):
 			missing_art.append(f)
 	_check(missing_art.is_empty(), "art for every village building: %s" % [missing_art])
+	var theme := UiTheme.build()
+	_check(theme.get_stylebox("panel", "PanelContainer") is FrameStyle, "panels framed from the art")
+	_check(theme.get_stylebox("disabled", "TabButton") is FrameStyle, "open tab trimmed")
+	_check(theme.get_font("font", "Heading") != null and theme.default_font != null, "fonts loaded")
+	var heading_font := theme.get_font("font", "Heading")
+	_check(heading_font.has_char("Č".unicode_at(0)) and heading_font.has_char("ђ".unicode_at(0)), "heading font covers Serbian")
+	_check(UI.costs({"wood": 320, "stone": 0, "grain": 5, "iron": 1}).contains("[img=30]res://art/generated/resource/wood.svg[/img] 320"), "costs with icons")
+	_check(UiTheme.frame("no/such", 64, 16, 10, Color.RED) is StyleBoxFlat, "flat frame without the art")
 
 
 func _test_rivers() -> void:

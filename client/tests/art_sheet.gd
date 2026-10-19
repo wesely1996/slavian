@@ -1,6 +1,6 @@
 extends SceneTree
 ## Renders every piece of art in client/art/art.json onto one sheet:
-##   godot --path client --resolution 1400x3000 --script res://tests/art_sheet.gd -- <out.png>
+##   godot --path client --resolution 1400x3400 --script res://tests/art_sheet.gd -- <out.png>
 ## (needs a display; under CI use xvfb-run). docs/art/style-sample.png is made with it.
 
 const SECTIONS := [
@@ -14,6 +14,7 @@ const SECTIONS := [
 	["In the village: buildings in three stages (levels 1-3, 4-7, 8+)", "building/"],
 	["Resource fields in three stages, and building plots", "field/"],
 	["", "plot/"],
+	["Interface icons", "icon/"],
 ]
 const SIDES := [["Yours", Color("#4caf50")], ["Allies'", Color("#3f7fd6")], ["Enemies'", Color("#d0453a")]]
 const INK := Color("#2b2118")
@@ -58,6 +59,8 @@ func _run() -> void:
 		owners.add_child(_owned(side[0], side[1]))
 	owners.add_child(_tile("app/icon"))
 	column.add_child(owners)
+	column.add_child(_label("Interface: framed panels, wooden buttons, tabs (ui/...), Kurale and Alegreya Sans", 24))
+	column.add_child(_interface())
 	for i in 6:
 		await process_frame
 	root.get_texture().get_image().save_png(out)
@@ -88,6 +91,27 @@ func _tile(id: String) -> Control:
 	name.custom_minimum_size.x = 104
 	box.add_child(name)
 	return box
+
+
+## A sample of the interface, built with the game's own theme and helpers.
+func _interface() -> Control:
+	var panel := UI.panel()
+	panel.custom_minimum_size.x = 700
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var body := UI.vbox(12)
+	panel.add_child(body)
+	body.add_child(UI.tabs([["village", "Buildings", "icon/build"], ["troops", "Troops", "icon/troops"], ["caravans", "Caravans", "icon/caravan"], ["research", "Research", "icon/research"]], "village", func(_k: String) -> void: pass))
+	body.add_child(UI.label("Elder's Hall  Lv 3", UI.HEADING_SIZE))
+	body.add_child(UI.label("6 of 12 building slots open, build queue 3. Čuvari, šuma, žito, đak."))
+	var row := UI.hbox()
+	row.add_child(UI.button("Upgrade", func() -> void: pass, "icon/build"))
+	row.add_child(UI.button("Map", func() -> void: pass, "icon/map"))
+	var off := UI.button("Not enough wood", func() -> void: pass)
+	off.disabled = true
+	row.add_child(off)
+	body.add_child(row)
+	body.add_child(UI.line_edit("Village name"))
+	return panel
 
 
 ## A village of the given side: outlined and bannered in its colour.
