@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
 import { runSummary } from '../db/runs.js';
 import { listForts, type Fort } from '../db/forts.js';
 import { listCamps } from '../db/camps.js';
@@ -427,7 +428,7 @@ export function worldSummary(world: World) {
 
 // Everything a member needs to render the world. Co-op: every member sees
 // every village in full.
-export async function worldView(client: DbClient, data: GameData, world: World) {
+export async function worldView(client: DbClient, data: GameData, world: World, at: Date = new Date()) {
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, world.id);
@@ -483,6 +484,9 @@ export async function worldView(client: DbClient, data: GameData, world: World) 
     bridge,
     // [q, r, fear]: where hordes were beaten, and how much they remember it.
     fear,
+    // Hand-overs still running, and what delegates did lately.
+    delegations: (await activeDelegations(client, world.id, at)).map((d) => ({ ...d, since: d.since.toISOString(), until: d.until.toISOString() })),
+    delegationLog: (await recentDelegationLog(client, world.id)).map((e) => ({ ...e, at: e.at.toISOString() })),
     // How a finished run went (null while it goes on).
     run: await runSummary(client, world),
     ...logistics,

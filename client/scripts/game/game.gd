@@ -51,6 +51,9 @@ var sites: Array = []
 var lore: Array = []
 ## The Kalinov Bridge (see server sim/bridge.ts).
 var bridge: Dictionary = {}
+## Hand-overs still running, and what delegates did lately.
+var delegations: Array = []
+var delegation_log: Array = []
 ## How much hordes fear each hex where they were beaten.
 var fear: Dictionary[Vector2i, float] = {}
 ## Standing orders of every village (see server orderView).
@@ -114,6 +117,8 @@ func set_world(new_world: Dictionary) -> void:
 	lore = new_world.get("lore", [])
 	var new_bridge: Variant = new_world.get("bridge")
 	bridge = new_bridge if new_bridge is Dictionary else {}
+	delegations = new_world.get("delegations", [])
+	delegation_log = new_world.get("delegationLog", [])
 	fear.clear()
 	for entry in new_world.get("fear", []):
 		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])
@@ -267,11 +272,16 @@ func set_expeditions(world_id_: int, new_expeditions: Array) -> void:
 	expeditions_changed.emit()
 
 
-## Your villages, oldest first.
+## The villages you command (yours, and any a teammate handed you), oldest first.
 func my_villages() -> Array:
-	var mine := villages.values().filter(func(v: Dictionary) -> bool: return is_mine(v))
+	var mine := villages.values().filter(func(v: Dictionary) -> bool: return commands(v))
 	mine.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
 	return mine
+
+
+## How many villages `owner` has (costs and garrisons scale with it).
+func villages_owned(owner: int) -> int:
+	return villages.values().filter(func(v: Dictionary) -> bool: return v.get("ownerAccountId") != null and int(v.ownerAccountId) == owner).size()
 
 
 ## The village the screens show: the one picked, else your first.
@@ -335,6 +345,13 @@ func village_at(cell: Vector2i) -> Dictionary:
 
 func is_mine(village: Dictionary) -> bool:
 	return int(village.get("ownerAccountId", -1)) == my_account_id()
+
+
+## Yours, or handed to you by a teammate for now.
+func commands(village: Dictionary) -> bool:
+	if village.get("ownerAccountId") == null:
+		return false
+	return DelegationText.commands(delegations, int(village.ownerAccountId), my_account_id(), server_now())
 
 
 func member_name(account_id: int) -> String:

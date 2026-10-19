@@ -102,7 +102,7 @@ export async function sendCaravanCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & CaravanOrder,
 ): Promise<{ village: Village; caravan: Caravan }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent a caravan' }, async ({ client, world, village }) => {
     const escorted = withEscort(deps.data, village.state, input.escort, input.now);
     const caravan = await dispatchCaravan(client, deps.data, world, village, 'deliver', input, input.now);
     const state: VillageState = { ...escorted, ledger: spend(escorted.ledger, input.now, input.load) };
@@ -118,7 +118,7 @@ export async function fetchFromVaultCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { load: Resources; escort?: Record<string, number> | undefined },
 ): Promise<{ village: Village; caravan: Caravan }> {
-  const { village, result } = await ownVillageCommand(db, deps, input, async ({ client, world, village }) => {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent caravans to the vault' }, async ({ client, world, village }) => {
     const state = withEscort(deps.data, village.state, input.escort, input.now);
     const caravan = await dispatchCaravan(
       client,

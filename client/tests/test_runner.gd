@@ -37,6 +37,7 @@ func _initialize() -> void:
 	_test_bridge()
 	_test_run()
 	_test_clans()
+	_test_delegation()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -473,3 +474,15 @@ func _test_clans() -> void:
 	_check(not ClanText.allowed({"clan": "rys"}, {"clan.sokol": 1}), "other clan's unit hidden")
 	_check(ClanText.allowed({"clan": "rys"}, {"clan.rys": 1}), "own clan's unit allowed")
 	_check(FieldRules.fort_cost({"field": {"fort": {"cost": {"wood": 600, "stone": 900}}}}, {"fortCost": 0.3}) == {"wood": 780, "stone": 1170}, "fort cost by clan")
+
+
+func _test_delegation() -> void:
+	var now := TimeUtil.parse_iso("2026-01-01T00:00:00.000Z")
+	var delegations := [{"ownerAccountId": 1, "delegateAccountId": 2, "since": "2025-12-31T00:00:00.000Z", "until": "2026-01-02T00:00:00.000Z"}]
+	_check(DelegationText.commands(delegations, 1, 1, now), "owner commands")
+	_check(DelegationText.commands(delegations, 1, 2, now), "delegate commands")
+	_check(not DelegationText.commands(delegations, 1, 3, now), "others don't")
+	_check(not DelegationText.commands(delegations, 1, 2, now + 2 * 86400), "hand-over runs out")
+	_check(DelegationText.owners_for(delegations, 2, now) == [1], "owners for delegate")
+	var e := {"ownerAccountId": 1, "delegateAccountId": 2, "villageId": 7, "action": "queued a build", "at": "2026-01-01T00:00:00.000Z"}
+	_check(DelegationText.entry(e, {1: "Mila", 2: "Goran"}, {7: "Mila's village"}) == "Goran (for Mila) queued a build in Mila's village", "delegation entry")
