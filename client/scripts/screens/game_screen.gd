@@ -45,6 +45,8 @@ var _repeat_batch := 5
 var _surplus_share := 80
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
+## The end-of-run panel opens by itself once.
+var _run_seen := false
 var _threat_button: Button
 ## Chosen number of scouts to send, per wave id.
 var _scout_counts: Dictionary[int, int] = {}
@@ -90,6 +92,7 @@ func _ready() -> void:
 	Game.scouting_changed.connect(_on_waves_changed)
 	Game.battles_changed.connect(_on_waves_changed)
 	Live.watch(Game.world_id())
+	_open_run_once()
 
 	hex_map.refresh()
 	camera.bounds = hex_map.get_bounds()
@@ -257,13 +260,50 @@ func _on_plot_tapped(plot: String) -> void:
 
 
 func _show_threats() -> void:
-	_panel_mode = "threats"
+	_panel_mode = "run" if RunText.is_over(Game.world) else "threats"
 	_rebuild_panel()
+
+
+func _open_run_once() -> void:
+	if RunText.is_over(Game.world) and not _run_seen:
+		_run_seen = true
+		_panel_mode = "run"
+
+
+## How the run ended: its story and what the group did.
+func _run_panel() -> void:
+	var ending := RunText.ending(Game.data, Game.world)
+	if ending.is_empty():
+		return
+	var won: bool = Game.world.status == "won"
+	_panel_body.add_child(UI.label(ending.title, UI.HEADING_SIZE, Color("#e8d9a8") if won else Color("#ffb4a8")))
+	_panel_body.add_child(UI.label(ending.story, UI.SMALL_SIZE, UI.MUTED))
+	var run: Variant = Game.world.get("run")
+	if run is Dictionary:
+		for line in RunText.stats(run):
+			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
+		_panel_body.add_child(UI.label("The group", UI.HEADING_SIZE))
+		for member in run.members:
+			_panel_body.add_child(UI.label(RunText.member_line(member), UI.SMALL_SIZE))
+	_panel_body.add_child(UI.label("The world stays open to look around, but nothing more can be done in it.", UI.SMALL_SIZE, UI.MUTED))
+	var row := UI.hbox(8)
+	var look := UI.button("Look at the map", func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel())
+	look.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(look)
+	var back := UI.button("Back to worlds", _leave)
+	back.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(back)
+	_panel_body.add_child(row)
 
 
 func _rebuild_panel() -> void:
 	UI.clear(_panel_body)
 	_ticking.clear()
+	if _panel_mode == "run":
+		_run_panel()
+		return
 	if _panel_mode == "threats":
 		_threats_panel()
 		return
@@ -1635,8 +1675,11 @@ func _train(village_id: int, unit: String, count: int) -> void:
 
 ## One line for the top banner: what needs attention first.
 func _threat_summary() -> String:
-	if Game.world.get("status") == "lost":
-		return "The Holy City has fallen"
+	if RunText.is_over(Game.world):
+		return "%s · see how the run went" % RunText.ending(Game.data, Game.world).title
+	var ritual_at: Variant = Game.world.get("ritualAt")
+	if ritual_at != null and TimeUtil.parse_iso(ritual_at) > Game.server_now():
+		return RunText.ritual_line(Game.world, Game.server_now())
 	if Game.waves.is_empty():
 		return "No threats known"
 	var now := Game.server_now()
@@ -1660,6 +1703,10 @@ func _threat_summary() -> String:
 
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
+	var ritual := RunText.ritual_line(Game.world, Game.server_now())
+	if ritual != "":
+		_panel_body.add_child(UI.label(ritual, 0, Color("#ffb4a8")))
+		_panel_body.add_child(UI.label(Game.data.bridge.ritualNight.story, UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label("The Holy City: " + HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label("%s difficulty · %s" % [GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))), GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
 	if Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id():
@@ -1831,6 +1878,7 @@ func _on_map_tapped(world_position: Vector2) -> void:
 
 func _on_world_changed() -> void:
 	hex_map.refresh()
+	_open_run_once()
 	_view_button.visible = not _my_village().is_empty()
 	if _view == "village" and _my_village().is_empty():
 		_set_view("map")

@@ -13,6 +13,7 @@ import { withdraw } from '../sim/logistics.js';
 import type { Resources } from '../sim/resources.js';
 import { scheduleEvent, type HandlerRegistry, type SchedulerDeps } from './events.js';
 import { tell } from './notices.js';
+import { callRitualNight } from './ritual.js';
 import { withWorld } from './world.js';
 
 // Saves the bridge, and starts raising the stage once nothing is missing.
@@ -118,5 +119,6 @@ export const bridgeHandlers: HandlerRegistry = {
       }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
+    if (next.status === 'complete') await callRitualNight(client, data, world, event.dueAt);
   },
 };

@@ -1,5 +1,6 @@
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
-import { getWorld } from '../db/worlds.js';
+import { RuleError } from '../errors.js';
+import { getWorld, isOver } from '../db/worlds.js';
 import type { ScheduledEvent, SchedulerDeps } from './events.js';
 
 // Advisory locks use the two-key form; the first key namespaces world locks.
@@ -39,7 +40,7 @@ export async function drainWorld(
   until: Date,
   deps: SchedulerDeps,
 ): Promise<number> {
-  const world = await getWorld(client, worldId);
+  let world = await getWorld(client, worldId);
   let processed = 0;
   for (; processed < MAX_EVENTS_PER_DRAIN; processed++) {
     // One at a time: a handler may schedule a new event that is due earlier
@@ -71,6 +72,9 @@ export async function drainWorld(
         [event.id],
       );
       await client.query('RELEASE SAVEPOINT event');
+      // Nothing more happens in a world whose run is over.
+      world = await getWorld(client, worldId);
+      if (isOver(world)) return processed + 1;
     } catch (error) {
       await client.query('ROLLBACK TO SAVEPOINT event');
       await client.query(
@@ -95,6 +99,8 @@ export async function withWorld<T>(
   return inTransaction(db, async (client) => {
     await lockWorld(client, worldId);
     await drainWorld(client, worldId, now, deps);
+    // A finished run stays readable, but nothing more can be done in it.
+    if (isOver(await getWorld(client, worldId))) throw new RuleError('This run is over');
     return fn(client);
   });
 }

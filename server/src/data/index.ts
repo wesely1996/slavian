@@ -474,6 +474,18 @@ const bridgeFileSchema = z.object({
     )
     .min(1),
   quests: z.record(z.enum(BRIDGE_QUESTS), z.object({ name: z.string(), description: z.string() })),
+  // When the last stage stands: every active front attacks at once, after
+  // delayHours (game hours), sizeFactor times its usual strength.
+  ritualNight: z.object({
+    delayHours: z.number().nonnegative(),
+    sizeFactor: z.number().positive(),
+    checkHours: z.number().positive(),
+    story: z.string(),
+  }),
+  endings: z.object({
+    won: z.object({ title: z.string(), story: z.string() }),
+    lost: z.object({ title: z.string(), story: z.string() }),
+  }),
 });
 export type BridgeData = z.infer<typeof bridgeFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
