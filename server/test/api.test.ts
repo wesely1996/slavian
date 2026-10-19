@@ -1126,6 +1126,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const second = w.waves.find((x: { status: string }) => x.status === 'scheduled');
     now = new Date(second.spawnAt);
     await tick(db, now, scheduler);
+    await db.query('UPDATE waves SET target_village_id = $2 WHERE id = $1', [second.id, home.id]);
     const marching = (await world()).waves.find((x: { id: number }) => x.id === second.id);
     now = new Date(marching.arrivesAt);
     await tick(db, now, scheduler);
