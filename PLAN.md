@@ -550,12 +550,21 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
    - **Pace:** waves grow 1.18× per wave (was 1.25×, which outran any economy by day 40; 1.15× never threatened). Balanced groups now win in 33–55 days or fall to Ritual Night itself.
    - **Still to do** (the bots, then the numbers): teammates coordinating strong points, late-game Ember gathering, enough runs per player count and preset for real win rates against the 60–75% target.
 
-### M5 breakdown (to plan in detail when M4 is done)
-- **UI design and art pass** (§11.7): Kingdom Rush–like art and UI; merged map art for connected tiles of one kind; settlement art per level, owner banners, green/blue/red outlines for yours/allies'/enemies'; a Travian-like village interior and resource fields.
-- **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon), drawn as a parchment campaign map (reference: `docs/reference/battle-map.jpg`).
-- **Roads:** players build roads between hexes. Roads speed up movement for everyone on them, allies and the human hordes alike, but not monsters. (Terrain already sets movement cost.)
-- **Rivers:** map generation lays rivers along hex edges, from the edge belt and hills towards the lowlands. Nothing crosses a river except at a **bridge**, hordes included: some bridges stand when the world is made (mapgen keeps every start able to reach the Holy City and every active front able to reach the starts), and players can build more. Rivers are drawn on the map, and bridges become natural choke points.
-- The rest of M5 as in the roadmap table (closed test, balance, localization, accessibility, donation button, privacy, backups/monitoring).
+### M5 breakdown (each step is its own PR)
+Art may be generated at first, as long as the style is consistent: clean and simple but distinct, every piece recognizable at a glance and still good-looking, and easy to replace later with the developer's own art (see `docs/art-style.md`).
+1. [x] **Art pipeline and style sample:** art addressed by id through `client/art/art.json` (an `Art` loader with a fallback, so any file, SVG or PNG, can be swapped by pointing its id at it), a first generated set (`tools/art/generate.py`: terrain, settlements in five stages by Elder's Hall level, ruins, the Holy City, banners, camps, lairs, forts, outposts, ancient sites, units, horde emblems, resources and the app icon), the style rules (`docs/art-style.md`) and a style sample rendered by the game (`docs/art/style-sample.png`), for approval before the rest.
+2. [ ] **Map art:** terrain drawn from the art, neighbouring tiles of one kind merged into regions (forests, mountain ranges, lakes); settlements by level with owner banners and green/blue/red outlines; camps, sites, forts, armies, caravans and hordes as icons.
+3. [ ] **Rivers and bridges:** rivers along hex edges from mapgen, crossable only at bridges (hordes included); some bridges at the start, keeping every start and front connected; players build more; pathing for armies, hordes, caravans, settlers and scouts; drawn on the map.
+4. [ ] **Roads:** players build roads; roads speed up players and the human hordes, not monsters; route choice and drawing.
+5. [ ] **Village interior:** a Travian-like village view and resource fields, with building art per level.
+6. [ ] **UI pass:** framed panels with Slavic ornament, icons wherever text stands for a thing, consistent type, the top bar and every screen.
+7. [ ] **Battle screen:** round-by-round play-by-play with narrative explanations over a parchment campaign map (reference: `docs/reference/battle-map.jpg`): unit blocks with map symbols in each side's colour, grouped into squads with one label, leaders as their own markers.
+8. [ ] **Localization:** English and Serbian (Latin); every string in translation files, server notices included.
+9. [ ] **Accessibility:** colour-blind-safe threat colours plus icons, adjustable text size, large tap targets.
+10. [ ] **Support and privacy:** the donation button and the server-cost slider (§11.8), a privacy policy, account deletion and data export.
+11. [ ] **Production:** VPS deployment (Docker), the Firebase service-account key on the server, automatic database backups, uptime and error monitoring, the light telemetry of §13.
+12. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
+13. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
@@ -571,7 +580,6 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
 
 ## 15. Open Items / To Verify
 
-- **Interslavic clan names:** verify spelling and the "Rod + genitive" form (Rod Jelena, Rod Rysa, Rod Medvěda, Rod Bobra, Rod Sokola, Rod Volka).
 - **All numbers marked *(tunable)*** are first guesses to be set by the headless simulator.
 - **Order of the One Throne** visual identity and art for the folklore roster: to design with the art pass (the rosters themselves are in `data/enemies.json`).
 - **Game title:** "Slavian" is the working title.
