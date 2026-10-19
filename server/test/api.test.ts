@@ -217,12 +217,19 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle).toMatchObject({ waveId: marching.id, villageId: village.id, status: 'ongoing', round: 0, defenderInitial: {} });
     expect(battle.attackerStance).toBeTruthy();
 
+    // Work started just before the round; the raid will burn it.
+    const roundAt = now.getTime() + (15 * 60_000) / 10;
+    now = new Date(roundAt - 10_000);
+    const building = (await call('POST', `/v1/villages/${village.id}/build`, ratimir.token, { plot: 'c0' })).body.village.queue[0];
+    expect(new Date(building.completesAt).getTime()).toBeGreaterThan(roundAt);
+
     // No defenders: the first round ends in a raid.
-    now = new Date(now.getTime() + (15 * 60_000) / 10);
+    now = new Date(roundAt);
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body;
     const raided = world.battles[0];
     expect(raided).toMatchObject({ status: 'raided', round: 1 });
+    expect(world.villages[0].queue).toEqual([]);
     // The whole horde survived, so it carried off 30% of what was stored,
     // scaled by its faction's greed (monsters care little for loot).
     const left = world.villages[0].resources;
@@ -240,6 +247,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       expect(after.struck).toEqual([village.id]);
       expect(after.status).toBe('marching');
     }
+    // The burned build's completion passes quietly.
+    now = new Date(new Date(building.completesAt).getTime() + 1000);
+    await tick(db, now, scheduler);
+    const failed = await db.query("SELECT 1 FROM scheduled_events WHERE world_id = $1 AND status = 'failed'", [worldId]);
+    expect(failed.rowCount).toBe(0);
+    expect((await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body.villages[0].levels.elder_hall).toBe(1);
   });
 
   it('sends scouts at a wave and shares their report', async () => {
@@ -773,6 +786,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const rebuild = await order({ kind: 'rebuild' });
     expect(rebuild.body.order.lastResult).toBe('Rebuilding the outpost at (9, 9)');
     expect(rebuild.body.village.queue.some((q: { plot: string }) => q.plot === 'o9,9')).toBe(true);
+
+    // Two raided outposts and only enough for one: the first keeps its place in the queue.
+    const cost = scheduler.data.buildings.buildings.outpost!.cost;
+    await db.query(
+      `UPDATE villages SET plots = plots || jsonb_build_object(
+           'o9,10', jsonb_build_object('building', 'outpost', 'level', 0, 'terrain', 'plains', 'peak', 1),
+           'o9,11', jsonb_build_object('building', 'outpost', 'level', 0, 'terrain', 'plains', 'peak', 1)),
+         queue = '[]', amounts = $3, settled_at = $2 WHERE id = $1`,
+      [village.id, now, JSON.stringify({ wood: cost.wood + 10, stone: cost.stone + 10, grain: cost.grain + 10, iron: cost.iron + 10 })],
+    );
+    await db.query(`UPDATE villages SET plots = plots - 'o9,9' WHERE id = $1`, [village.id]);
+    // Placed again, so it runs now.
+    await call('POST', `/v1/villages/${village.id}/orders/${rebuild.body.order.id}/cancel`, lada.token);
+    const partial = await order({ kind: 'rebuild' });
+    expect(partial.body.order.lastResult).toBe('Rebuilding the outpost at (9, 10)');
+    expect(partial.body.village.queue.map((q: { plot: string }) => q.plot)).toEqual(['o9,10']);
 
     // Cancelled orders stop.
     const cancel = await call('POST', `/v1/villages/${village.id}/orders/${train.body.order.id}/cancel`, lada.token);

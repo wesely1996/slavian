@@ -182,14 +182,16 @@ export const battleHandlers: HandlerRegistry = {
       await setDecision(client, battle.id, decision);
       if (decision.choice === 'raid') {
         const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor);
-        villageState = plunder(villageState, loot, at);
+        // A raid, like a raze, burns whatever was being built.
+        const lostBuilds = villageState.queue.length;
+        villageState = { ...plunder(villageState, loot, at), queue: [] };
         villageState = setBesieged(data, villageState, false, at, world.speed);
         await recordRound(client, battle.id, log, { status: 'raided', at, loot });
         await tell(client, world, village.ownerAccountId, {
           kind: 'battle_result',
           tier: 'digest',
           title: `${village.name} was raided`,
-          body: `The horde carried off ${total(loot)} resources after ${round} rounds.`,
+          body: `The horde carried off ${total(loot)} resources after ${round} rounds.${lostBuilds ? ` The work on ${lostBuilds} building${lostBuilds === 1 ? '' : 's'} was lost.` : ''}`,
         }, at);
       } else {
         await recordRound(client, battle.id, log, { status: 'raided', at, loot: null });

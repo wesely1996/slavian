@@ -52,7 +52,15 @@ async function runOrder(
     if (!targets.length) return { state, result: 'Every outpost stands at its best' };
     const rebuilt: string[] = [];
     for (const plot of targets) {
-      const { state: next, queued } = queueBuild(data, state, { plot }, at, world.speed);
+      // Each rebuild queued keeps its place even if a later one can't be paid for.
+      let step: ReturnType<typeof queueBuild>;
+      try {
+        step = queueBuild(data, state, { plot }, at, world.speed);
+      } catch (error) {
+        if (rebuilt.length === 0) throw error;
+        break;
+      }
+      const { state: next, queued } = step;
       state = next;
       await scheduleEvent(client, world.id, queued.completesAt, 'build_complete', {
         villageId: village.id,

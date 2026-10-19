@@ -41,6 +41,8 @@ export const handlers: HandlerRegistry = {
     // Razed before it was finished.
     if (village.ruin) return;
     const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
+    // A raid or raze cleared the queue before it was finished.
+    if (!village.state.queue.some((item) => item.plot === plot && item.targetLevel === payload.targetLevel)) return;
     const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
     const def = data.buildings.buildings[payload.building];
