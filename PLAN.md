@@ -561,12 +561,24 @@ Art may be generated at first, as long as the style is consistent: clean and sim
 7. [ ] **Modern art:** the map with texture and light (terrain in natural colours, soft edges between tiles, relief shading), and buildings, units, resources and the start picture redrawn to match.
 8. [x] **Battle screen:** a **Battle map** button on every battle (reports and battles being fought) opens it in place of the map: a parchment campaign map (reference: `docs/reference/battle-map.jpg`) with the battlefield's own ground (woods, marsh, hills, its river and road), our squads above and the enemy's below, each unit type one run of blocks with its map symbol (infantry ✕, cavalry a slash, archers a dot) in the side's colour (green yours, blue an ally's, red the enemy) under one label with its icon; fallen blocks stay as ghosts, reinforcements wait as ghosts until their round, the lines close in round by round, leaders (your hero, their chief) stand behind as oval markers, and the end shows Victory or Defeat. Step through the rounds or play them; each round is told in words (`BattleStory`: who joined and how, what fell on each side, how the lines hold, how it ended). Battles now carry the enemy's front.
 9. [x] **Enemy heroes:** every front has one named leader at a time (`data/leaders.json`, `sim/leaders.ts`): Mara the Hungry for the Monsters of the North, Beg Konchak for the Nomad Horde, Brother Anselm for the Order, rising in rank (the Dread, Khan, Commander; the Deathless, Great Khan, Grand Master) as they level. They take the head of their front's hordes as they set out (unless wounded or already out), and grow like player heroes: experience from every battle, more for a win or a raze, levels up to 15 with a skill each level in their front's order (Savagery: attack, Thick Hide: defense, Dread: holding longer, Greed: plunder). Beaten, they flee wounded (30 game hours) and swear revenge on the village that beat them (+15% attack there); if their horde falls to the last, they fall with it and a rival rises at a third of their level. The group hears when one falls or grows stronger. Shown in the threats panel (rank, level, state, skills, record, grudge, the fallen), on each wave ("Led by…"), on the battle map and in the battle story. Camps keep their unnamed chiefs for now.
-10. [ ] **Localization:** English and Serbian (Latin); every string in translation files, server notices included. Groundwork done (`docs/localization.md`): gettext files, the extractor with a CI check, the language picker, the start screen and every data text in Serbian.
-11. [ ] **Accessibility:** colour-blind-safe threat colours plus icons, adjustable text size, large tap targets.
-12. [ ] **Support and privacy:** the donation button and the server-cost slider (§11.8), a privacy policy, account deletion and data export.
-13. [ ] **Production:** VPS deployment (Docker), the Firebase service-account key on the server, automatic database backups, uptime and error monitoring, the light telemetry of §13.
-14. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
-15. [ ] **Closed test:** friends play a full run; fix what they find.
+10. [ ] **Walls and siege:**
+    - **Walls** are their own structure around the village, upgradable on their own (palisade → stone wall → fortress walls), each level adding defense against an assault and more **wall slots**.
+    - **Wall slots** take specialised defensive works, each built and upgraded separately with its own effect, for example: archer towers (damage every round), a gate tower (holds the gate, slows the assault), ballista platforms (strong against siege engines), murder holes and boiling oil (punish whoever reaches the wall), a ditch or moat and stakes (slow rams and ladders), a watchtower (sees hordes coming earlier).
+    - The village view draws the wall ring and its slots; the battle map and story show walls, towers and breaches.
+    - **Siege:** hordes need siege engines (rams, ladders, siege towers, catapults) and siege works (a siege camp, earthworks, saps) to break walls.
+    - Engines come two ways:
+      - **Brought along:** the horde marches slower, so it arrives later and is seen longer.
+      - **Built on site:** the horde sets up at the walls before it can assault. Defenders can sally out against it, reinforcements can arrive, and archers and ballistae harass the builders.
+    - Engines damage walls and towers; a breached wall loses its bonus until repaired.
+    - Factions differ: the Order brings heavy engines; the Nomads rarely besiege (they raid and starve villages out); the Monsters of the North build no engines, but some beasts batter gates and climb palisades.
+    - Scout reports reveal engines and siege progress; enemy leaders can take siege skills.
+    - Data in `data/walls.json` and `data/siege.json`; tuned with the simulator.
+11. [ ] **Localization:** English and Serbian (Latin); every string in translation files, server notices included. Groundwork done (`docs/localization.md`): gettext files, the extractor with a CI check, the language picker, the start screen and every data text in Serbian.
+12. [ ] **Accessibility:** colour-blind-safe threat colours plus icons, adjustable text size, large tap targets.
+13. [ ] **Support and privacy:** the donation button and the server-cost slider (§11.8), a privacy policy, account deletion and data export.
+14. [ ] **Production:** VPS deployment (Docker), the Firebase service-account key on the server, automatic database backups, uptime and error monitoring, the light telemetry of §13.
+15. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
+16. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
