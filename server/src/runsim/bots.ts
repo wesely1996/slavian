@@ -3,7 +3,7 @@
 // player of its kind would: keep building, keep a garrison, fill the vault
 // and the bridge, and go after the bridge's quests. Refused orders (not
 // enough resources, a full queue) are simply skipped.
-import { buildFortCommand, sendArmyCommand } from '../commands/armies.js';
+import { buildFortCommand, recallArmyCommand, sendArmyCommand } from '../commands/armies.js';
 import { listForts } from '../db/forts.js';
 import { sendCaravanCommand } from '../commands/logistics.js';
 import { placeOrderCommand } from '../commands/orders.js';
@@ -316,8 +316,14 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
   }
   const all = (await read(db, (c) => listArmies(c, world.id))).filter((a) => a.homeVillageId === home.id && a.status !== 'done');
   const guardsCity = (a: (typeof all)[number]) => a.orders === 'hold' && a.targetQ === 0 && a.targetR === 0;
+  // A strong point no longer needed: the army comes home.
+  if (!open.includes('choke')) {
+    for (const a of all.filter((x) => x.orders === 'hold' && x.status === 'stationed' && !guardsCity(x))) {
+      await go(() => recallArmyCommand(db, deps, { accountId: bot.accountId, armyId: a.id, now }));
+    }
+  }
   // Armies out on errands (the Holy City's guard stays put).
-  const armies = all.filter((a) => !guardsCity(a));
+  const armies = all.filter((a) => !guardsCity(a) && !(a.orders === 'hold' && !open.includes('choke')));
   const garrison = home.state.garrison;
   const fighters = (share: number): Record<string, number> => {
     const out: Record<string, number> = {};
