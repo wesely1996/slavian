@@ -92,7 +92,7 @@ export async function startWorldCommand(
 
     const members = await listMembers(client, world.id);
     const map = generateMap(deps.data, world.seed, members.length);
-    await markStarted(client, world.id, map, input.now);
+    await markStarted(client, world.id, map, input.now, deps.data.horde.holyCity.sanctity);
     await insertHexes(client, world.id, map);
     for (const [i, member] of members.entries()) {
       const site = map.startSites[i]!;

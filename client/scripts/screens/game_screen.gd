@@ -294,7 +294,13 @@ func _terrain_panel() -> void:
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
 	var where := "The Holy City." if distance == 0 else "%d hex%s from the Holy City." % [distance, "" if distance == 1 else "es"]
 	_panel_body.add_child(UI.label(where, UI.SMALL_SIZE, UI.MUTED))
+	var camp := Game.camp_at(_selected)
+	if not camp.is_empty():
+		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, Color("#ffb4a8")))
+	if Game.fear.has(_selected):
+		_panel_body.add_child(UI.label("Hordes fear this place: they were beaten here (%.0f)." % Game.fear[_selected], UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
+		_panel_body.add_child(UI.label(HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 		_vault_panel()
 		return
 	var holder := Game.outpost_owner(_selected)
@@ -1163,6 +1169,10 @@ func _own_village_panel(village: Dictionary) -> void:
 		Rules.outpost_plots(village).size(), Rules.outpost_limit(Game.data, hall)], UI.SMALL_SIZE, UI.MUTED))
 	if village.get("besieged", false):
 		_panel_body.add_child(UI.label("Under siege: outposts produce nothing until the battle ends.", UI.SMALL_SIZE, UI.ERROR))
+	if village.get("ruin") is Dictionary:
+		_panel_body.add_child(UI.label("In ruins: rebuild it from the village view.", UI.SMALL_SIZE, UI.ERROR))
+	if village.get("refuge", false):
+		_panel_body.add_child(UI.label("A refugee camp: hordes raid it but never burn it.", UI.SMALL_SIZE, UI.MUTED))
 	var village_id := int(village.id)
 	var troops := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(troops)
@@ -1190,6 +1200,9 @@ func _village_panel() -> void:
 			_plot = Rules.HALL_PLOT
 			_rebuild_panel())
 		_panel_body.add_child(picker)
+	if village.get("ruin") is Dictionary:
+		_ruin_section(village)
+		return
 	var tabs := UI.hbox()
 	for tab in [["village", "Buildings"], ["troops", "Troops"], ["caravans", "Caravans"], ["research", "Research"]]:
 		var button := UI.button(tab[1], func() -> void:
@@ -1209,6 +1222,45 @@ func _village_panel() -> void:
 		_queue_section(village)
 		_plot_section(village)
 		_outposts_section(village)
+
+
+## A razed village: what rebuilding it costs, or how long until it stands.
+func _ruin_section(village: Dictionary) -> void:
+	var ruin: Dictionary = village.ruin
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.label("%s lies in ruins" % village.name, UI.HEADING_SIZE))
+	if ruin.get("rebuildingUntil") != null:
+		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(line)
+		var until := TimeUtil.parse_iso(ruin.rebuildingUntil)
+		_tick(line, func() -> String: return "Rebuilding · stands again in %s" % TimeUtil.format_duration(until - Game.server_now()))
+		return
+	_panel_body.add_child(UI.label("A horde burned it down. Rebuild everything as it stood, at %d%% of what it cost." % roundi(float(Game.data.horde.ruins.rebuildCostShare) * 100.0), UI.SMALL_SIZE, UI.MUTED))
+	var cost := HordeText.rebuild_cost(Game.data, ruin.plots)
+	var seconds := float(Game.data.horde.ruins.rebuildHours) * 3600.0 / float(Game.world.speed)
+	var row := UI.hbox()
+	var cost_line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	cost_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(cost_line)
+	var button := UI.button("Rebuild", func() -> void: _rebuild_village(village_id))
+	button.custom_minimum_size.x = 160
+	row.add_child(button)
+	_panel_body.add_child(row)
+	var cost_text := "%s · %s" % [UI.resource_text(cost), TimeUtil.format_duration(seconds)]
+	_tick(cost_line, func() -> String:
+		var current: Dictionary = Game.villages.get(village_id, village)
+		button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
+		return cost_text)
+
+
+func _rebuild_village(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/rebuild" % village_id, {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _queue_section(village: Dictionary) -> void:
@@ -1488,16 +1540,22 @@ func _train(village_id: int, unit: String, count: int) -> void:
 
 ## One line for the top banner: what needs attention first.
 func _threat_summary() -> String:
+	if Game.world.get("status") == "lost":
+		return "The Holy City has fallen"
 	if Game.waves.is_empty():
 		return "No threats known"
 	var now := Game.server_now()
+	for wave in Game.waves:
+		if wave.status == "razing":
+			return "%s is burning · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
 	for wave in Game.waves:
 		if wave.status == "marching":
 			return "Horde marching on %s · %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 	for wave in Game.waves:
 		if wave.status == "battling":
 			var battle := Game.battle_for(int(wave.id))
-			return "Battle at %s · round %d" % [Game.village_name(wave.targetVillageId), int(battle.get("round", 0))]
+			var place := Game.battle_place(battle) if not battle.is_empty() else Game.village_name(wave.targetVillageId)
+			return "Battle at %s · round %d" % [place, int(battle.get("round", 0))]
 	for wave in Game.waves:
 		if wave.status == "arrived":
 			return "Horde at %s" % Game.village_name(wave.targetVillageId)
@@ -1507,6 +1565,7 @@ func _threat_summary() -> String:
 
 func _threats_panel() -> void:
 	_panel_body.add_child(UI.label("Threats", UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label("The Holy City: " + HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 	if Game.waves.is_empty():
 		_panel_body.add_child(UI.label("No waves announced.", UI.SMALL_SIZE, UI.MUTED))
 	for wave in Game.waves:
@@ -1521,9 +1580,16 @@ func _threats_panel() -> void:
 		if ground != "":
 			details += " · " + ground
 		_panel_body.add_child(UI.label(details, UI.SMALL_SIZE, UI.MUTED))
+		var choice := HordeText.decision(battle)
+		if choice != "":
+			_panel_body.add_child(UI.label(choice, UI.SMALL_SIZE, Color("#ffb4a8")))
 		var helpers := ArmyText.reinforcements(battle, Game.village_name)
 		if helpers != "":
 			_panel_body.add_child(UI.label("Help came from " + helpers, UI.SMALL_SIZE, UI.MUTED))
+	if not Game.camps.is_empty():
+		_panel_body.add_child(UI.label("Camps and lairs", UI.HEADING_SIZE))
+	for camp in Game.camps:
+		_panel_body.add_child(UI.label("%s at (%d, %d)" % [HordeText.camp(camp, Game.front_faction(camp.front)), int(camp.q), int(camp.r)], UI.SMALL_SIZE))
 	if not Game.raids.is_empty():
 		_panel_body.add_child(UI.label("Outposts burned", UI.HEADING_SIZE))
 	for raid in Game.raids:
@@ -1551,6 +1617,8 @@ func _wave_entry(wave: Dictionary) -> void:
 				return "Marching on %s · arrives in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 			"arrived":
 				return "At the gates of %s · leaves in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
+			"razing":
+				return "Burning %s · done in %s" % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.endsAt) - now)]
 			"battling":
 				var battle := Game.battle_for(int(wave.id))
 				return "Fighting at %s · round %d of %d · %d of them left" % [Game.battle_place(battle) if not battle.is_empty() else Game.village_name(wave.targetVillageId), int(battle.get("round", 0)), int(Game.data.battle.maxRounds), BattleText.total(battle.get("attackerNow", {}))]

@@ -13,6 +13,7 @@ import {
   claimOutpostCommand,
   foundVillageCommand,
   queueBuildCommand,
+  rebuildCommand,
   sendScoutsCommand,
   setStanceCommand,
   startResearchCommand,
@@ -172,6 +173,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     orders: scheduler.data.orders,
     armies: scheduler.data.armies,
     field: scheduler.data.field,
+    horde: scheduler.data.horde,
   }));
 
   app.post('/v1/auth/guest', async (request) => {
@@ -335,6 +337,13 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = hexBody.parse(request.body);
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/rebuild', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { village } = await rebuildCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 

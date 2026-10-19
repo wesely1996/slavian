@@ -21,6 +21,8 @@ import { ACADEMY, researchMs, researchProblem } from '../sim/research.js';
 import { spend } from '../sim/resources.js';
 import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
+import { startRebuild } from '../scheduler/horde.js';
+import { rebuildCost } from '../sim/horde.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
 import {
   abandonOutpost,
@@ -41,6 +43,8 @@ export interface VillageCommandInput {
   accountId: number;
   villageId: number;
   now: Date;
+  // Commands that work on a razed village (rebuilding it).
+  allowRuin?: boolean;
 }
 
 // Runs a command on the caller's own village with the world locked and
@@ -61,6 +65,7 @@ export async function ownVillageCommand<T>(
     const world = await getWorld(client, worldId);
     const village = await loadVillage(client, input.villageId);
     if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Not your village');
+    if (village.ruin && !input.allowRuin) throw new RuleError(`${village.name} lies in ruins; rebuild it first`);
     const { state, result } = await apply({ client, world, village });
     await saveVillageState(client, village.id, state);
     await notifyWorld(client, { worldId, type: 'village', villageId: village.id });
@@ -294,4 +299,19 @@ export async function startResearchCommand(
     return { state: { ...village.state, ledger }, result: research };
   });
   return { village, research: result };
+}
+
+// Rebuilds a razed village: pays a share of what stood, and it stands again
+// after the rebuild time.
+export async function rebuildCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput): Promise<{ village: Village; result: Date }> {
+  const done = await ownVillageCommand(db, deps, { ...input, allowRuin: true }, async ({ client, world, village }) => {
+    if (!village.ruin) throw new RuleError(`${village.name} is not in ruins`);
+    if (village.ruin.rebuildingUntil) throw new RuleError(`${village.name} is already being rebuilt`);
+    const state = { ...village.state, ledger: spend(village.state.ledger, input.now, rebuildCost(deps.data, village.ruin.plots)) };
+    const until = await startRebuild(client, deps.data, world, village, input.now);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    return { state, result: until };
+  });
+  const { village } = done;
+  return { ...done, village: { ...village, ruin: { ...village.ruin!, rebuildingUntil: done.result.toISOString() } } };
 }

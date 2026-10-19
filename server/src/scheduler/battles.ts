@@ -3,7 +3,7 @@
 // garrison, and either schedules the next round or settles the outcome.
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
-import { insertBattle, loadBattle, recordRound, type RoundLog } from '../db/battles.js';
+import { insertBattle, loadBattle, recordRound, setDecision, type RoundLog } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
@@ -31,6 +31,8 @@ import { armyLosses, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
 import { fieldRound } from './field.js';
+import { hordeBeaten, hordeWins, moveOn } from './horde.js';
+import { hex } from '../sim/hex.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -170,20 +172,34 @@ export const battleHandlers: HandlerRegistry = {
       const payload: BattlePayload = { battleId: battle.id };
       await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
     } else if (outcome === 'raided') {
-      const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor);
-      villageState = plunder(villageState, loot, at);
-      villageState = setBesieged(data, villageState, false, at, world.speed);
-      await recordRound(client, battle.id, log, { status: 'raided', at, loot });
-      await tell(client, world, village.ownerAccountId, {
-        kind: 'battle_result',
-        tier: 'digest',
-        title: `${village.name} was raided`,
-        body: `The horde carried off ${total(loot)} resources after ${round} rounds.`,
-      }, at);
-      await endWave(client, wave.id, 'dispersed', at);
+      // The horde decides: carry off what it can and move on, or stay and
+      // burn the village to the ground (horde.ts).
+      const decision = await hordeWins(client, data, world, wave, village, attackerNow, at);
+      await setDecision(client, battle.id, decision);
+      if (decision.choice === 'raid') {
+        const loot = raidLoot(data, amountsAt(villageState.ledger, at), battle.attackerInitial, attackerNow, bonuses, personality(data, wave).lootFactor);
+        villageState = plunder(villageState, loot, at);
+        villageState = setBesieged(data, villageState, false, at, world.speed);
+        await recordRound(client, battle.id, log, { status: 'raided', at, loot });
+        await tell(client, world, village.ownerAccountId, {
+          kind: 'battle_result',
+          tier: 'digest',
+          title: `${village.name} was raided`,
+          body: `The horde carried off ${total(loot)} resources after ${round} rounds.`,
+        }, at);
+      } else {
+        await recordRound(client, battle.id, log, { status: 'raided', at, loot: null });
+        await tell(client, world, village.ownerAccountId, {
+          kind: 'razing',
+          tier: 'push',
+          title: `${village.name} is being razed`,
+          body: `The horde broke the defenders after ${round} rounds and is burning the village.`,
+        }, at);
+      }
     } else {
       villageState = setBesieged(data, villageState, false, at, world.speed);
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
+      await hordeBeaten(client, data, world, hex(village.q, village.r), total(battle.attackerInitial) - total(attackerNow));
       await tell(client, world, village.ownerAccountId, {
         kind: 'battle_result',
         tier: 'digest',
@@ -194,6 +210,10 @@ export const battleHandlers: HandlerRegistry = {
     }
 
     await saveVillageState(client, village.id, villageState);
+    // A raiding horde moves on once the village is saved.
+    if (outcome === 'raided' && (await loadWave(client, wave.id)).status === 'battling') {
+      await moveOn(client, data, world, wave.id, hex(village.q, village.r), at);
+    }
     if (hero && outcome !== 'ongoing') {
       const kills = total(battle.attackerInitial) - total(attackerNow);
       await heroAfterBattle(client, data, world, hero, { kills, won: outcome !== 'raided', battleId: battle.id, at });

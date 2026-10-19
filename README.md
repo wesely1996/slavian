@@ -61,6 +61,7 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 | `POST` | `/v1/villages/:id/outposts/abandon` | Give up the outpost on `{ q, r }`. |
 | `POST` | `/v1/villages/:id/orders` | Place a standing order: `{ kind: "train", unit, batch, target }`, `{ kind: "rebuild" }` or `{ kind: "surplus", share }`. It runs at once, then every 20 game minutes. `POST /v1/villages/:id/orders/:orderId/cancel` stops it. |
 | `POST` | `/v1/villages/:id/armies` | Send `{ targetVillageId, units, orders }` (`support`, `reinforce` or `harass`) as an army, or `{ target: { q, r }, units, orders: "hold", withHero? }` to hold a hex (field battles). `POST /v1/armies/:id/recall` calls a supporting or holding army home. |
+| `POST` | `/v1/villages/:id/rebuild` | Rebuild a razed village (pays a share of what stood; done after the rebuild time). |
 | `POST` | `/v1/villages/:id/forts` | Build a fort `{ q, r }` within range of the village, paid from its stores. |
 | `PUT` | `/v1/villages/:id/reinforce` | How the village answers battles nearby: `{ share, range }` (share 0 stays out). |
 | `POST` | `/v1/villages/:id/research` | Start researching `{ tech }` in the village's Academy (one tech at a time per player; effects reach all your villages). |

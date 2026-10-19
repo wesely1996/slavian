@@ -137,6 +137,8 @@ const enemiesFileSchema = z.object({
         lootFactor: z.number().nonnegative(),
         raidReach: z.number().int().nonnegative(),
         nerve: z.number().positive(),
+        razeBias: z.number(),
+        erratic: z.number().min(0).max(1),
       }),
       spawnTerrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       units: z.record(z.string(), enemyUnitSchema),
@@ -151,7 +153,6 @@ const wavesFileSchema = z.object({
   graceHours: z.number().nonnegative(),
   intervalHours: z.tuple([z.number().positive(), z.number().positive()]),
   upcoming: z.number().int().positive(),
-  rampageHours: z.number().positive(),
   baseUnits: z.number().positive(),
   growthPerWave: z.number().min(1),
   perExtraPlayer: z.number().nonnegative(),
@@ -335,6 +336,38 @@ const fieldFileSchema = z.object({
 
 export type BuildingDef = z.infer<typeof buildingSchema>;
 export type FieldData = z.infer<typeof fieldFileSchema>;
+
+const hordeFileSchema = z.object({
+  version: z.number().int(),
+  fear: z.object({
+    perDefeat: z.number().nonnegative(),
+    perUnitLost: z.number().nonnegative(),
+    decayPerWave: z.number().min(0).max(1),
+    minimum: z.number().nonnegative(),
+    targetWeight: z.number().nonnegative(),
+    pathWeight: z.number().nonnegative(),
+  }),
+  holyCityExtraCost: z.number().nonnegative(),
+  rampageHours: z.number().positive(),
+  raid: z.object({ recruitShare: z.number().nonnegative() }),
+  raze: z.object({
+    graceWaves: z.number().int().nonnegative(),
+    hours: z.number().positive(),
+    minStrength: z.number().positive(),
+    threshold: z.number(),
+    weakenedPenalty: z.number().nonnegative(),
+  }),
+  ruins: z.object({ rebuildCostShare: z.number().nonnegative(), rebuildHours: z.number().positive() }),
+  refugeeCamp: z.object({ minDistance: z.number().int().positive(), name: z.string() }),
+  holyCity: z.object({
+    sanctity: z.number().int().positive(),
+    guard: z.record(z.string(), z.number().int().nonnegative()),
+    guardGrowthPerWave: z.number().min(1),
+    stance: z.enum(STANCES),
+    damagePerUnit: z.number().nonnegative(),
+  }),
+});
+export type HordeData = z.infer<typeof hordeFileSchema>;
 export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
@@ -368,6 +401,7 @@ export interface GameData {
   notifications: NotificationsData;
   armies: ArmiesData;
   field: FieldData;
+  horde: HordeData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -388,6 +422,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     notifications: notificationsFileSchema.parse(read('notifications.json')),
     armies: armiesFileSchema.parse(read('armies.json')),
     field: fieldFileSchema.parse(read('field.json')),
+    horde: hordeFileSchema.parse(read('horde.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

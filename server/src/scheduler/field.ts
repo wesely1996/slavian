@@ -7,18 +7,19 @@
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
-import { insertBattle, recordRound, type Battle, type RoundLog } from '../db/battles.js';
+import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
 import { fortAt, insertFort, loadFort, markFortStanding, type Fort } from '../db/forts.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { endWave, listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, type Wave } from '../db/waves.js';
-import type { World } from '../db/worlds.js';
+import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
 import { battleOutcome, battleRng, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total } from '../sim/battle.js';
 import { setupAt, setupFactors, stepInto, type Setup } from '../sim/field.js';
+import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { spend } from '../sim/resources.js';
@@ -27,6 +28,7 @@ import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { personality } from './battles.js';
+import { hordeBeaten } from './horde.js';
 import { tell } from './notices.js';
 import { planRaids } from './outposts.js';
 
@@ -36,13 +38,13 @@ export const fortPayload = z.object({ fortId: z.number().int() });
 export type FortPayload = z.infer<typeof fortPayload>;
 
 // Schedules a field_intercept for when `wave` enters each held hex at or
-// after `fromMs` into its march. Its target village's own hex is left to
-// the village battle.
+// after `fromMs` into its march. The end of its road (a village or the
+// Holy City) is left to the battle there.
 async function scheduleIntercepts(client: DbClient, world: World, wave: Wave, cells: readonly Hex[], fromMs: number): Promise<void> {
   if (!wave.path) return;
   const end = wave.path.at(-1);
   for (const cell of cells) {
-    if (wave.targetVillageId !== null && end && end.q === cell.q && end.r === cell.r) continue;
+    if (end && end.q === cell.q && end.r === cell.r) continue;
     const step = stepInto(wave.path, cell, fromMs);
     if (!step) continue;
     const payload: InterceptPayload = { waveId: wave.id, q: cell.q, r: cell.r, atMs: step.atMs };
@@ -78,7 +80,7 @@ export async function interceptAt(client: DbClient, _data: GameData, world: Worl
 }
 
 // Drops a wave's pending raids and intercepts: its timetable has changed.
-async function cancelPlans(client: DbClient, worldId: number, waveId: number): Promise<void> {
+export async function cancelPlans(client: DbClient, worldId: number, waveId: number): Promise<void> {
   await client.query(
     `UPDATE scheduled_events SET status = 'done', processed_at = now(), error = 'superseded'
      WHERE world_id = $1 AND status = 'pending' AND type IN ('outpost_raid', 'field_intercept') AND payload @> $2::jsonb`,
@@ -137,19 +139,25 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
   return battle;
 }
 
-// One round of a field battle (battle_round for a battle with no village).
+// One round of a field battle (battle_round for a battle with no village):
+// on open ground, or at the Holy City, whose guard fights beside any armies
+// holding it, behind its walls.
 export async function fieldRound(client: DbClient, data: GameData, world: World, battle: Battle, at: Date): Promise<void> {
   const wave = await loadWave(client, battle.waveId);
   const round = battle.round + 1;
   const engaged = await armiesInBattle(client, battle.id);
+  const holy = battle.setup.holyCity === true;
+  const guard = holy ? (battle.setup.guard ?? {}) : null;
   const leader = engaged[0] ? await loadVillage(client, engaged[0].homeVillageId) : null;
-  const stance = leader?.state.stance ?? 'balanced';
+  const stance = holy ? data.horde.holyCity.stance : (leader?.state.stance ?? 'balanced');
   // The holders fight with their owner's research and the hero leading them.
   let hero: Hero | null = null;
   for (const army of engaged) hero ??= await heroWithArmy(client, army.id);
   const research = leader?.state.bonuses ?? {};
   const bonuses = hero ? combine(research, heroBonuses(data, hero)) : research;
-  const factors = setupFactors(data, battle.setup as Setup, { round, holdersStance: stance });
+  const ground: Setup = { ambush: !!battle.setup.ambush, choke: !!battle.setup.choke, fort: !!battle.setup.fort };
+  const factors = setupFactors(data, ground, { round, holdersStance: stance });
+  const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
   const holderBase = playerStats(data, bonuses, false);
   const hordeBase = enemyStats(data, wave.front);
   const result = resolveRound(
@@ -162,23 +170,26 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       home: false,
     },
     {
-      units: engaged.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), {}),
+      units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
       stance,
       stats: (unit) => ({
         ...holderBase(unit),
         attack: holderBase(unit).attack * factors.holderAttack,
         defense: holderBase(unit).defense * factors.holderDefense,
       }),
-      home: false,
+      home: holy,
     },
     battleRng(world.seed, battle.id, round),
   );
   const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
   await setWaveStrength(client, wave.id, attackerNow);
-  const shares = splitLosses(result.defenderLosses, engaged.map((a) => a.units));
+  const shares = splitLosses(result.defenderLosses, forces);
+  const guardNow = guard ? subtractUnits(guard, shares[0]!) : null;
+  if (guardNow) await saveSetup(client, battle.id, { ...battle.setup, guard: guardNow });
+  const offset = guard ? 1 : 0;
   const armies: Army[] = [];
-  for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i]!, at));
-  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), {});
+  for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i + offset]!, at));
+  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...(guardNow ?? {}) });
 
   const outcome = battleOutcome(data, {
     round,
@@ -217,9 +228,25 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       else await sendHome(client, world, army, at, data);
     }
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });
-    if (won) await endWave(client, wave.id, 'defeated', at);
-    else await marchOn(client, data, world, wave, hex(battle.q, battle.r), at);
-    for (const owner of await owners(engaged)) {
+    if (won) {
+      await hordeBeaten(client, data, world, hex(battle.q, battle.r), kills);
+      await endWave(client, wave.id, 'defeated', at);
+    } else if (holy) {
+      await holyCityFalls(client, data, world, wave, attackerNow, at);
+    } else {
+      await marchOn(client, data, world, wave, hex(battle.q, battle.r), at);
+    }
+    if (holy) {
+      for (const member of await listMembers(client, world.id)) {
+        await tell(client, world, member.accountId, {
+          kind: 'battle_result',
+          tier: won ? 'digest' : 'push',
+          title: won ? 'The Holy City held' : 'The Holy City was struck',
+          body: won ? `The horde was beaten at its walls after ${round} rounds.` : `Its Sanctity fell to ${(await getWorld(client, world.id)).sanctity}.`,
+        }, at);
+      }
+    }
+    for (const owner of holy ? [] : await owners(engaged)) {
       await tell(client, world, owner, {
         kind: 'battle_result',
         tier: 'digest',
@@ -231,6 +258,14 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   }
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
+}
+
+// A horde beat the Holy City's defenders: Sanctity falls by its survivors,
+// and the horde, its rampage done, scatters.
+async function holyCityFalls(client: DbClient, data: GameData, world: World, wave: Wave, survivors: Record<string, number>, at: Date): Promise<void> {
+  await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)));
+  await endWave(client, wave.id, 'dispersed', at);
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
 // The horde broke through: the rest of its road shifts by the time it spent

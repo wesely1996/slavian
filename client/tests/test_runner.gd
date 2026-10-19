@@ -31,6 +31,7 @@ func _initialize() -> void:
 	_test_armies()
 	_test_field()
 	_test_fronts()
+	_test_horde()
 	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
@@ -381,3 +382,16 @@ func _test_fronts() -> void:
 	var lines := WaveMath.front_lines(data, ["east", "west"])
 	_check(lines.size() == 1 and lines[0] == "Nomad Horde (East): Fast.", "front lines: %s" % lines)
 	_check(WaveMath.front_color("south") == WaveMath.front_color("west") and WaveMath.front_color("east") != WaveMath.front_color("north"), "front colours")
+
+
+func _test_horde() -> void:
+	var data := {
+		"buildings": {"buildings": {"farm": {"cost": {"wood": 100, "stone": 0, "grain": 0, "iron": 0}, "costGrowth": 2.0}}},
+		"horde": {"ruins": {"rebuildCostShare": 0.5}, "holyCity": {"sanctity": 100}},
+	}
+	var cost := HordeText.rebuild_cost(data, {"f0": {"building": "farm", "level": 2}, "c1": {"building": null, "level": 0}})
+	_check(cost.wood == 150 and cost.stone == 0, "rebuild cost: %s" % cost)
+	_check(HordeText.decision({"decision": {"choice": "raze", "reasons": ["help is far", "it is strong"]}}) == "Razed: help is far, it is strong.", "raze text")
+	_check(HordeText.decision({"decision": null}) == "", "no decision")
+	_check(HordeText.camp({"kind": "lair", "size": 12}, "Monsters of the North") == "Monster lair of the Monsters of the North · 12 strong", "camp text")
+	_check(HordeText.sanctity({"sanctity": 87}, data) == "Sanctity 87 / 100", "sanctity text")
