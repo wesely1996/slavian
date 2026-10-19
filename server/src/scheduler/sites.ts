@@ -15,7 +15,8 @@ import { addEmbers, listMembers, loadHexes, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
 import { assault } from '../sim/camps.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
-import { hex } from '../sim/hex.js';
+import { hex, hexDistance } from '../sim/hex.js';
+import { listCamps } from '../db/camps.js';
 import { distanceShare, placeSites, rollFind, type Find } from '../sim/sites.js';
 import { armyLosses, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -36,6 +37,26 @@ export async function ensureSites(client: DbClient, data: GameData, world: World
   const villages = (await listVillages(client, world.id)).map((v) => hex(v.q, v.r));
   const players = (await listMembers(client, world.id)).length;
   await insertSites(client, world.id, placeSites(data, { terrain, radius: world.radius, startSites: villages, seed: world.seed, players }));
+}
+
+// When the bridge asks for a relic and every site has been searched, the
+// builders remember one more ruin: a new site appears, away from villages,
+// camps and the other sites. Returns whether one was found a place.
+export async function revealSite(client: DbClient, data: GameData, world: World): Promise<boolean> {
+  if (world.radius === null) return false;
+  const sites = await listSites(client, world.id);
+  if (sites.some((s) => s.status === 'unexplored')) return false;
+  const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const));
+  const villages = (await listVillages(client, world.id)).map((v) => hex(v.q, v.r));
+  const taken = [...sites.map((s) => hex(s.q, s.r)), ...(await listCamps(client, world.id)).map((c) => hex(c.q, c.r))];
+  const spacing = data.sites.placement.spacing;
+  const players = (await listMembers(client, world.id)).length;
+  const candidates = placeSites(data, { terrain, radius: world.radius, startSites: villages, seed: (world.seed ^ (sites.length * 0x9e37)) >>> 0, players });
+  const site = candidates.find((c) => taken.every((t) => hexDistance(t, hex(c.q, c.r)) >= spacing));
+  if (!site) return false;
+  await insertSites(client, world.id, [site]);
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
+  return true;
 }
 
 export function findText(data: GameData, find: Find): string {

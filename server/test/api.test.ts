@@ -217,12 +217,19 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle).toMatchObject({ waveId: marching.id, villageId: village.id, status: 'ongoing', round: 0, defenderInitial: {} });
     expect(battle.attackerStance).toBeTruthy();
 
+    // Work started just before the round; the raid will burn it.
+    const roundAt = now.getTime() + (15 * 60_000) / 10;
+    now = new Date(roundAt - 10_000);
+    const building = (await call('POST', `/v1/villages/${village.id}/build`, ratimir.token, { plot: 'c0' })).body.village.queue[0];
+    expect(new Date(building.completesAt).getTime()).toBeGreaterThan(roundAt);
+
     // No defenders: the first round ends in a raid.
-    now = new Date(now.getTime() + (15 * 60_000) / 10);
+    now = new Date(roundAt);
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body;
     const raided = world.battles[0];
     expect(raided).toMatchObject({ status: 'raided', round: 1 });
+    expect(world.villages[0].queue).toEqual([]);
     // The whole horde survived, so it carried off 30% of what was stored,
     // scaled by its faction's greed (monsters care little for loot).
     const left = world.villages[0].resources;
@@ -240,6 +247,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       expect(after.struck).toEqual([village.id]);
       expect(after.status).toBe('marching');
     }
+    // The burned build's completion passes quietly.
+    now = new Date(new Date(building.completesAt).getTime() + 1000);
+    await tick(db, now, scheduler);
+    const failed = await db.query("SELECT 1 FROM scheduled_events WHERE world_id = $1 AND status = 'failed'", [worldId]);
+    expect(failed.rowCount).toBe(0);
+    expect((await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body.villages[0].levels.elder_hall).toBe(1);
   });
 
   it('sends scouts at a wave and shares their report', async () => {
@@ -774,6 +787,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(rebuild.body.order.lastResult).toBe('Rebuilding the outpost at (9, 9)');
     expect(rebuild.body.village.queue.some((q: { plot: string }) => q.plot === 'o9,9')).toBe(true);
 
+    // Two raided outposts and only enough for one: the first keeps its place in the queue.
+    const cost = scheduler.data.buildings.buildings.outpost!.cost;
+    await db.query(
+      `UPDATE villages SET plots = plots || jsonb_build_object(
+           'o9,10', jsonb_build_object('building', 'outpost', 'level', 0, 'terrain', 'plains', 'peak', 1),
+           'o9,11', jsonb_build_object('building', 'outpost', 'level', 0, 'terrain', 'plains', 'peak', 1)),
+         queue = '[]', amounts = $3, settled_at = $2 WHERE id = $1`,
+      [village.id, now, JSON.stringify({ wood: cost.wood + 10, stone: cost.stone + 10, grain: cost.grain + 10, iron: cost.iron + 10 })],
+    );
+    await db.query(`UPDATE villages SET plots = plots - 'o9,9' WHERE id = $1`, [village.id]);
+    // Placed again, so it runs now.
+    await call('POST', `/v1/villages/${village.id}/orders/${rebuild.body.order.id}/cancel`, lada.token);
+    const partial = await order({ kind: 'rebuild' });
+    expect(partial.body.order.lastResult).toBe('Rebuilding the outpost at (9, 10)');
+    expect(partial.body.village.queue.map((q: { plot: string }) => q.plot)).toEqual(['o9,10']);
+
     // Cancelled orders stop.
     const cancel = await call('POST', `/v1/villages/${village.id}/orders/${train.body.order.id}/cancel`, lada.token);
     expect(cancel.status).toBe(200);
@@ -1007,6 +1036,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.armies[0].status).toBe('stationed');
     expect(w.forts[0]).toMatchObject({ q, r, status: 'standing' });
     const xpBefore = w.heroes[0].xp;
+    // The Iron Span is being built: holding the fort answers its strong-point quest.
+    const ironSpan = scheduler.data.bridge.stages.findIndex((s) => s.quests.some((x) => x.kind === 'choke'));
+    await db.query(`UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int) WHERE world_id = $1`, [worldId, ironSpan]);
 
     now = meetAt;
     await tick(db, now, scheduler);
@@ -1023,6 +1055,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     expect(battle.status).toBe('defended');
     w = await world();
+    expect(w.bridge.quests.choke).toBeTruthy();
     expect(w.waves.some((x: { id: number }) => x.id === first.id)).toBe(false);
     expect(w.armies[0].status).toBe('stationed');
     expect(w.heroes[0].status).toBe('with_army');
@@ -1547,6 +1580,33 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(again.village.resources.amounts.wood).toBeLessThan(built.village.resources.amounts.wood);
     w = (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
     expect(Object.keys(w.members[0].onboarding)).toEqual(['build']);
+  });
+
+  it('reveals a forgotten ruin when the bridge wants a relic and every site was searched', async () => {
+    const rusa = await guest('Rusa');
+    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Ruins', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, rusa.token)).body;
+    const stages = scheduler.data.bridge.stages;
+    const before = stages.findIndex((st, i) => i > 0 && stages[i + 1]?.quests.some((q) => q.kind === 'site'));
+    const stage = stages[before]!;
+    // Everything but one wood in place for the stage before the one that wants a relic.
+    const donated = { ...stage.cost, wood: stage.cost.wood - 1 };
+    const quests = Object.fromEntries(stage.quests.map((q) => [q.kind, now.toISOString()]));
+    await db.query(
+      `UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int, 'donated', $3::jsonb, 'embers', $4::int, 'quests', $5::jsonb) WHERE world_id = $1`,
+      [worldId, before, JSON.stringify(donated), stage.embers, JSON.stringify(quests)],
+    );
+    await db.query(`UPDATE vaults SET amounts = '{"wood": 1, "stone": 0, "grain": 0, "iron": 0}' WHERE world_id = $1`, [worldId]);
+    await db.query(`UPDATE sites SET status = 'explored' WHERE world_id = $1`, [worldId]);
+    const raising = (await call('POST', `/v1/worlds/${worldId}/bridge/donate`, rusa.token, { resources: { wood: 1, stone: 0, grain: 0, iron: 0 }, embers: 0 })).body;
+    expect(raising.bridge.status).toBe('raising');
+    now = new Date(raising.bridge.raisedAt);
+    await tick(db, now, scheduler);
+    const w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge.stage).toBe(before + 1);
+    expect(w.sites).toHaveLength(started.sites.length + 1);
+    expect(w.sites.filter((x: { status: string }) => x.status === 'unexplored')).toHaveLength(1);
   });
 
   it('refuses live subscriptions to worlds you are not in', async () => {

@@ -12,6 +12,7 @@
     "migrate": "tsx src/db/migrate.ts",
     "worker": "tsx src/scheduler/run-worker.ts",
     "demo": "tsx src/demo.ts",
+    "sim": "tsx src/runsim/run.ts",
     "start": "tsx src/server.ts"
   },
   "dependencies": {

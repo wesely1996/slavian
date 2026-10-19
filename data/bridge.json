@@ -56,7 +56,7 @@
         },
         {
           "kind": "choke",
-          "story": "The ore comes through the passes: hold a choke point against a horde, so the smiths know the road can be kept."
+          "story": "The ore comes through the passes: hold a pass or a fort on a horde's road, so the smiths know the road can be kept."
         }
       ],
       "story": "Iron forged under Svarog's eye carries the road over the fire. The forge must burn without break, fed by ore brought in through the passes."
@@ -69,7 +69,7 @@
         "grain": 6000,
         "iron": 6000
       },
-      "embers": 2,
+      "embers": 1,
       "quests": [
         {
           "kind": "site",
@@ -90,7 +90,7 @@
         "grain": 8000,
         "iron": 8000
       },
-      "embers": 3,
+      "embers": 2,
       "quests": [
         {
           "kind": "ritual",
@@ -114,8 +114,8 @@
       "description": "A wave ends without the Holy City losing Sanctity since this stage began."
     },
     "choke": {
-      "name": "Hold a choke point",
-      "description": "Win a field battle at a choke point while this stage is open."
+      "name": "Hold a strong point",
+      "description": "Win a field battle at a choke point or from a fort while this stage is open."
     },
     "ritual": {
       "name": "Craft the ritual torc",

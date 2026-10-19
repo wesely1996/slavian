@@ -336,7 +336,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
   - Clear a specific monster lair.
   - Survive a wave with no Sanctity loss.
   - Craft a ritual item (needs Svarog's Ember).
-  - Hold a choke point for a full battle.
+  - Hold a strong point (a choke point or a fort) for a full battle.
 - Bridge progress increases wave difficulty (it is part of group power).
 - **Stage 5 → Ritual Night:** all active fronts attack at once (respecting quiet hours). Surviving it with Sanctity above 0 **wins the run**.
 - **Loss:** Sanctity reaches 0.
@@ -372,11 +372,16 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 - Colorblind-safe threat colors **plus icons**. Adjustable text size. Large tap targets.
 
 ### 11.7 Art & UI (Q31)
-- Godot 2D, stylized flat illustration. Hex tiles and buildings as sprites.
+- Godot 2D, stylized flat illustration in the spirit of **Kingdom Rush** (UI and game art). Hex tiles and buildings as sprites.
 - Slavic ornament (embroidery patterns, carved-wood motifs) in UI frames.
 - Muted earth palette, bright accents only for threats and actions.
 - Placeholder (stock / AI-assisted) art until M5. Until then the UI stays minimal (code-built panels, flat hexes) so the rules can be built and tested first; the **UI design and art pass** (M5) replaces it before launch.
 - Portrait-first phone layout. Map pan/zoom with one-finger drag and pinch.
+- **Map art:** neighbouring tiles of the same kind merge into one shape (a big forest, a mountain range, a lake) instead of separate hexes; rivers wind along hex edges, with bridges where they can be crossed.
+- **Settlements** look different at each level; **banners** show the owner. **Outlines** tell sides apart at a glance: green for yours, blue for allies' units and settlements, red for enemies.
+- **Village interior and its resource fields** look and work like Travian's.
+- **Battle screen:** a play-by-play of each round with narrative explanations, over a 2D top-down view of the battlefield: units as squares with unit icons, neighbouring squares of the same kind grouped into a squad with one big icon over the whole group.
+  - Look: a parchment campaign map like [`docs/reference/battle-map.jpg`](docs/reference/battle-map.jpg) (the Battle of Hastings): shaded hills and ground, roads, rivers and marsh, place names; each side's units as rectangles in its colour with a military-map style symbol for the unit kind, drawn in lines; a label over each group ("Archers", "Bretons"); the leader (a hero, or the horde's chief) as a marker of their own behind the lines.
 
 ### 11.8 Support & server costs (Q6, Q37)
 - **No ads, no in-app purchases, no speed-ups.**
@@ -534,12 +539,23 @@ The `server/src/sim` module is pure (no I/O, no clock): it takes state + data + 
 ### M4 breakdown (each step is its own PR)
 Difficulty presets and world speed already exist (M3 step 6, M1).
 1. [x] **Ancient sites and lore scrolls** (`data/sites.json`, `data/lore.json`): kurgans, sunken shrines, old hillforts, stone idols and frozen ruins (3 per player, at least 5) are placed when a world starts, mostly in the borderlands, some mid-map, away from start sites; 20–70% are watched by guardians (beasts of the North, more the further out), unknown until someone fights them. Armies (scouts may go too) sent to **explore** fight any guardians, search the site for 3–8 game hours and come home with one find: resources (more the further out), a piece of hero gear, a Svarog's Ember, or a **lore scroll** the group lacks. Scrolls serve the whole group: five add group-wide boosts (grain, caravan load, attack, storage, defense) and two unlock **rare techs** (Wind Riders, Ember-Forged Arms) that every member can then research. Nothing can be built on a site's hex. Client: sites on the map, an explore form, finds, the group's scrolls in the Research tab.
-2. [x] **Kalinov Bridge:** five stages built in the Holy City from the vault (villages fill it by caravan) and Svarog's Ember, each with 1–2 quests (bring a relic from an ancient site, clear a named lair, survive a wave without losing Sanctity, hold a choke point through a battle, craft a ritual item). Every stage and every quest carries its story reason (`data/bridge.json`), shown in notices and the Holy City panel. A paid stage with its quests done is raised over 12 game hours. Bridge stages standing count towards group power.
+2. [x] **Kalinov Bridge:** five stages built in the Holy City from the vault (villages fill it by caravan) and Svarog's Ember, each with 1–2 quests (bring a relic from an ancient site, clear a named lair, survive a wave without losing Sanctity, hold a choke point or a fort through a battle, craft a ritual item). Every stage and every quest carries its story reason (`data/bridge.json`), shown in notices and the Holy City panel. A paid stage with its quests done is raised over 12 game hours. Bridge stages standing count towards group power.
 3. [x] **Ritual Night and the end of a run:** finishing stage 5 calls Ritual Night: the waves still to come are called off and every active front sends one horde (1.5× strength), all setting out together 6 game hours later (after quiet hours). The group wins when the last of them is beaten or gone and the Holy City still stands; it loses when Sanctity reaches 0. Each ending has its story (`data/bridge.json`), told to everyone. Win and loss screens show the story and a summary of the run (days, hordes beaten, battles, camps, sites, scrolls, villages, each member's villages); a finished world stays readable and refuses commands.
 4. [x] **Clans:** six clans (Rod Jelena, Rysa, Medvěda, Bobra, Sokola, Volka), each with a story, picked in the lobby (a member who joined without one picks once in the run). Each has a best resource or skill, a weakness and a unique unit (Forest Archer, River Barge, Border Rider) or building (Granary-Temple, Stone Redoubt, Longhouse Hall, whose effects grow per level) only it can train or build (`data/clans.json`). Clan effects join the player's research bonuses; new effect keys: `researchTime`, `fortCost`, `coldDefense` (against the North), `ambush` and `trainTime.<unit>`.
 5. [x] **Delegation:** a player hands a teammate temporary control (1–7 days) over their villages (no chains: someone who handed theirs over can't take on more). The delegate commands them as their own (building, training, research, scouts, outposts, settlers, caravans, armies, forts, standing orders); every action is logged and shown to the group. The owner can take them back and the delegate can hand them back early; heroes stay with their owner.
 6. [x] **Onboarding and almanac:** a getting-started chain (`data/onboarding.json`: raise a building, train defenders, claim an outpost, send scouts, clear a camp, gift a teammate or the vault), each step with the village elder's reason and a reward to the player's first village the first time it is done; the next step shows on your village. An in-game almanac (from the Threats panel) of units, buildings, stances and counters, hordes, clans, terrain and how a run is won or lost, written from `data/`.
-7. [ ] **Headless simulator and first balance pass:** `tools/runsim` plays whole worlds at accelerated time with scripted bots (turtle, expander, balanced) across player counts and presets, reports win rates and causes of loss, and the first tuning of `data/*.json` towards the targets in §13.
+7. [x] **Headless simulator and first balance pass:** `npm run sim` (`server/src/runsim`) plays whole worlds with scripted bots (turtle, expander, balanced) through the real commands, scheduler and database on a simulated clock, across player counts and presets, and reports how each run ended (won, lost and to which front, or unfinished and on what), the bridge stage, Sanctity, villages and hordes. First pass:
+   - **Bugs it found:** a raid didn't clear the village's build queue (it now does, like a raze); the rebuild order lost a queued outpost rebuild when a later one couldn't be paid for; completion events of cleared builds failed instead of passing.
+   - **Content it ran out of:** Svarog's Embers (sites find one more often, lairs give one 75% of the time, the last two stages need 1 and 2), lairs (the camp limit is per front, 4 each, and a lair rises when a stage wants one and none stands), relics (a forgotten ruin appears when a stage wants one and every site was searched), choke points on horde roads (the strong-point quest also counts a battle won from a fort).
+   - **Pace:** waves grow 1.18× per wave (was 1.25×, which outran any economy by day 40; 1.15× never threatened). Balanced groups now win in 33–55 days or fall to Ritual Night itself.
+   - **Still to do** (the bots, then the numbers): teammates coordinating strong points, late-game Ember gathering, enough runs per player count and preset for real win rates against the 60–75% target.
+
+### M5 breakdown (to plan in detail when M4 is done)
+- **UI design and art pass** (§11.7): Kingdom Rush–like art and UI; merged map art for connected tiles of one kind; settlement art per level, owner banners, green/blue/red outlines for yours/allies'/enemies'; a Travian-like village interior and resource fields.
+- **Battle screen:** round-by-round play-by-play with narrative explanations over a 2D top-down battlefield (unit squares with icons, grouped into squads with one big icon), drawn as a parchment campaign map (reference: `docs/reference/battle-map.jpg`).
+- **Roads:** players build roads between hexes. Roads speed up movement for everyone on them, allies and the human hordes alike, but not monsters. (Terrain already sets movement cost.)
+- **Rivers:** map generation lays rivers along hex edges, from the edge belt and hills towards the lowlands. Nothing crosses a river except at a **bridge**, hordes included: some bridges stand when the world is made (mapgen keeps every start able to reach the Holy City and every active front able to reach the starts), and players can build more. Rivers are drawn on the map, and bridges become natural choke points.
+- The rest of M5 as in the roadmap table (closed test, balance, localization, accessibility, donation button, privacy, backups/monitoring).
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
