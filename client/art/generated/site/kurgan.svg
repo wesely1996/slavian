@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <ellipse cx="64" cy="110" rx="50" ry="12" fill="#2b2118" stroke="none" stroke-width="0" opacity="0.25"/>
-  <path d="M10,110 Q64,30 118,110 Z" fill="#7fa04a" stroke="#2b2118" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
-  <path d="M40,80 Q64,50 88,72" fill="none" stroke="#9dbb5f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
-  <rect x="58" y="36" width="12" height="24" rx="2" fill="#a39d93" stroke="#2b2118" stroke-width="3" stroke-linejoin="round" opacity="1"/>
+  <defs><radialGradient id="g248" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.3"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient><radialGradient id="g249" cx="0.38" cy="0.3" r="0.8"><stop offset="0" stop-color="#a5b06a"/><stop offset="0.6" stop-color="#76824a"/><stop offset="1" stop-color="#4a5531"/></radialGradient><linearGradient id="g250" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bdb6aa"/><stop offset="1" stop-color="#6f695f"/></linearGradient><linearGradient id="g251" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bdb6aa"/><stop offset="1" stop-color="#6f695f"/></linearGradient><linearGradient id="g252" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bdb6aa"/><stop offset="1" stop-color="#6f695f"/></linearGradient></defs>
+  <ellipse cx="64" cy="112" rx="52" ry="11" fill="url(#g248)" stroke="none" stroke-width="0" opacity="1"/>
+  <path d="M12,114 Q30,56 64,52 Q98,56 116,114 Z" fill="url(#g249)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+  <polygon points="44,60 45,42 51,44 52,60" fill="url(#g250)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="60,60 61,36 67,38 68,60" fill="url(#g251)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="76,60 77,42 83,44 84,60" fill="url(#g252)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
 </svg>

@@ -21,10 +21,12 @@ const SLOT_LOCKED := Color("#2a241c")
 const BUILDING := Color("#8f6d45")
 const BUILDING_ACTIVE := Color("#e2b04a")
 const SELECTED := Color.WHITE
-const MEADOW := Color("#7fa04a")
-const SQUARE_EARTH := Color("#a08a62")
-const PALISADE := Color("#8b5a2b")
-const INK := Color("#2b2118")
+const MEADOW := Color("#7d9150")
+const MEADOW_EDGE := Color("#4c5e33")
+const SQUARE_EARTH := Color("#9c8a66")
+const SQUARE_EDGE := Color("#6e5f45")
+const PALISADE := Color("#6e4b2c")
+const INK := Color("#1d1813")
 
 ## Game data (buildings), the village as the server sent it, the picked plot.
 var data: Dictionary = {}
@@ -99,12 +101,14 @@ func _draw() -> void:
 	var radius := minf(size.x, size.y) * 0.4
 	var art := Art.has("plot/empty")
 	if art:
-		# Meadow around, the village square inside its palisade.
-		draw_circle(middle, radius * 1.22, INK)
-		draw_circle(middle, radius * 1.2, MEADOW)
-		draw_circle(middle, radius * 0.74, SQUARE_EARTH)
-		draw_arc(middle, radius * 0.74, 0.0, TAU, 96, PALISADE, radius * 0.05)
-		draw_arc(middle, radius * 0.77, 0.0, TAU, 96, INK, 2.0)
+		# A soft shadow, the meadow around, the village square inside its
+		# palisade; each shaded lighter towards the upper left.
+		for i in 6:
+			draw_circle(middle + Vector2(0, radius * 0.04), radius * (1.32 - i * 0.02), Color(0, 0, 0, 0.08))
+		_shaded_disc(middle, radius * 1.2, MEADOW_EDGE, MEADOW)
+		_shaded_disc(middle, radius * 0.76, SQUARE_EDGE, SQUARE_EARTH)
+		draw_arc(middle, radius * 0.76, 0.0, TAU, 96, PALISADE, radius * 0.045, true)
+		draw_arc(middle + Vector2(-1, -1), radius * 0.76, PI * 0.9, PI * 1.6, 48, Color(1, 0.9, 0.7, 0.25), 2.0, true)
 	else:
 		draw_circle(middle, radius * 1.22, GROUND)
 		draw_circle(middle, radius * 0.72, SQUARE)
@@ -151,6 +155,15 @@ func _draw() -> void:
 		else:
 			_text(font, rect.get_center() - Vector2(0, font_size * 0.6), _short_name(def.name), font_size)
 			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
+
+
+## A disc shaded from `edge` at its rim to `middle_color` towards its lit
+## upper left.
+func _shaded_disc(center: Vector2, r: float, edge: Color, middle_color: Color) -> void:
+	var steps := 10
+	for i in steps:
+		var t := float(i) / float(steps - 1)
+		draw_circle(center - Vector2(r, r) * 0.12 * t, r * (1.0 - 0.55 * t), edge.lerp(middle_color, t))
 
 
 ## A plot from the art: the field or building by stage (faded before its

@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <ellipse cx="64" cy="110" rx="44" ry="10" fill="#2b2118" stroke="none" stroke-width="0" opacity="0.25"/>
-  <polygon points="24,98 36,72 92,72 104,98" fill="#5d6672" stroke="#2b2118" stroke-width="4" stroke-linejoin="round" opacity="1"/>
-  <polygon points="40,76 88,76 84,82 44,82" fill="#8d98a6" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <defs><radialGradient id="g341" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.35"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient><linearGradient id="g342" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9b4c2"/><stop offset="0.5" stop-color="#6c7684"/><stop offset="1" stop-color="#3c434d"/></linearGradient><linearGradient id="g343" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9b4c2"/><stop offset="0.5" stop-color="#6c7684"/><stop offset="1" stop-color="#3c434d"/></linearGradient></defs>
+  <ellipse cx="64" cy="104" rx="46" ry="9" fill="url(#g341)" stroke="none" stroke-width="0" opacity="1"/>
+  <polygon points="22,98 34,76 94,76 106,98" fill="url(#g342)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="36,78 92,78 88,84 40,84" fill="#d8e0ea" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="0.55"/>
+  <polygon points="34,76 46,54 106,54 118,76" fill="url(#g343)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="48,56 104,56 100,62 52,62" fill="#d8e0ea" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="0.55"/>
 </svg>

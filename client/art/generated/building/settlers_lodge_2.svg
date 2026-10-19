@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <ellipse cx="64" cy="104" rx="56" ry="18" fill="#8a7a5a" stroke="none" stroke-width="0" opacity="0.55"/>
-  <ellipse cx="64" cy="110" rx="50" ry="10" fill="#2b2118" stroke="none" stroke-width="0" opacity="0.25"/>
-  <rect x="25.1" y="89" width="41.8" height="23" rx="0" fill="#8b5a2b" stroke="#2b2118" stroke-width="3" stroke-linejoin="round" opacity="1"/>
-  <rect x="41" y="98.2" width="10" height="13.8" rx="0" fill="#2b2118" stroke="#2b2118" stroke-width="0" stroke-linejoin="round" opacity="1"/>
-  <polygon points="20.1,89 46,66 71.9,89" fill="#c9a55a" stroke="#2b2118" stroke-width="3" stroke-linejoin="round" opacity="1"/>
-  <polygon points="46,68.1 64.8,87 52.3,87" fill="#e3c27a" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
-  <path d="M75.0,102 Q92,78 109.0,102 Z" fill="#f4f1ea" stroke="#2b2118" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
-  <rect x="75" y="100" width="34" height="10" rx="0" fill="#8b5a2b" stroke="#2b2118" stroke-width="3" stroke-linejoin="round" opacity="1"/>
-  <circle cx="80.7" cy="112" r="6" fill="#b07a45" stroke="#2b2118" stroke-width="2.5" opacity="1"/>
-  <circle cx="103.3" cy="112" r="6" fill="#b07a45" stroke="#2b2118" stroke-width="2.5" opacity="1"/>
-  <circle cx="92" cy="72" r="4" fill="#e3c27a" stroke="#2b2118" stroke-width="2" opacity="1"/>
+  <defs><radialGradient id="g489" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#a08f6a" stop-opacity="0.9"/><stop offset="0.75" stop-color="#7a6a4b" stop-opacity="0.7"/><stop offset="1" stop-color="#7a6a4b" stop-opacity="0"/></radialGradient><radialGradient id="g490" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.4"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient><linearGradient id="g491" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8c6640"/><stop offset="1" stop-color="#594027"/></linearGradient><linearGradient id="g492" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b78d5e"/><stop offset="1" stop-color="#8c6640"/></linearGradient><linearGradient id="g493" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#d6b46e"/><stop offset="0.55" stop-color="#a8854a"/><stop offset="1" stop-color="#6b5229"/></linearGradient><radialGradient id="g494" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.3"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient><linearGradient id="g495" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f4eddc"/><stop offset="1" stop-color="#b9ae96"/></linearGradient><linearGradient id="g496" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b78d5e"/><stop offset="1" stop-color="#594027"/></linearGradient><radialGradient id="g497" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#c9a16e"/><stop offset="1" stop-color="#5a3a1f"/></radialGradient><radialGradient id="g498" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#c9a16e"/><stop offset="1" stop-color="#5a3a1f"/></radialGradient></defs>
+  <ellipse cx="64" cy="104" rx="58" ry="19" fill="url(#g489)" stroke="none" stroke-width="0" opacity="1"/>
+  <ellipse cx="54.5" cy="109" rx="31.2" ry="6.7" fill="url(#g490)" stroke="none" stroke-width="0" opacity="1"/>
+  <polygon points="64.9,110 82.5,102.1 82.5,79.3 64.9,87.2" fill="url(#g491)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="23.1,110 23.1,87.2 44,65.5 64.9,87.2 64.9,110" fill="url(#g492)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <polygon points="43.2,63 60.8,55.1 85,81.8 67.4,89.7" fill="url(#g493)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <path d="M20.6,89.7 L43.2,63 L67.4,89.7" fill="none" stroke="#a8854a" stroke-width="3.344" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+  <rect x="39" y="95.9" width="10" height="14.1" rx="0" fill="#3a2a1c" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <rect x="51.9" y="93.6" width="5.9" height="5.5" rx="0" fill="#f3c46a" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="0.9"/>
+  <line x1="23.1" y1="110" x2="82.5" y2="102.1" stroke="#1d1813" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+  <ellipse cx="96" cy="112" rx="20.4" ry="4" fill="url(#g494)" stroke="none" stroke-width="0" opacity="1"/>
+  <path d="M77,102 Q94,76 111,102 Z" fill="url(#g495)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+  <rect x="77" y="100" width="34" height="9" rx="2" fill="url(#g496)" stroke="none" stroke-width="0" stroke-linejoin="round" opacity="1"/>
+  <circle cx="82.7" cy="110" r="5.5" fill="url(#g497)" stroke="none" stroke-width="0" opacity="1"/>
+  <circle cx="105.3" cy="110" r="5.5" fill="url(#g498)" stroke="none" stroke-width="0" opacity="1"/>
 </svg>
