@@ -4,7 +4,7 @@ extends Node
 
 const PATH := "user://session.cfg"
 ## The game's server (docs/production.md). Exported builds always use it.
-const REMOTE_SERVER_URL := "https://SERVER_IP.sslip.io"
+const REMOTE_SERVER_URL := "https://2-31-39-17.sslip.io"
 ## A server on this computer, for running the game from the editor.
 const LOCAL_SERVER_URL := "http://127.0.0.1:8080"
 
