@@ -6,6 +6,9 @@ extends RefCounted
 ## Missing art gives null, and callers draw their placeholder instead.
 
 const MANIFEST := "res://art/art.json"
+## Ids whose file you add yourself and that may be missing until then: the
+## studio's logo on the splash (client/art/brand/night_forge.png).
+const OPTIONAL := ["brand/studio"]
 
 static var _paths: Dictionary = {}
 static var _cache: Dictionary = {}

@@ -2247,166 +2247,166 @@ msgstr "Pobeda"
 msgid "Lost"
 msgstr "Poraz"
 
-#: client/scripts/screens/start_screen.gd:40
-msgid "Slavian"
-msgstr "Slavian"
-
-#: client/scripts/screens/start_screen.gd:44
+#: client/scripts/screens/start_screen.gd:86
 msgid "Defend the Holy City. Build the Kalinov Bridge."
 msgstr "Odbrani Sveti grad. Sagradi Kalinov most."
 
-#: client/scripts/screens/start_screen.gd:69
+#: client/scripts/screens/start_screen.gd:147
 msgid "Small"
 msgstr "Malo"
 
-#: client/scripts/screens/start_screen.gd:69
+#: client/scripts/screens/start_screen.gd:147
 msgid "Normal"
 msgstr "Normalno"
 
-#: client/scripts/screens/start_screen.gd:69
+#: client/scripts/screens/start_screen.gd:147
 msgid "Large"
 msgstr "Veliko"
 
-#: client/scripts/screens/start_screen.gd:104
+#: client/scripts/screens/start_screen.gd:154
+msgid "Text size: %s"
+msgstr "Veličina teksta: %s"
+
+#: client/scripts/screens/start_screen.gd:174
 msgid "Your name"
 msgstr "Tvoje ime"
 
-#: client/scripts/screens/start_screen.gd:105
+#: client/scripts/screens/start_screen.gd:175
 msgid "e.g. Vesna"
 msgstr "npr. Vesna"
 
-#: client/scripts/screens/start_screen.gd:107
+#: client/scripts/screens/start_screen.gd:177
 msgid "Play as guest"
 msgstr "Igraj kao gost"
 
-#: client/scripts/screens/start_screen.gd:134
+#: client/scripts/screens/start_screen.gd:204
 msgid "Loading…"
 msgstr "Učitavanje…"
 
-#: client/scripts/screens/start_screen.gd:143
+#: client/scripts/screens/start_screen.gd:213
 msgid "Retry"
 msgstr "Pokušaj ponovo"
 
-#: client/scripts/screens/start_screen.gd:150
+#: client/scripts/screens/start_screen.gd:220
 msgid "Signed in as %s"
 msgstr "Prijavljen kao %s"
 
-#: client/scripts/screens/start_screen.gd:153
+#: client/scripts/screens/start_screen.gd:223
 msgid "Sign out"
 msgstr "Odjavi se"
 
-#: client/scripts/screens/start_screen.gd:158
+#: client/scripts/screens/start_screen.gd:228
 msgid "Your worlds"
 msgstr "Tvoji svetovi"
 
-#: client/scripts/screens/start_screen.gd:160
+#: client/scripts/screens/start_screen.gd:230
 msgid "None yet. Create one or join with a code."
 msgstr "Još nijedan. Napravi svet ili se pridruži kodom."
 
-#: client/scripts/screens/start_screen.gd:162
+#: client/scripts/screens/start_screen.gd:232
 msgid "in lobby"
 msgstr "u predvorju"
 
-#: client/scripts/screens/start_screen.gd:166
+#: client/scripts/screens/start_screen.gd:236
 msgid "New world"
 msgstr "Novi svet"
 
-#: client/scripts/screens/start_screen.gd:167
+#: client/scripts/screens/start_screen.gd:237
 msgid "World name"
 msgstr "Ime sveta"
 
-#: client/scripts/screens/start_screen.gd:167
+#: client/scripts/screens/start_screen.gd:237
 msgid "%s's world"
 msgstr "Svet: %s"
 
-#: client/scripts/screens/start_screen.gd:170
+#: client/scripts/screens/start_screen.gd:240
 msgid "%d player"
 msgid_plural "%d players"
 msgstr[0] "%d igrač"
 msgstr[1] "%d igrača"
 msgstr[2] "%d igrača"
 
-#: client/scripts/screens/start_screen.gd:179
+#: client/scripts/screens/start_screen.gd:249
 msgid "Create world"
 msgstr "Napravi svet"
 
-#: client/scripts/screens/start_screen.gd:182
+#: client/scripts/screens/start_screen.gd:252
 msgid "Join a world"
 msgstr "Pridruži se svetu"
 
-#: client/scripts/screens/start_screen.gd:183
+#: client/scripts/screens/start_screen.gd:253
 msgid "Invite code"
 msgstr "Kod pozivnice"
 
-#: client/scripts/screens/start_screen.gd:185
+#: client/scripts/screens/start_screen.gd:255
 msgid "Join"
 msgstr "Pridruži se"
 
-#: client/scripts/screens/start_screen.gd:188
+#: client/scripts/screens/start_screen.gd:258
 msgid "Support and privacy"
 msgstr "Podrška i privatnost"
 
-#: client/scripts/screens/start_screen.gd:193
+#: client/scripts/screens/start_screen.gd:263
 msgid "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."
 msgstr "Slavian čuva što je manje moguće: ime koje izabereš (ili gostujuće ime), tvoje prijavne sesije i stanje svetova u kojima igraš. Nema oglašavanja, praćenja ni deljenja sa trećim stranama. Push obaveštenja koriste token tvog uređaja samo da bi te dosegla. Ono što se čuva o tebi možeš preuzeti i obrisati nalog u svakom trenutku sa ovog ekrana. Brisanje uklanja nalog, njegove sesije, članstva i tokene uređaja."
 
-#: client/scripts/screens/start_screen.gd:207
+#: client/scripts/screens/start_screen.gd:277
 msgid "Could not load the server costs."
 msgstr "Nije moguće učitati troškove servera."
 
-#: client/scripts/screens/start_screen.gd:213
+#: client/scripts/screens/start_screen.gd:283
 msgid "This month (%s): server costs %s, donations %s."
 msgstr "Ovaj mesec (%s): troškovi servera %s, donacije %s."
 
-#: client/scripts/screens/start_screen.gd:222
+#: client/scripts/screens/start_screen.gd:292
 msgid "Carried to next month: %s"
 msgstr "Preneto u sledeći mesec: %s"
 
-#: client/scripts/screens/start_screen.gd:225
+#: client/scripts/screens/start_screen.gd:295
 msgid "Buy me a coffee"
 msgstr "Časti me kafom"
 
-#: client/scripts/screens/start_screen.gd:226
+#: client/scripts/screens/start_screen.gd:296
 msgid "Privacy policy"
 msgstr "Politika privatnosti"
 
-#: client/scripts/screens/start_screen.gd:228
+#: client/scripts/screens/start_screen.gd:298
 msgid "Export my data"
 msgstr "Izvezi moje podatke"
 
-#: client/scripts/screens/start_screen.gd:229
+#: client/scripts/screens/start_screen.gd:299
 msgid "Delete my account"
 msgstr "Obriši moj nalog"
 
-#: client/scripts/screens/start_screen.gd:241
+#: client/scripts/screens/start_screen.gd:311
 msgid "Could not write the export file."
 msgstr "Nije moguće upisati datoteku izvoza."
 
-#: client/scripts/screens/start_screen.gd:245
+#: client/scripts/screens/start_screen.gd:315
 msgid "Your data is saved to %s"
 msgstr "Tvoji podaci su sačuvani u %s"
 
-#: client/scripts/screens/start_screen.gd:251
+#: client/scripts/screens/start_screen.gd:321
 msgid "Tap again to delete your account and all its data."
 msgstr "Dodirni ponovo da obrišeš nalog i sve njegove podatke."
 
-#: client/scripts/screens/start_screen.gd:298
+#: client/scripts/screens/start_screen.gd:368
 msgid "Share it with your group. %d of %d players joined."
 msgstr "Podeli ga sa svojom družinom. Pridružilo se %d od %d igrača."
 
-#: client/scripts/screens/start_screen.gd:300
+#: client/scripts/screens/start_screen.gd:370
 msgid " (host)"
 msgstr " (domaćin)"
 
-#: client/scripts/screens/start_screen.gd:304
+#: client/scripts/screens/start_screen.gd:374
 msgid "Start the world"
 msgstr "Pokreni svet"
 
-#: client/scripts/screens/start_screen.gd:306
+#: client/scripts/screens/start_screen.gd:376
 msgid "Waiting for the host to start…"
 msgstr "Čeka se da domaćin pokrene…"
 
-#: client/scripts/screens/start_screen.gd:322
+#: client/scripts/screens/start_screen.gd:392
 msgid "Your clan: %s"
 msgstr "Tvoj rod: %s"
 

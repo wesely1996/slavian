@@ -97,7 +97,14 @@ Every object is its own file, with no text baked in; words are drawn by code.
   - the walls by material (wood, timber, stone, fortress);
   - four fields in three stages;
   - the empty and locked plots.
-- **Interface:** ten line icons (tinted by the theme), the start picture and the app icon.
+- **Interface:**
+  - ten line icons (tinted by the theme);
+  - the walnut grain (`ui/wood`, PNG from `tools/art/wood.py`);
+  - the start screen's painting (`ui/hero`, imported 1:1) and the old start picture;
+  - the app icon.
+- **Brand:**
+  - `brand/emblem`, `brand/wordmark` and `brand/logo`;
+  - `brand/studio`, the developer's logo, a PNG you add yourself (optional).
 
 ## Still to do with the skill's generation pipeline
 

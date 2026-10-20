@@ -76,6 +76,26 @@ towel (*rushnyk*) that hangs in every Slavic house.
 - **One ornament.** A strip of cross-stitch embroidery (`Rushnyk`: madder
   lozenges and ink hooks on flax) runs under the top band, and nowhere else.
   Everything around it stays plain.
+- **Wood with gold plating** (`PlatedWood`, asked for on review):
+  - The dark wood is real walnut: `ui/wood`, a seamless grain texture that `tools/art/wood.py` makes with numpy.
+  - It is plated in gold: rails along its edges with domed rivets, and chamfered plates at the corners.
+  - Each plate has a cut lozenge, the "sown field" sign of Slavic embroidery, rather than baroque scrollwork.
+  - All of it is lit from the upper left, as vectors over the one texture.
+  - It is used for the top band, the frame of the start screen's sheet, tooltips, and the buttons on the wood (a thin gold rim and small plates).
+- **The logo:**
+  - `brand/emblem` is a gold lozenge framing the Holy City and the Kalinov Bridge at dusk, with the four "seeds" at its points.
+  - `brand/wordmark` is SLAVIAN, its letters cut from Ruslan Display as paths and plated in gold.
+  - `brand/logo` locks the two up over a lozenge rule.
+  - The app icon is the emblem on a dusk tile.
+- **The start screen** fills the screen, with no margins:
+  - The painting (`ui/hero`, Smorodina at dusk with the city and the bridge) holds the logo in its sky.
+  - The sheet sits beside it in landscape and under it on a phone, framed in plated wood with the gold rail where the two meet.
+  - The language and the text size share one row.
+- **The splash** (`scenes/splash.tscn`, the main scene):
+  - It shows the studio's logo, then the game's logo settling in with one pass of light across its gold (`shaders/shine.gdshader`), then the start screen.
+  - A tap, click or key skips it.
+  - Its background matches the engine's boot screen, so the two run on without a flash.
+  - The studio's logo is `brand/studio`: put the PNG (transparent background) at `client/art/brand/night_forge.png` and open the project once so Godot imports it. Until then the splash shows the game's logo alone.
 - **Colour carries side, never decoration.**
 
   | Name | Hex | Job |
