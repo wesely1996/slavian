@@ -624,10 +624,12 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Retrieve:** bring back gear or resources (lost caravans, a smith's hoard).
     - **Explore ruins:** search ancient sites and forgotten ruins in person, faster and with better finds than scouts.
     - Quests appear on the map from the world's seed and from events. A hero away on a quest doesn't lead the garrison, and can come back wounded.
-23. [ ] **How to play:** a guided tutorial for the first run, made to start fast:
-    - short coach marks over the real screens (build, train, claim an outpost, send scouts, read the threat line, send the hero out);
-    - a reward at each step, bigger than the getting-started chain's, for a quick start;
-    - it can be skipped, and played again from the menu. The almanac links each topic.
+23. [ ] **How to play, made visible:** the getting-started chain (step M4 6) exists, but it is easy to miss: it is three plain lines in the map's village panel, and only there. It doesn't show how to do each step, and its reward lands silently in the first village, so it isn't clear there is one or how to get it. Rework it:
+    - **Visible:** a quest card that is always on screen (map and village view) while the chain is open, with the step, its progress ("2 of 6") and the reward in icons. It can be folded away but not lost, and it pulses when a step is ready to claim.
+    - **How:** each step says exactly what to tap, with a **Show me** button that points at the real control (an arrow or highlight over the building plot, the Troops tab, the outpost hex) and walks through it.
+    - **Claim:** a finished step turns into a **Claim** button, and the reward flies into the resource bar with a sound. Nothing is credited silently.
+    - **Quick start:** rewards big enough to speed the first hour, plus a final reward for finishing the chain.
+    - **First run:** a short welcome card says what the run is about (hold out, build the bridge) and points at the quest card. It can be skipped, and played again from the menu. The almanac links each topic.
 24. [ ] **Local single player** (asked for after step 18): a solo world runs entirely in the app, with no calls to the server.
     - **How:** the rules, the scheduler and the battles are ported to GDScript as an in-app local server (`client/scripts/local/`). It answers the same API calls the client makes today, so the screens don't change. Worlds are saved on the device.
     - **Co-op** keeps the TypeScript server. Both sides run the same shared fixtures (`data/fixtures/`), as the hex math already does, so the two rule sets stay in step.
