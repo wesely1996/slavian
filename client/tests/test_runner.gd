@@ -582,6 +582,8 @@ func _test_rivers() -> void:
 	var data := {"field": {"bridge": {"range": 4}}}
 	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0)) == "", "bridge in range")
 	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(5, 0), Vector2i(6, 0)) != "", "bridge out of range")
+	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0), {Vector2i(4, 0): "lake"}) != "", "no bridge onto a lake")
+	_check(RiverText.size_of([0, 0, 1, 0, "none", 3]) == 3 and RiverText.size_of([0, 0, 1, 0, "none"]) == 1, "river size")
 	_check(RiverText.roads_at([[0, 0, 1, 0, "standing"], [0, 1, 0, 0, "building"]], Vector2i(0, 0)) == {Vector2i(1, 0): "standing", Vector2i(0, 1): "building"}, "roads at a hex")
 	var rdata := {"field": {"road": {"range": 4}}, "terrain": {"terrain": {"plains": {"moveCost": 1}, "lake": {"moveCost": null}}}}
 	var rterrain := {Vector2i(0, 0): "plains", Vector2i(1, 0): "plains", Vector2i(0, 1): "lake"}

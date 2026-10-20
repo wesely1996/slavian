@@ -607,11 +607,10 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Start screen:** full-bleed. A dusk painting holds the logo, and the sheet sits beside it (landscape) or under it (phone) in plated wood. Language and text size share one row.
     - **Splash:** the studio's logo (Night Forge, `client/art/brand/night_forge.png`), then the game's logo with one gold shine; it can be skipped.
     - **Town names** (asked for after this step): every town gets a Slavic name of its own (`data/names.json`; old roots and endings once the list runs out), unique in its world, and its owner can rename it. The village panel's header steps through the player's towns with ◀ and ▶. Old towns named "Mila's village 2" are renamed on start.
-19. [ ] **Rivers that make sense** (asked for after step 18):
-    - Every river ends in a lake, the ocean or off the edge of the map, never in a swamp or in the middle of the land.
-    - Rivers can merge: a tributary joins a bigger river and they flow on as one, wider below the meeting point.
-    - No bridge leads onto a lake hex; a crossing needs land on both banks. Roads and hordes route around lakes as they do today.
-    - Fixtures for the mapgen rules on the server; the client draws merged rivers wider below the confluence.
+19. [x] **Rivers that make sense** (asked for after step 18; `sim/mapgen.ts` `layRivers`):
+    - Every river ends where water takes it: at a lake, at the ocean or off the edge of the map. It may run on through the edge belt to get there, and it never ends in a swamp or in the middle of the land.
+    - Rivers merge: a later river that reaches a corner where an older one runs joins it, and rivers are drawn towards each other a little. Each edge has a **size** (1 from the source, +1 for each river joined above; migration 033), and the map draws a river wider below each meeting point.
+    - A river runs only between two land hexes, never along a lake's or the ocean's shore, so no bridge leads onto water. Building a bridge onto a lake or the ocean is refused, for rivers on older maps too.
 20. [ ] **Resources every minute:** production is credited in whole amounts once a minute (the scheduler's catch-up counts whole minutes), and the interface shows rates per minute next to the hourly figure.
 21. [ ] **Hero roster:** at the start of a run each player picks one of several heroes (`data/heroes.json`), for example a warrior prince, a forest huntress, a wise volkhv, a merchant rider and a shieldmaiden. Each has:
     - strengths and weaknesses (stats that differ by hero, such as attack, defense, speed and command);

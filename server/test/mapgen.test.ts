@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { findPath, hex, hexDistance, hexKey, ring, spiral } from '../src/sim/hex.js';
-import { edgeKey, moveCostOn } from '../src/sim/land.js';
-import { activeFrontsFor, frontOf, generateMap, landOfMap, radiusFor, START_RING } from '../src/sim/mapgen.js';
+import { findPath, hex, hexDistance, hexKey, ring, spiral, type Hex } from '../src/sim/hex.js';
+import { commonNeighbors, edgeKey, moveCostOn } from '../src/sim/land.js';
+import { activeFrontsFor, frontOf, generateMap, landOfMap, radiusFor, START_RING, WATER } from '../src/sim/mapgen.js';
 
 const data = loadGameData();
 
@@ -62,6 +62,31 @@ describe('rivers', () => {
       }
       expect(keys.size).toBe(map.rivers.length);
     }
+  });
+
+  it('end in a lake, the ocean, off the map or another river; never along a shore', () => {
+    for (const map of maps) {
+      const type = (h: Hex) => map.terrain.get(hexKey(h));
+      const corners = new Map<string, Hex[][]>();
+      for (const edge of map.rivers) {
+        // A river runs between two land hexes, so no bridge ever leads onto water.
+        for (const end of [edge.a, edge.b]) expect(WATER).not.toContain(type(end));
+        for (const third of commonNeighbors(edge.a, edge.b)) {
+          const key = [edge.a, edge.b, third].map(hexKey).sort().join('/');
+          corners.set(key, [...(corners.get(key) ?? []), [edge.a, edge.b, third]]);
+        }
+      }
+      for (const meeting of corners.values()) {
+        if (meeting.length !== 1) continue;
+        // A loose end: where the river rises in the hills, or its mouth.
+        const [a, b, third] = meeting[0]!;
+        const rises = [a!, b!].some((h) => ['hills', 'mountain'].includes(type(h)!));
+        const mouth = type(third!) === undefined || WATER.includes(type(third!)!);
+        expect(rises || mouth).toBe(true);
+      }
+    }
+    // Somewhere a river joins another, which runs on wider below.
+    expect(maps.some((m) => m.rivers.some((e) => e.size > 1))).toBe(true);
   });
 
   it('can be crossed only at bridges, and every start and front still gets through', () => {

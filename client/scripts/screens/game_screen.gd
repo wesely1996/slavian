@@ -1313,7 +1313,7 @@ func _river_section(cell: Vector2i) -> void:
 		_panel_body.add_child(UI.label(text + tr("no way across. Hordes can't cross either."), UI.SMALL_SIZE, UI.MUTED))
 		if home.is_empty():
 			continue
-		var problem := RiverText.bridge_problem(Game.data, Vector2i(int(home.q), int(home.r)), cell, other)
+		var problem := RiverText.bridge_problem(Game.data, Vector2i(int(home.q), int(home.r)), cell, other, Game.terrain)
 		if problem != "":
 			_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
 			continue

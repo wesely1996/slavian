@@ -1662,13 +1662,17 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     const crossing = (body: object) => call('POST', `/v1/villages/${home.id}/crossings`, mira.token, body);
     expect((await crossing({ a: home, b: { q: home.q + 9, r: home.r } })).body.message).toMatch(/within|No river/);
+    // An old map's river along a lake: no bridge leads onto the water.
+    await db.query("UPDATE hexes SET terrain = 'lake' WHERE world_id = $1 AND q = $2 AND r = $3", [worldId, across.q, across.r]);
+    expect((await crossing({ a: home, b: across })).body.message).toMatch(/both banks/);
+    await db.query('UPDATE hexes SET terrain = $4 WHERE world_id = $1 AND q = $2 AND r = $3', [worldId, across.q, across.r, terrain.get(`${across.q},${across.r}`)]);
     let w = (await crossing({ a: home, b: across })).body;
-    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'building']]);
+    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'building', 1]]);
     expect((await crossing({ a: across, b: home })).body.message).toMatch(/being built/);
     now = new Date(now.getTime() + (scheduler.data.field.bridge.buildSeconds * 1000) / 10);
     await tick(db, now, scheduler);
     w = (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
-    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'standing']]);
+    expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'standing', 1]]);
     // Over the bridge: straight across.
     expect((await hold()).body.army.path).toHaveLength(2);
   });

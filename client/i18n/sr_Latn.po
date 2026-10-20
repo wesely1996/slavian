@@ -863,19 +863,23 @@ msgstr "Potrebna je Akademija nivoa %d."
 msgid "Needs %s first."
 msgstr "Prvo treba završiti %s."
 
-#: client/scripts/game/river_text.gd:30
+#: client/scripts/game/river_text.gd:40
+msgid "A bridge needs land on both banks"
+msgstr "Mostu treba kopno na obe obale"
+
+#: client/scripts/game/river_text.gd:43
 msgid "Bridges go within %d hexes of your village"
 msgstr "Mostovi se postavljaju unutar %d polja od tvog sela"
 
-#: client/scripts/game/river_text.gd:52
+#: client/scripts/game/river_text.gd:65
 msgid "Roads go within %d hexes of your village"
 msgstr "Putevi se postavljaju unutar %d polja od tvog sela"
 
-#: client/scripts/game/river_text.gd:56
+#: client/scripts/game/river_text.gd:69
 msgid "No road can run there"
 msgstr "Tu ne može proći put"
 
-#: client/scripts/game/river_text.gd:59
+#: client/scripts/game/river_text.gd:72
 msgid "A river lies between; build a bridge first"
 msgstr "Između je reka; prvo izgradi most"
 

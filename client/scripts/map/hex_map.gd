@@ -166,11 +166,13 @@ func _draw_river(edge: Array) -> void:
 	if dir < 0:
 		return
 	var ends := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
-	draw_line(ends[0], ends[1], RIVER_BANK, hex_size * 0.2, true)
-	draw_line(ends[0], ends[1], RIVER_COLOR, hex_size * 0.13, true)
-	draw_line(ends[0].lerp(ends[1], 0.15), ends[0].lerp(ends[1], 0.85), RIVER_GLINT, hex_size * 0.03, true)
-	draw_circle(ends[0], hex_size * 0.065, RIVER_COLOR)
-	draw_circle(ends[1], hex_size * 0.065, RIVER_COLOR)
+	# Wider below where rivers meet (edge[5], the size: 1 from the source).
+	var wide := 1.0 + 0.4 * (RiverText.size_of(edge) - 1)
+	draw_line(ends[0], ends[1], RIVER_BANK, hex_size * 0.2 * wide, true)
+	draw_line(ends[0], ends[1], RIVER_COLOR, hex_size * 0.13 * wide, true)
+	draw_line(ends[0].lerp(ends[1], 0.15), ends[0].lerp(ends[1], 0.85), RIVER_GLINT, hex_size * 0.03 * wide, true)
+	draw_circle(ends[0], hex_size * 0.065 * wide, RIVER_COLOR)
+	draw_circle(ends[1], hex_size * 0.065 * wide, RIVER_COLOR)
 	if String(edge[4]) == "none":
 		return
 	var mid: Vector2 = (ends[0] + ends[1]) / 2.0

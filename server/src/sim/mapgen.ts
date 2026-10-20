@@ -12,6 +12,8 @@ export type Front = (typeof FRONTS)[number];
 export const START_RING = 2;
 const EDGE_BELT_WIDTH = 2;
 const MAX_ATTEMPTS = 20;
+// How much lower a river reckons a step towards an older river (it joins it).
+const JOIN_PULL = 0.25;
 
 export interface WorldMap {
   readonly seed: number;
@@ -27,7 +29,12 @@ export interface RiverEdge {
   readonly a: Hex;
   readonly b: Hex;
   readonly bridge: boolean;
+  // 1 for a river from its source; each river that joins above adds 1.
+  readonly size: number;
 }
+
+// Terrain a river flows into and never runs along.
+export const WATER: readonly string[] = ['lake', 'ocean'];
 
 // The land of a map: its terrain, and the river edges without a bridge.
 export function landOfMap(map: Pick<WorldMap, 'terrain' | 'rivers'>): Land {
@@ -106,65 +113,93 @@ function generateCandidate(seed: number, playerCount: number): { map: WorldMap; 
 }
 
 // Rivers run along hex edges, from the hills and mountains downhill (by the
-// elevation of the two hexes on either side) until they reach a lake, a
-// swamp or the edge belt. They keep off the Holy City and each other.
+// elevation of the two hexes on either side). Each ends where water takes it:
+// at a lake or the ocean, off the edge of the map, or in an older river it
+// joins, which runs on wider below the meeting point. A river never runs
+// along a lake's or the ocean's shore, so no bridge leads onto water.
 function layRivers(map: WorldMap, elevation: ReadonlyMap<string, number>, rng: () => number): RiverEdge[] {
   const interior = (h: Hex) => hexDistance(h, hex(0, 0)) <= map.radius - EDGE_BELT_WIDTH;
   const type = (h: Hex) => map.terrain.get(hexKey(h));
+  const water = (h: Hex) => WATER.includes(type(h) ?? '');
+  const onMap = (h: Hex) => map.terrain.has(hexKey(h));
+  // An edge a river may run along: land on both banks, off the Holy City.
+  const bank = (h: Hex) => onMap(h) && !water(h) && type(h) !== 'holy_city';
   const height = (a: Hex, b: Hex) => ((elevation.get(hexKey(a)) ?? 0) + (elevation.get(hexKey(b)) ?? 0)) / 2;
-  const ends = (h: Hex) => !interior(h) || ['lake', 'swamp', 'ocean'].includes(type(h) ?? '');
-  const used = new Set<string>();
+  const corner = (...hs: Hex[]) => hs.map(hexKey).sort().join('/');
+  // Every edge laid so far: the corner it flows into, the edge below it (none
+  // at a mouth) and its size (1 for a stream, +1 for each river above it).
+  const laid = new Map<string, { a: Hex; b: Hex; into: string; down: string | null; size: number }>();
   const sources: [Hex, Hex][] = [];
   for (const cell of spiral(hex(0, 0), map.radius - EDGE_BELT_WIDTH)) {
     if (!['hills', 'mountain'].includes(type(cell) ?? '')) continue;
     for (const n of neighbors(cell)) {
-      if (hexKey(cell) < hexKey(n) && interior(n) && type(n) !== 'holy_city') sources.push([cell, n]);
+      if (hexKey(cell) < hexKey(n) && interior(n) && bank(cell) && bank(n)) sources.push([cell, n]);
     }
   }
-  const out: RiverEdge[] = [];
+  const order: string[] = [];
   const wanted = 2 + Math.floor(map.radius / 6);
-  for (let tries = 0; tries < 40 && out.length < wanted * 8 && sources.length; tries++) {
+  for (let tries = 0; tries < 60 && order.length < wanted * 8 && sources.length; tries++) {
     const [a0, b0] = sources.splice(Math.floor(rng() * sources.length), 1)[0]!;
-    if (used.has(edgeKey(a0, b0))) continue;
+    if (laid.has(edgeKey(a0, b0))) continue;
     // Walk from the lower of the edge's two ends.
     const ends0 = commonNeighbors(a0, b0);
     let [a, b] = [a0, b0];
     let ahead = (elevation.get(hexKey(ends0[0]!)) ?? 0) <= (elevation.get(hexKey(ends0[1]!)) ?? 0) ? ends0[0]! : ends0[1]!;
-    const river: [Hex, Hex][] = [[a, b]];
+    const river: { a: Hex; b: Hex; into: string }[] = [{ a, b, into: corner(a, b, ahead) }];
     const seen = new Set([edgeKey(a, b)]);
-    let reached = false;
-    for (let step = 0; step < map.radius * 3; step++) {
-      if (ends(a) || ends(b)) {
-        reached = true;
+    let mouth: 'water' | 'join' | null = null;
+    let joins: string | null = null;
+    for (let step = 0; step < map.radius * 4; step++) {
+      // The corner ahead lies at water or off the map: the river flows out.
+      if (!onMap(ahead) || water(ahead)) {
+        mouth = 'water';
         break;
       }
-      // At the corner shared by a, b and `ahead`, go on along a-ahead or b-ahead.
+      // An older river leaves this corner: join it.
+      const here = corner(a, b, ahead);
+      const leaving = [edgeKey(a, ahead), edgeKey(b, ahead)].find((k) => laid.has(k) && laid.get(k)!.into !== here);
+      if (leaving) {
+        mouth = 'join';
+        joins = leaving;
+        break;
+      }
+      // Go on along a-ahead or b-ahead, whichever runs lower; water draws
+      // water, so a corner where an older river runs counts as lower still.
       const options = [[a, ahead], [b, ahead]] as [Hex, Hex][];
-      options.sort((x, y) => height(x[0], x[1]) - height(y[0], y[1]) + (rng() - 0.5) * 0.08);
+      const nearRiver = ([p, q]: [Hex, Hex]) =>
+        commonNeighbors(p, q).some((h) => laid.has(edgeKey(p, h)) || laid.has(edgeKey(q, h))) ? JOIN_PULL : 0;
+      const lowness = (x: [Hex, Hex]) => height(x[0], x[1]) - nearRiver(x);
+      options.sort((x, y) => lowness(x) - lowness(y) + (rng() - 0.5) * 0.08);
       let moved = false;
       for (const [p, q] of options) {
         const key = edgeKey(p, q);
-        if (seen.has(key) || used.has(key) || type(p) === 'holy_city' || type(q) === 'holy_city') continue;
+        if (seen.has(key) || laid.has(key) || !bank(p) || !bank(q)) continue;
         const other = p === a ? b : a;
         const next = commonNeighbors(p, q).find((h) => hexKey(h) !== hexKey(other));
-        if (!next || !map.terrain.has(hexKey(next))) continue;
+        if (!next) continue;
         [a, b, ahead] = [p, q, next];
-        river.push([a, b]);
+        river.push({ a, b, into: corner(a, b, ahead) });
         seen.add(key);
         moved = true;
         break;
       }
       if (!moved) break;
     }
-    if (!reached || river.length < 4) continue;
-    for (const [p, q] of river) {
-      used.add(edgeKey(p, q));
-      // A bridge every few edges, so a river is never one long wall.
-      out.push({ a: p, b: q, bridge: (out.length + 2) % 5 === 0 });
+    if (!mouth || river.length < 3) continue;
+    for (const [i, e] of river.entries()) {
+      const key = edgeKey(e.a, e.b);
+      const below = river[i + 1];
+      laid.set(key, { ...e, down: below ? edgeKey(below.a, below.b) : joins, size: 1 });
+      order.push(key);
     }
-    if (out.length >= wanted * 8) break;
+    // Everything below the meeting point carries this river's water too.
+    for (let k = joins; k; k = laid.get(k)!.down) laid.get(k)!.size += 1;
   }
-  return out;
+  return order.map((key, i) => {
+    const e = laid.get(key)!;
+    // A bridge every few edges, so a river is never one long wall.
+    return { a: e.a, b: e.b, bridge: (i + 2) % 5 === 0, size: e.size };
+  });
 }
 
 // Every active front's road to each start and to the Holy City, and each
