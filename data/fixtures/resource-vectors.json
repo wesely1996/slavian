@@ -1,38 +1,160 @@
 {
-  "_comment": "Lazy resource ledger reference cases shared by the server (TypeScript) and client (GDScript) test suites.",
+  "_comment": "Resource ledger reference cases shared by the server (TypeScript) and client (GDScript) test suites. Production is credited once a minute, on each whole minute (UTC) passed since the ledger was settled.",
   "cases": [
     {
       "name": "linear accrual, starvation floor and capacity",
       "ledger": {
-        "amounts": { "wood": 100, "stone": 100, "grain": 100, "iron": 100 },
-        "ratesPerHour": { "wood": 10, "stone": 0, "grain": -20, "iron": 50 },
-        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 200 },
+        "amounts": {
+          "wood": 100,
+          "stone": 100,
+          "grain": 100,
+          "iron": 100
+        },
+        "ratesPerHour": {
+          "wood": 10,
+          "stone": 0,
+          "grain": -20,
+          "iron": 50
+        },
+        "capacity": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 200
+        },
         "settledAt": "2026-01-01T00:00:00.000Z"
       },
       "at": "2026-01-01T02:30:00.000Z",
-      "expected": { "wood": 125, "stone": 100, "grain": 50, "iron": 200 }
+      "expected": {
+        "wood": 125,
+        "stone": 100,
+        "grain": 50,
+        "iron": 200
+      }
     },
     {
       "name": "long idle: capped and floored",
       "ledger": {
-        "amounts": { "wood": 100, "stone": 100, "grain": 100, "iron": 100 },
-        "ratesPerHour": { "wood": 10, "stone": 0, "grain": -20, "iron": 50 },
-        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 200 },
+        "amounts": {
+          "wood": 100,
+          "stone": 100,
+          "grain": 100,
+          "iron": 100
+        },
+        "ratesPerHour": {
+          "wood": 10,
+          "stone": 0,
+          "grain": -20,
+          "iron": 50
+        },
+        "capacity": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 200
+        },
         "settledAt": "2026-01-01T00:00:00.000Z"
       },
       "at": "2026-01-01T10:00:00.000Z",
-      "expected": { "wood": 200, "stone": 100, "grain": 0, "iron": 200 }
+      "expected": {
+        "wood": 200,
+        "stone": 100,
+        "grain": 0,
+        "iron": 200
+      }
     },
     {
       "name": "surplus above capacity is kept, not clamped",
       "ledger": {
-        "amounts": { "wood": 1500, "stone": 0, "grain": 0, "iron": 0 },
-        "ratesPerHour": { "wood": 30, "stone": 36, "grain": 0, "iron": 0 },
-        "capacity": { "wood": 1000, "stone": 1000, "grain": 1000, "iron": 1000 },
+        "amounts": {
+          "wood": 1500,
+          "stone": 0,
+          "grain": 0,
+          "iron": 0
+        },
+        "ratesPerHour": {
+          "wood": 30,
+          "stone": 36,
+          "grain": 0,
+          "iron": 0
+        },
+        "capacity": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 1000
+        },
         "settledAt": "2026-01-01T00:00:00.000Z"
       },
       "at": "2026-01-01T00:10:00.500Z",
-      "expected": { "wood": 1500, "stone": 6.005, "grain": 0, "iron": 0 }
+      "expected": {
+        "wood": 1500,
+        "stone": 6,
+        "grain": 0,
+        "iron": 0
+      }
+    },
+    {
+      "name": "credited on the minute: nothing mid-minute, a whole minute's worth at each minute mark",
+      "ledger": {
+        "amounts": {
+          "wood": 0,
+          "stone": 0,
+          "grain": 60,
+          "iron": 0
+        },
+        "ratesPerHour": {
+          "wood": 600,
+          "stone": 30,
+          "grain": -60,
+          "iron": 0
+        },
+        "capacity": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 1000
+        },
+        "settledAt": "2026-01-01T00:00:40.000Z"
+      },
+      "at": "2026-01-01T00:02:59.000Z",
+      "expected": {
+        "wood": 20,
+        "stone": 1,
+        "grain": 58,
+        "iron": 0
+      }
+    },
+    {
+      "name": "settled mid-minute, read before the next mark",
+      "ledger": {
+        "amounts": {
+          "wood": 5,
+          "stone": 0,
+          "grain": 0,
+          "iron": 0
+        },
+        "ratesPerHour": {
+          "wood": 600,
+          "stone": 0,
+          "grain": 0,
+          "iron": 0
+        },
+        "capacity": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 1000
+        },
+        "settledAt": "2026-01-01T00:00:10.000Z"
+      },
+      "at": "2026-01-01T00:00:59.999Z",
+      "expected": {
+        "wood": 5,
+        "stone": 0,
+        "grain": 0,
+        "iron": 0
+      }
     }
   ]
 }
