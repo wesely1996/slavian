@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "_comment": "Hero quests (PLAN.md M5 step 22). The hero offers `offers` quests at a time, new ones every `refreshHours` game hours. A quest takes the road there and back (`distance` hexes each way at the hero's speed; for ruins, the way to the site) plus `hours` on the spot; the hero then comes home with `xp` (times its heroXp) or, with chance `risk`, wounded. ambush: the next horde from the front sets out `delayHours` later. scout: a full report on the next horde from the front. caravan: `resources` (times 1 + `perLevel` x (level - 1)) to the hero's village. hoard: a piece of gear the hero doesn't have. ruins: the hero searches an unguarded ancient site.",
+  "offers": 3,
+  "refreshHours": 8,
+  "perLevel": 0.1,
+  "kinds": {
+    "ambush": {
+      "name": "Ambush the horde's road",
+      "description": "Fell trees across the road and burn the fords: the next horde from the {front} sets out later.",
+      "hours": 4, "distance": 5, "xp": 40, "risk": 0.25, "delayHours": 6
+    },
+    "scout": {
+      "name": "Ride beyond the border",
+      "description": "Count the next horde from the {front} with your own eyes: its size, its troops and its stance.",
+      "hours": 3, "distance": 6, "xp": 25, "risk": 0.15
+    },
+    "caravan": {
+      "name": "Find the lost caravan",
+      "description": "A merchant's train went missing in the woods. Bring back what is left of it.",
+      "hours": 3, "distance": 4, "xp": 20, "risk": 0.1,
+      "resources": { "wood": 300, "stone": 300, "grain": 300, "iron": 150 }
+    },
+    "hoard": {
+      "name": "The smith's hoard",
+      "description": "An old smith buried his best work under his hearth before the hordes came. Dig it up.",
+      "hours": 5, "distance": 4, "xp": 30, "risk": 0.2
+    },
+    "ruins": {
+      "name": "Search the ruins",
+      "description": "Search the {site} in person: nothing guards it now.",
+      "hours": 4, "distance": 0, "xp": 35, "risk": 0.15
+    }
+  }
+}

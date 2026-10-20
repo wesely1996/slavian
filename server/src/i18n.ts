@@ -79,6 +79,18 @@ const SERBIAN: Record<string, string> = {
 	'{name} is wounded': '{name} je ranjen',
 	'Back on their feet in a few hours.': 'Na nogama za nekoliko sati.',
 	'{name} reached level {level}': '{name} je stigao do nivoa {level}',
+	// Hero quests
+	'{name} is back from: {quest}': '{name} se vratio sa zadatka: {quest}',
+	'{name} came back wounded from: {quest}': '{name} se vratio ranjen sa zadatka: {quest}',
+	'The road lay empty: that horde had already set out.': 'Put je bio prazan: ta horda je već krenula.',
+	'The next horde from the {front} sets out {hours} game hours later.': 'Sledeća horda sa {front} kreće {hours} sati igre kasnije.',
+	"That horde had already set out; the hero saw only its dust.": 'Ta horda je već krenula; junak je video samo njenu prašinu.',
+	'A full report on the next horde from the {front} is in the threats panel.': 'Potpun izveštaj o sledećoj hordi sa {front} je u panelu pretnji.',
+	'Brought back {wood} wood, {stone} stone, {grain} grain and {iron} iron.': 'Doneo je {wood} drveta, {stone} kamena, {grain} žita i {iron} gvožđa.',
+	'The hoard had been dug up already.': 'Blago je već bilo iskopano.',
+	'Found the {item}.': 'Pronašao je: {item}.',
+	'Someone had been there first.': 'Neko je već bio tamo.',
+	'Searched the {site}.': 'Pretražio je: {site}.',
 	'A new skill point to spend.': 'Novi poen veštine za trošenje.',
 	'{leader} has fallen': '{leader} je pao',
 	'{leader} died with the last of the horde after {battles} battles. Another will rise to take their place.':

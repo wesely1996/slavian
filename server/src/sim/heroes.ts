@@ -7,7 +7,7 @@ import { RuleError } from '../errors.js';
 import { createRng } from './rng.js';
 import type { Bonuses } from './research.js';
 
-export type HeroStatus = 'home' | 'traveling' | 'wounded' | 'with_army';
+export type HeroStatus = 'home' | 'traveling' | 'wounded' | 'with_army' | 'questing';
 
 export interface HeroState {
   // Who it is in the roster (null for a hero from before the roster).

@@ -1557,6 +1557,8 @@ func _hero_panel() -> void:
 	if effects != "":
 		_panel_body.add_child(UI.label(tr("Adds where it stands: %s") % effects, UI.SMALL_SIZE, UI.MUTED))
 
+	_quest_section(hero)
+
 	var data: Dictionary = Game.data.heroes
 	for branch in data.branches:
 		_panel_body.add_child(UI.label(tr(data.branches[branch]), UI.HEADING_SIZE))
@@ -1617,6 +1619,48 @@ func _hero_panel() -> void:
 	var name_edit := UI.line_edit(tr("New name"), hero.name)
 	_panel_body.add_child(name_edit)
 	_panel_body.add_child(UI.button(tr("Rename"), func() -> void: _hero_action("rename", {"name": name_edit.text.strip_edges()})))
+
+
+## The quests the hero is offered, or the one it is on.
+func _quest_section(hero: Dictionary) -> void:
+	_panel_body.add_child(UI.label(tr("Quests"), UI.HEADING_SIZE))
+	var kinds: Dictionary = Game.data.get("quests", {}).get("kinds", {})
+	if hero.status == "questing" and hero.get("quest") is Dictionary:
+		var quest: Dictionary = hero.quest
+		_panel_body.add_child(UI.label(tr(kinds.get(String(quest.kind), {}).get("name", "")), 0, UI.ACCENT))
+		_panel_body.add_child(UI.label(HeroText.quest_description(Game.data, quest, _site_name(quest.get("siteId"))), UI.SMALL_SIZE, UI.MUTED))
+		var back := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(back)
+		_tick(back, func() -> String: return tr("Back in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(String(quest.returnsAt)) - Game.server_now()))
+		return
+	var offers: Array = hero.get("offers", [])
+	if offers.is_empty():
+		_panel_body.add_child(UI.label(tr("No quests while the hero is away, wounded or leading an army."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	_panel_body.add_child(UI.label(tr("The hero rides out alone: no garrison to lead while away, and a chance to come back wounded. New quests every few hours."), UI.SMALL_SIZE, UI.MUTED))
+	for offer in offers:
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label(tr(kinds.get(String(offer.kind), {}).get("name", ""))))
+		info.add_child(UI.label(HeroText.quest_description(Game.data, offer, _site_name(offer.get("siteId"))), UI.SMALL_SIZE, UI.MUTED))
+		info.add_child(UI.label(HeroText.quest_terms(offer, float(Game.world.get("speed", 1))), UI.SMALL_SIZE))
+		row.add_child(info)
+		var go := UI.primary(tr("Set out"), func() -> void: _hero_action("quest", {"offer": String(offer.id)}))
+		go.disabled = hero.status != "home"
+		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(go)
+		_panel_body.add_child(row)
+
+
+## The name of an ancient site by its id ("" if unknown).
+func _site_name(site_id: Variant) -> String:
+	if site_id == null:
+		return ""
+	for site in Game.sites:
+		if int(site.id) == int(site_id):
+			return tr(Game.data.get("sites", {}).get("kinds", {}).get(String(site.kind), {}).get("name", ""))
+	return ""
 
 
 func _hero_action(action: String, body: Dictionary) -> void:

@@ -587,6 +587,10 @@ func _test_rivers() -> void:
 	_check(HeroText.roster_ids(hdata) == ["volkh"] and HeroText.roster_title(hdata, "volkh") == "Volkh, the wise volkhv", "roster hero title")
 	_check(HeroText.roster_title(hdata, null) == "No hero yet" and HeroText.roster(hdata, "nobody").is_empty(), "no roster hero")
 	_check(HeroText.roster_traits(hdata, "volkh")[0] == "Healing rites: Heals. (−50% time wounded)", "roster traits")
+	var qdata := {"quests": {"kinds": {"ambush": {"description": "The next horde from the {front} sets out later."}, "ruins": {"description": "Search the {site}."}}}}
+	_check(HeroText.quest_description(qdata, {"kind": "ambush", "front": "north"}) == "The next horde from the north sets out later.", "quest front")
+	_check(HeroText.quest_description(qdata, {"kind": "ruins", "front": null}, "Kurgan") == "Search the Kurgan.", "quest site")
+	_check(HeroText.quest_terms({"hours": 4.0, "risk": 0.25, "xp": 40}, 1.0).ends_with("· 25% risk · +40 XP"), "quest terms")
 	_check(RiverText.size_of([0, 0, 1, 0, "none", 3]) == 3 and RiverText.size_of([0, 0, 1, 0, "none"]) == 1, "river size")
 	_check(RiverText.roads_at([[0, 0, 1, 0, "standing"], [0, 1, 0, 0, "building"]], Vector2i(0, 0)) == {Vector2i(1, 0): "standing", Vector2i(0, 1): "building"}, "roads at a hex")
 	var rdata := {"field": {"road": {"range": 4}}, "terrain": {"terrain": {"plains": {"moveCost": 1}, "lake": {"moveCost": null}}}}

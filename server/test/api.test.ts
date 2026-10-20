@@ -10,7 +10,7 @@ import { tick } from '../src/scheduler/worker.js';
 import { pushPending } from '../src/push/worker.js';
 import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
-import { rosterBonuses } from '../src/sim/heroes.js';
+import { gainXp, newHero, rosterBonuses } from '../src/sim/heroes.js';
 import { roadRoute } from '../src/sim/logistics.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
@@ -1659,6 +1659,53 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.bridge.stage).toBe(before + 1);
     expect(w.sites).toHaveLength(started.sites.length + 1);
     expect(w.sites.filter((x: { status: string }) => x.status === 'unexplored')).toHaveLength(1);
+  });
+
+  it('sends the hero on quests: an ambush holds a horde back, a ride out brings a report', async () => {
+    const zora = await guest('Zora');
+    const created = await call('POST', '/v1/worlds', zora.token, { name: 'Quests', maxPlayers: 1, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('PUT', `/v1/worlds/${worldId}/hero`, zora.token, { kind: 'dobrynya' });
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, zora.token)).body;
+    const offers = started.heroes[0].offers as { id: string; kind: string; front: string; hours: number }[];
+    expect(offers.length).toBe(scheduler.data.quests.offers);
+    const slot = offers[0]!.id.split(':')[0];
+    // Leave only the ambush and the ride out on offer.
+    await db.query(`UPDATE heroes SET quests_done = $2 WHERE world_id = $1`, [worldId, JSON.stringify(['caravan', 'hoard', 'ruins'].map((k) => `${slot}:${k}`))]);
+    const quest = (path: string, body: object) => call('POST', `/v1/worlds/${worldId}/hero/${path}`, zora.token, body);
+    let hero = (await quest('rename', { name: 'Dobrynya' })).body.hero;
+    expect(hero.offers.map((o: { kind: string }) => o.kind).sort()).toEqual(['ambush', 'scout']);
+    expect((await quest('quest', { offer: `${slot}:caravan` })).body.message).toMatch(/no longer on offer/);
+
+    // The ambush: the next horde of its front sets out later.
+    const ambush = hero.offers.find((o: { kind: string }) => o.kind === 'ambush');
+    const before = started.waves.find((w: { front: string; status: string }) => w.front === ambush.front && w.status === 'scheduled');
+    hero = (await quest('quest', { offer: ambush.id })).body.hero;
+    expect(hero).toMatchObject({ status: 'questing', quest: { kind: 'ambush' } });
+    expect((await quest('move', { villageId: started.villages[0].id })).body.message).toMatch(/away on a quest/);
+    expect((await quest('quest', { offer: ambush.id })).body.message).toMatch(/at home/);
+    now = new Date(hero.quest.returnsAt);
+    await tick(db, now, scheduler);
+    let w = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const delayed = w.waves.find((x: { id: number }) => x.id === before.id);
+    const delayMs = (scheduler.data.quests.kinds.ambush.delayHours! * 3_600_000) / 10;
+    expect(new Date(delayed.spawnAt).getTime() - new Date(before.spawnAt).getTime()).toBe(delayMs);
+    expect(['home', 'wounded']).toContain(w.heroes[0].status);
+    const grown = gainXp(scheduler.data, newHero(scheduler.data, 'dobrynya'), scheduler.data.quests.kinds.ambush.xp);
+    expect(w.heroes[0]).toMatchObject({ level: grown.level, xp: grown.xp });
+    expect(w.heroes[0].quest).toBeNull();
+
+    // Ride out: a full report on the next horde of its front.
+    await db.query(`UPDATE heroes SET status = 'home', wounded_until = NULL WHERE world_id = $1`, [worldId]);
+    hero = (await quest('rename', { name: 'Dobrynya' })).body.hero;
+    const scout = hero.offers.find((o: { kind: string }) => o.kind === 'scout');
+    hero = (await quest('quest', { offer: scout.id })).body.hero;
+    now = new Date(hero.quest.returnsAt);
+    await tick(db, now, scheduler);
+    w = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
+    const reported = w.scouting.find((m: { report: { tier: string } | null }) => m.report);
+    expect(reported.report.tier).toBe('exact');
+    expect(w.heroes[0].offers.some((o: { id: string }) => o.id === scout.id)).toBe(false);
   });
 
   it('keeps armies to bridges over rivers, and lets players build more', async () => {

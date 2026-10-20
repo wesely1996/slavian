@@ -6,10 +6,10 @@ import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
-import { heroWithArmy, loadHero, saveHero } from '../db/heroes.js';
+import { heroWithArmy, loadHero, saveHero, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
-import { addScroll, listScrolls, listSites, loadSite, markExplored, saveGuardians, siteAt, insertSites } from '../db/sites.js';
+import { addScroll, listScrolls, listSites, loadSite, markExplored, saveGuardians, siteAt, insertSites, type Site } from '../db/sites.js';
 import { listVillages, loadVillage } from '../db/villages.js';
 import { addEmbers, listMembers, loadHexes, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
@@ -152,6 +152,44 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
+// What a search turned up, besides resources (the searcher's to carry home):
+// Ember for the world, gear for the hero, a scroll for the whole group. The
+// site is marked explored and everyone hears of it.
+export async function claimFind(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  site: Site,
+  accountId: number | null,
+  hero: Hero | null,
+  find: Find,
+  at: Date,
+): Promise<void> {
+  if (find.type === 'ember') await addEmbers(client, world.id, 1);
+  if (find.type === 'gear' && hero) {
+    await saveHero(client, { ...hero, inventory: [...hero.inventory, find.item] });
+    await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  }
+  if (find.type === 'scroll') {
+    await addScroll(client, world.id, { scroll: find.scroll, accountId, siteId: site.id, foundAt: at });
+    const members = (await listMembers(client, world.id)).map((m) => m.accountId);
+    await refreshBonuses(client, data, world, members, at);
+    await notifyWorld(client, { worldId: world.id, type: 'research' });
+  }
+  await markExplored(client, site.id, accountId, find, at);
+  await bridgeQuest(client, data, world, 'site', at);
+  const name = data.sites.kinds[site.kind]?.name ?? 'site';
+  for (const member of await listMembers(client, world.id)) {
+    await tell(client, world, member.accountId, {
+      kind: 'site',
+      tier: find.type === 'scroll' && member.accountId !== accountId ? 'push' : 'digest',
+      title: 'The {name} at ({q}, {r}) gave up {find}',
+      body: find.type === 'scroll' ? data.lore.scrolls[find.scroll]?.description ?? '' : 'Explored and done.',
+      vars: { name, q: site.q, r: site.r, find: findText(data, find) },
+    }, at);
+  }
+}
+
 export const siteHandlers: HandlerRegistry = {
   async site_explored({ client, data, world }, event) {
     const payload = explorePayload.parse(event.payload);
@@ -174,31 +212,9 @@ export const siteHandlers: HandlerRegistry = {
     });
     let after = army;
     if (find.type === 'resources') after = { ...army, loot: find.resources };
-    if (find.type === 'ember') await addEmbers(client, world.id, 1);
-    if (find.type === 'gear' && ownerHero) {
-      await saveHero(client, { ...ownerHero, inventory: [...ownerHero.inventory, find.item] });
-      await notifyWorld(client, { worldId: world.id, type: 'heroes' });
-    }
-    if (find.type === 'scroll') {
-      await addScroll(client, world.id, { scroll: find.scroll, accountId: army.ownerAccountId, siteId: site.id, foundAt: event.dueAt });
-      const members = (await listMembers(client, world.id)).map((m) => m.accountId);
-      await refreshBonuses(client, data, world, members, event.dueAt);
-      await notifyWorld(client, { worldId: world.id, type: 'research' });
-    }
-    await markExplored(client, site.id, army.ownerAccountId, find, event.dueAt);
-    await bridgeQuest(client, data, world, 'site', event.dueAt);
+    await claimFind(client, data, world, site, army.ownerAccountId, ownerHero, find, event.dueAt);
     if (after !== army) await saveArmy(client, after);
     await sendHome(client, world, after, event.dueAt, data);
-    const name = data.sites.kinds[site.kind]?.name ?? 'site';
-    for (const member of await listMembers(client, world.id)) {
-      await tell(client, world, member.accountId, {
-        kind: 'site',
-        tier: find.type === 'scroll' && member.accountId !== army.ownerAccountId ? 'push' : 'digest',
-        title: 'The {name} at ({q}, {r}) gave up {find}',
-        body: find.type === 'scroll' ? data.lore.scrolls[find.scroll]?.description ?? '' : 'Explored and done.',
-        vars: { name, q: site.q, r: site.r, find: findText(data, find) },
-      }, event.dueAt);
-    }
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },

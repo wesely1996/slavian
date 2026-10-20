@@ -8,6 +8,7 @@ import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { HeroPayload } from '../scheduler/heroes.js';
+import { startQuest } from '../scheduler/quests.js';
 import { withWorld } from '../scheduler/world.js';
 import { equip, heroFactor, learnSkill, unequip } from '../sim/heroes.js';
 import { hex } from '../sim/hex.js';
@@ -36,6 +37,11 @@ async function heroCommand(
   });
 }
 
+// Sends the hero on one of the quests it is offered.
+export async function startQuestCommand(db: Db, deps: SchedulerDeps, input: HeroCommandInput & { offer: string }): Promise<Hero> {
+  return heroCommand(db, deps, input, ({ client, world, hero }) => startQuest(client, deps.data, world, hero, input.offer, input.now));
+}
+
 // Sends the hero to another of the caller's villages.
 export async function moveHeroCommand(
   db: Db,
@@ -46,6 +52,7 @@ export async function moveHeroCommand(
     if (hero.status === 'wounded') throw new RuleError(`${hero.name} is wounded`);
     if (hero.status === 'traveling') throw new RuleError(`${hero.name} is already on the road`);
     if (hero.status === 'with_army') throw new RuleError(`${hero.name} is leading an army`);
+    if (hero.status === 'questing') throw new RuleError(`${hero.name} is away on a quest`);
     if (hero.villageId === input.villageId) throw new RuleError(`${hero.name} is already there`);
     const destination = await loadVillage(client, input.villageId).catch(() => null);
     if (!destination || destination.worldId !== world.id || destination.ownerAccountId !== input.accountId) {

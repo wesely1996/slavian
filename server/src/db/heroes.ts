@@ -3,6 +3,7 @@ import { NotFoundError } from '../errors.js';
 import { combine, freeHeroKind, heroBonuses, newHero, type HeroState, type HeroStatus } from '../sim/heroes.js';
 import type { Bonuses } from '../sim/research.js';
 import type { PathStep } from '../sim/waves.js';
+import type { QuestOffer } from '../sim/quests.js';
 import type { DbClient } from './pool.js';
 
 export interface Hero extends HeroState {
@@ -16,6 +17,10 @@ export interface Hero extends HeroState {
   woundedUntil: Date | null;
   // Leading this army (status 'with_army').
   armyId: number | null;
+  // The quest it is on (status 'questing'), with when it set out and returns.
+  quest: (QuestOffer & { departsAt: string; returnsAt: string }) | null;
+  // Offers it already went on.
+  questsDone: string[];
 }
 
 interface HeroRow {
@@ -36,6 +41,8 @@ interface HeroRow {
   arrives_at: Date | null;
   wounded_until: Date | null;
   army_id: number | null;
+  quest: Hero['quest'];
+  quests_done: string[];
 }
 
 // Heroes with who they are in the roster (their member's pick).
@@ -60,6 +67,8 @@ function fromRow(row: HeroRow): Hero {
     arrivesAt: row.arrives_at,
     woundedUntil: row.wounded_until,
     armyId: row.army_id,
+    quest: row.quest,
+    questsDone: row.quests_done,
   };
 }
 
@@ -138,7 +147,8 @@ export async function listHeroes(client: DbClient, worldId: number): Promise<Her
 export async function saveHero(client: DbClient, hero: Hero): Promise<void> {
   await client.query(
     `UPDATE heroes SET name = $3, status = $4, village_id = $5, level = $6, xp = $7, skill_points = $8, skills = $9,
-       gear = $10, inventory = $11, path = $12, departs_at = $13, arrives_at = $14, wounded_until = $15, army_id = $16
+       gear = $10, inventory = $11, path = $12, departs_at = $13, arrives_at = $14, wounded_until = $15, army_id = $16,
+       quest = $17, quests_done = $18
      WHERE world_id = $1 AND account_id = $2`,
     [
       hero.worldId,
@@ -157,6 +167,8 @@ export async function saveHero(client: DbClient, hero: Hero): Promise<void> {
       hero.arrivesAt,
       hero.woundedUntil,
       hero.armyId,
+      hero.quest ? JSON.stringify(hero.quest) : null,
+      JSON.stringify(hero.questsDone),
     ],
   );
 }

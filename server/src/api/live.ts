@@ -125,7 +125,7 @@ export class LiveHub {
           return { type: 'orders', worldId: event.worldId, orders: await ordersView(client, event.worldId), serverTime };
         }
         if (event.type === 'heroes') {
-          return { type: 'heroes', worldId: event.worldId, heroes: await heroesView(client, this.data, event.worldId), serverTime };
+          return { type: 'heroes', worldId: event.worldId, heroes: await heroesView(client, this.data, event.worldId, this.clock()), serverTime };
         }
         if (event.type === 'research') {
           return { type: 'research', worldId: event.worldId, research: await researchListView(client, event.worldId), serverTime };
