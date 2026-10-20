@@ -351,6 +351,8 @@ export async function researchListView(client: DbClient, worldId: number) {
 export function heroView(data: GameData, hero: Hero) {
   return {
     accountId: hero.accountId,
+    // Who it is in the roster (data/heroes.json), for its portrait and traits.
+    kind: hero.kind,
     name: hero.name,
     status: hero.status,
     // Where it stands (or, travelling, where it is heading).
@@ -522,7 +524,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
         };
   return {
     ...worldSummary(world),
-    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, onboarding: m.onboarding })),
+    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, heroKind: m.heroKind, onboarding: m.onboarding })),
     villages: villages.map(villageView),
     waves,
     scouting,

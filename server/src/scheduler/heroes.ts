@@ -6,7 +6,7 @@ import { loadHero, saveHero, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import type { World } from '../db/worlds.js';
-import { gainXp, rollDrop, woundMs } from '../sim/heroes.js';
+import { gainXp, heroFactor, rollDrop, woundMs } from '../sim/heroes.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
@@ -22,12 +22,12 @@ export async function heroAfterBattle(
   hero: Hero,
   result: { kills: number; won: boolean; battleId: number; at: Date },
 ): Promise<void> {
-  let next: Hero = { ...hero, ...gainXp(data, hero, result.kills) };
+  let next: Hero = { ...hero, ...gainXp(data, hero, result.kills * heroFactor(data, hero.kind, 'heroXp')) };
   if (result.won) {
     const item = rollDrop(data, next, world.seed, result.battleId);
     if (item) next = { ...next, inventory: [...next.inventory, item] };
   } else {
-    const woundedUntil = new Date(result.at.getTime() + woundMs(data, world.speed));
+    const woundedUntil = new Date(result.at.getTime() + woundMs(data, world.speed, hero.kind));
     next = { ...next, status: 'wounded', woundedUntil };
     const payload: HeroPayload = { accountId: hero.accountId };
     await scheduleEvent(client, world.id, woundedUntil, 'hero_recover', payload);

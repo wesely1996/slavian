@@ -9,7 +9,7 @@ import { RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { HeroPayload } from '../scheduler/heroes.js';
 import { withWorld } from '../scheduler/world.js';
-import { equip, learnSkill, unequip } from '../sim/heroes.js';
+import { equip, heroFactor, learnSkill, unequip } from '../sim/heroes.js';
 import { hex } from '../sim/hex.js';
 import { roadRoute } from '../sim/logistics.js';
 
@@ -55,7 +55,7 @@ export async function moveHeroCommand(
     if (!from) throw new RuleError(`${hero.name} has no village to leave from`);
     if (from.state.besieged) throw new RuleError(`${hero.name} won't leave ${from.name} in the middle of a battle`);
     const terrain = await loadLand(client, world.id);
-    const path = roadRoute(deps.data, terrain, hex(from.q, from.r), hex(destination.q, destination.r), deps.data.heroes.speed, world.speed);
+    const path = roadRoute(deps.data, terrain, hex(from.q, from.r), hex(destination.q, destination.r), deps.data.heroes.speed * heroFactor(deps.data, hero.kind, 'heroSpeed'), world.speed);
     const arrivesAt = new Date(input.now.getTime() + path.at(-1)!.atMs);
     const payload: HeroPayload = { accountId: input.accountId };
     await scheduleEvent(client, world.id, arrivesAt, 'hero_arrive', payload);

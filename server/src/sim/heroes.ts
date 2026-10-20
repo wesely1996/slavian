@@ -1,5 +1,7 @@
-// Heroes: one per player, leading the garrison of the village they stand
-// in. Skills and gear use the same effect keys as research.
+// Heroes: one per player, picked from the roster (data/heroes.json), leading
+// the garrison of the village they stand in. Skills and gear use the same
+// effect keys as research and count where the hero stands; the roster hero's
+// strengths, weaknesses and traits count in all of the player's villages.
 import type { GameData, HeroSlot } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { createRng } from './rng.js';
@@ -8,6 +10,8 @@ import type { Bonuses } from './research.js';
 export type HeroStatus = 'home' | 'traveling' | 'wounded' | 'with_army';
 
 export interface HeroState {
+  // Who it is in the roster (null for a hero from before the roster).
+  readonly kind: string | null;
   readonly name: string;
   readonly level: number;
   readonly xp: number;
@@ -17,10 +21,29 @@ export interface HeroState {
   readonly inventory: readonly string[];
 }
 
-export function newHero(data: GameData, seed: number, accountId: number): HeroState {
-  const names = data.heroes.names;
-  const name = names[Math.floor(createRng((seed ^ Math.imul(accountId + 1, 0x9e3779b1)) >>> 0)() * names.length)]!;
-  return { name, level: 1, xp: 0, skillPoints: 0, skills: {}, gear: {}, inventory: [] };
+export function newHero(data: GameData, kind: string): HeroState {
+  const name = data.heroes.roster[kind]?.name ?? kind;
+  return { kind, name, level: 1, xp: 0, skillPoints: 0, skills: {}, gear: {}, inventory: [] };
+}
+
+// The first roster hero nobody in `taken` has (null: none left), for a
+// player who didn't pick one.
+export function freeHeroKind(data: GameData, taken: Iterable<string | null>): string | null {
+  const used = new Set(taken);
+  return Object.keys(data.heroes.roster).find((kind) => !used.has(kind)) ?? null;
+}
+
+// The roster hero's strengths and weaknesses plus its traits.
+export function rosterBonuses(data: GameData, kind: string | null): Record<string, number> {
+  const def = kind ? data.heroes.roster[kind] : undefined;
+  if (!def) return {};
+  return [def.effects, ...def.traits.map((t) => t.effects)].reduce<Record<string, number>>((sum, effects) => combine(sum, effects), {});
+}
+
+// 1 + a hero-only effect of the roster hero (heroSpeed, heroXp, woundTime),
+// never below a tenth.
+export function heroFactor(data: GameData, kind: string | null, key: 'heroSpeed' | 'heroXp' | 'woundTime'): number {
+  return Math.max(0.1, 1 + (rosterBonuses(data, kind)[key] ?? 0));
 }
 
 // XP needed to go from `level` to the next.
@@ -96,6 +119,6 @@ export function rollDrop(data: GameData, hero: HeroState, seed: number, battleId
   return candidates[Math.floor(rng() * candidates.length)]!;
 }
 
-export function woundMs(data: GameData, worldSpeed: number): number {
-  return Math.round((data.heroes.woundHours * 3_600_000) / worldSpeed);
+export function woundMs(data: GameData, worldSpeed: number, kind: string | null = null): number {
+  return Math.round((data.heroes.woundHours * 3_600_000 * heroFactor(data, kind, 'woundTime')) / worldSpeed);
 }
