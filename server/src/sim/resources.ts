@@ -1,6 +1,9 @@
 // Lazy resource ledger: amounts are stored together with the time they were
 // last settled and the current rates. The current amount is computed when
 // read; it is written back only when rates change or resources are spent.
+// Production is credited once a minute: a minute's worth at every whole
+// minute (UTC) passed since the ledger was settled, so settling never gains
+// or loses anything.
 
 export const RESOURCE_KINDS = ['wood', 'stone', 'grain', 'iron'] as const;
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
@@ -13,7 +16,12 @@ export interface ResourceLedger {
   readonly settledAt: Date;
 }
 
-const MS_PER_HOUR = 3_600_000;
+const MS_PER_MINUTE = 60_000;
+
+// Whole minute marks passed between two times.
+export function minutesBetween(from: Date, to: Date): number {
+  return Math.floor(to.getTime() / MS_PER_MINUTE) - Math.floor(from.getTime() / MS_PER_MINUTE);
+}
 
 export function emptyResources(): Resources {
   return { wood: 0, stone: 0, grain: 0, iron: 0 };
@@ -36,8 +44,8 @@ export class InsufficientResourcesError extends Error {
 }
 
 export function amountsAt(ledger: ResourceLedger, at: Date): Resources {
-  const hours = (at.getTime() - ledger.settledAt.getTime()) / MS_PER_HOUR;
-  if (hours < 0) throw new TimeTravelError(ledger.settledAt, at);
+  if (at.getTime() < ledger.settledAt.getTime()) throw new TimeTravelError(ledger.settledAt, at);
+  const hours = minutesBetween(ledger.settledAt, at) / 60;
   return mapResources((kind) => {
     const amount = ledger.amounts[kind];
     const rate = ledger.ratesPerHour[kind];

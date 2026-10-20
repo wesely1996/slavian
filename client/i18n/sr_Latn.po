@@ -1103,9 +1103,13 @@ msgstr "Bedemi izdržavaju: ostalo je %d od %d."
 msgid "%s (%s): %s"
 msgstr "%s (%s): %s"
 
+#: client/scripts/screens/game_screen.gd:166
+msgid "%s: %s an hour, credited every minute (next in %ds)"
+msgstr "%s: %s na sat, pristiže svakog minuta (sledeće za %ds)"
+
 #: client/scripts/screens/game_screen.gd:167
-msgid "%s/h"
-msgstr "%s/h"
+msgid "%s/min"
+msgstr "%s/min"
 
 #: client/scripts/screens/game_screen.gd:207
 msgid "Worlds"

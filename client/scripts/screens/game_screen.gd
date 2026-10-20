@@ -163,8 +163,8 @@ func _process(delta: float) -> void:
 			var rate: float = home.resources.ratesPerHour[kind]
 			var label := _resource_labels[kind]
 			label.text = str(int(amounts[kind]))
-			label.tooltip_text = UI.resource_name(kind)
-			_rate_labels[kind].text = tr("%s/h") % UI.signed(rate)
+			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %ds)") % [UI.resource_name(kind), UI.signed(rate), Ledger.seconds_to_next(Game.server_now())]
+			_rate_labels[kind].text = tr("%s/min") % UI.signed(rate / 60.0)
 			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
