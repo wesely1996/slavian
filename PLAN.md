@@ -31,7 +31,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | Q1 | Group | 2–6 players per world, solo allowed. Invite-code only, no public lobbies. |
 | Q2 | World | Fixed-length **run** (~6 weeks target), ends in win or loss. A new world with a new seed afterwards. |
 | Q3 | Time | Real wall-clock timers, server-authoritative simulation. |
-| Q4 | Connectivity | Co-op worlds are online (the server). Single player runs entirely on the device, with no server calls (M5 step 19). |
+| Q4 | Connectivity | Co-op worlds are online (the server). Single player runs entirely on the device, with no server calls (M5 step 24). |
 | Q5 | Stack | **Godot 4** client, **Node + TypeScript + PostgreSQL** server, game rules as shared JSON data. |
 | Q6 | Money | **No monetization.** A "Buy me a coffee" button and a monthly server-cost slider (surplus carries over to the next month). |
 | Q7 | Team | Solo developer. First milestone is a vertical slice for 2 players. |
@@ -52,7 +52,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | Q22 | Tactics | Stance + field setup. Enemy stances hidden until scouted. Visible matchup table. |
 | Q23 | Check-ins | Order queues limited by **order count per village** (grows with village size), standing orders, smart notifications + daily digest, teammate delegation. |
 | Q24 | Clans | 6 animal-named clans in Interslavic. Duplicates allowed. Each has some (not all) of: best resource, unique unit, unique building, bonus, weakness. |
-| Q25 | Heroes | One per player, leads one army, skill tree, gear from sites, wounded instead of killed. |
+| Q25 | Heroes | One per player, picked from a roster of heroes with their own strengths, weaknesses, traits and portraits (step 21); leads one army, goes on quests (step 22), skill tree, gear from sites, wounded instead of killed. |
 | Q26 | Research | Per-player tree (~30 techs) + **lore scrolls** from sites for rare techs and group boosts. |
 | Q27 | Endgame | **Kalinov Bridge** in 5 stages (resources + quests). The final stage triggers **Ritual Night**: all active fronts attack at once. Survive it to win. |
 | Q28 | Difficulty | Waves scale with **group power** (villages, armies, bridge progress) + player count, with floors. Presets: Story, Normal, Hard, Nightmare. |
@@ -607,12 +607,41 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Start screen:** full-bleed. A dusk painting holds the logo, and the sheet sits beside it (landscape) or under it (phone) in plated wood. Language and text size share one row.
     - **Splash:** the studio's logo (Night Forge, `client/art/brand/night_forge.png`), then the game's logo with one gold shine; it can be skipped.
     - **Town names** (asked for after this step): every town gets a Slavic name of its own (`data/names.json`; old roots and endings once the list runs out), unique in its world, and its owner can rename it. The village panel's header steps through the player's towns with ◀ and ▶. Old towns named "Mila's village 2" are renamed on start.
-19. [ ] **Local single player** (asked for after step 18): a solo world runs entirely in the app, with no calls to the server.
+19. [ ] **Rivers that make sense** (asked for after step 18):
+    - Every river ends in a lake, the ocean or off the edge of the map, never in a swamp or in the middle of the land.
+    - Rivers can merge: a tributary joins a bigger river and they flow on as one, wider below the meeting point.
+    - No bridge leads onto a lake hex; a crossing needs land on both banks. Roads and hordes route around lakes as they do today.
+    - Fixtures for the mapgen rules on the server; the client draws merged rivers wider below the confluence.
+20. [ ] **Resources every minute:** production is credited in whole amounts once a minute (the scheduler's catch-up counts whole minutes), and the interface shows rates per minute next to the hourly figure.
+21. [ ] **Hero roster:** at the start of a run each player picks one of several heroes (`data/heroes.json`), for example a warrior prince, a forest huntress, a wise volkhv, a merchant rider and a shieldmaiden. Each has:
+    - strengths and weaknesses (stats that differ by hero, such as attack, defense, speed and command);
+    - one or two special traits or abilities of their own (a rallying cry, tracking that reveals hordes earlier, rites that heal the wounded, better trade);
+    - a painted portrait (art ids `hero/<id>`), shown in the pick screen, the hero panel and battle reports.
+    - Heroes in the same group are different heroes.
+22. [ ] **Hero quests:** the hero can head out on quests that take real time, with risk and experience:
+    - **Delay the enemy:** ambush a horde's road or burn its camp, so the next wave sets out later.
+    - **Reveal:** scout a front far ahead and learn the next waves' size and makeup.
+    - **Retrieve:** bring back gear or resources (lost caravans, a smith's hoard).
+    - **Explore ruins:** search ancient sites and forgotten ruins in person, faster and with better finds than scouts.
+    - Quests appear on the map from the world's seed and from events. A hero away on a quest doesn't lead the garrison, and can come back wounded.
+23. [ ] **How to play:** a guided tutorial for the first run, made to start fast:
+    - short coach marks over the real screens (build, train, claim an outpost, send scouts, read the threat line, send the hero out);
+    - a reward at each step, bigger than the getting-started chain's, for a quick start;
+    - it can be skipped, and played again from the menu. The almanac links each topic.
+24. [ ] **Local single player** (asked for after step 18): a solo world runs entirely in the app, with no calls to the server.
     - **How:** the rules, the scheduler and the battles are ported to GDScript as an in-app local server (`client/scripts/local/`). It answers the same API calls the client makes today, so the screens don't change. Worlds are saved on the device.
     - **Co-op** keeps the TypeScript server. Both sides run the same shared fixtures (`data/fixtures/`), as the hex math already does, so the two rule sets stay in step.
     - **Order:** data and the sim core (resources, building, training), then the scheduler and catch-up, waves, hordes and battles, then the rest (outposts, caravans, research, heroes, sites, the bridge), each with its fixtures.
-20. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
-21. [ ] **Closed test:** friends play a full run; fix what they find.
+25. [ ] **Main menu rework:** research game UI design first: menus of strong mobile and PC strategy games, and what makes them read as modern. Then rebuild the main menu:
+    - modern, split into clear compartments: play (continue, new solo world, co-op worlds), profile, settings, help and support;
+    - the first action one tap away, and nothing that wastes space.
+    - Write the findings and the design in `docs/art-style.md` before building it.
+26. [ ] **Sound and music:**
+    - sound effects for taps, building, training, battle rounds, horns for hordes, and wins and losses;
+    - music: calm themes for the map and the village, a tense one when a horde is near, and one for battles;
+    - separate volume sliders for music and effects; everything free to use (CC0 or the like) and listed in the credits.
+27. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
+28. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
