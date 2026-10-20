@@ -77,6 +77,23 @@ static func whereabouts(hero: Dictionary, village_id: int, place: String, now: f
 			return UI.t("%s lies wounded in %s · %s") % [hero.name, place, TimeUtil.format_duration(TimeUtil.parse_iso(hero.woundedUntil) - now)]
 		"with_army":
 			return UI.t("%s (Lv %d) leads an army in the field") % [hero.name, int(hero.level)]
+		"questing":
+			var quest: Dictionary = hero.get("quest", {}) if hero.get("quest") is Dictionary else {}
+			return UI.t("%s is away on a quest · back in %s") % [hero.name, TimeUtil.format_duration(TimeUtil.parse_iso(String(quest.get("returnsAt", ""))) - now)]
 	if here:
 		return UI.t("Hero %s (Lv %d) leads this garrison") % [hero.name, int(hero.level)]
 	return UI.t("Hero %s (Lv %d) stands in %s") % [hero.name, int(hero.level), place]
+
+
+## A quest's description, its front or site filled in (data/quests.json).
+static func quest_description(data: Dictionary, offer: Dictionary, site_name := "") -> String:
+	var def: Dictionary = data.get("quests", {}).get("kinds", {}).get(String(offer.kind), {})
+	var text := UI.t(def.get("description", ""))
+	text = text.replace("{front}", UI.t(String(offer.get("front", "")))) if offer.get("front") != null else text
+	return text.replace("{site}", site_name if site_name != "" else UI.t("ancient site"))
+
+
+## "3h 20m · 25% risk · +40 XP"
+static func quest_terms(offer: Dictionary, world_speed: float) -> String:
+	var seconds := float(offer.hours) * 3600.0 / maxf(1.0, world_speed)
+	return UI.t("%s · %d%% risk · +%d XP") % [TimeUtil.format_duration(seconds), roundi(float(offer.risk) * 100.0), int(offer.xp)]

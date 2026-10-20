@@ -622,12 +622,14 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - Each member picks in the lobby (`PUT /v1/worlds/:id/hero`), one nobody else in the group has, and may change it until the start. Whoever didn't pick gets the first free hero in roster order. Runs from before the roster gave each player one on the server's start (migration 034).
     - A roster hero's strengths, weaknesses and traits reach all of the player's villages, like a clan's perks. Skills and gear still count where the hero stands. Hero-only effects: `heroSpeed`, `heroXp`, `woundTime`.
     - Client: hero cards in the lobby (portrait, story, effects, trait, who has which), and the portrait, title and traits at the top of the hero panel. Portraits in battle reports come with the hero quests (step 22).
-22. [ ] **Hero quests:** the hero can head out on quests that take real time, with risk and experience:
-    - **Delay the enemy:** ambush a horde's road or burn its camp, so the next wave sets out later.
-    - **Reveal:** scout a front far ahead and learn the next waves' size and makeup.
-    - **Retrieve:** bring back gear or resources (lost caravans, a smith's hoard).
-    - **Explore ruins:** search ancient sites and forgotten ruins in person, faster and with better finds than scouts.
-    - Quests appear on the map from the world's seed and from events. A hero away on a quest doesn't lead the garrison, and can come back wounded.
+22. [x] **Hero quests** (`data/quests.json`, `sim/quests.ts`, `scheduler/quests.ts`): the hero rides out alone (status `questing`) for real time, the road there and back at its own speed plus the work, and comes home with XP (times its `heroXp`) or, by a fixed chance per quest, wounded. While away it leads no garrison.
+    - **Ambush the horde's road:** the next horde from a front sets out 6 game hours later.
+    - **Ride beyond the border:** an exact scout report on the next horde from a front, in the threats panel.
+    - **Find the lost caravan:** resources to the hero's village, more as the hero rises in level.
+    - **The smith's hoard:** a piece of gear the hero doesn't have.
+    - **Search the ruins:** the hero searches the nearest unguarded ancient site in person, with the same finds as an army's search (`claimFind`).
+    - The hero is offered three at a time from what the world holds (a horde not yet set out, an unguarded site, gear left to find), new ones every 8 game hours, never one it already went on (`POST /v1/worlds/:id/hero/quest`). Offers and the quest under way are in the hero view; the hero panel lists them with time, risk and XP, and counts down the return. The player hears what came of it.
+    - Still to do: the hero's portrait in battle reports.
 23. [ ] **How to play, made visible:** the getting-started chain (step M4 6) exists, but it is easy to miss: it is three plain lines in the map's village panel, and only there. It doesn't show how to do each step, and its reward lands silently in the first village, so it isn't clear there is one or how to get it. Rework it:
     - **Visible:** a quest card that is always on screen (map and village view) while the chain is open, with the step, its progress ("2 of 6") and the reward in icons. It can be folded away but not lost, and it pulses when a step is ready to claim.
     - **How:** each step says exactly what to tap, with a **Show me** button that points at the real control (an arrow or highlight over the building plot, the Troops tab, the outpost hex) and walks through it.

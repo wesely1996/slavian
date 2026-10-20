@@ -390,6 +390,29 @@ const heroesFileSchema = z.object({
   ),
 });
 
+export const QUEST_KINDS = ['ambush', 'scout', 'caravan', 'hoard', 'ruins'] as const;
+export type QuestKind = (typeof QUEST_KINDS)[number];
+
+const questKindSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  hours: z.number().positive(),
+  distance: z.number().int().nonnegative(),
+  xp: z.number().int().nonnegative(),
+  risk: z.number().min(0).max(1),
+  delayHours: z.number().positive().optional(),
+  resources: z.object({ wood: z.number(), stone: z.number(), grain: z.number(), iron: z.number() }).optional(),
+});
+
+// Hero quests (sim/quests.ts).
+const questsFileSchema = z.object({
+  version: z.number().int(),
+  offers: z.number().int().positive(),
+  refreshHours: z.number().positive(),
+  perLevel: z.number().nonnegative(),
+  kinds: z.object(Object.fromEntries(QUEST_KINDS.map((k) => [k, questKindSchema])) as Record<QuestKind, typeof questKindSchema>),
+});
+
 const ordersFileSchema = z.object({
   version: z.number().int(),
   checkMinutes: z.number().positive(),
@@ -635,6 +658,7 @@ export type ArmiesData = z.infer<typeof armiesFileSchema>;
 export type NotificationsData = z.infer<typeof notificationsFileSchema>;
 export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
+export type QuestsData = z.infer<typeof questsFileSchema>;
 export type LeadersData = z.infer<typeof leadersFileSchema>;
 export type WallsData = z.infer<typeof wallsFileSchema>;
 export type NamesData = z.infer<typeof namesFileSchema>;
@@ -663,6 +687,7 @@ export interface GameData {
   expansion: ExpansionData;
   research: ResearchData;
   heroes: HeroesData;
+  quests: QuestsData;
   leaders: LeadersData;
   names: NamesData;
   walls: WallsData;
@@ -694,6 +719,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
+    quests: questsFileSchema.parse(read('quests.json')),
     leaders: leadersFileSchema.parse(read('leaders.json')),
     walls: wallsFileSchema.parse(read('walls.json')),
     names: namesFileSchema.parse(read('names.json')),

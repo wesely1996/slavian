@@ -6,7 +6,8 @@ import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notific
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
 import { buildCrossingCommand, buildFortCommand, buildRoadCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
-import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, unequipCommand } from '../commands/heroes.js';
+import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand } from '../commands/heroes.js';
+import { heroQuestOffers } from '../scheduler/quests.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
 import {
@@ -100,6 +101,7 @@ const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
 const heroUnequipBody = z.object({ slot: z.enum(HERO_SLOTS) });
 const heroRenameBody = z.object({ name: displayName });
+const heroQuestBody = z.object({ offer: z.string().min(1).max(40) });
 const orderBody = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('train'), unit: z.string().min(1).max(64), batch: z.number().int(), target: z.number().int() }),
   z.object({ kind: z.literal('rebuild') }),
@@ -207,6 +209,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     expansion: scheduler.data.expansion,
     research: scheduler.data.research,
     heroes: scheduler.data.heroes,
+    quests: scheduler.data.quests,
     leaders: scheduler.data.leaders,
     walls: scheduler.data.walls,
     orders: scheduler.data.orders,
@@ -501,8 +504,10 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     await requireMember(account, id);
     const hero = await run({ accountId: account.id, worldId: id, now: clock(), ...schema.parse(request.body) });
-    return { hero: heroView(scheduler.data, hero), serverTime: clock().toISOString() };
+    const offers = await inTransaction(db, async (client) => heroQuestOffers(client, scheduler.data, await getWorld(client, id), hero, clock()));
+    return { hero: heroView(scheduler.data, hero, offers), serverTime: clock().toISOString() };
   }
+  app.post('/v1/worlds/:id/hero/quest', (request) => heroRoute(request, heroQuestBody, (input) => startQuestCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/move', (request) => heroRoute(request, heroMoveBody, (input) => moveHeroCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/skills', (request) => heroRoute(request, heroSkillBody, (input) => learnSkillCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/equip', (request) => heroRoute(request, heroEquipBody, (input) => equipCommand(db, scheduler, input)));
