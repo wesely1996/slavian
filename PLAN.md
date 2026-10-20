@@ -606,6 +606,7 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Logo:** a gold lozenge emblem with the Holy City and the Kalinov Bridge at dusk, and SLAVIAN cut from Ruslan Display and plated in gold. The emblem is also the app icon.
     - **Start screen:** full-bleed. A dusk painting holds the logo, and the sheet sits beside it (landscape) or under it (phone) in plated wood. Language and text size share one row.
     - **Splash:** the studio's logo (Night Forge, `client/art/brand/night_forge.png`), then the game's logo with one gold shine; it can be skipped.
+    - **Town names** (asked for after this step): every town gets a Slavic name of its own (`data/names.json`; old roots and endings once the list runs out), unique in its world, and its owner can rename it. The village panel's header steps through the player's towns with ◀ and ▶. Old towns named "Mila's village 2" are renamed on start.
 19. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
 20. [ ] **Closed test:** friends play a full run; fix what they find.
 

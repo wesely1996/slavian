@@ -3,7 +3,7 @@ import { loadLand } from '../db/rivers.js';
 import type { OnboardingStep } from '../data/index.js';
 import { onboardingStep } from '../scheduler/onboarding.js';
 import { authorize } from '../db/delegations.js';
-import { NotFoundError, RuleError } from '../errors.js';
+import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
 import { listResearch, startResearch, type ResearchEntry } from '../db/research.js';
@@ -30,6 +30,8 @@ import { campAt } from '../db/camps.js';
 import { listScrolls, siteAt } from '../db/sites.js';
 import { rebuildCost } from '../sim/horde.js';
 import { batchCompletesAt, type TrainingBatch } from '../sim/training.js';
+import { townName } from '../sim/names.js';
+import { createRng } from '../sim/rng.js';
 import {
   abandonOutpost,
   claimOutpost,
@@ -263,16 +265,17 @@ export async function foundVillageCommand(
     const path = roadRoute(deps.data, terrain, home, cell, deps.data.units.units[SETTLER]!.speed, world.speed);
     const travelMs = path.at(-1)!.atMs;
     const arrivesAt = new Date(input.now.getTime() + travelMs);
-    const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
-    const { rows } = await client.query<{ display_name: string }>('SELECT display_name FROM accounts WHERE id = $1', [
-      village.ownerAccountId,
-    ]);
+    // A name of its own unless the player gave one: none the world's towns
+    // or settlers on the road already carry.
+    const { rows: going } = await client.query<{ name: string }>("SELECT name FROM expeditions WHERE world_id = $1 AND status = 'outbound'", [world.id]);
+    const taken = [...villages.map((v) => v.name), ...going.map((e) => e.name)];
+    const name = input.name?.trim() || townName(deps.data, taken, createRng((world.seed ^ Math.imul(taken.length + 1, 0x9e3779b1)) >>> 0));
     const expedition = await insertExpedition(client, {
       worldId: world.id,
       villageId: village.id,
       q: cell.q,
       r: cell.r,
-      name: input.name?.trim() || `${rows[0]?.display_name ?? 'New'}'s village ${owned + 1}`,
+      name,
       settlers,
       path,
       departsAt: input.now,
@@ -336,4 +339,14 @@ export async function rebuildCommand(db: Db, deps: SchedulerDeps, input: Village
   });
   const { village } = done;
   return { ...done, village: { ...village, ruin: { ...village.ruin!, rebuildingUntil: done.result.toISOString() } } };
+}
+
+// Renames one of the caller's towns. Only its owner names it, not a stand-in.
+export async function renameVillageCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput & { name: string }): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'renamed a town', allowRuin: true }, async ({ client, village }) => {
+    if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Only its owner can rename a town');
+    await client.query('UPDATE villages SET name = $2 WHERE id = $1', [village.id, input.name]);
+    return { state: village.state, result: null };
+  });
+  return { village: { ...village, name: input.name } };
 }

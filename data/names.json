@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "_comment": "Names for new towns (server/src/sim/names.ts): a town founded or started without a name of its own is given one of `whole` not yet used in its world, or else a root and an ending joined (Bel + grad = Belgrad), never twice in one world.",
+  "whole": [
+    "Vyshgorod", "Zvenigorod", "Belozersk", "Radogost", "Dubrava", "Kamenets", "Lipovets", "Berestye",
+    "Svetograd", "Yaroslavets", "Dobrograd", "Mirogost", "Sosnovka", "Ozerishche", "Gorodets", "Kievets",
+    "Volodimir", "Peremysl", "Turov", "Pinsk", "Galich", "Izborsk", "Ladoga", "Rostovets",
+    "Snovsk", "Lubech", "Vruchiy", "Chervensk", "Zaslavl", "Drutsk", "Polotsk", "Vitichev",
+    "Belgrad", "Novigrad", "Starigrad", "Krasnogor", "Zelenets", "Bystritsa", "Medvedets", "Volchye"
+  ],
+  "roots": [
+    "Bel", "Vysh", "Zveni", "Rado", "Svyato", "Dobro", "Mir", "Yaro", "Lipo", "Bere", "Kamen", "Ozer",
+    "Dubro", "Sosno", "Gori", "Veli", "Zlato", "Slavo", "Bogo", "Lado", "Vesno", "Perun", "Dazh", "Stribo",
+    "Rus", "Brat", "Krasno", "Zeleno", "Volo", "Vyshe"
+  ],
+  "endings": ["grad", "gorod", "ets", "itsa", "ovo", "evo", "sk", "in", "mir", "slav", "gost", "pol", "yar"]
+}

@@ -44,6 +44,8 @@ var _plot := Rules.HALL_PLOT
 ## Which part of the village panel is open: "village", "troops" or
 ## "caravans".
 var _tab := "village"
+## The town's name is being edited in the village panel.
+var _renaming := false
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
@@ -469,6 +471,7 @@ func _toggle_view() -> void:
 
 func _set_view(view: String) -> void:
 	_view = view
+	_renaming = false
 	var on_map := view == "map"
 	_view_button.text = tr("Village") if on_map else tr("Map")
 	_view_button.icon = Art.texture("icon/village" if on_map else "icon/map")
@@ -1776,24 +1779,82 @@ func _own_village_panel(village: Dictionary) -> void:
 	_hero_line(village_id)
 
 
+## The town's name between arrows that step through the player's towns (and
+## those they look after), with a pen to rename it.
+func _town_switcher(village: Dictionary) -> void:
+	var mine := Game.my_villages()
+	var index := 0
+	for i in mine.size():
+		if int(mine[i].id) == int(village.id):
+			index = i
+	var step := func(by: int) -> void:
+		Game.current_village_id = int(mine[posmod(index + by, mine.size())].id)
+		_plot = Rules.HALL_PLOT
+		_renaming = false
+		_rebuild_panel()
+	var row := UI.hbox(8)
+	var back := UI.button("◀", step.bind(-1))
+	back.tooltip_text = tr("Previous town")
+	back.disabled = mine.size() < 2
+	row.add_child(back)
+	back.custom_minimum_size.x = 56.0
+	if _renaming:
+		var field := UI.line_edit(tr("Town name"), village.name)
+		field.max_length = 32
+		field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var save := func(_text := "") -> void: _rename(int(village.id), field.text)
+		field.text_submitted.connect(save)
+		row.add_child(field)
+		row.add_child(UI.primary(tr("Save"), save))
+		field.call_deferred("grab_focus")
+		field.call_deferred("select_all")
+	else:
+		var title := UI.label(village.name, UI.HEADING_SIZE)
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.autowrap_mode = TextServer.AUTOWRAP_OFF
+		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		title.custom_minimum_size.x = 60.0
+		title.tooltip_text = tr("Town %d of %d") % [index + 1, mine.size()]
+		row.add_child(title)
+		if Game.is_mine(village):
+			var pen := UI.button("✎", func() -> void:
+				_renaming = true
+				_rebuild_panel())
+			pen.tooltip_text = tr("Rename the town")
+			pen.custom_minimum_size.x = 56.0
+			row.add_child(pen)
+	var forward := UI.button("▶", step.bind(1))
+	forward.tooltip_text = tr("Next town")
+	forward.disabled = mine.size() < 2
+	forward.custom_minimum_size.x = 56.0
+	row.add_child(forward)
+	_panel_body.add_child(row)
+	if not Game.is_mine(village):
+		_panel_body.add_child(UI.label(tr("Looking after it for %s") % Game.member_name(int(village.ownerAccountId)), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _rename(village_id: int, name: String) -> void:
+	_status.text = ""
+	if name.strip_edges().is_empty():
+		_renaming = false
+		_rebuild_panel()
+		return
+	var response := await Api.post_json("/v1/villages/%d/rename" % village_id, {"name": name.strip_edges()})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_renaming = false
+	Game.update_village(response.data.village)
+	_rebuild_panel()
+
+
 func _village_panel() -> void:
 	var village := _my_village()
 	if village.is_empty():
 		return
 	_village_view.show_village(Game.data, village, _plot)
-	var mine := Game.my_villages()
-	if mine.size() > 1:
-		var names := mine.map(func(v: Dictionary) -> String: return v.name if Game.is_mine(v) else tr("%s (for %s)") % [v.name, Game.member_name(int(v.ownerAccountId))])
-		var index := 0
-		for i in mine.size():
-			if int(mine[i].id) == int(village.id):
-				index = i
-		var picker := UI.options(names, index)
-		picker.item_selected.connect(func(i: int) -> void:
-			Game.current_village_id = int(mine[i].id)
-			_plot = Rules.HALL_PLOT
-			_rebuild_panel())
-		_panel_body.add_child(picker)
+	_town_switcher(village)
 	if village.get("ruin") is Dictionary:
 		_ruin_section(village)
 		return

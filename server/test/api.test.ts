@@ -108,6 +108,15 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(me.body.worlds.map((w: { id: number }) => w.id)).toContain(worldId);
 
     const vesnaVillage = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vesna.accountId);
+    // Every town has a name of its own, which its owner can change.
+    const names = started.body.villages.map((v: { name: string }) => v.name);
+    expect(new Set(names).size).toBe(2);
+    for (const name of names) expect(name).not.toMatch(/'s village/);
+    expect((await call('POST', `/v1/villages/${vesnaVillage.id}/rename`, bogdan.token, { name: 'Mine' })).status).toBe(403);
+    expect((await call('POST', `/v1/villages/${vesnaVillage.id}/rename`, vesna.token, { name: '  ' })).status).toBe(400);
+    const renamed = await call('POST', `/v1/villages/${vesnaVillage.id}/rename`, vesna.token, { name: ' Kitezh ' });
+    expect(renamed.status).toBe(200);
+    expect(renamed.body.village.name).toBe('Kitezh');
     // Teammates can see but not command each other's villages.
     expect((await call('POST', `/v1/villages/${vesnaVillage.id}/build`, bogdan.token, { building: 'farm' })).status).toBe(403);
     expect((await call('POST', `/v1/villages/${vesnaVillage.id}/build`, vesna.token, { building: 'castle' })).body.error).toBe('rule');

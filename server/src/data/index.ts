@@ -274,6 +274,14 @@ export const HERO_SLOTS = ['weapon', 'armor', 'amulet', 'banner', 'mount'] as co
 export type HeroSlot = (typeof HERO_SLOTS)[number];
 const effectsSchema = z.record(z.string(), z.number());
 
+// Names for new towns (sim/names.ts).
+const namesFileSchema = z.object({
+  version: z.number().int(),
+  whole: z.array(z.string().min(1)).min(1),
+  roots: z.array(z.string().min(1)).min(1),
+  endings: z.array(z.string().min(1)).min(1),
+});
+
 // Walls and siege (sim/walls.ts).
 const wallsFileSchema = z.object({
   version: z.number().int(),
@@ -618,6 +626,7 @@ export type OrdersData = z.infer<typeof ordersFileSchema>;
 export type HeroesData = z.infer<typeof heroesFileSchema>;
 export type LeadersData = z.infer<typeof leadersFileSchema>;
 export type WallsData = z.infer<typeof wallsFileSchema>;
+export type NamesData = z.infer<typeof namesFileSchema>;
 export type ResearchData = z.infer<typeof researchFileSchema>;
 export type ExpansionData = z.infer<typeof expansionFileSchema>;
 export type LogisticsData = z.infer<typeof logisticsFileSchema>;
@@ -644,6 +653,7 @@ export interface GameData {
   research: ResearchData;
   heroes: HeroesData;
   leaders: LeadersData;
+  names: NamesData;
   walls: WallsData;
   orders: OrdersData;
   notifications: NotificationsData;
@@ -675,6 +685,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     heroes: heroesFileSchema.parse(read('heroes.json')),
     leaders: leadersFileSchema.parse(read('leaders.json')),
     walls: wallsFileSchema.parse(read('walls.json')),
+    names: namesFileSchema.parse(read('names.json')),
     orders: ordersFileSchema.parse(read('orders.json')),
     notifications: notificationsFileSchema.parse(read('notifications.json')),
     armies: armiesFileSchema.parse(read('armies.json')),
