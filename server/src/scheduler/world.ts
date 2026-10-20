@@ -2,6 +2,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { RuleError } from '../errors.js';
 import { getWorld, isOver } from '../db/worlds.js';
 import type { ScheduledEvent, SchedulerDeps } from './events.js';
+import { alert } from '../alerts.js';
 
 // Advisory locks use the two-key form; the first key namespaces world locks.
 // Locks are database-wide while world ids are per schema, so the namespace
@@ -82,6 +83,7 @@ export async function drainWorld(
         [event.id, error instanceof Error ? error.message : String(error)],
       );
       console.error(`Event ${event.id} (${event.type}) in world ${worldId} failed:`, error);
+      void alert(`event:${event.type}`, `Event ${event.id} (${event.type}) in world ${worldId} failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   throw new Error(`World ${worldId} exceeded ${MAX_EVENTS_PER_DRAIN} events in one drain`);

@@ -12,6 +12,7 @@ import { planWave, waveFronts } from '../sim/waves.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { tell } from './notices.js';
 import { groupPower, waveContext, type WavePayload } from './waves.js';
+import { recordRunEnd } from '../db/telemetry.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -45,7 +46,9 @@ export async function callRitualNight(client: DbClient, data: GameData, world: W
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
-export async function runLost(client: DbClient, data: GameData, world: World, at: Date): Promise<void> {
+// The Holy City has fallen; `cause` is the front of the horde that took it.
+export async function runLost(client: DbClient, data: GameData, world: World, at: Date, cause: string | null = null): Promise<void> {
+  await recordRunEnd(client, world.id, at, cause);
   const { title, story } = data.bridge.endings.lost;
   await tellEveryone(client, world, title, story, at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -62,6 +65,7 @@ export const ritualHandlers: HandlerRegistry = {
       return;
     }
     await markWon(client, world.id, event.dueAt);
+    await recordRunEnd(client, world.id, event.dueAt);
     const { title, story } = data.bridge.endings.won;
     await tellEveryone(client, world, title, story, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });

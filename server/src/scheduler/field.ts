@@ -43,6 +43,7 @@ import { holdForQuiet } from './waves.js';
 import { bridgeQuest } from './bridge.js';
 import { tell, tellOwner } from './notices.js';
 import { planRaids } from './outposts.js';
+import { record } from '../db/telemetry.js';
 
 export const interceptPayload = z.object({ waveId: z.number().int(), q: z.number().int(), r: z.number().int(), atMs: z.number() });
 export type InterceptPayload = z.infer<typeof interceptPayload>;
@@ -240,6 +241,16 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   } else {
     const won = outcome === 'defended';
     const kills = total(battle.attackerInitial) - total(attackerNow);
+    await record(client, world.id, 'wave_result', {
+      wave: wave.index,
+      front: wave.front,
+      threat: wave.threat,
+      where: holy ? 'holy_city' : 'field',
+      outcome: won ? 'held' : 'broke',
+      rounds: round,
+      horde: total(battle.attackerInitial),
+      defenders: total(battle.defenderInitial),
+    }, at);
     // Beaten in the field, the horde's leader blames the army's village.
     const fallen = total(result.defenderLosses) + battle.rounds.reduce((n, r) => n + total(r.defenderLosses), 0);
     await leaderAfter(client, data, world, wave, { hordeWon: !won, kills: fallen, wiped: total(attackerNow) === 0, villageId: leader?.id ?? null }, at);
@@ -295,7 +306,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
 async function holyCityFalls(client: DbClient, data: GameData, world: World, wave: Wave, survivors: Record<string, number>, at: Date): Promise<void> {
   const sanctity = await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)), at);
   await finishWave(client, data, world, wave.id, 'dispersed', at);
-  if (sanctity <= 0) await runLost(client, data, world, at);
+  if (sanctity <= 0) await runLost(client, data, world, at, wave.front);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 

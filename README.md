@@ -15,6 +15,8 @@ A cooperative PvE hex-map strategy game for small groups of busy adults: defend 
 
 **Playtest with friends anywhere:** server on your computer, database on Neon, public HTTPS address through a Cloudflare quick tunnel — see [docs/playtest.md](docs/playtest.md).
 
+**Production:** the published server image on a VPS behind Caddy (HTTPS on your domain), nightly backups, error alerts, an uptime check and light telemetry — see [docs/production.md](docs/production.md).
+
 **Same Wi-Fi only:**
 
 1. Run the server and its database on a computer your phone can reach (same Wi-Fi):
