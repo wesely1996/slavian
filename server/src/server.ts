@@ -6,7 +6,7 @@ import { LiveHub } from './api/live.js';
 import { loadGameData } from './data/index.js';
 import { migrate } from './db/migrate.js';
 import { createPool, pooledEndpointWarning } from './db/pool.js';
-import { upgradeDigests, upgradeHeroes, upgradeLegacyVillages, upgradeSites, upgradeWallPlots } from './db/upgrades.js';
+import { upgradeDigests, upgradeHeroes, upgradeLegacyVillages, upgradeSites, upgradeTownNames, upgradeWallPlots } from './db/upgrades.js';
 import { pushSenderFromEnv } from './push/sender.js';
 import { runPushLoop } from './push/worker.js';
 import { handlers } from './scheduler/handlers.js';
@@ -30,6 +30,8 @@ if (walled) console.log(`Gave ${walled} older village(s) room for walls`);
 const heroes = await upgradeHeroes(db, scheduler.data);
 if (heroes) console.log(`Gave ${heroes} player(s) in older worlds a hero`);
 await upgradeDigests(db, new Date());
+const named = await upgradeTownNames(db, scheduler.data);
+if (named) console.log(`Named ${named} town(s) given the old default names`);
 const sited = await upgradeSites(db, scheduler.data);
 if (sited) console.log(`Placed ancient sites in ${sited} running world(s)`);
 // A crash is reported before the process goes down (Docker restarts it).

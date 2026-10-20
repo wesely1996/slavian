@@ -8,6 +8,8 @@ import { ensureSites } from '../scheduler/sites.js';
 import { ensureHeroes } from './heroes.js';
 import { getWorld } from './worlds.js';
 import { inTransaction, type Db } from './pool.js';
+import { isDefaultName, townName } from '../sim/names.js';
+import { createRng } from '../sim/rng.js';
 
 interface LegacyRow {
   id: number;
@@ -85,5 +87,28 @@ export async function upgradeSites(db: Db, data: GameData): Promise<number> {
     );
     for (const { id } of rows) await ensureSites(client, data, await getWorld(client, id));
     return rows.length;
+  });
+}
+
+// Towns named the old way ("Mila's village 2"): give each a town name of its
+// own, unique in its world.
+export async function upgradeTownNames(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number; world_id: number; name: string; seed: number }>(
+      'SELECT v.id, v.world_id, v.name, w.seed FROM villages v JOIN worlds w ON w.id = v.world_id ORDER BY v.world_id, v.id FOR UPDATE OF v',
+    );
+    let renamed = 0;
+    for (const worldId of new Set(rows.map((r) => r.world_id))) {
+      const towns = rows.filter((r) => r.world_id === worldId);
+      const taken = towns.filter((t) => !isDefaultName(t.name)).map((t) => t.name);
+      const rng = createRng((towns[0]!.seed ^ 0x7a11) >>> 0);
+      for (const town of towns.filter((t) => isDefaultName(t.name))) {
+        const name = townName(data, taken, rng);
+        taken.push(name);
+        await client.query('UPDATE villages SET name = $2 WHERE id = $1', [town.id, name]);
+        renamed++;
+      }
+    }
+    return renamed;
   });
 }

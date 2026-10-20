@@ -14,6 +14,7 @@ import {
   claimOutpostCommand,
   foundVillageCommand,
   queueBuildCommand,
+  renameVillageCommand,
   rebuildCommand,
   sendScoutsCommand,
   setStanceCommand,
@@ -61,6 +62,7 @@ const displayName = z.string().trim().min(1).max(32);
 const idParams = z.object({ id: z.coerce.number().int().positive() });
 
 const guestBody = z.object({ displayName: displayName.optional() }).default({});
+const renameBody = z.object({ name: displayName });
 const meBody = z.object({ displayName: displayName.optional(), language: z.string().max(16).optional() });
 const reportBody = z.object({
   message: z.string().trim().min(1).max(4000),
@@ -439,6 +441,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       now: clock(),
     });
     return { village: villageView(village), mission: missionView(mission), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/rename', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = renameBody.parse(request.body);
+    const { village } = await renameVillageCommand(db, scheduler, { accountId: account.id, villageId: id, name: body.name, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/stance', async (request) => {

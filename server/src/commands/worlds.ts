@@ -30,6 +30,8 @@ import { refreshBonuses } from '../scheduler/research.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
 import { record } from '../db/telemetry.js';
+import { townName } from '../sim/names.js';
+import { createRng } from '../sim/rng.js';
 
 // No 0/O, 1/I/L: invite codes get read aloud and typed on phones.
 const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -104,12 +106,17 @@ export async function startWorldCommand(
     await markStarted(client, world.id, map, input.now, deps.data.horde.holyCity.sanctity);
     await insertHexes(client, world.id, map);
     await insertRivers(client, world.id, map.rivers);
+    // Every town gets a name of its own (data/names.json).
+    const names: string[] = [];
+    const nameRng = createRng((world.seed ^ 0x7a11) >>> 0);
     for (const [i, member] of members.entries()) {
       const site = map.startSites[i]!;
+      const name = townName(deps.data, names, nameRng);
+      names.push(name);
       await insertVillage(client, {
         worldId: world.id,
         ownerAccountId: member.accountId,
-        name: `${member.displayName}'s village`,
+        name,
         q: site.q,
         r: site.r,
         state: newVillage(deps.data, input.now, world.speed),

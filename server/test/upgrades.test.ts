@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
 import { createGuestAccount } from '../src/db/accounts.js';
 import { inTransaction, type Db } from '../src/db/pool.js';
-import { upgradeLegacyVillages } from '../src/db/upgrades.js';
+import { upgradeLegacyVillages, upgradeTownNames } from '../src/db/upgrades.js';
 import { insertVillage, loadVillage } from '../src/db/villages.js';
 import { createWorld } from '../src/db/worlds.js';
 import { scheduleEvent } from '../src/scheduler/events.js';
@@ -61,5 +61,25 @@ describe.skipIf(!TEST_DATABASE_URL)('legacy village upgrade (postgres)', () => {
     village = await inTransaction(db, (client) => loadVillage(client, villageId));
     expect(village.state.plots.c2).toEqual({ building: 'barracks', level: 1 });
     expect(village.state.levels).toMatchObject({ woodcutter: 2, storehouse: 1, barracks: 1, elder_hall: 1 });
+  });
+
+  it('names towns that still carry the old default names', async () => {
+    const ids = await inTransaction(db, async (client) => {
+      const { account } = await createGuestAccount(client, 'Mila');
+      const world = await createWorld(client, { name: 'named', seed: 5, speed: 1 });
+      const ids: number[] = [];
+      for (const [i, name] of ["Mila's village", "Mila's village 2", 'Kitezh'].entries()) {
+        const village = await insertVillage(client, { worldId: world.id, ownerAccountId: account.id, name, q: 2 + i, r: 0, state: newVillage(data, T0, 1) });
+        ids.push(village.id);
+      }
+      return ids;
+    });
+    expect(await upgradeTownNames(db, data)).toBe(2);
+    expect(await upgradeTownNames(db, data)).toBe(0);
+    const names: string[] = [];
+    for (const id of ids) names.push((await inTransaction(db, (client) => loadVillage(client, id))).name);
+    expect(names[2]).toBe('Kitezh');
+    expect(new Set(names).size).toBe(3);
+    for (const name of names) expect(name).not.toMatch(/'s village/);
   });
 });
