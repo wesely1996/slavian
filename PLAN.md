@@ -595,7 +595,12 @@ Art may be generated at first, as long as the style is consistent: clean and sim
 14. [x] **Localization:** English and Serbian (Latin); every string in translation files, server notices included. Groundwork done (`docs/localization.md`): gettext files, the extractor with a CI check, the language picker, the start screen and every data text in Serbian. Every client UI string is wrapped and translated (885 strings); data-driven names are wrapped at display; server notices render in the player's language (`accounts.language`, `server/src/i18n.ts`).
 15. [x] **Accessibility:** colour-blind-safe threat colours plus icons (skull tiers), adjustable text size, large tap targets.
 16. [x] **Support and privacy:** the donation button and the server-cost slider (§11.8, `site/costs.json`), a privacy policy (`docs/privacy.md`), account deletion and data export, plus a **Report a bug** button that sends the player's message with the current game state and saves it as a file.
-17. [ ] **Production:** VPS deployment (Docker), the Firebase service-account key on the server, automatic database backups, uptime and error monitoring, the light telemetry of §13.
+17. [x] **Production** (`docs/production.md`, `ops/production/`):
+    - **Image:** every merge to main publishes the server image to GitHub's container registry (`ghcr.io/<owner>/slavian-server:main` and `:<sha>`).
+    - **Deploy:** on a VPS, Docker Compose runs it behind Caddy (HTTPS on your domain, renewed by itself), on Neon or a local Postgres. The Firebase key and the month's costs are mounted files, not baked in.
+    - **Backups:** a `pg_dump` every night with 14 days kept, and by hand with `BACKUP_ONCE=1`; on top of Neon's point-in-time restore.
+    - **Monitoring:** `/health` answers 503 while the database doesn't, for an uptime monitor. Failed scheduler events and passes, server errors, crashes and failed backups post to a Discord or Slack webhook (`ALERT_WEBHOOK_URL`), at most once per kind every 10 minutes.
+    - **Telemetry (§13):** run start and end (outcome, the front that struck the last blow, bridge stage, days, counts) and every wave's battle, with no personal data; `npm run telemetry` sums it up (win rate, losses by front, waves held by front).
 18. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
 19. [ ] **Closed test:** friends play a full run; fix what they find.
 

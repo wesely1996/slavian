@@ -1,0 +1,71 @@
+# Production (PLAN.md M5 step 17; docs/production.md): the game server from
+# the image CI publishes on every merge to main, Caddy in front of it for
+# HTTPS on your domain (certificates are fetched and renewed by themselves),
+# and a nightly database backup. The database is Neon by default
+# (DATABASE_URL in .env); `--profile local-db` runs Postgres here instead.
+#   cp .env.example .env   # then fill it in
+#   docker compose -f ops/production/docker-compose.yml up -d
+#   docker compose -f ops/production/docker-compose.yml pull && docker compose -f ops/production/docker-compose.yml up -d   # update
+name: slavian
+
+services:
+  server:
+    image: ghcr.io/wesely1996/slavian-server:${SLAVIAN_TAG:-main}
+    env_file: .env
+    environment:
+      PORT: "8080"
+    volumes:
+      # The Firebase service-account key (docs/push.md), kept out of the
+      # image; push is on once .env sets FCM_SERVICE_ACCOUNT_FILE.
+      - ./fcm.json:/run/secrets/fcm.json:ro
+      # The month's costs (site/costs.json), edited here without a redeploy.
+      - ./costs.json:/app/site/costs.json:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  caddy:
+    image: caddy:2.10
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  # Every night: a pg_dump of the database into ./backups, the last
+  # BACKUP_KEEP_DAYS kept (Neon's own point-in-time restore comes on top).
+  backup:
+    image: postgres:17
+    env_file: .env
+    volumes:
+      - ./backups:/backups
+      - ./backup.sh:/backup.sh:ro
+    entrypoint: ["sh", "/backup.sh"]
+    restart: unless-stopped
+
+  # Only with --profile local-db: Postgres on this machine instead of Neon
+  # (DATABASE_URL=postgres://slavian:<password>@postgres:5432/slavian).
+  postgres:
+    image: postgres:16
+    profiles: [local-db]
+    environment:
+      POSTGRES_USER: slavian
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-slavian}
+      POSTGRES_DB: slavian
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:
+  pgdata:

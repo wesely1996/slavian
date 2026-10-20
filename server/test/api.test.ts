@@ -61,6 +61,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
   }
 
   it('rejects requests without a valid token', async () => {
+    expect((await call('GET', '/health')).body).toEqual({ ok: true });
     expect((await call('GET', '/v1/me')).status).toBe(401);
     expect((await call('GET', '/v1/me', 'nope')).status).toBe(401);
   });
@@ -1505,6 +1506,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.endedAt).not.toBeNull();
     expect(w.run).toMatchObject({ outcome: 'won', wavesBeaten: ritual.length, villagesFounded: 1, villagesLost: 0 });
     expect(w.run.members).toEqual([{ accountId: rusa.accountId, displayName: 'Rusa', villages: 1, villagesLost: 0 }]);
+    // Telemetry kept the run's start and end, without names.
+    const { rows: telemetry } = await db.query<{ kind: string; data: Record<string, unknown> }>(
+      "SELECT kind, data FROM telemetry WHERE world_id = $1 AND kind IN ('run_start', 'run_end') ORDER BY id",
+      [worldId],
+    );
+    expect(telemetry.map((t) => t.kind)).toEqual(['run_start', 'run_end']);
+    expect(telemetry[1]!.data).toMatchObject({ outcome: 'won', players: 1, wavesBeaten: ritual.length });
+    expect(JSON.stringify(telemetry)).not.toContain('Rusa');
 
     // A finished run stays readable, but nothing more can be done in it.
     const home = started.body.villages[0];
@@ -1730,6 +1739,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const after = world.villages.find((v: { id: number }) => v.id === village.id);
     const breached = lefts.at(-1) === 0;
     expect(after.plots.w.level).toBe(breached ? 5 : 6);
+    const { rows: results } = await db.query<{ data: { where: string; walls: number } }>("SELECT data FROM telemetry WHERE world_id = $1 AND kind = 'wave_result'", [worldId]);
+    expect(results[0]!.data).toMatchObject({ where: 'village', walls: 6 });
     expect(fought.rounds.some((r: { breach?: boolean }) => r.breach)).toBe(breached);
   });
 

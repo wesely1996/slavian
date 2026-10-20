@@ -29,6 +29,7 @@ import { lockWorld, withWorld } from '../scheduler/world.js';
 import { refreshBonuses } from '../scheduler/research.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
+import { record } from '../db/telemetry.js';
 
 // No 0/O, 1/I/L: invite codes get read aloud and typed on phones.
 const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -122,6 +123,7 @@ export async function startWorldCommand(
     await loadBridge(client, started.id, input.now, started.sanctity);
     await announceFirstWaves(client, deps.data, started);
     await ensureDigests(client, started, input.now);
+    await record(client, world.id, 'run_start', { players: members.length, difficulty: started.difficulty, speed: started.speed, fronts: map.activeFronts }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     return started;
   });

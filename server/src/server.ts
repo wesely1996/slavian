@@ -11,6 +11,7 @@ import { pushSenderFromEnv } from './push/sender.js';
 import { runPushLoop } from './push/worker.js';
 import { handlers } from './scheduler/handlers.js';
 import { runWorkerLoop } from './scheduler/loop.js';
+import { alert } from './alerts.js';
 
 const port = Number(process.env.PORT ?? 8080);
 const host = process.env.HOST ?? '0.0.0.0';
@@ -31,6 +32,9 @@ if (heroes) console.log(`Gave ${heroes} player(s) in older worlds a hero`);
 await upgradeDigests(db, new Date());
 const sited = await upgradeSites(db, scheduler.data);
 if (sited) console.log(`Placed ancient sites in ${sited} running world(s)`);
+// A crash is reported before the process goes down (Docker restarts it).
+process.on('uncaughtExceptionMonitor', (error) => void alert('crash', `Server crashed: ${error.message}`));
+if (process.env.ALERT_WEBHOOK_URL) console.log('Alerts: on (ALERT_WEBHOOK_URL)');
 const pushSender = pushSenderFromEnv();
 console.log(pushSender ? 'Push notifications: Firebase Cloud Messaging' : 'Push notifications: off (no FCM service account); in-app inbox only');
 const clock = () => new Date();

@@ -13,6 +13,7 @@
     "worker": "tsx src/scheduler/run-worker.ts",
     "demo": "tsx src/demo.ts",
     "sim": "tsx src/runsim/run.ts",
+    "telemetry": "tsx src/telemetry.ts",
     "start": "tsx src/server.ts"
   },
   "dependencies": {

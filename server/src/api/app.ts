@@ -32,6 +32,7 @@ import { ForbiddenError, NotFoundError, RuleError, UnauthorizedError } from '../
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { InsufficientResourcesError } from '../sim/resources.js';
 import type { LiveHub } from './live.js';
+import { alert } from '../alerts.js';
 import {
   armyView,
   caravanView,
@@ -163,6 +164,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const status = (error as { statusCode?: number }).statusCode;
     if (status && status < 500) return reply.status(status).send({ error: 'bad_request', message: (error as Error).message });
     request.log.error(error);
+    void alert(`http:${request.routeOptions.url ?? request.url}`, `${request.method} ${request.url} failed: ${(error as Error).message}`);
     return reply.status(500).send({ error: 'internal', message: 'Internal server error' });
   });
 
@@ -179,7 +181,16 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     }));
   }
 
-  app.get('/health', async () => ({ ok: true }));
+  // For uptime monitors and the container's health check: up only while the
+  // database answers.
+  app.get('/health', async (_request, reply) => {
+    try {
+      await db.query('SELECT 1');
+      return { ok: true };
+    } catch {
+      return reply.status(503).send({ ok: false, error: 'database' });
+    }
+  });
 
   app.get('/v1/data', async () => ({
     buildings: scheduler.data.buildings,

@@ -1,0 +1,7 @@
+# HTTPS for the game server: Caddy fetches and renews the certificate for
+# DOMAIN (its DNS must point at this machine, ports 80 and 443 open) and
+# passes everything on, the live WebSocket included.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy server:8080
+}

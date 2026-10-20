@@ -39,6 +39,7 @@ import { fieldRound } from './field.js';
 import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
+import { record } from '../db/telemetry.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -290,6 +291,17 @@ export const battleHandlers: HandlerRegistry = {
     if (outcome !== 'ongoing' && wall && (wallLeft ?? wall.integrity) === 0) villageState = breachWalls(data, villageState);
     await saveVillageState(client, village.id, villageState);
     if (outcome !== 'ongoing') {
+      await record(client, world.id, 'wave_result', {
+        wave: wave.index,
+        front: wave.front,
+        threat: wave.threat,
+        where: 'village',
+        outcome: outcome === 'defended' ? 'held' : razed ? 'razed' : 'raided',
+        rounds: round,
+        horde: total(battle.attackerInitial),
+        defenders: total(battle.defenderInitial),
+        walls: battle.setup.wall?.level ?? 0,
+      }, at);
       const kills = total(defenderLosses) + battle.rounds.reduce((n, r) => n + total(r.defenderLosses), 0);
       await leaderAfter(client, data, world, wave, { hordeWon: outcome === 'raided', razed, kills, wiped: total(attackerNow) === 0, villageId: village.id }, at);
     }
