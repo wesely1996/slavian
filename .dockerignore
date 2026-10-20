@@ -2,4 +2,6 @@
 **/.godot
 build
 client
+# The server renders notices from the Serbian catalog (server/src/i18n.ts).
+!client/i18n
 .git

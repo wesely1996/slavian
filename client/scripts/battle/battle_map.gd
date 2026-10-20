@@ -33,7 +33,8 @@ var data: Dictionary = {}
 var battle: Dictionary = {}
 var round := 0
 ## Names and looks: {place, enemy, enemy_leader, leader, ours (colour),
-## terrain, river (bool), road (bool)}.
+## terrain, river (bool), road (bool), from ("From the north", the label
+## under the enemy)}.
 var ctx: Dictionary = {}
 var _font: Font
 ## The part of the width the squads stand in (a river along a flank takes
@@ -109,7 +110,7 @@ func _draw() -> void:
 		_draw_leader(Vector2(size.x * 0.5, maxf(our_back - size.x * 0.03, size.y * 0.15)), ours, ctx.leader)
 	_draw_leader(Vector2(size.x * 0.5, minf(their_back + size.x * 0.03, size.y * 0.85)), ENEMY, ctx.get("enemy_leader", tr("Warlord")))
 	_label(Vector2(size.x / 2.0, size.y * 0.035), ctx.get("place", ""), 22.0)
-	_label(Vector2(size.x / 2.0, size.y * 0.975), tr("From the %s") % String(ctx.get("from", "wilds")), 18.0)
+	_label(Vector2(size.x / 2.0, size.y * 0.975), String(ctx.get("from", tr("From the wilds"))), 18.0)
 	var over: bool = round >= int(battle.get("rounds", []).size()) and battle.get("status", "ongoing") != "ongoing"
 	if over:
 		_draw_verdict()

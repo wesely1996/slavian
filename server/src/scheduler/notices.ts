@@ -31,6 +31,8 @@ export interface Notice {
   title: string;
   body: string;
   vars?: Record<string, string | number>;
+  // A body written for the reader's language instead of `body` (the digest).
+  bodyFor?: (language: string) => string;
 }
 
 export async function tell(
@@ -47,7 +49,7 @@ export async function tell(
     kind: notice.kind,
     tier: notice.tier,
     title: localize(language, notice.title, notice.vars),
-    body: localize(language, notice.body, notice.vars),
+    body: notice.bodyFor ? notice.bodyFor(language) : localize(language, notice.body, notice.vars),
     at,
   });
 }
@@ -96,14 +98,14 @@ export const noticeHandlers: HandlerRegistry = {
   async wave_warning({ client, world }, event) {
     const wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'marching' || wave.targetVillageId === null || !wave.arrivesAt) return;
-    const hours = Math.max(0, (wave.arrivesAt.getTime() - event.dueAt.getTime()) / MS_PER_HOUR);
-    const when = hours >= 1 ? `in about ${Math.round(hours)} hour${Math.round(hours) === 1 ? '' : 's'}` : 'within the hour';
+    const hours = Math.round(Math.max(0, (wave.arrivesAt.getTime() - event.dueAt.getTime()) / MS_PER_HOUR));
+    const when = hours > 1 ? 'in about {hours} hours' : hours === 1 ? 'in about an hour' : 'within the hour';
     await tellOwner(client, world, wave.targetVillageId, (name) => ({
       kind: 'wave_soon',
       tier: 'push',
       title: 'A horde is coming to {village}',
-      body: 'The {threat} {front} horde arrives {when}. Check the garrison and its stance.',
-      vars: { village: name, threat: wave.threat.toLowerCase(), front: wave.front, when },
+      body: `The {threat} {front} horde arrives ${when}. Check the garrison and its stance.`,
+      vars: { village: name, threat: wave.threat.toLowerCase(), front: wave.front, hours },
     }), event.dueAt);
   },
 
@@ -116,6 +118,7 @@ export const noticeHandlers: HandlerRegistry = {
         tier: 'push',
         title: 'Today in {world}',
         body: digestSummary(pending.map((n) => n.kind)),
+        bodyFor: (language) => digestSummary(pending.map((n) => n.kind), language),
         vars: { world: world.name },
       }, event.dueAt);
       const digestId = await lastNotificationId(client, accountId, world.id);

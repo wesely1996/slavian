@@ -23,7 +23,7 @@ import {
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { createWorldCommand, joinWorldCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
-import { accountForToken, createGuestAccount, deleteAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
+import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { saveReport } from '../db/reports.js';
 import { loadCosts } from '../site.js';
@@ -227,7 +227,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const updated = await inTransaction(db, async (client) => {
       if (body.language !== undefined) await setAccountLanguage(client, account.id, body.language);
       if (body.displayName !== undefined) return renameAccount(client, account.id, body.displayName);
-      return account;
+      return body.language !== undefined ? { ...account, language: body.language } : account;
     });
     return { account: updated };
   });
@@ -270,8 +270,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   // Download everything the team keeps about you.
   app.get('/v1/me/export', async (request) => {
     const account = await authenticate(db, request);
-    const worlds = await inTransaction(db, (client) => listWorldsForAccount(client, account.id));
-    return { account, worlds, exportedAt: clock().toISOString() };
+    const kept = await inTransaction(db, (client) => exportAccount(client, account.id));
+    return { account, ...kept, exportedAt: clock().toISOString() };
   });
 
   // Delete the account and its data (sessions, memberships, devices cascade).
@@ -285,7 +285,12 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.post('/v1/reports', async (request) => {
     const account = await authenticate(db, request);
     const body = reportBody.parse(request.body);
-    const id = await inTransaction(db, (client) => saveReport(client, account.id, body));
+    const id = await inTransaction(db, async (client) => {
+      // A report names a world only if the sender plays in it (it may have
+      // been deleted since, or never been theirs).
+      const worldId = body.worldId !== null && (await isMember(client, body.worldId, account.id)) ? body.worldId : null;
+      return saveReport(client, account.id, { ...body, worldId });
+    });
     return { id };
   });
 

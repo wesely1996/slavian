@@ -35,7 +35,24 @@ export function nextDigestAt(after: Date, prefs: NotifyPrefs): Date {
 }
 
 // "3 builds finished, 1 tech researched, …" from the kinds of what happened.
-export function digestSummary(kinds: readonly string[]): string {
+// The digest's lines in Serbian ("label: count", which needs no plural forms).
+const SERBIAN_LABELS: Record<string, string> = {
+  build_done: 'završene gradnje',
+  research_done: 'istražene tehnologije',
+  battle_result: 'izveštaji o bitkama',
+  caravan_delivered: 'isporuke karavana',
+  settlers: 'izveštaji doseljenika',
+  hero: 'vesti o junacima',
+  leader: 'vesti o neprijateljskim vođama',
+};
+
+export function digestSummary(kinds: readonly string[], language = 'en'): string {
+  if (language.toLowerCase().startsWith('sr')) {
+    const counts = new Map<string, number>();
+    for (const kind of kinds) counts.set(kind, (counts.get(kind) ?? 0) + 1);
+    const line = [...counts.entries()].map(([kind, n]) => `${SERBIAN_LABELS[kind] ?? 'novosti'}: ${n}`).join(', ');
+    return line.charAt(0).toUpperCase() + line.slice(1);
+  }
   const labels: Record<string, [string, string]> = {
     build_done: ['build finished', 'builds finished'],
     research_done: ['tech researched', 'techs researched'],

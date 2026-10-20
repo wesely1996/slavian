@@ -29,6 +29,9 @@ func _ready() -> void:
 	UiTheme.fit(window)
 	window.size_changed.connect(func() -> void: UiTheme.fit(window))
 	TranslationServer.set_locale(language)
+	# Players who signed in before the server kept languages tell it now.
+	if token != "":
+		report_language.call_deferred()
 	# Only strings marked with tr() are translated, never names players chose.
 	get_tree().root.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 
@@ -58,6 +61,8 @@ func report_language() -> void:
 func set_text_size(size: String) -> void:
 	text_size = size
 	UiTheme.set_text_size(size)
+	# Rebuild the theme: its default and button font sizes follow the scale.
+	UiTheme.apply()
 	save()
 
 

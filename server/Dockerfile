@@ -6,6 +6,8 @@ WORKDIR /app
 COPY server/package.json server/package-lock.json server/
 RUN cd server && npm ci --omit=dev && npm cache clean --force
 COPY data data
+COPY site site
+COPY client/i18n client/i18n
 COPY server/tsconfig.json server/
 COPY server/migrations server/migrations
 COPY server/src server/src

@@ -127,7 +127,7 @@ static func opening(data: Dictionary, battle: Dictionary, ctx: Dictionary) -> St
 		text += UI.t(" %s led them.") % ctx.led_by
 	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
 	if setup.has("wall"):
-		text += UI.t(" Our %s stood between them (%d to batter down).") % [UI.t(WallText.tier(data, int(setup.wall.level))).to_lower(), int(setup.wall.max)]
+		text += UI.t(" Our %s stood between them (%d to batter down).") % [WallText.tier(data, int(setup.wall.level)).to_lower(), int(setup.wall.max)]
 	if setup.has("siege"):
 		var engine: String = setup.siege.engine
 		text += UI.t(" They built %s before the assault.") % units_text(data, {engine: int(setup.siege.count)})

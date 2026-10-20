@@ -7,6 +7,7 @@ extends Node2D
 const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
 const NEGATIVE := UiTheme.MADDER
+const REPORT_MAX := 4000
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: MapCamera = $MapCamera
@@ -433,11 +434,11 @@ func _battle_ctx(battle: Dictionary) -> Dictionary:
 	var place := Game.battle_place(battle)
 	var ctx := {
 		"place": place,
-		"enemy": ("the " + tr(Game.front_faction(front))) if front != "" else "the enemy",
-		"enemy_leader": "%s · Lv %d" % [chief.title, int(chief.level)] if not chief.is_empty() else "Their chief",
+		"enemy": (tr("the %s") % tr(Game.front_faction(front))) if front != "" else tr("the enemy"),
+		"enemy_leader": tr("%s, level %d") % [chief.title, int(chief.level)] if not chief.is_empty() else tr("Their chief"),
 		"led_by": String(chief.get("title", "")),
 		"leader_after": LeaderText.after_battle(chief, battle, place),
-		"from": front.capitalize() if front != "" else "wilds",
+		"from": {"north": tr("From the north"), "east": tr("From the east"), "south": tr("From the south"), "west": tr("From the west")}.get(front, tr("From the wilds")),
 		"ours": HexMap.ALLY_COLOR if not village.is_empty() and not Game.is_mine(village) else HexMap.MINE_COLOR,
 		"terrain": Game.terrain.get(cell, "plains"),
 		"river": not RiverText.edges_at(Game.rivers, cell).is_empty(),
@@ -2257,7 +2258,8 @@ func _report_bug() -> void:
 
 
 func _send_report(message: String) -> void:
-	var clean := message.strip_edges()
+	# The server takes up to 4000 characters.
+	var clean := message.strip_edges().left(REPORT_MAX)
 	if clean == "":
 		_status.text = tr("Write what went wrong first.")
 		return

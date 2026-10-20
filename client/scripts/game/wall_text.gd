@@ -19,7 +19,8 @@ static func tier_def(data: Dictionary, level: int) -> Dictionary:
 ## "Palisade", "Timber Rampart", "Stone Wall", "Fortress Walls"; "" with no
 ## walls.
 static func tier(data: Dictionary, level: int) -> String:
-	return String(tier_def(data, level).get("name", ""))
+	var name := String(tier_def(data, level).get("name", ""))
+	return UI.t(name) if name != "" else ""
 
 
 ## "wood", "timber", "stone", "fortress"; "" with no walls.

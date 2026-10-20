@@ -6,15 +6,28 @@
 //
 // English is the source text. A translation map holds the Serbian versions of
 // the notice templates; the same rendered text is stored in the inbox and sent
-// by push, so a player sees one language everywhere.
+// by push, so a player sees one language everywhere. Everything else a notice
+// carries from the game data (stories, quests, techs, names, threat levels) is
+// already translated in the client's gettext catalog, which serves as the
+// fallback, both for templates and for the values filled into them.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 export type Language = string;
+
+const CATALOGS: Record<string, string> = {
+	sr: fileURLToPath(new URL('../../client/i18n/sr_Latn.po', import.meta.url)),
+};
 
 const SERBIAN: Record<string, string> = {
 	// Wave warnings
 	'A horde is coming to {village}': 'Horda dolazi u {village}',
-	'The {threat} {front} horde arrives {when}. Check the garrison and its stance.':
-		'{threat} horda sa strane {front} dolazi {when}. Proveri posadu i njen stav.',
+	'The {threat} {front} horde arrives in about {hours} hours. Check the garrison and its stance.':
+		'Dolazi {threat} horda sa {front}, za oko {hours} h. Proveri posadu i njen stav.',
+	'The {threat} {front} horde arrives in about an hour. Check the garrison and its stance.':
+		'Dolazi {threat} horda sa {front}, za oko sat vremena. Proveri posadu i njen stav.',
+	'The {threat} {front} horde arrives within the hour. Check the garrison and its stance.':
+		'Dolazi {threat} horda sa {front}, za manje od sat vremena. Proveri posadu i njen stav.',
 	'Today in {world}': 'Danas u svetu {world}',
 	// Battles
 	'{village} is under attack': '{village} je napadnuto',
@@ -27,7 +40,8 @@ const SERBIAN: Record<string, string> = {
 	'The horde was beaten after {rounds} rounds.': 'Horda je pobeđena posle {rounds} rundi.',
 	// Field battles
 	'A horde ran into your army at ({q}, {r})': 'Horda je naletela na tvoju vojsku na ({q}, {r})',
-	'{enemy} against {defenders}{ground}.': '{enemy} protiv {defenders}{ground}.',
+	'{enemy} against {defenders}.': '{enemy} protiv {defenders}.',
+	'{enemy} against {defenders}, with {ground}.': '{enemy} protiv {defenders}, uz {ground}.',
 	'The Holy City held': 'Sveti grad se održao',
 	'The Holy City was struck': 'Sveti grad je udaren',
 	'The horde was beaten at its walls after {rounds} rounds.': 'Horda je pobeđena kod njegovih zidina posle {rounds} rundi.',
@@ -121,16 +135,97 @@ const SERBIAN: Record<string, string> = {
 	'Explored and done.': 'Istraženo i završeno.',
 	'Command them as your own for {days} day. Everything you do is noted for them.':
 		'Upravljaj njima kao svojim {days} dan. Sve što uradiš je zabeleženo za njih.',
+	'Ritual Night': 'Obredna noć',
+	// Values filled into the templates above.
+	north: 'severa',
+	east: 'istoka',
+	south: 'juga',
+	west: 'zapada',
+	beasts: 'zveri',
+	bandits: 'razbojnike',
+	site: 'nalazište',
+	'your village': 'tvoje selo',
+	'an ambush': 'zasedu',
+	'a choke point': 'tesnac',
+	'a fort': 'utvrdu',
+	'a river crossing': 'rečni prelaz',
+	'That hex is not on the map': 'To polje nije na mapi',
+	'Too close to the Holy City': 'Preblizu Svetom gradu',
+	'An outpost stands there': 'Tamo stoji ispostava',
 };
 
 const TABLES: Record<string, Record<string, string>> = {
 	sr: SERBIAN,
 };
 
+const merged = new Map<string, Record<string, string>>();
+
+/** The notice table over the client's catalog, for `language`; null for English. */
 function table(language: Language): Record<string, string> | null {
-	const tag = String(language).toLowerCase();
-	if (tag.startsWith('sr')) return SERBIAN;
-	return TABLES[tag] ?? null;
+	const tag = String(language).toLowerCase().startsWith('sr') ? 'sr' : String(language).toLowerCase();
+	const own = TABLES[tag];
+	if (!own) return null;
+	let all = merged.get(tag);
+	if (!all) {
+		all = { ...readCatalog(CATALOGS[tag]), ...own };
+		merged.set(tag, all);
+	}
+	return all;
+}
+
+/** A gettext catalog's translations (msgid → msgstr, plural forms left out); {} without the file. */
+export function parsePo(text: string): Record<string, string> {
+	const out: Record<string, string> = {};
+	const unquote = (line: string) => JSON.parse(line.trim()) as string;
+	let id: string | null = null;
+	let str: string | null = null;
+	let field: 'id' | 'str' | null = null;
+	const flush = () => {
+		if (id && str) out[id] = str;
+		id = str = null;
+		field = null;
+	};
+	for (const line of text.split(/\r?\n/)) {
+		if (line.startsWith('msgid ')) {
+			flush();
+			id = unquote(line.slice(6));
+			field = 'id';
+		} else if (line.startsWith('msgstr ')) {
+			str = unquote(line.slice(7));
+			field = 'str';
+		} else if (line.startsWith('"') && field) {
+			if (field === 'id') id += unquote(line);
+			else str += unquote(line);
+		} else if (line.startsWith('msgid_plural') || line.startsWith('msgstr[')) {
+			// Plural entries are the client's own.
+			id = null;
+			field = null;
+		}
+	}
+	flush();
+	return out;
+}
+
+function readCatalog(path: string | undefined): Record<string, string> {
+	if (!path) return {};
+	try {
+		return parsePo(readFileSync(path, 'utf8'));
+	} catch {
+		return {};
+	}
+}
+
+/** A value filled into a template, in `t`: as written, or capitalised as the
+ * data has it ("severe" → "Severe" → "teška"), or each of a list's items. */
+function translateValue(t: Record<string, string>, value: string): string {
+	if (t[value]) return t[value];
+	const capital = value.charAt(0).toUpperCase() + value.slice(1);
+	if (capital !== value && t[capital]) {
+		const found = t[capital];
+		return found.charAt(0).toLowerCase() + found.slice(1);
+	}
+	if (value.includes(', ')) return value.split(', ').map((part) => translateValue(t, part)).join(', ');
+	return value;
 }
 
 /** Fills `{name}` placeholders from `vars` (missing ones are left as-is). */
@@ -141,6 +236,8 @@ export function fill(template: string, vars?: Record<string, string | number>): 
 
 /** Renders an English template in `language`, then fills its values. */
 export function localize(language: Language, template: string, vars?: Record<string, string | number>): string {
-	const translated = table(language)?.[template] ?? template;
-	return fill(translated, vars);
+	const t = table(language);
+	if (!t) return fill(template, vars);
+	const values = vars && Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, typeof v === 'string' ? translateValue(t, v) : v]));
+	return fill(t[template] ?? template, values);
 }

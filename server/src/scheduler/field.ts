@@ -145,13 +145,13 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
       kind: 'under_attack',
       tier: 'push',
       title: 'A horde ran into your army at ({q}, {r})',
-      body: '{enemy} against {defenders}{ground}.',
+      body: ground ? '{enemy} against {defenders}, with {ground}.' : '{enemy} against {defenders}.',
       vars: {
         q: cell.q,
         r: cell.r,
         enemy: total(wave.composition),
         defenders: total(battle.defenderInitial),
-        ground: ground ? `, with ${ground}` : '',
+        ground,
       },
     }, at);
   }
