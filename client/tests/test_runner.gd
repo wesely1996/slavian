@@ -45,7 +45,6 @@ func _initialize() -> void:
 	_test_translation()
 	_test_walls()
 	_test_rivers()
-	_test_server_url()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -255,14 +254,6 @@ func _test_battle_text() -> void:
 	_check(BattleText.raid({"q": 3, "r": -2, "levelAfter": 2}, "Vesna's village").ends_with("down to level 2."), "raid down a level")
 	var stanced := {"sent": 4, "survivors": 4, "dispersed": false, "tier": "detailed", "stance": "hold_the_line", "size": {"min": 9, "max": 11}, "units": [{"unit": "grey_wolf", "name": "Grey Wolf", "min": 5, "max": 7}]}
 	_check(ScoutText.describe(stanced) == "9–11 units, hold the line stance: Grey Wolf 5–7", "scout report shows stance: %s" % ScoutText.describe(stanced))
-
-
-func _test_server_url() -> void:
-	var session := load("res://scripts/net/session.gd")
-	_check(session.normalize_url(" 192.168.1.10:8080/ ") == "http://192.168.1.10:8080", "LAN IP gets http")
-	_check(session.normalize_url("localhost:8080") == "http://localhost:8080", "localhost gets http")
-	_check(session.normalize_url("affects-taken-marble-serial.trycloudflare.com") == "https://affects-taken-marble-serial.trycloudflare.com", "domain gets https")
-	_check(session.normalize_url("http://example.com") == "http://example.com", "explicit scheme kept")
 
 
 func _test_caravans() -> void:

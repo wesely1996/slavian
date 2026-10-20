@@ -24,7 +24,7 @@ A cooperative PvE hex-map strategy game for small groups of busy adults: defend 
    docker compose -f ops/docker-compose.yml up -d --build
    ```
 2. Install the latest dev build APK (see Releases) on your phone.
-3. In the app, set **Server address** to `http://<that computer's LAN IP>:8080`, enter a name and tap **Play as guest**.
+3. Phone builds always talk to the production server (`REMOTE_SERVER_URL` in `client/scripts/net/session.gd`). To use this one instead, run the game from the editor on the same computer, or set `SLAVIAN_SERVER_URL=http://<that computer's LAN IP>:8080` before starting it. Enter a name and tap **Play as guest**.
 4. Create a world and share its invite code; teammates tap **Join**. The host taps **Start the world**.
 
 Pick **Test (10×)** speed to see builds finish quickly.
