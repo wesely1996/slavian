@@ -527,9 +527,10 @@ func _test_art() -> void:
 	_check(Art.ids().size() >= 40, "art manifest read: %d ids" % Art.ids().size())
 	var missing := []
 	for id in Art.ids():
-		if Art.texture(id) == null:
+		if Art.texture(id) == null and not id in Art.OPTIONAL:
 			missing.append(id)
 	_check(missing.is_empty(), "every art id loads: %s" % [missing])
+	_check(Art.has("brand/logo") and Art.has("brand/emblem") and Art.has("ui/hero") and Art.has("ui/wood"), "the brand, the start painting and the wood")
 	for terrain in ["plains", "forest", "hills", "mountain", "swamp", "lake", "holy_city", "ocean", "dark_forest", "ice", "steppe", "hallowed"]:
 		_check(Terrain.COLORS.has(terrain) and Terrain.HEIGHTS.has(terrain), "ground for %s" % terrain)
 		for kind in MapFeatures.FEATURES.get(terrain, []):

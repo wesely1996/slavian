@@ -11,73 +11,50 @@ const LANGUAGES := [["en", "English"], ["sr_Latn", "Srpski"]]
 
 var _status: Label
 var _content: VBoxContainer
+var _layout: BoxContainer
+var _hero: Control
+var _logo: TextureRect
+var _tagline: Label
+var _frame: PanelContainer
 var _lobby_world_id := 0
 ## Both the start request and the live "world started" push lead here.
 var _entering := false
 
 
 func _ready() -> void:
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
-	for side in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 48)
-	add_child(margin)
+	# Full bleed, nothing wasted: the painting with the logo on one side (on
+	# top on a phone), the sheet framed in plated wood on the other.
+	var back := ColorRect.new()
+	back.color = UiTheme.WOOD_DEEP
+	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(back)
+	_layout = BoxContainer.new()
+	_layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_layout.add_theme_constant_override("separation", 0)
+	add_child(_layout)
+	_hero = _build_hero()
+	_layout.add_child(_hero)
 
+	_frame = PanelContainer.new()
+	_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_layout.add_child(_frame)
+	var sheet_box := UI.panel(1.0, 0)
+	sheet_box.add_theme_stylebox_override("panel", UiTheme.sheet_style(24))
+	_frame.add_child(sheet_box)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	margin.add_child(scroll)
-	# One column, as wide as a phone, in the middle of any screen.
-	var root := UI.vbox(24)
-	root.size_flags_horizontal = Control.SIZE_SHRINK_CENTER | Control.SIZE_EXPAND
-	root.custom_minimum_size.x = minf(720.0, get_viewport_rect().size.x - 48.0)
-	scroll.add_child(root)
-
-	var picture := UI.icon("ui/title", 0)
-	picture.custom_minimum_size.y = 328
-	root.add_child(picture)
-	var title := UI.label(tr("Slavian"), 96)
-	title.theme_type_variation = "Logo"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(title)
-	var tagline := UI.label(tr("Defend the Holy City. Build the Kalinov Bridge."), UI.SMALL_SIZE + 4)
-	tagline.theme_type_variation = "OnWoodMuted"
-	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(tagline)
-	_status = UI.label("", UI.SMALL_SIZE, Color("#e58a7d"))
-	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(_status)
-	var frame := UI.panel()
-	root.add_child(frame)
-	var sheet := UI.vbox(20)
-	frame.add_child(sheet)
-	# The language, by its own name, at the head of the sheet.
-	var languages := UI.hbox(8)
-	for language in LANGUAGES:
-		var code: String = language[0]
-		var pick := UI.button(language[1], func() -> void:
-			Session.set_language(code)
-			get_tree().reload_current_scene())
-		pick.theme_type_variation = "TabButton"
-		pick.disabled = Session.language == code
-		pick.custom_minimum_size.x = 160
-		languages.add_child(pick)
-	sheet.add_child(languages)
-	# Text size for accessibility: small, normal, large.
-	var sizes := UI.hbox(8)
-	for entry in [["small", tr("Small")], ["normal", tr("Normal")], ["large", tr("Large")]]:
-		var size_code: String = entry[0]
-		var size_pick := UI.button(entry[1], func() -> void:
-			Session.set_text_size(size_code)
-			get_tree().reload_current_scene())
-		size_pick.theme_type_variation = "TabButton"
-		size_pick.disabled = Session.text_size == size_code
-		size_pick.custom_minimum_size.x = 160
-		sizes.add_child(size_pick)
-	sheet.add_child(sizes)
+	sheet_box.add_child(scroll)
+	var sheet := UI.vbox(18)
+	sheet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(sheet)
+	sheet.add_child(_settings_row())
+	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
+	sheet.add_child(_status)
 	_content = UI.vbox(20)
 	sheet.add_child(_content)
+	get_viewport().size_changed.connect(_arrange)
+	_arrange()
 
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)
@@ -86,6 +63,99 @@ func _ready() -> void:
 		_show_home()
 	else:
 		_show_login()
+
+
+## The painting, the logo in its sky and the tagline.
+func _build_hero() -> Control:
+	var hero := Control.new()
+	hero.clip_contents = true
+	hero.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hero.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	hero.size_flags_stretch_ratio = 1.35
+	var painting := TextureRect.new()
+	painting.texture = Art.texture("ui/hero")
+	painting.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	painting.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	painting.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hero.add_child(painting)
+	_logo = TextureRect.new()
+	_logo.texture = Art.texture("brand/logo")
+	_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero.add_child(_logo)
+	_tagline = UI.label(tr("Defend the Holy City. Build the Kalinov Bridge."), UI.SMALL_SIZE + 6)
+	_tagline.theme_type_variation = "OnWood"
+	_tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_tagline.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	_tagline.add_theme_constant_override("outline_size", 8)
+	hero.add_child(_tagline)
+	hero.resized.connect(_place_logo)
+	return hero
+
+
+## Side by side on a wide screen, stacked on a tall one.
+func _arrange() -> void:
+	var area := get_viewport_rect().size
+	var wide := area.x > area.y * 1.05
+	_layout.vertical = not wide
+	_hero.custom_minimum_size = Vector2.ZERO if wide else Vector2(0, area.y * 0.36)
+	_hero.size_flags_vertical = Control.SIZE_EXPAND_FILL if wide else Control.SIZE_FILL
+	var frame := PlatedWood.new(18)
+	# The gold rail runs where the wood meets the painting.
+	if wide:
+		frame.rails = [SIDE_LEFT]
+		frame.plates = [CORNER_TOP_LEFT, CORNER_BOTTOM_LEFT, CORNER_TOP_RIGHT, CORNER_BOTTOM_RIGHT]
+	else:
+		frame.rails = [SIDE_TOP]
+		frame.plates = [CORNER_TOP_LEFT, CORNER_TOP_RIGHT]
+	frame.content_margin_left = 26.0 if wide else 16.0
+	frame.content_margin_top = 18.0 if wide else 24.0
+	_frame.add_theme_stylebox_override("panel", frame)
+	_place_logo.call_deferred()
+
+
+## The logo in the painting's sky, as large as fits; the tagline under it.
+func _place_logo() -> void:
+	var box := _hero.size
+	if _logo.texture == null or box.x <= 0.0:
+		return
+	var aspect := float(_logo.texture.get_width()) / float(_logo.texture.get_height())
+	var height := minf(box.y * 0.5, box.x * 0.78 / aspect)
+	var size := Vector2(height * aspect, height)
+	_logo.position = Vector2((box.x - size.x) / 2.0, box.y * 0.05)
+	_logo.size = size
+	_tagline.position = Vector2(box.x * 0.05, _logo.position.y + size.y + 2.0)
+	_tagline.size = Vector2(box.x * 0.9, 0)
+
+
+## The language (by its own name) and the text size, on one row.
+func _settings_row() -> Control:
+	var row := UI.hbox(8)
+	for language in LANGUAGES:
+		var code: String = language[0]
+		var pick := UI.button(language[1], func() -> void:
+			Session.set_language(code)
+			get_tree().reload_current_scene())
+		pick.theme_type_variation = "TabButton"
+		pick.disabled = Session.language == code
+		pick.custom_minimum_size.x = 150
+		row.add_child(pick)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(spacer)
+	# Text size for accessibility: the same letter at three sizes.
+	for entry in [["small", 22, tr("Small")], ["normal", 28, tr("Normal")], ["large", 36, tr("Large")]]:
+		var size_code: String = entry[0]
+		var size_pick := UI.button("A", func() -> void:
+			Session.set_text_size(size_code)
+			get_tree().reload_current_scene())
+		size_pick.theme_type_variation = "TabButton"
+		size_pick.add_theme_font_size_override("font_size", int(entry[1]))
+		size_pick.tooltip_text = tr("Text size: %s") % entry[2]
+		size_pick.disabled = Session.text_size == size_code
+		size_pick.custom_minimum_size = Vector2(64, 76)
+		row.add_child(size_pick)
+	return row
 
 
 func _exit_tree() -> void:

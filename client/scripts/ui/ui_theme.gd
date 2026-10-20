@@ -114,7 +114,10 @@ static func build() -> Theme:
 	var hover_row := StyleBoxFlat.new()
 	hover_row.bg_color = Color(MALACHITE, 0.16)
 	theme.set_stylebox("hover", "PopupMenu", hover_row)
-	theme.set_stylebox("panel", "TooltipPanel", wood_style(10))
+	var tip := wood_style(10)
+	(tip as PlatedWood).plates = []
+	(tip as PlatedWood).rivet_every = 0.0
+	theme.set_stylebox("panel", "TooltipPanel", tip)
 	theme.set_color("font_color", "TooltipLabel", ON_WOOD)
 	theme.set_color("default_color", "RichTextLabel", INK)
 
@@ -181,14 +184,20 @@ static func build() -> Theme:
 	theme.set_stylebox("hover", "IconButton", _box(Color(INK, 0.06), Color(0, 0, 0, 0)))
 	theme.set_stylebox("pressed", "IconButton", _box(Color(INK, 0.12), Color(0, 0, 0, 0)))
 
-	# Buttons on the wood: flax lettering, a faint outline (none for icons).
+	# Buttons on the wood: plated wood with flax lettering; icon-only ones
+	# stay bare until touched.
 	for type in ["WoodButton", "WoodIconButton"]:
 		theme.set_type_variation(type, "Button")
-		var line := Color(ON_WOOD, 0.3) if type == "WoodButton" else Color(0, 0, 0, 0)
-		theme.set_stylebox("normal", type, _box(Color(0, 0, 0, 0), line))
-		theme.set_stylebox("hover", type, _box(Color(ON_WOOD, 0.08), Color(ON_WOOD, 0.5)))
-		theme.set_stylebox("pressed", type, _box(Color(ON_WOOD, 0.16), ON_WOOD))
-		theme.set_stylebox("hover_pressed", type, _box(Color(ON_WOOD, 0.16), ON_WOOD))
+		if type == "WoodButton":
+			theme.set_stylebox("normal", type, plated_button())
+			theme.set_stylebox("hover", type, plated_button(0.08))
+			theme.set_stylebox("pressed", type, plated_button(-0.25))
+			theme.set_stylebox("hover_pressed", type, plated_button(-0.25))
+		else:
+			theme.set_stylebox("normal", type, _box(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
+			theme.set_stylebox("hover", type, _box(Color(ON_WOOD, 0.08), Color(0, 0, 0, 0)))
+			theme.set_stylebox("pressed", type, _box(Color(ON_WOOD, 0.16), Color(0, 0, 0, 0)))
+			theme.set_stylebox("hover_pressed", type, _box(Color(ON_WOOD, 0.16), Color(0, 0, 0, 0)))
 		for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
 			theme.set_color(state, type, ON_WOOD)
 		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
@@ -239,11 +248,27 @@ static func sheet_style(padding := 22, alpha := 1.0) -> StyleBoxFlat:
 	return style
 
 
-## The dark wood of the top band.
-static func wood_style(padding := 14) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = WOOD
-	style.set_content_margin_all(padding)
+## Walnut with gold plating (PlatedWood): a rail along the bottom with
+## rivets and plates at the corners; the top band's look.
+static func wood_style(padding := 14) -> StyleBox:
+	var style := PlatedWood.new(padding)
+	style.plates = [CORNER_BOTTOM_LEFT, CORNER_BOTTOM_RIGHT]
+	return style
+
+
+## A button of plated wood: a thin gold rim and small corner plates; `lift`
+## lightens it under the finger and darkens it pressed.
+static func plated_button(lift := 0.0) -> StyleBox:
+	var style := PlatedWood.new(0)
+	style.rails = [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
+	style.rail_width = 2.0
+	style.rivet_every = 0.0
+	style.plate_size = 12.0
+	style.lift = lift
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
 	return style
 
 
