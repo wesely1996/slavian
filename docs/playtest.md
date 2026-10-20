@@ -41,13 +41,13 @@ Check it: opening `https://<address>/health` in a browser shows `{"ok":true}`.
 ## 3. Play
 
 1. Install the latest **Dev build** APK from the repository's Releases on each phone.
-2. In the app, set **Server address** to the `https://….trycloudflare.com` address, enter a name, **Play as guest**.
+2. Exported builds always use the production server (`docs/production.md`). To play on this one, start the game with `SLAVIAN_SERVER_URL=https://….trycloudflare.com` (the editor or a desktop build). Enter a name, **Play as guest**.
 3. One player creates a world (**Test (10×)** speed for a quick playtest) and shares the invite code; the others **Join**; the host taps **Start the world**.
 
 ## Day to day
 
 - **Stopping:** `docker compose -f ops/playtest/docker-compose.yml down`. Nothing is lost: worlds live in Neon, and when the server starts again it processes everything that came due while it was off, in order (builds finish, waves march and fight on schedule).
-- **New address after a restart:** quick tunnels get a new random address every time they start. Look it up again (step 2) and in the app tap **Change** next to *Server* on the worlds screen. You stay signed in; accounts live in the database.
+- **New address after a restart:** quick tunnels get a new random address every time they start. Look it up again (step 2) and restart the game with the new `SLAVIAN_SERVER_URL`. You stay signed in; accounts live in the database.
 - **Updating:** `git pull`, then the same `up -d --build` command.
 - **Logs:** `docker compose -f ops/playtest/docker-compose.yml logs -f server`.
 

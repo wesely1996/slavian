@@ -33,7 +33,7 @@ same machine.
    ```
 5. **Check:**
    - `curl https://play.example.com/health` answers `{"ok":true}`.
-   - In the app, set the server to `https://play.example.com`.
+   - Set `REMOTE_SERVER_URL` in `client/scripts/net/session.gd` to `https://play.example.com`: every exported build talks to it, with no address to type.
 
 ## Updates
 

@@ -2256,172 +2256,144 @@ msgid "Text size: %s"
 msgstr ""
 
 #: client/scripts/screens/start_screen.gd:174
-msgid "Server address"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:177
 msgid "Your name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:178
+#: client/scripts/screens/start_screen.gd:175
 msgid "e.g. Vesna"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:180
+#: client/scripts/screens/start_screen.gd:177
 msgid "Play as guest"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:208
+#: client/scripts/screens/start_screen.gd:204
 msgid "Loading…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:217
-msgid "Server: %s"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:218
+#: client/scripts/screens/start_screen.gd:213
 msgid "Retry"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:219
-msgid "Change server address"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:226
+#: client/scripts/screens/start_screen.gd:220
 msgid "Signed in as %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:229
+#: client/scripts/screens/start_screen.gd:223
 msgid "Sign out"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:237
-msgid "Change"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:240
+#: client/scripts/screens/start_screen.gd:228
 msgid "Your worlds"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:242
+#: client/scripts/screens/start_screen.gd:230
 msgid "None yet. Create one or join with a code."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:244
+#: client/scripts/screens/start_screen.gd:232
 msgid "in lobby"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:248
+#: client/scripts/screens/start_screen.gd:236
 msgid "New world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:249
+#: client/scripts/screens/start_screen.gd:237
 msgid "World name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:249
+#: client/scripts/screens/start_screen.gd:237
 msgid "%s's world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:252
+#: client/scripts/screens/start_screen.gd:240
 msgid "%d player"
 msgid_plural "%d players"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/start_screen.gd:261
+#: client/scripts/screens/start_screen.gd:249
 msgid "Create world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:264
+#: client/scripts/screens/start_screen.gd:252
 msgid "Join a world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:265
+#: client/scripts/screens/start_screen.gd:253
 msgid "Invite code"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:267
+#: client/scripts/screens/start_screen.gd:255
 msgid "Join"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:270
+#: client/scripts/screens/start_screen.gd:258
 msgid "Support and privacy"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:275
+#: client/scripts/screens/start_screen.gd:263
 msgid "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:289
+#: client/scripts/screens/start_screen.gd:277
 msgid "Could not load the server costs."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:295
+#: client/scripts/screens/start_screen.gd:283
 msgid "This month (%s): server costs %s, donations %s."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:304
+#: client/scripts/screens/start_screen.gd:292
 msgid "Carried to next month: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:307
+#: client/scripts/screens/start_screen.gd:295
 msgid "Buy me a coffee"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:308
+#: client/scripts/screens/start_screen.gd:296
 msgid "Privacy policy"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:310
+#: client/scripts/screens/start_screen.gd:298
 msgid "Export my data"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:311
+#: client/scripts/screens/start_screen.gd:299
 msgid "Delete my account"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:323
+#: client/scripts/screens/start_screen.gd:311
 msgid "Could not write the export file."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:327
+#: client/scripts/screens/start_screen.gd:315
 msgid "Your data is saved to %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:333
+#: client/scripts/screens/start_screen.gd:321
 msgid "Tap again to delete your account and all its data."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:351
-msgid "You stay signed in; your account lives on the server."
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:354
-msgid "Save"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:358
-msgid "Cancel"
-msgstr ""
-
-#: client/scripts/screens/start_screen.gd:397
+#: client/scripts/screens/start_screen.gd:368
 msgid "Share it with your group. %d of %d players joined."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:399
+#: client/scripts/screens/start_screen.gd:370
 msgid " (host)"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:403
+#: client/scripts/screens/start_screen.gd:374
 msgid "Start the world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:405
+#: client/scripts/screens/start_screen.gd:376
 msgid "Waiting for the host to start…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:421
+#: client/scripts/screens/start_screen.gd:392
 msgid "Your clan: %s"
 msgstr ""
 

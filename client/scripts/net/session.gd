@@ -1,10 +1,15 @@
 extends Node
-## The server address, login token and language, persisted on the device.
+## The login token and language, persisted on the device, and the server
+## the game talks to.
 
 const PATH := "user://session.cfg"
-const DEFAULT_SERVER_URL := "http://127.0.0.1:8080"
+## The game's server (docs/production.md). Exported builds always use it.
+const REMOTE_SERVER_URL := "https://2-31-39-17.sslip.io"
+## A server on this computer, for running the game from the editor.
+const LOCAL_SERVER_URL := "http://127.0.0.1:8080"
 
-var server_url := DEFAULT_SERVER_URL
+## SLAVIAN_SERVER_URL overrides both, e.g. to try a branch's server.
+var server_url := _pick_server_url()
 var token := ""
 var account: Dictionary = {}
 ## The game's language: "en" or "sr_Latn" (docs/localization.md).
@@ -16,7 +21,6 @@ var text_size := "normal"
 func _ready() -> void:
 	var config := ConfigFile.new()
 	if config.load(PATH) == OK:
-		server_url = config.get_value("session", "server_url", DEFAULT_SERVER_URL)
 		token = config.get_value("session", "token", "")
 		language = config.get_value("session", "language", "")
 		text_size = config.get_value("session", "text_size", "normal")
@@ -38,7 +42,6 @@ func _ready() -> void:
 
 func save() -> void:
 	var config := ConfigFile.new()
-	config.set_value("session", "server_url", server_url)
 	config.set_value("session", "token", token)
 	config.set_value("session", "language", language)
 	config.set_value("session", "text_size", text_size)
@@ -76,19 +79,11 @@ func log_out() -> void:
 	save()
 
 
-func set_server_url(url: String) -> void:
-	server_url = normalize_url(url)
-
-
-## Adds a scheme when missing: http for IPs and localhost (a server on your
-## Wi-Fi), https for domain names (e.g. a trycloudflare.com tunnel).
-static func normalize_url(url: String) -> String:
-	var clean := url.strip_edges().trim_suffix("/")
-	if clean.contains("://"):
-		return clean
-	var host := clean.split("/")[0].split(":")[0]
-	var local := host == "localhost" or host.is_valid_ip_address()
-	return ("http://" if local else "https://") + clean
+static func _pick_server_url() -> String:
+	var override := OS.get_environment("SLAVIAN_SERVER_URL").strip_edges().trim_suffix("/")
+	if override != "":
+		return override
+	return LOCAL_SERVER_URL if OS.has_feature("editor") else REMOTE_SERVER_URL
 
 
 func live_url() -> String:
