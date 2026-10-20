@@ -4,6 +4,7 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { WATER } from '../sim/mapgen.js';
 import { insertRoad, markRoadStanding, roadEdge, type RoadEdge } from '../db/roads.js';
 import { canCross } from '../sim/land.js';
 import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
@@ -377,6 +378,9 @@ export async function buildCrossing(client: DbClient, data: GameData, world: Wor
   if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) throw new RuleError(`Bridges go within ${rules.range} hexes of the village`);
   const edge = await riverEdge(client, world.id, a, b);
   if (!edge) throw new RuleError('No river runs there');
+  // Old maps had rivers along lake shores; a bridge needs land on both banks.
+  const land = await terrainOf(client, world.id);
+  if ([a, b].some((end) => WATER.includes(land.get(`${end.q},${end.r}`) ?? ''))) throw new RuleError('A bridge needs land on both banks');
   if (edge.crossing !== 'none') throw new RuleError(edge.crossing === 'standing' ? 'A bridge already stands there' : 'A bridge is being built there');
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
   const completesAt = new Date(at.getTime() + (rules.buildSeconds * 1000) / world.speed);

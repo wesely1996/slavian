@@ -1,8 +1,18 @@
 class_name RiverText
 extends RefCounted
 ## Rivers along hex edges and their bridges (server sim/land.ts, db/rivers.ts).
-## Game.rivers holds [aq, ar, bq, br, crossing], crossing being "none",
-## "building" or "standing".
+## Game.rivers holds [aq, ar, bq, br, crossing, size], crossing being "none",
+## "building" or "standing", and size 1 from a river's source, +1 for each
+## river that joined it above.
+
+
+## Terrain a river flows into and never runs along (server mapgen WATER).
+const WATER := ["lake", "ocean"]
+
+
+## How big the river is along an edge (1 when the server didn't say).
+static func size_of(edge: Array) -> int:
+	return int(edge[5]) if edge.size() > 5 else 1
 
 
 ## The river edges along `cell`: [{"other": Vector2i, "crossing": String}].
@@ -24,7 +34,10 @@ static func direction(a: Vector2i, b: Vector2i) -> int:
 
 
 ## Why a bridge can't be built over the edge a-b from `home`, or "".
-static func bridge_problem(data: Dictionary, home: Vector2i, a: Vector2i, b: Vector2i) -> String:
+static func bridge_problem(data: Dictionary, home: Vector2i, a: Vector2i, b: Vector2i, terrain := {}) -> String:
+	# Rivers on older maps could run along a lake: no bridge leads onto water.
+	if String(terrain.get(a, "")) in WATER or String(terrain.get(b, "")) in WATER:
+		return UI.t("A bridge needs land on both banks")
 	var range_ := int(data.field.bridge.range)
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > range_:
 		return UI.t("Bridges go within %d hexes of your village") % range_

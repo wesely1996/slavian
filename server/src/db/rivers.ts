@@ -13,6 +13,7 @@ export interface StoredRiverEdge {
   crossing: Crossing;
   builtBy: number | null;
   completesAt: Date | null;
+  size: number;
 }
 
 interface Row {
@@ -23,6 +24,7 @@ interface Row {
   crossing: Crossing;
   built_by: string | null;
   completes_at: Date | null;
+  size: number;
 }
 
 // Stored with a before b (edgeKey order), so each edge has one row.
@@ -34,8 +36,8 @@ export async function insertRivers(client: DbClient, worldId: number, rivers: re
   for (const edge of rivers) {
     const [a, b] = ordered(edge.a, edge.b);
     await client.query(
-      'INSERT INTO river_edges (world_id, aq, ar, bq, br, crossing) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING',
-      [worldId, a.q, a.r, b.q, b.r, edge.bridge ? 'standing' : 'none'],
+      'INSERT INTO river_edges (world_id, aq, ar, bq, br, crossing, size) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING',
+      [worldId, a.q, a.r, b.q, b.r, edge.bridge ? 'standing' : 'none', edge.size],
     );
   }
 }
@@ -48,6 +50,7 @@ export async function listRiverEdges(client: DbClient, worldId: number): Promise
     crossing: r.crossing,
     builtBy: r.built_by === null ? null : Number(r.built_by),
     completesAt: r.completes_at,
+    size: r.size,
   }));
 }
 
