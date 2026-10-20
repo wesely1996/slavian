@@ -28,6 +28,9 @@ services:
       PORT: "8080"
     ports:
       - "8080:8080"
+    # The month's costs are edited in site/costs.json without a rebuild.
+    volumes:
+      - ../site:/app/site:ro
     depends_on:
       postgres:
         condition: service_healthy

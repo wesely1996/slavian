@@ -144,8 +144,15 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     await tell(client, world, owner, {
       kind: 'under_attack',
       tier: 'push',
-      title: `A horde ran into your army at (${cell.q}, ${cell.r})`,
-      body: `${total(wave.composition)} against ${total(battle.defenderInitial)}${ground ? `, with ${ground}` : ''}.`,
+      title: 'A horde ran into your army at ({q}, {r})',
+      body: ground ? '{enemy} against {defenders}, with {ground}.' : '{enemy} against {defenders}.',
+      vars: {
+        q: cell.q,
+        r: cell.r,
+        enemy: total(wave.composition),
+        defenders: total(battle.defenderInitial),
+        ground,
+      },
     }, at);
   }
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
@@ -263,7 +270,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
           kind: 'battle_result',
           tier: won ? 'digest' : 'push',
           title: won ? 'The Holy City held' : 'The Holy City was struck',
-          body: won ? `The horde was beaten at its walls after ${round} rounds.` : `Its Sanctity fell to ${(await getWorld(client, world.id)).sanctity}.`,
+          body: won ? 'The horde was beaten at its walls after {rounds} rounds.' : 'Its Sanctity fell to {sanctity}.',
+          vars: won ? { rounds: round } : { sanctity: (await getWorld(client, world.id)).sanctity },
         }, at);
       }
     }
@@ -271,8 +279,9 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       await tell(client, world, owner, {
         kind: 'battle_result',
         tier: 'digest',
-        title: won ? `Your army held (${battle.q}, ${battle.r})` : `Your army fell back from (${battle.q}, ${battle.r})`,
-        body: won ? `The horde was beaten after ${round} rounds.` : `The horde marches on, ${round} rounds late.`,
+        title: won ? 'Your army held ({q}, {r})' : 'Your army fell back from ({q}, {r})',
+        body: won ? 'The horde was beaten after {rounds} rounds.' : 'The horde marches on, {rounds} rounds late.',
+        vars: { q: battle.q, r: battle.r, rounds: round },
       }, at);
     }
     await notifyWorld(client, { worldId: world.id, type: 'waves' });
@@ -409,8 +418,9 @@ export const fieldHandlers: HandlerRegistry = {
       await tellOwner(client, world, edge.builtBy, (name) => ({
         kind: 'build_done',
         tier: 'digest',
-        title: `A bridge stands near ${name}`,
-        body: `Roads now cross the river between (${aq}, ${ar}) and (${bq}, ${br}), for friend and foe alike.`,
+        title: 'A bridge stands near {village}',
+        body: 'Roads now cross the river between ({aq}, {ar}) and ({bq}, {br}), for friend and foe alike.',
+        vars: { village: name, aq, ar, bq, br },
       }), event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -431,8 +441,9 @@ export const fieldHandlers: HandlerRegistry = {
     await tell(client, world, fort.ownerAccountId, {
       kind: 'build_done',
       tier: 'digest',
-      title: `Fort at (${fort.q}, ${fort.r}) finished`,
+      title: 'Fort at ({q}, {r}) finished',
       body: 'Armies holding it fight from behind its walls.',
+      vars: { q: fort.q, r: fort.r },
     }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },

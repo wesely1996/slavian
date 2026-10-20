@@ -68,7 +68,7 @@ static func squads(data: Dictionary, start: Dictionary, now: Dictionary) -> Arra
 ## A unit's name, ours or any front's.
 static func unit_name(data: Dictionary, unit: String) -> String:
 	var def := _unit_def(data, unit)
-	return String(def.get("name", unit.replace("_", " ").capitalize()))
+	return UI.t(String(def.get("name", unit.replace("_", " ").capitalize())))
 
 
 ## A siege engine (rams, catapults, ladders, siege towers), as
@@ -94,16 +94,16 @@ static func units_text(data: Dictionary, units: Dictionary) -> String:
 	keys.sort_custom(func(a: String, b: String) -> bool: return int(units[a]) > int(units[b]))
 	var parts := PackedStringArray()
 	for unit in keys:
-		parts.append("%d %s" % [int(units[unit]), plural(unit_name(data, unit), int(units[unit]))])
+		parts.append(UI.t("%d %s") % [int(units[unit]), plural(unit_name(data, unit), int(units[unit]))])
 	if parts.is_empty():
-		return "no one"
+		return UI.t("no one")
 	if parts.size() == 1:
 		return parts[0]
-	return ", ".join(parts.slice(0, parts.size() - 1)) + " and " + parts[-1]
+	return ", ".join(parts.slice(0, parts.size() - 1)) + UI.t(" and ") + parts[-1]
 
 
 static func plural(name: String, count: int) -> String:
-	if count == 1:
+	if count == 1 or TranslationServer.get_locale().begins_with("sr"):
 		return name
 	if name.ends_with("man"):
 		return name.trim_suffix("man") + "men"
@@ -120,20 +120,20 @@ static func plural(name: String, count: int) -> String:
 ## village_name: Callable}.
 static func opening(data: Dictionary, battle: Dictionary, ctx: Dictionary) -> String:
 	var stance := String(battle.get("attackerStance", "balanced")).replace("_", " ")
-	var text := "%s came on, %s, with %s. %s held with %s." % [
-		_sentence(ctx.get("enemy", "the horde")), stance, units_text(data, battle.get("attackerInitial", {})),
-		_sentence(ctx.get("place", "the village")), units_text(data, battle.get("defenderInitial", {}))]
+	var text := UI.t("%s came on, %s, with %s. %s held with %s.") % [
+		_sentence(ctx.get("enemy", UI.t("the horde"))), stance, units_text(data, battle.get("attackerInitial", {})),
+		_sentence(ctx.get("place", UI.t("the village"))), units_text(data, battle.get("defenderInitial", {}))]
 	if ctx.get("led_by", "") != "":
-		text += " %s led them." % ctx.led_by
+		text += UI.t(" %s led them.") % ctx.led_by
 	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
 	if setup.has("wall"):
-		text += " Our %s stood between them (%d to batter down)." % [WallText.tier(data, int(setup.wall.level)).to_lower(), int(setup.wall.max)]
+		text += UI.t(" Our %s stood between them (%d to batter down).") % [WallText.tier(data, int(setup.wall.level)).to_lower(), int(setup.wall.max)]
 	if setup.has("siege"):
 		var engine: String = setup.siege.engine
-		text += " They built %s before the assault." % units_text(data, {engine: int(setup.siege.count)})
+		text += UI.t(" They built %s before the assault.") % units_text(data, {engine: int(setup.siege.count)})
 	var ground := BattleText.setup_text(battle)
 	if ground != "":
-		text += " The ground favoured us: %s." % ground.to_lower()
+		text += UI.t(" The ground favoured us: %s.") % ground.to_lower()
 	return text
 
 
@@ -144,19 +144,19 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 		return ""
 	var entry: Dictionary = rounds[round - 1]
 	var lines := PackedStringArray()
-	var village_name: Callable = ctx.get("village_name", func(_id: Variant) -> String: return "a neighbour")
+	var village_name: Callable = ctx.get("village_name", func(_id: Variant) -> String: return UI.t("a neighbour"))
 	for army in entry.get("joined", []):
-		var how: String = {"harass": "harried the flank", "pincer": "struck from behind", "support": "joined the line"}.get(String(army.orders), "joined the fight")
-		lines.append("Help from %s %s with %s%s." % [village_name.call(army.villageId), how, units_text(data, army.units), (" (+%d%%)" % roundi(float(army.bonus) * 100.0)) if float(army.bonus) > 0.0 else ""])
+		var how: String = {"harass": UI.t("harried the flank"), "pincer": UI.t("struck from behind"), "support": UI.t("joined the line")}.get(String(army.orders), UI.t("joined the fight"))
+		lines.append(UI.t("Help from %s %s with %s%s.") % [village_name.call(army.villageId), how, units_text(data, army.units), (UI.t(" (+%d%%)") % roundi(float(army.bonus) * 100.0)) if float(army.bonus) > 0.0 else ""])
 	var theirs := BattleText.total(entry.attackerLosses)
 	var ours := BattleText.total(entry.defenderLosses)
-	lines.append("%s fell on their side." % _sentence(units_text(data, entry.attackerLosses)) if theirs > 0 else "None of them fell.")
-	lines.append("We lost %s." % units_text(data, entry.defenderLosses) if ours > 0 else "We lost no one.")
+	lines.append(UI.t("%s fell on their side.") % _sentence(units_text(data, entry.attackerLosses)) if theirs > 0 else UI.t("None of them fell."))
+	lines.append(UI.t("We lost %s.") % units_text(data, entry.defenderLosses) if ours > 0 else UI.t("We lost no one."))
 	var before := units_at(battle, round - 1)
 	var share_theirs := theirs / maxf(1.0, BattleText.total(before.attacker))
 	var share_ours := ours / maxf(1.0, BattleText.total(before.defender))
 	if entry.has("smashed"):
-		lines.append("Our ballistae smashed %s." % units_text(data, entry.smashed))
+		lines.append(UI.t("Our ballistae smashed %s.") % units_text(data, entry.smashed))
 	var walls := WallText.round_text(battle, entry)
 	if walls != "":
 		lines.append(walls)
@@ -173,27 +173,27 @@ static func ending(battle: Dictionary, ctx: Dictionary) -> String:
 	var assault := battle.get("campId") != null or battle.get("siteId") != null
 	match String(battle.get("status", "")):
 		"defended":
-			return "The enemy broke and fled. The field is ours." if not assault else "We fell back; they still hold their ground."
+			return UI.t("The enemy broke and fled. The field is ours.") if not assault else UI.t("We fell back; they still hold their ground.")
 		"cleared":
-			return "The last of them fell. The camp is ours to burn."
+			return UI.t("The last of them fell. The camp is ours to burn.")
 		"raided":
 			if battle.get("villageId") == null and not assault:
-				return "Our line broke and fell back; the horde marched on."
+				return UI.t("Our line broke and fell back; the horde marched on.")
 			var decision: Variant = battle.get("decision")
 			if decision is Dictionary and decision.get("choice") == "raze":
-				return "Our line broke. The horde stayed to burn %s." % ctx.get("place", "the village")
-			return "Our line broke. The horde carried off %s." % BattleText.loot_text(battle.get("loot"))
-	return "The fight goes on."
+				return UI.t("Our line broke. The horde stayed to burn %s.") % ctx.get("place", UI.t("the village"))
+			return UI.t("Our line broke. The horde carried off %s.") % BattleText.loot_text(battle.get("loot"))
+	return UI.t("The fight goes on.")
 
 
 static func _mood(theirs: float, ours: float) -> String:
 	if theirs <= 0.0 and ours <= 0.0:
-		return "Both lines stood and glared."
+		return UI.t("Both lines stood and glared.")
 	if theirs > ours * 2.0:
-		return "Their ranks are thinning fast."
+		return UI.t("Their ranks are thinning fast.")
 	if ours > theirs * 2.0:
-		return "Our line bends under the weight."
-	return "Neither side gives ground."
+		return UI.t("Our line bends under the weight.")
+	return UI.t("Neither side gives ground.")
 
 
 ## "vesna's village" → "Vesna's village": only the first letter.

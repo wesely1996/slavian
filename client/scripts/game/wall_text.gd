@@ -19,7 +19,8 @@ static func tier_def(data: Dictionary, level: int) -> Dictionary:
 ## "Palisade", "Timber Rampart", "Stone Wall", "Fortress Walls"; "" with no
 ## walls.
 static func tier(data: Dictionary, level: int) -> String:
-	return String(tier_def(data, level).get("name", ""))
+	var name := String(tier_def(data, level).get("name", ""))
+	return UI.t(name) if name != "" else ""
 
 
 ## "wood", "timber", "stone", "fortress"; "" with no walls.
@@ -52,17 +53,18 @@ static func wall_effect(data: Dictionary, level: int) -> String:
 		return ""
 	var text := ""
 	if level > 0:
-		text = "%s: %d to batter down; the garrison defends %d%% better while it stands, and %d archers shoot from it %d%% harder. Until it falls, the horde strikes at %d%% but where ladders and siege towers carry it over. %d wall slot%s open." % [
+		var slots := Rules.open_tower_slots(data, level)
+		text = UI.t("%s: %d to batter down; the garrison defends %d%% better while it stands, and %d archers shoot from it %d%% harder. Until it falls, the horde strikes at %d%% but where ladders and siege towers carry it over.") % [
 			tier(data, level), integrity(data, level), roundi(level * float(w.defensePerLevel) * 100.0),
 			capacity(data, level), roundi(level * float(w.manning.archerAttackPerLevel) * 100.0),
-			roundi(float(w.escalade.meleeHeld) * 100.0),
-			Rules.open_tower_slots(data, level), "" if Rules.open_tower_slots(data, level) == 1 else "s"]
+			roundi(float(w.escalade.meleeHeld) * 100.0)]
+		text += " " + UI.tn("%d wall slot open.", "%d wall slots open.", slots) % slots
 	else:
-		text = "No walls yet: a horde walks straight in."
+		text = UI.t("No walls yet: a horde walks straight in.")
 	if level < 10:
 		var next := level + 1
-		text += " Level %d: %s, %d to batter down%s." % [next, tier(data, next), integrity(data, next),
-			", opens a wall slot" if Rules.open_tower_slots(data, next) > Rules.open_tower_slots(data, level) else ""]
+		text += UI.t(" Level %d: %s, %d to batter down%s.") % [next, tier(data, next), integrity(data, next),
+			UI.t(", opens a wall slot") if Rules.open_tower_slots(data, next) > Rules.open_tower_slots(data, level) else ""]
 	return text
 
 
@@ -74,23 +76,24 @@ static func tower_effect(data: Dictionary, tower: String, level: int) -> String:
 	var at := func(l: int) -> String:
 		match tower:
 			"archer_tower":
-				return "+%d%% attack for the garrison while the walls stand" % roundi(l * float(t.attackPerLevel) * 100.0)
+				return UI.t("+%d%% attack for the garrison while the walls stand") % roundi(l * float(t.attackPerLevel) * 100.0)
 			"gate_tower":
-				return "+%d%% to the walls' strength" % roundi(l * float(t.integrityPerLevel) * 100.0)
+				return UI.t("+%d%% to the walls' strength") % roundi(l * float(t.integrityPerLevel) * 100.0)
 			"ballista":
-				return "smashes %.1f siege engines a round" % (l * float(t.enginesPerLevel))
+				return UI.t("smashes %.1f siege engines a round") % (l * float(t.enginesPerLevel))
 			"murder_holes":
-				return "+%d%% defense while the walls stand" % roundi(l * float(t.defensePerLevel) * 100.0)
+				return UI.t("+%d%% defense while the walls stand") % roundi(l * float(t.defensePerLevel) * 100.0)
 			"ditch":
-				return "%s keeps off %d%% of the battering and %d%% of the climbers; engines take %d%% longer to build" % [
-					"a water-filled moat" if moat_water(data, l) else "a dry moat with stakes",
+				return UI.t("%s keeps off %d%% of the battering and %d%% of the climbers; engines take %d%% longer to build") % [
+					UI.t("a water-filled moat") if moat_water(data, l) else UI.t("a dry moat with stakes"),
 					roundi(minf(0.9, l * float(t.siegeCutPerLevel)) * 100.0), roundi(minf(0.9, l * float(t.get("escaladeCutPerLevel", 0.0))) * 100.0),
 					roundi(l * float(t.setupPerLevel) * 100.0)]
 			"watchtower":
-				return "warns of a horde %d hour%s earlier" % [roundi(l * float(t.warningHoursPerLevel)), "" if roundi(l * float(t.warningHoursPerLevel)) == 1 else "s"]
+				var hours := roundi(l * float(t.warningHoursPerLevel))
+				return UI.tn("warns of a horde %d hour earlier", "warns of a horde %d hours earlier", hours) % hours
 		return ""
-	var now: String = at.call(level) if level > 0 else "Not built yet"
-	return "%s. Level %d: %s." % [now.left(1).to_upper() + now.substr(1), level + 1, at.call(level + 1)]
+	var now: String = at.call(level) if level > 0 else UI.t("Not built yet")
+	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, at.call(level + 1)]
 
 
 ## "The walls hold: 540 of 720 left." / "The walls are breached!" for a
@@ -101,10 +104,10 @@ static func round_text(battle: Dictionary, entry: Dictionary) -> String:
 	var over := float(entry.get("over", 0.0))
 	var climbing := ""
 	if over >= 1.0:
-		climbing = " Their ladders and towers put every man of them on the walls."
+		climbing = UI.t(" Their ladders and towers put every man of them on the walls.")
 	elif over > 0.0:
-		climbing = " Their ladders and towers carried %d%% of them onto the walls." % roundi(over * 100.0)
+		climbing = UI.t(" Their ladders and towers carried %d%% of them onto the walls.") % roundi(over * 100.0)
 	if entry.get("breach", false):
-		return "The walls are breached!" + climbing
+		return UI.t("The walls are breached!") + climbing
 	var wall: Dictionary = battle.get("setup", {}).get("wall", {})
-	return "The walls hold: %d of %d left." % [int(entry.wallLeft), int(wall.get("max", entry.wallLeft))] + climbing
+	return UI.t("The walls hold: %d of %d left.") % [int(entry.wallLeft), int(wall.get("max", entry.wallLeft))] + climbing

@@ -23,15 +23,15 @@ static func losses(battle: Dictionary) -> Dictionary:
 ## "Defended Vesna's village: 8 of the horde fell, we lost 3."
 static func outcome(battle: Dictionary, village_name: String) -> String:
 	var lost := losses(battle)
-	var tally := "%d of the horde fell, we lost %d" % [lost.attacker, lost.defender]
+	var tally := UI.t("%d of the horde fell, we lost %d") % [lost.attacker, lost.defender]
 	match battle.status:
 		"defended":
-			return "Defended %s: %s." % [village_name, tally]
+			return UI.t("Defended %s: %s.") % [village_name, tally]
 		"raided":
 			if battle.has("q") and battle.get("villageId") == null:
-				return "Our army fell back from %s: %s. The horde marched on." % [village_name, tally]
-			return "%s was raided: %s. Taken: %s." % [village_name, tally, loot_text(battle.loot)]
-	return "Battle at %s, round %d: %s." % [village_name, battle.round, tally]
+				return UI.t("Our army fell back from %s: %s. The horde marched on.") % [village_name, tally]
+			return UI.t("%s was raided: %s. Taken: %s.") % [village_name, tally, loot_text(battle.loot)]
+	return UI.t("Battle at %s, round %d: %s.") % [village_name, battle.round, tally]
 
 
 ## "Ambush, fort" — what the ground gave the holders: a river the horde
@@ -41,22 +41,22 @@ static func setup_text(battle: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for key in ["ambush", "choke", "fort", "river"]:
 		if setup.get(key, false):
-			parts.append({"ambush": "ambush", "choke": "choke point", "fort": "fort", "river": "river crossing"}[key])
+			parts.append({"ambush": UI.t("ambush"), "choke": UI.t("choke point"), "fort": UI.t("fort"), "river": UI.t("river crossing")}[key])
 	return ", ".join(parts).capitalize() if not parts.is_empty() else ""
 
 
 static func loot_text(loot: Variant) -> String:
 	if not loot is Dictionary:
-		return "nothing"
+		return UI.t("nothing")
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
 		if int(loot.get(kind, 0)) > 0:
-			parts.append("%s %d" % [kind.capitalize(), loot[kind]])
-	return ", ".join(parts) if not parts.is_empty() else "nothing"
+			parts.append(UI.t("%s %d") % [UI.resource_name(kind), loot[kind]])
+	return ", ".join(parts) if not parts.is_empty() else UI.t("nothing")
 
 
 ## "A horde burned Vesna's village's outpost at (3, -2) to ruins."
 static func raid(raid: Dictionary, village_name: String) -> String:
 	var after := int(raid.levelAfter)
-	var result := "to ruins" if after <= 0 else "down to level %d" % after
-	return "A horde burned the outpost of %s at (%d, %d) %s." % [village_name, int(raid.q), int(raid.r), result]
+	var result := UI.t("to ruins") if after <= 0 else UI.t("down to level %d") % after
+	return UI.t("A horde burned the outpost of %s at (%d, %d) %s.") % [village_name, int(raid.q), int(raid.r), result]

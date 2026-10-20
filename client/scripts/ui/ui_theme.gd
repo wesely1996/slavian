@@ -37,6 +37,16 @@ const BODY_FONT := "res://ui/fonts/PTSans-Regular.ttf"
 const MEDIUM_FONT := BODY_FONT
 const STRONG_FONT := "res://ui/fonts/PTSans-Bold.ttf"
 
+## Text size for accessibility (M5 15): small, normal or large. The scale
+## multiplies every font size; set at start-up from Session.
+static var text_scale := 1.0
+
+const TEXT_SIZES := {"small": 0.85, "normal": 1.0, "large": 1.2}
+
+
+static func set_text_size(size: String) -> void:
+	text_scale = TEXT_SIZES.get(size, 1.0)
+
 
 ## Merges the look into the project theme (ui/theme.tres), which every
 ## control falls back to, under any CanvasLayer too.
@@ -64,7 +74,7 @@ static func fit(window: Window) -> void:
 static func build() -> Theme:
 	var theme := Theme.new()
 	theme.default_font = _font(BODY_FONT)
-	theme.default_font_size = 28
+	theme.default_font_size = int(round(28 * text_scale))
 	theme.set_color("font_color", "Label", INK)
 	theme.set_color("font_shadow_color", "Label", Color(0, 0, 0, 0))
 
@@ -116,7 +126,7 @@ static func build() -> Theme:
 	focus.set_expand_margin_all(3)
 	for type in ["Button", "OptionButton"]:
 		theme.set_font("font", type, _font(STRONG_FONT))
-		theme.set_font_size("font_size", type, 27)
+		theme.set_font_size("font_size", type, int(round(27 * text_scale)))
 		theme.set_stylebox("normal", type, frame("ui/button", 64, 16, 14, _box(FLAX_DEEP, Color(INK, 0.28))))
 		theme.set_stylebox("hover", type, frame("ui/button_hover", 64, 16, 14, _box(FLAX_DEEP.lightened(0.18), Color(INK, 0.55))))
 		theme.set_stylebox("pressed", type, frame("ui/button_pressed", 64, 16, 14, _box(FLAX_DEEP.darkened(0.08), INK)))

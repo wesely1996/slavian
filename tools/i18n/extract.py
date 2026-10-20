@@ -46,7 +46,7 @@ def escape(s):
 
 def data_strings():
     """Player-facing texts in the game data: names, titles, descriptions."""
-    keys = {"name", "title", "description", "faction", "signature", "story", "text", "label", "flavor", "body", "hint", "summary", "goal"}
+    keys = {"name", "title", "description", "faction", "signature", "story", "text", "label", "flavor", "body", "hint", "summary", "goal", "best", "weakness", "animal"}
     found = {}
 
     def walk(node, where):
@@ -66,7 +66,7 @@ def data_strings():
                 walk(item, where)
 
     for path in sorted(DATA.glob("*.json")):
-        walk(json.loads(path.read_text()), f"data/{path.name}")
+        walk(json.loads(path.read_text(encoding="utf-8")), f"data/{path.name}")
     return found
 
 
@@ -75,7 +75,7 @@ def collect():
     messages = {}
     for path in sorted(SCRIPTS.rglob("*.gd")):
         rel = path.relative_to(ROOT).as_posix()
-        for lineno, line in enumerate(path.read_text().splitlines(), 1):
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             for m in PLURAL.finditer(line):
                 messages.setdefault(unescape(m.group(1)), (unescape(m.group(2)), f"{rel}:{lineno}"))
             for m in SINGLE.finditer(line):
@@ -93,7 +93,7 @@ def parse_po(path):
     if not path.exists():
         return {}
     entries, current, key = {}, {}, None
-    for raw in path.read_text().splitlines() + [""]:
+    for raw in path.read_text(encoding="utf-8").splitlines() + [""]:
         line = raw.strip()
         if not line or line.startswith("#"):
             if "msgid" in current:
@@ -142,7 +142,7 @@ def main():
         translations = parse_po(path)
         files[path] = render(messages, language, translations)
         missing[language] = [m for m in messages if not any(translations.get(m, []))]
-    stale = [p for p, text in files.items() if not p.exists() or p.read_text() != text]
+    stale = [p for p, text in files.items() if not p.exists() or p.read_text(encoding="utf-8") != text]
     if check:
         problems = [f"{p.relative_to(ROOT)} is out of date" for p in stale]
         problems += [f"{lang}: {len(m)} strings untranslated, e.g. {m[0]!r}" for lang, m in missing.items() if m]
@@ -151,7 +151,7 @@ def main():
         sys.exit(1 if problems else 0)
     OUT.mkdir(parents=True, exist_ok=True)
     for path, text in files.items():
-        path.write_text(text)
+        path.write_text(text, encoding="utf-8")
     print(f"{len(messages)} strings; untranslated: " + ", ".join(f"{lang} {len(m)}" for lang, m in missing.items()))
 
 

@@ -1733,6 +1733,39 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(fought.rounds.some((r: { breach?: boolean }) => r.breach)).toBe(breached);
   });
 
+  it('exports, reports and deletes an account that hosts a world and owns a village', async () => {
+    const ana = await guest('Ana');
+    const other = await guest('Other');
+    const renamed = await call('PATCH', '/v1/me', ana.token, { language: 'sr_Latn' });
+    expect(renamed.body.account.language).toBe('sr_Latn');
+    const created = await call('POST', '/v1/worlds', ana.token, { name: 'Leaving', maxPlayers: 1 });
+    const worldId: number = created.body.id;
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, ana.token);
+    const villageId: number = started.body.villages[0].id;
+    // A report names only a world its sender plays in.
+    const mine = await call('POST', '/v1/reports', ana.token, { message: 'The map froze', worldId, state: { view: 'map' } });
+    const theirs = await call('POST', '/v1/reports', other.token, { message: 'Not my world', worldId });
+    const gone = await call('POST', '/v1/reports', ana.token, { message: 'Old world', worldId: 999999 });
+    expect([mine.status, theirs.status, gone.status]).toEqual([200, 200, 200]);
+    const { rows: reports } = await db.query<{ id: string; world_id: string | null }>('SELECT id, world_id FROM reports WHERE id = ANY($1) ORDER BY id', [
+      [mine.body.id, theirs.body.id, gone.body.id],
+    ]);
+    expect(reports.map((r) => r.world_id === null ? null : Number(r.world_id))).toEqual([worldId, null, null]);
+    const exported = await call('GET', '/v1/me/export', ana.token);
+    expect(exported.body.settings.language).toBe('sr_Latn');
+    expect(exported.body.worlds.map((w: { world_id: number }) => Number(w.world_id))).toEqual([worldId]);
+    expect(exported.body.villages.map((v: { id: number }) => Number(v.id))).toEqual([villageId]);
+    expect(exported.body.reports).toHaveLength(2);
+    // Deleting leaves the world and the village standing, without an owner.
+    expect((await call('DELETE', '/v1/me', ana.token)).status).toBe(200);
+    expect((await call('GET', '/v1/me', ana.token)).status).toBe(401);
+    const { rows } = await db.query<{ owner: string | null; host: string | null }>(
+      'SELECT v.owner_account_id AS owner, w.host_account_id AS host FROM villages v JOIN worlds w ON w.id = v.world_id WHERE v.id = $1',
+      [villageId],
+    );
+    expect(rows[0]).toEqual({ owner: null, host: null });
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

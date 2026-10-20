@@ -97,8 +97,11 @@ export const outpostHandlers: HandlerRegistry = {
     await tell(client, world, village.ownerAccountId, {
       kind: 'outpost_raided',
       tier: 'push',
-      title: `A horde burned an outpost of ${village.name}`,
-      body: after.level > 0 ? `The outpost at (${cell.q}, ${cell.r}) is down to level ${after.level}.` : `The outpost at (${cell.q}, ${cell.r}) lies in ruins.`,
+      title: 'A horde burned an outpost of {village}',
+      body: after.level > 0
+        ? 'The outpost at ({q}, {r}) is down to level {level}.'
+        : 'The outpost at ({q}, {r}) lies in ruins.',
+      vars: { village: village.name, q: cell.q, r: cell.r, level: after.level },
     }, event.dueAt);
   },
 };

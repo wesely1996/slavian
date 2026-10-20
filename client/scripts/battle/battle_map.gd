@@ -33,7 +33,8 @@ var data: Dictionary = {}
 var battle: Dictionary = {}
 var round := 0
 ## Names and looks: {place, enemy, enemy_leader, leader, ours (colour),
-## terrain, river (bool), road (bool)}.
+## terrain, river (bool), road (bool), from ("From the north", the label
+## under the enemy)}.
 var ctx: Dictionary = {}
 var _font: Font
 ## The part of the width the squads stand in (a river along a flank takes
@@ -107,9 +108,9 @@ func _draw() -> void:
 	# Leaders stand behind their lines.
 	if ctx.has("leader"):
 		_draw_leader(Vector2(size.x * 0.5, maxf(our_back - size.x * 0.03, size.y * 0.15)), ours, ctx.leader)
-	_draw_leader(Vector2(size.x * 0.5, minf(their_back + size.x * 0.03, size.y * 0.85)), ENEMY, ctx.get("enemy_leader", "Warlord"))
+	_draw_leader(Vector2(size.x * 0.5, minf(their_back + size.x * 0.03, size.y * 0.85)), ENEMY, ctx.get("enemy_leader", tr("Warlord")))
 	_label(Vector2(size.x / 2.0, size.y * 0.035), ctx.get("place", ""), 22.0)
-	_label(Vector2(size.x / 2.0, size.y * 0.975), "From the %s" % String(ctx.get("from", "wilds")), 18.0)
+	_label(Vector2(size.x / 2.0, size.y * 0.975), String(ctx.get("from", tr("From the wilds"))), 18.0)
 	var over: bool = round >= int(battle.get("rounds", []).size()) and battle.get("status", "ongoing") != "ongoing"
 	if over:
 		_draw_verdict()
@@ -215,7 +216,7 @@ func _draw_squad(squad: Dictionary, origin: Vector2, block: Vector2, step: float
 	# One label for the whole squad, on its outer side.
 	var span := Vector2(origin.x - step * 0.05, origin.x + (blocks - 1) * step + block.x)
 	var label_y := origin.y + facing * (block.y * 0.5 + step * 0.42)
-	var name := "%s %d" % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
+	var name := tr("%s %d") % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
 	var icon := Art.texture("unit/" + String(squad.unit))
 	var center := Vector2((span.x + span.y) / 2.0, label_y)
 	if icon != null:
@@ -309,7 +310,7 @@ func _draw_wall(y: float) -> void:
 		for i in 7:
 			var p := Vector2(lerpf(gap.x, gap.y, (i + 0.5) / 7.0), y + (i % 3 - 1) * h * 0.5)
 			draw_circle(p, h * 0.55, body.darkened(0.2))
-		var breached := "%s breached!" % WallText.tier(data, int(wall.level))
+		var breached := tr("%s breached!") % WallText.tier(data, int(wall.level))
 		_label(label_at + Vector2(_width(breached, 18.0) / 2.0 + 6.0, 0), breached, 18.0)
 	else:
 		var share := float(left) / maxf(1.0, float(wall.max))
@@ -317,7 +318,7 @@ func _draw_wall(y: float) -> void:
 			for i in int((1.0 - share) * 6.0):
 				var cx: float = size.x * ((i * 0.37 + 0.11) - floor(i * 0.37 + 0.11))
 				draw_line(Vector2(cx, y - h), Vector2(cx + h * 0.6, y + h * 0.6), INK, 1.5, true)
-		var text := "%s  %d / %d" % [WallText.tier(data, int(wall.level)), left, int(wall.max)]
+		var text := tr("%s  %d / %d") % [WallText.tier(data, int(wall.level)), left, int(wall.max)]
 		_label(label_at + Vector2(_width(text, 16.0) / 2.0 + 6.0, 0), text, 16.0)
 
 
@@ -362,7 +363,7 @@ func _draw_on_walls(squads: Array, color: Color, y: float) -> void:
 			draw_rect(rect, INK, false, 1.5)
 			if i < int(squad.alive):
 				draw_circle(rect.get_center(), rect.size.y * 0.22, INK)
-		var name := "%s %d on the walls" % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
+		var name := tr("%s %d on the walls") % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
 		_label(Vector2(x + (int(squad.blocks) - 1) * step / 2.0 + block.x / 2.0, y - size.y * 0.03 - block.y - 12.0), name, 14.0)
 		x += (int(squad.blocks) + 1) * step
 
@@ -385,7 +386,7 @@ func _draw_engines(squads: Array, y: float) -> void:
 			var x := _engine_x(i, shown)
 			_engine(String(squad.unit), Vector2(x, foot), k < alive, y)
 			i += 1
-		var label := "%s %d" % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
+		var label := tr("%s %d") % [BattleStory.plural(BattleStory.unit_name(data, squad.unit), int(squad.now)), int(squad.now)]
 		_label(Vector2((_engine_x(i - n, shown) + _engine_x(i - 1, shown)) / 2.0, foot + size.y * 0.025), label, 14.0)
 
 
@@ -460,7 +461,7 @@ func _draw_river_across(y: float, rng: RandomNumberGenerator) -> void:
 	var bridge := Rect2(size.x * 0.46, y - w * 0.75, size.x * 0.08, w * 1.5)
 	draw_rect(bridge, Color("#a07a4c"))
 	draw_rect(bridge, INK, false, 2.0)
-	_label(Vector2(size.x * 0.5 + size.x * 0.12, y), "River", 16.0)
+	_label(Vector2(size.x * 0.5 + size.x * 0.12, y), tr("River"), 16.0)
 
 
 ## A broad river down one flank: the lines keep to the rest of the field.
@@ -504,7 +505,7 @@ func _draw_verdict() -> void:
 	var assault := battle.get("campId") != null or battle.get("siteId") != null
 	if assault and status == "defended":
 		won = false
-	var text := ("Victory" if won else "Defeat")
+	var text := (tr("Victory") if won else tr("Defeat"))
 	var font_size := size.x * 0.09
 	var width := _width(text, font_size)
 	var at := Vector2(size.x / 2.0, size.y / 2.0)

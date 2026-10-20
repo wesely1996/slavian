@@ -29,16 +29,16 @@ static func ground(data: Dictionary, terrain: Dictionary, cell: Vector2i, fort: 
 	var id: String = terrain.get(cell, "")
 	if is_cover(data, id):
 		var prep := float(data.field.ambush.prepMinutes) * 60.0 / world_speed
-		lines.append("Ambush ground: +%d%% attack in the first round if your army is here %s before the horde." % [
+		lines.append(UI.t("Ambush ground: +%d%% attack in the first round if your army is here %s before the horde.") % [
 			roundi(float(data.field.ambush.bonus) * 100.0), TimeUtil.format_duration(prep)])
 	if is_choke_point(data, terrain, cell):
-		lines.append("Choke point: the horde strikes at %d%%; Hold the Line adds +%d%% defense." % [
+		lines.append(UI.t("Choke point: the horde strikes at %d%%; Hold the Line adds +%d%% defense.") % [
 			roundi(float(data.field.choke.attackerFactor) * 100.0), roundi(float(data.field.choke.holdTheLineDefense) * 100.0)])
 	if not fort.is_empty():
 		var bonus := roundi(float(data.field.fort.defenseBonus) * 100.0)
-		lines.append("Fort: +%d%% defense." % bonus if fort.status == "standing" else "Fort being built (+%d%% defense when done)." % bonus)
+		lines.append(UI.t("Fort: +%d%% defense.") % bonus if fort.status == "standing" else UI.t("Fort being built (+%d%% defense when done).") % bonus)
 	if lines.is_empty():
-		lines.append("Open ground: no help from the land.")
+		lines.append(UI.t("Open ground: no help from the land."))
 	return lines
 
 
@@ -47,11 +47,11 @@ static func fort_problem(data: Dictionary, village: Dictionary, cell: Vector2i, 
 	var range_ := int(data.field.fort.range)
 	var distance := HexMath.distance(cell, Vector2i(int(village.q), int(village.r)))
 	if distance == 0 or distance > range_:
-		return "Forts go within %d hexes of %s." % [range_, village.name]
+		return UI.t("Forts go within %d hexes of %s.") % [range_, village.name]
 	if terrain_id == "holy_city" or data.terrain.terrain.get(terrain_id, {}).get("moveCost") == null:
-		return "No fort can stand here."
+		return UI.t("No fort can stand here.")
 	if taken:
-		return "Something already stands here."
+		return UI.t("Something already stands here.")
 	return ""
 
 

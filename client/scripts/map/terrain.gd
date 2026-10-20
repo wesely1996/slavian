@@ -51,5 +51,5 @@ static func is_water(id: String) -> bool:
 static func display_name(id: String, data: Dictionary = {}) -> String:
 	var defs: Dictionary = data.get("terrain", {}).get("terrain", {})
 	if defs.has(id):
-		return defs[id].name
+		return UI.t(defs[id].name)
 	return id.capitalize()

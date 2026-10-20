@@ -60,7 +60,11 @@ Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled ove
 | Method | Path | |
 |---|---|---|
 | `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
-| `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename. |
+| `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename, report your language. |
+| `GET` | `/v1/me/export` | Everything kept about you, as JSON. |
+| `DELETE` | `/v1/me` | Delete your account and its data (sessions, memberships, devices). |
+| `GET` | `/v1/costs` | This month's server costs, donations and the donation link (`site/costs.json`). |
+| `POST` | `/v1/reports` | Send a bug report `{ message, worldId, state }`; the app also saves it as a file. |
 | `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle, logistics, expansion, research, hero and standing-order settings). |
 | `POST` | `/v1/worlds` | Create a world (lobby) with an invite code: `{ name, maxPlayers, speed, difficulty }` (`story`, `normal`, `hard` or `nightmare`). |
 | `PUT` | `/v1/worlds/:id/quiet` | Host only: the group's quiet hours `{ start, end, utcOffsetMinutes }` (minutes after local midnight; `null` start/end: none). Hordes arriving inside them wait until they end. |

@@ -39,8 +39,12 @@ export async function delegateCommand(
     await tell(client, world, delegate.accountId, {
       kind: 'delegation',
       tier: 'push',
-      title: `${me.displayName} handed you their villages`,
-      body: `Command them as your own for ${input.days} day${input.days === 1 ? '' : 's'}. Everything you do is noted for them.`,
+      title: '{name} handed you their villages',
+      body:
+        input.days === 1
+          ? 'Command them as your own for {days} day. Everything you do is noted for them.'
+          : 'Command them as your own for {days} days. Everything you do is noted for them.',
+      vars: { name: me.displayName, days: input.days },
     }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
@@ -65,8 +69,9 @@ export async function endDelegationCommand(
     await tell(client, world, other, {
       kind: 'delegation',
       tier: 'digest',
-      title: owner === input.accountId ? `${name} took their villages back` : `${name} handed your villages back`,
+      title: owner === input.accountId ? '{name} took their villages back' : '{name} handed your villages back',
       body: 'The hand-over has ended.',
+      vars: { name },
     }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   });

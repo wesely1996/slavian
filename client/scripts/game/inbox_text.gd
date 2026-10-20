@@ -7,12 +7,12 @@ extends RefCounted
 static func ago(created_unix: float, now: float) -> String:
 	var seconds := maxf(0.0, now - created_unix)
 	if seconds < 60.0:
-		return "just now"
+		return UI.t("just now")
 	if seconds < 3600.0:
-		return "%dm ago" % floori(seconds / 60.0)
+		return UI.t("%dm ago") % floori(seconds / 60.0)
 	if seconds < 86400.0:
-		return "%dh ago" % floori(seconds / 3600.0)
-	return "%dd ago" % floori(seconds / 86400.0)
+		return UI.t("%dh ago") % floori(seconds / 3600.0)
+	return UI.t("%dd ago") % floori(seconds / 86400.0)
 
 
 ## Minutes after midnight as "22:00".

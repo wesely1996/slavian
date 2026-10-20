@@ -64,6 +64,18 @@ func _ready() -> void:
 		pick.custom_minimum_size.x = 160
 		languages.add_child(pick)
 	sheet.add_child(languages)
+	# Text size for accessibility: small, normal, large.
+	var sizes := UI.hbox(8)
+	for entry in [["small", tr("Small")], ["normal", tr("Normal")], ["large", tr("Large")]]:
+		var size_code: String = entry[0]
+		var size_pick := UI.button(entry[1], func() -> void:
+			Session.set_text_size(size_code)
+			get_tree().reload_current_scene())
+		size_pick.theme_type_variation = "TabButton"
+		size_pick.disabled = Session.text_size == size_code
+		size_pick.custom_minimum_size.x = 160
+		sizes.add_child(size_pick)
+	sheet.add_child(sizes)
 	_content = UI.vbox(20)
 	sheet.add_child(_content)
 
@@ -112,6 +124,7 @@ func _login(server_url: String, display_name: String) -> void:
 	Session.token = response.data.token
 	Session.account = response.data.account
 	Session.save()
+	Session.report_language()
 	Push.register()
 	_show_home()
 
@@ -182,6 +195,80 @@ func _show_home() -> void:
 	var code := UI.line_edit(tr("Invite code"))
 	_content.add_child(code)
 	_content.add_child(UI.button(tr("Join"), func() -> void: _join_world(code.text)))
+
+	# Support and privacy: donations, server costs, your data, and the bug report.
+	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
+	_content.add_child(UI.button(tr("Support and privacy"), _show_support))
+
+
+## The privacy policy, in short (docs/privacy.md has the long version).
+const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."  # tr
+
+var _delete_armed := false
+
+
+## Donations, this month's server costs, the privacy policy, exporting your
+## data and deleting your account.
+func _show_support() -> void:
+	_set_status("")
+	_delete_armed = false
+	UI.clear(_content)
+	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
+	var costs := await Api.get_json("/v1/costs")
+	if not costs.ok or not costs.data is Dictionary:
+		_content.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
+	else:
+		var c: Dictionary = costs.data
+		var currency := str(c.get("currency", "EUR"))
+		var spent := float(c.get("costs", 0.0))
+		var raised := float(c.get("donations", 0.0)) + float(c.get("carryIn", 0.0))
+		_content.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
+			str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE, UI.MUTED))
+		var bar := ProgressBar.new()
+		bar.max_value = maxf(spent, 0.01)
+		bar.value = minf(raised, spent)
+		bar.custom_minimum_size.y = 28
+		bar.show_percentage = false
+		_content.add_child(bar)
+		var surplus := raised - spent
+		_content.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, surplus]), UI.SMALL_SIZE, UI.MUTED))
+		var url := str(c.get("donationUrl", ""))
+		if url != "":
+			_content.add_child(UI.primary(tr("Buy me a coffee"), func() -> void: OS.shell_open(url)))
+	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
+	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.button(tr("Export my data"), _export_data))
+	_content.add_child(UI.button(tr("Delete my account"), _confirm_delete))
+	_content.add_child(UI.button(tr("Back"), _show_home))
+
+
+func _export_data() -> void:
+	var response := await Api.get_json("/v1/me/export")
+	if not response.ok:
+		_set_status(response.error)
+		return
+	var path := "user://export_%d.json" % int(Time.get_unix_time_from_system())
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		_set_status(tr("Could not write the export file."))
+		return
+	file.store_string(JSON.stringify(response.data, "\t"))
+	file.close()
+	_set_status(tr("Your data is saved to %s") % ProjectSettings.globalize_path(path))
+
+
+func _confirm_delete() -> void:
+	if not _delete_armed:
+		_delete_armed = true
+		_set_status(tr("Tap again to delete your account and all its data."))
+		return
+	_delete_armed = false
+	var response := await Api.request(HTTPClient.METHOD_DELETE, "/v1/me")
+	if not response.ok:
+		_set_status(response.error)
+		return
+	Session.log_out()
+	_show_login()
 
 
 ## Changes the server address but stays signed in: a playtest server behind

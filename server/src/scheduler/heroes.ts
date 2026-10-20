@@ -35,9 +35,9 @@ export async function heroAfterBattle(
   await saveHero(client, next);
   await notifyWorld(client, { worldId: world.id, type: 'heroes' });
   if (!result.won) {
-    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: `${hero.name} is wounded`, body: 'Back on their feet in a few hours.' }, result.at);
+    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: '{name} is wounded', body: 'Back on their feet in a few hours.', vars: { name: hero.name } }, result.at);
   } else if (next.level > hero.level) {
-    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: `${hero.name} reached level ${next.level}`, body: 'A new skill point to spend.' }, result.at);
+    await tell(client, world, hero.accountId, { kind: 'hero', tier: 'digest', title: '{name} reached level {level}', body: 'A new skill point to spend.', vars: { name: hero.name, level: next.level } }, result.at);
   }
 }
 

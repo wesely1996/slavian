@@ -69,8 +69,9 @@ export async function leaderAfter(client: DbClient, data: GameData, world: World
       await tell(client, world, member.accountId, {
         kind: 'leader',
         tier: 'digest',
-        title: `${title} has fallen`,
-        body: `${title} died with the last of the horde after ${next.battles} battles. Another will rise to take their place.`,
+        title: '{leader} has fallen',
+        body: '{leader} died with the last of the horde after {battles} battles. Another will rise to take their place.',
+        vars: { leader: title, battles: next.battles },
       }, at);
     }
   } else if (next.level > leader.level) {
@@ -78,8 +79,9 @@ export async function leaderAfter(client: DbClient, data: GameData, world: World
       await tell(client, world, member.accountId, {
         kind: 'leader',
         tier: 'digest',
-        title: `${title} grows stronger`,
-        body: `${leaderTitle(data, wave.front, leader)} is now level ${next.level}.`,
+        title: '{leader} grows stronger',
+        body: '{leader} is now level {level}.',
+        vars: { leader: leaderTitle(data, wave.front, leader), level: next.level },
       }, at);
     }
   }

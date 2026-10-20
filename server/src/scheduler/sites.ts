@@ -136,8 +136,9 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       await tell(client, world, army.ownerAccountId, {
         kind: 'battle_result',
         tier: 'digest',
-        title: `Guardians drove your army from the ${data.sites.kinds[site.kind]?.name ?? 'site'}`,
-        body: `${kills} of them fell; ${total(result.campNow)} still watch it.`,
+        title: 'Guardians drove your army from the {where}',
+        body: '{kills} of them fell; {remaining} still watch it.',
+        vars: { where: data.sites.kinds[site.kind]?.name ?? 'site', kills, remaining: total(result.campNow) },
       }, at);
       await notifyWorld(client, { worldId: world.id, type: 'world' });
       return;
@@ -193,8 +194,9 @@ export const siteHandlers: HandlerRegistry = {
       await tell(client, world, member.accountId, {
         kind: 'site',
         tier: find.type === 'scroll' && member.accountId !== army.ownerAccountId ? 'push' : 'digest',
-        title: `The ${name} at (${site.q}, ${site.r}) gave up ${findText(data, find)}`,
+        title: 'The {name} at ({q}, {r}) gave up {find}',
         body: find.type === 'scroll' ? data.lore.scrolls[find.scroll]?.description ?? '' : 'Explored and done.',
+        vars: { name, q: site.q, r: site.r, find: findText(data, find) },
       }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
