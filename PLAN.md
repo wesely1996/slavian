@@ -601,8 +601,13 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Backups:** a `pg_dump` every night with 14 days kept, and by hand with `BACKUP_ONCE=1`; on top of Neon's point-in-time restore.
     - **Monitoring:** `/health` answers 503 while the database doesn't, for an uptime monitor. Failed scheduler events and passes, server errors, crashes and failed backups post to a Discord or Slack webhook (`ALERT_WEBHOOK_URL`), at most once per kind every 10 minutes.
     - **Telemetry (§13):** run start and end (outcome, the front that struck the last blow, bridge stage, days, counts) and every wave's battle, with no personal data; `npm run telemetry` sums it up (win rate, losses by front, waves held by front).
-18. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
-19. [ ] **Closed test:** friends play a full run; fix what they find.
+18. [x] **Brand, splash and plated wood** (asked for after step 17; `docs/art-style.md`):
+    - **Wood:** the interface's wood is walnut plated in gold: rails with rivets, and corner plates with a cut lozenge (`PlatedWood`).
+    - **Logo:** a gold lozenge emblem with the Holy City and the Kalinov Bridge at dusk, and SLAVIAN cut from Ruslan Display and plated in gold. The emblem is also the app icon.
+    - **Start screen:** full-bleed. A dusk painting holds the logo, and the sheet sits beside it (landscape) or under it (phone) in plated wood. Language and text size share one row.
+    - **Splash:** the studio's logo (Night Forge, `client/art/brand/night_forge.png`), then the game's logo with one gold shine; it can be skipped.
+19. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
+20. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.

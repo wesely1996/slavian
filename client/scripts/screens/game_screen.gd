@@ -340,7 +340,7 @@ func _arrange() -> void:
 
 
 ## The wood band, with room at the top for a phone's status bar.
-func _top_style() -> StyleBoxFlat:
+func _top_style() -> StyleBox:
 	var style := UiTheme.wood_style(14)
 	style.content_margin_top = 26
 	style.content_margin_left = 18

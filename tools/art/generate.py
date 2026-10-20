@@ -1046,15 +1046,10 @@ def banner(part):
 
 
 def app_icon():
+    """The launcher icon: the game's emblem on a dusk-dark tile."""
     s = Svg(192, 192)
-    s.rect(6, 6, 180, 180, s.lin([(0, "#e3c27a"), (1, "#8a6212")], 0, 0, 1, 1), stroke="none", sw=0, rx=38)
-    s.rect(14, 14, 164, 164, s.rad([(0, "#2c3644"), (1, "#10141a")], 0.45, 0.3, 0.85), stroke="none", sw=0, rx=32)
-    s.path("M30,150 Q96,96 162,150", "none", stroke="#6a655d", sw=14)
-    s.path("M30,150 Q96,96 162,150", "none", stroke="#c9c3b7", sw=8)
-    for x in (60, 96, 132):
-        s.line(x, 150 - (40 if x == 96 else 24), x, 162, stroke="#9d978c", sw=6)
-    s.rect(72, 74, 48, 36, s.lin([(0, "#f5efe1"), (1, "#bfb6a1")], 0, 0, 1, 0), stroke="none", sw=0)
-    dome(s, 96, 76, 18)
+    s.rect(4, 4, 184, 184, s.rad([(0, "#2b2a45"), (0.7, "#141a2c"), (1, "#0b0f19")], 0.5, 0.35, 0.85), stroke="none", sw=0, rx=40)
+    s.embed(emblem(), 96 - 128 * 0.66, 92 - 124 * 0.66, 0.66)
     return s
 
 
@@ -1076,6 +1071,166 @@ def ui_title():
     for x in (150, 180, 210):
         s.line(x, 158 - (24 if x == 180 else 16), x, 168, stroke="#6a655d", sw=4)
     return s
+
+def ui_hero():
+    """The start screen's painting, large enough to fill half a desktop or the
+    top of a phone: dusk over the Smorodina, ranges fading into the haze, the
+    Holy City on its hill, the Kalinov Bridge over the river of fire, dark
+    woods at the edges; open sky above for the logo."""
+    import random
+
+    rnd = random.Random(11)
+    s = Svg(1200, 1000)
+    s.rect(0, 0, 1200, 1000, s.lin([(0, "#0f1424"), (0.34, "#2b2a45"), (0.56, "#7a4c58"), (0.7, "#d48a5c"), (0.8, "#f2b56c")]), stroke="none", sw=0)
+    for _ in range(90):
+        x, y = rnd.uniform(0, 1200), rnd.uniform(0, 420)
+        s.circle(x, y, rnd.uniform(0.8, 2.2), "#fff4cf", stroke="none", sw=0, opacity=round(rnd.uniform(0.25, 0.85) * (1 - y / 520), 2))
+    s.circle(820, 690, 260, s.rad([(0, "#ffe7b0", 0.85), (0.3, "#f6c46e", 0.45), (1, "#f6c46e", 0)]), stroke="none", sw=0)
+    s.circle(820, 690, 70, s.rad([(0, "#fff6dc"), (0.6, "#ffe0a0"), (1, "#f6c46e", 0)]), stroke="none", sw=0)
+    # Ranges, palest and haziest furthest away (aerial perspective).
+    ranges = [
+        ("M0,640 L90,580 L170,612 L260,540 L360,600 L450,560 L560,620 L640,570 L760,630 L860,560 L980,610 L1080,570 L1200,620 L1200,1000 L0,1000 Z", ("#8a6a78", "#6d5466"), 0.85),
+        ("M0,700 Q80,640 170,672 Q260,610 360,668 Q470,626 560,690 Q680,640 780,700 Q900,650 1010,690 Q1110,660 1200,700 L1200,1000 L0,1000 Z", ("#5d4a5e", "#3f3346"), 1),
+        ("M0,770 Q120,720 260,748 Q400,712 520,744 Q700,700 860,750 Q1020,716 1200,756 L1200,1000 L0,1000 Z", ("#3a3a3c", "#262629"), 1),
+    ]
+    for d, (a, b), op in ranges:
+        s.path(d, s.lin([(0, a), (1, b)]), stroke="none", sw=0, opacity=op)
+    # The hill and the city on it.
+    s.path("M400,850 Q530,770 640,780 Q760,772 860,850 Z", s.lin([(0, "#4b5a3a"), (1, "#2c3624")]), stroke="none", sw=0)
+    s.embed(holy_city(), 512, 640, 1.3)
+    # Woods at the edges, nearest darkest.
+    for x, foot, size in [(40, 860, 150), (120, 900, 190), (230, 880, 140), (10, 960, 220), (980, 870, 150), (1080, 900, 200), (1160, 880, 150), (900, 940, 170), (330, 930, 120)]:
+        conifer(s, x, foot, size * 0.6, size, ("#26332a", "#17211b", "#0b110d"))
+    # The Smorodina, the river of fire, and the Kalinov Bridge.
+    s.path("M0,880 Q200,850 420,872 Q600,890 800,868 Q1000,848 1200,876 L1200,1000 L0,1000 Z", s.lin([(0, "#e98a46"), (0.6, "#b24a20"), (1, "#5e1d0e")]), stroke="none", sw=0)
+    for x0, y0 in ((120, 912), (520, 920), (860, 906), (1040, 930)):
+        s.path(f"M{x0},{y0} Q{x0 + 60},{y0 - 10} {x0 + 120},{y0}", "none", stroke="#ffd27a", sw=4, opacity=0.65)
+    # The Kalinov Bridge: stone piers in the fire, then the arched deck on
+    # them, its courses lit from above and its underside in shade.
+    def deck_y(x):
+        return 912 - 92 * (1 - ((x - 600) / 230) ** 2)
+
+    for x in (500, 600, 700):
+        s.rect(x - 11, deck_y(x) + 10, 22, 960 - deck_y(x) - 10, s.lin([(0, "#8f8472"), (1, "#4a4038")], 0, 0, 1, 0), stroke="none", sw=0)
+    s.path("M370,912 Q600,728 830,912", "none", stroke="#1c1820", sw=36)
+    s.path("M370,918 Q600,734 830,918", "none", stroke="#5f564b", sw=14)
+    s.path("M370,906 Q600,722 830,906", "none", stroke=s.lin([(0, "#f3e9d3"), (1, "#b3a78f")]), sw=16)
+    for i in range(1, 12):
+        x = 370 + 460 * i / 12
+        y = deck_y(x) - 6
+        s.line(x, y - 7, x, y + 7, stroke="#8a7f6c", sw=2)
+    # A low mist over the river, and the night closing in at the top.
+    s.rect(0, 840, 1200, 160, s.lin([(0, "#ffffff", 0), (0.5, "#f6d7b0", 0.10), (1, "#ffffff", 0)]), stroke="none", sw=0)
+    return s
+
+
+# --- The game's brand: emblem, wordmark and logo -----------------------------
+# A gold lozenge, the "sown field" of Slavic embroidery, framing the Holy City
+# and the Kalinov Bridge at dusk; under it SLAVIAN in Ruslan Display, its
+# letters cut from the font as paths and plated in gold.
+
+GOLD_PLATE = [(0, "#fff4c2"), (0.32, "#ecc457"), (0.58, "#b8862a"), (0.82, "#7a5512"), (1, "#c99a3a")]
+FONT_DIR = ROOT / "client" / "ui" / "fonts"
+
+
+def lozenge(cx, cy, rx, ry):
+    return [(cx, cy - ry), (cx + rx, cy), (cx, cy + ry), (cx - rx, cy)]
+
+
+def emblem():
+    s = Svg(256, 256)
+    soft_shadow(s, 132, 246, 70, 8, 0.4)
+    # The plate: a gold lozenge with a dark bevel, lit from the upper left.
+    s.poly(lozenge(128, 124, 122, 122), "#2a1a08", stroke="none", sw=0)
+    s.poly(lozenge(128, 124, 118, 118), s.lin(GOLD_PLATE, 0, 0, 1, 1), stroke="none", sw=0)
+    s.poly(lozenge(128, 124, 104, 104), s.lin([(0, "#7a5512"), (1, "#fff1b8")], 0, 0, 1, 1), stroke="none", sw=0)
+    # The field, clipped to the inner lozenge: dusk over the Smorodina.
+    clip = f"c{next(GRADIENT_IDS)}"
+    s.defs.append(f'<clipPath id="{clip}"><polygon points="{pts(lozenge(128, 124, 100, 100))}"/></clipPath>')
+    field = Svg(256, 256)
+    field.rect(0, 0, 256, 256, field.lin([(0, "#151c33"), (0.45, "#3d3350"), (0.72, "#b06a4c"), (1, "#f0b468")]), stroke="none", sw=0)
+    field.circle(170, 128, 30, field.rad([(0, "#fff4cf"), (0.35, "#ffd37a", 0.95), (1, "#f6c46e", 0)]), stroke="none", sw=0)
+    for x, y, r in ((92, 70, 1.6), (120, 52, 1.2), (150, 64, 1.4), (104, 92, 1.0), (176, 86, 1.1)):
+        field.circle(x, y, r, "#fff4cf", stroke="none", sw=0, opacity=0.8)
+    field.path("M20,150 Q70,122 120,138 Q170,116 236,140 L236,256 L20,256 Z", field.lin([(0, "#4f4a58"), (1, "#2c2934")]), stroke="none", sw=0)
+    field.embed(holy_city(), 84, 66, 0.62)
+    for x, foot, size in ((58, 172, 30), (74, 180, 36), (186, 174, 32), (200, 182, 38)):
+        conifer(field, x, foot, size * 0.6, size, ("#2f3d33", "#1d2820", "#0f1611"))
+    # The river of fire and the bridge over it.
+    field.path("M20,184 Q90,172 128,180 Q170,188 236,176 L236,256 L20,256 Z", field.lin([(0, "#e0773a"), (1, "#7a2a14")]), stroke="none", sw=0)
+    field.path("M60,196 Q90,190 118,196 M146,192 Q176,186 204,192", "none", stroke="#ffd27a", sw=2, opacity=0.75)
+    field.path("M78,186 Q128,148 178,186", "none", stroke="#2a2430", sw=11)
+    field.path("M78,186 Q128,148 178,186", "none", stroke=field.lin([(0, "#e8dcc2"), (1, "#9a8f7c")]), sw=6)
+    for x in (102, 128, 154):
+        field.line(x, 186 - (14 if x == 128 else 8), x, 198, stroke="#4a4038", sw=3.5)
+    s.defs.extend(field.defs)
+    s.add(f'<g clip-path="url(#{clip})">{"".join(field.parts)}</g>')
+    # Bevel lines and the four "seeds" of the sown field at the plate's points.
+    s.poly(lozenge(128, 124, 100, 100), "none", stroke="#3a2608", sw=2)
+    s.poly(lozenge(128, 124, 112, 112), "none", stroke="#fff4c2", sw=1, opacity=0.6)
+    for x, y in ((128, 14), (238, 124), (128, 234), (18, 124)):
+        s.poly(lozenge(x, y, 7, 7), "#3a2608", stroke="none", sw=0)
+        s.poly(lozenge(x, y, 4, 4), s.lin(GOLD_PLATE, 0, 0, 1, 1), stroke="none", sw=0)
+    return s
+
+
+def wordmark_paths(text, size, tracking=-40):
+    """The text's outlines in Ruslan Display: (paths, width, height), each
+    path a (d, x offset) in font units scaled to `size` px per em."""
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.ttLib import TTFont
+
+    font = TTFont(str(FONT_DIR / "RuslanDisplay-Regular.ttf"))
+    glyphs = font.getGlyphSet()
+    cmap = font.getBestCmap()
+    scale = size / font["head"].unitsPerEm
+    out, x = [], 0.0
+    for ch in text:
+        name = cmap[ord(ch)]
+        pen = SVGPathPen(glyphs)
+        glyphs[name].draw(pen)
+        out.append((pen.getCommands(), x))
+        x += glyphs[name].width + tracking
+    return out, (x - tracking) * scale, scale
+
+
+def wordmark(text="SLAVIAN", size=120):
+    """The name plated in gold over a dark bevel, a soft shadow under it."""
+    paths, width, scale = wordmark_paths(text, size)
+    cap = 500 * scale
+    pad = 14
+    s = Svg(round(width + pad * 2), round(cap + 112 * scale + pad * 2))
+    base = pad + cap
+
+    def letters(fill, stroke, sw, dx=0.0, dy=0.0, opacity=1):
+        for d, x in paths:
+            s.add(
+                f'<path transform="translate({fmt(pad + x * scale + dx)},{fmt(base + dy)}) scale({fmt(scale)},{fmt(-scale)})" d="{d}" '
+                f'fill="{fill}" stroke="{stroke}" stroke-width="{fmt(sw / scale)}" stroke-linejoin="round" opacity="{opacity}"/>'
+            )
+
+    letters("#000000", "#000000", 6, 2, 5, 0.45)
+    letters("#2a1a08", "#2a1a08", 7)
+    # The glyphs are drawn flipped (font units grow upwards), so the plate's
+    # gradient runs from the box's bottom to its top to light them from above.
+    letters(s.lin(GOLD_PLATE, 0, 1, 0, 0), "#fff4c2", 1.2)
+    return s
+
+
+def logo():
+    """The lockup: the emblem over the wordmark and a lozenge rule under it."""
+    mark = wordmark(size=128)
+    s = Svg(max(560, mark.w + 20), 300 + mark.h + 30)
+    s.embed(emblem(), (s.w - 256) / 2 + 2, 4, 1.0)
+    s.embed(mark, (s.w - mark.w) / 2, 270, 1.0)
+    y = 270 + mark.h + 10
+    gold = s.lin(GOLD_PLATE, 0, 0, 0, 1)
+    for x0, x1 in ((s.w / 2 - 190, s.w / 2 - 18), (s.w / 2 + 18, s.w / 2 + 190)):
+        s.rect(x0, y - 1.5, x1 - x0, 3, gold, stroke="none", sw=0)
+    s.poly(lozenge(s.w / 2, y, 11, 11), "#2a1a08", stroke="none", sw=0)
+    s.poly(lozenge(s.w / 2, y, 8, 8), s.lin(GOLD_PLATE, 0, 0, 1, 1), stroke="none", sw=0)
+    return s
+
 
 # --- Build everything --------------------------------------------------------
 
@@ -1119,21 +1274,40 @@ def assets():
     out["plot/empty"] = plot("empty")
     out["plot/locked"] = plot("locked")
     out["ui/title"] = ui_title()
+    out["ui/hero"] = ui_hero()
+    out["brand/emblem"] = emblem()
+    out["brand/wordmark"] = wordmark()
+    out["brand/logo"] = logo()
     for kind in UI_ICONS:
         out[f"icon/{kind}"] = icon(kind)
     return out
 
 
-def set_import_scale(svg_path):
+# Pieces drawn at full size already, imported 1:1 (2x would cost a phone
+# 19 MB of video memory for the start screen's painting).
+FULL_SIZE = {"ui/hero"}
+
+
+def set_import_scale(svg_path, scale=IMPORT_SCALE):
     """Godot reads its import settings from <file>.import; a minimal one is
     completed by Godot on the next import."""
     imp = svg_path.with_name(svg_path.name + ".import")
     if not imp.exists():
-        imp.write_text(f'[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n[params]\n\nsvg/scale={IMPORT_SCALE}\n')
+        imp.write_text(f'[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n[params]\n\nsvg/scale={scale}\n')
         return
     lines = imp.read_text().splitlines()
-    lines = [f"svg/scale={IMPORT_SCALE}" if line.startswith("svg/scale=") else line for line in lines]
+    lines = [f"svg/scale={scale}" if line.startswith("svg/scale=") else line for line in lines]
     imp.write_text("\n".join(lines) + "\n")
+
+
+def textures():
+    """Raster pieces (PNG), made with numpy and Pillow: the interface's wood."""
+    try:
+        from wood import wood
+    except ImportError:
+        print("numpy or Pillow missing: ui/wood left as it is")
+        return {}
+    return {"ui/wood": wood()}
 
 
 def main():
@@ -1145,12 +1319,18 @@ def main():
         path = OUT_DIR / f"{art_id}.svg"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(svg.text())
-        set_import_scale(path)
+        set_import_scale(path, 1.0 if art_id in FULL_SIZE else IMPORT_SCALE)
         res = f"{RES}/{art_id}.svg"
         # Your own art (a path outside generated/) is never replaced.
         if not manifest.get(art_id, res).startswith(RES):
             continue
         manifest[art_id] = res
+    for art_id, image in textures().items():
+        path = OUT_DIR / f"{art_id}.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        image.save(path)
+        if manifest.get(art_id, f"{RES}/{art_id}.png").startswith(RES):
+            manifest[art_id] = f"{RES}/{art_id}.png"
     MANIFEST.write_text(json.dumps(dict(sorted(manifest.items())), indent=2) + "\n")
     print(f"{len(manifest)} art ids in {MANIFEST.relative_to(ROOT)}")
 
