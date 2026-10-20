@@ -31,7 +31,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | Q1 | Group | 2–6 players per world, solo allowed. Invite-code only, no public lobbies. |
 | Q2 | World | Fixed-length **run** (~6 weeks target), ends in win or loss. A new world with a new seed afterwards. |
 | Q3 | Time | Real wall-clock timers, server-authoritative simulation. |
-| Q4 | Connectivity | Online-only. Cached last-known state viewable offline; orders need a connection. |
+| Q4 | Connectivity | Co-op worlds are online (the server). Single player runs entirely on the device, with no server calls (M5 step 19). |
 | Q5 | Stack | **Godot 4** client, **Node + TypeScript + PostgreSQL** server, game rules as shared JSON data. |
 | Q6 | Money | **No monetization.** A "Buy me a coffee" button and a monthly server-cost slider (surplus carries over to the next month). |
 | Q7 | Team | Solo developer. First milestone is a vertical slice for 2 players. |
@@ -607,8 +607,12 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **Start screen:** full-bleed. A dusk painting holds the logo, and the sheet sits beside it (landscape) or under it (phone) in plated wood. Language and text size share one row.
     - **Splash:** the studio's logo (Night Forge, `client/art/brand/night_forge.png`), then the game's logo with one gold shine; it can be skipped.
     - **Town names** (asked for after this step): every town gets a Slavic name of its own (`data/names.json`; old roots and endings once the list runs out), unique in its world, and its owner can rename it. The village panel's header steps through the player's towns with ◀ and ▶. Old towns named "Mila's village 2" are renamed on start.
-19. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
-20. [ ] **Closed test:** friends play a full run; fix what they find.
+19. [ ] **Local single player** (asked for after step 18): a solo world runs entirely in the app, with no calls to the server.
+    - **How:** the rules, the scheduler and the battles are ported to GDScript as an in-app local server (`client/scripts/local/`). It answers the same API calls the client makes today, so the screens don't change. Worlds are saved on the device.
+    - **Co-op** keeps the TypeScript server. Both sides run the same shared fixtures (`data/fixtures/`), as the hex math already does, so the two rule sets stay in step.
+    - **Order:** data and the sim core (resources, building, training), then the scheduler and catch-up, waves, hordes and battles, then the rest (outposts, caravans, research, heroes, sites, the bridge), each with its fixtures.
+20. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
+21. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
