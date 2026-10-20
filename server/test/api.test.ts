@@ -10,10 +10,14 @@ import { tick } from '../src/scheduler/worker.js';
 import { pushPending } from '../src/push/worker.js';
 import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
+import { rosterBonuses } from '../src/sim/heroes.js';
 import { roadRoute } from '../src/sim/logistics.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
+
+// A spearman's grain an hour under Dobrynya, the hero of anyone who doesn't pick.
+const DOBRYNYA_UPKEEP = 10 * (1 + rosterBonuses(loadGameData(), 'dobrynya').upkeep!);
 
 describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
   let db: Db;
@@ -93,6 +97,11 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(joined.body.members.map((m: { displayName: string }) => m.displayName)).toEqual(['Vesna', 'Bogdan']);
     expect((await call('POST', '/v1/worlds/join', stranger.token, { inviteCode: created.body.inviteCode })).body.error).toBe('rule');
 
+    // Each picks a hero from the roster; no two the same.
+    expect((await call('PUT', `/v1/worlds/${worldId}/hero`, bogdan.token, { kind: 'vasilisa' })).status).toBe(200);
+    expect((await call('PUT', `/v1/worlds/${worldId}/hero`, vesna.token, { kind: 'vasilisa' })).body.message).toMatch(/someone else/);
+    expect((await call('PUT', `/v1/worlds/${worldId}/hero`, vesna.token, { kind: 'nobody' })).body.error).toBe('rule');
+
     // Only the host starts it.
     expect((await call('POST', `/v1/worlds/${worldId}/start`, bogdan.token)).status).toBe(403);
     const started = await call('POST', `/v1/worlds/${worldId}/start`, vesna.token);
@@ -103,6 +112,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(started.body.villages).toHaveLength(2);
     for (const v of started.body.villages) expect(hexDistance(hex(v.q, v.r), hex(0, 0))).toBe(2);
     expect((await call('POST', `/v1/worlds/${worldId}/start`, vesna.token)).body.error).toBe('rule');
+
+    // Bogdan rides with Vasilisa; Vesna, who didn't pick, got another hero.
+    const kinds = new Map(started.body.members.map((m: { accountId: number; heroKind: string }) => [m.accountId, m.heroKind]));
+    expect(kinds.get(bogdan.accountId)).toBe('vasilisa');
+    expect(kinds.get(vesna.accountId)).toMatch(/^(?!vasilisa$)\w+$/);
+    expect((await call('PUT', `/v1/worlds/${worldId}/hero`, bogdan.token, { kind: 'volkh' })).body.message).toMatch(/chosen for this run/);
 
     const me = await call('GET', '/v1/me', bogdan.token);
     expect(me.body.worlds.map((w: { id: number }) => w.id)).toContain(worldId);
@@ -175,8 +190,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(trained.status).toBe(200);
     const batch = trained.body.village.training[0];
     expect(batch).toMatchObject({ unit: 'spearman', count: 3, perUnitMs: 6000 });
+    // Mila didn't pick, so she rides with the first hero, Dobrynya, whose retinue eats more.
     expect(trained.body.village.resources.ratesPerHour.grain).toBeCloseTo(
-      started.body.villages[0].resources.ratesPerHour.grain - 3 * 10,
+      started.body.villages[0].resources.ratesPerHour.grain - 3 * DOBRYNYA_UPKEEP,
     );
     expect((await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'horseman', count: 1 })).body.message).toMatch(
       /Barracks level 2/,
@@ -365,7 +381,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
     // Fallen spearmen stop eating.
     const fallen = 20 - (world.villages[0].garrison.spearman ?? 0);
-    expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * 10);
+    expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * DOBRYNYA_UPKEEP);
   });
 
   it('builds on plots: fields, free slots and the Elder\'s Hall', async () => {
@@ -624,6 +640,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const jarik = await guest('Jarik');
     const created = await call('POST', '/v1/worlds', jarik.token, { name: 'Research', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
+    await call('PUT', `/v1/worlds/${worldId}/hero`, jarik.token, { kind: 'dobrynya' });
     const started = await call('POST', `/v1/worlds/${worldId}/start`, jarik.token);
     const village = started.body.villages[0];
     const research = (tech: string) => call('POST', `/v1/villages/${village.id}/research`, jarik.token, { tech });
@@ -645,7 +662,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     const world = (await call('GET', `/v1/worlds/${worldId}`, jarik.token)).body;
     expect(world.research).toEqual([expect.objectContaining({ accountId: jarik.accountId, tech: 'felling_axes', status: 'done' })]);
-    expect(world.villages[0].bonuses).toEqual({ 'production.wood': 0.1 });
+    // The tech, besides what Dobrynya brings to all of Jarik's villages.
+    expect(world.villages[0].bonuses).toEqual({ ...rosterBonuses(scheduler.data, 'dobrynya'), 'production.wood': 0.1 });
     expect(world.villages[0].resources.ratesPerHour.wood).toBeCloseTo(woodBefore * 1.1);
     expect((await research('felling_axes')).body.message).toMatch(/already known/);
   });
@@ -654,6 +672,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const rada = await guest('Rada');
     const created = await call('POST', '/v1/worlds', rada.token, { name: 'Heroes', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
+    // Dobrynya learns at the usual pace.
+    await call('PUT', `/v1/worlds/${worldId}/hero`, rada.token, { kind: 'dobrynya' });
     const started = await call('POST', `/v1/worlds/${worldId}/start`, rada.token);
     const village = started.body.villages[0];
     expect(started.body.heroes).toEqual([
@@ -1413,7 +1433,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       const effects = scheduler.data.lore.scrolls[site.find.scroll]!.effects;
       for (const v of [home, theirs]) {
         const village = w.villages.find((x: { id: number }) => x.id === v.id);
-        for (const [key, value] of Object.entries(effects)) expect(village.bonuses[key]).toBeCloseTo(value);
+        // On top of what each player's roster hero brings.
+        const kind = w.members.find((m: { accountId: number }) => m.accountId === village.ownerAccountId).heroKind;
+        for (const [key, value] of Object.entries(effects)) expect(village.bonuses[key]).toBeCloseTo(value + (rosterBonuses(scheduler.data, kind)[key] ?? 0));
       }
       expect(w.armies.find((a: { id: number }) => a.id === army.body.army.id).status).toBe('returning');
       expect((await send(idol!, { scout: 1 })).body.message).toMatch(/already been explored/);

@@ -122,7 +122,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
     await saveArmy(client, gone);
     const hero = await heroWithArmy(client, army.id);
     if (hero && data) {
-      const woundedUntil = new Date(at.getTime() + woundMs(data, world.speed));
+      const woundedUntil = new Date(at.getTime() + woundMs(data, world.speed, hero.kind));
       await saveHero(client, { ...hero, status: 'wounded', villageId: army.homeVillageId, armyId: null, woundedUntil });
       await scheduleEvent(client, world.id, woundedUntil, 'hero_recover', { accountId: hero.accountId });
       await notifyWorld(client, { worldId: world.id, type: 'heroes' });

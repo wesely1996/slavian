@@ -18,6 +18,7 @@ import {
   listMembers,
   markStarted,
   setClan,
+  setHeroKind,
   setQuietHours,
   type World,
 } from '../db/worlds.js';
@@ -122,7 +123,7 @@ export async function startWorldCommand(
         state: newVillage(deps.data, input.now, world.speed),
       });
     }
-    await ensureHeroes(client, deps.data, world.id, world.seed);
+    await ensureHeroes(client, deps.data, world.id);
     const started = await getWorld(client, world.id);
     // Each village carries its owner's clan.
     await refreshBonuses(client, deps.data, started, members.map((m) => m.accountId), input.now);
@@ -152,6 +153,30 @@ export async function setClanCommand(
     await setClan(client, world.id, input.account.id, input.clan);
     if (world.status === 'running') await refreshBonuses(client, deps.data, world, [input.account.id], input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
+  });
+}
+
+// Each member picks a hero from the roster, one nobody else in the group has.
+// It can change in the lobby; once the run starts it is set (members of a run
+// from before the roster pick once).
+export async function pickHeroCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; worldId: number; kind: string; now: Date },
+): Promise<void> {
+  const def = deps.data.heroes.roster[input.kind];
+  if (!def) throw new RuleError(`Unknown hero "${input.kind}"`);
+  await withWorld(db, input.worldId, input.now, deps, async (client) => {
+    const world = await getWorld(client, input.worldId);
+    const members = await listMembers(client, world.id);
+    const member = members.find((m) => m.accountId === input.account.id);
+    if (!member) throw new ForbiddenError('You are not in this world');
+    if (world.status !== 'lobby' && member.heroKind !== null) throw new RuleError('Your hero is chosen for this run');
+    if (members.some((m) => m.accountId !== member.accountId && m.heroKind === input.kind)) throw new RuleError(`${def.name} already rides with someone else`);
+    await setHeroKind(client, world.id, input.account.id, input.kind);
+    if (world.status === 'running') await refreshBonuses(client, deps.data, world, [input.account.id], input.now);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    await notifyWorld(client, { worldId: world.id, type: 'heroes' });
   });
 }
 

@@ -377,6 +377,17 @@ const heroesFileSchema = z.object({
     }),
   ),
   sets: z.record(z.string(), z.object({ name: z.string(), items: z.array(z.string()).min(2), effects: effectsSchema })),
+  // The heroes to pick from: strengths and weaknesses, and traits.
+  roster: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      title: z.string(),
+      story: z.string(),
+      effects: effectsSchema,
+      traits: z.array(z.object({ name: z.string(), description: z.string(), effects: effectsSchema })).min(1),
+    }),
+  ),
 });
 
 const ordersFileSchema = z.object({

@@ -369,13 +369,15 @@ func _show_lobby(world: Dictionary) -> void:
 	for member in world.members:
 		var host := tr(" (host)") if int(member.accountId) == int(world.hostAccountId) else ""
 		var clan := " · %s" % ClanText.title(Game.data, member.get("clan")) if not Game.data.is_empty() else ""
-		_content.add_child(UI.label("• %s%s%s" % [member.displayName, host, clan]))
+		var hero := " · %s" % tr(HeroText.roster(Game.data, member.get("heroKind")).get("name", "")) if member.get("heroKind") != null and not Game.data.is_empty() else ""
+		_content.add_child(UI.label("• %s%s%s%s" % [member.displayName, host, clan, hero]))
 	if int(world.hostAccountId) == int(Session.account.id):
 		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id))))
 	else:
 		_content.add_child(UI.label(tr("Waiting for the host to start…"), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.button(tr("Back"), _show_home))
 	_clan_picker(world)
+	_hero_picker(world)
 
 
 ## Each member picks their clan in the lobby (and may change it until the start).
@@ -396,6 +398,54 @@ func _clan_picker(world: Dictionary) -> void:
 		_content.add_child(pick)
 		_content.add_child(UI.label(tr(def.story), UI.SMALL_SIZE, UI.MUTED))
 		_content.add_child(UI.label(ClanText.perks(Game.data, clan), UI.SMALL_SIZE, UI.MUTED))
+
+
+## Each member picks a hero from the roster, one nobody else in the group
+## has (and may change it until the start).
+func _hero_picker(world: Dictionary) -> void:
+	if Game.data.is_empty():
+		return
+	var mine: Variant = null
+	var taken := {}
+	for member in world.members:
+		if int(member.accountId) == int(Session.account.id):
+			mine = member.get("heroKind")
+		elif member.get("heroKind") != null:
+			taken[String(member.heroKind)] = String(member.displayName)
+	_content.add_child(UI.label(tr("Your hero: %s") % HeroText.roster_title(Game.data, mine), UI.HEADING_SIZE))
+	_content.add_child(UI.label(tr("Their strengths and traits reach all your villages; the hero leads the garrison where it stands."), UI.SMALL_SIZE, UI.MUTED))
+	for kind in HeroText.roster_ids(Game.data):
+		var def := HeroText.roster(Game.data, kind)
+		var card := UI.hbox(14)
+		var face := HeroText.portrait(kind, 104.0)
+		face.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		card.add_child(face)
+		var text := UI.vbox(4)
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.add_child(UI.label(HeroText.roster_title(Game.data, kind), 0, UI.ACCENT if kind == mine else Color.WHITE))
+		text.add_child(UI.label(tr(def.story), UI.SMALL_SIZE, UI.MUTED))
+		text.add_child(UI.label(HeroText.effects(def.effects), UI.SMALL_SIZE))
+		for line in HeroText.roster_traits(Game.data, kind):
+			text.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+		if taken.has(kind):
+			text.add_child(UI.label(tr("Rides with %s") % taken[kind], UI.SMALL_SIZE, UI.MUTED))
+		elif kind != mine:
+			var pick := UI.button(tr("Pick %s") % tr(def.name), func() -> void: _pick_hero(int(world.id), kind))
+			pick.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			text.add_child(pick)
+		else:
+			text.add_child(UI.label(tr("✓ Your hero"), UI.SMALL_SIZE, UI.ACCENT))
+		card.add_child(text)
+		_content.add_child(card)
+
+
+func _pick_hero(world_id: int, kind: String) -> void:
+	_set_status("")
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/hero" % world_id, {"kind": kind})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	_show_lobby(response.data)
 
 
 func _pick_clan(world_id: int, clan: String) -> void:

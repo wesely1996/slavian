@@ -1234,6 +1234,120 @@ def logo():
 
 # --- Build everything --------------------------------------------------------
 
+# --- Hero portraits -----------------------------------------------------------
+# Painted busts on a dusk sky in an arched frame, lit from the upper left
+# like everything else: each hero's own headwear, hair, beard and garb.
+
+HEROES = {
+    # skin, hair, beard (None: none), garb (light, dark), trim, headwear, sky
+    "dobrynya": dict(skin=("#f0c8a0", "#b9825c"), hair=("#8a5a32", "#4a2c16"), beard="short", garb=("#c0443a", "#6e1f1a"),
+                     trim="#e2b33c", head="helm", sky=("#f2b768", "#7a4a6e"), mail=True),
+    "vasilisa": dict(skin=("#f3cfae", "#bf8a68"), hair=("#b5552a", "#5e2410"), beard=None, garb=("#5f8a44", "#2c4a22"),
+                     trim="#c9a16e", head="hood", sky=("#cfe0a8", "#3f6b55"), braid=True, bow=True),
+    "volkh": dict(skin=("#e8c09c", "#a8785a"), hair=("#e9e4da", "#a39d93"), beard="long", garb=("#4d6a8a", "#1f3048"),
+                  trim="#d9cfb8", head="fur", sky=("#b6c9e6", "#33405e"), staff=True),
+    "sadko": dict(skin=("#f2cba6", "#b8835e"), hair=("#e0b25a", "#8a6420"), beard="short", garb=("#3a6fa8", "#163a63"),
+                  trim="#e2b33c", head="kolpak", sky=("#f6d58e", "#3f7f9e"), fur=True),
+    "nastasya": dict(skin=("#f5d2b2", "#c08d6a"), hair=("#ecd08a", "#a07a2e"), beard=None, garb=("#e6e0d2", "#8f877a"),
+                     trim="#b5452f", head="nasal", sky=("#f0c8a8", "#8e4a3c"), braid=True, shield=True, mail=True),
+    "ilya": dict(skin=("#e2b48e", "#9e6c4c"), hair=("#bdb5a8", "#6b645a"), beard="full", garb=("#6f6a62", "#2e2b27"),
+                 trim="#a39d93", head="cone", sky=("#e6c08a", "#5a4a3a"), mail=True),
+}
+
+
+def portrait(kind):
+    h = HEROES[kind]
+    s = Svg(160, 200)
+    # The arch: a dusk sky with a low sun at the upper left.
+    arch = "M10,196 L10,70 Q10,10 80,10 Q150,10 150,70 L150,196 Z"
+    s.path(arch, s.lin([(0, h["sky"][0]), (1, h["sky"][1])], 0, 0, 0.4, 1), stroke="none", sw=0)
+    s.circle(46, 58, 30, s.rad([(0, "#fff4c2", 0.9), (1, "#fff4c2", 0)]), stroke="none", sw=0)
+    s.path("M10,150 Q50,128 90,142 Q125,152 150,136 L150,196 L10,196 Z", s.lin([(0, "#3f6b35", 0.55), (1, "#1d2a18", 0.85)]), stroke="none", sw=0)
+    skin = s.lin([(0, h["skin"][0]), (1, h["skin"][1])], 0.2, 0, 0.9, 1)
+    hair = s.lin([(0, h["hair"][0]), (1, h["hair"][1])], 0, 0, 1, 1)
+    garb = s.lin([(0, h["garb"][0]), (1, h["garb"][1])], 0, 0, 1, 1)
+    shade = "#2b2118"
+    if h.get("staff"):
+        s.line(128, 196, 134, 46, stroke=s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 1, 0), sw=6)
+        s.circle(134, 44, 7, s.rad([(0, "#bfe3f0"), (1, "#3f7f9e")], 0.35, 0.3), stroke="none", sw=0)
+    if h.get("bow"):
+        s.path("M124,70 Q150,130 120,192", "none", stroke=s.lin([(0, "#b78d5e"), (1, "#594027")]), sw=5)
+        s.line(124, 70, 120, 192, stroke="#e6dcc2", sw=1.2)
+    # Long hair and braids fall behind the shoulders.
+    if h["head"] in ("hood",) or h.get("braid"):
+        s.path("M52,74 Q46,120 58,150 L102,150 Q114,120 108,74 Z", hair, stroke="none", sw=0)
+    # Shoulders and chest.
+    s.path("M18,196 Q20,150 52,138 Q80,130 108,138 Q140,150 142,196 Z", garb, stroke="none", sw=0)
+    if h.get("mail"):
+        for y in range(146, 196, 7):
+            s.path(f"M{30 + (y - 146) * 0.1},{y} Q80,{y - 6} {130 - (y - 146) * 0.1},{y}", "none", stroke="#d9d4ca", sw=1.2, opacity=0.35)
+    if h.get("fur"):
+        s.path("M34,150 Q80,128 126,150 Q118,162 80,156 Q42,162 34,150 Z", s.lin([(0, "#e9dcc2"), (1, "#8c7a5e")]), stroke="none", sw=0)
+    s.path("M64,138 L80,170 L96,138", "none", stroke=h["trim"], sw=4)
+    if h.get("shield"):
+        s.circle(38, 172, 23, s.rad([(0, "#c9614a"), (1, "#6e2a1f")], 0.35, 0.3), stroke="none", sw=0)
+        s.circle(38, 172, 23, "none", stroke="#e2b33c", sw=4)
+        s.circle(38, 172, 6, "#e2b33c", stroke="none", sw=0)
+    # Neck and head.
+    s.path("M70,112 L70,136 Q80,142 90,136 L90,112 Z", s.lin([(0, h["skin"][1]), (1, shade)], 0, 0, 0, 1), stroke="none", sw=0)
+    s.ellipse(80, 92, 25, 31, skin, stroke="none", sw=0)
+    s.ellipse(92, 98, 12, 20, shade, stroke="none", sw=0, opacity=0.12)
+    # Eyes, brows, nose, mouth.
+    for x in (70, 90):
+        s.ellipse(x, 90, 3.6, 2.4, "#fbf5e6", stroke="none", sw=0)
+        s.circle(x + 0.5, 90, 1.8, "#3a2a1c", stroke="none", sw=0)
+        s.path(f"M{x - 6},{84} Q{x},{80} {x + 6},{84}", "none", stroke=h["hair"][1], sw=2.4)
+    s.path("M80,92 Q78,101 82,103", "none", stroke=h["skin"][1], sw=2)
+    if not h["beard"]:
+        s.path("M73,110 Q80,114 87,110", "none", stroke="#a0524a", sw=2.2)
+        s.ellipse(68, 101, 5, 3, "#e8907a", stroke="none", sw=0, opacity=0.35)
+        s.ellipse(92, 101, 5, 3, "#e8907a", stroke="none", sw=0, opacity=0.35)
+    # Beards.
+    if h["beard"] == "short":
+        s.path("M56,96 Q58,126 80,130 Q102,126 104,96 Q98,112 80,114 Q62,112 56,96 Z", hair, stroke="none", sw=0)
+        s.path("M70,107 Q80,104 90,107", "none", stroke=h["hair"][1], sw=3)
+    elif h["beard"] in ("long", "full"):
+        length = 178 if h["beard"] == "long" else 156
+        s.path(f"M55,92 Q54,{length - 30} 80,{length} Q106,{length - 30} 105,92 Q98,112 80,114 Q62,112 55,92 Z", hair, stroke="none", sw=0)
+        for x in (70, 80, 90):
+            s.path(f"M{x},118 Q{x - 2},{length - 30} {x + 1},{length - 10}", "none", stroke=h["hair"][1], sw=1.4, opacity=0.6)
+        s.path("M70,107 Q80,104 90,107", "none", stroke=h["hair"][1], sw=3)
+    # Hair on top, then headwear.
+    head = h["head"]
+    if head in ("kolpak", "fur", "hood") or h.get("braid"):
+        s.path("M54,92 Q52,58 80,56 Q108,58 106,92 Q100,72 80,70 Q60,72 54,92 Z", hair, stroke="none", sw=0)
+    steel = s.lin([(0, "#f1f3f5"), (0.5, "#a3a9b0"), (1, "#4c535b")], 0, 0, 1, 1)
+    if head == "helm":
+        s.path("M52,84 Q54,46 80,28 Q106,46 108,84 Z", steel, stroke="none", sw=0)
+        s.rect(51, 78, 58, 8, h["trim"], stroke="none", sw=0, rx=2)
+        s.path("M80,28 L80,84", "none", stroke=h["trim"], sw=3)
+        s.path("M78,84 L82,84 L81,100 L79,100 Z", steel, stroke="none", sw=0)
+    elif head == "nasal":
+        s.path("M54,84 Q54,50 80,44 Q106,50 106,84 Z", steel, stroke="none", sw=0)
+        s.rect(53, 78, 54, 7, "#8f877a", stroke="none", sw=0, rx=2)
+        s.path("M78,84 L82,84 L81,98 L79,98 Z", steel, stroke="none", sw=0)
+    elif head == "cone":
+        s.path("M50,86 Q56,40 80,18 Q104,40 110,86 Z", steel, stroke="none", sw=0)
+        s.rect(49, 80, 62, 8, "#6b645a", stroke="none", sw=0, rx=2)
+        s.path("M50,86 Q48,120 62,128 L62,96 Z M110,86 Q112,120 98,128 L98,96 Z", s.lin([(0, "#c9ccd1"), (1, "#5c636b")]), stroke="none", sw=0, opacity=0.9)
+    elif head == "hood":
+        s.path("M44,110 Q42,48 80,40 Q118,48 116,110 Q108,74 80,68 Q52,74 44,110 Z", garb, stroke="none", sw=0)
+    elif head == "fur":
+        s.path("M52,80 Q50,52 80,48 Q110,52 108,80 Z", s.lin([(0, "#7a5a3a"), (1, "#3a2719")]), stroke="none", sw=0)
+        s.path("M50,82 Q80,70 110,82 Q110,92 80,86 Q50,92 50,82 Z", s.lin([(0, "#e9dcc2"), (1, "#8c7a5e")]), stroke="none", sw=0)
+    elif head == "kolpak":
+        s.path("M54,80 Q56,44 84,36 Q112,40 106,80 Z", garb, stroke="none", sw=0)
+        s.path("M52,82 Q80,72 108,82 Q108,92 80,88 Q52,92 52,82 Z", s.lin([(0, "#e9dcc2"), (1, "#8c7a5e")]), stroke="none", sw=0)
+        s.circle(84, 52, 4, h["trim"], stroke="none", sw=0)
+    if h.get("braid"):
+        for i in range(5):
+            s.ellipse(104 + i * 1.5, 104 + i * 12, 6, 7, hair, stroke="none", sw=0)
+    # The frame: a gold arch with the light along its upper left.
+    s.path(arch, "none", stroke=s.lin([(0, "#fff4c2"), (0.4, "#ecc457"), (0.75, "#b8862a"), (1, "#7a5512")], 0, 0, 1, 1), sw=7)
+    s.path(arch, "none", stroke="#2a1a08", sw=1.5, opacity=0.6)
+    return s
+
+
 def assets():
     out = {}
     for kind, make in FEATURES.items():
@@ -1280,6 +1394,8 @@ def assets():
     out["brand/logo"] = logo()
     for kind in UI_ICONS:
         out[f"icon/{kind}"] = icon(kind)
+    for kind in HEROES:
+        out[f"hero/{kind}"] = portrait(kind)
     return out
 
 

@@ -1,6 +1,6 @@
 import type { GameData, HeroSlot } from '../data/index.js';
 import { NotFoundError } from '../errors.js';
-import { combine, heroBonuses, newHero, type HeroState, type HeroStatus } from '../sim/heroes.js';
+import { combine, freeHeroKind, heroBonuses, newHero, type HeroState, type HeroStatus } from '../sim/heroes.js';
 import type { Bonuses } from '../sim/research.js';
 import type { PathStep } from '../sim/waves.js';
 import type { DbClient } from './pool.js';
@@ -20,6 +20,7 @@ export interface Hero extends HeroState {
 
 interface HeroRow {
   world_id: number;
+  kind: string | null;
   account_id: number;
   name: string;
   status: HeroStatus;
@@ -37,10 +38,14 @@ interface HeroRow {
   army_id: number | null;
 }
 
+// Heroes with who they are in the roster (their member's pick).
+const SELECT = 'SELECT h.*, m.hero_kind AS kind FROM heroes h LEFT JOIN world_members m ON m.world_id = h.world_id AND m.account_id = h.account_id';
+
 function fromRow(row: HeroRow): Hero {
   return {
     worldId: row.world_id,
     accountId: row.account_id,
+    kind: row.kind,
     name: row.name,
     status: row.status,
     villageId: row.village_id,
@@ -58,8 +63,35 @@ function fromRow(row: HeroRow): Hero {
   };
 }
 
-// Gives every member with a village a hero, standing in their first one.
-export async function ensureHeroes(client: DbClient, data: GameData, worldId: number, seed: number): Promise<number> {
+// Gives every member who didn't pick a roster hero one nobody else in the
+// group has; returns who got one.
+export async function assignHeroKinds(client: DbClient, data: GameData, worldId: number): Promise<number[]> {
+  const { rows: members } = await client.query<{ account_id: number; hero_kind: string | null }>(
+    'SELECT account_id, hero_kind FROM world_members WHERE world_id = $1 ORDER BY joined_at, account_id',
+    [worldId],
+  );
+  const kinds = new Map(members.map((m) => [m.account_id, m.hero_kind]));
+  const assigned: number[] = [];
+  for (const member of members) {
+    if (member.hero_kind) continue;
+    const kind = freeHeroKind(data, kinds.values());
+    if (!kind) continue;
+    kinds.set(member.account_id, kind);
+    await client.query('UPDATE world_members SET hero_kind = $3 WHERE world_id = $1 AND account_id = $2', [worldId, member.account_id, kind]);
+    assigned.push(member.account_id);
+  }
+  return assigned;
+}
+
+// Gives every member their roster hero, and every member with a village
+// without a hero one, standing in their first village.
+export async function ensureHeroes(client: DbClient, data: GameData, worldId: number): Promise<number> {
+  await assignHeroKinds(client, data, worldId);
+  const { rows: members } = await client.query<{ account_id: number; hero_kind: string | null }>(
+    'SELECT account_id, hero_kind FROM world_members WHERE world_id = $1',
+    [worldId],
+  );
+  const kinds = new Map(members.map((m) => [m.account_id, m.hero_kind]));
   const { rows } = await client.query<{ account_id: number; village_id: number }>(
     `SELECT DISTINCT ON (v.owner_account_id) v.owner_account_id AS account_id, v.id AS village_id
      FROM villages v
@@ -69,7 +101,7 @@ export async function ensureHeroes(client: DbClient, data: GameData, worldId: nu
     [worldId],
   );
   for (const row of rows) {
-    const hero = newHero(data, seed, row.account_id);
+    const hero = newHero(data, kinds.get(row.account_id) ?? Object.keys(data.heroes.roster)[0]!);
     await client.query(
       'INSERT INTO heroes (world_id, account_id, name, village_id) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
       [worldId, row.account_id, hero.name, row.village_id],
@@ -79,7 +111,7 @@ export async function ensureHeroes(client: DbClient, data: GameData, worldId: nu
 }
 
 export async function loadHero(client: DbClient, worldId: number, accountId: number): Promise<Hero> {
-  const { rows } = await client.query<HeroRow>('SELECT * FROM heroes WHERE world_id = $1 AND account_id = $2', [
+  const { rows } = await client.query<HeroRow>(`${SELECT} WHERE h.world_id = $1 AND h.account_id = $2`, [
     worldId,
     accountId,
   ]);
@@ -89,17 +121,17 @@ export async function loadHero(client: DbClient, worldId: number, accountId: num
 
 // The hero standing (not wounded) in a village, if any.
 export async function heroAt(client: DbClient, villageId: number): Promise<Hero | null> {
-  const { rows } = await client.query<HeroRow>(`SELECT * FROM heroes WHERE village_id = $1 AND status = 'home'`, [villageId]);
+  const { rows } = await client.query<HeroRow>(`${SELECT} WHERE h.village_id = $1 AND h.status = 'home'`, [villageId]);
   return rows[0] ? fromRow(rows[0]) : null;
 }
 
 export async function heroWithArmy(client: DbClient, armyId: number): Promise<Hero | null> {
-  const { rows } = await client.query<HeroRow>(`SELECT * FROM heroes WHERE army_id = $1 AND status = 'with_army'`, [armyId]);
+  const { rows } = await client.query<HeroRow>(`${SELECT} WHERE h.army_id = $1 AND h.status = 'with_army'`, [armyId]);
   return rows[0] ? fromRow(rows[0]) : null;
 }
 
 export async function listHeroes(client: DbClient, worldId: number): Promise<Hero[]> {
-  const { rows } = await client.query<HeroRow>('SELECT * FROM heroes WHERE world_id = $1 ORDER BY account_id', [worldId]);
+  const { rows } = await client.query<HeroRow>(`${SELECT} WHERE h.world_id = $1 ORDER BY h.account_id`, [worldId]);
   return rows.map(fromRow);
 }
 

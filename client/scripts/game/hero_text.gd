@@ -10,7 +10,48 @@ static func effect_name(key: String) -> String:
 		"defense.all": UI.t("defense"), "defense.infantry": UI.t("infantry defense"), "defense.archers": UI.t("archer defense"), "defense.cavalry": UI.t("cavalry defense"),
 		"homeDefense": UI.t("defense at home"), "lootTaken": UI.t("loot taken"), "scoutSpeed": UI.t("scout speed"), "scoutSurvival": UI.t("scout survival"),
 		"caravanSpeed": UI.t("caravan speed"), "caravanCapacity": UI.t("caravan load"),
+		"upkeep": UI.t("troop upkeep"), "ambush": UI.t("ambush"), "researchTime": UI.t("research time"),
+		"production.all": UI.t("production"), "production.grain": UI.t("grain"), "trainTime.spearman": UI.t("spearman training time"),
+		"heroSpeed": UI.t("hero speed"), "heroXp": UI.t("hero XP"), "woundTime": UI.t("time wounded"),
 	}.get(key, key)
+
+
+## The roster's heroes (data/heroes.json), in their order.
+static func roster_ids(data: Dictionary) -> Array:
+	return data.get("heroes", {}).get("roster", {}).keys()
+
+
+## A roster hero's definition ({} if unknown).
+static func roster(data: Dictionary, kind: Variant) -> Dictionary:
+	if kind == null:
+		return {}
+	return data.get("heroes", {}).get("roster", {}).get(String(kind), {})
+
+
+## "Dobrynya, the serpent-slayer prince"
+static func roster_title(data: Dictionary, kind: Variant) -> String:
+	var def := roster(data, kind)
+	if def.is_empty():
+		return UI.t("No hero yet")
+	return UI.t("%s, %s") % [UI.t(def.name), UI.t(def.title).to_lower()]
+
+
+## Its traits: "Tracker: Moves fast and teaches the scouts to come back alive."
+static func roster_traits(data: Dictionary, kind: Variant) -> PackedStringArray:
+	var out := PackedStringArray()
+	for trait_ in roster(data, kind).get("traits", []):
+		out.append(UI.t("%s: %s (%s)") % [UI.t(trait_.name), UI.t(trait_.description), effects(trait_.effects)])
+	return out
+
+
+## The portrait, `width` wide (art id hero/<kind>).
+static func portrait(kind: Variant, width: float) -> TextureRect:
+	var rect := TextureRect.new()
+	rect.texture = Art.texture("hero/%s" % String(kind)) if kind != null else null
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.custom_minimum_size = Vector2(width, width * 1.25)
+	return rect
 
 
 ## "+8% attack, −15% loot taken"

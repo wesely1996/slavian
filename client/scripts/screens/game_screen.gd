@@ -1532,6 +1532,21 @@ func _hero_panel() -> void:
 		_panel_mode = "hex"
 		_rebuild_panel()))
 	_panel_body.add_child(top)
+	# Who it is: the portrait, the roster hero's strengths and traits.
+	var kind: Variant = hero.get("kind")
+	if not HeroText.roster(Game.data, kind).is_empty():
+		var card := UI.hbox(14)
+		var face := HeroText.portrait(kind, 104.0)
+		face.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		card.add_child(face)
+		var about := UI.vbox(4)
+		about.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		about.add_child(UI.label(tr(HeroText.roster(Game.data, kind).title), 0, UI.ACCENT))
+		about.add_child(UI.label(tr("In all your villages: %s") % HeroText.effects(HeroText.roster(Game.data, kind).effects), UI.SMALL_SIZE))
+		for line in HeroText.roster_traits(Game.data, kind):
+			about.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+		card.add_child(about)
+		_panel_body.add_child(card)
 	var status := UI.label("", UI.SMALL_SIZE)
 	_panel_body.add_child(status)
 	_tick(status, func() -> String: return HeroText.whereabouts(hero, -1, Game.village_name(hero.villageId), Game.server_now()))

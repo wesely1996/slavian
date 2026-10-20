@@ -612,11 +612,16 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - Rivers merge: a later river that reaches a corner where an older one runs joins it, and rivers are drawn towards each other a little. Each edge has a **size** (1 from the source, +1 for each river joined above; migration 033), and the map draws a river wider below each meeting point.
     - A river runs only between two land hexes, never along a lake's or the ocean's shore, so no bridge leads onto water. Building a bridge onto a lake or the ocean is refused, for rivers on older maps too.
 20. [x] **Resources every minute** (`sim/resources.ts`, client `Ledger`): production is credited once a minute, a minute's worth at every whole minute (UTC) since the ledger was settled, so settling never gains or loses anything; upkeep is taken the same way. The title row shows each rate per minute, and its tooltip gives the hourly figure and the seconds to the next credit. Shared cases in `data/fixtures/resource-vectors.json`.
-21. [ ] **Hero roster:** at the start of a run each player picks one of several heroes (`data/heroes.json`), for example a warrior prince, a forest huntress, a wise volkhv, a merchant rider and a shieldmaiden. Each has:
-    - strengths and weaknesses (stats that differ by hero, such as attack, defense, speed and command);
-    - one or two special traits or abilities of their own (a rallying cry, tracking that reveals hordes earlier, rites that heal the wounded, better trade);
-    - a painted portrait (art ids `hero/<id>`), shown in the pick screen, the hero panel and battle reports.
-    - Heroes in the same group are different heroes.
+21. [x] **Hero roster** (`data/heroes.json` `roster`, `sim/heroes.ts`): six heroes to pick from, each with strengths and weaknesses, a trait and a painted portrait (art `hero/<id>`, from `tools/art/generate.py`):
+    - **Dobrynya**, the serpent-slayer prince: attack and cavalry, but his retinue eats more (upkeep); *Rallying cry* (defense at home).
+    - **Vasilisa**, the forest huntress: archers and ambush, weaker infantry defense; *Tracker* (hero and scout speed, scouts come back alive).
+    - **Volkh**, the wise volkhv: faster research and more grain, weaker attack; *Healing rites* (half the time wounded, more XP).
+    - **Sadko**, the merchant rider: caravans and production, weaker defense; *Silver tongue* (raiders carry off less).
+    - **Nastasya**, the shieldmaiden: defense, slow on the road; *Unbreakable* (spearmen train faster, defense at home).
+    - **Ilya**, the old bogatyr: attack and defense, learns slowly (XP); *Strength of the earth* (less time wounded).
+    - Each member picks in the lobby (`PUT /v1/worlds/:id/hero`), one nobody else in the group has, and may change it until the start. Whoever didn't pick gets the first free hero in roster order. Runs from before the roster gave each player one on the server's start (migration 034).
+    - A roster hero's strengths, weaknesses and traits reach all of the player's villages, like a clan's perks. Skills and gear still count where the hero stands. Hero-only effects: `heroSpeed`, `heroXp`, `woundTime`.
+    - Client: hero cards in the lobby (portrait, story, effects, trait, who has which), and the portrait, title and traits at the top of the hero panel. Portraits in battle reports come with the hero quests (step 22).
 22. [ ] **Hero quests:** the hero can head out on quests that take real time, with risk and experience:
     - **Delay the enemy:** ambush a horde's road or burn its camp, so the next wave sets out later.
     - **Reveal:** scout a front far ahead and learn the next waves' size and makeup.

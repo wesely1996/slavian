@@ -5,7 +5,8 @@ import { HALL_PLOT, plotsFromLegacyLevels, withWallPlots, type Plot } from '../s
 import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
 import { ensureSites } from '../scheduler/sites.js';
-import { ensureHeroes } from './heroes.js';
+import { assignHeroKinds, ensureHeroes } from './heroes.js';
+import { refreshBonuses } from '../scheduler/research.js';
 import { getWorld } from './worlds.js';
 import { inTransaction, type Db } from './pool.js';
 import { isDefaultName, townName } from '../sim/names.js';
@@ -64,9 +65,15 @@ export async function upgradeWallPlots(db: Db, data: GameData): Promise<number> 
 // Worlds started before heroes existed: give every player theirs.
 export async function upgradeHeroes(db: Db, data: GameData): Promise<number> {
   return inTransaction(db, async (client) => {
-    const { rows } = await client.query<{ id: number; seed: number }>(`SELECT id, seed FROM worlds WHERE status <> 'lobby'`);
+    const { rows } = await client.query<{ id: number; seed: number; status: string }>(`SELECT id, seed, status FROM worlds WHERE status <> 'lobby'`);
     let created = 0;
-    for (const world of rows) created += await ensureHeroes(client, data, world.id, world.seed);
+    for (const world of rows) {
+      // Runs from before the roster: each player gets a roster hero, whose
+      // strengths and traits reach their villages.
+      const assigned = await assignHeroKinds(client, data, world.id);
+      if (assigned.length && world.status === 'running') await refreshBonuses(client, data, await getWorld(client, world.id), assigned, new Date());
+      created += await ensureHeroes(client, data, world.id);
+    }
     return created;
   });
 }

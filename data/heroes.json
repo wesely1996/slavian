@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "One hero per player. The hero leads the garrison of the village it stands in: its skills and gear add to that village's research effects (same keys as research.json) for battles there, and for scouts and caravans sent from there. XP comes from enemies killed in battles the hero fights in; level L needs `levelXp.base` x `levelXp.growth`^(L-1) more XP to reach L+1 and gives one skill point. A beaten horde may drop gear (`dropChance`); losing a battle wounds the hero for `woundHours` game hours. `speed` is hexes per hour on plains.",
+  "_comment": "One hero per player. The hero leads the garrison of the village it stands in: its skills and gear add to that village's research effects (same keys as research.json) for battles there, and for scouts and caravans sent from there. XP comes from enemies killed in battles the hero fights in; level L needs `levelXp.base` x `levelXp.growth`^(L-1) more XP to reach L+1 and gives one skill point. A beaten horde may drop gear (`dropChance`); losing a battle wounds the hero for `woundHours` game hours. `speed` is hexes per hour on plains. Each player picks a hero from `roster` before the run (a hero not yet picked by someone else in the group); its `effects` are its strengths (positive) and weaknesses (negative), and each of its `traits` adds its own effects. Hero-only keys: `heroSpeed` (travel), `heroXp` (XP gained), `woundTime` (time spent wounded).",
   "speed": 6,
   "woundHours": 8,
   "maxLevel": 20,
@@ -226,6 +226,127 @@
       "effects": {
         "defense.all": 0.05
       }
+    }
+  },
+  "roster": {
+    "dobrynya": {
+      "name": "Dobrynya",
+      "title": "The serpent-slayer prince",
+      "story": "A prince's son who struck down the Zmey at the Puchai river. Bold in the charge, and a retinue to keep fed.",
+      "effects": {
+        "attack.all": 0.1,
+        "attack.cavalry": 0.06,
+        "upkeep": 0.08
+      },
+      "traits": [
+        {
+          "name": "Rallying cry",
+          "description": "His name alone makes men fight harder at their own gates.",
+          "effects": {
+            "homeDefense": 0.06
+          }
+        }
+      ]
+    },
+    "vasilisa": {
+      "name": "Vasilisa",
+      "title": "The forest huntress",
+      "story": "She reads the forest like a letter. Her bow never misses, but she is no shield-wall fighter.",
+      "effects": {
+        "attack.archers": 0.15,
+        "ambush": 0.1,
+        "defense.infantry": -0.06
+      },
+      "traits": [
+        {
+          "name": "Tracker",
+          "description": "Moves fast and teaches the scouts to come back alive.",
+          "effects": {
+            "heroSpeed": 0.25,
+            "scoutSpeed": 0.2,
+            "scoutSurvival": 0.15
+          }
+        }
+      ]
+    },
+    "volkh": {
+      "name": "Volkh",
+      "title": "The wise volkhv",
+      "story": "A priest of the old gods who knows herbs, stars and secrets. Wisdom over the sword.",
+      "effects": {
+        "researchTime": -0.12,
+        "production.grain": 0.06,
+        "attack.all": -0.06
+      },
+      "traits": [
+        {
+          "name": "Healing rites",
+          "description": "Rises from wounds in half the time, and learns from every fight.",
+          "effects": {
+            "woundTime": -0.5,
+            "heroXp": 0.2
+          }
+        }
+      ]
+    },
+    "sadko": {
+      "name": "Sadko",
+      "title": "The merchant rider",
+      "story": "A gusli player turned the richest trader of Novgorod. Gold opens more gates than steel.",
+      "effects": {
+        "caravanCapacity": 0.25,
+        "caravanSpeed": 0.2,
+        "production.all": 0.04,
+        "defense.all": -0.05
+      },
+      "traits": [
+        {
+          "name": "Silver tongue",
+          "description": "Talks raiders out of a fifth of what they came for.",
+          "effects": {
+            "lootTaken": -0.2
+          }
+        }
+      ]
+    },
+    "nastasya": {
+      "name": "Nastasya",
+      "title": "The shieldmaiden",
+      "story": "A polyanitsa of the steppe border who has never given ground. Slow to march, impossible to move.",
+      "effects": {
+        "defense.all": 0.1,
+        "defense.infantry": 0.06,
+        "heroSpeed": -0.2
+      },
+      "traits": [
+        {
+          "name": "Unbreakable",
+          "description": "Her spearmen train faster and hold the walls longer.",
+          "effects": {
+            "trainTime.spearman": -0.15,
+            "homeDefense": 0.04
+          }
+        }
+      ]
+    },
+    "ilya": {
+      "name": "Ilya",
+      "title": "The old bogatyr",
+      "story": "Thirty years he sat by the stove; then he rose stronger than any man. Strong in all things, slow to learn new ones.",
+      "effects": {
+        "attack.all": 0.06,
+        "defense.all": 0.06,
+        "heroXp": -0.15
+      },
+      "traits": [
+        {
+          "name": "Strength of the earth",
+          "description": "Mother Earth hides him: he is wounded for less time.",
+          "effects": {
+            "woundTime": -0.3
+          }
+        }
+      ]
     }
   }
 }

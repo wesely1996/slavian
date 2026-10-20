@@ -583,6 +583,10 @@ func _test_rivers() -> void:
 	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0)) == "", "bridge in range")
 	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(5, 0), Vector2i(6, 0)) != "", "bridge out of range")
 	_check(RiverText.bridge_problem(data, Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0), {Vector2i(4, 0): "lake"}) != "", "no bridge onto a lake")
+	var hdata := {"heroes": {"roster": {"volkh": {"name": "Volkh", "title": "The wise volkhv", "effects": {"researchTime": -0.12}, "traits": [{"name": "Healing rites", "description": "Heals.", "effects": {"woundTime": -0.5}}]}}}}
+	_check(HeroText.roster_ids(hdata) == ["volkh"] and HeroText.roster_title(hdata, "volkh") == "Volkh, the wise volkhv", "roster hero title")
+	_check(HeroText.roster_title(hdata, null) == "No hero yet" and HeroText.roster(hdata, "nobody").is_empty(), "no roster hero")
+	_check(HeroText.roster_traits(hdata, "volkh")[0] == "Healing rites: Heals. (−50% time wounded)", "roster traits")
 	_check(RiverText.size_of([0, 0, 1, 0, "none", 3]) == 3 and RiverText.size_of([0, 0, 1, 0, "none"]) == 1, "river size")
 	_check(RiverText.roads_at([[0, 0, 1, 0, "standing"], [0, 1, 0, 0, "building"]], Vector2i(0, 0)) == {Vector2i(1, 0): "standing", Vector2i(0, 1): "building"}, "roads at a hex")
 	var rdata := {"field": {"road": {"range": 4}}, "terrain": {"terrain": {"plains": {"moveCost": 1}, "lake": {"moveCost": null}}}}

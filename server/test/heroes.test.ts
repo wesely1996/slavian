@@ -1,16 +1,34 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { equip, gainXp, heroBonuses, learnSkill, newHero, rollDrop, unequip, xpToNext, type HeroState } from '../src/sim/heroes.js';
+import { equip, freeHeroKind, gainXp, heroBonuses, heroFactor, learnSkill, newHero, rollDrop, rosterBonuses, unequip, woundMs, xpToNext, type HeroState } from '../src/sim/heroes.js';
 
 const data = loadGameData();
 
 describe('heroes', () => {
-  const hero = newHero(data, 2026, 7);
+  const hero = newHero(data, 'dobrynya');
 
-  it('are born with a name from the list, at level 1', () => {
-    expect(data.heroes.names).toContain(hero.name);
-    expect(hero).toMatchObject({ level: 1, xp: 0, skillPoints: 0, skills: {}, gear: {}, inventory: [] });
-    expect(newHero(data, 2026, 7).name).toBe(hero.name);
+  it('are born from the roster with its name, at level 1', () => {
+    expect(hero).toMatchObject({ kind: 'dobrynya', name: 'Dobrynya', level: 1, xp: 0, skillPoints: 0, skills: {}, gear: {}, inventory: [] });
+  });
+
+  it('each have their strengths, weaknesses and traits', () => {
+    expect(Object.keys(data.heroes.roster).length).toBeGreaterThanOrEqual(5);
+    for (const kind of Object.keys(data.heroes.roster)) {
+      const def = data.heroes.roster[kind]!;
+      expect(Object.keys(def.effects).length).toBeGreaterThanOrEqual(2);
+      expect(def.traits.length).toBeGreaterThanOrEqual(1);
+    }
+    expect(rosterBonuses(data, 'volkh')).toMatchObject({ researchTime: -0.12, 'attack.all': -0.06, woundTime: -0.5 });
+    expect(rosterBonuses(data, null)).toEqual({});
+    expect(heroFactor(data, 'vasilisa', 'heroSpeed')).toBeCloseTo(1.25);
+    expect(woundMs(data, 1, 'volkh')).toBe(woundMs(data, 1) / 2);
+  });
+
+  it('are handed out so no two in a group are the same', () => {
+    const taken: (string | null)[] = [];
+    for (let i = 0; i < Object.keys(data.heroes.roster).length; i++) taken.push(freeHeroKind(data, taken));
+    expect(new Set(taken).size).toBe(taken.length);
+    expect(freeHeroKind(data, taken)).toBeNull();
   });
 
   it('level up with XP, one skill point a level', () => {
