@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_local_mapgen()
 	_test_local_start()
 	_test_local_villages()
+	_test_local_waves()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -557,10 +558,22 @@ func _test_local_start() -> void:
 
 
 ## A scripted solo session against the answers the server gave
-## (data/fixtures/village-scenario.json, server/test/village-scenario.test.ts).
+## (data/fixtures/village-scenario.json).
 func _test_local_villages() -> void:
+	_replay_scenario("village-scenario.json", "local villages")
+	_check(LocalServer._js_number(0.1 + 0.2) == "0.30000000000000004" and LocalServer._js_number(70.0) == "70" and LocalServer._js_number(70.5) == "70.5", "numbers as JavaScript prints them")
+
+
+## Hordes setting out (data/fixtures/wave-scenario.json).
+func _test_local_waves() -> void:
+	_replay_scenario("wave-scenario.json", "local waves")
+
+
+## Replays a scenario recorded on the server (server/test/scenario.ts) on a
+## solo world started in the app, and compares every answer.
+func _replay_scenario(file: String, name: String) -> void:
 	var root := ProjectSettings.globalize_path("res://").path_join("../data")
-	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures/village-scenario.json")))
+	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures").path_join(file)))
 	var start: Dictionary = fixture.start
 	var local := LocalServer.new(LocalData.load_data(), "")
 	var now := LocalTime.parse(start.at)
@@ -574,11 +587,10 @@ func _test_local_villages() -> void:
 			local.drain(world, now, [])
 			continue
 		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
-		var label := "local villages %d %s %s" % [i, step.method, step.path]
+		var label := "%s %d %s %s" % [name, i, step.method, step.path]
 		_check(int(answer.status) == int(step.status), "%s: status %d != %d %s" % [label, int(answer.status), int(step.status), answer.data.get("message", "")])
 		var difference := _difference(answer.data, step.response, "response")
 		_check(difference == "", "%s: %s" % [label, difference])
-	_check(LocalServer._js_number(0.1 + 0.2) == "0.30000000000000004" and LocalServer._js_number(70.0) == "70" and LocalServer._js_number(70.5) == "70.5", "numbers as JavaScript prints them")
 
 
 ## Where two JSON values differ ("" if they don't); numbers within a hair
