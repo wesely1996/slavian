@@ -17,7 +17,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { endWave, loadWave, reinforceWave, type Wave } from '../db/waves.js';
-import { addEmbers, listMembers, type World } from '../db/worlds.js';
+import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
 import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, addUnits } from '../sim/camps.js';
 import { campsPerWave } from '../sim/difficulty.js';
@@ -33,6 +33,14 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
 import { bridgeQuest } from './bridge.js';
+import { findBridge } from '../db/bridges.js';
+import { embersWanted } from '../sim/bridge.js';
+
+// Whether the group has fewer Embers than the open bridge stage wants.
+async function embersShort(client: DbClient, data: GameData, worldId: number): Promise<boolean> {
+  const bridge = await findBridge(client, worldId);
+  return bridge !== null && bridge.status === 'open' && (await getWorld(client, worldId)).embers < embersWanted(data, bridge);
+}
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -211,7 +219,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   if (result.cleared) {
     await markCleared(client, camp.id);
     after = { ...after, loot: campLoot(data, camp.units) };
-    ember = camp.kind === 'lair' && rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
+    // A lair holds an Ember by chance, and always while the bridge lacks one.
+    const lucky = rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
+    ember = camp.kind === 'lair' && (lucky || (await embersShort(client, data, world.id)));
     if (ember) await addEmbers(client, world.id, 1);
     if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
     await onboardingStep(client, data, world, army.ownerAccountId, 'camp', at);

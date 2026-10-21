@@ -50,6 +50,13 @@ export function needs(data: GameData, bridge: BridgeState): { resources: Resourc
   };
 }
 
+// Svarog's Embers the open stage still wants: its own and, when its quest is
+// open, the ritual torc's.
+export function embersWanted(data: GameData, bridge: BridgeState): number {
+  const need = needs(data, bridge);
+  return need.embers + (need.quests.includes('ritual') ? data.bridge.ritualEmbers : 0);
+}
+
 export function isReady(data: GameData, bridge: BridgeState): boolean {
   const need = needs(data, bridge);
   return bridge.status === 'open' && RESOURCE_KINDS.every((k) => need.resources[k] === 0) && need.embers === 0 && need.quests.length === 0;
