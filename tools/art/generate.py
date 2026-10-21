@@ -196,10 +196,19 @@ def icon(kind):
         s.circle(32, 32, 22, "none", stroke=W, sw=4.5)
         stroke("M25,25 Q25,17 32,17 Q40,17 40,25 Q40,31 32,34 L32,39", 4)
         s.circle(32, 46, 1.5, W, stroke=W, sw=3)
+    elif kind == "credits":
+        # A quill over the line it wrote: who made the game.
+        stroke("M50,10 Q30,14 20,36 L16,48 L28,44 Q46,32 50,10 Z", 4)
+        stroke("M16,48 L28,30", 3)
+        stroke("M10,56 L54,56", 3.5)
+    elif kind == "quit":
+        # An open door and the way out.
+        stroke("M30,10 L12,10 L12,54 L30,54", 4.5)
+        stroke("M24,32 L54,32 M44,22 L54,32 L44,42", 4.5)
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help"]
+UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------

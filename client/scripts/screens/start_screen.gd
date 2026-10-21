@@ -1,37 +1,55 @@
 extends Control
-## The main menu (docs/art-style.md, "The main menu"): Continue the last
-## world, play solo on this device (no sign-in or connection needed), or
-## sign in as a guest to create or join a co-op world and wait in its lobby
-## until the host starts it; then your profile, the settings and help, each
-## in its own compartment.
+## The main menu (docs/art-style.md, "The main menu"): four doors, Play,
+## Settings, Credits and Quit, each opening its own pages one step at a time.
+## Play leads to Continue, solo worlds on this device (no sign-in or
+## connection needed) and co-op worlds (sign in as a guest, create or join one
+## and wait in its lobby until the host starts it). Every page has Back; the
+## Android back key and Esc go one step up too.
 
 const GAME_SCENE := "res://scenes/game.tscn"
 const SPEEDS := [1, 2, 10]
 const SPEED_LABELS := ["Normal (1×)", "Fast (2×)", "Test (10×)"]  # tr
-const WORLD_STATUSES := ["Running", "Won", "Lost"]  # tr
+const WORLD_STATUSES := ["Running", "Won", "Lost", "Abandoned"]  # tr
 ## Languages by their own names, never translated.
 const LANGUAGES := [["en", "English"], ["sr_Latn", "Srpski"]]
+## Text sizes: the setting and the letter size its button shows.
+const TEXT_SIZES := [["small", 22], ["normal", 28], ["large", 36]]
+const TEXT_SIZE_LABELS := ["Small", "Normal", "Large"]  # tr
 
-## The compartments (each with its icon, "icon/<key>") and their labels.
-const TABS := ["play", "profile", "settings", "help"]
-const TAB_LABELS := ["Play", "Profile", "Settings", "Help"]  # tr
+## Each page's heading (the home page has none: the logo is its heading).
+const PAGE_TITLES := {
+	"play": "Play",
+	"solo": "Play solo",
+	"solo_new": "New solo world",
+	"friends": "Play with friends",
+	"friends_new": "New co-op world",
+	"join": "Join with a code",
+	"settings": "Settings",
+	"language": "Language",
+	"text_size": "Text size",
+	"sound": "Sound",
+	"account": "Account",
+	"help": "Help and support",
+	"credits": "Credits",
+}  # tr
 
 var _status: Label
 var _content: VBoxContainer
-## The sheet: the tab bar goes on top (wide) or at the bottom (phone).
-var _sheet: VBoxContainer
-var _tab_bar: Control
-var _tab := "play"
-## Forms opened from a button ("solo", "coop").
-var _open_forms := {}
 var _layout: BoxContainer
 var _hero: Control
 var _logo: TextureRect
 var _tagline: Label
 var _frame: PanelContainer
+## The page showing and the pages Back returns to.
+var _page := "home"
+var _trail: Array[String] = []
+## The lobby on show and the world it belongs to.
+var _lobby: Dictionary = {}
 var _lobby_world_id := 0
 ## A solo world waiting for a second tap to be deleted.
 var _delete_solo := 0
+## Leaving a co-op world asks twice.
+var _leave_armed := false
 ## Both the start request and the live "world started" push lead here.
 var _entering := false
 
@@ -57,12 +75,10 @@ func _ready() -> void:
 	var sheet_box := UI.panel(1.0, 0)
 	sheet_box.add_theme_stylebox_override("panel", UiTheme.sheet_style(24))
 	_frame.add_child(sheet_box)
-	_sheet = UI.vbox(14)
-	sheet_box.add_child(_sheet)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_sheet.add_child(scroll)
+	sheet_box.add_child(scroll)
 	var body := UI.vbox(18)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
@@ -73,12 +89,14 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_arrange)
 	_arrange()
 
+	# The back key steps back through the menu instead of closing the app.
+	get_tree().set_quit_on_go_back(false)
 	Live.world_updated.connect(_on_live_world)
 	Live.connection_changed.connect(_on_live_connection)
 	if Session.is_logged_in():
 		Push.register()
 	Sound.music("map")
-	_show_tab("play")
+	_render("home")
 
 
 ## The painting, the logo in its sky and the tagline.
@@ -128,7 +146,6 @@ func _arrange() -> void:
 	frame.content_margin_top = 18.0 if wide else 24.0
 	_frame.add_theme_stylebox_override("panel", frame)
 	_place_logo.call_deferred()
-	_place_tabs()
 
 
 ## The logo in the painting's sky, as large as fits; the tagline under it.
@@ -145,38 +162,21 @@ func _place_logo() -> void:
 	_tagline.size = Vector2(box.x * 0.9, 0)
 
 
-## The compartments' tab bar, at the top of the sheet on a wide screen and
-## at its bottom (in thumb reach) on a phone.
-func _place_tabs() -> void:
-	if _sheet == null:
-		return
-	if _tab_bar != null:
-		_tab_bar.queue_free()
-	_tab_bar = UI.tabs(range(TABS.size()).map(func(i: int) -> Array: return [TABS[i], tr(TAB_LABELS[i]), "icon/" + TABS[i]]), _tab, _show_tab)
-	_sheet.add_child(_tab_bar)
-	_sheet.move_child(_tab_bar, 0 if _layout.vertical == false else _sheet.get_child_count() - 1)
-
-
-func _show_tab(key: String) -> void:
-	_tab = key
-	_lobby_world_id = 0
-	Live.stop()
-	_set_status("")
-	_place_tabs()
-	match key:
-		"play":
-			_show_play()
-		"profile":
-			_show_profile()
-		"settings":
-			_show_settings()
-		"help":
-			_show_help()
-
-
 func _exit_tree() -> void:
+	get_tree().set_quit_on_go_back(true)
 	Live.world_updated.disconnect(_on_live_world)
 	Live.connection_changed.disconnect(_on_live_connection)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_back()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_back()
+		get_viewport().set_input_as_handled()
 
 
 func _set_status(text: String) -> void:
@@ -184,20 +184,113 @@ func _set_status(text: String) -> void:
 	_status.visible = text != ""
 
 
-# --- Play ------------------------------------------------------------------
+# --- Navigation --------------------------------------------------------------
 
-## Continue, then solo, then co-op.
-func _show_play() -> void:
+## One step further in: the page we leave is where Back returns to.
+func _open(page: String) -> void:
+	if page != _page:
+		_trail.append(_page)
+	_render(page)
+
+
+## One step back; at home the back key does nothing (Quit closes the app).
+func _back() -> void:
+	if _trail.is_empty():
+		if _page != "home":
+			_render("home")
+		return
+	_render(_trail.pop_back())
+
+
+## Draws a page: Back and its heading on top, then what it holds.
+func _render(page: String) -> void:
+	_page = page
+	_set_status("")
+	if page != "lobby" and _lobby_world_id != 0:
+		_lobby_world_id = 0
+		Live.stop()
+	if page != "solo":
+		_delete_solo = 0
+	if page != "lobby":
+		_leave_armed = false
 	UI.clear(_content)
-	_continue_card()
-	_content.add_child(_solo_section())
-	var coop := UI.vbox(14)
-	_content.add_child(coop)
-	_coop_section(coop)
+	if page != "home":
+		var top := UI.hbox(14)
+		var back := UI.button(tr("Back"), _back, "icon/back")
+		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		top.add_child(back)
+		var heading := UI.label(_lobby.get("name", "") if page == "lobby" else tr(PAGE_TITLES.get(page, "")), UI.HEADING_SIZE)
+		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		top.add_child(heading)
+		_content.add_child(top)
+	match page:
+		"home": _home_page()
+		"play": _play_page()
+		"solo": _solo_page()
+		"solo_new": _solo_form()
+		"friends": _friends_page()
+		"friends_new": _friends_form()
+		"join": _join_page()
+		"lobby": _lobby_page()
+		"settings": _settings_page()
+		"language": _language_page()
+		"text_size": _text_size_page()
+		"sound": _sound_page()
+		"account": _account_page()
+		"help": _help_page()
+		"credits": _credits_page()
+
+
+## A full-width door to the next step, with a line on where it leads.
+func _door(text: String, about: String, page: String, icon_id := "", primary := false) -> void:
+	var go := func() -> void: _open(page)
+	var door := UI.primary(text, go, icon_id) if primary else UI.button(text, go, icon_id)
+	door.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	door.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var group := UI.vbox(6)
+	group.add_child(door)
+	if about != "":
+		group.add_child(UI.label(about, UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(group)
+
+
+# --- Home --------------------------------------------------------------------
+
+## Four doors: Play first and largest, Quit apart at the bottom.
+func _home_page() -> void:
+	var play := UI.primary(tr("Play"), func() -> void: _open("play"), "icon/play")
+	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	play.custom_minimum_size.y *= 1.35
+	play.add_theme_font_size_override("font_size", UI.scaled(UI.HEADING_SIZE))
+	_content.add_child(play)
+	for entry in [["Settings", "settings", "icon/settings"], ["Credits", "credits", "icon/credits"]]:
+		var page: String = entry[1]
+		var door := UI.button(tr(entry[0]), func() -> void: _open(page), entry[2])
+		door.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_content.add_child(door)
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 18
+	_content.add_child(gap)
+	var quit := UI.button(tr("Quit"), func() -> void: get_tree().quit(), "icon/quit")
+	quit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(quit)
+	var version := UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED)
+	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_content.add_child(version)
+
+
+# --- Play --------------------------------------------------------------------
+
+## Continue the world played last, or choose how to play.
+func _play_page() -> void:
+	_continue_button()
+	_door(tr("Play solo"), tr("On this device, alone against the hordes. No connection needed."), "solo", "icon/village")
+	_door(tr("Play with friends"), tr("Defend a world together, each from their own phone."), "friends", "icon/troops")
 
 
 ## The world played last, one tap away.
-func _continue_card() -> void:
+func _continue_button() -> void:
 	var last: Dictionary = Session.last_world
 	if last.is_empty():
 		return
@@ -207,20 +300,21 @@ func _continue_card() -> void:
 		return
 	if not solo and not Session.is_logged_in():
 		return
-	_content.add_child(UI.primary(tr("Continue: %s") % String(last.get("name", "")), func() -> void:
+	var resume := UI.primary(tr("Continue: %s") % String(last.get("name", "")), func() -> void:
 		if solo:
 			_open_solo(id)
 		else:
-			_open_world(id), "icon/play"))
+			_open_world(id), "icon/play")
+	resume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(resume)
 
 
-## Solo worlds on this device: continue one, start one, or delete one. They
-## need neither an account nor a connection (docs/local-engine.md).
-func _solo_section() -> Control:
-	var box := UI.vbox(12)
-	box.add_child(UI.label(tr("Play solo"), UI.HEADING_SIZE))
-	box.add_child(UI.label(tr("On this device, alone against the hordes. No connection needed."), UI.SMALL_SIZE, UI.MUTED))
+## Solo worlds on this device: continue one or delete one, or start another.
+## They need neither an account nor a connection (docs/local-engine.md).
+func _solo_page() -> void:
 	var worlds := Local.list_worlds()
+	if worlds.is_empty():
+		_content.add_child(UI.label(tr("No solo worlds yet. Start one; it plays on this device."), UI.SMALL_SIZE, UI.MUTED))
 	for world in worlds:
 		var row := UI.hbox()
 		var id := int(world.id)
@@ -237,21 +331,19 @@ func _solo_section() -> Control:
 				_delete_solo = 0
 			else:
 				_delete_solo = id
-			_show_play()))
-		box.add_child(row)
-	if worlds.is_empty() or _open_forms.get("solo", false):
-		_solo_form(box)
-	else:
-		box.add_child(UI.button(tr("New solo world"), func() -> void:
-			_open_forms["solo"] = true
-			_show_play()))
-	return box
+			_render("solo")))
+		_content.add_child(row)
+	var new := UI.primary(tr("New solo world"), func() -> void: _open("solo_new")) if worlds.is_empty() else UI.button(tr("New solo world"), func() -> void: _open("solo_new"))
+	new.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(new)
 
 
-func _solo_form(box: Control) -> void:
+func _solo_form() -> void:
 	var data := LocalData.load_data()
+	_content.add_child(UI.label(tr("World name"), UI.SMALL_SIZE, UI.MUTED))
 	var world_name := UI.line_edit(tr("World name"), tr("A solo world"))
-	box.add_child(world_name)
+	_content.add_child(world_name)
+	_content.add_child(UI.label(tr("Speed and difficulty"), UI.SMALL_SIZE, UI.MUTED))
 	var row := UI.hbox()
 	var speed := UI.options(SPEED_LABELS.map(tr), 0)
 	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -259,21 +351,21 @@ func _solo_form(box: Control) -> void:
 	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
 	difficulty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(difficulty)
-	box.add_child(row)
+	_content.add_child(row)
+	_content.add_child(UI.label(tr("Your hero"), UI.SMALL_SIZE, UI.MUTED))
 	var kinds := HeroText.roster_ids(data)
 	var hero := UI.options(kinds.map(func(kind: String) -> String: return HeroText.roster_title(data, kind)), 0)
-	box.add_child(hero)
-	box.add_child(UI.primary(tr("Start a solo world"), func() -> void:
+	_content.add_child(hero)
+	_content.add_child(UI.primary(tr("Start a solo world"), func() -> void:
 		var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
 		_start_solo({"name": world_name.text.strip_edges() if world_name.text.strip_edges() != "" else tr("A solo world"),
 			"displayName": who if who != "" else tr("You"), "speed": SPEEDS[speed.selected],
-			"difficulty": GroupText.DIFFICULTIES[difficulty.selected], "heroKind": kinds[hero.selected] if not kinds.is_empty() else null})))
+			"difficulty": GroupText.DIFFICULTIES[difficulty.selected], "heroKind": kinds[hero.selected] if not kinds.is_empty() else null}), "icon/play"))
 
 
 func _start_solo(params: Dictionary) -> void:
 	_set_status("")
 	Live.stop()
-	_open_forms.erase("solo")
 	var view := Local.start(params)
 	# The game's data comes from the app from here on, not the server.
 	Local.world_id = int(view.id)
@@ -291,30 +383,30 @@ func _open_solo(id: int) -> void:
 	_enter_game(view)
 
 
-## Co-op: sign in as a guest, then the worlds you play with others.
-func _coop_section(box: VBoxContainer) -> void:
-	box.add_child(UI.label(tr("Play with friends"), UI.HEADING_SIZE))
+## Co-op: first a name to play as a guest, then the worlds you play with
+## others, a new one and joining with a code.
+func _friends_page() -> void:
 	if not Session.is_logged_in():
-		box.add_child(UI.label(tr("Defend a world together. Pick a name to play as a guest."), UI.SMALL_SIZE, UI.MUTED))
-		var name_edit := UI.line_edit(tr("e.g. Vesna"))
-		box.add_child(name_edit)
-		box.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+		_guest_step(tr("Pick the name your group will see. You play as a guest; no email or password."))
 		return
+	var box := UI.vbox(14)
+	_content.add_child(box)
 	var waiting := UI.label(tr("Loading…"), UI.SMALL_SIZE, UI.MUTED)
 	box.add_child(waiting)
 	var response := await Api.get_json("/v1/me")
-	if not is_instance_valid(box) or _tab != "play":
+	if not is_instance_valid(box) or _page != "friends":
 		return
 	waiting.queue_free()
 	if response.status == 401:
 		Session.log_out()
-		_show_play()
+		_render("friends")
 		return
 	if not response.ok:
 		box.add_child(UI.label(tr("The server can't be reached. Solo worlds play on all the same."), UI.SMALL_SIZE, UI.MUTED))
-		box.add_child(UI.button(tr("Retry"), _show_play))
+		box.add_child(UI.button(tr("Retry"), func() -> void: _render("friends")))
 		return
 	Session.account = response.data.account
+	box.add_child(UI.label(tr("Your worlds"), UI.SMALL_SIZE, UI.MUTED))
 	if response.data.worlds.is_empty():
 		box.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
 	for world in response.data.worlds:
@@ -327,31 +419,49 @@ func _coop_section(box: VBoxContainer) -> void:
 		state.autowrap_mode = TextServer.AUTOWRAP_OFF
 		row.add_child(state)
 		box.add_child(row)
-	if _open_forms.get("coop", false):
-		var world_name := UI.line_edit(tr("World name"), tr("%s's world") % Session.account.displayName)
-		box.add_child(world_name)
-		var row := UI.hbox()
-		var players := UI.options(range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1)
-		players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(players)
-		var speed := UI.options(SPEED_LABELS.map(tr), 0)
-		speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(speed)
-		box.add_child(row)
-		var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
-		box.add_child(difficulty)
-		box.add_child(UI.primary(tr("Create world"), func() -> void:
-			_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
-	else:
-		box.add_child(UI.button(tr("New co-op world"), func() -> void:
-			_open_forms["coop"] = true
-			_show_play()))
-	var join := UI.hbox()
-	var code := UI.line_edit(tr("Invite code"))
-	code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	join.add_child(code)
-	join.add_child(UI.button(tr("Join"), func() -> void: _join_world(code.text)))
+	var none: bool = response.data.worlds.is_empty()
+	var create := UI.primary(tr("Create a world"), func() -> void: _open("friends_new")) if none else UI.button(tr("Create a world"), func() -> void: _open("friends_new"))
+	create.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(create)
+	var join := UI.button(tr("Join with a code"), func() -> void: _open("join"))
+	join.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(join)
+
+
+## Signing in as a guest, then on to the page that asked for it.
+func _guest_step(why: String) -> void:
+	_content.add_child(UI.label(why, UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED))
+	var name_edit := UI.line_edit(tr("e.g. Vesna"))
+	_content.add_child(name_edit)
+	_content.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+
+
+func _friends_form() -> void:
+	_content.add_child(UI.label(tr("World name"), UI.SMALL_SIZE, UI.MUTED))
+	var world_name := UI.line_edit(tr("World name"), tr("%s's world") % Session.account.get("displayName", ""))
+	_content.add_child(world_name)
+	_content.add_child(UI.label(tr("Players and speed"), UI.SMALL_SIZE, UI.MUTED))
+	var row := UI.hbox()
+	var players := UI.options(range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1)
+	players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(players)
+	var speed := UI.options(SPEED_LABELS.map(tr), 0)
+	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(speed)
+	_content.add_child(row)
+	_content.add_child(UI.label(tr("Difficulty"), UI.SMALL_SIZE, UI.MUTED))
+	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
+	_content.add_child(difficulty)
+	_content.add_child(UI.primary(tr("Create world"), func() -> void:
+		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
+
+
+func _join_page() -> void:
+	_content.add_child(UI.label(tr("Ask the host for the six-character code shown in their lobby."), UI.SMALL_SIZE, UI.MUTED))
+	var code := UI.line_edit(tr("Invite code"))
+	_content.add_child(code)
+	_content.add_child(UI.primary(tr("Join"), func() -> void: _join_world(code.text)))
 
 
 func _login(display_name: String) -> void:
@@ -368,104 +478,57 @@ func _login(display_name: String) -> void:
 	Session.save()
 	Session.report_language()
 	Push.register()
-	_show_tab(_tab)
+	_render(_page)
 
 
-# --- Profile ---------------------------------------------------------------
-
-## The privacy policy, in short (docs/privacy.md has the long version).
-const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."  # tr
-
-var _delete_armed := false
-
-## The music and sounds, all CC0 (client/audio/CREDITS.md): what, and by
-## whom (names stay as they are).
-const CREDITS := [
-	"Music for the map and the menu, the village, battles, victory and defeat",  # tr
-	"Music when a horde is near",  # tr
-	"The war horn",  # tr
-	"Sound effects",  # tr
-]
-const CREDITED := ["RandomMind (opengameart.org)", "spring-spring (opengameart.org)", "stumpystrust (opengameart.org)", "Kenney (kenney.nl)"]
+func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
+	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
+	_handle_world_response(response)
 
 
-## Who you are and your data; destructive actions stand apart.
-func _show_profile() -> void:
-	_delete_armed = false
-	UI.clear(_content)
-	_content.add_child(UI.label(tr("Profile"), UI.HEADING_SIZE))
-	if not Session.is_logged_in():
-		_content.add_child(UI.label(tr("Solo worlds need no account. To play with friends, pick a name and play as a guest."), UI.SMALL_SIZE, UI.MUTED))
-		var name_edit := UI.line_edit(tr("e.g. Vesna"))
-		_content.add_child(name_edit)
-		_content.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+func _join_world(code: String) -> void:
+	var response := await Api.post_json("/v1/worlds/join", {"inviteCode": code})
+	_handle_world_response(response)
+
+
+func _open_world(world_id: int) -> void:
+	var response := await Api.get_json("/v1/worlds/%d" % world_id)
+	_handle_world_response(response)
+
+
+func _handle_world_response(response: Api.Response) -> void:
+	if not response.ok:
+		_set_status(response.error)
 		return
-	var who := String(Session.account.get("displayName", ""))
-	_content.add_child(UI.label(tr("Signed in as %s") % who, UI.SMALL_SIZE, UI.MUTED))
-	var rename := UI.hbox()
-	var name_edit := UI.line_edit(tr("Your name"), who)
-	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	rename.add_child(name_edit)
-	rename.add_child(UI.button(tr("Rename"), func() -> void: _rename(name_edit.text)))
-	_content.add_child(rename)
-	_content.add_child(UI.button(tr("Sign out"), func() -> void:
-		Session.log_out()
-		_show_profile()))
-	_content.add_child(UI.label(tr("Your data"), UI.HEADING_SIZE))
-	_content.add_child(UI.button(tr("Export my data"), _export_data))
-	var gap := Control.new()
-	gap.custom_minimum_size.y = 24
-	_content.add_child(gap)
-	_content.add_child(UI.button(tr("Delete my account"), _confirm_delete))
-
-
-func _rename(display_name: String) -> void:
 	_set_status("")
-	var response := await Api.request(HTTPClient.METHOD_PATCH, "/v1/me", {"displayName": display_name.strip_edges()})
-	if not response.ok:
-		_set_status(response.error)
-		return
-	Session.account = response.data.get("account", Session.account)
-	_show_profile()
+	if response.data.status == "lobby":
+		_show_lobby(response.data)
+	else:
+		_enter_game(response.data)
 
 
-func _export_data() -> void:
-	var response := await Api.get_json("/v1/me/export")
-	if not response.ok:
-		_set_status(response.error)
-		return
-	var path := "user://export_%d.json" % int(Time.get_unix_time_from_system())
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
-		_set_status(tr("Could not write the export file."))
-		return
-	file.store_string(JSON.stringify(response.data, "\t"))
-	file.close()
-	_set_status(tr("Your data is saved to %s") % ProjectSettings.globalize_path(path))
+# --- Settings ----------------------------------------------------------------
+
+## One door per setting, each showing what it is set to now.
+func _settings_page() -> void:
+	var language := ""
+	for entry in LANGUAGES:
+		if entry[0] == Session.language:
+			language = entry[1]
+	var size := ""
+	for i in TEXT_SIZES.size():
+		if TEXT_SIZES[i][0] == Session.text_size:
+			size = tr(TEXT_SIZE_LABELS[i])
+	_door(tr("Language: %s") % language, "", "language", "icon/research")
+	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
+	_door(tr("Sound"), tr("Music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "sound", "icon/inbox")
+	var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
+	_door(tr("Account"), tr("Signed in as %s") % who if who != "" else tr("Not signed in"), "account", "icon/profile")
+	_door(tr("Help and support"), tr("How a run goes, reporting a problem, the server costs and privacy."), "help", "icon/help")
 
 
-func _confirm_delete() -> void:
-	if not _delete_armed:
-		_delete_armed = true
-		_set_status(tr("Tap again to delete your account and all its data."))
-		return
-	_delete_armed = false
-	var response := await Api.request(HTTPClient.METHOD_DELETE, "/v1/me")
-	if not response.ok:
-		_set_status(response.error)
-		return
-	Session.log_out()
-	_show_profile()
-
-
-# --- Settings --------------------------------------------------------------
-
-## The language (by its own name) and the text size.
-func _show_settings() -> void:
-	UI.clear(_content)
-	_content.add_child(UI.label(tr("Settings"), UI.HEADING_SIZE))
-	_content.add_child(UI.label(tr("Language"), UI.SMALL_SIZE, UI.MUTED))
-	var languages := UI.hbox(8)
+## The language, by its own name.
+func _language_page() -> void:
 	for language in LANGUAGES:
 		var code: String = language[0]
 		var pick := UI.button(language[1], func() -> void:
@@ -473,24 +536,30 @@ func _show_settings() -> void:
 			get_tree().reload_current_scene())
 		pick.theme_type_variation = "TabButton"
 		pick.disabled = Session.language == code
-		pick.custom_minimum_size.x = 150
-		languages.add_child(pick)
-	_content.add_child(languages)
-	_content.add_child(UI.label(tr("Text size"), UI.SMALL_SIZE, UI.MUTED))
-	# Text size for accessibility: the same letter at three sizes.
+		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_content.add_child(pick)
+
+
+## Text size for accessibility: the same letter at three sizes.
+func _text_size_page() -> void:
+	_content.add_child(UI.label(tr("Applies everywhere in the game."), UI.SMALL_SIZE, UI.MUTED))
 	var sizes := UI.hbox(8)
-	for entry in [["small", 22, tr("Small")], ["normal", 28, tr("Normal")], ["large", 36, tr("Large")]]:
+	for i in TEXT_SIZES.size():
+		var entry: Array = TEXT_SIZES[i]
 		var size_code: String = entry[0]
 		var size_pick := UI.button("A", func() -> void:
 			Session.set_text_size(size_code)
 			get_tree().reload_current_scene())
 		size_pick.theme_type_variation = "TabButton"
 		size_pick.add_theme_font_size_override("font_size", int(entry[1]))
-		size_pick.tooltip_text = tr("Text size: %s") % entry[2]
+		size_pick.tooltip_text = tr("Text size: %s") % tr(TEXT_SIZE_LABELS[i])
 		size_pick.disabled = Session.text_size == size_code
 		size_pick.custom_minimum_size = Vector2(76, 76)
 		sizes.add_child(size_pick)
 	_content.add_child(sizes)
+
+
+func _sound_page() -> void:
 	_volume_slider(tr("Music"), "Music", Session.music_volume)
 	_volume_slider(tr("Sound effects"), "Effects", Session.effects_volume)
 
@@ -519,11 +588,82 @@ func _volume_slider(text: String, bus: String, volume: float) -> void:
 	_content.add_child(slider)
 
 
-# --- Help ------------------------------------------------------------------
+# --- Account -----------------------------------------------------------------
 
-## How a run goes, supporting the game, privacy, and reporting a problem.
-func _show_help() -> void:
-	UI.clear(_content)
+## The privacy policy, in short (docs/privacy.md has the long version).
+const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."  # tr
+
+var _delete_armed := false
+
+
+## Who you are and your data; deleting the account stands apart.
+func _account_page() -> void:
+	_delete_armed = false
+	if not Session.is_logged_in():
+		_guest_step(tr("Solo worlds need no account. To play with friends, pick a name and play as a guest."))
+		return
+	var who := String(Session.account.get("displayName", ""))
+	_content.add_child(UI.label(tr("Signed in as %s") % who, UI.SMALL_SIZE, UI.MUTED))
+	var rename := UI.hbox()
+	var name_edit := UI.line_edit(tr("Your name"), who)
+	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rename.add_child(name_edit)
+	rename.add_child(UI.button(tr("Rename"), func() -> void: _rename(name_edit.text)))
+	_content.add_child(rename)
+	_content.add_child(UI.button(tr("Sign out"), func() -> void:
+		Session.log_out()
+		_render("account")))
+	_content.add_child(UI.label(tr("Your data"), UI.HEADING_SIZE))
+	_content.add_child(UI.button(tr("Export my data"), _export_data))
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 24
+	_content.add_child(gap)
+	_content.add_child(UI.button(tr("Delete my account"), _confirm_delete))
+
+
+func _rename(display_name: String) -> void:
+	_set_status("")
+	var response := await Api.request(HTTPClient.METHOD_PATCH, "/v1/me", {"displayName": display_name.strip_edges()})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	Session.account = response.data.get("account", Session.account)
+	_render("account")
+
+
+func _export_data() -> void:
+	var response := await Api.get_json("/v1/me/export")
+	if not response.ok:
+		_set_status(response.error)
+		return
+	var path := "user://export_%d.json" % int(Time.get_unix_time_from_system())
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		_set_status(tr("Could not write the export file."))
+		return
+	file.store_string(JSON.stringify(response.data, "\t"))
+	file.close()
+	_set_status(tr("Your data is saved to %s") % ProjectSettings.globalize_path(path))
+
+
+func _confirm_delete() -> void:
+	if not _delete_armed:
+		_delete_armed = true
+		_set_status(tr("Tap again to delete your account and all its data."))
+		return
+	_delete_armed = false
+	var response := await Api.request(HTTPClient.METHOD_DELETE, "/v1/me")
+	if not response.ok:
+		_set_status(response.error)
+		return
+	Session.log_out()
+	_render("account")
+
+
+# --- Help --------------------------------------------------------------------
+
+## How a run goes, reporting a problem, supporting the game and privacy.
+func _help_page() -> void:
 	var data := LocalData.load_data()
 	_content.add_child(UI.label(tr("How a run goes"), UI.HEADING_SIZE))
 	for entry in AlmanacText.entries(data, "The run"):
@@ -538,17 +678,14 @@ func _show_help() -> void:
 		_content.add_child(message)
 		_content.add_child(UI.button(tr("Send"), func() -> void: _send_report(message.text)))
 	else:
-		_content.add_child(UI.label(tr("Sign in as a guest (Profile) to send a report."), UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.label(tr("Sign in as a guest (Settings, Account) to send a report."), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
 	var costs_box := UI.vbox(10)
 	_content.add_child(costs_box)
 	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
 	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("Credits"), UI.SMALL_SIZE))
-	for i in CREDITS.size():
-		_content.add_child(UI.label(tr(CREDITS[i]) + "\n" + CREDITED[i], UI.SMALL_SIZE, UI.MUTED))
 	var costs := await Api.get_json("/v1/costs")
-	if not is_instance_valid(costs_box) or _tab != "help":
+	if not is_instance_valid(costs_box) or _page != "help":
 		return
 	if not costs.ok or not costs.data is Dictionary:
 		costs_box.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
@@ -578,40 +715,57 @@ func _send_report(message: String) -> void:
 	_set_status(tr("Thank you; the report is sent.") if response.ok else response.error)
 
 
-func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
-	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
-	_handle_world_response(response)
+# --- Credits -----------------------------------------------------------------
+
+## The music and sounds, all CC0 (client/audio/CREDITS.md): what, and by
+## whom (names stay as they are).
+const CREDITS := [
+	"Music for the map and the menu, the village, battles, victory and defeat",  # tr
+	"Music when a horde is near",  # tr
+	"The war horn",  # tr
+	"Sound effects",  # tr
+]
+const CREDITED := ["RandomMind (opengameart.org)", "spring-spring (opengameart.org)", "stumpystrust (opengameart.org)", "Kenney (kenney.nl)"]
 
 
-func _join_world(code: String) -> void:
-	var response := await Api.post_json("/v1/worlds/join", {"inviteCode": code})
-	_handle_world_response(response)
+func _credits_page() -> void:
+	_content.add_child(UI.label("Slavian", UI.TITLE_SIZE))
+	_content.add_child(UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED))
+	# The studio: its mark, then its name.
+	var studio := Art.texture("brand/studio")
+	if studio != null:
+		var mark := TextureRect.new()
+		mark.texture = studio
+		mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		mark.custom_minimum_size = Vector2(0, 220)
+		_content.add_child(mark)
+	_content.add_child(UI.label(tr("Made by"), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label("Night Forge Software Company"))
+	_content.add_child(UI.label(tr("Music and sound"), UI.HEADING_SIZE))
+	for i in CREDITS.size():
+		_content.add_child(UI.label(tr(CREDITS[i]), UI.SMALL_SIZE, UI.MUTED))
+		_content.add_child(UI.label(CREDITED[i]))
+	_content.add_child(UI.label(tr("All under CC0, given freely. Thank you."), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Built with"), UI.HEADING_SIZE))
+	_content.add_child(UI.label("Godot Engine (godotengine.org)"))
 
 
-func _open_world(world_id: int) -> void:
-	var response := await Api.get_json("/v1/worlds/%d" % world_id)
-	_handle_world_response(response)
-
-
-func _handle_world_response(response: Api.Response) -> void:
-	if not response.ok:
-		_set_status(response.error)
-		return
-	_set_status("")
-	if response.data.status == "lobby":
-		_show_lobby(response.data)
-	else:
-		_enter_game(response.data)
-
-
-# --- Lobby -----------------------------------------------------------------
+# --- Lobby -------------------------------------------------------------------
 
 func _show_lobby(world: Dictionary) -> void:
+	_lobby = world
+	if _page == "lobby":
+		_render("lobby")
+	else:
+		_open("lobby")
+
+
+func _lobby_page() -> void:
+	var world := _lobby
 	if _lobby_world_id != int(world.id):
 		_lobby_world_id = int(world.id)
 		Live.watch(_lobby_world_id)
-	UI.clear(_content)
-	_content.add_child(UI.label(world.name, UI.HEADING_SIZE))
 	_content.add_child(UI.label(tr("Invite code"), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.label(world.inviteCode, UI.TITLE_SIZE))
 	_content.add_child(UI.label(tr("Share it with your group. %d of %d players joined.") % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED))
@@ -621,12 +775,32 @@ func _show_lobby(world: Dictionary) -> void:
 		var hero := " · %s" % tr(HeroText.roster(Game.data, member.get("heroKind")).get("name", "")) if member.get("heroKind") != null and not Game.data.is_empty() else ""
 		_content.add_child(UI.label("• %s%s%s%s" % [member.displayName, host, clan, hero]))
 	if int(world.hostAccountId) == int(Session.account.id):
-		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id))))
+		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id)), "icon/play"))
 	else:
 		_content.add_child(UI.label(tr("Waiting for the host to start…"), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.button(tr("Back"), func() -> void: _show_tab("play")))
 	_clan_picker(world)
 	_hero_picker(world)
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 24
+	_content.add_child(gap)
+	_content.add_child(UI.button(tr("Sure? Leave this world") if _leave_armed else tr("Leave this world"), func() -> void: _leave_lobby(int(world.id)), "icon/quit"))
+
+
+## Leaving the lobby asks twice; if you hosted it, the next player hosts it.
+func _leave_lobby(world_id: int) -> void:
+	if not _leave_armed:
+		_leave_armed = true
+		_render("lobby")
+		_set_status(tr("Tap again to leave. If you host it, the next player in the lobby will."))
+		return
+	var response := await Api.post_json("/v1/worlds/%d/leave" % world_id)
+	if not response.ok:
+		_set_status(response.error)
+		return
+	if int(Session.last_world.get("id", 0)) == world_id:
+		Session.last_world = {}
+		Session.save()
+	_back()
 
 
 ## Each member picks their clan in the lobby (and may change it until the start).
@@ -634,7 +808,7 @@ func _clan_picker(world: Dictionary) -> void:
 	if Game.data.is_empty():
 		var error := await Game.ensure_data()
 		if error == "" and _lobby_world_id == int(world.id):
-			_show_lobby(world)
+			_render("lobby")
 		return
 	var mine: Variant = null
 	for member in world.members:
