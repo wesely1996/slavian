@@ -308,7 +308,7 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	wave.arrivesAt = march.arrivesAt
 	server.schedule(world, int(wave.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	plan_raids(server, world, wave, 0)
-	# Field intercepts come with armies (scheduler/field.ts planIntercepts).
+	LocalArmies.plan_intercepts(server, world, wave)
 	plan_warning(server, world, wave, at)
 	if not wave.ritual and world.ritualAt == null:
 		var last: Dictionary = {}

@@ -4,9 +4,8 @@ extends RefCounted
 ## server/src/scheduler/battles.ts and horde.ts, with the parts of waves.ts,
 ## camps.ts, leaders.ts, heroes.ts, outposts.ts and bridge.ts they call.
 ##
-## Messages to players wait for the inbox (part 5). Armies (rallying to a
-## battle, holding hexes, field battles and the Holy City's) come with
-## their own part; a battle round they would fight waits until then.
+## Messages to players wait for the inbox (part 5). Armies come from
+## cmd_armies.gd.
 
 const RAIDING := ["marching", "battling", "arrived"]
 
@@ -95,6 +94,7 @@ static func start_battle(server: LocalServer, world: Dictionary, wave: Dictionar
 	var battle := insert_battle(world, {"waveId": wave.id, "villageId": village_id, "q": village.q, "r": village.r, "setup": setup,
 		"attackerStance": wave.stance, "attackerInitial": composition, "defenderInitial": state.garrison, "startedAt": at})
 	server.schedule(world, first_round, "battle_round", {"battleId": battle.id})
+	LocalArmies.rally_to_battle(server, world, battle, village, at)
 	changed.append(["village", village_id])
 
 
@@ -217,7 +217,19 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		own = own.duplicate()
 		own["defense.all"] = float(own.get("defense.all", 0.0)) + float(own.coldDefense)
 	var bonuses := LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
+	# The garrison fights alongside armies sent to help; armies joining this
+	# round bring their pincer or harassment bonus.
+	var engaged := LocalArmies.armies_in_battle(world, int(battle.id))
 	var forces: Array = [state.garrison]
+	for a in engaged:
+		forces.append(a.units)
+	var joining: Array = engaged.filter(func(a: Dictionary) -> bool: return a.joinsRound != null and int(a.joinsRound) == round)
+	var surge := 1.0
+	for a in joining:
+		surge += float(a.joinBonus)
+	# As they joined (losses below change the armies in place).
+	var joined: Array = joining.map(func(a: Dictionary) -> Dictionary:
+		return {"armyId": a.id, "villageId": a.homeVillageId, "orders": a.orders, "units": a.units.duplicate(), "bonus": a.joinBonus})
 	var base_stats := LocalBattle.player_stats(data, bonuses, true)
 	var rng := LocalBattle.battle_rng(int(world.seed), int(battle.id), round)
 	var wall: Variant = battle.setup.get("wall")
@@ -245,7 +257,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		{"units": defenders, "stance": state.stance, "home": true, "stats": func(unit: String) -> Dictionary:
 			var s: Dictionary = base_stats.call(unit).duplicate()
 			var shooting: float = walls.archers if s.family == "archers" else 1.0
-			s.attack = float(s.attack) * 1.0 * float(walls.attack) * shooting
+			s.attack = float(s.attack) * surge * float(walls.attack) * shooting
 			s.defense = float(s.defense) * float(walls.defense)
 			return s},
 		rng)
@@ -261,7 +273,23 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	var shares := split_losses(result.defenderLosses, forces)
 	var village_state := LocalVillage.lose_garrison(data, state, shares[0], at, world.speed)
 	var defender_losses: Dictionary = shares[0].duplicate()
+	var armies: Array = []
+	for i in engaged.size():
+		var army: Dictionary = engaged[i]
+		var losses: Dictionary = shares[i + 1]
+		# Harassers strike and ride off before the horde can close.
+		if army.orders == "harass" and army.joinsRound != null and int(army.joinsRound) == round:
+			var cut := {}
+			for u in losses:
+				cut[u] = floori(int(losses[u]) * float(data.armies.harass.lossFactor))
+			losses = cut
+		defender_losses = LocalCamps.add_units(defender_losses, losses)
+		armies.append(LocalArmies.army_losses(server, world, army, losses, at))
+	var leaving := func(a: Dictionary) -> bool: return a.orders == "harass" and a.joinsRound != null and int(a.joinsRound) == round
 	var defenders_now: Dictionary = village_state.garrison.duplicate()
+	for a in armies:
+		if not leaving.call(a):
+			defenders_now = LocalCamps.add_units(defenders_now, a.units)
 	wave.composition = attacker_now
 
 	var outcome := LocalBattle.battle_outcome(data, {
@@ -278,6 +306,23 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		log.smashed = smashed
 	if over > 0:
 		log.over = LocalWaves.js_round(over * 100) / 100.0
+	if not joined.is_empty():
+		log.joined = joined
+	# Armies after the round: harassers ride home; when the battle is over,
+	# support stays on guard and reinforcements go home.
+	for army in armies:
+		if leaving.call(army) or (outcome != "ongoing" and army.orders != "support"):
+			LocalArmies.send_home(server, world, army, at)
+		elif outcome != "ongoing":
+			if LocalBattle.total(army.units) > 0:
+				army.status = "stationed"
+				army.battleId = null
+				army.joinsRound = null
+				army.joinBonus = 0
+			else:
+				army.status = "done"
+		elif LocalBattle.total(army.units) == 0:
+			army.status = "done"
 	# Kills in the rounds before this one, for the leader.
 	var kills_before := 0
 	for r in battle.rounds:
@@ -327,32 +372,43 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	return true
 
 
-## A round away from the villages (scheduler/field.ts fieldRound). Only the
-## Holy City's guard fights here until armies are ported: a battle with
-## holders waits (false).
+## A round away from the villages (scheduler/field.ts fieldRound): on open
+## ground, or at the Holy City, whose guard fights beside any armies
+## holding it.
 static func field_round(server: LocalServer, world: Dictionary, battle: Dictionary, at: int, changed: Array) -> bool:
 	var data := server.data
-	var holy: bool = battle.setup.get("holyCity", false) == true
-	if not holy:
-		return false
 	var wave := server.find_wave(world, int(battle.waveId))
 	var round := int(battle.round) + 1
-	var guard: Dictionary = battle.setup.get("guard", {})
-	var stance: String = data.horde.holyCity.stance
-	# Holders fight with their owner's research and hero; the guard alone
-	# has neither.
-	var bonuses := {}
+	var engaged := LocalArmies.armies_in_battle(world, int(battle.id))
+	var holy: bool = battle.setup.get("holyCity", false) == true
+	var guard: Variant = battle.setup.get("guard", {}) if holy else null
+	var leader: Dictionary = server.find_village(world, int(engaged[0].homeVillageId)) if not engaged.is_empty() else {}
+	var stance: String = data.horde.holyCity.stance if holy else (leader.state.stance if not leader.is_empty() else "balanced")
+	# The holders fight with their owner's research and the hero leading them.
+	var hero: Dictionary = {}
+	for army in engaged:
+		if hero.is_empty():
+			hero = LocalArmies.hero_with_army(world, int(army.id))
+	var research: Dictionary = leader.state.bonuses if not leader.is_empty() else {}
+	if wave.front == "north" and float(research.get("coldDefense", 0.0)) != 0.0:
+		research = research.duplicate()
+		research["defense.all"] = float(research.get("defense.all", 0.0)) + float(research.coldDefense)
+	var bonuses: Dictionary = LocalHeroes.combine(research, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else research
 	var ground: Dictionary = battle.setup
+	var first := round == 1
+	var ambush: bool = ground.get("ambush", false) == true
 	var hold_defense := 1.0
 	if ground.get("fort", false):
 		hold_defense += float(data.field.fort.defenseBonus)
 	if ground.get("choke", false) and stance == "hold_the_line":
 		hold_defense += float(data.field.choke.holdTheLineDefense)
-	var first := round == 1
-	var ambush: bool = ground.get("ambush", false) == true
-	var hold_attack := 1.0 + float(data.field.ambush.bonus) + float(bonuses.get("ambush", 0.0)) if ambush and first else 1.0
+	var hold_attack := (1.0 + float(data.field.ambush.bonus) + float(bonuses.get("ambush", 0.0))) if ambush and first else 1.0
 	var horde_attack := (float(data.field.choke.attackerFactor) if ground.get("choke", false) else 1.0) * (float(data.field.river.attackerFactor) if ground.get("river", false) else 1.0)
-	var forces: Array = [guard]
+	var forces: Array = []
+	if guard != null:
+		forces.append(guard)
+	for army in engaged:
+		forces.append(army.units)
 	var holder_base := LocalBattle.player_stats(data, bonuses, false)
 	var chief := horde_stats(server, world, wave, LocalBattle.enemy_stats(data, wave.front), null)
 	var horde_base: Callable = chief.stats
@@ -374,11 +430,18 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var attacker_now := LocalCamps.subtract_units(wave.composition, result.attackerLosses)
 	wave.composition = attacker_now
 	var shares := split_losses(result.defenderLosses, forces)
-	var guard_now := LocalCamps.subtract_units(guard, shares[0])
-	var setup: Dictionary = battle.setup.duplicate(true)
-	setup.guard = guard_now
-	battle.setup = setup
-	var defenders_now: Dictionary = guard_now.duplicate()
+	var guard_now: Variant = LocalCamps.subtract_units(guard, shares[0]) if guard != null else null
+	if guard_now != null:
+		var setup: Dictionary = battle.setup.duplicate(true)
+		setup.guard = guard_now
+		battle.setup = setup
+	var offset := 1 if guard != null else 0
+	var armies: Array = []
+	for i in engaged.size():
+		armies.append(LocalArmies.army_losses(server, world, engaged[i], shares[i + offset], at))
+	var defenders_now: Dictionary = guard_now.duplicate() if guard_now != null else {}
+	for army in armies:
+		defenders_now = LocalCamps.add_units(defenders_now, army.units)
 	var outcome := LocalBattle.battle_outcome(data, {
 		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
 		"defenderStance": stance, "defenderInitial": battle.defenderInitial, "defenderNow": defenders_now,
@@ -387,23 +450,48 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var log := {"round": round, "at": LocalTime.iso(at), "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
 		"attackerLeft": LocalBattle.total(attacker_now), "defenderLeft": LocalBattle.total(defenders_now)}
 	if outcome == "ongoing":
+		for army in armies:
+			if LocalBattle.total(army.units) == 0:
+				army.status = "done"
 		_record_round(battle, log, null)
 		server.schedule(world, at + LocalBattle.round_ms(data, world.speed), "battle_round", {"battleId": battle.id})
 	else:
 		var won := outcome == "defended"
 		var kills := LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now)
+		# Beaten in the field, the horde's leader blames the army's village.
 		var fallen := LocalBattle.total(result.defenderLosses)
 		for r in battle.rounds:
 			fallen += LocalBattle.total(r.defenderLosses)
-		leader_after(server, world, wave, {"hordeWon": not won, "kills": fallen, "wiped": LocalBattle.total(attacker_now) == 0, "villageId": null}, at)
+		leader_after(server, world, wave, {"hordeWon": not won, "kills": fallen, "wiped": LocalBattle.total(attacker_now) == 0,
+			"villageId": leader.id if not leader.is_empty() else null}, at)
+		# Heroes first: a beaten hero is carried home wounded.
+		for army in armies:
+			var led := LocalArmies.hero_with_army(world, int(army.id))
+			if led.is_empty():
+				continue
+			if not won:
+				led.villageId = army.homeVillageId
+				led.armyId = null
+			hero_after_battle(server, world, led, {"kills": kills, "won": won, "battleId": battle.id, "at": at})
+		for army in armies:
+			if won and LocalBattle.total(army.units) > 0:
+				army.status = "stationed"
+				army.battleId = null
+				army.joinsRound = null
+				army.joinBonus = 0
+			else:
+				LocalArmies.send_home(server, world, army, at)
 		_record_round(battle, log, {"status": "defended" if won else "raided", "at": at, "loot": null})
 		if won:
 			horde_beaten(server, world, Vector2i(battle.q, battle.r), kills)
 			finish_wave(server, world, wave, "defeated", at, changed)
+			# A strong point held: a choke, or a fort built on the horde's road.
 			if ground.get("choke", false) or ground.get("fort", false):
 				bridge_quest(server, world, "choke", at)
-		else:
+		elif holy:
 			holy_city_falls(server, world, wave, attacker_now, at, changed)
+		else:
+			LocalArmies.march_on(server, world, wave, Vector2i(battle.q, battle.r), at)
 	changed.append(["world"])
 	return true
 
@@ -533,6 +621,7 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 		return not (e.status == "pending" and e.type in ["outpost_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	server.schedule(world, int(march.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, since_spawn + 1)
+	LocalArmies.plan_intercepts(server, world, wave, since_spawn + 1)
 	LocalHordes.plan_warning(server, world, wave, at)
 	changed.append(["world"])
 
@@ -570,7 +659,8 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 				member = m
 		var name := String(data.horde.refugeeCamp.name).replace("{owner}", member.get("displayName", "Refugees"))
 		var camp := server.insert_village(world, owner, name, site,
-			LocalVillage.new_village(data, at, world.speed, server.player_bonuses(world, owner)))
+			LocalVillage.new_village(data, at, world.speed, {"startingResources": data.buildings.village.startingResources, "adminUpkeep": 0,
+				"bonuses": server.player_bonuses(world, owner)}))
 		camp.refuge = true
 
 
@@ -602,13 +692,26 @@ static func on_village_rebuilt(server: LocalServer, world: Dictionary, event: Di
 	changed.append(["world"])
 
 
-## A horde at the Holy City fights its guard (and anyone holding the city,
-## once armies are ported).
+## A horde at the Holy City fights its guard and anyone holding the city.
 static func start_holy_city_battle(server: LocalServer, world: Dictionary, wave: Dictionary, at: int, _changed: Array) -> void:
 	var guard := LocalHorde.holy_city_guard(server.data, int(wave.index))
 	wave.status = "battling"
+	# In the order db/armies.ts listArmies gives them: newest first.
+	var holders: Array = world.armies.filter(func(a: Dictionary) -> bool:
+		return a.targetVillageId == null and int(a.targetQ) == 0 and int(a.targetR) == 0 and a.status == "stationed")
+	holders.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.departsAt) > int(b.departsAt) or (int(a.departsAt) == int(b.departsAt) and int(a.id) > int(b.id)))
+	var defenders: Dictionary = guard.duplicate()
+	for army in holders:
+		for unit in army.units:
+			defenders[unit] = int(defenders.get(unit, 0)) + int(army.units[unit])
 	var battle := insert_battle(world, {"waveId": wave.id, "villageId": null, "q": 0, "r": 0, "setup": {"holyCity": true, "guard": guard},
-		"attackerStance": wave.stance, "attackerInitial": wave.composition, "defenderInitial": guard.duplicate(), "startedAt": at})
+		"attackerStance": wave.stance, "attackerInitial": wave.composition, "defenderInitial": defenders, "startedAt": at})
+	for army in holders:
+		army.status = "engaged"
+		army.battleId = battle.id
+		army.joinsRound = 1
+		army.joinBonus = 0
 	server.schedule(world, at + LocalBattle.round_ms(server.data, world.speed), "battle_round", {"battleId": battle.id})
 
 

@@ -45,6 +45,9 @@ change: they keep calling `Api` and listening to `Live`.
   that order before each event and request (as the server loads its rows
   afresh), and code builds dictionaries in the order the server's code
   builds objects.
+- **Map order:** the server reads the map by row, then column, and some
+  searches settle ties by that order (the nearest spawn hex for scouts).
+  The local world keeps its hexes in that order.
 - **Ids:** Postgres sequences aren't rolled back. When a server command
   inserts a row and then fails, that id is used up, and the local engine
   skips it too (`world.next`).
@@ -75,11 +78,13 @@ Tracked in PLAN.md under step 24. Order:
 3. Villages: resources, building, training, outposts, upkeep (done).
 4. The scheduler and catch-up, waves and hordes, village and field battles.
    Done: hordes setting out (`sched_waves.gd`), arriving, village and Holy
-   City battles, the horde AI and camps (`sched_battles.gd`). Field battles
-   and anything with armies come with armies (part 5).
+   City battles, the horde AI and camps (`sched_battles.gd`).
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
    sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
    Done: research, caravans and the vault, rebuilding and the hero's own
-   commands (`cmd_research.gd`, `cmd_logistics.gd`, `cmd_heroes.gd`).
+   commands and quests (`cmd_research.gd`, `cmd_logistics.gd`,
+   `cmd_heroes.gd`); armies, field battles, forts, roads, bridges, camps
+   stormed and sites explored (`cmd_armies.gd`); scouting and settlers
+   (`cmd_scouting.gd`).
 6. The start screen's **Play solo**: create, continue and delete local
    worlds.

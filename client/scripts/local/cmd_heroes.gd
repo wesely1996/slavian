@@ -94,6 +94,122 @@ static func on_hero_arrive(_server: LocalServer, world: Dictionary, event: Dicti
 		changed.append(["world"])
 
 
+# --- Quests (scheduler/quests.ts) -----------------------------------------------------
+
+const DONE_KEPT := 30
+
+
+## Sends the hero on one of its offers.
+static func start_quest(server: LocalServer, world: Dictionary, hero: Dictionary, offer_id: String, now: int) -> Dictionary:
+	if hero.status != "home":
+		return LocalVillage.rule("%s must be at home, unhurt, to set out" % hero.name)
+	var home := server.find_village(world, int(hero.villageId))
+	if home.state.besieged:
+		return LocalVillage.rule("%s won't leave %s in the middle of a battle" % [hero.name, home.name])
+	var offer: Dictionary = {}
+	for o in server.quest_offers(world, hero, now):
+		if o.id == offer_id:
+			offer = o
+	if offer.is_empty():
+		return LocalVillage.rule("That quest is no longer on offer")
+	var returns_at := now + LocalHeroes.quest_ms(offer, world.speed)
+	var away := hero.duplicate(true)
+	away.status = "questing"
+	var quest := offer.duplicate(true)
+	quest.departsAt = LocalTime.iso(now)
+	quest.returnsAt = LocalTime.iso(returns_at)
+	away.quest = quest
+	var done: Array = hero.questsDone + [offer.id]
+	away.questsDone = done.slice(maxi(0, done.size() - DONE_KEPT))
+	server.schedule(world, returns_at, "hero_quest", {"accountId": hero.accountId})
+	return away
+
+
+## The next horde from a front that hasn't set out yet.
+static func _next_wave(world: Dictionary, front: Variant) -> Dictionary:
+	var best: Dictionary = {}
+	for w in world.waves:
+		if w.front == front and w.status == "scheduled":
+			if best.is_empty() or int(w.spawnAt) < int(best.spawnAt) or (int(w.spawnAt) == int(best.spawnAt) and int(w.id) < int(best.id)):
+				best = w
+	return best
+
+
+## Does what the quest set out to do.
+static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, quest: Dictionary, at: int, changed: Array) -> void:
+	var data := server.data
+	var home := server.find_village(world, int(hero.villageId))
+	match String(quest.kind):
+		"ambush":
+			var wave := _next_wave(world, quest.front)
+			if wave.is_empty():
+				return
+			var delay := LocalWaves.js_round((float(data.quests.kinds.ambush.get("delayHours", 0)) * LocalTime.MS_PER_HOUR) / world.speed)
+			wave.spawnAt = int(wave.spawnAt) + delay
+			for e in world.events:
+				if e.status == "pending" and e.type in ["wave_spawn", "wave_warning"] and int(e.payload.get("waveId", -1)) == int(wave.id):
+					e.dueAt = int(e.dueAt) + delay
+		"scout":
+			var wave := _next_wave(world, quest.front)
+			if wave.is_empty():
+				return
+			var tiers: Array = data.scouting.tiers.duplicate()
+			var best: Dictionary = tiers[0]
+			for t in tiers:
+				if int(t.minSurvivors) > int(best.minSurvivors):
+					best = t
+			var sent := int(best.minSurvivors)
+			var mission := LocalScouting.insert_mission(world, {"villageId": home.id, "waveId": wave.id, "sent": sent, "target": {"q": home.q, "r": home.r},
+				"departsAt": LocalTime.parse(quest.departsAt), "arrivesAt": at, "returnsAt": at})
+			mission.report = LocalScouting.scout_report(data, wave.front, wave.composition, wave.stance, sent, sent, false, int(world.seed), int(mission.id))
+			mission.survivors = sent
+			mission.status = "done"
+		"caravan":
+			home.state.ledger = LocalLogistics.receive(home.state.ledger, at, LocalHeroes.caravan_find(data, int(hero.level))).ledger
+			changed.append(["village", home.id])
+		"hoard":
+			var owned: Array = hero.inventory + hero.gear.values()
+			var left: Array = data.heroes.items.keys().filter(func(i: String) -> bool: return not i in owned)
+			left.sort()
+			if left.is_empty():
+				return
+			var rng := LocalRng.new((int(world.seed) ^ LocalRng.imul(int(hero.accountId) + 1, 0x165667b1) ^ left.size()) & 0xffffffff)
+			hero.inventory = hero.inventory + [left[floori(rng.next() * left.size())]]
+		"ruins":
+			var site: Dictionary = {}
+			for s in world.sites:
+				if quest.siteId != null and int(s.id) == int(quest.siteId):
+					site = s
+			if site.is_empty() or site.status == "explored" or LocalBattle.total(site.guardians) > 0:
+				return
+			var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius)),
+				LocalResearch.scrolls(world), hero.inventory + hero.gear.values())
+			if find.type == "resources":
+				home.state.ledger = LocalLogistics.receive(home.state.ledger, at, find.resources).ledger
+				changed.append(["village", home.id])
+			LocalArmies.claim_find(server, world, site, hero.accountId, hero, find, at, changed)
+
+
+static func on_hero_quest(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var data := server.data
+	var hero := LocalArmies.hero_of(world, int(event.payload.accountId))
+	var quest: Variant = hero.get("quest")
+	var at := int(event.dueAt)
+	if hero.status != "questing" or quest == null or LocalTime.parse(quest.returnsAt) > at:
+		return
+	_fulfil(server, world, hero, quest, at, changed)
+	var wounded := LocalHeroes.quest_wounds(quest, int(world.seed), int(hero.accountId), LocalTime.parse(quest.departsAt))
+	hero.merge(LocalHeroes.gain_xp(data, hero, LocalHeroes.quest_xp(data, quest, hero.kind)), true)
+	hero.status = "home"
+	hero.quest = null
+	if wounded:
+		var until := at + LocalHeroes.wound_ms(data, world.speed, hero.kind)
+		hero.status = "wounded"
+		hero.woundedUntil = LocalTime.iso(until)
+		server.schedule(world, until, "hero_recover", {"accountId": hero.accountId})
+	changed.append(["world"])
+
+
 ## Runs a hero command for `account_id`: {status, data} as the route answers.
 static func command(server: LocalServer, world: Dictionary, account_id: int, action: String, body: Dictionary, now: int) -> Dictionary:
 	var hero: Dictionary = {}
@@ -119,6 +235,8 @@ static func command(server: LocalServer, world: Dictionary, account_id: int, act
 			next.name = name
 		"move":
 			next = move(server, world, hero, int(body.get("villageId", 0)), now)
+		"quest":
+			next = start_quest(server, world, hero, String(body.get("offer", "")), now)
 		_:
 			return {"error": "Not in single player yet", "kind": "local"}
 	if next.has("error"):

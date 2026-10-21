@@ -565,12 +565,15 @@ func _test_local_villages() -> void:
 
 
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
-## battle-scenario.json, raze-scenario.json, logistics-scenario.json).
+## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
+## army-scenario.json, expansion-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
 	_replay_scenario("raze-scenario.json", "local razes")
 	_replay_scenario("logistics-scenario.json", "local logistics")
+	_replay_scenario("army-scenario.json", "local armies")
+	_replay_scenario("expansion-scenario.json", "local expansion")
 
 
 ## Replays a scenario recorded on the server (server/test/scenario.ts) on a
