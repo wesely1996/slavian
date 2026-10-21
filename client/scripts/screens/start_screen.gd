@@ -77,6 +77,7 @@ func _ready() -> void:
 	Live.connection_changed.connect(_on_live_connection)
 	if Session.is_logged_in():
 		Push.register()
+	Sound.music("map")
 	_show_tab("play")
 
 
@@ -377,6 +378,16 @@ const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a g
 
 var _delete_armed := false
 
+## The music and sounds, all CC0 (client/audio/CREDITS.md): what, and by
+## whom (names stay as they are).
+const CREDITS := [
+	"Music for the map and the menu, the village, battles, victory and defeat",  # tr
+	"Music when a horde is near",  # tr
+	"The war horn",  # tr
+	"Sound effects",  # tr
+]
+const CREDITED := ["RandomMind (opengameart.org)", "spring-spring (opengameart.org)", "stumpystrust (opengameart.org)", "Kenney (kenney.nl)"]
+
 
 ## Who you are and your data; destructive actions stand apart.
 func _show_profile() -> void:
@@ -480,6 +491,32 @@ func _show_settings() -> void:
 		size_pick.custom_minimum_size = Vector2(76, 76)
 		sizes.add_child(size_pick)
 	_content.add_child(sizes)
+	_volume_slider(tr("Music"), "Music", Session.music_volume)
+	_volume_slider(tr("Sound effects"), "Effects", Session.effects_volume)
+
+
+## A volume from 0 to 100%, kept on the device; effects tap as you slide.
+func _volume_slider(text: String, bus: String, volume: float) -> void:
+	var title := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_content.add_child(title)
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.05
+	slider.value = volume
+	slider.custom_minimum_size.y = 48
+	var show := func(value: float) -> void: title.text = tr("%s: %d%%") % [text, roundi(value * 100.0)]
+	show.call(volume)
+	slider.value_changed.connect(func(value: float) -> void:
+		show.call(value)
+		Sound.set_volume(bus, value)
+		if bus == "Music":
+			Session.music_volume = value
+		else:
+			Session.effects_volume = value
+			Sound.effect("tap"))
+	slider.drag_ended.connect(func(_changed: bool) -> void: Session.save())
+	_content.add_child(slider)
 
 
 # --- Help ------------------------------------------------------------------
@@ -507,6 +544,9 @@ func _show_help() -> void:
 	_content.add_child(costs_box)
 	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
 	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Credits"), UI.SMALL_SIZE))
+	for i in CREDITS.size():
+		_content.add_child(UI.label(tr(CREDITS[i]) + "\n" + CREDITED[i], UI.SMALL_SIZE, UI.MUTED))
 	var costs := await Api.get_json("/v1/costs")
 	if not is_instance_valid(costs_box) or _tab != "help":
 		return

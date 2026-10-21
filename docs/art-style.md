@@ -189,6 +189,19 @@ Sources: [GameAnalytics on game UI](https://www.gameanalytics.com/blog/how-to-ma
 [TechSpot, the ten commandments of video game menus](https://www.techspot.com/news/62281-ten-commandments-video-game-menus.html),
 [Push Me Pull You's menu design](https://www.goodreads.com/author_blog_posts/12290040-push-me-pull-you-s-long-stretch-to-good-menu-design?tab=book).
 
+## Sound
+
+Music and effects live in `client/audio/` (`music/`, `sfx/`) and play
+through the `Sound` autoload. When the music changes is decided in
+`SoundCues`. Every file is CC0 and listed in `client/audio/CREDITS.md`,
+with the credits in the menu's Help. To add or replace one:
+
+- encode it as mono Ogg Vorbis, normalised to the same loudness as the
+  rest: `ffmpeg -i in.wav -ac 1 -af loudnorm=I=-20:TP=-1.5:LRA=11
+  -c:a libvorbis -q:a 1 out.ogg` (`-q:a 3` and `I=-16` for effects);
+- keep music calm and unhurried; save the tense theme for real danger;
+- add it to `CREDITS.md`, and to the menu's credits when it is by someone new.
+
 ## Replacing a piece of art
 
 `client/art/art.json` maps every art id to a file:

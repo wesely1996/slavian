@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_local_waves()
 	_test_local_notices()
 	_test_local_saves()
+	_test_sound_cues()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -582,6 +583,28 @@ func _test_local_waves() -> void:
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
+func _test_sound_cues() -> void:
+	var now := 1_000_000.0
+	var soon := Time.get_datetime_string_from_unix_time(int(now + 600), false) + "Z"
+	var later := Time.get_datetime_string_from_unix_time(int(now + 7200), false) + "Z"
+	var waves := [
+		{"id": 1, "status": "marching", "targetVillageId": 5, "arrivesAt": later},
+		{"id": 2, "status": "marching", "targetVillageId": 9, "arrivesAt": soon},
+		{"id": 3, "status": "spawning", "targetVillageId": null},
+	]
+	_check(SoundCues.incoming(waves, [5]) == [1], "sound: hordes marching on my villages")
+	_check(not SoundCues.threatened(waves, [5], now), "sound: a horde two hours off is not near")
+	_check(SoundCues.threatened(waves, [9], now), "sound: a horde ten minutes off is near")
+	_check(SoundCues.threatened([{"id": 4, "status": "battling", "targetVillageId": 5}], [5], now), "sound: a battle at my village is near")
+	_check(not SoundCues.threatened([{"id": 4, "status": "battling", "targetVillageId": 6}], [5], now), "sound: someone else's battle is not")
+	_check(SoundCues.track("map", "running", false) == "map", "sound: calm map music")
+	_check(SoundCues.track("village", "running", true) == "threat", "sound: tense music when a horde is near")
+	_check(SoundCues.track("battle", "running", true) == "battle", "sound: battle music on the battle map")
+	_check(SoundCues.track("battle", "won", false) == "won", "sound: the run's ending wins out")
+	_check(SoundCues.new_hordes([1], [1, 2]) == [2], "sound: a horn for each new horde")
+	_check(SoundCues.new_hordes([1, 2], [2]).is_empty(), "sound: no horn when a horde is gone")
+
+
 func _test_local_saves() -> void:
 	var dir := OS.get_user_data_dir().path_join("test-local-saves")
 	DirAccess.make_dir_recursive_absolute(dir)

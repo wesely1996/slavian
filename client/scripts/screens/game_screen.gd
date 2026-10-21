@@ -78,6 +78,8 @@ var _panel: PanelContainer
 var _panel_body: VBoxContainer
 ## Labels refreshed every UI tick, with a callable producing their text.
 var _ticking: Array[Array] = []
+## Hordes already marching on your villages: a new one sounds the horn.
+var _known_hordes: Array = []
 
 
 func _ready() -> void:
@@ -126,6 +128,8 @@ func _ready() -> void:
 		_select(Vector2i.ZERO)
 	_refresh_quest_card()
 	_welcome_once()
+	_known_hordes = SoundCues.incoming(Game.waves, _my_village_ids())
+	_update_music()
 
 
 func _exit_tree() -> void:
@@ -159,11 +163,13 @@ func _process(delta: float) -> void:
 			_battle_clock = 0.0
 			_battle_round += 1
 			_battle_playing = _battle_round < _battle().get("rounds", []).size()
+			Sound.effect("clash")
 			_rebuild_panel()
 	_since_refresh += delta
 	if _since_refresh < UI_REFRESH_SEC:
 		return
 	_since_refresh = 0.0
+	_update_music()
 	var home := _my_village()
 	if not home.is_empty():
 		var amounts := Ledger.amounts_at(home.resources, Game.server_now())
@@ -423,6 +429,7 @@ func _battle_panel() -> void:
 	var next := UI.button("▶", func() -> void:
 		_battle_playing = false
 		_battle_round += 1
+		Sound.effect("clash")
 		_rebuild_panel())
 	next.disabled = _battle_round >= count
 	row.add_child(next)
@@ -505,6 +512,7 @@ func _set_view(view: String) -> void:
 	# village or a battle is open.
 	camera.set_process_unhandled_input(on_map)
 	_panel_mode = "hex"
+	_update_music()
 	_rebuild_panel()
 
 
@@ -580,7 +588,9 @@ func _claim_onboarding(step_id: String) -> void:
 	var response := await Api.post_json("/v1/worlds/%d/onboarding/claim" % Game.world_id(), {"step": step_id})
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("done")
 	_fly_reward(from, step.get("reward", {}))
 	Game.set_world(response.data)
 	if response.data.get("claimed", {}).get("finale", false):
@@ -1042,7 +1052,9 @@ func _donate_bridge(amounts: Dictionary, embers: int) -> void:
 	var response := await Api.post_json("/v1/worlds/%d/bridge/donate" % Game.world_id(), {"resources": resources, "embers": embers})
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("coins")
 	Game.set_world(response.data)
 
 
@@ -1198,7 +1210,9 @@ func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort:
 	var response := await Api.post_json("/v1/villages/%d/caravans" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("coins")
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	_army_units.clear()
 	Game.note_server_time(response.data.serverTime)
@@ -1293,7 +1307,9 @@ func _start_research(village_id: int, tech: String) -> void:
 	var response := await Api.post_json("/v1/villages/%d/research" % village_id, {"tech": tech})
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("done")
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -2487,7 +2503,9 @@ func _train(village_id: int, unit: String, count: int) -> void:
 	var response := await Api.post_json("/v1/villages/%d/train" % village_id, {"unit": unit, "count": count})
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("train")
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -2760,7 +2778,29 @@ func _send_scouts(village_id: int, wave_id: int, count: int) -> void:
 
 func _on_waves_changed() -> void:
 	hex_map.queue_redraw()
+	_sound_hordes()
 	_rebuild_panel()
+
+
+# --- Sound -------------------------------------------------------------------
+
+func _my_village_ids() -> Array:
+	return Game.my_villages().map(func(v: Dictionary) -> int: return int(v.id))
+
+
+## The music for what is on screen (SoundCues.track).
+func _update_music() -> void:
+	var near := SoundCues.threatened(Game.waves, _my_village_ids(), Game.server_now())
+	Sound.music(SoundCues.track(_view, String(Game.world.get("status", "")), near))
+
+
+## A horn for each horde that sets out on one of your villages.
+func _sound_hordes() -> void:
+	var now_ids := SoundCues.incoming(Game.waves, _my_village_ids())
+	if not SoundCues.new_hordes(_known_hordes, now_ids).is_empty():
+		Sound.effect("horn")
+	_known_hordes = now_ids
+	_update_music()
 
 
 ## Keeps a label (or rich label) showing `text`'s result.
@@ -2774,7 +2814,9 @@ func _queue_build(village_id: int, plot: String, building: String) -> void:
 	var response := await Api.post_json("/v1/villages/%d/build" % village_id, {"plot": plot, "building": building})
 	if not response.ok:
 		_status.text = response.error
+		Sound.effect("error")
 		return
+	Sound.effect("build")
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -2788,6 +2830,7 @@ func _on_map_tapped(world_position: Vector2) -> void:
 
 
 func _on_world_changed() -> void:
+	_update_music()
 	hex_map.refresh()
 	_refresh_quest_card()
 	_open_run_once()
