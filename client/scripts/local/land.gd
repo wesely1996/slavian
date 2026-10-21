@@ -121,3 +121,16 @@ class _Heap:
 		var p := _priorities[a]
 		_priorities[a] = _priorities[b]
 		_priorities[b] = p
+
+
+## sim/land.ts moveCostOn: the cost of entering `to`, or -1 where it is
+## impassable or a river lies between. `land`: {terrain, blocked, roads}.
+static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> Callable:
+	return func(from: Vector2i, to: Vector2i) -> float:
+		var type: Variant = land.terrain.get(key(to))
+		if type == null or land.blocked.has(edge_key(from, to)):
+			return -1.0
+		var cost: Variant = data.terrain.terrain[type].moveCost
+		if cost == null:
+			return -1.0
+		return float(cost) * float(data.field.road.factor) if roads and land.roads.has(edge_key(from, to)) else float(cost)

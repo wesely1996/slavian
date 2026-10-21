@@ -45,6 +45,9 @@ change: they keep calling `Api` and listening to `Live`.
   that order before each event and request (as the server loads its rows
   afresh), and code builds dictionaries in the order the server's code
   builds objects.
+- **Ids:** Postgres sequences aren't rolled back. When a server command
+  inserts a row and then fails, that id is used up, and the local engine
+  skips it too (`world.next`).
 - **Precision:** use doubles (`float`) for anything that feeds a decision.
   `Vector2` is single precision.
 - **Fixture numbers:** Godot's JSON reader isn't exact in the last digits.
@@ -76,5 +79,7 @@ Tracked in PLAN.md under step 24. Order:
    and anything with armies come with armies (part 5).
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
    sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
+   Done: research, caravans and the vault, rebuilding and the hero's own
+   commands (`cmd_research.gd`, `cmd_logistics.gd`, `cmd_heroes.gd`).
 6. The start screen's **Play solo**: create, continue and delete local
    worlds.

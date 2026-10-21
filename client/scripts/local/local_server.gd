@@ -43,8 +43,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -69,7 +69,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	_ensure_heroes(world)
 	# Each village carries its owner's clan and hero.
 	for member in world.members:
-		_refresh_bonuses(world, int(member.accountId), now)
+		refresh_bonuses(world, int(member.accountId), now)
 	_ensure_sites(world)
 	world.bridge = {"stage": 0, "donated": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "embers": 0, "quests": {},
 		"stageStartedAt": LocalTime.iso(now), "sanctityAtStart": world.sanctity, "status": "open", "raisedAt": null}
@@ -116,11 +116,14 @@ func _ensure_heroes(world: Dictionary) -> void:
 
 ## A player's bonuses: research, the group's scrolls, their clan and hero
 ## (scheduler/research.ts playerBonuses), given to each of their villages.
-func _refresh_bonuses(world: Dictionary, account_id: int, at: int) -> void:
+## Gives each of the player's villages their current bonuses
+## (scheduler/research.ts refreshBonuses).
+func refresh_bonuses(world: Dictionary, account_id: int, at: int, changed: Array = []) -> void:
 	var bonuses := player_bonuses(world, account_id)
 	for village in world.villages:
 		if int(village.ownerAccountId) == account_id:
 			village.state = LocalVillage.with_bonuses(data, village.state, bonuses, at, world.speed)
+			changed.append(["village", village.id])
 
 
 ## Research, the group's scrolls, the player's clan and hero
@@ -131,7 +134,9 @@ func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 		if int(m.accountId) == account_id:
 			member = m
 	var own := LocalHeroes.combine(LocalVillage.clan_bonuses(data, member.get("clan")), LocalHeroes.roster_bonuses(data, member.get("heroKind")))
-	return LocalHeroes.combine(LocalHeroes.combine({}, {}), own)
+	var research := LocalResearch.bonuses_of(data, LocalResearch.known(world, account_id))
+	var lore := LocalResearch.lore_bonuses(data, LocalResearch.scrolls(world))
+	return LocalHeroes.combine(LocalHeroes.combine(research, lore), own)
 
 
 func _ensure_sites(world: Dictionary) -> void:
@@ -245,6 +250,18 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		var view := world_view(world, now)
 		view.claimed = claimed
 		return {"status": 200, "data": view}
+	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "hero":
+		var hero := LocalHeroCommands.command(self, world, int(world.hostAccountId), parts[4], body, now)
+		if hero.has("error"):
+			return _rule_answer(hero)
+		changed.append(["world"])
+		return {"status": 200, "data": {"hero": _hero_view(world, hero, now), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "vault" and parts[4] == "upgrade":
+		var vault := LocalLogistics.upgrade_vault(self, world, now)
+		if vault.has("error"):
+			return _rule_answer(vault)
+		changed.append(["world"])
+		return {"status": 200, "data": {"vault": LocalLogistics.vault_view(data, vault), "serverTime": LocalTime.iso(now)}}
 	if parts.size() >= 4 and parts[1] == "villages" and method == "POST":
 		var village := find_village(world, int(parts[2]))
 		if village.is_empty():
@@ -252,10 +269,12 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if int(village.ownerAccountId) != int(world.hostAccountId):
 			return _fail(403, "forbidden", "Not your village")
 		var action := "/".join(parts.slice(3))
-		if village.ruin != null:
+		if village.ruin != null and action != "rebuild":
 			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
 		var result: Dictionary
 		var step := ""
+		# What the answer carries besides the village: [key, value].
+		var extra: Array = []
 		match action:
 			"build":
 				result = _queue_build(world, village, body, now)
@@ -282,15 +301,31 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					return _fail(400, "invalid_request", "Give the town a name of 1 to 32 letters")
 				village.name = name
 				result = {"state": village.state}
+			"research":
+				result = LocalResearch.start_research(self, world, village, String(body.get("tech", "")), now)
+				if result.has("research"):
+					extra = ["research", LocalResearch.research_view(result.research)]
+			"rebuild":
+				result = LocalResearch.rebuild(self, world, village, now)
+			"caravans", "caravans/fetch":
+				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
+				if result.has("caravan"):
+					extra = ["caravan", LocalLogistics.caravan_view(result.caravan)]
+					step = result.get("onboarding", "")
 			_:
 				return _fail(501, "local", "Not in single player yet")
 		if result.has("error") or result.has("missing"):
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
+		if action in ["research", "rebuild", "caravans", "caravans/fetch"]:
+			changed.append(["world"])
 		if step != "":
 			_onboarding_step(world, int(village.ownerAccountId), step, now, changed)
-		return {"status": 200, "data": {"village": village_view(world, village), "serverTime": LocalTime.iso(now)}}
+		var answer := {"village": village_view(world, village), "serverTime": LocalTime.iso(now)}
+		if not extra.is_empty():
+			answer[extra[0]] = extra[1]
+		return {"status": 200, "data": answer}
 	return _fail(501, "local", "Not in single player yet")
 
 
@@ -403,6 +438,13 @@ static func _rule_answer(result: Dictionary) -> Dictionary:
 		for kind in LocalLedger.KINDS:
 			parts.append("\"%s\":%s" % [kind, _js_number(result.missing[kind])])
 		return {"status": 400, "data": {"error": "insufficient_resources", "message": "Insufficient resources: missing {%s}" % ",".join(parts), "missing": result.missing}}
+	match String(result.get("kind", "rule")):
+		"not_found":
+			return _fail(404, "not_found", String(result.error))
+		"invalid":
+			return _fail(400, "invalid_request", String(result.error))
+		"local":
+			return _fail(501, "local", String(result.error))
 	return _fail(400, "rule", String(result.error))
 
 
@@ -473,6 +515,9 @@ func as_stored(world: Dictionary) -> void:
 			b[key] = LocalStore.stored(b[key])
 	for c in world.camps:
 		c.units = LocalStore.stored(c.units)
+	for c in world.caravans:
+		for key in ["cargo", "carriedBack", "escort", "ambush"]:
+			c[key] = LocalStore.stored(c[key])
 	for l in world.leaders:
 		l.skills = LocalStore.stored(l.skills)
 	for h in world.heroes:
@@ -507,6 +552,30 @@ func _on_outpost_raid(world: Dictionary, event: Dictionary, changed: Array) -> v
 
 func _on_camp_grow(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalBattles.on_camp_grow(self, world, event, changed)
+
+
+func _on_research_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalResearch.on_research_complete(self, world, event, changed)
+
+
+func _on_caravan_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalLogistics.on_caravan_arrive(self, world, event, changed)
+
+
+func _on_caravan_return(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalLogistics.on_caravan_return(self, world, event, changed)
+
+
+func _on_caravan_ambush(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalLogistics.on_caravan_ambush(self, world, event, changed)
+
+
+func _on_vault_upgrade(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalLogistics.on_vault_upgrade(self, world, event, changed)
+
+
+func _on_hero_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalHeroCommands.on_hero_arrive(self, world, event, changed)
 
 
 func _on_hero_recover(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -574,10 +643,11 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": [], "battles": _battles_view(world), "raids": _raids_view(world), "expeditions": [],
-		"research": [], "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": [], "forts": [], "camps": _camps_view(world), "sites": sites,
-		"lore": [], "bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": null, "caravans": [],
-		"vault": {"level": world.vault.level, "amounts": world.vault.amounts, "capacity": _vault_capacity(int(world.vault.level)),
-			"upgradingTo": world.vault.upgradingTo, "upgradeCompletesAt": world.vault.upgradeCompletesAt},
+		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": [], "forts": [], "camps": _camps_view(world), "sites": sites,
+		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
+			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
+		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": null,
+		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": []},
 		"serverTime": LocalTime.iso(now),
 	}
@@ -623,7 +693,8 @@ func _hero_view(world: Dictionary, h: Dictionary, now: int) -> Dictionary:
 		"accountId": h.accountId, "kind": h.kind, "name": h.name, "status": h.status, "villageId": h.villageId, "armyId": h.armyId,
 		"level": h.level, "xp": h.xp, "xpToNext": null if int(h.level) >= int(data.heroes.maxLevel) else LocalHeroes.xp_to_next(data, int(h.level)),
 		"skillPoints": h.skillPoints, "skills": h.skills, "gear": h.gear, "inventory": h.inventory, "bonuses": LocalHeroes.hero_bonuses(data, h),
-		"path": h.path, "departsAt": h.departsAt, "arrivesAt": h.arrivesAt, "woundedUntil": h.woundedUntil, "quest": h.quest,
+		"path": h.path.map(func(st: Dictionary) -> Array: return [st.q, st.r, st.atMs]) if h.path != null else null,
+		"departsAt": h.departsAt, "arrivesAt": h.arrivesAt, "woundedUntil": h.woundedUntil, "quest": h.quest,
 		"offers": _quest_offers(world, h, now),
 	}
 
@@ -714,11 +785,6 @@ func _fear_view(world: Dictionary) -> Array:
 	return out
 
 
-func _vault_capacity(level: int) -> float:
-	var v: Dictionary = data.logistics.vault
-	return float(v.baseCapacity) * pow(float(v.capacityGrowth), level - 1)
-
-
 static func _total(units: Dictionary) -> int:
 	var n := 0
 	for count in units.values():
@@ -753,8 +819,9 @@ func _load_all() -> void:
 		if parsed is Dictionary:
 			var world: Dictionary = _decode(parsed)
 			# Worlds saved before part 4.
-			world.merge({"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
-			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1})
+			world.merge({"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [],
+				"quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
+			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1})
 			for w in world.waves:
 				w.merge({"initial": w.composition.duplicate()})
 			worlds[int(world.id)] = world
