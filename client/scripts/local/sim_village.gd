@@ -570,3 +570,23 @@ static func plunder(state: Dictionary, loot: Dictionary, at: int) -> Dictionary:
 	var next := state.duplicate(true)
 	next.ledger = LocalLedger.take(state.ledger, at, loot)
 	return next
+
+
+## Sends `count` units away from home (finished training counts as home):
+## {"error"} when there aren't that many.
+static func send_away(state: Dictionary, unit: String, count: int, at: int) -> Dictionary:
+	var settled := complete_training(state, at)
+	var home := int(settled.garrison.get(unit, 0))
+	if home < count:
+		return rule("Only %d %s at home" % [home, unit])
+	settled.garrison[unit] = home - count
+	settled.away = add_units(settled.away, {unit: count})
+	return settled
+
+
+## Units coming home from a mission.
+static func return_home(state: Dictionary, unit: String, count: int) -> Dictionary:
+	var next := state.duplicate(true)
+	next.away[unit] = maxi(0, int(state.away.get(unit, 0)) - count)
+	next.garrison = add_units(state.garrison, {unit: count})
+	return next

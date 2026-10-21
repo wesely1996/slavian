@@ -643,7 +643,7 @@ static func create_camp(server: LocalServer, world: Dictionary, camp: Dictionary
 	world.camps.append(created)
 	server.schedule(world, LocalTime.ms(at + (float(server.data.camps.growth.everyHours) * LocalTime.MS_PER_HOUR) / world.speed), "camp_grow",
 		{"campId": created.id})
-	# Ambushes on caravans come with caravans.
+	LocalLogistics.plan_ambushes_for(server, world, at)
 	return created
 
 
