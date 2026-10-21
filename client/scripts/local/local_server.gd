@@ -43,7 +43,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1},
+		"leaders": [], "fear": {}, "camps": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -141,18 +142,32 @@ func _ensure_sites(world: Dictionary) -> void:
 
 ## The first waves, announced at the start (scheduler/waves.ts).
 func _announce_first_waves(world: Dictionary) -> void:
-	var ctx := {"seed": world.seed, "activeFronts": world.activeFronts, "playerCount": world.members.size(), "startedAt": world.startedAt, "worldSpeed": world.speed}
 	var previous: Variant = null
 	for index in int(data.waves.upcoming):
-		var factor := LocalWaves.wave_factor(data, world.difficulty, _group_power(world, index))
-		var planned := LocalWaves.plan_wave(data, ctx.merged({"sizeFactor": factor}), index, previous)
-		var wave := {"id": world.next.wave, "index": planned.index, "front": planned.front, "status": "scheduled", "threat": planned.threat,
-			"stance": planned.stance, "composition": planned.composition, "spawnAt": planned.spawnAt, "spawn": null, "targetVillageId": null,
-			"path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [], "ritual": false, "leaderId": null}
-		world.next.wave += 1
-		world.waves.append(wave)
-		_schedule(world, planned.spawnAt, "wave_spawn", {"waveId": wave.id})
-		previous = planned.spawnAt
+		previous = announce_wave(world, index, previous).spawnAt
+
+
+## Plans wave `index` after the one spawning at `previous_spawn_at` (ms, or
+## null for the first), and schedules its spawn (announceWave).
+func announce_wave(world: Dictionary, index: int, previous_spawn_at: Variant) -> Dictionary:
+	var ctx := {"seed": world.seed, "activeFronts": world.activeFronts, "playerCount": world.members.size(), "startedAt": world.startedAt,
+		"worldSpeed": world.speed, "sizeFactor": LocalWaves.wave_factor(data, world.difficulty, _group_power(world, index))}
+	var planned := LocalWaves.plan_wave(data, ctx, index, previous_spawn_at)
+	var wave := {"id": world.next.wave, "index": planned.index, "front": planned.front, "status": "scheduled", "threat": planned.threat,
+		"stance": planned.stance, "composition": planned.composition, "initial": planned.composition.duplicate(), "spawnAt": planned.spawnAt,
+		"spawn": null, "targetVillageId": null, "path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [],
+		"ritual": false, "leaderId": null}
+	world.next.wave += 1
+	world.waves.append(wave)
+	schedule(world, planned.spawnAt, "wave_spawn", {"waveId": wave.id})
+	return wave
+
+
+func find_wave(world: Dictionary, id: int) -> Dictionary:
+	for w in world.waves:
+		if int(w.id) == id:
+			return w
+	return {}
 
 
 ## What the group has built up, for wave sizes (difficulty.ts GroupPower).
@@ -169,9 +184,30 @@ func _group_power(world: Dictionary, index: int) -> Dictionary:
 		"bridgeStages": int(world.bridge.stage) if world.has("bridge") else 0}
 
 
-func _schedule(world: Dictionary, due_at: int, type: String, payload: Dictionary) -> void:
+func schedule(world: Dictionary, due_at: int, type: String, payload: Dictionary) -> void:
 	world.events.append({"id": world.next.event, "dueAt": due_at, "type": type, "payload": payload, "status": "pending"})
 	world.next.event += 1
+
+
+## Whether a pending event of `type` carries all of `payload` (jsonb @>).
+func pending(world: Dictionary, type: String, payload: Dictionary) -> bool:
+	for e in world.events:
+		if e.type != type or e.status != "pending":
+			continue
+		var all := true
+		for key in payload:
+			if not e.payload.has(key) or not _same(e.payload[key], payload[key]):
+				all = false
+				break
+		if all:
+			return true
+	return false
+
+
+static func _same(a: Variant, b: Variant) -> bool:
+	if (a is int or a is float) and (b is int or b is float):
+		return float(a) == float(b)
+	return typeof(a) == typeof(b) and a == b
 
 
 # --- Requests (api/app.ts) ----------------------------------------------------
@@ -203,7 +239,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		view.claimed = claimed
 		return {"status": 200, "data": view}
 	if parts.size() >= 4 and parts[1] == "villages" and method == "POST":
-		var village := _village(world, int(parts[2]))
+		var village := find_village(world, int(parts[2]))
 		if village.is_empty():
 			return _fail(404, "not_found", "Village %s not found" % parts[2])
 		if int(village.ownerAccountId) != int(world.hostAccountId):
@@ -260,7 +296,7 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 	var result := LocalVillage.queue_build(data, village.state, order, now, world.speed)
 	if result.has("state"):
 		var q: Dictionary = result.queued
-		_schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
+		schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
 	return result
 
 
@@ -268,7 +304,7 @@ func _train(world: Dictionary, village: Dictionary, body: Dictionary, now: int) 
 	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
 	var result := LocalVillage.queue_training(data, village.state, String(body.get("unit", "")), int(body.get("count", 0)), now, world.speed, owned)
 	if result.has("state"):
-		_schedule(world, LocalVillage.batch_completes_at(result.batch), "training_complete", {"villageId": village.id})
+		schedule(world, LocalVillage.batch_completes_at(result.batch), "training_complete", {"villageId": village.id})
 	return result
 
 
@@ -289,11 +325,11 @@ func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, no
 	var result := LocalVillage.claim_outpost(data, village.state, site, now, world.speed)
 	if result.has("state"):
 		var q: Dictionary = result.queued
-		_schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
+		schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
 	return result
 
 
-func _village(world: Dictionary, id: int) -> Dictionary:
+func find_village(world: Dictionary, id: int) -> Dictionary:
 	for v in world.villages:
 		if int(v.id) == id:
 			return v
@@ -400,7 +436,7 @@ func drain(world: Dictionary, until: int, changed: Array) -> int:
 
 func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
-	var village := _village(world, int(p.villageId))
+	var village := find_village(world, int(p.villageId))
 	if village.is_empty() or village.ruin != null:
 		return
 	var plot: String = p.get("plot", "")
@@ -413,8 +449,17 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	changed.append(["village", village.id])
 
 
+func _on_wave_spawn(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalHordes.on_wave_spawn(self, world, event, changed)
+
+
+## The target's owner is told a horde is near; the inbox comes in part 5.
+func _on_wave_warning(_world: Dictionary, _event: Dictionary, _changed: Array) -> void:
+	pass
+
+
 func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
-	var village := _village(world, int(event.payload.villageId))
+	var village := find_village(world, int(event.payload.villageId))
 	if village.is_empty():
 		return
 	village.state = LocalVillage.complete_training(village.state, int(event.dueAt))
@@ -465,8 +510,8 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": [], "battles": [], "raids": [], "expeditions": [],
-		"research": [], "heroes": heroes, "leaders": [], "orders": [], "armies": [], "forts": [], "camps": [], "sites": sites,
-		"lore": [], "bridge": world.bridge, "fear": [], "delegations": [], "delegationLog": [], "run": null, "caravans": [],
+		"research": [], "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": [], "forts": [], "camps": [], "sites": sites,
+		"lore": [], "bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": null, "caravans": [],
 		"vault": {"level": world.vault.level, "amounts": world.vault.amounts, "capacity": _vault_capacity(int(world.vault.level)),
 			"upgradingTo": world.vault.upgradingTo, "upgradeCompletesAt": world.vault.upgradeCompletesAt},
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": []},
@@ -542,6 +587,16 @@ func _quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 	return LocalHeroes.quest_offers(data, quest_world, hero, Vector2i(home.q, home.r), now, hero.questsDone)
 
 
+## [q, r, fear], to a tenth.
+func _fear_view(world: Dictionary) -> Array:
+	var out: Array = []
+	for key in world.fear:
+		var parts: PackedStringArray = key.split(",")
+		out.append([int(parts[0]), int(parts[1]), LocalWaves.js_round(float(world.fear[key]) * 10) / 10.0])
+	out.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	return out
+
+
 func _vault_capacity(level: int) -> float:
 	var v: Dictionary = data.logistics.vault
 	return float(v.baseCapacity) * pow(float(v.capacityGrowth), level - 1)
@@ -580,6 +635,9 @@ func _load_all() -> void:
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("%s/%s" % [save_dir, file]))
 		if parsed is Dictionary:
 			var world: Dictionary = _decode(parsed)
+			# Worlds saved before part 4.
+			world.merge({"leaders": [], "fear": {}, "camps": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
+			world.next.merge({"leader": 1})
 			worlds[int(world.id)] = world
 
 

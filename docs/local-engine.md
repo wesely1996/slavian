@@ -48,7 +48,7 @@ change: they keep calling `Api` and listening to `Live`.
   both sides, or check the fixture there with a tolerance.
 - **Scenario fixtures:** a server test plays a script of requests and
   waits on a real solo world and records every answer with the local
-  engine's ids (`server/test/local-ids.ts`). The client test replays the
+  engine's ids (`server/test/scenario.ts`, `local-ids.ts`). The client test replays the
   script on a solo world started in the app and compares each answer.
   New rules come with new steps in a scenario.
 - **Whole fixtures:** `server/test/start-fixture.test.ts` records a real
@@ -65,6 +65,8 @@ Tracked in PLAN.md under step 24. Order:
    map, villages, heroes, sites, the first waves (done).
 3. Villages: resources, building, training, outposts, upkeep (done).
 4. The scheduler and catch-up, waves and hordes, village and field battles.
+   Hordes setting out are done (`sched_waves.gd`); arriving, battles, the
+   horde's raids, razes and rampage, camps and field battles are next.
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
    sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
 6. The start screen's **Play solo**: create, continue and delete local

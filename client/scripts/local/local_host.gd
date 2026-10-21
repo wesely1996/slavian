@@ -82,6 +82,6 @@ func _announce(changed: Array) -> void:
 		if item[0] == "world":
 			Live.world_updated.emit(server.world_view(world, now))
 		elif item[0] == "village":
-			var village := server._village(world, int(item[1]))
+			var village := server.find_village(world, int(item[1]))
 			if not village.is_empty():
 				Live.village_updated.emit(server.village_view(world, village))
