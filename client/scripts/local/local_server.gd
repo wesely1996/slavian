@@ -43,8 +43,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -248,7 +248,13 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 	var changed: Array = []
 	drain(world, now, changed)
 	as_stored(world)
-	var answer := _route(world, method, parts, body if body is Dictionary else {}, now, changed)
+	# A finished run stays readable, but nothing more can be done in it
+	# (withWorld); the reinforce rule is set outside it.
+	var answer: Dictionary
+	if world.status in ["won", "lost"] and method != "GET" and not (method == "PUT" and path.ends_with("/reinforce")):
+		answer = _fail(400, "rule", "This run is over")
+	else:
+		answer = _route(world, method, parts, body if body is Dictionary else {}, now, changed)
 	answer.changed = changed
 	save(world)
 	return answer
@@ -270,6 +276,19 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(hero)
 		changed.append(["world"])
 		return {"status": 200, "data": {"hero": _hero_view(world, hero, now), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "bridge":
+		var bridge: Dictionary
+		match parts[4]:
+			"donate":
+				bridge = LocalBridgeCommands.donate_command(self, world, body, now)
+			"ritual":
+				bridge = LocalBridgeCommands.ritual_command(self, world, now)
+			_:
+				return _fail(404, "not_found", "No such route")
+		if bridge.has("error"):
+			return _rule_answer(bridge)
+		changed.append(["world"])
+		return {"status": 200, "data": world_view(world, now)}
 	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "vault" and parts[4] == "upgrade":
 		var vault := LocalLogistics.upgrade_vault(self, world, now)
 		if vault.has("error"):
@@ -298,6 +317,8 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if int(village.ownerAccountId) != int(world.hostAccountId):
 			return _fail(403, "forbidden", "Not your village")
 		var action := "/".join(parts.slice(3))
+		if action == "orders" or action.begins_with("orders/"):
+			return _order_command(world, village, parts, body, now, changed)
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
 		if village.ruin != null and not action in ["rebuild", "armies", "forts", "crossings", "roads"]:
@@ -369,6 +390,24 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			answer[extra[0]] = extra[1]
 		return {"status": 200, "data": answer}
 	return _fail(501, "local", "Not in single player yet")
+
+
+## Standing orders: place one (answering the village and the order after
+## its first run), or cancel one.
+func _order_command(world: Dictionary, village: Dictionary, parts: PackedStringArray, body: Dictionary, now: int, changed: Array) -> Dictionary:
+	changed.append(["village", village.id])
+	changed.append(["world"])
+	if parts.size() == 4:
+		var order := LocalOrders.place(self, world, village, body, now)
+		if order.has("error"):
+			return _rule_answer(order)
+		return {"status": 200, "data": {"village": village_view(world, village), "order": LocalOrders.order_view(order), "serverTime": LocalTime.iso(now)}}
+	if parts.size() == 6 and parts[5] == "cancel":
+		var done := LocalOrders.cancel(world, village, int(parts[4]))
+		if done.has("error"):
+			return _rule_answer(done)
+		return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
+	return _fail(404, "not_found", "No such route")
 
 
 ## Commands that answer with what they made rather than the village
@@ -532,7 +571,8 @@ static func _js_number(value: Variant) -> String:
 ## time (a handler may schedule an earlier one).
 func drain(world: Dictionary, until: int, changed: Array) -> int:
 	var processed := 0
-	while processed < 10000:
+	# A finished run (won or lost) stands still.
+	while processed < 10000 and not world.status in ["won", "lost"]:
 		var next: Dictionary = {}
 		for e in world.events:
 			if e.status == "pending" and int(e.dueAt) <= until and (next.is_empty() or int(e.dueAt) < int(next.dueAt) or (int(e.dueAt) == int(next.dueAt) and e.id < next.id)):
@@ -598,6 +638,8 @@ func as_stored(world: Dictionary) -> void:
 		h.skills = LocalStore.stored(h.skills)
 		h.gear = LocalStore.stored(h.gear)
 	world.bridge = LocalStore.stored(world.bridge)
+	for o in world.orders:
+		o.spec = LocalStore.stored(o.spec)
 
 
 func _on_wave_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -704,6 +746,18 @@ func _on_hero_quest(world: Dictionary, event: Dictionary, changed: Array) -> voi
 	LocalHeroCommands.on_hero_quest(self, world, event, changed)
 
 
+func _on_orders_check(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalOrders.on_orders_check(self, world, event, changed)
+
+
+func _on_bridge_raised(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBridgeCommands.on_bridge_raised(self, world, event, changed)
+
+
+func _on_ritual_check(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBridgeCommands.on_ritual_check(self, world, event, changed)
+
+
 func _on_hero_recover(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalBattles.on_hero_recover(self, world, event, changed)
 
@@ -776,10 +830,10 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "battles": _battles_view(world), "raids": _raids_view(world),
 		"expeditions": LocalScouting.expeditions_view(world),
-		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
+		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
 		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
 			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
-		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": null,
+		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads},
 		"serverTime": LocalTime.iso(now),
@@ -953,8 +1007,8 @@ func _load_all() -> void:
 			var world: Dictionary = _decode(parsed)
 			# Worlds saved before part 4.
 			world.merge({"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [],
-				"armies": [], "forts": [], "missions": [], "expeditions": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
-			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1})
+				"armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
+			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			world.hexes = _by_row(world.hexes)
