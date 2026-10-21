@@ -166,3 +166,27 @@ static func roll_drop(data: Dictionary, hero: Dictionary, seed_value: int, battl
 
 static func wound_ms(data: Dictionary, world_speed: float, kind: Variant = null) -> int:
 	return LocalWaves.js_round((float(data.heroes.woundHours) * 3600000.0 * hero_factor(data, kind, "woundTime")) / world_speed)
+
+
+# --- Quests (sim/quests.ts) -------------------------------------------------------
+
+static func quest_ms(offer: Dictionary, world_speed: float) -> int:
+	return LocalWaves.js_round((float(offer.hours) * 3600000.0) / world_speed)
+
+
+## What the hero brings home from a caravan quest, more as it rises in level.
+static func caravan_find(data: Dictionary, level: int) -> Dictionary:
+	var base: Dictionary = data.quests.kinds.caravan.get("resources", {"wood": 0, "stone": 0, "grain": 0, "iron": 0})
+	var scale := 1.0 + float(data.quests.perLevel) * (level - 1)
+	return {"wood": LocalWaves.js_round(float(base.wood) * scale), "stone": LocalWaves.js_round(float(base.stone) * scale),
+		"grain": LocalWaves.js_round(float(base.grain) * scale), "iron": LocalWaves.js_round(float(base.iron) * scale)}
+
+
+## Whether the hero comes home wounded, by the seed (fixed for one quest).
+static func quest_wounds(offer: Dictionary, seed_value: int, account_id: int, departs_at: int) -> bool:
+	var rng := LocalRng.new((seed_value ^ LocalRng.imul(account_id + 1, 0x27d4eb2f) ^ floori(departs_at / 1000.0)) & MASK)
+	return rng.next() < float(offer.risk)
+
+
+static func quest_xp(data: Dictionary, offer: Dictionary, kind: Variant) -> int:
+	return LocalWaves.js_round(float(offer.xp) * hero_factor(data, kind, "heroXp"))

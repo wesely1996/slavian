@@ -175,9 +175,9 @@ static func capacity(data: Dictionary, levels: Dictionary, bonuses: Dictionary) 
 
 
 ## A fresh village (the first one; founded ones come with the expansion port).
-## `bonuses`: a village founded later carries its owner's (newVillage's
-## `founded`).
-static func new_village(data: Dictionary, at: int, world_speed: float, bonuses: Dictionary = {}) -> Dictionary:
+## `founded`: for a village founded later, {startingResources, adminUpkeep,
+## bonuses}.
+static func new_village(data: Dictionary, at: int, world_speed: float, founded: Dictionary = {}) -> Dictionary:
 	var plots := initial_plots(data)
 	var state := {
 		"plots": plots,
@@ -188,11 +188,11 @@ static func new_village(data: Dictionary, at: int, world_speed: float, bonuses: 
 		"away": {},
 		"stance": "balanced",
 		"besieged": false,
-		"adminUpkeep": 0,
-		"bonuses": bonuses,
+		"adminUpkeep": founded.get("adminUpkeep", 0),
+		"bonuses": founded.get("bonuses", {}),
 	}
 	state.ledger = {
-		"amounts": data.buildings.village.startingResources.duplicate(),
+		"amounts": founded.get("startingResources", data.buildings.village.startingResources).duplicate(),
 		"ratesPerHour": village_rates(data, state, world_speed),
 		"capacity": capacity(data, state.levels, state.bonuses),
 		"settledAt": at,
@@ -590,3 +590,28 @@ static func return_home(state: Dictionary, unit: String, count: int) -> Dictiona
 	next.away[unit] = maxi(0, int(state.away.get(unit, 0)) - count)
 	next.garrison = add_units(state.garrison, {unit: count})
 	return next
+
+
+
+# --- Expansion (expansion.ts) -------------------------------------------------------
+
+## Why settlers can't found a village at `cell` ("" when they can).
+static func settle_problem(data: Dictionary, cell: Vector2i, terrain: Variant, home: Vector2i, villages: Array, outposts: Dictionary) -> String:
+	var rules: Dictionary = data.expansion
+	if terrain == null:
+		return "That hex is not on the map"
+	if not data.terrain.terrain[terrain].settleable:
+		return "Villages can't be founded on %s" % data.terrain.terrain[terrain].name
+	if HexMath.distance(cell, home) > int(rules.maxDistance):
+		return "Settlers walk at most %d hexes from their village" % int(rules.maxDistance)
+	if HexMath.distance(cell, Vector2i.ZERO) < int(rules.minHolyCityDistance):
+		return "Too close to the Holy City"
+	if villages.any(func(v: Vector2i) -> bool: return HexMath.distance(v, cell) < int(rules.minVillageDistance)):
+		return "Villages stand at least %d hexes apart" % int(rules.minVillageDistance)
+	if outposts.has(LocalLand.key(cell)):
+		return "An outpost stands there"
+	return ""
+
+
+static func admin_upkeep_for(data: Dictionary, villages_owned: int) -> float:
+	return float(data.expansion.adminUpkeepPerVillage) * villages_owned
