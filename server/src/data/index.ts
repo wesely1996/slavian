@@ -614,8 +614,19 @@ export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 const onboardingFileSchema = z.object({
   version: z.number().int(),
   steps: z.array(
-    z.object({ id: z.enum(ONBOARDING_STEPS), title: z.string(), hint: z.string(), story: z.string(), reward: resourcesSchema }),
+    z.object({
+      id: z.enum(ONBOARDING_STEPS),
+      title: z.string(),
+      hint: z.string(),
+      story: z.string(),
+      // What to tap, step by step, and what the quest card's Show me points at.
+      how: z.array(z.string()).min(1),
+      show: z.enum(['village', 'troops', 'outpost', 'threats', 'camp', 'caravans']),
+      reward: resourcesSchema,
+    }),
   ),
+  // The reward for claiming every step.
+  finale: z.object({ title: z.string(), story: z.string(), reward: resourcesSchema }),
 });
 export type OnboardingData = z.infer<typeof onboardingFileSchema>;
 

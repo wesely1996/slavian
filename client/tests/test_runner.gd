@@ -493,13 +493,18 @@ func _test_delegation() -> void:
 
 func _test_onboarding_almanac() -> void:
 	var data := {"onboarding": {"steps": [
-		{"id": "build", "title": "Raise a building", "reward": {"wood": 150, "stone": 0, "grain": 100, "iron": 0}},
+		{"id": "build", "title": "Raise a building", "how": ["Tap Village.", "Tap a plot."], "reward": {"wood": 150, "stone": 0, "grain": 100, "iron": 0}},
 		{"id": "train", "title": "Train defenders", "reward": {"wood": 0, "stone": 0, "grain": 0, "iron": 50}},
 	]}}
 	_check(OnboardingText.next_step(data, {"onboarding": {}}).id == "build", "first step")
 	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x"}}).id == "train", "next step")
 	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x", "train": "y"}}).is_empty(), "all done")
-	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}}) == "Getting started 1 of 2", "progress")
+	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}, "onboardingClaimed": {"build": "x"}}) == "Getting started 1 of 2", "progress counts claims")
+	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}}) == "Getting started 0 of 2", "not claimed yet")
+	var waiting := {"onboarding": {"train": "x"}, "onboardingClaimed": {}}
+	_check(OnboardingText.current(data, waiting).id == "train" and OnboardingText.claimable(waiting, data.onboarding.steps[1]), "a reward waits")
+	_check(OnboardingText.current(data, {"onboarding": {"train": "x"}, "onboardingClaimed": {"train": "x"}}).id == "build", "back to the next step")
+	_check(OnboardingText.how(data.onboarding.steps[0]) == PackedStringArray(["1. Tap Village.", "2. Tap a plot."]), "how-to lines")
 	_check(OnboardingText.reward(data.onboarding.steps[0]) == "Reward: Wood 150, Grain 100", "reward")
 	var full := {
 		"units": {"units": {"spearman": {"name": "Spearman", "family": "infantry", "building": "barracks", "requiresLevel": 1, "attack": 20, "defense": 40, "speed": 5, "carry": 40, "upkeepPerHour": 1}}},

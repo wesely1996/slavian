@@ -93,6 +93,8 @@ export interface Member {
   heroKind: string | null;
   // Getting-started steps done: step -> when.
   onboarding: Record<string, string>;
+  // Their rewards claimed: step (or 'finale') -> when.
+  onboardingClaimed: Record<string, string>;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -104,7 +106,7 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
-    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding
+    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1
      ORDER BY m.joined_at, m.account_id`,
@@ -127,6 +129,16 @@ export async function markOnboarding(client: DbClient, worldId: number, accountI
     `UPDATE world_members SET onboarding = onboarding || jsonb_build_object($3::text, $4::text)
      WHERE world_id = $1 AND account_id = $2 AND NOT onboarding ? $3`,
     [worldId, accountId, step, at.toISOString()],
+  );
+  return rowCount === 1;
+}
+
+// Marks a getting-started reward claimed; false if it already was.
+export async function markClaimed(client: DbClient, worldId: number, accountId: number, key: string, at: Date): Promise<boolean> {
+  const { rowCount } = await client.query(
+    `UPDATE world_members SET onboarding_claimed = onboarding_claimed || jsonb_build_object($3::text, $4::text)
+     WHERE world_id = $1 AND account_id = $2 AND NOT onboarding_claimed ? $3`,
+    [worldId, accountId, key, at.toISOString()],
   );
   return rowCount === 1;
 }

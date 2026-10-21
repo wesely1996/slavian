@@ -46,7 +46,7 @@ def escape(s):
 
 def data_strings():
     """Player-facing texts in the game data: names, titles, descriptions."""
-    keys = {"name", "title", "description", "faction", "signature", "story", "text", "label", "flavor", "body", "hint", "summary", "goal", "best", "weakness", "animal"}
+    keys = {"name", "title", "description", "faction", "signature", "story", "text", "label", "flavor", "body", "hint", "summary", "goal", "best", "weakness", "animal", "how"}
     found = {}
 
     def walk(node, where):

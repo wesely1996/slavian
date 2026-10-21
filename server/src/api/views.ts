@@ -532,7 +532,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
         };
   return {
     ...worldSummary(world),
-    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, heroKind: m.heroKind, onboarding: m.onboarding })),
+    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, heroKind: m.heroKind, onboarding: m.onboarding, onboardingClaimed: m.onboardingClaimed })),
     villages: villages.map(villageView),
     waves,
     scouting,

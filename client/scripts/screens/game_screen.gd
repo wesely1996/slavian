@@ -70,6 +70,10 @@ var _scout_counts: Dictionary[int, int] = {}
 ## Chosen batch size per unit, kept while the panel rebuilds.
 var _train_counts: Dictionary[String, int] = {}
 var _status: Label
+## The getting-started quest card over the map and the village (M5 step 23).
+var _quest_card: QuestCard
+var _ui_layer: CanvasLayer
+var _main: Control
 var _panel: PanelContainer
 var _panel_body: VBoxContainer
 ## Labels refreshed every UI tick, with a callable producing their text.
@@ -120,6 +124,8 @@ func _ready() -> void:
 		_select(cell)
 	else:
 		_select(Vector2i.ZERO)
+	_refresh_quest_card()
+	_welcome_once()
 
 
 func _exit_tree() -> void:
@@ -187,6 +193,7 @@ func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 2
 	add_child(layer)
+	_ui_layer = layer
 	var root := UI.vbox(0)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -278,6 +285,7 @@ func _build_ui() -> void:
 	main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_body.add_child(main)
+	_main = main
 	_spacer = Control.new()
 	_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -302,6 +310,15 @@ func _build_ui() -> void:
 	_panel_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_panel_body)
 	_root = root
+	# The quest card floats over the map and the village, at their top left.
+	_quest_card = QuestCard.new()
+	_quest_card.claim.connect(_claim_onboarding)
+	_quest_card.show_me.connect(_show_me)
+	_quest_card.hide_tutorial.connect(func() -> void:
+		Session.set_tutorial_flag(Game.world_id(), "hidden", true)
+		_status.text = tr("The tutorial is hidden. Bring it back with How to play in the almanac.")
+		_refresh_quest_card())
+	layer.add_child(_quest_card)
 	get_viewport().size_changed.connect(_arrange)
 	_arrange()
 
@@ -339,6 +356,7 @@ func _arrange() -> void:
 		_scroll.custom_minimum_size.y = area.y * 0.36
 	# Centre the map in the part the sheet leaves uncovered.
 	camera.view_offset = Vector2(-_panel.custom_minimum_size.x / 2.0, 0) if landscape else Vector2(0, -area.y * 0.1)
+	_place_quest_card.call_deferred()
 
 
 ## The wood band, with room at the top for a phone's status bar.
@@ -506,19 +524,218 @@ func _open_run_once() -> void:
 		_panel_mode = "run"
 
 
-## The next getting-started step, on your own villages.
-func _onboarding_card(village: Dictionary) -> void:
-	if not Game.is_mine(village) or Game.world.get("status") != "running":
-		return
+# --- Getting started ---------------------------------------------------------
+
+## This player's entry in the world's members ({} if none).
+func _me() -> Dictionary:
 	for member in Game.world.get("members", []):
-		if int(member.accountId) != Game.my_account_id():
+		if int(member.accountId) == Game.my_account_id():
+			return member
+	return {}
+
+
+func _refresh_quest_card() -> void:
+	if _quest_card == null:
+		return
+	var running: bool = Game.world.get("status") == "running"
+	if not running or Game.data.is_empty() or Session.tutorial_flag(Game.world_id(), "hidden") or _my_village().is_empty():
+		_quest_card.visible = false
+		return
+	_quest_card.show_for(Game.data, _me())
+	_place_quest_card.call_deferred()
+
+
+## At the top left of the map (or the village), narrower on a phone.
+func _place_quest_card() -> void:
+	if _quest_card == null or _main == null:
+		return
+	var rect := _main.get_global_rect()
+	var width := minf(460.0, rect.size.x - 32.0)
+	_quest_card.custom_minimum_size.x = width
+	_quest_card.size = Vector2(width, 0)
+	_quest_card.position = rect.position + Vector2(16, 16)
+
+
+func _claim_onboarding(step_id: String) -> void:
+	_status.text = ""
+	var step: Dictionary = {}
+	for s in Game.data.onboarding.steps:
+		if s.id == step_id:
+			step = s
+	var from := _quest_card.get_global_rect().get_center()
+	var response := await Api.post_json("/v1/worlds/%d/onboarding/claim" % Game.world_id(), {"step": step_id})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_fly_reward(from, step.get("reward", {}))
+	Game.set_world(response.data)
+	if response.data.get("claimed", {}).get("finale", false):
+		var finale: Dictionary = Game.data.onboarding.finale
+		_fly_reward(from, finale.reward)
+		_show_note(tr(finale.title), "%s\n\n%s" % [tr(finale.story), OnboardingText.reward(finale)], tr("Onward"))
+
+
+## The reward's resources fly from `from` into the resource strip.
+func _fly_reward(from: Vector2, amounts: Dictionary) -> void:
+	var delay := 0.0
+	for kind in Ledger.KINDS:
+		if int(amounts.get(kind, 0)) <= 0 or not _resource_labels.has(kind):
 			continue
-		var step := OnboardingText.next_step(Game.data, member)
-		if step.is_empty():
-			return
-		_panel_body.add_child(UI.label(tr("%s: %s") % [OnboardingText.progress(Game.data, member), tr(step.title)], 0, UI.ACCENT))
-		_panel_body.add_child(UI.label(tr(step.story), UI.SMALL_SIZE, UI.MUTED))
-		_panel_body.add_child(UI.label(tr("%s %s") % [tr(step.hint), OnboardingText.reward(step)], UI.SMALL_SIZE))
+		var label: Label = _resource_labels[kind]
+		var to := label.get_global_rect().get_center()
+		for i in 3:
+			var icon := UI.icon("resource/" + kind, 36)
+			icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			icon.position = from - Vector2(18, 18) + Vector2(randf_range(-30, 30), randf_range(-20, 20))
+			_ui_layer.add_child(icon)
+			var tween := icon.create_tween()
+			tween.tween_interval(delay + i * 0.08)
+			tween.tween_property(icon, "position", to - Vector2(18, 18), 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tween.parallel().tween_property(icon, "scale", Vector2(0.6, 0.6), 0.7)
+			tween.tween_callback(icon.queue_free)
+		var bump := label.create_tween()
+		bump.tween_interval(delay + 0.75)
+		bump.tween_property(label, "modulate", Color(1.6, 1.4, 0.7), 0.15)
+		bump.tween_property(label, "modulate", Color.WHITE, 0.4)
+		delay += 0.12
+
+
+## Show me: takes the player to the control the step needs and rings it.
+func _show_me(target: String) -> void:
+	var home := _my_village()
+	if home.is_empty():
+		return
+	var home_cell := Vector2i(int(home.q), int(home.r))
+	match target:
+		"village":
+			if _view != "village":
+				_point_at(_view_button)
+				return
+			_point_at(_find_button(_panel_body, [tr("Build"), tr("Upgrade")]))
+		"troops", "caravans":
+			if _view != "village":
+				_set_view("village")
+			_point_at(_find_button(_panel_body, [tr("Troops") if target == "troops" else tr("Caravans")]))
+		"threats":
+			_point_at(_threat_button)
+		"outpost":
+			if _view != "map":
+				_set_view("map")
+			for cell in HexMath.neighbors(home_cell):
+				var terrain: String = Game.terrain.get(cell, "")
+				if Game.data.buildings.buildings[Rules.OUTPOST].yields.has(terrain) and Game.outpost_owner(cell).is_empty() \
+						and Rules.claim_problem(Game.data, home, cell, terrain, false) == "":
+					_go_to(cell)
+					_point_at(_find_button(_panel_body, [tr("Claim")]))
+					return
+			_point_at(_main)
+		"camp":
+			if _view != "map":
+				_set_view("map")
+			var best := {}
+			for camp in Game.camps:
+				var cell := Vector2i(int(camp.q), int(camp.r))
+				if best.is_empty() or HexMath.distance(cell, home_cell) < HexMath.distance(Vector2i(int(best.q), int(best.r)), home_cell):
+					best = camp
+			if best.is_empty():
+				_status.text = tr("No camps on the map yet: they rise where a horde was beaten.")
+				return
+			_go_to(Vector2i(int(best.q), int(best.r)))
+			_point_at(_panel)
+
+
+## Centres the map on `cell` and opens its sheet.
+func _go_to(cell: Vector2i) -> void:
+	camera.position = hex_map.hex_to_local(cell)
+	_select(cell)
+
+
+## The first button under `node` whose text starts with one of `texts`.
+func _find_button(node: Node, texts: Array) -> Control:
+	for child in node.get_children():
+		if child is Button and (child as Button).visible:
+			for text in texts:
+				if String((child as Button).text).begins_with(String(text)):
+					return child
+		var found := _find_button(child, texts)
+		if found != null:
+			return found
+	return null
+
+
+## A pulsing gold ring around `target` for a few seconds.
+func _point_at(target: Control) -> void:
+	if target == null:
+		return
+	await get_tree().process_frame
+	var ring := Panel.new()
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.draw_center = false
+	style.border_color = Color("#ecc457")
+	style.set_border_width_all(5)
+	style.set_corner_radius_all(10)
+	ring.add_theme_stylebox_override("panel", style)
+	var rect := target.get_global_rect().grow(8)
+	ring.position = rect.position
+	ring.size = rect.size
+	_ui_layer.add_child(ring)
+	var tween := ring.create_tween().set_loops(4)
+	tween.tween_property(ring, "modulate:a", 0.25, 0.4)
+	tween.tween_property(ring, "modulate:a", 1.0, 0.4)
+	tween.finished.connect(ring.queue_free)
+
+
+## The first time a player enters a running world: what the run is about,
+## and where the quest card is.
+func _welcome_once() -> void:
+	var world_id := Game.world_id()
+	if Game.world.get("status") != "running" or Session.tutorial_flag(world_id, "welcomed") or _my_village().is_empty():
+		return
+	Session.set_tutorial_flag(world_id, "welcomed", true)
+	_show_welcome()
+
+
+func _show_welcome() -> void:
+	var text := tr("Hordes will come from the edges of the map, wave after wave. Hold your villages, help your group, and build the Kalinov Bridge in the Holy City before it falls.") \
+		+ "\n\n" + tr("The quest card at the top of the map shows what to do next, with Show me to point the way and a reward for each step.")
+	_show_note(tr("Welcome to %s") % Game.world.get("name", ""), text, tr("Let's begin"), tr("Skip the tutorial"), func() -> void:
+		Session.set_tutorial_flag(Game.world_id(), "hidden", true)
+		_refresh_quest_card())
+
+
+## A card in the middle of the screen over a dimmed game.
+func _show_note(title: String, text: String, ok: String, other := "", on_other := Callable()) -> void:
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.5)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_ui_layer.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.add_child(center)
+	var card := UI.wood(28)
+	card.custom_minimum_size.x = minf(640.0, get_viewport().get_visible_rect().size.x - 48.0)
+	center.add_child(card)
+	var body := UI.vbox(18)
+	card.add_child(body)
+	var heading := UI.label(title, UI.HEADING_SIZE)
+	heading.theme_type_variation = "OnWoodHeading"
+	body.add_child(heading)
+	var words := UI.label(text)
+	words.theme_type_variation = "OnWoodStrong"
+	body.add_child(words)
+	var row := UI.hbox(12)
+	if other != "":
+		var skip := UI.button(other, func() -> void:
+			dim.queue_free()
+			if on_other.is_valid():
+				on_other.call())
+		skip.theme_type_variation = "WoodButton"
+		row.add_child(skip)
+	var go := UI.primary(ok, dim.queue_free)
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(go)
+	body.add_child(row)
 
 
 var _almanac_section := "Units"
@@ -527,6 +744,10 @@ var _almanac_section := "Units"
 ## The almanac: units, buildings, stances, hordes, clans, terrain and the run.
 func _almanac_panel() -> void:
 	_panel_body.add_child(UI.label(tr("Almanac"), UI.HEADING_SIZE))
+	_panel_body.add_child(UI.button(tr("How to play"), func() -> void:
+		Session.set_tutorial_flag(Game.world_id(), "hidden", false)
+		_refresh_quest_card()
+		_show_welcome()))
 	var picker := UI.options(AlmanacText.SECTIONS.map(tr), AlmanacText.SECTIONS.find(_almanac_section))
 	picker.item_selected.connect(func(i: int) -> void:
 		_almanac_section = AlmanacText.SECTIONS[i]
@@ -1818,7 +2039,6 @@ func _ally_village_panel(village: Dictionary) -> void:
 func _own_village_panel(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(village.name, UI.HEADING_SIZE))
 	_handed_line(village)
-	_onboarding_card(village)
 	var hall := Rules.hall_level(village)
 	var queue: Array = village.queue
 	_panel_body.add_child(UI.label(tr("Elder's Hall Lv %d · building %d of %d · outposts %d of %d") % [hall, queue.size(), Rules.queue_limit(Game.data, hall),
@@ -2555,6 +2775,7 @@ func _on_map_tapped(world_position: Vector2) -> void:
 
 func _on_world_changed() -> void:
 	hex_map.refresh()
+	_refresh_quest_card()
 	_open_run_once()
 	_view_button.visible = not _my_village().is_empty()
 	if _view == "village" and _my_village().is_empty():
