@@ -4,10 +4,10 @@ import type { Difficulty } from '../data/index.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import type { Account } from '../db/accounts.js';
 import { notifyWorld } from '../db/notify.js';
-import { inTransaction, type Db } from '../db/pool.js';
+import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { ensureHeroes } from '../db/heroes.js';
-import { ensureDigests } from '../scheduler/notices.js';
-import { insertVillage } from '../db/villages.js';
+import { ensureDigests, tell } from '../scheduler/notices.js';
+import { insertVillage, listVillages } from '../db/villages.js';
 import {
   addMember,
   createWorld,
@@ -16,17 +16,22 @@ import {
   insertHexes,
   isMember,
   listMembers,
+  markAbandoned,
+  markLeft,
   markStarted,
+  removeMember,
   setClan,
   setHeroKind,
+  setHost,
   setQuietHours,
+  type Member,
   type World,
 } from '../db/worlds.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { announceFirstWaves } from '../scheduler/waves.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { loadBridge } from '../db/bridges.js';
-import { lockWorld, withWorld } from '../scheduler/world.js';
+import { drainWorld, lockWorld, withWorld } from '../scheduler/world.js';
 import { refreshBonuses } from '../scheduler/research.js';
 import { claimOnboarding } from '../scheduler/onboarding.js';
 import { generateMap } from '../sim/mapgen.js';
@@ -206,4 +211,81 @@ export async function setQuietHoursCommand(
     await setQuietHours(client, world.id, none ? null : { start: input.start!, end: input.end!, utcOffsetMinutes: input.utcOffsetMinutes });
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
+}
+
+// A player quits a world (they can't or don't want to play any more).
+// - In the lobby they are simply gone; if they hosted it, the longest-standing
+//   member hosts it now.
+// - In a running world their villages go to the teammates who stay, spread
+//   evenly, and any hand-over they were part of ends.
+// - Quitting a finished world only takes it off their list.
+// When nobody is left, the world is abandoned: it stands still and doesn't
+// count as a loss.
+export async function leaveWorldCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; worldId: number; now: Date },
+): Promise<void> {
+  await inTransaction(db, async (client) => {
+    await lockWorld(client, input.worldId);
+    let world = await getWorld(client, input.worldId);
+    if (world.status === 'running') {
+      // Catch up first, so the villages change hands in the present.
+      await drainWorld(client, world.id, input.now, deps);
+      world = await getWorld(client, world.id);
+    }
+    const members = await listMembers(client, world.id);
+    const me = members.find((m) => m.accountId === input.account.id);
+    if (!me) throw new NotFoundError('You are not in this world');
+    const others = members.filter((m) => m.accountId !== me.accountId);
+
+    if (world.status === 'lobby') {
+      await removeMember(client, world.id, me.accountId);
+      if (world.hostAccountId === me.accountId) await setHost(client, world.id, others[0]?.accountId ?? null);
+    } else {
+      await markLeft(client, world.id, me.accountId, input.now);
+    }
+
+    if (world.status === 'running' && others.length > 0) {
+      await handOverVillages(client, deps, world, me, others, input.now);
+    }
+    if (others.length === 0) await markAbandoned(client, world.id, input.now);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+  });
+}
+
+async function handOverVillages(
+  client: DbClient,
+  deps: SchedulerDeps,
+  world: World,
+  leaver: Member,
+  stayers: Member[],
+  now: Date,
+): Promise<void> {
+  await client.query(
+    'DELETE FROM delegations WHERE world_id = $1 AND (owner_account_id = $2 OR delegate_account_id = $2)',
+    [world.id, leaver.accountId],
+  );
+  const villages = await listVillages(client, world.id);
+  const held = new Map(stayers.map((m) => [m.accountId, villages.filter((v) => v.ownerAccountId === m.accountId).length]));
+  const given = new Map<number, number>();
+  for (const village of villages.filter((v) => v.ownerAccountId === leaver.accountId)) {
+    // Whoever holds the fewest takes the next one; ties go to the earliest to join.
+    const to = stayers.reduce((best, m) => (held.get(m.accountId)! < held.get(best.accountId)! ? m : best));
+    await client.query('UPDATE villages SET owner_account_id = $2 WHERE id = $1', [village.id, to.accountId]);
+    held.set(to.accountId, held.get(to.accountId)! + 1);
+    given.set(to.accountId, (given.get(to.accountId) ?? 0) + 1);
+  }
+  // Villages carry their owner's clan and research.
+  await refreshBonuses(client, deps.data, world, [...given.keys()], now);
+  for (const member of stayers) {
+    const count = given.get(member.accountId) ?? 0;
+    await tell(client, world, member.accountId, {
+      kind: 'member_left',
+      tier: 'push',
+      title: '{name} left the world',
+      body: count === 0 ? 'Their villages went to your teammates.' : count === 1 ? 'You now command one of their villages.' : 'You now command {count} of their villages.',
+      vars: { name: leaver.displayName, count },
+    }, now);
+  }
 }
