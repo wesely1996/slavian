@@ -5,7 +5,8 @@
 // Options: --players N (1–6), --bots kind[,kind…] (turtle, expander,
 // balanced; cycled over the players), --difficulty story|normal|hard|nightmare,
 // --runs N, --speed N (world speed), --days N (game days before giving up),
-// --json (one JSON line per run).
+// --json (one JSON line per run), --seed N (the map seed of the first run,
+// counting up; random maps without it).
 import { parseArgs } from 'node:util';
 import { createGuestAccount } from '../db/accounts.js';
 import { findBridge } from '../db/bridges.js';
@@ -46,7 +47,7 @@ export interface RunResult {
 
 export async function runOnce(
   db: Db,
-  opts: { players: number; bots: BotKind[]; difficulty: Difficulty; speed: number; days: number; seed: number; verbose?: boolean },
+  opts: { players: number; bots: BotKind[]; difficulty: Difficulty; speed: number; days: number; seed: number; mapSeed?: number; verbose?: boolean },
 ): Promise<RunResult> {
   const deps = { data: loadGameData(), handlers };
   const start = new Date('2030-01-01T06:00:00Z');
@@ -71,6 +72,8 @@ export async function runOnce(
     difficulty: opts.difficulty,
   });
   for (const account of accounts.slice(1)) await joinWorldCommand(db, { account, inviteCode: created.inviteCode! });
+  // A fixed map, so two tunings can be compared on the same worlds.
+  if (opts.mapSeed !== undefined) await db.query('UPDATE worlds SET seed = $2 WHERE id = $1', [created.id, opts.mapSeed]);
   const world = await startWorldCommand(db, deps, { account: accounts[0]!, worldId: created.id, now });
   const terrain = await terrainOf(db, world.id);
 
@@ -177,6 +180,7 @@ async function main(): Promise<void> {
       days: { type: 'string', default: '45' },
       json: { type: 'boolean', default: false },
       verbose: { type: 'boolean', default: false },
+      seed: { type: 'string' },
     },
   });
   const bots = values.bots.split(',').map((b) => b.trim()) as BotKind[];
@@ -192,6 +196,7 @@ async function main(): Promise<void> {
       speed: Number(values.speed),
       days: Number(values.days),
       seed: i,
+      ...(values.seed === undefined ? {} : { mapSeed: Number(values.seed) + i }),
       verbose: values.verbose,
     });
     results.push(result);

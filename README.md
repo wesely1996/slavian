@@ -55,7 +55,13 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim -- --players 2 --bots balanced,turtle --difficulty normal --runs 3
 ```
 
-Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled over the players), `--difficulty` (`story`, `normal`, `hard`, `nightmare`), `--runs`, `--speed` (world speed, default 20), `--days` (game days before giving up, default 45), `--json` (one JSON line per run), `--verbose` (a line per game day and the most common refused orders). Bots build, keep a garrison, explore sites, clear camps, found villages, tithe to the bridge and chase its quests; refused orders are normal and only counted.
+Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled over the players), `--difficulty` (`story`, `normal`, `hard`, `nightmare`), `--runs`, `--speed` (world speed, default 20), `--days` (game days before giving up, default 45), `--json` (one JSON line per run), `--seed N` (the map seed of the first run, counting up; random maps without it), `--verbose` (a line per game day and the most common refused orders). Bots build (walls and towers too), keep a garrison and go defensive while a horde is coming, explore sites, clear camps, found villages, tithe to the bridge and chase its quests; refused orders are normal and only counted.
+
+`npm run sim:matrix` plays many runs at once for win rates: every player count and preset asked for, `--runs` each on map seeds 1, 2, … (so two tunings play the same maps), over `--jobs` processes, then a table of wins, losses (and the front that struck last), unfinished runs, the days to win and villages lost. A run takes a few minutes, so a large matrix takes an hour or more.
+
+```sh
+DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:matrix -- --players 1,2,3,4 --difficulty normal --runs 6 --jobs 6
+```
 
 ### API (v1)
 

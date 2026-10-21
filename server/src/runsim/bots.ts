@@ -7,7 +7,7 @@ import { buildFortCommand, recallArmyCommand, sendArmyCommand } from '../command
 import { listForts } from '../db/forts.js';
 import { sendCaravanCommand } from '../commands/logistics.js';
 import { placeOrderCommand } from '../commands/orders.js';
-import { foundVillageCommand, queueBuildCommand, rebuildCommand, startResearchCommand, trainUnitsCommand } from '../commands/village.js';
+import { foundVillageCommand, queueBuildCommand, rebuildCommand, setStanceCommand, startResearchCommand, trainUnitsCommand } from '../commands/village.js';
 import type { GameData, TerrainId } from '../data/index.js';
 import { findBridge } from '../db/bridges.js';
 import { listCamps } from '../db/camps.js';
@@ -43,15 +43,19 @@ interface Style {
   villages: number;
   // Center buildings, in the order they are wanted.
   buildings: string[];
+  // A wall level every this many game days (towers half as often).
+  wallEvery: number;
 }
 
 const STYLES: Record<BotKind, Style> = {
-  turtle: { garrisonBase: 20, garrisonPerDay: 8, villages: 1, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'] },
-  expander: { garrisonBase: 6, garrisonPerDay: 3, villages: 5, buildings: ['barracks', 'settlers_lodge', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'] },
-  balanced: { garrisonBase: 12, garrisonPerDay: 5, villages: 3, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy', 'settlers_lodge'] },
+  turtle: { garrisonBase: 20, garrisonPerDay: 8, villages: 1, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'], wallEvery: 3 },
+  expander: { garrisonBase: 6, garrisonPerDay: 3, villages: 5, buildings: ['barracks', 'settlers_lodge', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'], wallEvery: 6 },
+  balanced: { garrisonBase: 12, garrisonPerDay: 5, villages: 3, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy', 'settlers_lodge'], wallEvery: 4 },
 };
 
 const FIELDS = ['woodcutter', 'quarry', 'farm', 'iron_mine'];
+// Towers on the walls, in the order they are wanted.
+const TOWERS = ['archer_tower', 'ditch', 'gate_tower'];
 const KINDS = ['wood', 'stone', 'grain', 'iron'] as const;
 
 export interface Bot {
@@ -116,12 +120,17 @@ export async function playTurn(ctx: TurnContext, bot: Bot): Promise<void> {
     return attempt(stats, fn);
   };
   const villages = await ownVillages(ctx, bot);
+  const waves = await read(db, (c) => listActiveWaves(c, ctx.world.id));
   for (const village of villages) {
     const base = { accountId: bot.accountId, villageId: village.id, now };
     if (village.ruin) {
       await go(() => rebuildCommand(db, deps, base));
       continue;
     }
+    // Behind the walls while a horde is coming; balanced otherwise.
+    const threatened = waves.some((w) => w.targetVillageId === village.id && ['marching', 'arrived', 'battling'].includes(w.status));
+    const stance = threatened ? 'defensive' : 'balanced';
+    if ((village.state.stance ?? 'balanced') !== stance) await go(() => setStanceCommand(db, deps, { ...base, stance }));
     const levels = village.state.levels;
     const amounts = amountsAt(village.state.ledger, now);
     const capacity = village.state.ledger.capacity;
@@ -212,6 +221,13 @@ function buildChoices(
   if (freeSlots > 0) for (const b of style.buildings) if ((levels[b] ?? 0) === 0) add(b);
   if (freeSlots <= 0 || hall < 2 + Math.floor(fieldAvg / 2)) add('elder_hall');
   if ((levels.barracks ?? 0) > 0 && (levels.barracks ?? 0) < Math.min(8, 1 + Math.floor(day / 3))) add('barracks');
+  // Walls once there is a barracks, and towers on them (archers first).
+  if ((levels.barracks ?? 0) > 0 && day >= 2) {
+    if ((levels.wall ?? 0) < Math.min(10, 1 + Math.floor(day / style.wallEvery))) add('wall');
+    for (const tower of TOWERS) {
+      if ((levels[tower] ?? 0) < Math.min(10, Math.floor(day / (style.wallEvery * 2)))) add(tower);
+    }
+  }
   if ((levels.caravan_yard ?? 0) > 0 && (levels.caravan_yard ?? 0) < Math.min(5, 1 + Math.floor(day / 5))) add('caravan_yard');
   if ((levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < Math.min(storeMax, 1 + Math.floor(fieldAvg))) add('storehouse');
   for (const f of fieldsByNeed(data, village, amounts)) add(f);
@@ -322,8 +338,9 @@ async function bridgeWork(ctx: TurnContext, bot: Bot, home: Village, go: (fn: ()
       await go(() => recallArmyCommand(db, deps, { accountId: bot.accountId, armyId: a.id, now }));
     }
   }
-  // Armies out on errands (the Holy City's guard stays put).
-  const armies = all.filter((a) => !guardsCity(a) && !(a.orders === 'hold' && !open.includes('choke')));
+  // Armies out on errands (the Holy City's guard stays put; reinforcements
+  // riding to a battle come home by themselves).
+  const armies = all.filter((a) => !guardsCity(a) && a.orders !== 'reinforce' && a.orders !== 'support' && !(a.orders === 'hold' && !open.includes('choke')));
   const garrison = home.state.garrison;
   const fighters = (share: number): Record<string, number> => {
     const out: Record<string, number> = {};
