@@ -73,24 +73,29 @@ change: they keep calling `Api` and listening to `Live`.
 
 ## Progress
 
-Tracked in PLAN.md under step 24. Order:
+Tracked in PLAN.md under step 24, now done. Where each part lives in
+`client/scripts/local/`:
 
-1. The map (done): RNG, noise, A*, map generation.
+1. The map: RNG, noise, A*, map generation (`rng.gd`, `noise.gd`,
+   `land.gd`, `mapgen.gd`).
 2. The store, the routing in `Api` and `Live`, and starting a solo world:
-   map, villages, heroes, sites, the first waves (done).
-3. Villages: resources, building, training, outposts, upkeep (done).
-4. The scheduler and catch-up, waves and hordes, village and field battles.
-   Done: hordes setting out (`sched_waves.gd`), arriving, village and Holy
-   City battles, the horde AI and camps (`sched_battles.gd`).
-5. The rest: scouting, caravans and the vault, research, heroes and quests,
-   sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
-   Done: research, caravans and the vault, rebuilding and the hero's own
-   commands and quests (`cmd_research.gd`, `cmd_logistics.gd`,
-   `cmd_heroes.gd`); armies, field battles, forts, roads, bridges, camps
-   stormed and sites explored (`cmd_armies.gd`); scouting and settlers
-   (`cmd_scouting.gd`); standing orders (`cmd_orders.gd`); the bridge,
-   Ritual Night and the end of a run (`cmd_bridge.gd`); the inbox and its
-   digests (`inbox.gd`, with the server's notice table bundled as
+   map, villages, heroes, sites, the first waves (`local_server.gd`,
+   `local_host.gd`).
+3. Villages: resources, building, training, outposts, upkeep
+   (`sim_village.gd`, `sim_resources.gd`).
+4. Waves and hordes: setting out (`sched_waves.gd`), arriving, village and
+   Holy City battles, the horde AI and camps (`sched_battles.gd`,
+   `sim_battle.gd`, `sim_walls.gd`, `sim_horde.gd`, `sched_camps.gd`).
+5. The rest: research and rebuilding (`cmd_research.gd`), caravans and the
+   vault (`cmd_logistics.gd`), the hero's commands and quests
+   (`cmd_heroes.gd`), armies, field battles, forts, roads, bridges, camps
+   stormed and sites explored (`cmd_armies.gd`), scouting and settlers
+   (`cmd_scouting.gd`), standing orders (`cmd_orders.gd`), the bridge,
+   Ritual Night and the end of a run (`cmd_bridge.gd`), and the inbox
+   (`inbox.gd`, with the server's notice table bundled as
    `client/data/notices.json`).
-6. The start screen's **Play solo**: create, continue and delete local
-   worlds.
+6. The start screen's **Play solo**: start, continue and delete solo
+   worlds, signed in or not, with or without a connection.
+
+Co-op only: inviting and joining, delegating villages, and push
+notifications stay with the server.

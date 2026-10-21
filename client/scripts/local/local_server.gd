@@ -1024,6 +1024,13 @@ func save(world: Dictionary) -> void:
 		file.store_string(JSON.stringify(_encode(world)))
 
 
+## Forgets a world and removes its save.
+func delete_world(id: int) -> void:
+	worlds.erase(id)
+	if save_dir != "":
+		DirAccess.remove_absolute("%s/%d.json" % [save_dir, -id])
+
+
 func _load_all() -> void:
 	if save_dir == "" or not DirAccess.dir_exists_absolute(save_dir):
 		return
