@@ -135,6 +135,60 @@ towel (*rushnyk*) that hangs in every Slavic house.
   field 12 of 48.
 - `ui/title` is the start screen's picture.
 
+## The main menu
+
+PLAN step 25. What we looked at first, then the design.
+
+**What strong strategy games do.**
+- **The first action resumes play.** Players who come back want their game,
+  not a menu: the top, largest item is Continue, and it loads the latest
+  game in one tap (menu guides; Killzone 2 loads the last save from the
+  title screen; players mash through menus to get back in).
+- **Few compartments, grouped by what players come to do.** Supercell's
+  2026 rework of Clash of Clans' home screen started from clutter: new
+  systems had been bolted on until everyday actions were buried. They gave
+  the two halves of the core loop equal weight and moved rarely used
+  buttons a tap deeper rather than removing them.
+- **Within thumb reach on a phone.** Navigation with few destinations
+  belongs in a bar at the bottom of the screen, where one hand reaches it.
+- **Restraint.** Every option on the first screen costs attention; keep
+  the screen to what most visits need. Destructive actions stand apart and
+  ask twice.
+- **The menu belongs to the world.** Mini Metro and Push Me Pull You build
+  their menus from the game's own pieces; ours keeps the painting of the
+  city and the bridge beside the menu.
+
+**The design.**
+- The painting with the logo stays on one side (on top on a phone); the
+  flax sheet in plated wood holds the menu.
+- Four compartments, each a tab with an icon: **Play**, **Profile**,
+  **Settings**, **Help**. The tab bar sits at the top of the sheet on a wide
+  screen and at its bottom on a phone, in thumb reach.
+- **Play** opens first:
+  - **Continue** the world played last, solo or co-op, as the one malachite
+    button at the top.
+  - **Solo**: the solo worlds on this device, and a new one (its form opens
+    from a button, or at once when there are none). No account or
+    connection needed.
+  - **Co-op**: signing in as a guest when not signed in; otherwise the
+    co-op worlds, a new one (from a button) and joining with a code. When
+    the server can't be reached it says so, with Retry, and solo still
+    works.
+- **Profile**: who you are, renaming, signing out, exporting your data and
+  deleting your account (the last one apart, and asked twice).
+- **Settings**: the language and the text size, which used to crowd the
+  top of the sheet.
+- **Help**: how a run goes (from the almanac), the server costs and
+  donations, the privacy policy, and reporting a problem.
+
+Sources: [GameAnalytics on game UI](https://www.gameanalytics.com/blog/how-to-make-your-game-ui-shine-and-increase-conversions),
+[Packt, mobile game design](https://www.packtpub.com/en-cy/learning/how-to-tutorials/mobile-game-design-best-practices),
+[Supercell, the new home village screen](https://supercell.com/en/games/clashofclans/blog/news/a-word-on-the-new-home-village-screen/),
+[Supercell, the revamped interface](https://supercell.com/en/games/clashofclans/blog/news/weve-revamped-the-clash-of-clans-user-interface/),
+[Smashing Magazine, the thumb zone](https://smashingmagazine.com/2016/09/the-thumb-zone-designing-for-mobile-users),
+[TechSpot, the ten commandments of video game menus](https://www.techspot.com/news/62281-ten-commandments-video-game-menus.html),
+[Push Me Pull You's menu design](https://www.goodreads.com/author_blog_posts/12290040-push-me-pull-you-s-long-stretch-to-good-menu-design?tab=book).
+
 ## Replacing a piece of art
 
 `client/art/art.json` maps every art id to a file:

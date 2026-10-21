@@ -1,7 +1,9 @@
 extends Control
-## First screen: play solo on this device (no sign-in or connection
-## needed), or sign in as a guest, then pick, create or join a co-op world
-## and wait in its lobby until the host starts it.
+## The main menu (docs/art-style.md, "The main menu"): Continue the last
+## world, play solo on this device (no sign-in or connection needed), or
+## sign in as a guest to create or join a co-op world and wait in its lobby
+## until the host starts it; then your profile, the settings and help, each
+## in its own compartment.
 
 const GAME_SCENE := "res://scenes/game.tscn"
 const SPEEDS := [1, 2, 10]
@@ -10,8 +12,18 @@ const WORLD_STATUSES := ["Running", "Won", "Lost"]  # tr
 ## Languages by their own names, never translated.
 const LANGUAGES := [["en", "English"], ["sr_Latn", "Srpski"]]
 
+## The compartments (each with its icon, "icon/<key>") and their labels.
+const TABS := ["play", "profile", "settings", "help"]
+const TAB_LABELS := ["Play", "Profile", "Settings", "Help"]  # tr
+
 var _status: Label
 var _content: VBoxContainer
+## The sheet: the tab bar goes on top (wide) or at the bottom (phone).
+var _sheet: VBoxContainer
+var _tab_bar: Control
+var _tab := "play"
+## Forms opened from a button ("solo", "coop").
+var _open_forms := {}
 var _layout: BoxContainer
 var _hero: Control
 var _logo: TextureRect
@@ -45,17 +57,19 @@ func _ready() -> void:
 	var sheet_box := UI.panel(1.0, 0)
 	sheet_box.add_theme_stylebox_override("panel", UiTheme.sheet_style(24))
 	_frame.add_child(sheet_box)
+	_sheet = UI.vbox(14)
+	sheet_box.add_child(_sheet)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sheet_box.add_child(scroll)
-	var sheet := UI.vbox(18)
-	sheet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(sheet)
-	sheet.add_child(_settings_row())
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_sheet.add_child(scroll)
+	var body := UI.vbox(18)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(body)
 	_status = UI.label("", UI.SMALL_SIZE, UI.ERROR)
-	sheet.add_child(_status)
+	body.add_child(_status)
 	_content = UI.vbox(20)
-	sheet.add_child(_content)
+	body.add_child(_content)
 	get_viewport().size_changed.connect(_arrange)
 	_arrange()
 
@@ -63,9 +77,7 @@ func _ready() -> void:
 	Live.connection_changed.connect(_on_live_connection)
 	if Session.is_logged_in():
 		Push.register()
-		_show_home()
-	else:
-		_show_login()
+	_show_tab("play")
 
 
 ## The painting, the logo in its sky and the tagline.
@@ -115,6 +127,7 @@ func _arrange() -> void:
 	frame.content_margin_top = 18.0 if wide else 24.0
 	_frame.add_theme_stylebox_override("panel", frame)
 	_place_logo.call_deferred()
+	_place_tabs()
 
 
 ## The logo in the painting's sky, as large as fits; the tagline under it.
@@ -131,34 +144,33 @@ func _place_logo() -> void:
 	_tagline.size = Vector2(box.x * 0.9, 0)
 
 
-## The language (by its own name) and the text size, on one row.
-func _settings_row() -> Control:
-	var row := UI.hbox(8)
-	for language in LANGUAGES:
-		var code: String = language[0]
-		var pick := UI.button(language[1], func() -> void:
-			Session.set_language(code)
-			get_tree().reload_current_scene())
-		pick.theme_type_variation = "TabButton"
-		pick.disabled = Session.language == code
-		pick.custom_minimum_size.x = 150
-		row.add_child(pick)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(spacer)
-	# Text size for accessibility: the same letter at three sizes.
-	for entry in [["small", 22, tr("Small")], ["normal", 28, tr("Normal")], ["large", 36, tr("Large")]]:
-		var size_code: String = entry[0]
-		var size_pick := UI.button("A", func() -> void:
-			Session.set_text_size(size_code)
-			get_tree().reload_current_scene())
-		size_pick.theme_type_variation = "TabButton"
-		size_pick.add_theme_font_size_override("font_size", int(entry[1]))
-		size_pick.tooltip_text = tr("Text size: %s") % entry[2]
-		size_pick.disabled = Session.text_size == size_code
-		size_pick.custom_minimum_size = Vector2(64, 76)
-		row.add_child(size_pick)
-	return row
+## The compartments' tab bar, at the top of the sheet on a wide screen and
+## at its bottom (in thumb reach) on a phone.
+func _place_tabs() -> void:
+	if _sheet == null:
+		return
+	if _tab_bar != null:
+		_tab_bar.queue_free()
+	_tab_bar = UI.tabs(range(TABS.size()).map(func(i: int) -> Array: return [TABS[i], tr(TAB_LABELS[i]), "icon/" + TABS[i]]), _tab, _show_tab)
+	_sheet.add_child(_tab_bar)
+	_sheet.move_child(_tab_bar, 0 if _layout.vertical == false else _sheet.get_child_count() - 1)
+
+
+func _show_tab(key: String) -> void:
+	_tab = key
+	_lobby_world_id = 0
+	Live.stop()
+	_set_status("")
+	_place_tabs()
+	match key:
+		"play":
+			_show_play()
+		"profile":
+			_show_profile()
+		"settings":
+			_show_settings()
+		"help":
+			_show_help()
 
 
 func _exit_tree() -> void:
@@ -168,18 +180,177 @@ func _exit_tree() -> void:
 
 func _set_status(text: String) -> void:
 	_status.text = text
+	_status.visible = text != ""
 
 
-# --- Sign in ---------------------------------------------------------------
+# --- Play ------------------------------------------------------------------
 
-func _show_login() -> void:
+## Continue, then solo, then co-op.
+func _show_play() -> void:
 	UI.clear(_content)
-	_content.add_child(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED))
-	var name_edit := UI.line_edit(tr("e.g. Vesna"))
-	_content.add_child(name_edit)
-	_content.add_child(UI.primary(tr("Play as guest"), func() -> void:
-		_login(name_edit.text)))
-	_content.add_child(_solo_section(name_edit))
+	_continue_card()
+	_content.add_child(_solo_section())
+	var coop := UI.vbox(14)
+	_content.add_child(coop)
+	_coop_section(coop)
+
+
+## The world played last, one tap away.
+func _continue_card() -> void:
+	var last: Dictionary = Session.last_world
+	if last.is_empty():
+		return
+	var id := int(last.get("id", 0))
+	var solo := id < 0
+	if solo and not Local.server.worlds.has(id):
+		return
+	if not solo and not Session.is_logged_in():
+		return
+	_content.add_child(UI.primary(tr("Continue: %s") % String(last.get("name", "")), func() -> void:
+		if solo:
+			_open_solo(id)
+		else:
+			_open_world(id), "icon/play"))
+
+
+## Solo worlds on this device: continue one, start one, or delete one. They
+## need neither an account nor a connection (docs/local-engine.md).
+func _solo_section() -> Control:
+	var box := UI.vbox(12)
+	box.add_child(UI.label(tr("Play solo"), UI.HEADING_SIZE))
+	box.add_child(UI.label(tr("On this device, alone against the hordes. No connection needed."), UI.SMALL_SIZE, UI.MUTED))
+	var worlds := Local.list_worlds()
+	for world in worlds:
+		var row := UI.hbox()
+		var id := int(world.id)
+		var open := UI.button(world.name, func() -> void: _open_solo(id))
+		open.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(open)
+		var about := UI.label("%s\n%s" % [tr(String(world.status).capitalize()), tr(GroupText.DIFFICULTY_LABELS[maxi(0, GroupText.DIFFICULTIES.find(world.difficulty))])], UI.SMALL_SIZE, UI.MUTED)
+		about.autowrap_mode = TextServer.AUTOWRAP_OFF
+		row.add_child(about)
+		var armed := _delete_solo == id
+		row.add_child(UI.button(tr("Sure? Delete") if armed else tr("Delete"), func() -> void:
+			if _delete_solo == id:
+				Local.delete_world(id)
+				_delete_solo = 0
+			else:
+				_delete_solo = id
+			_show_play()))
+		box.add_child(row)
+	if worlds.is_empty() or _open_forms.get("solo", false):
+		_solo_form(box)
+	else:
+		box.add_child(UI.button(tr("New solo world"), func() -> void:
+			_open_forms["solo"] = true
+			_show_play()))
+	return box
+
+
+func _solo_form(box: Control) -> void:
+	var data := LocalData.load_data()
+	var world_name := UI.line_edit(tr("World name"), tr("A solo world"))
+	box.add_child(world_name)
+	var row := UI.hbox()
+	var speed := UI.options(SPEED_LABELS.map(tr), 0)
+	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(speed)
+	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
+	difficulty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(difficulty)
+	box.add_child(row)
+	var kinds := HeroText.roster_ids(data)
+	var hero := UI.options(kinds.map(func(kind: String) -> String: return HeroText.roster_title(data, kind)), 0)
+	box.add_child(hero)
+	box.add_child(UI.primary(tr("Start a solo world"), func() -> void:
+		var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
+		_start_solo({"name": world_name.text.strip_edges() if world_name.text.strip_edges() != "" else tr("A solo world"),
+			"displayName": who if who != "" else tr("You"), "speed": SPEEDS[speed.selected],
+			"difficulty": GroupText.DIFFICULTIES[difficulty.selected], "heroKind": kinds[hero.selected] if not kinds.is_empty() else null})))
+
+
+func _start_solo(params: Dictionary) -> void:
+	_set_status("")
+	Live.stop()
+	_open_forms.erase("solo")
+	var view := Local.start(params)
+	# The game's data comes from the app from here on, not the server.
+	Local.world_id = int(view.id)
+	_enter_game(view)
+
+
+func _open_solo(id: int) -> void:
+	_set_status("")
+	Live.stop()
+	var view := Local.open(id)
+	if view.is_empty():
+		_set_status(tr("That solo world is gone."))
+		return
+	Local.world_id = id
+	_enter_game(view)
+
+
+## Co-op: sign in as a guest, then the worlds you play with others.
+func _coop_section(box: VBoxContainer) -> void:
+	box.add_child(UI.label(tr("Play with friends"), UI.HEADING_SIZE))
+	if not Session.is_logged_in():
+		box.add_child(UI.label(tr("Defend a world together. Pick a name to play as a guest."), UI.SMALL_SIZE, UI.MUTED))
+		var name_edit := UI.line_edit(tr("e.g. Vesna"))
+		box.add_child(name_edit)
+		box.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+		return
+	var waiting := UI.label(tr("Loading…"), UI.SMALL_SIZE, UI.MUTED)
+	box.add_child(waiting)
+	var response := await Api.get_json("/v1/me")
+	if not is_instance_valid(box) or _tab != "play":
+		return
+	waiting.queue_free()
+	if response.status == 401:
+		Session.log_out()
+		_show_play()
+		return
+	if not response.ok:
+		box.add_child(UI.label(tr("The server can't be reached. Solo worlds play on all the same."), UI.SMALL_SIZE, UI.MUTED))
+		box.add_child(UI.button(tr("Retry"), _show_play))
+		return
+	Session.account = response.data.account
+	if response.data.worlds.is_empty():
+		box.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
+	for world in response.data.worlds:
+		var row := UI.hbox()
+		var world_id := int(world.id)
+		var open := UI.button(world.name, func() -> void: _open_world(world_id))
+		open.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(open)
+		var state := UI.label(tr("In the lobby") if world.status == "lobby" else tr(String(world.status).capitalize()), UI.SMALL_SIZE, UI.MUTED)
+		state.autowrap_mode = TextServer.AUTOWRAP_OFF
+		row.add_child(state)
+		box.add_child(row)
+	if _open_forms.get("coop", false):
+		var world_name := UI.line_edit(tr("World name"), tr("%s's world") % Session.account.displayName)
+		box.add_child(world_name)
+		var row := UI.hbox()
+		var players := UI.options(range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1)
+		players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(players)
+		var speed := UI.options(SPEED_LABELS.map(tr), 0)
+		speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(speed)
+		box.add_child(row)
+		var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
+		box.add_child(difficulty)
+		box.add_child(UI.primary(tr("Create world"), func() -> void:
+			_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
+	else:
+		box.add_child(UI.button(tr("New co-op world"), func() -> void:
+			_open_forms["coop"] = true
+			_show_play()))
+	var join := UI.hbox()
+	var code := UI.line_edit(tr("Invite code"))
+	code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	join.add_child(code)
+	join.add_child(UI.button(tr("Join"), func() -> void: _join_world(code.text)))
+	box.add_child(join)
 
 
 func _login(display_name: String) -> void:
@@ -196,76 +367,10 @@ func _login(display_name: String) -> void:
 	Session.save()
 	Session.report_language()
 	Push.register()
-	_show_home()
+	_show_tab(_tab)
 
 
-# --- Worlds ----------------------------------------------------------------
-
-func _show_home() -> void:
-	Live.stop()
-	_lobby_world_id = 0
-	UI.clear(_content)
-	_content.add_child(UI.label(tr("Loading…"), UI.SMALL_SIZE, UI.MUTED))
-	var response := await Api.get_json("/v1/me")
-	if response.status == 401:
-		Session.log_out()
-		_show_login()
-		return
-	if not response.ok:
-		UI.clear(_content)
-		_set_status(response.error)
-		_content.add_child(UI.button(tr("Retry"), _show_home))
-		# No server: solo worlds play on all the same.
-		_content.add_child(_solo_section())
-		return
-	_set_status("")
-	Session.account = response.data.account
-	UI.clear(_content)
-
-	var who := UI.hbox()
-	var signed_in := UI.label(tr("Signed in as %s") % Session.account.displayName, UI.SMALL_SIZE, UI.MUTED)
-	signed_in.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	who.add_child(signed_in)
-	who.add_child(UI.button(tr("Sign out"), func() -> void:
-		Session.log_out()
-		_show_login()))
-	_content.add_child(who)
-
-	_content.add_child(_solo_section())
-
-	_content.add_child(UI.label(tr("Your worlds"), UI.HEADING_SIZE))
-	if response.data.worlds.is_empty():
-		_content.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
-	for world in response.data.worlds:
-		var text := "%s  ·  %s" % [world.name, tr("in lobby") if world.status == "lobby" else tr(String(world.status).capitalize())]
-		var world_id := int(world.id)
-		_content.add_child(UI.button(text, func() -> void: _open_world(world_id)))
-
-	_content.add_child(UI.label(tr("New world"), UI.HEADING_SIZE))
-	var world_name := UI.line_edit(tr("World name"), tr("%s's world") % Session.account.displayName)
-	_content.add_child(world_name)
-	var row := UI.hbox()
-	var players := UI.options(range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1)
-	players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(players)
-	var speed := UI.options(SPEED_LABELS.map(tr), 0)
-	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(speed)
-	_content.add_child(row)
-	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
-	_content.add_child(difficulty)
-	_content.add_child(UI.primary(tr("Create world"), func() -> void:
-		_create_world(world_name.text, players.selected + 1, SPEEDS[speed.selected], GroupText.DIFFICULTIES[difficulty.selected])))
-
-	_content.add_child(UI.label(tr("Join a world"), UI.HEADING_SIZE))
-	var code := UI.line_edit(tr("Invite code"))
-	_content.add_child(code)
-	_content.add_child(UI.button(tr("Join"), func() -> void: _join_world(code.text)))
-
-	# Support and privacy: donations, server costs, your data, and the bug report.
-	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
-	_content.add_child(UI.button(tr("Support and privacy"), _show_support))
-
+# --- Profile ---------------------------------------------------------------
 
 ## The privacy policy, in short (docs/privacy.md has the long version).
 const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."  # tr
@@ -273,39 +378,44 @@ const PRIVACY := "Slavian keeps as little as it can: the name you choose (or a g
 var _delete_armed := false
 
 
-## Donations, this month's server costs, the privacy policy, exporting your
-## data and deleting your account.
-func _show_support() -> void:
-	_set_status("")
+## Who you are and your data; destructive actions stand apart.
+func _show_profile() -> void:
 	_delete_armed = false
 	UI.clear(_content)
-	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
-	var costs := await Api.get_json("/v1/costs")
-	if not costs.ok or not costs.data is Dictionary:
-		_content.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
-	else:
-		var c: Dictionary = costs.data
-		var currency := str(c.get("currency", "EUR"))
-		var spent := float(c.get("costs", 0.0))
-		var raised := float(c.get("donations", 0.0)) + float(c.get("carryIn", 0.0))
-		_content.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
-			str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE, UI.MUTED))
-		var bar := ProgressBar.new()
-		bar.max_value = maxf(spent, 0.01)
-		bar.value = minf(raised, spent)
-		bar.custom_minimum_size.y = 28
-		bar.show_percentage = false
-		_content.add_child(bar)
-		var surplus := raised - spent
-		_content.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, surplus]), UI.SMALL_SIZE, UI.MUTED))
-		var url := str(c.get("donationUrl", ""))
-		if url != "":
-			_content.add_child(UI.primary(tr("Buy me a coffee"), func() -> void: OS.shell_open(url)))
-	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
-	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Profile"), UI.HEADING_SIZE))
+	if not Session.is_logged_in():
+		_content.add_child(UI.label(tr("Solo worlds need no account. To play with friends, pick a name and play as a guest."), UI.SMALL_SIZE, UI.MUTED))
+		var name_edit := UI.line_edit(tr("e.g. Vesna"))
+		_content.add_child(name_edit)
+		_content.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+		return
+	var who := String(Session.account.get("displayName", ""))
+	_content.add_child(UI.label(tr("Signed in as %s") % who, UI.SMALL_SIZE, UI.MUTED))
+	var rename := UI.hbox()
+	var name_edit := UI.line_edit(tr("Your name"), who)
+	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rename.add_child(name_edit)
+	rename.add_child(UI.button(tr("Rename"), func() -> void: _rename(name_edit.text)))
+	_content.add_child(rename)
+	_content.add_child(UI.button(tr("Sign out"), func() -> void:
+		Session.log_out()
+		_show_profile()))
+	_content.add_child(UI.label(tr("Your data"), UI.HEADING_SIZE))
 	_content.add_child(UI.button(tr("Export my data"), _export_data))
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 24
+	_content.add_child(gap)
 	_content.add_child(UI.button(tr("Delete my account"), _confirm_delete))
-	_content.add_child(UI.button(tr("Back"), _show_home))
+
+
+func _rename(display_name: String) -> void:
+	_set_status("")
+	var response := await Api.request(HTTPClient.METHOD_PATCH, "/v1/me", {"displayName": display_name.strip_edges()})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	Session.account = response.data.get("account", Session.account)
+	_show_profile()
 
 
 func _export_data() -> void:
@@ -334,7 +444,98 @@ func _confirm_delete() -> void:
 		_set_status(response.error)
 		return
 	Session.log_out()
-	_show_login()
+	_show_profile()
+
+
+# --- Settings --------------------------------------------------------------
+
+## The language (by its own name) and the text size.
+func _show_settings() -> void:
+	UI.clear(_content)
+	_content.add_child(UI.label(tr("Settings"), UI.HEADING_SIZE))
+	_content.add_child(UI.label(tr("Language"), UI.SMALL_SIZE, UI.MUTED))
+	var languages := UI.hbox(8)
+	for language in LANGUAGES:
+		var code: String = language[0]
+		var pick := UI.button(language[1], func() -> void:
+			Session.set_language(code)
+			get_tree().reload_current_scene())
+		pick.theme_type_variation = "TabButton"
+		pick.disabled = Session.language == code
+		pick.custom_minimum_size.x = 150
+		languages.add_child(pick)
+	_content.add_child(languages)
+	_content.add_child(UI.label(tr("Text size"), UI.SMALL_SIZE, UI.MUTED))
+	# Text size for accessibility: the same letter at three sizes.
+	var sizes := UI.hbox(8)
+	for entry in [["small", 22, tr("Small")], ["normal", 28, tr("Normal")], ["large", 36, tr("Large")]]:
+		var size_code: String = entry[0]
+		var size_pick := UI.button("A", func() -> void:
+			Session.set_text_size(size_code)
+			get_tree().reload_current_scene())
+		size_pick.theme_type_variation = "TabButton"
+		size_pick.add_theme_font_size_override("font_size", int(entry[1]))
+		size_pick.tooltip_text = tr("Text size: %s") % entry[2]
+		size_pick.disabled = Session.text_size == size_code
+		size_pick.custom_minimum_size = Vector2(76, 76)
+		sizes.add_child(size_pick)
+	_content.add_child(sizes)
+
+
+# --- Help ------------------------------------------------------------------
+
+## How a run goes, supporting the game, privacy, and reporting a problem.
+func _show_help() -> void:
+	UI.clear(_content)
+	var data := LocalData.load_data()
+	_content.add_child(UI.label(tr("How a run goes"), UI.HEADING_SIZE))
+	for entry in AlmanacText.entries(data, "The run"):
+		_content.add_child(UI.label(entry[0]))
+		_content.add_child(UI.label(entry[1], UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("In a world, the quest card shows the way, and the almanac explains the rest."), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Report a problem"), UI.HEADING_SIZE))
+	if Session.is_logged_in():
+		var message := TextEdit.new()
+		message.placeholder_text = tr("What went wrong?")
+		message.custom_minimum_size.y = 140
+		_content.add_child(message)
+		_content.add_child(UI.button(tr("Send"), func() -> void: _send_report(message.text)))
+	else:
+		_content.add_child(UI.label(tr("Sign in as a guest (Profile) to send a report."), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
+	var costs_box := UI.vbox(10)
+	_content.add_child(costs_box)
+	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
+	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
+	var costs := await Api.get_json("/v1/costs")
+	if not is_instance_valid(costs_box) or _tab != "help":
+		return
+	if not costs.ok or not costs.data is Dictionary:
+		costs_box.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var c: Dictionary = costs.data
+	var currency := str(c.get("currency", "EUR"))
+	var spent := float(c.get("costs", 0.0))
+	var raised := float(c.get("donations", 0.0)) + float(c.get("carryIn", 0.0))
+	costs_box.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
+		str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE, UI.MUTED))
+	var bar := ProgressBar.new()
+	bar.max_value = maxf(spent, 0.01)
+	bar.value = minf(raised, spent)
+	bar.custom_minimum_size.y = 28
+	bar.show_percentage = false
+	costs_box.add_child(bar)
+	costs_box.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, raised - spent]), UI.SMALL_SIZE, UI.MUTED))
+	var url := str(c.get("donationUrl", ""))
+	if url != "":
+		costs_box.add_child(UI.primary(tr("Buy me a coffee"), func() -> void: OS.shell_open(url)))
+
+
+func _send_report(message: String) -> void:
+	if message.strip_edges() == "":
+		return
+	var response := await Api.post_json("/v1/reports", {"message": message.strip_edges(), "worldId": null, "state": {"screen": "start"}})
+	_set_status(tr("Thank you; the report is sent.") if response.ok else response.error)
 
 
 func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
@@ -363,89 +564,6 @@ func _handle_world_response(response: Api.Response) -> void:
 		_enter_game(response.data)
 
 
-# --- Solo ------------------------------------------------------------------
-
-## Solo worlds on this device: continue one, start one, or delete one. They
-## need neither an account nor a connection (docs/local-engine.md).
-## `name_edit`: the sign-in name field, for the player's name when not
-## signed in.
-func _solo_section(name_edit: LineEdit = null) -> Control:
-	var box := UI.vbox(12)
-	box.add_child(UI.label(tr("Play solo"), UI.HEADING_SIZE))
-	box.add_child(UI.label(tr("On this device, alone against the hordes. No connection needed."), UI.SMALL_SIZE, UI.MUTED))
-	for world in Local.list_worlds():
-		var row := UI.hbox()
-		var id := int(world.id)
-		var status := tr(String(world.status).capitalize())
-		var open := UI.button(world.name, func() -> void: _open_solo(id))
-		open.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(open)
-		var about := UI.label("%s\n%s" % [status, tr(GroupText.DIFFICULTY_LABELS[maxi(0, GroupText.DIFFICULTIES.find(world.difficulty))])], UI.SMALL_SIZE, UI.MUTED)
-		row.add_child(about)
-		var armed := _delete_solo == id
-		row.add_child(UI.button(tr("Sure? Delete") if armed else tr("Delete"), func() -> void:
-			if _delete_solo == id:
-				Local.delete_world(id)
-				_delete_solo = 0
-			else:
-				_delete_solo = id
-			_refresh_solo(box, name_edit)))
-		box.add_child(row)
-
-	var data := LocalData.load_data()
-	var world_name := UI.line_edit(tr("World name"), tr("A solo world"))
-	box.add_child(world_name)
-	var row := UI.hbox()
-	var speed := UI.options(SPEED_LABELS.map(tr), 0)
-	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(speed)
-	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
-	difficulty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(difficulty)
-	box.add_child(row)
-	var kinds := HeroText.roster_ids(data)
-	var hero := UI.options(kinds.map(func(kind: String) -> String: return HeroText.roster_title(data, kind)), 0)
-	box.add_child(hero)
-	box.add_child(UI.primary(tr("Start a solo world"), func() -> void:
-		var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
-		if who == "" and name_edit != null:
-			who = name_edit.text.strip_edges()
-		_start_solo({"name": world_name.text.strip_edges() if world_name.text.strip_edges() != "" else tr("A solo world"),
-			"displayName": who if who != "" else tr("You"), "speed": SPEEDS[speed.selected],
-			"difficulty": GroupText.DIFFICULTIES[difficulty.selected], "heroKind": kinds[hero.selected] if not kinds.is_empty() else null})))
-	return box
-
-
-## Rebuilds the solo section in place (after a delete).
-func _refresh_solo(box: Control, name_edit: LineEdit) -> void:
-	var parent := box.get_parent()
-	var at := box.get_index()
-	box.queue_free()
-	var fresh := _solo_section(name_edit)
-	parent.add_child(fresh)
-	parent.move_child(fresh, at)
-
-
-func _start_solo(params: Dictionary) -> void:
-	_set_status("")
-	Live.stop()
-	var view := Local.start(params)
-	# The game's data comes from the app from here on, not the server.
-	Local.world_id = int(view.id)
-	_enter_game(view)
-
-
-func _open_solo(id: int) -> void:
-	_set_status("")
-	Live.stop()
-	var view := Local.open(id)
-	if view.is_empty():
-		_set_status(tr("That solo world is gone."))
-		return
-	Local.world_id = id
-	_enter_game(view)
-
-
 # --- Lobby -----------------------------------------------------------------
 
 func _show_lobby(world: Dictionary) -> void:
@@ -466,7 +584,7 @@ func _show_lobby(world: Dictionary) -> void:
 		_content.add_child(UI.primary(tr("Start the world"), func() -> void: _start_world(int(world.id))))
 	else:
 		_content.add_child(UI.label(tr("Waiting for the host to start…"), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.button(tr("Back"), _show_home))
+	_content.add_child(UI.button(tr("Back"), func() -> void: _show_tab("play")))
 	_clan_picker(world)
 	_hero_picker(world)
 
@@ -579,4 +697,6 @@ func _enter_game(world: Dictionary) -> void:
 		_set_status(error)
 		return
 	Game.set_world(world)
+	Session.last_world = {"id": int(world.id), "name": String(world.get("name", ""))}
+	Session.save()
 	get_tree().change_scene_to_file(GAME_SCENE)
