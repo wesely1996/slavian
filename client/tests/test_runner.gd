@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_resource_vectors()
 	_test_local_mapgen()
 	_test_local_start()
+	_test_local_villages()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -553,6 +554,31 @@ func _test_local_start() -> void:
 	var kept := saved.start_world({"name": "Kept", "seed": 99, "speed": 10}, 1, at)
 	var reopened := LocalServer.new(LocalData.load_data(), dir)
 	_check(reopened.worlds.has(int(kept.id)) and _difference(reopened.world_view(reopened.worlds[kept.id], at), saved.world_view(kept, at), "saved") == "", "local world saved and read back")
+
+
+## A scripted solo session against the answers the server gave
+## (data/fixtures/village-scenario.json, server/test/village-scenario.test.ts).
+func _test_local_villages() -> void:
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures/village-scenario.json")))
+	var start: Dictionary = fixture.start
+	var local := LocalServer.new(LocalData.load_data(), "")
+	var now := LocalTime.parse(start.at)
+	var world := local.start_world({"name": start.name, "displayName": start.displayName, "speed": start.speed,
+		"difficulty": start.difficulty, "seed": int(start.seed)}, 1, now)
+	var i := 0
+	for step in fixture.steps:
+		i += 1
+		if step.has("advance"):
+			now += int(step.advance)
+			local.drain(world, now, [])
+			continue
+		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
+		var label := "local villages %d %s %s" % [i, step.method, step.path]
+		_check(int(answer.status) == int(step.status), "%s: status %d != %d %s" % [label, int(answer.status), int(step.status), answer.data.get("message", "")])
+		var difference := _difference(answer.data, step.response, "response")
+		_check(difference == "", "%s: %s" % [label, difference])
+	_check(LocalServer._js_number(0.1 + 0.2) == "0.30000000000000004" and LocalServer._js_number(70.0) == "70" and LocalServer._js_number(70.5) == "70.5", "numbers as JavaScript prints them")
 
 
 ## Where two JSON values differ ("" if they don't); numbers within a hair

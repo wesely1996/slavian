@@ -174,6 +174,253 @@ func _schedule(world: Dictionary, due_at: int, type: String, payload: Dictionary
 	world.next.event += 1
 
 
+# --- Requests (api/app.ts) ----------------------------------------------------
+
+## Answers a request for a solo world as the server's routes do: {status,
+## data}. Due events run first (withWorld), and `changed` lists what to tell
+## the screens: ["village", id] or ["world"].
+func handle(world_id: int, method: String, path: String, body: Variant, now: int) -> Dictionary:
+	var world: Dictionary = worlds.get(world_id, {})
+	if world.is_empty():
+		return _fail(404, "not_found", "No such solo world")
+	var parts := path.split("?")[0].split("/", false)
+	var changed: Array = []
+	drain(world, now, changed)
+	var answer := _route(world, method, parts, body if body is Dictionary else {}, now, changed)
+	answer.changed = changed
+	save(world)
+	return answer
+
+
+func _route(world: Dictionary, method: String, parts: PackedStringArray, body: Dictionary, now: int, changed: Array) -> Dictionary:
+	if method == "GET" and parts.size() == 3 and parts[1] == "worlds":
+		return {"status": 200, "data": world_view(world, now)}
+	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "onboarding" and parts[4] == "claim":
+		var claimed := _claim_onboarding(world, String(body.get("step", "")), now, changed)
+		if claimed.has("error"):
+			return _rule_answer(claimed)
+		var view := world_view(world, now)
+		view.claimed = claimed
+		return {"status": 200, "data": view}
+	if parts.size() >= 4 and parts[1] == "villages" and method == "POST":
+		var village := _village(world, int(parts[2]))
+		if village.is_empty():
+			return _fail(404, "not_found", "Village %s not found" % parts[2])
+		if int(village.ownerAccountId) != int(world.hostAccountId):
+			return _fail(403, "forbidden", "Not your village")
+		var action := "/".join(parts.slice(3))
+		if village.ruin != null:
+			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
+		var result: Dictionary
+		var step := ""
+		match action:
+			"build":
+				result = _queue_build(world, village, body, now)
+				step = "build"
+			"train":
+				result = _train(world, village, body, now)
+				step = "train"
+			"outposts":
+				result = _claim_outpost(world, village, body, now)
+				step = "outpost"
+			"outposts/abandon":
+				result = LocalVillage.abandon_outpost(data, village.state, LocalVillage.outpost_plot(Vector2i(int(body.get("q", 0)), int(body.get("r", 0)))), now, world.speed)
+				if not result.has("error"):
+					result = {"state": result}
+			"stance":
+				if not String(body.get("stance", "")) in data.battle.stances:
+					return _fail(400, "invalid_request", "Unknown stance")
+				var stanced: Dictionary = village.state.duplicate(true)
+				stanced.stance = String(body.stance)
+				result = {"state": stanced}
+			"rename":
+				var name := String(body.get("name", "")).strip_edges()
+				if name == "" or name.length() > 32:
+					return _fail(400, "invalid_request", "Give the town a name of 1 to 32 letters")
+				village.name = name
+				result = {"state": village.state}
+			_:
+				return _fail(501, "local", "Not in single player yet")
+		if result.has("error") or result.has("missing"):
+			return _rule_answer(result)
+		village.state = result.state
+		changed.append(["village", village.id])
+		if step != "":
+			_onboarding_step(world, int(village.ownerAccountId), step, now, changed)
+		return {"status": 200, "data": {"village": village_view(world, village), "serverTime": LocalTime.iso(now)}}
+	return _fail(501, "local", "Not in single player yet")
+
+
+func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var order := {}
+	if body.get("plot"):
+		order.plot = String(body.plot)
+	if body.get("building"):
+		order.building = String(body.building)
+	var result := LocalVillage.queue_build(data, village.state, order, now, world.speed)
+	if result.has("state"):
+		var q: Dictionary = result.queued
+		_schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
+	return result
+
+
+func _train(world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
+	var result := LocalVillage.queue_training(data, village.state, String(body.get("unit", "")), int(body.get("count", 0)), now, world.speed, owned)
+	if result.has("state"):
+		_schedule(world, LocalVillage.batch_completes_at(result.batch), "training_complete", {"villageId": village.id})
+	return result
+
+
+func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var cell := Vector2i(int(body.get("q", 0)), int(body.get("r", 0)))
+	var terrain: Variant = world.hexes.get(LocalLand.key(cell))
+	if terrain == null:
+		return LocalVillage.rule("That hex is not on the map")
+	for s in world.sites:
+		if s.q == cell.x and s.r == cell.y:
+			return LocalVillage.rule("An ancient site lies there")
+	var taken := {}
+	for other in world.villages:
+		taken[LocalLand.key(Vector2i(other.q, other.r))] = true
+		for plot in LocalVillage.outpost_plots(other.state.plots):
+			taken[LocalLand.key(LocalVillage.outpost_hex(plot))] = true
+	var site := {"cell": cell, "terrain": terrain, "home": Vector2i(village.q, village.r), "taken": taken}
+	var result := LocalVillage.claim_outpost(data, village.state, site, now, world.speed)
+	if result.has("state"):
+		var q: Dictionary = result.queued
+		_schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
+	return result
+
+
+func _village(world: Dictionary, id: int) -> Dictionary:
+	for v in world.villages:
+		if int(v.id) == id:
+			return v
+	return {}
+
+
+## The first time a player does a getting-started step (scheduler/onboarding.ts).
+func _onboarding_step(world: Dictionary, account_id: int, step: String, now: int, changed: Array) -> void:
+	for member in world.members:
+		if int(member.accountId) == account_id and not member.onboarding.has(step):
+			if data.onboarding.steps.any(func(s: Dictionary) -> bool: return s.id == step):
+				member.onboarding[step] = LocalTime.iso(now)
+				changed.append(["world"])
+
+
+func _claim_onboarding(world: Dictionary, step: String, now: int, changed: Array) -> Dictionary:
+	var member: Dictionary = world.members[0]
+	var def: Dictionary = {}
+	for s in data.onboarding.steps:
+		if s.id == step:
+			def = s
+	if def.is_empty():
+		return LocalVillage.rule("Unknown step \"%s\"" % step)
+	if not member.onboarding.has(step):
+		return LocalVillage.rule("\"%s\" is not done yet" % def.title)
+	if member.onboardingClaimed.has(step):
+		return LocalVillage.rule("That reward is already claimed")
+	member.onboardingClaimed[step] = LocalTime.iso(now)
+	var village_id: Variant = _reward(world, int(member.accountId), def.reward, now, changed)
+	var finale := false
+	var all_claimed: bool = data.onboarding.steps.all(func(s: Dictionary) -> bool: return member.onboardingClaimed.has(s.id))
+	if all_claimed and not member.onboardingClaimed.has("finale"):
+		member.onboardingClaimed["finale"] = LocalTime.iso(now)
+		_reward(world, int(member.accountId), data.onboarding.finale.reward, now, changed)
+		finale = true
+	changed.append(["world"])
+	return {"villageId": village_id, "finale": finale}
+
+
+## A reward, all of it, to the player's first standing village.
+func _reward(world: Dictionary, account_id: int, amounts: Dictionary, now: int, changed: Array) -> Variant:
+	var home: Dictionary = {}
+	for v in world.villages:
+		if int(v.ownerAccountId) == account_id and v.ruin == null and (home.is_empty() or v.id < home.id):
+			home = v
+	if home.is_empty():
+		return null
+	var ledger := LocalLedger.settle(home.state.ledger, now)
+	for kind in LocalLedger.KINDS:
+		ledger.amounts[kind] = float(ledger.amounts[kind]) + float(amounts[kind])
+	home.state.ledger = ledger
+	changed.append(["village", home.id])
+	return home.id
+
+
+static func _fail(status: int, error: String, message: String) -> Dictionary:
+	return {"status": status, "data": {"error": error, "message": message}}
+
+
+## A rule broken, or resources short, as the server answers them.
+static func _rule_answer(result: Dictionary) -> Dictionary:
+	if result.has("missing"):
+		var parts: PackedStringArray = []
+		for kind in LocalLedger.KINDS:
+			parts.append("\"%s\":%s" % [kind, _js_number(result.missing[kind])])
+		return {"status": 400, "data": {"error": "insufficient_resources", "message": "Insufficient resources: missing {%s}" % ",".join(parts), "missing": result.missing}}
+	return _fail(400, "rule", String(result.error))
+
+
+## A number as JavaScript prints it: whole numbers bare, others in the
+## shortest form that reads back as the same number.
+static func _js_number(value: Variant) -> String:
+	var f := float(value)
+	if f == floorf(f) and absf(f) < 1e15:
+		return str(int(f))
+	return String.num_scientific(f)
+
+
+# --- Scheduler (scheduler/world.ts drainWorld) ---------------------------------
+
+## Runs the world's pending events due by `until`, oldest first, one at a
+## time (a handler may schedule an earlier one).
+func drain(world: Dictionary, until: int, changed: Array) -> int:
+	var processed := 0
+	while processed < 10000:
+		var next: Dictionary = {}
+		for e in world.events:
+			if e.status == "pending" and int(e.dueAt) <= until and (next.is_empty() or int(e.dueAt) < int(next.dueAt) or (int(e.dueAt) == int(next.dueAt) and e.id < next.id)):
+				next = e
+		if next.is_empty():
+			break
+		var handler := Callable(self, "_on_" + String(next.type))
+		if handler.is_valid():
+			handler.call(world, next, changed)
+			next.status = "done"
+		else:
+			# Not ported yet: the server would run it; here it waits, and the
+			# world stops at it (docs/local-engine.md, part 4).
+			break
+		processed += 1
+	world.events = world.events.filter(func(e: Dictionary) -> bool: return e.status == "pending")
+	return processed
+
+
+func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var p: Dictionary = event.payload
+	var village := _village(world, int(p.villageId))
+	if village.is_empty() or village.ruin != null:
+		return
+	var plot: String = p.get("plot", "")
+	if not village.state.queue.any(func(item: Dictionary) -> bool: return item.plot == plot and int(item.targetLevel) == int(p.targetLevel)):
+		return
+	var done := LocalVillage.complete_build(data, village.state, plot, int(p.targetLevel), int(event.dueAt), world.speed)
+	if done.has("error"):
+		return
+	village.state = done
+	changed.append(["village", village.id])
+
+
+func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var village := _village(world, int(event.payload.villageId))
+	if village.is_empty():
+		return
+	village.state = LocalVillage.complete_training(village.state, int(event.dueAt))
+	changed.append(["village", village.id])
+
+
 # --- Views (api/views.ts) -----------------------------------------------------
 
 func world_view(world: Dictionary, now: int) -> Dictionary:
