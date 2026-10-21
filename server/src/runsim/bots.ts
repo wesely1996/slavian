@@ -101,10 +101,6 @@ function read<T>(db: Db, fn: (client: DbClient) => Promise<T>): Promise<T> {
   return inTransaction(db, fn);
 }
 
-function garrisonTarget(style: Style, day: number): number {
-  return style.garrisonBase + style.garrisonPerDay * day;
-}
-
 function garrisonSize(village: Village): number {
   const fighting = Object.entries(village.state.garrison).filter(([unit]) => unit !== 'scout' && unit !== 'settler');
   const training = village.state.training.filter((b) => b.unit !== 'scout' && b.unit !== 'settler').reduce((n, b) => n + b.count, 0);
@@ -139,34 +135,25 @@ export async function playTurn(ctx: TurnContext, bot: Bot): Promise<void> {
     const amounts = amountsAt(village.state.ledger, now);
     const capacity = village.state.ledger.capacity;
 
-    // Defenders first while the garrison is under half its target: most of
-    // the stores go to training and only fields (and a barracks) are built.
-    // Otherwise half the stores, after building.
-    const target = garrisonTarget(style, ctx.day);
-    const missing = target - garrisonSize(village);
-    const short = missing > target / 2;
-    const train = async () => {
-      if (missing <= 0 || (levels.barracks ?? 0) === 0) return;
-      const unit = (levels.barracks ?? 0) >= 2 && ctx.day % 3 === 2 ? 'horseman' : ctx.day % 2 === 0 ? 'spearman' : 'archer';
-      const cost = deps.data.units.units[unit]!.cost;
-      const share = short ? 0.8 : 0.5;
-      const affordable = Math.min(...KINDS.filter((k) => cost[k] > 0).map((k) => Math.floor((amounts[k] * share) / cost[k])));
-      const count = Math.min(missing, deps.data.units.maxBatch, 20, affordable);
-      if (count > 0) await go(() => trainUnitsCommand(db, deps, { ...base, unit, count }));
-    };
-    if (short) await train();
-
     // Building: keep the queue busy.
     const hall = levels.elder_hall ?? 0;
     let free = buildQueueLimit(deps.data, hall) - village.state.queue.length;
-    const choices = buildChoices(deps.data, village, style, amounts, capacity, ctx.day).filter(
-      (b) => !short || FIELDS.includes(b) || (b === 'barracks' && (levels.barracks ?? 0) === 0),
-    );
-    for (const choice of choices) {
+    for (const choice of buildChoices(deps.data, village, style, amounts, capacity, ctx.day)) {
       if (free <= 0) break;
       if (await go(() => queueBuildCommand(db, deps, { ...base, building: choice }))) free--;
     }
-    if (!short) await train();
+
+    // Defenders: spearmen and archers, some horsemen once the barracks allows.
+    const target = style.garrisonBase + style.garrisonPerDay * ctx.day;
+    const missing = target - garrisonSize(village);
+    if (missing > 0 && (levels.barracks ?? 0) > 0) {
+      const unit = (levels.barracks ?? 0) >= 2 && ctx.day % 3 === 2 ? 'horseman' : ctx.day % 2 === 0 ? 'spearman' : 'archer';
+      // As many as half the stores can pay for: building goes on too.
+      const cost = deps.data.units.units[unit]!.cost;
+      const affordable = Math.min(...KINDS.filter((k) => cost[k] > 0).map((k) => Math.floor((amounts[k] * 0.5) / cost[k])));
+      const count = Math.min(missing, deps.data.units.maxBatch, 20, affordable);
+      if (count > 0) await go(() => trainUnitsCommand(db, deps, { ...base, unit, count }));
+    }
     if ((levels.scout_lodge ?? 0) > 0 && (village.state.garrison.scout ?? 0) < 4 && !village.state.training.some((b) => b.unit === 'scout')) {
       await go(() => trainUnitsCommand(db, deps, { ...base, unit: 'scout', count: 4 }));
     }
@@ -450,8 +437,6 @@ export async function feedVault(ctx: TurnContext, bot: Bot, share = 0.3): Promis
   for (const k of KINDS) lacking[k] = Math.max(0, stage.cost[k] - (bridge.donated[k] ?? 0) - Math.floor(vault[k]));
   for (const village of await ownVillages(ctx, bot)) {
     if ((village.state.levels.caravan_yard ?? 0) === 0 || village.ruin) continue;
-    // Not while the village can't defend itself.
-    if (garrisonSize(village) < garrisonTarget(STYLES[bot.kind], ctx.day) / 2) continue;
     const amounts = amountsAt(village.state.ledger, ctx.now);
     const load: Resources = { wood: 0, stone: 0, grain: 0, iron: 0 };
     for (const k of KINDS) load[k] = Math.max(0, Math.min(lacking[k], Math.floor(amounts[k] * share)));
