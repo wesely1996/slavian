@@ -18,6 +18,9 @@ var language := ""
 var text_size := "normal"
 ## The tutorial on this device, per world: {world id: {"welcomed": bool, "hidden": bool}}.
 var tutorial: Dictionary = {}
+## The world played last, for the menu's Continue: {"id", "name"} (solo ids
+## are negative).
+var last_world: Dictionary = {}
 
 
 func _ready() -> void:
@@ -27,6 +30,7 @@ func _ready() -> void:
 		language = config.get_value("session", "language", "")
 		text_size = config.get_value("session", "text_size", "normal")
 		tutorial = config.get_value("session", "tutorial", {})
+		last_world = config.get_value("session", "last_world", {})
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -49,6 +53,7 @@ func save() -> void:
 	config.set_value("session", "language", language)
 	config.set_value("session", "text_size", text_size)
 	config.set_value("session", "tutorial", tutorial)
+	config.set_value("session", "last_world", last_world)
 	config.save(PATH)
 
 

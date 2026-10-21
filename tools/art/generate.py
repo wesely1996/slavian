@@ -180,10 +180,26 @@ def icon(kind):
     elif kind == "clock":
         s.circle(32, 32, 22, "none", stroke=W, sw=4.5)
         stroke("M32,18 L32,32 L42,38", 4)
+    elif kind == "play":
+        # Crossed spears: off to the fight.
+        stroke("M12,52 L48,16 M40,14 L50,14 L50,24")
+        stroke("M52,52 L16,16 M14,24 L14,14 L24,14")
+    elif kind == "profile":
+        s.circle(32, 22, 10, "none", stroke=W, sw=4.5)
+        stroke("M12,54 Q14,36 32,36 Q50,36 52,54")
+    elif kind == "settings":
+        # Three sliders.
+        stroke("M10,18 L54,18 M10,32 L54,32 M10,46 L54,46", 3.5)
+        for x, y in ((22, 18), (42, 32), (28, 46)):
+            s.circle(x, y, 5.5, "none", stroke=W, sw=4)
+    elif kind == "help":
+        s.circle(32, 32, 22, "none", stroke=W, sw=4.5)
+        stroke("M25,25 Q25,17 32,17 Q40,17 40,25 Q40,31 32,34 L32,39", 4)
+        s.circle(32, 46, 1.5, W, stroke=W, sw=3)
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock"]
+UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------
