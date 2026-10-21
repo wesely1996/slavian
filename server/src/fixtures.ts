@@ -1,7 +1,8 @@
 // Writes the shared fixtures the client's local engine is checked against
-// (PLAN.md M5 step 24): the server's rules are the reference, the GDScript
-// port must give the same results. `npm run fixtures` after changing a rule;
-// test/fixtures.test.ts fails while a fixture is out of date.
+// (PLAN.md M5 step 24), and the game data the app bundles for it: the
+// server's rules are the reference, the GDScript port must give the same
+// results. `npm run fixtures` after changing a rule or anything in data/;
+// test/fixtures.test.ts fails while either is out of date.
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createNoise2D } from 'simplex-noise';
@@ -11,6 +12,13 @@ import { generateMap } from './sim/mapgen.js';
 import { createRng } from './sim/rng.js';
 
 export const MAPGEN_FIXTURE = fileURLToPath(new URL('../../data/fixtures/mapgen-vectors.json', import.meta.url));
+// The game data as the server reads it (defaults filled in), bundled into the
+// app for the local engine.
+export const CLIENT_DATA = fileURLToPath(new URL('../../client/data/game.json', import.meta.url));
+
+export function clientData(data: GameData): string {
+  return JSON.stringify(data) + '\n';
+}
 
 export function mapgenVectors(data: GameData) {
   const rng = [1, 42, 0x7fffffff, 0xdeadbeef].map((seed) => {
@@ -48,6 +56,8 @@ export function mapgenVectors(data: GameData) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  writeFileSync(MAPGEN_FIXTURE, JSON.stringify(mapgenVectors(loadGameData()), null, 1) + '\n');
-  console.log(`Wrote ${MAPGEN_FIXTURE}`);
+  const data = loadGameData();
+  writeFileSync(MAPGEN_FIXTURE, JSON.stringify(mapgenVectors(data), null, 1) + '\n');
+  writeFileSync(CLIENT_DATA, clientData(data));
+  console.log(`Wrote ${MAPGEN_FIXTURE} and ${CLIENT_DATA}`);
 }

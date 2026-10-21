@@ -509,7 +509,8 @@ func _test_local_mapgen() -> void:
 			# Godot's JSON reader isn't exact in the last digits.
 			same = same and absf(noise.noise(point[0], point[1]) - float(point[2])) < 1e-12
 		_check(same, "noise %d" % int(case.seed))
-	var data := {"terrain": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("terrain.json")))}
+	var data := LocalData.load_data()
+	_check(data.has("terrain") and data.has("buildings") and data.buildings.has("buildings"), "bundled game data")
 	for case in fixture.maps:
 		var map := LocalMapgen.generate(data, int(case.seed), int(case.players))
 		var terrain: Array = []
