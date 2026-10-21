@@ -265,6 +265,8 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 	if problem != "":
 		expedition.status = "returning"
 		expedition.failure = problem
+		LocalInbox.tell(server, world, home.ownerAccountId, {"kind": "settlers", "tier": "digest", "title": "Settlers turned back from ({q}, {r})",
+			"body": "{problem}. They are walking home to {home}.", "vars": {"q": expedition.q, "r": expedition.r, "problem": problem, "home": home.name}}, at)
 		server.schedule(world, int(expedition.returnsAt), "settlers_return", {"expeditionId": expedition.id})
 		return
 	var owner := int(home.ownerAccountId)
@@ -275,6 +277,8 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 	home.state = LocalVillage.lose_away(data, home.state, SETTLER, int(expedition.settlers), at, world.speed)
 	expedition.status = "founded"
 	expedition.foundedVillageId = founded.id
+	LocalInbox.tell(server, world, owner, {"kind": "settlers", "tier": "digest", "title": "{name} founded",
+		"body": "Your settlers built a new village.", "vars": {"name": expedition.name}}, at)
 
 
 static func on_settlers_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:

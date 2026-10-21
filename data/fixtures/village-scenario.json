@@ -13138,6 +13138,80 @@
     },
     "serverTime": "2026-06-01T12:22:17.000Z"
    }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 7,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Outpost level 1 in Kitezh",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T10:38:30.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Claim an outpost",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T10:37:00.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Kitezh",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:37:07.500Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Train defenders",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:30:00.000Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Barracks level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:22.500Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:07.500Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 7,
+    "serverTime": "2026-06-01T12:22:17.000Z"
+   }
   }
  ]
 }

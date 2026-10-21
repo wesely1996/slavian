@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_test_local_start()
 	_test_local_villages()
 	_test_local_waves()
+	_test_local_notices()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -566,7 +567,8 @@ func _test_local_villages() -> void:
 
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
 ## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
-## army-scenario.json, expansion-scenario.json, endgame-scenario.json).
+## army-scenario.json, expansion-scenario.json, endgame-scenario.json,
+## inbox-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
@@ -575,6 +577,20 @@ func _test_local_waves() -> void:
 	_replay_scenario("army-scenario.json", "local armies")
 	_replay_scenario("expansion-scenario.json", "local expansion")
 	_replay_scenario("endgame-scenario.json", "local endgame")
+	_replay_scenario("inbox-scenario.json", "local inbox")
+
+
+## Notices rendered as the server renders them, in English and Serbian
+## (data/fixtures/notice-vectors.json).
+func _test_local_notices() -> void:
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var vectors: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures/notice-vectors.json")))
+	for v in vectors.localized:
+		var text := LocalInbox.localize(v.language, v.template, v.vars)
+		_check(text == v.text, "notice in %s: %s != %s" % [v.language, text, v.text])
+	for d in vectors.digests:
+		var text := LocalInbox.digest_summary(d.kinds, d.language)
+		_check(text == d.text, "digest in %s: %s != %s" % [d.language, text, d.text])
 
 
 ## Replays a scenario recorded on the server (server/test/scenario.ts) on a

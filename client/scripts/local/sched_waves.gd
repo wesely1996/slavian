@@ -361,13 +361,25 @@ static func fear_of(server: LocalServer, world: Dictionary) -> Dictionary:
 
 ## Raids on every standing outpost near the rest of a march.
 static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary, from_ms: int) -> void:
-	if wave.path == null:
-		return
 	var outposts: Array = []
 	for v in world.villages:
 		for plot in LocalVillage.outpost_plots(v.state.plots):
 			if int(v.state.plots[plot].level) > 0:
 				outposts.append({"villageId": v.id, "plot": plot, "cell": LocalVillage.outpost_hex(plot)})
+	schedule_raids(server, world, wave, outposts, from_ms)
+
+
+## An outpost has just been (re)built: hordes still on the march may pass it.
+static func outpost_standing(server: LocalServer, world: Dictionary, target: Dictionary, at: int) -> void:
+	var marching: Array = world.waves.filter(func(w: Dictionary) -> bool: return w.status == "marching")
+	marching.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.index) < int(b.index))
+	for wave in marching:
+		schedule_raids(server, world, wave, [target], at - int(wave.spawnAt))
+
+
+static func schedule_raids(server: LocalServer, world: Dictionary, wave: Dictionary, outposts: Array, from_ms: int) -> void:
+	if wave.path == null:
+		return
 	var reach := int(server.data.enemies.fronts[wave.front].personality.raidReach)
 	for raid in raids_along(wave.path, outposts, reach, from_ms):
 		var payload := {"waveId": wave.id, "villageId": raid.villageId, "plot": raid.plot}

@@ -1,0 +1,550 @@
+{
+ "start": {
+  "seed": 4242,
+  "at": "2026-06-01T17:50:00.000Z",
+  "name": "Letters",
+  "displayName": "You",
+  "speed": 1,
+  "difficulty": "normal"
+ },
+ "steps": [
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "f6"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 0,
+       "building": null
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "f6",
+       "building": "farm",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T17:50:00.000Z",
+       "completesAt": "2026-06-01T17:51:15.000Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 290,
+       "wood": 450,
+       "grain": 480,
+       "stone": 460
+      },
+      "ratesPerHour": {
+       "iron": 3,
+       "wood": 6,
+       "grain": 8,
+       "stone": 6
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T17:50:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T17:50:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "f0"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 0,
+       "building": null
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "f6",
+       "building": "farm",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T17:50:00.000Z",
+       "completesAt": "2026-06-01T17:51:15.000Z"
+      },
+      {
+       "plot": "f0",
+       "building": "woodcutter",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T17:51:15.000Z",
+       "completesAt": "2026-06-01T17:52:45.000Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 270,
+       "wood": 410,
+       "grain": 450,
+       "stone": 400
+      },
+      "ratesPerHour": {
+       "iron": 3,
+       "wood": 6,
+       "grain": 8,
+       "stone": 6
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T17:50:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T17:50:00.000Z"
+   }
+  },
+  {
+   "advance": 540000
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Woodcutter level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:52:45.000Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:51:15.000Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 3,
+    "serverTime": "2026-06-01T17:59:00.000Z"
+   }
+  },
+  {
+   "advance": 120000
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 4,
+      "kind": "digest",
+      "tier": "push",
+      "title": "Today in Letters",
+      "body": "1 update, 2 builds finished",
+      "createdAt": "2026-06-01T18:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Woodcutter level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:52:45.000Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:51:15.000Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 4,
+    "serverTime": "2026-06-01T18:01:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/worlds/-1/notifications/read",
+   "body": {},
+   "status": 200,
+   "response": {
+    "ok": true
+   }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 4,
+      "kind": "digest",
+      "tier": "push",
+      "title": "Today in Letters",
+      "body": "1 update, 2 builds finished",
+      "createdAt": "2026-06-01T18:00:00.000Z",
+      "read": true
+     },
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Woodcutter level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:52:45.000Z",
+      "read": true
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T17:51:15.000Z",
+      "read": true
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": true
+     }
+    ],
+    "unread": 0,
+    "serverTime": "2026-06-01T18:01:00.000Z"
+   }
+  }
+ ]
+}

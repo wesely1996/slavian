@@ -101,6 +101,9 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
           return { status: answer.status, body };
         },
       });
+      // Everything the player was told along the way.
+      const inbox = await call('GET', `/v1/worlds/${world.id}/notifications`, token);
+      recorded.push({ method: 'GET', path: '/v1/worlds/-1/notifications', status: inbox.status, response: toLocalIds(inbox.body, maps) });
       const fixture = { start, steps: recorded };
       if (process.env.UPDATE_FIXTURES) writeFileSync(path, JSON.stringify(fixture, null, 1) + '\n');
       expect(fixture).toEqual(JSON.parse(readFileSync(path, 'utf8')));

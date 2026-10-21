@@ -269,6 +269,11 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 		village.state.ledger = received.ledger
 		carried_back = received.leftover
 		changed.append(["village", village.id])
+		var sender := server.find_village(world, int(caravan.villageId))
+		if int(sender.ownerAccountId) != int(village.ownerAccountId):
+			LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "caravan_delivered", "tier": "digest",
+				"title": "A caravan from {sender} reached {village}", "body": "It brought {amount} resources.",
+				"vars": {"sender": sender.name, "village": village.name, "amount": total(caravan.cargo) - total(received.leftover)}}, int(event.dueAt))
 	caravan.status = "returning"
 	caravan.carriedBack = carried_back
 	plan_ambushes(server, world, caravan, "back", int(event.dueAt))
@@ -410,6 +415,11 @@ static func on_caravan_ambush(server: LocalServer, world: Dictionary, event: Dic
 	else:
 		caravan.carriedBack = left
 	caravan.escort = escort
+	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "ambush", "tier": "digest" if result.beatenOff else "push",
+		"title": "A caravan from {village} beat off an ambush" if result.beatenOff else "A caravan from {village} was ambushed",
+		"body": "Its escort drove off the {enemy} at ({q}, {r})." if result.beatenOff else "It lost {lost} of its load near ({q}, {r}).",
+		"vars": {"village": village.name, "enemy": "beasts" if camp.kind == "lair" else "bandits", "q": camp.q, "r": camp.r,
+			"lost": int(total(result.lost))}}, int(event.dueAt))
 	changed.append(["world"])
 
 

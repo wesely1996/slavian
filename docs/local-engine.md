@@ -26,8 +26,9 @@ change: they keep calling `Api` and listening to `Live`.
 ## Staying the same as the server
 
 - **Fixtures:** `npm run fixtures` (`server/src/fixtures.ts`) writes the
-  shared fixtures (`data/fixtures/*-vectors.json`) and the bundled game data
-  (`client/data/game.json`).
+  shared fixtures (`data/fixtures/*-vectors.json`), the bundled game data
+  (`client/data/game.json`) and the notice translations
+  (`client/data/notices.json`).
   - `server/test/fixtures.test.ts` fails while either is stale.
   - The client test (`client/tests/test_runner.gd`) checks the port against
     the fixtures.
@@ -88,6 +89,8 @@ Tracked in PLAN.md under step 24. Order:
    `cmd_heroes.gd`); armies, field battles, forts, roads, bridges, camps
    stormed and sites explored (`cmd_armies.gd`); scouting and settlers
    (`cmd_scouting.gd`); standing orders (`cmd_orders.gd`); the bridge,
-   Ritual Night and the end of a run (`cmd_bridge.gd`). The inbox is next.
+   Ritual Night and the end of a run (`cmd_bridge.gd`); the inbox and its
+   digests (`inbox.gd`, with the server's notice table bundled as
+   `client/data/notices.json`).
 6. The start screen's **Play solo**: create, continue and delete local
    worlds.

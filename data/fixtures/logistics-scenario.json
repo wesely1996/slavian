@@ -11251,6 +11251,125 @@
     },
     "serverTime": "2026-06-01T12:05:00.000Z"
    }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 12,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Gift a teammate",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T11:55:00.000Z",
+      "read": false
+     },
+     {
+      "id": 11,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T11:27:14.400Z",
+      "read": false
+     },
+     {
+      "id": 10,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Vyrgan the Hungry grows stronger",
+      "body": "Vyrgan the Hungry is now level 2.",
+      "createdAt": "2026-06-01T11:27:14.400Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "8 of them against its guard of 30.",
+      "createdAt": "2026-06-01T11:26:56.400Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "hero",
+      "tier": "digest",
+      "title": "Ilya is wounded",
+      "body": "Back on their feet in a few hours.",
+      "createdAt": "2026-06-01T11:26:13.200Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy was raided",
+      "body": "The horde carried off 641 resources after 1 rounds.",
+      "createdAt": "2026-06-01T11:26:13.200Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 8 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T11:25:55.200Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "research_done",
+      "tier": "digest",
+      "title": "Felling Axes researched",
+      "body": "Woodcutters and forest outposts cut 10% more wood.",
+      "createdAt": "2026-06-01T08:15:24.000Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Caravan Yard level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:09.000Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Academy level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:06.000Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 12,
+    "serverTime": "2026-06-01T12:05:00.000Z"
+   }
   }
  ]
 }

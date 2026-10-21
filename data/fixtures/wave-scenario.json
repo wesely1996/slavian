@@ -5189,6 +5189,53 @@
     },
     "serverTime": "2026-06-01T11:24:55.200Z"
    }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 4,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Train defenders",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:20:00.000Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Barracks level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:03.000Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 4,
+    "serverTime": "2026-06-01T11:24:55.200Z"
+   }
   }
  ]
 }

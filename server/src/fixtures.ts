@@ -8,8 +8,32 @@ import { fileURLToPath } from 'node:url';
 import { createNoise2D } from 'simplex-noise';
 import { loadGameData, type GameData } from './data/index.js';
 import { hexKey, spiral, hex } from './sim/hex.js';
+import { localize, NOTICE_TABLES } from './i18n.js';
 import { generateMap } from './sim/mapgen.js';
+import { digestSummary, SERBIAN_LABELS } from './sim/notifications.js';
 import { createRng } from './sim/rng.js';
+
+export const NOTICE_FIXTURE = fileURLToPath(new URL('../../data/fixtures/notice-vectors.json', import.meta.url));
+
+// Notices as the server renders them, in English and Serbian: templates
+// from the notice table and the client's catalog, values translated too.
+export function noticeVectors() {
+  const samples: [string, Record<string, string | number>][] = [
+    ['A horde is coming to {village}', { village: 'Kitezh' }],
+    ['The {threat} {front} horde arrives in about {hours} hours. Check the garrison and its stance.', { threat: 'low', front: 'north', hours: 3 }],
+    ['{village} was raided', { village: 'Vruchiy' }],
+    ['{tech} researched', { tech: 'Felling Axes' }],
+    ['{enemy} against {defenders}, with {ground}.', { enemy: 12, defenders: 7.5, ground: 'an ambush, a choke point' }],
+    ['Done: {step}', { step: 'Raise a building' }],
+    ['Not a notice at all, {name}', { name: 'Ilya' }],
+  ];
+  const localized = ['en', 'sr', 'sr_Latn'].flatMap((language) =>
+    samples.map(([template, vars]) => ({ language, template, vars, text: localize(language, template, vars) })),
+  );
+  const kinds = ['build_done', 'build_done', 'battle_result', 'hero', 'outpost_raided', 'build_done'];
+  const digests = ['en', 'sr'].map((language) => ({ language, kinds, text: digestSummary(kinds, language) }));
+  return { _comment: 'Written by `npm run fixtures` (server/src/fixtures.ts): notices as the server renders them; the local engine must match.', localized, digests };
+}
 
 export const MAPGEN_FIXTURE = fileURLToPath(new URL('../../data/fixtures/mapgen-vectors.json', import.meta.url));
 // The game data as the server reads it (defaults filled in), bundled into the
@@ -18,6 +42,14 @@ export const CLIENT_DATA = fileURLToPath(new URL('../../client/data/game.json', 
 
 export function clientData(data: GameData): string {
   return JSON.stringify(data) + '\n';
+}
+
+// The notice templates' translations (i18n.ts) and the digest's labels
+// (sim/notifications.ts), for the local engine's inbox.
+export const CLIENT_NOTICES = fileURLToPath(new URL('../../client/data/notices.json', import.meta.url));
+
+export function clientNotices(): string {
+  return JSON.stringify({ tables: NOTICE_TABLES, digestLabels: { sr: SERBIAN_LABELS } }, null, 1) + '\n';
 }
 
 export function mapgenVectors(data: GameData) {
@@ -59,5 +91,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const data = loadGameData();
   writeFileSync(MAPGEN_FIXTURE, JSON.stringify(mapgenVectors(data), null, 1) + '\n');
   writeFileSync(CLIENT_DATA, clientData(data));
-  console.log(`Wrote ${MAPGEN_FIXTURE} and ${CLIENT_DATA}`);
+  writeFileSync(CLIENT_NOTICES, clientNotices());
+  writeFileSync(NOTICE_FIXTURE, JSON.stringify(noticeVectors(), null, 1) + '\n');
+  console.log(`Wrote ${MAPGEN_FIXTURE}, ${NOTICE_FIXTURE}, ${CLIENT_DATA} and ${CLIENT_NOTICES}`);
 }
