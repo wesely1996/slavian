@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { completeQuest, donate, isReady, needs, newBridge, raised, stagesStanding, startRaising } from '../src/sim/bridge.js';
+import { completeQuest, donate, embersWanted, isReady, needs, newBridge, raised, stagesStanding, startRaising } from '../src/sim/bridge.js';
 import { waveFactor } from '../src/sim/difficulty.js';
 
 const data = loadGameData();
@@ -48,8 +48,18 @@ describe('the Kalinov Bridge', () => {
     expect(needs(data, last).quests).toEqual([]);
   });
 
+  it("counts the Embers a stage still wants, the torc's among them", () => {
+    const at = (stage: number) => ({ ...newBridge(T0, 100), stage });
+    expect(embersWanted(data, at(0))).toBe(0);
+    expect(embersWanted(data, at(1))).toBe(data.bridge.stages[1]!.embers);
+    expect(embersWanted(data, { ...at(1), embers: data.bridge.stages[1]!.embers })).toBe(0);
+    const arch = data.bridge.stages.length - 1;
+    expect(embersWanted(data, at(arch))).toBe(data.bridge.stages[arch]!.embers + data.bridge.ritualEmbers);
+    expect(embersWanted(data, { ...at(arch), quests: { ritual: T0.toISOString() } })).toBe(data.bridge.stages[arch]!.embers);
+  });
+
   it('makes waves bigger with every stage standing', () => {
     const base = { players: 1, villages: 1, armyAttack: 0, waveIndex: 2 };
-    expect(waveFactor(data, 'normal', { ...base, bridgeStages: 3 })).toBeCloseTo(1 + 3 * data.bridge.powerPerStage);
+    expect(waveFactor(data, 'normal', { ...base, bridgeStages: 3 })).toBeCloseTo((1 + 3 * data.bridge.powerPerStage) * data.difficulty.presets.normal.waveScale);
   });
 });

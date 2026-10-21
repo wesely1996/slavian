@@ -8,7 +8,7 @@ import type { Db, DbClient } from '../db/pool.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { getWorld, isMember, listMembers, spendEmbers, type World } from '../db/worlds.js';
 import { ForbiddenError, RuleError } from '../errors.js';
-import { completeQuest, currentStage, donate, isReady, raised, startRaising, type BridgeState } from '../sim/bridge.js';
+import { completeQuest, currentStage, donate, embersWanted, isReady, raised, startRaising, type BridgeState } from '../sim/bridge.js';
 import { withdraw } from '../sim/logistics.js';
 import type { Resources } from '../sim/resources.js';
 import { scheduleEvent, type HandlerRegistry, type SchedulerDeps } from './events.js';
@@ -126,9 +126,11 @@ export const bridgeHandlers: HandlerRegistry = {
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     if (next.status === 'complete') await callRitualNight(client, data, world, event.dueAt);
-    // A relic is wanted and every ruin has been searched: one more is remembered.
+    // A lair is wanted (for the quest, or for the Embers the group lacks) and
+    // none stands: the North sends one.
     const stage = currentStage(data, next);
-    if (stage?.quests.some((q) => q.kind === 'lair') && (await revealLair(client, data, world, event.dueAt))) {
+    const embersShort = (await getWorld(client, world.id)).embers < embersWanted(data, next);
+    if (stage && (stage.quests.some((q) => q.kind === 'lair') || embersShort) && (await revealLair(client, data, world, event.dueAt))) {
       for (const member of await listMembers(client, world.id)) {
         await tell(client, world, member.accountId, {
           kind: 'bridge',
@@ -139,6 +141,7 @@ export const bridgeHandlers: HandlerRegistry = {
         }, event.dueAt);
       }
     }
+    // A relic is wanted and every ruin has been searched: one more is remembered.
     if (stage?.quests.some((q) => q.kind === 'site') && (await revealSite(client, data, world))) {
       for (const member of await listMembers(client, world.id)) {
         await tell(client, world, member.accountId, {

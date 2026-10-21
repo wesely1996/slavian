@@ -10,9 +10,10 @@ const quiet = { start: 22 * 60, end: 7 * 60, utcOffsetMinutes: 120 };
 
 describe('difficulty', () => {
   const base = { players: 2, villages: 2, armyAttack: 0, waveIndex: 3 };
+  const normal = data.difficulty.presets.normal.waveScale;
 
   it('scales waves by preset, between floor and cap', () => {
-    expect(waveFactor(data, 'normal', base)).toBe(1);
+    expect(waveFactor(data, 'normal', base)).toBeCloseTo(normal);
     expect(waveFactor(data, 'story', base)).toBe(0.7);
     expect(waveFactor(data, 'nightmare', base)).toBe(1.5);
     // A huge group hits the cap; nothing goes below the floor.
@@ -21,10 +22,10 @@ describe('difficulty', () => {
   });
 
   it('grows waves with extra villages and an army above the curve', () => {
-    expect(waveFactor(data, 'normal', { ...base, villages: 4 })).toBeCloseTo(1.5);
+    expect(waveFactor(data, 'normal', { ...base, villages: 4 })).toBeCloseTo(1.5 * normal);
     const expected = 2 * data.difficulty.power.attackPerPlayer * (1 + data.difficulty.power.growthPerWave * 3);
-    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected })).toBe(1);
-    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected * 2 })).toBeCloseTo(1.5);
+    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected })).toBeCloseTo(normal);
+    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected * 2 })).toBeCloseTo(1.5 * normal);
   });
 
   it('sets how many camps rise and how hordes decide', () => {

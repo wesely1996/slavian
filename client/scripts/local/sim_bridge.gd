@@ -15,6 +15,13 @@ static func current_stage(data: Dictionary, bridge: Dictionary) -> Variant:
 	return data.bridge.stages[int(bridge.stage)]
 
 
+## Svarog's Embers the open stage still wants: its own and, when its quest
+## is open, the ritual torc's (sim/bridge.ts embersWanted).
+static func embers_wanted(data: Dictionary, bridge: Dictionary) -> int:
+	var need := needs(data, bridge)
+	return int(need.embers) + (int(data.bridge.ritualEmbers) if "ritual" in need.quests else 0)
+
+
 ## What the stage still needs: {resources, embers, quests}.
 static func needs(data: Dictionary, bridge: Dictionary) -> Dictionary:
 	var stage: Variant = current_stage(data, bridge)

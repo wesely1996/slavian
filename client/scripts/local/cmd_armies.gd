@@ -864,7 +864,11 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	if result.cleared:
 		camp.status = "cleared"
 		after.loot = camp_loot(data, camp.units)
-		ember = camp.kind == "lair" and LocalWaves.rng_for(int(world.seed), int(camp.id), 0xe3).next() < float(data.camps.loot.emberChance)
+		# A lair holds an Ember by chance, and always while the bridge lacks one.
+		var lucky := LocalWaves.rng_for(int(world.seed), int(camp.id), 0xe3).next() < float(data.camps.loot.emberChance)
+		var bridge: Dictionary = world.get("bridge", {})
+		var short: bool = not bridge.is_empty() and bridge.status == "open" and int(world.embers) < LocalBridge.embers_wanted(data, bridge)
+		ember = camp.kind == "lair" and (lucky or short)
 		if ember:
 			world.embers = int(world.embers) + 1
 		if camp.kind == "lair":

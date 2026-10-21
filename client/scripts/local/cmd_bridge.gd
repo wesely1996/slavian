@@ -86,11 +86,14 @@ static func on_bridge_raised(server: LocalServer, world: Dictionary, event: Dict
 		"vars": {"name": name, "stage": next_stage.name} if next_stage != null else {"name": name}}, at)
 	if next.status == "complete":
 		call_ritual_night(server, world, at)
-	# A relic is wanted and every ruin has been searched: one more is remembered.
+	# A lair is wanted (for the quest, or for the Embers the group lacks) and
+	# none stands: the North sends one.
 	var stage: Variant = LocalBridge.current_stage(data, next)
-	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "lair") and reveal_lair(server, world, at):
+	var embers_short := int(world.embers) < LocalBridge.embers_wanted(data, next)
+	if stage != null and (stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "lair") or embers_short) and reveal_lair(server, world, at):
 		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "A lair in the woods",
 			"body": "Beasts of the North have made a lair by the road their last horde took. {stage} needs it cleared.", "vars": {"stage": stage.name}}, at)
+	# A relic is wanted and every ruin has been searched: one more is remembered.
 	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "site") and reveal_site(server, world):
 		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "A forgotten ruin",
 			"body": "The builders of {stage} remember a ruin nobody has searched yet. It is marked on the map.", "vars": {"stage": stage.name}}, at)

@@ -570,7 +570,7 @@ func _test_local_villages() -> void:
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
 ## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
 ## army-scenario.json, expansion-scenario.json, endgame-scenario.json,
-## inbox-scenario.json).
+## inbox-scenario.json, ember-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
@@ -580,6 +580,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("expansion-scenario.json", "local expansion")
 	_replay_scenario("endgame-scenario.json", "local endgame")
 	_replay_scenario("inbox-scenario.json", "local inbox")
+	_replay_scenario("ember-scenario.json", "local embers")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -660,6 +661,8 @@ func _replay_scenario(file: String, name: String) -> void:
 				world.bridge = LocalServer._decode(step.set.bridge)
 			if step.set.has("embers"):
 				world.embers = int(step.set.embers)
+			if step.set.has("vault"):
+				world.vault.amounts = LocalServer._decode(step.set.vault)
 			continue
 		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
 		var label := "%s %d %s %s" % [name, i, step.method, step.path]
