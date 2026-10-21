@@ -134,3 +134,35 @@ static func quest_offers(data: Dictionary, world: Dictionary, hero: Dictionary, 
 			"distance": distance, "hours": float(def.hours) + (2 * distance) / speed, "xp": int(def.xp), "risk": float(def.risk),
 		})
 	return offers
+
+
+static func gain_xp(data: Dictionary, hero: Dictionary, xp: float) -> Dictionary:
+	var level := int(hero.level)
+	var points := int(hero.skillPoints)
+	var pool := int(hero.xp) + maxi(0, floori(xp))
+	while level < int(data.heroes.maxLevel) and pool >= xp_to_next(data, level):
+		pool -= xp_to_next(data, level)
+		level += 1
+		points += 1
+	var next := hero.duplicate()
+	next.level = level
+	next.skillPoints = points
+	next.xp = 0 if level >= int(data.heroes.maxLevel) else pool
+	return next
+
+
+## Gear dropped by a beaten horde, or null.
+static func roll_drop(data: Dictionary, hero: Dictionary, seed_value: int, battle_id: int) -> Variant:
+	var rng := LocalRng.new((seed_value ^ LocalRng.imul(battle_id + 1, 0x2545f491) ^ 0xd2) & MASK)
+	if rng.next() >= float(data.heroes.dropChance):
+		return null
+	var owned: Array = hero.inventory + hero.gear.values()
+	var candidates: Array = data.heroes.items.keys().filter(func(item: String) -> bool: return not item in owned)
+	candidates.sort()
+	if candidates.is_empty():
+		return null
+	return candidates[floori(rng.next() * candidates.size())]
+
+
+static func wound_ms(data: Dictionary, world_speed: float, kind: Variant = null) -> int:
+	return LocalWaves.js_round((float(data.heroes.woundHours) * 3600000.0 * hero_factor(data, kind, "woundTime")) / world_speed)

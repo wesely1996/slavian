@@ -56,3 +56,61 @@ static func camps_join(server: LocalServer, world: Dictionary, wave: Dictionary)
 	if joined:
 		wave.composition = composition
 		wave.initial = composition.duplicate()
+
+
+static func camp_size(data: Dictionary, wave_index: int) -> int:
+	var spawn: Dictionary = data.camps.spawn
+	return maxi(1, LocalWaves.js_round(float(spawn.baseUnits) * pow(float(spawn.growthPerWave), wave_index)))
+
+
+## Free hexes near a horde's road, away from villages, in a seeded order.
+static func spawn_sites(data: Dictionary, terrain: Dictionary, path: Array, villages: Array, taken: Dictionary, rng: LocalRng, count: int) -> Array:
+	var near := int(data.camps.spawn.nearRoad)
+	var min_distance := int(data.camps.spawn.minVillageDistance)
+	var seen := {}
+	var candidates: Array = []
+	for step in path:
+		for cell in HexMath.spiral(Vector2i(step.q, step.r), near):
+			var key := LocalLand.key(cell)
+			if seen.has(key):
+				continue
+			seen[key] = true
+			var type: Variant = terrain.get(key)
+			if type == null or type == "holy_city" or data.terrain.terrain[type].moveCost == null:
+				continue
+			if data.terrain.terrain[type].get("edge", false) or taken.has(key):
+				continue
+			if villages.any(func(v: Vector2i) -> bool: return HexMath.distance(v, cell) < min_distance):
+				continue
+			candidates.append(cell)
+	var picked: Array = []
+	while picked.size() < count and not candidates.is_empty():
+		var cell: Vector2i = candidates.pop_at(floori(rng.next() * candidates.size()))
+		if picked.all(func(p: Vector2i) -> bool: return HexMath.distance(p, cell) > 1):
+			picked.append(cell)
+	return picked
+
+
+## A camp draws in more of its kind, up to a limit.
+static func grow(data: Dictionary, units: Dictionary) -> Dictionary:
+	var share := float(data.camps.growth.share)
+	var max_units := int(data.camps.growth.maxUnits)
+	var now := total(units)
+	if now == 0 or now >= max_units:
+		return units
+	var extra := mini(max_units - now, maxi(1, LocalWaves.js_round(now * share)))
+	var next := units.duplicate()
+	# The most numerous first; ties keep their order (V8's sort is stable).
+	var kinds: Array = []
+	for unit in units:
+		if int(units[unit]) > 0:
+			var at := kinds.size()
+			for i in kinds.size():
+				if int(units[unit]) > int(units[kinds[i]]):
+					at = i
+					break
+			kinds.insert(at, unit)
+	for i in extra:
+		var unit: String = kinds[i % kinds.size()]
+		next[unit] = int(next.get(unit, 0)) + 1
+	return next

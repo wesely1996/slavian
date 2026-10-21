@@ -564,9 +564,12 @@ func _test_local_villages() -> void:
 	_check(LocalServer._js_number(0.1 + 0.2) == "0.30000000000000004" and LocalServer._js_number(70.0) == "70" and LocalServer._js_number(70.5) == "70.5", "numbers as JavaScript prints them")
 
 
-## Hordes setting out (data/fixtures/wave-scenario.json).
+## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
+## battle-scenario.json, raze-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
+	_replay_scenario("battle-scenario.json", "local battles")
+	_replay_scenario("raze-scenario.json", "local razes")
 
 
 ## Replays a scenario recorded on the server (server/test/scenario.ts) on a

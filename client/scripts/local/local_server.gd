@@ -43,8 +43,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -65,7 +65,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		var site: Vector2i = map.startSites[i]
 		var town := LocalHeroes.town_name(data, names, name_rng)
 		names.append(town)
-		_insert_village(world, member.accountId, town, site, LocalVillage.new_village(data, now, speed))
+		insert_village(world, member.accountId, town, site, LocalVillage.new_village(data, now, speed))
 	_ensure_heroes(world)
 	# Each village carries its owner's clan and hero.
 	for member in world.members:
@@ -79,7 +79,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	return world
 
 
-func _insert_village(world: Dictionary, owner: int, name: String, at: Vector2i, state: Dictionary) -> Dictionary:
+func insert_village(world: Dictionary, owner: int, name: String, at: Vector2i, state: Dictionary) -> Dictionary:
 	var village := {"id": world.next.village, "ownerAccountId": owner, "name": name, "q": at.x, "r": at.y, "state": state,
 		# Auto-reinforce defaults (migration 015): half the garrison, 4 hexes.
 		"reinforce": {"share": 0.5, "range": 4}, "ruin": null, "refuge": false}
@@ -117,15 +117,21 @@ func _ensure_heroes(world: Dictionary) -> void:
 ## A player's bonuses: research, the group's scrolls, their clan and hero
 ## (scheduler/research.ts playerBonuses), given to each of their villages.
 func _refresh_bonuses(world: Dictionary, account_id: int, at: int) -> void:
+	var bonuses := player_bonuses(world, account_id)
+	for village in world.villages:
+		if int(village.ownerAccountId) == account_id:
+			village.state = LocalVillage.with_bonuses(data, village.state, bonuses, at, world.speed)
+
+
+## Research, the group's scrolls, the player's clan and hero
+## (scheduler/research.ts playerBonuses).
+func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 	var member: Dictionary = {}
 	for m in world.members:
 		if int(m.accountId) == account_id:
 			member = m
 	var own := LocalHeroes.combine(LocalVillage.clan_bonuses(data, member.get("clan")), LocalHeroes.roster_bonuses(data, member.get("heroKind")))
-	var bonuses := LocalHeroes.combine(LocalHeroes.combine({}, {}), own)
-	for village in world.villages:
-		if int(village.ownerAccountId) == account_id:
-			village.state = LocalVillage.with_bonuses(data, village.state, bonuses, at, world.speed)
+	return LocalHeroes.combine(LocalHeroes.combine({}, {}), own)
 
 
 func _ensure_sites(world: Dictionary) -> void:
@@ -222,6 +228,7 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 	var parts := path.split("?")[0].split("/", false)
 	var changed: Array = []
 	drain(world, now, changed)
+	as_stored(world)
 	var answer := _route(world, method, parts, body if body is Dictionary else {}, now, changed)
 	answer.changed = changed
 	save(world)
@@ -422,13 +429,15 @@ func drain(world: Dictionary, until: int, changed: Array) -> int:
 		if next.is_empty():
 			break
 		var handler := Callable(self, "_on_" + String(next.type))
-		if handler.is_valid():
-			handler.call(world, next, changed)
-			next.status = "done"
-		else:
-			# Not ported yet: the server would run it; here it waits, and the
-			# world stops at it (docs/local-engine.md, part 4).
+		# Not ported yet (no handler, or a handler that answers false): the
+		# server would run it; here it waits, and the world stops at it.
+		if not handler.is_valid():
 			break
+		as_stored(world)
+		var ran: Variant = handler.call(world, next, changed)
+		if ran is bool and not ran:
+			break
+		next.status = "done"
 		processed += 1
 	world.events = world.events.filter(func(e: Dictionary) -> bool: return e.status == "pending")
 	return processed
@@ -447,6 +456,61 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 		return
 	village.state = done
 	changed.append(["village", village.id])
+
+
+## What the server keeps as jsonb, in the order it reads back in
+## (LocalStore): run before each event and request, as the server loads
+## its rows afresh for each.
+func as_stored(world: Dictionary) -> void:
+	for v in world.villages:
+		v.state = LocalStore.stored(v.state)
+		v.ruin = LocalStore.stored(v.ruin)
+	for w in world.waves:
+		w.composition = LocalStore.stored(w.composition)
+		w.initial = LocalStore.stored(w.initial)
+	for b in world.battles:
+		for key in ["setup", "attackerInitial", "defenderInitial", "rounds", "loot", "decision"]:
+			b[key] = LocalStore.stored(b[key])
+	for c in world.camps:
+		c.units = LocalStore.stored(c.units)
+	for l in world.leaders:
+		l.skills = LocalStore.stored(l.skills)
+	for h in world.heroes:
+		h.skills = LocalStore.stored(h.skills)
+		h.gear = LocalStore.stored(h.gear)
+	world.bridge = LocalStore.stored(world.bridge)
+
+
+func _on_wave_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_wave_arrive(self, world, event, changed)
+
+
+func _on_wave_disperse(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_wave_disperse(self, world, event, changed)
+
+
+func _on_battle_round(world: Dictionary, event: Dictionary, changed: Array) -> bool:
+	return LocalBattles.on_battle_round(self, world, event, changed)
+
+
+func _on_wave_raze(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_wave_raze(self, world, event, changed)
+
+
+func _on_village_rebuilt(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_village_rebuilt(self, world, event, changed)
+
+
+func _on_outpost_raid(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_outpost_raid(self, world, event, changed)
+
+
+func _on_camp_grow(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_camp_grow(self, world, event, changed)
+
+
+func _on_hero_recover(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_hero_recover(self, world, event, changed)
 
 
 func _on_wave_spawn(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -509,8 +573,8 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"sanctity": world.sanctity, "embers": world.embers, "difficulty": world.difficulty, "quietHours": null,
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
-		"members": members, "villages": villages, "waves": waves, "scouting": [], "battles": [], "raids": [], "expeditions": [],
-		"research": [], "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": [], "forts": [], "camps": [], "sites": sites,
+		"members": members, "villages": villages, "waves": waves, "scouting": [], "battles": _battles_view(world), "raids": _raids_view(world), "expeditions": [],
+		"research": [], "heroes": heroes, "leaders": LocalHordes.leaders_view(data, world), "orders": [], "armies": [], "forts": [], "camps": _camps_view(world), "sites": sites,
 		"lore": [], "bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": null, "caravans": [],
 		"vault": {"level": world.vault.level, "amounts": world.vault.amounts, "capacity": _vault_capacity(int(world.vault.level)),
 			"upgradingTo": world.vault.upgradingTo, "upgradeCompletesAt": world.vault.upgradeCompletesAt},
@@ -587,6 +651,59 @@ func _quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 	return LocalHeroes.quest_offers(data, quest_world, hero, Vector2i(home.q, home.r), now, hero.questsDone)
 
 
+## Ongoing battles and the ten latest, newest first (api/views.ts).
+func _battles_view(world: Dictionary) -> Array:
+	var battles: Array = world.battles.duplicate()
+	battles.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if (a.status == "ongoing") != (b.status == "ongoing"):
+			return a.status == "ongoing"
+		if int(a.startedAt) != int(b.startedAt):
+			return int(a.startedAt) > int(b.startedAt)
+		return int(a.id) > int(b.id))
+	var out: Array = []
+	for battle in battles.slice(0, 10):
+		var wave: Dictionary = find_wave(world, int(battle.waveId)) if battle.waveId != null else {}
+		var now: Dictionary
+		if wave.is_empty():
+			# A camp's numbers after the assault: its start minus what fell.
+			var left: Dictionary = battle.attackerInitial.duplicate()
+			for r in battle.rounds:
+				for unit in r.attackerLosses:
+					left[unit] = int(left.get(unit, 0)) - int(r.attackerLosses[unit])
+			now = {}
+			for unit in left:
+				if int(left[unit]) > 0:
+					now[unit] = left[unit]
+		else:
+			now = wave.composition
+		var front: Variant = wave.front if not wave.is_empty() else null
+		if battle.campId != null:
+			for c in world.camps:
+				if int(c.id) == int(battle.campId):
+					front = c.front
+		out.append({"id": battle.id, "front": front, "leaderId": wave.get("leaderId"), "waveId": battle.waveId, "campId": battle.campId,
+			"siteId": battle.siteId, "villageId": battle.villageId, "q": battle.q, "r": battle.r, "setup": battle.setup, "status": battle.status,
+			"round": battle.round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": now,
+			"defenderInitial": battle.defenderInitial, "rounds": battle.rounds, "loot": battle.loot, "decision": battle.decision,
+			"startedAt": LocalTime.iso(battle.startedAt), "endedAt": LocalTime.iso(battle.endedAt) if battle.endedAt != null else null})
+	return out
+
+
+func _raids_view(world: Dictionary) -> Array:
+	var raids: Array = world.raids.duplicate()
+	raids.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.at) > int(b.at) or (int(a.at) == int(b.at) and int(a.id) > int(b.id)))
+	return raids.slice(0, 10).map(func(r: Dictionary) -> Dictionary:
+		return {"id": r.id, "waveId": r.waveId, "villageId": r.villageId, "q": r.q, "r": r.r, "levelAfter": r.levelAfter, "at": LocalTime.iso(r.at)})
+
+
+func _camps_view(world: Dictionary) -> Array:
+	var out: Array = []
+	for c in world.camps:
+		if c.status == "active":
+			out.append({"id": c.id, "kind": c.kind, "front": c.front, "q": c.q, "r": c.r, "size": _total(c.units), "waveId": c.waveId})
+	return out
+
+
 ## [q, r, fear], to a tenth.
 func _fear_view(world: Dictionary) -> Array:
 	var out: Array = []
@@ -636,8 +753,10 @@ func _load_all() -> void:
 		if parsed is Dictionary:
 			var world: Dictionary = _decode(parsed)
 			# Worlds saved before part 4.
-			world.merge({"leaders": [], "fear": {}, "camps": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
-			world.next.merge({"leader": 1})
+			world.merge({"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
+			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1})
+			for w in world.waves:
+				w.merge({"initial": w.composition.duplicate()})
 			worlds[int(world.id)] = world
 
 

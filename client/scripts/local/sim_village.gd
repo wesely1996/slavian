@@ -175,7 +175,9 @@ static func capacity(data: Dictionary, levels: Dictionary, bonuses: Dictionary) 
 
 
 ## A fresh village (the first one; founded ones come with the expansion port).
-static func new_village(data: Dictionary, at: int, world_speed: float) -> Dictionary:
+## `bonuses`: a village founded later carries its owner's (newVillage's
+## `founded`).
+static func new_village(data: Dictionary, at: int, world_speed: float, bonuses: Dictionary = {}) -> Dictionary:
 	var plots := initial_plots(data)
 	var state := {
 		"plots": plots,
@@ -187,7 +189,7 @@ static func new_village(data: Dictionary, at: int, world_speed: float) -> Dictio
 		"stance": "balanced",
 		"besieged": false,
 		"adminUpkeep": 0,
-		"bonuses": {},
+		"bonuses": bonuses,
 	}
 	state.ledger = {
 		"amounts": data.buildings.village.startingResources.duplicate(),
@@ -511,4 +513,60 @@ static func complete_training(state: Dictionary, at: int) -> Dictionary:
 	var next := state.duplicate(true)
 	next.garrison = add_units(state.garrison, finished)
 	next.training = remaining
+	return next
+
+
+# --- Battles (village.ts) -------------------------------------------------------
+
+## A breach knocks the walls down (walls.json breachLevelsLost).
+static func breach_walls(data: Dictionary, state: Dictionary) -> Dictionary:
+	var wall: Variant = state.plots.get(WALL_PLOT)
+	if wall == null or int(wall.level) <= 0:
+		return state
+	var next := state.duplicate(true)
+	next.plots[WALL_PLOT].level = maxi(0, int(wall.level) - int(data.walls.breachLevelsLost))
+	next.levels = levels_of(next.plots)
+	return next
+
+
+## A passing horde burns an outpost down a level.
+static func raid_outpost(data: Dictionary, state: Dictionary, plot: String, at: int, world_speed: float) -> Dictionary:
+	var current: Variant = state.plots.get(plot)
+	if outpost_hex(plot) == Vector2i.MAX or current == null or int(current.level) <= 0:
+		return state
+	var next := state.duplicate(true)
+	next.plots[plot].level = int(current.level) - 1
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
+static func set_besieged(data: Dictionary, state: Dictionary, besieged: bool, at: int, world_speed: float) -> Dictionary:
+	if state.besieged == besieged:
+		return state
+	var next := state.duplicate(true)
+	next.besieged = besieged
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
+## Units away that will never come back: they stop eating now.
+static func lose_away(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float) -> Dictionary:
+	var next := state.duplicate(true)
+	next.away[unit] = maxi(0, int(state.away.get(unit, 0)) - count)
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
+## Garrison losses in battle: the dead stop eating from `at`.
+static func lose_garrison(data: Dictionary, state: Dictionary, losses: Dictionary, at: int, world_speed: float) -> Dictionary:
+	var next := state.duplicate(true)
+	for unit in losses:
+		next.garrison[unit] = maxi(0, int(next.garrison.get(unit, 0)) - int(losses[unit]))
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
+static func plunder(state: Dictionary, loot: Dictionary, at: int) -> Dictionary:
+	var next := state.duplicate(true)
+	next.ledger = LocalLedger.take(state.ledger, at, loot)
 	return next
