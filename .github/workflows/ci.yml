@@ -1,7 +1,7 @@
 name: CI
 
 # Runs on every pull request. The dev-build workflow calls it for pushes to
-# main, so main is never built twice.
+# main, so main is never built twice, and release.yml for version tags.
 on:
   pull_request:
   workflow_dispatch:
@@ -119,6 +119,14 @@ jobs:
           # Minutes since 2026-01-01: always increasing, so every build installs over the last one.
           code=$(( ($(date +%s) - 1767225600) / 60 ))
           name="${base}-dev.${sha}"
+          # A release tag (release.yml) builds exactly the tagged version.
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            if [[ "${GITHUB_REF_NAME#v}" != "$base" ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match config/version $base in client/project.godot"
+              exit 1
+            fi
+            name="$base"
+          fi
           echo "version_name=$name" >> "$GITHUB_OUTPUT"
           echo "version_code=$code" >> "$GITHUB_OUTPUT"
           echo "artifact=slavian-${name}" >> "$GITHUB_OUTPUT"
