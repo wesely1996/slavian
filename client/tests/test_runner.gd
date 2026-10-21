@@ -566,7 +566,7 @@ func _test_local_villages() -> void:
 
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
 ## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
-## army-scenario.json, expansion-scenario.json).
+## army-scenario.json, expansion-scenario.json, endgame-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
@@ -574,6 +574,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("logistics-scenario.json", "local logistics")
 	_replay_scenario("army-scenario.json", "local armies")
 	_replay_scenario("expansion-scenario.json", "local expansion")
+	_replay_scenario("endgame-scenario.json", "local endgame")
 
 
 ## Replays a scenario recorded on the server (server/test/scenario.ts) on a
@@ -592,6 +593,13 @@ func _replay_scenario(file: String, name: String) -> void:
 		if step.has("advance"):
 			now += int(step.advance)
 			local.drain(world, now, [])
+			continue
+		if step.has("set"):
+			# The scenario jumps ahead (server/test/scenario.ts WorldSet).
+			if step.set.has("bridge"):
+				world.bridge = LocalServer._decode(step.set.bridge)
+			if step.set.has("embers"):
+				world.embers = int(step.set.embers)
 			continue
 		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
 		var label := "%s %d %s %s" % [name, i, step.method, step.path]

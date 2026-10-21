@@ -62,7 +62,9 @@ change: they keep calling `Api` and listening to `Live`.
   waits on a real solo world and records every answer with the local
   engine's ids (`server/test/scenario.ts`, `local-ids.ts`). The client test replays the
   script on a solo world started in the app and compares each answer.
-  New rules come with new steps in a scenario.
+  New rules come with new steps in a scenario. Where play would take too
+  long, a `set` step jumps the world ahead (the bridge's state, the group's
+  Ember) on both sides.
 - **Whole fixtures:** `server/test/start-fixture.test.ts` records a real
   world start. `UPDATE_FIXTURES=1` with `TEST_DATABASE_URL` rewrites it
   after a rule change, and the client test compares the local engine's view
@@ -85,6 +87,7 @@ Tracked in PLAN.md under step 24. Order:
    commands and quests (`cmd_research.gd`, `cmd_logistics.gd`,
    `cmd_heroes.gd`); armies, field battles, forts, roads, bridges, camps
    stormed and sites explored (`cmd_armies.gd`); scouting and settlers
-   (`cmd_scouting.gd`).
+   (`cmd_scouting.gd`); standing orders (`cmd_orders.gd`); the bridge,
+   Ritual Night and the end of a run (`cmd_bridge.gd`). The inbox is next.
 6. The start screen's **Play solo**: create, continue and delete local
    worlds.

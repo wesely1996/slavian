@@ -27,8 +27,11 @@ export interface ScenarioStart {
 }
 
 // Requests use the local engine's ids ("/v1/villages/1/build"); `advance`
-// moves the clock on and runs what fell due.
-export type Step = { advance?: number; method?: string; path?: string; body?: unknown };
+// moves the clock on and runs what fell due; `set` jumps the world ahead
+// where play would take too long (the bridge's state, the group's Ember),
+// and the client test makes the same change.
+export type WorldSet = { bridge?: Record<string, unknown>; embers?: number };
+export type Step = { advance?: number; method?: string; path?: string; body?: unknown; set?: WorldSet };
 
 export interface Session {
   // The world as it started (the server's ids).
@@ -74,6 +77,17 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
         maps,
         now: () => now,
         async play(step) {
+          if (step.set) {
+            if (step.set.bridge) {
+              await db.query(
+                'INSERT INTO bridges (world_id, state) VALUES ($1, $2) ON CONFLICT (world_id) DO UPDATE SET state = EXCLUDED.state',
+                [world.id, JSON.stringify(step.set.bridge)],
+              );
+            }
+            if (step.set.embers !== undefined) await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [world.id, step.set.embers]);
+            recorded.push({ set: step.set });
+            return { status: 200, body: null };
+          }
           if (step.advance) {
             now = new Date(now.getTime() + step.advance);
             await tick(db, now, scheduler);
