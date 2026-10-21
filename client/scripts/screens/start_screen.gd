@@ -1,6 +1,7 @@
 extends Control
-## First screen: sign in as a guest, then pick, create or join a world and
-## wait in its lobby until the host starts it.
+## First screen: play solo on this device (no sign-in or connection
+## needed), or sign in as a guest, then pick, create or join a co-op world
+## and wait in its lobby until the host starts it.
 
 const GAME_SCENE := "res://scenes/game.tscn"
 const SPEEDS := [1, 2, 10]
@@ -17,6 +18,8 @@ var _logo: TextureRect
 var _tagline: Label
 var _frame: PanelContainer
 var _lobby_world_id := 0
+## A solo world waiting for a second tap to be deleted.
+var _delete_solo := 0
 ## Both the start request and the live "world started" push lead here.
 var _entering := false
 
@@ -176,6 +179,7 @@ func _show_login() -> void:
 	_content.add_child(name_edit)
 	_content.add_child(UI.primary(tr("Play as guest"), func() -> void:
 		_login(name_edit.text)))
+	_content.add_child(_solo_section(name_edit))
 
 
 func _login(display_name: String) -> void:
@@ -211,6 +215,8 @@ func _show_home() -> void:
 		UI.clear(_content)
 		_set_status(response.error)
 		_content.add_child(UI.button(tr("Retry"), _show_home))
+		# No server: solo worlds play on all the same.
+		_content.add_child(_solo_section())
 		return
 	_set_status("")
 	Session.account = response.data.account
@@ -224,6 +230,8 @@ func _show_home() -> void:
 		Session.log_out()
 		_show_login()))
 	_content.add_child(who)
+
+	_content.add_child(_solo_section())
 
 	_content.add_child(UI.label(tr("Your worlds"), UI.HEADING_SIZE))
 	if response.data.worlds.is_empty():
@@ -353,6 +361,89 @@ func _handle_world_response(response: Api.Response) -> void:
 		_show_lobby(response.data)
 	else:
 		_enter_game(response.data)
+
+
+# --- Solo ------------------------------------------------------------------
+
+## Solo worlds on this device: continue one, start one, or delete one. They
+## need neither an account nor a connection (docs/local-engine.md).
+## `name_edit`: the sign-in name field, for the player's name when not
+## signed in.
+func _solo_section(name_edit: LineEdit = null) -> Control:
+	var box := UI.vbox(12)
+	box.add_child(UI.label(tr("Play solo"), UI.HEADING_SIZE))
+	box.add_child(UI.label(tr("On this device, alone against the hordes. No connection needed."), UI.SMALL_SIZE, UI.MUTED))
+	for world in Local.list_worlds():
+		var row := UI.hbox()
+		var id := int(world.id)
+		var status := tr(String(world.status).capitalize())
+		var open := UI.button(world.name, func() -> void: _open_solo(id))
+		open.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(open)
+		var about := UI.label("%s\n%s" % [status, tr(GroupText.DIFFICULTY_LABELS[maxi(0, GroupText.DIFFICULTIES.find(world.difficulty))])], UI.SMALL_SIZE, UI.MUTED)
+		row.add_child(about)
+		var armed := _delete_solo == id
+		row.add_child(UI.button(tr("Sure? Delete") if armed else tr("Delete"), func() -> void:
+			if _delete_solo == id:
+				Local.delete_world(id)
+				_delete_solo = 0
+			else:
+				_delete_solo = id
+			_refresh_solo(box, name_edit)))
+		box.add_child(row)
+
+	var data := LocalData.load_data()
+	var world_name := UI.line_edit(tr("World name"), tr("A solo world"))
+	box.add_child(world_name)
+	var row := UI.hbox()
+	var speed := UI.options(SPEED_LABELS.map(tr), 0)
+	speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(speed)
+	var difficulty := UI.options(GroupText.DIFFICULTY_LABELS.map(tr), 1)
+	difficulty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(difficulty)
+	box.add_child(row)
+	var kinds := HeroText.roster_ids(data)
+	var hero := UI.options(kinds.map(func(kind: String) -> String: return HeroText.roster_title(data, kind)), 0)
+	box.add_child(hero)
+	box.add_child(UI.primary(tr("Start a solo world"), func() -> void:
+		var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
+		if who == "" and name_edit != null:
+			who = name_edit.text.strip_edges()
+		_start_solo({"name": world_name.text.strip_edges() if world_name.text.strip_edges() != "" else tr("A solo world"),
+			"displayName": who if who != "" else tr("You"), "speed": SPEEDS[speed.selected],
+			"difficulty": GroupText.DIFFICULTIES[difficulty.selected], "heroKind": kinds[hero.selected] if not kinds.is_empty() else null})))
+	return box
+
+
+## Rebuilds the solo section in place (after a delete).
+func _refresh_solo(box: Control, name_edit: LineEdit) -> void:
+	var parent := box.get_parent()
+	var at := box.get_index()
+	box.queue_free()
+	var fresh := _solo_section(name_edit)
+	parent.add_child(fresh)
+	parent.move_child(fresh, at)
+
+
+func _start_solo(params: Dictionary) -> void:
+	_set_status("")
+	Live.stop()
+	var view := Local.start(params)
+	# The game's data comes from the app from here on, not the server.
+	Local.world_id = int(view.id)
+	_enter_game(view)
+
+
+func _open_solo(id: int) -> void:
+	_set_status("")
+	Live.stop()
+	var view := Local.open(id)
+	if view.is_empty():
+		_set_status(tr("That solo world is gone."))
+		return
+	Local.world_id = id
+	_enter_game(view)
 
 
 # --- Lobby -----------------------------------------------------------------

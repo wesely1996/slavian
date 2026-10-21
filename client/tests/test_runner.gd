@@ -20,6 +20,7 @@ func _initialize() -> void:
 	_test_local_villages()
 	_test_local_waves()
 	_test_local_notices()
+	_test_local_saves()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -578,6 +579,26 @@ func _test_local_waves() -> void:
 	_replay_scenario("expansion-scenario.json", "local expansion")
 	_replay_scenario("endgame-scenario.json", "local endgame")
 	_replay_scenario("inbox-scenario.json", "local inbox")
+
+
+## Solo worlds are saved on the device, read back, and deleted.
+func _test_local_saves() -> void:
+	var dir := OS.get_user_data_dir().path_join("test-local-saves")
+	DirAccess.make_dir_recursive_absolute(dir)
+	for file in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir.path_join(file))
+	var data := LocalData.load_data()
+	var first := LocalServer.new(data, dir)
+	var a := first.start_world({"name": "One", "seed": 11}, 1, LocalTime.parse("2026-06-01T08:00:00.000Z"))
+	var b := first.start_world({"name": "Two", "seed": 12}, 1, LocalTime.parse("2026-06-01T09:00:00.000Z"))
+	_check(int(a.id) == -1 and int(b.id) == -2, "solo worlds take ids -1, -2: %s %s" % [a.id, b.id])
+	var again := LocalServer.new(data, dir)
+	_check(again.worlds.size() == 2 and again.worlds[-2].name == "Two", "solo worlds are read back from the device")
+	_check(_difference(again.world_view(again.worlds[-1], 0), first.world_view(first.worlds[-1], 0), "view") == "", "a saved world reads back the same")
+	again.delete_world(-1)
+	_check(not again.worlds.has(-1) and LocalServer.new(data, dir).worlds.keys() == [-2], "a deleted solo world is gone from the device")
+	for file in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir.path_join(file))
 
 
 ## Notices rendered as the server renders them, in English and Serbian

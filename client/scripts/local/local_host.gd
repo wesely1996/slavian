@@ -28,6 +28,21 @@ func list_worlds() -> Array:
 	return out
 
 
+## A saved solo world, caught up to now: its view ({} if there is none).
+func open(id: int) -> Dictionary:
+	var world: Dictionary = server.worlds.get(id, {})
+	if world.is_empty():
+		return {}
+	server.language = TranslationServer.get_locale()
+	var answer := server.handle(id, "GET", "/v1/worlds/%d" % id, null, LocalTime.now())
+	return answer.data if int(answer.status) == 200 else {}
+
+
+## Forgets a solo world and its save.
+func delete_world(id: int) -> void:
+	server.delete_world(id)
+
+
 ## Starts a solo world and returns its view.
 func start(params: Dictionary) -> Dictionary:
 	server.language = TranslationServer.get_locale()
