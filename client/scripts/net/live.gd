@@ -33,6 +33,10 @@ var _backoff := RETRY_MIN_SEC
 
 func watch(world_id: int) -> void:
 	stop()
+	# A solo world needs no connection: the local engine sends its news.
+	if world_id < 0:
+		_set_connected(true)
+		return
 	_world_id = world_id
 	_open()
 

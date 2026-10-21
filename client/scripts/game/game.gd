@@ -86,12 +86,16 @@ func world_id() -> int:
 
 
 func my_account_id() -> int:
-	return int(Session.account.get("id", 0))
+	return Local.ACCOUNT_ID if world_id() < 0 else int(Session.account.get("id", 0))
 
 
 ## Fetches buildings/terrain definitions once per session.
 func ensure_data() -> String:
 	if not data.is_empty():
+		return ""
+	# Offline, the bundled data (the same the server reads) will do.
+	if Local.is_active():
+		data = Local.server.data
 		return ""
 	var response := await Api.get_json("/v1/data")
 	if not response.ok:
@@ -102,6 +106,7 @@ func ensure_data() -> String:
 
 func set_world(new_world: Dictionary) -> void:
 	world = new_world
+	Local.world_id = int(new_world.get("id", 0)) if int(new_world.get("id", 0)) < 0 else 0
 	if new_world.has("serverTime"):
 		note_server_time(new_world.serverTime)
 	var world_map: Variant = new_world.get("map")
