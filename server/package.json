@@ -14,7 +14,8 @@
     "demo": "tsx src/demo.ts",
     "sim": "tsx src/runsim/run.ts",
     "telemetry": "tsx src/telemetry.ts",
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "fixtures": "tsx src/fixtures.ts"
   },
   "dependencies": {
     "@fastify/websocket": "^11.3.4",
