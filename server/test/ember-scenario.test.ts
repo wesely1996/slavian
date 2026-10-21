@@ -38,8 +38,11 @@ scenario('ember-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: `${world}/bridge/donate`, body: { resources: { wood: 10, stone: 0, grain: 0, iron: 0 }, embers: 0 } });
   // Raised: the Iron Span wants an Ember the group lacks.
   await play({ advance: (data.bridge.buildHours * 60 * MINUTE) / START.speed + MINUTE });
-  const lair = (await play({ method: 'GET', path: world })).body.camps.find((c: { kind: string }) => c.kind === 'lair');
-  await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'clear', target: { q: lair.q, r: lair.r }, units: { spearman: 7 }, withHero: true } });
+  const view = (await play({ method: 'GET', path: world })).body;
+  const lair = view.camps.find((c: { kind: string }) => c.kind === 'lair');
+  // Every spearman at home, with the hero.
+  const spearmen = view.villages[0].garrison.spearman;
+  await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'clear', target: { q: lair.q, r: lair.r }, units: { spearman: spearmen }, withHero: true } });
   for (let i = 0; i < 6; i++) {
     await play({ advance: 10 * MINUTE });
     await play({ method: 'GET', path: world });

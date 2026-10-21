@@ -60,6 +60,6 @@ describe('the Kalinov Bridge', () => {
 
   it('makes waves bigger with every stage standing', () => {
     const base = { players: 1, villages: 1, armyAttack: 0, waveIndex: 2 };
-    expect(waveFactor(data, 'normal', { ...base, bridgeStages: 3 })).toBeCloseTo(1 + 3 * data.bridge.powerPerStage);
+    expect(waveFactor(data, 'normal', { ...base, bridgeStages: 3 })).toBeCloseTo((1 + 3 * data.bridge.powerPerStage) * data.difficulty.presets.normal.waveScale);
   });
 });

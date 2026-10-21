@@ -4,7 +4,7 @@
   "default": "normal",
   "presets": {
     "story":     { "name": "Story",     "waveScale": 0.7,  "floor": 0.6, "maxFactor": 1.4, "powerWeight": 0.25, "campRate": 0.5, "fearWeight": 0,   "razeThreshold": 1.5,  "graceWaves": 3 },
-    "normal":    { "name": "Normal",    "waveScale": 1,    "floor": 0.8, "maxFactor": 2,   "powerWeight": 0.5,  "campRate": 1,   "fearWeight": 1,   "razeThreshold": 0,    "graceWaves": 2 },
+    "normal":    { "name": "Normal",    "waveScale": 1.1,  "floor": 0.8, "maxFactor": 2,   "powerWeight": 0.5,  "campRate": 1,   "fearWeight": 1,   "razeThreshold": 0,    "graceWaves": 2 },
     "hard":      { "name": "Hard",      "waveScale": 1.25, "floor": 1,   "maxFactor": 2.5, "powerWeight": 0.75, "campRate": 1.5, "fearWeight": 1.25, "razeThreshold": -0.5, "graceWaves": 1 },
     "nightmare": { "name": "Nightmare", "waveScale": 1.5,  "floor": 1.2, "maxFactor": 3,   "powerWeight": 1,    "campRate": 2,   "fearWeight": 1.5, "razeThreshold": -1,   "graceWaves": 0 }
   },
