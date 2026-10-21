@@ -23,7 +23,7 @@ import {
   trainUnitsCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
-import { createWorldCommand, joinWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -113,6 +113,7 @@ const minuteOfDay = z.number().int().min(0).max(1439);
 const donateBody = z.object({ resources: loadSchema, embers: z.number().int().min(0).max(100).default(0) });
 const clanBody = z.object({ clan: z.string().min(1).max(32) });
 const heroPickBody = z.object({ kind: z.string().min(1).max(32) });
+const claimBody = z.object({ step: z.string().min(1).max(32) });
 const delegateBody = z.object({ to: z.number().int().positive(), days: z.number().int() });
 const endDelegationBody = z.object({ owner: z.number().int().positive().optional() });
 // The group's quiet hours (null start/end: none), set by the host.
@@ -358,6 +359,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { kind } = heroPickBody.parse(request.body);
     await pickHeroCommand(db, scheduler, { account, worldId: id, kind, now: clock() });
     return fullWorldView(id);
+  });
+
+  app.post('/v1/worlds/:id/onboarding/claim', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { step } = claimBody.parse(request.body);
+    const claimed = await claimOnboardingCommand(db, scheduler, { account, worldId: id, step, now: clock() });
+    return { ...(await fullWorldView(id)), claimed };
   });
 
   app.put('/v1/worlds/:id/delegation', async (request) => {

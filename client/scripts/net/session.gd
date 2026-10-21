@@ -16,6 +16,8 @@ var account: Dictionary = {}
 var language := ""
 ## Text size for accessibility: "small", "normal" or "large" (M5 15).
 var text_size := "normal"
+## The tutorial on this device, per world: {world id: {"welcomed": bool, "hidden": bool}}.
+var tutorial: Dictionary = {}
 
 
 func _ready() -> void:
@@ -24,6 +26,7 @@ func _ready() -> void:
 		token = config.get_value("session", "token", "")
 		language = config.get_value("session", "language", "")
 		text_size = config.get_value("session", "text_size", "normal")
+		tutorial = config.get_value("session", "tutorial", {})
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -45,6 +48,7 @@ func save() -> void:
 	config.set_value("session", "token", token)
 	config.set_value("session", "language", language)
 	config.set_value("session", "text_size", text_size)
+	config.set_value("session", "tutorial", tutorial)
 	config.save(PATH)
 
 
@@ -59,6 +63,18 @@ func set_language(code: String) -> void:
 func report_language() -> void:
 	if token != "":
 		Api.request(HTTPClient.METHOD_PATCH, "/v1/me", {"language": language})
+
+
+## How far the tutorial got in a world on this device ("welcomed", "hidden").
+func tutorial_flag(world_id: int, key: String) -> bool:
+	return bool(tutorial.get(str(world_id), {}).get(key, false))
+
+
+func set_tutorial_flag(world_id: int, key: String, value: bool) -> void:
+	var state: Dictionary = tutorial.get(str(world_id), {})
+	state[key] = value
+	tutorial[str(world_id)] = state
+	save()
 
 
 func set_text_size(size: String) -> void:

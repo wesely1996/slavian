@@ -116,7 +116,7 @@ const SERBIAN: Record<string, string> = {
 	'{name} handed your villages back': '{name} ti je vratio sela',
 	'The hand-over has ended.': 'Predaja je završena.',
 	'Done: {step}': 'Završeno: {step}',
-	'A reward has reached {home}.': 'Nagrada je stigla u {home}.',
+	'Claim its reward from the quest card.': 'Preuzmi nagradu sa kartice zadataka.',
 	// Raids that also lost building work, camps, fieldworks and outposts
 	'The horde carried off {loot} resources after {rounds} rounds. The work on {buildings} building was lost.':
 		'Horda je odnela {loot} resursa posle {rounds} rundi. Radovi na {buildings} građevini su izgubljeni.',

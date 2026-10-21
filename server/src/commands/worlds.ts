@@ -28,6 +28,7 @@ import { ensureSites } from '../scheduler/sites.js';
 import { loadBridge } from '../db/bridges.js';
 import { lockWorld, withWorld } from '../scheduler/world.js';
 import { refreshBonuses } from '../scheduler/research.js';
+import { claimOnboarding } from '../scheduler/onboarding.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
 import { record } from '../db/telemetry.js';
@@ -177,6 +178,19 @@ export async function pickHeroCommand(
     if (world.status === 'running') await refreshBonuses(client, deps.data, world, [input.account.id], input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  });
+}
+
+// Claims a getting-started reward from the quest card.
+export async function claimOnboardingCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; worldId: number; step: string; now: Date },
+): Promise<{ villageId: number | null; finale: boolean }> {
+  return withWorld(db, input.worldId, input.now, deps, async (client) => {
+    const world = await getWorld(client, input.worldId);
+    if (world.status !== 'running') throw new RuleError('The run is not under way');
+    return claimOnboarding(client, deps.data, world, input.account.id, input.step, input.now);
   });
 }
 

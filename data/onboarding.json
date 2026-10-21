@@ -1,48 +1,123 @@
 {
   "version": 1,
-  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6). Each step is done by doing it once, in any order; its reward goes to the player's first village. The `story` is the elder's reason for asking.",
+  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6, M5 step 23). Each step is done by doing it once, in any order; its reward then waits to be claimed from the quest card and goes to the player's first village. `how` says what to tap, step by step; `show` is what the quest card's Show me points at. The `story` is the elder's reason for asking. `finale` is the reward for claiming every step.",
   "steps": [
     {
       "id": "build",
       "title": "Raise a building",
       "hint": "Open your village and queue any building or field upgrade.",
       "story": "The elder looks at the thin palisade and the half-empty fields. \"Walls and bread first, child. Everything else grows from them.\"",
-      "reward": { "wood": 150, "stone": 150, "grain": 100, "iron": 50 }
+      "reward": {
+        "wood": 300,
+        "stone": 300,
+        "grain": 200,
+        "iron": 100
+      },
+      "how": [
+        "Tap Village in the top bar.",
+        "Tap an empty plot or a building in the village.",
+        "Tap Build or Upgrade in the sheet."
+      ],
+      "show": "village"
     },
     {
       "id": "train",
       "title": "Train defenders",
       "hint": "Build a Barracks and train any unit there.",
       "story": "\"The hordes do not wait for the harvest. Put spears in the hands of those who can hold them.\"",
-      "reward": { "wood": 100, "stone": 50, "grain": 150, "iron": 100 }
+      "reward": {
+        "wood": 200,
+        "stone": 100,
+        "grain": 300,
+        "iron": 200
+      },
+      "how": [
+        "Build a Barracks on a free plot in the village.",
+        "When it stands, open the Troops tab.",
+        "Pick a unit and a number, then tap Train."
+      ],
+      "show": "troops"
     },
     {
       "id": "outpost",
       "title": "Claim an outpost",
       "hint": "Tap a forest, hill, field or mine hex near your village and claim it.",
       "story": "\"The land around us is rich, and nobody tends it. Set a camp there before the beasts do.\"",
-      "reward": { "wood": 200, "stone": 200, "grain": 100, "iron": 100 }
+      "reward": {
+        "wood": 400,
+        "stone": 400,
+        "grain": 200,
+        "iron": 200
+      },
+      "how": [
+        "Go back to the map.",
+        "Tap a forest, hills, plains, mountain or lake hex next to your village.",
+        "In the sheet, tap Claim beside Build an outpost."
+      ],
+      "show": "outpost"
     },
     {
       "id": "scout",
       "title": "Send scouts",
       "hint": "Build a Scout Lodge and send scouts at a horde, a camp or an ancient site.",
       "story": "\"Fear is what you feel about a thing you have not seen. Go and see it.\"",
-      "reward": { "wood": 100, "stone": 100, "grain": 100, "iron": 50 }
+      "reward": {
+        "wood": 200,
+        "stone": 200,
+        "grain": 200,
+        "iron": 100
+      },
+      "how": [
+        "Build a Scout Lodge in the village.",
+        "Tap the threat line in the top bar.",
+        "Pick a horde and tap Send scouts."
+      ],
+      "show": "threats"
     },
     {
       "id": "camp",
       "title": "Clear your first camp",
       "hint": "Send an army to storm a monster camp or a lair (order: storm it).",
       "story": "\"A camp of beasts in the woods is a wave that has not yet happened. Burn it out.\"",
-      "reward": { "wood": 300, "stone": 300, "grain": 300, "iron": 200 }
+      "reward": {
+        "wood": 600,
+        "stone": 600,
+        "grain": 600,
+        "iron": 400
+      },
+      "how": [
+        "Find a camp or a lair on the map (the tents and dens).",
+        "Tap it, choose your troops in the sheet and order them to storm it."
+      ],
+      "show": "camp"
     },
     {
       "id": "gift",
       "title": "Gift a teammate",
       "hint": "Send a caravan to a teammate's village or to the Holy City vault.",
       "story": "\"No village stands alone. What you share now comes back to you on the night the walls shake.\"",
-      "reward": { "wood": 200, "stone": 200, "grain": 200, "iron": 200 }
+      "reward": {
+        "wood": 400,
+        "stone": 400,
+        "grain": 400,
+        "iron": 400
+      },
+      "how": [
+        "Build a Caravan Yard in the village.",
+        "Open the Caravans tab.",
+        "Load resources and send them to a teammate or to the Holy City vault."
+      ],
+      "show": "caravans"
     }
-  ]
+  ],
+  "finale": {
+    "title": "Ready for the hordes",
+    "story": "The elder nods at last. \"Now you know the ways of the steppe and the forest. The rest you will learn from the hordes themselves.\"",
+    "reward": {
+      "wood": 800,
+      "stone": 800,
+      "grain": 800,
+      "iron": 500
+    }
+  }
 }
