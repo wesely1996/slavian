@@ -1,0 +1,211 @@
+{
+ "_comment": "Written by `npm run fixtures` (server/src/fixtures.ts): notices as the server renders them; the local engine must match.",
+ "localized": [
+  {
+   "language": "en",
+   "template": "A horde is coming to {village}",
+   "vars": {
+    "village": "Kitezh"
+   },
+   "text": "A horde is coming to Kitezh"
+  },
+  {
+   "language": "en",
+   "template": "The {threat} {front} horde arrives in about {hours} hours. Check the garrison and its stance.",
+   "vars": {
+    "threat": "low",
+    "front": "north",
+    "hours": 3
+   },
+   "text": "The low north horde arrives in about 3 hours. Check the garrison and its stance."
+  },
+  {
+   "language": "en",
+   "template": "{village} was raided",
+   "vars": {
+    "village": "Vruchiy"
+   },
+   "text": "Vruchiy was raided"
+  },
+  {
+   "language": "en",
+   "template": "{tech} researched",
+   "vars": {
+    "tech": "Felling Axes"
+   },
+   "text": "Felling Axes researched"
+  },
+  {
+   "language": "en",
+   "template": "{enemy} against {defenders}, with {ground}.",
+   "vars": {
+    "enemy": 12,
+    "defenders": 7.5,
+    "ground": "an ambush, a choke point"
+   },
+   "text": "12 against 7.5, with an ambush, a choke point."
+  },
+  {
+   "language": "en",
+   "template": "Done: {step}",
+   "vars": {
+    "step": "Raise a building"
+   },
+   "text": "Done: Raise a building"
+  },
+  {
+   "language": "en",
+   "template": "Not a notice at all, {name}",
+   "vars": {
+    "name": "Ilya"
+   },
+   "text": "Not a notice at all, Ilya"
+  },
+  {
+   "language": "sr",
+   "template": "A horde is coming to {village}",
+   "vars": {
+    "village": "Kitezh"
+   },
+   "text": "Horda dolazi u Kitezh"
+  },
+  {
+   "language": "sr",
+   "template": "The {threat} {front} horde arrives in about {hours} hours. Check the garrison and its stance.",
+   "vars": {
+    "threat": "low",
+    "front": "north",
+    "hours": 3
+   },
+   "text": "Dolazi niska horda sa severa, za oko 3 h. Proveri posadu i njen stav."
+  },
+  {
+   "language": "sr",
+   "template": "{village} was raided",
+   "vars": {
+    "village": "Vruchiy"
+   },
+   "text": "Vruchiy je opljačkano"
+  },
+  {
+   "language": "sr",
+   "template": "{tech} researched",
+   "vars": {
+    "tech": "Felling Axes"
+   },
+   "text": "Sekire za seču je istraženo"
+  },
+  {
+   "language": "sr",
+   "template": "{enemy} against {defenders}, with {ground}.",
+   "vars": {
+    "enemy": 12,
+    "defenders": 7.5,
+    "ground": "an ambush, a choke point"
+   },
+   "text": "12 protiv 7.5, uz zasedu, tesnac."
+  },
+  {
+   "language": "sr",
+   "template": "Done: {step}",
+   "vars": {
+    "step": "Raise a building"
+   },
+   "text": "Završeno: Podigni građevinu"
+  },
+  {
+   "language": "sr",
+   "template": "Not a notice at all, {name}",
+   "vars": {
+    "name": "Ilya"
+   },
+   "text": "Not a notice at all, Ilija"
+  },
+  {
+   "language": "sr_Latn",
+   "template": "A horde is coming to {village}",
+   "vars": {
+    "village": "Kitezh"
+   },
+   "text": "Horda dolazi u Kitezh"
+  },
+  {
+   "language": "sr_Latn",
+   "template": "The {threat} {front} horde arrives in about {hours} hours. Check the garrison and its stance.",
+   "vars": {
+    "threat": "low",
+    "front": "north",
+    "hours": 3
+   },
+   "text": "Dolazi niska horda sa severa, za oko 3 h. Proveri posadu i njen stav."
+  },
+  {
+   "language": "sr_Latn",
+   "template": "{village} was raided",
+   "vars": {
+    "village": "Vruchiy"
+   },
+   "text": "Vruchiy je opljačkano"
+  },
+  {
+   "language": "sr_Latn",
+   "template": "{tech} researched",
+   "vars": {
+    "tech": "Felling Axes"
+   },
+   "text": "Sekire za seču je istraženo"
+  },
+  {
+   "language": "sr_Latn",
+   "template": "{enemy} against {defenders}, with {ground}.",
+   "vars": {
+    "enemy": 12,
+    "defenders": 7.5,
+    "ground": "an ambush, a choke point"
+   },
+   "text": "12 protiv 7.5, uz zasedu, tesnac."
+  },
+  {
+   "language": "sr_Latn",
+   "template": "Done: {step}",
+   "vars": {
+    "step": "Raise a building"
+   },
+   "text": "Završeno: Podigni građevinu"
+  },
+  {
+   "language": "sr_Latn",
+   "template": "Not a notice at all, {name}",
+   "vars": {
+    "name": "Ilya"
+   },
+   "text": "Not a notice at all, Ilija"
+  }
+ ],
+ "digests": [
+  {
+   "language": "en",
+   "kinds": [
+    "build_done",
+    "build_done",
+    "battle_result",
+    "hero",
+    "outpost_raided",
+    "build_done"
+   ],
+   "text": "3 builds finished, 1 battle report, 1 hero report, 1 update"
+  },
+  {
+   "language": "sr",
+   "kinds": [
+    "build_done",
+    "build_done",
+    "battle_result",
+    "hero",
+    "outpost_raided",
+    "build_done"
+   ],
+   "text": "Završene gradnje: 3, izveštaji o bitkama: 1, vesti o junacima: 1, novosti: 1"
+  }
+ ]
+}

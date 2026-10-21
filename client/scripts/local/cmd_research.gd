@@ -100,6 +100,9 @@ static func on_research_complete(server: LocalServer, world: Dictionary, event: 
 		if int(e.accountId) == int(p.accountId) and e.tech == p.tech and e.status == "researching":
 			e.status = "done"
 			server.refresh_bonuses(world, int(p.accountId), int(event.dueAt), changed)
+			var def: Dictionary = server.data.research.techs.get(p.tech, {})
+			LocalInbox.tell(server, world, int(p.accountId), {"kind": "research_done", "tier": "digest", "title": "{tech} researched",
+				"body": def.get("description", ""), "vars": {"tech": def.get("name", p.tech)}}, int(event.dueAt))
 			changed.append(["world"])
 			return
 

@@ -11929,6 +11929,170 @@
     },
     "serverTime": "2026-06-01T12:58:55.200Z"
    }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 17,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy held",
+      "body": "The horde was beaten after 9 rounds.",
+      "createdAt": "2026-06-01T12:24:28.157Z",
+      "read": false
+     },
+     {
+      "id": 16,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 9 is fighting your garrison of 14.",
+      "createdAt": "2026-06-01T12:21:46.157Z",
+      "read": false
+     },
+     {
+      "id": 15,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low south horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T12:19:36.557Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "hero",
+      "tier": "digest",
+      "title": "Dobrynya is back from: Search the ruins",
+      "body": "Searched the Sunken Shrine.",
+      "createdAt": "2026-06-01T12:05:43.200Z",
+      "read": false
+     },
+     {
+      "id": 13,
+      "kind": "site",
+      "tier": "digest",
+      "title": "The Sunken Shrine at (3, 0) gave up 1755 resources",
+      "body": "Explored and done.",
+      "createdAt": "2026-06-01T12:05:43.200Z",
+      "read": false
+     },
+     {
+      "id": 12,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Your army cleared the lair at (6, -8)",
+      "body": "It carries home 371 resources and a Svarog's Ember for the group.",
+      "createdAt": "2026-06-01T12:01:33.600Z",
+      "read": false
+     },
+     {
+      "id": 11,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Clear your first camp",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T12:01:33.600Z",
+      "read": false
+     },
+     {
+      "id": 10,
+      "kind": "site",
+      "tier": "digest",
+      "title": "The Stone Idol at (-3, 0) gave up a Svarog's Ember",
+      "body": "Explored and done.",
+      "createdAt": "2026-06-01T11:33:14.400Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "bridge",
+      "tier": "digest",
+      "title": "Foundation Stones: Bring back a relic",
+      "body": "Bring back a relic of the old builders from an ancient site: their mark, set in the first stone, lets the foundation lie on the burning bank.",
+      "createdAt": "2026-06-01T11:33:14.400Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Your army held (-2, 1)",
+      "body": "The horde was beaten after 4 rounds.",
+      "createdAt": "2026-06-01T11:26:38.400Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde ran into your army at (-2, 1)",
+      "body": "8 against 7.",
+      "createdAt": "2026-06-01T11:25:26.400Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Send scouts",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T11:01:36.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Train defenders",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:20:00.000Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Scout Lodge level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:05.400Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Barracks level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:03.000Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 17,
+    "serverTime": "2026-06-01T12:58:55.200Z"
+   }
   }
  ]
 }

@@ -17,6 +17,8 @@ var worlds: Dictionary = {}
 var data: Dictionary = {}
 ## Where worlds are saved ("" keeps them in memory only, for tests).
 var save_dir := DIR
+## The player's language, for what the inbox tells them (accounts.language).
+var language := "en"
 
 
 func _init(game_data: Dictionary = {}, dir := DIR) -> void:
@@ -43,8 +45,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -74,6 +76,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	world.bridge = {"stage": 0, "donated": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "embers": 0, "quests": {},
 		"stageStartedAt": LocalTime.iso(now), "sanctityAtStart": world.sanctity, "status": "open", "raisedAt": null}
 	_announce_first_waves(world)
+	LocalInbox.ensure_digests(self, world, now)
 	world.hexes = _by_row(world.hexes)
 	worlds[id] = world
 	save(world)
@@ -263,6 +266,15 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 func _route(world: Dictionary, method: String, parts: PackedStringArray, body: Dictionary, now: int, changed: Array) -> Dictionary:
 	if method == "GET" and parts.size() == 3 and parts[1] == "worlds":
 		return {"status": 200, "data": world_view(world, now)}
+	if parts.size() >= 4 and parts[1] == "worlds" and parts[3] == "notifications":
+		if method == "GET" and parts.size() == 4:
+			var inbox := LocalInbox.inbox_view(world, int(world.hostAccountId))
+			inbox.serverTime = LocalTime.iso(now)
+			return {"status": 200, "data": inbox}
+		if method == "POST" and parts.size() == 5 and parts[4] == "read":
+			LocalInbox.mark_all_read(world, int(world.hostAccountId), now)
+			changed.append(["inbox"])
+			return {"status": 200, "data": {"ok": true}}
 	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "onboarding" and parts[4] == "claim":
 		var claimed := _claim_onboarding(world, String(body.get("step", "")), now, changed)
 		if claimed.has("error"):
@@ -488,11 +500,16 @@ func find_village(world: Dictionary, id: int) -> Dictionary:
 
 ## The first time a player does a getting-started step (scheduler/onboarding.ts).
 func onboarding_step(world: Dictionary, account_id: int, step: String, now: int, changed: Array) -> void:
+	if world.status != "running":
+		return
 	for member in world.members:
 		if int(member.accountId) == account_id and not member.onboarding.has(step):
-			if data.onboarding.steps.any(func(s: Dictionary) -> bool: return s.id == step):
-				member.onboarding[step] = LocalTime.iso(now)
-				changed.append(["world"])
+			for s in data.onboarding.steps:
+				if s.id == step:
+					member.onboarding[step] = LocalTime.iso(now)
+					LocalInbox.tell(self, world, account_id, {"kind": "onboarding", "tier": "digest", "title": "Done: {step}",
+						"body": "Claim its reward from the quest card.", "vars": {"step": s.title}}, now)
+					changed.append(["world"])
 
 
 func _claim_onboarding(world: Dictionary, step: String, now: int, changed: Array) -> Dictionary:
@@ -606,6 +623,14 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	if done.has("error"):
 		return
 	village.state = done
+	var def: Variant = data.buildings.buildings.get(p.building)
+	var big: bool = p.building == "elder_hall" or int(p.targetLevel) >= int(data.notifications.bigBuildLevel)
+	LocalInbox.tell(self, world, village.ownerAccountId, {"kind": "build_done", "tier": "push" if big else "digest",
+		"title": "{building} level {level} in {village}", "body": "Finished. Your build queue may have room for more." if big else "Finished.",
+		"vars": {"building": def.name if def != null else p.building, "level": int(p.targetLevel), "village": village.name}}, int(event.dueAt))
+	var cell := LocalVillage.outpost_hex(plot)
+	if cell != Vector2i.MAX and int(p.targetLevel) == 1:
+		LocalHordes.outpost_standing(self, world, {"villageId": village.id, "plot": plot, "cell": cell}, int(event.dueAt))
 	changed.append(["village", village.id])
 
 
@@ -766,9 +791,12 @@ func _on_wave_spawn(world: Dictionary, event: Dictionary, changed: Array) -> voi
 	LocalHordes.on_wave_spawn(self, world, event, changed)
 
 
-## The target's owner is told a horde is near; the inbox comes in part 5.
-func _on_wave_warning(_world: Dictionary, _event: Dictionary, _changed: Array) -> void:
-	pass
+func _on_wave_warning(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalInbox.on_wave_warning(self, world, event, changed)
+
+
+func _on_daily_digest(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalInbox.on_daily_digest(self, world, event, changed)
 
 
 func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1007,8 +1035,9 @@ func _load_all() -> void:
 			var world: Dictionary = _decode(parsed)
 			# Worlds saved before part 4.
 			world.merge({"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [],
-				"armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
-			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1})
+				"armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
+			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1,
+				"notification": 1})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			world.hexes = _by_row(world.hexes)

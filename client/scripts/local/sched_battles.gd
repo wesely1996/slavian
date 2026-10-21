@@ -78,6 +78,8 @@ static func start_battle(server: LocalServer, world: Dictionary, wave: Dictionar
 	if came_over_river(wave.path if wave.path != null else [], Vector2i(village.q, village.r), rivers):
 		setup.river = true
 	var composition: Dictionary = wave.composition
+	# As it arrived, before any engines built on site (the notice counts these).
+	var arrived := LocalBattle.total(composition)
 	var first_round := at + LocalBattle.round_ms(data, world.speed)
 	var integrity := LocalWalls.wall_integrity(data, state.plots)
 	if integrity > 0:
@@ -95,6 +97,9 @@ static func start_battle(server: LocalServer, world: Dictionary, wave: Dictionar
 		"attackerStance": wave.stance, "attackerInitial": composition, "defenderInitial": state.garrison, "startedAt": at})
 	server.schedule(world, first_round, "battle_round", {"battleId": battle.id})
 	LocalArmies.rally_to_battle(server, world, battle, village, at)
+	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "under_attack", "tier": "push", "title": "{village} is under attack",
+		"body": "A horde of {enemy} is fighting your garrison of {defenders}.",
+		"vars": {"village": village.name, "enemy": arrived, "defenders": LocalBattle.total(state.garrison)}}, at)
 	changed.append(["village", village_id])
 
 
@@ -342,16 +347,27 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 			var loot := LocalBattle.raid_loot(data, LocalLedger.amounts_at(village_state.ledger, at), battle.attackerInitial, attacker_now, bonuses,
 				float(data.enemies.fronts[wave.front].personality.lootFactor) * (1.0 + float(led.loot)))
 			# A raid, like a raze, burns whatever was being built.
+			var lost_builds: int = village_state.queue.size()
 			village_state = LocalVillage.plunder(village_state, loot, at)
 			village_state.queue = []
 			village_state = LocalVillage.set_besieged(data, village_state, false, at, world.speed)
 			_record_round(battle, log, {"status": "raided", "at": at, "loot": loot})
+			var body := "The horde carried off {loot} resources after {rounds} rounds."
+			if lost_builds > 0:
+				body += " The work on {buildings} building%s was lost." % ("" if lost_builds == 1 else "s")
+			LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "{village} was raided",
+				"body": body, "vars": {"village": village.name, "loot": int(LocalLogistics.total(loot)), "rounds": round, "buildings": lost_builds}}, at)
 		else:
 			_record_round(battle, log, {"status": "raided", "at": at, "loot": null})
+			LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "razing", "tier": "push", "title": "{village} is being razed",
+				"body": "The horde broke the defenders after {rounds} rounds and is burning the village.",
+				"vars": {"village": village.name, "rounds": round}}, at)
 	else:
 		village_state = LocalVillage.set_besieged(data, village_state, false, at, world.speed)
 		_record_round(battle, log, {"status": "defended", "at": at, "loot": null})
 		horde_beaten(server, world, Vector2i(village.q, village.r), LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now))
+		LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "{village} held",
+			"body": "The horde was beaten after {rounds} rounds.", "vars": {"village": village.name, "rounds": round}}, at)
 		finish_wave(server, world, wave, "defeated", at, changed)
 
 	# A breach knocks the walls down a level.
@@ -492,6 +508,17 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 			holy_city_falls(server, world, wave, attacker_now, at, changed)
 		else:
 			LocalArmies.march_on(server, world, wave, Vector2i(battle.q, battle.r), at)
+		if holy:
+			LocalInbox.tell_everyone(server, world, {"kind": "battle_result", "tier": "digest" if won else "push",
+				"title": "The Holy City held" if won else "The Holy City was struck",
+				"body": "The horde was beaten at its walls after {rounds} rounds." if won else "Its Sanctity fell to {sanctity}.",
+				"vars": {"rounds": round} if won else {"sanctity": int(world.sanctity)}}, at)
+		else:
+			for owner in LocalArmies.owners(engaged):
+				LocalInbox.tell(server, world, owner, {"kind": "battle_result", "tier": "digest",
+					"title": "Your army held ({q}, {r})" if won else "Your army fell back from ({q}, {r})",
+					"body": "The horde was beaten after {rounds} rounds." if won else "The horde marches on, {rounds} rounds late.",
+					"vars": {"q": battle.q, "r": battle.r, "rounds": round}}, at)
 	changed.append(["world"])
 	return true
 
@@ -505,6 +532,9 @@ static func holy_city_falls(server: LocalServer, world: Dictionary, wave: Dictio
 		world.endedAt = at
 	world.sanctity = maxi(0, int(world.sanctity) - damage)
 	finish_wave(server, world, wave, "dispersed", at, changed)
+	if int(world.sanctity) <= 0:
+		var lost: Dictionary = server.data.bridge.endings.lost
+		LocalInbox.tell_everyone(server, world, {"kind": "ritual", "tier": "push", "title": lost.title, "body": lost.story}, at)
 
 
 # --- The horde AI (scheduler/horde.ts) -----------------------------------------
@@ -585,6 +615,10 @@ static func settle(server: LocalServer, world: Dictionary, wave: Dictionary, fro
 		wave.status = "settled"
 		wave.endsAt = at
 		_after_wave(server, world, wave, at)
+		LocalInbox.tell_everyone(server, world, {"kind": "camp", "tier": "digest",
+			"title": "Monsters made a lair at ({q}, {r})" if wave.front == "north" else "Raiders made camp at ({q}, {r})",
+			"body": "{count} survivors of wave {wave} settled there.",
+			"vars": {"q": site.x, "r": site.y, "count": LocalBattle.total(units), "wave": int(wave.index) + 1}}, at)
 	changed.append(["world"])
 
 
@@ -648,6 +682,8 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 	var plots: Dictionary = village.state.plots.duplicate(true)
 	village.state = ruined_state(data, village.state, at, world.speed)
 	village.ruin = {"plots": plots, "since": LocalTime.iso(at), "rebuildingUntil": null}
+	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "razed", "tier": "push", "title": "{village} was razed",
+		"body": "Only ruins are left. Rebuild them, or start over from what remains.", "vars": {"village": village.name}}, at)
 	# Nothing left standing: a refugee camp by the Holy City.
 	var owner := int(village.ownerAccountId)
 	var standing: Array = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == owner and v.ruin == null and v.id != village.id)
@@ -662,6 +698,8 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 			LocalVillage.new_village(data, at, world.speed, {"startingResources": data.buildings.village.startingResources, "adminUpkeep": 0,
 				"bonuses": server.player_bonuses(world, owner)}))
 		camp.refuge = true
+		LocalInbox.tell(server, world, owner, {"kind": "refuge", "tier": "push", "title": "A refuge by the Holy City",
+			"body": "{camp} takes in your people at ({q}, {r}).", "vars": {"camp": camp.name, "q": site.x, "r": site.y}}, at)
 
 
 static func on_wave_raze(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -688,6 +726,8 @@ static func on_village_rebuilt(server: LocalServer, world: Dictionary, event: Di
 		LocalVillage.capacity(server.data, next.levels, next.bonuses))
 	village.state = next
 	village.ruin = null
+	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "build_done", "tier": "push", "title": "{village} stands again",
+		"body": "Its fields and buildings are rebuilt as they were.", "vars": {"village": village.name}}, int(event.dueAt))
 	changed.append(["village", village.id])
 	changed.append(["world"])
 
@@ -713,6 +753,9 @@ static func start_holy_city_battle(server: LocalServer, world: Dictionary, wave:
 		army.joinsRound = 1
 		army.joinBonus = 0
 	server.schedule(world, at + LocalBattle.round_ms(server.data, world.speed), "battle_round", {"battleId": battle.id})
+	LocalInbox.tell_everyone(server, world, {"kind": "under_attack", "tier": "push", "title": "A horde is at the Holy City",
+		"body": "{enemy} of them against its guard of {defenders}.",
+		"vars": {"enemy": LocalBattle.total(wave.composition), "defenders": LocalBattle.total(defenders)}}, at)
 
 
 # --- Outposts (scheduler/outposts.ts) ------------------------------------------
@@ -733,6 +776,9 @@ static func on_outpost_raid(server: LocalServer, world: Dictionary, event: Dicti
 	world.raids.append({"id": world.next.raid, "waveId": wave.id, "villageId": village.id, "q": cell.x, "r": cell.y,
 		"levelAfter": after.level, "at": int(event.dueAt)})
 	world.next.raid += 1
+	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "A horde burned an outpost of {village}",
+		"body": "The outpost at ({q}, {r}) is down to level {level}." if int(after.level) > 0 else "The outpost at ({q}, {r}) lies in ruins.",
+		"vars": {"village": village.name, "q": cell.x, "r": cell.y, "level": int(after.level)}}, int(event.dueAt))
 	changed.append(["village", village.id])
 	changed.append(["world"])
 
@@ -814,6 +860,14 @@ static func bridge_quest(server: LocalServer, world: Dictionary, quest: String, 
 	var done: Variant = LocalBridge.complete_quest(server.data, bridge, quest, at)
 	if done == null:
 		return
+	var stage: Dictionary = LocalBridge.current_stage(server.data, done)
+	var story := ""
+	for q in stage.quests:
+		if q.kind == quest:
+			story = q.get("story", "")
+			break
+	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "{stage}: {quest}", "body": story,
+		"vars": {"stage": stage.name, "quest": server.data.bridge.quests[quest].name}}, at)
 	settle_bridge(server, world, done, at)
 
 
@@ -823,6 +877,8 @@ static func settle_bridge(server: LocalServer, world: Dictionary, bridge: Dictio
 	if LocalBridge.is_ready(server.data, next):
 		next = LocalBridge.start_raising(server.data, next, at, world.speed)
 		server.schedule(world, LocalTime.parse(next.raisedAt), "bridge_raised", {"stage": next.stage})
+		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "Raising {stage}",
+			"body": "Everything it needs is in place; the builders are at work.", "vars": {"stage": LocalBridge.current_stage(server.data, next).name}}, at)
 	world.bridge = next
 
 
@@ -836,6 +892,8 @@ static func leader_after(server: LocalServer, world: Dictionary, wave: Dictionar
 	if leader.status == "dead":
 		return
 	var after := LocalHordes.leader_after_battle(server.data, wave.front, leader, outcome, world.speed)
+	var title_before := LocalHordes.leader_title(server.data, wave.front, leader)
+	var level_before := int(leader.level)
 	var state: Dictionary = after.state
 	leader.level = state.level
 	leader.xp = state.xp
@@ -851,6 +909,13 @@ static func leader_after(server: LocalServer, world: Dictionary, wave: Dictionar
 		leader.woundedUntil = at + int(after.woundMs)
 	if not (after.grudge is String and after.grudge == "keep"):
 		leader.grudgeVillageId = after.grudge
+	if after.dead:
+		LocalInbox.tell_everyone(server, world, {"kind": "leader", "tier": "digest", "title": "{leader} has fallen",
+			"body": "{leader} died with the last of the horde after {battles} battles. Another will rise to take their place.",
+			"vars": {"leader": LocalHordes.leader_title(server.data, wave.front, leader), "battles": int(leader.battles)}}, at)
+	elif int(leader.level) > level_before:
+		LocalInbox.tell_everyone(server, world, {"kind": "leader", "tier": "digest", "title": "{leader} grows stronger",
+			"body": "{leader} is now level {level}.", "vars": {"leader": title_before, "level": int(leader.level)}}, at)
 
 
 ## scheduler/heroes.ts heroAfterBattle.
@@ -866,7 +931,14 @@ static func hero_after_battle(server: LocalServer, world: Dictionary, hero: Dict
 		next.status = "wounded"
 		next.woundedUntil = LocalTime.iso(wounded_until)
 		server.schedule(world, wounded_until, "hero_recover", {"accountId": hero.accountId})
+	var level_before := int(hero.level)
 	hero.merge(next, true)
+	if not result.won:
+		LocalInbox.tell(server, world, hero.accountId, {"kind": "hero", "tier": "digest", "title": "{name} is wounded",
+			"body": "Back on their feet in a few hours.", "vars": {"name": hero.name}}, int(result.at))
+	elif int(hero.level) > level_before:
+		LocalInbox.tell(server, world, hero.accountId, {"kind": "hero", "tier": "digest", "title": "{name} reached level {level}",
+			"body": "A new skill point to spend.", "vars": {"name": hero.name, "level": int(hero.level)}}, int(result.at))
 
 
 static func on_hero_recover(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:

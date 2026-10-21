@@ -170,6 +170,9 @@ const TABLES: Record<string, Record<string, string>> = {
 	sr: SERBIAN,
 };
 
+/** The notice tables by language, bundled into the app for the local engine. */
+export const NOTICE_TABLES: Readonly<Record<string, Readonly<Record<string, string>>>> = TABLES;
+
 const merged = new Map<string, Record<string, string>>();
 
 /** The notice table over the client's catalog, for `language`; null for English. */

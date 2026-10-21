@@ -41993,6 +41993,332 @@
     },
     "serverTime": "2026-06-01T16:00:00.000Z"
    }
+  },
+  {
+   "method": "GET",
+   "path": "/v1/worlds/-1/notifications",
+   "status": 200,
+   "response": {
+    "notifications": [
+     {
+      "id": 35,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 6 rounds.",
+      "createdAt": "2026-06-01T15:00:57.553Z",
+      "read": false
+     },
+     {
+      "id": 34,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Brother Lothar has fallen",
+      "body": "Brother Lothar died with the last of the horde after 4 battles. Another will rise to take their place.",
+      "createdAt": "2026-06-01T15:00:57.553Z",
+      "read": false
+     },
+     {
+      "id": 33,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "19 of them against its guard of 45.",
+      "createdAt": "2026-06-01T14:59:09.553Z",
+      "read": false
+     },
+     {
+      "id": 32,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "You's refuge was raided",
+      "body": "The horde carried off 693 resources after 1 rounds.",
+      "createdAt": "2026-06-01T14:58:40.753Z",
+      "read": false
+     },
+     {
+      "id": 31,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "You's refuge is under attack",
+      "body": "A horde of 18 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T14:58:22.753Z",
+      "read": false
+     },
+     {
+      "id": 30,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to You's refuge",
+      "body": "The moderate south horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T14:55:15.553Z",
+      "read": false
+     },
+     {
+      "id": 29,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 3 rounds.",
+      "createdAt": "2026-06-01T13:46:27.900Z",
+      "read": false
+     },
+     {
+      "id": 28,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Vyrgan the Hungry has fallen",
+      "body": "Vyrgan the Hungry died with the last of the horde after 5 battles. Another will rise to take their place.",
+      "createdAt": "2026-06-01T13:46:27.900Z",
+      "read": false
+     },
+     {
+      "id": 27,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "16 of them against its guard of 39.",
+      "createdAt": "2026-06-01T13:45:33.900Z",
+      "read": false
+     },
+     {
+      "id": 26,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "You's refuge was raided",
+      "body": "The horde carried off 324 resources after 1 rounds.",
+      "createdAt": "2026-06-01T13:44:57.900Z",
+      "read": false
+     },
+     {
+      "id": 25,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "You's refuge is under attack",
+      "body": "A horde of 16 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T13:44:39.900Z",
+      "read": false
+     },
+     {
+      "id": 24,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to You's refuge",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T13:44:03.900Z",
+      "read": false
+     },
+     {
+      "id": 23,
+      "kind": "refuge",
+      "tier": "push",
+      "title": "A refuge by the Holy City",
+      "body": "You's refuge takes in your people at (-1, 2).",
+      "createdAt": "2026-06-01T13:44:03.900Z",
+      "read": false
+     },
+     {
+      "id": 22,
+      "kind": "razed",
+      "tier": "push",
+      "title": "Vruchiy was razed",
+      "body": "Only ruins are left. Rebuild them, or start over from what remains.",
+      "createdAt": "2026-06-01T13:44:03.900Z",
+      "read": false
+     },
+     {
+      "id": 21,
+      "kind": "hero",
+      "tier": "digest",
+      "title": "Dobrynya is wounded",
+      "body": "Back on their feet in a few hours.",
+      "createdAt": "2026-06-01T13:40:27.900Z",
+      "read": false
+     },
+     {
+      "id": 20,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Vyrgan the Hungry grows stronger",
+      "body": "Vyrgan the Hungry is now level 3.",
+      "createdAt": "2026-06-01T13:40:27.900Z",
+      "read": false
+     },
+     {
+      "id": 19,
+      "kind": "razing",
+      "tier": "push",
+      "title": "Vruchiy is being razed",
+      "body": "The horde broke the defenders after 1 rounds and is burning the village.",
+      "createdAt": "2026-06-01T13:40:27.900Z",
+      "read": false
+     },
+     {
+      "id": 18,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 16 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T13:40:09.900Z",
+      "read": false
+     },
+     {
+      "id": 17,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T13:35:21.900Z",
+      "read": false
+     },
+     {
+      "id": 16,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T12:23:23.357Z",
+      "read": false
+     },
+     {
+      "id": 15,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Brother Lothar grows stronger",
+      "body": "Brother Lothar is now level 2.",
+      "createdAt": "2026-06-01T12:23:23.357Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "9 of them against its guard of 35.",
+      "createdAt": "2026-06-01T12:22:47.357Z",
+      "read": false
+     },
+     {
+      "id": 13,
+      "kind": "hero",
+      "tier": "digest",
+      "title": "Dobrynya is wounded",
+      "body": "Back on their feet in a few hours.",
+      "createdAt": "2026-06-01T12:22:04.157Z",
+      "read": false
+     },
+     {
+      "id": 12,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy was raided",
+      "body": "The horde carried off 912 resources after 1 rounds.",
+      "createdAt": "2026-06-01T12:22:04.157Z",
+      "read": false
+     },
+     {
+      "id": 11,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 9 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T12:21:46.157Z",
+      "read": false
+     },
+     {
+      "id": 10,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low south horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T12:19:36.557Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T11:27:14.400Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Vyrgan the Hungry grows stronger",
+      "body": "Vyrgan the Hungry is now level 2.",
+      "createdAt": "2026-06-01T11:27:14.400Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "8 of them against its guard of 30.",
+      "createdAt": "2026-06-01T11:26:56.400Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "hero",
+      "tier": "digest",
+      "title": "Dobrynya is wounded",
+      "body": "Back on their feet in a few hours.",
+      "createdAt": "2026-06-01T11:26:13.200Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy was raided",
+      "body": "The horde carried off 684 resources after 1 rounds.",
+      "createdAt": "2026-06-01T11:26:13.200Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 8 is fighting your garrison of 0.",
+      "createdAt": "2026-06-01T11:25:55.200Z",
+      "read": false
+     },
+     {
+      "id": 3,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 2,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Farm level 1 in Vruchiy",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:01.500Z",
+      "read": false
+     },
+     {
+      "id": 1,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Raise a building",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
+     }
+    ],
+    "unread": 35,
+    "serverTime": "2026-06-01T16:00:00.000Z"
+   }
   }
  ]
 }

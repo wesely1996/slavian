@@ -36,7 +36,7 @@ export function nextDigestAt(after: Date, prefs: NotifyPrefs): Date {
 
 // "3 builds finished, 1 tech researched, …" from the kinds of what happened.
 // The digest's lines in Serbian ("label: count", which needs no plural forms).
-const SERBIAN_LABELS: Record<string, string> = {
+export const SERBIAN_LABELS: Record<string, string> = {
   build_done: 'završene gradnje',
   research_done: 'istražene tehnologije',
   battle_result: 'izveštaji o bitkama',

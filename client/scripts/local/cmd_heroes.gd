@@ -135,24 +135,26 @@ static func _next_wave(world: Dictionary, front: Variant) -> Dictionary:
 	return best
 
 
-## Does what the quest set out to do.
-static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, quest: Dictionary, at: int, changed: Array) -> void:
+## Does what the quest set out to do: what the hero has to tell, {body, vars}.
+static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, quest: Dictionary, at: int, changed: Array) -> Dictionary:
 	var data := server.data
 	var home := server.find_village(world, int(hero.villageId))
 	match String(quest.kind):
 		"ambush":
 			var wave := _next_wave(world, quest.front)
 			if wave.is_empty():
-				return
+				return {"body": "The road lay empty: that horde had already set out."}
 			var delay := LocalWaves.js_round((float(data.quests.kinds.ambush.get("delayHours", 0)) * LocalTime.MS_PER_HOUR) / world.speed)
 			wave.spawnAt = int(wave.spawnAt) + delay
 			for e in world.events:
 				if e.status == "pending" and e.type in ["wave_spawn", "wave_warning"] and int(e.payload.get("waveId", -1)) == int(wave.id):
 					e.dueAt = int(e.dueAt) + delay
+			return {"body": "The next horde from the {front} sets out {hours} game hours later.",
+				"vars": {"front": quest.front if quest.front != null else "", "hours": data.quests.kinds.ambush.get("delayHours", 0)}}
 		"scout":
 			var wave := _next_wave(world, quest.front)
 			if wave.is_empty():
-				return
+				return {"body": "That horde had already set out; the hero saw only its dust."}
 			var tiers: Array = data.scouting.tiers.duplicate()
 			var best: Dictionary = tiers[0]
 			for t in tiers:
@@ -164,30 +166,38 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 			mission.report = LocalScouting.scout_report(data, wave.front, wave.composition, wave.stance, sent, sent, false, int(world.seed), int(mission.id))
 			mission.survivors = sent
 			mission.status = "done"
+			return {"body": "A full report on the next horde from the {front} is in the threats panel.",
+				"vars": {"front": quest.front if quest.front != null else ""}}
 		"caravan":
-			home.state.ledger = LocalLogistics.receive(home.state.ledger, at, LocalHeroes.caravan_find(data, int(hero.level))).ledger
+			var found := LocalHeroes.caravan_find(data, int(hero.level))
+			home.state.ledger = LocalLogistics.receive(home.state.ledger, at, found).ledger
 			changed.append(["village", home.id])
+			return {"body": "Brought back {wood} wood, {stone} stone, {grain} grain and {iron} iron.", "vars": found}
 		"hoard":
 			var owned: Array = hero.inventory + hero.gear.values()
 			var left: Array = data.heroes.items.keys().filter(func(i: String) -> bool: return not i in owned)
 			left.sort()
 			if left.is_empty():
-				return
+				return {"body": "The hoard had been dug up already."}
 			var rng := LocalRng.new((int(world.seed) ^ LocalRng.imul(int(hero.accountId) + 1, 0x165667b1) ^ left.size()) & 0xffffffff)
-			hero.inventory = hero.inventory + [left[floori(rng.next() * left.size())]]
+			var item: String = left[floori(rng.next() * left.size())]
+			hero.inventory = hero.inventory + [item]
+			return {"body": "Found the {item}.", "vars": {"item": data.heroes.items[item].name}}
 		"ruins":
 			var site: Dictionary = {}
 			for s in world.sites:
 				if quest.siteId != null and int(s.id) == int(quest.siteId):
 					site = s
 			if site.is_empty() or site.status == "explored" or LocalBattle.total(site.guardians) > 0:
-				return
+				return {"body": "Someone had been there first."}
 			var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius)),
 				LocalResearch.scrolls(world), hero.inventory + hero.gear.values())
 			if find.type == "resources":
 				home.state.ledger = LocalLogistics.receive(home.state.ledger, at, find.resources).ledger
 				changed.append(["village", home.id])
 			LocalArmies.claim_find(server, world, site, hero.accountId, hero, find, at, changed)
+			return {"body": "Searched the {site}.", "vars": {"site": data.sites.kinds.get(site.kind, {}).get("name", "site")}}
+	return {"body": ""}
 
 
 static func on_hero_quest(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -197,7 +207,8 @@ static func on_hero_quest(server: LocalServer, world: Dictionary, event: Diction
 	var at := int(event.dueAt)
 	if hero.status != "questing" or quest == null or LocalTime.parse(quest.returnsAt) > at:
 		return
-	_fulfil(server, world, hero, quest, at, changed)
+	var told := _fulfil(server, world, hero, quest, at, changed)
+	var name: String = hero.name
 	var wounded := LocalHeroes.quest_wounds(quest, int(world.seed), int(hero.accountId), LocalTime.parse(quest.departsAt))
 	hero.merge(LocalHeroes.gain_xp(data, hero, LocalHeroes.quest_xp(data, quest, hero.kind)), true)
 	hero.status = "home"
@@ -207,6 +218,10 @@ static func on_hero_quest(server: LocalServer, world: Dictionary, event: Diction
 		hero.status = "wounded"
 		hero.woundedUntil = LocalTime.iso(until)
 		server.schedule(world, until, "hero_recover", {"accountId": hero.accountId})
+	var vars: Dictionary = told.get("vars", {}).duplicate()
+	vars.merge({"name": name, "quest": data.quests.kinds[quest.kind].name}, true)
+	LocalInbox.tell(server, world, hero.accountId, {"kind": "hero", "tier": "digest",
+		"title": "{name} came back wounded from: {quest}" if wounded else "{name} is back from: {quest}", "body": told.body, "vars": vars}, at)
 	changed.append(["world"])
 
 

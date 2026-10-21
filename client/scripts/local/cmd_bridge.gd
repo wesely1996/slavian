@@ -76,17 +76,24 @@ static func on_bridge_raised(server: LocalServer, world: Dictionary, event: Dict
 	var at := int(event.dueAt)
 	if bridge.status != "raising" or bridge.raisedAt == null or LocalTime.parse(bridge.raisedAt) > at:
 		return
+	var name: String = LocalBridge.current_stage(data, bridge).name
 	var next := raised(data, bridge, at, int(world.sanctity))
 	world.bridge = next
 	changed.append(["world"])
+	var next_stage: Variant = LocalBridge.current_stage(data, next)
+	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{name} stands",
+		"body": "The Kalinov Bridge is whole. Ritual Night is coming." if next.status == "complete" else "Next: {stage}.",
+		"vars": {"name": name, "stage": next_stage.name} if next_stage != null else {"name": name}}, at)
 	if next.status == "complete":
 		call_ritual_night(server, world, at)
 	# A relic is wanted and every ruin has been searched: one more is remembered.
 	var stage: Variant = LocalBridge.current_stage(data, next)
-	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "lair"):
-		reveal_lair(server, world, at)
-	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "site"):
-		reveal_site(server, world)
+	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "lair") and reveal_lair(server, world, at):
+		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "A lair in the woods",
+			"body": "Beasts of the North have made a lair by the road their last horde took. {stage} needs it cleared.", "vars": {"stage": stage.name}}, at)
+	if stage != null and stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "site") and reveal_site(server, world):
+		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "A forgotten ruin",
+			"body": "The builders of {stage} remember a ruin nobody has searched yet. It is marked on the map.", "vars": {"stage": stage.name}}, at)
 
 
 ## When the bridge wants a lair cleared and none stands, the North sends one
@@ -162,6 +169,7 @@ static func call_ritual_night(server: LocalServer, world: Dictionary, at: int) -
 		world.waves.append(wave)
 		server.schedule(world, spawn_at, "wave_spawn", {"waveId": wave.id})
 	server.schedule(world, LocalTime.ms(spawn_at + (float(rules.checkHours) * LocalTime.MS_PER_HOUR) / world.speed), "ritual_check", {})
+	LocalInbox.tell_everyone(server, world, {"kind": "ritual", "tier": "push", "title": "Ritual Night", "body": rules.story}, at)
 
 
 ## Until Ritual Night's last horde is done; then, if the city stands, the run is won.
@@ -175,6 +183,8 @@ static func on_ritual_check(server: LocalServer, world: Dictionary, event: Dicti
 		return
 	world.status = "won"
 	world.endedAt = at
+	var won: Dictionary = server.data.bridge.endings.won
+	LocalInbox.tell_everyone(server, world, {"kind": "ritual", "tier": "push", "title": won.title, "body": won.story}, at)
 	changed.append(["world"])
 
 

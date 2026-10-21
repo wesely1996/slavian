@@ -543,6 +543,24 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		army.joinsRound = 1
 		army.joinBonus = 0
 	server.schedule(world, at + LocalBattle.round_ms(data, world.speed), "battle_round", {"battleId": battle.id})
+	var ground: Array = []
+	for pair in [["ambush", "an ambush"], ["choke", "a choke point"], ["fort", "a fort"], ["river", "a river crossing"]]:
+		if setup[pair[0]]:
+			ground.append(pair[1])
+	var text := ", ".join(ground)
+	for owner in owners(holders):
+		LocalInbox.tell(server, world, owner, {"kind": "under_attack", "tier": "push", "title": "A horde ran into your army at ({q}, {r})",
+			"body": "{enemy} against {defenders}, with {ground}." if text != "" else "{enemy} against {defenders}.",
+			"vars": {"q": cell.x, "r": cell.y, "enemy": LocalBattle.total(wave.composition), "defenders": LocalBattle.total(battle.defenderInitial), "ground": text}}, at)
+
+
+## The accounts that own `armies`, each once, in order.
+static func owners(armies: Array) -> Array:
+	var out: Array = []
+	for a in armies:
+		if a.ownerAccountId != null and not int(a.ownerAccountId) in out:
+			out.append(int(a.ownerAccountId))
+	return out
 
 
 ## The horde broke through: the rest of its road shifts by the time it spent
@@ -627,6 +645,8 @@ static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dict
 		return
 	fort.status = "standing"
 	_plan_fort_check(server, world, int(fort.id), int(event.dueAt))
+	LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "build_done", "tier": "digest", "title": "Fort at ({q}, {r}) finished",
+		"body": "Armies holding it fight from behind its walls.", "vars": {"q": fort.q, "r": fort.r}}, int(event.dueAt))
 	changed.append(["world"])
 
 
@@ -669,6 +689,8 @@ static func on_fort_check(server: LocalServer, world: Dictionary, event: Diction
 	var front := _bandit_front(world, Vector2i(fort.q, fort.r))
 	var units := LocalWaves.compose_wave(data, front, 0, int(data.camps.fort.units), int(world.seed) ^ int(fort.id), world.members.size())
 	LocalBattles.create_camp(server, world, {"kind": "bandit", "front": front, "q": fort.q, "r": fort.r, "units": units, "waveId": null}, at)
+	LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "camp", "tier": "push", "title": "Bandits took the fort at ({q}, {r})",
+		"body": "No army held it, and now it is their camp. Send an army to clear it.", "vars": {"q": fort.q, "r": fort.r}}, at)
 	changed.append(["world"])
 
 
@@ -755,14 +777,20 @@ static func on_road_built(_server: LocalServer, world: Dictionary, event: Dictio
 
 
 ## A bridge stands: from now on, roads (and hordes) may cross there.
-static func on_crossing_built(_server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+static func on_crossing_built(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
 	var edge := _river_edge(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
 	if edge.is_empty() or edge.crossing != "building":
 		return
+	var built_by: Variant = edge.builtBy
 	edge.crossing = "standing"
 	edge.builtBy = null
 	edge.completesAt = null
+	if built_by != null:
+		LocalInbox.tell_owner(server, world, int(built_by), func(name: String) -> Dictionary:
+			return {"kind": "build_done", "tier": "digest", "title": "A bridge stands near {village}",
+				"body": "Roads now cross the river between ({aq}, {ar}) and ({bq}, {br}), for friend and foe alike.",
+				"vars": {"village": name, "aq": int(p.aq), "ar": int(p.ar), "bq": int(p.bq), "br": int(p.br)}}, int(event.dueAt))
 	changed.append(["world"])
 
 
@@ -832,10 +860,11 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
 	var after := army_losses(server, world, army, _losses(army, result.armyNow), at)
 	var kills := LocalBattle.total(camp.units) - LocalBattle.total(result.campNow)
+	var ember := false
 	if result.cleared:
 		camp.status = "cleared"
 		after.loot = camp_loot(data, camp.units)
-		var ember: bool = camp.kind == "lair" and LocalWaves.rng_for(int(world.seed), int(camp.id), 0xe3).next() < float(data.camps.loot.emberChance)
+		ember = camp.kind == "lair" and LocalWaves.rng_for(int(world.seed), int(camp.id), 0xe3).next() < float(data.camps.loot.emberChance)
 		if ember:
 			world.embers = int(world.embers) + 1
 		if camp.kind == "lair":
@@ -849,6 +878,13 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
 	send_home(server, world, after, at)
+	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else "bandit camp", int(camp.q), int(camp.r)]
+	var body := "{kills} of them fell; {defenders} still hold it."
+	if result.cleared:
+		body = "It carries home {loot} resources and a Svarog's Ember for the group." if ember else "It carries home {loot} resources."
+	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
+		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
+		"vars": {"where": where, "loot": int(LocalLogistics.total(camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
 
 
 # --- Ancient sites (scheduler/sites.ts) -----------------------------------------------
@@ -881,6 +917,9 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 			LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
 		if not result.cleared or LocalBattle.total(explorers.units) == 0:
 			send_home(server, world, explorers, at)
+			LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "Guardians drove your army from the {where}",
+				"body": "{kills} of them fell; {remaining} still watch it.",
+				"vars": {"where": data.sites.kinds.get(site.kind, {}).get("name", "site"), "kills": kills, "remaining": LocalBattle.total(result.campNow)}}, at)
 			return
 	# Search the site.
 	explorers.status = "stationed"
@@ -907,6 +946,26 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 	site.find = find
 	site.exploredAt = at
 	LocalBattles.bridge_quest(server, world, "site", at)
+	var data := server.data
+	var name: String = data.sites.kinds.get(site.kind, {}).get("name", "site")
+	for member in world.members:
+		var scroll: bool = find.type == "scroll"
+		LocalInbox.tell(server, world, member.accountId, {"kind": "site",
+			"tier": "push" if scroll and (account_id == null or int(member.accountId) != int(account_id)) else "digest",
+			"title": "The {name} at ({q}, {r}) gave up {find}",
+			"body": data.lore.scrolls.get(find.scroll, {}).get("description", "") if scroll else "Explored and done.",
+			"vars": {"name": name, "q": site.q, "r": site.r, "find": find_text(data, find)}}, at)
+
+
+static func find_text(data: Dictionary, find: Dictionary) -> String:
+	match String(find.type):
+		"resources":
+			return "%d resources" % int(LocalLogistics.total(find.resources))
+		"gear":
+			return data.heroes.items.get(find.item, {}).get("name", find.item)
+		"ember":
+			return "a Svarog's Ember"
+	return "the scroll \"%s\"" % data.lore.scrolls.get(find.scroll, {}).get("name", find.scroll)
 
 
 static func on_site_explored(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
