@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_hex_vectors()
 	_test_hex_round_trip()
 	_test_resource_vectors()
+	_test_local_mapgen()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -489,6 +490,42 @@ func _test_delegation() -> void:
 	_check(DelegationText.owners_for(delegations, 2, now) == [1], "owners for delegate")
 	var e := {"ownerAccountId": 1, "delegateAccountId": 2, "villageId": 7, "action": "queued a build", "at": "2026-01-01T00:00:00.000Z"}
 	_check(DelegationText.entry(e, {1: "Mila", 2: "Goran"}, {7: "Mila's village"}) == "Goran (for Mila) queued a build in Mila's village", "delegation entry")
+
+
+## The local engine against the server's rules (data/fixtures/mapgen-vectors.json).
+func _test_local_mapgen() -> void:
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures/mapgen-vectors.json")))
+	for case in fixture.rng:
+		var rng := LocalRng.new(int(case.seed))
+		var same := true
+		for value in case.values:
+			same = same and int(rng.next() * 4294967296.0) == int(value)
+		_check(same, "rng %d" % int(case.seed))
+	for case in fixture.noise:
+		var noise := LocalNoise.new(LocalRng.new(int(case.seed)).callable())
+		var same := true
+		for point in case.points:
+			# Godot's JSON reader isn't exact in the last digits.
+			same = same and absf(noise.noise(point[0], point[1]) - float(point[2])) < 1e-12
+		_check(same, "noise %d" % int(case.seed))
+	var data := {"terrain": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("terrain.json")))}
+	for case in fixture.maps:
+		var map := LocalMapgen.generate(data, int(case.seed), int(case.players))
+		var terrain: Array = []
+		for cell in HexMath.spiral(Vector2i.ZERO, map.radius):
+			terrain.append(map.terrain[LocalLand.key(cell)])
+		var starts: Array = []
+		for s in map.startSites:
+			starts.append([float(s.x), float(s.y)])
+		var rivers: Array = []
+		for e in map.rivers:
+			rivers.append([float(e.a.x), float(e.a.y), float(e.b.x), float(e.b.y), 1.0 if e.bridge else 0.0, float(e.size)])
+		var label := "map %d/%d" % [int(case.seed), int(case.players)]
+		_check(int(map.seed) == int(case.madeWith) and int(map.radius) == int(case.radius) and map.activeFronts == case.activeFronts, label + " shape")
+		_check(",".join(terrain) == case.terrain, label + " terrain")
+		_check(str(starts) == str(case.startSites), label + " starts")
+		_check(str(rivers) == str(case.rivers), label + " rivers")
 
 
 func _test_onboarding_almanac() -> void:

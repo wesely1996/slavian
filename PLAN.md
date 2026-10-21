@@ -640,6 +640,8 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - **How:** the rules, the scheduler and the battles are ported to GDScript as an in-app local server (`client/scripts/local/`). It answers the same API calls the client makes today, so the screens don't change. Worlds are saved on the device.
     - **Co-op** keeps the TypeScript server. Both sides run the same shared fixtures (`data/fixtures/`), as the hex math already does, so the two rule sets stay in step.
     - **Order:** data and the sim core (resources, building, training), then the scheduler and catch-up, waves, hordes and battles, then the rest (outposts, caravans, research, heroes, sites, the bridge), each with its fixtures.
+    - **Progress:**
+      - [x] **The map:** the seeded RNG (mulberry32 in 32-bit integer arithmetic), simplex noise, the server's A* (same heap, same ties) and map generation with rivers and bridges (`client/scripts/local/`). The server writes `data/fixtures/mapgen-vectors.json` (`npm run fixtures`; a server test fails while it is stale), and the client test makes the same five maps from it, terrain, starts, rivers and bridges, exactly.
 25. [ ] **Main menu rework:** research game UI design first: menus of strong mobile and PC strategy games, and what makes them read as modern. Then rebuild the main menu:
     - modern, split into clear compartments: play (continue, new solo world, co-op worlds), profile, settings, help and support;
     - the first action one tap away, and nothing that wastes space.
