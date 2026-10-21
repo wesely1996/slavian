@@ -181,6 +181,32 @@ static func level_up(data: Dictionary, front: String, leader: Dictionary) -> Dic
 	return next
 
 
+static func gain_leader_xp(data: Dictionary, front: String, leader: Dictionary, xp: float) -> Dictionary:
+	var next := leader.duplicate()
+	next.xp = int(leader.xp) + maxi(0, floori(xp))
+	while int(next.level) < int(data.leaders.maxLevel) and int(next.xp) >= leader_xp_to_next(data, int(next.level)):
+		next.xp = int(next.xp) - leader_xp_to_next(data, int(next.level))
+		next = level_up(data, front, next)
+	if int(next.level) >= int(data.leaders.maxLevel):
+		next.xp = 0
+	return next
+
+
+## What a battle does to its horde's leader (leaderAfterBattle): {state,
+## dead, woundMs, grudge} where grudge is a village id, null, or "keep".
+static func leader_after_battle(data: Dictionary, front: String, leader: Dictionary, outcome: Dictionary, world_speed: float) -> Dictionary:
+	var xp: Dictionary = data.leaders.xp
+	if not outcome.hordeWon and outcome.wiped:
+		return {"state": leader, "dead": true, "woundMs": 0, "grudge": "keep"}
+	var gained := float(xp.battle) + float(xp.perKill) * int(outcome.kills)
+	gained += (float(xp.win) + (float(xp.raze) if outcome.get("razed", false) else 0.0)) if outcome.hordeWon else float(xp.escape)
+	return {
+		"state": gain_leader_xp(data, front, leader, gained), "dead": false,
+		"woundMs": 0 if outcome.hordeWon else LocalWaves.js_round((float(data.leaders.woundHours) * LocalTime.MS_PER_HOUR) / world_speed),
+		"grudge": "keep" if outcome.hordeWon else outcome.villageId,
+	}
+
+
 static func leader_effects(data: Dictionary, leader: Dictionary) -> Dictionary:
 	var sum := {}
 	for skill in leader.skills:
@@ -261,6 +287,8 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	var at := int(event.dueAt)
 	assign_leader(server, world, wave, at)
 	LocalCamps.camps_join(server, world, wave)
+	wave.composition = LocalStore.stored(wave.composition)
+	wave.initial = LocalStore.stored(wave.initial)
 	# Old memories fade as a new horde sets out.
 	var fear: Dictionary = world.fear
 	for key in fear.keys():
@@ -271,10 +299,7 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	for v in world.villages:
 		if v.ruin == null:
 			villages.append({"id": v.id, "q": v.q, "r": v.r})
-	var weight := float(data.difficulty.presets[world.difficulty].fearWeight)
-	var weighted := {}
-	for key in fear:
-		weighted[key] = float(fear[key]) * weight
+	var weighted := fear_of(server, world)
 	var march := hold_for_quiet(world, int(wave.spawnAt), plan_march(data, land_of(world), wave, villages, int(world.seed), at, world.speed, weighted))
 	wave.status = "marching"
 	wave.spawn = {"q": march.spawn.x, "r": march.spawn.y}
@@ -284,7 +309,7 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	server.schedule(world, int(wave.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	plan_raids(server, world, wave, 0)
 	# Field intercepts come with armies (scheduler/field.ts planIntercepts).
-	_plan_warning(server, world, wave, at)
+	plan_warning(server, world, wave, at)
 	if not wave.ritual and world.ritualAt == null:
 		var last: Dictionary = {}
 		for w in world.waves:
@@ -325,6 +350,15 @@ static func after_quiet(world: Dictionary, at: int) -> int:
 	return (minute + wait) * 60000
 
 
+## Fear as this world's hordes heed it (Story hordes don't learn).
+static func fear_of(server: LocalServer, world: Dictionary) -> Dictionary:
+	var weight := float(server.data.difficulty.presets[world.difficulty].fearWeight)
+	var weighted := {}
+	for key in world.fear:
+		weighted[key] = float(world.fear[key]) * weight
+	return weighted
+
+
 ## Raids on every standing outpost near the rest of a march.
 static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary, from_ms: int) -> void:
 	if wave.path == null:
@@ -342,7 +376,7 @@ static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary,
 
 
 ## The target's owner hears of a horde a few hours before it arrives.
-static func _plan_warning(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
+static func plan_warning(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	if wave.targetVillageId == null or wave.arrivesAt == null:
 		return
 	var target := server.find_village(world, int(wave.targetVillageId))

@@ -39,6 +39,12 @@ change: they keep calling `Api` and listening to `Live`.
   - JavaScript's `Math.round` (round half up) where the server uses it;
   - V8's comparator call order for `sort`, where a comparator draws
     randomness.
+- **Key order:** the server keeps units, plots and the like as jsonb,
+  which reads back with keys shortest first, then in byte order, and loops
+  over them feed the RNG and sums. `LocalServer.as_stored` puts the world in
+  that order before each event and request (as the server loads its rows
+  afresh), and code builds dictionaries in the order the server's code
+  builds objects.
 - **Precision:** use doubles (`float`) for anything that feeds a decision.
   `Vector2` is single precision.
 - **Fixture numbers:** Godot's JSON reader isn't exact in the last digits.
@@ -65,8 +71,9 @@ Tracked in PLAN.md under step 24. Order:
    map, villages, heroes, sites, the first waves (done).
 3. Villages: resources, building, training, outposts, upkeep (done).
 4. The scheduler and catch-up, waves and hordes, village and field battles.
-   Hordes setting out are done (`sched_waves.gd`); arriving, battles, the
-   horde's raids, razes and rampage, camps and field battles are next.
+   Done: hordes setting out (`sched_waves.gd`), arriving, village and Holy
+   City battles, the horde AI and camps (`sched_battles.gd`). Field battles
+   and anything with armies come with armies (part 5).
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
    sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
 6. The start screen's **Play solo**: create, continue and delete local
