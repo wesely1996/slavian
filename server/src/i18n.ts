@@ -110,6 +110,10 @@ const SERBIAN: Record<string, string> = {
 	'Finished. Your build queue may have room for more.': 'Završeno. Tvoj red gradnje možda ima mesta za još.',
 	'Finished.': 'Završeno.',
 	'{name} handed you their villages': '{name} ti je predao svoja sela',
+	'{name} left the world': '{name} je napustio svet',
+	'Their villages went to your teammates.': 'Njegova sela su pripala tvojim saigračima.',
+	'You now command one of their villages.': 'Sada zapovedaš jednim od njegovih sela.',
+	'You now command {count} of their villages.': 'Sada zapovedaš sa {count} njegovih sela.',
 	'Command them as your own for {days} days. Everything you do is noted for them.':
 		'Upravljaj njima kao svojim {days} dana. Sve što uradiš je zabeleženo za njih.',
 	'{name} took their villages back': '{name} je vratio svoja sela',

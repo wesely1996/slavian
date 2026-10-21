@@ -1878,6 +1878,58 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(rows[0]).toEqual({ owner: null, host: null });
   });
 
+  it('lets players quit: the lobby passes the host on, the last one out abandons it', async () => {
+    const host = await guest('Host');
+    const second = await guest('Second');
+    const created = await call('POST', '/v1/worlds', host.token, { name: 'Leaving lobby', maxPlayers: 3, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', second.token, { inviteCode: created.body.inviteCode });
+
+    expect((await call('POST', `/v1/worlds/${worldId}/leave`, host.token)).body).toEqual({ ok: true });
+    let w = (await call('GET', `/v1/worlds/${worldId}`, second.token)).body;
+    expect(w.status).toBe('lobby');
+    expect(w.hostAccountId).toBe(second.accountId);
+    expect(w.members.map((m: { displayName: string }) => m.displayName)).toEqual(['Second']);
+    // Gone from their list and no longer allowed in; can't quit twice.
+    expect((await call('GET', `/v1/worlds/${worldId}`, host.token)).status).toBe(404);
+    expect((await call('POST', `/v1/worlds/${worldId}/leave`, host.token)).status).toBe(404);
+
+    await call('POST', `/v1/worlds/${worldId}/leave`, second.token);
+    const { rows } = await db.query<{ status: string }>('SELECT status FROM worlds WHERE id = $1', [worldId]);
+    expect(rows[0]!.status).toBe('abandoned');
+  });
+
+  it("hands a quitter's villages to the team, then stands still once everyone left", async () => {
+    const stays = await guest('Stays');
+    const quits = await guest('Quits');
+    const created = await call('POST', '/v1/worlds', stays.token, { name: 'Leaving run', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', quits.token, { inviteCode: created.body.inviteCode });
+    await call('POST', `/v1/worlds/${worldId}/start`, stays.token);
+
+    expect((await call('POST', `/v1/worlds/${worldId}/leave`, quits.token)).status).toBe(200);
+    let w = (await call('GET', `/v1/worlds/${worldId}`, stays.token)).body;
+    expect(w.status).toBe('running');
+    expect(w.members.map((m: { accountId: number }) => m.accountId)).toEqual([stays.accountId]);
+    expect(w.villages.map((v: { ownerAccountId: number }) => v.ownerAccountId)).toEqual([stays.accountId, stays.accountId]);
+    const inbox = (await call('GET', `/v1/worlds/${worldId}/notifications`, stays.token)).body;
+    expect(JSON.stringify(inbox)).toContain('Quits left the world');
+    // The quitter can't act in it any more.
+    expect((await call('GET', `/v1/worlds/${worldId}`, quits.token)).status).toBe(404);
+    expect((await call('GET', '/v1/me', quits.token)).body.worlds).not.toContainEqual(expect.objectContaining({ id: worldId }));
+
+    await call('POST', `/v1/worlds/${worldId}/leave`, stays.token);
+    const { rows } = await db.query<{ status: string; ended_at: Date | null }>('SELECT status, ended_at FROM worlds WHERE id = $1', [worldId]);
+    expect(rows[0]!.status).toBe('abandoned');
+    expect(rows[0]!.ended_at).not.toBeNull();
+    // The scheduler leaves it alone, like a finished run.
+    now = new Date(now.getTime() + 7 * 86_400_000);
+    const pending = await db.query<{ n: number }>("SELECT count(*)::int AS n FROM scheduled_events WHERE world_id = $1 AND status = 'pending'", [worldId]);
+    await tick(db, now, scheduler);
+    const after = await db.query<{ n: number }>("SELECT count(*)::int AS n FROM scheduled_events WHERE world_id = $1 AND status = 'pending'", [worldId]);
+    expect(after.rows[0]!.n).toBe(pending.rows[0]!.n);
+  });
+
   it('refuses live subscriptions to worlds you are not in', async () => {
     const outsider = await guest('Outsider');
     const host = await guest('Host');

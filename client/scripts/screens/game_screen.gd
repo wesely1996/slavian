@@ -2609,6 +2609,51 @@ func _threats_panel() -> void:
 			_panel_body.add_child(row)
 	# A bug report carries the current game state with the player's message.
 	_panel_body.add_child(UI.button(tr("Report a bug"), _report_bug))
+	_leave_section()
+
+
+## Back to the menu (the world goes on), or quit it for good: a co-op world
+## passes your villages to the team (the last one out closes it); a solo
+## world is deleted. Quitting asks twice.
+var _quit_armed := false
+
+func _leave_section() -> void:
+	_panel_body.add_child(UI.label(tr("Leave"), UI.HEADING_SIZE))
+	var row := UI.hbox(8)
+	var menu := UI.button(tr("Back to the menu"), _leave, "icon/back")
+	menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(menu)
+	var quit := UI.button(tr("Sure? Quit this world") if _quit_armed else tr("Quit this world"), _quit_world, "icon/quit")
+	quit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(quit)
+	_panel_body.add_child(row)
+	if _quit_armed:
+		var solo := Local.is_active()
+		var alone: bool = Game.world.get("members", []).size() <= 1
+		_panel_body.add_child(UI.label(
+			tr("Tap again to delete this solo world.") if solo
+			else tr("Tap again to quit. You're the last one here, so the world closes.") if alone
+			else tr("Tap again to quit. Your villages go to your teammates, and you can't come back."), UI.SMALL_SIZE, UI.ERROR))
+
+
+func _quit_world() -> void:
+	if not _quit_armed:
+		_quit_armed = true
+		_rebuild_panel()
+		return
+	_quit_armed = false
+	var id := Game.world_id()
+	if Local.is_active():
+		Local.delete_world(id)
+	else:
+		var response := await Api.post_json("/v1/worlds/%d/leave" % id)
+		if not response.ok:
+			_status.text = response.error
+			return
+	if int(Session.last_world.get("id", 0)) == id:
+		Session.last_world = {}
+		Session.save()
+	_leave()
 
 
 ## Opens a short form; the report is saved as a file and sent to the server.

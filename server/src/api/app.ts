@@ -23,7 +23,7 @@ import {
   trainUnitsCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
-import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -420,6 +420,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     await requireMember(account, id);
     await startWorldCommand(db, scheduler, { account, worldId: id, now: clock() });
     return fullWorldView(id);
+  });
+
+  // Quit a world: in the lobby, during a run (teammates take over the
+  // villages) or after it ended. The last one out abandons it.
+  app.post('/v1/worlds/:id/leave', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await leaveWorldCommand(db, scheduler, { account, worldId: id, now: clock() });
+    return { ok: true };
   });
 
   app.post('/v1/villages/:id/build', async (request) => {

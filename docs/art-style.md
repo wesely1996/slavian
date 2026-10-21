@@ -95,7 +95,7 @@ towel (*rushnyk*) that hangs in every Slavic house.
   - It shows the studio's logo, then the game's logo settling in with one pass of light across its gold (`shaders/shine.gdshader`), then the start screen.
   - A tap, click or key skips it.
   - Its background matches the engine's boot screen, so the two run on without a flash.
-  - The studio's logo is `brand/studio`: put the PNG (transparent background) at `client/art/brand/night_forge.png` and open the project once so Godot imports it. Until then the splash shows the game's logo alone.
+  - The studio's logo is `brand/studio`: Night Forge Software Company's mark (transparent PNG) at `client/art/brand/night_forge.png`. The splash opens on it, and Credits shows it.
 - **Colour carries side, never decoration.**
 
   | Name | Hex | Job |
@@ -161,25 +161,32 @@ PLAN step 25. What we looked at first, then the design.
 **The design.**
 - The painting with the logo stays on one side (on top on a phone); the
   flax sheet in plated wood holds the menu.
-- Four compartments, each a tab with an icon: **Play**, **Profile**,
-  **Settings**, **Help**. The tab bar sits at the top of the sheet on a wide
-  screen and at its bottom on a phone, in thumb reach.
-- **Play** opens first:
-  - **Continue** the world played last, solo or co-op, as the one malachite
-    button at the top.
-  - **Solo**: the solo worlds on this device, and a new one (its form opens
-    from a button, or at once when there are none). No account or
-    connection needed.
-  - **Co-op**: signing in as a guest when not signed in; otherwise the
-    co-op worlds, a new one (from a button) and joining with a code. When
-    the server can't be reached it says so, with Retry, and solo still
-    works.
-- **Profile**: who you are, renaming, signing out, exporting your data and
-  deleting your account (the last one apart, and asked twice).
-- **Settings**: the language and the text size, which used to crowd the
-  top of the sheet.
-- **Help**: how a run goes (from the almanac), the server costs and
-  donations, the privacy policy, and reporting a problem.
+- Home is four doors, nothing else: **Play** (the one malachite button,
+  larger than the rest), **Settings**, **Credits**, and **Quit** set apart
+  at the bottom. Every other choice sits one step deeper.
+- Each door opens pages one step at a time, with **Back** and the page's
+  name on top; the Android back key and Esc go one step up.
+- **Play**: Continue the world played last (when there is one), then two
+  doors, **Play solo** and **Play with friends**.
+  - **Solo**: the solo worlds on this device (open or delete), and **New
+    solo world**, a form on its own page. No account or connection needed.
+  - **With friends**: first a name to play as a guest (when not signed
+    in); then your worlds, **Create a world** and **Join with a code**,
+    each on its own page; then the lobby, where you can also leave the
+    world (asked twice; the next player hosts it). When the server can't be
+    reached it says so, with Retry, and solo still works.
+- **Settings**: one door per setting, each showing what it is set to:
+  language, text size, sound, **Account** (rename, sign out, export your
+  data; deleting the account apart and asked twice) and **Help and
+  support** (how a run goes, reporting a problem, the server costs and
+  donations, the privacy policy).
+- **Credits**: the studio's mark (Night Forge Software Company), the music
+  and sound and their authors, and the engine.
+- **Quit** closes the app; nothing is lost.
+- In a world, the Threats panel ends with **Leave**: back to the menu, or
+  quit the world for good (asked twice). A co-op world passes your
+  villages to the teammates who stay, and closes when the last one leaves;
+  a solo world is deleted.
 
 Sources: [GameAnalytics on game UI](https://www.gameanalytics.com/blog/how-to-make-your-game-ui-shine-and-increase-conversions),
 [Packt, mobile game design](https://www.packtpub.com/en-cy/learning/how-to-tutorials/mobile-game-design-best-practices),

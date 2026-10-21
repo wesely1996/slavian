@@ -4,7 +4,8 @@ import type { Front, WorldMap } from '../sim/mapgen.js';
 import { NotFoundError } from '../errors.js';
 import type { DbClient } from './pool.js';
 
-export type WorldStatus = 'lobby' | 'running' | 'won' | 'lost';
+// abandoned: everyone left (migration 037).
+export type WorldStatus = 'lobby' | 'running' | 'won' | 'lost' | 'abandoned';
 
 export interface World {
   id: number;
@@ -76,7 +77,7 @@ export async function findWorldByInviteCode(client: DbClient, inviteCode: string
 export async function listWorldsForAccount(client: DbClient, accountId: number): Promise<World[]> {
   const { rows } = await client.query<World>(
     `SELECT ${COLUMNS} FROM worlds
-     WHERE id IN (SELECT world_id FROM world_members WHERE account_id = $1)
+     WHERE id IN (SELECT world_id FROM world_members WHERE account_id = $1 AND left_at IS NULL)
      ORDER BY id DESC`,
     [accountId],
   );
@@ -108,11 +109,33 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
-     WHERE m.world_id = $1
+     WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,
     [worldId],
   );
   return rows;
+}
+
+// Quitting before the start: the player is simply gone from the lobby.
+export async function removeMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
+  await client.query('DELETE FROM world_members WHERE world_id = $1 AND account_id = $2', [worldId, accountId]);
+}
+
+// Quitting a started world: kept on its record, no longer one of its players.
+export async function markLeft(client: DbClient, worldId: number, accountId: number, at: Date): Promise<void> {
+  await client.query('UPDATE world_members SET left_at = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, at]);
+}
+
+export async function setHost(client: DbClient, worldId: number, accountId: number | null): Promise<void> {
+  await client.query('UPDATE worlds SET host_account_id = $2 WHERE id = $1', [worldId, accountId]);
+}
+
+// The last player left: the world stands still from now on.
+export async function markAbandoned(client: DbClient, worldId: number, at: Date): Promise<void> {
+  await client.query(
+    "UPDATE worlds SET status = 'abandoned', ended_at = $2 WHERE id = $1 AND status IN ('lobby', 'running')",
+    [worldId, at],
+  );
 }
 
 export async function setClan(client: DbClient, worldId: number, accountId: number, clan: string): Promise<void> {
@@ -145,7 +168,7 @@ export async function markClaimed(client: DbClient, worldId: number, accountId: 
 
 export async function isMember(client: DbClient, worldId: number, accountId: number): Promise<boolean> {
   const { rowCount } = await client.query(
-    'SELECT 1 FROM world_members WHERE world_id = $1 AND account_id = $2',
+    'SELECT 1 FROM world_members WHERE world_id = $1 AND account_id = $2 AND left_at IS NULL',
     [worldId, accountId],
   );
   return rowCount === 1;
@@ -180,7 +203,7 @@ export async function markWon(client: DbClient, worldId: number, at: Date): Prom
 }
 
 export function isOver(world: World): boolean {
-  return world.status === 'won' || world.status === 'lost';
+  return world.status === 'won' || world.status === 'lost' || world.status === 'abandoned';
 }
 
 export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {
