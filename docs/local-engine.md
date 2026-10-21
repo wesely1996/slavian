@@ -46,6 +46,11 @@ change: they keep calling `Api` and listening to `Live`.
 - **Powers:** V8's `**` and C's `pow` can differ in the last bit. Where a
   power feeds a decision (a threshold, a floor), round it the same way on
   both sides, or check the fixture there with a tolerance.
+- **Scenario fixtures:** a server test plays a script of requests and
+  waits on a real solo world and records every answer with the local
+  engine's ids (`server/test/local-ids.ts`). The client test replays the
+  script on a solo world started in the app and compares each answer.
+  New rules come with new steps in a scenario.
 - **Whole fixtures:** `server/test/start-fixture.test.ts` records a real
   world start. `UPDATE_FIXTURES=1` with `TEST_DATABASE_URL` rewrites it
   after a rule change, and the client test compares the local engine's view
@@ -58,7 +63,7 @@ Tracked in PLAN.md under step 24. Order:
 1. The map (done): RNG, noise, A*, map generation.
 2. The store, the routing in `Api` and `Live`, and starting a solo world:
    map, villages, heroes, sites, the first waves (done).
-3. Villages: resources, building, training, outposts, upkeep.
+3. Villages: resources, building, training, outposts, upkeep (done).
 4. The scheduler and catch-up, waves and hordes, village and field battles.
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
    sites, camps, the bridge and Ritual Night, leaders, orders, the inbox.
