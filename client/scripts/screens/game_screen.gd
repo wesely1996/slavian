@@ -129,6 +129,8 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	# Back to the start screen: the real server answers again.
+	Local.world_id = 0
 	Live.village_updated.disconnect(Game.update_village)
 	Live.world_updated.disconnect(Game.set_world)
 	Live.connection_changed.disconnect(_on_live_connection)
@@ -170,7 +172,7 @@ func _process(delta: float) -> void:
 			var label := _resource_labels[kind]
 			label.text = str(int(amounts[kind]))
 			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %ds)") % [UI.resource_name(kind), UI.signed(rate), Ledger.seconds_to_next(Game.server_now())]
-			_rate_labels[kind].text = tr("%s/min") % UI.signed(rate / 60.0)
+			_rate_labels[kind].text = tr("%s/min") % _per_minute(rate)
 			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
@@ -554,6 +556,18 @@ func _place_quest_card() -> void:
 	_quest_card.custom_minimum_size.x = width
 	_quest_card.size = Vector2(width, 0)
 	_quest_card.position = rect.position + Vector2(16, 16)
+	# Wrapped text knows its height only once laid out at this width.
+	await get_tree().process_frame
+	if is_instance_valid(_quest_card):
+		_quest_card.size = Vector2(width, 0)
+
+
+## "+12/min", or "+0.3/min" for a small rate (a fresh village at speed 1).
+static func _per_minute(rate_per_hour: float) -> String:
+	var per_minute := rate_per_hour / 60.0
+	if absf(per_minute) >= 10.0 or is_zero_approx(per_minute):
+		return UI.signed(per_minute)
+	return ("+%.1f" if per_minute >= 0 else "−%.1f") % absf(per_minute)
 
 
 func _claim_onboarding(step_id: String) -> void:

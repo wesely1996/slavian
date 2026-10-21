@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_hex_round_trip()
 	_test_resource_vectors()
 	_test_local_mapgen()
+	_test_local_start()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -527,6 +528,64 @@ func _test_local_mapgen() -> void:
 		_check(",".join(terrain) == case.terrain, label + " terrain")
 		_check(str(starts) == str(case.startSites), label + " starts")
 		_check(str(rivers) == str(case.rivers), label + " rivers")
+
+
+## A solo world started in the app against one started on the server
+## (data/fixtures/start-world.json, server/test/start-fixture.test.ts).
+func _test_local_start() -> void:
+	var root := ProjectSettings.globalize_path("res://").path_join("../data")
+	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(root.path_join("fixtures/start-world.json")))
+	var local := LocalServer.new(LocalData.load_data(), "")
+	var at := LocalTime.parse(fixture.startedAt)
+	var world := local.start_world({"name": fixture.name, "displayName": fixture.members[0].displayName, "speed": fixture.speed,
+		"difficulty": fixture.difficulty, "seed": 4242}, 1, at)
+	var view := local.world_view(world, at)
+	for key in fixture:
+		var difference := _difference(view.get(key), fixture[key], key)
+		_check(difference == "", "local start: %s" % (difference if difference != "" else key))
+	_check(LocalTime.iso(at) == fixture.startedAt and LocalTime.parse("2026-06-10T08:20:27.870Z") == 1781079627870, "local times")
+	# Saved on the device and read back, it is the same world.
+	var dir := "user://test_local"
+	if DirAccess.dir_exists_absolute(dir):
+		for file in DirAccess.get_files_at(dir):
+			DirAccess.remove_absolute("%s/%s" % [dir, file])
+	var saved := LocalServer.new(LocalData.load_data(), dir)
+	var kept := saved.start_world({"name": "Kept", "seed": 99, "speed": 10}, 1, at)
+	var reopened := LocalServer.new(LocalData.load_data(), dir)
+	_check(reopened.worlds.has(int(kept.id)) and _difference(reopened.world_view(reopened.worlds[kept.id], at), saved.world_view(kept, at), "saved") == "", "local world saved and read back")
+
+
+## Where two JSON values differ ("" if they don't); numbers within a hair
+## (Godot's JSON reader isn't exact), dictionaries in any order.
+func _difference(a: Variant, b: Variant, path: String) -> String:
+	if (a is int or a is float) and (b is int or b is float):
+		return "" if absf(float(a) - float(b)) <= 1e-9 * maxf(1.0, absf(float(b))) else "%s: %s != %s" % [path, a, b]
+	if a is Dictionary and b is Dictionary:
+		for key in b:
+			if not a.has(key):
+				return "%s.%s missing" % [path, key]
+			var d := _difference(a[key], b[key], "%s.%s" % [path, key])
+			if d != "":
+				return d
+		for key in a:
+			if not b.has(key):
+				return "%s.%s extra" % [path, key]
+		return ""
+	if a is Array and b is Array:
+		if a.size() != b.size():
+			return "%s: %d items != %d" % [path, a.size(), b.size()]
+		for i in a.size():
+			var d := _difference(a[i], b[i], "%s[%d]" % [path, i])
+			if d != "":
+				return d
+		return ""
+	if a is String and b is String:
+		return "" if a == b else "%s: %s != %s" % [path, a, b]
+	if a == null and b == null:
+		return ""
+	if typeof(a) == typeof(b) and a == b:
+		return ""
+	return "%s: %s != %s" % [path, a, b]
 
 
 func _test_onboarding_almanac() -> void:

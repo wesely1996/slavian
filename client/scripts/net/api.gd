@@ -25,6 +25,15 @@ func patch_json(path: String, body: Dictionary) -> Response:
 
 func request(method: HTTPClient.Method, path: String, body: Variant = null) -> Response:
 	var response := Response.new()
+	# A solo world plays on the device (docs/local-engine.md).
+	if Local.is_active():
+		var answer := Local.respond(method, path, body)
+		response.status = answer.status
+		response.data = answer.data
+		response.ok = response.status >= 200 and response.status < 300
+		if not response.ok:
+			response.error = str(answer.data.get("message", "Error %d" % response.status))
+		return response
 	var http := HTTPRequest.new()
 	http.timeout = 15.0
 	add_child(http)

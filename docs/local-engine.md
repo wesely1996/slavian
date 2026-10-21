@@ -43,6 +43,13 @@ change: they keep calling `Api` and listening to `Live`.
   `Vector2` is single precision.
 - **Fixture numbers:** Godot's JSON reader isn't exact in the last digits.
   Store exact values as integers (scaled) or compare with a tolerance.
+- **Powers:** V8's `**` and C's `pow` can differ in the last bit. Where a
+  power feeds a decision (a threshold, a floor), round it the same way on
+  both sides, or check the fixture there with a tolerance.
+- **Whole fixtures:** `server/test/start-fixture.test.ts` records a real
+  world start. `UPDATE_FIXTURES=1` with `TEST_DATABASE_URL` rewrites it
+  after a rule change, and the client test compares the local engine's view
+  with it value by value.
 
 ## Progress
 
@@ -50,7 +57,7 @@ Tracked in PLAN.md under step 24. Order:
 
 1. The map (done): RNG, noise, A*, map generation.
 2. The store, the routing in `Api` and `Live`, and starting a solo world:
-   map, villages, heroes, sites, the first waves.
+   map, villages, heroes, sites, the first waves (done).
 3. Villages: resources, building, training, outposts, upkeep.
 4. The scheduler and catch-up, waves and hordes, village and field battles.
 5. The rest: scouting, caravans and the vault, research, heroes and quests,
