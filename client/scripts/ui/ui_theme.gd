@@ -233,6 +233,18 @@ static func build() -> Theme:
 	track.content_margin_left = 4
 	track.content_margin_right = 4
 	theme.set_stylebox("scroll", "VScrollBar", track)
+
+	# Volume sliders: a thin track, filled in malachite up to the handle.
+	var rail := StyleBoxFlat.new()
+	rail.bg_color = Color(INK, 0.15)
+	rail.set_corner_radius_all(4)
+	rail.content_margin_top = 4
+	rail.content_margin_bottom = 4
+	theme.set_stylebox("slider", "HSlider", rail)
+	var filled := rail.duplicate()
+	filled.bg_color = MALACHITE
+	theme.set_stylebox("grabber_area", "HSlider", filled)
+	theme.set_stylebox("grabber_area_highlight", "HSlider", filled)
 	return theme
 
 

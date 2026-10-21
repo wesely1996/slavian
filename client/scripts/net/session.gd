@@ -21,6 +21,9 @@ var tutorial: Dictionary = {}
 ## The world played last, for the menu's Continue: {"id", "name"} (solo ids
 ## are negative).
 var last_world: Dictionary = {}
+## Music and effects volumes, 0 to 1 (M5 26).
+var music_volume := 0.6
+var effects_volume := 0.8
 
 
 func _ready() -> void:
@@ -31,6 +34,8 @@ func _ready() -> void:
 		text_size = config.get_value("session", "text_size", "normal")
 		tutorial = config.get_value("session", "tutorial", {})
 		last_world = config.get_value("session", "last_world", {})
+		music_volume = config.get_value("session", "music_volume", 0.6)
+		effects_volume = config.get_value("session", "effects_volume", 0.8)
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -54,6 +59,8 @@ func save() -> void:
 	config.set_value("session", "text_size", text_size)
 	config.set_value("session", "tutorial", tutorial)
 	config.set_value("session", "last_world", last_world)
+	config.set_value("session", "music_volume", music_volume)
+	config.set_value("session", "effects_volume", effects_volume)
 	config.save(PATH)
 
 

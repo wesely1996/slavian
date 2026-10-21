@@ -656,10 +656,11 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - the first action one tap away, and nothing that wastes space.
     - Write the findings and the design in `docs/art-style.md` before building it.
     - **Done:** the findings and the design are in `docs/art-style.md` ("The main menu"). The start screen is now four compartments behind a tab bar (on top on a wide screen, at the bottom in thumb reach on a phone), each with a new icon: **Play** (Continue the world played last, then solo worlds, then co-op: guest sign-in, your worlds, a new world and joining by code; the new-world forms open from a button), **Profile** (rename, sign out, export your data; deleting the account stands apart and asks twice), **Settings** (language and text size) and **Help** (how a run goes, reporting a problem, the server costs and donating, the privacy policy). The world played last is kept on the device (`Session.last_world`).
-26. [ ] **Sound and music:**
+26. [x] **Sound and music:**
     - sound effects for taps, building, training, battle rounds, horns for hordes, and wins and losses;
     - music: calm themes for the map and the village, a tense one when a horde is near, and one for battles;
     - separate volume sliders for music and effects; everything free to use (CC0 or the like) and listed in the credits.
+    - **Done:** a `Sound` autoload with "Music" and "Effects" buses. Music crossfades as the screen changes (`SoundCues`): the map theme on the map and in the menu, the village theme in the village, a war theme while a horde is under an hour from one of your villages or at its gates, the battle theme on the battle map, and the victory or defeat theme when a run ends. Effects: every button taps; building, training, research and claims, caravans and donations, errors, battle rounds (five takes of clashing steel), and a war horn when a horde sets out on one of your villages. The volume sliders are in the menu's Settings and are kept on the device. All CC0 (RandomMind, spring-spring and stumpystrust on OpenGameArt, and Kenney), listed in `client/audio/CREDITS.md` and in the menu's Help.
 27. [ ] **Balance:** smarter simulator bots (teammates holding strong points, late Ember gathering), many runs per player count and preset, tuning towards a 60–75% win rate on Normal.
 28. [ ] **Closed test:** friends play a full run; fix what they find.
 

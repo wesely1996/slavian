@@ -14,6 +14,7 @@ config/icon="res://art/generated/app/icon.svg"
 [autoload]
 
 Session="*res://scripts/net/session.gd"
+Sound="*res://scripts/audio/sound.gd"
 Api="*res://scripts/net/api.gd"
 Game="*res://scripts/game/game.gd"
 Live="*res://scripts/net/live.gd"
