@@ -22,6 +22,11 @@ In the manner of modern grand strategy games ([`art/map-sample.png`](art/map-sam
   swamps, grass and bushes on the plains and steppe, ice, standing stones on
   the hallowed lands. Their placement is seeded by the hex and drawn back to
   front; hexes with a settlement, camp, site or fort stay clear.
+- **Hordes' roads** are red dots, with a target ring where they will strike:
+  bold for a horde on the march, fainter for the next ones, whose road is a
+  forecast (the server's `forecast` on a scheduled wave: its march planned
+  from today's villages and fear; it is planned again when it sets out). A
+  forecast horde's front emblem marks where it will gather.
 - Feature art is **shaded, without outlines**: gradients lit from the upper
   left, a soft shadow at the foot (at the bottom centre of the picture), and a
   foot that fades into the ground.
@@ -132,6 +137,11 @@ towel (*rushnyk*) that hangs in every Slavic house.
   one gets an info mark (`UI.info`, `UI.with_info`): an "i" in a ring that
   opens the text in a parchment popup when held (or tapped). A setting's
   door says what it is set to in its own label ("Account: Vesna").
+  Buildings, units and clans have a **card** behind their mark
+  (`UI.info_card`, `BuildingInfo`, `ClanText.card`): the picture, what it is
+  for, and for a building every level's cost, time and what it gives, on a
+  little paper scroll between wooden rollers (`ScrollRoll`) that unrolls
+  over the card and scrolls when it is long.
 - **No scrolling.** A sheet that holds more than fits is split instead:
   tabs along the top for its main parts (the village's Buildings, Troops,
   Caravans, Research), **side tabs** down its left for the parts within,

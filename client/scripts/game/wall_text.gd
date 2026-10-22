@@ -70,30 +70,33 @@ static func wall_effect(data: Dictionary, level: int) -> String:
 
 ## What a tower does at `level` and at the next.
 static func tower_effect(data: Dictionary, tower: String, level: int) -> String:
+	if data.get("walls", {}).get("towers", {}).get(tower, {}).is_empty():
+		return ""
+	var now: String = tower_at(data, tower, level) if level > 0 else UI.t("Not built yet")
+	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, tower_at(data, tower, level + 1)]
+
+
+## What a tower does at `level`, in a few words.
+static func tower_at(data: Dictionary, tower: String, level: int) -> String:
 	var t: Dictionary = data.get("walls", {}).get("towers", {}).get(tower, {})
-	if t.is_empty():
-		return ""
-	var at := func(l: int) -> String:
-		match tower:
-			"archer_tower":
-				return UI.t("+%d%% attack for the garrison while the walls stand") % roundi(l * float(t.attackPerLevel) * 100.0)
-			"gate_tower":
-				return UI.t("+%d%% to the walls' strength") % roundi(l * float(t.integrityPerLevel) * 100.0)
-			"ballista":
-				return UI.t("smashes %.1f siege engines a round") % (l * float(t.enginesPerLevel))
-			"murder_holes":
-				return UI.t("+%d%% defense while the walls stand") % roundi(l * float(t.defensePerLevel) * 100.0)
-			"ditch":
-				return UI.t("%s keeps off %d%% of the battering and %d%% of the climbers; engines take %d%% longer to build") % [
-					UI.t("a water-filled moat") if moat_water(data, l) else UI.t("a dry moat with stakes"),
-					roundi(minf(0.9, l * float(t.siegeCutPerLevel)) * 100.0), roundi(minf(0.9, l * float(t.get("escaladeCutPerLevel", 0.0))) * 100.0),
-					roundi(l * float(t.setupPerLevel) * 100.0)]
-			"watchtower":
-				var hours := roundi(l * float(t.warningHoursPerLevel))
-				return UI.tn("warns of a horde %d hour earlier", "warns of a horde %d hours earlier", hours) % hours
-		return ""
-	var now: String = at.call(level) if level > 0 else UI.t("Not built yet")
-	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, at.call(level + 1)]
+	match tower:
+		"archer_tower":
+			return UI.t("+%d%% attack for the garrison while the walls stand") % roundi(level * float(t.attackPerLevel) * 100.0)
+		"gate_tower":
+			return UI.t("+%d%% to the walls' strength") % roundi(level * float(t.integrityPerLevel) * 100.0)
+		"ballista":
+			return UI.t("smashes %.1f siege engines a round") % (level * float(t.enginesPerLevel))
+		"murder_holes":
+			return UI.t("+%d%% defense while the walls stand") % roundi(level * float(t.defensePerLevel) * 100.0)
+		"ditch":
+			return UI.t("%s keeps off %d%% of the battering and %d%% of the climbers; engines take %d%% longer to build") % [
+				UI.t("a water-filled moat") if moat_water(data, level) else UI.t("a dry moat with stakes"),
+				roundi(minf(0.9, level * float(t.siegeCutPerLevel)) * 100.0), roundi(minf(0.9, level * float(t.get("escaladeCutPerLevel", 0.0))) * 100.0),
+				roundi(level * float(t.setupPerLevel) * 100.0)]
+		"watchtower":
+			var hours := roundi(level * float(t.warningHoursPerLevel))
+			return UI.tn("warns of a horde %d hour earlier", "warns of a horde %d hours earlier", hours) % hours
+	return ""
 
 
 ## "The walls hold: 540 of 720 left." / "The walls are breached!" for a

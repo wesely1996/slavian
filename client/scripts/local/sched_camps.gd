@@ -91,6 +91,30 @@ static func spawn_sites(data: Dictionary, terrain: Dictionary, path: Array, vill
 	return picked
 
 
+## Where a village's starter camp goes: a free, passable hex within
+## starter.minDistance-maxDistance of it, no nearer any other village or the
+## Holy City, in a
+## seeded order (Vector2i.MAX if none) (sim/camps.ts starterSite).
+static func starter_site(data: Dictionary, terrain: Dictionary, village: Vector2i, villages: Array, taken: Dictionary, rng: LocalRng) -> Vector2i:
+	var min_distance := int(data.camps.starter.minDistance)
+	var candidates: Array = []
+	for cell in HexMath.spiral(village, int(data.camps.starter.maxDistance)):
+		var key := LocalLand.key(cell)
+		var type: Variant = terrain.get(key)
+		if type == null or type == "holy_city" or data.terrain.terrain[type].moveCost == null:
+			continue
+		if data.terrain.terrain[type].get("edge", false) or taken.has(key):
+			continue
+		# Not at the Holy City's gates either.
+		if HexMath.distance(village, cell) < min_distance or HexMath.distance(cell, Vector2i.ZERO) < min_distance:
+			continue
+		if villages.all(func(v: Vector2i) -> bool: return HexMath.distance(v, cell) >= min_distance):
+			candidates.append(cell)
+	if candidates.is_empty():
+		return Vector2i.MAX
+	return candidates[floori(rng.next() * candidates.size())]
+
+
 ## A camp draws in more of its kind, up to a limit.
 static func grow(data: Dictionary, units: Dictionary) -> Dictionary:
 	var share := float(data.camps.growth.share)

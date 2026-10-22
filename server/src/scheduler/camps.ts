@@ -19,7 +19,7 @@ import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { endWave, loadWave, reinforceWave, type Wave } from '../db/waves.js';
 import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
-import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, addUnits } from '../sim/camps.js';
+import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, starterSite, addUnits } from '../sim/camps.js';
 import { campsPerWave } from '../sim/difficulty.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
@@ -102,6 +102,28 @@ async function spawnAfterWave(client: DbClient, data: GameData, world: World, wa
   for (const [i, cell] of sites.entries()) {
     const units = composeWave(data, wave.front, wave.index, campSize(data, wave.index), world.seed ^ (0xc0 + i), players);
     await createCamp(client, data, world, { kind: wave.front === 'north' ? 'lair' : 'bandit', front: wave.front, q: cell.q, r: cell.r, units, waveId: wave.id }, at);
+  }
+}
+
+// When a run starts: a small bandit camp near every village, the first one
+// the getting-started quest sends an army to clear.
+export async function placeStarterCamps(client: DbClient, data: GameData, world: World, at: Date): Promise<void> {
+  const terrain = await terrainOf(client, world.id);
+  const villages = await listVillages(client, world.id);
+  const cells = villages.map((v) => hex(v.q, v.r));
+  const players = (await listMembers(client, world.id)).length;
+  for (const [i, village] of villages.entries()) {
+    const cell = starterSite(data, {
+      terrain,
+      village: hex(village.q, village.r),
+      villages: cells,
+      taken: await occupiedHexes(client, world.id),
+      rng: rngFor(world.seed, i, 0x57),
+    });
+    if (!cell) continue;
+    const front = banditFront(world, cell);
+    const units = composeWave(data, front, 0, data.camps.starter.units, world.seed ^ (0x5700 + i), players);
+    await createCamp(client, data, world, { kind: 'bandit', front, q: cell.q, r: cell.r, units, waveId: null }, at);
   }
 }
 

@@ -738,7 +738,8 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": 1
+      "leaderId": 1,
+      "forecast": null
      },
      {
       "id": 2,
@@ -755,7 +756,62 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -2,
+         7,
+         72000
+        ],
+        [
+         -2,
+         6,
+         86400
+        ],
+        [
+         -2,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -2,
+         2,
+         172800
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:40.885Z"
+      }
      },
      {
       "id": 3,
@@ -772,7 +828,87 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ],
+        [
+         -1,
+         1,
+         252000
+        ],
+        [
+         -2,
+         2,
+         288000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:51:37.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -865,7 +1001,17 @@
     "orders": [],
     "armies": [],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 10,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -3129,7 +3275,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -3146,7 +3362,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -3338,6 +3624,15 @@
     "camps": [
      {
       "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 10,
+      "waveId": null
+     },
+     {
+      "id": 2,
       "kind": "lair",
       "front": "north",
       "q": 3,
@@ -5689,7 +5984,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -5706,7 +6071,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -5716,14 +6151,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -5740,21 +6175,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -6008,7 +6461,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 10,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -8279,7 +8742,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -8296,7 +8829,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -8306,14 +8909,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -8330,21 +8933,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -8598,7 +9219,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 11,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -10869,7 +11500,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -10886,7 +11587,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -10896,14 +11667,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -10920,21 +11691,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -11188,7 +11977,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 11,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -13459,7 +14258,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -13476,7 +14345,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -13486,14 +14425,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -13510,21 +14449,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -13778,7 +14735,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 11,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -16049,7 +17016,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -16066,7 +17103,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -16076,14 +17183,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -16100,21 +17207,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -16368,7 +17493,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 12,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,
@@ -18639,7 +19774,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": -1,
+        "r": 9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         -1,
+         9,
+         0
+        ],
+        [
+         -1,
+         8,
+         28800
+        ],
+        [
+         -2,
+         8,
+         43200
+        ],
+        [
+         -3,
+         8,
+         57600
+        ],
+        [
+         -3,
+         7,
+         72000
+        ],
+        [
+         -3,
+         6,
+         86400
+        ],
+        [
+         -3,
+         5,
+         100800
+        ],
+        [
+         -2,
+         4,
+         115200
+        ],
+        [
+         -2,
+         3,
+         144000
+        ],
+        [
+         -1,
+         2,
+         158400
+        ],
+        [
+         -1,
+         1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T12:44:55.285Z"
+      }
      },
      {
       "id": 3,
@@ -18656,7 +19861,77 @@
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null
+      "leaderId": null,
+      "forecast": {
+       "spawn": {
+        "q": 10,
+        "r": -8
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         10,
+         -8,
+         0
+        ],
+        [
+         9,
+         -8,
+         54000
+        ],
+        [
+         8,
+         -7,
+         72000
+        ],
+        [
+         7,
+         -7,
+         90000
+        ],
+        [
+         6,
+         -6,
+         108000
+        ],
+        [
+         5,
+         -5,
+         126000
+        ],
+        [
+         4,
+         -4,
+         144000
+        ],
+        [
+         3,
+         -3,
+         162000
+        ],
+        [
+         3,
+         -2,
+         180000
+        ],
+        [
+         2,
+         -1,
+         198000
+        ],
+        [
+         1,
+         -1,
+         216000
+        ],
+        [
+         0,
+         0,
+         234000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T13:50:43.804Z"
+      }
      }
     ],
     "scouting": [],
@@ -18666,14 +19941,14 @@
       "front": "north",
       "leaderId": null,
       "waveId": null,
-      "campId": 1,
+      "campId": 2,
       "siteId": null,
       "villageId": null,
       "q": 3,
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "grey_wolf": 4,
@@ -18690,21 +19965,39 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
+        "attackerLeft": 5,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 2,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 3,
+        "attackerLeft": 4,
+        "defenderLeft": 6,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:39:12.000Z",
+        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -18958,7 +20251,17 @@
      }
     ],
     "forts": [],
-    "camps": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -4,
+      "r": 3,
+      "size": 12,
+      "waveId": null
+     }
+    ],
     "sites": [
      {
       "id": 1,

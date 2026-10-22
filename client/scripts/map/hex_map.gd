@@ -13,7 +13,7 @@ const HOLY_CITY_COLOR := Color("#8a2b2b")
 const MY_VILLAGE_COLOR := Color("#ffd75e")
 const ALLY_VILLAGE_COLOR := Color("#f4efe1")
 const VILLAGE_OUTLINE_COLOR := Color("#2b2118")
-const HORDE_PATH_COLOR := Color(0.78, 0.22, 0.18, 0.6)
+const HORDE_PATH_COLOR := Color(0.82, 0.14, 0.1, 0.95)
 const RUINS_COLOR := Color("#6d655a")
 const CARAVAN_COLOR := Color("#c99a5b")
 const SETTLERS_COLOR := Color("#e8e2d0")
@@ -137,6 +137,9 @@ func _draw() -> void:
 		_draw_army(army, now)
 	for hero in Game.heroes:
 		_draw_hero(hero, now)
+	for wave in Game.waves:
+		if wave.status == "scheduled" and wave.get("forecast") is Dictionary:
+			_draw_forecast(wave)
 	for wave in WaveMath.visible_waves(Game.waves):
 		_draw_horde(wave, now)
 
@@ -362,6 +365,44 @@ func has_moving_hordes() -> bool:
 		or Game.armies.any(func(a: Dictionary) -> bool: return a.status in ["marching", "returning"])
 
 
+## A horde's road as a line of red dots, and a target where it will strike.
+func _draw_route(points: PackedVector2Array, color: Color) -> void:
+	var spacing := hex_size * 0.3
+	var dot := hex_size * 0.095
+	var carry := 0.0
+	for i in range(1, points.size()):
+		var a := points[i - 1]
+		var b := points[i]
+		var length := a.distance_to(b)
+		var along := carry
+		while along < length:
+			draw_circle(a.lerp(b, along / length), dot, color)
+			along += spacing
+		carry = along - length
+	var at := points[points.size() - 1]
+	draw_arc(at, hex_size * 0.62, 0.0, TAU, 36, color, 4.0, true)
+	draw_arc(at, hex_size * 0.3, 0.0, TAU, 24, color, 3.0, true)
+	for i in 4:
+		var way := Vector2.RIGHT.rotated(i * PI / 2.0)
+		draw_line(at + way * hex_size * 0.42, at + way * hex_size * 0.8, color, 4.0, true)
+
+
+## Where a horde not yet out is expected to gather and go (its forecast):
+## fainter than one on the march.
+func _draw_forecast(wave: Dictionary) -> void:
+	var forecast: Dictionary = wave.forecast
+	var points := PackedVector2Array()
+	for step in forecast.get("path", []):
+		points.append(HexMath.to_pixel(Vector2i(int(step[0]), int(step[1])), hex_size))
+	if points.size() < 2:
+		return
+	_draw_route(points, Color(HORDE_PATH_COLOR, 0.75))
+	var emblem := "faction/" + String(EMBLEMS.get(String(wave.get("front", "north")), "north"))
+	draw_circle(points[0], hex_size * 0.42, Color(ENEMY_COLOR, 0.5))
+	if Art.has(emblem):
+		_draw_art(emblem, points[0], hex_size * 0.72, Color(1, 1, 1, 0.6))
+
+
 func _draw_horde(wave: Dictionary, now: float) -> void:
 	var p := WaveMath.progress(wave, now)
 	if p.is_empty():
@@ -377,7 +418,7 @@ func _draw_horde(wave: Dictionary, now: float) -> void:
 			if ahead:
 				trail.append(HexMath.to_pixel(cell, hex_size))
 		if trail.size() >= 2:
-			draw_polyline(trail, HORDE_PATH_COLOR, 5.0)
+			_draw_route(trail, HORDE_PATH_COLOR)
 	else:
 		# Camped at the gates: sit beside the village so both stay visible.
 		pos += Vector2(hex_size * 0.42, -hex_size * 0.42)

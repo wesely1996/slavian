@@ -146,7 +146,7 @@ export class LiveHub {
           return {
             type: 'waves',
             worldId: event.worldId,
-            waves: await wavesView(client, event.worldId),
+            waves: await wavesView(client, this.data, await getWorld(client, event.worldId)),
             leaders: await leadersView(client, this.data, event.worldId),
             serverTime,
           };

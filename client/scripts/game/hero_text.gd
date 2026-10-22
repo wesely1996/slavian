@@ -13,6 +13,10 @@ static func effect_name(key: String) -> String:
 		"upkeep": UI.t("troop upkeep"), "ambush": UI.t("ambush"), "researchTime": UI.t("research time"),
 		"production.all": UI.t("production"), "production.grain": UI.t("grain"), "trainTime.spearman": UI.t("spearman training time"),
 		"heroSpeed": UI.t("hero speed"), "heroXp": UI.t("hero XP"), "woundTime": UI.t("time wounded"),
+		"production.wood": UI.t("wood"), "production.stone": UI.t("stone"), "production.iron": UI.t("iron"),
+		"buildTime": UI.t("build time"), "trainTime": UI.t("training time"), "trainTime.settler": UI.t("settler training time"),
+		"coldDefense": UI.t("defense against the North"), "fortCost": UI.t("fort cost"), "outpostYield": UI.t("outpost yield"),
+		"storage": UI.t("storage"),
 	}.get(key, key)
 
 

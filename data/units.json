@@ -7,6 +7,7 @@
   "units": {
     "spearman": {
       "name": "Spearman",
+      "description": "Cheap, steady infantry that holds the walls and stops riders.",
       "family": "infantry",
       "building": "barracks",
       "requiresLevel": 1,
@@ -20,6 +21,7 @@
     },
     "archer": {
       "name": "Archer",
+      "description": "Shoots hard at infantry; riders cut them down.",
       "family": "archers",
       "building": "barracks",
       "requiresLevel": 1,
@@ -33,6 +35,7 @@
     },
     "horseman": {
       "name": "Horseman",
+      "description": "Fast riders that strike hard and run down archers.",
       "family": "cavalry",
       "building": "barracks",
       "requiresLevel": 2,
@@ -46,6 +49,7 @@
     },
     "scout": {
       "name": "Scout",
+      "description": "Rides out to see a horde's numbers before it arrives.",
       "family": "scout",
       "building": "scout_lodge",
       "requiresLevel": 1,
@@ -59,6 +63,7 @@
     },
     "settler": {
       "name": "Settler",
+      "description": "Founds a new village where you send them; no use in a fight.",
       "family": "infantry",
       "building": "settlers_lodge",
       "requiresLevel": 1,
@@ -73,6 +78,7 @@
     },
     "forest_archer": {
       "name": "Forest Archer",
+      "description": "The lynx-folk's own: archers who strike from the trees.",
       "clan": "rys",
       "family": "archers",
       "building": "barracks",
@@ -87,6 +93,7 @@
     },
     "river_barge": {
       "name": "River Barge",
+      "description": "The beaver-folk's own: a river crew who carry a great load and hold firm.",
       "clan": "bobr",
       "family": "infantry",
       "building": "barracks",
@@ -101,6 +108,7 @@
     },
     "border_rider": {
       "name": "Border Rider",
+      "description": "The falcon-folk's own: light riders who see far and ride fast.",
       "clan": "sokol",
       "family": "cavalry",
       "building": "barracks",

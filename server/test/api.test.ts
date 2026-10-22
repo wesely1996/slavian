@@ -58,6 +58,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     return { status: response.statusCode, body: response.json() };
   }
 
+  // Every village starts with a small bandit camp nearby, placed by the
+  // world's (random) seed: it may stand on the hex a test wants, or ambush
+  // its caravans. Tests of other things take them away.
+  async function withoutStarterCamps(worldId: number): Promise<void> {
+    await db.query('DELETE FROM camps WHERE world_id = $1', [worldId]);
+  }
+
   async function guest(displayName: string): Promise<{ token: string; accountId: number }> {
     const { status, body } = await call('POST', '/v1/auth/guest', undefined, { displayName });
     expect(status).toBe(200);
@@ -414,6 +421,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const created = await call('POST', '/v1/worlds', zora.token, { name: 'Outposts', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
     const started = await call('POST', `/v1/worlds/${worldId}/start`, zora.token);
+    await withoutStarterCamps(worldId);
     const village = started.body.villages[0];
     const home = hex(village.q, village.r);
     const yields = scheduler.data.buildings.buildings.outpost!.yields!;
@@ -475,6 +483,24 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(abandoned.body.village.plots[`o${q1},${r1}`]).toBeUndefined();
   });
 
+  it('gives every village a small bandit camp nearby to clear first', async () => {
+    const lada = await guest('Lada');
+    const ivo = await guest('Ivo');
+    const created = await call('POST', '/v1/worlds', lada.token, { name: 'Starters', maxPlayers: 2, speed: 10 });
+    await call('POST', '/v1/worlds/join', ivo.token, { inviteCode: created.body.inviteCode });
+    const started = await call('POST', `/v1/worlds/${created.body.id}/start`, lada.token);
+    const { units, minDistance, maxDistance } = scheduler.data.camps.starter;
+    for (const village of started.body.villages as { q: number; r: number }[]) {
+      const near = (started.body.camps as { kind: string; q: number; r: number; size: number }[]).filter((c) => {
+        const d = hexDistance(hex(c.q, c.r), hex(village.q, village.r));
+        return d >= minDistance && d <= maxDistance;
+      });
+      expect(near.length).toBeGreaterThanOrEqual(1);
+      expect(near[0]!.kind).toBe('bandit');
+      expect(near[0]!.size).toBe(units);
+    }
+  });
+
   it('sends caravans to an ally and to the vault, fetches from it and enlarges it', async () => {
     const vid = await guest('Vid');
     const ola = await guest('Ola');
@@ -483,6 +509,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await call('POST', '/v1/worlds/join', ola.token, { inviteCode: created.body.inviteCode });
     const started = await call('POST', `/v1/worlds/${worldId}/start`, vid.token);
     expect(started.body.vault).toMatchObject({ level: 1, amounts: { wood: 0, stone: 0, grain: 0, iron: 0 }, capacity: 3000 });
+    await withoutStarterCamps(worldId);
     const mine = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vid.accountId);
     const theirs = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ola.accountId);
     const send = (body: object) => call('POST', `/v1/villages/${mine.id}/caravans`, vid.token, body);
@@ -859,6 +886,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const created = await call('POST', '/v1/worlds', mira.token, { name: 'Notices', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
     const started = await call('POST', `/v1/worlds/${worldId}/start`, mira.token);
+    await withoutStarterCamps(worldId);
     const village = started.body.villages[0];
     const inbox = async () => (await call('GET', `/v1/worlds/${worldId}/notifications`, mira.token)).body;
 
@@ -1026,6 +1054,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const created = await call('POST', '/v1/worlds', mira.token, { name: 'Field', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
     const started = await call('POST', `/v1/worlds/${worldId}/start`, mira.token);
+    await withoutStarterCamps(worldId);
     const home = started.body.villages[0];
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
     const roundMs = (15 * 60_000) / 10;

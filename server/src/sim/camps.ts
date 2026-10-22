@@ -50,6 +50,34 @@ export function spawnSites(
   return picked;
 }
 
+// Where a village's starter camp goes: a free, passable hex within
+// starter.minDistance-maxDistance of it, no nearer any other village or the
+// Holy City, in a
+// seeded order (null if none).
+export function starterSite(
+  data: GameData,
+  input: {
+    terrain: ReadonlyMap<string, TerrainId>;
+    village: Hex;
+    villages: readonly Hex[];
+    taken: ReadonlySet<string>;
+    rng: () => number;
+  },
+): Hex | null {
+  const { minDistance, maxDistance } = data.camps.starter;
+  const candidates = spiral(input.village, maxDistance).filter((cell) => {
+    const key = hexKey(cell);
+    const type = input.terrain.get(key);
+    if (type === undefined || type === 'holy_city' || data.terrain.terrain[type].moveCost === null) return false;
+    if (data.terrain.terrain[type].edge || input.taken.has(key)) return false;
+    const distance = hexDistance(input.village, cell);
+    // Not at the Holy City's gates either.
+    return distance >= minDistance && hexDistance(cell, { q: 0, r: 0 }) >= minDistance && input.villages.every((v) => hexDistance(v, cell) >= minDistance);
+  });
+  if (candidates.length === 0) return null;
+  return candidates[Math.floor(input.rng() * candidates.length)]!;
+}
+
 // A camp draws in more of its kind, up to a limit.
 export function grow(data: GameData, units: Units): Units {
   const { share, maxUnits } = data.camps.growth;

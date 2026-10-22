@@ -14,7 +14,8 @@ const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hill
 	"steppe": "feature/bush", "hallowed": "feature/blossom"}
 
 
-## [[title, text, art id or ""], …] for a section of the almanac.
+## [[title, text, art id or "", unit, building or clan id], …] for a
+## section of the almanac (the id for those three only).
 static func entries(data: Dictionary, section: String) -> Array:
 	match section:
 		"Units":
@@ -44,7 +45,7 @@ static func _units(data: Dictionary) -> Array:
 			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.speed), int(u.carry), int(u.upkeepPerHour), where]
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
-		out.append([UI.t(u.name), text, "unit/%s" % id])
+		out.append([UI.t(u.name), text, "unit/%s" % id, id])
 	return out
 
 
@@ -64,20 +65,8 @@ static func _buildings(data: Dictionary) -> Array:
 			text += UI.t(" · per level: ") + ", ".join(parts)
 		if b.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[b.clan].name)
-		out.append([UI.t(b.name), text, _building_art(id, String(b.kind))])
+		out.append([UI.t(b.name), text, BuildingInfo.picture(data, id), id])
 	return out
-
-
-## A building's picture at its first stage.
-static func _building_art(id: String, kind: String) -> String:
-	match kind:
-		"field":
-			return Art.building_id(id, 1, true)
-		"wall":
-			return "building/wall_wood"
-		"outpost":
-			return "map/outpost"
-	return Art.building_id(id, 1)
 
 
 static func _stances(data: Dictionary) -> Array:
@@ -111,7 +100,7 @@ static func _clans(data: Dictionary) -> Array:
 	var out := []
 	for clan in data.clans.clans:
 		var c: Dictionary = data.clans.clans[clan]
-		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s %s") % [UI.t(c.story), ClanText.perks(data, clan), ClanText.arms(data, clan)], "clan/%s" % clan])
+		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s") % [UI.t(c.story), ClanText.perks(data, clan)], "clan/%s" % clan, clan])
 	return out
 
 

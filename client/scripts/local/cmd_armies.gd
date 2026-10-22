@@ -659,7 +659,7 @@ static func _plan_fort_check(server: LocalServer, world: Dictionary, fort_id: in
 
 
 ## The front whose bandits would take over a fort here.
-static func _bandit_front(world: Dictionary, cell: Vector2i) -> String:
+static func bandit_front(world: Dictionary, cell: Vector2i) -> String:
 	var here := LocalMapgen.front_of(cell)
 	if here != "north" and here in world.activeFronts:
 		return here
@@ -686,7 +686,7 @@ static func on_fort_check(server: LocalServer, world: Dictionary, event: Diction
 		return
 	# Left empty too long: bandits move in.
 	world.forts.erase(fort)
-	var front := _bandit_front(world, Vector2i(fort.q, fort.r))
+	var front := bandit_front(world, Vector2i(fort.q, fort.r))
 	var units := LocalWaves.compose_wave(data, front, 0, int(data.camps.fort.units), int(world.seed) ^ int(fort.id), world.members.size())
 	LocalBattles.create_camp(server, world, {"kind": "bandit", "front": front, "q": fort.q, "r": fort.r, "units": units, "waveId": null}, at)
 	LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "camp", "tier": "push", "title": "Bandits took the fort at ({q}, {r})",

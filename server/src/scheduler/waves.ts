@@ -12,7 +12,7 @@ import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
 import { insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
-import { planMarch, planWave, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
+import { planMarch, planWave, type March, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
 import { findBridge } from '../db/bridges.js';
 import { stagesStanding } from '../sim/bridge.js';
@@ -103,6 +103,36 @@ export function holdForQuiet<M extends { path: readonly PathStep[]; arrivesAt: D
   if (delay <= 0) return march;
   const path = march.path.map((s, i) => (i === march.path.length - 1 ? { ...s, atMs: at.getTime() - spawnAt.getTime() } : s));
   return { ...march, path, arrivesAt: at };
+}
+
+// Where each scheduled wave is expected to go: its march planned as at
+// spawn, from today's villages and fear (it is planned again, for real, when
+// it sets out, so the forecast can still change). By wave id.
+export async function forecastMarches(client: DbClient, data: GameData, world: World, waves: readonly Wave[]): Promise<Map<number, March>> {
+  const forecasts = new Map<number, March>();
+  const scheduled = waves.filter((w) => w.status === 'scheduled');
+  if (scheduled.length === 0) return forecasts;
+  const terrain = await loadLand(client, world.id);
+  const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
+  const fear = await fearOf(client, data, world);
+  for (const wave of scheduled) {
+    try {
+      const march = planMarch(data, {
+        terrain,
+        radius: world.radius ?? 0,
+        wave: asPlanned(wave),
+        villages,
+        seed: world.seed,
+        departAt: wave.spawnAt,
+        worldSpeed: world.speed,
+        fear,
+      });
+      forecasts.set(wave.id, holdForQuiet(world, wave.spawnAt, march));
+    } catch {
+      // No way through from its front today: nothing to forecast.
+    }
+  }
+  return forecasts;
 }
 
 export const waveHandlers: HandlerRegistry = {
