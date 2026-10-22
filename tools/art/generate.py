@@ -201,6 +201,20 @@ def icon(kind):
         s.circle(32, 32, 22, "none", stroke=W, sw=4.5)
         s.circle(32, 20, 1.5, W, stroke=W, sw=3.5)
         stroke("M32,28 L32,44", 4.5)
+    elif kind == "coin":
+        # An old coin with a square hole: the server's costs, giving.
+        s.circle(32, 32, 22, "none", stroke=W, sw=4.5)
+        s.rect(26, 26, 12, 12, "none", stroke=W, sw=4)
+    elif kind == "lock":
+        # A padlock: privacy.
+        s.rect(16, 28, 32, 24, "none", stroke=W, sw=4.5, rx=4)
+        stroke("M22,28 L22,20 Q22,10 32,10 Q42,10 42,20 L42,28", 4.5)
+        stroke("M32,37 L32,43", 4.5)
+    elif kind == "music":
+        # Two notes on a beam: music and sound.
+        stroke("M24,44 L24,14 L48,10 L48,40", 4.5)
+        s.circle(19, 45, 6, W, stroke="none", sw=0)
+        s.circle(43, 41, 6, W, stroke="none", sw=0)
     elif kind == "credits":
         # A quill over the line it wrote: who made the game.
         stroke("M50,10 Q30,14 20,36 L16,48 L28,44 Q46,32 50,10 Z", 4)
@@ -213,7 +227,7 @@ def icon(kind):
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info"]
+UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------
