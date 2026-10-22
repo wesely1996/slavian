@@ -217,6 +217,18 @@ with the credits in the menu's Help. To add or replace one:
 - keep music calm and unhurried; save the tense theme for real danger;
 - add it to `CREDITS.md`, and to the menu's credits when it is by someone new.
 
+## Mosaic
+
+The hero portraits and the logo are laid in mosaic, in the manner of the
+Serbian churches of the Nemanjić era (Studenica, Gračanica): small stones,
+each one colour, set in dark grout, the gold ones catching the light
+unevenly. `tools/art/generate.py` draws them as before (the portraits as
+icons now: gold leaf, a halo, almond eyes, dark contours, a cinnabar
+border) and `tools/art/mosaic.py` lays the drawing in tesserae; they ship as
+PNG (`MOSAIC` in generate.py sets the scale and the stone size). Reading the
+SVG needs cairosvg (`pip install cairosvg`); without it the mosaics are left
+as they are.
+
 ## Replacing a piece of art
 
 `client/art/art.json` maps every art id to a file:
