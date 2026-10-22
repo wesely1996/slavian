@@ -777,7 +777,7 @@ func _test_art() -> void:
 	_check(missing_art.is_empty(), "art for every village building, wall material and enemy unit: %s" % [missing_art])
 	var theme := UiTheme.build()
 	var panel := theme.get_stylebox("panel", "PanelContainer")
-	_check(panel is StyleBoxFlat and (panel as StyleBoxFlat).bg_color.is_equal_approx(UiTheme.FLAX) and (panel as StyleBoxFlat).shadow_size == 0, "sheets are flat flax")
+	_check(panel is Parchment and Art.texture("ui/parchment") != null, "sheets are torn parchment")
 	var open_tab := theme.get_stylebox("disabled", "TabButton")
 	_check(open_tab is StyleBoxFlat and (open_tab as StyleBoxFlat).border_width_bottom == 4 and (open_tab as StyleBoxFlat).border_color == UiTheme.MADDER, "open tab underlined in madder")
 	_check(theme.get_stylebox("focus", "Button") is StyleBoxFlat, "keyboard focus is visible")
