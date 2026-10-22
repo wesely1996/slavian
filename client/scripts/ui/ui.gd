@@ -93,6 +93,50 @@ static func hbox(separation := 12) -> HBoxContainer:
 	return node
 
 
+## An "i" to hold (or tap) for `text`, in a parchment popup beside it:
+## explanations live here rather than under every button.
+static func info(text: String) -> Button:
+	var node := Button.new()
+	node.icon = Art.texture("icon/info")
+	node.flat = true
+	node.focus_mode = Control.FOCUS_NONE
+	node.custom_minimum_size = Vector2(56, 56) * UiTheme.text_scale
+	node.add_theme_constant_override("icon_max_width", int(38 * UiTheme.text_scale))
+	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+		node.add_theme_color_override(state, UiTheme.WHEAT if state != "icon_normal_color" else UiTheme.MUTED)
+	node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	node.tooltip_text = text
+	node.button_down.connect(func() -> void: _show_info(node, text))
+	return node
+
+
+static func _show_info(anchor: Control, text: String) -> void:
+	var popup := PopupPanel.new()
+	popup.add_theme_stylebox_override("panel", UiTheme.sheet_style(14))
+	var area := anchor.get_viewport_rect().size
+	var width := minf(560.0, area.x - 32.0)
+	var words := label(text, SMALL_SIZE)
+	words.custom_minimum_size.x = width - 50.0
+	popup.add_child(words)
+	anchor.add_child(popup)
+	popup.popup_hide.connect(popup.queue_free)
+	# Under the mark (or over it, near the bottom), kept on the screen.
+	var at := anchor.get_screen_position()
+	var x := clampf(at.x + anchor.size.x - width, 16.0, area.x - width - 16.0)
+	popup.popup(Rect2i(Vector2i(int(x), int(at.y + anchor.size.y + 6.0)), Vector2i(int(width), 0)))
+	if popup.position.y + popup.size.y > area.y - 16.0:
+		popup.position.y = int(at.y - popup.size.y - 6.0)
+
+
+## `control` with an info mark at its end (UI.info), as one row.
+static func with_info(control: Control, text: String) -> HBoxContainer:
+	var row := hbox(8)
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(control)
+	row.add_child(info(text))
+	return row
+
+
 ## A wrapping label in a row takes the room left over; left to its minimum
 ## width it would wrap after every letter and stand on end.
 static func _fit_wrapping(child: Node) -> void:

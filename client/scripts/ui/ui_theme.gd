@@ -249,15 +249,9 @@ static func build() -> Theme:
 
 
 ## A sheet of flax: flat, square-cornered, an ink hairline round it.
-static func sheet_style(padding := 22, alpha := 1.0) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(FLAX, alpha)
-	style.border_color = Color(INK, 0.35)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(2)
-	style.set_content_margin_all(padding)
-	style.anti_aliasing = true
-	return style
+static func sheet_style(padding := 22, alpha := 1.0) -> StyleBox:
+	# Torn parchment (Parchment, art ui/parchment), the sheets' paper.
+	return Parchment.new(padding, alpha)
 
 
 ## Walnut with gold plating (PlatedWood): a rail along the bottom with
@@ -285,7 +279,7 @@ static func plated_button(lift := 0.0) -> StyleBox:
 
 
 ## Older name for the sheet.
-static func panel_style(padding := 22, alpha := 1.0) -> StyleBoxFlat:
+static func panel_style(padding := 22, alpha := 1.0) -> StyleBox:
 	return sheet_style(padding, alpha)
 
 

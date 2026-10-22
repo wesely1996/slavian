@@ -101,7 +101,7 @@ towel (*rushnyk*) that hangs in every Slavic house.
   | Name | Hex | Job |
   |---|---|---|
   | Wood | `#2b211b` | the top band; the background |
-  | Flax | `#e4dfd2` | sheets (greyer than cream on purpose) |
+  | Parchment | `#ece0c2`–`#d6c296` | sheets: torn, aged paper (`Parchment`, art `ui/parchment`) |
   | Ink | `#2a221c` | lettering; muted `#6b5f52` |
   | Malachite | `#2f6e55` | ours, done, and the main action (`UI.primary`) |
   | Madder | `#a8322b` | hordes, danger, the open tab, the embroidery |
@@ -124,6 +124,14 @@ towel (*rushnyk*) that hangs in every Slavic house.
   - Buttons on the wood (`WoodButton`, `WoodIconButton`) have flax
     lettering.
   - Tap targets are at least 76 px.
+- **Sheets** are parchment (`Parchment`, playtest 0.1.1): a seamless paper tile
+  (`tools/art/parchment.py`, `ui/parchment`) inside a torn outline, the edge
+  darkened and singed, a soft shadow under it. The tears depend only on the
+  sheet's size, so they hold still while it redraws.
+- **Explanations** don't sit under buttons. A button or a heading that needs
+  one gets an info mark (`UI.info`, `UI.with_info`): an "i" in a ring that
+  opens the text in a parchment popup when held (or tapped). A setting's
+  door says what it is set to in its own label ("Account: Vesna").
 - **Icons** (`icon/...`) are white line drawings that the theme tints: ink on
   flax, flax on wood and on malachite. Resources (`resource/...`) stand in
   for their names on the top band and in every cost line.

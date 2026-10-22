@@ -263,17 +263,14 @@ func _render(page: String) -> void:
 		"credits": _credits_page()
 
 
-## A full-width door to the next step, with a line on where it leads.
+## A full-width door to the next step; where it leads is behind its info
+## mark (UI.info) rather than written under it.
 func _door(text: String, about: String, page: String, icon_id := "", primary := false) -> void:
 	var go := func() -> void: _open(page)
 	var door := UI.primary(text, go, icon_id) if primary else UI.button(text, go, icon_id)
 	door.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	door.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	var group := UI.vbox(6)
-	group.add_child(door)
-	if about != "":
-		group.add_child(UI.label(about, UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(group)
+	_content.add_child(UI.with_info(door, about) if about != "" else door)
 
 
 # --- Home --------------------------------------------------------------------
@@ -470,8 +467,7 @@ func _friends_page() -> void:
 
 ## Signing in as a guest, then on to the page that asked for it.
 func _guest_step(why: String) -> void:
-	_content.add_child(UI.label(why, UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.with_info(UI.label(tr("Your name"), UI.SMALL_SIZE, UI.MUTED), why))
 	var name_edit := UI.line_edit(tr("e.g. Vesna"))
 	_content.add_child(name_edit)
 	_content.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
@@ -613,12 +609,13 @@ func _settings_page() -> void:
 			size = tr(TEXT_SIZE_LABELS[i])
 	_door(tr("Language: %s") % language, "", "language", "icon/research")
 	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
-	_door(tr("Sound"), tr("Music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "sound", "icon/inbox")
+	_door(tr("Sound: music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "", "sound", "icon/inbox")
+	# Who is signed in, on the door itself.
 	var who := String(Session.account.get("displayName", ""))
-	var account := tr("Not signed in")
+	var account := tr("Account: not signed in")
 	if Session.is_logged_in():
-		account = tr("Signed in as %s") % who if who != "" else tr("Signed in")
-	_door(tr("Account"), account, "account", "icon/profile")
+		account = tr("Account: %s") % who if who != "" else tr("Account: signed in")
+	_door(account, "", "account", "icon/profile")
 	_door(tr("Help and support"), tr("How a run goes, reporting a problem, the server costs and privacy."), "help", "icon/help")
 
 
@@ -637,7 +634,6 @@ func _language_page() -> void:
 
 ## Text size for accessibility: the same letter at three sizes.
 func _text_size_page() -> void:
-	_content.add_child(UI.label(tr("Applies everywhere in the game."), UI.SMALL_SIZE, UI.MUTED))
 	var sizes := UI.hbox(8)
 	for i in TEXT_SIZES.size():
 		var entry: Array = TEXT_SIZES[i]
@@ -869,7 +865,8 @@ func _lobby_page() -> void:
 		Live.watch(_lobby_world_id)
 	_content.add_child(UI.label(tr("Invite code"), UI.SMALL_SIZE, UI.MUTED))
 	_content.add_child(UI.label(world.inviteCode, UI.TITLE_SIZE))
-	_content.add_child(UI.label(tr("Share it with your group. %d of %d players joined.") % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.with_info(UI.label(tr("%d of %d players joined") % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED),
+		tr("Share the code with your group: they join with it from Play with friends.")))
 	for member in world.members:
 		var host := tr(" (host)") if int(member.accountId) == int(world.hostAccountId) else ""
 		var clan := " · %s" % ClanText.title(Game.data, member.get("clan")) if not Game.data.is_empty() else ""
