@@ -46,6 +46,11 @@ var _plot := Rules.HALL_PLOT
 var _tab := "village"
 ## The town's name is being edited in the village panel.
 var _renaming := false
+## Names being typed (key -> {text, caret}). Game events rebuild the panel
+## often; a draft keeps what was typed, where, and the keyboard focus.
+var _drafts := {}
+## The draft whose field had the focus when the panel was last rebuilt.
+var _focused_draft := ""
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
@@ -1016,6 +1021,8 @@ func _run_panel() -> void:
 
 
 func _rebuild_panel() -> void:
+	var focus := get_viewport().gui_get_focus_owner()
+	_focused_draft = String(focus.get_meta("draft", "")) if focus != null and _panel_body.is_ancestor_of(focus) else ""
 	UI.clear(_panel_body)
 	_ticking.clear()
 	_fit_sheet()
@@ -2145,9 +2152,14 @@ func _hero_journey(hero: Dictionary) -> void:
 		go.disabled = hero.status != "home"
 		_panel_body.add_child(go))
 	_panel_body.add_child(UI.label(tr("Name"), UI.HEADING_SIZE))
-	var name_edit := UI.line_edit(tr("New name"), hero.name)
+	var key := "hero:%d" % int(hero.accountId)
+	var name_edit := _draft_field(key, tr("New name"), hero.name)
 	_panel_body.add_child(name_edit)
-	_panel_body.add_child(UI.button(tr("Rename"), func() -> void: _hero_action("rename", {"name": name_edit.text.strip_edges()})))
+	var rename := func(_text := "") -> void:
+		if await _hero_action("rename", {"name": name_edit.text.strip_edges()}):
+			_drafts.erase(key)
+	name_edit.text_submitted.connect(rename)
+	_panel_body.add_child(UI.button(tr("Rename"), rename))
 
 
 ## The quests the hero is offered, or the one it is on.
@@ -2191,17 +2203,19 @@ func _site_name(site_id: Variant) -> String:
 	return ""
 
 
-func _hero_action(action: String, body: Dictionary) -> void:
+## True when the server took it.
+func _hero_action(action: String, body: Dictionary) -> bool:
 	_status.text = ""
 	var response := await Api.post_json("/v1/worlds/%d/hero/%s" % [Game.world_id(), action], body)
 	if not response.ok:
 		_status.text = response.error
-		return
+		return false
 	Game.note_server_time(response.data.serverTime)
 	var updated: Dictionary = response.data.hero
 	var heroes := Game.heroes.filter(func(h: Dictionary) -> bool: return int(h.accountId) != int(updated.accountId))
 	heroes.append(updated)
 	Game.set_heroes(Game.world_id(), heroes)
+	return true
 
 
 ## Settlers from `village_id` on the road, and how recent ones ended.
@@ -2387,15 +2401,20 @@ func _town_switcher(village: Dictionary) -> void:
 	row.add_child(back)
 	back.custom_minimum_size.x = 56.0
 	if _renaming:
-		var field := UI.line_edit(tr("Town name"), village.name)
-		field.max_length = 32
+		var key := "town:%d" % int(village.id)
+		var fresh := not _drafts.has(key)
+		var field := _draft_field(key, tr("Town name"), village.name)
 		field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var save := func(_text := "") -> void: _rename(int(village.id), field.text)
 		field.text_submitted.connect(save)
 		row.add_child(field)
 		row.add_child(UI.primary(tr("Save"), save))
-		field.call_deferred("grab_focus")
-		field.call_deferred("select_all")
+		# Opening the pen selects the old name to type over; a rebuild while
+		# typing keeps the text and the caret instead (_draft_field).
+		if fresh:
+			_drafts[key] = {"text": village.name, "caret": village.name.length()}
+			field.call_deferred("grab_focus")
+			field.call_deferred("select_all")
 	else:
 		var title := UI.label(village.name, UI.HEADING_SIZE)
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2426,6 +2445,7 @@ func _rename(village_id: int, name: String) -> void:
 	_status.text = ""
 	if name.strip_edges().is_empty():
 		_renaming = false
+		_drafts.erase("town:%d" % village_id)
 		_rebuild_panel()
 		return
 	var response := await Api.post_json("/v1/villages/%d/rename" % village_id, {"name": name.strip_edges()})
@@ -2433,8 +2453,31 @@ func _rename(village_id: int, name: String) -> void:
 		_status.text = response.error
 		return
 	_renaming = false
+	_drafts.erase("town:%d" % village_id)
 	Game.update_village(response.data.village)
 	_rebuild_panel()
+
+
+## A name field whose text, caret and focus outlive the panel's rebuilds:
+## typing is kept in _drafts under `key` until the caller erases it.
+func _draft_field(key: String, placeholder: String, text: String) -> LineEdit:
+	var draft: Dictionary = _drafts.get(key, {})
+	var field := UI.line_edit(placeholder, String(draft.get("text", text)))
+	field.max_length = 32
+	field.set_meta("draft", key)
+	field.text_changed.connect(func(typed: String) -> void:
+		_drafts[key] = {"text": typed, "caret": field.caret_column})
+	field.caret_changed.connect(func() -> void:
+		if _drafts.has(key):
+			_drafts[key].caret = field.caret_column)
+	if not draft.is_empty() and key == _focused_draft:
+		var caret := int(draft.get("caret", field.text.length()))
+		var refocus := func() -> void:
+			if is_instance_valid(field):
+				field.grab_focus()
+				field.caret_column = caret
+		refocus.call_deferred()
+	return field
 
 
 func _village_panel() -> void:
