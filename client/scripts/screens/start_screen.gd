@@ -823,12 +823,9 @@ func _costs(box: VBoxContainer) -> void:
 	var raised := float(c.get("donations", 0.0)) + float(c.get("carryIn", 0.0))
 	box.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
 		str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE))
-	var bar := ProgressBar.new()
-	bar.max_value = maxf(spent, 0.01)
-	bar.value = minf(raised, spent)
-	bar.custom_minimum_size.y = 28
-	bar.show_percentage = false
-	box.add_child(bar)
+	# Saint George rides along the embroidery towards the dragon; once the
+	# month is paid for, he runs it through.
+	box.add_child(GeorgeBar.new(raised, spent))
 	box.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, raised - spent]), UI.SMALL_SIZE, UI.MUTED))
 	var url := str(c.get("donationUrl", ""))
 	if url != "":

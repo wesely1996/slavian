@@ -22,6 +22,7 @@ func _initialize() -> void:
 	_test_local_notices()
 	_test_local_saves()
 	_test_sound_cues()
+	_test_george_bar()
 	_test_time_util()
 	_test_rules()
 	_test_village_layout()
@@ -585,6 +586,14 @@ func _test_local_waves() -> void:
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
+func _test_george_bar() -> void:
+	_check(is_equal_approx(GeorgeBar.new(4.75, 9.5).ratio, 0.5), "george bar: half the costs raised, half way")
+	_check(GeorgeBar.new(20.0, 9.5).ratio == 1.0 and GeorgeBar.new(0.0, 0.0).ratio == 1.0, "george bar: costs met (or none), he reaches the dragon")
+	_check(GeorgeBar.new(-3.0, 9.5).ratio == 0.0, "george bar: never behind the start")
+	for id in ["ui/george", "ui/dragon"]:
+		_check(Art.texture(id) != null, "george bar: art %s" % id)
+
+
 func _test_sound_cues() -> void:
 	var now := 1_000_000.0
 	var soon := Time.get_datetime_string_from_unix_time(int(now + 600), false) + "Z"

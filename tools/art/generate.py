@@ -1349,8 +1349,12 @@ def logo():
 # --- Build everything --------------------------------------------------------
 
 # --- Hero portraits -----------------------------------------------------------
-# Painted busts on a dusk sky in an arched frame, lit from the upper left
-# like everything else: each hero's own headwear, hair, beard and garb.
+# Icons in the manner of the Serbian churches of the Nemanjić era: a bust on
+# gold leaf before a gold halo, almond eyes, dark contours, in an arched
+# frame; laid in mosaic afterwards (mosaic.py). Each hero's own headwear,
+# hair, beard and garb.
+
+CONTOUR = "#3b2414"
 
 HEROES = {
     # skin, hair, beard (None: none), garb (light, dark), trim, headwear, sky
@@ -1372,11 +1376,11 @@ HEROES = {
 def portrait(kind):
     h = HEROES[kind]
     s = Svg(160, 200)
-    # The arch: a dusk sky with a low sun at the upper left.
+    # The arch: gold leaf, and the halo behind the head.
     arch = "M10,196 L10,70 Q10,10 80,10 Q150,10 150,70 L150,196 Z"
-    s.path(arch, s.lin([(0, h["sky"][0]), (1, h["sky"][1])], 0, 0, 0.4, 1), stroke="none", sw=0)
-    s.circle(46, 58, 30, s.rad([(0, "#fff4c2", 0.9), (1, "#fff4c2", 0)]), stroke="none", sw=0)
-    s.path("M10,150 Q50,128 90,142 Q125,152 150,136 L150,196 L10,196 Z", s.lin([(0, "#3f6b35", 0.55), (1, "#1d2a18", 0.85)]), stroke="none", sw=0)
+    s.path(arch, s.lin([(0, "#f4d98a"), (0.55, "#dcae4c"), (1, "#a8772a")], 0, 0, 0.5, 1), stroke="none", sw=0)
+    s.circle(80, 84, 42, s.rad([(0, "#fbe7a6"), (1, "#d9a646")], 0.4, 0.35), stroke="#8a2e1c", sw=3)
+    s.circle(80, 84, 37, "none", stroke="#fff1b8", sw=1.5, opacity=0.7)
     skin = s.lin([(0, h["skin"][0]), (1, h["skin"][1])], 0.2, 0, 0.9, 1)
     hair = s.lin([(0, h["hair"][0]), (1, h["hair"][1])], 0, 0, 1, 1)
     garb = s.lin([(0, h["garb"][0]), (1, h["garb"][1])], 0, 0, 1, 1)
@@ -1391,7 +1395,7 @@ def portrait(kind):
     if h["head"] in ("hood",) or h.get("braid"):
         s.path("M52,74 Q46,120 58,150 L102,150 Q114,120 108,74 Z", hair, stroke="none", sw=0)
     # Shoulders and chest.
-    s.path("M18,196 Q20,150 52,138 Q80,130 108,138 Q140,150 142,196 Z", garb, stroke="none", sw=0)
+    s.path("M18,196 Q20,150 52,138 Q80,130 108,138 Q140,150 142,196 Z", garb, stroke=CONTOUR, sw=2.5)
     if h.get("mail"):
         for y in range(146, 196, 7):
             s.path(f"M{30 + (y - 146) * 0.1},{y} Q80,{y - 6} {130 - (y - 146) * 0.1},{y}", "none", stroke="#d9d4ca", sw=1.2, opacity=0.35)
@@ -1404,14 +1408,15 @@ def portrait(kind):
         s.circle(38, 172, 6, "#e2b33c", stroke="none", sw=0)
     # Neck and head.
     s.path("M70,112 L70,136 Q80,142 90,136 L90,112 Z", s.lin([(0, h["skin"][1]), (1, shade)], 0, 0, 0, 1), stroke="none", sw=0)
-    s.ellipse(80, 92, 25, 31, skin, stroke="none", sw=0)
-    s.ellipse(92, 98, 12, 20, shade, stroke="none", sw=0, opacity=0.12)
-    # Eyes, brows, nose, mouth.
+    s.ellipse(80, 92, 24, 32, skin, stroke=CONTOUR, sw=2)
+    # The icon painters' green under-shade along the cheek.
+    s.ellipse(93, 99, 11, 20, "#5a6a3a", stroke="none", sw=0, opacity=0.18)
+    # Almond eyes under high arched brows, a long thin nose, a small mouth.
     for x in (70, 90):
-        s.ellipse(x, 90, 3.6, 2.4, "#fbf5e6", stroke="none", sw=0)
-        s.circle(x + 0.5, 90, 1.8, "#3a2a1c", stroke="none", sw=0)
-        s.path(f"M{x - 6},{84} Q{x},{80} {x + 6},{84}", "none", stroke=h["hair"][1], sw=2.4)
-    s.path("M80,92 Q78,101 82,103", "none", stroke=h["skin"][1], sw=2)
+        s.path(f"M{x - 7},90 Q{x},84.5 {x + 7},90 Q{x},94 {x - 7},90 Z", "#f3ead6", stroke=CONTOUR, sw=1.6)
+        s.circle(x + 0.5, 89.6, 2.3, "#2a1a10", stroke="none", sw=0)
+        s.path(f"M{x - 8},{83} Q{x},{77} {x + 7},{82}", "none", stroke=h["hair"][1], sw=2.2)
+    s.path("M79,84 L78,101 Q80,104 84,102", "none", stroke=CONTOUR, sw=1.6)
     if not h["beard"]:
         s.path("M73,110 Q80,114 87,110", "none", stroke="#a0524a", sw=2.2)
         s.ellipse(68, 101, 5, 3, "#e8907a", stroke="none", sw=0, opacity=0.35)
@@ -1456,9 +1461,10 @@ def portrait(kind):
     if h.get("braid"):
         for i in range(5):
             s.ellipse(104 + i * 1.5, 104 + i * 12, 6, 7, hair, stroke="none", sw=0)
-    # The frame: a gold arch with the light along its upper left.
-    s.path(arch, "none", stroke=s.lin([(0, "#fff4c2"), (0.4, "#ecc457"), (0.75, "#b8862a"), (1, "#7a5512")], 0, 0, 1, 1), sw=7)
-    s.path(arch, "none", stroke="#2a1a08", sw=1.5, opacity=0.6)
+    # The frame: a cinnabar band with a gold line inside it, as on the icons.
+    s.path(arch, "none", stroke="#8a2318", sw=10)
+    inner = "M15,196 L15,70 Q15,15 80,15 Q145,15 145,70 L145,196"
+    s.path(inner, "none", stroke="#f2cf6e", sw=1.8)
     return s
 
 
@@ -1533,6 +1539,18 @@ def set_import_scale(svg_path, scale=IMPORT_SCALE):
     imp.write_text("\n".join(lines) + "\n")
 
 
+# Pieces laid in mosaic (mosaic.py) after drawing: art id prefix -> (scale
+# the SVG is read at, tessera size in pixels). They ship as PNG.
+MOSAIC = {"hero/": (2.0, 6.5), "brand/logo": (1.5, 5.5)}
+
+
+def mosaic_of(art_id):
+    for prefix, spec in MOSAIC.items():
+        if art_id.startswith(prefix):
+            return spec
+    return None
+
+
 def textures():
     """Raster pieces (PNG), made with numpy and Pillow: the interface's wood."""
     try:
@@ -1548,9 +1566,25 @@ def main():
     made = assets()
     # Generated art that is no longer made goes; your own stays.
     manifest = {k: v for k, v in manifest.items() if k in made or not v.startswith(RES)}
-    for art_id, svg in made.items():
+    try:
+        import mosaic
+    except ImportError:
+        mosaic = None
+        print("cairosvg, numpy or Pillow missing: mosaics left as they are")
+    for index, (art_id, svg) in enumerate(made.items()):
         path = OUT_DIR / f"{art_id}.svg"
         path.parent.mkdir(parents=True, exist_ok=True)
+        spec = mosaic_of(art_id)
+        if spec is not None:
+            # Laid in mosaic: a PNG takes the drawing's place.
+            if mosaic is not None:
+                scale, cell = spec
+                mosaic.mosaic(mosaic.rasterize(svg.text(), scale), cell, seed=index + 1).save(path.with_suffix(".png"), optimize=True)
+                for stale in (path, path.with_name(path.name + ".import")):
+                    stale.unlink(missing_ok=True)
+            if manifest.get(art_id, RES).startswith(RES):
+                manifest[art_id] = f"{RES}/{art_id}.png"
+            continue
         path.write_text(svg.text())
         set_import_scale(path, 1.0 if art_id in FULL_SIZE else IMPORT_SCALE)
         res = f"{RES}/{art_id}.svg"
