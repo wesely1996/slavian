@@ -166,10 +166,8 @@ static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer
 		var key: String = tab[0]
 		var node := button(tab[1], func() -> void: on_pick.call(key), tab[2] if tab.size() > 2 else "")
 		node.theme_type_variation = "TabButton"
-		node.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		node.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		node.add_theme_font_size_override("font_size", scaled(SMALL_SIZE))
-		node.custom_minimum_size.y = 100 * UiTheme.text_scale
+		node.custom_minimum_size.y = 64 * UiTheme.text_scale
 		node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		node.disabled = key == open
 		row.add_child(node)
@@ -177,33 +175,42 @@ static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer
 
 
 ## Tabs down a sheet's side, pictures rather than words (the name shows on
-## hover): `tabs_` is [[key, art id, name], ...]. Line icons (icon/...) take
-## the theme's ink; portraits and emblems keep their colours.
-static func side_tabs(tabs_: Array, open: String, on_pick: Callable) -> VBoxContainer:
+## hover): `tabs_` is [[key, art id, name], ...], each tab `size` square.
+## Line icons (icon/...) take the theme's ink; portraits and emblems keep
+## their colours.
+static func side_tabs(tabs_: Array, open: String, on_pick: Callable, size := 88.0) -> VBoxContainer:
 	var column := vbox(6)
 	for tab in tabs_:
 		var key: String = tab[0]
-		var node := Button.new()
-		node.theme_type_variation = "SideTab"
-		node.icon = Art.texture(tab[1])
-		node.expand_icon = true
-		node.tooltip_text = tab[2]
-		node.focus_mode = Control.FOCUS_NONE
-		node.custom_minimum_size = Vector2(88, 88) * UiTheme.text_scale
+		var node := picture_button(tab[1], tab[2], func() -> void: on_pick.call(key), size)
 		node.disabled = key == open
-		if not String(tab[1]).begins_with("icon/"):
-			for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_disabled_color"]:
-				node.add_theme_color_override(state, Color.WHITE)
-		node.pressed.connect(func() -> void: on_pick.call(key))
 		column.add_child(node)
 	return column
 
 
+## A square button that is all picture (a side tab's look), `size` across;
+## `name` shows on hover. Shown pressed while disabled.
+static func picture_button(art_id: String, name: String, on_pressed: Callable, size := 88.0) -> Button:
+	var node := Button.new()
+	node.theme_type_variation = "SideTab"
+	node.icon = Art.texture(art_id)
+	node.expand_icon = true
+	node.tooltip_text = name
+	node.focus_mode = Control.FOCUS_NONE
+	node.custom_minimum_size = Vector2(size, size) * UiTheme.text_scale
+	node.add_theme_constant_override("icon_max_width", roundi(size * 0.72 * UiTheme.text_scale))
+	if not art_id.begins_with("icon/"):
+		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_disabled_color"]:
+			node.add_theme_color_override(state, Color.WHITE)
+	node.pressed.connect(on_pressed)
+	return node
+
+
 ## A sheet with side tabs: the tabs on the left, and the box (returned
 ## second) where the open tab's content goes.
-static func side_layout(tabs_: Array, open: String, on_pick: Callable) -> Array:
+static func side_layout(tabs_: Array, open: String, on_pick: Callable, size := 88.0) -> Array:
 	var row := hbox(14)
-	var column := side_tabs(tabs_, open, on_pick)
+	var column := side_tabs(tabs_, open, on_pick, size)
 	column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(column)
 	var content := vbox(12)

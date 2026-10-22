@@ -132,6 +132,17 @@ towel (*rushnyk*) that hangs in every Slavic house.
   one gets an info mark (`UI.info`, `UI.with_info`): an "i" in a ring that
   opens the text in a parchment popup when held (or tapped). A setting's
   door says what it is set to in its own label ("Account: Vesna").
+- **No scrolling.** A sheet that holds more than fits is split instead:
+  tabs along the top for its main parts (the village's Buildings, Troops,
+  Caravans, Research), **side tabs** down its left for the parts within,
+  each a picture rather than a word (a unit's badge, a building, a clan's
+  emblem, a line icon; `UI.side_tabs`), and long lists a few to a page
+  with ◀ ▶ (`UI.paged`). On a phone the sheet under the map is short while
+  the map is needed (a hex, the village's plots) and grows to well over
+  half the screen for the sheets that don't need it (threats, almanac,
+  hero, inbox, the village's troops, caravans and research); the
+  tutorial's card folds meanwhile. The scroll stays only as a fallback
+  (very large text).
 - **Icons** (`icon/...`) are white line drawings that the theme tints: ink on
   flax, flax on wood and on malachite. Resources (`resource/...`) stand in
   for their names on the top band and in every cost line.

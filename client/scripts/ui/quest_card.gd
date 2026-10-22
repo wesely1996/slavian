@@ -77,6 +77,11 @@ func show_for(data: Dictionary, member: Dictionary) -> void:
 	reset_size()
 
 
+## Opens or folds the card (shown so at the next show_for).
+func set_open(open: bool) -> void:
+	_open = open
+
+
 ## A gentle glow while a reward waits.
 func _start_pulse() -> void:
 	if _pulse and _pulse.is_valid():
