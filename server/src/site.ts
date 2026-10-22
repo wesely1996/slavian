@@ -23,7 +23,7 @@ const FALLBACK: Costs = {
   costs: 0,
   donations: 0,
   carryIn: 0,
-  donationUrl: 'https://ko-fi.com/',
+  donationUrl: 'https://ko-fi.com/nightforgese',
 };
 
 /** Reads site/costs.json; a missing or broken file reads as all zeroes. */
