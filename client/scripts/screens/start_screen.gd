@@ -1046,7 +1046,7 @@ func _clan_pick_page() -> void:
 	var clan: String = _pick_preview
 	var def: Dictionary = data.clans.clans[clan]
 	_content.add_child(UI.label(ClanText.title(data, clan), UI.HEADING_SIZE))
-	_content.add_child(UI.label(tr(def.story), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.with_info(UI.label(tr(def.story), UI.SMALL_SIZE, UI.MUTED), ClanText.arms(data, clan)))
 	_content.add_child(UI.label(tr("Best at: %s") % tr(def.best), UI.SMALL_SIZE))
 	_content.add_child(UI.label(tr("Weakness: %s") % tr(def.weakness), UI.SMALL_SIZE))
 	_content.add_child(UI.label(tr("Their own: %s") % ClanText.unique_name(data, clan), UI.SMALL_SIZE))

@@ -32,5 +32,10 @@ static func perks(data: Dictionary, clan: String) -> String:
 	return UI.t("Best at: %s · Weakness: %s · Own: %s") % [UI.t(def.best), UI.t(def.weakness), unique_name(data, clan)]
 
 
+## Whose historic arms the clan's emblem follows.
+static func arms(data: Dictionary, clan: String) -> String:
+	return UI.t(String(data.clans.clans[clan].get("arms", "")))
+
+
 static func ids(data: Dictionary) -> Array:
 	return data.clans.clans.keys()

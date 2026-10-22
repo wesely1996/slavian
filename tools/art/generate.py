@@ -10,6 +10,8 @@ touched, so you can replace any asset by pointing its id at your file.
     python3 tools/art/generate.py
 """
 import itertools
+import math
+import sys
 import json
 from pathlib import Path
 
@@ -819,74 +821,220 @@ def faction(front):
         s.rect(40, 82, 48, 8, "#c99a2e", stroke="none", sw=0)
     return s
 
+# The clans' arms, each after a historic Slavic coat of arms with its animal
+# (docs/art-style.md, Clans): the field's tincture, then the charge.
+ARGENT = ("#f4f2ec", "#cfcbc0")
+AZURE = ("#3a6fb8", "#1f4482")
+OR = ("#f1cd4c", "#c99a22")
+SABLE = "#2a2421"
+GULES = "#c62f2c"
+VERT = "#3f8a3c"
 CLAN_FIELDS = {
-    "jelen": ("#5d8a3e", "#2a4419"),
-    "rys": ("#3e6b5a", "#1b3329"),
-    "medved": ("#82512c", "#3a2210"),
-    "bobr": ("#3f6f8e", "#1b3646"),
-    "sokol": ("#b07a32", "#5a3a10"),
-    "volk": ("#626c78", "#2a3038"),
+    "jelen": ARGENT,   # Nizhny Novgorod: a red stag walking, on silver
+    "rys": AZURE,      # Gomel: a gold lynx lying, on blue
+    "medved": ARGENT,  # Yaroslavl: a black bear upright with a gold poleaxe, on silver
+    "bobr": ARGENT,    # Bobrov (1781): a beaver in its own colour, on silver
+    "sokol": OR,       # Sokołów Podlaski: a falcon on an oak branch, a ring in its beak, on gold
+    "volk": AZURE,     # Vovchansk (1781): a silver wolf running on green ground, on blue
 }
 
 
+def charge(s, parts, fill, outline=SABLE, width=2.4):
+    """An animal or a thing on a shield: its outline all round first, then
+    its colour, so that limbs and body read as one figure. `parts` are
+    ("area", path) or ("limb", path, thickness)."""
+    for part in parts:
+        if part[0] == "area":
+            s.path(part[1], outline, stroke=outline, sw=width * 2)
+        else:
+            s.path(part[1], "none", stroke=outline, sw=part[2] + width * 2)
+    for part in parts:
+        if part[0] == "area":
+            s.path(part[1], fill, stroke="none", sw=0)
+        else:
+            s.path(part[1], "none", stroke=fill, sw=part[2])
+
+
+# Where each charge lies as drawn (x0, y0, x1, y1), measured by rendering it
+# alone (tools/art/generate.py --measure-charges): the medallion scales and
+# centres it from this.
+CHARGE_BOX = {
+    "jelen": (26.2, 14.5, 93.8, 98.5), "rys": (26.5, 28.0, 99.0, 88.0), "medved": (31.8, 19.5, 96.5, 105.5),
+    "bobr": (25.2, 47.2, 99.8, 87.0), "sokol": (28.5, 24.8, 99.5, 102.8), "volk": (22.5, 39.5, 98.5, 84.5),
+}
+CHARGES = {}
+
+
 def clan_emblem(clan):
-    """A clan's shield: its colour and its totem animal's head, in pale cream."""
+    """A clan's arms in a gilded roundel, its animal in the middle (see
+    CLAN_FIELDS). Laid in mosaic afterwards (MOSAIC)."""
     s = Svg()
     field = CLAN_FIELDS[clan]
-    soft_shadow(s, 66, 120, 40, 7, 0.35)
-    s.path("M24,14 L104,14 L104,58 Q104,98 64,118 Q24,98 24,58 Z", s.lin([(0, "#f3d98f"), (0.5, "#b48a2e"), (1, "#7a5a17")], 0, 0, 1, 1), stroke="none", sw=0)
-    s.path("M30,20 L98,20 L98,58 Q98,94 64,111 Q30,94 30,58 Z", s.rad([(0, field[0]), (1, field[1])], 0.4, 0.3, 0.9), stroke="none", sw=0)
-    pale = s.lin([(0, "#fbf5e6"), (1, "#c9bea6")], 0, 0, 1, 1)
-    dark = field[1]
-    if clan == "jelen":
-        # A stag: a long narrow face under branching antlers.
-        for side in (-1, 1):
-            x = lambda v: 64 + side * v
-            s.path(f"M{x(6)},58 Q{x(18)},46 {x(22)},28 M{x(16)},44 L{x(28)},40 M{x(20)},34 L{x(30)},26 M{x(22)},28 L{x(18)},22", "none", stroke=pale, sw=5)
-            s.path(f"M{x(8)},60 L{x(20)},54 L{x(14)},64 Z", pale, stroke="none", sw=0)
-        s.path("M54,58 Q64,52 74,58 L70,92 Q64,102 58,92 Z", pale, stroke="none", sw=0)
-        for x in (59, 69):
-            s.circle(x, 68, 2.4, dark, stroke="none", sw=0)
-        s.ellipse(64, 93, 4, 3, dark, stroke="none", sw=0)
-    elif clan == "rys":
-        # A lynx: a broad cat's face, tufted ears, a ruff at the cheeks.
-        s.path("M38,64 Q38,58 44,50 L44,28 L56,44 Q64,42 72,44 L84,28 L84,50 Q90,58 90,64 L96,76 L86,80 Q78,96 64,98 Q50,96 42,80 L32,76 Z", pale, stroke="none", sw=0)
-        s.path("M44,28 L42,18 M84,28 L86,18", "none", stroke=pale, sw=3)
-        for x in (54, 74):
-            s.path(f"M{x - 6},64 Q{x},58 {x + 6},64 Q{x},68 {x - 6},64 Z", dark, stroke="none", sw=0)
-        s.poly([(60, 76), (68, 76), (64, 81)], dark, stroke="none", sw=0)
-        s.path("M64,81 L64,86 M64,86 Q58,90 54,87 M64,86 Q70,90 74,87", "none", stroke=dark, sw=2)
-    elif clan == "medved":
-        # A bear: a round head, round ears, a broad muzzle.
-        for x in (44, 84):
-            s.circle(x, 44, 10, pale, stroke="none", sw=0)
-            s.circle(x, 44, 5, dark, stroke="none", sw=0, opacity=0.6)
-        s.circle(64, 66, 27, pale, stroke="none", sw=0)
-        s.ellipse(64, 80, 13, 10, s.lin([(0, "#e6dcc2"), (1, "#b8ab8e")], 0, 0, 0, 1), stroke="none", sw=0)
-        s.ellipse(64, 75, 5, 3.5, dark, stroke="none", sw=0)
-        for x in (54, 74):
-            s.circle(x, 62, 2.6, dark, stroke="none", sw=0)
-    elif clan == "bobr":
-        # A beaver: a round face, small ears, two great front teeth.
-        for x in (46, 82):
-            s.circle(x, 46, 6, pale, stroke="none", sw=0)
-        s.ellipse(64, 66, 24, 26, pale, stroke="none", sw=0)
-        s.ellipse(64, 78, 11, 7, s.lin([(0, "#e6dcc2"), (1, "#b8ab8e")], 0, 0, 0, 1), stroke="none", sw=0)
-        s.ellipse(64, 73, 4.5, 3, dark, stroke="none", sw=0)
-        s.rect(58.5, 82, 11, 12, "#fffaf0", stroke=dark, sw=1.5, rx=1.5)
-        s.line(64, 82, 64, 94, stroke=dark, sw=1.5)
-        for x in (55, 73):
-            s.circle(x, 60, 2.6, dark, stroke="none", sw=0)
-    elif clan == "sokol":
-        # A falcon in profile: a hooked beak and the dark stripe under the eye.
-        s.path("M86,36 Q66,28 52,40 Q44,48 42,58 L34,64 Q38,70 46,68 Q46,86 62,100 L92,100 Q96,66 86,36 Z", pale, stroke="none", sw=0)
-        s.path("M42,58 L34,64 Q38,70 46,68 L48,60 Z", s.lin([(0, "#f6d572"), (1, "#c99a2e")], 0, 0, 1, 1), stroke="none", sw=0)
-        s.path("M56,52 Q58,66 52,78", "none", stroke=dark, sw=4)
-        s.circle(58, 50, 4, dark, stroke="none", sw=0)
-        s.circle(57, 49, 1.3, "#fbf5e6", stroke="none", sw=0)
-    else:
-        wolf_head(s, pale)
+    s.circle(64, 64, 57, s.lin([(0, "#f6dc8c"), (0.5, "#b48a2e"), (1, "#6e5014")], 0, 0, 1, 1), stroke="#4a3610", sw=1.5)
+    s.circle(64, 64, 49, s.lin([(0, field[0]), (1, field[1])], 0.2, 0, 0.8, 1), stroke="#4a3610", sw=1.5)
+    # Pearls round the rim, as on the medallions of the old churches.
+    for i in range(36):
+        a = math.tau * i / 36
+        s.circle(64 + 53 * math.cos(a), 64 + 53 * math.sin(a), 1.5, "#fbf3d6", stroke="none", sw=0)
+    gid = f"c{next(GRADIENT_IDS)}"
+    s.defs.append(f'<clipPath id="{gid}"><circle cx="64" cy="64" r="48.2"/></clipPath>')
+    first = len(s.parts)
+    x0, y0, x1, y1 = CHARGE_BOX[clan]
+    w, h = x1 - x0, y1 - y0
+    scale = min(76.0 / w, 72.0 / h)
+    cy = 64.0
+    if clan == "volk":
+        # The wolf runs over green ground: the two together in the middle.
+        cy = 58.0
+        top = cy + h * scale / 2 - 3
+        s.path(f"M8,{fmt(top + 4)} Q64,{fmt(top - 6)} 120,{fmt(top + 4)} L120,120 L8,120 Z", VERT, stroke=SABLE, sw=1.6)
+    ground = "".join(s.parts[first:])
+    del s.parts[first:]
+    CHARGES[clan](s)
+    body = "".join(s.parts[first:])
+    del s.parts[first:]
+    tx, ty = 64 - (x0 + w / 2) * scale, cy - (y0 + h / 2) * scale
+    s.add(f'<g clip-path="url(#{gid})">{ground}<g transform="translate({fmt(tx)},{fmt(ty)}) scale({fmt(scale)})">{body}</g></g>')
+    # Light across the upper left, as on glass.
+    s.path("M26,48 A40,40 0 0 1 64,22 L64,28 A34,34 0 0 0 31,50 Z", "#ffffff", stroke="none", sw=0, opacity=0.14)
     return s
+
+
+def stag(s):
+    """A red stag walking to the left, black antlers and hooves."""
+    for d in ("M47,39 Q49,30 45,22 Q42,17 37,19", "M47,33 L40,30", "M46,27 L39,24", "M45,22 L49,16",
+              "M51,38 Q56,30 55,21", "M54,31 L60,28", "M55,25 L61,21"):
+        s.path(d, "none", stroke=SABLE, sw=2.6)
+    charge(s, [
+        ("limb", "M56,72 L55,84 L56,94", 4.2),
+        ("limb", "M51,70 L45,79 L49,87", 4.2),
+        ("limb", "M83,71 L85,83 L87,94", 4.2),
+        ("limb", "M77,72 L74,84 L72,94", 4.2),
+        ("area", "M50,60 Q58,55 70,56 Q82,55 87,60 Q91,65 87,71 Q80,76 68,75 Q56,76 51,72 Q46,66 50,60 Z"),
+        ("area", "M50,68 Q46,58 45,50 L52,45 Q56,54 60,62 Z"),
+        ("area", "M53,46 Q51,38 45,37 Q38,37 34,41 L29,46 Q28,49 31,50 L37,50 Q44,50 48,53 Z"),
+        ("area", "M50,41 Q57,35 60,39 Q56,43 50,45 Z"),
+        ("area", "M86,59 Q92,55 91,63 Z"),
+    ], GULES)
+    for x, y in ((56, 94), (49, 87), (87, 94), (72, 94)):
+        s.circle(x, y, 2.4, SABLE, stroke="none", sw=0)
+    s.circle(41, 42, 1.5, SABLE, stroke="none", sw=0)
+    s.circle(29.5, 47.5, 1.2, SABLE, stroke="none", sw=0)
+
+
+def lynx(s):
+    """A gold lynx lying to the left, spotted, its ears tufted."""
+    gold = "#f0c246"
+    charge(s, [
+        ("limb", "M90,70 Q95,64 94,58", 4.5),
+        ("area", "M45,57 L58,60 L57,71 L47,68 Z"),
+        ("limb", "M54,80 L37,81", 5),
+        ("limb", "M62,81 L45,83", 5),
+        ("area", "M44,72 Q46,62 56,60 L80,60 Q92,60 93,70 Q94,80 86,82 L50,82 Q42,80 44,72 Z"),
+        ("area", "M37,47 L38,34 L45,44 Z"),
+        ("area", "M47,44 L53,34 L54,48 Z"),
+        ("area", "M32,59 Q30,49 38,45 Q46,42 52,46 Q57,51 56,58 Q54,65 46,67 Q37,68 32,59 Z"),
+        ("area", "M35,64 L29,69 L39,67 Z"),
+    ], gold)
+    s.path("M94,58 L94,53", "none", stroke=SABLE, sw=4.5)
+    for x, y in ((38, 34), (53, 34)):
+        s.path(f"M{x},{y} L{x},{y - 5}", "none", stroke=SABLE, sw=1.6)
+    for x, y in ((60, 66), (67, 71), (73, 65), (79, 72), (85, 67), (64, 77), (75, 77), (69, 62), (82, 63), (88, 75), (55, 72)):
+        s.circle(x, y, 1.6, SABLE, stroke="none", sw=0)
+    s.path("M36,53 Q39,51 42,53 Q39,55 36,53 Z", SABLE, stroke="none", sw=0)
+    s.path("M31,57 L34,57 L32.5,59 Z", SABLE, stroke="none", sw=0)
+    s.path("M32.5,59 Q33,62 36,62", "none", stroke=SABLE, sw=1)
+
+
+def bear(s):
+    """A black bear upright to the left, a gold poleaxe on its shoulder."""
+    gold = s.lin([(0, "#ffe38a"), (1, "#c98f1e")], 0, 0, 1, 1)
+    charge(s, [
+        ("limb", "M36,78 L84,26", 3),
+        ("area", "M80,22 Q94,24 94,38 Q88,32 80,34 Z"),
+    ], gold)
+    charge(s, [
+        ("limb", "M60,88 L58,98 L51,99", 8),
+        ("limb", "M71,88 L71,98 L64,99", 8),
+        ("limb", "M60,62 L48,68 L44,64", 7),
+        ("area", "M52,52 Q50,40 58,37 Q67,36 71,45 Q79,57 78,73 Q78,87 70,93 L57,93 Q49,84 50,71 Q49,60 52,52 Z"),
+        ("area", "M61,41 Q61,31 53,29 Q46,29 42,33 L35,35 Q33,38 36,39 L44,41 Q50,45 61,45 Z"),
+        ("area", "M53,30 Q52,24 57,25 Q59,28 57,31 Z"),
+    ], "#3a322d", outline="#16110f")
+    # The near paw grips the shaft.
+    charge(s, [("limb", "M58,52 L50,56 L46,53", 7)], "#3a322d", outline="#16110f")
+    s.circle(42, 35, 1.4, "#e8e0d0", stroke="none", sw=0)
+    s.path("M35,35 L33,36", "none", stroke="#e8e0d0", sw=1)
+
+
+def beaver(s):
+    """A beaver in its own brown, walking to the left."""
+    brown = s.lin([(0, "#9a6a3c"), (1, "#5e3a1c")], 0, 0, 0, 1)
+    charge(s, [
+        ("area", "M80,66 Q92,64 97,72 Q98,80 92,82 Q86,78 79,74 Z"),
+    ], "#4a3424")
+    for d in ("M84,68 L92,79", "M88,67 L95,76", "M82,73 L95,72", "M83,77 L93,79"):
+        s.path(d, "none", stroke="#2a1d14", sw=0.8)
+    charge(s, [
+        ("limb", "M46,72 L43,81", 5),
+        ("limb", "M55,74 L57,82", 5),
+        ("limb", "M70,73 L68,82", 5),
+        ("limb", "M77,71 L80,80", 5),
+        ("area", "M37,66 Q38,52 55,50 Q73,48 82,60 Q86,68 82,74 Q60,78 41,75 Q36,72 37,66 Z"),
+        ("area", "M42,58 Q34,55 29,61 Q26,66 30,68 L42,70 Z"),
+        ("area", "M39,55 Q40,51 43,53 Q43,56 41,57 Z"),
+    ], brown)
+    s.rect(29.5, 67, 3, 3.6, "#fff7e6", stroke=SABLE, sw=0.6)
+    s.circle(35, 59, 1.4, SABLE, stroke="none", sw=0)
+    s.circle(28.5, 63, 1.2, SABLE, stroke="none", sw=0)
+
+
+def falcon(s):
+    """A falcon on an oak branch, turned to the left, a gold ring in its beak."""
+    charge(s, [("limb", "M33,92 Q64,86 95,88", 4)], "#6a4526")
+    for x, y, a in ((40, 95, 30), (50, 84, -30), (84, 94, -20), (90, 83, 25)):
+        s.add(f'<ellipse cx="{x}" cy="{y}" rx="6.5" ry="3.4" transform="rotate({a} {x} {y})" fill="{VERT}" stroke="{SABLE}" stroke-width="1.2"/>')
+    s.ellipse(46, 99, 2.6, 3.2, "#b8862e", stroke=SABLE, sw=1)
+    brown = s.lin([(0, "#8d5f34"), (1, "#4e3218")], 0, 0, 1, 1)
+    charge(s, [
+        ("area", "M61,86 L58,100 L72,100 L71,86 Z"),
+        ("area", "M58,40 Q66,34 72,40 Q81,52 80,67 Q80,80 72,89 L60,89 Q52,78 52,64 Q52,50 58,40 Z"),
+        ("area", "M58,43 Q53,32 60,28 Q68,25 72,33 Q73,40 68,45 Z"),
+    ], brown)
+    s.path("M56,48 Q53,64 58,82 L64,84 Q60,64 62,48 Z", "#f3e8cf", stroke="none", sw=0)
+    for x, y in ((57, 56), (59, 62), (57, 68), (60, 73), (58, 78), (60, 53)):
+        s.path(f"M{x - 1.5},{y} Q{x},{y + 1.6} {x + 1.5},{y}", "none", stroke="#5a3a1c", sw=1)
+    s.path("M68,46 Q81,54 80,70 Q79,82 73,90 L70,80 Q66,62 68,46 Z", "#5b3a1c", stroke=SABLE, sw=1)
+    for d in ("M71,58 L77,64", "M70,66 L77,72", "M70,74 L75,80"):
+        s.path(d, "none", stroke="#3a2412", sw=1)
+    for x in (62, 69):
+        s.path(f"M{x},88 L{x - 1},93 M{x},88 L{x + 2},93", "none", stroke="#e0a020", sw=1.6)
+    s.path("M57,33 L50,35 Q49,39 54,40 Z", "#e8b02a", stroke=SABLE, sw=1.2)
+    s.circle(46.5, 41, 3.6, "none", stroke=SABLE, sw=3.4)
+    s.circle(46.5, 41, 3.6, "none", stroke="#fbe27a", sw=1.6)
+    s.circle(61, 33, 2.2, "#f6d35a", stroke=SABLE, sw=0.8)
+    s.circle(61, 33, 1, SABLE, stroke="none", sw=0)
+    s.path("M60,36 Q60,41 58,44", "none", stroke="#2a1a0e", sw=1.6)
+
+
+def wolf(s):
+    """A silver wolf running to the left (its ground is the medallion's)."""
+    silver = s.lin([(0, "#ffffff"), (1, "#c9ccd2")], 0, 0, 0, 1)
+    charge(s, [
+        ("area", "M86,60 Q95,54 96,63 Q92,62 87,66 Z"),
+        ("limb", "M51,66 L41,72 L33,72", 3.8),
+        ("limb", "M56,68 L48,77 L41,79", 3.8),
+        ("limb", "M82,66 L89,72 L94,72", 3.8),
+        ("limb", "M78,68 L83,78 L90,80", 3.8),
+        ("area", "M45,58 Q57,52 74,54 Q86,55 89,60 Q91,66 86,70 L53,70 Q45,67 45,58 Z"),
+        ("area", "M49,58 Q45,50 39,50 L31,53 L25,56 Q25,59 29,60 L35,61 Q42,64 49,65 Z"),
+        ("area", "M39,51 L43,42 L47,53 Z"),
+    ], silver, outline="#3a3f48")
+    s.path("M27,59 L34,61", "none", stroke="#c62f2c", sw=1.6)
+    s.circle(37, 54, 1.3, SABLE, stroke="none", sw=0)
+
+
+CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sokol": falcon, "volk": wolf})
 
 
 # --- Village interior: buildings and fields in three stages --------------------
@@ -1541,7 +1689,7 @@ def set_import_scale(svg_path, scale=IMPORT_SCALE):
 
 # Pieces laid in mosaic (mosaic.py) after drawing: art id prefix -> (scale
 # the SVG is read at, tessera size in pixels). They ship as PNG.
-MOSAIC = {"hero/": (2.0, 6.5), "brand/logo": (1.5, 5.5)}
+MOSAIC = {"hero/": (2.0, 6.5), "brand/logo": (1.5, 5.5), "clan/": (2.0, 4.5)}
 
 
 def mosaic_of(art_id):
@@ -1602,5 +1750,23 @@ def main():
     print(f"{len(manifest)} art ids in {MANIFEST.relative_to(ROOT)}")
 
 
+def measure_charges():
+    """Prints CHARGE_BOX: where each clan's animal lies as drawn."""
+    import io
+    import cairosvg
+    from PIL import Image
+    boxes = {}
+    for clan, draw in CHARGES.items():
+        s = Svg()
+        draw(s)
+        png = cairosvg.svg2png(bytestring=s.text().encode(), scale=4)
+        box = Image.open(io.BytesIO(png)).getchannel("A").getbbox()
+        boxes[clan] = tuple(round(v / 4, 1) for v in box)
+    print("CHARGE_BOX = " + json.dumps(boxes).replace("[", "(").replace("]", ")"))
+
+
 if __name__ == "__main__":
-    main()
+    if "--measure-charges" in sys.argv:
+        measure_charges()
+    else:
+        main()

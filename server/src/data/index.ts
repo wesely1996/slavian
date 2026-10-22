@@ -600,6 +600,8 @@ const clansFileSchema = z.object({
       name: z.string(),
       animal: z.string(),
       story: z.string(),
+      /** The historic coat of arms its emblem follows. */
+      arms: z.string(),
       best: z.string(),
       weakness: z.string(),
       effects: z.record(z.string(), z.number()),

@@ -142,8 +142,8 @@ msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #: client/scripts/game/almanac_text.gd:114
-msgid "%s %s"
-msgstr "%s %s"
+msgid "%s %s %s"
+msgstr "%s %s %s"
 
 #: client/scripts/game/almanac_text.gd:123
 msgid "impassable"
@@ -1036,6 +1036,10 @@ msgstr "%s, u stavu %s"
 #: client/scripts/game/scout_text.gd:17
 msgid "%s, mostly %s"
 msgstr "%s, uglavnom %s"
+
+#: client/scripts/game/scout_text.gd:20
+msgid "%s %s"
+msgstr "%s %s"
 
 #: client/scripts/game/scout_text.gd:21
 msgid "%s: %s"
@@ -3259,6 +3263,10 @@ msgid "The stag-folk of the river meadows: first to sow, first to harvest, their
 msgstr "Jelenov rod sa rečnih livada: prvi seju, prvi žanju, a sela im rastu kao prolećna trava. Konjanici nikad nisu bili."
 
 #: data/clans.json
+msgid "Its arms are those of Nizhny Novgorod (1781): a red stag walking, on silver."
+msgstr "Grb mu je grb Nižnjeg Novgoroda (1781): crveni jelen u hodu, na srebrnom polju."
+
+#: data/clans.json
 msgid "Grain and fast village growth"
 msgstr "Žito i brz rast sela"
 
@@ -3277,6 +3285,10 @@ msgstr "Ris"
 #: data/clans.json
 msgid "The lynx-folk of the deep woods strike from the shadows of the trees and are gone before the horde can turn. Their elders trust old ways over new learning."
 msgstr "Risov rod iz dubokih šuma udara iz senke drveća i nestaje pre nego što se horda okrene. Njihove starešine više veruju starim običajima nego novom znanju."
+
+#: data/clans.json
+msgid "Its arms are those of Gomel (granted in 1781): a gold lynx lying, on blue."
+msgstr "Grb mu je grb Gomelja (dodeljen 1781): zlatni ris koji leži, na plavom polju."
 
 #: data/clans.json
 msgid "Wood and ambushes"
@@ -3299,6 +3311,10 @@ msgid "The bear-folk of the iron hills dig deep and build thick walls. They are 
 msgstr "Medvedov rod sa gvozdenih brda kopa duboko i zida debele zidove. Teško napuštaju brlog koji su sagradili."
 
 #: data/clans.json
+msgid "Its arms are those of Yaroslavl (1672): a black bear upright with a gold poleaxe, on silver."
+msgstr "Grb mu je grb Jaroslavlja (1672): crni medved uspravljen sa zlatnom sekirom, na srebrnom polju."
+
+#: data/clans.json
 msgid "Iron and fortifications"
 msgstr "Gvožđe i utvrđenja"
 
@@ -3317,6 +3333,10 @@ msgstr "Dabar"
 #: data/clans.json
 msgid "The beaver-folk know every river and ford; their barges carry what the roads cannot. Their homes are built for trade, not for siege."
 msgstr "Dabrov rod zna svaku reku i svaki gaz; njihove barke nose ono što putevi ne mogu. Domovi su im građeni za trgovinu, ne za opsadu."
+
+#: data/clans.json
+msgid "Its arms are those of Bobrov (1781): a beaver in its own colour, on silver."
+msgstr "Grb mu je grb Bobrova (1781): dabar u svojoj boji, na srebrnom polju."
 
 #: data/clans.json
 msgid "Caravan speed and capacity"
@@ -3339,6 +3359,10 @@ msgid "The falcon-folk of the open steppe ride fast and see far; their scouts co
 msgstr "Sokolov rod sa otvorene stepe jaše brzo i vidi daleko; njihovi izviđači se vraćaju kad drugi ne mogu. Nemaju strpljenja za kamen."
 
 #: data/clans.json
+msgid "Its arms are those of Sokołów Podlaski (seal of 1764): a falcon on an oak branch with a gold ring in its beak, on gold."
+msgstr "Grb mu je grb Sokolova Podlaskog (pečat iz 1764): soko na hrastovoj grani sa zlatnim prstenom u kljunu, na zlatnom polju."
+
+#: data/clans.json
 msgid "Cavalry and scouts (fewer scout losses)"
 msgstr "Konjica i izviđači (manji gubici izviđača)"
 
@@ -3357,6 +3381,10 @@ msgstr "Vuk"
 #: data/clans.json
 msgid "The wolf-folk of the northern stone fields know the cold and the things that come out of it. Their thin soil feeds them poorly."
 msgstr "Vučji rod sa severnih kamenih polja poznaje hladnoću i ono što iz nje dolazi. Tanka zemlja ih slabo hrani."
+
+#: data/clans.json
+msgid "Its arms are those of Vovchansk (1781): a silver wolf running over green ground, on blue."
+msgstr "Grb mu je grb Vovčanska (1781): srebrni vuk u trku preko zelene zemlje, na plavom polju."
 
 #: data/clans.json
 msgid "Stone and cold resistance (against the North)"
