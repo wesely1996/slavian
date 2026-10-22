@@ -17,6 +17,9 @@ const TEXT_SIZES := [["small", 22], ["normal", 28], ["large", 36]]
 const TEXT_SIZE_LABELS := ["Small", "Normal", "Large"]  # tr
 
 ## Each page's heading (the home page has none: the logo is its heading).
+## World lists show this many at a time, and turn pages for the rest.
+const WORLDS_PER_PAGE := 4
+
 const PAGE_TITLES := {
 	"play": "Play",
 	"solo": "Play solo",
@@ -62,6 +65,9 @@ var _choice := {"hero": null, "clan": null}
 var _pick_for := "form"
 ## The hero or clan shown in a picker before it is chosen.
 var _pick_preview: Variant = null
+## The side tab open on Help and Credits, and the page of each world list.
+var _side := {"help": "run", "credits": "studio"}
+var _list_page := {"solo": 0, "friends": 0}
 
 
 func _ready() -> void:
@@ -142,7 +148,9 @@ func _arrange() -> void:
 	var area := get_viewport_rect().size
 	var wide := area.x > area.y * 1.05
 	_layout.vertical = not wide
-	_hero.custom_minimum_size = Vector2.ZERO if wide else Vector2(0, area.y * 0.36)
+	# On a phone the painting gives the sheet room past the first page.
+	_hero.custom_minimum_size = Vector2.ZERO if wide else Vector2(0, area.y * (0.36 if _page == "home" else 0.2))
+	_tagline.visible = wide or _page == "home"
 	_hero.size_flags_vertical = Control.SIZE_EXPAND_FILL if wide else Control.SIZE_FILL
 	var frame := PlatedWood.new(18)
 	# The gold rail runs where the wood meets the painting.
@@ -221,7 +229,10 @@ func _back() -> void:
 
 ## Draws a page: Back and its heading on top, then what it holds.
 func _render(page: String) -> void:
+	var was_home := _page == "home"
 	_page = page
+	if was_home != (page == "home"):
+		_arrange()
 	_set_status("")
 	# The lobby stays live while its hero and clan pickers are open.
 	var in_lobby := page == "lobby" or (_pick_for == "lobby" and page in ["pick_hero", "pick_clan"])
@@ -333,7 +344,10 @@ func _solo_page() -> void:
 	var worlds := Local.list_worlds()
 	if worlds.is_empty():
 		_content.add_child(UI.label(tr("No solo worlds yet. Start one; it plays on this device."), UI.SMALL_SIZE, UI.MUTED))
-	for world in worlds:
+	var paged := UI.paged(worlds, _list_page.solo, WORLDS_PER_PAGE, func(page: int) -> void:
+		_list_page.solo = page
+		_render("solo"))
+	for world in paged[0]:
 		var row := UI.hbox()
 		var id := int(world.id)
 		var open := UI.button(world.name, func() -> void: _open_solo(id))
@@ -351,6 +365,7 @@ func _solo_page() -> void:
 				_delete_solo = id
 			_render("solo")))
 		_content.add_child(row)
+	_content.add_child(paged[1])
 	var new := UI.primary(tr("New solo world"), func() -> void: _open("solo_new")) if worlds.is_empty() else UI.button(tr("New solo world"), func() -> void: _open("solo_new"))
 	new.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(new)
@@ -446,7 +461,10 @@ func _friends_page() -> void:
 	box.add_child(UI.label(tr("Your worlds"), UI.SMALL_SIZE, UI.MUTED))
 	if response.data.worlds.is_empty():
 		box.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
-	for world in response.data.worlds:
+	var paged := UI.paged(response.data.worlds, _list_page.friends, WORLDS_PER_PAGE, func(page: int) -> void:
+		_list_page.friends = page
+		_render("friends"))
+	for world in paged[0]:
 		var row := UI.hbox()
 		var world_id := int(world.id)
 		var open := UI.button(world.name, func() -> void: _open_world(world_id))
@@ -456,6 +474,7 @@ func _friends_page() -> void:
 		state.autowrap_mode = TextServer.AUTOWRAP_OFF
 		row.add_child(state)
 		box.add_child(row)
+	box.add_child(paged[1])
 	var none: bool = response.data.worlds.is_empty()
 	var create := UI.primary(tr("Create a world"), func() -> void: _open("friends_new")) if none else UI.button(tr("Create a world"), func() -> void: _open("friends_new"))
 	create.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -756,50 +775,64 @@ func _confirm_delete() -> void:
 
 # --- Help --------------------------------------------------------------------
 
-## How a run goes, reporting a problem, supporting the game and privacy.
+## How a run goes, reporting a problem, the server costs and privacy: one
+## side tab each.
 func _help_page() -> void:
-	var data := LocalData.load_data()
-	_content.add_child(UI.label(tr("How a run goes"), UI.HEADING_SIZE))
-	for entry in AlmanacText.entries(data, "The run"):
-		_content.add_child(UI.label(entry[0]))
-		_content.add_child(UI.label(entry[1], UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("In a world, the quest card shows the way, and the almanac explains the rest."), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("Report a problem"), UI.HEADING_SIZE))
-	if Session.is_logged_in():
-		var message := TextEdit.new()
-		message.placeholder_text = tr("What went wrong?")
-		message.custom_minimum_size.y = 140
-		_content.add_child(message)
-		_content.add_child(UI.button(tr("Send"), func() -> void: _send_report(message.text)))
-	else:
-		_content.add_child(UI.label(tr("Sign in as a guest (Settings, Account) to send a report."), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("Support and privacy"), UI.HEADING_SIZE))
-	var costs_box := UI.vbox(10)
-	_content.add_child(costs_box)
-	_content.add_child(UI.label(tr("Privacy policy"), UI.SMALL_SIZE))
-	_content.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE, UI.MUTED))
+	var tabs := [["run", "icon/research", tr("How a run goes")], ["report", "icon/inbox", tr("Report a problem")],
+		["support", "icon/coin", tr("Support the game")], ["privacy", "icon/lock", tr("Privacy policy")]]
+	var layout := UI.side_layout(tabs, _side.help, func(key: String) -> void:
+		_side.help = key
+		_render("help"))
+	_content.add_child(layout[0])
+	var box: VBoxContainer = layout[1]
+	for tab in tabs:
+		if tab[0] == _side.help:
+			box.add_child(UI.label(tab[2], UI.HEADING_SIZE))
+	match _side.help:
+		"run":
+			for entry in AlmanacText.entries(LocalData.load_data(), "The run"):
+				box.add_child(UI.with_info(UI.label(entry[0]), entry[1]))
+			box.add_child(UI.label(tr("In a world, the quest card shows the way, and the almanac explains the rest."), UI.SMALL_SIZE, UI.MUTED))
+		"report":
+			if not Session.is_logged_in():
+				box.add_child(UI.label(tr("Sign in as a guest (Settings, Account) to send a report."), UI.SMALL_SIZE, UI.MUTED))
+				return
+			var message := TextEdit.new()
+			message.placeholder_text = tr("What went wrong?")
+			message.custom_minimum_size.y = 220
+			message.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+			box.add_child(message)
+			box.add_child(UI.primary(tr("Send"), func() -> void: _send_report(message.text)))
+		"support":
+			await _costs(box)
+		"privacy":
+			box.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE))
+
+
+## This month's server costs and donations, and where to give.
+func _costs(box: VBoxContainer) -> void:
 	var costs := await Api.get_json("/v1/costs")
-	if not is_instance_valid(costs_box) or _page != "help":
+	if not is_instance_valid(box) or _page != "help":
 		return
 	if not costs.ok or not costs.data is Dictionary:
-		costs_box.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
+		box.add_child(UI.label(tr("Could not load the server costs."), UI.SMALL_SIZE, UI.MUTED))
 		return
 	var c: Dictionary = costs.data
 	var currency := str(c.get("currency", "EUR"))
 	var spent := float(c.get("costs", 0.0))
 	var raised := float(c.get("donations", 0.0)) + float(c.get("carryIn", 0.0))
-	costs_box.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
-		str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE, UI.MUTED))
+	box.add_child(UI.label(tr("This month (%s): server costs %s, donations %s.") % [
+		str(c.get("month", "")), "%s %.2f" % [currency, spent], "%s %.2f" % [currency, raised]], UI.SMALL_SIZE))
 	var bar := ProgressBar.new()
 	bar.max_value = maxf(spent, 0.01)
 	bar.value = minf(raised, spent)
 	bar.custom_minimum_size.y = 28
 	bar.show_percentage = false
-	costs_box.add_child(bar)
-	costs_box.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, raised - spent]), UI.SMALL_SIZE, UI.MUTED))
+	box.add_child(bar)
+	box.add_child(UI.label(tr("Carried to next month: %s") % ("%s %.2f" % [currency, raised - spent]), UI.SMALL_SIZE, UI.MUTED))
 	var url := str(c.get("donationUrl", ""))
 	if url != "":
-		costs_box.add_child(UI.primary(tr("Buy me a coffee"), func() -> void: OS.shell_open(url)))
+		box.add_child(UI.primary(tr("Buy me a coffee"), func() -> void: OS.shell_open(url)))
 
 
 func _send_report(message: String) -> void:
@@ -822,27 +855,37 @@ const CREDITS := [
 const CREDITED := ["RandomMind (opengameart.org)", "spring-spring (opengameart.org)", "stumpystrust (opengameart.org)", "Kenney (kenney.nl)"]
 
 
+## The studio, the music and sound, and the engine: one side tab each.
 func _credits_page() -> void:
-	_content.add_child(UI.label("Slavian", UI.TITLE_SIZE))
-	_content.add_child(UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED))
-	# The studio: its mark pressed into red wax (tools/art/seal.py), then its name.
-	var studio := Art.texture("brand/seal")
-	if studio != null:
-		var mark := TextureRect.new()
-		mark.texture = studio
-		mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		mark.custom_minimum_size = Vector2(0, 240)
-		_content.add_child(mark)
-	_content.add_child(UI.label(tr("Made by"), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label("Night Forge"))
-	_content.add_child(UI.label(tr("Music and sound"), UI.HEADING_SIZE))
-	for i in CREDITS.size():
-		_content.add_child(UI.label(tr(CREDITS[i]), UI.SMALL_SIZE, UI.MUTED))
-		_content.add_child(UI.label(CREDITED[i]))
-	_content.add_child(UI.label(tr("All under CC0, given freely. Thank you."), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(tr("Built with"), UI.HEADING_SIZE))
-	_content.add_child(UI.label("Godot Engine (godotengine.org)"))
+	var tabs := [["studio", "brand/seal", "Night Forge"], ["music", "icon/music", tr("Music and sound")], ["engine", "icon/build", tr("Built with")]]
+	var layout := UI.side_layout(tabs, _side.credits, func(key: String) -> void:
+		_side.credits = key
+		_render("credits"))
+	_content.add_child(layout[0])
+	var box: VBoxContainer = layout[1]
+	match _side.credits:
+		"studio":
+			box.add_child(UI.label("Slavian", UI.TITLE_SIZE))
+			box.add_child(UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED))
+			# The studio: its mark pressed into red wax (tools/art/seal.py), then its name.
+			var studio := Art.texture("brand/seal")
+			if studio != null:
+				var mark := TextureRect.new()
+				mark.texture = studio
+				mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				mark.custom_minimum_size = Vector2(0, 220)
+				box.add_child(mark)
+			box.add_child(UI.label(tr("Made by"), UI.SMALL_SIZE, UI.MUTED))
+			box.add_child(UI.label("Night Forge"))
+		"music":
+			box.add_child(UI.label(tr("Music and sound"), UI.HEADING_SIZE))
+			for i in CREDITS.size():
+				box.add_child(UI.with_info(UI.label(CREDITED[i]), tr(CREDITS[i])))
+			box.add_child(UI.label(tr("All under CC0, given freely. Thank you."), UI.SMALL_SIZE, UI.MUTED))
+		"engine":
+			box.add_child(UI.label(tr("Built with"), UI.HEADING_SIZE))
+			box.add_child(UI.label("Godot Engine (godotengine.org)"))
 
 
 # --- Lobby -------------------------------------------------------------------

@@ -176,6 +176,64 @@ static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer
 	return row
 
 
+## Tabs down a sheet's side, pictures rather than words (the name shows on
+## hover): `tabs_` is [[key, art id, name], ...]. Line icons (icon/...) take
+## the theme's ink; portraits and emblems keep their colours.
+static func side_tabs(tabs_: Array, open: String, on_pick: Callable) -> VBoxContainer:
+	var column := vbox(6)
+	for tab in tabs_:
+		var key: String = tab[0]
+		var node := Button.new()
+		node.theme_type_variation = "SideTab"
+		node.icon = Art.texture(tab[1])
+		node.expand_icon = true
+		node.tooltip_text = tab[2]
+		node.focus_mode = Control.FOCUS_NONE
+		node.custom_minimum_size = Vector2(88, 88) * UiTheme.text_scale
+		node.disabled = key == open
+		if not String(tab[1]).begins_with("icon/"):
+			for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_disabled_color"]:
+				node.add_theme_color_override(state, Color.WHITE)
+		node.pressed.connect(func() -> void: on_pick.call(key))
+		column.add_child(node)
+	return column
+
+
+## A sheet with side tabs: the tabs on the left, and the box (returned
+## second) where the open tab's content goes.
+static func side_layout(tabs_: Array, open: String, on_pick: Callable) -> Array:
+	var row := hbox(14)
+	var column := side_tabs(tabs_, open, on_pick)
+	column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(column)
+	var content := vbox(12)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(content)
+	return [row, content]
+
+
+## Page `page` of `items`, `per_page` at a time: [the items on it, a row of
+## ◀ n / m ▶ to turn pages (empty when they all fit)]. `on_page` gets the
+## page to show.
+static func paged(items: Array, page: int, per_page: int, on_page: Callable) -> Array:
+	var pages := maxi(1, ceili(items.size() / float(per_page)))
+	var at := clampi(page, 0, pages - 1)
+	var shown := items.slice(at * per_page, (at + 1) * per_page)
+	var row := hbox(8)
+	if pages > 1:
+		var back := button("◀", func() -> void: on_page.call(at - 1))
+		back.disabled = at == 0
+		row.add_child(back)
+		var where := label(t("%d / %d") % [at + 1, pages], SMALL_SIZE, MUTED)
+		where.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		where.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(where)
+		var next := button("▶", func() -> void: on_page.call(at + 1))
+		next.disabled = at == pages - 1
+		row.add_child(next)
+	return [shown, row]
+
+
 ## A small icon from the art, `size` across; empty when the art is missing.
 static func icon(id: String, size := 32.0) -> TextureRect:
 	var node := TextureRect.new()

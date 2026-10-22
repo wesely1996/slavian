@@ -178,6 +178,31 @@ static func build() -> Theme:
 	theme.set_color("icon_disabled_color", "TabButton", INK)
 	theme.set_constant("icon_max_width", "TabButton", 44)
 
+	# Progress bars: an ink groove filled with malachite.
+	var groove := _box(Color(INK, 0.12), Color(0, 0, 0, 0))
+	groove.set_corner_radius_all(4)
+	theme.set_stylebox("background", "ProgressBar", groove)
+	var fill := _box(MALACHITE, Color(0, 0, 0, 0))
+	fill.set_corner_radius_all(4)
+	theme.set_stylebox("fill", "ProgressBar", fill)
+
+	# Side tabs: pictures down the sheet's side, quiet until open, then lit
+	# with a madder bar along their left.
+	theme.set_type_variation("SideTab", "Button")
+	theme.set_stylebox("normal", "SideTab", _box(Color(INK, 0.03), Color(0, 0, 0, 0)))
+	theme.set_stylebox("hover", "SideTab", _box(Color(INK, 0.08), Color(0, 0, 0, 0)))
+	theme.set_stylebox("pressed", "SideTab", _box(Color(INK, 0.08), Color(0, 0, 0, 0)))
+	var side_open := _box(Color(WHEAT, 0.16), MADDER)
+	side_open.set_border_width_all(0)
+	side_open.border_width_left = 5
+	side_open.set_corner_radius_all(0)
+	theme.set_stylebox("disabled", "SideTab", side_open)
+	theme.set_stylebox("focus", "SideTab", StyleBoxEmpty.new())
+	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color"]:
+		theme.set_color(state, "SideTab", MUTED)
+	theme.set_color("icon_disabled_color", "SideTab", INK)
+	theme.set_constant("icon_max_width", "SideTab", 60)
+
 	# Icon-only buttons on a sheet: no box until touched.
 	theme.set_type_variation("IconButton", "Button")
 	theme.set_stylebox("normal", "IconButton", _box(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
