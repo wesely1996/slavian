@@ -3,7 +3,8 @@ name: Release
 # Pushing a version tag (v0.1.0) that matches config/version in
 # client/project.godot runs CI on the tagged commit, then publishes the APK
 # as a GitHub release (not a pre-release, so cleanup-dev-builds.yml keeps
-# it) and the server image as ghcr.io/<owner>/slavian-server:<version>.
+# it) and the server image as ghcr.io/<owner>/slavian-server:<version>,
+# then deploys that version to the production server (job "deploy").
 #   git tag v0.1.0 origin/main && git push origin v0.1.0
 on:
   push:
@@ -72,3 +73,32 @@ jobs:
             ${{ steps.image.outputs.name }}:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Runs the release on the production server (ops/production/deploy.sh),
+  # once its image is published. The SSH key may run only that script.
+  # Secrets: DEPLOY_HOST, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS (docs/production.md).
+  deploy:
+    name: Deploy to production
+    needs: [publish, server-image]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    steps:
+      - name: Deploy ${{ github.ref_name }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "::warning::DEPLOY_HOST / DEPLOY_SSH_KEY are not set; skipping the deploy."
+            exit 0
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "root@$DEPLOY_HOST" "$GITHUB_REF_NAME"
+          echo "Deployed $GITHUB_REF_NAME to $DEPLOY_HOST" >> "$GITHUB_STEP_SUMMARY"

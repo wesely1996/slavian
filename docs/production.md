@@ -37,15 +37,33 @@ same machine.
 
 ## Updates
 
-Every merge to main publishes a new `main` image. To run it:
+**Releases deploy themselves.** Pushing a version tag (`git tag v0.2.0
+origin/main && git push origin v0.2.0`) runs `release.yml`: CI, the APK
+release, the server image `slavian-server:v0.2.0`, and then the **Deploy to
+production** job. It SSHes to the VPS and runs `ops/production/deploy.sh
+v0.2.0`. The script checks out the tag, pins `SLAVIAN_TAG` in `.env`, pulls
+and restarts, and waits up to two minutes for the server to be healthy and
+answer `https://<DOMAIN>/health`. If it doesn't, the previous image runs
+again and the job fails. Database migrations run on start and are not undone.
 
-```sh
-cd slavian/ops/production && git pull && docker compose pull && docker compose up -d
-```
+What it needs, once:
+- **A deploy key** that may run only the script. On the VPS, in
+  `/root/.ssh/authorized_keys`:
+  `command="/opt/slavian/ops/production/deploy.sh",restrict ssh-ed25519 AAAA… slavian-release-deploy`.
+  Anything sent over that key goes to the script, which accepts nothing but
+  `vX.Y.Z`.
+- **Repository secrets:** `DEPLOY_SSH_KEY` (the key's private half),
+  `DEPLOY_HOST` (the VPS's address) and `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan -t
+  ed25519 <host>`, so the job only talks to this machine). Optional variable
+  `PRODUCTION_URL` for the link on the run. Without the secrets the job is
+  skipped with a warning.
+- The job runs in the GitHub environment `production`; add required
+  reviewers there (Settings → Environments) to approve each deploy by hand.
 
-The server applies new database migrations on start. To go back to an
-earlier build, set `SLAVIAN_TAG=<commit sha>` in `.env` and run
-`docker compose up -d`.
+**By hand**, the same thing: `/opt/slavian/ops/production/deploy.sh v0.2.0`.
+To go back to an earlier release, run it with that tag. To run the latest
+`main` between releases (every merge publishes a `main` image), set
+`SLAVIAN_TAG=main` in `.env` and run `docker compose pull && docker compose up -d`.
 
 ## Backups
 
