@@ -240,6 +240,28 @@ PNG (`MOSAIC` in generate.py sets the scale and the stone size). Reading the
 SVG needs cairosvg (`pip install cairosvg`); without it the mosaics are left
 as they are.
 
+## Clans
+
+Each clan's emblem follows a real historic Slavic coat of arms with its
+animal, in its tinctures and pose, redrawn for the game (not copied from
+any drawing of it), in a gilded roundel ringed with pearls like the
+medallions of the old churches, and laid in mosaic:
+
+| Clan | Arms | The charge |
+|---|---|---|
+| Rod Jelena (stag) | Nizhny Novgorod (1781) | a red stag walking, on silver |
+| Rod Rysa (lynx) | Gomel (granted 1781) | a gold lynx lying, on blue |
+| Rod Medvěda (bear) | Yaroslavl (1672) | a black bear upright with a gold poleaxe, on silver |
+| Rod Bobra (beaver) | Bobrov (1781) | a beaver in its own colour, on silver |
+| Rod Sokola (falcon) | Sokołów Podlaski (seal of 1764) | a falcon on an oak branch, a gold ring in its beak, on gold |
+| Rod Volka (wolf) | Vovchansk (1781) | a silver wolf running over green ground, on blue |
+
+The clan's `arms` line in `data/clans.json` says so in the game (the clan
+pickers and the almanac). Each animal is centred in the roundel from its
+measured outline: after changing one, run
+`python3 tools/art/generate.py --measure-charges` and copy the result into
+`CHARGE_BOX`.
+
 ## Replacing a piece of art
 
 `client/art/art.json` maps every art id to a file:

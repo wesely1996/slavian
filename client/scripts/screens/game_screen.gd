@@ -949,7 +949,7 @@ func _clan_section() -> void:
 		tile.disabled = clan == _clan_preview
 		grid.add_child(tile)
 	_panel_body.add_child(grid)
-	_panel_body.add_child(UI.label(ClanText.title(Game.data, _clan_preview), 0, UI.ACCENT))
+	_panel_body.add_child(UI.with_info(UI.label(ClanText.title(Game.data, _clan_preview), 0, UI.ACCENT), ClanText.arms(Game.data, _clan_preview)))
 	_panel_body.add_child(UI.label(ClanText.perks(Game.data, _clan_preview), UI.SMALL_SIZE, UI.MUTED))
 	var chosen := _clan_preview
 	_panel_body.add_child(UI.primary(tr("Choose %s") % ClanText.title(Game.data, chosen), func() -> void: _pick_clan(chosen), "icon/play"))

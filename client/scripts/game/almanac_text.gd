@@ -111,7 +111,7 @@ static func _clans(data: Dictionary) -> Array:
 	var out := []
 	for clan in data.clans.clans:
 		var c: Dictionary = data.clans.clans[clan]
-		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s") % [UI.t(c.story), ClanText.perks(data, clan)], "clan/%s" % clan])
+		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s %s") % [UI.t(c.story), ClanText.perks(data, clan), ClanText.arms(data, clan)], "clan/%s" % clan])
 	return out
 
 
