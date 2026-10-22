@@ -30,6 +30,7 @@ func _ready() -> void:
 	var config := ConfigFile.new()
 	if config.load(PATH) == OK:
 		token = config.get_value("session", "token", "")
+		account = config.get_value("session", "account", {})
 		language = config.get_value("session", "language", "")
 		text_size = config.get_value("session", "text_size", "normal")
 		tutorial = config.get_value("session", "tutorial", {})
@@ -55,6 +56,8 @@ func _ready() -> void:
 func save() -> void:
 	var config := ConfigFile.new()
 	config.set_value("session", "token", token)
+	# Who is signed in (id and name), so the menu can say so offline too.
+	config.set_value("session", "account", account)
 	config.set_value("session", "language", language)
 	config.set_value("session", "text_size", text_size)
 	config.set_value("session", "tutorial", tutorial)

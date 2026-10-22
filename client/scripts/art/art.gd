@@ -8,7 +8,7 @@ extends RefCounted
 const MANIFEST := "res://art/art.json"
 ## Ids whose file you add yourself and that may be missing until then: the
 ## studio's logo on the splash (client/art/brand/night_forge.png).
-const OPTIONAL := ["brand/studio"]
+const OPTIONAL := ["brand/studio", "brand/seal"]
 
 static var _paths: Dictionary = {}
 static var _cache: Dictionary = {}

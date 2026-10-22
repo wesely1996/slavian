@@ -18,6 +18,10 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
   const steps: Step[] = [
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f6' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } },
+    // Three more fill the queue; the storehouse finds it full.
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f0' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f3' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f10' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c3', building: 'storehouse' } },
     { method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 5 } },
     { advance: 30 * MINUTE },

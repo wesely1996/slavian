@@ -15,18 +15,19 @@ func get_json(path: String) -> Response:
 	return await request(HTTPClient.METHOD_GET, path)
 
 
-func post_json(path: String, body: Dictionary = {}) -> Response:
-	return await request(HTTPClient.METHOD_POST, path, body)
+func post_json(path: String, body: Dictionary = {}, remote := false) -> Response:
+	return await request(HTTPClient.METHOD_POST, path, body, remote)
 
 
 func patch_json(path: String, body: Dictionary) -> Response:
 	return await request(HTTPClient.METHOD_PATCH, path, body)
 
 
-func request(method: HTTPClient.Method, path: String, body: Variant = null) -> Response:
+## `remote`: to the server even while a solo world is open (bug reports).
+func request(method: HTTPClient.Method, path: String, body: Variant = null, remote := false) -> Response:
 	var response := Response.new()
 	# A solo world plays on the device (docs/local-engine.md).
-	if Local.is_active():
+	if Local.is_active() and not remote:
 		var answer := Local.respond(method, path, body)
 		response.status = answer.status
 		response.data = answer.data

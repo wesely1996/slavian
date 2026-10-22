@@ -238,6 +238,11 @@ func _build_ui() -> void:
 	_inbox_button.theme_type_variation = "WoodIconButton"
 	_inbox_button.tooltip_text = tr("Inbox")
 	bar.add_child(_inbox_button)
+	# The tutorial, shown or hidden at any time.
+	var tutorial := UI.button("", _toggle_tutorial, "icon/help")
+	tutorial.theme_type_variation = "WoodIconButton"
+	tutorial.tooltip_text = tr("Tutorial")
+	bar.add_child(tutorial)
 	# The resource strip: icon, stock, and the hourly rate beside it.
 	_resources = UI.hbox(4)
 	top_rows.add_child(_resources)
@@ -324,7 +329,7 @@ func _build_ui() -> void:
 	_quest_card.show_me.connect(_show_me)
 	_quest_card.hide_tutorial.connect(func() -> void:
 		Session.set_tutorial_flag(Game.world_id(), "hidden", true)
-		_status.text = tr("The tutorial is hidden. Bring it back with How to play in the almanac.")
+		_status.text = tr("The tutorial is hidden. The ? button at the top brings it back.")
 		_refresh_quest_card())
 	layer.add_child(_quest_card)
 	get_viewport().size_changed.connect(_arrange)
@@ -553,6 +558,16 @@ func _refresh_quest_card() -> void:
 		return
 	_quest_card.show_for(Game.data, _me())
 	_place_quest_card.call_deferred()
+
+
+## The ? button: brings the tutorial back, or puts it away.
+func _toggle_tutorial() -> void:
+	var hidden := Session.tutorial_flag(Game.world_id(), "hidden") or not _quest_card.visible
+	Session.set_tutorial_flag(Game.world_id(), "hidden", not hidden)
+	_status.text = ""
+	_refresh_quest_card()
+	if hidden and not _quest_card.visible:
+		_status.text = tr("The tutorial is for a running world with a village of your own.")
 
 
 ## At the top left of the map (or the village), narrower on a phone.
@@ -798,7 +813,8 @@ func _handed_line(village: Dictionary) -> void:
 ## Hand-overs: give your villages to a teammate while away, take them back,
 ## and what delegates did lately.
 func _delegation_section() -> void:
-	if Game.world.get("status") != "running":
+	# Hand-overs are between teammates: none in a solo world.
+	if Game.world.get("status") != "running" or Local.is_active():
 		return
 	var me := Game.my_account_id()
 	var now := Game.server_now()
@@ -2552,8 +2568,13 @@ func _threats_panel() -> void:
 		_panel_body.add_child(UI.label(ritual, 0, UI.ERROR))
 		_panel_body.add_child(UI.label(tr(Game.data.bridge.ritualNight.story), UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.label(tr("The Holy City: %s") % HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
-	_panel_body.add_child(UI.label(tr("%s difficulty · %s") % [tr(GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal")))), GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
-	if Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id():
+	var difficulty := tr(GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))))
+	# Quiet hours keep a group's nights calm; a solo world pauses with the app.
+	if Local.is_active():
+		_panel_body.add_child(UI.label(tr("%s difficulty") % difficulty, UI.SMALL_SIZE, UI.MUTED))
+	else:
+		_panel_body.add_child(UI.label(tr("%s difficulty · %s") % [difficulty, GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
+	if not Local.is_active() and Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id():
 		var quiet_row := UI.hbox(8)
 		var off := UI.button(tr("Off"), func() -> void: _set_quiet(null, null))
 		off.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2688,7 +2709,8 @@ func _send_report(message: String) -> void:
 		file.store_string(JSON.stringify(report, "\t"))
 		file.close()
 	_status.text = tr("Sending the report…")
-	var response := await Api.post_json("/v1/reports", report)
+	# Reports go to the server even from a solo world (they need a sign-in).
+	var response := await Api.post_json("/v1/reports", report, true)
 	if response.ok:
 		_status.text = tr("Report sent. Saved to %s") % ProjectSettings.globalize_path(path)
 	else:
@@ -2925,6 +2947,9 @@ func _show_inbox() -> void:
 	_rebuild_panel()
 	if Game.unread > 0:
 		await Api.post_json("/v1/worlds/%d/notifications/read" % Game.world_id(), {})
+	# Push settings belong to the account; a solo world sends no pushes.
+	if Local.is_active():
+		return
 	var response := await Api.get_json("/v1/me/notifications")
 	if response.ok:
 		_prefs = response.data.prefs
@@ -2941,7 +2966,8 @@ func _inbox_panel() -> void:
 		_panel_mode = "hex"
 		_rebuild_panel()))
 	_panel_body.add_child(top)
-	_panel_body.add_child(UI.label(tr("Danger is pushed to your phone; everything else waits for the daily digest."), UI.SMALL_SIZE, UI.MUTED))
+	if not Local.is_active():
+		_panel_body.add_child(UI.label(tr("Danger is pushed to your phone; everything else waits for the daily digest."), UI.SMALL_SIZE, UI.MUTED))
 	if Game.inbox.is_empty():
 		_panel_body.add_child(UI.label(tr("Nothing yet."), UI.SMALL_SIZE, UI.MUTED))
 	var now := Game.server_now()

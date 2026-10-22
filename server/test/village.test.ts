@@ -148,7 +148,13 @@ describe('building', () => {
     expect(second.state.ledger.amounts.wood).toBe(
       village.startingResources.wood - levelCost(woodcutter, 1).wood - data.buildings.buildings.farm!.cost.wood,
     );
-    expect(() => queueBuild(data, second.state, { plot: 'f3' }, T0, 1)).toThrow(/queue is full/);
+    // Fill the queue up to the limit (one build per field); one more is refused.
+    let state = second.state;
+    const limit = buildQueueLimit(data, 1);
+    const fields = ['f1', 'f3', 'f7', 'f10', 'f2', 'f4', 'f8'];
+    for (const plot of fields.slice(0, limit - 2)) state = queueBuild(data, state, { plot }, T0, 1).state;
+    expect(state.queue).toHaveLength(limit);
+    expect(() => queueBuild(data, state, { plot: fields[limit - 2]! }, T0, 1)).toThrow(/queue is full/);
   });
 
   it('completing raises the plot and production from that moment only', () => {
