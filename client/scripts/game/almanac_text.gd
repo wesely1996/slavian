@@ -5,7 +5,16 @@ extends RefCounted
 const SECTIONS := ["Units", "Buildings", "Stances", "Hordes", "Clans", "Terrain", "The run"]  # tr
 
 
-## [[title, text], …] for a section of the almanac.
+## The picture on each section's tab.
+const ART := {"Units": "unit/spearman", "Buildings": "icon/build", "Stances": "icon/troops", "Hordes": "icon/threat",
+	"Clans": "clan/volk", "Terrain": "icon/map", "The run": "settlement/holy_city"}
+## Pictures for the kinds of ground that have one.
+const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hills": "feature/hill", "mountain": "feature/mountain",
+	"swamp": "feature/reeds", "holy_city": "settlement/holy_city", "dark_forest": "feature/dark_pine", "ice": "feature/ice",
+	"steppe": "feature/bush", "hallowed": "feature/blossom"}
+
+
+## [[title, text, art id or ""], …] for a section of the almanac.
 static func entries(data: Dictionary, section: String) -> Array:
 	match section:
 		"Units":
@@ -35,7 +44,7 @@ static func _units(data: Dictionary) -> Array:
 			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.speed), int(u.carry), int(u.upkeepPerHour), where]
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
-		out.append([UI.t(u.name), text])
+		out.append([UI.t(u.name), text, "unit/%s" % id])
 	return out
 
 
@@ -55,8 +64,20 @@ static func _buildings(data: Dictionary) -> Array:
 			text += UI.t(" · per level: ") + ", ".join(parts)
 		if b.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[b.clan].name)
-		out.append([UI.t(b.name), text])
+		out.append([UI.t(b.name), text, _building_art(id, String(b.kind))])
 	return out
+
+
+## A building's picture at its first stage.
+static func _building_art(id: String, kind: String) -> String:
+	match kind:
+		"field":
+			return Art.building_id(id, 1, true)
+		"wall":
+			return "building/wall_wood"
+		"outpost":
+			return "map/outpost"
+	return Art.building_id(id, 1)
 
 
 static func _stances(data: Dictionary) -> Array:
@@ -65,12 +86,12 @@ static func _stances(data: Dictionary) -> Array:
 	for id in stances:
 		var s: Dictionary = stances[id]
 		var retreat := UI.t("never breaks") if s.retreatAt == null else UI.t("breaks at %d%% losses") % roundi(float(s.retreatAt) * 100.0)
-		out.append([UI.t(s.name), UI.t("attack ×%.2f · defense ×%.2f · %s") % [float(s.attack), float(s.defense), retreat]])
+		out.append([UI.t(s.name), UI.t("attack ×%.2f · defense ×%.2f · %s") % [float(s.attack), float(s.defense), retreat], ""])
 	var counters := PackedStringArray()
 	for family in data.battle.counters:
 		for target in data.battle.counters[family]:
 			counters.append(UI.t("%s beat %s (×%.1f)") % [String(family).capitalize(), target, float(data.battle.counters[family][target])])
-	out.append([UI.t("Counters"), ", ".join(counters)])
+	out.append([UI.t("Counters"), ", ".join(counters), ""])
 	return out
 
 
@@ -82,7 +103,7 @@ static func _hordes(data: Dictionary) -> Array:
 		var names := PackedStringArray()
 		for unit in f.units:
 			names.append(UI.t(f.units[unit].name))
-		out.append([UI.t("%s (%s front)") % [UI.t(f.faction), String(front).capitalize()], UI.t("%s Units: %s.") % [UI.t(f.signature), ", ".join(names)]])
+		out.append([UI.t("%s (%s front)") % [UI.t(f.faction), String(front).capitalize()], UI.t("%s Units: %s.") % [UI.t(f.signature), ", ".join(names)], WaveMath.front_icon(String(front))])
 	return out
 
 
@@ -90,7 +111,7 @@ static func _clans(data: Dictionary) -> Array:
 	var out := []
 	for clan in data.clans.clans:
 		var c: Dictionary = data.clans.clans[clan]
-		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s") % [UI.t(c.story), ClanText.perks(data, clan)]])
+		out.append([UI.t("%s (%s)") % [UI.t(c.name), UI.t(c.animal)], UI.t("%s %s") % [UI.t(c.story), ClanText.perks(data, clan)], "clan/%s" % clan])
 	return out
 
 
@@ -100,7 +121,7 @@ static func _terrain(data: Dictionary) -> Array:
 	for id in terrain:
 		var t: Dictionary = terrain[id]
 		var move := UI.t("impassable") if t.moveCost == null else UI.t("move cost %s") % str(t.moveCost)
-		out.append([UI.t(t.name), UI.t("%s · %s") % [move, UI.t("villages can be founded here") if t.settleable else UI.t("no villages")]])
+		out.append([UI.t(t.name), UI.t("%s · %s") % [move, UI.t("villages can be founded here") if t.settleable else UI.t("no villages")], TERRAIN_ART.get(id, "")])
 	return out
 
 

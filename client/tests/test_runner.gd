@@ -744,6 +744,22 @@ func _test_onboarding_almanac() -> void:
 
 func _test_art() -> void:
 	_check(Art.ids().size() >= 40, "art manifest read: %d ids" % Art.ids().size())
+	# The almanac's tabs and entries show pictures that exist.
+	var real := LocalData.load_data()
+	var no_picture := []
+	for section in AlmanacText.SECTIONS:
+		if not Art.has(AlmanacText.ART[section]):
+			no_picture.append(AlmanacText.ART[section])
+		for entry in AlmanacText.entries(real, section):
+			if entry.size() > 2 and entry[2] != "" and not Art.has(entry[2]):
+				no_picture.append(entry[2])
+	_check(no_picture.is_empty(), "almanac pictures exist: %s" % [no_picture])
+	_check(AlmanacText.entries(real, "Units").all(func(entry: Array) -> bool: return entry[2] != ""), "every unit has its picture")
+	# Side tabs are pictures of the size asked, the open one pressed.
+	var column := UI.side_tabs([["a", "unit/spearman", "A"], ["b", "icon/map", "B"]], "b", func(_key: String) -> void: pass, 64.0)
+	var tab: Button = column.get_child(0)
+	_check(tab.custom_minimum_size == Vector2(64, 64) * UiTheme.text_scale and tab.tooltip_text == "A" and not tab.disabled and column.get_child(1).disabled, "side tabs sized and open")
+	column.free()
 	var missing := []
 	for id in Art.ids():
 		if Art.texture(id) == null and not id in Art.OPTIONAL:

@@ -176,7 +176,7 @@ static func build() -> Theme:
 	theme.set_color("icon_hover_color", "TabButton", INK)
 	theme.set_color("font_disabled_color", "TabButton", INK)
 	theme.set_color("icon_disabled_color", "TabButton", INK)
-	theme.set_constant("icon_max_width", "TabButton", 44)
+	theme.set_constant("icon_max_width", "TabButton", 36)
 
 	# Progress bars: an ink groove filled with malachite.
 	var groove := _box(Color(INK, 0.12), Color(0, 0, 0, 0))
@@ -188,14 +188,20 @@ static func build() -> Theme:
 
 	# Side tabs: pictures down the sheet's side, quiet until open, then lit
 	# with a madder bar along their left.
+	# Little margin, so the picture fills the tab.
 	theme.set_type_variation("SideTab", "Button")
-	theme.set_stylebox("normal", "SideTab", _box(Color(INK, 0.03), Color(0, 0, 0, 0)))
-	theme.set_stylebox("hover", "SideTab", _box(Color(INK, 0.08), Color(0, 0, 0, 0)))
-	theme.set_stylebox("pressed", "SideTab", _box(Color(INK, 0.08), Color(0, 0, 0, 0)))
+	var side_normal := _box(Color(INK, 0.03), Color(0, 0, 0, 0))
+	var side_hover := _box(Color(INK, 0.08), Color(0, 0, 0, 0))
 	var side_open := _box(Color(WHEAT, 0.16), MADDER)
 	side_open.set_border_width_all(0)
 	side_open.border_width_left = 5
 	side_open.set_corner_radius_all(0)
+	for style in [side_normal, side_hover, side_open]:
+		style.set_content_margin_all(8)
+		style.content_margin_left = 10
+	theme.set_stylebox("normal", "SideTab", side_normal)
+	theme.set_stylebox("hover", "SideTab", side_hover)
+	theme.set_stylebox("pressed", "SideTab", side_hover)
 	theme.set_stylebox("disabled", "SideTab", side_open)
 	theme.set_stylebox("focus", "SideTab", StyleBoxEmpty.new())
 	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color"]:
