@@ -406,6 +406,7 @@ func _friends_page() -> void:
 		box.add_child(UI.button(tr("Retry"), func() -> void: _render("friends")))
 		return
 	Session.account = response.data.account
+	Session.save()
 	box.add_child(UI.label(tr("Your worlds"), UI.SMALL_SIZE, UI.MUTED))
 	if response.data.worlds.is_empty():
 		box.add_child(UI.label(tr("None yet. Create one or join with a code."), UI.SMALL_SIZE, UI.MUTED))
@@ -509,8 +510,28 @@ func _handle_world_response(response: Api.Response) -> void:
 
 # --- Settings ----------------------------------------------------------------
 
+## Asks the server who is signed in (a sign-in from before the app kept the
+## account has a token but no name), then draws `page` again if it changed.
+func _refresh_account(page: String) -> void:
+	if not Session.is_logged_in():
+		return
+	var response := await Api.get_json("/v1/me")
+	if _page != page:
+		return
+	if response.status == 401:
+		Session.log_out()
+		_render(page)
+		return
+	if not response.ok or response.data.account == Session.account:
+		return
+	Session.account = response.data.account
+	Session.save()
+	_render(page)
+
+
 ## One door per setting, each showing what it is set to now.
 func _settings_page() -> void:
+	_refresh_account("settings")
 	var language := ""
 	for entry in LANGUAGES:
 		if entry[0] == Session.language:
@@ -522,8 +543,11 @@ func _settings_page() -> void:
 	_door(tr("Language: %s") % language, "", "language", "icon/research")
 	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
 	_door(tr("Sound"), tr("Music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "sound", "icon/inbox")
-	var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
-	_door(tr("Account"), tr("Signed in as %s") % who if who != "" else tr("Not signed in"), "account", "icon/profile")
+	var who := String(Session.account.get("displayName", ""))
+	var account := tr("Not signed in")
+	if Session.is_logged_in():
+		account = tr("Signed in as %s") % who if who != "" else tr("Signed in")
+	_door(tr("Account"), account, "account", "icon/profile")
 	_door(tr("Help and support"), tr("How a run goes, reporting a problem, the server costs and privacy."), "help", "icon/help")
 
 
@@ -602,8 +626,10 @@ func _account_page() -> void:
 	if not Session.is_logged_in():
 		_guest_step(tr("Solo worlds need no account. To play with friends, pick a name and play as a guest."))
 		return
+	_refresh_account("account")
 	var who := String(Session.account.get("displayName", ""))
-	_content.add_child(UI.label(tr("Signed in as %s") % who, UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(tr("Signed in as"), UI.SMALL_SIZE, UI.MUTED))
+	_content.add_child(UI.label(who if who != "" else tr("Loading…"), UI.HEADING_SIZE))
 	var rename := UI.hbox()
 	var name_edit := UI.line_edit(tr("Your name"), who)
 	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -628,6 +654,7 @@ func _rename(display_name: String) -> void:
 		_set_status(response.error)
 		return
 	Session.account = response.data.get("account", Session.account)
+	Session.save()
 	_render("account")
 
 
@@ -731,17 +758,17 @@ const CREDITED := ["RandomMind (opengameart.org)", "spring-spring (opengameart.o
 func _credits_page() -> void:
 	_content.add_child(UI.label("Slavian", UI.TITLE_SIZE))
 	_content.add_child(UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED))
-	# The studio: its mark, then its name.
-	var studio := Art.texture("brand/studio")
+	# The studio: its mark pressed into red wax (tools/art/seal.py), then its name.
+	var studio := Art.texture("brand/seal")
 	if studio != null:
 		var mark := TextureRect.new()
 		mark.texture = studio
 		mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		mark.custom_minimum_size = Vector2(0, 220)
+		mark.custom_minimum_size = Vector2(0, 240)
 		_content.add_child(mark)
 	_content.add_child(UI.label(tr("Made by"), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label("Night Forge Software Company"))
+	_content.add_child(UI.label("Night Forge"))
 	_content.add_child(UI.label(tr("Music and sound"), UI.HEADING_SIZE))
 	for i in CREDITS.size():
 		_content.add_child(UI.label(tr(CREDITS[i]), UI.SMALL_SIZE, UI.MUTED))

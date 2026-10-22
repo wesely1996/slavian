@@ -404,6 +404,645 @@
    "method": "POST",
    "path": "/v1/villages/1/build",
    "body": {
+    "plot": "f0"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Starigrad",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 0,
+       "building": null
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "f6",
+       "building": "farm",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:07.500Z"
+      },
+      {
+       "plot": "c2",
+       "building": "barracks",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:07.500Z",
+       "completesAt": "2026-06-01T08:00:22.500Z"
+      },
+      {
+       "plot": "f0",
+       "building": "woodcutter",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:22.500Z",
+       "completesAt": "2026-06-01T08:00:31.500Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 210,
+       "wood": 260,
+       "grain": 390,
+       "stone": 280
+      },
+      "ratesPerHour": {
+       "iron": 30,
+       "wood": 60,
+       "grain": 80,
+       "stone": 60
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "f3"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Starigrad",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 0,
+       "building": null
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "f6",
+       "building": "farm",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:07.500Z"
+      },
+      {
+       "plot": "c2",
+       "building": "barracks",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:07.500Z",
+       "completesAt": "2026-06-01T08:00:22.500Z"
+      },
+      {
+       "plot": "f0",
+       "building": "woodcutter",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:22.500Z",
+       "completesAt": "2026-06-01T08:00:31.500Z"
+      },
+      {
+       "plot": "f3",
+       "building": "quarry",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:31.500Z",
+       "completesAt": "2026-06-01T08:00:40.500Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 190,
+       "wood": 190,
+       "grain": 360,
+       "stone": 250
+      },
+      "ratesPerHour": {
+       "iron": 30,
+       "wood": 60,
+       "grain": 80,
+       "stone": 60
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "f10"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Starigrad",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 0,
+       "building": null
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "f6",
+       "building": "farm",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:07.500Z"
+      },
+      {
+       "plot": "c2",
+       "building": "barracks",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:07.500Z",
+       "completesAt": "2026-06-01T08:00:22.500Z"
+      },
+      {
+       "plot": "f0",
+       "building": "woodcutter",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:22.500Z",
+       "completesAt": "2026-06-01T08:00:31.500Z"
+      },
+      {
+       "plot": "f3",
+       "building": "quarry",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:31.500Z",
+       "completesAt": "2026-06-01T08:00:40.500Z"
+      },
+      {
+       "plot": "f10",
+       "building": "iron_mine",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:40.500Z",
+       "completesAt": "2026-06-01T08:00:52.500Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 190,
+       "wood": 110,
+       "grain": 320,
+       "stone": 170
+      },
+      "ratesPerHour": {
+       "iron": 30,
+       "wood": 60,
+       "grain": 80,
+       "stone": 60
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
     "plot": "c3",
     "building": "storehouse"
    },
@@ -514,7 +1153,7 @@
         "building": null
        },
        "f0": {
-        "level": 0,
+        "level": 1,
         "building": "woodcutter"
        },
        "f1": {
@@ -526,7 +1165,7 @@
         "building": "woodcutter"
        },
        "f3": {
-        "level": 0,
+        "level": 1,
         "building": "quarry"
        },
        "f4": {
@@ -582,7 +1221,7 @@
         "building": null
        },
        "f10": {
-        "level": 0,
+        "level": 1,
         "building": "iron_mine"
        },
        "f11": {
@@ -592,8 +1231,11 @@
       },
       "levels": {
        "farm": 1,
+       "quarry": 1,
        "barracks": 1,
-       "elder_hall": 1
+       "iron_mine": 1,
+       "elder_hall": 1,
+       "woodcutter": 1
       },
       "queue": [],
       "garrison": {},
@@ -616,16 +1258,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 230,
-        "wood": 300,
-        "grain": 420,
-        "stone": 340
+        "iron": 190,
+        "wood": 110,
+        "grain": 320,
+        "stone": 170
        },
        "ratesPerHour": {
-        "iron": 30,
-        "wood": 60,
+        "iron": 110,
+        "wood": 180,
         "grain": 230,
-        "stone": 60
+        "stone": 180
        },
        "capacity": {
         "iron": 1000,
@@ -633,7 +1275,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:00:22.500Z"
+       "settledAt": "2026-06-01T08:00:52.500Z"
       }
      }
     ],
@@ -2726,192 +3368,16 @@
     "unit": "spearman",
     "count": 5
    },
-   "status": 200,
+   "status": 400,
    "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Starigrad",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "barracks"
-      },
-      "c3": {
-       "level": 0,
-       "building": null
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 0,
-       "building": null
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 1,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "farm": 1,
-      "barracks": 1,
-      "elder_hall": 1
-     },
-     "queue": [],
-     "garrison": {},
-     "away": {},
-     "stance": "balanced",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06
-     },
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
-     "ruin": null,
-     "refuge": false,
-     "training": [
-      {
-       "unit": "spearman",
-       "count": 5,
-       "startsAt": "2026-06-01T08:30:00.000Z",
-       "perUnitMs": 6000,
-       "completesAt": "2026-06-01T08:30:30.000Z"
-      }
-     ],
-     "resources": {
-      "amounts": {
-       "iron": 95,
-       "wood": 80,
-       "grain": 385,
-       "stone": 270
-      },
-      "ratesPerHour": {
-       "iron": 30,
-       "wood": 60,
-       "grain": 176,
-       "stone": 60
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T08:30:00.000Z"
-     }
-    },
-    "serverTime": "2026-06-01T08:30:00.000Z"
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":50,\"stone\":0,\"grain\":0,\"iron\":0}",
+    "missing": {
+     "wood": 50,
+     "stone": 0,
+     "grain": 0,
+     "iron": 0
+    }
    }
   },
   {
@@ -2975,7 +3441,7 @@
        "building": null
       },
       "f0": {
-       "level": 0,
+       "level": 1,
        "building": "woodcutter"
       },
       "f1": {
@@ -2987,7 +3453,7 @@
        "building": "woodcutter"
       },
       "f3": {
-       "level": 0,
+       "level": 1,
        "building": "quarry"
       },
       "f4": {
@@ -3043,7 +3509,7 @@
        "building": null
       },
       "f10": {
-       "level": 0,
+       "level": 1,
        "building": "iron_mine"
       },
       "f11": {
@@ -3053,8 +3519,11 @@
      },
      "levels": {
       "farm": 1,
+      "quarry": 1,
       "barracks": 1,
-      "elder_hall": 1
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "woodcutter": 1
      },
      "queue": [],
      "garrison": {},
@@ -3074,27 +3543,19 @@
      },
      "ruin": null,
      "refuge": false,
-     "training": [
-      {
-       "unit": "spearman",
-       "count": 5,
-       "startsAt": "2026-06-01T08:30:00.000Z",
-       "perUnitMs": 6000,
-       "completesAt": "2026-06-01T08:30:30.000Z"
-      }
-     ],
+     "training": [],
      "resources": {
       "amounts": {
-       "iron": 95,
-       "wood": 80,
-       "grain": 385,
-       "stone": 270
+       "iron": 190,
+       "wood": 110,
+       "grain": 320,
+       "stone": 170
       },
       "ratesPerHour": {
-       "iron": 30,
-       "wood": 60,
-       "grain": 176,
-       "stone": 60
+       "iron": 110,
+       "wood": 180,
+       "grain": 230,
+       "stone": 180
       },
       "capacity": {
        "iron": 1000,
@@ -3102,7 +3563,7 @@
        "grain": 1000,
        "stone": 1000
       },
-      "settledAt": "2026-06-01T08:30:00.000Z"
+      "settledAt": "2026-06-01T08:00:52.500Z"
      }
     },
     "serverTime": "2026-06-01T08:30:00.000Z"
@@ -3115,16 +3576,200 @@
     "q": -1,
     "r": 2
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":70,\"stone\":0,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 70,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    }
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Starigrad",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 1,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 1,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 1,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 1,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "o-1,2": {
+       "level": 0,
+       "terrain": "hills",
+       "building": "outpost"
+      }
+     },
+     "levels": {
+      "farm": 1,
+      "quarry": 1,
+      "barracks": 1,
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "woodcutter": 1
+     },
+     "queue": [
+      {
+       "plot": "o-1,2",
+       "building": "outpost",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:30:00.000Z",
+       "completesAt": "2026-06-01T08:31:30.000Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "defensive",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 205,
+       "wood": 50,
+       "grain": 355,
+       "stone": 160
+      },
+      "ratesPerHour": {
+       "iron": 110,
+       "wood": 180,
+       "grain": 230,
+       "stone": 180
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:30:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:30:00.000Z"
    }
   },
   {
@@ -3204,7 +3849,7 @@
        "building": null
       },
       "f0": {
-       "level": 0,
+       "level": 1,
        "building": "woodcutter"
       },
       "f1": {
@@ -3216,7 +3861,7 @@
        "building": "woodcutter"
       },
       "f3": {
-       "level": 0,
+       "level": 1,
        "building": "quarry"
       },
       "f4": {
@@ -3272,18 +3917,27 @@
        "building": null
       },
       "f10": {
-       "level": 0,
+       "level": 1,
        "building": "iron_mine"
       },
       "f11": {
        "level": 0,
        "building": "iron_mine"
+      },
+      "o-1,2": {
+       "peak": 1,
+       "level": 1,
+       "terrain": "hills",
+       "building": "outpost"
       }
      },
      "levels": {
       "farm": 1,
+      "quarry": 1,
       "barracks": 1,
-      "elder_hall": 1
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "woodcutter": 1
      },
      "queue": [
       {
@@ -3294,9 +3948,7 @@
        "completesAt": "2026-06-01T08:37:07.500Z"
       }
      ],
-     "garrison": {
-      "spearman": 5
-     },
+     "garrison": {},
      "away": {},
      "stance": "defensive",
      "besieged": false,
@@ -3316,16 +3968,16 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 88.5,
-       "wood": 37,
-       "grain": 385.53333333333336,
-       "stone": 237
+       "iron": 211.83333333333334,
+       "wood": 21,
+       "grain": 361.8333333333333,
+       "stone": 147
       },
       "ratesPerHour": {
-       "iron": 30,
-       "wood": 60,
-       "grain": 176,
-       "stone": 60
+       "iron": 150,
+       "wood": 180,
+       "grain": 230,
+       "stone": 240
       },
       "capacity": {
        "iron": 1000,
@@ -3400,7 +4052,7 @@
        "building": null
       },
       "f0": {
-       "level": 0,
+       "level": 1,
        "building": "woodcutter"
       },
       "f1": {
@@ -3412,7 +4064,7 @@
        "building": "woodcutter"
       },
       "f3": {
-       "level": 0,
+       "level": 1,
        "building": "quarry"
       },
       "f4": {
@@ -3468,18 +4120,27 @@
        "building": null
       },
       "f10": {
-       "level": 0,
+       "level": 1,
        "building": "iron_mine"
       },
       "f11": {
        "level": 0,
        "building": "iron_mine"
+      },
+      "o-1,2": {
+       "peak": 1,
+       "level": 1,
+       "terrain": "hills",
+       "building": "outpost"
       }
      },
      "levels": {
       "farm": 1,
+      "quarry": 1,
       "barracks": 1,
-      "elder_hall": 1
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "woodcutter": 1
      },
      "queue": [
       {
@@ -3490,9 +4151,7 @@
        "completesAt": "2026-06-01T08:37:07.500Z"
       }
      ],
-     "garrison": {
-      "spearman": 5
-     },
+     "garrison": {},
      "away": {},
      "stance": "defensive",
      "besieged": false,
@@ -3512,16 +4171,16 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 88.5,
-       "wood": 37,
-       "grain": 385.53333333333336,
-       "stone": 237
+       "iron": 211.83333333333334,
+       "wood": 21,
+       "grain": 361.8333333333333,
+       "stone": 147
       },
       "ratesPerHour": {
-       "iron": 30,
-       "wood": 60,
-       "grain": 176,
-       "stone": 60
+       "iron": 150,
+       "wood": 180,
+       "grain": 230,
+       "stone": 240
       },
       "capacity": {
        "iron": 1000,
@@ -3568,7 +4227,7 @@
       "heroKind": "dobrynya",
       "onboarding": {
        "build": "2026-06-01T08:00:00.000Z",
-       "train": "2026-06-01T08:30:00.000Z"
+       "outpost": "2026-06-01T08:30:00.000Z"
       },
       "onboardingClaimed": {
        "build": "2026-06-01T10:37:00.000Z"
@@ -3629,7 +4288,7 @@
         "building": null
        },
        "f0": {
-        "level": 0,
+        "level": 1,
         "building": "woodcutter"
        },
        "f1": {
@@ -3641,7 +4300,7 @@
         "building": "woodcutter"
        },
        "f3": {
-        "level": 0,
+        "level": 1,
         "building": "quarry"
        },
        "f4": {
@@ -3697,23 +4356,30 @@
         "building": null
        },
        "f10": {
-        "level": 0,
+        "level": 1,
         "building": "iron_mine"
        },
        "f11": {
         "level": 0,
         "building": "iron_mine"
+       },
+       "o-1,2": {
+        "peak": 1,
+        "level": 1,
+        "terrain": "hills",
+        "building": "outpost"
        }
       },
       "levels": {
        "farm": 1,
+       "quarry": 1,
        "barracks": 1,
-       "elder_hall": 1
+       "iron_mine": 1,
+       "elder_hall": 1,
+       "woodcutter": 1
       },
       "queue": [],
-      "garrison": {
-       "spearman": 5
-      },
+      "garrison": {},
       "away": {},
       "stance": "defensive",
       "besieged": false,
@@ -3733,16 +4399,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 248.5,
-        "wood": 457,
+        "iron": 611.8333333333334,
+        "wood": 681,
         "grain": 1200,
-        "stone": 657
+        "stone": 927
        },
        "ratesPerHour": {
-        "iron": 30,
-        "wood": 60,
-        "grain": 326,
-        "stone": 60
+        "iron": 150,
+        "wood": 180,
+        "grain": 380,
+        "stone": 240
        },
        "capacity": {
         "iron": 1000,
@@ -5846,6 +6512,19 @@
     "q": -1,
     "r": 2
    },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "That hex is already taken"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/outposts/abandon",
+   "body": {
+    "q": -1,
+    "r": 2
+   },
    "status": 200,
    "response": {
     "village": {
@@ -5901,7 +6580,7 @@
        "building": null
       },
       "f0": {
-       "level": 0,
+       "level": 1,
        "building": "woodcutter"
       },
       "f1": {
@@ -5913,7 +6592,7 @@
        "building": "woodcutter"
       },
       "f3": {
-       "level": 0,
+       "level": 1,
        "building": "quarry"
       },
       "f4": {
@@ -5969,36 +6648,24 @@
        "building": null
       },
       "f10": {
-       "level": 0,
+       "level": 1,
        "building": "iron_mine"
       },
       "f11": {
        "level": 0,
        "building": "iron_mine"
-      },
-      "o-1,2": {
-       "level": 0,
-       "terrain": "hills",
-       "building": "outpost"
       }
      },
      "levels": {
       "farm": 1,
+      "quarry": 1,
       "barracks": 1,
-      "elder_hall": 1
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "woodcutter": 1
      },
-     "queue": [
-      {
-       "plot": "o-1,2",
-       "building": "outpost",
-       "targetLevel": 1,
-       "startsAt": "2026-06-01T10:37:00.000Z",
-       "completesAt": "2026-06-01T10:38:30.000Z"
-      }
-     ],
-     "garrison": {
-      "spearman": 5
-     },
+     "queue": [],
+     "garrison": {},
      "away": {},
      "stance": "defensive",
      "besieged": false,
@@ -6018,16 +6685,16 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 208.5,
-       "wood": 307,
-       "grain": 1120,
-       "stone": 557
+       "wood": 681,
+       "stone": 927,
+       "grain": 1200,
+       "iron": 611.8333333333334
       },
       "ratesPerHour": {
-       "iron": 30,
-       "wood": 60,
-       "grain": 326,
-       "stone": 60
+       "wood": 180,
+       "stone": 180,
+       "grain": 380,
+       "iron": 110
       },
       "capacity": {
        "iron": 1000,
@@ -6039,19 +6706,6 @@
      }
     },
     "serverTime": "2026-06-01T10:37:00.000Z"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/outposts/abandon",
-   "body": {
-    "q": -1,
-    "r": 2
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "The outpost is being built; wait for it to finish"
    }
   },
   {
@@ -6087,8 +6741,7 @@
       "heroKind": "dobrynya",
       "onboarding": {
        "build": "2026-06-01T08:00:00.000Z",
-       "train": "2026-06-01T08:30:00.000Z",
-       "outpost": "2026-06-01T10:37:00.000Z"
+       "outpost": "2026-06-01T08:30:00.000Z"
       },
       "onboardingClaimed": {
        "build": "2026-06-01T10:37:00.000Z",
@@ -6150,7 +6803,7 @@
         "building": null
        },
        "f0": {
-        "level": 0,
+        "level": 1,
         "building": "woodcutter"
        },
        "f1": {
@@ -6162,7 +6815,7 @@
         "building": "woodcutter"
        },
        "f3": {
-        "level": 0,
+        "level": 1,
         "building": "quarry"
        },
        "f4": {
@@ -6218,29 +6871,24 @@
         "building": null
        },
        "f10": {
-        "level": 0,
+        "level": 1,
         "building": "iron_mine"
        },
        "f11": {
         "level": 0,
         "building": "iron_mine"
-       },
-       "o-1,2": {
-        "peak": 1,
-        "level": 1,
-        "terrain": "hills",
-        "building": "outpost"
        }
       },
       "levels": {
        "farm": 1,
+       "quarry": 1,
        "barracks": 1,
-       "elder_hall": 1
+       "iron_mine": 1,
+       "elder_hall": 1,
+       "woodcutter": 1
       },
       "queue": [],
-      "garrison": {
-       "spearman": 5
-      },
+      "garrison": {},
       "away": {},
       "stance": "defensive",
       "besieged": false,
@@ -6260,16 +6908,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 477.8333333333333,
-        "wood": 767,
-        "grain": 1320,
-        "stone": 1076
+        "iron": 921.8333333333334,
+        "wood": 1261,
+        "grain": 1400,
+        "stone": 1400
        },
        "ratesPerHour": {
-        "iron": 70,
-        "wood": 60,
-        "grain": 326,
-        "stone": 120
+        "iron": 110,
+        "wood": 180,
+        "grain": 380,
+        "stone": 180
        },
        "capacity": {
         "iron": 1000,
@@ -8381,8 +9029,7 @@
       "heroKind": "dobrynya",
       "onboarding": {
        "build": "2026-06-01T08:00:00.000Z",
-       "train": "2026-06-01T08:30:00.000Z",
-       "outpost": "2026-06-01T10:37:00.000Z"
+       "outpost": "2026-06-01T08:30:00.000Z"
       },
       "onboardingClaimed": {
        "build": "2026-06-01T10:37:00.000Z",
@@ -8444,7 +9091,7 @@
         "building": null
        },
        "f0": {
-        "level": 0,
+        "level": 1,
         "building": "woodcutter"
        },
        "f1": {
@@ -8456,7 +9103,7 @@
         "building": "woodcutter"
        },
        "f3": {
-        "level": 0,
+        "level": 1,
         "building": "quarry"
        },
        "f4": {
@@ -8512,29 +9159,24 @@
         "building": null
        },
        "f10": {
-        "level": 0,
+        "level": 1,
         "building": "iron_mine"
        },
        "f11": {
         "level": 0,
         "building": "iron_mine"
-       },
-       "o-1,2": {
-        "peak": 1,
-        "level": 1,
-        "terrain": "hills",
-        "building": "outpost"
        }
       },
       "levels": {
        "farm": 1,
+       "quarry": 1,
        "barracks": 1,
-       "elder_hall": 1
+       "iron_mine": 1,
+       "elder_hall": 1,
+       "woodcutter": 1
       },
       "queue": [],
-      "garrison": {
-       "spearman": 5
-      },
+      "garrison": {},
       "away": {},
       "stance": "defensive",
       "besieged": false,
@@ -8554,16 +9196,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 477.8333333333333,
-        "wood": 767,
-        "grain": 1320,
-        "stone": 1076
+        "iron": 921.8333333333334,
+        "wood": 1261,
+        "grain": 1400,
+        "stone": 1400
        },
        "ratesPerHour": {
-        "iron": 70,
-        "wood": 60,
-        "grain": 326,
-        "stone": 120
+        "iron": 110,
+        "wood": 180,
+        "grain": 380,
+        "stone": 180
        },
        "capacity": {
         "iron": 1000,
@@ -10651,186 +11293,10 @@
     "q": -1,
     "r": 2
    },
-   "status": 200,
+   "status": 400,
    "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Kitezh",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "barracks"
-      },
-      "c3": {
-       "level": 0,
-       "building": null
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 0,
-       "building": null
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 1,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 1,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "farm": 1,
-      "barracks": 1,
-      "elder_hall": 1
-     },
-     "queue": [],
-     "garrison": {
-      "spearman": 5
-     },
-     "away": {},
-     "stance": "defensive",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06
-     },
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
-     "ruin": null,
-     "refuge": false,
-     "training": [],
-     "resources": {
-      "amounts": {
-       "wood": 767,
-       "stone": 1076,
-       "grain": 1320,
-       "iron": 477.8333333333333
-      },
-      "ratesPerHour": {
-       "wood": 60,
-       "stone": 60,
-       "grain": 326,
-       "iron": 30
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T11:37:00.000Z"
-     }
-    },
-    "serverTime": "2026-06-01T11:37:00.000Z"
+    "error": "rule",
+    "message": "No outpost there"
    }
   },
   {
@@ -10843,12 +11309,12 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":1733,\"stone\":0,\"grain\":180,\"iron\":1022.1666666666667}",
+    "message": "Insufficient resources: missing {\"wood\":1239,\"stone\":0,\"grain\":100,\"iron\":578.1666666666666}",
     "missing": {
-     "wood": 1733,
+     "wood": 1239,
      "stone": 0,
-     "grain": 180,
-     "iron": 1022.1666666666667
+     "grain": 100,
+     "iron": 578.1666666666666
     }
    }
   },
@@ -10882,8 +11348,7 @@
       "heroKind": "dobrynya",
       "onboarding": {
        "build": "2026-06-01T08:00:00.000Z",
-       "train": "2026-06-01T08:30:00.000Z",
-       "outpost": "2026-06-01T10:37:00.000Z"
+       "outpost": "2026-06-01T08:30:00.000Z"
       },
       "onboardingClaimed": {
        "build": "2026-06-01T10:37:00.000Z",
@@ -10945,7 +11410,7 @@
         "building": null
        },
        "f0": {
-        "level": 0,
+        "level": 1,
         "building": "woodcutter"
        },
        "f1": {
@@ -10957,7 +11422,7 @@
         "building": "woodcutter"
        },
        "f3": {
-        "level": 0,
+        "level": 1,
         "building": "quarry"
        },
        "f4": {
@@ -11013,7 +11478,7 @@
         "building": null
        },
        "f10": {
-        "level": 0,
+        "level": 1,
         "building": "iron_mine"
        },
        "f11": {
@@ -11023,13 +11488,14 @@
       },
       "levels": {
        "farm": 1,
+       "quarry": 1,
        "barracks": 1,
-       "elder_hall": 1
+       "iron_mine": 1,
+       "elder_hall": 1,
+       "woodcutter": 1
       },
       "queue": [],
-      "garrison": {
-       "spearman": 5
-      },
+      "garrison": {},
       "away": {},
       "stance": "defensive",
       "besieged": false,
@@ -11049,16 +11515,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 477.8333333333333,
-        "wood": 767,
-        "grain": 1320,
-        "stone": 1076
+        "iron": 921.8333333333334,
+        "wood": 1261,
+        "grain": 1400,
+        "stone": 1400
        },
        "ratesPerHour": {
-        "iron": 30,
-        "wood": 60,
-        "grain": 326,
-        "stone": 60
+        "iron": 110,
+        "wood": 180,
+        "grain": 380,
+        "stone": 180
        },
        "capacity": {
         "iron": 1000,
@@ -13146,25 +13612,7 @@
    "response": {
     "notifications": [
      {
-      "id": 7,
-      "kind": "build_done",
-      "tier": "digest",
-      "title": "Outpost level 1 in Kitezh",
-      "body": "Finished.",
-      "createdAt": "2026-06-01T10:38:30.000Z",
-      "read": false
-     },
-     {
-      "id": 6,
-      "kind": "onboarding",
-      "tier": "digest",
-      "title": "Done: Claim an outpost",
-      "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T10:37:00.000Z",
-      "read": false
-     },
-     {
-      "id": 5,
+      "id": 9,
       "kind": "build_done",
       "tier": "digest",
       "title": "Farm level 1 in Kitezh",
@@ -13173,12 +13621,48 @@
       "read": false
      },
      {
-      "id": 4,
+      "id": 8,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Outpost level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:31:30.000Z",
+      "read": false
+     },
+     {
+      "id": 7,
       "kind": "onboarding",
       "tier": "digest",
-      "title": "Done: Train defenders",
+      "title": "Done: Claim an outpost",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:30:00.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Iron Mine level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:52.500Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Quarry level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:40.500Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Woodcutter level 1 in Starigrad",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:00:31.500Z",
       "read": false
      },
      {
@@ -13209,7 +13693,7 @@
       "read": false
      }
     ],
-    "unread": 7,
+    "unread": 9,
     "serverTime": "2026-06-01T12:22:17.000Z"
    }
   }

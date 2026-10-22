@@ -89,7 +89,15 @@ static func vbox(separation := 16) -> VBoxContainer:
 static func hbox(separation := 12) -> HBoxContainer:
 	var node := HBoxContainer.new()
 	node.add_theme_constant_override("separation", separation)
+	node.child_entered_tree.connect(_fit_wrapping)
 	return node
+
+
+## A wrapping label in a row takes the room left over; left to its minimum
+## width it would wrap after every letter and stand on end.
+static func _fit_wrapping(child: Node) -> void:
+	if child is Label and child.autowrap_mode != TextServer.AUTOWRAP_OFF and child.size_flags_horizontal == Control.SIZE_FILL:
+		child.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 
 ## A sheet of flax (or ui/panel from the art), `alpha` see-through.

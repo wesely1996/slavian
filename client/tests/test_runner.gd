@@ -136,7 +136,8 @@ func _test_village_layout() -> void:
 	for index in 12:
 		var level := Rules.slot_unlock_level(data, index)
 		_check(Rules.unlocked_slots(data, level) > index and (level == 1 or Rules.unlocked_slots(data, level - 1) <= index), "slot %d opens exactly at Hall %d" % [index, level])
-	_check(Rules.queue_limit(data, 1) == 2 and Rules.queue_limit(data, 3) == 3 and Rules.queue_limit(data, 9) == 5, "queue grows every 3 Hall levels")
+	var base_queue := int(data.buildings.village.baseQueueLimit)
+	_check(Rules.queue_limit(data, 1) == base_queue and Rules.queue_limit(data, 3) == base_queue + 1 and Rules.queue_limit(data, 9) == base_queue + 3, "queue grows every 3 Hall levels")
 	_check(is_equal_approx(Rules.hall_speedup(data, 1), 1.0) and Rules.hall_speedup(data, 2) < 1.0, "Hall speeds up building")
 
 	var village := {
