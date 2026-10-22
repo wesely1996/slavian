@@ -800,6 +800,76 @@ def faction(front):
         s.rect(40, 82, 48, 8, "#c99a2e", stroke="none", sw=0)
     return s
 
+CLAN_FIELDS = {
+    "jelen": ("#5d8a3e", "#2a4419"),
+    "rys": ("#3e6b5a", "#1b3329"),
+    "medved": ("#82512c", "#3a2210"),
+    "bobr": ("#3f6f8e", "#1b3646"),
+    "sokol": ("#b07a32", "#5a3a10"),
+    "volk": ("#626c78", "#2a3038"),
+}
+
+
+def clan_emblem(clan):
+    """A clan's shield: its colour and its totem animal's head, in pale cream."""
+    s = Svg()
+    field = CLAN_FIELDS[clan]
+    soft_shadow(s, 66, 120, 40, 7, 0.35)
+    s.path("M24,14 L104,14 L104,58 Q104,98 64,118 Q24,98 24,58 Z", s.lin([(0, "#f3d98f"), (0.5, "#b48a2e"), (1, "#7a5a17")], 0, 0, 1, 1), stroke="none", sw=0)
+    s.path("M30,20 L98,20 L98,58 Q98,94 64,111 Q30,94 30,58 Z", s.rad([(0, field[0]), (1, field[1])], 0.4, 0.3, 0.9), stroke="none", sw=0)
+    pale = s.lin([(0, "#fbf5e6"), (1, "#c9bea6")], 0, 0, 1, 1)
+    dark = field[1]
+    if clan == "jelen":
+        # A stag: a long narrow face under branching antlers.
+        for side in (-1, 1):
+            x = lambda v: 64 + side * v
+            s.path(f"M{x(6)},58 Q{x(18)},46 {x(22)},28 M{x(16)},44 L{x(28)},40 M{x(20)},34 L{x(30)},26 M{x(22)},28 L{x(18)},22", "none", stroke=pale, sw=5)
+            s.path(f"M{x(8)},60 L{x(20)},54 L{x(14)},64 Z", pale, stroke="none", sw=0)
+        s.path("M54,58 Q64,52 74,58 L70,92 Q64,102 58,92 Z", pale, stroke="none", sw=0)
+        for x in (59, 69):
+            s.circle(x, 68, 2.4, dark, stroke="none", sw=0)
+        s.ellipse(64, 93, 4, 3, dark, stroke="none", sw=0)
+    elif clan == "rys":
+        # A lynx: a broad cat's face, tufted ears, a ruff at the cheeks.
+        s.path("M38,64 Q38,58 44,50 L44,28 L56,44 Q64,42 72,44 L84,28 L84,50 Q90,58 90,64 L96,76 L86,80 Q78,96 64,98 Q50,96 42,80 L32,76 Z", pale, stroke="none", sw=0)
+        s.path("M44,28 L42,18 M84,28 L86,18", "none", stroke=pale, sw=3)
+        for x in (54, 74):
+            s.path(f"M{x - 6},64 Q{x},58 {x + 6},64 Q{x},68 {x - 6},64 Z", dark, stroke="none", sw=0)
+        s.poly([(60, 76), (68, 76), (64, 81)], dark, stroke="none", sw=0)
+        s.path("M64,81 L64,86 M64,86 Q58,90 54,87 M64,86 Q70,90 74,87", "none", stroke=dark, sw=2)
+    elif clan == "medved":
+        # A bear: a round head, round ears, a broad muzzle.
+        for x in (44, 84):
+            s.circle(x, 44, 10, pale, stroke="none", sw=0)
+            s.circle(x, 44, 5, dark, stroke="none", sw=0, opacity=0.6)
+        s.circle(64, 66, 27, pale, stroke="none", sw=0)
+        s.ellipse(64, 80, 13, 10, s.lin([(0, "#e6dcc2"), (1, "#b8ab8e")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.ellipse(64, 75, 5, 3.5, dark, stroke="none", sw=0)
+        for x in (54, 74):
+            s.circle(x, 62, 2.6, dark, stroke="none", sw=0)
+    elif clan == "bobr":
+        # A beaver: a round face, small ears, two great front teeth.
+        for x in (46, 82):
+            s.circle(x, 46, 6, pale, stroke="none", sw=0)
+        s.ellipse(64, 66, 24, 26, pale, stroke="none", sw=0)
+        s.ellipse(64, 78, 11, 7, s.lin([(0, "#e6dcc2"), (1, "#b8ab8e")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.ellipse(64, 73, 4.5, 3, dark, stroke="none", sw=0)
+        s.rect(58.5, 82, 11, 12, "#fffaf0", stroke=dark, sw=1.5, rx=1.5)
+        s.line(64, 82, 64, 94, stroke=dark, sw=1.5)
+        for x in (55, 73):
+            s.circle(x, 60, 2.6, dark, stroke="none", sw=0)
+    elif clan == "sokol":
+        # A falcon in profile: a hooked beak and the dark stripe under the eye.
+        s.path("M86,36 Q66,28 52,40 Q44,48 42,58 L34,64 Q38,70 46,68 Q46,86 62,100 L92,100 Q96,66 86,36 Z", pale, stroke="none", sw=0)
+        s.path("M42,58 L34,64 Q38,70 46,68 L48,60 Z", s.lin([(0, "#f6d572"), (1, "#c99a2e")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.path("M56,52 Q58,66 52,78", "none", stroke=dark, sw=4)
+        s.circle(58, 50, 4, dark, stroke="none", sw=0)
+        s.circle(57, 49, 1.3, "#fbf5e6", stroke="none", sw=0)
+    else:
+        wolf_head(s, pale)
+    return s
+
+
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
@@ -1421,6 +1491,9 @@ def assets():
         out[f"icon/{kind}"] = icon(kind)
     for kind in HEROES:
         out[f"hero/{kind}"] = portrait(kind)
+    # Last, so gradient ids of the pieces above stay as they were.
+    for clan in CLAN_FIELDS:
+        out[f"clan/{clan}"] = clan_emblem(clan)
     return out
 
 
