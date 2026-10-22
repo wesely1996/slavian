@@ -42,6 +42,7 @@
   "buildings": {
     "elder_hall": {
       "name": "Elder's Hall",
+      "description": "The heart of the village. Each level opens another building slot and builds a little faster; every few levels add a place in the build queue and another outpost.",
       "kind": "center",
       "maxLevel": 10,
       "cost": {
@@ -56,6 +57,7 @@
     },
     "woodcutter": {
       "name": "Woodcutter",
+      "description": "Cuts wood in the forest around the village.",
       "maxLevel": 10,
       "cost": {
         "wood": 40,
@@ -75,6 +77,7 @@
     },
     "quarry": {
       "name": "Quarry",
+      "description": "Breaks stone from the hills around the village.",
       "maxLevel": 10,
       "cost": {
         "wood": 70,
@@ -94,6 +97,7 @@
     },
     "farm": {
       "name": "Farm",
+      "description": "Grows grain, which feeds the village and its troops.",
       "maxLevel": 10,
       "cost": {
         "wood": 50,
@@ -113,6 +117,7 @@
     },
     "iron_mine": {
       "name": "Iron Mine",
+      "description": "Digs iron for weapons, armour and walls.",
       "maxLevel": 10,
       "cost": {
         "wood": 80,
@@ -132,6 +137,7 @@
     },
     "storehouse": {
       "name": "Storehouse",
+      "description": "How much of each resource the village can keep; what comes in above it is lost.",
       "maxLevel": 10,
       "cost": {
         "wood": 120,
@@ -147,6 +153,7 @@
     },
     "barracks": {
       "name": "Barracks",
+      "description": "Trains soldiers. Each level trains them faster, and higher levels open stronger troops.",
       "maxLevel": 10,
       "cost": {
         "wood": 150,
@@ -161,6 +168,7 @@
     },
     "scout_lodge": {
       "name": "Scout Lodge",
+      "description": "Trains scouts, who ride out to see a horde before it arrives.",
       "maxLevel": 10,
       "cost": {
         "wood": 100,
@@ -175,6 +183,7 @@
     },
     "caravan_yard": {
       "name": "Caravan Yard",
+      "description": "Keeps caravans to carry resources to allies and to the Holy City vault; each level adds more.",
       "kind": "center",
       "maxLevel": 10,
       "cost": {
@@ -189,6 +198,7 @@
     },
     "settlers_lodge": {
       "name": "Settlers' Lodge",
+      "description": "Trains settlers, who walk out to found new villages.",
       "kind": "center",
       "maxLevel": 5,
       "cost": {
@@ -203,6 +213,7 @@
     },
     "academy": {
       "name": "Academy",
+      "description": "Studies the techs of the research tree; what you learn helps all your villages.",
       "kind": "center",
       "maxLevel": 5,
       "cost": {
@@ -217,6 +228,7 @@
     },
     "outpost": {
       "name": "Outpost",
+      "description": "A camp on a nearby hex that gathers what the land gives: wood in forests, stone and iron in hills and mountains, grain on plains and lakes.",
       "kind": "outpost",
       "maxLevel": 5,
       "cost": {
@@ -251,6 +263,7 @@
     },
     "granary_temple": {
       "name": "Granary-Temple",
+      "description": "The stag-folk's own: a temple granary that brings in grain and feeds the troops for less.",
       "clan": "jelen",
       "kind": "center",
       "maxLevel": 10,
@@ -263,6 +276,7 @@
     },
     "stone_redoubt": {
       "name": "Stone Redoubt",
+      "description": "The bear-folk's own: a stone keep that makes the garrison harder to break.",
       "clan": "medved",
       "kind": "center",
       "maxLevel": 10,
@@ -274,6 +288,7 @@
     },
     "longhouse_hall": {
       "name": "Longhouse Hall",
+      "description": "The wolf-folk's own: a longhouse where warriors eat less and train faster.",
       "clan": "volk",
       "kind": "center",
       "maxLevel": 10,
@@ -285,6 +300,7 @@
     },
     "wall": {
       "name": "Walls",
+      "description": "The walls round the village: hordes must break or climb them before they reach the garrison. Higher levels change wood for stone.",
       "kind": "wall",
       "maxLevel": 10,
       "cost": { "wood": 180, "stone": 300, "grain": 40, "iron": 40 },
@@ -294,6 +310,7 @@
     },
     "archer_tower": {
       "name": "Archer Tower",
+      "description": "A tower on the walls: its archers make the garrison strike harder while the walls stand.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 160, "stone": 120, "grain": 30, "iron": 60 },
@@ -303,6 +320,7 @@
     },
     "gate_tower": {
       "name": "Gate Tower",
+      "description": "Strengthens the gate, so the walls take longer to batter down.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 120, "stone": 260, "grain": 30, "iron": 80 },
@@ -312,6 +330,7 @@
     },
     "ballista": {
       "name": "Ballista Platform",
+      "description": "A great crossbow on the walls that smashes the horde's siege engines.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 220, "stone": 80, "grain": 30, "iron": 140 },
@@ -321,6 +340,7 @@
     },
     "murder_holes": {
       "name": "Murder Holes",
+      "description": "Openings over the gate to rain stones on the attackers: the garrison defends better while the walls stand.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 100, "stone": 220, "grain": 40, "iron": 60 },
@@ -330,6 +350,7 @@
     },
     "ditch": {
       "name": "Moat",
+      "description": "A moat before the walls: it keeps off battering and climbers and slows the building of siege engines; at higher levels it holds water.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 80, "stone": 60, "grain": 80, "iron": 20 },
@@ -339,6 +360,7 @@
     },
     "watchtower": {
       "name": "Watchtower",
+      "description": "Sees hordes coming from farther away, so the warning comes sooner.",
       "kind": "tower",
       "maxLevel": 10,
       "cost": { "wood": 180, "stone": 60, "grain": 30, "iron": 20 },

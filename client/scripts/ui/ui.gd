@@ -96,6 +96,14 @@ static func hbox(separation := 12) -> HBoxContainer:
 ## An "i" to hold (or tap) for `text`, in a parchment popup beside it:
 ## explanations live here rather than under every button.
 static func info(text: String) -> Button:
+	var node := info_card(func() -> Control: return label(text, SMALL_SIZE))
+	node.tooltip_text = text
+	return node
+
+
+## An info mark whose popup holds what `make` builds (a building's card,
+## say), made when it is opened.
+static func info_card(make: Callable) -> Button:
 	var node := Button.new()
 	node.icon = Art.texture("icon/info")
 	node.flat = true
@@ -105,27 +113,42 @@ static func info(text: String) -> Button:
 	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
 		node.add_theme_color_override(state, UiTheme.WHEAT if state != "icon_normal_color" else UiTheme.MUTED)
 	node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	node.tooltip_text = text
-	node.button_down.connect(func() -> void: _show_info(node, text))
+	node.button_down.connect(func() -> void: _show_info(node, make.call()))
 	return node
 
 
-static func _show_info(anchor: Control, text: String) -> void:
+static func _show_info(anchor: Control, content: Control) -> void:
 	var popup := PopupPanel.new()
 	popup.add_theme_stylebox_override("panel", UiTheme.sheet_style(14))
 	var area := anchor.get_viewport_rect().size
-	var width := minf(560.0, area.x - 32.0)
-	var words := label(text, SMALL_SIZE)
-	words.custom_minimum_size.x = width - 50.0
-	popup.add_child(words)
+	var width := minf(600.0, area.x - 32.0)
+	content.custom_minimum_size.x = width - 50.0
+	popup.add_child(content)
 	anchor.add_child(popup)
 	popup.popup_hide.connect(popup.queue_free)
 	# Under the mark (or over it, near the bottom), kept on the screen.
 	var at := anchor.get_screen_position()
 	var x := clampf(at.x + anchor.size.x - width, 16.0, area.x - width - 16.0)
 	popup.popup(Rect2i(Vector2i(int(x), int(at.y + anchor.size.y + 6.0)), Vector2i(int(width), 0)))
-	if popup.position.y + popup.size.y > area.y - 16.0:
-		popup.position.y = int(at.y - popup.size.y - 6.0)
+	var keep_on_screen := func() -> void:
+		if popup.position.y + popup.size.y > area.y - 16.0:
+			popup.position.y = int(maxf(16.0, at.y - popup.size.y - 6.0))
+	keep_on_screen.call()
+	# Content that changes size (a scroll unrolling) is fitted again, and
+	# kept on the screen.
+	content.minimum_size_changed.connect(func() -> void:
+		popup.reset_size()
+		popup.size.x = int(width)
+		keep_on_screen.call())
+
+
+## `control` with an info card's mark at its end (UI.info_card), as one row.
+static func with_card(control: Control, make: Callable) -> HBoxContainer:
+	var row := hbox(8)
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(control)
+	row.add_child(info_card(make))
+	return row
 
 
 ## `control` with an info mark at its end (UI.info), as one row.
@@ -167,7 +190,10 @@ static func tabs(tabs_: Array, open: String, on_pick: Callable) -> HBoxContainer
 		var node := button(tab[1], func() -> void: on_pick.call(key), tab[2] if tab.size() > 2 else "")
 		node.theme_type_variation = "TabButton"
 		node.add_theme_font_size_override("font_size", scaled(SMALL_SIZE))
-		node.custom_minimum_size.y = 64 * UiTheme.text_scale
+		node.custom_minimum_size = Vector2(0, 64 * UiTheme.text_scale)
+		# Four tabs share a phone's width: a word too long is cut short.
+		node.clip_text = true
+		node.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		node.disabled = key == open
 		row.add_child(node)

@@ -854,7 +854,16 @@ func _almanac_section(section: String) -> void:
 			row.add_child(picture)
 		var text := UI.vbox(2)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.add_child(UI.label(entry[0]))
+		var id: String = entry[3] if entry.size() > 3 else ""
+		var speed := float(Game.world.get("speed", 1))
+		if section == "Units" and id != "":
+			text.add_child(UI.with_card(UI.label(entry[0]), func() -> Control: return BuildingInfo.unit_card(Game.data, id, speed)))
+		elif section == "Buildings" and id != "":
+			text.add_child(UI.with_card(UI.label(entry[0]), func() -> Control: return BuildingInfo.card(Game.data, id, speed)))
+		elif section == "Clans" and id != "":
+			text.add_child(UI.with_card(UI.label(entry[0]), func() -> Control: return ClanText.card(Game.data, id)))
+		else:
+			text.add_child(UI.label(entry[0]))
 		text.add_child(UI.label(entry[1], UI.SMALL_SIZE, UI.MUTED))
 		row.add_child(text)
 		_panel_body.add_child(row))
@@ -928,9 +937,23 @@ var _clan_preview := ""
 
 ## The group's clans; a member with none yet picks one here.
 func _clan_section() -> void:
-	for member in Game.world.get("members", []):
-		_panel_body.add_child(UI.label(tr("%s: %s") % [member.displayName, ClanText.title(Game.data, member.get("clan"))], UI.SMALL_SIZE, UI.MUTED))
 	var me := _me()
+	# Your clan in full; the others' a line each, their card behind a mark.
+	if me.get("clan") != null:
+		_panel_body.add_child(ClanText.card(Game.data, String(me.clan)))
+	for member in Game.world.get("members", []):
+		if int(member.accountId) == Game.my_account_id() and member.get("clan") != null:
+			continue
+		var row := UI.hbox(10)
+		var clan: Variant = member.get("clan")
+		if clan != null:
+			row.add_child(UI.icon("clan/%s" % clan, 44))
+		var line := UI.label(tr("%s: %s") % [member.displayName, ClanText.title(Game.data, clan)], UI.SMALL_SIZE, UI.MUTED)
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(line)
+		if clan != null:
+			row.add_child(UI.info_card(func() -> Control: return ClanText.card(Game.data, String(clan))))
+		_panel_body.add_child(row)
 	if me.is_empty() or me.get("clan") != null or RunText.is_over(Game.world):
 		return
 	_panel_body.add_child(UI.with_info(UI.label(tr("Pick your clan"), UI.HEADING_SIZE), tr("Its perks go to all your villages, for the rest of this run.")))
@@ -1150,7 +1173,7 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 	var state := tr("Lv %d") % level
 	if level == 0:
 		state = tr("being built") if int(planned.level) > 0 else tr("in ruins")
-	_panel_body.add_child(UI.label(tr("Outpost  %s") % state, UI.HEADING_SIZE))
+	_panel_body.add_child(UI.with_card(UI.label(tr("Outpost  %s") % state, UI.HEADING_SIZE), _building_card(holder, Rules.OUTPOST, level)))
 	_panel_body.add_child(UI.label(tr("%s · supplies %s") % [who, holder.name], UI.SMALL_SIZE, UI.MUTED))
 	var speed := float(Game.world.speed)
 	var terrain: String = holds.get("terrain", "")
@@ -1561,18 +1584,23 @@ func _armies_section(village: Dictionary) -> void:
 	var share := roundi(float(rule.share) * 100.0)
 	var range_ := int(rule.range)
 	_panel_body.add_child(UI.label(tr("When a battle starts within %d hexes, send %d%% of the troops here to help.") % [range_, share] if share > 0 else tr("This village doesn't send help to battles nearby."), UI.SMALL_SIZE, UI.MUTED))
+	# How much goes, then how far: two rows, to fit beside the side tabs.
 	var rule_row := UI.hbox(8)
 	for option in [0, 25, 50, 75]:
 		var b := UI.button("%d%%" % option, func() -> void: _set_reinforce(village_id, option / 100.0, range_))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.x = 0
 		b.disabled = option == share
 		rule_row.add_child(b)
+	_panel_body.add_child(rule_row)
+	var range_row := UI.hbox(8)
 	for step in [-1, 1]:
 		var b := UI.button((tr("%+d hex") % step).replace("-", "−"), func() -> void:
 			_set_reinforce(village_id, share / 100.0, clampi(range_ + step, 0, int(Game.data.armies.reinforce.maxRange))))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-		rule_row.add_child(b)
-	_panel_body.add_child(rule_row)
+		range_row.add_child(b)
+	_panel_body.add_child(range_row)
 
 
 ## Troops from this village to another: where, on what orders, and who.
@@ -2254,7 +2282,7 @@ func _claim_panel(terrain: String) -> void:
 	var row := UI.hbox()
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label(tr("Build an outpost")))
+	info.add_child(UI.with_card(UI.label(tr("Build an outpost")), _building_card(home, Rules.OUTPOST, 0)))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
@@ -2559,7 +2587,7 @@ func _plot_section(village: Dictionary) -> void:
 	var title := tr("%s  Lv %d") % [tr(def.name), level]
 	if int(planned.level) > level:
 		title += tr("  (→ %d queued)") % int(planned.level)
-	_panel_body.add_child(UI.label(title, UI.HEADING_SIZE))
+	_panel_body.add_child(UI.with_card(UI.label(title, UI.HEADING_SIZE), _building_card(village, building, level)))
 	var effect := _effect_text(village, building, level)
 	if effect != "":
 		_panel_body.add_child(UI.label(effect, UI.SMALL_SIZE, UI.MUTED))
@@ -2583,7 +2611,7 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var row := UI.hbox()
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label(tr("%s → Lv %d") % [tr(def.name), target]))
+	info.add_child(UI.with_card(UI.label(tr("%s → Lv %d") % [tr(def.name), target]), _building_card(village, building, target - 1)))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
@@ -2597,6 +2625,22 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
 		button.disabled = queue_full or not affordable
 		return cost_text + (tr("  (queue full)") if queue_full else ""))
+
+
+## Opens the card of `building` (BuildingInfo) with its build times in
+## `village` (its Hall and research), `level` marked.
+func _building_card(village: Dictionary, building: String, level: int) -> Callable:
+	return func() -> Control:
+		var factor := Rules.hall_speedup(Game.data, Rules.hall_level(village)) * ResearchRules.time_factor(village.get("bonuses", {}), "buildTime")
+		return BuildingInfo.card(Game.data, building, float(Game.world.speed), factor, level)
+
+
+## Opens the card of `unit` with its training time in `village`.
+func _unit_card(village: Dictionary, unit: String) -> Callable:
+	return func() -> Control:
+		var def: Dictionary = Game.data.units.units[unit]
+		return BuildingInfo.unit_card(Game.data, unit, float(Game.world.speed), maxi(1, int(village.levels.get(def.building, 1))),
+			Game.villages_owned(int(village.ownerAccountId)), ResearchRules.time_factor(village.get("bonuses", {}), "trainTime"))
 
 
 ## What a building does at its level, and at the next one.
@@ -2706,7 +2750,7 @@ func _train_tab(village: Dictionary) -> void:
 		var info := UI.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
-		info.add_child(UI.label(tr("%s  ×%d") % [tr(def.name), count]))
+		info.add_child(UI.with_card(UI.label(tr("%s  ×%d") % [tr(def.name), count]), _unit_card(village, unit)))
 		info.add_child(UI.label(tr("%s · atk %d · def %d · %d grain/h") % [def.family.capitalize(), def.attack, def.defense, def.upkeepPerHour], UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(card)
 		if not unlocked:
@@ -2814,7 +2858,15 @@ func _threat_summary() -> String:
 		if wave.status == "arrived":
 			return tr("Horde at %s") % Game.village_name(wave.targetVillageId)
 	var next: Dictionary = Game.waves[0]
-	return tr("Next horde from the %s (%s threat) sets out in %s") % [String(next.front).to_lower(), tr(String(next.threat)).to_lower(), TimeUtil.format_duration(TimeUtil.parse_iso(next.spawnAt) - now)]
+	var line := tr("Next horde from the %s (%s threat) sets out in %s") % [String(next.front).to_lower(), tr(String(next.threat)).to_lower(), TimeUtil.format_duration(TimeUtil.parse_iso(next.spawnAt) - now)]
+	if next.get("forecast") is Dictionary:
+		line += tr(", expected at %s") % _target_name(next.forecast.targetVillageId)
+	return line
+
+
+## A horde's target by its village id; null is the Holy City.
+func _target_name(village_id: Variant) -> String:
+	return tr("the Holy City") if village_id == null else Game.village_name(village_id)
 
 
 func _threats_panel() -> void:
@@ -3078,7 +3130,11 @@ func _wave_entry(wave: Dictionary) -> void:
 		var now := Game.server_now()
 		match wave.status:
 			"scheduled":
-				return tr("Appears in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(wave.spawnAt) - now)
+				var appears := tr("Appears in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(wave.spawnAt) - now)
+				var forecast: Variant = wave.get("forecast")
+				if forecast is Dictionary:
+					appears += tr(" · expected at %s in %s") % [_target_name(forecast.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(forecast.arrivesAt) - now)]
+				return appears
 			"marching":
 				return tr("Marching on %s · arrives in %s") % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
 			"arrived":

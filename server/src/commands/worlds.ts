@@ -8,6 +8,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { ensureHeroes } from '../db/heroes.js';
 import { ensureDigests, tell } from '../scheduler/notices.js';
 import { insertVillage, listVillages } from '../db/villages.js';
+import { placeStarterCamps } from '../scheduler/camps.js';
 import {
   addMember,
   createWorld,
@@ -134,6 +135,7 @@ export async function startWorldCommand(
     // Each village carries its owner's clan.
     await refreshBonuses(client, deps.data, started, members.map((m) => m.accountId), input.now);
     await ensureSites(client, deps.data, started);
+    await placeStarterCamps(client, deps.data, started, input.now);
     await loadBridge(client, started.id, input.now, started.sanctity);
     await announceFirstWaves(client, deps.data, started);
     await ensureDigests(client, started, input.now);

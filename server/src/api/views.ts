@@ -34,6 +34,8 @@ import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { heroQuestOffers } from '../scheduler/quests.js';
+import { forecastMarches } from '../scheduler/waves.js';
+import type { March } from '../sim/waves.js';
 import type { QuestOffer } from '../sim/quests.js';
 
 export interface VillageView {
@@ -120,7 +122,7 @@ export function villageView(village: Village): VillageView {
 
 // What everyone knows about a wave. Its composition stays hidden until
 // scouted (M1 step 4).
-export function waveView(wave: Wave) {
+export function waveView(wave: Wave, forecast: March | null = null) {
   return {
     id: wave.id,
     index: wave.index,
@@ -140,6 +142,16 @@ export function waveView(wave: Wave) {
     ritual: wave.ritual,
     // The enemy leader at its head (see leaders), if any.
     leaderId: wave.leaderId,
+    // A scheduled wave: where it is expected to set out from, its target,
+    // its road (as path) and its arrival, were it to set out today.
+    forecast: forecast
+      ? {
+          spawn: { q: forecast.spawn.q, r: forecast.spawn.r },
+          targetVillageId: forecast.targetVillageId,
+          path: forecast.path.map((step) => [step.q, step.r, step.atMs]),
+          arrivesAt: forecast.arrivesAt.toISOString(),
+        }
+      : null,
   };
 }
 
@@ -171,8 +183,10 @@ export async function leadersView(client: DbClient, data: GameData, worldId: num
   return (await listLeaders(client, worldId)).map((l) => leaderView(data, l));
 }
 
-export async function wavesView(client: DbClient, worldId: number) {
-  return (await listActiveWaves(client, worldId)).map(waveView);
+export async function wavesView(client: DbClient, data: GameData, world: World) {
+  const waves = await listActiveWaves(client, world.id);
+  const forecasts = await forecastMarches(client, data, world, waves);
+  return waves.map((wave) => waveView(wave, forecasts.get(wave.id) ?? null));
 }
 
 // Scout missions and their reports are shared with the whole group.
@@ -490,7 +504,7 @@ export function worldSummary(world: World) {
 export async function worldView(client: DbClient, data: GameData, world: World, at: Date = new Date()) {
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
-  const waves = await wavesView(client, world.id);
+  const waves = await wavesView(client, data, world);
   const scouting = await scoutingView(client, world.id);
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);

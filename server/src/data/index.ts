@@ -32,6 +32,8 @@ const resourcesSchema = z.object({
 
 const buildingSchema = z.object({
   name: z.string(),
+  /** What it does, in a line (the client's building card). */
+  description: z.string(),
   // 'field': a resource plot around the village; 'center': a building slot;
   // 'outpost': built on a resource hex near the village; 'wall': the walls
   // (plot "w"); 'tower': a wall slot's defensive work (plots "t0"...).
@@ -98,6 +100,8 @@ export type Stance = (typeof STANCES)[number];
 
 const unitSchema = z.object({
   name: z.string(),
+  /** What it is for, in a line (the client's unit card). */
+  description: z.string(),
   family: z.enum(UNIT_FAMILIES),
   building: z.string(),
   requiresLevel: z.number().int().positive(),
@@ -531,6 +535,7 @@ const campsFileSchema = z.object({
     escortLoss: z.number().min(0).max(1),
   }),
   fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
+  starter: z.object({ units: z.number().int().positive(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive() }),
 });
 export type CampsData = z.infer<typeof campsFileSchema>;
 

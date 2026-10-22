@@ -74,7 +74,18 @@ func show_for(data: Dictionary, member: Dictionary) -> void:
 		_start_pulse()
 	else:
 		_stop_pulse()
-	reset_size()
+	_settle()
+
+
+## Wrapped text knows its height only once laid out at the card's width:
+## shrink to fit then (folding or opening it changes the text).
+func _settle() -> void:
+	size = Vector2(size.x, 0)
+	if not is_inside_tree():
+		return
+	await get_tree().process_frame
+	if is_inside_tree():
+		size = Vector2(size.x, 0)
 
 
 ## Opens or folds the card (shown so at the next show_for).

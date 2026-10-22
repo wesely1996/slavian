@@ -73,6 +73,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	for member in world.members:
 		refresh_bonuses(world, int(member.accountId), now)
 	_ensure_sites(world)
+	_place_starter_camps(world, now)
 	world.bridge = {"stage": 0, "donated": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "embers": 0, "quests": {},
 		"stageStartedAt": LocalTime.iso(now), "sanctityAtStart": world.sanctity, "status": "open", "raisedAt": null}
 	_announce_first_waves(world)
@@ -81,6 +82,21 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	worlds[id] = world
 	save(world)
 	return world
+
+
+## A small bandit camp near every village, the first one the getting-started
+## quest sends an army to clear (scheduler/camps.ts placeStarterCamps).
+func _place_starter_camps(world: Dictionary, now: int) -> void:
+	var cells: Array = world.villages.map(func(v: Dictionary) -> Vector2i: return Vector2i(v.q, v.r))
+	for i in world.villages.size():
+		var village: Dictionary = world.villages[i]
+		var cell := LocalCamps.starter_site(data, world.hexes, Vector2i(village.q, village.r), cells,
+			LocalBattles.occupied_hexes(world), LocalWaves.rng_for(int(world.seed), i, 0x57))
+		if cell == Vector2i.MAX:
+			continue
+		var front := LocalArmies.bandit_front(world, cell)
+		var units := LocalWaves.compose_wave(data, front, 0, int(data.camps.starter.units), int(world.seed) ^ (0x5700 + i), world.members.size())
+		LocalBattles.create_camp(self, world, {"kind": "bandit", "front": front, "q": cell.x, "r": cell.y, "units": units, "waveId": null}, now)
 
 
 func insert_village(world: Dictionary, owner: int, name: String, at: Vector2i, state: Dictionary) -> Dictionary:
@@ -811,9 +827,10 @@ func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array)
 
 func world_view(world: Dictionary, now: int) -> Dictionary:
 	var waves: Array = []
+	var forecasts := _forecasts(world)
 	for w in world.waves:
 		if not w.status in ["dispersed", "defeated", "settled"]:
-			waves.append(_wave_view(w))
+			waves.append(_wave_view(w, forecasts.get(w.id, {})))
 	waves.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.index < b.index)
 	var heroes: Array = []
 	for h in world.heroes:
@@ -889,7 +906,28 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 	}
 
 
-func _wave_view(w: Dictionary) -> Dictionary:
+## Where each scheduled wave is expected to go, by wave id: its march
+## planned as at spawn from today's villages and fear (scheduler/waves.ts
+## forecastMarches).
+func _forecasts(world: Dictionary) -> Dictionary:
+	var out := {}
+	var scheduled: Array = world.waves.filter(func(w: Dictionary) -> bool: return w.status == "scheduled")
+	if scheduled.is_empty():
+		return out
+	var land := LocalHordes.land_of(world)
+	var villages: Array = []
+	for v in world.villages:
+		if v.ruin == null:
+			villages.append({"id": v.id, "q": v.q, "r": v.r})
+	var fear := LocalHordes.fear_of(self, world)
+	for w in scheduled:
+		var march := LocalHordes.plan_march(data, land, w, villages, int(world.seed), int(w.spawnAt), world.speed, fear)
+		if not march.is_empty():
+			out[w.id] = LocalHordes.hold_for_quiet(world, int(w.spawnAt), march)
+	return out
+
+
+func _wave_view(w: Dictionary, forecast := {}) -> Dictionary:
 	var path: Variant = null
 	if w.path != null:
 		path = []
@@ -900,7 +938,11 @@ func _wave_view(w: Dictionary) -> Dictionary:
 		"arrivesAt": LocalTime.iso(w.arrivesAt) if w.arrivesAt != null else null,
 		"endsAt": LocalTime.iso(w.endsAt) if w.endsAt != null else null,
 		"rampageEndsAt": LocalTime.iso(w.rampageEndsAt) if w.rampageEndsAt != null else null,
-		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId}
+		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId,
+		"forecast": null if forecast.is_empty() else {
+			"spawn": {"q": forecast.spawn.x, "r": forecast.spawn.y}, "targetVillageId": forecast.targetVillageId,
+			"path": forecast.path.map(func(step: Dictionary) -> Array: return [step.q, step.r, step.atMs]),
+			"arrivesAt": LocalTime.iso(int(forecast.arrivesAt))}}
 
 
 func _hero_view(world: Dictionary, h: Dictionary, now: int) -> Dictionary:
