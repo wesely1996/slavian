@@ -39,11 +39,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION_NAME: ${{ needs.ci.outputs.version_name }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/*.apk \
-            --repo "$GITHUB_REPOSITORY" \
-            --verify-tag \
-            --title "Slavian ${VERSION_NAME}" \
-            --generate-notes
+          # A release made by hand in GitHub's UI (which also makes the tag)
+          # gets the APK added; otherwise the release is made here.
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/*.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --title "Slavian ${VERSION_NAME}" \
+              --generate-notes
+          fi
           echo "Published [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME)" >> "$GITHUB_STEP_SUMMARY"
 
   server-image:
