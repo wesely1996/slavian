@@ -122,13 +122,19 @@ jobs:
           # Minutes since 2026-01-01: always increasing, so every build installs over the last one.
           code=$(( ($(date +%s) - 1767225600) / 60 ))
           name="${base}-dev.${sha}"
-          # A release tag (release.yml) builds exactly the tagged version.
+          # A release tag (release.yml) builds the tagged version: the tag
+          # wins over config/version (a release made in GitHub's UI doesn't
+          # bump it), so the game shows the version it was released as.
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            if [[ "${GITHUB_REF_NAME#v}" != "$base" ]]; then
-              echo "::error::Tag $GITHUB_REF_NAME does not match config/version $base in client/project.godot"
+            name="${GITHUB_REF_NAME#v}"
+            if [[ ! "$name" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME is not a version like v1.2.3"
               exit 1
             fi
-            name="$base"
+            if [[ "$name" != "$base" ]]; then
+              echo "::warning::Tag $GITHUB_REF_NAME differs from config/version $base in client/project.godot; building $name. Bump config/version on main."
+              sed -i "s|^config/version=.*|config/version=\"$name\"|" client/project.godot
+            fi
           fi
           echo "version_name=$name" >> "$GITHUB_OUTPUT"
           echo "version_code=$code" >> "$GITHUB_OUTPUT"
