@@ -77,12 +77,13 @@ const createWorldBody = z.object({
   difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
-// `plot` targets a field, center slot or outpost ("o3,-2"); `building`
+// `plot` targets a field, center slot, the walls ("w"), a wall slot ("t0")
+// or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
 // `building`.
 const buildBody = z
   .object({
-    plot: z.string().regex(/^([fc]\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
+    plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
     building: z.string().min(1).max(64).optional(),
   })
   .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });

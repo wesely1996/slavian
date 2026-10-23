@@ -408,6 +408,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(field.body.village.queue[0]).toMatchObject({ plot: 'f4', building: 'quarry', targetLevel: 1 });
     const slot = await build({ plot: 'c3', building: 'barracks' });
     expect(slot.body.village.queue[1]).toMatchObject({ plot: 'c3', building: 'barracks', targetLevel: 1 });
+    // The walls and their tower slots are plots too.
+    const wall = await build({ plot: 'w' });
+    expect(wall.status).toBe(200);
+    expect(wall.body.village.queue[2]).toMatchObject({ plot: 'w', building: 'wall', targetLevel: 1 });
+    // (refused by the rules, no longer by the plot's shape)
+    expect(['rule', 'insufficient_resources']).toContain((await build({ plot: 't0', building: 'archer_tower' })).body.error);
 
     now = new Date(slot.body.village.queue[1].completesAt);
     await tick(db, now, scheduler);
