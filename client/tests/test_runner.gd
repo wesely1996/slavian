@@ -191,6 +191,20 @@ func _test_village_layout() -> void:
 			if a < b:
 				_check(not (rects[a] as Rect2).intersects(rects[b]), "%s and %s do not overlap" % [a, b])
 	_check(VillageView.plot_at(rects, Vector2(2, 2)) == "", "a tap on open ground picks nothing")
+	# The ring of a plot being built: what is left of it.
+	var start := TimeUtil.parse_iso("2026-01-01T00:00:00.000Z")
+	var queue := [{"plot": "c1", "startsAt": "2026-01-01T00:00:00.000Z", "completesAt": "2026-01-01T00:10:00.000Z"},
+		{"plot": "c2", "startsAt": "2026-01-01T00:10:00.000Z", "completesAt": "2026-01-01T00:20:00.000Z"}]
+	var left := VillageView.builds_left(queue, start + 150.0)
+	_check(is_equal_approx(left.c1, 0.75) and is_equal_approx(left.c2, 1.0), "a build a quarter done has three quarters of its ring left; one waiting has all: %s" % left)
+	var hero_data := {"heroes": {"roster": {"x": {"effects": {"attack.all": 0.1}, "traits": [{"effects": {"scoutSpeed": 0.2}}]}},
+		"skills": {"s": {"effectsPerRank": {"attack.all": 0.02}}}, "items": {"a": {"effects": {"defense.all": 0.05}}, "b": {"effects": {}}},
+		"sets": {"ab": {"items": ["a", "b"], "effects": {"defense.all": 0.05}}}}}
+	var parts := HeroText.breakdown(hero_data, {"kind": "x", "skills": {"s": 2}, "gear": {"weapon": "a", "charm": "b"}})
+	_check(is_equal_approx(parts["attack.all"][0], 0.1) and is_equal_approx(parts["attack.all"][1], 0.04) and is_equal_approx(parts["attack.all"][3], 0.14),
+		"hero stats split its own gifts from its skills: %s" % parts)
+	_check(is_equal_approx(parts["defense.all"][2], 0.1) and is_equal_approx(parts["scoutSpeed"][0], 0.2), "gear counts a full set; traits count as its own: %s" % parts)
+	_check(HeroText.percent(0.14) == "+14%" and HeroText.percent(-0.15) == "−15%" and HeroText.percent(0.0) == "—", "bonus shares read as percents")
 
 
 func _test_training() -> void:

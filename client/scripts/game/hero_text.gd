@@ -20,6 +20,47 @@ static func effect_name(key: String) -> String:
 	}.get(key, key)
 
 
+## Where the hero's bonuses come from (server sim/heroes.ts heroBonuses):
+## {effect key: [own, skills, gear, total]}. Its own (roster effects and
+## traits) count in all your villages; skills and gear (sets included)
+## where it stands.
+static func breakdown(data: Dictionary, hero: Dictionary) -> Dictionary:
+	var parts := {}
+	var add := func(effects: Dictionary, column: int, times := 1.0) -> void:
+		for key in effects:
+			if not parts.has(key):
+				parts[key] = [0.0, 0.0, 0.0, 0.0]
+			parts[key][column] += float(effects[key]) * times
+			parts[key][3] += float(effects[key]) * times
+	var def := roster(data, hero.get("kind"))
+	add.call(def.get("effects", {}), 0)
+	for trait_ in def.get("traits", []):
+		add.call(trait_.get("effects", {}), 0)
+	var heroes: Dictionary = data.get("heroes", {})
+	for skill in hero.get("skills", {}):
+		add.call(heroes.get("skills", {}).get(skill, {}).get("effectsPerRank", {}), 1, float(hero.skills[skill]))
+	var worn: Array = hero.get("gear", {}).values().filter(func(item: Variant) -> bool: return item != null)
+	for item in worn:
+		add.call(heroes.get("items", {}).get(item, {}).get("effects", {}), 2)
+	for set_id in heroes.get("sets", {}):
+		var set_def: Dictionary = heroes.sets[set_id]
+		if set_def.get("items", []).all(func(item: String) -> bool: return item in worn):
+			add.call(set_def.get("effects", {}), 2)
+	return parts
+
+
+## Whether a bonus helps you: less upkeep, time or loot lost is better.
+static func helps(key: String, value: float) -> bool:
+	var less_is_better := key in ["upkeep", "researchTime", "buildTime", "woundTime", "lootTaken", "fortCost"] or key.begins_with("trainTime")
+	return (value < 0.0) == less_is_better
+
+
+## "+8%" or "−15%" for a bonus share.
+static func percent(value: float) -> String:
+	var whole := roundi(value * 100.0)
+	return "—" if whole == 0 else ("+%d%%" % whole if whole > 0 else "−%d%%" % absi(whole))
+
+
 ## The roster's heroes (data/heroes.json), in their order.
 static func roster_ids(data: Dictionary) -> Array:
 	return data.get("heroes", {}).get("roster", {}).keys()

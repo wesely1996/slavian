@@ -89,6 +89,16 @@ func select(cell: Vector2i) -> void:
 	queue_redraw()
 
 
+## The hexes a road being laid from the selected hex can go to: marked
+## until one is picked (empty: none).
+var road_targets: Array = []
+
+
+func show_road_targets(cells: Array) -> void:
+	road_targets = cells
+	queue_redraw()
+
+
 ## Bounding rectangle of all hex centres, in local coordinates.
 func get_bounds() -> Rect2:
 	var extent := HexMath.to_pixel(Vector2i(radius, 0), hex_size).x
@@ -113,6 +123,8 @@ func _draw() -> void:
 	var now := Game.server_now()
 	for caravan in Game.caravans:
 		var p := CaravanMath.progress(caravan, now)
+		if Game.is_mine(Game.villages.get(int(caravan.villageId), {})):
+			_draw_trail(caravan.get("path", []), p, caravan.status == "returning", CARAVAN_COLOR)
 		if not p.is_empty():
 			var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
 			draw_circle(pos, hex_size * 0.2, CARAVAN_COLOR)
@@ -148,6 +160,15 @@ func _draw() -> void:
 		var outline := HexMath.corners(HexMath.to_pixel(selected, hex_size), hex_size * 0.92)
 		outline.append(outline[0])
 		draw_polyline(outline, SELECTION_COLOR, 4.0)
+	# Where a road can go: a dashed track from here and the hex ringed.
+	for cell in road_targets:
+		var from := HexMath.to_pixel(selected, hex_size)
+		var to := HexMath.to_pixel(cell, hex_size)
+		var ring := HexMath.corners(to, hex_size * 0.86)
+		draw_colored_polygon(ring, Color(SELECTION_COLOR, 0.18))
+		ring.append(ring[0])
+		draw_polyline(ring, SELECTION_COLOR, 4.0, true)
+		draw_dashed_line(from, to, SELECTION_COLOR, hex_size * 0.08, hex_size * 0.18, true)
 
 
 ## A road between two hex centres: a dirt track, faded while being built.
@@ -270,6 +291,13 @@ func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
 func _draw_army(army: Dictionary, now: float) -> void:
 	var pos := Vector2.INF
 	var p := ArmyText.progress(army, now)
+	var mine := int(army.get("ownerAccountId", -1)) == Game.my_account_id()
+	if mine:
+		_draw_trail(army.get("path", []), p, army.status == "returning", MINE_COLOR)
+	# A hex your army holds (or marches to hold): an ambush set, ringed.
+	var held := ArmyText.held_hex(army)
+	if mine and held != Vector2i.MAX and army.status in ["marching", "stationed", "engaged"] and army.orders == "hold":
+		_draw_ambush(held, army.status != "marching")
 	if not p.is_empty():
 		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
 	elif army.status in ["stationed", "engaged"] and ArmyText.held_hex(army) != Vector2i.MAX:
@@ -290,6 +318,21 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	draw_colored_polygon(shield, ARMY_COLOR)
 	shield.append(shield[0])
 	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## An ambush set on a hex: a dashed ring in your colour and crossed spears
+## (faint while the army is still on its way).
+func _draw_ambush(cell: Vector2i, ready: bool) -> void:
+	var center := HexMath.to_pixel(cell, hex_size)
+	var color := Color(MINE_COLOR, 0.95 if ready else 0.5)
+	var corners := HexMath.corners(center, hex_size * 0.82)
+	for i in corners.size():
+		draw_dashed_line(corners[i], corners[(i + 1) % corners.size()], color, 3.0, hex_size * 0.14, true)
+	var at := center + Vector2(-hex_size * 0.38, -hex_size * 0.42)
+	var r := hex_size * 0.16
+	draw_circle(at, r * 1.25, Color(0.1, 0.12, 0.08, 0.6))
+	draw_line(at + Vector2(-r, r), at + Vector2(r, -r), color, 2.5, true)
+	draw_line(at + Vector2(r, r), at + Vector2(-r, -r), color, 2.5, true)
 
 
 ## An ancient site: a standing stone, gold until explored.
@@ -368,8 +411,18 @@ func has_moving_hordes() -> bool:
 
 ## A horde's road as a line of red dots, and a target where it will strike.
 func _draw_route(points: PackedVector2Array, color: Color) -> void:
+	_draw_dots(points, color, hex_size * 0.095)
+	var at := points[points.size() - 1]
+	draw_arc(at, hex_size * 0.62, 0.0, TAU, 36, color, 4.0, true)
+	draw_arc(at, hex_size * 0.3, 0.0, TAU, 24, color, 3.0, true)
+	for i in 4:
+		var way := Vector2.RIGHT.rotated(i * PI / 2.0)
+		draw_line(at + way * hex_size * 0.42, at + way * hex_size * 0.8, color, 4.0, true)
+
+
+## A line of dots along `points`.
+func _draw_dots(points: PackedVector2Array, color: Color, dot: float) -> void:
 	var spacing := hex_size * 0.3
-	var dot := hex_size * 0.095
 	var carry := 0.0
 	for i in range(1, points.size()):
 		var a := points[i - 1]
@@ -380,12 +433,34 @@ func _draw_route(points: PackedVector2Array, color: Color) -> void:
 			draw_circle(a.lerp(b, along / length), dot, color)
 			along += spacing
 		carry = along - length
-	var at := points[points.size() - 1]
-	draw_arc(at, hex_size * 0.62, 0.0, TAU, 36, color, 4.0, true)
-	draw_arc(at, hex_size * 0.3, 0.0, TAU, 24, color, 3.0, true)
-	for i in 4:
-		var way := Vector2.RIGHT.rotated(i * PI / 2.0)
-		draw_line(at + way * hex_size * 0.42, at + way * hex_size * 0.8, color, 4.0, true)
+
+
+## The road still ahead of something on the move, from `pos`: on along
+## `path` ([q, r, ms] steps) from the hex it heads for, or (`back`) the same
+## road home.
+func _road_ahead(path: Array, heading: Vector2i, pos: Vector2, back: bool) -> PackedVector2Array:
+	var cells: Array = path.map(func(step: Array) -> Vector2i: return Vector2i(int(step[0]), int(step[1])))
+	if back:
+		cells.reverse()
+	var trail := PackedVector2Array([pos])
+	var ahead := false
+	for cell in cells:
+		ahead = ahead or cell == heading
+		if ahead:
+			trail.append(HexMath.to_pixel(cell, hex_size))
+	return trail
+
+
+## Your armies' and caravans' roads: dots to where they go, and home again.
+func _draw_trail(path: Array, p: Dictionary, back: bool, color: Color) -> void:
+	if p.is_empty() or path.is_empty():
+		return
+	var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	var trail := _road_ahead(path, p.to, pos, back)
+	if trail.size() < 2:
+		return
+	_draw_dots(trail, Color(color, 0.6), hex_size * 0.06)
+	draw_arc(trail[trail.size() - 1], hex_size * 0.4, 0.0, TAU, 28, Color(color, 0.7), 3.0, true)
 
 
 ## Where a horde not yet out is expected to gather and go (its forecast):

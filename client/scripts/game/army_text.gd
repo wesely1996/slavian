@@ -47,6 +47,25 @@ static func status(army: Dictionary, target_name: String, now: float) -> String:
 	return UI.t("Back from %s") % target_name
 
 
+## When it gets there and when it is home again: on the march, the arrival
+## and then the way back (orders that end on their own: reinforce, harass,
+## clear, explore) or that it stays until called home; standing, how far
+## home is; coming home, when it is back.
+static func timeline(army: Dictionary, target_name: String, now: float) -> String:
+	var road := TimeUtil.parse_iso(army.arrivesAt) - TimeUtil.parse_iso(army.departsAt)
+	match army.status:
+		"marching":
+			var there := UI.t("At %s in %s") % [target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
+			if army.orders in ["reinforce", "harass", "clear", "explore"]:
+				return there + UI.t(" · then home, %s on the road") % TimeUtil.format_duration(road)
+			return there + UI.t(" · stays until called home (%s back)") % TimeUtil.format_duration(road)
+		"stationed", "engaged":
+			return UI.t("At %s · called home, it is back in %s") % [target_name, TimeUtil.format_duration(road)]
+		"returning":
+			return UI.t("Coming home · back in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)
+	return UI.t("Home")
+
+
 ## Where it is headed: a village's name, or the hex it holds.
 static func target_name(army: Dictionary, village_name: Callable) -> String:
 	if army.get("targetVillageId") == null and army.get("target") is Array:
