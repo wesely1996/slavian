@@ -46,9 +46,9 @@
       "kind": "center",
       "maxLevel": 10,
       "cost": {
-        "wood": 170,
-        "stone": 220,
-        "grain": 120,
+        "wood": 200,
+        "stone": 200,
+        "grain": 100,
         "iron": 80
       },
       "costGrowth": 1.6,
@@ -60,9 +60,9 @@
       "description": "Cuts wood in the forest around the village.",
       "maxLevel": 10,
       "cost": {
-        "wood": 30,
+        "wood": 40,
         "stone": 60,
-        "grain": 40,
+        "grain": 30,
         "iron": 20
       },
       "costGrowth": 1.6,
@@ -80,8 +80,8 @@
       "description": "Breaks stone from the hills around the village.",
       "maxLevel": 10,
       "cost": {
-        "wood": 50,
-        "stone": 40,
+        "wood": 70,
+        "stone": 30,
         "grain": 30,
         "iron": 20
       },
@@ -100,10 +100,10 @@
       "description": "Grows grain, which feeds the village and its troops.",
       "maxLevel": 10,
       "cost": {
-        "wood": 40,
+        "wood": 50,
         "stone": 40,
         "grain": 20,
-        "iron": 20
+        "iron": 10
       },
       "costGrowth": 1.6,
       "buildSeconds": 75,
@@ -120,8 +120,8 @@
       "description": "Digs iron for weapons, armour and walls.",
       "maxLevel": 10,
       "cost": {
-        "wood": 60,
-        "stone": 90,
+        "wood": 80,
+        "stone": 80,
         "grain": 40,
         "iron": 0
       },
@@ -140,10 +140,10 @@
       "description": "How much of each resource the village can keep; what comes in above it is lost.",
       "maxLevel": 10,
       "cost": {
-        "wood": 90,
-        "stone": 120,
+        "wood": 120,
+        "stone": 100,
         "grain": 40,
-        "iron": 30
+        "iron": 20
       },
       "costGrowth": 1.5,
       "buildSeconds": 100,
@@ -156,9 +156,9 @@
       "description": "Trains soldiers. Each level trains them faster, and higher levels open stronger troops.",
       "maxLevel": 10,
       "cost": {
-        "wood": 120,
-        "stone": 140,
-        "grain": 70,
+        "wood": 150,
+        "stone": 120,
+        "grain": 60,
         "iron": 60
       },
       "costGrowth": 1.6,
@@ -187,10 +187,10 @@
       "kind": "center",
       "maxLevel": 10,
       "cost": {
-        "wood": 100,
-        "stone": 110,
+        "wood": 120,
+        "stone": 100,
         "grain": 60,
-        "iron": 50
+        "iron": 40
       },
       "costGrowth": 1.55,
       "buildSeconds": 150,
@@ -232,10 +232,10 @@
       "kind": "outpost",
       "maxLevel": 5,
       "cost": {
-        "wood": 110,
-        "stone": 130,
+        "wood": 150,
+        "stone": 100,
         "grain": 80,
-        "iron": 50
+        "iron": 40
       },
       "costGrowth": 1.7,
       "buildSeconds": 900,
@@ -292,7 +292,7 @@
       "clan": "volk",
       "kind": "center",
       "maxLevel": 10,
-      "cost": { "wood": 160, "stone": 180, "grain": 70, "iron": 50 },
+      "cost": { "wood": 200, "stone": 160, "grain": 60, "iron": 40 },
       "costGrowth": 1.6,
       "buildSeconds": 160,
       "timeGrowth": 1.55,
@@ -303,7 +303,7 @@
       "description": "The walls round the village: hordes must break or climb them before they reach the garrison. Higher levels change wood for stone.",
       "kind": "wall",
       "maxLevel": 10,
-      "cost": { "wood": 150, "stone": 320, "grain": 40, "iron": 50 },
+      "cost": { "wood": 180, "stone": 300, "grain": 40, "iron": 40 },
       "costGrowth": 1.5,
       "buildSeconds": 240,
       "timeGrowth": 1.45
@@ -313,7 +313,7 @@
       "description": "A tower on the walls: its archers make the garrison strike harder while the walls stand.",
       "kind": "tower",
       "maxLevel": 10,
-      "cost": { "wood": 130, "stone": 140, "grain": 30, "iron": 70 },
+      "cost": { "wood": 160, "stone": 120, "grain": 30, "iron": 60 },
       "costGrowth": 1.55,
       "buildSeconds": 200,
       "timeGrowth": 1.5
@@ -333,7 +333,7 @@
       "description": "A great crossbow on the walls that smashes the horde's siege engines.",
       "kind": "tower",
       "maxLevel": 10,
-      "cost": { "wood": 170, "stone": 100, "grain": 40, "iron": 150 },
+      "cost": { "wood": 220, "stone": 80, "grain": 30, "iron": 140 },
       "costGrowth": 1.55,
       "buildSeconds": 200,
       "timeGrowth": 1.5
@@ -363,7 +363,7 @@
       "description": "Sees hordes coming from farther away, so the warning comes sooner.",
       "kind": "tower",
       "maxLevel": 10,
-      "cost": { "wood": 120, "stone": 110, "grain": 30, "iron": 30 },
+      "cost": { "wood": 180, "stone": 60, "grain": 30, "iron": 20 },
       "costGrowth": 1.55,
       "buildSeconds": 200,
       "timeGrowth": 1.5

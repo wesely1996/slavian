@@ -379,9 +379,9 @@
      "resources": {
       "amounts": {
        "iron": 140,
-       "wood": 80,
-       "grain": 230,
-       "stone": 110
+       "wood": 50,
+       "grain": 240,
+       "stone": 130
       },
       "ratesPerHour": {
        "iron": 150,
@@ -414,10 +414,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":70,\"stone\":40,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":100,\"stone\":20,\"grain\":0,\"iron\":0}",
     "missing": {
-     "wood": 70,
-     "stone": 40,
+     "wood": 100,
+     "stone": 20,
      "grain": 0,
      "iron": 0
     }
@@ -599,9 +599,9 @@
      "resources": {
       "amounts": {
        "iron": 90,
-       "wood": 80,
-       "grain": 196.66666666666663,
-       "stone": 60
+       "wood": 50,
+       "grain": 206.66666666666663,
+       "stone": 80
       },
       "ratesPerHour": {
        "iron": 150,
@@ -634,11 +634,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":70,\"stone\":90,\"grain\":6.000000000000057,\"iron\":10}",
+    "message": "Insufficient resources: missing {\"wood\":100,\"stone\":70,\"grain\":0,\"iron\":10}",
     "missing": {
-     "wood": 70,
-     "stone": 90,
-     "grain": 6.000000000000057,
+     "wood": 100,
+     "stone": 70,
+     "grain": 0,
      "iron": 10
     }
    }
@@ -821,9 +821,9 @@
      "resources": {
       "amounts": {
        "iron": 40,
-       "wood": 80,
-       "grain": 91.33333333333326,
-       "stone": 10
+       "wood": 50,
+       "grain": 101.33333333333326,
+       "stone": 30
       },
       "ratesPerHour": {
        "iron": 150,
@@ -856,11 +856,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":70,\"stone\":140,\"grain\":147.33333333333343,\"iron\":60}",
+    "message": "Insufficient resources: missing {\"wood\":100,\"stone\":120,\"grain\":137.33333333333343,\"iron\":60}",
     "missing": {
-     "wood": 70,
-     "stone": 140,
-     "grain": 147.33333333333343,
+     "wood": 100,
+     "stone": 120,
+     "grain": 137.33333333333343,
      "iron": 60
     }
    }
@@ -878,11 +878,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":40,\"grain\":86.00000000000009,\"iron\":10}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":20,\"grain\":76.00000000000009,\"iron\":10}",
     "missing": {
      "wood": 0,
-     "stone": 40,
-     "grain": 86.00000000000009,
+     "stone": 20,
+     "grain": 76.00000000000009,
      "iron": 10
     }
    }
@@ -900,11 +900,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":24.666666666666742,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":14.666666666666742,\"iron\":0}",
     "missing": {
      "wood": 0,
      "stone": 0,
-     "grain": 24.666666666666742,
+     "grain": 14.666666666666742,
      "iron": 0
     }
    }
@@ -1087,9 +1087,9 @@
      "resources": {
       "amounts": {
        "iron": 90,
-       "wood": 380,
-       "grain": 36.66666666666657,
-       "stone": 160
+       "wood": 350,
+       "grain": 46.66666666666657,
+       "stone": 180
       },
       "ratesPerHour": {
        "iron": 150,
@@ -1282,9 +1282,9 @@
      "resources": {
       "amounts": {
        "iron": 90,
-       "wood": 380,
-       "grain": 36.66666666666657,
-       "stone": 160
+       "wood": 350,
+       "grain": 46.66666666666657,
+       "stone": 180
       },
       "ratesPerHour": {
        "iron": 150,
@@ -1546,9 +1546,9 @@
       "resources": {
        "amounts": {
         "iron": 169,
-        "wood": 595,
-        "grain": 184.53333333333322,
-        "stone": 320
+        "wood": 570,
+        "grain": 192.53333333333322,
+        "stone": 337
        },
        "ratesPerHour": {
         "iron": 150,
@@ -2032,9 +2032,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -4343,9 +4343,9 @@
      "resources": {
       "amounts": {
        "iron": 59,
-       "wood": 485,
-       "grain": 91.19999999999987,
-       "stone": 260
+       "wood": 460,
+       "grain": 99.19999999999987,
+       "stone": 277
       },
       "ratesPerHour": {
        "iron": 150,
@@ -4681,9 +4681,9 @@
       "resources": {
        "amounts": {
         "iron": 59,
-        "wood": 485,
-        "grain": 91.19999999999987,
-        "stone": 260
+        "wood": 460,
+        "grain": 99.19999999999987,
+        "stone": 277
        },
        "ratesPerHour": {
         "iron": 150,
@@ -5198,9 +5198,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -7611,9 +7611,9 @@
       "resources": {
        "amounts": {
         "iron": 184,
-        "wood": 710,
-        "grain": 194.53333333333322,
-        "stone": 260
+        "wood": 685,
+        "grain": 202.53333333333322,
+        "stone": 277
        },
        "ratesPerHour": {
         "iron": 150,
@@ -8128,9 +8128,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -10354,11 +10354,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":640,\"grain\":5.466666666666782,\"iron\":16}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":623,\"grain\":0,\"iron\":16}",
     "missing": {
      "wood": 0,
-     "stone": 640,
-     "grain": 5.466666666666782,
+     "stone": 623,
+     "grain": 0,
      "iron": 16
     }
    }
@@ -10561,9 +10561,9 @@
       "resources": {
        "amounts": {
         "iron": 146.5,
-        "wood": 557.5,
-        "grain": 158.3333333333332,
-        "stone": 209
+        "wood": 538.5,
+        "grain": 164.3333333333332,
+        "stone": 222
        },
        "ratesPerHour": {
         "iron": 150,
@@ -11010,9 +11010,9 @@
       ],
       "loot": {
        "iron": 45,
-       "wood": 175,
-       "grain": 49,
-       "stone": 66
+       "wood": 169,
+       "grain": 51,
+       "stone": 70
       },
       "decision": {
        "choice": "raid",
@@ -11235,9 +11235,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -13713,8 +13713,8 @@
        "amounts": {
         "iron": 278,
         "wood": 820,
-        "grain": 494.36666666666656,
-        "stone": 488
+        "grain": 499.36666666666656,
+        "stone": 498
        },
        "ratesPerHour": {
         "iron": 150,
@@ -14199,8 +14199,8 @@
       "loot": {
        "iron": 61,
        "wood": 180,
-       "grain": 108,
-       "stone": 106
+       "grain": 109,
+       "stone": 109
       },
       "decision": {
        "choice": "raid",
@@ -14324,9 +14324,9 @@
       ],
       "loot": {
        "iron": 45,
-       "wood": 175,
-       "grain": 49,
-       "stone": 66
+       "wood": 169,
+       "grain": 51,
+       "stone": 70
       },
       "decision": {
        "choice": "raid",
@@ -14549,9 +14549,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -17054,8 +17054,8 @@
        "amounts": {
         "iron": 278,
         "wood": 820,
-        "grain": 494.36666666666656,
-        "stone": 488
+        "grain": 499.36666666666656,
+        "stone": 498
        },
        "ratesPerHour": {
         "iron": 150,
@@ -17540,8 +17540,8 @@
       "loot": {
        "iron": 61,
        "wood": 180,
-       "grain": 108,
-       "stone": 106
+       "grain": 109,
+       "stone": 109
       },
       "decision": {
        "choice": "raid",
@@ -17665,9 +17665,9 @@
       ],
       "loot": {
        "iron": 45,
-       "wood": 175,
-       "grain": 49,
-       "stone": 66
+       "wood": 169,
+       "grain": 51,
+       "stone": 70
       },
       "decision": {
        "choice": "raid",
@@ -17890,9 +17890,9 @@
       ],
       "loot": {
        "iron": 36,
-       "wood": 130,
-       "grain": 40,
-       "stone": 70
+       "wood": 125,
+       "grain": 42,
+       "stone": 73
       },
       "decision": {
        "choice": "raid",
@@ -21602,8 +21602,8 @@
       "loot": {
        "iron": 61,
        "wood": 180,
-       "grain": 108,
-       "stone": 106
+       "grain": 109,
+       "stone": 109
       },
       "decision": {
        "choice": "raid",
@@ -21727,9 +21727,9 @@
       ],
       "loot": {
        "iron": 45,
-       "wood": 175,
-       "grain": 49,
-       "stone": 66
+       "wood": 169,
+       "grain": 51,
+       "stone": 70
       },
       "decision": {
        "choice": "raid",
@@ -24398,7 +24398,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 455 resources after 1 rounds.",
+      "body": "The horde carried off 459 resources after 1 rounds.",
       "createdAt": "2026-06-01T13:40:27.900Z",
       "read": false
      },
