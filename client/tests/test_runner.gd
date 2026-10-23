@@ -721,6 +721,9 @@ func _test_onboarding_almanac() -> void:
 	]}}
 	_check(OnboardingText.next_step(data, {"onboarding": {}}).id == "build", "first step")
 	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x"}}).id == "train", "next step")
+	var gift := {"id": "gift", "title": "Gift a teammate", "how": ["Send it to a teammate."], "solo": {"title": "Fill the vault", "how": ["Send it to the vault."]}}
+	_check(OnboardingText.worded(gift, true).title == "Fill the vault" and OnboardingText.worded(gift, true).id == "gift", "a solo world words a step its own way")
+	_check(OnboardingText.worded(gift, false).title == "Gift a teammate", "a group's world keeps the step's words")
 	_check(OnboardingText.next_step(data, {"onboarding": {"build": "x", "train": "y"}}).is_empty(), "all done")
 	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}, "onboardingClaimed": {"build": "x"}}) == "Getting started 1 of 2", "progress counts claims")
 	_check(OnboardingText.progress(data, {"onboarding": {"build": "x"}}) == "Getting started 0 of 2", "not claimed yet")

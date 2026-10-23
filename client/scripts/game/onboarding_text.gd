@@ -6,23 +6,34 @@ extends RefCounted
 
 
 ## The step the quest card shows: the first done one whose reward waits,
-## else the first one not done yet, else {} when the chain is over.
-static func current(data: Dictionary, member: Dictionary) -> Dictionary:
+## else the first one not done yet, else {} when the chain is over. In a
+## `solo` world, in its solo words (worded).
+static func current(data: Dictionary, member: Dictionary, solo := false) -> Dictionary:
 	var done: Dictionary = member.get("onboarding", {})
 	var claimed: Dictionary = member.get("onboardingClaimed", {})
 	for step in data.onboarding.steps:
 		if done.has(step.id) and not claimed.has(step.id):
-			return step
-	return next_step(data, member)
+			return worded(step, solo)
+	return next_step(data, member, solo)
 
 
 ## The first step this member has not done yet, or {} when all are done.
-static func next_step(data: Dictionary, member: Dictionary) -> Dictionary:
+static func next_step(data: Dictionary, member: Dictionary, solo := false) -> Dictionary:
 	var done: Dictionary = member.get("onboarding", {})
 	for step in data.onboarding.steps:
 		if not done.has(step.id):
-			return step
+			return worded(step, solo)
 	return {}
+
+
+## The step with its solo words in a solo world, where there are no
+## teammates (its `solo` in data/onboarding.json).
+static func worded(step: Dictionary, solo: bool) -> Dictionary:
+	if not solo or not step.get("solo") is Dictionary:
+		return step
+	var out := step.duplicate()
+	out.merge(step.solo, true)
+	return out
 
 
 ## Whether the step is done and its reward waits to be claimed.

@@ -23,7 +23,7 @@ func show_for(data: Dictionary, member: Dictionary) -> void:
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
-	var step := OnboardingText.current(data, member)
+	var step := OnboardingText.current(data, member, Local.is_active())
 	visible = not step.is_empty()
 	if step.is_empty():
 		_stop_pulse()

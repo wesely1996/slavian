@@ -630,6 +630,8 @@ const onboardingFileSchema = z.object({
       how: z.array(z.string()).min(1),
       show: z.enum(['village', 'troops', 'outpost', 'threats', 'camp', 'caravans']),
       reward: resourcesSchema,
+      // Its words in a solo world, where there are no teammates.
+      solo: z.object({ title: z.string(), hint: z.string(), story: z.string(), how: z.array(z.string()).min(1) }).optional(),
     }),
   ),
   // The reward for claiming every step.
