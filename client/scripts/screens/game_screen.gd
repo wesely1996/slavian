@@ -412,6 +412,19 @@ func _build_ui() -> void:
 func _arrange() -> void:
 	var area := get_viewport().get_visible_rect().size
 	var landscape := area.x > area.y * 1.05
+	# On some phones the on-screen keyboard resizes the window: the sheet is
+	# only moved when the orientation turns, as taking it out of the tree
+	# drops the typing focus and with it the keyboard.
+	if _panel.get_parent() != (_body if landscape else _root):
+		_move_panel(landscape, area)
+	elif not landscape:
+		_fit_sheet()
+	# Centre the map in the part the sheet leaves uncovered.
+	camera.view_offset = Vector2(-_panel.custom_minimum_size.x / 2.0, 0) if landscape else Vector2(0, -area.y * 0.1)
+	_place_quest_card.call_deferred()
+
+
+func _move_panel(landscape: bool, area: Vector2) -> void:
 	if _panel.get_parent() != null:
 		_panel.get_parent().remove_child(_panel)
 	# In landscape the resources ride in the title row.
@@ -440,9 +453,6 @@ func _arrange() -> void:
 		_panel.custom_minimum_size = Vector2.ZERO
 		_panel.size_flags_vertical = Control.SIZE_FILL
 		_fit_sheet()
-	# Centre the map in the part the sheet leaves uncovered.
-	camera.view_offset = Vector2(-_panel.custom_minimum_size.x / 2.0, 0) if landscape else Vector2(0, -area.y * 0.1)
-	_place_quest_card.call_deferred()
 
 
 ## In portrait the sheet under the map is short while the map matters (a
@@ -1113,7 +1123,9 @@ func _run_panel() -> void:
 
 func _rebuild_panel() -> void:
 	var focus := get_viewport().gui_get_focus_owner()
-	_focused_draft = String(focus.get_meta("draft", "")) if focus != null and _panel_body.is_ancestor_of(focus) else ""
+	# Only a field still being typed in gets its focus back (not one sent).
+	var typing := focus is LineEdit and (focus as LineEdit).is_editing() and _panel_body.is_ancestor_of(focus)
+	_focused_draft = String(focus.get_meta("draft", "")) if typing else ""
 	_clearing = true
 	UI.clear(_panel_body)
 	_clearing = false
@@ -2658,7 +2670,9 @@ func _draft_field(key: String, placeholder: String, text: String) -> LineEdit:
 	field.text_changed.connect(func(typed: String) -> void:
 		_drafts[key] = {"text": typed, "caret": field.caret_column})
 	# (LineEdit has no caret signal: the caret is kept as of the last keystroke.)
-	if not draft.is_empty() and key == _focused_draft:
+	# Refocused even before anything is typed: a rebuild (a live update, the
+	# keyboard resizing the window) must not close the keyboard just opened.
+	if key == _focused_draft:
 		var caret := int(draft.get("caret", field.text.length()))
 		var refocus := func() -> void:
 			if is_instance_valid(field):
