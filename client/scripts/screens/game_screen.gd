@@ -81,6 +81,7 @@ var _train_counts: Dictionary[String, int] = {}
 var _status: Label
 ## The getting-started quest card over the map and the village (M5 step 23).
 var _quest_card: QuestCard
+var _compass: Compass
 var _ui_layer: CanvasLayer
 var _main: Control
 var _panel: PanelContainer
@@ -341,6 +342,10 @@ func _build_ui() -> void:
 		_status.text = tr("The tutorial is hidden. The ? button at the top brings it back.")
 		_refresh_quest_card())
 	layer.add_child(_quest_card)
+	# The compass in the map's bottom right corner.
+	_compass = Compass.new()
+	layer.add_child(_compass)
+	_main.resized.connect(_place_quest_card)
 	get_viewport().size_changed.connect(_arrange)
 	_arrange()
 
@@ -548,6 +553,7 @@ func _set_view(view: String) -> void:
 	_grade.visible = on_map
 	_village_view.visible = view == "village"
 	_battle_view.visible = view == "battle"
+	_compass.visible = on_map
 	_battle_playing = _battle_playing and view == "battle"
 	# The map camera listens for unhandled input; keep it still while the
 	# village or a battle is open.
@@ -599,6 +605,11 @@ func _refresh_quest_card() -> void:
 
 ## The ? button: brings the tutorial back, or puts it away.
 func _toggle_tutorial() -> void:
+	# Once the getting-started chain is over, the ? opens the almanac.
+	if not _me().is_empty() and OnboardingText.current(Game.data, _me()).is_empty():
+		_panel_mode = "almanac"
+		_rebuild_panel()
+		return
 	var hidden := Session.tutorial_flag(Game.world_id(), "hidden") or not _quest_card.visible
 	Session.set_tutorial_flag(Game.world_id(), "hidden", not hidden)
 	_status.text = ""
@@ -607,10 +618,15 @@ func _toggle_tutorial() -> void:
 		_status.text = tr("The tutorial is for a running world with a village of your own.")
 
 
-## At the top left of the map (or the village), narrower on a phone.
+## At the top left of the map (or the village), narrower on a phone; the
+## compass at the map's bottom right.
 func _place_quest_card() -> void:
 	if _quest_card == null or _main == null:
 		return
+	if _compass != null:
+		var corner := _main.get_global_rect()
+		_compass.visible = _view == "map"
+		_compass.position = corner.end - _compass.size - Vector2(14, 14)
 	var rect := _main.get_global_rect()
 	var width := minf(460.0, rect.size.x - 32.0)
 	_quest_card.custom_minimum_size.x = width
@@ -2933,7 +2949,7 @@ func _threats_panel() -> void:
 	# Hand-overs are between teammates: none in a solo world.
 	if Game.world.get("status") == "running" and not Local.is_active():
 		tabs.append(["handovers", "icon/village", tr("Hand-overs"), _delegation_section])
-	tabs.append(["leave", "icon/settings", tr("Leave or report a bug"), _leave_tab])
+	tabs.append(["leave", "icon/settings", tr("World settings"), _leave_tab])
 	_side_tabs("threats", tabs)
 
 
@@ -3007,28 +3023,41 @@ func _fronts_tab() -> void:
 ## The group: difficulty and quiet hours, everyone's clan, and hand-overs.
 func _group_tab() -> void:
 	var difficulty := tr(GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))))
-	# Quiet hours keep a group's nights calm; a solo world pauses with the app.
-	if Local.is_active():
-		_panel_body.add_child(UI.label(tr("%s difficulty") % difficulty, UI.SMALL_SIZE, UI.MUTED))
-	else:
-		_panel_body.add_child(UI.label(tr("%s difficulty · %s") % [difficulty, GroupText.quiet(Game.world.get("quietHours"))], UI.SMALL_SIZE, UI.MUTED))
-	if not Local.is_active() and Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id():
-		var quiet_row := UI.hbox(8)
-		var off := UI.button(tr("Off"), func() -> void: _set_quiet(null, null))
-		off.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		quiet_row.add_child(off)
-		for choice in GroupText.QUIET_CHOICES:
-			var start: int = choice[0] * 60
-			var end: int = choice[1] * 60
-			var b := UI.button("%02d–%02d" % [choice[0], choice[1]], func() -> void: _set_quiet(start, end))
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			quiet_row.add_child(b)
-		_panel_body.add_child(quiet_row)
+	_panel_body.add_child(UI.label(tr("%s difficulty") % difficulty, UI.SMALL_SIZE, UI.MUTED))
 	_clan_section()
 
 
-## Report a bug, or leave the world.
+## Quiet hours: no horde arrives in them (it waits outside until they end),
+## so nothing falls while you sleep. The host sets them (in solo, you).
+func _quiet_section() -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Peaceful hours"), UI.HEADING_SIZE),
+		tr("No horde arrives in these hours: one that would waits outside until they end. Set them to when you sleep.")))
+	var window: Variant = Game.world.get("quietHours")
+	_panel_body.add_child(UI.label(GroupText.quiet(window), UI.SMALL_SIZE, UI.MUTED))
+	var host: bool = Local.is_active() or (Game.world.get("hostAccountId") != null and int(Game.world.hostAccountId) == Game.my_account_id())
+	if not host:
+		_panel_body.add_child(UI.label(tr("The host sets them."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var quiet_row := UI.hbox(8)
+	var off := UI.button(tr("Off"), func() -> void: _set_quiet(null, null))
+	off.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	off.custom_minimum_size.x = 0
+	off.disabled = not window is Dictionary
+	quiet_row.add_child(off)
+	for choice in GroupText.QUIET_CHOICES:
+		var start: int = choice[0] * 60
+		var end: int = choice[1] * 60
+		var b := UI.button("%02d–%02d" % [choice[0], choice[1]], func() -> void: _set_quiet(start, end))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.x = 0
+		b.disabled = window is Dictionary and int(window.start) == start and int(window.end) == end
+		quiet_row.add_child(b)
+	_panel_body.add_child(quiet_row)
+
+
+## The world's settings: its peaceful hours; report a bug, or leave it.
 func _leave_tab() -> void:
+	_quiet_section()
 	# A bug report carries the current game state with the player's message.
 	_panel_body.add_child(UI.button(tr("Report a bug"), _report_bug, "icon/help"))
 	_leave_section()

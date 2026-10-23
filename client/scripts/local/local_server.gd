@@ -282,6 +282,16 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 func _route(world: Dictionary, method: String, parts: PackedStringArray, body: Dictionary, now: int, changed: Array) -> Dictionary:
 	if method == "GET" and parts.size() == 3 and parts[1] == "worlds":
 		return {"status": 200, "data": world_view(world, now)}
+	# Quiet hours: no horde arrives in them (commands/worlds.ts setQuietHoursCommand).
+	if method == "PUT" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "quiet":
+		var start: Variant = body.get("start")
+		var end: Variant = body.get("end")
+		var none: bool = start == null or end == null or int(start) == int(end)
+		world.quietStart = null if none else int(start)
+		world.quietEnd = null if none else int(end)
+		world.quietUtcOffset = 0 if none else int(body.get("utcOffsetMinutes", 0))
+		changed.append(["world"])
+		return {"status": 200, "data": world_view(world, now)}
 	if parts.size() >= 4 and parts[1] == "worlds" and parts[3] == "notifications":
 		if method == "GET" and parts.size() == 4:
 			var inbox := LocalInbox.inbox_view(world, int(world.hostAccountId))
@@ -870,7 +880,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	return {
 		"id": world.id, "name": world.name, "status": world.status, "inviteCode": null, "speed": world.speed,
 		"maxPlayers": world.maxPlayers, "hostAccountId": world.hostAccountId, "startedAt": LocalTime.iso(world.startedAt),
-		"sanctity": world.sanctity, "embers": world.embers, "difficulty": world.difficulty, "quietHours": null,
+		"sanctity": world.sanctity, "embers": world.embers, "difficulty": world.difficulty, "quietHours": _quiet_window(world),
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "battles": _battles_view(world), "raids": _raids_view(world),
@@ -904,6 +914,16 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 		"resources": {"amounts": s.ledger.amounts, "ratesPerHour": s.ledger.ratesPerHour, "capacity": s.ledger.capacity,
 			"settledAt": LocalTime.iso(s.ledger.settledAt)},
 	}
+
+
+## The quiet hours as the server shows them (db/worlds.ts quietWindow), or
+## null for none.
+static func _quiet_window(world: Dictionary) -> Variant:
+	var start: Variant = world.get("quietStart")
+	var end: Variant = world.get("quietEnd")
+	if start == null or end == null or int(start) == int(end):
+		return null
+	return {"start": int(start), "end": int(end), "utcOffsetMinutes": int(world.get("quietUtcOffset", 0))}
 
 
 ## Where each scheduled wave is expected to go, by wave id: its march

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6, M5 step 23). Each step is done by doing it once, in any order; its reward then waits to be claimed from the quest card and goes to the player's first village. `how` says what to tap, step by step; `show` is what the quest card's Show me points at. The `story` is the elder's reason for asking. `finale` is the reward for claiming every step.",
+  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6, M5 step 23). Each step is done by doing it once, in any order; its reward then waits to be claimed from the quest card and goes to the player's first village. `how` says what to tap, step by step; `show` is what the quest card's Show me points at. The `story` is the elder's reason for asking. `finale` is the reward for claiming every step. A step's `solo` replaces its words in a solo world, where there are no teammates.",
   "steps": [
     {
       "id": "build",
@@ -32,7 +32,7 @@
         "iron": 200
       },
       "how": [
-        "Build a Barracks on a free plot in the village.",
+        "Build a Barracks on a free plot in the village (no free plot? Upgrade the Elder's Hall: each level opens one).",
         "When it stands, open the Troops tab.",
         "Pick a unit and a number, then tap Train."
       ],
@@ -68,7 +68,7 @@
         "iron": 100
       },
       "how": [
-        "Build a Scout Lodge in the village.",
+        "Build a Scout Lodge on a free plot in the village (no free plot? Upgrade the Elder's Hall).",
         "Tap the threat line in the top bar.",
         "Pick a horde and tap Send scouts."
       ],
@@ -77,7 +77,7 @@
     {
       "id": "camp",
       "title": "Clear your first camp",
-      "hint": "Send an army to storm a monster camp or a lair (order: storm it).",
+      "hint": "Send an army to storm a bandit camp or a lair (order: storm it).",
       "story": "\"A camp of beasts in the woods is a wave that has not yet happened. Burn it out.\"",
       "reward": {
         "wood": 600,
@@ -86,7 +86,7 @@
         "iron": 400
       },
       "how": [
-        "Find a camp or a lair on the map (the tents and dens).",
+        "Find a camp on the map: there is one near your village (the tents).",
         "Tap it, choose your troops in the sheet and order them to storm it."
       ],
       "show": "camp"
@@ -103,11 +103,21 @@
         "iron": 400
       },
       "how": [
-        "Build a Caravan Yard in the village.",
+        "Build a Caravan Yard on a free plot in the village (no free plot? Upgrade the Elder's Hall: each level opens one).",
         "Open the Caravans tab.",
         "Load resources and send them to a teammate or to the Holy City vault."
       ],
-      "show": "caravans"
+      "show": "caravans",
+      "solo": {
+        "title": "Fill the Holy City's vault",
+        "hint": "Send a caravan of resources to the Holy City vault.",
+        "story": "\"The Holy City feeds the bridge and the guard on its walls. What you send now comes back to you on the night the walls shake.\"",
+        "how": [
+          "Build a Caravan Yard on a free plot in the village (no free plot? Upgrade the Elder's Hall: each level opens one).",
+          "Open the Caravans tab.",
+          "Load resources and send them to the Holy City vault."
+        ]
+      }
     }
   ],
   "finale": {

@@ -21,8 +21,8 @@ static func offset_text(offset_minutes: int) -> String:
 ## "Hordes hold off 22:00–06:00 (UTC+02:00)" or "No quiet hours".
 static func quiet(window: Variant) -> String:
 	if not window is Dictionary:
-		return "No quiet hours: hordes may arrive any time"
-	return "Hordes hold off %s–%s (%s)" % [hhmm(int(window.start)), hhmm(int(window.end)), offset_text(int(window.utcOffsetMinutes))]
+		return UI.t("No quiet hours: hordes may arrive any time")
+	return UI.t("Hordes hold off %s–%s (%s)") % [hhmm(int(window.start)), hhmm(int(window.end)), offset_text(int(window.utcOffsetMinutes))]
 
 
 static func difficulty(data: Dictionary, id: String) -> String:

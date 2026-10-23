@@ -286,16 +286,22 @@ func _door(text: String, about: String, page: String, icon_id := "", primary := 
 
 # --- Home --------------------------------------------------------------------
 
-## Four doors: Play first and largest, Quit apart at the bottom.
+## Play first and largest, then Settings, Help and Support us; Quit apart at
+## the bottom.
 func _home_page() -> void:
 	var play := UI.primary(tr("Play"), func() -> void: _open("play"), "icon/play")
 	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	play.custom_minimum_size.y *= 1.35
 	play.add_theme_font_size_override("font_size", UI.scaled(UI.HEADING_SIZE))
 	_content.add_child(play)
-	for entry in [["Settings", "settings", "icon/settings"], ["Credits", "credits", "icon/credits"]]:
+	# Help opens on how a run goes, Support us on the server costs.
+	for entry in [[tr("Settings"), "settings", "icon/settings", ""], [tr("Help"), "help", "icon/help", "run"], [tr("Support us"), "help", "icon/coin", "support"]]:
 		var page: String = entry[1]
-		var door := UI.button(tr(entry[0]), func() -> void: _open(page), entry[2])
+		var side: String = entry[3]
+		var door := UI.button(entry[0], func() -> void:
+			if side != "":
+				_side.help = side
+			_open(page), entry[2])
 		door.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_content.add_child(door)
 	var gap := Control.new()
@@ -626,16 +632,16 @@ func _settings_page() -> void:
 	for i in TEXT_SIZES.size():
 		if TEXT_SIZES[i][0] == Session.text_size:
 			size = tr(TEXT_SIZE_LABELS[i])
-	_door(tr("Language: %s") % language, "", "language", "icon/research")
-	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
-	_door(tr("Sound: music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "", "sound", "icon/inbox")
-	# Who is signed in, on the door itself.
+	# Who is signed in, on the door itself, first.
 	var who := String(Session.account.get("displayName", ""))
 	var account := tr("Account: not signed in")
 	if Session.is_logged_in():
 		account = tr("Account: %s") % who if who != "" else tr("Account: signed in")
 	_door(account, "", "account", "icon/profile")
-	_door(tr("Help and support"), tr("How a run goes, reporting a problem, the server costs and privacy."), "help", "icon/help")
+	_door(tr("Language: %s") % language, "", "language", "icon/research")
+	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
+	_door(tr("Sound: music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "", "sound", "icon/music")
+	_door(tr("Credits"), "", "credits", "icon/credits")
 
 
 ## The language, by its own name.
@@ -904,7 +910,19 @@ func _lobby_page() -> void:
 		_lobby_world_id = int(world.id)
 		Live.watch(_lobby_world_id)
 	_content.add_child(UI.label(tr("Invite code"), UI.SMALL_SIZE, UI.MUTED))
-	_content.add_child(UI.label(world.inviteCode, UI.TITLE_SIZE))
+	var code_row := UI.hbox(10)
+	var code := UI.label(world.inviteCode, UI.TITLE_SIZE)
+	code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	code_row.add_child(code)
+	var invite := String(world.inviteCode)
+	code_row.add_child(UI.button(tr("Copy"), func() -> void:
+		DisplayServer.clipboard_set(invite)
+		_status.text = tr("Invite code copied.")))
+	code_row.add_child(UI.button(tr("Share"), func() -> void:
+		var message := tr("Join my world in Slavian with the invite code %s (Play with friends, Join with a code).") % invite
+		if not Share.text(message, tr("Share the invite code")):
+			_status.text = tr("Invite copied: paste it in a message to your group.")))
+	_content.add_child(code_row)
 	_content.add_child(UI.with_info(UI.label(tr("%d of %d players joined") % [world.members.size(), world.maxPlayers], UI.SMALL_SIZE, UI.MUTED),
 		tr("Share the code with your group: they join with it from Play with friends.")))
 	for member in world.members:

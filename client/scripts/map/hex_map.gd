@@ -13,7 +13,8 @@ const HOLY_CITY_COLOR := Color("#8a2b2b")
 const MY_VILLAGE_COLOR := Color("#ffd75e")
 const ALLY_VILLAGE_COLOR := Color("#f4efe1")
 const VILLAGE_OUTLINE_COLOR := Color("#2b2118")
-const HORDE_PATH_COLOR := Color(0.82, 0.14, 0.1, 0.95)
+## Hordes' roads: half see-through, so the map shows through.
+const HORDE_PATH_COLOR := Color(0.82, 0.14, 0.1, 0.5)
 const RUINS_COLOR := Color("#6d655a")
 const CARAVAN_COLOR := Color("#c99a5b")
 const SETTLERS_COLOR := Color("#e8e2d0")
@@ -396,7 +397,7 @@ func _draw_forecast(wave: Dictionary) -> void:
 		points.append(HexMath.to_pixel(Vector2i(int(step[0]), int(step[1])), hex_size))
 	if points.size() < 2:
 		return
-	_draw_route(points, Color(HORDE_PATH_COLOR, 0.75))
+	_draw_route(points, Color(HORDE_PATH_COLOR, 0.35))
 	var emblem := "faction/" + String(EMBLEMS.get(String(wave.get("front", "north")), "north"))
 	draw_circle(points[0], hex_size * 0.42, Color(ENEMY_COLOR, 0.5))
 	if Art.has(emblem):
