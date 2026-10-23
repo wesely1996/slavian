@@ -58,6 +58,42 @@ var _woods := FastNoiseLite.new()
 var _middle := Vector2.ZERO
 var _radius := 1.0
 var _seed := 0
+## Plots being built: what is left of each build (1: not started yet), so
+## its ring empties clockwise as it goes.
+var _left: Dictionary = {}
+var _since_redraw := 0.0
+## The time now (unix seconds): the game's server clock, set by the screen.
+var clock: Callable = func() -> float: return Time.get_unix_time_from_system()
+
+
+## Redraws now and then while something is being built, for the rings.
+func _process(delta: float) -> void:
+	if village.is_empty() or village.get("queue", []).is_empty():
+		return
+	_since_redraw += delta
+	if _since_redraw >= 0.5:
+		_since_redraw = 0.0
+		queue_redraw()
+
+
+## How much of the build on each plot in the queue is still to come.
+static func builds_left(queue: Array, now: float) -> Dictionary:
+	var left := {}
+	for item in queue:
+		var start := TimeUtil.parse_iso(String(item.get("startsAt", item.completesAt)))
+		var done := TimeUtil.parse_iso(String(item.completesAt))
+		var share := 1.0 if now <= start or done <= start else clampf((done - now) / (done - start), 0.0, 1.0)
+		left[String(item.get("plot", ""))] = share
+	return left
+
+
+## The ring round a plot being built: what is still to do, from the top
+## clockwise to where the work has got to.
+func _draw_progress(center: Vector2, r: float, plot: String, width: float) -> void:
+	var share: float = _left.get(plot, 1.0)
+	if share <= 0.0:
+		return
+	draw_arc(center, r, -PI / 2.0 + TAU * (1.0 - share), -PI / 2.0 + TAU, 48, BUILDING_ACTIVE, width, true)
 
 
 func _ready() -> void:
@@ -178,6 +214,7 @@ func _draw() -> void:
 	var building_plots := {}
 	for item in village.queue:
 		building_plots[item.get("plot", "")] = int(item.targetLevel)
+	_left = builds_left(village.queue, clock.call())
 	var font := get_theme_default_font()
 	for plot in Rules.plot_ids(village):
 		if not rects.has(plot):
@@ -196,7 +233,7 @@ func _draw() -> void:
 			var color: Color = FIELD_COLORS.get(resource, BUILDING)
 			draw_circle(center, r, color if level > 0 else color.darkened(0.45))
 			if under_way:
-				draw_arc(center, r - 3.0, 0.0, TAU, 48, BUILDING_ACTIVE, 6.0)
+				_draw_progress(center, r - 3.0, plot, 6.0)
 			if plot == selected:
 				draw_arc(center, r + 4.0, 0.0, TAU, 48, SELECTED, 4.0)
 			_text(font, center - Vector2(0, r * 0.12), str(level), r * 0.7)
@@ -206,7 +243,7 @@ func _draw() -> void:
 		var fill := SLOT_LOCKED if locked else (SLOT_EMPTY if def.is_empty() else BUILDING)
 		draw_rect(rect, fill)
 		if under_way:
-			draw_rect(rect.grow(-3.0), BUILDING_ACTIVE, false, 6.0)
+			_draw_progress(rect.get_center(), rect.size.x * 0.48, plot, 6.0)
 		if plot == selected:
 			draw_rect(rect.grow(4.0), SELECTED, false, 4.0)
 		var font_size := rect.size.y * 0.2
@@ -416,7 +453,7 @@ func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, un
 	if plot == selected:
 		draw_arc(rect.get_center(), rect.size.x * 0.62, 0.0, TAU, 48, SELECTED, 4.0)
 	if under_way:
-		draw_arc(rect.get_center(), rect.size.x * 0.56, 0.0, TAU, 48, BUILDING_ACTIVE, 5.0)
+		_draw_progress(rect.get_center(), rect.size.x * 0.56, plot, 5.0)
 	if id == "plot/locked":
 		var needs := (tr("Walls %d") % Rules.tower_unlock_level(data, Rules.plot_index(plot))) if Rules.is_tower_slot(plot) else (tr("Hall %d") % Rules.slot_unlock_level(data, Rules.plot_index(plot)))
 		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), needs, rect.size.y * (0.24 if Rules.is_tower_slot(plot) else 0.18), Color.WHITE)

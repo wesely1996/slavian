@@ -17,7 +17,10 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 			var verb := UI.t("Fetching") if caravan.kind == "fetch" else UI.t("To %s:") % where
 			if caravan.kind == "fetch":
 				return UI.t("%s %s from the vault · there in %s") % [verb, cargo, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.arrivesAt) - now)]
-			return UI.t("%s %s · arrives in %s") % [verb, cargo, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.arrivesAt) - now)]
+			var going := UI.t("%s %s · arrives in %s") % [verb, cargo, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.arrivesAt) - now)]
+			if caravan.get("returnsAt") != null:
+				going += UI.t(" · home in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt) - now)
+			return going
 		"returning":
 			var back := _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")
 			return UI.t("Heading home with %s · back in %s") % [back, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt) - now)]

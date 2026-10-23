@@ -103,5 +103,6 @@ func _load(path: String) -> AudioStream:
 
 ## Every button taps when pressed.
 func _on_node_added(node: Node) -> void:
-	if node is BaseButton:
+	# (A button moved to another parent comes by again.)
+	if node is BaseButton and not node.pressed.is_connected(effect.bind("tap")):
 		node.pressed.connect(effect.bind("tap"))

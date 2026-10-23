@@ -17,6 +17,11 @@ var _since_refresh := 0.0
 
 var _live_label: Label
 var _resource_labels: Dictionary[String, Label] = {}
+## Under each stock: how full the storehouse is, and its limit.
+var _resource_bars: Dictionary[String, ProgressBar] = {}
+var _capacity_labels: Dictionary[String, Label] = {}
+## Whose stores the strip shows (tap: the next of your villages).
+var _stores_button: Button
 var _rate_labels: Dictionary[String, Label] = {}
 ## "map", "village" (the inside of your own village) or "battle" (a battle
 ## on its campaign map).
@@ -51,6 +56,11 @@ var _renaming := false
 var _drafts := {}
 ## The draft whose field had the focus when the panel was last rebuilt.
 var _focused_draft := ""
+## The panel is being cleared to be rebuilt (its fields lose the focus).
+var _clearing := false
+## A road being laid: from this hex, by this village, to a hex tapped next.
+var _road_from := Vector2i.MAX
+var _road_village := 0
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
@@ -183,10 +193,17 @@ func _process(delta: float) -> void:
 	var home := _my_village()
 	if not home.is_empty():
 		var amounts := Ledger.amounts_at(home.resources, Game.server_now())
+		_stores_button.text = ("%s ▸" % home.name) if Game.my_villages().size() > 1 else String(home.name)
+		_stores_button.tooltip_text = tr("The stores of %s: each village keeps its own.") % home.name
 		for kind in Ledger.KINDS:
 			var rate: float = home.resources.ratesPerHour[kind]
 			var label := _resource_labels[kind]
 			label.text = str(int(amounts[kind]))
+			var capacity := float(home.resources.capacity[kind])
+			_capacity_labels[kind].text = "/%d" % roundi(capacity)
+			var share := clampf(float(amounts[kind]) / capacity, 0.0, 1.0) if capacity > 0.0 else 0.0
+			_resource_bars[kind].value = share
+			_resource_bars[kind].modulate = Color(1.6, 0.6, 0.55) if share >= 0.95 else Color.WHITE
 			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %ds)") % [UI.resource_name(kind), UI.signed(rate), Ledger.seconds_to_next(Game.server_now())]
 			_rate_labels[kind].text = tr("%s/min") % _per_minute(rate)
 			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
@@ -244,6 +261,13 @@ func _build_ui() -> void:
 	_view_button.theme_type_variation = "WoodButton"
 	_view_button.visible = not _my_village().is_empty()
 	bar.add_child(_view_button)
+	# All your troops at a glance: where they stand, who is on the move.
+	var forces := UI.button("", func() -> void:
+		_panel_mode = "forces"
+		_rebuild_panel(), "icon/troops")
+	forces.theme_type_variation = "WoodIconButton"
+	forces.tooltip_text = tr("Your forces")
+	bar.add_child(forces)
 	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
 	_inbox_button.theme_type_variation = "WoodIconButton"
 	_inbox_button.tooltip_text = tr("Inbox")
@@ -253,25 +277,56 @@ func _build_ui() -> void:
 	tutorial.theme_type_variation = "WoodIconButton"
 	tutorial.tooltip_text = tr("Tutorial")
 	bar.add_child(tutorial)
-	# The resource strip: icon, stock, and the hourly rate beside it.
+	# The resource strip: whose stores they are, then for each resource its
+	# icon, stock and limit, the hourly rate, and how full the store is.
 	_resources = UI.hbox(4)
 	top_rows.add_child(_resources)
+	_stores_button = UI.button("", _next_village)
+	_stores_button.theme_type_variation = "WoodIconButton"
+	_stores_button.add_theme_font_size_override("font_size", 18)
+	_stores_button.custom_minimum_size = Vector2(104, 0)
+	_stores_button.clip_text = true
+	_stores_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_stores_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_resources.add_child(_stores_button)
 	for kind in Ledger.KINDS:
-		var cell := UI.hbox(10)
+		var cell := UI.hbox(8)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cell.add_child(UI.icon("resource/" + kind, 40))
+		cell.add_child(UI.icon("resource/" + kind, 36))
 		var numbers := UI.vbox(0)
-		var label := UI.label("", 28)
+		var stock := UI.hbox(2)
+		var label := UI.label("", 26)
 		label.theme_type_variation = "OnWoodStrong"
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		numbers.add_child(label)
-		var rate := UI.label("", 20)
+		stock.add_child(label)
+		var most := UI.label("", 16)
+		most.theme_type_variation = "OnWoodMuted"
+		most.autowrap_mode = TextServer.AUTOWRAP_OFF
+		most.size_flags_vertical = Control.SIZE_SHRINK_END
+		stock.add_child(most)
+		numbers.add_child(stock)
+		var rate := UI.label("", 18)
 		rate.theme_type_variation = "OnWoodMuted"
 		rate.autowrap_mode = TextServer.AUTOWRAP_OFF
 		numbers.add_child(rate)
+		var full := ProgressBar.new()
+		full.show_percentage = false
+		full.custom_minimum_size = Vector2(70, 5)
+		full.max_value = 1.0
+		full.step = 0.0
+		# The theme's ink groove vanishes on the wood: a darker one here.
+		var groove := StyleBoxFlat.new()
+		groove.bg_color = Color(0, 0, 0, 0.45)
+		groove.border_color = Color(UiTheme.ON_WOOD, 0.35)
+		groove.set_border_width_all(1)
+		groove.set_corner_radius_all(3)
+		full.add_theme_stylebox_override("background", groove)
+		numbers.add_child(full)
 		cell.add_child(numbers)
 		_resources.add_child(cell)
 		_resource_labels[kind] = label
+		_capacity_labels[kind] = most
+		_resource_bars[kind] = full
 		_rate_labels[kind] = rate
 	# The next threat: madder on the wood, opens the threats sheet.
 	_threat_button = UI.button("", _show_threats, "icon/threat")
@@ -314,6 +369,7 @@ func _build_ui() -> void:
 	_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	main.add_child(_spacer)
 	_village_view = VillageView.new()
+	_village_view.clock = Game.server_now
 	_village_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_village_view.visible = false
 	_village_view.plot_tapped.connect(_on_plot_tapped)
@@ -370,7 +426,8 @@ func _arrange() -> void:
 		_resources.size_flags_horizontal = Control.SIZE_FILL
 		_resources.add_theme_constant_override("separation", 4)
 	for cell in _resources.get_children():
-		(cell as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if landscape else Control.SIZE_EXPAND_FILL
+		if cell != _stores_button:
+			(cell as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if landscape else Control.SIZE_EXPAND_FILL
 	if landscape:
 		_body.add_child(_panel)
 		_panel.custom_minimum_size = Vector2(clampf(area.x * 0.34, 620.0, 900.0), 0)
@@ -410,6 +467,20 @@ func _sheet_height() -> float:
 	if _scroll.custom_minimum_size.y > 0.0:
 		return _scroll.custom_minimum_size.y
 	return maxf(_scroll.size.y, 600.0)
+
+
+## The strip shows the next of your villages' stores (and the sheets it).
+func _next_village() -> void:
+	var mine := Game.my_villages()
+	if mine.size() < 2:
+		return
+	var at := 0
+	for i in mine.size():
+		if int(mine[i].id) == Game.current_village_id:
+			at = i
+	Game.current_village_id = int(mine[(at + 1) % mine.size()].id)
+	_plot = Rules.HALL_PLOT
+	_rebuild_panel()
 
 
 ## The wood band, with room at the top for a phone's status bar.
@@ -530,6 +601,8 @@ func _battle_ctx(battle: Dictionary) -> Dictionary:
 func _select(cell: Vector2i) -> void:
 	_selected = cell
 	_side.erase("hex")
+	_road_from = Vector2i.MAX
+	hex_map.show_road_targets([])
 	var village := Game.village_at(cell)
 	if not village.is_empty() and Game.commands(village):
 		Game.current_village_id = int(village.id)
@@ -1039,9 +1112,16 @@ func _run_panel() -> void:
 func _rebuild_panel() -> void:
 	var focus := get_viewport().gui_get_focus_owner()
 	_focused_draft = String(focus.get_meta("draft", "")) if focus != null and _panel_body.is_ancestor_of(focus) else ""
+	_clearing = true
 	UI.clear(_panel_body)
+	_clearing = false
 	_ticking.clear()
 	_fit_sheet()
+	# A road being laid is dropped once the sheet shows something else.
+	if _road_from != Vector2i.MAX and _panel_mode != "hex":
+		_road_from = Vector2i.MAX
+		hex_map.show_road_targets([])
+		_status.text = ""
 	if _panel_mode == "run":
 		_run_panel()
 		return
@@ -1056,6 +1136,9 @@ func _rebuild_panel() -> void:
 		return
 	if _panel_mode == "inbox":
 		_inbox_panel()
+		return
+	if _panel_mode == "forces":
+		_forces_panel()
 		return
 	if _view == "village":
 		_village_panel()
@@ -1382,38 +1465,50 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 		_rebuild_panel())
 	_panel_body.add_child(picker)
 
+	# How much of each: typed in, up to what the village holds.
 	var amounts := Ledger.amounts_at(village.resources, Game.server_now())
 	for kind in Ledger.KINDS:
 		var row := UI.hbox(8)
-		var amount_label := UI.label(tr("%s %d") % [UI.resource_name(kind), _caravan_load[kind]])
-		amount_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(amount_label)
-		for step in [-500, -100, 100, 500]:
-			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
-				_caravan_load[kind] = clampi(_caravan_load[kind] + step, 0, 1_000_000)
-				_rebuild_panel())
-			stepper.custom_minimum_size.x = 84
-			stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-			row.add_child(stepper)
+		row.add_child(UI.icon("resource/%s" % kind, 40))
+		var name := UI.label(UI.resource_name(kind), UI.SMALL_SIZE)
+		name.custom_minimum_size.x = 90
+		row.add_child(name)
+		var most := int(floor(float(amounts.get(kind, 0))))
+		row.add_child(_number_field("load:%s" % kind, mini(_caravan_load[kind], most), 0, maxi(most, _caravan_load[kind]), func(n: int) -> void:
+			_caravan_load[kind] = n))
+		var of := UI.label(tr("of %d") % most, UI.SMALL_SIZE, UI.MUTED)
+		of.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(of)
 		_panel_body.add_child(row)
 
-	var needed := CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {}))
-	var summary := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Pick what to carry")
-	_panel_body.add_child(UI.label(summary, UI.SMALL_SIZE, UI.MUTED))
-	var escort := _picked_units(Rules.garrison_at(village, Game.server_now())) if not Game.camps.is_empty() else {}
-	if not escort.is_empty():
-		_panel_body.add_child(UI.label(tr("Escort: %s") % _units_text(escort), UI.SMALL_SIZE, UI.MUTED))
+	var garrison := Rules.garrison_at(village, Game.server_now())
+	var escort := func() -> Dictionary: return _picked_units(garrison) if not Game.camps.is_empty() else {}
+	var summary := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(summary)
 	var buttons := UI.hbox()
-	var cargo := _caravan_load.duplicate()
-	var send := UI.button(tr("Send"), func() -> void: _send_caravan(village_id, _caravan_to, cargo, escort))
+	var send := UI.button(tr("Send"), func() -> void: _send_caravan(village_id, _caravan_to, _caravan_load.duplicate(), escort.call()))
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	send.disabled = needed == 0 or needed > free or not Ledger.can_afford(amounts, cargo)
 	buttons.add_child(send)
+	var fetch: Button = null
 	if _caravan_to == 0:
-		var fetch := UI.button(tr("Fetch from vault"), func() -> void: _fetch_from_vault(village_id, cargo, escort))
+		fetch = UI.button(tr("Fetch from vault"), func() -> void: _fetch_from_vault(village_id, _caravan_load.duplicate(), escort.call()))
 		fetch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		fetch.disabled = needed == 0 or needed > free
 		buttons.add_child(fetch)
+	# What it takes, and whether it can go, as the numbers are typed.
+	_tick(summary, func() -> String:
+		var needed := CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {}))
+		var current: Dictionary = Game.villages.get(village_id, village)
+		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), _caravan_load)
+		send.disabled = needed == 0 or needed > free or not affordable
+		if fetch != null:
+			fetch.disabled = needed == 0 or needed > free
+		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Type how much of each to carry")
+		if needed > free:
+			line += tr(" (only %d at home)") % free
+		var guard: Dictionary = escort.call()
+		if not guard.is_empty():
+			line += " · " + tr("Escort: %s") % _units_text(guard)
+		return line)
 	_panel_body.add_child(buttons)
 
 
@@ -1444,6 +1539,7 @@ func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort:
 	Sound.effect("coins")
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	_army_units.clear()
+	_forget_drafts(["load:", "escort:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -1455,6 +1551,7 @@ func _fetch_from_vault(village_id: int, cargo: Dictionary, escort: Dictionary) -
 		_status.text = response.error
 		return
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	_forget_drafts(["load:", "escort:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -1617,12 +1714,15 @@ func _armies_section(village: Dictionary) -> void:
 		rule_row.add_child(b)
 	_panel_body.add_child(rule_row)
 	var range_row := UI.hbox(8)
-	for step in [-1, 1]:
-		var b := UI.button((tr("%+d hex") % step).replace("-", "−"), func() -> void:
-			_set_reinforce(village_id, share / 100.0, clampi(range_ + step, 0, int(Game.data.armies.reinforce.maxRange))))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-		range_row.add_child(b)
+	range_row.add_child(UI.label(tr("Within"), UI.SMALL_SIZE))
+	var reach := [range_]
+	range_row.add_child(_number_field("reinforce:%d" % village_id, range_, 0, int(Game.data.armies.reinforce.maxRange), func(n: int) -> void: reach[0] = n))
+	var hexes := UI.label(tr("hexes"), UI.SMALL_SIZE)
+	hexes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	range_row.add_child(hexes)
+	range_row.add_child(UI.button(tr("Set"), func() -> void:
+		_drafts.erase("reinforce:%d" % village_id)
+		_set_reinforce(village_id, share / 100.0, int(reach[0]))))
 	_panel_body.add_child(range_row)
 
 
@@ -1659,11 +1759,11 @@ func _send_troops(village: Dictionary) -> void:
 		kind_row.add_child(b)
 	kind_row.add_child(UI.info(ArmyText.order_text(_army_orders)))
 	_panel_body.add_child(kind_row)
-	var chosen := _unit_pickers(home_units, false, "send")
-	var body := {"targetVillageId": _army_to, "units": chosen, "orders": _army_orders}
-	var go := UI.button(tr("Send"), func() -> void: _send_army(village_id, body))
-	go.disabled = chosen.is_empty()
+	_unit_pickers(home_units, false, "send")
+	var go := UI.button(tr("Send"), func() -> void:
+		_send_army(village_id, {"targetVillageId": _army_to, "units": _picked_units(home_units), "orders": _army_orders}))
 	_panel_body.add_child(go)
+	_picked_hint(go, home_units)
 
 
 ## Steppers for each fighting unit at home, a few to a page (`list` keeps
@@ -1682,27 +1782,35 @@ func _unit_pickers(home_units: Dictionary, with_scouts := false, list := "units"
 		row.tooltip_text = tr(def.name)
 		if Art.has("unit/%s" % unit):
 			row.add_child(UI.icon("unit/%s" % unit, 48))
-		var label := UI.label(tr("%d / %d") % [count, have] if Art.has("unit/%s" % unit) else tr("%s %d / %d") % [tr(def.name), count, have], UI.SMALL_SIZE)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(label)
-		for step in [-10, -1, 1, 10]:
-			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
-				_army_units[unit] = clampi(count + step, 0, have)
-				_rebuild_panel())
-			stepper.custom_minimum_size.x = 72
-			stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-			row.add_child(stepper)
+		else:
+			row.add_child(UI.label(tr(def.name), UI.SMALL_SIZE))
+		var key := "%s:%s" % [list, unit]
+		row.add_child(_number_field(key, count, 0, have, func(n: int) -> void: _army_units[unit] = n))
+		var of := UI.label(tr("of %d") % have, UI.SMALL_SIZE, UI.MUTED)
+		of.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(of)
 		var all := UI.button(tr("All"), func() -> void:
 			_army_units[unit] = have
+			_drafts.erase(key)
 			_rebuild_panel())
-		all.custom_minimum_size.x = 72
+		all.custom_minimum_size.x = 80
 		all.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
 		row.add_child(all)
 		_panel_body.add_child(row))
 	return _picked_units(home_units)
 
 
-## The troops picked on the steppers, as many as are at home.
+## Under a send button: it waits until some troops are picked.
+func _picked_hint(button: Button, home_units: Dictionary) -> void:
+	var hint := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(hint)
+	_tick(hint, func() -> String:
+		var none := _picked_units(home_units).is_empty()
+		button.disabled = none
+		return tr("Type how many of each to send.") if none else "")
+
+
+## The troops picked in the fields, as many as are at home.
 func _picked_units(home_units: Dictionary) -> Dictionary:
 	var chosen := {}
 	for unit in _army_units:
@@ -1718,6 +1826,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 		_status.text = response.error
 		return
 	_army_units.clear()
+	_forget_drafts(["units:", "send:", "escort:"])
 	_army_hero = false
 	Game.note_server_time(response.data.serverTime)
 
@@ -1765,7 +1874,8 @@ func _hold_panel(terrain_id: String) -> void:
 
 	var village_id := int(home.id)
 	_panel_body.add_child(UI.label(tr("Send from %s") % home.name, UI.SMALL_SIZE, UI.MUTED))
-	var chosen := _unit_pickers(Rules.garrison_at(home, Game.server_now()), exploring)
+	var at_home := Rules.garrison_at(home, Game.server_now())
+	_unit_pickers(at_home, exploring)
 	var hero := Game.my_hero()
 	var hero_ready: bool = not hero.is_empty() and hero.status == "home" and hero.villageId != null and int(hero.villageId) == village_id
 	if hero_ready:
@@ -1773,10 +1883,10 @@ func _hold_panel(terrain_id: String) -> void:
 			_army_hero = not _army_hero
 			_rebuild_panel())
 		_panel_body.add_child(lead)
-	var body := {"target": {"q": cell.x, "r": cell.y}, "units": chosen, "orders": orders, "withHero": _army_hero and hero_ready}
-	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void: _send_army(village_id, body))
-	go.disabled = chosen.is_empty()
+	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
+		_send_army(village_id, {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready}))
 	_panel_body.add_child(go)
+	_picked_hint(go, at_home)
 
 
 ## A fort on the selected open hex, built from your village.
@@ -1849,7 +1959,7 @@ func _river_section(cell: Vector2i) -> void:
 			continue
 		var cost: Dictionary = Game.data.field.bridge.cost
 		var row := UI.hbox()
-		var info := UI.rich(tr("Build a bridge: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UiTheme.TEXT)
+		var info := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(info)
 		var village_id := int(home.id)
@@ -1858,6 +1968,11 @@ func _river_section(cell: Vector2i) -> void:
 		button.custom_minimum_size.x = 160
 		row.add_child(button)
 		_panel_body.add_child(row)
+		var price := tr("Build a bridge: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))]
+		_tick(info, func() -> String:
+			var current: Dictionary = Game.villages.get(village_id, home)
+			button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
+			return price)
 
 
 ## Roads from the selected hex: where they run, and building more.
@@ -1882,16 +1997,23 @@ func _road_section(cell: Vector2i) -> void:
 		_panel_body.add_child(UI.label(tr("Roads run %s.") % ", ".join(built), UI.SMALL_SIZE))
 	if open.is_empty():
 		return
+	# One button; then the hex the road goes to is tapped on the map.
 	var cost: Dictionary = Game.data.field.road.cost
-	_panel_body.add_child(UI.rich(tr("Build a road (%s · %s each) towards:") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UiTheme.TEXT))
-	var row := UI.hbox(6)
+	var info := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
+	_panel_body.add_child(info)
 	var village_id := int(home.id)
-	for i in open:
-		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
-		var button := UI.button(tr(names[i]), func() -> void: _build_road(village_id, cell, other))
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(button)
-	_panel_body.add_child(row)
+	var targets: Array = open.map(func(i: int) -> Vector2i: return cell + HexMath.DIRECTIONS[i])
+	var build := UI.button(tr("Build a road"), func() -> void:
+		_road_from = cell
+		_road_village = village_id
+		hex_map.show_road_targets(targets)
+		_status.text = tr("Tap the hex next to this one to build the road to."), "icon/map")
+	_panel_body.add_child(build)
+	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))]
+	_tick(info, func() -> String:
+		var current: Dictionary = Game.villages.get(village_id, home)
+		build.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
+		return text)
 
 
 func _build_road(village_id: int, a: Vector2i, b: Vector2i) -> void:
@@ -1958,24 +2080,17 @@ func _repeat_order(village: Dictionary) -> void:
 		_repeat_unit = names[i]
 		_rebuild_panel())
 	_panel_body.add_child(picker)
+	# How many to keep, and how many to train at a time: typed in.
 	var row := UI.hbox(8)
-	var text := UI.label(tr("Keep %d, %d at a time") % [_repeat_target, _repeat_batch], UI.SMALL_SIZE)
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(text)
-	for step in [[-5, 0], [5, 0], [0, -1], [0, 1]]:
-		var label := ("%+d" % step[0]) if step[0] != 0 else (tr("batch %+d") % step[1])
-		var stepper := UI.button(label.replace("-", "−"), func() -> void:
-			_repeat_target = clampi(_repeat_target + step[0], 1, 999)
-			_repeat_batch = clampi(_repeat_batch + step[1], 1, mini(_repeat_target, int(Game.data.units.maxBatch)))
-			_rebuild_panel())
-		stepper.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
-		row.add_child(stepper)
+	row.add_child(UI.label(tr("Keep"), UI.SMALL_SIZE))
+	row.add_child(_number_field("repeat:target", _repeat_target, 1, 999, func(n: int) -> void: _repeat_target = n))
+	row.add_child(UI.label(tr("ready, training"), UI.SMALL_SIZE))
+	row.add_child(_number_field("repeat:batch", _repeat_batch, 1, int(Game.data.units.maxBatch), func(n: int) -> void: _repeat_batch = n))
+	row.add_child(UI.label(tr("at a time"), UI.SMALL_SIZE))
 	_panel_body.add_child(row)
 	var unit := _repeat_unit
-	var target := _repeat_target
-	var batch := mini(_repeat_batch, _repeat_target)
 	var place := UI.button(tr("Keep %s topped up") % tr(units[unit].name), func() -> void:
-		_place_order(village_id, {"kind": "train", "unit": unit, "batch": batch, "target": target}))
+		_place_order(village_id, {"kind": "train", "unit": unit, "batch": mini(_repeat_batch, _repeat_target), "target": _repeat_target}))
 	place.disabled = not Game.orders_of(village_id, "train").filter(func(o: Dictionary) -> bool: return o.unit == unit).is_empty()
 	_panel_body.add_child(place)
 
@@ -1997,17 +2112,13 @@ func _surplus_order(village_id: int) -> void:
 		return
 	var limits: Dictionary = Game.data.orders.surplusShare
 	var row := UI.hbox(8)
-	var text := UI.label(tr("Above %d%% of storage") % _surplus_share, UI.SMALL_SIZE)
+	row.add_child(UI.label(tr("Above"), UI.SMALL_SIZE))
+	row.add_child(_number_field("surplus", _surplus_share, roundi(float(limits.min) * 100.0), roundi(float(limits.max) * 100.0), func(n: int) -> void:
+		_surplus_share = n))
+	var text := UI.label(tr("% of storage"), UI.SMALL_SIZE)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	for step in [-5, 5]:
-		var stepper := UI.button(("%+d%%" % step).replace("-", "−"), func() -> void:
-			_surplus_share = clampi(_surplus_share + step, roundi(float(limits.min) * 100.0), roundi(float(limits.max) * 100.0))
-			_rebuild_panel())
-		stepper.custom_minimum_size.x = 100
-		row.add_child(stepper)
-	var share := _surplus_share
-	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "surplus", "share": share / 100.0}))
+	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "surplus", "share": _surplus_share / 100.0}))
 	place.custom_minimum_size.x = 110
 	row.add_child(place)
 	_panel_body.add_child(row)
@@ -2065,6 +2176,7 @@ func _hero_panel() -> void:
 	var face := "hero/%s" % kind if kind != null and Art.has("hero/%s" % kind) else "ui/hero"
 	_side_tabs("hero", [["about", face, tr("Your hero"), _hero_about.bind(hero)],
 		["quests", "site/kurgan", tr("Quests"), _quest_section.bind(hero)],
+		["stats", "icon/troops", tr("Stats"), _hero_stats.bind(hero)],
 		["skills", "icon/research", tr("Skills"), _hero_skills.bind(hero)],
 		["gear", "resource/iron", tr("Gear"), _hero_gear.bind(hero)],
 		["journey", "icon/map", tr("Send to"), _hero_journey.bind(hero)]])
@@ -2099,6 +2211,40 @@ func _hero_about(hero: Dictionary) -> void:
 		_panel_body.add_child(UI.label(tr("Adds where it stands: %s") % effects, UI.SMALL_SIZE, UI.MUTED))
 
 
+## What the hero adds, and from where: its own gifts (in all your
+## villages), its skills and its gear (where it stands), and the total.
+func _hero_stats(hero: Dictionary) -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Stats"), UI.HEADING_SIZE),
+		tr("Its own gifts count in all your villages; what its skills and gear add counts where it stands, and for the army it leads.")))
+	var xp_text := tr("XP %d / %d") % [int(hero.xp), int(hero.xpToNext)] if hero.xpToNext != null else tr("Highest level")
+	_panel_body.add_child(UI.label(tr("Level %d · %s") % [int(hero.level), xp_text], UI.SMALL_SIZE, UI.MUTED))
+	var parts := HeroText.breakdown(Game.data, hero)
+	if parts.is_empty():
+		_panel_body.add_child(UI.label(tr("No bonuses yet."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 6)
+	for heading in [tr("Bonus"), tr("Own"), tr("Skills"), tr("Gear"), tr("Total")]:
+		var head := UI.label(heading, UI.SMALL_SIZE, UI.MUTED)
+		head.autowrap_mode = TextServer.AUTOWRAP_OFF
+		head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if heading == tr("Bonus") else HORIZONTAL_ALIGNMENT_RIGHT
+		grid.add_child(head)
+	for key in parts:
+		var name := UI.label(HeroText.effect_name(key), UI.SMALL_SIZE)
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(name)
+		for column in 4:
+			var value: float = parts[key][column]
+			var cell := UI.label(HeroText.percent(value), UI.SMALL_SIZE,
+				UiTheme.INK if column < 3 or is_zero_approx(value) else (UI.GOOD if HeroText.helps(key, value) else UI.ERROR))
+			cell.autowrap_mode = TextServer.AUTOWRAP_OFF
+			cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			grid.add_child(cell)
+	_panel_body.add_child(grid)
+
+
 ## The skill tree, a branch to a page on a phone.
 func _hero_skills(hero: Dictionary) -> void:
 	var data: Dictionary = Game.data.heroes
@@ -2131,14 +2277,25 @@ func _hero_gear(hero: Dictionary) -> void:
 	for slot in data.slots:
 		var item: Variant = hero.gear.get(slot)
 		var row := UI.hbox()
-		var label := UI.label(tr("%s: %s") % [String(slot).capitalize(), tr(data.items[item].name) if item != null else "—"], UI.SMALL_SIZE)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(label)
+		var worn := UI.vbox(0)
+		worn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		worn.add_child(UI.label(tr("%s: %s") % [String(slot).capitalize(), tr(data.items[item].name) if item != null else "—"], UI.SMALL_SIZE))
+		if item != null:
+			worn.add_child(UI.label(HeroText.effects(data.items[item].effects), UI.SMALL_SIZE, UI.GOOD))
+		row.add_child(worn)
 		if item != null:
 			var off := UI.button(tr("Take off"), func() -> void: _hero_action("unequip", {"slot": slot}))
 			off.custom_minimum_size.x = 150
 			row.add_child(off)
 		_panel_body.add_child(row)
+	# Sets: what wearing all of one adds, and how much of it is worn.
+	var wearing: Array = hero.gear.values()
+	for set_id in data.get("sets", {}):
+		var set_def: Dictionary = data.sets[set_id]
+		var have: int = set_def.items.filter(func(it: String) -> bool: return it in wearing).size()
+		if have > 0:
+			_panel_body.add_child(UI.label(tr("%s set (%d of %d worn): %s") % [tr(set_def.get("name", set_id)), have, set_def.items.size(), HeroText.effects(set_def.effects)],
+				UI.SMALL_SIZE, UI.GOOD if have == set_def.items.size() else UI.MUTED))
 	if hero.inventory.is_empty():
 		_panel_body.add_child(UI.with_info(UI.label(tr("No gear yet."), UI.SMALL_SIZE, UI.MUTED), tr("Beaten hordes sometimes leave gear behind for a hero who fought them.")))
 	_paged("hero gear", hero.inventory, 4 if _roomy() else 2, func(item: String) -> void:
@@ -2483,9 +2640,7 @@ func _draft_field(key: String, placeholder: String, text: String) -> LineEdit:
 	field.set_meta("draft", key)
 	field.text_changed.connect(func(typed: String) -> void:
 		_drafts[key] = {"text": typed, "caret": field.caret_column})
-	field.caret_changed.connect(func() -> void:
-		if _drafts.has(key):
-			_drafts[key].caret = field.caret_column)
+	# (LineEdit has no caret signal: the caret is kept as of the last keystroke.)
 	if not draft.is_empty() and key == _focused_draft:
 		var caret := int(draft.get("caret", field.text.length()))
 		var refocus := func() -> void:
@@ -2493,6 +2648,41 @@ func _draft_field(key: String, placeholder: String, text: String) -> LineEdit:
 				field.grab_focus()
 				field.caret_column = caret
 		refocus.call_deferred()
+	return field
+
+
+## Drops what was typed in the fields whose keys start so (once it is sent).
+func _forget_drafts(prefixes: Array) -> void:
+	for key in _drafts.keys():
+		if prefixes.any(func(prefix: String) -> bool: return String(key).begins_with(prefix)):
+			_drafts.erase(key)
+
+
+## A field to type a number in, instead of steps up and down; what is typed
+## outlives the panel's rebuilds (like _draft_field). `on_set` gets each
+## number typed, held within min..max; when done typing the field shows it.
+func _number_field(key: String, value: int, min_value: int, max_value: int, on_set: Callable) -> LineEdit:
+	var field := _draft_field(key, "", str(value))
+	field.max_length = 7
+	field.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.custom_minimum_size.x = 110
+	field.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	field.select_all_on_focus = true
+	field.text_changed.connect(func(typed: String) -> void:
+		if typed.strip_edges().is_valid_int():
+			on_set.call(clampi(int(typed.strip_edges()), min_value, max_value)))
+	var done := func(_text := "") -> void:
+		# A rebuild takes the focus away too: the draft stays for the new field.
+		if _clearing or not is_instance_valid(field):
+			return
+		var typed := field.text.strip_edges()
+		var number := clampi(int(typed) if typed.is_valid_int() else value, min_value, max_value)
+		field.text = str(number)
+		_drafts.erase(key)
+		on_set.call(number)
+	field.text_submitted.connect(done)
+	field.focus_exited.connect(done)
 	return field
 
 
@@ -2799,8 +2989,6 @@ func _train_tab(village: Dictionary) -> void:
 		var def: Dictionary = units[unit]
 		var building_level := int(village.levels.get(def.building, 0))
 		var unlocked := building_level >= int(def.requiresLevel)
-		var count: int = _train_counts.get(unit, 1)
-
 		var card := UI.hbox(12)
 		if Art.has("unit/%s" % unit):
 			var picture := UI.icon("unit/%s" % unit, 64)
@@ -2809,35 +2997,35 @@ func _train_tab(village: Dictionary) -> void:
 		var info := UI.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
-		info.add_child(UI.with_card(UI.label(tr("%s  ×%d") % [tr(def.name), count]), _unit_card(village, unit)))
+		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
 		info.add_child(UI.label(tr("%s · atk %d · def %d · %d grain/h") % [def.family.capitalize(), def.attack, def.defense, def.upkeepPerHour], UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(card)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
 			return
-		var cost := Rules.unit_cost(def, count, Game.villages_owned(int(village.ownerAccountId)))
 		var cost_line := UI.rich()
 		info.add_child(cost_line)
 
+		# How many: typed in; the cost and the button follow as it is typed.
 		var row := UI.hbox()
 		info.add_child(row)
-		for step in [-5, -1, 1, 5]:
-			var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
-				_train_counts[unit] = clampi(count + step, 1, max_batch)
-				_rebuild_panel())
-			stepper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(stepper)
-		var train := UI.primary(tr("Train"), func() -> void: _train(village_id, unit, count))
+		row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, max_batch, func(n: int) -> void:
+			_train_counts[unit] = n))
+		var train := UI.primary(tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
 		train.custom_minimum_size.x = 120
 		row.add_child(train)
 		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) \
 			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)
-		var cost_text := tr("%s · %s each") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
+		var owned := Game.villages_owned(int(village.ownerAccountId))
 		_tick(cost_line, func() -> String:
+			var cost := Rules.unit_cost(def, int(_train_counts.get(unit, 1)), owned)
 			var current: Dictionary = Game.villages.get(village_id, village)
 			var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
 			train.disabled = queue_full or not affordable
-			return cost_text + (tr("  (queue full)") if queue_full else "")))
+			var text := tr("%s · %s each") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
+			if queue_full:
+				return text + tr("  (queue full)")
+			return text if affordable else text + tr("  (not enough)")))
 
 
 func _stance_picker(village: Dictionary) -> void:
@@ -3258,16 +3446,11 @@ func _scouting_section(wave: Dictionary) -> void:
 	var count := clampi(_scout_counts.get(wave_id, mini(at_home, 3)), 1, max_scouts)
 	var row := UI.hbox()
 	_panel_body.add_child(row)
-	for step in [-1, 1]:
-		var stepper := UI.button(("%+d" % step).replace("-", "−"), func() -> void:
-			_scout_counts[wave_id] = clampi(count + step, 1, max_scouts)
-			_rebuild_panel())
-		stepper.custom_minimum_size.x = 80
-		row.add_child(stepper)
-	var send := UI.button(tr_n("Send %d scout (%d home)", "Send %d scouts (%d home)", count) % [count, at_home], func() -> void:
-		_send_scouts(village_id, wave_id, count))
+	row.add_child(_number_field("scouts:%d" % wave_id, count, 1, max_scouts, func(n: int) -> void: _scout_counts[wave_id] = n))
+	var send := UI.button(tr_n("Send scouts (%d home)", "Send scouts (%d home)", at_home) % at_home, func() -> void:
+		_send_scouts(village_id, wave_id, clampi(int(_scout_counts.get(wave_id, count)), 1, max_scouts)))
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	send.disabled = at_home < count
+	send.disabled = at_home < 1
 	row.add_child(send)
 
 
@@ -3330,6 +3513,16 @@ func _queue_build(village_id: int, plot: String, building: String) -> void:
 
 func _on_map_tapped(world_position: Vector2) -> void:
 	var cell := hex_map.local_to_hex(hex_map.to_local(world_position))
+	# Laying a road: the hex tapped is where it goes (anything else cancels).
+	if _road_from != Vector2i.MAX:
+		var from := _road_from
+		_road_from = Vector2i.MAX
+		var picked: bool = hex_map.road_targets.has(cell)
+		hex_map.show_road_targets([])
+		_status.text = ""
+		if picked:
+			_build_road(_road_village, from, cell)
+			return
 	if hex_map.has_hex(cell):
 		_select(cell)
 
@@ -3375,6 +3568,153 @@ func _on_inbox_changed() -> void:
 	_inbox_button.text = str(Game.unread) if Game.unread > 0 else ""
 	if _panel_mode == "inbox":
 		_rebuild_panel()
+
+
+# --- Forces ------------------------------------------------------------------
+
+## All your troops: how many of each there are, each village's garrison,
+## the armies out (from where, to where, and when) and the hero.
+func _forces_panel() -> void:
+	var top := UI.hbox()
+	var title := UI.label(tr("Your forces"), UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UI.button(tr("Close"), func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	var hero := Game.my_hero()
+	var tabs := [["totals", "unit/spearman", tr("All troops"), _forces_totals],
+		["villages", "icon/village", tr("By village"), _forces_villages],
+		["moving", "icon/troops", tr("Armies"), _forces_armies]]
+	if not hero.is_empty():
+		var face := "hero/%s" % hero.get("kind") if hero.get("kind") != null and Art.has("hero/%s" % hero.get("kind")) else "icon/profile"
+		tabs.append(["hero", face, tr("Your hero"), _forces_hero])
+	_side_tabs("forces", tabs)
+
+
+## Your armies out of their villages (not done).
+func _my_armies() -> Array:
+	return Game.armies.filter(func(army: Dictionary) -> bool:
+		return army.status != "done" and army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id())
+
+
+## How many of each unit you have: at home, out in armies, in training.
+func _forces_totals() -> void:
+	var now := Game.server_now()
+	var home := {}
+	var training := {}
+	for village in Game.my_villages():
+		for unit in Rules.garrison_at(village, now):
+			home[unit] = int(home.get(unit, 0)) + int(Rules.garrison_at(village, now)[unit])
+		for batch in village.training:
+			training[batch.unit] = int(training.get(batch.unit, 0)) + int(batch.count) - Rules.finished_by(batch, now)
+	var out := {}
+	for army in _my_armies():
+		for unit in army.units:
+			out[unit] = int(out.get(unit, 0)) + int(army.units[unit])
+	var kinds := {}
+	for table in [home, out, training]:
+		for unit in table:
+			if int(table[unit]) > 0:
+				kinds[unit] = true
+	if kinds.is_empty():
+		_panel_body.add_child(UI.label(tr("No troops yet. Train them in a village's Troops tab."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var defs: Dictionary = Game.data.units.units
+	var grand := 0
+	_paged("forces totals", kinds.keys(), 8 if _roomy() else 4, func(unit: String) -> void:
+		var row := UI.hbox(10)
+		if Art.has("unit/%s" % unit):
+			row.add_child(UI.icon("unit/%s" % unit, 44))
+		var words := UI.vbox(0)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var all := int(home.get(unit, 0)) + int(out.get(unit, 0)) + int(training.get(unit, 0))
+		words.add_child(UI.label(tr("%s ×%d") % [tr(defs.get(unit, {"name": unit}).name), all]))
+		words.add_child(UI.label(tr("%d at home · %d out · %d in training") % [int(home.get(unit, 0)), int(out.get(unit, 0)), int(training.get(unit, 0))], UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(words)
+		_panel_body.add_child(row))
+	for unit in kinds:
+		grand += int(home.get(unit, 0)) + int(out.get(unit, 0)) + int(training.get(unit, 0))
+	_panel_body.add_child(UI.label(tr("%d in all") % grand, UI.SMALL_SIZE, UI.MUTED))
+
+
+## Each of your villages: who is at home, who is away, who is training.
+func _forces_villages() -> void:
+	var now := Game.server_now()
+	_paged("forces villages", Game.my_villages(), 4 if _roomy() else 2, func(village: Dictionary) -> void:
+		var row := UI.hbox(10)
+		row.add_child(UI.icon(Art.settlement_id(Rules.hall_level(village)), 48))
+		var words := UI.vbox(2)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(village.name))
+		words.add_child(UI.label(tr("At home: %s") % _units_text(Rules.garrison_at(village, now)), UI.SMALL_SIZE, UI.MUTED))
+		var away: Dictionary = village.get("away", {}).duplicate()
+		for unit in away.keys():
+			if int(away[unit]) <= 0:
+				away.erase(unit)
+		if not away.is_empty():
+			words.add_child(UI.label(tr("Away: %s") % _units_text(away), UI.SMALL_SIZE, UI.MUTED))
+		if not village.training.is_empty():
+			var training := {}
+			for batch in village.training:
+				training[batch.unit] = int(training.get(batch.unit, 0)) + int(batch.count) - Rules.finished_by(batch, now)
+			words.add_child(UI.label(tr("Training: %s") % _units_text(training), UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(words)
+		var village_id := int(village.id)
+		var go := UI.button(tr("Open"), func() -> void:
+			Game.current_village_id = village_id
+			_tab = "troops"
+			_side["troops"] = "garrison"
+			_set_view("village"))
+		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(go)
+		_panel_body.add_child(row))
+
+
+## Your armies: who, from where to where, and when they arrive and are home.
+func _forces_armies() -> void:
+	var armies := _my_armies()
+	if armies.is_empty():
+		_panel_body.add_child(UI.label(tr("No armies out. Send them from a village's Troops tab, or from a hex on the map."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var defs: Dictionary = Game.data.units.units
+	_paged("forces armies", armies, 4 if _roomy() else 2, func(army: Dictionary) -> void:
+		var row := UI.hbox(10)
+		var words := UI.vbox(2)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(ArmyText.units_text(army.units, defs), UI.SMALL_SIZE))
+		var target := ArmyText.target_name(army, Game.village_name)
+		words.add_child(UI.label(tr("From %s to %s") % [Game.village_name(army.homeVillageId), target], UI.SMALL_SIZE, UI.MUTED))
+		var line := UI.label("", UI.SMALL_SIZE)
+		words.add_child(line)
+		_tick(line, func() -> String: return ArmyText.timeline(army, target, Game.server_now()))
+		row.add_child(words)
+		var show := UI.button(tr("Show"), func() -> void:
+			var p := ArmyText.progress(army, Game.server_now())
+			var cell: Vector2i = ArmyText.held_hex(army)
+			if not p.is_empty():
+				cell = p.to
+			elif cell == Vector2i.MAX and army.get("target") is Array:
+				cell = Vector2i(int(army.target[0]), int(army.target[1]))
+			_set_view("map")
+			camera.position = hex_map.hex_to_local(cell)
+			_select(cell))
+		show.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(show)
+		_panel_body.add_child(row))
+
+
+## Where your hero is.
+func _forces_hero() -> void:
+	var hero := Game.my_hero()
+	var line := UI.label("", UI.SMALL_SIZE)
+	_panel_body.add_child(UI.label(tr("%s  Lv %d") % [hero.name, int(hero.level)], UI.HEADING_SIZE))
+	_panel_body.add_child(line)
+	_tick(line, func() -> String: return HeroText.whereabouts(hero, -1, Game.village_name(hero.villageId), Game.server_now()))
+	_panel_body.add_child(UI.button(tr("Open the hero"), func() -> void:
+		_panel_mode = "hero"
+		_rebuild_panel(), "icon/profile"))
 
 
 # --- Inbox -------------------------------------------------------------------

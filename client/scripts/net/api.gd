@@ -33,7 +33,7 @@ func request(method: HTTPClient.Method, path: String, body: Variant = null, remo
 		response.data = answer.data
 		response.ok = response.status >= 200 and response.status < 300
 		if not response.ok:
-			response.error = str(answer.data.get("message", "Error %d" % response.status))
+			response.error = error_text(answer.data, response.status)
 		return response
 	var http := HTTPRequest.new()
 	http.timeout = 15.0
@@ -61,8 +61,22 @@ func request(method: HTTPClient.Method, path: String, body: Variant = null, remo
 	response.data = JSON.parse_string(text) if text != "" else null
 	response.ok = response.status >= 200 and response.status < 300
 	if not response.ok:
-		if response.data is Dictionary and response.data.has("message"):
-			response.error = str(response.data.message)
-		else:
-			response.error = "Server error %d" % response.status
+		response.error = error_text(response.data, response.status)
 	return response
+
+
+## What went wrong, in words for the player: what is missing rather than
+## the server's record of it ("Not enough: 120 more wood, 30 more iron.").
+static func error_text(data: Variant, status: int) -> String:
+	if not data is Dictionary:
+		return UI.t("Server error %d") % status
+	if data.get("error") == "insufficient_resources" and data.get("missing") is Dictionary:
+		var parts := PackedStringArray()
+		for kind in ["wood", "stone", "grain", "iron"]:
+			var short := ceili(float(data.missing.get(kind, 0)))
+			if short > 0:
+				parts.append(UI.t("%d more %s") % [short, UI.resource_name(kind).to_lower()])
+		return UI.t("Not enough resources: %s.") % ", ".join(parts)
+	if data.has("message"):
+		return str(data.message)
+	return UI.t("Server error %d") % status
