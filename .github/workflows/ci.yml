@@ -2,6 +2,8 @@ name: CI
 
 # Runs on every pull request. The dev-build workflow calls it for pushes to
 # main, so main is never built twice, and release.yml for version tags.
+# The Android APK is built only for those (merges to main and releases),
+# not for pull requests.
 on:
   pull_request:
   workflow_dispatch:
@@ -91,6 +93,7 @@ jobs:
   android:
     name: Android debug APK
     needs: [server, client]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       artifact: ${{ steps.version.outputs.artifact }}

@@ -131,10 +131,10 @@ All changes go on a feature branch and are merged into `main` through a pull req
 
 | Workflow | When | What |
 |---|---|---|
-| `ci.yml` | Every pull request | Server typecheck + tests (with Postgres), server Docker image smoke test, client tests + smoke run, then a debug APK uploaded as a run artifact (kept 7 days). |
+| `ci.yml` | Every pull request | Server typecheck + tests (with Postgres), server Docker image smoke test, client tests + smoke run. The debug APK is built only when it runs for a merge to `main` or a release (uploaded as a run artifact, kept 7 days), not for pull requests. |
 | `dev-build.yml` | Every push to `main` (i.e. merged PRs), or manually | Runs CI, then publishes the APK as a **dev pre-release** tagged `dev-<date>-<sha>`. |
 | `release.yml` | Pushing a tag `v<version>` matching `config/version` | Runs CI on the tag, then publishes the APK as a full release (kept, not cleaned up) and the server image as `slavian-server:v<version>`. |
-| `cleanup-dev-builds.yml` | Daily at 03:17 UTC, or manually | Deletes dev pre-releases (and their tags) older than 7 days, always keeping the newest one. A manual run can change the age or do a dry run. |
+| `cleanup-dev-builds.yml` | Daily at 03:17 UTC, or manually | Deletes dev pre-releases (and their tags) and CI run artifacts older than 7 days. A manual run can change the age, do a dry run, or delete every dev build and artifact at once (`everything`). |
 
 To test a build on a phone, open the latest **Dev build** under Releases and install the APK (allow installs from unknown sources).
 
