@@ -179,13 +179,13 @@
      "resources": {
       "amounts": {
        "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "wood": 380,
+       "grain": 430,
+       "stone": 360
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -377,14 +377,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 200,
-       "wood": 170,
-       "grain": 400,
-       "stone": 80
+       "iron": 190,
+       "wood": 230,
+       "grain": 390,
+       "stone": 40
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -413,10 +413,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":130,\"stone\":0,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":20,\"grain\":0,\"iron\":0}",
     "missing": {
-     "wood": 130,
-     "stone": 0,
+     "wood": 0,
+     "stone": 20,
      "grain": 0,
      "iron": 0
     }
@@ -597,14 +597,14 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 497.5,
-       "wood": 700,
-       "grain": 820,
-       "stone": 880
+       "iron": 487.5,
+       "wood": 790,
+       "grain": 760,
+       "stone": 874.9999999999999
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 76,
        "stone": 300
       },
@@ -799,14 +799,14 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 417.5,
-       "wood": 560,
-       "grain": 760,
-       "stone": 860
+       "iron": 407.5,
+       "wood": 690,
+       "grain": 680,
+       "stone": 844.9999999999999
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": -32,
        "stone": 300
       },
@@ -1016,14 +1016,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 417.5,
-        "wood": 560,
-        "grain": 760,
-        "stone": 860
+        "iron": 407.5,
+        "wood": 690,
+        "grain": 680,
+        "stone": 844.9999999999999
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": -32,
         "stone": 300
        },
@@ -3550,14 +3550,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 452.5,
-        "wood": 630,
-        "grain": 752.5333333333333,
-        "stone": 930
+        "iron": 442.5,
+        "wood": 795,
+        "grain": 672.5333333333333,
+        "stone": 914.9999999999999
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": -32,
         "stone": 300
        },
@@ -6123,14 +6123,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 457.5,
-        "wood": 640,
-        "grain": 752.3666666666667,
-        "stone": 940
+        "iron": 447.5,
+        "wood": 810,
+        "grain": 672.3666666666667,
+        "stone": 924.9999999999999
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": 22,
         "stone": 300
        },
@@ -8672,14 +8672,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 457.5,
-        "wood": 640,
-        "grain": 752.3666666666667,
-        "stone": 940
+        "iron": 447.5,
+        "wood": 810,
+        "grain": 672.3666666666667,
+        "stone": 924.9999999999999
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": 22,
         "stone": 300
        },
@@ -11220,14 +11220,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 506,
-        "wood": 781,
-        "grain": 648.7,
+        "iron": 497,
+        "wood": 835,
+        "grain": 582.7,
         "stone": 835
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": 292,
         "stone": 300
        },
@@ -11604,9 +11604,9 @@
        }
       ],
       "loot": {
-       "iron": 99,
-       "wood": 154,
-       "grain": 128,
+       "iron": 98,
+       "wood": 165,
+       "grain": 114,
        "stone": 165
       },
       "decision": {
@@ -14002,14 +14002,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 506,
-        "wood": 781,
-        "grain": 648.7,
+        "iron": 497,
+        "wood": 835,
+        "grain": 582.7,
         "stone": 835
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": 292,
         "stone": 300
        },
@@ -14377,9 +14377,9 @@
        }
       ],
       "loot": {
-       "iron": 99,
-       "wood": 154,
-       "grain": 128,
+       "iron": 98,
+       "wood": 165,
+       "grain": 114,
        "stone": 165
       },
       "decision": {
@@ -16645,7 +16645,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 546 resources after 5 rounds.",
+      "body": "The horde carried off 542 resources after 5 rounds.",
       "createdAt": "2026-06-01T12:26:08.957Z",
       "read": false
      },

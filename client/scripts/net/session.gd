@@ -24,6 +24,15 @@ var last_world: Dictionary = {}
 ## Music and effects volumes, 0 to 1 (M5 26).
 var music_volume := 0.6
 var effects_volume := 0.8
+## Push topics switched off (notifications.json `topics`), whether the
+## first answer to the permission ask has set them, and whether the server
+## still has to hear of them.
+var push_off: Array = []
+var push_decided := false
+var push_sync := false
+## Whether the intro picture book has been seen (it opens before the first
+## game).
+var intro_seen := false
 
 
 func _ready() -> void:
@@ -37,6 +46,10 @@ func _ready() -> void:
 		last_world = config.get_value("session", "last_world", {})
 		music_volume = config.get_value("session", "music_volume", 0.6)
 		effects_volume = config.get_value("session", "effects_volume", 0.8)
+		push_off = config.get_value("session", "push_off", [])
+		push_decided = config.get_value("session", "push_decided", false)
+		push_sync = config.get_value("session", "push_sync", false)
+		intro_seen = config.get_value("session", "intro_seen", false)
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -64,6 +77,10 @@ func save() -> void:
 	config.set_value("session", "last_world", last_world)
 	config.set_value("session", "music_volume", music_volume)
 	config.set_value("session", "effects_volume", effects_volume)
+	config.set_value("session", "push_off", push_off)
+	config.set_value("session", "push_decided", push_decided)
+	config.set_value("session", "push_sync", push_sync)
+	config.set_value("session", "intro_seen", intro_seen)
 	config.save(PATH)
 
 

@@ -185,7 +185,7 @@
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -378,14 +378,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 110,
-       "wood": 130,
+       "iron": 100,
+       "wood": 150,
        "grain": 290,
-       "stone": 100
+       "stone": 90
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -567,14 +567,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 55,
-       "stone": 75,
+       "wood": 112.5,
+       "stone": 65,
        "grain": 310,
-       "iron": 87.5
+       "iron": 77.5
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -630,29 +630,6 @@
     "load": {
      "wood": 100,
      "stone": 50,
-     "grain": 0,
-     "iron": 0
-    }
-   },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":45,\"stone\":0,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 45,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    }
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/caravans/fetch",
-   "body": {
-    "load": {
-     "wood": 100,
-     "stone": 0,
      "grain": 0,
      "iron": 0
     }
@@ -814,14 +791,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 87.5,
-       "wood": 55,
+       "iron": 77.5,
+       "wood": 12.5,
        "grain": 310,
-       "stone": 75
+       "stone": 15
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -835,16 +812,16 @@
      }
     },
     "caravan": {
-     "id": 2,
+     "id": 1,
      "villageId": 1,
      "destinationVillageId": null,
-     "kind": "fetch",
+     "kind": "deliver",
      "caravans": 1,
      "cargo": {
       "iron": 0,
       "wood": 100,
       "grain": 0,
-      "stone": 0
+      "stone": 50
      },
      "carriedBack": null,
      "status": "outbound",
@@ -872,6 +849,23 @@
      "ambush": null
     },
     "serverTime": "2026-06-01T08:15:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/caravans/fetch",
+   "body": {
+    "load": {
+     "wood": 100,
+     "stone": 0,
+     "grain": 0,
+     "iron": 0
+    }
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "That takes 1 caravan; 0 at home"
    }
   },
   {
@@ -1053,6 +1047,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
+       "gift": "2026-06-01T08:15:00.000Z",
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {}
@@ -1215,14 +1210,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 90,
-        "wood": 60.5,
+        "iron": 80,
+        "wood": 20.75,
         "grain": 316.6666666666667,
-        "stone": 80
+        "stone": 20
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 330,
+        "wood": 495.00000000000006,
         "grain": 400,
         "stone": 300
        },
@@ -1570,16 +1565,16 @@
     "run": null,
     "caravans": [
      {
-      "id": 2,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
-      "kind": "fetch",
+      "kind": "deliver",
       "caravans": 1,
       "cargo": {
        "iron": 0,
        "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "carriedBack": {
        "iron": 0,
@@ -1616,9 +1611,9 @@
      "level": 1,
      "amounts": {
       "iron": 0,
-      "wood": 0,
+      "wood": 100,
       "grain": 0,
-      "stone": 0
+      "stone": 50
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -3675,14 +3670,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 90,
-       "wood": 60.5,
+       "iron": 80,
+       "wood": 20.75,
        "grain": 316.6666666666667,
-       "stone": 80
+       "stone": 20
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 330,
+       "wood": 495.00000000000006,
        "grain": 400,
        "stone": 300
       },
@@ -3696,7 +3691,7 @@
      }
     },
     "caravan": {
-     "id": 3,
+     "id": 2,
      "villageId": 1,
      "destinationVillageId": null,
      "kind": "fetch",
@@ -3764,6 +3759,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
+       "gift": "2026-06-01T08:15:00.000Z",
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {}
@@ -3926,14 +3922,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 165,
-        "wood": 225.5,
+        "iron": 155,
+        "wood": 368.25,
         "grain": 516.6666666666667,
-        "stone": 230
+        "stone": 220
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 330,
+        "wood": 495.00000000000006,
         "grain": 400,
         "stone": 300
        },
@@ -4281,7 +4277,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 3,
+      "id": 2,
       "villageId": 1,
       "destinationVillageId": null,
       "kind": "fetch",
@@ -4294,9 +4290,9 @@
       },
       "carriedBack": {
        "iron": 0,
-       "wood": 0,
+       "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "status": "done",
       "path": [
@@ -4323,16 +4319,16 @@
       "ambush": null
      },
      {
-      "id": 2,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
-      "kind": "fetch",
+      "kind": "deliver",
       "caravans": 1,
       "cargo": {
        "iron": 0,
        "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "carriedBack": {
        "iron": 0,
@@ -6276,6 +6272,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
+       "gift": "2026-06-01T08:15:00.000Z",
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {}
@@ -6438,14 +6435,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 464,
+        "iron": 456,
         "wood": 820,
         "grain": 820,
         "stone": 820
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 330,
+        "wood": 495.00000000000006,
         "grain": 400,
         "stone": 300
        },
@@ -6707,7 +6704,7 @@
        }
       ],
       "loot": {
-       "iron": 101,
+       "iron": 99,
        "wood": 180,
        "grain": 180,
        "stone": 180
@@ -6926,7 +6923,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 3,
+      "id": 2,
       "villageId": 1,
       "destinationVillageId": null,
       "kind": "fetch",
@@ -6939,9 +6936,9 @@
       },
       "carriedBack": {
        "iron": 0,
-       "wood": 0,
+       "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "status": "done",
       "path": [
@@ -6968,16 +6965,16 @@
       "ambush": null
      },
      {
-      "id": 2,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
-      "kind": "fetch",
+      "kind": "deliver",
       "caravans": 1,
       "cargo": {
        "iron": 0,
        "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "carriedBack": {
        "iron": 0,
@@ -9062,14 +9059,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 536.5,
-       "wood": 879.5,
+       "iron": 528.5,
+       "wood": 900,
        "grain": 900,
        "stone": 965
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 330,
+       "wood": 495.00000000000006,
        "grain": 400,
        "stone": 300
       },
@@ -9083,7 +9080,7 @@
      }
     },
     "caravan": {
-     "id": 4,
+     "id": 3,
      "villageId": 1,
      "destinationVillageId": null,
      "kind": "deliver",
@@ -9151,7 +9148,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "gift": "2026-06-01T11:55:00.000Z",
+       "gift": "2026-06-01T08:15:00.000Z",
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {}
@@ -9314,14 +9311,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 539,
-        "wood": 885,
+        "iron": 531,
+        "wood": 908.25,
         "grain": 906.6666666666666,
         "stone": 970
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 330,
+        "wood": 495.00000000000006,
         "grain": 400,
         "stone": 300
        },
@@ -9583,7 +9580,7 @@
        }
       ],
       "loot": {
-       "iron": 101,
+       "iron": 99,
        "wood": 180,
        "grain": 180,
        "stone": 180
@@ -9802,7 +9799,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 4,
+      "id": 3,
       "villageId": 1,
       "destinationVillageId": null,
       "kind": "deliver",
@@ -9844,7 +9841,7 @@
       "ambush": null
      },
      {
-      "id": 3,
+      "id": 2,
       "villageId": 1,
       "destinationVillageId": null,
       "kind": "fetch",
@@ -9857,9 +9854,9 @@
       },
       "carriedBack": {
        "iron": 0,
-       "wood": 0,
+       "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "status": "done",
       "path": [
@@ -9886,16 +9883,16 @@
       "ambush": null
      },
      {
-      "id": 2,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
-      "kind": "fetch",
+      "kind": "deliver",
       "caravans": 1,
       "cargo": {
        "iron": 0,
        "wood": 100,
        "grain": 0,
-       "stone": 0
+       "stone": 50
       },
       "carriedBack": {
        "iron": 0,
@@ -11818,15 +11815,6 @@
     "notifications": [
      {
       "id": 12,
-      "kind": "onboarding",
-      "tier": "digest",
-      "title": "Done: Gift a teammate",
-      "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T11:55:00.000Z",
-      "read": false
-     },
-     {
-      "id": 11,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -11835,7 +11823,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -11844,7 +11832,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -11853,7 +11841,7 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "hero",
       "tier": "digest",
       "title": "Ilya is wounded",
@@ -11862,16 +11850,16 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 641 resources after 1 rounds.",
+      "body": "The horde carried off 639 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:26:13.200Z",
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -11880,7 +11868,7 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -11889,12 +11877,21 @@
       "read": false
      },
      {
-      "id": 4,
+      "id": 5,
       "kind": "research_done",
       "tier": "digest",
       "title": "Felling Axes researched",
       "body": "Woodcutters and forest outposts cut 10% more wood.",
       "createdAt": "2026-06-01T08:15:24.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "onboarding",
+      "tier": "digest",
+      "title": "Done: Gift a teammate",
+      "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T08:15:00.000Z",
       "read": false
      },
      {

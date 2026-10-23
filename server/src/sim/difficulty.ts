@@ -52,7 +52,7 @@ export interface QuietWindow {
 // moves to its end.
 export function afterQuiet(window: QuietWindow | null, at: Date): Date {
   if (!window) return at;
-  const prefs = { quietStart: window.start, quietEnd: window.end, utcOffsetMinutes: window.utcOffsetMinutes, digestHour: 0 };
+  const prefs = { quietStart: window.start, quietEnd: window.end, utcOffsetMinutes: window.utcOffsetMinutes, digestHour: 0, pushOff: [] };
   if (!inQuietHours(at, prefs)) return at;
   const minute = Math.floor(at.getTime() / MS_PER_MINUTE);
   const local = (((minute + window.utcOffsetMinutes) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;

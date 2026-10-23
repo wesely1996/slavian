@@ -430,6 +430,7 @@ const notificationsFileSchema = z.object({
   waveWarningHours: z.number().positive(),
   bigBuildLevel: z.number().int().positive(),
   pushExpiryHours: z.number().positive(),
+  topics: z.record(z.string(), z.array(z.string())),
 });
 
 const armiesFileSchema = z.object({

@@ -892,7 +892,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // Preferences and a device.
     const prefs = await call('PATCH', '/v1/me/notifications', mira.token, { quietStart: 1320, quietEnd: 420, digestHour: 20 });
-    expect(prefs.body.prefs).toEqual({ quietStart: 1320, quietEnd: 420, utcOffsetMinutes: 0, digestHour: 20 });
+    expect(prefs.body.prefs).toEqual({ quietStart: 1320, quietEnd: 420, utcOffsetMinutes: 0, digestHour: 20, pushOff: [] });
     expect((await call('POST', '/v1/me/devices', mira.token, { token: 'phone-token-123', platform: 'android' })).status).toBe(200);
 
     // A small build goes to the digest (its getting-started notice is not what this test is about).
@@ -929,6 +929,16 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(await pushPending(db, scheduler.data, sender, noon)).toBeGreaterThanOrEqual(2);
     expect(sent.some((line) => line.startsWith('phone-token-123: A horde is coming'))).toBe(true);
     expect(sent.some((line) => /build/i.test(line))).toBe(false);
+
+    // A topic switched off isn't pushed (unknown topics are dropped).
+    const off = await call('PATCH', '/v1/me/notifications', mira.token, { pushOff: ['hordes', 'hordes', 'nonsense'] });
+    expect(off.body.prefs).toMatchObject({ digestHour: 20, pushOff: ['hordes'] });
+    sent.length = 0;
+    await db.query(`UPDATE notifications SET pushed_at = NULL WHERE account_id = $1`, [mira.accountId]);
+    expect(await pushPending(db, scheduler.data, sender, noon)).toBeGreaterThanOrEqual(1);
+    expect(sent.some((line) => /A horde is coming/.test(line))).toBe(false);
+    expect(sent.length).toBeGreaterThan(0);
+    await call('PATCH', '/v1/me/notifications', mira.token, { pushOff: [] });
 
     // The digest at 20:00 sums up the rest.
     const { rows } = await db.query<{ due_at: Date }>(

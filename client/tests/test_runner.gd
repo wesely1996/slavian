@@ -244,6 +244,12 @@ func _test_wave_math() -> void:
 	_check(mid.from == Vector2i(0, -7) and mid.to == Vector2i(1, -7) and is_equal_approx(mid.t, 0.5), "halfway along the second leg")
 	_check(WaveMath.current_hex(wave, t0 + 1.8) == Vector2i(0, -7), "still on the hex it is leaving")
 	_check(WaveMath.current_hex(wave, t0 + 2.6) == Vector2i(1, -7), "on the next hex past the midpoint")
+	var fighting := wave.duplicate()
+	fighting.status = "battling"
+	fighting.id = 99
+	var ambush := [{"waveId": 99, "villageId": null, "q": 0, "r": -7, "status": "ongoing"}]
+	_check(WaveMath.progress(fighting, t0 + 10.0, ambush).to == Vector2i(0, -7), "a horde fighting in the field stands where it was stopped, not at its target")
+	_check(WaveMath.current_hex(fighting, t0 + 10.0, [{"waveId": 99, "villageId": null, "q": 0, "r": -7, "status": "won"}]) != Vector2i(0, -7), "a finished field battle no longer holds it")
 	var done := WaveMath.progress(wave, t0 + 10.0)
 	_check(done.to == Vector2i(1, -7) and is_equal_approx(done.t, 1.0), "stops at the target")
 	_check(WaveMath.progress({"status": "scheduled", "spawnAt": wave.spawnAt, "path": null}, t0).is_empty(), "no position before spawning")
@@ -404,6 +410,7 @@ func _test_field() -> void:
 	var hold := {"orders": "hold", "status": "stationed", "targetVillageId": null, "target": [2, -1]}
 	_check(ArmyText.held_hex(hold) == Vector2i(2, -1), "held hex")
 	_check(ArmyText.status(hold, ArmyText.target_name(hold, func(_id: Variant) -> String: return "?"), 0.0) == "Holding (2, -1)", "hold status")
+	_check(ArmyText.target_name({"targetVillageId": null, "target": [0, 0]}, func(_id: Variant) -> String: return "?") == "the Holy City", "troops holding the Holy City say so")
 	var battle := {"villageId": null, "q": 2, "r": -1, "status": "raided", "rounds": [], "setup": {"ambush": true, "fort": true}}
 	_check(BattleText.setup_text(battle) == "Ambush, Fort", "setup text: %s" % BattleText.setup_text(battle))
 	_check(BattleText.outcome(battle, "(2, -1)").begins_with("Our army fell back from (2, -1)"), "field battle lost")
@@ -533,6 +540,11 @@ func _test_local_mapgen() -> void:
 		_check(same, "noise %d" % int(case.seed))
 	var data := LocalData.load_data()
 	_check(data.has("terrain") and data.has("buildings") and data.buildings.has("buildings"), "bundled game data")
+	var topics: Array = data.notifications.topics.keys()
+	topics.sort()
+	var listed: Array = InboxText.PUSH_TOPICS.duplicate()
+	listed.sort()
+	_check(topics == listed, "the settings list every push topic in notifications.json: %s" % [topics])
 	for case in fixture.maps:
 		var map := LocalMapgen.generate(data, int(case.seed), int(case.players))
 		var terrain: Array = []

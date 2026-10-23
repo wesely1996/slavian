@@ -3,7 +3,7 @@
 import type { GameData } from '../data/index.js';
 import { deviceTokens, forgetDevice, loadPrefs, markPushed, unpushed } from '../db/notifications.js';
 import { inTransaction, type Db } from '../db/pool.js';
-import { inQuietHours } from '../sim/notifications.js';
+import { inQuietHours, pushWanted } from '../sim/notifications.js';
 import type { PushSender } from './sender.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -14,8 +14,11 @@ export async function pushPending(db: Db, data: GameData, sender: PushSender | n
     let sent = 0;
     for (const n of await unpushed(client)) {
       const expired = now.getTime() - n.createdAt.getTime() > data.notifications.pushExpiryHours * MS_PER_HOUR;
-      const tokens = sender && !expired ? await deviceTokens(client, n.accountId) : [];
-      if (tokens.length && inQuietHours(now, await loadPrefs(client, n.accountId))) continue;
+      const prefs = await loadPrefs(client, n.accountId);
+      // A topic switched off: marked pushed, never sent.
+      const wanted = !expired && pushWanted(data.notifications.topics, prefs, n.kind);
+      const tokens = sender && wanted ? await deviceTokens(client, n.accountId) : [];
+      if (tokens.length && inQuietHours(now, prefs)) continue;
       if (tokens.length) {
         const invalid = await sender!.send(tokens, {
           title: n.title,

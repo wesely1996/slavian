@@ -2,6 +2,10 @@ class_name InboxText
 extends RefCounted
 ## Words for the inbox and notification settings.
 
+## The push topics (data/notifications.json `topics`), in the order the
+## settings list them.
+const PUSH_TOPICS := ["hordes", "battles", "outposts", "buildings", "world", "digest"]
+
 
 ## "5m ago", "3h ago", "2d ago".
 static func ago(created_unix: float, now: float) -> String:

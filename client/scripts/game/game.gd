@@ -337,11 +337,16 @@ func leader(leader_id: Variant) -> Dictionary:
 	return {}
 
 
+## The horde's battle: the one going on, else its latest.
 func battle_for(wave_id: int) -> Dictionary:
+	var found := {}
 	for battle in battles:
-		if int(battle.waveId) == wave_id:
-			return battle
-	return {}
+		if battle.waveId != null and int(battle.waveId) == wave_id:
+			if battle.status == "ongoing":
+				return battle
+			if found.is_empty() or int(battle.id) > int(found.id):
+				found = battle
+	return found
 
 
 func missions_for(wave_id: int) -> Array:

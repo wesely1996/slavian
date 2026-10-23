@@ -358,6 +358,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 - **Push only for:** wave arriving within 6 h, a village/outpost under attack, big build finished, teammate request/delegation.
 - Everything else goes into **one daily digest**.
 - Respect the device's and the group's quiet hours.
+- **Topics:** players switch pushes off by topic in Settings (hordes, battles, outposts, buildings, the bridge and the wilds, the digest; `topics` in data/notifications.json). The phone asks for permission once; the first answer turns every topic on (allowed) or off (denied).
 
 ### 11.4 Delegation
 - A player can grant a teammate temporary control (e.g. 1–7 days). The delegate's actions are logged and visible.
