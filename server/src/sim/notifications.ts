@@ -9,9 +9,16 @@ export interface NotifyPrefs {
   readonly quietEnd: number | null;
   readonly utcOffsetMinutes: number;
   readonly digestHour: number;
+  // Push topics switched off (notifications.json `topics`).
+  readonly pushOff: readonly string[];
 }
 
-export const DEFAULT_PREFS: NotifyPrefs = { quietStart: null, quietEnd: null, utcOffsetMinutes: 0, digestHour: 18 };
+export const DEFAULT_PREFS: NotifyPrefs = { quietStart: null, quietEnd: null, utcOffsetMinutes: 0, digestHour: 18, pushOff: [] };
+
+// Whether a notice of `kind` may be pushed: not when its topic is off.
+export function pushWanted(topics: Readonly<Record<string, readonly string[]>>, prefs: NotifyPrefs, kind: string): boolean {
+  return !prefs.pushOff.some((topic) => topics[topic]?.includes(kind));
+}
 
 function localMinute(at: Date, prefs: NotifyPrefs): number {
   const minutes = Math.floor(at.getTime() / MS_PER_MINUTE) + prefs.utcOffsetMinutes;

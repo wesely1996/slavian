@@ -77,12 +77,13 @@ const createWorldBody = z.object({
   difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
-// `plot` targets a field, center slot or outpost ("o3,-2"); `building`
+// `plot` targets a field, center slot, the walls ("w"), a wall slot ("t0")
+// or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
 // `building`.
 const buildBody = z
   .object({
-    plot: z.string().regex(/^([fc]\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
+    plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
     building: z.string().min(1).max(64).optional(),
   })
   .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });
@@ -127,6 +128,9 @@ const prefsBody = z.object({
   quietEnd: minuteOfDay.nullable().optional(),
   utcOffsetMinutes: z.number().int().min(-14 * 60).max(14 * 60).optional(),
   digestHour: z.number().int().min(0).max(23).optional(),
+  // Push topics to switch off (notifications.json `topics`); unknown ones
+  // are dropped.
+  pushOff: z.array(z.string().max(40)).max(40).optional(),
 });
 const deviceBody = z.object({ token: z.string().min(10).max(4096), platform: z.enum(['android', 'ios', 'web']) });
 // A village to go to, or (orders 'hold') a hex to hold.
@@ -267,6 +271,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         quietEnd: body.quietEnd === undefined ? current.quietEnd : body.quietEnd,
         utcOffsetMinutes: body.utcOffsetMinutes ?? current.utcOffsetMinutes,
         digestHour: body.digestHour ?? current.digestHour,
+        pushOff: body.pushOff === undefined ? current.pushOff : [...new Set(body.pushOff)].filter((topic) => topic in scheduler.data.notifications.topics),
       };
       await savePrefs(client, account.id, next);
       return next;

@@ -8,6 +8,8 @@ const START_SCENE := "res://scenes/start.tscn"
 const UI_REFRESH_SEC := 0.25
 const NEGATIVE := UiTheme.MADDER
 const REPORT_MAX := 4000
+## The Holy City stands in the middle of the map.
+const HOLY_CITY := Vector2i.ZERO
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: MapCamera = $MapCamera
@@ -64,7 +66,7 @@ var _road_village := 0
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 var _caravan_to := 0
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
-## Army form: destination, troops and orders.
+## Army form: destination (village id; 0: the Holy City), troops and orders.
 var _army_to := 0
 var _army_units: Dictionary[String, int] = {}
 var _army_orders := "support"
@@ -1155,7 +1157,7 @@ func _hex_panel() -> void:
 	var cell := _selected
 	var parts := []
 	var here := WaveMath.visible_waves(Game.waves).filter(func(wave: Dictionary) -> bool:
-		return WaveMath.current_hex(wave, Game.server_now()) == cell)
+		return WaveMath.current_hex(wave, Game.server_now(), Game.battles) == cell)
 	if not here.is_empty():
 		parts.append(["horde", "icon/threat", tr("Hordes here"), func() -> void:
 			for wave in here:
@@ -1726,16 +1728,21 @@ func _armies_section(village: Dictionary) -> void:
 	_panel_body.add_child(range_row)
 
 
-## Troops from this village to another: where, on what orders, and who.
+## Troops from this village to another, or to guard the Holy City: where,
+## on what orders, and who. Nearest first; `_army_to` 0 is the Holy City.
 func _send_troops(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	var home_units := Rules.garrison_at(village, Game.server_now())
-	var targets := Game.villages.values().filter(func(v: Dictionary) -> bool: return int(v.id) != village_id)
-	if targets.is_empty():
-		_panel_body.add_child(UI.label(tr("No other village to send troops to yet."), UI.SMALL_SIZE, UI.MUTED))
-		return
+	var here := Vector2i(int(village.q), int(village.r))
+	var targets: Array = [{"id": 0, "name": tr("The Holy City"), "at": HOLY_CITY}]
+	for v in Game.villages.values():
+		if int(v.id) != village_id:
+			targets.append({"id": int(v.id), "name": tr("%s (%s)") % [v.name, Game.member_name(int(v.ownerAccountId))], "at": Vector2i(int(v.q), int(v.r))})
+	targets.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return HexMath.distance(here, a.at) < HexMath.distance(here, b.at))
 	_panel_body.add_child(UI.label(tr("Send troops"), UI.HEADING_SIZE))
-	var labels := targets.map(func(v: Dictionary) -> String: return tr("%s (%s)") % [v.name, Game.member_name(int(v.ownerAccountId))])
+	var labels := targets.map(func(t: Dictionary) -> String:
+		var away := HexMath.distance(here, t.at)
+		return tr_n("%s · %d hex", "%s · %d hexes", away) % [t.name, away])
 	var selected := 0
 	for i in targets.size():
 		if int(targets[i].id) == _army_to:
@@ -1746,22 +1753,32 @@ func _send_troops(village: Dictionary) -> void:
 		_army_to = int(targets[i].id)
 		_rebuild_panel())
 	_panel_body.add_child(picker)
-	if _army_orders == "hold":
-		_army_orders = "support"
-	var kinds := ["support", "reinforce", "harass"]
-	var kind_row := UI.hbox(8)
-	for kind in kinds:
-		var b := UI.button(String(kind).capitalize(), func() -> void:
-			_army_orders = kind
-			_rebuild_panel())
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.disabled = _army_orders == kind
-		kind_row.add_child(b)
-	kind_row.add_child(UI.info(ArmyText.order_text(_army_orders)))
-	_panel_body.add_child(kind_row)
+	var body := {}
+	if _army_to == 0:
+		# The Holy City: they hold it beside its guard, against every horde
+		# that comes to its gates or passes through.
+		_panel_body.add_child(UI.label(tr("They stand with the Holy City's guard and fight every horde that reaches it, until called home."), UI.SMALL_SIZE, UI.MUTED))
+		body = {"target": {"q": HOLY_CITY.x, "r": HOLY_CITY.y}, "orders": "hold"}
+	else:
+		if _army_orders == "hold":
+			_army_orders = "support"
+		var kinds := ["support", "reinforce", "harass"]
+		var kind_row := UI.hbox(8)
+		for kind in kinds:
+			var b := UI.button(String(kind).capitalize(), func() -> void:
+				_army_orders = kind
+				_rebuild_panel())
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			b.disabled = _army_orders == kind
+			kind_row.add_child(b)
+		kind_row.add_child(UI.info(ArmyText.order_text(_army_orders)))
+		_panel_body.add_child(kind_row)
+		body = {"targetVillageId": _army_to, "orders": _army_orders}
 	_unit_pickers(home_units, false, "send")
 	var go := UI.button(tr("Send"), func() -> void:
-		_send_army(village_id, {"targetVillageId": _army_to, "units": _picked_units(home_units), "orders": _army_orders}))
+		var order := body.duplicate()
+		order.units = _picked_units(home_units)
+		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, home_units)
 

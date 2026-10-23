@@ -480,7 +480,7 @@ func _draw_forecast(wave: Dictionary) -> void:
 
 
 func _draw_horde(wave: Dictionary, now: float) -> void:
-	var p := WaveMath.progress(wave, now)
+	var p := WaveMath.progress(wave, now, Game.battles)
 	if p.is_empty():
 		return
 	var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)

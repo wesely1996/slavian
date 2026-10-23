@@ -66,6 +66,12 @@ change: they keep calling `Api` and listening to `Live`.
   New rules come with new steps in a scenario. Where play would take too
   long, a `set` step jumps the world ahead (the bridge's state, the group's
   Ember) on both sides.
+- **Coverage:** `server/test/parity.test.ts` fails when an API route is
+  played by no scenario (unless it's listed as one a solo world never
+  calls, with the reason), when a scenario calls a route the server lacks,
+  or when no scenario builds on some kind of plot (field, centre, walls,
+  tower slot, outpost). A new route or plot kind comes with a scenario
+  step, so the server and the solo engine are held to the same answers.
 - **Whole fixtures:** `server/test/start-fixture.test.ts` records a real
   world start. `UPDATE_FIXTURES=1` with `TEST_DATABASE_URL` rewrites it
   after a rule change, and the client test compares the local engine's view

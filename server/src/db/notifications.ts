@@ -122,22 +122,29 @@ interface PrefsRow {
   quiet_end: number | null;
   utc_offset_minutes: number;
   digest_hour: number;
+  push_off: string[];
 }
 
 export async function loadPrefs(client: DbClient, accountId: number): Promise<NotifyPrefs> {
   const { rows } = await client.query<PrefsRow>(
-    'SELECT quiet_start, quiet_end, utc_offset_minutes, digest_hour FROM accounts WHERE id = $1',
+    'SELECT quiet_start, quiet_end, utc_offset_minutes, digest_hour, push_off FROM accounts WHERE id = $1',
     [accountId],
   );
   const row = rows[0];
   if (!row) return DEFAULT_PREFS;
-  return { quietStart: row.quiet_start, quietEnd: row.quiet_end, utcOffsetMinutes: row.utc_offset_minutes, digestHour: row.digest_hour };
+  return {
+    quietStart: row.quiet_start,
+    quietEnd: row.quiet_end,
+    utcOffsetMinutes: row.utc_offset_minutes,
+    digestHour: row.digest_hour,
+    pushOff: row.push_off,
+  };
 }
 
 export async function savePrefs(client: DbClient, accountId: number, prefs: NotifyPrefs): Promise<void> {
   await client.query(
-    'UPDATE accounts SET quiet_start = $2, quiet_end = $3, utc_offset_minutes = $4, digest_hour = $5 WHERE id = $1',
-    [accountId, prefs.quietStart, prefs.quietEnd, prefs.utcOffsetMinutes, prefs.digestHour],
+    'UPDATE accounts SET quiet_start = $2, quiet_end = $3, utc_offset_minutes = $4, digest_hour = $5, push_off = $6 WHERE id = $1',
+    [accountId, prefs.quietStart, prefs.quietEnd, prefs.utcOffsetMinutes, prefs.digestHour, prefs.pushOff],
   );
 }
 

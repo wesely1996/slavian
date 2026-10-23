@@ -39,10 +39,16 @@ const FRONT_ICONS := {
 
 ## {"from": Vector2i, "to": Vector2i, "t": 0..1} for the leg the horde is on,
 ## or {} when the wave has no path yet.
-static func progress(wave: Dictionary, at_unix: float) -> Dictionary:
+static func progress(wave: Dictionary, at_unix: float, battles: Array = []) -> Dictionary:
 	var path: Variant = wave.get("path")
 	if not path is Array or path.is_empty():
 		return {}
+	# Fighting in the field (an ambush, a held hex): it stands where it was
+	# stopped, not at its target.
+	var field := field_battle(wave, battles)
+	if not field.is_empty():
+		var cell := Vector2i(int(field.q), int(field.r))
+		return {"from": cell, "to": cell, "t": 1.0}
 	var elapsed_ms := (at_unix - TimeUtil.parse_iso(wave.spawnAt)) * 1000.0
 	var last: Array = path[path.size() - 1]
 	if wave.status != "marching" or elapsed_ms >= float(last[2]):
@@ -64,11 +70,21 @@ static func progress(wave: Dictionary, at_unix: float) -> Dictionary:
 
 
 ## The hex the horde currently stands on (or is about to leave).
-static func current_hex(wave: Dictionary, at_unix: float) -> Vector2i:
-	var p := progress(wave, at_unix)
+static func current_hex(wave: Dictionary, at_unix: float, battles: Array = []) -> Vector2i:
+	var p := progress(wave, at_unix, battles)
 	if p.is_empty():
 		return Vector2i.MAX
 	return p.to if p.t >= 0.5 else p.from
+
+
+## The battle in the open that `wave` is fighting ({} if none).
+static func field_battle(wave: Dictionary, battles: Array) -> Dictionary:
+	if wave.get("status") != "battling":
+		return {}
+	for battle in battles:
+		if battle.get("waveId") != null and int(battle.waveId) == int(wave.id) and battle.get("villageId") == null and battle.get("status") == "ongoing":
+			return battle
+	return {}
 
 
 ## Hordes on the map: marching, or at their target (camped or fighting).

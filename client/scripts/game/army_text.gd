@@ -69,6 +69,8 @@ static func timeline(army: Dictionary, target_name: String, now: float) -> Strin
 ## Where it is headed: a village's name, or the hex it holds.
 static func target_name(army: Dictionary, village_name: Callable) -> String:
 	if army.get("targetVillageId") == null and army.get("target") is Array:
+		if int(army.target[0]) == 0 and int(army.target[1]) == 0:
+			return UI.t("the Holy City")
 		return "(%d, %d)" % [int(army.target[0]), int(army.target[1])]
 	return village_name.call(army.targetVillageId)
 

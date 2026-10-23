@@ -87,7 +87,7 @@ describe('queueTraining', () => {
     const at = state.ledger.settledAt;
     const before = amountsAt(state.ledger, at);
     const first = queueTraining(data, state, 'spearman', 3, at, 1);
-    expect(amountsAt(first.state.ledger, at).wood).toBe(before.wood - 3 * 50);
+    expect(amountsAt(first.state.ledger, at).wood).toBe(before.wood - 3 * data.units.units.spearman!.cost.wood);
     const second = queueTraining(data, first.state, 'archer', 2, at, 1);
     expect(second.batch.startsAt).toEqual(batchCompletesAt(first.batch));
     state = second.state;

@@ -1,7 +1,8 @@
 // The village rules in a solo session (docs/local-engine.md): builds, a
 // full queue, training before and after the barracks, the stance, outposts
 // (too poor, out of range, claimed, abandoned too early and then on time),
-// renaming, claiming rewards, too many units, and waits for the clock.
+// renaming, claiming rewards, too many units, the walls and a tower slot,
+// peaceful hours, and waits for the clock.
 import { hexDistance, neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler, type Step } from './scenario.js';
 
@@ -45,6 +46,18 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
     { method: 'POST', path: '/v1/villages/1/outposts/abandon', body: { q: outpost.q, r: outpost.r } },
     { method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 50 } },
     { advance: 45 * MINUTE + 17_000 },
+    { method: 'GET', path: '/v1/worlds/-1' },
+    // The walls, and a tower slot before and after they open it.
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 't0', building: 'archer_tower' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'w' } },
+    { advance: 60 * MINUTE },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 't0', building: 'archer_tower' } },
+    // An outpost claimed again, then raised a level.
+    { method: 'POST', path: '/v1/villages/1/outposts', body: { q: outpost.q, r: outpost.r } },
+    { advance: 60 * MINUTE },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: `o${outpost.q},${outpost.r}` } },
+    // Peaceful hours, then the world that reports them.
+    { method: 'PUT', path: '/v1/worlds/-1/quiet', body: { start: 1320, end: 420, utcOffsetMinutes: 60 } },
     { method: 'GET', path: '/v1/worlds/-1' },
   ];
   for (const step of steps) await play(step);

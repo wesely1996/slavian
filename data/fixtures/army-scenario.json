@@ -185,7 +185,7 @@
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -385,7 +385,7 @@
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -577,13 +577,13 @@
      "resources": {
       "amounts": {
        "iron": 120,
-       "wood": 100,
+       "wood": 225,
        "grain": 383.33333333333326,
        "stone": 300
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 130,
        "stone": 300
       },
@@ -779,13 +779,13 @@
      "resources": {
       "amounts": {
        "iron": 100,
-       "wood": 20,
+       "wood": 165,
        "grain": 343.33333333333326,
        "stone": 260
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": 22,
        "stone": 300
       },
@@ -1008,13 +1008,13 @@
      "resources": {
       "amounts": {
        "iron": 202.49999999999994,
-       "wood": 324.9999999999999,
+       "wood": 650,
        "grain": 102.36666666666656,
        "stone": 800
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": -518.0000000000001,
        "stone": 300
       },
@@ -1208,13 +1208,13 @@
      "resources": {
       "amounts": {
        "iron": 202.49999999999994,
-       "wood": 324.9999999999999,
+       "wood": 650,
        "grain": 102.36666666666656,
        "stone": 800
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 300,
+       "wood": 450,
        "grain": -518.0000000000001,
        "stone": 300
       },
@@ -1456,13 +1456,13 @@
       "resources": {
        "amounts": {
         "iron": 204.99999999999994,
-        "wood": 329.9999999999999,
+        "wood": 657.5,
         "grain": 93.73333333333322,
         "stone": 805
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": -464,
         "stone": 300
        },
@@ -4116,13 +4116,13 @@
       "resources": {
        "amounts": {
         "iron": 264.99999999999994,
-        "wood": 449.9999999999999,
+        "wood": 837.5,
         "grain": 0,
         "stone": 925
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": -248,
         "stone": 300
        },
@@ -6618,9 +6618,9 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":140.0000000000001,\"stone\":0,\"grain\":200,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":200,\"iron\":0}",
     "missing": {
-     "wood": 140.0000000000001,
+     "wood": 0,
      "stone": 0,
      "grain": 200,
      "iron": 0
@@ -6845,13 +6845,13 @@
       "resources": {
        "amounts": {
         "iron": 264.99999999999994,
-        "wood": 449.9999999999999,
+        "wood": 837.5,
         "grain": 0,
         "stone": 925
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": -248,
         "stone": 300
        },
@@ -9655,7 +9655,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 300,
+        "wood": 450,
         "grain": 184,
         "stone": 300
        },

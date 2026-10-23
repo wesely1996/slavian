@@ -1,7 +1,33 @@
 {
   "version": 1,
-  "_comment": "Push (outside the player's quiet hours) for what needs attention: a horde due at your village within `waveWarningHours` game hours, a battle at your village, a raided outpost, an Elder's Hall level or any building reaching `bigBuildLevel`. Everything else waits for the daily digest at the player's digest hour. Pushes not sent within `pushExpiryHours` real hours are dropped.",
+  "_comment": "Push (outside the player's quiet hours) for what needs attention: a horde due at your village within `waveWarningHours` game hours, a battle at your village, a raided outpost, an Elder's Hall level or any building reaching `bigBuildLevel`. Everything else waits for the daily digest at the player's digest hour. Pushes not sent within `pushExpiryHours` real hours are dropped. Players switch pushes off by `topics`, each a group of notice kinds; a notice of a kind in no topic always goes.",
   "waveWarningHours": 6,
   "bigBuildLevel": 5,
-  "pushExpiryHours": 24
+  "pushExpiryHours": 24,
+  "topics": {
+    "hordes": [
+      "wave_soon"
+    ],
+    "battles": [
+      "under_attack",
+      "razing",
+      "razed",
+      "refuge"
+    ],
+    "outposts": [
+      "outpost_raided"
+    ],
+    "buildings": [
+      "build_done"
+    ],
+    "world": [
+      "bridge",
+      "ritual",
+      "camp",
+      "bandit"
+    ],
+    "digest": [
+      "digest"
+    ]
+  }
 }

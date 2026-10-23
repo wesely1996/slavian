@@ -20,23 +20,41 @@ const TEXT_SIZE_LABELS := ["Small", "Normal", "Large"]  # tr
 ## World lists show this many at a time, and turn pages for the rest.
 const WORLDS_PER_PAGE := 4
 
+## Page headings, each on a line of its own for the string extractor (# tr).
 const PAGE_TITLES := {
-	"play": "Play",
-	"solo": "Play solo",
-	"solo_new": "New solo world",
-	"friends": "Play with friends",
-	"friends_new": "New co-op world",
-	"join": "Join with a code",
-	"pick_hero": "Choose your hero",
-	"pick_clan": "Choose your clan",
-	"settings": "Settings",
-	"language": "Language",
-	"text_size": "Text size",
-	"sound": "Sound",
-	"account": "Account",
-	"help": "Help and support",
-	"credits": "Credits",
-}  # tr
+	"play":
+		"Play",  # tr
+	"solo":
+		"Play solo",  # tr
+	"solo_new":
+		"New solo world",  # tr
+	"friends":
+		"Play with friends",  # tr
+	"friends_new":
+		"New co-op world",  # tr
+	"join":
+		"Join with a code",  # tr
+	"pick_hero":
+		"Choose your hero",  # tr
+	"pick_clan":
+		"Choose your clan",  # tr
+	"settings":
+		"Settings",  # tr
+	"language":
+		"Language",  # tr
+	"text_size":
+		"Text size",  # tr
+	"sound":
+		"Sound",  # tr
+	"notifications":
+		"Notifications",  # tr
+	"account":
+		"Account",  # tr
+	"help":
+		"Help and support",  # tr
+	"credits":
+		"Credits",  # tr
+}
 
 var _status: Label
 var _content: VBoxContainer
@@ -269,6 +287,7 @@ func _render(page: String) -> void:
 		"language": _language_page()
 		"text_size": _text_size_page()
 		"sound": _sound_page()
+		"notifications": _notifications_page()
 		"account": _account_page()
 		"help": _help_page()
 		"credits": _credits_page()
@@ -289,7 +308,12 @@ func _door(text: String, about: String, page: String, icon_id := "", primary := 
 ## Play first and largest, then Settings, Help and Support us; Quit apart at
 ## the bottom.
 func _home_page() -> void:
-	var play := UI.primary(tr("Play"), func() -> void: _open("play"), "icon/play")
+	# The first time, the picture book comes before the worlds.
+	var play := UI.primary(tr("Play"), func() -> void:
+		if Session.intro_seen:
+			_open("play")
+		else:
+			_picture_book(func() -> void: _open("play")), "icon/play")
 	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	play.custom_minimum_size.y *= 1.35
 	play.add_theme_font_size_override("font_size", UI.scaled(UI.HEADING_SIZE))
@@ -641,6 +665,8 @@ func _settings_page() -> void:
 	_door(tr("Language: %s") % language, "", "language", "icon/research")
 	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
 	_door(tr("Sound: music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "", "sound", "icon/music")
+	var off := Session.push_off.size()
+	_door(tr("Notifications: all on") if off == 0 else (tr("Notifications: all off") if off >= InboxText.PUSH_TOPICS.size() else tr("Notifications: %d of %d on") % [InboxText.PUSH_TOPICS.size() - off, InboxText.PUSH_TOPICS.size()]), "", "notifications", "icon/inbox")
 	_door(tr("Credits"), "", "credits", "icon/credits")
 
 
@@ -678,6 +704,64 @@ func _text_size_page() -> void:
 func _sound_page() -> void:
 	_volume_slider(tr("Music"), "Music", Session.music_volume)
 	_volume_slider(tr("Sound effects"), "Effects", Session.effects_volume)
+
+
+## Which pushes come to this phone, a switch a topic; the account keeps
+## them (the server sends the pushes, for worlds played with friends).
+func _notifications_page() -> void:
+	if not Push.permission_changed.is_connected(_on_push_permission):
+		Push.permission_changed.connect(_on_push_permission)
+	_refresh_push_topics()
+	if not Push.available():
+		_content.add_child(UI.label(tr("Notifications come to the Android app."), UI.SMALL_SIZE, UI.MUTED))
+	elif Push.permission != "granted":
+		_content.add_child(UI.label(tr("Notifications aren't allowed for Slavian on this phone."), UI.SMALL_SIZE, UiTheme.MADDER))
+		var allow := UI.primary(tr("Allow notifications"), Push.ask, "icon/inbox")
+		allow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_content.add_child(allow)
+	_content.add_child(UI.label(tr("Only worlds played with friends send them; a solo world sends none."), UI.SMALL_SIZE, UI.MUTED))
+	var topics := {
+		"hordes": [tr("Hordes on the way"), tr("A horde will reach your village within hours.")],
+		"battles": [tr("Battles at your villages"), tr("Under attack, burning or razed.")],
+		"outposts": [tr("Raided outposts"), tr("A horde took what an outpost held.")],
+		"buildings": [tr("Big buildings finished"), tr("Elder's Hall levels and buildings reaching a high level.")],
+		"world": [tr("The bridge and the wilds"), tr("Bridge stages, Ritual Night, camps and bandits.")],
+		"digest": [tr("Daily digest"), tr("Everything else, summed up once a day.")],
+	}
+	for topic in InboxText.PUSH_TOPICS:
+		var on: bool = not topic in Session.push_off
+		var row := UI.hbox(12)
+		var words := UI.vbox(0)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(topics[topic][0]))
+		words.add_child(UI.label(topics[topic][1], UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(words)
+		var flip := UI.button(tr("On") if on else tr("Off"), func() -> void:
+			Push.set_topic(topic, not on)
+			_render("notifications"))
+		flip.custom_minimum_size.x = 110
+		flip.add_theme_color_override("font_color", UI.GOOD if on else UI.MUTED)
+		row.add_child(flip)
+		_content.add_child(row)
+
+
+func _on_push_permission() -> void:
+	if _page == "notifications":
+		_render("notifications")
+
+
+## The account's topics as the server keeps them (unless ours are newer).
+func _refresh_push_topics() -> void:
+	if not Session.is_logged_in() or Session.push_sync:
+		return
+	var response := await Api.get_json("/v1/me/notifications")
+	if not response.ok or _page != "notifications":
+		return
+	var off: Array = response.data.prefs.get("pushOff", [])
+	if off != Session.push_off:
+		Session.push_off = off
+		Session.save()
+		_render("notifications")
 
 
 ## A volume from 0 to 100%, kept on the device; effects tap as you slide.
@@ -799,6 +883,7 @@ func _help_page() -> void:
 			for entry in AlmanacText.entries(LocalData.load_data(), "The run"):
 				box.add_child(UI.with_info(UI.label(entry[0]), entry[1]))
 			box.add_child(UI.label(tr("In a world, the quest card shows the way, and the almanac explains the rest."), UI.SMALL_SIZE, UI.MUTED))
+			box.add_child(UI.button(tr("Open the picture book"), _picture_book.bind(Callable()), "icon/research"))
 		"report":
 			if not Session.is_logged_in():
 				box.add_child(UI.label(tr("Sign in as a guest (Settings, Account) to send a report."), UI.SMALL_SIZE, UI.MUTED))
@@ -813,6 +898,22 @@ func _help_page() -> void:
 			await _costs(box)
 		"privacy":
 			box.add_child(UI.label(tr(PRIVACY), UI.SMALL_SIZE))
+
+
+## The intro picture book over the menu; `then` runs once it is put away.
+func _picture_book(then: Callable) -> void:
+	# On a layer of its own, over the whole menu.
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	var book := PictureBook.new()
+	book.closed.connect(func() -> void:
+		Session.intro_seen = true
+		Session.save()
+		layer.queue_free()
+		if then.is_valid():
+			then.call())
+	layer.add_child(book)
+	add_child(layer)
 
 
 ## This month's server costs and donations, and where to give.
