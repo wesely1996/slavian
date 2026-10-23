@@ -1,7 +1,8 @@
 name: Release
 
-# Pushing a version tag (v0.1.0) that matches config/version in
-# client/project.godot runs CI on the tagged commit, then publishes the APK
+# Pushing a version tag (v0.1.0), or making a release in GitHub's UI, runs
+# CI on the tagged commit (building the tag's version; bump config/version in
+# client/project.godot on main to match), then publishes the APK
 # as a GitHub release (not a pre-release, so cleanup-dev-builds.yml keeps
 # it) and the server image as ghcr.io/<owner>/slavian-server:<version>,
 # then deploys that version to the production server (job "deploy").
