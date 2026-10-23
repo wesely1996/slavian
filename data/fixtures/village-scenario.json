@@ -3673,7 +3673,7 @@
       "amounts": {
        "iron": 85,
        "wood": 145,
-       "grain": 215,
+       "grain": 265,
        "stone": 120
       },
       "ratesPerHour": {
@@ -3870,7 +3870,7 @@
       "amounts": {
        "iron": 85,
        "wood": 145,
-       "grain": 215,
+       "grain": 265,
        "stone": 120
       },
       "ratesPerHour": {
@@ -4104,7 +4104,7 @@
       "amounts": {
        "iron": 77.83333333333333,
        "wood": 133,
-       "grain": 215.53333333333333,
+       "grain": 265.53333333333336,
        "stone": 101
       },
       "ratesPerHour": {
@@ -4303,7 +4303,7 @@
       "amounts": {
        "iron": 77.83333333333333,
        "wood": 133,
-       "grain": 215.53333333333333,
+       "grain": 265.53333333333336,
        "stone": 101
       },
       "ratesPerHour": {
@@ -4527,7 +4527,7 @@
        "amounts": {
         "iron": 397.8333333333333,
         "wood": 913,
-        "grain": 1067.5333333333333,
+        "grain": 1117.5333333333333,
         "stone": 761
        },
        "ratesPerHour": {
@@ -6950,7 +6950,7 @@
       "amounts": {
        "iron": 347.8333333333333,
        "wood": 803,
-       "grain": 987.5333333333333,
+       "grain": 1037.5333333333333,
        "stone": 631
       },
       "ratesPerHour": {
@@ -7195,7 +7195,7 @@
        "amounts": {
         "iron": 697.1666666666666,
         "wood": 1400,
-        "grain": 1200,
+        "grain": 1237.5333333333333,
         "stone": 1270
        },
        "ratesPerHour": {
@@ -9627,7 +9627,7 @@
        "amounts": {
         "iron": 697.1666666666666,
         "wood": 1400,
-        "grain": 1200,
+        "grain": 1237.5333333333333,
         "stone": 1270
        },
        "ratesPerHour": {
@@ -12021,7 +12021,7 @@
       "amounts": {
        "wood": 1400,
        "stone": 1270,
-       "grain": 1200,
+       "grain": 1237.5333333333333,
        "iron": 697.1666666666666
       },
       "ratesPerHour": {
@@ -12052,11 +12052,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":350,\"stone\":0,\"grain\":800,\"iron\":802.8333333333334}",
+    "message": "Insufficient resources: missing {\"wood\":350,\"stone\":0,\"grain\":262.4666666666667,\"iron\":802.8333333333334}",
     "missing": {
      "wood": 350,
      "stone": 0,
-     "grain": 800,
+     "grain": 262.4666666666667,
      "iron": 802.8333333333334
     }
    }
@@ -12263,7 +12263,7 @@
        "amounts": {
         "iron": 697.1666666666666,
         "wood": 1400,
-        "grain": 1200,
+        "grain": 1237.5333333333333,
         "stone": 1270
        },
        "ratesPerHour": {
