@@ -33,7 +33,7 @@ import { announceFirstWaves } from '../scheduler/waves.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { loadBridge } from '../db/bridges.js';
 import { drainWorld, lockWorld, withWorld } from '../scheduler/world.js';
-import { refreshBonuses } from '../scheduler/research.js';
+import { refreshBonuses, settleResearchPoints } from '../scheduler/research.js';
 import { claimOnboarding } from '../scheduler/onboarding.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
@@ -268,6 +268,8 @@ async function handOverVillages(
     'DELETE FROM delegations WHERE world_id = $1 AND (owner_account_id = $2 OR delegate_account_id = $2)',
     [world.id, leaver.accountId],
   );
+  // Academies change hands: what they brought in so far stays with whoever held them.
+  for (const member of [leaver, ...stayers]) await settleResearchPoints(client, deps.data, world, member.accountId, now);
   const villages = await listVillages(client, world.id);
   const held = new Map(stayers.map((m) => [m.accountId, villages.filter((v) => v.ownerAccountId === m.accountId).length]));
   const given = new Map<number, number>();

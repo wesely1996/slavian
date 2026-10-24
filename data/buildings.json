@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Unique buildings carry `clan` (only that clan builds them) and `effects`, added per level to the village's bonuses. Village layout: `fields` are the resource plots around the village (one building type each, upgraded individually); the center has `centerSlots` building slots, the first holding the Elder's Hall. Each Hall level above 1 unlocks `slotsPerHallLevel` more slots, every `hallLevelsPerQueueSlot` levels add a build-queue place, and each level speeds construction by `hallBuildSpeedup`. Outposts are claimed on resource hexes within `outpostRange` of the village; a village may hold `baseOutposts` plus one per `hallLevelsPerOutpost` Hall levels. An outpost's yield per hour depends on its hex's terrain (`yields`), multiplied by `yieldGrowth` per level above 1.",
+  "_comment": "Unique buildings carry `clan` (only that clan builds them) and `effects`, added per level to the village's bonuses. Village layout: `fields` are the resource plots around the village (one building type each, upgraded individually); the center has `centerSlots` building slots, the first holding the Elder's Hall. Each Hall level above 1 unlocks `slotsPerHallLevel` more slots, every `hallLevelsPerQueueSlot` levels add a build-queue place, and each level speeds construction by `hallBuildSpeedup`. Outposts are claimed on resource hexes within `outpostRange` of the village; a village may hold `baseOutposts` plus one per `hallLevelsPerOutpost` Hall levels. An outpost's yield per hour depends on its hex's terrain (`yields`), multiplied by `yieldGrowth` per level above 1. A building marked `multiple` may stand in more than one slot (its effects add up; storehouses add their capacity); one with `requires` needs those buildings at those levels first. Demolishing a building gives the village back `demolishRefund` of everything it cost; abandoning a whole village sends `abandonRefund` of everything that stood there to the Holy City vault. The Academy brings in research per hour (`research`), the player's own, which techs cost. The Market trades at `market.baseRate`, plus `ratePerLevel` per level above 1 (what one resource fetches of another), and buys a spare piece of the hero's gear for `gearValue`.",
   "village": {
     "startingResources": {
       "wood": 500,
@@ -37,7 +37,10 @@
     "hallBuildSpeedup": 0.96,
     "outpostRange": 2,
     "baseOutposts": 1,
-    "hallLevelsPerOutpost": 2
+    "hallLevelsPerOutpost": 2,
+    "demolishRefund": 0.5,
+    "abandonRefund": 0.5,
+    "market": { "baseRate": 0.4, "ratePerLevel": 0.04, "gearValue": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 } }
   },
   "buildings": {
     "elder_hall": {
@@ -137,7 +140,8 @@
     },
     "storehouse": {
       "name": "Storehouse",
-      "description": "How much of each resource the village can keep; what comes in above it is lost.",
+      "description": "How much of each resource the village can keep; what comes in above it is lost. A village may build more than one.",
+      "multiple": true,
       "maxLevel": 10,
       "cost": {
         "wood": 120,
@@ -213,7 +217,8 @@
     },
     "academy": {
       "name": "Academy",
-      "description": "Studies the techs of the research tree; what you learn helps all your villages.",
+      "description": "Studies the techs of the research tree and brings in the research every tech costs; what you learn helps all your villages.",
+      "research": { "basePerHour": 30, "growth": 1.35 },
       "kind": "center",
       "maxLevel": 5,
       "cost": {
@@ -367,6 +372,79 @@
       "costGrowth": 1.55,
       "buildSeconds": 200,
       "timeGrowth": 1.5
+    },
+    "forester": {
+      "name": "Forester",
+      "description": "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 5.",
+      "kind": "center",
+      "maxLevel": 5,
+      "multiple": true,
+      "requires": { "woodcutter": 5 },
+      "cost": { "wood": 160, "stone": 120, "grain": 60, "iron": 40 },
+      "costGrowth": 1.7,
+      "buildSeconds": 240,
+      "timeGrowth": 1.6,
+      "effects": { "production.wood": 0.05 }
+    },
+    "stonemason": {
+      "name": "Stonemason",
+      "description": "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 5.",
+      "kind": "center",
+      "maxLevel": 5,
+      "multiple": true,
+      "requires": { "quarry": 5 },
+      "cost": { "wood": 120, "stone": 160, "grain": 60, "iron": 40 },
+      "costGrowth": 1.7,
+      "buildSeconds": 240,
+      "timeGrowth": 1.6,
+      "effects": { "production.stone": 0.05 }
+    },
+    "mill": {
+      "name": "Mill",
+      "description": "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 5.",
+      "kind": "center",
+      "maxLevel": 5,
+      "multiple": true,
+      "requires": { "farm": 5 },
+      "cost": { "wood": 140, "stone": 120, "grain": 60, "iron": 40 },
+      "costGrowth": 1.7,
+      "buildSeconds": 240,
+      "timeGrowth": 1.6,
+      "effects": { "production.grain": 0.05 }
+    },
+    "smelter": {
+      "name": "Smelter",
+      "description": "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 5.",
+      "kind": "center",
+      "maxLevel": 5,
+      "multiple": true,
+      "requires": { "iron_mine": 5 },
+      "cost": { "wood": 160, "stone": 140, "grain": 60, "iron": 60 },
+      "costGrowth": 1.7,
+      "buildSeconds": 240,
+      "timeGrowth": 1.6,
+      "effects": { "production.iron": 0.05 }
+    },
+    "hospital": {
+      "name": "Hospital",
+      "description": "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again.",
+      "kind": "center",
+      "maxLevel": 10,
+      "cost": { "wood": 180, "stone": 160, "grain": 120, "iron": 40 },
+      "costGrowth": 1.6,
+      "buildSeconds": 200,
+      "timeGrowth": 1.55,
+      "effects": { "hospital": 0.05 }
+    },
+    "market": {
+      "name": "Market",
+      "description": "Trades one resource for another, at better rates every level, and buys the hero's spare gear.",
+      "kind": "center",
+      "maxLevel": 10,
+      "cost": { "wood": 160, "stone": 120, "grain": 100, "iron": 40 },
+      "costGrowth": 1.6,
+      "buildSeconds": 180,
+      "timeGrowth": 1.55
     }
   }
 }

@@ -57,3 +57,27 @@ export async function finishResearch(client: DbClient, worldId: number, accountI
   );
   return (rowCount ?? 0) > 0;
 }
+
+// Research a player's Academies brought in, as of `settledAt` (null: never
+// settled yet).
+export interface ResearchPoints {
+  amount: number;
+  settledAt: Date | null;
+}
+
+export async function loadResearchPoints(client: DbClient, worldId: number, accountId: number): Promise<ResearchPoints> {
+  const { rows } = await client.query<{ research_points: number; research_settled_at: Date | null }>(
+    'SELECT research_points, research_settled_at FROM world_members WHERE world_id = $1 AND account_id = $2',
+    [worldId, accountId],
+  );
+  return { amount: rows[0]?.research_points ?? 0, settledAt: rows[0]?.research_settled_at ?? null };
+}
+
+export async function saveResearchPoints(client: DbClient, worldId: number, accountId: number, points: ResearchPoints): Promise<void> {
+  await client.query('UPDATE world_members SET research_points = $3, research_settled_at = $4 WHERE world_id = $1 AND account_id = $2', [
+    worldId,
+    accountId,
+    points.amount,
+    points.settledAt,
+  ]);
+}

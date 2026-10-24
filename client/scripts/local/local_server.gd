@@ -42,7 +42,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"difficulty": String(params.get("difficulty", "normal")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
-			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}}],
+			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null}],
 		"villages": [], "heroes": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
@@ -357,6 +357,12 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		var action := "/".join(parts.slice(3))
 		if action == "orders" or action.begins_with("orders/"):
 			return _order_command(world, village, parts, body, now, changed)
+		if action == "abandon":
+			var gone := LocalLogistics.abandon_village(self, world, village, now)
+			if gone.has("error"):
+				return _rule_answer(gone)
+			changed.append(["world"])
+			return {"status": 200, "data": world_view(world, now)}
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
 		if village.ruin != null and not action in ["rebuild", "armies", "forts", "crossings", "roads"]:
@@ -397,6 +403,28 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					extra = ["research", LocalResearch.research_view(result.research)]
 			"rebuild":
 				result = LocalResearch.rebuild(self, world, village, now)
+			"demolish":
+				var plot := String(body.get("plot", ""))
+				if not RegEx.create_from_string("^([fc]\\d{1,2}|w|t\\d{1,2})$").search(plot):
+					return _fail(400, "invalid_request", "Give a plot")
+				var standing: Variant = village.state.plots.get(plot, {}).get("building")
+				result = LocalVillage.demolish(data, village.state, plot, now, world.speed)
+				if result.has("refund"):
+					extra = ["refund", result.refund]
+					# Settled before the village changes (an Academy torn down).
+					if data.buildings.buildings.get(standing, {}).get("research") != null:
+						LocalResearch.settle_points(self, world, int(village.ownerAccountId), now)
+			"market/trade":
+				var give := String(body.get("give", ""))
+				var get_ := String(body.get("get", ""))
+				var amount: Variant = body.get("amount")
+				if not give in LocalVillage.KINDS or not get_ in LocalVillage.KINDS or not (amount is float or amount is int) or float(amount) != floorf(float(amount)) or float(amount) < 1:
+					return _fail(400, "invalid_request", "Give two resources and an amount")
+				result = LocalVillage.trade(data, village.state, give, get_, int(amount), now)
+				if result.has("got"):
+					extra = ["got", result.got]
+			"market/sell":
+				result = LocalHeroCommands.sell_gear(self, world, village, String(body.get("item", "")), now)
 			"scout":
 				result = LocalScouting.send_scouts(self, world, village, body, now)
 				if result.has("mission"):
@@ -419,7 +447,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
-		if action in ["research", "rebuild", "caravans", "caravans/fetch", "scout", "found"]:
+		if action in ["research", "rebuild", "caravans", "caravans/fetch", "scout", "found", "market/sell"]:
 			changed.append(["world"])
 		if step != "":
 			onboarding_step(world, int(village.ownerAccountId), step, now, changed)
@@ -645,6 +673,9 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	var plot: String = p.get("plot", "")
 	if not village.state.queue.any(func(item: Dictionary) -> bool: return item.plot == plot and int(item.targetLevel) == int(p.targetLevel)):
 		return
+	# An Academy's level changes what research comes in from now on.
+	if data.buildings.buildings.get(p.building, {}).get("research") != null and village.ownerAccountId != null:
+		LocalResearch.settle_points(self, world, int(village.ownerAccountId), int(event.dueAt))
 	var done := LocalVillage.complete_build(data, village.state, plot, int(p.targetLevel), int(event.dueAt), world.speed)
 	if done.has("error"):
 		return
@@ -852,8 +883,11 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 			"exploredAt": LocalTime.iso(s.exploredAt) if s.exploredAt != null else null})
 	var members: Array = []
 	for m in world.members:
+		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
-			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed})
+			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed,
+			"research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:
 		villages.append(village_view(world, v))

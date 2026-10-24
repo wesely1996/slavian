@@ -58,6 +58,12 @@ const buildingSchema = z.object({
   // village's bonuses per level.
   clan: z.string().optional(),
   effects: z.record(z.string(), z.number()).optional(),
+  // May stand in more than one slot of a village (otherwise one per village).
+  multiple: z.boolean().optional(),
+  // Buildings (and their levels) the village needs before it can build this.
+  requires: z.record(z.string(), z.number().int().positive()).optional(),
+  // The Academy: research per hour at level 1, times growth per level above.
+  research: z.object({ basePerHour: z.number().positive(), growth: z.number().min(1) }).optional(),
 });
 
 const buildingsFileSchema = z.object({
@@ -76,6 +82,9 @@ const buildingsFileSchema = z.object({
     outpostRange: z.number().int().positive(),
     baseOutposts: z.number().int().nonnegative(),
     hallLevelsPerOutpost: z.number().int().positive(),
+    demolishRefund: z.number().min(0).max(1),
+    abandonRefund: z.number().min(0).max(1),
+    market: z.object({ baseRate: z.number().positive(), ratePerLevel: z.number().nonnegative(), gearValue: resourcesSchema }),
   }),
   buildings: z.record(z.string(), buildingSchema),
 });
@@ -256,6 +265,7 @@ export const RESEARCH_BRANCHES = ['economy', 'military', 'fortification', 'scout
 
 const researchFileSchema = z.object({
   version: z.number().int(),
+  researchPerSecond: z.number().nonnegative(),
   branches: z.record(z.enum(RESEARCH_BRANCHES), z.string()),
   techs: z.record(
     z.string(),
@@ -800,6 +810,14 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
   }
   for (const field of data.buildings.village.fields) {
     if (buildings[field]?.kind !== 'field') throw new Error(`Village field "${field}" is not a field building`);
+  }
+  if (!buildings.academy.research) throw new Error('buildings.json: the academy needs its research per hour');
+  if (buildings.market?.kind !== 'center') throw new Error('buildings.json needs a center building "market"');
+  for (const [id, def] of Object.entries(buildings)) {
+    for (const needed of Object.keys(def.requires ?? {})) {
+      if (!buildings[needed]) throw new Error(`Building "${id}" requires unknown building "${needed}"`);
+    }
+    if (def.multiple && def.kind !== 'center') throw new Error(`Only center buildings can be built more than once ("${id}")`);
   }
   for (const [id, unit] of Object.entries(data.units.units)) {
     if (!data.buildings.buildings[unit.building]) {

@@ -2,7 +2,7 @@
 // bonuses, which every one of their villages carries.
 import type { GameData, ResearchData, UnitFamily } from '../data/index.js';
 import { RuleError } from '../errors.js';
-import type { ResourceKind } from './resources.js';
+import { minutesBetween, type ResourceKind } from './resources.js';
 
 export type Bonuses = Readonly<Record<string, number>>;
 export const ACADEMY = 'academy';
@@ -68,4 +68,18 @@ export function researchMs(data: GameData, tech: string, worldSpeed: number, bon
   const def = data.research.techs[tech];
   if (!def) throw new RuleError(`Unknown tech "${tech}"`);
   return Math.round((def.seconds * 1000 * Math.max(0.1, 1 + bonus(bonuses, 'researchTime'))) / worldSpeed);
+}
+
+// Research needed to study `tech`, besides its cost in resources.
+export function researchCost(data: GameData, tech: string): number {
+  const def = data.research.techs[tech];
+  if (!def) throw new RuleError(`Unknown tech "${tech}"`);
+  return Math.round(def.seconds * data.research.researchPerSecond);
+}
+
+// Research brought in by `at`: like the resource ledger, credited a
+// minute's worth at every whole minute passed since it was settled.
+export function researchPointsAt(points: { amount: number; settledAt: Date | null }, ratePerHour: number, at: Date): number {
+  if (!points.settledAt) return points.amount;
+  return points.amount + (ratePerHour * Math.max(0, minutesBetween(points.settledAt, at))) / 60;
 }

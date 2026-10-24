@@ -96,6 +96,9 @@ export interface Member {
   onboarding: Record<string, string>;
   // Their rewards claimed: step (or 'finale') -> when.
   onboardingClaimed: Record<string, string>;
+  // Research their Academies brought in, as of researchSettledAt.
+  researchPoints: number;
+  researchSettledAt: Date | null;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -107,7 +110,8 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
-    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed"
+    `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
+            m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,

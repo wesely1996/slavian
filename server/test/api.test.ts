@@ -684,6 +684,11 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
 
     expect((await research('shield_wall')).body.message).toMatch(/Academy of level 2/);
+    // Research comes in from the Academy, 30 an hour at level 1 (×10 world speed).
+    expect((await research('felling_axes')).body.message).toBe('Felling Axes takes 60 research; your Academies have brought in 0');
+    now = new Date(now.getTime() + 12 * 60_000);
+    const before = (await call('GET', `/v1/worlds/${worldId}`, jarik.token)).body.members[0].research;
+    expect(before).toMatchObject({ points: 0, perHour: 300 });
     const started1 = await research('felling_axes');
     expect(started1.status).toBe(200);
     expect(started1.body.research).toMatchObject({ accountId: jarik.accountId, tech: 'felling_axes', status: 'researching' });

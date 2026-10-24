@@ -1,7 +1,8 @@
 // Founding a second village in a solo session (docs/local-engine.md,
 // part 5): settlers trained one by one and sent out; then the hero moves
 // there, a caravan and an army go between the villages, a road and a fort
-// rise, and the hordes keep coming.
+// rise, and the hordes keep coming. The new village is given up (refused
+// while an army guards it), and the first can't be.
 import { hexDistance, hex, spiral } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -43,11 +44,20 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
     await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'support', targetVillageId: second.id, units: { spearman: 2 } } });
     await play({ method: 'PUT', path: `/v1/villages/${second.id}/reinforce`, body: { share: 1, range: 6 } });
     await play({ advance: 30 * MINUTE });
-    await play({ method: 'GET', path: world });
+    const settled = (await play({ method: 'GET', path: world })).body;
+    // Given up: refused while an army guards it, then once it has gone home.
+    await play({ method: 'POST', path: `/v1/villages/${second.id}/abandon`, body: {} });
+    for (const army of (settled.armies as { id: number; status: string; targetVillageId: number | null }[]).filter((a) => a.targetVillageId === second.id && a.status === 'stationed')) {
+      await play({ method: 'POST', path: `/v1/armies/${army.id}/recall`, body: {} });
+    }
+    await play({ advance: 30 * MINUTE });
+    await play({ method: 'POST', path: `/v1/villages/${second.id}/abandon`, body: {} });
   }
   const near = spiral(hex(home.q, home.r), 1).find((c) => hexDistance(c, hex(home.q, home.r)) === 1 && settleable(c.q, c.r))!;
   await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: near.q, r: near.r } } });
   await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: near.q, r: near.r } });
+  // The first village can't be given up: there is nowhere left to go.
+  await play({ method: 'POST', path: '/v1/villages/1/abandon', body: {} });
   for (let i = 0; i < 4; i++) {
     await play({ advance: 45 * MINUTE });
     await play({ method: 'GET', path: world });

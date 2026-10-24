@@ -4,11 +4,13 @@ import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
 import { hex, hexDistance, hexKey, type Hex } from './hex.js';
 import { bonus, productionFactor, timeFactor, trainFactor, type Bonuses } from './research.js';
+import { receive } from './logistics.js';
 import {
   mapResources,
   spend,
   take,
   withRates,
+  type ResourceKind,
   type ResourceLedger,
   type Resources,
 } from './resources.js';
@@ -73,6 +75,7 @@ const MS_PER_SECOND = 1000;
 export const HALL = 'elder_hall';
 export const HALL_PLOT = 'c0';
 export const OUTPOST = 'outpost';
+export const MARKET = 'market';
 
 function buildingDef(data: GameData, building: string): BuildingDef {
   const def = data.buildings.buildings[building];
@@ -219,11 +222,26 @@ export function villageRates(
   return { ...rates, grain: rates.grain - upkeep };
 }
 
-export function capacity(data: GameData, levels: VillageState['levels'], bonuses: Bonuses = {}): Resources {
-  const storehouse = data.buildings.buildings.storehouse;
-  const level = levels.storehouse ?? 0;
-  const cap = data.buildings.village.baseCapacity * (storehouse?.capacityGrowth ?? 1) ** level * (1 + bonus(bonuses, 'storage'));
+// What the village can keep: every storehouse adds what it holds above the
+// base (one storehouse of level n holds base × growth^n).
+export function capacity(data: GameData, plots: Plots, bonuses: Bonuses = {}): Resources {
+  const growth = data.buildings.buildings.storehouse?.capacityGrowth ?? 1;
+  let factor = 1;
+  for (const [id, plot] of Object.entries(plots)) {
+    if (plot.building === 'storehouse' && plot.level > 0 && !outpostHex(id)) factor += growth ** plot.level - 1;
+  }
+  const cap = data.buildings.village.baseCapacity * factor * (1 + bonus(bonuses, 'storage'));
   return mapResources(() => cap);
+}
+
+// Research the village's Academy brings in per hour (world speed applied).
+export function researchPerHour(data: GameData, plots: Plots, worldSpeed: number): number {
+  let rate = 0;
+  for (const plot of Object.values(plots)) {
+    const research = plot.building ? data.buildings.buildings[plot.building]?.research : undefined;
+    if (research && plot.level > 0) rate += research.basePerHour * research.growth ** (plot.level - 1) * worldSpeed;
+  }
+  return rate;
 }
 
 // A fresh village. Founded ones (after the first) bring their own
@@ -253,7 +271,7 @@ export function newVillage(
     ledger: {
       amounts: { ...(founded?.startingResources ?? data.buildings.village.startingResources) },
       ratesPerHour: villageRates(data, state, worldSpeed),
-      capacity: capacity(data, levels, state.bonuses),
+      capacity: capacity(data, plots, state.bonuses),
       settledAt: at,
     },
   };
@@ -262,7 +280,7 @@ export function newVillage(
 // The owner's research changed: new rates and capacity from `at`.
 export function withBonuses(data: GameData, state: VillageState, bonuses: Bonuses, at: Date, worldSpeed: number): VillageState {
   const next = { ...state, bonuses };
-  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, state.levels, bonuses)) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, state.plots, bonuses)) };
 }
 
 // What a plot will hold once everything already queued completes.
@@ -347,8 +365,10 @@ export function queueBuild(
     if (slot === null && def.kind === 'tower') throw new RuleError(`${def.name} is built in a wall slot`);
     if (slot === null && def.kind !== 'center') throw new RuleError(`${def.name} is built on fields, not in the village`);
     if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can build a ${def.name}`);
-    const taken = Object.keys(state.plots).some((id) => id !== plot && plannedPlot(state, id).building === building);
+    const taken = !def.multiple && Object.keys(state.plots).some((id) => id !== plot && plannedPlot(state, id).building === building);
     if (taken) throw new RuleError(`This village already has a ${def.name}`);
+    const missing = Object.entries(def.requires ?? {}).find(([needed, level]) => (state.levels[needed] ?? 0) < level);
+    if (missing) throw new RuleError(`${def.name} needs ${buildingDef(data, missing[0]).name} level ${missing[1]}`);
   }
 
   const def = buildingDef(data, building);
@@ -384,7 +404,77 @@ export function completeBuild(
   const plots = { ...state.plots, [plot]: built };
   const levels = levelsOf(plots);
   const next = { ...state, plots, levels, queue: rest };
-  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels, state.bonuses)) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
+}
+
+// Everything a building of `level` cost to raise, level by level.
+export function builtCost(def: BuildingDef, level: number): Resources {
+  const sum = mapResources(() => 0);
+  for (let l = 1; l <= level; l++) {
+    const cost = levelCost(def, l);
+    for (const kind of Object.keys(sum) as (keyof Resources)[]) sum[kind] += cost[kind];
+  }
+  return sum;
+}
+
+// What tearing down everything that stands on `plots` gives back.
+export function refundOf(data: GameData, plots: Plots, share: number): Resources {
+  const sum = mapResources(() => 0);
+  for (const plot of Object.values(plots)) {
+    const def = plot.building ? data.buildings.buildings[plot.building] : undefined;
+    if (!def || plot.level <= 0) continue;
+    const cost = builtCost(def, plot.level);
+    for (const kind of Object.keys(sum) as (keyof Resources)[]) sum[kind] += cost[kind];
+  }
+  return mapResources((kind) => Math.floor(sum[kind] * share));
+}
+
+// Tears down the building on a center or wall slot: the slot is free again
+// and the village gets back a share of what it cost (what fits its stores).
+export function demolish(data: GameData, state: VillageState, plot: string, at: Date, worldSpeed: number): { state: VillageState; refund: Resources } {
+  const current = state.plots[plot];
+  if (!current?.building || current.level <= 0) throw new RuleError('Nothing stands there to tear down');
+  const def = buildingDef(data, current.building);
+  if (current.building === HALL) throw new RuleError("The Elder's Hall can't be torn down");
+  if (def.kind !== 'center' && def.kind !== 'tower') throw new RuleError(`The ${def.name} can't be torn down`);
+  if (state.queue.some((item) => item.plot === plot)) throw new RuleError(`The ${def.name} is being built; wait for it to finish`);
+  const refund = refundOf(data, { [plot]: current }, data.buildings.village.demolishRefund);
+  const plots = { ...state.plots, [plot]: { building: null, level: 0 } };
+  const levels = levelsOf(plots);
+  const next = { ...state, plots, levels };
+  const ledger = withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses));
+  return { state: { ...next, ledger: receive(ledger, at, refund).ledger }, refund };
+}
+
+// What one resource fetches of another at the village's Market.
+export function marketRate(data: GameData, marketLevel: number): number {
+  const { baseRate, ratePerLevel } = data.buildings.village.market;
+  return marketLevel > 0 ? baseRate + ratePerLevel * (marketLevel - 1) : 0;
+}
+
+// Trades `amount` of `give` for `get` at the Market: what is bought goes
+// into the stores, as far as they hold.
+export function trade(
+  data: GameData,
+  state: VillageState,
+  order: { give: ResourceKind; get: ResourceKind; amount: number },
+  at: Date,
+): { state: VillageState; got: number } {
+  const rate = marketRate(data, state.levels[MARKET] ?? 0);
+  if (rate <= 0) throw new RuleError('Build a Market to trade');
+  if (order.give === order.get) throw new RuleError('Trade one resource for another');
+  if (!Number.isInteger(order.amount) || order.amount < 1) throw new RuleError('Trade at least 1');
+  const got = Math.floor(order.amount * rate);
+  if (got < 1) throw new RuleError('Too little to fetch anything');
+  const paid = spend(state.ledger, at, mapResources((kind) => (kind === order.give ? order.amount : 0)));
+  const ledger = receive(paid, at, mapResources((kind) => (kind === order.get ? got : 0))).ledger;
+  return { state: { ...state, ledger }, got };
+}
+
+// The Market buys a piece of spare gear: its price goes into the stores.
+export function sellGear(data: GameData, state: VillageState, at: Date): VillageState {
+  if ((state.levels[MARKET] ?? 0) <= 0) throw new RuleError('Build a Market to sell gear');
+  return { ...state, ledger: receive(state.ledger, at, data.buildings.village.market.gearValue).ledger };
 }
 
 export interface OutpostSite {
@@ -557,6 +647,27 @@ export function loseGarrison(data: GameData, state: VillageState, losses: Units,
   for (const [unit, count] of Object.entries(losses)) garrison[unit] = Math.max(0, (garrison[unit] ?? 0) - count);
   const next = { ...state, garrison };
   return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
+}
+
+// Of the garrison's fallen (`lost`), those its hospital saves: each gets up
+// again with the hospital's chance, drawn from `rng` unit by unit (by name).
+export function hospitalHealed(bonuses: Bonuses, lost: Units, rng: () => number): Record<string, number> {
+  const chance = Math.min(1, bonus(bonuses, 'hospital'));
+  const healed: Record<string, number> = {};
+  if (chance <= 0) return healed;
+  for (const unit of Object.keys(lost).sort()) {
+    let saved = 0;
+    for (let i = 0; i < lost[unit]!; i++) if (rng() < chance) saved++;
+    if (saved > 0) healed[unit] = saved;
+  }
+  return healed;
+}
+
+// Soldiers joining the garrison (back on their feet, or moved in): home,
+// eating from `at`.
+export function joinGarrison(data: GameData, state: VillageState, healed: Units, at: Date, worldSpeed: number): VillageState {
+  const next = { ...state, garrison: addUnits(state.garrison, healed) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), state.ledger.capacity) };
 }
 
 export function plunder(state: VillageState, loot: Resources, at: Date): VillageState {

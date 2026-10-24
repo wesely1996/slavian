@@ -49,6 +49,48 @@ static func research_problem(data: Dictionary, tech: String, academy_level: int,
 	return ""
 
 
+## Research a tech takes, besides its cost in resources.
+static func research_cost(data: Dictionary, tech: String) -> int:
+	return LocalWaves.js_round(float(data.research.techs[tech].seconds) * float(data.research.researchPerSecond))
+
+
+static func member(world: Dictionary, account_id: int) -> Dictionary:
+	for m in world.members:
+		if int(m.accountId) == account_id:
+			return m
+	return {}
+
+
+## Research per hour the player's Academies bring in, as their villages stand.
+static func research_rate(server: LocalServer, world: Dictionary, account_id: int) -> float:
+	var rate := 0.0
+	for v in world.villages:
+		if v.ownerAccountId != null and int(v.ownerAccountId) == account_id:
+			rate += LocalVillage.research_per_hour(server.data, v.state.plots, world.speed)
+	return rate
+
+
+## The player's research as of `at` (scheduler/research.ts settleResearchPoints,
+## without saving it).
+static func points_at(server: LocalServer, world: Dictionary, account_id: int, at: int) -> float:
+	var m := member(world, account_id)
+	var amount := float(m.get("researchPoints", 0))
+	var settled: Variant = m.get("researchSettledAt")
+	if settled == null:
+		return amount
+	return amount + (research_rate(server, world, account_id) * maxi(0, LocalLedger.minutes_between(int(settled), at))) / 60.0
+
+
+## Credits the player's research up to `at`. Called before anything changes
+## what their Academies bring in.
+static func settle_points(server: LocalServer, world: Dictionary, account_id: int, at: int) -> float:
+	var amount := points_at(server, world, account_id, at)
+	var m := member(world, account_id)
+	m.researchPoints = amount
+	m.researchSettledAt = at
+	return amount
+
+
 static func research_ms(data: Dictionary, tech: String, world_speed: float, bonuses: Dictionary = {}) -> int:
 	var def: Dictionary = data.research.techs[tech]
 	return LocalWaves.js_round((float(def.seconds) * 1000.0 * maxf(0.1, 1.0 + float(bonuses.get("researchTime", 0.0)))) / world_speed)
@@ -82,9 +124,17 @@ static func start_research(server: LocalServer, world: Dictionary, village: Dict
 		mine.any(func(e: Dictionary) -> bool: return e.status == "researching"), scrolls(world))
 	if problem != "":
 		return LocalVillage.rule(problem)
+	# Research comes from all the player's Academies, resources from this village.
+	var needed := research_cost(data, tech)
+	var points := points_at(server, world, account, now)
+	if points < needed:
+		return LocalVillage.rule("%s takes %d research; your Academies have brought in %d" % [data.research.techs[tech].name, needed, floori(points)])
 	var ledger := LocalLedger.spend(village.state.ledger, now, data.research.techs[tech].cost)
 	if ledger.has("missing"):
 		return ledger
+	var m := member(world, account)
+	m.researchPoints = points - needed
+	m.researchSettledAt = now
 	var entry := {"accountId": account, "tech": tech, "status": "researching", "villageId": village.id, "startedAt": now,
 		"completesAt": now + research_ms(data, tech, world.speed, village.state.bonuses)}
 	world.research.append(entry)

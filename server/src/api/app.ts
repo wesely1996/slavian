@@ -12,17 +12,22 @@ import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
 import {
   abandonOutpostCommand,
+  abandonVillageCommand,
   claimOutpostCommand,
+  demolishCommand,
   foundVillageCommand,
   queueBuildCommand,
   renameVillageCommand,
   rebuildCommand,
+  sellGearCommand,
   sendScoutsCommand,
   setStanceCommand,
   startResearchCommand,
   trainUnitsCommand,
+  tradeCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
+import { RESOURCE_KINDS } from '../sim/resources.js';
 import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
@@ -87,6 +92,8 @@ const buildBody = z
     building: z.string().min(1).max(64).optional(),
   })
   .refine((body) => body.plot || body.building, { message: 'Give a plot or a building' });
+const plotBody = z.object({ plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2})$/) });
+const tradeBody = z.object({ give: z.enum(RESOURCE_KINDS), get: z.enum(RESOURCE_KINDS), amount: z.number().int().positive().max(1_000_000) });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
 const amount = z.number().int().min(0).max(1_000_000);
@@ -507,6 +514,39 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = hexBody.parse(request.body);
     const { village } = await abandonOutpostCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  // Tears down the building on a slot, for a share of what it cost.
+  app.post('/v1/villages/:id/demolish', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = plotBody.parse(request.body);
+    const { village, refund } = await demolishCommand(db, scheduler, { accountId: account.id, villageId: id, plot: body.plot, now: clock() });
+    return { village: villageView(village), refund, serverTime: clock().toISOString() };
+  });
+
+  // Gives up the village: a share of what stood goes to the Holy City vault.
+  app.post('/v1/villages/:id/abandon', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { worldId } = await abandonVillageCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
+    return fullWorldView(worldId);
+  });
+
+  app.post('/v1/villages/:id/market/trade', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = tradeBody.parse(request.body);
+    const { village, got } = await tradeCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), got, serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/market/sell', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = heroEquipBody.parse(request.body);
+    const { village } = await sellGearCommand(db, scheduler, { accountId: account.id, villageId: id, item: body.item, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 

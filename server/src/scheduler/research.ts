@@ -9,10 +9,10 @@ import { listMembers, type World } from '../db/worlds.js';
 import { combine, rosterBonuses } from '../sim/heroes.js';
 import { loreBonuses } from '../sim/sites.js';
 import { notifyWorld } from '../db/notify.js';
-import { finishResearch, listResearch } from '../db/research.js';
+import { finishResearch, listResearch, loadResearchPoints, saveResearchPoints } from '../db/research.js';
 import { listVillages, saveVillageState } from '../db/villages.js';
-import { bonusesOf } from '../sim/research.js';
-import { withBonuses } from '../sim/village.js';
+import { bonusesOf, researchPointsAt } from '../sim/research.js';
+import { researchPerHour, withBonuses } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
 import { tell } from './notices.js';
 
@@ -39,6 +39,22 @@ export async function refreshBonuses(client: DbClient, data: GameData, world: Wo
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     }
   }
+}
+
+// Research per hour the player's Academies bring in, as their villages stand.
+export async function researchRate(client: DbClient, data: GameData, world: World, accountId: number): Promise<number> {
+  return (await listVillages(client, world.id))
+    .filter((v) => v.ownerAccountId === accountId)
+    .reduce((sum, v) => sum + researchPerHour(data, v.state.plots, world.speed), 0);
+}
+
+// Credits the player's research up to `at` at the rate their villages give
+// now. Called before anything changes that rate, and before spending.
+export async function settleResearchPoints(client: DbClient, data: GameData, world: World, accountId: number, at: Date): Promise<number> {
+  const points = await loadResearchPoints(client, world.id, accountId);
+  const amount = researchPointsAt(points, await researchRate(client, data, world, accountId), at);
+  await saveResearchPoints(client, world.id, accountId, { amount, settledAt: at });
+  return amount;
 }
 
 export const researchHandlers: HandlerRegistry = {

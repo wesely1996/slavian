@@ -386,6 +386,15 @@ func commands(village: Dictionary) -> bool:
 	return DelegationText.commands(delegations, int(village.ownerAccountId), my_account_id(), server_now())
 
 
+## The player's research: what their Academies have brought in by now, and
+## what comes in per hour.
+func my_research() -> Dictionary:
+	for member in world.get("members", []):
+		if int(member.accountId) == my_account_id():
+			return {"points": ResearchRules.points(member, server_now()), "perHour": float(member.get("research", {}).get("perHour", 0))}
+	return {"points": 0.0, "perHour": 0.0}
+
+
 func member_name(account_id: int) -> String:
 	for member in world.get("members", []):
 		if int(member.accountId) == account_id:

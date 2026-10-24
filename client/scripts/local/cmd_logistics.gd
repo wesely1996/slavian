@@ -446,3 +446,74 @@ static func caravan_view(c: Dictionary) -> Dictionary:
 static func vault_view(data: Dictionary, vault: Dictionary) -> Dictionary:
 	return {"level": vault.level, "amounts": vault.amounts, "capacity": vault_capacity(data, int(vault.level)), "upgradingTo": vault.upgradingTo,
 		"upgradeCompletesAt": LocalTime.iso(vault.upgradeCompletesAt) if vault.upgradeCompletesAt != null else null}
+
+
+# --- Abandoning a village (commands/village.ts abandonVillageCommand) ---------
+
+## Gives up a quiet village: a share of what stood there goes to the vault,
+## its garrison and the hero standing there move to the owner's nearest other
+## standing village, and the village is gone (with what the server's rows
+## lose or forget along with it). {} or {"error"}.
+static func abandon_village(server: LocalServer, world: Dictionary, village: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	var id := int(village.id)
+	if village.refuge:
+		return LocalVillage.rule("A refugee camp is not yours to abandon")
+	var home := Vector2i(village.q, village.r)
+	var to: Dictionary = {}
+	for v in world.villages:
+		if int(v.id) != id and v.ownerAccountId != null and int(v.ownerAccountId) == int(village.ownerAccountId) and v.ruin == null:
+			if to.is_empty() or HexMath.distance(Vector2i(v.q, v.r), home) < HexMath.distance(Vector2i(to.q, to.r), home):
+				to = v
+	if to.is_empty():
+		return LocalVillage.rule("Its people need another standing village of yours to move to")
+	if village.state.besieged or world.battles.any(func(b: Dictionary) -> bool: return b.villageId != null and int(b.villageId) == id and b.status == "ongoing"):
+		return LocalVillage.rule("Not while a battle is fought there")
+	if world.waves.any(func(w: Dictionary) -> bool: return w.targetVillageId != null and int(w.targetVillageId) == id and w.status in ["marching", "arrived", "battling", "razing"]):
+		return LocalVillage.rule("A horde is on its way there")
+	var state := LocalVillage.complete_training(village.state, now)
+	if not state.queue.is_empty() or not state.training.is_empty():
+		return LocalVillage.rule("Wait for its builds and training to finish")
+	if state.away.values().any(func(n: Variant) -> bool: return int(n) > 0):
+		return LocalVillage.rule("Wait for everyone away to come home")
+	if world.caravans.any(func(c: Dictionary) -> bool:
+		return c.status != "done" and (int(c.villageId) == id or (c.destinationVillageId != null and int(c.destinationVillageId) == id))):
+		return LocalVillage.rule("Not while caravans are on the road to or from it")
+	if world.armies.any(func(a: Dictionary) -> bool:
+		return a.status != "done" and (int(a.homeVillageId) == id or (a.targetVillageId != null and int(a.targetVillageId) == id))):
+		return LocalVillage.rule("Not while armies march from it, to it or stand guard there")
+	# (Its standing orders' checks go with it.)
+	var its_own := func(e: Dictionary) -> bool: return e.status == "pending" and e.payload.get("villageId") != null and int(e.payload.villageId) == id
+	if world.events.any(func(e: Dictionary) -> bool: return its_own.call(e) and e.type != "orders_check"):
+		return LocalVillage.rule("It still has work under way")
+	var hero: Dictionary = {}
+	for h in world.heroes:
+		if h.villageId != null and int(h.villageId) == id:
+			hero = h
+	if not hero.is_empty() and hero.status == "traveling":
+		return LocalVillage.rule("%s is on the way there" % hero.name)
+
+	if LocalVillage.research_per_hour(data, village.state.plots, world.speed) > 0:
+		LocalResearch.settle_points(server, world, int(village.ownerAccountId), now)
+	var refund := LocalVillage.refund_of(data, village.state.plots, float(data.buildings.village.abandonRefund))
+	world.vault.amounts = store(world.vault.amounts, vault_capacity(data, int(world.vault.level)), refund).amounts
+	to.state = LocalVillage.join_garrison(data, LocalVillage.complete_training(to.state, now), state.garrison, now, world.speed)
+	if not hero.is_empty():
+		hero.villageId = to.id
+	# What goes with the village's row (ON DELETE CASCADE), and what forgets it
+	# (ON DELETE SET NULL).
+	var other := func(key: String) -> Callable:
+		return func(row: Dictionary) -> bool: return row.get(key) == null or int(row[key]) != id
+	world.events = world.events.filter(func(e: Dictionary) -> bool: return not its_own.call(e))
+	world.villages = world.villages.filter(other.call("id"))
+	for list in ["battles", "raids", "missions", "orders"]:
+		world[list] = world[list].filter(other.call("villageId"))
+	world.caravans = world.caravans.filter(func(c: Dictionary) -> bool: return other.call("villageId").call(c) and other.call("destinationVillageId").call(c))
+	world.expeditions = world.expeditions.filter(other.call("villageId"))
+	world.armies = world.armies.filter(func(a: Dictionary) -> bool: return other.call("homeVillageId").call(a) and other.call("targetVillageId").call(a))
+	for pair in [["expeditions", "foundedVillageId"], ["research", "villageId"], ["forts", "villageId"], ["rivers", "builtBy"], ["roads", "builtBy"],
+			["leaders", "grudgeVillageId"], ["waves", "targetVillageId"]]:
+		for row in world[pair[0]]:
+			if row.get(pair[1]) != null and int(row[pair[1]]) == id:
+				row[pair[1]] = null
+	return {}

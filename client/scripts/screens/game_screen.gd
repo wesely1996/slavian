@@ -1594,6 +1594,12 @@ func _academy_tab(village: Dictionary) -> void:
 		_panel_body.add_child(UI.label(tr("Build an Academy to research. Research belongs to you and helps all your villages."), UI.SMALL_SIZE, UI.MUTED))
 	else:
 		_panel_body.add_child(UI.label(tr("Academy Lv %d · %d of %d techs known") % [academy, mine.done.size(), techs.size()], UI.SMALL_SIZE, UI.MUTED))
+	# Research comes in from all your Academies; every tech takes some.
+	var points := UI.label("", UI.SMALL_SIZE)
+	_panel_body.add_child(points)
+	_tick(points, func() -> String:
+		var research := Game.my_research()
+		return tr("Research: %d (+%d per hour from your Academies)") % [floori(research.points), roundi(research.perHour)])
 	if not current.is_empty():
 		var done_at := TimeUtil.parse_iso(current.completesAt)
 		var line := UI.label("", UI.SMALL_SIZE)
@@ -1641,10 +1647,11 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 			return
 		var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty(), Game.scrolls())
 		var cost: Dictionary = def.cost
+		var needed := ResearchRules.research_cost(Game.data, tech)
 		var cost_line := UI.rich()
 		info.add_child(cost_line)
 		var duration := TimeUtil.format_duration(float(def.seconds) / speed)
-		var cost_text := tr("%s · %s") % [UI.costs(cost), duration]
+		var cost_text := tr("%s · %d research · %s") % [UI.costs(cost), needed, duration]
 		if problem != "":
 			cost_line.text = tr("%s  (%s)") % [cost_text, problem.trim_suffix(".").to_lower()]
 			return
@@ -1653,8 +1660,9 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		row.add_child(button)
 		_tick(cost_line, func() -> String:
 			var home: Dictionary = Game.villages.get(village_id, village)
-			button.disabled = not Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
-			return cost_text))
+			var scholarly: bool = Game.my_research().points >= needed
+			button.disabled = not scholarly or not Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+			return cost_text if scholarly else tr("%s  (not enough research)") % cost_text))
 
 
 func _who_knows(tech: String) -> PackedStringArray:
@@ -2689,10 +2697,32 @@ func _forget_drafts(prefixes: Array) -> void:
 			_drafts.erase(key)
 
 
-## A field to type a number in, instead of steps up and down; what is typed
-## outlives the panel's rebuilds (like _draft_field). `on_set` gets each
-## number typed, held within min..max; when done typing the field shows it.
-func _number_field(key: String, value: int, min_value: int, max_value: int, on_set: Callable) -> LineEdit:
+## A field to type a number in, with − and + beside it to step it by one;
+## what is typed outlives the panel's rebuilds (like _draft_field). `on_set`
+## gets each number typed or stepped to, held within min..max; when done
+## typing the field shows it.
+func _number_field(key: String, value: int, min_value: int, max_value: int, on_set: Callable) -> Control:
+	var field := _number_input(key, value, min_value, max_value, on_set)
+	var step := func(by: int) -> void:
+		var typed := field.text.strip_edges()
+		var number := clampi((int(typed) if typed.is_valid_int() else value) + by, min_value, max_value)
+		field.text = str(number)
+		_drafts.erase(key)
+		on_set.call(number)
+	var row := UI.hbox(4)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	for part: Array in [["−", -1], ["+", 1]]:
+		var button := UI.button(part[0], step.bind(part[1]))
+		button.custom_minimum_size.x = 56
+		# Tapping a step keeps the keyboard (and the field's focus) as it is.
+		button.focus_mode = Control.FOCUS_NONE
+		row.add_child(button)
+		if part[1] < 0:
+			row.add_child(field)
+	return row
+
+
+func _number_input(key: String, value: int, min_value: int, max_value: int, on_set: Callable) -> LineEdit:
 	var field := _draft_field(key, "", str(value))
 	field.max_length = 7
 	field.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
@@ -2858,6 +2888,11 @@ func _plot_section(village: Dictionary) -> void:
 		_paged("plot options", options, 5 if _roomy() else 2, func(building: String) -> void:
 			if on_walls:
 				_panel_body.add_child(UI.label(WallText.tower_effect(Game.data, building, 0), UI.SMALL_SIZE, UI.MUTED))
+			var missing := Rules.missing_requirement(Game.data, village, building)
+			if not missing.is_empty():
+				_panel_body.add_child(UI.with_card(UI.label(tr(_building_def(building).name)), _building_card(village, building, 0)))
+				_panel_body.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(missing[0]).name), missing[1]], UI.SMALL_SIZE, UI.ERROR))
+				return
 			_build_row(village, _plot, building, 1, tr("Build")))
 		return
 
@@ -2874,8 +2909,173 @@ func _plot_section(village: Dictionary) -> void:
 	var target := int(planned.level) + 1
 	if target > int(def.maxLevel):
 		_panel_body.add_child(UI.label(tr("Max level"), UI.SMALL_SIZE, UI.MUTED))
+	else:
+		_build_row(village, _plot, building, target, tr("Build") if level == 0 and int(planned.level) == 0 else tr("Upgrade"))
+	if building == "market" and level > 0:
+		_market_section(village, level)
+	_demolish_row(village, building, level)
+	if building == Rules.HALL:
+		_abandon_row(village)
+
+
+## What the village's Market does: trade one resource for another, and buy
+## the hero's spare gear.
+var _trade := {"give": "wood", "get": "iron", "amount": 100}
+
+func _market_section(village: Dictionary, level: int) -> void:
+	var village_id := int(village.id)
+	var rate := Rules.market_rate(Game.data, level)
+	_panel_body.add_child(UI.label(tr("Trade"), UI.HEADING_SIZE))
+	var kinds: Array = Ledger.KINDS
+	var row := UI.hbox(8)
+	var give := UI.options(kinds.map(func(kind: String) -> String: return UI.resource_name(kind)), kinds.find(_trade.give))
+	give.item_selected.connect(func(i: int) -> void:
+		_trade.give = kinds[i]
+		_rebuild_panel())
+	row.add_child(give)
+	row.add_child(_number_field("trade:amount", int(_trade.amount), 1, 999999, func(n: int) -> void: _trade.amount = n))
+	row.add_child(UI.label(tr("for"), UI.SMALL_SIZE))
+	var get_ := UI.options(kinds.map(func(kind: String) -> String: return UI.resource_name(kind)), kinds.find(_trade.get))
+	get_.item_selected.connect(func(i: int) -> void:
+		_trade.get = kinds[i]
+		_rebuild_panel())
+	row.add_child(get_)
+	_panel_body.add_child(row)
+	var deal := UI.hbox(8)
+	var summary := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	deal.add_child(summary)
+	var button := UI.primary(tr("Trade"), func() -> void: _market_trade(village_id))
+	deal.add_child(button)
+	_panel_body.add_child(deal)
+	_tick(summary, func() -> String:
+		var got := floori(int(_trade.amount) * rate)
+		var home: Dictionary = Game.villages.get(village_id, village)
+		var have := float(Ledger.amounts_at(home.resources, Game.server_now()).get(_trade.give, 0))
+		button.disabled = _trade.give == _trade.get or got < 1 or have < int(_trade.amount)
+		return tr("You get %d %s (%d%% of what you give)") % [got, UI.resource_name(_trade.get), roundi(rate * 100.0)])
+
+	var hero := Game.my_hero()
+	var spare: Array = hero.get("inventory", [])
+	_panel_body.add_child(UI.label(tr("Sell spare gear"), UI.HEADING_SIZE))
+	if spare.is_empty():
+		_panel_body.add_child(UI.label(tr("Your hero carries no spare gear. Gear they wear must be taken off first."), UI.SMALL_SIZE, UI.MUTED))
 		return
-	_build_row(village, _plot, building, target, tr("Build") if level == 0 and int(planned.level) == 0 else tr("Upgrade"))
+	var price: Dictionary = Game.data.buildings.village.market.gearValue
+	for item in spare:
+		var line := UI.hbox(8)
+		var name := UI.label(tr(Game.data.heroes.items.get(item, {}).get("name", item)))
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line.add_child(name)
+		line.add_child(UI.button(tr("Sell"), func() -> void: _market_sell(village_id, item)))
+		_panel_body.add_child(line)
+	var worth := UI.rich()
+	worth.text = tr("Each piece fetches %s") % UI.costs(price)
+	_panel_body.add_child(worth)
+
+
+func _market_trade(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/market/trade" % village_id, {"give": _trade.give, "get": _trade.get, "amount": int(_trade.amount)})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("coins")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+func _market_sell(village_id: int, item: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/market/sell" % village_id, {"item": item})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("coins")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+## Tearing a building down gives back part of what it cost; it asks twice.
+var _demolish_armed := ""
+
+func _demolish_row(village: Dictionary, building: String, level: int) -> void:
+	var def := _building_def(building)
+	if level <= 0 or building == Rules.HALL or not def.get("kind") in ["center", "tower"]:
+		return
+	if village.queue.any(func(item: Dictionary) -> bool: return item.get("plot", "") == _plot):
+		return
+	var village_id := int(village.id)
+	var plot := _plot
+	var armed := _demolish_armed == "%d:%s" % [village_id, plot]
+	var button := UI.button(tr("Sure? Tear it down") if armed else tr("Tear down"), func() -> void:
+		if _demolish_armed != "%d:%s" % [village_id, plot]:
+			_demolish_armed = "%d:%s" % [village_id, plot]
+			_rebuild_panel()
+			return
+		_demolish_armed = ""
+		_demolish(village_id, plot))
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_panel_body.add_child(button)
+	if armed:
+		var refund := Rules.refund(Game.data, building, level, float(Game.data.buildings.village.demolishRefund))
+		var text := UI.rich()
+		text.text = tr("Tap again to tear down the %s. You get back %s, as far as the stores hold it.") % [tr(def.name), UI.costs(refund)]
+		_panel_body.add_child(text)
+
+
+func _demolish(village_id: int, plot: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/demolish" % village_id, {"plot": plot})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("build")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+## Giving up a whole village (from its Elder's Hall); it asks twice.
+var _abandon_armed := 0
+
+func _abandon_row(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	if village.get("refuge", false) or Game.my_villages().size() < 2:
+		return
+	var armed := _abandon_armed == village_id
+	var button := UI.button(tr("Sure? Abandon %s") % village.name if armed else tr("Abandon this village"), func() -> void:
+		if _abandon_armed != village_id:
+			_abandon_armed = village_id
+			_rebuild_panel()
+			return
+		_abandon_armed = 0
+		_abandon(village_id), "icon/quit")
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_panel_body.add_child(button)
+	if armed:
+		var refund := Rules.village_refund(Game.data, village, float(Game.data.buildings.village.abandonRefund))
+		var text := UI.rich()
+		text.text = tr("Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way.") % UI.costs(refund)
+		_panel_body.add_child(text)
+
+
+func _abandon(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/abandon" % village_id)
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("done")
+	Game.set_world(response.data)
+	var mine := Game.my_villages()
+	if not mine.is_empty():
+		Game.current_village_id = int(mine[0].id)
+	_plot = Rules.HALL_PLOT
+	_rebuild_panel()
 
 
 ## One "build `building` to `target` on `plot`" row with its cost, time
@@ -2945,7 +3145,21 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 		return WallText.tower_effect(Game.data, building, level)
 	if def.has("capacityGrowth"):
 		var base := float(Game.data.buildings.village.baseCapacity)
-		return tr("Stores %d of each resource") % roundi(base * pow(float(def.capacityGrowth), level))
+		var total := roundi(float(village.get("resources", {}).get("capacity", {}).get("wood", base)))
+		return tr("Holds %d of each resource above the base; the village keeps %d in all") % [roundi(base * (pow(float(def.capacityGrowth), level) - 1.0)), total]
+	if def.has("research"):
+		var research: Dictionary = def.research
+		var per_hour := func(l: int) -> int: return roundi(float(research.basePerHour) * pow(float(research.growth), l - 1) * speed) if l > 0 else 0
+		return tr("Research +%d/h now, +%d/h at level %d") % [per_hour.call(level), per_hour.call(level + 1), level + 1]
+	if building == "market":
+		return tr("Trades at %d%% now, %d%% at level %d") % [roundi(Rules.market_rate(Game.data, level) * 100.0), roundi(Rules.market_rate(Game.data, level + 1) * 100.0), level + 1]
+	var effects: Dictionary = def.get("effects", {}) if def.get("effects") != null else {}
+	if effects.has("hospital"):
+		return tr("%d%% of the garrison's fallen get up again when it holds the village") % roundi(float(effects.hospital) * level * 100.0)
+	for key in effects:
+		if String(key).begins_with("production."):
+			var kind := String(key).trim_prefix("production.")
+			return tr("%s +%d%% now, +%d%% at level %d") % [UI.resource_name(kind), roundi(float(effects[key]) * level * 100.0), roundi(float(effects[key]) * (level + 1) * 100.0), level + 1]
 	return ""
 
 

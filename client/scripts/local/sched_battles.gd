@@ -313,6 +313,8 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		log.over = LocalWaves.js_round(over * 100) / 100.0
 	if not joined.is_empty():
 		log.joined = joined
+	if not engaged.is_empty():
+		log.garrisonLosses = shares[0]
 	# Armies after the round: harassers ride home; when the battle is over,
 	# support stays on guard and reinforcements go home.
 	for army in armies:
@@ -364,10 +366,21 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 				"vars": {"village": village.name, "rounds": round}}, at)
 	else:
 		village_state = LocalVillage.set_besieged(data, village_state, false, at, world.speed)
+		# The hospital puts some of the garrison's fallen back on their feet.
+		var fallen := {}
+		for r in battle.rounds + [log]:
+			fallen = LocalCamps.add_units(fallen, r.get("garrisonLosses", r.defenderLosses))
+		var healed := LocalVillage.hospital_healed(LocalVillage.village_bonuses(data, village_state), fallen,
+			LocalRng.new((int(world.seed) ^ LocalRng.imul(int(battle.id) + 1, 0x2545f491) ^ 0x4b) & 0xffffffff))
+		var saved := LocalBattle.total(healed)
+		if saved > 0:
+			log.healed = healed
+			village_state = LocalVillage.join_garrison(data, village_state, healed, at, world.speed)
 		_record_round(battle, log, {"status": "defended", "at": at, "loot": null})
 		horde_beaten(server, world, Vector2i(village.q, village.r), LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now))
 		LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "{village} held",
-			"body": "The horde was beaten after {rounds} rounds.", "vars": {"village": village.name, "rounds": round}}, at)
+			"body": "The horde was beaten after {rounds} rounds; the hospital saved {healed} of the fallen." if saved > 0 else "The horde was beaten after {rounds} rounds.",
+			"vars": {"village": village.name, "rounds": round, "healed": saved}}, at)
 		finish_wave(server, world, wave, "defeated", at, changed)
 
 	# A breach knocks the walls down a level.
@@ -671,13 +684,15 @@ static func ruined_state(data: Dictionary, state: Dictionary, at: int, world_spe
 	next.besieged = false
 	next.ledger.amounts = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	next.ledger.settledAt = at
-	next.ledger = LocalLedger.with_rates(next.ledger, at, LocalVillage.village_rates(data, next, world_speed), LocalVillage.capacity(data, next.levels, state.bonuses))
+	next.ledger = LocalLedger.with_rates(next.ledger, at, LocalVillage.village_rates(data, next, world_speed), LocalVillage.capacity(data, next.plots, state.bonuses))
 	return next
 
 
 static func ruin_village(server: LocalServer, world: Dictionary, village: Dictionary, at: int) -> void:
 	if village.ruin != null:
 		return
+	if LocalVillage.research_per_hour(server.data, village.state.plots, world.speed) > 0 and village.ownerAccountId != null:
+		LocalResearch.settle_points(server, world, int(village.ownerAccountId), at)
 	var data := server.data
 	var plots: Dictionary = village.state.plots.duplicate(true)
 	village.state = ruined_state(data, village.state, at, world.speed)
@@ -718,12 +733,14 @@ static func on_village_rebuilt(server: LocalServer, world: Dictionary, event: Di
 	var ruin: Variant = village.get("ruin")
 	if ruin == null or ruin.rebuildingUntil == null or LocalTime.parse(ruin.rebuildingUntil) > int(event.dueAt):
 		return
+	if LocalVillage.research_per_hour(server.data, ruin.plots, world.speed) > 0 and village.ownerAccountId != null:
+		LocalResearch.settle_points(server, world, int(village.ownerAccountId), int(event.dueAt))
 	var next: Dictionary = village.state.duplicate(true)
 	for plot in ruin.plots:
 		next.plots[plot] = ruin.plots[plot]
 	next.levels = LocalVillage.levels_of(next.plots)
 	next.ledger = LocalLedger.with_rates(village.state.ledger, int(event.dueAt), LocalVillage.village_rates(server.data, next, world.speed),
-		LocalVillage.capacity(server.data, next.levels, next.bonuses))
+		LocalVillage.capacity(server.data, next.plots, next.bonuses))
 	village.state = next
 	village.ruin = null
 	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "build_done", "tier": "push", "title": "{village} stands again",
