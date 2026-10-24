@@ -1,6 +1,7 @@
 name: Release
 
-# Pushing a version tag (v0.1.0), or making a release in GitHub's UI, runs
+# Pushing a version tag (v0.1.0), or making a release in GitHub's UI (with
+# immutable releases on, that release can't get the APK attached), runs
 # CI on the tagged commit (building the tag's version; bump config/version in
 # client/project.godot on main to match), then publishes the APK
 # as a GitHub release (not a pre-release, so cleanup-dev-builds.yml keeps
@@ -41,9 +42,15 @@ jobs:
           VERSION_NAME: ${{ needs.ci.outputs.version_name }}
         run: |
           # A release made by hand in GitHub's UI (which also makes the tag)
-          # gets the APK added; otherwise the release is made here.
+          # gets the APK added; otherwise the release is made here. With
+          # immutable releases on, a published release takes no more files:
+          # the APK stays in this run's artifacts and the deploy goes ahead.
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber
+            if ! gh release upload "$GITHUB_REF_NAME" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber; then
+              echo "::warning::Could not add the APK to release $GITHUB_REF_NAME (immutable once published). Push the tag instead of making the release in GitHub's UI; the APK is in this run's artifacts."
+              echo "APK not attached to [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME): it is in this run's artifacts." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
           else
             gh release create "$GITHUB_REF_NAME" dist/*.apk \
               --repo "$GITHUB_REPOSITORY" \
@@ -82,11 +89,12 @@ jobs:
           cache-to: type=gha,mode=max
 
   # Runs the release on the production server (ops/production/deploy.sh),
-  # once its image is published. The SSH key may run only that script.
+  # once its image is published (the APK's release page doesn't hold it up).
+  # The SSH key may run only that script.
   # Secrets: DEPLOY_HOST, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS (docs/production.md).
   deploy:
     name: Deploy to production
-    needs: [publish, server-image]
+    needs: server-image
     runs-on: ubuntu-latest
     environment:
       name: production
