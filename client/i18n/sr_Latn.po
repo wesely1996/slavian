@@ -405,47 +405,51 @@ msgstr "Nismo izgubili nikoga."
 msgid "Our ballistae smashed %s."
 msgstr "Naše baliste su razbile %s."
 
-#: client/scripts/game/battle_story.gd:176
+#: client/scripts/game/battle_story.gd:167
+msgid "In the hospital, %s got up again."
+msgstr "U bolnici je ustalo %s."
+
+#: client/scripts/game/battle_story.gd:178
 msgid "The enemy broke and fled. The field is ours."
 msgstr "Neprijatelj je slomljen i pobegao. Polje je naše."
 
-#: client/scripts/game/battle_story.gd:176
+#: client/scripts/game/battle_story.gd:178
 msgid "We fell back; they still hold their ground."
 msgstr "Povukli smo se; oni još drže svoj položaj."
 
-#: client/scripts/game/battle_story.gd:178
+#: client/scripts/game/battle_story.gd:180
 msgid "The last of them fell. The camp is ours to burn."
 msgstr "Poslednji od njih je pao. Logor je naš da ga spalimo."
 
-#: client/scripts/game/battle_story.gd:181
+#: client/scripts/game/battle_story.gd:183
 msgid "Our line broke and fell back; the horde marched on."
 msgstr "Naša linija je pukla i povukla se; horda je nastavila dalje."
 
-#: client/scripts/game/battle_story.gd:184
+#: client/scripts/game/battle_story.gd:186
 msgid "Our line broke. The horde stayed to burn %s."
 msgstr "Naša linija je pukla. Horda je ostala da spali %s."
 
-#: client/scripts/game/battle_story.gd:185
+#: client/scripts/game/battle_story.gd:187
 msgid "Our line broke. The horde carried off %s."
 msgstr "Naša linija je pukla. Horda je odnela %s."
 
-#: client/scripts/game/battle_story.gd:186
+#: client/scripts/game/battle_story.gd:188
 msgid "The fight goes on."
 msgstr "Borba se nastavlja."
 
-#: client/scripts/game/battle_story.gd:191
+#: client/scripts/game/battle_story.gd:193
 msgid "Both lines stood and glared."
 msgstr "Obe linije su stale i gledale jedna drugu."
 
-#: client/scripts/game/battle_story.gd:193
+#: client/scripts/game/battle_story.gd:195
 msgid "Their ranks are thinning fast."
 msgstr "Njihovi redovi se brzo proređuju."
 
-#: client/scripts/game/battle_story.gd:195
+#: client/scripts/game/battle_story.gd:197
 msgid "Our line bends under the weight."
 msgstr "Naša linija se savija pod teretom."
 
-#: client/scripts/game/battle_story.gd:196
+#: client/scripts/game/battle_story.gd:198
 msgid "Neither side gives ground."
 msgstr "Nijedna strana ne popušta."
 
@@ -1117,46 +1121,46 @@ msgstr "Tu ne može proći put"
 msgid "A river lies between; build a bridge first"
 msgstr "Između je reka; prvo izgradi most"
 
-#: client/scripts/game/rules.gd:186
+#: client/scripts/game/rules.gd:200
 msgid "Outposts go within %d hexes of your village."
 msgstr "Ispostave se postavljaju unutar %d polja od tvog sela."
 
-#: client/scripts/game/rules.gd:188
+#: client/scripts/game/rules.gd:202
 msgid "Nothing to gather here."
 msgstr "Ovde nema šta da se sakupi."
 
-#: client/scripts/game/rules.gd:190
+#: client/scripts/game/rules.gd:204
 msgid "Already taken."
 msgstr "Već je zauzeto."
 
-#: client/scripts/game/rules.gd:193
+#: client/scripts/game/rules.gd:207
 msgid "Your village can hold %d outpost; upgrade the Elder's Hall for more."
 msgid_plural "Your village can hold %d outposts; upgrade the Elder's Hall for more."
 msgstr[0] "Tvoje selo može da drži %d ispostavu; unapredi Dom starešina za više."
 msgstr[1] "Tvoje selo može da drži %d ispostave; unapredi Dom starešina za više."
 msgstr[2] "Tvoje selo može da drži %d ispostava; unapredi Dom starešina za više."
 
-#: client/scripts/game/rules.gd:239
+#: client/scripts/game/rules.gd:253
 msgid "That hex is not on the map."
 msgstr "To polje nije na mapi."
 
-#: client/scripts/game/rules.gd:241
+#: client/scripts/game/rules.gd:255
 msgid "Villages can't be founded on %s."
 msgstr "Sela ne mogu da se osnuju na %s."
 
-#: client/scripts/game/rules.gd:243
+#: client/scripts/game/rules.gd:257
 msgid "Settlers walk at most %d hexes from their village."
 msgstr "Doseljenici mogu da odu najviše %d polja od svog sela."
 
-#: client/scripts/game/rules.gd:245
+#: client/scripts/game/rules.gd:259
 msgid "Too close to the Holy City."
 msgstr "Preblizu Svetom gradu."
 
-#: client/scripts/game/rules.gd:248
+#: client/scripts/game/rules.gd:262
 msgid "Villages stand at least %d hexes apart."
 msgstr "Sela su udaljena najmanje %d polja."
 
-#: client/scripts/game/rules.gd:250
+#: client/scripts/game/rules.gd:264
 msgid "An outpost stands there."
 msgstr "Tamo se nalazi ispostava."
 
@@ -1860,1031 +1864,1111 @@ msgid "Academy Lv %d · %d of %d techs known"
 msgstr "Akademija nivo %d · poznato %d od %d tehnologija"
 
 #: client/scripts/screens/game_screen.gd:1602
+msgid "Research: %d (+%d per hour from your Academies)"
+msgstr "Istraživanje: %d (+%d na sat od tvojih akademija)"
+
+#: client/scripts/screens/game_screen.gd:1608
 msgid "Researching %s · %s"
 msgstr "Istražuje se %s · %s"
 
-#: client/scripts/screens/game_screen.gd:1604
+#: client/scripts/screens/game_screen.gd:1610
 msgid "Nothing being researched: pick a tech from a branch."
 msgstr "Ništa se ne istražuje: izaberi znanje iz neke grane."
 
-#: client/scripts/screens/game_screen.gd:1607
+#: client/scripts/screens/game_screen.gd:1613
 msgid "Lore scrolls of the group"
 msgstr "Svitci predanja grupe"
 
-#: client/scripts/screens/game_screen.gd:1611
+#: client/scripts/screens/game_screen.gd:1617
 msgid "%s (found by %s)"
 msgstr "%s (pronašao %s)"
 
-#: client/scripts/screens/game_screen.gd:1636
+#: client/scripts/screens/game_screen.gd:1642
 msgid "Known by %s"
 msgstr "Zna ga %s"
 
-#: client/scripts/screens/game_screen.gd:1649
+#: client/scripts/screens/game_screen.gd:1654
+msgid "%s · %d research · %s"
+msgstr "%s · %d istraživanja · %s"
+
+#: client/scripts/screens/game_screen.gd:1656
 msgid "%s  (%s)"
 msgstr "%s  (%s)"
 
-#: client/scripts/screens/game_screen.gd:1651
+#: client/scripts/screens/game_screen.gd:1658
 msgid "Research"
 msgstr "Istraživanje"
 
-#: client/scripts/screens/game_screen.gd:1690
+#: client/scripts/screens/game_screen.gd:1665
+msgid "%s  (not enough research)"
+msgstr "%s  (nema dovoljno istraživanja)"
+
+#: client/scripts/screens/game_screen.gd:1698
 msgid "Armies"
 msgstr "Vojske"
 
-#: client/scripts/screens/game_screen.gd:1692
+#: client/scripts/screens/game_screen.gd:1700
 msgid "No armies out from here, and none standing guard."
 msgstr "Nijedna vojska nije otišla odavde, i niko ne stoji na straži."
 
-#: client/scripts/screens/game_screen.gd:1706
+#: client/scripts/screens/game_screen.gd:1714
 msgid "From %s, standing guard here"
 msgstr "Iz %s, čuva stražu ovde"
 
-#: client/scripts/screens/game_screen.gd:1710
+#: client/scripts/screens/game_screen.gd:1718
 msgid "Call home"
 msgstr "Pozovi kući"
 
-#: client/scripts/screens/game_screen.gd:1720
+#: client/scripts/screens/game_screen.gd:1728
 msgid "When a battle starts within %d hexes, send %d%% of the troops here to help."
 msgstr "Kada bitka počne u krugu od %d polja, pošalji %d%% trupa odavde u pomoć."
 
-#: client/scripts/screens/game_screen.gd:1720
+#: client/scripts/screens/game_screen.gd:1728
 msgid "This village doesn't send help to battles nearby."
 msgstr "Ovo selo ne šalje pomoć u obližnje bitke."
 
-#: client/scripts/screens/game_screen.gd:1731
+#: client/scripts/screens/game_screen.gd:1739
 msgid "Within"
 msgstr "Do"
 
-#: client/scripts/screens/game_screen.gd:1734
+#: client/scripts/screens/game_screen.gd:1742
 msgid "hexes"
 msgstr "polja"
 
-#: client/scripts/screens/game_screen.gd:1737
+#: client/scripts/screens/game_screen.gd:1745
 msgid "Set"
 msgstr "Postavi"
 
-#: client/scripts/screens/game_screen.gd:1749
+#: client/scripts/screens/game_screen.gd:1757
 msgid "The Holy City"
 msgstr "Sveti grad"
 
-#: client/scripts/screens/game_screen.gd:1754
+#: client/scripts/screens/game_screen.gd:1762
 msgid "Send troops"
 msgstr "Pošalji trupe"
 
-#: client/scripts/screens/game_screen.gd:1757
+#: client/scripts/screens/game_screen.gd:1765
 msgid "%s · %d hex"
 msgid_plural "%s · %d hexes"
 msgstr[0] "%s · %d polje"
 msgstr[1] "%s · %d polja"
 msgstr[2] "%s · %d polja"
 
-#: client/scripts/screens/game_screen.gd:1772
+#: client/scripts/screens/game_screen.gd:1780
 msgid "They stand with the Holy City's guard and fight every horde that reaches it, until called home."
 msgstr "Stoje uz stražu Svetog grada i bore se sa svakom hordom koja do njega stigne, dok ih ne pozoveš kući."
 
-#: client/scripts/screens/game_screen.gd:1821
+#: client/scripts/screens/game_screen.gd:1829
 msgid "All"
 msgstr "Sve"
 
-#: client/scripts/screens/game_screen.gd:1839
+#: client/scripts/screens/game_screen.gd:1847
 msgid "Type how many of each to send."
 msgstr "Upiši koliko kojih da pošalješ."
 
-#: client/scripts/screens/game_screen.gd:1877
+#: client/scripts/screens/game_screen.gd:1885
 msgid "Ancient site"
 msgstr "Drevno mesto"
 
-#: client/scripts/screens/game_screen.gd:1880
+#: client/scripts/screens/game_screen.gd:1888
 msgid "Explore it"
 msgstr "Istraži ga"
 
-#: client/scripts/screens/game_screen.gd:1880
+#: client/scripts/screens/game_screen.gd:1888
 msgid "Hold this hex"
 msgstr "Drži ovo polje"
 
-#: client/scripts/screens/game_screen.gd:1880
+#: client/scripts/screens/game_screen.gd:1888
 msgid "Clear this camp"
 msgstr "Očisti ovaj logor"
 
-#: client/scripts/screens/game_screen.gd:1905
+#: client/scripts/screens/game_screen.gd:1913
 msgid "Send from %s"
 msgstr "Pošalji iz %s"
 
-#: client/scripts/screens/game_screen.gd:1911
+#: client/scripts/screens/game_screen.gd:1919
 msgid "%s leads it: %s"
 msgstr "%s ga vodi: %s"
 
-#: client/scripts/screens/game_screen.gd:1911
+#: client/scripts/screens/game_screen.gd:1919
 msgid "yes"
 msgstr "da"
 
-#: client/scripts/screens/game_screen.gd:1911
+#: client/scripts/screens/game_screen.gd:1919
 msgid "no"
 msgstr "ne"
 
-#: client/scripts/screens/game_screen.gd:1915
+#: client/scripts/screens/game_screen.gd:1923
 msgid "Explore"
 msgstr "Istraži"
 
-#: client/scripts/screens/game_screen.gd:1915
+#: client/scripts/screens/game_screen.gd:1923
 msgid "Storm it"
 msgstr "Jurišaj"
 
-#: client/scripts/screens/game_screen.gd:1941
+#: client/scripts/screens/game_screen.gd:1949
 msgid "Build a fort (+%d%% defense here)"
 msgstr "Izgradi utvrdu (+%d%% odbrane ovde)"
 
-#: client/scripts/screens/game_screen.gd:1945
+#: client/scripts/screens/game_screen.gd:1953
 msgid "Build fort"
 msgstr "Izgradi utvrdu"
 
-#: client/scripts/screens/game_screen.gd:1974
+#: client/scripts/screens/game_screen.gd:1982
 msgid "Towards (%d, %d): "
 msgstr "Prema (%d, %d): "
 
-#: client/scripts/screens/game_screen.gd:1977
+#: client/scripts/screens/game_screen.gd:1985
 msgid "a bridge crosses here."
 msgstr "ovde prolazi most."
 
-#: client/scripts/screens/game_screen.gd:1980
+#: client/scripts/screens/game_screen.gd:1988
 msgid "a bridge is being built."
 msgstr "most se gradi."
 
-#: client/scripts/screens/game_screen.gd:1982
+#: client/scripts/screens/game_screen.gd:1990
 msgid "no way across. Hordes can't cross either."
 msgstr "nema prelaza. Ni horde ne mogu preći."
 
-#: client/scripts/screens/game_screen.gd:1996
+#: client/scripts/screens/game_screen.gd:2004
 msgid "Build bridge"
 msgstr "Gradi most"
 
-#: client/scripts/screens/game_screen.gd:2000
+#: client/scripts/screens/game_screen.gd:2008
 msgid "Build a bridge: %s · %s"
 msgstr "Gradi most: %s · %s"
 
-#: client/scripts/screens/game_screen.gd:2013
+#: client/scripts/screens/game_screen.gd:2021
 msgid "NE"
 msgstr "SI"
 
-#: client/scripts/screens/game_screen.gd:2013
+#: client/scripts/screens/game_screen.gd:2021
 msgid "NW"
 msgstr "SZ"
 
-#: client/scripts/screens/game_screen.gd:2013
+#: client/scripts/screens/game_screen.gd:2021
 msgid "SW"
 msgstr "JZ"
 
-#: client/scripts/screens/game_screen.gd:2013
+#: client/scripts/screens/game_screen.gd:2021
 msgid "SE"
 msgstr "JI"
 
-#: client/scripts/screens/game_screen.gd:2019
+#: client/scripts/screens/game_screen.gd:2027
 msgid " (being built)"
 msgstr " (u gradnji)"
 
-#: client/scripts/screens/game_screen.gd:2024
+#: client/scripts/screens/game_screen.gd:2032
 msgid "Roads halve the march for everyone on them, the human hordes too, but the beasts of the North keep off them."
 msgstr "Putevi prepolovljuju marš svima koji njima idu, i ljudskim hordama, ali zveri Severa ih zaobilaze."
 
-#: client/scripts/screens/game_screen.gd:2026
+#: client/scripts/screens/game_screen.gd:2034
 msgid "Roads run %s."
 msgstr "Putevi vode %s."
 
-#: client/scripts/screens/game_screen.gd:2035
+#: client/scripts/screens/game_screen.gd:2043
 msgid "Build a road"
 msgstr "Izgradi put"
 
-#: client/scripts/screens/game_screen.gd:2039
+#: client/scripts/screens/game_screen.gd:2047
 msgid "Tap the hex next to this one to build the road to."
 msgstr "Dodirni susedno polje do kog ide put."
 
-#: client/scripts/screens/game_screen.gd:2041
+#: client/scripts/screens/game_screen.gd:2049
 msgid "A road: %s · %s"
 msgstr "Put: %s · %s"
 
-#: client/scripts/screens/game_screen.gd:2089
+#: client/scripts/screens/game_screen.gd:2097
 msgid "Last: %s"
 msgstr "Poslednje: %s"
 
-#: client/scripts/screens/game_screen.gd:2093
+#: client/scripts/screens/game_screen.gd:2101
 msgid "Stop"
 msgstr "Zaustavi"
 
-#: client/scripts/screens/game_screen.gd:2102
+#: client/scripts/screens/game_screen.gd:2110
 msgid "Repeat training (checked every %d game minutes)"
 msgstr "Ponavljaj obuku (provera svakih %d minuta igre)"
 
-#: client/scripts/screens/game_screen.gd:2114
+#: client/scripts/screens/game_screen.gd:2122
 msgid "Keep"
 msgstr "Drži"
 
-#: client/scripts/screens/game_screen.gd:2116
+#: client/scripts/screens/game_screen.gd:2124
 msgid "ready, training"
 msgstr "spremnih, obučavaj po"
 
-#: client/scripts/screens/game_screen.gd:2118
+#: client/scripts/screens/game_screen.gd:2126
 msgid "at a time"
 msgstr "odjednom"
 
-#: client/scripts/screens/game_screen.gd:2121
+#: client/scripts/screens/game_screen.gd:2129
 msgid "Keep %s topped up"
 msgstr "Dopunjavaj %s"
 
-#: client/scripts/screens/game_screen.gd:2130
+#: client/scripts/screens/game_screen.gd:2138
 msgid "Rebuild raided outposts automatically"
 msgstr "Automatski obnovi opustošene ispostave"
 
-#: client/scripts/screens/game_screen.gd:2137
+#: client/scripts/screens/game_screen.gd:2145
 msgid "Caravans take what is above this share of storage to the Holy City vault."
 msgstr "Karavani nose u riznicu Svetog grada sve što pređe ovaj deo skladišta."
 
-#: client/scripts/screens/game_screen.gd:2144
+#: client/scripts/screens/game_screen.gd:2152
 msgid "Above"
 msgstr "Iznad"
 
-#: client/scripts/screens/game_screen.gd:2147
+#: client/scripts/screens/game_screen.gd:2155
 msgid "% of storage"
 msgstr "% skladišta"
 
-#: client/scripts/screens/game_screen.gd:2150
+#: client/scripts/screens/game_screen.gd:2158
 msgid "Start"
 msgstr "Počni"
 
-#: client/scripts/screens/game_screen.gd:2182
+#: client/scripts/screens/game_screen.gd:2190
 msgid "Hero"
 msgstr "Junak"
 
-#: client/scripts/screens/game_screen.gd:2197
+#: client/scripts/screens/game_screen.gd:2205
 msgid "%s  Lv %d"
 msgstr "%s  nivo %d"
 
-#: client/scripts/screens/game_screen.gd:2200
+#: client/scripts/screens/game_screen.gd:2208
 msgid "Close"
 msgstr "Zatvori"
 
-#: client/scripts/screens/game_screen.gd:2206
+#: client/scripts/screens/game_screen.gd:2214
 msgid "Your hero"
 msgstr "Tvoj junak"
 
-#: client/scripts/screens/game_screen.gd:2207
+#: client/scripts/screens/game_screen.gd:2215
 msgid "Quests"
 msgstr "Zadaci"
 
-#: client/scripts/screens/game_screen.gd:2208
+#: client/scripts/screens/game_screen.gd:2216
 msgid "Stats"
 msgstr "Osobine"
 
-#: client/scripts/screens/game_screen.gd:2209
+#: client/scripts/screens/game_screen.gd:2217
 msgid "Skills"
 msgstr "Veštine"
 
-#: client/scripts/screens/game_screen.gd:2210
+#: client/scripts/screens/game_screen.gd:2218
 msgid "Gear"
 msgstr "Oprema"
 
-#: client/scripts/screens/game_screen.gd:2211
+#: client/scripts/screens/game_screen.gd:2219
 msgid "Send to"
 msgstr "Pošalji u"
 
-#: client/scripts/screens/game_screen.gd:2226
+#: client/scripts/screens/game_screen.gd:2234
 msgid "In all your villages: %s"
 msgstr "U svim tvojim selima: %s"
 
-#: client/scripts/screens/game_screen.gd:2234
+#: client/scripts/screens/game_screen.gd:2242
 msgid "XP %d / %d"
 msgstr "XP %d / %d"
 
-#: client/scripts/screens/game_screen.gd:2234
+#: client/scripts/screens/game_screen.gd:2242
 msgid "Highest level"
 msgstr "Najviši nivo"
 
-#: client/scripts/screens/game_screen.gd:2235
+#: client/scripts/screens/game_screen.gd:2243
 msgid "skill point"
 msgid_plural "skill points"
 msgstr[0] "poen veštine"
 msgstr[1] "poena veštine"
 msgstr[2] "poena veštine"
 
-#: client/scripts/screens/game_screen.gd:2236
+#: client/scripts/screens/game_screen.gd:2244
 msgid "%s · %d %s"
 msgstr "%s · %d %s"
 
-#: client/scripts/screens/game_screen.gd:2237
+#: client/scripts/screens/game_screen.gd:2245
 msgid "XP comes from enemies slain while leading a garrison."
 msgstr "Iskustvo donose neprijatelji pobijeni dok junak predvodi posadu."
 
-#: client/scripts/screens/game_screen.gd:2240
+#: client/scripts/screens/game_screen.gd:2248
 msgid "Adds where it stands: %s"
 msgstr "Dodaje gde stoji: %s"
 
-#: client/scripts/screens/game_screen.gd:2247
+#: client/scripts/screens/game_screen.gd:2255
 msgid "Its own gifts count in all your villages; what its skills and gear add counts where it stands, and for the army it leads."
 msgstr "Njegovi sopstveni darovi važe u svim tvojim selima; ono što dodaju veštine i oprema važi tamo gde stoji i za vojsku koju predvodi."
 
-#: client/scripts/screens/game_screen.gd:2249
+#: client/scripts/screens/game_screen.gd:2257
 msgid "Level %d · %s"
 msgstr "Nivo %d · %s"
 
-#: client/scripts/screens/game_screen.gd:2252
+#: client/scripts/screens/game_screen.gd:2260
 msgid "No bonuses yet."
 msgstr "Još nema bonusa."
 
-#: client/scripts/screens/game_screen.gd:2258
+#: client/scripts/screens/game_screen.gd:2266
 msgid "Bonus"
 msgstr "Bonus"
 
-#: client/scripts/screens/game_screen.gd:2258
+#: client/scripts/screens/game_screen.gd:2266
 msgid "Own"
 msgstr "Svoje"
 
-#: client/scripts/screens/game_screen.gd:2258
+#: client/scripts/screens/game_screen.gd:2266
 msgid "Total"
 msgstr "Ukupno"
 
-#: client/scripts/screens/game_screen.gd:2281
+#: client/scripts/screens/game_screen.gd:2289
 msgid "%d %s to spend"
 msgstr "%d %s za trošenje"
 
-#: client/scripts/screens/game_screen.gd:2292
+#: client/scripts/screens/game_screen.gd:2300
 msgid "%s  %d/%d"
 msgstr "%s  %d/%d"
 
-#: client/scripts/screens/game_screen.gd:2316
+#: client/scripts/screens/game_screen.gd:2324
 msgid "Take off"
 msgstr "Skini"
 
-#: client/scripts/screens/game_screen.gd:2326
+#: client/scripts/screens/game_screen.gd:2334
 msgid "%s set (%d of %d worn): %s"
 msgstr "Komplet %s (nosi %d od %d): %s"
 
-#: client/scripts/screens/game_screen.gd:2329
+#: client/scripts/screens/game_screen.gd:2337
 msgid "No gear yet."
 msgstr "Još nema opreme."
 
-#: client/scripts/screens/game_screen.gd:2329
+#: client/scripts/screens/game_screen.gd:2337
 msgid "Beaten hordes sometimes leave gear behind for a hero who fought them."
 msgstr "Pobeđene horde ponekad ostave opremu junaku koji se borio protiv njih."
 
-#: client/scripts/screens/game_screen.gd:2338
+#: client/scripts/screens/game_screen.gd:2346
 msgid "Wear"
 msgstr "Obuci"
 
-#: client/scripts/screens/game_screen.gd:2350
+#: client/scripts/screens/game_screen.gd:2358
 msgid "Found another village to send the hero there."
 msgstr "Osnuj još jedno selo da bi junaka poslao tamo."
 
-#: client/scripts/screens/game_screen.gd:2356
+#: client/scripts/screens/game_screen.gd:2364
 msgid "Name"
 msgstr "Ime"
 
-#: client/scripts/screens/game_screen.gd:2358
+#: client/scripts/screens/game_screen.gd:2366
 msgid "New name"
 msgstr "Novo ime"
 
-#: client/scripts/screens/game_screen.gd:2364
+#: client/scripts/screens/game_screen.gd:2372
 msgid "Rename"
 msgstr "Preimenuj"
 
-#: client/scripts/screens/game_screen.gd:2369
+#: client/scripts/screens/game_screen.gd:2377
 msgid "The hero rides out alone: no garrison to lead while away, and a chance to come back wounded. New quests every few hours."
 msgstr "Junak jaše sam: dok je odsutan ne predvodi posadu i može se vratiti ranjen. Novi zadaci na svakih nekoliko sati."
 
-#: client/scripts/screens/game_screen.gd:2377
+#: client/scripts/screens/game_screen.gd:2385
 msgid "Back in %s"
 msgstr "Vraća se za %s"
 
-#: client/scripts/screens/game_screen.gd:2381
+#: client/scripts/screens/game_screen.gd:2389
 msgid "No quests while the hero is away, wounded or leading an army."
 msgstr "Nema zadataka dok je junak odsutan, ranjen ili predvodi vojsku."
 
-#: client/scripts/screens/game_screen.gd:2391
+#: client/scripts/screens/game_screen.gd:2399
 msgid "Set out"
 msgstr "Kreni"
 
-#: client/scripts/screens/game_screen.gd:2433
+#: client/scripts/screens/game_screen.gd:2441
 msgid "Settlers on their way to found %s · %s"
 msgstr "Doseljenici na putu da osnuju %s · %s"
 
-#: client/scripts/screens/game_screen.gd:2435
+#: client/scripts/screens/game_screen.gd:2443
 msgid "Settlers coming home (%s) · %s"
 msgstr "Doseljenici se vraćaju kući (%s) · %s"
 
-#: client/scripts/screens/game_screen.gd:2437
+#: client/scripts/screens/game_screen.gd:2445
 msgid "Founded %s"
 msgstr "Osnovano %s"
 
-#: client/scripts/screens/game_screen.gd:2438
+#: client/scripts/screens/game_screen.gd:2446
 msgid "Settlers came home from (%d, %d)"
 msgstr "Doseljenici su se vratili sa (%d, %d)"
 
-#: client/scripts/screens/game_screen.gd:2456
+#: client/scripts/screens/game_screen.gd:2464
 msgid "%d settlers from %s walk here and found it (%d at home). Train them in a Settlers' Lodge."
 msgstr "%d doseljenika iz %s ide ovamo i osniva ga (%d kod kuće). Obučavaj ih u Loži doseljenika."
 
-#: client/scripts/screens/game_screen.gd:2457
+#: client/scripts/screens/game_screen.gd:2465
 msgid "Name (optional)"
 msgstr "Ime (opciono)"
 
-#: client/scripts/screens/game_screen.gd:2461
+#: client/scripts/screens/game_screen.gd:2469
 msgid "Send settlers"
 msgstr "Pošalji doseljenike"
 
-#: client/scripts/screens/game_screen.gd:2487
+#: client/scripts/screens/game_screen.gd:2495
 msgid "An outpost here would gather %s."
 msgstr "Ispostava ovde bi skupljala %s."
 
-#: client/scripts/screens/game_screen.gd:2514
+#: client/scripts/screens/game_screen.gd:2522
 msgid "  (queue full)"
 msgstr "  (red pun)"
 
-#: client/scripts/screens/game_screen.gd:2547
+#: client/scripts/screens/game_screen.gd:2555
 msgid "Ally: %s"
 msgstr "Saveznik: %s"
 
-#: client/scripts/screens/game_screen.gd:2557
+#: client/scripts/screens/game_screen.gd:2565
 msgid "Hero %s (Lv %d) leads the garrison"
 msgstr "Junak %s (nivo %d) vodi posadu"
 
-#: client/scripts/screens/game_screen.gd:2560
+#: client/scripts/screens/game_screen.gd:2568
 msgid "Send resources"
 msgstr "Pošalji resurse"
 
-#: client/scripts/screens/game_screen.gd:2569
+#: client/scripts/screens/game_screen.gd:2577
 msgid "Elder's Hall Lv %d · building %d of %d · outposts %d of %d"
 msgstr "Dom starešina nivo %d · gradnja %d od %d · ispostave %d od %d"
 
-#: client/scripts/screens/game_screen.gd:2572
+#: client/scripts/screens/game_screen.gd:2580
 msgid "Under siege: outposts produce nothing until the battle ends."
 msgstr "Pod opsadom: ispostave ne proizvode ništa dok se bitka ne završi."
 
-#: client/scripts/screens/game_screen.gd:2574
+#: client/scripts/screens/game_screen.gd:2582
 msgid "In ruins: rebuild it from the village view."
 msgstr "U ruševinama: obnovi ga iz prikaza sela."
 
-#: client/scripts/screens/game_screen.gd:2576
+#: client/scripts/screens/game_screen.gd:2584
 msgid "A refugee camp"
 msgstr "Izbeglički logor"
 
-#: client/scripts/screens/game_screen.gd:2576
+#: client/scripts/screens/game_screen.gd:2584
 msgid "Hordes raid a refugee camp but never burn it."
 msgstr "Horde pljačkaju izbeglički logor, ali ga nikad ne spale."
 
-#: client/scripts/screens/game_screen.gd:2582
+#: client/scripts/screens/game_screen.gd:2590
 msgid "Enter village"
 msgstr "Uđi u selo"
 
-#: client/scripts/screens/game_screen.gd:2601
+#: client/scripts/screens/game_screen.gd:2609
 msgid "Previous town"
 msgstr "Prethodni grad"
 
-#: client/scripts/screens/game_screen.gd:2608
+#: client/scripts/screens/game_screen.gd:2616
 msgid "Town name"
 msgstr "Ime grada"
 
-#: client/scripts/screens/game_screen.gd:2613
+#: client/scripts/screens/game_screen.gd:2621
 msgid "Save"
 msgstr "Sačuvaj"
 
-#: client/scripts/screens/game_screen.gd:2627
+#: client/scripts/screens/game_screen.gd:2635
 msgid "Town %d of %d"
 msgstr "Grad %d od %d"
 
-#: client/scripts/screens/game_screen.gd:2633
+#: client/scripts/screens/game_screen.gd:2641
 msgid "Rename the town"
 msgstr "Preimenuj grad"
 
-#: client/scripts/screens/game_screen.gd:2637
+#: client/scripts/screens/game_screen.gd:2645
 msgid "Next town"
 msgstr "Sledeći grad"
 
-#: client/scripts/screens/game_screen.gd:2643
+#: client/scripts/screens/game_screen.gd:2651
 msgid "Looking after it for %s"
 msgstr "Čuvaš ga za igrača %s"
 
-#: client/scripts/screens/game_screen.gd:2729
+#: client/scripts/screens/game_screen.gd:2759
 msgid "Troops"
 msgstr "Trupe"
 
-#: client/scripts/screens/game_screen.gd:2729
+#: client/scripts/screens/game_screen.gd:2759
 msgid "Caravans"
 msgstr "Karavani"
 
-#: client/scripts/screens/game_screen.gd:2741
+#: client/scripts/screens/game_screen.gd:2771
 msgid "The picked plot"
 msgstr "Izabrano mesto"
 
-#: client/scripts/screens/game_screen.gd:2742
+#: client/scripts/screens/game_screen.gd:2772
 msgid "Build queue"
 msgstr "Red gradnje"
 
-#: client/scripts/screens/game_screen.gd:2743
+#: client/scripts/screens/game_screen.gd:2773
 msgid "Outposts"
 msgstr "Ispostave"
 
-#: client/scripts/screens/game_screen.gd:2755
+#: client/scripts/screens/game_screen.gd:2785
 msgid "%s lies in ruins"
 msgstr "%s leži u ruševinama"
 
-#: client/scripts/screens/game_screen.gd:2760
+#: client/scripts/screens/game_screen.gd:2790
 msgid "Rebuilding · stands again in %s"
 msgstr "Obnova · ponovo stoji za %s"
 
-#: client/scripts/screens/game_screen.gd:2762
+#: client/scripts/screens/game_screen.gd:2792
 msgid "A horde burned it down. Rebuild everything as it stood, at %d%% of what it cost."
 msgstr "Horda ga je spalila. Obnovi sve kako je bilo, uz %d%% cene koštanja."
 
-#: client/scripts/screens/game_screen.gd:2793
+#: client/scripts/screens/game_screen.gd:2823
 msgid "Build queue (%d/%d)"
 msgstr "Red gradnje (%d/%d)"
 
-#: client/scripts/screens/game_screen.gd:2795
+#: client/scripts/screens/game_screen.gd:2825
 msgid "Nothing under construction."
 msgstr "Ništa se ne gradi."
 
-#: client/scripts/screens/game_screen.gd:2798
+#: client/scripts/screens/game_screen.gd:2828
 msgid "%s → Lv %d"
 msgstr "%s → nivo %d"
 
-#: client/scripts/screens/game_screen.gd:2803
+#: client/scripts/screens/game_screen.gd:2833
 msgid "%s   %s"
 msgstr "%s   %s"
 
-#: client/scripts/screens/game_screen.gd:2803
+#: client/scripts/screens/game_screen.gd:2833
 msgid "finishing…"
 msgstr "završava se…"
 
-#: client/scripts/screens/game_screen.gd:2809
+#: client/scripts/screens/game_screen.gd:2839
 msgid "Outposts (%d/%d)"
 msgstr "Ispostave (%d/%d)"
 
-#: client/scripts/screens/game_screen.gd:2815
+#: client/scripts/screens/game_screen.gd:2845
 msgid "None yet. Tap a forest, plains, hills, mountain or lake hex within %d of the village on the map to claim one."
 msgstr "Još nijedna. Dodirni polje šume, ravnice, brda, planine ili jezera na udaljenosti do %d od sela na mapi da je prisvojiš."
 
-#: client/scripts/screens/game_screen.gd:2823
+#: client/scripts/screens/game_screen.gd:2853
 msgid "%s (%d, %d)  %s"
 msgstr "%s (%d, %d)  %s"
 
-#: client/scripts/screens/game_screen.gd:2824
+#: client/scripts/screens/game_screen.gd:2854
 msgid "Lv %d · %s"
 msgstr "nivo %d · %s"
 
-#: client/scripts/screens/game_screen.gd:2824
+#: client/scripts/screens/game_screen.gd:2854
 msgid "Lv 0"
 msgstr "nivo 0"
 
-#: client/scripts/screens/game_screen.gd:2827
+#: client/scripts/screens/game_screen.gd:2857
 msgid "Show"
 msgstr "Prikaži"
 
-#: client/scripts/screens/game_screen.gd:2846
+#: client/scripts/screens/game_screen.gd:2876
 msgid "Wall slot"
 msgstr "Mesto na bedemu"
 
-#: client/scripts/screens/game_screen.gd:2847
+#: client/scripts/screens/game_screen.gd:2877
 msgid "Raise the walls to level %d to build a tower here."
 msgstr "Podigni bedeme na nivo %d da bi ovde gradio kulu."
 
-#: client/scripts/screens/game_screen.gd:2849
+#: client/scripts/screens/game_screen.gd:2879
 msgid "Locked slot"
 msgstr "Zaključano mesto"
 
-#: client/scripts/screens/game_screen.gd:2851
+#: client/scripts/screens/game_screen.gd:2881
 msgid "Upgrade the Elder's Hall to level %d to build here."
 msgstr "Unapredi Dom starešina na nivo %d da bi ovde gradio."
 
-#: client/scripts/screens/game_screen.gd:2854
+#: client/scripts/screens/game_screen.gd:2884
 msgid "Empty wall slot"
 msgstr "Prazno mesto na bedemu"
 
-#: client/scripts/screens/game_screen.gd:2854
+#: client/scripts/screens/game_screen.gd:2884
 msgid "Empty slot"
 msgstr "Prazno mesto"
 
-#: client/scripts/screens/game_screen.gd:2857
+#: client/scripts/screens/game_screen.gd:2887
 msgid "Every tower already stands on these walls."
 msgstr "Sve kule već stoje na ovim bedemima."
 
-#: client/scripts/screens/game_screen.gd:2857
+#: client/scripts/screens/game_screen.gd:2887
 msgid "Every building already stands in this village."
 msgstr "Sve zgrade već stoje u ovom selu."
 
-#: client/scripts/screens/game_screen.gd:2869
-msgid "  (→ %d queued)"
-msgstr "  (→ %d u redu)"
-
-#: client/scripts/screens/game_screen.gd:2932
-msgid "%s +%d/h now, +%d/h at level %d"
-msgstr "%s +%d/h sada, +%d/h na nivou %d"
-
-#: client/scripts/screens/game_screen.gd:2936
-msgid "%d of %d building slots open, build queue %d."
-msgstr "Otvoreno %d od %d mesta za gradnju, red za gradnju %d."
-
-#: client/scripts/screens/game_screen.gd:2938
-msgid " Level %d: %d slots, queue %d, builds %d%% faster than level 1."
-msgstr " Nivo %d: %d mesta, red %d, gradnja %d%% brža nego na nivou 1."
-
-#: client/scripts/screens/game_screen.gd:2948
-msgid "Stores %d of each resource"
-msgstr "Čuva %d svakog resursa"
-
-#: client/scripts/screens/game_screen.gd:2954
-msgid "Garrison"
-msgstr "Posada"
-
-#: client/scripts/screens/game_screen.gd:2956
-msgid "Repeat training"
-msgstr "Ponovljena obuka"
-
-#: client/scripts/screens/game_screen.gd:2972
-msgid "Recommended garrison: %d (%d at home)"
-msgstr "Preporučena posada: %d (%d kod kuće)"
-
-#: client/scripts/screens/game_screen.gd:2974
-msgid "At home"
-msgstr "Kod kuće"
-
-#: client/scripts/screens/game_screen.gd:2985
-msgid "Away: %s"
-msgstr "Na terenu: %s"
-
-#: client/scripts/screens/game_screen.gd:2994
-msgid "Training (%d/%d)"
-msgstr "Obuka (%d/%d)"
-
-#: client/scripts/screens/game_screen.gd:2996
-msgid "Nobody in training."
-msgstr "Nema nikoga na obuci."
-
-#: client/scripts/screens/game_screen.gd:3008
-msgid "%s %d/%d   finishing…"
-msgstr "%s %d/%d   završava se…"
-
-#: client/scripts/screens/game_screen.gd:3010
-msgid "%s %d/%d   next %s · all %s"
-msgstr "%s %d/%d   sledeće za %s · sve za %s"
-
-#: client/scripts/screens/game_screen.gd:3032
-msgid "%s · atk %d · def %d · %d grain/h"
-msgstr "%s · nap %d · odb %d · %d žita/h"
-
-#: client/scripts/screens/game_screen.gd:3035
+#: client/scripts/screens/game_screen.gd:2894
 msgid "Needs %s level %d"
 msgstr "Potrebno: %s nivo %d"
 
-#: client/scripts/screens/game_screen.gd:3056
+#: client/scripts/screens/game_screen.gd:2904
+msgid "  (→ %d queued)"
+msgstr "  (→ %d u redu)"
+
+#: client/scripts/screens/game_screen.gd:2928
+msgid "Trade"
+msgstr "Trguj"
+
+#: client/scripts/screens/game_screen.gd:2937
+msgid "for"
+msgstr "za"
+
+#: client/scripts/screens/game_screen.gd:2956
+msgid "You get %d %s (%d%% of what you give)"
+msgstr "Dobijaš %d %s (%d%% od onoga što daješ)"
+
+#: client/scripts/screens/game_screen.gd:2960
+msgid "Sell spare gear"
+msgstr "Prodaj suvišnu opremu"
+
+#: client/scripts/screens/game_screen.gd:2962
+msgid "Your hero carries no spare gear. Gear they wear must be taken off first."
+msgstr "Tvoj junak ne nosi suvišnu opremu. Opremu koju nosi na sebi prvo mora da skine."
+
+#: client/scripts/screens/game_screen.gd:2970
+msgid "Sell"
+msgstr "Prodaj"
+
+#: client/scripts/screens/game_screen.gd:2973
+msgid "Each piece fetches %s"
+msgstr "Svaki komad donosi %s"
+
+#: client/scripts/screens/game_screen.gd:3013
+msgid "Sure? Tear it down"
+msgstr "Sigurno? Sruši je"
+
+#: client/scripts/screens/game_screen.gd:3013
+msgid "Tear down"
+msgstr "Sruši"
+
+#: client/scripts/screens/game_screen.gd:3025
+msgid "Tap again to tear down the %s. You get back %s, as far as the stores hold it."
+msgstr "Dodirni ponovo da srušiš: %s. Dobijaš nazad %s, koliko skladišta mogu da prime."
+
+#: client/scripts/screens/game_screen.gd:3049
+msgid "Sure? Abandon %s"
+msgstr "Sigurno? Napusti %s"
+
+#: client/scripts/screens/game_screen.gd:3049
+msgid "Abandon this village"
+msgstr "Napusti ovo selo"
+
+#: client/scripts/screens/game_screen.gd:3061
+msgid "Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way."
+msgstr "Dodirni ponovo da ga napustiš zauvek. %s od izgrađenog ide u riznicu Svetog grada; njegove trupe i tvoj junak u njemu sele se u tvoje najbliže selo; ono što je uskladišteno propada. Mora biti mirno: bez gradnje, obuke, karavana ili vojski u pokretu."
+
+#: client/scripts/screens/game_screen.gd:3132
+msgid "%s +%d/h now, +%d/h at level %d"
+msgstr "%s +%d/h sada, +%d/h na nivou %d"
+
+#: client/scripts/screens/game_screen.gd:3136
+msgid "%d of %d building slots open, build queue %d."
+msgstr "Otvoreno %d od %d mesta za gradnju, red za gradnju %d."
+
+#: client/scripts/screens/game_screen.gd:3138
+msgid " Level %d: %d slots, queue %d, builds %d%% faster than level 1."
+msgstr " Nivo %d: %d mesta, red %d, gradnja %d%% brža nego na nivou 1."
+
+#: client/scripts/screens/game_screen.gd:3149
+msgid "Holds %d of each resource above the base; the village keeps %d in all"
+msgstr "Čuva %d svakog resursa preko osnove; selo ukupno čuva %d"
+
+#: client/scripts/screens/game_screen.gd:3153
+msgid "Research +%d/h now, +%d/h at level %d"
+msgstr "Istraživanje +%d/h sada, +%d/h na nivou %d"
+
+#: client/scripts/screens/game_screen.gd:3155
+msgid "Trades at %d%% now, %d%% at level %d"
+msgstr "Trguje po %d%% sada, %d%% na nivou %d"
+
+#: client/scripts/screens/game_screen.gd:3158
+msgid "%d%% of the garrison's fallen get up again when it holds the village"
+msgstr "%d%% palih iz posade ponovo ustaje kad odbrani selo"
+
+#: client/scripts/screens/game_screen.gd:3162
+msgid "%s +%d%% now, +%d%% at level %d"
+msgstr "%s +%d%% sada, +%d%% na nivou %d"
+
+#: client/scripts/screens/game_screen.gd:3168
+msgid "Garrison"
+msgstr "Posada"
+
+#: client/scripts/screens/game_screen.gd:3170
+msgid "Repeat training"
+msgstr "Ponovljena obuka"
+
+#: client/scripts/screens/game_screen.gd:3186
+msgid "Recommended garrison: %d (%d at home)"
+msgstr "Preporučena posada: %d (%d kod kuće)"
+
+#: client/scripts/screens/game_screen.gd:3188
+msgid "At home"
+msgstr "Kod kuće"
+
+#: client/scripts/screens/game_screen.gd:3199
+msgid "Away: %s"
+msgstr "Na terenu: %s"
+
+#: client/scripts/screens/game_screen.gd:3208
+msgid "Training (%d/%d)"
+msgstr "Obuka (%d/%d)"
+
+#: client/scripts/screens/game_screen.gd:3210
+msgid "Nobody in training."
+msgstr "Nema nikoga na obuci."
+
+#: client/scripts/screens/game_screen.gd:3222
+msgid "%s %d/%d   finishing…"
+msgstr "%s %d/%d   završava se…"
+
+#: client/scripts/screens/game_screen.gd:3224
+msgid "%s %d/%d   next %s · all %s"
+msgstr "%s %d/%d   sledeće za %s · sve za %s"
+
+#: client/scripts/screens/game_screen.gd:3246
+msgid "%s · atk %d · def %d · %d grain/h"
+msgstr "%s · nap %d · odb %d · %d žita/h"
+
+#: client/scripts/screens/game_screen.gd:3270
 msgid "%s · %s each"
 msgstr "%s · po %s"
 
-#: client/scripts/screens/game_screen.gd:3059
+#: client/scripts/screens/game_screen.gd:3273
 msgid "  (not enough)"
 msgstr "  (nema dovoljno)"
 
-#: client/scripts/screens/game_screen.gd:3065
+#: client/scripts/screens/game_screen.gd:3279
 msgid "Stance when attacked"
 msgstr "Stav pri napadu"
 
-#: client/scripts/screens/game_screen.gd:3078
+#: client/scripts/screens/game_screen.gd:3292
 msgid "%s: attack ×%.2f, defense ×%.2f, %s."
 msgstr "%s: napad ×%.2f, odbrana ×%.2f, %s."
 
-#: client/scripts/screens/game_screen.gd:3092
+#: client/scripts/screens/game_screen.gd:3306
 msgid "No troops yet."
 msgstr "Još nema trupa."
 
-#: client/scripts/screens/game_screen.gd:3117
+#: client/scripts/screens/game_screen.gd:3331
 msgid "%s · see how the run went"
 msgstr "%s · pogledaj kako je pohod prošao"
 
-#: client/scripts/screens/game_screen.gd:3122
+#: client/scripts/screens/game_screen.gd:3336
 msgid "No threats known"
 msgstr "Nema poznatih pretnji"
 
-#: client/scripts/screens/game_screen.gd:3126
+#: client/scripts/screens/game_screen.gd:3340
 msgid "%s is burning, %s left"
 msgstr "%s gori, preostalo %s"
 
-#: client/scripts/screens/game_screen.gd:3129
+#: client/scripts/screens/game_screen.gd:3343
 msgid "A horde reaches %s in %s"
 msgstr "Horda stiže do %s za %s"
 
-#: client/scripts/screens/game_screen.gd:3134
+#: client/scripts/screens/game_screen.gd:3348
 msgid "Battle at %s, round %d"
 msgstr "Bitka kod %s, runda %d"
 
-#: client/scripts/screens/game_screen.gd:3137
+#: client/scripts/screens/game_screen.gd:3351
 msgid "Horde at %s"
 msgstr "Horda kod %s"
 
-#: client/scripts/screens/game_screen.gd:3139
+#: client/scripts/screens/game_screen.gd:3353
 msgid "Next horde from the %s (%s threat) sets out in %s"
 msgstr "Sledeća horda sa %s (pretnja: %s) kreće za %s"
 
-#: client/scripts/screens/game_screen.gd:3141
+#: client/scripts/screens/game_screen.gd:3355
 msgid ", expected at %s"
 msgstr ", očekuje se kod: %s"
 
-#: client/scripts/screens/game_screen.gd:3152
+#: client/scripts/screens/game_screen.gd:3366
 msgid "Threats"
 msgstr "Pretnje"
 
-#: client/scripts/screens/game_screen.gd:3163
+#: client/scripts/screens/game_screen.gd:3377
 msgid "Enemy leaders"
 msgstr "Neprijateljske vođe"
 
-#: client/scripts/screens/game_screen.gd:3164
+#: client/scripts/screens/game_screen.gd:3378
 msgid "Battle reports"
 msgstr "Izveštaji o bitkama"
 
-#: client/scripts/screens/game_screen.gd:3165
+#: client/scripts/screens/game_screen.gd:3379
 msgid "Camps and fronts"
 msgstr "Logori i strane"
 
-#: client/scripts/screens/game_screen.gd:3167
+#: client/scripts/screens/game_screen.gd:3381
 msgid "Your group"
 msgstr "Tvoja grupa"
 
-#: client/scripts/screens/game_screen.gd:3171
+#: client/scripts/screens/game_screen.gd:3385
 msgid "World settings"
 msgstr "Podešavanja sveta"
 
-#: client/scripts/screens/game_screen.gd:3186
+#: client/scripts/screens/game_screen.gd:3400
 msgid "The Holy City: %s"
 msgstr "Sveti grad: %s"
 
-#: client/scripts/screens/game_screen.gd:3188
+#: client/scripts/screens/game_screen.gd:3402
 msgid "No waves announced."
 msgstr "Nema najavljenih talasa."
 
-#: client/scripts/screens/game_screen.gd:3197
+#: client/scripts/screens/game_screen.gd:3411
 msgid "No battles fought yet."
 msgstr "Još nije bilo bitaka."
 
-#: client/scripts/screens/game_screen.gd:3204
+#: client/scripts/screens/game_screen.gd:3418
 msgid "%s horde, %d rounds"
 msgstr "%s horda, %d rundi"
 
-#: client/scripts/screens/game_screen.gd:3214
+#: client/scripts/screens/game_screen.gd:3428
 msgid "Help came from %s"
 msgstr "Pomoć je stigla od %s"
 
-#: client/scripts/screens/game_screen.gd:3223
+#: client/scripts/screens/game_screen.gd:3437
 msgid "Fronts"
 msgstr "Strane"
 
-#: client/scripts/screens/game_screen.gd:3233
+#: client/scripts/screens/game_screen.gd:3447
 msgid "Camps and lairs"
 msgstr "Logori i jazbine"
 
-#: client/scripts/screens/game_screen.gd:3235
+#: client/scripts/screens/game_screen.gd:3449
 msgid "%s at (%d, %d)"
 msgstr "%s na (%d, %d)"
 
-#: client/scripts/screens/game_screen.gd:3237
+#: client/scripts/screens/game_screen.gd:3451
 msgid "Outposts burned"
 msgstr "Spaljene ispostave"
 
-#: client/scripts/screens/game_screen.gd:3245
+#: client/scripts/screens/game_screen.gd:3459
 msgid "%s difficulty"
 msgstr "Težina: %s"
 
-#: client/scripts/screens/game_screen.gd:3252
+#: client/scripts/screens/game_screen.gd:3466
 msgid "Peaceful hours"
 msgstr "Mirni sati"
 
-#: client/scripts/screens/game_screen.gd:3253
+#: client/scripts/screens/game_screen.gd:3467
 msgid "No horde arrives in these hours: one that would waits outside until they end. Set them to when you sleep."
 msgstr "U ovim satima ne stiže nijedna horda: ona koja bi stigla čeka napolju dok ne prođu. Postavi ih na vreme kad spavaš."
 
-#: client/scripts/screens/game_screen.gd:3258
+#: client/scripts/screens/game_screen.gd:3472
 msgid "The host sets them."
 msgstr "Postavlja ih domaćin."
 
-#: client/scripts/screens/game_screen.gd:3261
+#: client/scripts/screens/game_screen.gd:3475
 msgid "Off"
 msgstr "Isključi"
 
-#: client/scripts/screens/game_screen.gd:3281
+#: client/scripts/screens/game_screen.gd:3495
 msgid "Report a bug"
 msgstr "Prijavi grešku"
 
-#: client/scripts/screens/game_screen.gd:3291
+#: client/scripts/screens/game_screen.gd:3505
 msgid "Leave"
 msgstr "Napusti"
 
-#: client/scripts/screens/game_screen.gd:3293
+#: client/scripts/screens/game_screen.gd:3507
 msgid "Back to the menu"
 msgstr "Nazad u meni"
 
-#: client/scripts/screens/game_screen.gd:3296
+#: client/scripts/screens/game_screen.gd:3510
 msgid "Sure? Quit this world"
 msgstr "Sigurno? Napusti ovaj svet"
 
-#: client/scripts/screens/game_screen.gd:3296
+#: client/scripts/screens/game_screen.gd:3510
 msgid "Quit this world"
 msgstr "Napusti ovaj svet"
 
-#: client/scripts/screens/game_screen.gd:3304
+#: client/scripts/screens/game_screen.gd:3518
 msgid "Tap again to delete this solo world."
 msgstr "Dodirni ponovo da obrišeš ovaj solo svet."
 
-#: client/scripts/screens/game_screen.gd:3305
+#: client/scripts/screens/game_screen.gd:3519
 msgid "Tap again to quit. You're the last one here, so the world closes."
 msgstr "Dodirni ponovo da odeš. Poslednji si ovde, pa se svet zatvara."
 
-#: client/scripts/screens/game_screen.gd:3306
+#: client/scripts/screens/game_screen.gd:3520
 msgid "Tap again to quit. Your villages go to your teammates, and you can't come back."
 msgstr "Dodirni ponovo da odeš. Tvoja sela pripadaju saigračima, a nazad ne možeš."
 
-#: client/scripts/screens/game_screen.gd:3337
+#: client/scripts/screens/game_screen.gd:3551
 msgid "What went wrong?"
 msgstr "Šta je pošlo naopako?"
 
-#: client/scripts/screens/game_screen.gd:3340
+#: client/scripts/screens/game_screen.gd:3554
 msgid "The current game state is attached to the report."
 msgstr "Trenutno stanje igre se prilaže uz prijavu."
 
-#: client/scripts/screens/game_screen.gd:3351
+#: client/scripts/screens/game_screen.gd:3565
 msgid "Write what went wrong first."
 msgstr "Prvo napiši šta je pošlo naopako."
 
-#: client/scripts/screens/game_screen.gd:3360
+#: client/scripts/screens/game_screen.gd:3574
 msgid "Sending the report…"
 msgstr "Šaljem prijavu…"
 
-#: client/scripts/screens/game_screen.gd:3364
+#: client/scripts/screens/game_screen.gd:3578
 msgid "Report sent. Saved to %s"
 msgstr "Prijava poslata. Sačuvana u %s"
 
-#: client/scripts/screens/game_screen.gd:3366
+#: client/scripts/screens/game_screen.gd:3580
 msgid "Report saved to %s (the server did not take it: %s)"
 msgstr "Prijava sačuvana u %s (server je nije prihvatio: %s)"
 
-#: client/scripts/screens/game_screen.gd:3385
+#: client/scripts/screens/game_screen.gd:3599
 msgid "%s · %s front"
 msgstr "%s · strana %s"
 
-#: client/scripts/screens/game_screen.gd:3395
+#: client/scripts/screens/game_screen.gd:3609
 msgid "Fallen: %s"
 msgstr "Pali: %s"
 
-#: client/scripts/screens/game_screen.gd:3409
+#: client/scripts/screens/game_screen.gd:3623
 msgid "Wave %d · %s"
 msgstr "Talas %d · %s"
 
-#: client/scripts/screens/game_screen.gd:3411
+#: client/scripts/screens/game_screen.gd:3625
 msgid " · composition unknown"
 msgstr " · sastav nepoznat"
 
-#: client/scripts/screens/game_screen.gd:3416
+#: client/scripts/screens/game_screen.gd:3630
 msgid "%s front · %s threat%s"
 msgstr "Strana %s · pretnja: %s%s"
 
-#: client/scripts/screens/game_screen.gd:3424
+#: client/scripts/screens/game_screen.gd:3638
 msgid "Appears in %s"
 msgstr "Pojavljuje se za %s"
 
-#: client/scripts/screens/game_screen.gd:3427
+#: client/scripts/screens/game_screen.gd:3641
 msgid " · expected at %s in %s"
 msgstr " · očekuje se kod: %s za %s"
 
-#: client/scripts/screens/game_screen.gd:3430
+#: client/scripts/screens/game_screen.gd:3644
 msgid "Marching on %s · arrives in %s"
 msgstr "Maršira na %s · stiže za %s"
 
-#: client/scripts/screens/game_screen.gd:3432
+#: client/scripts/screens/game_screen.gd:3646
 msgid "At the gates of %s · leaves in %s"
 msgstr "Pred kapijama %s · odlazi za %s"
 
-#: client/scripts/screens/game_screen.gd:3434
+#: client/scripts/screens/game_screen.gd:3648
 msgid "Burning %s · done in %s"
 msgstr "Spaljuje %s · gotovo za %s"
 
-#: client/scripts/screens/game_screen.gd:3437
+#: client/scripts/screens/game_screen.gd:3651
 msgid "Fighting at %s · round %d of %d · %d of them left"
 msgstr "Borba kod %s · runda %d od %d · preostalo %d"
 
-#: client/scripts/screens/game_screen.gd:3441
+#: client/scripts/screens/game_screen.gd:3655
 msgid "Led by %s"
 msgstr "Predvodi %s"
 
-#: client/scripts/screens/game_screen.gd:3458
+#: client/scripts/screens/game_screen.gd:3672
 msgid "Scouts from %s: %s"
 msgstr "Izviđači iz %s: %s"
 
-#: client/scripts/screens/game_screen.gd:3468
+#: client/scripts/screens/game_screen.gd:3682
 msgid "%d scouts en route · report in %s"
 msgstr "%d izviđača na putu · izveštaj za %s"
 
-#: client/scripts/screens/game_screen.gd:3469
+#: client/scripts/screens/game_screen.gd:3683
 msgid "Scouts heading home · back in %s"
 msgstr "Izviđači se vraćaju kući · nazad za %s"
 
-#: client/scripts/screens/game_screen.gd:3481
+#: client/scripts/screens/game_screen.gd:3695
 msgid "Send scouts (%d home)"
 msgid_plural "Send scouts (%d home)"
 msgstr[0] "Pošalji izviđače (%d kod kuće)"
 msgstr[1] "Pošalji izviđače (%d kod kuće)"
 msgstr[2] "Pošalji izviđače (%d kod kuće)"
 
-#: client/scripts/screens/game_screen.gd:3579
+#: client/scripts/screens/game_screen.gd:3793
 msgid "● live"
 msgstr "● uživo"
 
-#: client/scripts/screens/game_screen.gd:3579
+#: client/scripts/screens/game_screen.gd:3793
 msgid "○ offline"
 msgstr "○ van mreže"
 
-#: client/scripts/screens/game_screen.gd:3618
+#: client/scripts/screens/game_screen.gd:3832
 msgid "All troops"
 msgstr "Sve trupe"
 
-#: client/scripts/screens/game_screen.gd:3619
+#: client/scripts/screens/game_screen.gd:3833
 msgid "By village"
 msgstr "Po selima"
 
-#: client/scripts/screens/game_screen.gd:3653
+#: client/scripts/screens/game_screen.gd:3867
 msgid "No troops yet. Train them in a village's Troops tab."
 msgstr "Još nema trupa. Obuči ih na kartici Trupe u selu."
 
-#: client/scripts/screens/game_screen.gd:3665
+#: client/scripts/screens/game_screen.gd:3879
 msgid "%d at home · %d out · %d in training"
 msgstr "%d kod kuće · %d napolju · %d na obuci"
 
-#: client/scripts/screens/game_screen.gd:3670
+#: client/scripts/screens/game_screen.gd:3884
 msgid "%d in all"
 msgstr "ukupno %d"
 
-#: client/scripts/screens/game_screen.gd:3682
+#: client/scripts/screens/game_screen.gd:3896
 msgid "At home: %s"
 msgstr "Kod kuće: %s"
 
-#: client/scripts/screens/game_screen.gd:3693
+#: client/scripts/screens/game_screen.gd:3907
 msgid "Training: %s"
 msgstr "Obuka: %s"
 
-#: client/scripts/screens/game_screen.gd:3696
+#: client/scripts/screens/game_screen.gd:3910
 msgid "Open"
 msgstr "Otvori"
 
-#: client/scripts/screens/game_screen.gd:3710
+#: client/scripts/screens/game_screen.gd:3924
 msgid "No armies out. Send them from a village's Troops tab, or from a hex on the map."
 msgstr "Nijedna vojska nije napolju. Pošalji ih sa kartice Trupe u selu ili sa polja na mapi."
 
-#: client/scripts/screens/game_screen.gd:3719
+#: client/scripts/screens/game_screen.gd:3933
 msgid "From %s to %s"
 msgstr "Od %s do %s"
 
-#: client/scripts/screens/game_screen.gd:3746
+#: client/scripts/screens/game_screen.gd:3960
 msgid "Open the hero"
 msgstr "Otvori junaka"
 
-#: client/scripts/screens/game_screen.gd:3775
+#: client/scripts/screens/game_screen.gd:3989
 msgid "Danger is pushed to your phone; everything else waits for the daily digest."
 msgstr "Opasnost stiže na telefon; sve ostalo čeka dnevni sažetak."
 
-#: client/scripts/screens/game_screen.gd:3784
+#: client/scripts/screens/game_screen.gd:3998
 msgid "Messages"
 msgstr "Poruke"
 
-#: client/scripts/screens/game_screen.gd:3785
+#: client/scripts/screens/game_screen.gd:3999
 msgid "Settings"
 msgstr "Podešavanja"
 
-#: client/scripts/screens/game_screen.gd:3790
+#: client/scripts/screens/game_screen.gd:4004
 msgid "Nothing yet."
 msgstr "Još ništa."
 
-#: client/scripts/screens/game_screen.gd:3807
+#: client/scripts/screens/game_screen.gd:4021
 msgid "Quiet hours %s–%s"
 msgstr "Tihi sati %s–%s"
 
-#: client/scripts/screens/game_screen.gd:3807
+#: client/scripts/screens/game_screen.gd:4021
 msgid "No quiet hours"
 msgstr "Nema tihih sati"
 
-#: client/scripts/screens/game_screen.gd:3810
+#: client/scripts/screens/game_screen.gd:4024
 msgid "On"
 msgstr "Uključi"
 
-#: client/scripts/screens/game_screen.gd:3815
+#: client/scripts/screens/game_screen.gd:4029
 msgid "From −1h"
 msgstr "Od −1h"
 
-#: client/scripts/screens/game_screen.gd:3815
+#: client/scripts/screens/game_screen.gd:4029
 msgid "From +1h"
 msgstr "Od +1h"
 
-#: client/scripts/screens/game_screen.gd:3815
+#: client/scripts/screens/game_screen.gd:4029
 msgid "Until −1h"
 msgstr "Do −1h"
 
-#: client/scripts/screens/game_screen.gd:3815
+#: client/scripts/screens/game_screen.gd:4029
 msgid "Until +1h"
 msgstr "Do +1h"
 
-#: client/scripts/screens/game_screen.gd:3824
+#: client/scripts/screens/game_screen.gd:4038
 msgid "Daily digest at %s"
 msgstr "Dnevni sažetak u %s"
 
@@ -3736,8 +3820,8 @@ msgid "Storehouse"
 msgstr "Skladište"
 
 #: data/buildings.json
-msgid "How much of each resource the village can keep; what comes in above it is lost."
-msgstr "Koliko svakog resursa selo može da čuva; ono što pređe to se gubi."
+msgid "How much of each resource the village can keep; what comes in above it is lost. A village may build more than one."
+msgstr "Koliko svakog resursa selo može da čuva; ono što stigne preko toga propada. Selo može da izgradi više od jednog."
 
 #: data/buildings.json
 msgid "Barracks"
@@ -3772,8 +3856,8 @@ msgid "Trains settlers, who walk out to found new villages."
 msgstr "Obučava naseljenike, koji idu da osnuju nova sela."
 
 #: data/buildings.json
-msgid "Studies the techs of the research tree; what you learn helps all your villages."
-msgstr "Proučava znanja iz stabla istraživanja; ono što naučiš pomaže svim tvojim selima."
+msgid "Studies the techs of the research tree and brings in the research every tech costs; what you learn helps all your villages."
+msgstr "Proučava tehnologije sa stabla istraživanja i donosi istraživanje koje svaka tehnologija košta; ono što naučiš pomaže svim tvojim selima."
 
 #: data/buildings.json
 msgid "A camp on a nearby hex that gathers what the land gives: wood in forests, stone and iron in hills and mountains, grain on plains and lakes."
@@ -3858,6 +3942,54 @@ msgstr "Osmatračnica"
 #: data/buildings.json
 msgid "Sees hordes coming from farther away, so the warning comes sooner."
 msgstr "Vidi horde izdaleka, pa upozorenje stiže ranije."
+
+#: data/buildings.json
+msgid "Forester"
+msgstr "Šumar"
+
+#: data/buildings.json
+msgid "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 5."
+msgstr "Neguje šume da ponovo izrastu guste: 5% više drveta po nivou, i sa polja i sa ispostava. Potrebna je Drvoseča nivoa 5."
+
+#: data/buildings.json
+msgid "Stonemason"
+msgstr "Kamenorezac"
+
+#: data/buildings.json
+msgid "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 5."
+msgstr "Obrađuje kamen čim stigne: 5% više kamena po nivou. Potreban je Kamenolom nivoa 5."
+
+#: data/buildings.json
+msgid "Mill"
+msgstr "Vodenica"
+
+#: data/buildings.json
+msgid "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 5."
+msgstr "Melje žito da manje propadne: 5% više žita po nivou. Potrebna je Njiva nivoa 5."
+
+#: data/buildings.json
+msgid "Smelter"
+msgstr "Topionica"
+
+#: data/buildings.json
+msgid "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 5."
+msgstr "Topi rudu na jačoj vatri: 5% više gvožđa po nivou. Potreban je Rudnik gvožđa nivoa 5."
+
+#: data/buildings.json
+msgid "Hospital"
+msgstr "Bolnica"
+
+#: data/buildings.json
+msgid "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again."
+msgstr "Leči ranjene: kad posada odbrani svoje selo, 5% njenih palih po nivou ponovo ustaje."
+
+#: data/buildings.json
+msgid "Market"
+msgstr "Pijaca"
+
+#: data/buildings.json
+msgid "Trades one resource for another, at better rates every level, and buys the hero's spare gear."
+msgstr "Menja jedan resurs za drugi, po boljem kursu sa svakim nivoom, i otkupljuje junakovu suvišnu opremu."
 
 #: data/clans.json
 msgid "Rod Jelena"

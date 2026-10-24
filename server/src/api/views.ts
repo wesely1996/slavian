@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { researchPerHour } from '../sim/village.js';
 import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
@@ -546,7 +547,21 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
         };
   return {
     ...worldSummary(world),
-    members: members.map((m) => ({ accountId: m.accountId, displayName: m.displayName, clan: m.clan, heroKind: m.heroKind, onboarding: m.onboarding, onboardingClaimed: m.onboardingClaimed })),
+    members: members.map((m) => ({
+      accountId: m.accountId,
+      displayName: m.displayName,
+      clan: m.clan,
+      heroKind: m.heroKind,
+      onboarding: m.onboarding,
+      onboardingClaimed: m.onboardingClaimed,
+      // Research their Academies brought in by settledAt (null: none yet),
+      // and what comes in per hour since.
+      research: {
+        points: m.researchPoints,
+        perHour: villages.filter((v) => v.ownerAccountId === m.accountId).reduce((sum, v) => sum + researchPerHour(data, v.state.plots, world.speed), 0),
+        settledAt: m.researchSettledAt?.toISOString() ?? null,
+      },
+    })),
     villages: villages.map(villageView),
     waves,
     scouting,

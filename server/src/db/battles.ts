@@ -23,6 +23,11 @@ export interface RoundLog {
   smashed?: Record<string, number>;
   // The share of the horde's fighters its climbers carried over the walls.
   over?: number;
+  // The village's own garrison's part of defenderLosses, when armies fought
+  // beside it.
+  garrisonLosses?: Record<string, number>;
+  // A village that held: the garrison's fallen its hospital saved.
+  healed?: Record<string, number>;
 }
 
 // What the ground gave the defenders of a field battle; at the Holy City,

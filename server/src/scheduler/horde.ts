@@ -14,7 +14,7 @@ import { afterSettling, createCamp, finishWave } from './camps.js';
 import { addFear } from '../db/fear.js';
 import { presetOf } from '../sim/difficulty.js';
 import { fearOf, holdForQuiet } from './waves.js';
-import { playerBonuses } from './research.js';
+import { playerBonuses, settleResearchPoints } from './research.js';
 import { listForts } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -46,7 +46,7 @@ import {
   type Decision,
 } from '../sim/horde.js';
 import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
-import { capacity, levelsOf, newVillage, outpostHex, outpostPlots, villageRates, type VillageState } from '../sim/village.js';
+import { capacity, levelsOf, newVillage, outpostHex, outpostPlots, researchPerHour, villageRates, type VillageState } from '../sim/village.js';
 import { withRates } from '../sim/resources.js';
 import { rngFor, routeFrom, targetsOf } from '../sim/waves.js';
 import { terrainOf } from './armies.js';
@@ -211,11 +211,14 @@ function ruinedState(data: GameData, state: VillageState, at: Date, worldSpeed: 
     besieged: false,
     ledger: { ...state.ledger, amounts: { wood: 0, stone: 0, grain: 0, iron: 0 }, settledAt: at },
   };
-  return { ...next, ledger: withRates(next.ledger, at, villageRates(data, next, worldSpeed), capacity(data, levels, state.bonuses)) };
+  return { ...next, ledger: withRates(next.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
 }
 
 async function ruinVillage(client: DbClient, data: GameData, world: World, village: Village, at: Date): Promise<void> {
   if (village.ruin) return;
+  if (researchPerHour(data, village.state.plots, world.speed) > 0 && village.ownerAccountId !== null) {
+    await settleResearchPoints(client, data, world, village.ownerAccountId, at);
+  }
   await saveVillageState(client, village.id, ruinedState(data, village.state, at, world.speed));
   await saveRuin(client, village.id, { plots: { ...village.state.plots }, since: at.toISOString(), rebuildingUntil: null });
   await tell(client, world, village.ownerAccountId, {
@@ -317,12 +320,15 @@ export const hordeHandlers: HandlerRegistry = {
     const village = await loadVillage(client, rebuildPayload.parse(event.payload).villageId);
     const ruin = village.ruin;
     if (!ruin?.rebuildingUntil || new Date(ruin.rebuildingUntil) > event.dueAt) return;
+    if (researchPerHour(data, ruin.plots, world.speed) > 0 && village.ownerAccountId !== null) {
+      await settleResearchPoints(client, data, world, village.ownerAccountId, event.dueAt);
+    }
     const plots = { ...village.state.plots, ...ruin.plots };
     const levels = levelsOf(plots);
     const next = { ...village.state, plots, levels };
     const state: VillageState = {
       ...next,
-      ledger: withRates(village.state.ledger, event.dueAt, villageRates(data, next, world.speed), capacity(data, levels, next.bonuses)),
+      ledger: withRates(village.state.ledger, event.dueAt, villageRates(data, next, world.speed), capacity(data, plots, next.bonuses)),
     };
     await saveVillageState(client, village.id, state);
     await saveRuin(client, village.id, null);

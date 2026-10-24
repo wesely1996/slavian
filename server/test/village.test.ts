@@ -16,12 +16,15 @@ import {
   buildSeconds,
   capacity,
   completeBuild,
+  demolish,
   HALL_PLOT,
+  hospitalHealed,
   levelCost,
   newVillage,
   plotsFromLegacyLevels,
   productionPerHour,
   queueBuild,
+  trade,
   unlockedSlots,
   type VillageState,
 } from '../src/sim/village.js';
@@ -125,7 +128,7 @@ describe('building', () => {
     expect(v.plots.c1).toEqual({ building: 'storehouse', level: 1 });
     v = build(v, 'storehouse');
     expect(v.plots.c1!.level).toBe(2);
-    expect(capacity(data, v.levels).wood).toBeGreaterThan(village.baseCapacity);
+    expect(capacity(data, v.plots).wood).toBeGreaterThan(village.baseCapacity);
   });
 
   it('scales cost and time with level, world speed and the hall', () => {
@@ -269,5 +272,52 @@ describe('outposts', () => {
     expect(sieged.besieged).toBe(true);
     expect(sieged.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, newVillage(data, T0, 1).plots, 1).wood);
     expect(setBesieged(data, sieged, false, sieged.ledger.settledAt, 1).ledger.ratesPerHour).toEqual(v.ledger.ratesPerHour);
+  });
+});
+
+describe('more buildings', () => {
+  const at = (state: VillageState) => state.ledger.settledAt;
+
+  it('lets storehouses and boosters stand more than once, once their field is high enough', () => {
+    let v = rich(newVillage(data, T0, 1));
+    v = build(v, { plot: 'c1', building: 'storehouse' });
+    v = build(v, { plot: 'c2', building: 'storehouse' });
+    // Two storehouses of level 1 hold what each adds above the base.
+    expect(capacity(data, v.plots).wood).toBeCloseTo(village.baseCapacity * (1 + 2 * (1.3 - 1)));
+    expect(() => build(v, { plot: 'c3', building: 'barracks' })).not.toThrow();
+    expect(() => build(build(v, { plot: 'c3', building: 'barracks' }), { building: 'barracks', plot: 'c1' })).toThrow(/holds a Storehouse/);
+    expect(() => build(v, { plot: 'c3', building: 'forester' })).toThrow('Forester needs Woodcutter level 5');
+    for (let i = 0; i < 5; i++) v = build(v, { plot: 'f0' });
+    const forested = build(build(v, { plot: 'c3', building: 'forester' }), { plot: 'c3' });
+    expect(forested.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, forested.plots, 1).wood * 1.1);
+  });
+
+  it('tears buildings down for half of what they cost, but not the Hall or fields', () => {
+    const v = build(build(rich(newVillage(data, T0, 1)), { plot: 'c1', building: 'barracks' }), { plot: 'c1' });
+    const { state, refund } = demolish(data, v, 'c1', at(v), 1);
+    const barracks = data.buildings.buildings.barracks!;
+    expect(refund.wood).toBe(Math.floor((levelCost(barracks, 1).wood + levelCost(barracks, 2).wood) / 2));
+    expect(state.plots.c1).toEqual({ building: null, level: 0 });
+    expect(state.levels.barracks).toBeUndefined();
+    expect(() => demolish(data, v, HALL_PLOT, at(v), 1)).toThrow(/Elder's Hall/);
+    expect(() => demolish(data, build(v, { plot: 'f0' }), 'f0', at(v), 1)).toThrow("The Woodcutter can't be torn down");
+  });
+
+  it('trades at the market, better with every level', () => {
+    const v = build(rich(newVillage(data, T0, 1)), { plot: 'c1', building: 'market' });
+    const { state, got } = trade(data, v, { give: 'wood', get: 'iron', amount: 100 }, at(v));
+    expect(got).toBe(40);
+    expect(amountsAt(state.ledger, at(v)).wood).toBe(amountsAt(v.ledger, at(v)).wood - 100);
+    const bigger = build(v, { plot: 'c1' });
+    expect(trade(data, bigger, { give: 'wood', get: 'iron', amount: 100 }, at(bigger)).got).toBe(44);
+    expect(() => trade(data, rich(newVillage(data, T0, 1)), { give: 'wood', get: 'iron', amount: 100 }, T0)).toThrow(/Build a Market/);
+  });
+
+  it('saves some of the fallen in the hospital, as its chance says', () => {
+    const always = () => 0;
+    const never = () => 0.99;
+    expect(hospitalHealed({ hospital: 0.1 }, { spearman: 3, archer: 2 }, always)).toEqual({ archer: 2, spearman: 3 });
+    expect(hospitalHealed({ hospital: 0.1 }, { spearman: 3 }, never)).toEqual({});
+    expect(hospitalHealed({}, { spearman: 3 }, always)).toEqual({});
   });
 });

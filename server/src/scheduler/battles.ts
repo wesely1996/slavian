@@ -1,6 +1,7 @@
 // Battles on the scheduler: a horde reaching a village starts a battle; each
 // battle_round event fights one round, applies losses to the horde and the
 // garrison, and either schedules the next round or settles the outcome.
+import { createRng } from '../sim/rng.js';
 import { againstFront, villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
@@ -25,7 +26,7 @@ import {
   total,
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
-import { breachWalls, completeTraining, loseGarrison, plunder, setBesieged } from '../sim/village.js';
+import { breachWalls, completeTraining, joinGarrison, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { heroAt } from '../db/heroes.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { tell } from './notices.js';
@@ -225,6 +226,7 @@ export const battleHandlers: HandlerRegistry = {
       ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
       ...(total(smashed) ? { smashed } : {}),
       ...(over > 0 ? { over: Math.round(over * 100) / 100 } : {}),
+      ...(engaged.length ? { garrisonLosses: shares[0]! } : {}),
     };
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard and reinforcements go home.
@@ -275,14 +277,21 @@ export const battleHandlers: HandlerRegistry = {
       }
     } else {
       villageState = setBesieged(data, villageState, false, at, world.speed);
+      // The hospital puts some of the garrison's fallen back on their feet.
+      const fallen = [...battle.rounds, log].reduce<Record<string, number>>((sum, r) => addUnits(sum, r.garrisonLosses ?? r.defenderLosses), {});
+      const healed = hospitalHealed(villageBonuses(data, villageState), fallen, createRng((world.seed ^ Math.imul(battle.id + 1, 0x2545f491) ^ 0x4b) >>> 0));
+      if (total(healed) > 0) {
+        log.healed = healed;
+        villageState = joinGarrison(data, villageState, healed, at, world.speed);
+      }
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
       await hordeBeaten(client, data, world, hex(village.q, village.r), total(battle.attackerInitial) - total(attackerNow));
       await tell(client, world, village.ownerAccountId, {
         kind: 'battle_result',
         tier: 'digest',
         title: '{village} held',
-        body: 'The horde was beaten after {rounds} rounds.',
-        vars: { village: village.name, rounds: round },
+        body: total(healed) > 0 ? 'The horde was beaten after {rounds} rounds; the hospital saved {healed} of the fallen.' : 'The horde was beaten after {rounds} rounds.',
+        vars: { village: village.name, rounds: round, healed: total(healed) },
       }, at);
       await finishWave(client, data, world, wave.id, 'defeated', at);
     }

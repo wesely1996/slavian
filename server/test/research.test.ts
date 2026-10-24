@@ -47,7 +47,7 @@ describe('research effects', () => {
     const boosted = productionPerHour(data, v.plots, 1, false, { 'production.wood': 0.1, 'production.all': 0.05 });
     expect(boosted.wood).toBeCloseTo(plain.wood * 1.15);
     expect(boosted.iron).toBeCloseTo(plain.iron * 1.05);
-    expect(capacity(data, v.levels, { storage: 0.25 }).wood).toBeCloseTo(capacity(data, v.levels).wood * 1.25);
+    expect(capacity(data, v.plots, { storage: 0.25 }).wood).toBeCloseTo(capacity(data, v.plots).wood * 1.25);
     const fed = { ...v, garrison: { spearman: 10 } };
     const lean = { ...fed, bonuses: { upkeep: -0.5 } };
     expect(villageRates(data, lean, 1).grain - villageRates(data, fed, 1).grain).toBeCloseTo(5);

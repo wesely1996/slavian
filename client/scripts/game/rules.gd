@@ -119,7 +119,8 @@ static func planned_plot(village: Dictionary, plot: String) -> Dictionary:
 
 
 ## Buildings of `kind` ("center", or "tower" for a wall slot) that could go
-## in an empty slot: not built or queued anywhere in the village yet.
+## in an empty slot: not built or queued anywhere in the village yet, unless
+## the village may have more than one.
 static func constructible(data: Dictionary, village: Dictionary, kind := "center") -> Array[String]:
 	var taken := {}
 	for id in village.get("plots", {}):
@@ -129,9 +130,22 @@ static func constructible(data: Dictionary, village: Dictionary, kind := "center
 	var result: Array[String] = []
 	var buildings: Dictionary = data.buildings.buildings
 	for building in buildings:
-		if buildings[building].kind == kind and not taken.has(building) and ClanText.allowed(buildings[building], village.get("bonuses", {})):
+		var def: Dictionary = buildings[building]
+		if def.kind == kind and (def.get("multiple", false) or not taken.has(building)) and ClanText.allowed(def, village.get("bonuses", {})):
 			result.append(building)
 	return result
+
+
+## What `building` still needs in `village` before it can be built (its
+## `requires`), as [building, level]; [] when nothing.
+static func missing_requirement(data: Dictionary, village: Dictionary, building: String) -> Array:
+	var requires: Variant = data.buildings.buildings[building].get("requires")
+	if requires == null:
+		return []
+	for needed in requires:
+		if int(village.get("levels", {}).get(needed, 0)) < int(requires[needed]):
+			return [needed, int(requires[needed])]
+	return []
 
 
 # --- Outposts: plots "o<q>,<r>" on map hexes near the village.
@@ -254,3 +268,42 @@ static func settle_problem(data: Dictionary, cell: Vector2i, terrain: String, ho
 static func recommended_garrison(data: Dictionary, villages_owned: int) -> int:
 	var g: Dictionary = data.expansion.recommendedGarrison
 	return int(g.base) + int(g.perVillage) * maxi(0, villages_owned - 1)
+
+
+# --- The Market, and tearing down (sim/village.ts).
+
+## What one resource fetches of another at a Market of `level`.
+static func market_rate(data: Dictionary, level: int) -> float:
+	var market: Dictionary = data.buildings.village.market
+	return float(market.baseRate) + float(market.ratePerLevel) * (level - 1) if level > 0 else 0.0
+
+
+## What tearing down `building` of `level` gives back: `share` of all it cost.
+static func refund(data: Dictionary, building: String, level: int, share: float) -> Dictionary:
+	var def: Dictionary = data.buildings.buildings[building]
+	var sum := {}
+	for kind in Ledger.KINDS:
+		sum[kind] = 0
+	for l in range(1, level + 1):
+		var cost := level_cost(def, l)
+		for kind in Ledger.KINDS:
+			sum[kind] += int(cost[kind])
+	for kind in Ledger.KINDS:
+		sum[kind] = floori(sum[kind] * share)
+	return sum
+
+
+## What giving up `village` sends to the vault: `share` of all that stands.
+static func village_refund(data: Dictionary, village: Dictionary, share: float) -> Dictionary:
+	var sum := {}
+	for kind in Ledger.KINDS:
+		sum[kind] = 0
+	for plot in village.get("plots", {}).values():
+		if plot.building == null or int(plot.level) <= 0 or not data.buildings.buildings.has(plot.building):
+			continue
+		var part := refund(data, plot.building, int(plot.level), 1.0)
+		for kind in Ledger.KINDS:
+			sum[kind] += part[kind]
+	for kind in Ledger.KINDS:
+		sum[kind] = floori(sum[kind] * share)
+	return sum

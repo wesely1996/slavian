@@ -258,3 +258,22 @@ static func command(server: LocalServer, world: Dictionary, account_id: int, act
 		return next
 	hero.merge(next, true)
 	return hero
+
+
+## Sells a piece of the hero's spare gear at the village's Market
+## (commands/village.ts sellGearCommand): {state} or {"error"}.
+static func sell_gear(server: LocalServer, world: Dictionary, village: Dictionary, item: String, now: int) -> Dictionary:
+	var hero: Dictionary = {}
+	for h in world.heroes:
+		if int(h.accountId) == int(village.ownerAccountId):
+			hero = h
+	if hero.is_empty():
+		return {"error": "You have no hero in this world", "kind": "not_found"}
+	var index: int = hero.inventory.find(item)
+	if index < 0:
+		return LocalVillage.rule("The hero carries no such spare item")
+	var sold := LocalVillage.sell_gear(server.data, village.state, now)
+	if sold.has("error"):
+		return sold
+	hero.inventory.remove_at(index)
+	return sold

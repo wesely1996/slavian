@@ -13,6 +13,7 @@ const HALL_PLOT := "c0"
 const OUTPOST := "outpost"
 const WALL := "wall"
 const WALL_PLOT := "w"
+const MARKET := "market"
 const KINDS := ["wood", "stone", "grain", "iron"]
 
 
@@ -167,11 +168,28 @@ static func village_rates(data: Dictionary, state: Dictionary, world_speed: floa
 	return rates
 
 
-static func capacity(data: Dictionary, levels: Dictionary, bonuses: Dictionary) -> Dictionary:
-	var storehouse: Dictionary = data.buildings.buildings.get("storehouse", {})
-	var level := int(levels.get("storehouse", 0))
-	var cap := float(data.buildings.village.baseCapacity) * pow(float(storehouse.get("capacityGrowth", 1)), level) * (1.0 + bonus(bonuses, "storage"))
+## Every storehouse adds what it holds above the base.
+static func capacity(data: Dictionary, plots: Dictionary, bonuses: Dictionary) -> Dictionary:
+	var growth := float(data.buildings.buildings.get("storehouse", {}).get("capacityGrowth", 1))
+	var factor := 1.0
+	for id in plots:
+		var plot: Dictionary = plots[id]
+		if plot.building == "storehouse" and int(plot.level) > 0 and outpost_hex(id) == Vector2i.MAX:
+			factor += pow(growth, int(plot.level)) - 1.0
+	var cap := float(data.buildings.village.baseCapacity) * factor * (1.0 + bonus(bonuses, "storage"))
 	return resources(func(_kind: String) -> float: return cap)
+
+
+## Research the village's Academy brings in per hour (world speed applied).
+static func research_per_hour(data: Dictionary, plots: Dictionary, world_speed: float) -> float:
+	var rate := 0.0
+	for plot in plots.values():
+		if plot.building == null or int(plot.level) <= 0:
+			continue
+		var research: Variant = data.buildings.buildings.get(plot.building, {}).get("research")
+		if research != null:
+			rate += float(research.basePerHour) * pow(float(research.growth), int(plot.level) - 1) * world_speed
+	return rate
 
 
 ## A fresh village (the first one; founded ones come with the expansion port).
@@ -194,7 +212,7 @@ static func new_village(data: Dictionary, at: int, world_speed: float, founded: 
 	state.ledger = {
 		"amounts": founded.get("startingResources", data.buildings.village.startingResources).duplicate(),
 		"ratesPerHour": village_rates(data, state, world_speed),
-		"capacity": capacity(data, state.levels, state.bonuses),
+		"capacity": capacity(data, plots, state.bonuses),
 		"settledAt": at,
 	}
 	return state
@@ -204,7 +222,7 @@ static func new_village(data: Dictionary, at: int, world_speed: float, founded: 
 static func with_bonuses(data: Dictionary, state: Dictionary, bonuses: Dictionary, at: int, world_speed: float) -> Dictionary:
 	var next := state.duplicate(true)
 	next.bonuses = bonuses
-	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, state.levels, bonuses))
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, state.plots, bonuses))
 	return next
 
 
@@ -380,9 +398,14 @@ static func queue_build(data: Dictionary, state: Dictionary, order: Dictionary, 
 			return rule("%s is built on fields, not in the village" % def.name)
 		if def.get("clan") != null and not has_clan(state.bonuses, def.clan):
 			return rule("Only %s can build a %s" % [clan_name(data, def.clan), def.name])
-		for id in state.plots:
-			if id != plot and planned_plot(state, id).building == building:
-				return rule("This village already has a %s" % def.name)
+		if not def.get("multiple", false):
+			for id in state.plots:
+				if id != plot and planned_plot(state, id).building == building:
+					return rule("This village already has a %s" % def.name)
+		var requires: Dictionary = def.get("requires", {}) if def.get("requires") != null else {}
+		for needed in requires:
+			if int(state.levels.get(needed, 0)) < int(requires[needed]):
+				return rule("%s needs %s level %d" % [def.name, build_def(data, needed).name, int(requires[needed])])
 	var def: Dictionary = build_def(data, building)
 	var target := int(planned.level) + 1
 	if target > int(def.maxLevel):
@@ -414,8 +437,88 @@ static func complete_build(data: Dictionary, state: Dictionary, plot: String, ta
 	next.plots[plot] = built
 	next.levels = levels_of(next.plots)
 	next.queue.pop_front()
-	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, next.levels, state.bonuses))
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, next.plots, state.bonuses))
 	return next
+
+
+## Everything a building of `level` cost to raise, level by level.
+static func built_cost(def: Dictionary, level: int) -> Dictionary:
+	var sum := resources(func(_kind: String) -> int: return 0)
+	for l in range(1, level + 1):
+		var cost := level_cost(def, l)
+		for kind in KINDS:
+			sum[kind] += cost[kind]
+	return sum
+
+
+## What tearing down everything that stands on `plots` gives back.
+static func refund_of(data: Dictionary, plots: Dictionary, share: float) -> Dictionary:
+	var sum := resources(func(_kind: String) -> int: return 0)
+	for plot in plots.values():
+		var def: Variant = build_def(data, plot.building) if plot.building != null else null
+		if def == null or int(plot.level) <= 0:
+			continue
+		var cost := built_cost(def, int(plot.level))
+		for kind in KINDS:
+			sum[kind] += cost[kind]
+	return resources(func(kind: String) -> int: return floori(sum[kind] * share))
+
+
+## Tears down the building on a center or wall slot, for a share of what it
+## cost: {state, refund} or {"error"}.
+static func demolish(data: Dictionary, state: Dictionary, plot: String, at: int, world_speed: float) -> Dictionary:
+	var current: Variant = state.plots.get(plot)
+	if current == null or current.building == null or int(current.level) <= 0:
+		return rule("Nothing stands there to tear down")
+	var def: Dictionary = build_def(data, current.building)
+	if current.building == HALL:
+		return rule("The Elder's Hall can't be torn down")
+	if def.kind != "center" and def.kind != "tower":
+		return rule("The %s can't be torn down" % def.name)
+	for item in state.queue:
+		if item.plot == plot:
+			return rule("The %s is being built; wait for it to finish" % def.name)
+	var refund := refund_of(data, {plot: current}, float(data.buildings.village.demolishRefund))
+	var next := state.duplicate(true)
+	next.plots[plot] = {"building": null, "level": 0}
+	next.levels = levels_of(next.plots)
+	var ledger := LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, next.plots, state.bonuses))
+	next.ledger = LocalLogistics.receive(ledger, at, refund).ledger
+	return {"state": next, "refund": refund}
+
+
+static func market_rate(data: Dictionary, market_level: int) -> float:
+	var market: Dictionary = data.buildings.village.market
+	return float(market.baseRate) + float(market.ratePerLevel) * (market_level - 1) if market_level > 0 else 0.0
+
+
+## Trades `amount` of `give` for `get` at the Market: {state, got} or {"error"}.
+static func trade(data: Dictionary, state: Dictionary, give: String, get: String, amount: int, at: int) -> Dictionary:
+	var rate := market_rate(data, int(state.levels.get(MARKET, 0)))
+	if rate <= 0:
+		return rule("Build a Market to trade")
+	if give == get:
+		return rule("Trade one resource for another")
+	if amount < 1:
+		return rule("Trade at least 1")
+	var got := floori(amount * rate)
+	if got < 1:
+		return rule("Too little to fetch anything")
+	var paid := LocalLedger.spend(state.ledger, at, resources(func(kind: String) -> int: return amount if kind == give else 0))
+	if paid.has("missing"):
+		return paid
+	var next := state.duplicate(true)
+	next.ledger = LocalLogistics.receive(paid, at, resources(func(kind: String) -> int: return got if kind == get else 0)).ledger
+	return {"state": next, "got": got}
+
+
+## The Market buys a piece of spare gear: {state} or {"error"}.
+static func sell_gear(data: Dictionary, state: Dictionary, at: int) -> Dictionary:
+	if int(state.levels.get(MARKET, 0)) <= 0:
+		return rule("Build a Market to sell gear")
+	var next := state.duplicate(true)
+	next.ledger = LocalLogistics.receive(state.ledger, at, data.buildings.village.market.gearValue).ledger
+	return {"state": next}
 
 
 ## Claims a resource hex and queues its outpost: {state, queued} or {"error"}.
@@ -562,6 +665,33 @@ static func lose_garrison(data: Dictionary, state: Dictionary, losses: Dictionar
 	var next := state.duplicate(true)
 	for unit in losses:
 		next.garrison[unit] = maxi(0, int(next.garrison.get(unit, 0)) - int(losses[unit]))
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
+## Of the garrison's fallen (`lost`), those its hospital saves: each gets up
+## again with the hospital's chance, drawn unit by unit (by name).
+static func hospital_healed(bonuses: Dictionary, lost: Dictionary, rng: LocalRng) -> Dictionary:
+	var chance := minf(1.0, bonus(bonuses, "hospital"))
+	var healed := {}
+	if chance <= 0:
+		return healed
+	var units: Array = lost.keys()
+	units.sort()
+	for unit in units:
+		var saved := 0
+		for i in int(lost[unit]):
+			if rng.next() < chance:
+				saved += 1
+		if saved > 0:
+			healed[unit] = saved
+	return healed
+
+
+## Soldiers joining the garrison (back on their feet, or moved in).
+static func join_garrison(data: Dictionary, state: Dictionary, units: Dictionary, at: int, world_speed: float) -> Dictionary:
+	var next := state.duplicate(true)
+	next.garrison = add_units(state.garrison, units)
 	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
 	return next
 

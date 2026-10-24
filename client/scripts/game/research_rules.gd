@@ -51,3 +51,19 @@ static func time_factor(bonuses: Dictionary, key: String) -> float:
 
 static func production_factor(bonuses: Dictionary, kind: String) -> float:
 	return 1.0 + bonus(bonuses, "production." + kind) + bonus(bonuses, "production.all")
+
+
+## Research `tech` takes, besides its resources (sim/research.ts researchCost).
+static func research_cost(data: Dictionary, tech: String) -> int:
+	return roundi(float(data.research.techs[tech].seconds) * float(data.research.get("researchPerSecond", 0)))
+
+
+## The research a member's Academies have brought in by `now` (seconds),
+## credited a minute's worth at every whole minute, as the server does.
+static func points(member: Dictionary, now: float) -> float:
+	var research: Dictionary = member.get("research", {})
+	var amount := float(research.get("points", 0))
+	if research.get("settledAt") == null:
+		return amount
+	var minutes := floori(now / 60.0) - floori(TimeUtil.parse_iso(research.settledAt) / 60.0)
+	return amount + float(research.get("perHour", 0)) * maxi(0, minutes) / 60.0

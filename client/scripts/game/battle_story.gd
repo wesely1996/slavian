@@ -163,6 +163,8 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 	lines.append(_mood(share_theirs, share_ours))
 	if round == rounds.size() and battle.get("status", "ongoing") != "ongoing":
 		lines.append(ending(battle, ctx))
+		if entry.has("healed"):
+			lines.append(UI.t("In the hospital, %s got up again.") % units_text(data, entry.healed))
 		if ctx.get("leader_after", "") != "":
 			lines.append(ctx.leader_after)
 	return " ".join(lines)

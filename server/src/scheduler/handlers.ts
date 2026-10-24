@@ -17,7 +17,7 @@ import { heroHandlers } from './heroes.js';
 import { questHandlers } from './quests.js';
 import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
-import { researchHandlers } from './research.js';
+import { researchHandlers, settleResearchPoints } from './research.js';
 import { outpostHandlers, outpostStanding } from './outposts.js';
 import { tell } from './notices.js';
 import { scoutingHandlers } from './scouting.js';
@@ -44,6 +44,10 @@ export const handlers: HandlerRegistry = {
     const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
     // A raid or raze cleared the queue before it was finished.
     if (!village.state.queue.some((item) => item.plot === plot && item.targetLevel === payload.targetLevel)) return;
+    // An Academy's level changes what research comes in from now on.
+    if (data.buildings.buildings[payload.building]?.research && village.ownerAccountId !== null) {
+      await settleResearchPoints(client, data, world, village.ownerAccountId, event.dueAt);
+    }
     const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
     const def = data.buildings.buildings[payload.building];

@@ -155,7 +155,10 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["scout_lodge", "caravan_yard", "settlers_lodge", "academy"], "only buildings not yet built or queued: %s" % [Rules.constructible(data, village)])
+	_check(Rules.constructible(data, village) == ["storehouse", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
+		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
+	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
+		"a booster needs its field higher first")
 	var farm: Dictionary = data.buildings.buildings.farm
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
 	_check(is_equal_approx(Rules.field_production(farm, 2, 10.0), float(farm.production.basePerHour) * float(farm.production.growth) * 10.0), "field production grows per level")
