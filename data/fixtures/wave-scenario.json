@@ -628,7 +628,7 @@
        "q": 9,
        "r": -8
       },
-      "targetVillageId": 1,
+      "targetVillageId": null,
       "path": [
        [
         9,
@@ -681,32 +681,22 @@
         172800
        ],
        [
-        -1,
+        0,
         -2,
         187200
        ],
        [
-        -2,
+        0,
         -1,
         201600
        ],
        [
-        -2,
+        0,
         0,
         216000
-       ],
-       [
-        -2,
-        1,
-        230400
-       ],
-       [
-        -2,
-        2,
-        259200
        ]
       ],
-      "arrivesAt": "2026-06-01T11:25:55.200Z",
+      "arrivesAt": "2026-06-01T11:25:12.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
@@ -802,7 +792,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -840,37 +830,27 @@
          162000
         ],
         [
-         -1,
+         0,
          -3,
          180000
         ],
         [
-         -2,
+         0,
          -2,
          198000
         ],
         [
-         -2,
+         0,
          -1,
          216000
         ],
         [
-         -2,
+         0,
          0,
          234000
-        ],
-        [
-         -2,
-         1,
-         252000
-        ],
-        [
-         -2,
-         2,
-         288000
         ]
        ],
-       "arrivesAt": "2026-06-01T13:40:09.900Z"
+       "arrivesAt": "2026-06-01T13:39:15.900Z"
       }
      }
     ],
@@ -2936,7 +2916,7 @@
    }
   },
   {
-   "advance": 139200
+   "advance": 96000
   },
   {
    "method": "GET",
@@ -3165,7 +3145,7 @@
        "q": 9,
        "r": -8
       },
-      "targetVillageId": 1,
+      "targetVillageId": null,
       "path": [
        [
         9,
@@ -3218,32 +3198,22 @@
         172800
        ],
        [
-        -1,
+        0,
         -2,
         187200
        ],
        [
-        -2,
+        0,
         -1,
         201600
        ],
        [
-        -2,
+        0,
         0,
         216000
-       ],
-       [
-        -2,
-        1,
-        230400
-       ],
-       [
-        -2,
-        2,
-        259200
        ]
       ],
-      "arrivesAt": "2026-06-01T11:25:55.200Z",
+      "arrivesAt": "2026-06-01T11:25:12.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
@@ -3339,7 +3309,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -3377,37 +3347,27 @@
          162000
         ],
         [
-         -1,
+         0,
          -3,
          180000
         ],
         [
-         -2,
+         0,
          -2,
          198000
         ],
         [
-         -2,
+         0,
          -1,
          216000
         ],
         [
-         -2,
+         0,
          0,
          234000
-        ],
-        [
-         -2,
-         1,
-         252000
-        ],
-        [
-         -2,
-         2,
-         288000
         ]
        ],
-       "arrivesAt": "2026-06-01T13:40:09.900Z"
+       "arrivesAt": "2026-06-01T13:39:15.900Z"
       }
      }
     ],
@@ -5469,7 +5429,7 @@
      ],
      "roads": []
     },
-    "serverTime": "2026-06-01T11:24:55.200Z"
+    "serverTime": "2026-06-01T11:24:12.000Z"
    }
   },
   {
@@ -5478,15 +5438,6 @@
    "status": 200,
    "response": {
     "notifications": [
-     {
-      "id": 4,
-      "kind": "wave_soon",
-      "tier": "push",
-      "title": "A horde is coming to Vruchiy",
-      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
-      "read": false
-     },
      {
       "id": 3,
       "kind": "onboarding",
@@ -5515,8 +5466,8 @@
       "read": false
      }
     ],
-    "unread": 4,
-    "serverTime": "2026-06-01T11:24:55.200Z"
+    "unread": 3,
+    "serverTime": "2026-06-01T11:24:12.000Z"
    }
   }
  ]

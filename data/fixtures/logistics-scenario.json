@@ -1263,7 +1263,7 @@
         "q": 9,
         "r": -8
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          9,
@@ -1316,32 +1316,22 @@
          172800
         ],
         [
-         -1,
+         0,
          -2,
          187200
         ],
         [
-         -2,
+         0,
          -1,
          201600
         ],
         [
-         -2,
+         0,
          0,
          216000
-        ],
-        [
-         -2,
-         1,
-         230400
-        ],
-        [
-         -2,
-         2,
-         259200
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:55.200Z"
+       "arrivesAt": "2026-06-01T11:25:12.000Z"
       }
      },
      {
@@ -3979,7 +3969,7 @@
         "q": 9,
         "r": -8
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          9,
@@ -4032,32 +4022,22 @@
          172800
         ],
         [
-         -1,
+         0,
          -2,
          187200
         ],
         [
-         -2,
+         0,
          -1,
          201600
         ],
         [
-         -2,
+         0,
          0,
          216000
-        ],
-        [
-         -2,
-         1,
-         230400
-        ],
-        [
-         -2,
-         2,
-         259200
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:55.200Z"
+       "arrivesAt": "2026-06-01T11:25:12.000Z"
       }
      },
      {
@@ -6453,10 +6433,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 464,
-        "wood": 820,
-        "grain": 820,
-        "stone": 820
+        "iron": 165,
+        "wood": 348.25,
+        "grain": 516.6666666666667,
+        "stone": 230
        },
        "ratesPerHour": {
         "iron": 150,
@@ -6470,7 +6450,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:26:13.200Z"
+       "settledAt": "2026-06-01T08:46:26.400Z"
       }
      }
     ],
@@ -6638,7 +6618,7 @@
     "scouting": [],
     "battles": [
      {
-      "id": 2,
+      "id": 1,
       "front": "north",
       "leaderId": 1,
       "waveId": 1,
@@ -6649,8 +6629,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 19
+        "archer": 10,
+        "spearman": 20
        },
        "holyCity": true
       },
@@ -6670,71 +6650,21 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:27:14.400Z",
+        "at": "2026-06-01T11:25:30.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 28,
+        "defenderLeft": 30,
         "attackerLosses": {
          "grey_wolf": 6,
          "leshy_thrall": 2
         },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T11:26:56.400Z",
-      "endedAt": "2026-06-01T11:27:14.400Z"
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": 1,
-      "q": -2,
-      "r": 2,
-      "setup": {},
-      "status": "raided",
-      "round": 1,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
-      },
-      "attackerNow": {
-       "leshy_thrall": 1
-      },
-      "defenderInitial": {},
-      "rounds": [
-       {
-        "at": "2026-06-01T11:26:13.200Z",
-        "round": 1,
-        "attackerLeft": 9,
-        "defenderLeft": 0,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       }
-      ],
-      "loot": {
-       "iron": 101,
-       "wood": 180,
-       "grain": 180,
-       "stone": 180
-      },
-      "decision": {
-       "choice": "raid",
-       "reasons": [
-        "an early raiding party"
-       ]
-      },
-      "startedAt": "2026-06-01T11:25:55.200Z",
-      "endedAt": "2026-06-01T11:26:13.200Z"
+      "startedAt": "2026-06-01T11:25:12.000Z",
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -6810,25 +6740,23 @@
       "front": "north",
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
-      "level": 2,
-      "xp": 8,
-      "xpToNext": 28,
-      "skills": {
-       "savagery": 1
-      },
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
       "effects": {
-       "attack": 0.04,
+       "attack": 0,
        "defense": 0,
        "nerve": 0,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:03:14.400Z",
-      "battles": 2,
-      "wins": 1,
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -6850,9 +6778,9 @@
       "id": 2,
       "kind": "lair",
       "front": "north",
-      "q": 1,
-      "r": 0,
-      "size": 6,
+      "q": 6,
+      "r": -8,
+      "size": 7,
       "waveId": 1
      }
     ],
@@ -9077,10 +9005,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 536.5,
+       "iron": 637.5,
        "wood": 900,
        "grain": 900,
-       "stone": 965
+       "stone": 1000
       },
       "ratesPerHour": {
        "iron": 150,
@@ -9334,10 +9262,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 539,
+        "iron": 640,
         "wood": 908.25,
         "grain": 906.6666666666666,
-        "stone": 970
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -9519,7 +9447,7 @@
     "scouting": [],
     "battles": [
      {
-      "id": 2,
+      "id": 1,
       "front": "north",
       "leaderId": 1,
       "waveId": 1,
@@ -9530,8 +9458,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 19
+        "archer": 10,
+        "spearman": 20
        },
        "holyCity": true
       },
@@ -9551,71 +9479,21 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:27:14.400Z",
+        "at": "2026-06-01T11:25:30.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 28,
+        "defenderLeft": 30,
         "attackerLosses": {
          "grey_wolf": 6,
          "leshy_thrall": 2
         },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T11:26:56.400Z",
-      "endedAt": "2026-06-01T11:27:14.400Z"
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": 1,
-      "q": -2,
-      "r": 2,
-      "setup": {},
-      "status": "raided",
-      "round": 1,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
-      },
-      "attackerNow": {
-       "leshy_thrall": 1
-      },
-      "defenderInitial": {},
-      "rounds": [
-       {
-        "at": "2026-06-01T11:26:13.200Z",
-        "round": 1,
-        "attackerLeft": 9,
-        "defenderLeft": 0,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       }
-      ],
-      "loot": {
-       "iron": 101,
-       "wood": 180,
-       "grain": 180,
-       "stone": 180
-      },
-      "decision": {
-       "choice": "raid",
-       "reasons": [
-        "an early raiding party"
-       ]
-      },
-      "startedAt": "2026-06-01T11:25:55.200Z",
-      "endedAt": "2026-06-01T11:26:13.200Z"
+      "startedAt": "2026-06-01T11:25:12.000Z",
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -9691,25 +9569,23 @@
       "front": "north",
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
-      "level": 2,
-      "xp": 8,
-      "xpToNext": 28,
-      "skills": {
-       "savagery": 1
-      },
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
       "effects": {
-       "attack": 0.04,
+       "attack": 0,
        "defense": 0,
        "nerve": 0,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:03:14.400Z",
-      "battles": 2,
-      "wins": 1,
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -9731,8 +9607,8 @@
       "id": 2,
       "kind": "lair",
       "front": "north",
-      "q": 1,
-      "r": 0,
+      "q": 6,
+      "r": -8,
       "size": 7,
       "waveId": 1
      }
@@ -11837,7 +11713,7 @@
    "response": {
     "notifications": [
      {
-      "id": 12,
+      "id": 7,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Gift a teammate",
@@ -11846,66 +11722,21 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 6,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
       "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T11:27:14.400Z",
-      "read": false
-     },
-     {
-      "id": 10,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Vyrgan the Hungry grows stronger",
-      "body": "Vyrgan the Hungry is now level 2.",
-      "createdAt": "2026-06-01T11:27:14.400Z",
-      "read": false
-     },
-     {
-      "id": 9,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "A horde is at the Holy City",
-      "body": "9 of them against its guard of 30.",
-      "createdAt": "2026-06-01T11:26:56.400Z",
-      "read": false
-     },
-     {
-      "id": 8,
-      "kind": "hero",
-      "tier": "digest",
-      "title": "Ilya is wounded",
-      "body": "Back on their feet in a few hours.",
-      "createdAt": "2026-06-01T11:26:13.200Z",
-      "read": false
-     },
-     {
-      "id": 7,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "Vruchiy was raided",
-      "body": "The horde carried off 641 resources after 1 rounds.",
-      "createdAt": "2026-06-01T11:26:13.200Z",
-      "read": false
-     },
-     {
-      "id": 6,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "Vruchiy is under attack",
-      "body": "A horde of 9 is fighting your garrison of 0.",
-      "createdAt": "2026-06-01T11:25:55.200Z",
+      "createdAt": "2026-06-01T11:25:30.000Z",
       "read": false
      },
      {
       "id": 5,
-      "kind": "wave_soon",
+      "kind": "under_attack",
       "tier": "push",
-      "title": "A horde is coming to Vruchiy",
-      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
+      "title": "A horde is at the Holy City",
+      "body": "9 of them against its guard of 30.",
+      "createdAt": "2026-06-01T11:25:12.000Z",
       "read": false
      },
      {
@@ -11945,7 +11776,7 @@
       "read": false
      }
     ],
-    "unread": 12,
+    "unread": 7,
     "serverTime": "2026-06-01T12:05:00.000Z"
    }
   }
