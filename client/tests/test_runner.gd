@@ -134,6 +134,19 @@ func _test_village_layout() -> void:
 	_check(Rules.unlocked_slots(data, 3) == 6, "one more slot per Hall level")
 	_check(Rules.unlocked_slots(data, 10) == 12, "capped at the slot count")
 	_check(Rules.slot_unlock_level(data, 3) == 1 and Rules.slot_unlock_level(data, 4) == 2 and Rules.slot_unlock_level(data, 11) == 9, "slot unlock levels")
+	# Founded villages: fields from the land around (server village.test.ts, same cases).
+	var mixed: Array = []
+	for t in ["forest", "plains", "hills"]:
+		for n in 6:
+			mixed.append(t)
+	var fields := LocalVillage.fields_from_land(data, mixed)
+	_check(fields == ["woodcutter", "woodcutter", "woodcutter", "woodcutter", "quarry", "quarry", "farm", "farm", "farm", "farm", "iron_mine", "iron_mine"],
+		"fields follow the land, largest remainders first: %s" % [fields])
+	var forest: Array = []
+	forest.resize(18)
+	forest.fill("forest")
+	_check(LocalVillage.fields_from_land(data, forest).count("woodcutter") == 9, "a forest site gets nine woodcutters")
+	_check(LocalVillage.fields_from_land(data, ["ocean", null]) == data.buildings.village.fields, "barren land keeps the balanced layout")
 	for index in 12:
 		var level := Rules.slot_unlock_level(data, index)
 		_check(Rules.unlocked_slots(data, level) > index and (level == 1 or Rules.unlocked_slots(data, level - 1) <= index), "slot %d opens exactly at Hall %d" % [index, level])

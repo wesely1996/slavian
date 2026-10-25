@@ -2,7 +2,7 @@ import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js'
 import { openTowerSlots, towerIndex, towerPlot, WALL, WALL_PLOT } from './walls.js';
 import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
-import { hex, hexDistance, hexKey, type Hex } from './hex.js';
+import { hex, hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import { bonus, productionFactor, timeFactor, trainFactor, type Bonuses } from './research.js';
 import { receive } from './logistics.js';
 import {
@@ -105,8 +105,40 @@ export function outpostPlots(plots: Plots): string[] {
   return Object.keys(plots).filter((id) => outpostHex(id) !== null);
 }
 
-export function initialPlots(data: GameData): Record<string, Plot> {
-  const { fields, centerSlots } = data.buildings.village;
+// A founded village's fields follow the land within outpostRange (the
+// outposts' yields say what each terrain gives): one field of every kind,
+// the rest shared out by what the land yields (largest remainder, ties in
+// the order of the balanced layout). Land that yields nothing keeps the
+// balanced layout, as starting villages do.
+export function fieldsFromLand(data: GameData, around: readonly (TerrainId | undefined)[]): string[] {
+  const balanced = data.buildings.village.fields;
+  const kinds = [...new Set(balanced)];
+  const yields = data.buildings.buildings.outpost?.yields ?? {};
+  const weights = kinds.map((kind) => {
+    const resource = data.buildings.buildings[kind]!.production!.resource;
+    return around.reduce((sum, t) => sum + (t === undefined ? 0 : (yields[t]?.[resource] ?? 0)), 0);
+  });
+  const total = weights.reduce((a, b) => a + b, 0);
+  const extra = balanced.length - kinds.length;
+  if (total === 0 || extra < 0) return [...balanced];
+  const counts = weights.map((w) => 1 + Math.floor((w * extra) / total));
+  let left = balanced.length - counts.reduce((a, b) => a + b, 0);
+  const order = kinds.map((_, i) => i).sort((a, b) => ((weights[b]! * extra) % total) - ((weights[a]! * extra) % total) || a - b);
+  for (const i of order) {
+    if (left <= 0) break;
+    counts[i]! += 1;
+    left -= 1;
+  }
+  return kinds.flatMap((kind, i) => Array<string>(counts[i]!).fill(kind));
+}
+
+// The terrain of the hexes around a village's site (not its own).
+export function landAround(data: GameData, terrain: ReadonlyMap<string, TerrainId>, cell: Hex): (TerrainId | undefined)[] {
+  return spiral(cell, data.buildings.village.outpostRange).slice(1).map((h) => terrain.get(hexKey(h)));
+}
+
+export function initialPlots(data: GameData, fields: readonly string[] = data.buildings.village.fields): Record<string, Plot> {
+  const { centerSlots } = data.buildings.village;
   const plots: Record<string, Plot> = {};
   fields.forEach((building, i) => (plots[fieldPlot(i)] = { building, level: 0 }));
   for (let i = 0; i < centerSlots; i++) plots[centerPlot(i)] = { building: null, level: 0 };
@@ -250,9 +282,9 @@ export function newVillage(
   data: GameData,
   at: Date,
   worldSpeed: number,
-  founded: { startingResources: Resources; adminUpkeep: number; bonuses: Bonuses } | null = null,
+  founded: { startingResources: Resources; adminUpkeep: number; bonuses: Bonuses; fields?: readonly string[] } | null = null,
 ): VillageState {
-  const plots = initialPlots(data);
+  const plots = initialPlots(data, founded?.fields);
   const levels = levelsOf(plots);
   const state: Omit<VillageState, 'ledger'> = {
     plots,

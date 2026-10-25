@@ -17,6 +17,7 @@ import {
   capacity,
   completeBuild,
   demolish,
+  fieldsFromLand,
   HALL_PLOT,
   hospitalHealed,
   levelCost,
@@ -63,6 +64,21 @@ describe('village layout', () => {
     expect(v.plots[HALL_PLOT]).toEqual({ building: 'elder_hall', level: 1 });
     expect(v.plots.c1).toEqual({ building: null, level: 0 });
     expect(v.levels).toEqual({ elder_hall: 1 });
+  });
+
+  it('a founded village takes its fields from the land around it', () => {
+    const count = (fields: string[]) => Object.fromEntries([...new Set(fields)].map((f) => [f, fields.filter((x) => x === f).length]));
+    const forest = Array<TerrainId>(18).fill('forest');
+    expect(count(fieldsFromLand(data, forest))).toEqual({ woodcutter: 9, quarry: 1, farm: 1, iron_mine: 1 });
+    // Wood 60, grain 60, stone 36, iron 24: 8 fields shared out, the two left over to the largest remainders.
+    const mixed: TerrainId[] = [...Array<TerrainId>(6).fill('forest'), ...Array<TerrainId>(6).fill('plains'), ...Array<TerrainId>(6).fill('hills')];
+    const fields = fieldsFromLand(data, mixed);
+    expect(fields).toHaveLength(village.fields.length);
+    expect(count(fields)).toEqual({ woodcutter: 4, quarry: 2, farm: 4, iron_mine: 2 });
+    // Land that yields nothing (or none at all) keeps the balanced layout.
+    expect(fieldsFromLand(data, ['ocean', undefined])).toEqual(village.fields);
+    const founded = newVillage(data, T0, 1, { startingResources: village.startingResources, adminUpkeep: 0, bonuses: {}, fields: fieldsFromLand(data, forest) });
+    expect(founded.plots.f8).toEqual({ building: 'woodcutter', level: 0 });
   });
 
   it('a bigger Elder\'s Hall unlocks slots and queue places', () => {
