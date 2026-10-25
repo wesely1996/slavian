@@ -208,6 +208,11 @@ func _test_village_layout() -> void:
 		"hero stats split its own gifts from its skills: %s" % parts)
 	_check(is_equal_approx(parts["defense.all"][2], 0.1) and is_equal_approx(parts["scoutSpeed"][0], 0.2), "gear counts a full set; traits count as its own: %s" % parts)
 	_check(HeroText.percent(0.14) == "+14%" and HeroText.percent(-0.15) == "−15%" and HeroText.percent(0.0) == "—", "bonus shares read as percents")
+	var base_data := {"heroes": {"speed": 6, "woundHours": 8, "slots": ["weapon", "armor", "amulet"],
+		"roster": {"x": {"effects": {"heroSpeed": 0.25}, "traits": [{"effects": {"woundTime": -0.5}}]}}}}
+	var base := HeroText.base_stats(base_data, {"kind": "x", "gear": {"weapon": "a", "armor": null}, "skillPoints": 2}, 2.0)
+	_check(base == PackedStringArray(["Rides 7.5 hexes an hour", "Wounded for 2h 00m after a lost fight", "Gear: 1 of 3 slots worn", "2 skill points to spend"]),
+		"a hero's own numbers: speed and wounds with its gifts, at world speed: %s" % base)
 
 
 func _test_training() -> void:

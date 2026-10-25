@@ -20,6 +20,25 @@ static func effect_name(key: String) -> String:
 	}.get(key, key)
 
 
+## The hero's own numbers, before any bonus table (server sim/heroes.ts):
+## travel speed (hexes per game hour), time wounded after a lost fight,
+## gear slots worn and skill points to spend.
+static func base_stats(data: Dictionary, hero: Dictionary, world_speed: float) -> PackedStringArray:
+	var speed := float(data.heroes.speed) * LocalHeroes.hero_factor(data, hero.kind, "heroSpeed")
+	var wound_seconds := float(LocalHeroes.wound_ms(data, world_speed, hero.kind)) / 1000.0
+	var worn := 0
+	for slot in data.heroes.slots:
+		if hero.get("gear", {}).get(slot) != null:
+			worn += 1
+	var points := int(hero.get("skillPoints", 0))
+	return PackedStringArray([
+		UI.t("Rides %s hexes an hour") % String.num(speed, 1).trim_suffix(".0"),
+		UI.t("Wounded for %s after a lost fight") % TimeUtil.format_duration(wound_seconds),
+		UI.t("Gear: %d of %d slots worn") % [worn, data.heroes.slots.size()],
+		UI.t("%d %s to spend") % [points, UI.tn("skill point", "skill points", points)],
+	])
+
+
 ## Where the hero's bonuses come from (server sim/heroes.ts heroBonuses):
 ## {effect key: [own, skills, gear, total]}. Its own (roster effects and
 ## traits) count in all your villages; skills and gear (sets included)

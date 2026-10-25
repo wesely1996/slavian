@@ -2255,6 +2255,8 @@ func _hero_stats(hero: Dictionary) -> void:
 		tr("Its own gifts count in all your villages; what its skills and gear add counts where it stands, and for the army it leads.")))
 	var xp_text := tr("XP %d / %d") % [int(hero.xp), int(hero.xpToNext)] if hero.xpToNext != null else tr("Highest level")
 	_panel_body.add_child(UI.label(tr("Level %d · %s") % [int(hero.level), xp_text], UI.SMALL_SIZE, UI.MUTED))
+	for line in HeroText.base_stats(Game.data, hero, float(Game.world.speed)):
+		_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
 	var parts := HeroText.breakdown(Game.data, hero)
 	if parts.is_empty():
 		_panel_body.add_child(UI.label(tr("No bonuses yet."), UI.SMALL_SIZE, UI.MUTED))
