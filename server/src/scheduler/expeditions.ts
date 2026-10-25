@@ -9,7 +9,7 @@ import { insertVillage, listVillages, loadVillage, saveVillageState } from '../d
 import { loadHexes } from '../db/worlds.js';
 import { adminUpkeepFor, SETTLER, settleProblem } from '../sim/expansion.js';
 import { hex, hexKey } from '../sim/hex.js';
-import { loseAway, newVillage, outpostHex, outpostPlots, returnHome } from '../sim/village.js';
+import { fieldsFromLand, landAround, loseAway, newVillage, outpostHex, outpostPlots, returnHome } from '../sim/village.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
@@ -24,7 +24,8 @@ export const expeditionHandlers: HandlerRegistry = {
     const villages = await listVillages(client, world.id);
     const outposts = new Set(villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => hexKey(outpostHex(plot)!))));
     const cell = hex(expedition.q, expedition.r);
-    const terrain = (await loadHexes(client, world.id)).find(([q, r]) => q === cell.q && r === cell.r)?.[2] as TerrainId | undefined;
+    const land = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [hexKey(hex(q, r)), t as TerrainId] as const));
+    const terrain = land.get(hexKey(cell));
     const problem = settleProblem(data, {
       cell,
       terrain,
@@ -59,6 +60,7 @@ export const expeditionHandlers: HandlerRegistry = {
         startingResources: data.expansion.startingResources,
         adminUpkeep: adminUpkeepFor(data, owned),
         bonuses: home.state.bonuses,
+        fields: fieldsFromLand(data, landAround(data, land, cell)),
       }),
     });
     // The settlers become the new village's people: they stop eating at home.

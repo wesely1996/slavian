@@ -272,7 +272,8 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 	var owner := int(home.ownerAccountId)
 	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == owner).size()
 	var founded := server.insert_village(world, owner, expedition.name, cell, LocalVillage.new_village(data, at, world.speed,
-		{"startingResources": data.expansion.startingResources, "adminUpkeep": LocalVillage.admin_upkeep_for(data, owned), "bonuses": home.state.bonuses}))
+		{"startingResources": data.expansion.startingResources, "adminUpkeep": LocalVillage.admin_upkeep_for(data, owned), "bonuses": home.state.bonuses,
+		"fields": LocalVillage.fields_from_land(data, LocalVillage.land_around(data, world.hexes, cell))}))
 	# The settlers become the new village's people: they stop eating at home.
 	home.state = LocalVillage.lose_away(data, home.state, SETTLER, int(expedition.settlers), at, world.speed)
 	expedition.status = "founded"
