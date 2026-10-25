@@ -37,6 +37,19 @@ const FRONT_ICONS := {
 }
 
 
+## The outposts a marching horde will still burn (server sim/waves.ts
+## raidsAlong): those within `reach` hexes of a step of its road it has not
+## reached yet.
+static func raided_outposts(wave: Dictionary, outposts: Array, reach: int, at_unix: float) -> Array:
+	var path: Variant = wave.get("path")
+	if wave.get("status") != "marching" or not path is Array:
+		return []
+	var elapsed_ms := (at_unix - TimeUtil.parse_iso(wave.spawnAt)) * 1000.0
+	return outposts.filter(func(cell: Vector2i) -> bool:
+		return path.any(func(step: Array) -> bool:
+			return float(step[2]) >= elapsed_ms and HexMath.distance(Vector2i(int(step[0]), int(step[1])), cell) <= reach))
+
+
 ## {"from": Vector2i, "to": Vector2i, "t": 0..1} for the leg the horde is on,
 ## or {} when the wave has no path yet.
 static func progress(wave: Dictionary, at_unix: float, battles: Array = []) -> Dictionary:
