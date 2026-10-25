@@ -90,7 +90,7 @@ describe('the Holy City', () => {
 
 describe('targeting', () => {
   const terrain = plains(6);
-  const route = (fear?: Map<string, number>, villages = [{ id: 1, q: 4, r: 0 }, { id: 2, q: -4, r: 0 }]) =>
+  const route = (fear?: Map<string, number>, villages = [{ id: 1, q: 2, r: -4 }, { id: 2, q: -2, r: -2 }]) =>
     routeFrom(data, {
       terrain,
       from: hex(0, -6),
@@ -107,12 +107,14 @@ describe('targeting', () => {
     const plain = route();
     expect(plain.path[0]).toMatchObject({ q: 0, r: -6, atMs: 1000 });
     const first = plain.targetVillageId;
-    const feared = new Map([[hexKey(first === 1 ? hex(4, 0) : hex(-4, 0)), 50]]);
+    const feared = new Map([[hexKey(first === 1 ? hex(2, -4) : hex(-2, -2)), 50]]);
     expect(route(feared).targetVillageId).toBe(first === 1 ? 2 : 1);
   });
 
-  it('goes for the Holy City when it is clearly closer, or there is nothing else', () => {
+  it('goes for the Holy City when no village is closer, or there is nothing else', () => {
     expect(route(undefined, []).targetVillageId).toBeNull();
-    expect(route(undefined, [{ id: 3, q: 0, r: 6 }]).targetVillageId).toBe(3);
+    expect(route(undefined, [{ id: 3, q: 0, r: 6 }]).targetVillageId).toBeNull();
+    // As close as the Holy City: the village.
+    expect(route(undefined, [{ id: 4, q: 6, r: -6 }]).targetVillageId).toBe(4);
   });
 });

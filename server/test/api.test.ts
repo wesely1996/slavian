@@ -16,6 +16,18 @@ import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
 
+// The Holy City counts as the nearest settlement, so in these small worlds a
+// horde may go for it first; tests of fights at a village put it further off.
+const villagesFirst = (body: () => Promise<void>) => async () => {
+  const was = scheduler.data.horde.holyCityExtraCost;
+  scheduler.data.horde.holyCityExtraCost = 100;
+  try {
+    await body();
+  } finally {
+    scheduler.data.horde.holyCityExtraCost = was;
+  }
+};
+
 // A spearman's grain an hour under Dobrynya, the hero of anyone who doesn't pick.
 const DOBRYNYA_UPKEEP = 10 * (1 + rosterBonuses(loadGameData(), 'dobrynya').upkeep!);
 
@@ -213,7 +225,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.body.villages[0].training).toEqual([]);
   });
 
-  it('announces waves when a world starts and runs them through the scheduler', async () => {
+  it('announces waves when a world starts and runs them through the scheduler', villagesFirst(async () => {
     const ratimir = await guest('Ratimir');
     const created = await call('POST', '/v1/worlds', ratimir.token, { name: 'Waves', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -286,7 +298,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const failed = await db.query("SELECT 1 FROM scheduled_events WHERE world_id = $1 AND status = 'failed'", [worldId]);
     expect(failed.rowCount).toBe(0);
     expect((await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body.villages[0].levels.elder_hall).toBe(1);
-  });
+  }));
 
   it('sends scouts at a wave and shares their report', async () => {
     const zora = await guest('Zora');
@@ -338,7 +350,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages[0].away.scout).toBe(0);
   });
 
-  it('a garrison fights off a wave, round by round, with its stance', async () => {
+  it('a garrison fights off a wave, round by round, with its stance', villagesFirst(async () => {
     const dobran = await guest('Dobran');
     const created = await call('POST', '/v1/worlds', dobran.token, { name: 'Battle', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -389,7 +401,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Fallen spearmen stop eating.
     const fallen = 20 - (world.villages[0].garrison.spearman ?? 0);
     expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * DOBRYNYA_UPKEEP);
-  });
+  }));
 
   it('builds on plots: fields, free slots and the Elder\'s Hall', async () => {
     const lada = await guest('Lada');
@@ -422,7 +434,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.body.villages[0].plots.c3).toEqual({ building: 'barracks', level: 1 });
   });
 
-  it('claims outposts, which hordes burn as they pass and sieges cut off', async () => {
+  it('claims outposts, which hordes burn as they pass and sieges cut off', villagesFirst(async () => {
     const zora = await guest('Zora');
     const created = await call('POST', '/v1/worlds', zora.token, { name: 'Outposts', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -487,7 +499,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Ruins can be abandoned.
     const abandoned = await call('POST', `/v1/villages/${village.id}/outposts/abandon`, zora.token, { q: q1, r: r1 });
     expect(abandoned.body.village.plots[`o${q1},${r1}`]).toBeUndefined();
-  });
+  }));
 
   it('gives every village a small bandit camp nearby to clear first', async () => {
     const lada = await guest('Lada');
@@ -705,7 +717,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await research('felling_axes')).body.message).toMatch(/already known/);
   });
 
-  it('gives each player a hero who levels up, wears gear, travels and gets wounded', async () => {
+  it('gives each player a hero who levels up, wears gear, travels and gets wounded', villagesFirst(async () => {
     const rada = await guest('Rada');
     const created = await call('POST', '/v1/worlds', rada.token, { name: 'Heroes', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -810,7 +822,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
     expect(world.heroes[0]).toMatchObject({ status: 'home', woundedUntil: null });
-  });
+  }));
 
   it('runs standing orders: repeat training, rebuilding raided outposts, surplus to the vault', async () => {
     const lada = await guest('Ivo');
@@ -892,7 +904,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     for (const o of left) await call('POST', `/v1/villages/${village.id}/orders/${o.id}/cancel`, lada.token);
   });
 
-  it('tells players what happened: pushes for danger, a daily digest for the rest', async () => {
+  it('tells players what happened: pushes for danger, a daily digest for the rest', villagesFirst(async () => {
     const mira = await guest('Mira');
     const created = await call('POST', '/v1/worlds', mira.token, { name: 'Notices', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -973,7 +985,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     expect((await call('POST', `/v1/worlds/${worldId}/notifications/read`, mira.token)).status).toBe(200);
     expect((await inbox()).unread).toBe(0);
-  });
+  }));
 
   it('sends armies: support that guards an ally, reinforcements that rally to battles', async () => {
     const vid = await guest('Vid');
@@ -1394,7 +1406,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.camps).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bandit', q: site.q, r: site.r })]));
   });
 
-  it('difficulty sets wave sizes; quiet hours set by the host hold hordes back', async () => {
+  it('difficulty sets wave sizes; quiet hours set by the host hold hordes back', villagesFirst(async () => {
     const yara = await guest('Yara');
     const stranger = await guest('Stranger');
     const created = await call('POST', '/v1/worlds', yara.token, { name: 'Gentle', maxPlayers: 1, speed: 10, difficulty: 'story' });
@@ -1430,7 +1442,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await call('GET', `/v1/worlds/${worldId}`, yara.token)).body.battles[0]).toMatchObject({ villageId: home.id });
     // Cleared quiet hours.
     expect((await call('PUT', `/v1/worlds/${worldId}/quiet`, yara.token, { start: null, end: null })).body.quietHours).toBeNull();
-  });
+  }));
 
   it('explores ancient sites: guardians, a search, and finds such as lore scrolls for the whole group', async () => {
     const vesna = await guest('Vesna');
@@ -1847,7 +1859,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(await march()).toBe(Math.round(offRoad * scheduler.data.field.road.factor));
   });
 
-  it('fights at the walls: siege works, battering, towers and a breach', async () => {
+  it('fights at the walls: siege works, battering, towers and a breach', villagesFirst(async () => {
     const zora = await guest('Zora');
     const created = await call('POST', '/v1/worlds', zora.token, { name: 'Walls', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -1893,7 +1905,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const { rows: results } = await db.query<{ data: { where: string; walls: number } }>("SELECT data FROM telemetry WHERE world_id = $1 AND kind = 'wave_result'", [worldId]);
     expect(results[0]!.data).toMatchObject({ where: 'village', walls: 6 });
     expect(fought.rounds.some((r: { breach?: boolean }) => r.breach)).toBe(breached);
-  });
+  }));
 
   it('exports, reports and deletes an account that hosts a world and owns a village', async () => {
     const ana = await guest('Ana');
