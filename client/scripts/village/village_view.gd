@@ -31,6 +31,8 @@ const SLOT_EMPTY := Color("#4a3f30")
 const SLOT_LOCKED := Color("#2a241c")
 const BUILDING := Color("#8f6d45")
 const BUILDING_ACTIVE := Color("#e2b04a")
+## A building at its highest level: a gold rim and number on its badge.
+const MAXED := Color("#f3cf6a")
 const SELECTED := Color.WHITE
 const MEADOW := Color("#97a85c")
 const SQUARE_EARTH := Color("#9c8a66")
@@ -236,7 +238,9 @@ func _draw() -> void:
 				_draw_progress(center, r - 3.0, plot, 6.0)
 			if plot == selected:
 				draw_arc(center, r + 4.0, 0.0, TAU, 48, SELECTED, 4.0)
-			_text(font, center - Vector2(0, r * 0.12), str(level), r * 0.7)
+			if _maxed(holds, level):
+				draw_arc(center, r - 2.0, 0.0, TAU, 48, MAXED, 4.0)
+			_text(font, center - Vector2(0, r * 0.12), str(level), r * 0.7, MAXED if _maxed(holds, level) else Color.WHITE)
 			_text(font, center + Vector2(0, r * 0.48), UI.resource_name(resource), r * 0.3)
 			continue
 		var locked := Rules.is_locked(data, village, plot)
@@ -253,7 +257,7 @@ func _draw() -> void:
 			_text(font, rect.get_center(), "+", rect.size.y * 0.45, UI.MUTED)
 		else:
 			_text(font, rect.get_center() - Vector2(0, font_size * 0.6), _short_name(tr(def.name)), font_size)
-			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3)
+			_text(font, rect.get_center() + Vector2(0, font_size * 0.7), str(level), font_size * 1.3, MAXED if _maxed(holds, level) else Color.WHITE)
 
 
 ## The walls around the square by their material, along the village's
@@ -458,13 +462,22 @@ func _draw_plot_art(plot: String, rect: Rect2, holds: Dictionary, level: int, un
 		var needs := (tr("Walls %d") % Rules.tower_unlock_level(data, Rules.plot_index(plot))) if Rules.is_tower_slot(plot) else (tr("Hall %d") % Rules.slot_unlock_level(data, Rules.plot_index(plot)))
 		_text(font, rect.get_center() + Vector2(0, rect.size.y * 0.42), needs, rect.size.y * (0.24 if Rules.is_tower_slot(plot) else 0.18), Color.WHITE)
 	elif id != "plot/empty":
-		# The level in a dark badge at the plot's lower right.
+		# The level in a dark badge at the plot's lower right; gold at the top.
 		var at := rect.position + rect.size * Vector2(0.86, 0.84)
 		var r := rect.size.x * 0.16
-		draw_circle(at, r, INK)
+		var maxed := _maxed(holds, level)
+		draw_circle(at, r, MAXED if maxed else INK)
 		draw_circle(at, r * 0.82, BUILDING_ACTIVE if under_way else Color("#4a3f30"))
-		_text(font, at, str(level), r * 1.2)
+		_text(font, at, str(level), r * 1.2, MAXED if maxed and not under_way else Color.WHITE)
 	return true
+
+
+## Whether the plot's building stands at its highest level.
+func _maxed(holds: Dictionary, level: int) -> bool:
+	if holds.get("building") == null:
+		return false
+	var def: Dictionary = data.buildings.buildings.get(holds.building, {})
+	return def.has("maxLevel") and level >= int(def.maxLevel)
 
 
 func _text(font: Font, center: Vector2, text: String, font_size: float, color := Color.WHITE) -> void:

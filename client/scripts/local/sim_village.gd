@@ -102,11 +102,66 @@ static func upkeep_per_hour(data: Dictionary, units: Dictionary, world_speed: fl
 
 # --- village.ts ---------------------------------------------------------------
 
-static func initial_plots(data: Dictionary) -> Dictionary:
+## A founded village's fields follow the land within outpostRange (server
+## fieldsFromLand): one of every kind, the rest shared out by what the
+## outposts' yields say the land gives; land yielding nothing stays balanced.
+static func fields_from_land(data: Dictionary, around: Array) -> Array:
+	var balanced: Array = data.buildings.village.fields
+	var kinds: Array = []
+	for kind in balanced:
+		if not kind in kinds:
+			kinds.append(kind)
+	var yields: Dictionary = data.buildings.buildings.outpost.get("yields", {})
+	var weights: Array = []
+	var total := 0
+	for kind in kinds:
+		var resource: String = data.buildings.buildings[kind].production.resource
+		var w := 0
+		for t in around:
+			if t != null:
+				w += int(yields.get(t, {}).get(resource, 0))
+		weights.append(w)
+		total += w
+	var extra := balanced.size() - kinds.size()
+	if total == 0 or extra < 0:
+		return balanced.duplicate()
+	var counts: Array = []
+	var left := balanced.size()
+	for i in kinds.size():
+		counts.append(1 + int(weights[i] * extra / total))
+		left -= counts[i]
+	var order: Array = range(kinds.size())
+	order.sort_custom(func(a: int, b: int) -> bool:
+		var ra: int = (weights[a] * extra) % total
+		var rb: int = (weights[b] * extra) % total
+		return ra > rb or (ra == rb and a < b))
+	for i in order:
+		if left <= 0:
+			break
+		counts[i] += 1
+		left -= 1
+	var out: Array = []
+	for i in kinds.size():
+		for n in counts[i]:
+			out.append(kinds[i])
+	return out
+
+
+## The terrain of the hexes around a village's site (not its own).
+static func land_around(data: Dictionary, hexes: Dictionary, cell: Vector2i) -> Array:
+	var out: Array = []
+	for h in HexMath.spiral(cell, int(data.buildings.village.outpostRange)).slice(1):
+		out.append(hexes.get(LocalLand.key(h)))
+	return out
+
+
+static func initial_plots(data: Dictionary, fields: Array = []) -> Dictionary:
 	var v: Dictionary = data.buildings.village
+	if fields.is_empty():
+		fields = v.fields
 	var plots := {}
-	for i in v.fields.size():
-		plots[field_plot(i)] = {"building": v.fields[i], "level": 0}
+	for i in fields.size():
+		plots[field_plot(i)] = {"building": fields[i], "level": 0}
 	for i in int(v.centerSlots):
 		plots[center_plot(i)] = {"building": null, "level": 0}
 	plots[HALL_PLOT] = {"building": HALL, "level": 1}
@@ -194,9 +249,9 @@ static func research_per_hour(data: Dictionary, plots: Dictionary, world_speed: 
 
 ## A fresh village (the first one; founded ones come with the expansion port).
 ## `founded`: for a village founded later, {startingResources, adminUpkeep,
-## bonuses}.
+## bonuses, fields?}.
 static func new_village(data: Dictionary, at: int, world_speed: float, founded: Dictionary = {}) -> Dictionary:
-	var plots := initial_plots(data)
+	var plots := initial_plots(data, founded.get("fields", []))
 	var state := {
 		"plots": plots,
 		"levels": levels_of(plots),

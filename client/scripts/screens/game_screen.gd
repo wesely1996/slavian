@@ -2900,7 +2900,9 @@ func _plot_section(village: Dictionary) -> void:
 	var def := _building_def(building)
 	var level := int(holds.level)
 	var title := tr("%s  Lv %d") % [tr(def.name), level]
-	if int(planned.level) > level:
+	if level >= int(def.maxLevel):
+		title += tr("  (max)")
+	elif int(planned.level) > level:
 		title += tr("  (→ %d queued)") % int(planned.level)
 	_panel_body.add_child(UI.with_card(UI.label(title, UI.HEADING_SIZE), _building_card(village, building, level)))
 	var effect := _effect_text(village, building, level)
