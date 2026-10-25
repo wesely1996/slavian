@@ -247,6 +247,13 @@ func _test_wave_math() -> void:
 	_check(mid.from == Vector2i(0, -7) and mid.to == Vector2i(1, -7) and is_equal_approx(mid.t, 0.5), "halfway along the second leg")
 	_check(WaveMath.current_hex(wave, t0 + 1.8) == Vector2i(0, -7), "still on the hex it is leaving")
 	_check(WaveMath.current_hex(wave, t0 + 2.6) == Vector2i(1, -7), "on the next hex past the midpoint")
+	# Outposts within reach of the road still ahead are marked; ones it passed, or too far, not.
+	var outposts := [Vector2i(0, -9), Vector2i(2, -7), Vector2i(4, -7)]
+	_check(WaveMath.raided_outposts(wave, outposts, 1, t0) == [Vector2i(0, -9), Vector2i(2, -7)], "a horde will burn the outposts near its road")
+	_check(WaveMath.raided_outposts(wave, outposts, 1, t0 + 2.0) == [Vector2i(2, -7)], "not the ones already behind it")
+	var camped := wave.duplicate()
+	camped.status = "arrived"
+	_check(WaveMath.raided_outposts(camped, outposts, 1, t0) == [], "only while it marches")
 	var fighting := wave.duplicate()
 	fighting.status = "battling"
 	fighting.id = 99

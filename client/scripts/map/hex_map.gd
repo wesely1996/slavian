@@ -272,6 +272,16 @@ func _draw_village(village: Dictionary) -> void:
 
 ## A small watchtower: its art ringed in the owner's colour, faded while in
 ## ruins or under construction (a diamond without art).
+## Every built outpost on the map (level 0 is still going up).
+func _standing_outposts() -> Array:
+	var cells: Array = []
+	for village in Game.villages.values():
+		for plot in Rules.outpost_plots(village):
+			if int(village.plots[plot].level) > 0:
+				cells.append(Rules.outpost_hex(plot))
+	return cells
+
+
 func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
 	var c := HexMath.to_pixel(cell, hex_size)
 	var side := MINE_COLOR if mine else ALLY_COLOR
@@ -412,12 +422,16 @@ func has_moving_hordes() -> bool:
 ## A horde's road as a line of red dots, and a target where it will strike.
 func _draw_route(points: PackedVector2Array, color: Color) -> void:
 	_draw_dots(points, color, hex_size * 0.095)
-	var at := points[points.size() - 1]
-	draw_arc(at, hex_size * 0.62, 0.0, TAU, 36, color, 4.0, true)
-	draw_arc(at, hex_size * 0.3, 0.0, TAU, 24, color, 3.0, true)
+	_draw_crosshair(points[points.size() - 1], color, 1.0)
+
+
+## A target's crosshair; `scale` < 1 for one struck in passing.
+func _draw_crosshair(at: Vector2, color: Color, scale: float) -> void:
+	draw_arc(at, hex_size * 0.62 * scale, 0.0, TAU, 36, color, 4.0 * scale, true)
+	draw_arc(at, hex_size * 0.3 * scale, 0.0, TAU, 24, color, 3.0 * scale, true)
 	for i in 4:
 		var way := Vector2.RIGHT.rotated(i * PI / 2.0)
-		draw_line(at + way * hex_size * 0.42, at + way * hex_size * 0.8, color, 4.0, true)
+		draw_line(at + way * hex_size * 0.42 * scale, at + way * hex_size * 0.8 * scale, color, 4.0 * scale, true)
 
 
 ## A line of dots along `points`.
@@ -495,6 +509,10 @@ func _draw_horde(wave: Dictionary, now: float) -> void:
 				trail.append(HexMath.to_pixel(cell, hex_size))
 		if trail.size() >= 2:
 			_draw_route(trail, HORDE_PATH_COLOR)
+		# Outposts it will burn on the way are targets too.
+		var reach := int(Game.data.enemies.fronts[String(wave.get("front", "north"))].personality.raidReach)
+		for cell in WaveMath.raided_outposts(wave, _standing_outposts(), reach, now):
+			_draw_crosshair(HexMath.to_pixel(cell, hex_size), HORDE_PATH_COLOR, 0.7)
 	else:
 		# Camped at the gates: sit beside the village so both stay visible.
 		pos += Vector2(hex_size * 0.42, -hex_size * 0.42)
