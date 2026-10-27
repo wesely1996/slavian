@@ -9,14 +9,14 @@ import { fortCost } from '../src/scheduler/field.js';
 const data = loadGameData();
 const T0 = new Date('2026-02-01T12:00:00Z');
 
-function rich(clan: string | null, barracks = 0) {
+function rich(clan: string | null, level = 0, building = 'barracks') {
   const fresh = withBonuses(data, newVillage(data, T0, 1), clanBonuses(data, clan), T0, 1);
   let state = {
     ...fresh,
     ledger: { ...fresh.ledger, amounts: { wood: 9e5, stone: 9e5, grain: 9e5, iron: 9e5 }, capacity: { wood: 9e9, stone: 9e9, grain: 9e9, iron: 9e9 } },
   };
-  for (let target = 1; target <= barracks; target++) {
-    const { state: queued, queued: item } = queueBuild(data, state, 'barracks', state.ledger.settledAt, 1);
+  for (let target = 1; target <= level; target++) {
+    const { state: queued, queued: item } = queueBuild(data, state, building, state.ledger.settledAt, 1);
     state = completeBuild(data, queued, item.plot, target, item.completesAt, 1);
   }
   return state;
@@ -40,9 +40,9 @@ describe('clans', () => {
   });
 
   it('lets only the clan train its unique unit', () => {
-    const sokol = rich('sokol', 2);
+    const sokol = rich('sokol', 2, 'shooting_range');
     expect(() => queueTraining(data, sokol, 'forest_archer', 1, sokol.ledger.settledAt, 1)).toThrow(/Only Rod Rysa can train a Forest Archer/);
-    const rys = rich('rys', 2);
+    const rys = rich('rys', 2, 'shooting_range');
     expect(queueTraining(data, rys, 'forest_archer', 1, rys.ledger.settledAt, 1).batch.unit).toBe('forest_archer');
   });
 

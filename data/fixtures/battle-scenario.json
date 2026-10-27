@@ -802,26 +802,7 @@
    "method": "POST",
    "path": "/v1/villages/1/train",
    "body": {
-    "unit": "spearman",
-    "count": 6
-   },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":97.86666666666673,\"iron\":0}",
-    "missing": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 97.86666666666673,
-     "iron": 0
-    }
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/train",
-   "body": {
-    "unit": "archer",
+    "unit": "ambusher",
     "count": 2
    },
    "status": 200,
@@ -990,7 +971,7 @@
      "refuge": false,
      "training": [
       {
-       "unit": "archer",
+       "unit": "ambusher",
        "count": 2,
        "startsAt": "2026-06-01T11:11:36.000Z",
        "perUnitMs": 1500,
@@ -1000,8 +981,8 @@
      "resources": {
       "amounts": {
        "iron": 317.5,
-       "wood": 720,
-       "grain": 22.13333333333327,
+       "wood": 740,
+       "grain": 12.133333333333269,
        "stone": 685
       },
       "ratesPerHour": {
@@ -1023,7 +1004,52 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "shooting_range"
+   },
+   "status": 400,
+   "response": {
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":47.86666666666673,\"iron\":0}",
+    "missing": {
+     "wood": 0,
+     "stone": 0,
+     "grain": 47.86666666666673,
+     "iron": 0
+    }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "archer",
+    "count": 2
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "Archer needs Shooting Range level 1"
+   }
+  },
+  {
    "advance": 660000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "archer",
+    "count": 2
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "Archer needs Shooting Range level 1"
+   }
   },
   {
    "method": "GET",
@@ -1200,7 +1226,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "away": {},
@@ -1223,8 +1249,8 @@
       "resources": {
        "amounts": {
         "iron": 317.5,
-        "wood": 720,
-        "grain": 22.13333333333327,
+        "wood": 740,
+        "grain": 12.133333333333269,
         "stone": 685
        },
        "ratesPerHour": {
@@ -3720,7 +3746,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "away": {},
@@ -3743,8 +3769,8 @@
       "resources": {
        "amounts": {
         "iron": 317.5,
-        "wood": 720,
-        "grain": 22.13333333333327,
+        "wood": 740,
+        "grain": 12.133333333333269,
         "stone": 685
        },
        "ratesPerHour": {
@@ -6279,7 +6305,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "away": {},
@@ -6302,8 +6328,8 @@
       "resources": {
        "amounts": {
         "iron": 317.5,
-        "wood": 720,
-        "grain": 22.13333333333327,
+        "wood": 740,
+        "grain": 12.133333333333269,
         "stone": 685
        },
        "ratesPerHour": {
@@ -8787,7 +8813,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "away": {},
@@ -8810,8 +8836,8 @@
       "resources": {
        "amounts": {
         "iron": 317.5,
-        "wood": 720,
-        "grain": 22.13333333333327,
+        "wood": 740,
+        "grain": 12.133333333333269,
         "stone": 685
        },
        "ratesPerHour": {
@@ -11294,7 +11320,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 0,
+       "ambusher": 0,
        "spearman": 4
       },
       "away": {},
@@ -11586,7 +11612,7 @@
        "crossbowman": 1
       },
       "defenderInitial": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "rounds": [
@@ -11612,7 +11638,7 @@
          "crossbowman": 1
         },
         "defenderLosses": {
-         "archer": 1,
+         "ambusher": 1,
          "spearman": 1
         }
        },
@@ -11650,7 +11676,7 @@
          "zealot": 1
         },
         "defenderLosses": {
-         "archer": 1,
+         "ambusher": 1,
          "spearman": 1
         }
        },
@@ -14006,7 +14032,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 0,
+       "ambusher": 0,
        "spearman": 4
       },
       "away": {},
@@ -14342,7 +14368,7 @@
        "siege_ram": 1
       },
       "defenderInitial": {
-       "archer": 2,
+       "ambusher": 2,
        "spearman": 8
       },
       "rounds": [
@@ -14368,7 +14394,7 @@
          "crossbowman": 1
         },
         "defenderLosses": {
-         "archer": 1,
+         "ambusher": 1,
          "spearman": 1
         }
        },
@@ -14406,7 +14432,7 @@
          "zealot": 1
         },
         "defenderLosses": {
-         "archer": 1,
+         "ambusher": 1,
          "spearman": 1
         }
        },

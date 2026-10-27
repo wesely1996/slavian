@@ -74,6 +74,8 @@ var _army_orders := "support"
 var _army_hero := false
 ## Standing order forms: repeat training and the surplus share.
 var _repeat_unit := "spearman"
+## The training building whose troops the Train tab shows.
+var _train_building := "barracks"
 var _repeat_target := 20
 var _repeat_batch := 5
 var _surplus_share := 80
@@ -2888,14 +2890,16 @@ func _plot_section(village: Dictionary) -> void:
 		if options.is_empty():
 			_panel_body.add_child(UI.label(tr("Every tower already stands on these walls.") if on_walls else tr("Every building already stands in this village."), UI.SMALL_SIZE, UI.MUTED))
 		_paged("plot options", options, 5 if _roomy() else 2, func(building: String) -> void:
-			if on_walls:
-				_panel_body.add_child(UI.label(WallText.tower_effect(Game.data, building, 0), UI.SMALL_SIZE, UI.MUTED))
+			# What a tower does, under its name.
+			var effect := WallText.tower_effect(Game.data, building, 0, float(Game.world.speed)) if on_walls else ""
 			var missing := Rules.missing_requirement(Game.data, village, building)
 			if not missing.is_empty():
 				_panel_body.add_child(UI.with_card(UI.label(tr(_building_def(building).name)), _building_card(village, building, 0)))
+				if effect != "":
+					_panel_body.add_child(UI.label(effect, UI.SMALL_SIZE, UI.MUTED))
 				_panel_body.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(missing[0]).name), missing[1]], UI.SMALL_SIZE, UI.ERROR))
 				return
-			_build_row(village, _plot, building, 1, tr("Build")))
+			_build_row(village, _plot, building, 1, tr("Build"), effect))
 		return
 
 	var building: String = planned.building
@@ -3084,7 +3088,7 @@ func _abandon(village_id: int) -> void:
 
 ## One "build `building` to `target` on `plot`" row with its cost, time
 ## and button.
-func _build_row(village: Dictionary, plot: String, building: String, target: int, verb: String) -> void:
+func _build_row(village: Dictionary, plot: String, building: String, target: int, verb: String, note := "") -> void:
 	var village_id := int(village.id)
 	var def := _building_def(building)
 	var hall := Rules.hall_level(village)
@@ -3096,6 +3100,8 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(UI.with_card(UI.label(tr("%s → Lv %d") % [tr(def.name), target]), _building_card(village, building, target - 1)))
+	if note != "":
+		info.add_child(UI.label(note, UI.SMALL_SIZE, UI.MUTED))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
@@ -3146,7 +3152,7 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	if def.get("kind") == "wall":
 		return WallText.wall_effect(Game.data, level)
 	if def.get("kind") == "tower":
-		return WallText.tower_effect(Game.data, building, level)
+		return WallText.tower_effect(Game.data, building, level, float(Game.world.speed))
 	if def.has("capacityGrowth"):
 		var base := float(Game.data.buildings.village.baseCapacity)
 		var total := roundi(float(village.get("resources", {}).get("capacity", {}).get("wood", base)))
@@ -3230,11 +3236,33 @@ func _train_tab(village: Dictionary) -> void:
 
 	var queue_full := training.size() >= limit
 	var max_batch := int(Game.data.units.maxBatch)
-	# What the village can train first, then what it could with more building.
 	var allowed := units.keys().filter(func(unit: String) -> bool: return ClanText.allowed(units[unit], village.get("bonuses", {})))
+	# One training building's troops at a time: a button for each.
+	var buildings := []
+	for unit in allowed:
+		if not buildings.has(units[unit].building):
+			buildings.append(units[unit].building)
+	if not buildings.has(_train_building):
+		_train_building = buildings[0]
+	var picker := GridContainer.new()
+	picker.columns = 3 if _roomy() else 2
+	picker.add_theme_constant_override("h_separation", 8)
+	picker.add_theme_constant_override("v_separation", 8)
+	_panel_body.add_child(picker)
+	for building in buildings:
+		var level := int(village.levels.get(building, 0))
+		var label := tr(_building_def(building).name) + (tr("  Lv %d") % level if level > 0 else "")
+		var button := UI.button(label, func() -> void:
+			_train_building = building
+			_rebuild_panel())
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = building == _train_building
+		picker.add_child(button)
+	allowed = allowed.filter(func(unit: String) -> bool: return units[unit].building == _train_building)
+	# What the village can train first, then what it could with more building.
 	var ready := func(unit: String) -> bool: return int(village.levels.get(units[unit].building, 0)) >= int(units[unit].requiresLevel)
 	var trainable := allowed.filter(ready) + allowed.filter(func(unit: String) -> bool: return not ready.call(unit))
-	_paged("train", trainable, 3 if _roomy() else 2, func(unit: String) -> void:
+	_paged("train " + _train_building, trainable, 3 if _roomy() else 2, func(unit: String) -> void:
 		var def: Dictionary = units[unit]
 		var building_level := int(village.levels.get(def.building, 0))
 		var unlocked := building_level >= int(def.requiresLevel)

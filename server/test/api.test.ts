@@ -214,7 +214,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       started.body.villages[0].resources.ratesPerHour.grain - 3 * DOBRYNYA_UPKEEP,
     );
     expect((await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'horseman', count: 1 })).body.message).toMatch(
-      /Barracks level 2/,
+      /Stables level 1/,
     );
     expect((await call('POST', `/v1/villages/${villageId}/train`, mila.token, { unit: 'spearman', count: 0 })).status).toBe(400);
 

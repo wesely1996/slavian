@@ -61,12 +61,13 @@ func refresh() -> void:
 	queue_redraw()
 
 
-## Hexes kept clear of trees and peaks: settlements, camps, sites and forts.
+## Hexes kept clear of trees and peaks: settlements, camps, sites still to
+## explore and forts.
 func _occupied() -> Dictionary:
 	var cells := {Vector2i.ZERO: true}
 	for village in Game.villages.values():
 		cells[Vector2i(int(village.q), int(village.r))] = true
-	for list in [Game.camps, Game.sites, Game.forts]:
+	for list in [Game.camps, Game.sites.filter(func(site: Dictionary) -> bool: return site.status == "unexplored"), Game.forts]:
 		for entry in list:
 			cells[Vector2i(int(entry.q), int(entry.r))] = true
 	return cells
@@ -145,7 +146,8 @@ func _draw() -> void:
 	for camp in Game.camps:
 		_draw_camp(camp)
 	for site in Game.sites:
-		_draw_site(site)
+		if site.status == "unexplored":
+			_draw_site(site)
 	for army in Game.armies:
 		_draw_army(army, now)
 	for hero in Game.heroes:
@@ -345,16 +347,16 @@ func _draw_ambush(cell: Vector2i, ready: bool) -> void:
 	draw_line(at + Vector2(r, r), at + Vector2(-r, -r), color, 2.5, true)
 
 
-## An ancient site: a standing stone, gold until explored.
+## An ancient site still to explore: a standing stone (explored ones are
+## gone from the map).
 func _draw_site(site: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(site.q), int(site.r)), hex_size)
-	# Searched sites fade into the land.
-	if _draw_art("site/" + String(site.kind), c, hex_size * 1.1, Color.WHITE if site.status == "unexplored" else Color(0.75, 0.72, 0.68, 0.7)):
+	if _draw_art("site/" + String(site.kind), c, hex_size * 1.1, Color.WHITE):
 		return
 	var w := hex_size * 0.13
 	var h := hex_size * 0.34
 	var stone := PackedVector2Array([c + Vector2(-w, h * 0.7), c + Vector2(-w * 1.2, -h * 0.4), c + Vector2(0, -h), c + Vector2(w * 1.2, -h * 0.4), c + Vector2(w, h * 0.7)])
-	draw_colored_polygon(stone, SITE_COLOR if site.status == "unexplored" else RUINS_COLOR)
+	draw_colored_polygon(stone, SITE_COLOR)
 	stone.append(stone[0])
 	draw_polyline(stone, VILLAGE_OUTLINE_COLOR, 2.0)
 

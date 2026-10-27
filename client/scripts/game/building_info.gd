@@ -16,7 +16,7 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 		"wall":
 			parts.append(UI.t("%s, %d to batter down") % [WallText.tier(data, level), WallText.integrity(data, level)])
 		"tower":
-			parts.append(WallText.tower_at(data, building, level))
+			parts.append(WallText.tower_at(data, building, level, speed))
 		"outpost":
 			parts.append(UI.t("yields ×%.2f") % pow(float(def.get("yieldGrowth", 1.0)), level - 1))
 	if building == Rules.HALL:
@@ -115,8 +115,10 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	box.add_child(UI.label(UI.t("%s · attack %d · defense %d") % [family.capitalize(), int(def.attack), int(def.defense)], UI.SMALL_SIZE))
 	box.add_child(UI.label(UI.t("Speed %d hexes/h · carries %d · eats %d grain/h") % [int(def.speed), int(def.carry), int(def.upkeepPerHour)], UI.SMALL_SIZE))
 	var counters: Dictionary = data.battle.counters
-	for target in counters.get(family, {}):
-		box.add_child(UI.label(UI.t("Strong against %s (×%.1f)") % [target, float(counters[family][target])], UI.SMALL_SIZE, UI.ACCENT))
+	# Its own counters, or its family's.
+	var strong: Dictionary = def.counters if def.get("counters") != null else counters.get(family, {})
+	for target in strong:
+		box.add_child(UI.label(UI.t("Strong against %s (×%.1f)") % [target, float(strong[target])], UI.SMALL_SIZE, UI.ACCENT))
 	for attacker in counters:
 		if counters[attacker].has(family):
 			box.add_child(UI.label(UI.t("Weak against %s") % attacker, UI.SMALL_SIZE, UI.ERROR))

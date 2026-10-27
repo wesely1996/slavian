@@ -24,12 +24,16 @@ static func defense_factor(bonuses: Dictionary, family: String, home: bool) -> f
 
 
 ## The player's units, with their research: `home` adds the bonus for
-## defending one's own village. Stats are {attack, defense, family}.
+## defending one's own village. Stats are {attack, defense, family}, and
+## counters when the unit has its own in place of its family's.
 static func player_stats(data: Dictionary, bonuses: Dictionary = {}, home := false) -> Callable:
 	return func(unit: String) -> Dictionary:
 		var def: Dictionary = data.units.units.get(unit, {"attack": 0, "defense": 1, "family": "infantry"})
-		return {"family": def.family, "attack": float(def.attack) * attack_factor(bonuses, def.family),
+		var stats := {"family": def.family, "attack": float(def.attack) * attack_factor(bonuses, def.family),
 			"defense": float(def.defense) * defense_factor(bonuses, def.family, home)}
+		if def.get("counters") != null:
+			stats.counters = def.counters
+		return stats
 
 
 static func enemy_stats(data: Dictionary, front: String) -> Callable:
@@ -68,7 +72,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			if count <= 0:
 				continue
 			var attacker: Dictionary = from.stats.call(unit)
-			var counter := float(battle.counters.get(attacker.family, {}).get(stats.family, 1.0))
+			var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
 			damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
 		var share := float(target_count) / target_total
 		var variance := 1.0 + float(battle.variance) * (rng.next() * 2.0 - 1.0)

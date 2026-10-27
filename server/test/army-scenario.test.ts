@@ -1,8 +1,9 @@
 // Armies, scouts, sites, roads and the hero's quests in a solo session
 // (docs/local-engine.md, part 5): scouts sent to a horde, an army led by
 // the hero holding a hex on the horde's road and fighting it there, then
-// called home; an army exploring an ancient site; a road built, a fort and
-// a bridge refused; a quest; a camp stormed; settlers refused.
+// called home; an army exploring an ancient site (no fort on it until it
+// is explored); a road built, a fort and a bridge refused; a quest; a camp
+// stormed; settlers refused.
 import { hexDistance, neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -45,6 +46,7 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
   const site = [...after.sites]
     .filter((s: { status: string; guardians: number | null }) => s.status === 'unexplored')
     .sort((a: { q: number; r: number }, b: { q: number; r: number }) => hexDistance(hex(a.q, a.r), hex(home.q, home.r)) - hexDistance(hex(b.q, b.r), hex(home.q, home.r)))[0];
+  await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: site.q, r: site.r } });
   await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'explore', target: { q: site.q, r: site.r }, units: { spearman: 2, scout: 1 } } });
   const next = neighbors(hex(home.q, home.r)).find((n) => passable(n.q, n.r))!;
   await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: next.q, r: next.r } } });
@@ -60,4 +62,6 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/found', body: { q: home.q + 1, r: home.r } });
   await play({ advance: 60 * MINUTE });
   await play({ method: 'GET', path: world });
+  // Explored, the site is gone from the land: a fort may stand there.
+  await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: site.q, r: site.r } });
 });

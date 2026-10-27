@@ -678,7 +678,121 @@ def unit(kind):
         s.line(62, 74, 62, 24, stroke=pale, sw=4)
         s.poly([(66, 26), (92, 68), (66, 68)], pale, stroke="none", sw=0)
         s.path("M28,100 Q38,94 48,100 Q58,106 68,100 Q78,94 88,100", "none", stroke="#7fb6cf", sw=3)
+    elif kind in TROOPS:
+        troop(s, pale, *TROOPS[kind])
     return s
+
+
+# The troops of the Barracks, the Shooting Range and the Stables: each is
+# its weapon (or mount) in the medallion, a mark of who they serve, and a
+# gold pip for each tier along the bottom. (weapon, mark, tier)
+TROOPS = {
+    "axe_levy": ("axe", None, 1), "warrior": ("sword_shield", None, 1), "axeman": ("axe_shield", None, 1),
+    "ambusher": ("dagger_leaf", None, 1), "horse_cutter": ("hook", None, 1),
+    "warrior_of_perun": ("sword_shield", "perun", 2), "axe_warrior": ("axe_shield", None, 2),
+    "follower_of_veles": ("staff", "veles", 2), "horse_butcher": ("hook", None, 2),
+    "large_shield": ("tall_shield", None, 2), "noble_spearman": ("spear_shield", None, 2),
+    "champion_of_perun": ("sword_shield", "perun", 3), "perun_axe": ("axe", "perun", 3),
+    "veles_chosen": ("staff", "veles", 3), "warlords_guard": ("sword_shield", "crown", 3),
+    "chosen_shield": ("tall_shield", "crown", 3),
+    "skirmisher": ("javelins", None, 1), "poison_archer": ("bow", "poison", 1),
+    "hunter": ("bow", "boar", 2), "noble_skirmisher": ("javelins", "crown", 2), "poison_hunter": ("bow", "poison", 2),
+    "onager": ("onager", None, 2), "devana_hunter": ("bow", "moon", 3), "thunder_thrower": ("firepot", "perun", 3),
+    "raider": ("horse", "sack", 1), "mounted_archer": ("horse", "bow", 2), "bear_rider": ("bear", None, 2),
+    "svarog_raider": ("horse", "fire", 3),
+}
+
+FIRE = [(0, "#fff1b0"), (0.5, "#ffb347"), (1, "#c2410c")]
+
+
+def troop(s, pale, weapon, mark, tier):
+    red = s.rad([(0, "#c9614a"), (1, "#6e2a1f")], 0.35, 0.3, 0.8)
+    wood = s.lin([(0, "#c49a6c"), (1, "#6b4a2c")], 0, 0, 1, 0)
+    if weapon in ("axe", "axe_shield"):
+        s.line(44, 98, 80, 30, stroke=wood, sw=5)
+        s.path("M74,24 Q96,22 98,44 Q86,40 80,48 L72,40 Z", pale, stroke="none", sw=0)
+        if weapon == "axe_shield":
+            s.circle(48, 74, 17, red, stroke="none", sw=0)
+            s.circle(48, 74, 17, "none", stroke=pale, sw=3)
+            s.circle(48, 74, 4, pale, stroke="none", sw=0)
+    elif weapon == "sword_shield":
+        s.line(84, 92, 84, 26, stroke=pale, sw=5)
+        s.poly([(80, 28), (84, 18), (88, 28)], pale, stroke="none", sw=0)
+        s.line(76, 80, 92, 80, stroke=pale, sw=4)
+        s.circle(52, 64, 22, red, stroke="none", sw=0)
+        s.circle(52, 64, 22, "none", stroke=pale, sw=3)
+        s.circle(52, 64, 5, pale, stroke="none", sw=0)
+    elif weapon == "spear_shield":
+        s.line(40, 98, 88, 22, stroke=pale, sw=5)
+        s.poly([(88, 22), (94, 12), (92, 28)], pale, stroke="none", sw=0)
+        s.path("M40,46 L66,46 L66,70 Q53,90 40,70 Z", red, stroke="none", sw=0)
+        s.path("M40,46 L66,46 L66,70 Q53,90 40,70 Z", "none", stroke=pale, sw=3)
+    elif weapon == "tall_shield":
+        s.rect(42, 26, 44, 70, red, stroke="none", sw=0, rx=8)
+        s.rect(42, 26, 44, 70, "none", stroke=pale, sw=3, rx=8)
+        s.line(64, 30, 64, 92, stroke=pale, sw=3)
+        s.circle(64, 61, 6, pale, stroke="none", sw=0)
+    elif weapon == "dagger_leaf":
+        s.path("M30,92 Q36,52 72,34 Q60,70 30,92 Z", s.lin([(0, "#9cbf6a"), (1, "#4f7a34")]), stroke="none", sw=0)
+        s.line(58, 92, 92, 36, stroke=pale, sw=5)
+        s.line(56, 80, 70, 88, stroke=pale, sw=4)
+    elif weapon == "hook":
+        s.line(40, 100, 80, 26, stroke=wood, sw=5)
+        s.path("M80,26 Q100,30 96,50 Q92,62 80,58 Q90,50 86,40 Q84,34 76,34 Z", pale, stroke="none", sw=0)
+    elif weapon == "staff":
+        s.line(64, 100, 64, 34, stroke=wood, sw=5)
+        s.path("M64,36 Q46,30 42,16 M64,36 Q82,30 86,16", "none", stroke=pale, sw=4)
+    elif weapon == "bow":
+        s.path("M48,22 Q86,62 48,102", "none", stroke=pale, sw=5)
+        s.line(48, 22, 48, 102, stroke="#d9cfb8", sw=1.5)
+        s.line(40, 62, 96, 62, stroke=pale, sw=3.5)
+        s.poly([(96, 62), (86, 56), (86, 68)], pale, stroke="none", sw=0)
+    elif weapon == "javelins":
+        for dx in (-12, 0, 12):
+            s.line(44 + dx, 100, 76 + dx, 26, stroke=pale, sw=3.5)
+            s.poly([(76 + dx, 26), (80 + dx, 16), (82 + dx, 30)], pale, stroke="none", sw=0)
+    elif weapon == "onager":
+        s.rect(30, 84, 68, 8, wood, stroke="none", sw=0, rx=2)
+        for x in (40, 88):
+            s.circle(x, 94, 8, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+        s.line(48, 86, 84, 34, stroke=pale, sw=5)
+        s.circle(86, 30, 9, s.rad([(0, "#cfc9bd"), (1, "#7d776d")]), stroke="none", sw=0)
+        s.line(74, 86, 74, 62, stroke=wood, sw=4)
+    elif weapon == "firepot":
+        s.circle(60, 70, 22, s.rad([(0, "#5a4129"), (1, "#2b211a")]), stroke="none", sw=0)
+        s.circle(60, 70, 22, "none", stroke=pale, sw=3)
+        s.line(68, 50, 78, 34, stroke=pale, sw=3)
+        s.path("M78,34 Q92,24 84,14 Q96,20 94,34 Q90,42 78,34 Z", s.rad(FIRE), stroke="none", sw=0)
+    elif weapon == "horse":
+        horse_head(s, pale)
+    elif weapon == "bear":
+        s.path("M34,96 Q30,62 46,46 Q42,34 52,30 Q58,36 58,42 Q64,40 70,42 Q70,36 76,30 Q86,34 82,46 Q98,62 94,96 Z", pale, stroke="none", sw=0)
+        s.ellipse(64, 74, 12, 9, "#bdb29b", stroke="none", sw=0)
+        s.circle(64, 70, 4, "#1d232c", stroke="none", sw=0)
+        for x in (52, 76):
+            s.circle(x, 58, 3, "#1d232c", stroke="none", sw=0)
+    # Who they serve.
+    if mark == "perun":
+        s.path("M28,24 L38,24 L32,36 L40,36 L26,54 L30,40 L24,40 Z", "#f2cf72", stroke="none", sw=0)
+    elif mark == "veles":
+        s.path("M24,44 Q22,28 34,22 Q30,32 36,40 M44,44 Q46,28 34,22", "none", stroke="#9cbf6a", sw=3)
+    elif mark == "crown":
+        s.poly([(22, 40), (22, 26), (29, 33), (34, 22), (39, 33), (46, 26), (46, 40)], "#f2cf72", stroke="none", sw=0)
+    elif mark == "poison":
+        s.path("M32,22 Q42,36 42,42 Q42,50 32,50 Q22,50 22,42 Q22,36 32,22 Z", s.rad([(0, "#c4e08a"), (1, "#4f7a34")]), stroke="none", sw=0)
+    elif mark == "boar":
+        s.path("M24,44 Q26,30 40,30 L46,36 L40,44 Z", "#bdb29b", stroke="none", sw=0)
+        s.path("M42,40 Q48,40 46,32", "none", stroke="#fbf5e6", sw=2)
+    elif mark == "moon":
+        s.path("M38,20 Q22,24 22,38 Q22,52 38,56 Q28,46 28,38 Q28,28 38,20 Z", "#dfe7eb", stroke="none", sw=0)
+    elif mark == "sack":
+        s.path("M92,96 Q84,84 90,76 L102,76 Q108,84 100,96 Z", s.lin([(0, "#d9c39a"), (1, "#8c6a45")]), stroke="none", sw=0)
+    elif mark == "bow":
+        s.path("M86,70 Q108,84 96,104", "none", stroke="#d9cfb8", sw=3.5)
+    elif mark == "fire":
+        s.path("M98,104 Q86,92 94,78 Q96,88 102,88 Q100,76 108,70 Q116,90 106,104 Z", s.rad(FIRE, 0.5, 0.7, 0.7), stroke="none", sw=0)
+    for i in range(tier):
+        s.circle(64 + (i - (tier - 1) / 2) * 10, 104, 3.2, "#f2cf72", stroke="none", sw=0)
 
 
 # The enemy's units: the same enamel medallion in an iron rim run with
@@ -1041,6 +1155,9 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
 VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
+# The Stables and the Shooting Range, drawn after the rest (their gradient
+# ids come last).
+MILITARY_BUILDINGS = ["stables", "shooting_range"]
 FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
 WALL_TOWERS = ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]
 
@@ -1061,6 +1178,20 @@ def sign(s, x, y, emblem):
     elif emblem == "sheaf":
         for dx in (-5, 0, 5):
             s.line(x, y + 7, x + dx, y - 6, stroke="#f2cf72", sw=2.5)
+    elif emblem == "horseshoe":
+        s.path(f"M{x - 6},{y + 7} L{x - 6},{y - 1} Q{x - 6},{y - 7} {x},{y - 7} Q{x + 6},{y - 7} {x + 6},{y - 1} L{x + 6},{y + 7}", "none", stroke=pale, sw=3)
+    elif emblem == "bow":
+        s.path(f"M{x - 4},{y - 8} Q{x + 8},{y} {x - 4},{y + 8}", "none", stroke=pale, sw=2.5)
+        s.line(x - 7, y, x + 8, y, stroke=pale, sw=2)
+
+
+def standing_horse(s, x, foot, color):
+    """A small horse side on, facing right, its hooves at (x, foot)."""
+    shape = [(-14, -11), (-10, -15), (4, -15), (8, -21), (12, -23), (15, -19), (11, -17), (8, -11), (7, 0), (5, 0),
+             (4, -8), (-8, -8), (-9, 0), (-11, 0), (-12, -9), (-16, -5)]
+    soft_shadow(s, x, foot, 14, 3, 0.3)
+    s.poly([(x + dx, foot + dy) for dx, dy in shape], s.lin([(0, color), (1, "#2b211a")], 0, 0, 0.4, 1), stroke="none", sw=0)
+    s.path(f"M{x - 14},{foot - 11} Q{x - 19},{foot - 8} {x - 18},{foot - 2}", "none", stroke="#2b211a", sw=2)
 
 
 def cart(s, x, foot, w=34, covered=False):
@@ -1109,6 +1240,30 @@ def building(kind, stage):
             if stage == 3:
                 round_tower(s, 108, 112, 16, 50)
         sign(s, 30 if stage > 1 else 64, 70 if stage > 1 else 58, "spears")
+    elif kind == "stables":
+        # A long low stable by a paddock, more horses in it as it grows.
+        house(s, 44, 106, 56 * big, 22 * big, roof="thatch" if stage < 3 else "red", wall="wood", windows=0)
+        for i in range(stage):
+            standing_horse(s, 82 + i * 14, 114 - (i % 2) * 5, ["#8a5e3c", "#5a4129", "#c9a77a"][i])
+        for x in range(74, 124, 10):
+            s.line(x, 118, x, 102, stroke="#6e4b2c", sw=2.5)
+        for y in (106, 113):
+            s.line(72, y, 122, y - 3, stroke="#a8794a", sw=2)
+        sign(s, 104, 74, "horseshoe")
+    elif kind == "shooting_range":
+        # A row of straw butts with painted targets, and a shelter for the bows.
+        if stage == 1:
+            tent(s, 38, 108, 36, ("#b98a5e", "#8a5e3c", "#563821"))
+        else:
+            house(s, 38, 110, 42 * big, 24 * big, roof="slate" if stage == 3 else "thatch", wall="wood", windows=1)
+        for i in range(stage):
+            tx, foot = 80 + i * 17, 116 - i * 4
+            s.line(tx, foot, tx, foot - 18, stroke="#6e4b2c", sw=3)
+            s.rect(tx - 9, foot - 10, 18, 9, s.lin([(0, "#e3c27a"), (1, "#a8853e")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+            s.circle(tx, foot - 22, 10, "#f4ead2", stroke="none", sw=0)
+            s.circle(tx, foot - 22, 6.5, "#c9614a", stroke="none", sw=0)
+            s.circle(tx, foot - 22, 2.5, "#f4ead2", stroke="none", sw=0)
+        sign(s, 108, 62, "bow")
     elif kind == "scout_lodge":
         h = [0, 34, 46, 56][stage]
         soft_shadow(s, 66, 112, 26, 6, 0.35)
@@ -1667,6 +1822,11 @@ def assets():
     # Last, so gradient ids of the pieces above stay as they were.
     for clan in CLAN_FIELDS:
         out[f"clan/{clan}"] = clan_emblem(clan)
+    for kind in TROOPS:
+        out[f"unit/{kind}"] = unit(kind)
+    for kind in MILITARY_BUILDINGS:
+        for stage in (1, 2, 3):
+            out[f"building/{kind}_{stage}"] = building(kind, stage)
     return out
 
 

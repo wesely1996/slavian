@@ -68,16 +68,17 @@ static func wall_effect(data: Dictionary, level: int) -> String:
 	return text
 
 
-## What a tower does at `level` and at the next.
-static func tower_effect(data: Dictionary, tower: String, level: int) -> String:
+## What a tower does at `level` and at the next. `speed` is the world's:
+## the watchtower's warning is told in real time.
+static func tower_effect(data: Dictionary, tower: String, level: int, speed := 1.0) -> String:
 	if data.get("walls", {}).get("towers", {}).get(tower, {}).is_empty():
 		return ""
-	var now: String = tower_at(data, tower, level) if level > 0 else UI.t("Not built yet")
-	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, tower_at(data, tower, level + 1)]
+	var now: String = tower_at(data, tower, level, speed) if level > 0 else UI.t("Not built yet")
+	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, tower_at(data, tower, level + 1, speed)]
 
 
 ## What a tower does at `level`, in a few words.
-static func tower_at(data: Dictionary, tower: String, level: int) -> String:
+static func tower_at(data: Dictionary, tower: String, level: int, speed := 1.0) -> String:
 	var t: Dictionary = data.get("walls", {}).get("towers", {}).get(tower, {})
 	match tower:
 		"archer_tower":
@@ -94,8 +95,8 @@ static func tower_at(data: Dictionary, tower: String, level: int) -> String:
 				roundi(minf(0.9, level * float(t.siegeCutPerLevel)) * 100.0), roundi(minf(0.9, level * float(t.get("escaladeCutPerLevel", 0.0))) * 100.0),
 				roundi(level * float(t.setupPerLevel) * 100.0)]
 		"watchtower":
-			var hours := roundi(level * float(t.warningHoursPerLevel))
-			return UI.tn("warns of a horde %d hour earlier", "warns of a horde %d hours earlier", hours) % hours
+			# Game hours, which pass faster in a faster world.
+			return UI.t("warns of a horde %s earlier") % TimeUtil.format_duration(level * float(t.warningHoursPerLevel) * 3600.0 / speed)
 	return ""
 
 

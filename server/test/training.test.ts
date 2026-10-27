@@ -17,8 +17,9 @@ const data = loadGameData();
 const T0 = new Date('2026-02-01T12:00:00Z');
 const ms = (n: number) => new Date(T0.getTime() + n);
 
-// A village with a level-1 barracks and plenty of resources.
-function withBarracks(level = 1) {
+// A village with a level-1 barracks (or another training building) and
+// plenty of resources.
+function withBarracks(level = 1, building = 'barracks') {
   const fresh = newVillage(data, T0, 1);
   const rich = {
     ...fresh,
@@ -26,7 +27,7 @@ function withBarracks(level = 1) {
   };
   let state = rich;
   for (let target = 1; target <= level; target++) {
-    const { state: queued, queued: item } = queueBuild(data, state, 'barracks', state.ledger.settledAt, 1);
+    const { state: queued, queued: item } = queueBuild(data, state, building, state.ledger.settledAt, 1);
     state = completeBuild(data, queued, item.plot, target, item.completesAt, 1);
   }
   return state;
@@ -68,9 +69,16 @@ describe('training batches', () => {
 describe('queueTraining', () => {
   it('needs the training building at the required level', () => {
     expect(() => queueTraining(data, newVillage(data, T0, 1), 'spearman', 1, T0, 1)).toThrow(/Barracks level 1/);
-    expect(() => queueTraining(data, withBarracks(1), 'horseman', 1, T0, 1)).toThrow(/Barracks level 2/);
+    expect(() => queueTraining(data, withBarracks(1), 'axeman', 1, T0, 1)).toThrow(/Barracks level 2/);
     expect(() => queueTraining(data, withBarracks(1), 'scout', 1, T0, 1)).toThrow(/Scout Lodge/);
-    expect(() => queueTraining(data, withBarracks(2), 'horseman', 1, withBarracks(2).ledger.settledAt, 1)).not.toThrow();
+    expect(() => queueTraining(data, withBarracks(2), 'axeman', 1, withBarracks(2).ledger.settledAt, 1)).not.toThrow();
+    // Riders come from the Stables, shooters from the Shooting Range.
+    expect(() => queueTraining(data, withBarracks(2), 'horseman', 1, T0, 1)).toThrow(/Stables level 1/);
+    expect(() => queueTraining(data, withBarracks(2), 'archer', 1, T0, 1)).toThrow(/Shooting Range level 1/);
+    const stables = withBarracks(1, 'stables');
+    expect(() => queueTraining(data, stables, 'horseman', 1, stables.ledger.settledAt, 1)).not.toThrow();
+    const range = withBarracks(1, 'shooting_range');
+    expect(() => queueTraining(data, range, 'archer', 1, range.ledger.settledAt, 1)).not.toThrow();
   });
 
   it('rejects bad counts and unknown units', () => {
@@ -88,7 +96,7 @@ describe('queueTraining', () => {
     const before = amountsAt(state.ledger, at);
     const first = queueTraining(data, state, 'spearman', 3, at, 1);
     expect(amountsAt(first.state.ledger, at).wood).toBe(before.wood - 3 * data.units.units.spearman!.cost.wood);
-    const second = queueTraining(data, first.state, 'archer', 2, at, 1);
+    const second = queueTraining(data, first.state, 'axe_levy', 2, at, 1);
     expect(second.batch.startsAt).toEqual(batchCompletesAt(first.batch));
     state = second.state;
     while (state.training.length < data.units.trainingQueueLimit) {

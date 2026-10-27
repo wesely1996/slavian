@@ -168,7 +168,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["storehouse", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
+	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
 	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
@@ -978,7 +978,9 @@ func _test_walls() -> void:
 	_check(WallText.tower_effect(data, "ditch", 1).begins_with("A dry moat with stakes keeps off 5% of the battering and 6% of the climbers"), "moat effect: %s" % WallText.tower_effect(data, "ditch", 1))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
 	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
-	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2 hours earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
+	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2h 00m earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
+	# The warning is in game hours, which pass 10 times faster in a speed-10 world.
+	_check(WallText.tower_effect(data, "watchtower", 2, 10.0).begins_with("Warns of a horde 12m 00s earlier."), "watchtower effect at speed 10: %s" % WallText.tower_effect(data, "watchtower", 2, 10.0))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")
 	# Every village's own outline keeps its plots clear of each other.
 	var clear := true

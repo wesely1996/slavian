@@ -529,9 +529,8 @@ func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, no
 	var terrain: Variant = world.hexes.get(LocalLand.key(cell))
 	if terrain == null:
 		return LocalVillage.rule("That hex is not on the map")
-	for s in world.sites:
-		if s.q == cell.x and s.r == cell.y:
-			return LocalVillage.rule("An ancient site lies there")
+	if LocalArmies.site_at(world, cell).get("status") == "unexplored":
+		return LocalVillage.rule("An ancient site lies there")
 	var taken := {}
 	for other in world.villages:
 		taken[LocalLand.key(Vector2i(other.q, other.r))] = true

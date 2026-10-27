@@ -13,6 +13,8 @@ export interface UnitStats {
   readonly attack: number;
   readonly defense: number;
   readonly family: UnitFamily;
+  // The unit's own counters, in place of its family's.
+  readonly counters?: Partial<Record<UnitFamily, number>>;
 }
 
 export interface Side {
@@ -46,6 +48,7 @@ export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false)
       family: def.family,
       attack: def.attack * attackFactor(bonuses, def.family),
       defense: def.defense * defenseFactor(bonuses, def.family, home),
+      ...('counters' in def && def.counters ? { counters: def.counters } : {}),
     };
   };
 }
@@ -76,7 +79,7 @@ function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<
     for (const [unit, count] of Object.entries(from.units)) {
       if (count <= 0) continue;
       const attacker = from.stats(unit);
-      const counter = battle.counters[attacker.family]?.[stats.family] ?? 1;
+      const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
       damage += count * attacker.attack * fromStance.attack * matchup * counter;
     }
     const share = targetCount / targetTotal;

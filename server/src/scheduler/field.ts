@@ -350,7 +350,7 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   if (outposts.some((o) => o.q === cell.q && o.r === cell.r)) throw new RuleError('There is an outpost there');
   if (await fortAt(client, world.id, cell.q, cell.r)) throw new RuleError('There is a fort there already');
   if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
-  if (await siteAt(client, world.id, cell.q, cell.r)) throw new RuleError('An ancient site lies there');
+  if ((await siteAt(client, world.id, cell.q, cell.r))?.status === 'unexplored') throw new RuleError('An ancient site lies there');
   const cost = fortCost(data, village.state.bonuses);
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, cost) });
   const fort = await insertFort(client, {

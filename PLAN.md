@@ -9,7 +9,7 @@ This plan is the outcome of a design interview. Each decision below is settled u
 
 ## 1. Vision
 
-The last bastion of Slavic faith and culture is the **Holy City**. A small group of friends (2–6, or solo) found villages around it, grow them, claim the land and prepare for the hordes coming from every direction. They win by building the **Kalinov Bridge** between the realms in the Holy City before the city falls.
+The last bastion of Slavic faith and culture is the **Holy City**. A small group of friends (2–6, or solo) found villages around it, grow them, claim the land and prepare for the hordes coming from every direction. They win by extending the **Kalinov Bridge**, which already joins Nav to Yav, on from Yav to Prav before the city falls.
 
 - **Inspirations:** Travian (village interior, real-time timers, troop marches) and Ikariam (calm economy, few-minutes-a-day loop).
 - **Twist:** fully cooperative PvE. No PvP. The enemy is nature, monsters and three invading forces.
@@ -95,7 +95,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | **Field setup** | A prepared position on a tile: Ambush, Fort, Choke Point. |
 | **Caravan** | A resource transport with capacity and travel time. |
 | **Vault** | Shared storage in the Holy City. |
-| **Kalinov Bridge** | The win objective: a 5-stage project in the Holy City. Named after the mythic bridge over the Smorodina river between Yav (the living world) and Nav (the other realm). |
+| **Kalinov Bridge** | The win objective: a 5-stage project in the Holy City. The mythic bridge over the Smorodina river already joins Nav (the other realm) to Yav (the living world); the group extends it from Yav to Prav (the realm of the gods), and once it reaches Prav nothing from Nav can cross it. |
 | **Ritual Night** | The final event: all active fronts attack at once. |
 | **Quiet hours** | The group's daily window in which no waves or battle starts happen. |
 | **Standing order** | A rule that repeats or triggers automatically (repeat training, auto-rebuild, reinforcement rules). |
@@ -163,7 +163,7 @@ Edges of inactive fronts are generated as ordinary terrain/ocean without spawn z
 
 ### 5.2 Villages
 - **Interior view (Travian-style):** a village screen with a center (buildings) and surrounding fields. Tap a slot to build/upgrade.
-- Starting buildings *(tunable)*: Elder's Hall (main building), Granary, Storehouse, Barracks, Wall (Palisade), Marketplace/Caravan Yard, Scout Lodge, Academy, Shrine, Hero's Hall, Settlers' Lodge, Workshop. Plus clan-unique buildings.
+- Starting buildings *(tunable)*: Elder's Hall (main building), Granary, Storehouse, Barracks (infantry), Stables (cavalry), Shooting Range (ranged), Wall (Palisade), Marketplace/Caravan Yard, Scout Lodge, Academy, Shrine, Hero's Hall, Settlers' Lodge, Workshop. Plus clan-unique buildings.
 - **Village size** (driven by Elder's Hall + population) unlocks building slots and raises the **order queue limit** (Q23).
 - **Population** grows with grain surplus and housing. It is a resource the enemy can kill when a village is besieged.
 
@@ -199,6 +199,14 @@ Edges of inactive fronts are generated as ordinary terrain/ocean without spawn z
 | Siege-defense (crews on forts/walls) | Attackers at walls | Field battles |
 
 Each clan modifies or adds to these (§9).
+
+Infantry trains in the **Barracks**, archers and throwers in the **Shooting Range**, riders in the **Stables** (`data/units.json`). Each has three tiers, opened at building levels 1–3, 4–6 and 7–9; a unit may carry its own counters in place of its family's (Horse Cutters and Horse Butchers cut riders down, poisoners hit infantry and riders alike).
+
+| | Tier 1 | Tier 2 | Tier 3 |
+|---|---|---|---|
+| **Infantry** (Barracks) | Axe Levy, Warrior, Spearman, Axeman, Ambusher, Horse Cutter | Warrior of Perun, Axe Warrior, Follower of Veles, Horse Butcher, Large Shield, Noble Spearman | Champion of Perun, Perun's Axe, Veles' Chosen, Chosen Shield, Warlord's Guard |
+| **Ranged** (Shooting Range) | Archer, Skirmisher, Poison Archer | Hunter, Noble Skirmisher, Poison Hunter, Onager | Devana's Hunter, Perun's Thunder Thrower |
+| **Cavalry** (Stables) | Horse Raider, Raider | Horse Archer, Bear Rider | Svarog's Raider |
 
 ### 6.2 Stances (Q22)
 | Stance | Effect *(tunable)* |
@@ -330,6 +338,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 
 ## 10. The Kalinov Bridge — Win Condition (Q27)
 
+- The Kalinov Bridge already crosses the Smorodina from Nav to Yav, and the hordes come over it. The group extends it from Yav to **Prav**: joined to the realm of the gods, the bridge is closed to Nav for good.
 - Built in the Holy City in **5 stages**.
 - Each stage needs a **large shared resource cost** (donations) plus **1–2 quests**, for example:
   - Retrieve a relic from an ancient site.
