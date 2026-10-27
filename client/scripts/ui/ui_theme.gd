@@ -178,12 +178,16 @@ static func build() -> Theme:
 	theme.set_color("icon_disabled_color", "TabButton", INK)
 	theme.set_constant("icon_max_width", "TabButton", 36)
 
-	# Progress bars: an ink groove filled with malachite.
+	# Progress bars: an ink groove filled with malachite. No content margins:
+	# the bar always draws the fill's margins, so a box's 36px would show a
+	# 70px bar half full when it is nearly empty.
 	var groove := _box(Color(INK, 0.12), Color(0, 0, 0, 0))
 	groove.set_corner_radius_all(4)
+	groove.set_content_margin_all(0)
 	theme.set_stylebox("background", "ProgressBar", groove)
 	var fill := _box(MALACHITE, Color(0, 0, 0, 0))
 	fill.set_corner_radius_all(4)
+	fill.set_content_margin_all(0)
 	theme.set_stylebox("fill", "ProgressBar", fill)
 
 	# Side tabs: pictures down the sheet's side, quiet until open, then lit

@@ -76,6 +76,13 @@ describe('a battle round', () => {
     expect(spearRatio).toBeCloseTo(1.5, 1);
     const archerRatio = damage({ archer: 20 }, 'leshy_thrall', thrallDefense) / damage({ archer: 20 }, 'grey_wolf', wolfDefense);
     expect(archerRatio).toBeCloseTo(1.5, 1);
+    // A unit's own counters stand in for its family's: horse cutters hit
+    // riders twice as hard, ambushers hit archers (upyrs) and riders.
+    const cutterRatio = damage({ horse_cutter: 20 }, 'grey_wolf', wolfDefense) / damage({ horse_cutter: 20 }, 'leshy_thrall', thrallDefense);
+    expect(cutterRatio).toBeCloseTo(2, 1);
+    const upyrDefense = data.enemies.fronts.north!.units.upyr!.defense;
+    const ambushRatio = damage({ ambusher: 20 }, 'upyr', upyrDefense) / damage({ ambusher: 20 }, 'leshy_thrall', thrallDefense);
+    expect(ambushRatio).toBeCloseTo(1.5, 1);
   });
 
   it('stances trade attack for defense', () => {

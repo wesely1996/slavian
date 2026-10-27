@@ -19,9 +19,13 @@ scenario('battle-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 8 } });
   await play({ advance: spawnAt - now().getTime() - 10 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c3', building: 'hospital' } });
-  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
+  // Ambushers strike with their own counters, not their family's.
+  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'ambusher', count: 2 } });
+  // Archers wait for the Shooting Range.
+  await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'shooting_range' } });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'archer', count: 2 } });
   await play({ advance: 11 * MINUTE });
+  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'archer', count: 2 } });
   const first = (await play({ method: 'GET', path: '/v1/worlds/-1' })).body.waves[0];
   // The first round, then the rest.
   await play({ advance: at(first.arrivesAt) - now().getTime() + 1_000 });

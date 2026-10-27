@@ -1,7 +1,7 @@
 {
   "version": 1,
   "_comment": "The Kalinov Bridge (PLAN.md §10), built in the Holy City in five stages. Each stage needs its cost in resources, drawn from the group's vault (caravans bring resources there), its embers (Svarog's Ember from lairs and ancient sites) and its quests, all done while the stage is open; it then takes buildHours game hours to raise. Each stage and each of its quests carries the story of why the bridge needs it. Quest kinds: site (explore an ancient site), lair (clear a monster lair), unscathed (a wave ends without the Holy City losing Sanctity since the stage began), choke (win a field battle at a choke point), ritual (craft a ritual item from ritualEmbers embers). Every finished stage makes waves powerPerStage bigger (group power). When the fifth stage stands, Ritual Night comes.",
-  "story": "Beyond the Holy City runs the Smorodina, the river of fire between the living world and Nav, and every horde that comes is fed from across it. The Kalinov Bridge is the old way over it: built whole and sealed with the Ritual Arch, it lets the volkhvs close the crossing for good. The hordes know this, and will throw everything at the city on the night the arch is bound.",
+  "story": "Beyond the Holy City the Kalinov Bridge crosses the Smorodina, the river of fire, from Nav to Yav, the living world, and every horde that comes walks over it. The volkhvs mean to raise it on from Yav to Prav, the realm of the gods: once the Ritual Arch joins it to Prav, the gods' light runs down the whole bridge and nothing from Nav can set foot on it again. The hordes know this, and will throw everything at the city on the night the arch is bound.",
   "buildHours": 12,
   "powerPerStage": 0.1,
   "ritualEmbers": 1,
@@ -18,10 +18,10 @@
       "quests": [
         {
           "kind": "site",
-          "story": "Bring back a relic of the old builders from an ancient site: their mark, set in the first stone, lets the foundation lie on the burning bank."
+          "story": "Bring back a relic of the old builders from an ancient site: their mark, set in the first stone, binds the new span to the old bridge's end in Yav."
         }
       ],
-      "story": "The Smorodina can't be bridged on common stone. The old builders left their first stones among the ruins they abandoned, and only stones that remember the old rites will rest on the fire's bank."
+      "story": "A road to Prav can't rise from common stone. The old builders left their first stones among the ruins they abandoned, and only stones that remember the old rites will carry the bridge on from Yav."
     },
     {
       "name": "The Oak Piers",
@@ -38,7 +38,7 @@
           "story": "Clear a monster lair: the volkhvs won't raise an axe in the grove while the beasts are there."
         }
       ],
-      "story": "The piers are cut from the sacred oaks of the grove, but beasts of the North have made their lairs among the roots and nobody can fell a tree while they howl."
+      "story": "The piers that lift the bridge towards Prav are cut from the sacred oaks of the grove, but beasts of the North have made their lairs among the roots and nobody can fell a tree while they howl."
     },
     {
       "name": "The Iron Span",
@@ -59,7 +59,7 @@
           "story": "The ore comes through the passes: hold a pass or a fort on a horde's road, so the smiths know the road can be kept."
         }
       ],
-      "story": "Iron forged under Svarog's eye carries the road over the fire. The forge must burn without break, fed by ore brought in through the passes."
+      "story": "Iron forged under Svarog's eye carries the road up into the sky. The forge must burn without break, fed by ore brought in through the passes."
     },
     {
       "name": "The Guardian Rails",
@@ -80,7 +80,7 @@
           "story": "A rail is quenched in the blood of a beast of the North: clear a lair to give the carvers what they need."
         }
       ],
-      "story": "The rails are carved with the faces of guardians so that nothing from Nav can climb onto the bridge, and every rail must be quenched before it will hold."
+      "story": "The rails are carved with the faces of guardians so that nothing from Nav can climb the new span to Prav, and every rail must be quenched before it will hold."
     },
     {
       "name": "The Ritual Arch",
@@ -94,10 +94,10 @@
       "quests": [
         {
           "kind": "ritual",
-          "story": "Forge the ritual torc from a Svarog's Ember: the volkhvs bind the arch with it, and without it the bridge is only a road for the enemy."
+          "story": "Forge the ritual torc from a Svarog's Ember: the volkhvs bind the arch with it, and without it the new span is only a road into Prav for the enemy."
         }
       ],
-      "story": "The arch at the far end closes the crossing. It is bound with a torc of Svarog's fire, and once it stands, everything beyond the river will come at once: Ritual Night."
+      "story": "The arch at the top of the span opens onto Prav. It is bound with a torc of Svarog's fire, and once it stands, everything in Nav will come at once: Ritual Night."
     }
   ],
   "quests": {
@@ -126,16 +126,16 @@
     "delayHours": 6,
     "sizeFactor": 1.5,
     "checkHours": 1,
-    "story": "With the arch sealed, the volkhvs begin the rite that will close the crossing for good. Every horde in Nav feels it. Tonight they all come at once, from every front, to break the city before the last words are spoken."
+    "story": "With the arch raised, the volkhvs begin the rite that will join the bridge to Prav. Every horde in Nav feels it. Tonight they all come at once, from every front, to break the city before the last words are spoken."
   },
   "endings": {
     "won": {
       "title": "The Kalinov Bridge holds",
-      "story": "The last horde broke against the walls and the rite was finished. The bridge over the Smorodina is sealed, Nav is shut, and the bells of the Holy City ring for the first time in a generation. The old faith lives on, because you held."
+      "story": "The last horde broke against the walls and the rite was finished. The Kalinov Bridge runs from Nav through Yav to Prav, the gods' light holds it end to end, the road from Nav is shut, and the bells of the Holy City ring for the first time in a generation. The old faith lives on, because you held."
     },
     "lost": {
       "title": "The Holy City has fallen",
-      "story": "The walls are breached and the sanctuary fires are out. The hordes pour across the Smorodina unopposed. Some of the people escaped into the forests, carrying the songs with them; perhaps one day they will try again."
+      "story": "The walls are breached and the sanctuary fires are out. The hordes pour over the Kalinov Bridge unopposed. Some of the people escaped into the forests, carrying the songs with them; perhaps one day they will try again."
     }
   }
 }

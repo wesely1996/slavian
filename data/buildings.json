@@ -157,7 +157,7 @@
     },
     "barracks": {
       "name": "Barracks",
-      "description": "Trains soldiers. Each level trains them faster, and higher levels open stronger troops.",
+      "description": "Trains infantry. Each level trains them faster, and higher levels open stronger troops.",
       "maxLevel": 10,
       "cost": {
         "wood": 150,
@@ -167,6 +167,36 @@
       },
       "costGrowth": 1.6,
       "buildSeconds": 150,
+      "timeGrowth": 1.55,
+      "kind": "center"
+    },
+    "stables": {
+      "name": "Stables",
+      "description": "Breeds horses and trains riders. Each level trains them faster, and higher levels open stronger riders.",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 160,
+        "stone": 100,
+        "grain": 120,
+        "iron": 70
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 180,
+      "timeGrowth": 1.55,
+      "kind": "center"
+    },
+    "shooting_range": {
+      "name": "Shooting Range",
+      "description": "Trains archers, skirmishers and throwers. Each level trains them faster, and higher levels open stronger shooters.",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 170,
+        "stone": 90,
+        "grain": 60,
+        "iron": 50
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 160,
       "timeGrowth": 1.55,
       "kind": "center"
     },

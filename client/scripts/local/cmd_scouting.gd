@@ -216,7 +216,7 @@ static func found_village(server: LocalServer, world: Dictionary, village: Dicti
 		return LocalVillage.rule(problem)
 	if not LocalArmies.camp_at(world, cell).is_empty():
 		return LocalVillage.rule("A camp stands there; clear it first")
-	if not LocalArmies.site_at(world, cell).is_empty():
+	if LocalArmies.site_at(world, cell).get("status") == "unexplored":
 		return LocalVillage.rule("An ancient site lies there")
 	if world.expeditions.any(func(e: Dictionary) -> bool: return int(e.q) == cell.x and int(e.r) == cell.y and e.status == "outbound"):
 		return LocalVillage.rule("Settlers are already on their way there")

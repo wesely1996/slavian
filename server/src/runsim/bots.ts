@@ -48,9 +48,9 @@ interface Style {
 }
 
 const STYLES: Record<BotKind, Style> = {
-  turtle: { garrisonBase: 20, garrisonPerDay: 8, villages: 1, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'], wallEvery: 3 },
-  expander: { garrisonBase: 6, garrisonPerDay: 3, villages: 5, buildings: ['barracks', 'settlers_lodge', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy'], wallEvery: 6 },
-  balanced: { garrisonBase: 12, garrisonPerDay: 5, villages: 3, buildings: ['barracks', 'storehouse', 'caravan_yard', 'scout_lodge', 'academy', 'settlers_lodge'], wallEvery: 4 },
+  turtle: { garrisonBase: 20, garrisonPerDay: 8, villages: 1, buildings: ['barracks', 'storehouse', 'shooting_range', 'caravan_yard', 'scout_lodge', 'academy', 'stables'], wallEvery: 3 },
+  expander: { garrisonBase: 6, garrisonPerDay: 3, villages: 5, buildings: ['barracks', 'settlers_lodge', 'storehouse', 'caravan_yard', 'scout_lodge', 'shooting_range', 'academy'], wallEvery: 6 },
+  balanced: { garrisonBase: 12, garrisonPerDay: 5, villages: 3, buildings: ['barracks', 'storehouse', 'shooting_range', 'caravan_yard', 'scout_lodge', 'academy', 'settlers_lodge', 'stables'], wallEvery: 4 },
 };
 
 const FIELDS = ['woodcutter', 'quarry', 'farm', 'iron_mine'];
@@ -143,11 +143,13 @@ export async function playTurn(ctx: TurnContext, bot: Bot): Promise<void> {
       if (await go(() => queueBuildCommand(db, deps, { ...base, building: choice }))) free--;
     }
 
-    // Defenders: spearmen and archers, some horsemen once the barracks allows.
+    // Defenders: spearmen, archers once a shooting range stands, some
+    // horsemen once there are stables.
     const target = style.garrisonBase + style.garrisonPerDay * ctx.day;
     const missing = target - garrisonSize(village);
     if (missing > 0 && (levels.barracks ?? 0) > 0) {
-      const unit = (levels.barracks ?? 0) >= 2 && ctx.day % 3 === 2 ? 'horseman' : ctx.day % 2 === 0 ? 'spearman' : 'archer';
+      const unit =
+        (levels.stables ?? 0) > 0 && ctx.day % 3 === 2 ? 'horseman' : ctx.day % 2 === 1 && (levels.shooting_range ?? 0) > 0 ? 'archer' : 'spearman';
       // As many as half the stores can pay for: building goes on too.
       const cost = deps.data.units.units[unit]!.cost;
       const affordable = Math.min(...KINDS.filter((k) => cost[k] > 0).map((k) => Math.floor((amounts[k] * 0.5) / cost[k])));

@@ -107,6 +107,8 @@ export type UnitFamily = (typeof UNIT_FAMILIES)[number];
 export const STANCES = ['defensive', 'balanced', 'offensive', 'hold_the_line'] as const;
 export type Stance = (typeof STANCES)[number];
 
+const familyMultipliers = z.partialRecord(z.enum(UNIT_FAMILIES), z.number().positive());
+
 const unitSchema = z.object({
   name: z.string(),
   /** What it is for, in a line (the client's unit card). */
@@ -122,6 +124,8 @@ const unitSchema = z.object({
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   carry: z.number().nonnegative(),
+  // Its own counters, in place of its family's (battle.json).
+  counters: familyMultipliers.optional(),
   // A clan's own unit: only that clan trains it.
   clan: z.string().optional(),
 });
@@ -208,7 +212,6 @@ const scoutingFileSchema = z.object({
     .min(1),
 });
 
-const familyMultipliers = z.partialRecord(z.enum(UNIT_FAMILIES), z.number().positive());
 const stanceMultipliers = z.partialRecord(z.enum(STANCES), z.number().positive());
 
 const battleFileSchema = z.object({

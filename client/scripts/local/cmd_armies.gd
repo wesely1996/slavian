@@ -620,7 +620,7 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 		return LocalVillage.rule("There is a fort there already")
 	if not camp_at(world, cell).is_empty():
 		return LocalVillage.rule("A camp stands there; clear it first")
-	if not site_at(world, cell).is_empty():
+	if site_at(world, cell).get("status") == "unexplored":
 		return LocalVillage.rule("An ancient site lies there")
 	var ledger := LocalLedger.spend(village.state.ledger, at, fort_cost(data, village.state.bonuses))
 	if ledger.has("missing"):

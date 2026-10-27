@@ -192,9 +192,11 @@ func set_forts(world_id_: int, new_forts: Array) -> void:
 	forts_changed.emit()
 
 
+## The ancient site still waiting on `cell`; one explored is gone from the
+## land.
 func site_at(cell: Vector2i) -> Dictionary:
 	for site in sites:
-		if Vector2i(int(site.q), int(site.r)) == cell:
+		if Vector2i(int(site.q), int(site.r)) == cell and site.status == "unexplored":
 			return site
 	return {}
 
