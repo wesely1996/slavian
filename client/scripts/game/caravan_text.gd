@@ -6,6 +6,10 @@ extends RefCounted
 static func describe(caravan: Dictionary, village_id: int, now: float) -> String:
 	var outgoing := int(caravan.villageId) == village_id
 	var where := UI.t("the Holy City vault") if caravan.destinationVillageId == null else Game.village_name(caravan.destinationVillageId)
+	if caravan.get("destinationFortId") != null:
+		# A supply route: a fort or supply point (which may be gone by now).
+		var store := Game.fort_at_id(int(caravan.destinationFortId))
+		where = UI.t("the store at (%d, %d)") % [int(store.q), int(store.r)] if not store.is_empty() else UI.t("a store that is gone")
 	var cargo := _load_text(caravan.cargo)
 	if not outgoing:
 		var from := Game.village_name(caravan.villageId)

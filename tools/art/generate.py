@@ -561,6 +561,27 @@ def fort():
     return s
 
 
+def supply_point():
+    """A supply point: an open granary shed on posts, sacks of grain stacked
+    under its thatch and a low fence round it."""
+    s = Svg()
+    soft_shadow(s, 64, 114, 52, 11, 0.35)
+    post = s.lin([(0, "#b07a45"), (1, "#6b4a2c")], 0, 0, 1, 0)
+    for x in (28, 100):
+        s.rect(x - 3, 58, 6, 54, post, sw=2.5)
+    s.poly([(18, 62), (64, 32), (110, 62)], s.lin([(0, P["thatch"][1]), (1, P["thatch"][0])]), sw=3)
+    s.line(30, 56, 98, 56, stroke="#9c7a3a", sw=2, opacity=0.7)
+    sack = s.rad([(0, "#efe0b6"), (0.7, "#cdb27a"), (1, "#9c8452")], 0.4, 0.35, 0.7)
+    for x, y in [(46, 100), (64, 101), (82, 100), (55, 84), (73, 84)]:
+        s.ellipse(x, y, 11, 10, sack, sw=2.5)
+        s.line(x - 4, y - 8, x + 4, y - 8, stroke="#7a5e34", sw=2)
+    for x, y in [(38, 92), (90, 92)]:
+        s.circle(x, y, 2.5, P["gold"][1], stroke="none", sw=0)
+    stakes(s, 14, 40, 114, 10, gap=6)
+    stakes(s, 88, 114, 114, 10, gap=6)
+    return s
+
+
 def outpost():
     s = Svg()
     house(s, 58, 108, 34, 20, roof="wood", wall="wood")
@@ -1835,6 +1856,7 @@ def assets():
     for kind in MILITARY_BUILDINGS:
         for stage in (1, 2, 3):
             out[f"building/{kind}_{stage}"] = building(kind, stage)
+    out["map/supply_point"] = supply_point()
     return out
 
 

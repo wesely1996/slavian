@@ -220,6 +220,14 @@ func camp_at(cell: Vector2i) -> Dictionary:
 	return {}
 
 
+## A fort or supply point by id ({} once it is gone).
+func fort_at_id(id: int) -> Dictionary:
+	for fort in forts:
+		if int(fort.id) == id:
+			return fort
+	return {}
+
+
 func fort_at(cell: Vector2i) -> Dictionary:
 	for fort in forts:
 		if Vector2i(int(fort.q), int(fort.r)) == cell:

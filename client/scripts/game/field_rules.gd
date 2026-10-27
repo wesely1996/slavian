@@ -34,25 +34,36 @@ static func ground(data: Dictionary, terrain: Dictionary, cell: Vector2i, fort: 
 	if is_choke_point(data, terrain, cell):
 		lines.append(UI.t("Choke point: the horde strikes at %d%%; Hold the Line adds +%d%% defense.") % [
 			roundi(float(data.field.choke.attackerFactor) * 100.0), roundi(float(data.field.choke.holdTheLineDefense) * 100.0)])
-	if not fort.is_empty():
+	if not fort.is_empty() and fort.get("kind", "fort") == "supply":
+		lines.append(UI.t("Supply point: armies here fill up from its grain.") if fort.status == "standing" else UI.t("Supply point being built."))
+	elif not fort.is_empty():
 		var bonus := roundi(float(data.field.fort.defenseBonus) * 100.0)
 		lines.append(UI.t("Fort: +%d%% defense.") % bonus if fort.status == "standing" else UI.t("Fort being built (+%d%% defense when done).") % bonus)
+	if not fort.is_empty() and fort.status == "standing":
+		lines.append(UI.t("Grain kept here: %d of %d.") % [floori(float(fort.get("grain", 0))), int(grain_capacity(data, fort.get("kind", "fort")))])
 	if lines.is_empty():
 		lines.append(UI.t("Open ground: no help from the land."))
 	return lines
 
 
-## Why `village` can't build a fort on `cell` ("" if it can).
-static func fort_problem(data: Dictionary, village: Dictionary, cell: Vector2i, terrain_id: String, taken: bool) -> String:
-	var range_ := int(data.field.fort.range)
+## Why `village` can't build a fort (or, with kind "supply", a supply
+## point) on `cell` ("" if it can).
+static func fort_problem(data: Dictionary, village: Dictionary, cell: Vector2i, terrain_id: String, taken: bool, kind := "fort") -> String:
+	var supply := kind == "supply"
+	var range_ := int(data.field.supplyPoint.range if supply else data.field.fort.range)
 	var distance := HexMath.distance(cell, Vector2i(int(village.q), int(village.r)))
 	if distance == 0 or distance > range_:
-		return UI.t("Forts go within %d hexes of %s.") % [range_, village.name]
+		return (UI.t("Supply points go within %d hexes of %s.") if supply else UI.t("Forts go within %d hexes of %s.")) % [range_, village.name]
 	if terrain_id == "holy_city" or data.terrain.terrain.get(terrain_id, {}).get("moveCost") == null:
-		return UI.t("No fort can stand here.")
+		return UI.t("No supply point can stand here.") if supply else UI.t("No fort can stand here.")
 	if taken:
 		return UI.t("Something already stands here.")
 	return ""
+
+
+## The grain a fort or supply point keeps at most (data/field.json).
+static func grain_capacity(data: Dictionary, kind: String) -> float:
+	return float(data.field.supplyPoint.grainCapacity if kind == "supply" else data.field.fort.grainCapacity)
 
 
 ## What a fort costs a village with these bonuses (some clans pay more,

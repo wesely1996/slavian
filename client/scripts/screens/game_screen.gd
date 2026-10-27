@@ -81,6 +81,9 @@ var _train_building := "barracks"
 var _repeat_target := 20
 var _repeat_batch := 5
 var _surplus_share := 80
+## The supply route form: the fort or supply point picked, and how full to keep it.
+var _supply_fort := 0
+var _supply_target := 1000
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
 ## The side tab open on each sheet ("threats", "hero", …), and the page each
@@ -1286,6 +1289,7 @@ func _terrain_panel() -> Array:
 		hold_art = "site/%s" % site.kind
 	parts.append(["hold", hold_art, tr("Send an army"), _hold_panel.bind(id)])
 	parts.append(["fort", "map/fort", tr("Build a fort"), _fort_panel.bind(id)])
+	parts.append(["supply", "map/supply_point", tr("Build a supply point"), _fort_panel.bind(id, "supply")])
 	return parts
 
 
@@ -1448,6 +1452,7 @@ func _caravans_section(village: Dictionary) -> void:
 		tabs.append(["escort", "unit/spearman", tr("Escort"), _caravan_escort.bind(village)])
 	tabs.append(["road", "icon/map", tr("On the road"), _caravan_trips.bind(village_id)])
 	tabs.append(["vault", "settlement/holy_city", tr("Surplus to the vault"), _surplus_order.bind(village_id)])
+	tabs.append(["supply", "map/supply_point", tr("Supply routes"), _supply_order.bind(village_id)])
 	_side_tabs("caravans", tabs, VILLAGE_TOP)
 
 
@@ -1924,7 +1929,8 @@ func _hold_panel(terrain_id: String) -> void:
 			var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
 			recall.custom_minimum_size.x = 150
 			row.add_child(recall)
-		_panel_body.add_child(row))
+		_panel_body.add_child(row)
+		_store_row(army))
 
 	var village_id := int(home.id)
 	_panel_body.add_child(UI.label(tr("Send from %s") % home.name, UI.SMALL_SIZE, UI.MUTED))
@@ -1949,31 +1955,38 @@ func _hold_panel(terrain_id: String) -> void:
 		_move_here_rows(cell)
 
 
-## A fort on the selected open hex, built from your village.
-func _fort_panel(terrain_id: String) -> void:
+## A fort (or, with kind "supply", a supply point) on the selected open
+## hex, built from your village.
+func _fort_panel(terrain_id: String, kind := "fort") -> void:
 	var home := _my_village()
 	var cell := _selected
+	var supply := kind == "supply"
 	if home.is_empty() or terrain_id == "holy_city" or not FieldRules.passable(Game.data, Game.terrain, cell):
 		return
 	if not Game.fort_at(cell).is_empty() or not Game.camp_at(cell).is_empty() or not Game.site_at(cell).is_empty():
 		return
 	var village_id := int(home.id)
-	_panel_body.add_child(UI.label(tr("Build a fort"), UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label(tr("Build a supply point") if supply else tr("Build a fort"), UI.HEADING_SIZE))
 	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty()
-	var problem := FieldRules.fort_problem(Game.data, home, cell, terrain_id, taken)
+	var problem := FieldRules.fort_problem(Game.data, home, cell, terrain_id, taken, kind)
 	if problem != "":
 		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
 		return
-	var cost := FieldRules.fort_cost(Game.data, home.get("bonuses", {}))
-	var seconds := float(Game.data.field.fort.buildSeconds) / float(Game.world.speed)
+	var rules: Dictionary = Game.data.field.supplyPoint if supply else Game.data.field.fort
+	var cost: Dictionary = rules.cost if supply else FieldRules.fort_cost(Game.data, home.get("bonuses", {}))
+	var seconds := float(rules.buildSeconds) / float(Game.world.speed)
 	var row := UI.hbox()
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label(tr("Build a fort (+%d%% defense here)") % roundi(float(Game.data.field.fort.defenseBonus) * 100.0)))
+	if supply:
+		info.add_child(UI.with_info(UI.label(tr("A grain store for armies (%d grain)") % int(rules.grainCapacity)),
+			tr("Armies standing here fill up from its grain, and can leave grain here. A supply route keeps it stocked by caravan. A horde passing close burns it unless an army stands on it.")))
+	else:
+		info.add_child(UI.label(tr("Build a fort (+%d%% defense here)") % roundi(float(Game.data.field.fort.defenseBonus) * 100.0)))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
-	var button := UI.button(tr("Build fort"), func() -> void: _build_fort(village_id, cell))
+	var button := UI.button(tr("Build supply point") if supply else tr("Build fort"), func() -> void: _build_fort(village_id, cell, kind))
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
@@ -1984,9 +1997,9 @@ func _fort_panel(terrain_id: String) -> void:
 		return cost_text)
 
 
-func _build_fort(village_id: int, cell: Vector2i) -> void:
+func _build_fort(village_id: int, cell: Vector2i, kind := "fort") -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/forts" % village_id, {"q": cell.x, "r": cell.y})
+	var response := await Api.post_json("/v1/villages/%d/%s" % [village_id, "supply-points" if kind == "supply" else "forts"], {"q": cell.x, "r": cell.y})
 	if not response.ok:
 		_status.text = response.error
 		return
@@ -2222,6 +2235,24 @@ func _army_orders_row(army: Dictionary) -> void:
 		row.add_child(UI.button(tr("Take on grain"), func() -> void: _army_command(army_id, "resupply", {})))
 	row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
 	_panel_body.add_child(row)
+	_store_row(army)
+
+
+## For your army standing on a fort or supply point: take on grain from
+## its store, or leave half of what it carries there.
+func _store_row(army: Dictionary) -> void:
+	var store := Game.fort_at(ArmyText.held_hex(army))
+	if army.targetVillageId != null or army.get("supply") == null or army.status != "stationed" or store.is_empty() or store.status != "standing":
+		return
+	if army.ownerAccountId == null or int(army.ownerAccountId) != Game.my_account_id():
+		return
+	var army_id := int(army.id)
+	var row := UI.hbox(8)
+	row.add_child(UI.button(tr("Take grain"), func() -> void: _army_command(army_id, "resupply", {})))
+	row.add_child(UI.button(tr("Leave half its grain"), func() -> void:
+		var half := floori(ArmyText.supply_left(Game.data, army, float(Game.world.speed), Game.server_now()) / 2.0)
+		_army_command(army_id, "store", {"grain": maxi(1, half)})))
+	_panel_body.add_child(row)
 
 
 func _army_command(army_id: int, action: String, body: Dictionary) -> void:
@@ -2273,7 +2304,7 @@ func _order_row(order: Dictionary) -> void:
 	var row := UI.hbox()
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label(OrderText.describe(order, Game.data.units.units), UI.SMALL_SIZE))
+	info.add_child(UI.label(OrderText.describe(order, Game.data.units.units, Game.forts), UI.SMALL_SIZE))
 	if order.lastResult != null:
 		info.add_child(UI.label(tr("Last: %s") % order.lastResult, UI.SMALL_SIZE, UI.MUTED))
 	row.add_child(info)
@@ -2338,6 +2369,43 @@ func _surplus_order(village_id: int) -> void:
 	row.add_child(text)
 	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "surplus", "share": _surplus_share / 100.0}))
 	place.custom_minimum_size.x = 110
+	row.add_child(place)
+	_panel_body.add_child(row)
+
+
+## Supply routes: keep one of your forts or supply points stocked with
+## grain from this village, by caravan.
+func _supply_order(village_id: int) -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Supply routes"), UI.HEADING_SIZE),
+		tr("Caravans from this village keep a fort or supply point of yours filled with grain up to the amount you set, whenever at least %d is missing.") % int(Game.data.orders.supplyMinLoad)))
+	for order in Game.orders_of(village_id, "supply"):
+		_order_row(order)
+	var stores: Array = Game.forts.filter(func(f: Dictionary) -> bool:
+		return f.ownerAccountId != null and int(f.ownerAccountId) == Game.my_account_id())
+	if stores.is_empty():
+		_panel_body.add_child(UI.label(tr("Build a fort or a supply point on the map first."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var ids: Array = stores.map(func(f: Dictionary) -> int: return int(f.id))
+	if not _supply_fort in ids:
+		_supply_fort = ids[0]
+	var labels: Array = stores.map(func(f: Dictionary) -> String:
+		return (tr("Supply point at (%d, %d)") if f.get("kind", "fort") == "supply" else tr("Fort at (%d, %d)")) % [int(f.q), int(f.r)])
+	var picker := UI.options(labels, ids.find(_supply_fort))
+	picker.item_selected.connect(func(i: int) -> void:
+		_supply_fort = ids[i]
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	var most := maxi(int(Game.data.field.fort.grainCapacity), int(Game.data.field.supplyPoint.grainCapacity))
+	var row := UI.hbox(8)
+	row.add_child(UI.label(tr("Keep"), UI.SMALL_SIZE))
+	row.add_child(_number_field("supply", _supply_target, int(Game.data.orders.supplyMinLoad), most, func(n: int) -> void: _supply_target = n))
+	var text := UI.label(tr("grain there"), UI.SMALL_SIZE)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var fort_id := _supply_fort
+	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "supply", "fortId": fort_id, "target": _supply_target}))
+	place.custom_minimum_size.x = 110
+	place.disabled = Game.orders_of(village_id, "supply").any(func(o: Dictionary) -> bool: return int(o.fortId) == fort_id)
 	row.add_child(place)
 	_panel_body.add_child(row)
 

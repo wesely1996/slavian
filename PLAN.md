@@ -265,7 +265,10 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - **Attrition** (`data/armies.json`): out of food, it marches 25% slower; 8 game hours later it loses 5% of each unit (rounded up) every hour; after a day without food it is lost. Its general dies, and the hero is carried home wounded.
 - Soldiers can be **dismissed** from a garrison, and a standing army can be **disbanded**.
 
-**Coming next:** supply points, grain left in forts, and caravan supply routes that keep them filled.
+- **Supply points** (`data/field.json`, `supplyPoint`) are built like forts, within 5 hexes of a village and paid from it: grain stores with no walls, keeping up to 6000 grain. **Forts keep grain too** (up to 3000).
+- An army that arrives at or stands on a fort or supply point **fills up from its grain** as it would in a village: on arrival, when its own grain runs out, or when told to take on grain. A standing army there can also **leave grain** from its own supply.
+- **Hordes burn supply points:** one passing within its raid reach of a supply point (built or being built) burns it with all its grain, unless an army stands on it. Forts keep their grain behind their walls (until bandits take an abandoned one).
+- **Supply routes** are a standing order: "keep this fort or supply point stocked to N grain from this village". Every check, it sends the grain missing (counting what is already on the way, at least `orders.supplyMinLoad`) with the caravans at home; what doesn't fit when they arrive comes back.
 
 ---
 
@@ -377,7 +380,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 
 ### 11.2 Queues & standing orders (Q23)
 - **Order queue limit per village** = a number of orders (not a time span) that grows with village size *(tunable: e.g. 3 → 8)*.
-- **Standing orders:** repeat training, auto-rebuild after raid/raze, reinforcement rules, auto-caravan surplus to the vault above a threshold.
+- **Standing orders:** repeat training, auto-rebuild after raid/raze, reinforcement rules, auto-caravan surplus to the vault above a threshold, supply routes that keep a fort or supply point stocked with grain.
 
 ### 11.3 Notifications (Q23)
 - **Push only for:** wave arriving within 6 h, a village/outpost under attack, big build finished, teammate request/delegation.
