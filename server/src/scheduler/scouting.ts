@@ -46,11 +46,11 @@ export const scoutingHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'scouting' });
   },
 
-  async scout_return({ client, world }, event) {
+  async scout_return({ client, data, world }, event) {
     const mission = await loadMission(client, missionPayload.parse(event.payload).missionId);
     if (mission.status !== 'returning') return;
     const village = await loadVillage(client, mission.villageId);
-    await saveVillageState(client, village.id, returnHome(village.state, SCOUT_UNIT, mission.survivors ?? 0));
+    await saveVillageState(client, village.id, returnHome(data, village.state, SCOUT_UNIT, mission.survivors ?? 0, event.dueAt, world.speed));
     await markMissionDone(client, mission.id);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'scouting' });

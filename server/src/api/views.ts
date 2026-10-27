@@ -486,6 +486,11 @@ export function armyView(army: Army) {
     arrivesAt: army.arrivesAt.toISOString(),
     leavesAt: army.leavesAt?.toISOString() ?? null,
     returnsAt: army.returnsAt?.toISOString() ?? null,
+    // Grain carried at supplyAt (null: fed by its home village), and when
+    // the food ran out, once settled.
+    supply: army.supply,
+    supplyAt: army.supplyAt?.toISOString() ?? null,
+    hungrySince: army.hungrySince?.toISOString() ?? null,
   };
 }
 

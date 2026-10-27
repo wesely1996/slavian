@@ -29,7 +29,8 @@ const villagesFirst = (body: () => Promise<void>) => async () => {
 };
 
 // A spearman's grain an hour under Dobrynya, the hero of anyone who doesn't pick.
-const DOBRYNYA_UPKEEP = 10 * (1 + rosterBonuses(loadGameData(), 'dobrynya').upkeep!);
+// A spearman at home, on garrison rations, at world speed 10.
+const DOBRYNYA_UPKEEP = 10 * (1 + rosterBonuses(loadGameData(), 'dobrynya').upkeep!) * loadGameData().armies.supply.garrisonUpkeep;
 
 describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
   let db: Db;
@@ -1012,7 +1013,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await send({ targetVillageId: b.id, units: { spearman: 99 }, orders: 'support' })).body.message).toMatch(/Only 30/);
     const sent = await send({ targetVillageId: b.id, units: { spearman: 20 }, orders: 'support' });
     expect(sent.body.army).toMatchObject({ status: 'marching', orders: 'support', units: { spearman: 20 } });
-    expect((await village(a.id)).away.spearman).toBe(20);
+    // They leave the garrison, with grain from its stores.
+    expect((await village(a.id)).garrison.spearman).toBe(10);
+    expect(sent.body.army.supply).toBeGreaterThan(0);
     now = new Date(sent.body.army.arrivesAt);
     await tick(db, now, scheduler);
     expect((await world()).armies[0]).toMatchObject({ id: sent.body.army.id, status: 'stationed' });
@@ -1383,10 +1386,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(storm.loot.wood).toBeGreaterThan(0);
     expect(w.camps.some((c: { id: number }) => c.id === camp.id)).toBe(false);
     const marching = w.armies.find((a: { id: number }) => a.id === army.body.army.id);
-    expect(marching).toMatchObject({ status: 'returning', loot: storm.loot });
+    // It stands on the camp's hex with the loot until called home.
+    expect(marching).toMatchObject({ status: 'stationed', orders: 'hold', loot: storm.loot });
     expect([0, 1]).toContain(w.embers);
     const before = (await village()).resources.amounts.iron;
-    now = new Date(marching.returnsAt);
+    const called = await call('POST', `/v1/armies/${marching.id}/recall`, bogdan.token);
+    expect(called.body.army.status).toBe('returning');
+    now = new Date(called.body.army.returnsAt);
     await tick(db, now, scheduler);
     expect((await village()).resources.amounts.iron).toBeGreaterThanOrEqual(Math.min(before + storm.loot.iron, (await village()).resources.capacity.iron) - 1);
 
@@ -1498,7 +1504,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
         const kind = w.members.find((m: { accountId: number }) => m.accountId === village.ownerAccountId).heroKind;
         for (const [key, value] of Object.entries(effects)) expect(village.bonuses[key]).toBeCloseTo(value + (rosterBonuses(scheduler.data, kind)[key] ?? 0));
       }
-      expect(w.armies.find((a: { id: number }) => a.id === army.body.army.id).status).toBe('returning');
+      // Searched, the army stands on the site's hex until it is moved or called home.
+      expect(w.armies.find((a: { id: number }) => a.id === army.body.army.id).status).toBe('stationed');
       expect((await send(idol!, { scout: 1 })).body.message).toMatch(/already been explored/);
     } finally {
       Object.assign(finds, saved);

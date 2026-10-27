@@ -5,7 +5,17 @@ import { z, ZodError } from 'zod';
 import { loadPrefs, markAllRead, registerDevice, savePrefs } from '../db/notifications.js';
 import { notifyWorld } from '../db/notify.js';
 import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
-import { buildCrossingCommand, buildFortCommand, buildRoadCommand, recallArmyCommand, sendArmyCommand, setReinforceCommand } from '../commands/armies.js';
+import {
+  buildCrossingCommand,
+  buildFortCommand,
+  buildRoadCommand,
+  disbandArmyCommand,
+  moveArmyCommand,
+  recallArmyCommand,
+  resupplyArmyCommand,
+  sendArmyCommand,
+  setReinforceCommand,
+} from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand } from '../commands/heroes.js';
 import { heroQuestOffers } from '../scheduler/quests.js';
@@ -18,6 +28,7 @@ import {
   demolishCommand,
   foundVillageCommand,
   queueBuildCommand,
+  dismissUnitsCommand,
   renameVillageCommand,
   rebuildCommand,
   sellGearCommand,
@@ -147,12 +158,14 @@ const armyBody = z.object({
   targetVillageId: z.number().int().positive().nullable().default(null),
   target: hexBody.optional(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
-  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore']),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore', 'garrison']),
   withHero: z.boolean().optional(),
   // One of the caller's generals at home in the village leads it.
   generalId: z.number().int().positive().optional(),
 });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
+const armyMoveBody = z.object({ target: hexBody.optional(), villageId: z.number().int().positive().optional() });
+const dismissBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)) });
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
@@ -625,6 +638,36 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     await dismissGeneralCommand(db, scheduler, { accountId: account.id, generalId: id, now: clock() });
     return { ok: true, serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/move', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = armyMoveBody.parse(request.body);
+    const army = await moveArmyCommand(db, scheduler, { accountId: account.id, armyId: id, target: body.target, villageId: body.villageId, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/disband', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const army = await disbandArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/resupply', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const army = await resupplyArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/dismiss', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { units } = dismissBody.parse(request.body);
+    const { village } = await dismissUnitsCommand(db, scheduler, { accountId: account.id, villageId: id, units, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/armies/:id/recall', async (request) => {

@@ -329,6 +329,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 				army.battleId = null
 				army.joinsRound = null
 				army.joinBonus = 0
+				LocalArmies.plan_hunger(server, world, army, at)
 			else:
 				army.status = "done"
 		elif LocalBattle.total(army.units) == 0:

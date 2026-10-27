@@ -76,11 +76,11 @@ export const expeditionHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 
-  async settlers_return({ client, world }, event) {
+  async settlers_return({ client, data, world }, event) {
     const expedition = await loadExpedition(client, expeditionPayload.parse(event.payload).expeditionId);
     if (expedition.status !== 'returning') return;
     const home = await loadVillage(client, expedition.villageId);
-    await saveVillageState(client, home.id, returnHome(home.state, SETTLER, expedition.settlers));
+    await saveVillageState(client, home.id, returnHome(data, home.state, SETTLER, expedition.settlers, event.dueAt, world.speed));
     await markExpeditionDone(client, expedition.id);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: home.id });
     await notifyWorld(client, { worldId: world.id, type: 'expeditions' });

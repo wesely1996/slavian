@@ -9,8 +9,9 @@ static func order_text(order: String) -> String:
 		"reinforce": UI.t("Reinforce: joins the battle there, then comes home."),
 		"harass": UI.t("Harass (mostly cavalry): strikes one round hard, takes few losses, rides home."),
 		"hold": UI.t("Hold: digs in on a hex and fights every horde whose road runs through it."),
-		"clear": UI.t("Clear: storms a camp or lair and carries its loot home."),
-		"explore": UI.t("Explore: fights any guardians, searches the site for some hours and brings home what it finds. Scouts may go too."),
+		"clear": UI.t("Clear: storms a camp or lair and holds its hex with the loot until moved or called home."),
+		"explore": UI.t("Explore: fights any guardians, searches the site for some hours, then holds its hex with what it found. Scouts may go too."),
+		"garrison": UI.t("Garrison: marches into your village and joins its garrison, bringing what grain it has left."),
 	}.get(order, order)
 
 
@@ -31,6 +32,7 @@ static func status(army: Dictionary, target_name: String, now: float) -> String:
 		"hold": UI.t("Marching to hold"),
 		"clear": UI.t("Marching to clear the camp at"),
 		"explore": UI.t("Marching to explore"),
+		"garrison": UI.t("Marching into"),
 	}.get(army.orders, UI.t("Marching to"))
 	match army.status:
 		"marching":
@@ -56,7 +58,7 @@ static func timeline(army: Dictionary, target_name: String, now: float) -> Strin
 	match army.status:
 		"marching":
 			var there := UI.t("At %s in %s") % [target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
-			if army.orders in ["reinforce", "harass", "clear", "explore"]:
+			if army.orders in ["reinforce", "harass"]:
 				return there + UI.t(" · then home, %s on the road") % TimeUtil.format_duration(road)
 			return there + UI.t(" · stays until called home (%s back)") % TimeUtil.format_duration(road)
 		"stationed", "engaged":
@@ -64,6 +66,43 @@ static func timeline(army: Dictionary, target_name: String, now: float) -> Strin
 		"returning":
 			return UI.t("Coming home · back in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)
 	return UI.t("Home")
+
+
+## An army's grain: how long it lasts, or how long it has gone without
+## ("" for an army its home village feeds).
+static func supply_text(data: Dictionary, army: Dictionary, speed: float, now: float) -> String:
+	var out := _out_of_food_at(data, army, speed)
+	if out < 0:
+		return ""
+	if now < out:
+		return UI.t("Grain for %s") % TimeUtil.format_duration(out - now)
+	var a: Dictionary = data.armies.attrition
+	var hours := (now - out) * speed / 3600.0
+	if hours < float(a.lossAfterHours):
+		return UI.t("Out of food: marching slower · men start to die in %s") % TimeUtil.format_duration((float(a.lossAfterHours) - hours) * 3600.0 / speed)
+	return UI.t("Starving: losing men every hour · gone in %s") % TimeUtil.format_duration(maxf(0.0, float(a.lostAfterHours) - hours) * 3600.0 / speed)
+
+
+## Whether an army carrying its own grain has run out of it.
+static func out_of_food(data: Dictionary, army: Dictionary, speed: float, now: float) -> bool:
+	var out := _out_of_food_at(data, army, speed)
+	return out >= 0 and now >= out
+
+
+## When an army's grain runs out, in unix seconds (-1: its village feeds it,
+## or it eats nothing).
+static func _out_of_food_at(data: Dictionary, army: Dictionary, speed: float) -> float:
+	if army.get("supply") == null or army.get("supplyAt") == null or army.status == "done":
+		return -1.0
+	if army.get("hungrySince") != null:
+		return TimeUtil.parse_iso(String(army.hungrySince))
+	var rate := 0.0
+	for unit in army.units:
+		rate += float(data.units.units.get(unit, {}).get("upkeepPerHour", 0)) * int(army.units[unit])
+	rate *= speed
+	if rate <= 0:
+		return -1.0
+	return TimeUtil.parse_iso(String(army.supplyAt)) + float(army.supply) / rate * 3600.0
 
 
 ## Where it is headed: a village's name, or the hex it holds.

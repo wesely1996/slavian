@@ -224,6 +224,14 @@ func _group_power(world: Dictionary, index: int) -> Dictionary:
 			var def: Dictionary = data.units.units.get(unit, {})
 			if def.get("family") in ["infantry", "archers", "cavalry"] and unit != "settler" and int(fed[unit]) > 0:
 				attack += int(fed[unit]) * float(def.get("attack", 0))
+	# Armies out on the map count too.
+	var field: Array = world.armies.filter(func(a: Dictionary) -> bool: return a.status != "done" and LocalArmies.supplied(a))
+	field.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+	for army in field:
+		for unit in army.units:
+			var def: Dictionary = data.units.units.get(unit, {})
+			if def.get("family") in ["infantry", "archers", "cavalry"] and unit != "settler" and int(army.units[unit]) > 0:
+				attack += int(army.units[unit]) * float(def.get("attack", 0))
 	return {"players": world.members.size(), "villages": villages.size(), "armyAttack": attack, "waveIndex": index,
 		"bridgeStages": int(world.bridge.stage) if world.has("bridge") else 0}
 
@@ -343,6 +351,22 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if general.has("ok"):
 			return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
 		return {"status": 200, "data": {"general": LocalGenerals.view(data, general), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply"]:
+		var found := LocalArmies.find_army(world, int(parts[2]))
+		if found.is_empty():
+			return _fail(404, "not_found", "No such army")
+		var moved: Dictionary
+		match parts[3]:
+			"move":
+				moved = LocalArmies.move(self, world, found, body, now)
+			"disband":
+				moved = LocalArmies.disband(self, world, found, now)
+			_:
+				moved = LocalArmies.resupply_command(self, world, found, now)
+		if moved.has("error"):
+			return _rule_answer(moved)
+		changed.append(["world"])
+		return {"status": 200, "data": {"army": LocalArmies.army_view(moved), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "recall":
 		var army := LocalArmies.recall(self, world, int(parts[2]), now)
 		if army.has("error"):
@@ -435,6 +459,22 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					extra = ["got", result.got]
 			"market/sell":
 				result = LocalHeroCommands.sell_gear(self, world, village, String(body.get("item", "")), now)
+			"dismiss":
+				var units: Variant = body.get("units")
+				if not units is Dictionary:
+					return _fail(400, "invalid_request", "Say who to dismiss")
+				var picked := {}
+				for unit in units:
+					if int(units[unit]) > 0:
+						picked[unit] = int(units[unit])
+				if picked.is_empty():
+					return _fail(400, "rule", "Say who to dismiss")
+				for unit in picked:
+					if not data.units.units.has(unit):
+						return _fail(400, "rule", "Unknown unit \"%s\"" % unit)
+				result = {"state": LocalVillage.leave_garrison(data, village.state, picked, now, world.speed)}
+				if result.state.has("error"):
+					return _rule_answer(result.state)
 			"generals":
 				result = LocalGenerals.recruit(self, world, village, now)
 				if result.has("general"):
@@ -796,6 +836,10 @@ func _on_general_ready(world: Dictionary, event: Dictionary, changed: Array) -> 
 func _on_general_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalGenerals.on_general_arrive(self, world, event, changed)
 
+
+
+func _on_army_hunger(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalArmies.on_army_hunger(self, world, event, changed)
 
 
 func _on_army_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1167,6 +1211,8 @@ func _load_all() -> void:
 			world.merge({"generals": []})
 			for a in world.armies:
 				a.merge({"generalId": null})
+				# Armies from before supplies: fed by their home village.
+				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			world.hexes = _by_row(world.hexes)

@@ -818,7 +818,7 @@
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 130,
+       "grain": 265,
        "stone": 300
       },
       "capacity": {
@@ -1051,7 +1051,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 265,
         "stone": 300
        },
        "capacity": {
@@ -3486,7 +3486,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 265,
         "stone": 300
        },
        "capacity": {
@@ -5878,7 +5878,10 @@
      "departsAt": "2026-06-01T11:22:36.000Z",
      "arrivesAt": "2026-06-01T11:23:19.200Z",
      "leavesAt": null,
-     "returnsAt": null
+     "returnsAt": null,
+     "supply": 96,
+     "supplyAt": "2026-06-01T11:22:36.000Z",
+     "hungrySince": null
     },
     "serverTime": "2026-06-01T11:22:36.000Z"
    }
@@ -6072,9 +6075,7 @@
       "garrison": {
        "spearman": 2
       },
-      "away": {
-       "spearman": 0
-      },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -6095,13 +6096,13 @@
        "amounts": {
         "iron": 425,
         "wood": 1000,
-        "grain": 568.1333333333333,
+        "grain": 935.8166666666666,
         "stone": 950
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -6110,7 +6111,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:26:09.600Z"
+       "settledAt": "2026-06-01T11:26:52.800Z"
       }
      }
     ],
@@ -6537,7 +6538,10 @@
       "departsAt": "2026-06-01T11:22:36.000Z",
       "arrivesAt": "2026-06-01T11:23:19.200Z",
       "leavesAt": "2026-06-01T11:26:09.600Z",
-      "returnsAt": "2026-06-01T11:26:52.800Z"
+      "returnsAt": "2026-06-01T11:26:52.800Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:26:52.800Z",
+      "hungrySince": null
      }
     ],
     "forts": [],
@@ -8706,9 +8710,7 @@
       "garrison": {
        "spearman": 2
       },
-      "away": {
-       "spearman": 0
-      },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -8729,13 +8731,13 @@
        "amounts": {
         "iron": 425,
         "wood": 1000,
-        "grain": 568.1333333333333,
+        "grain": 935.8166666666666,
         "stone": 950
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -8744,7 +8746,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:26:09.600Z"
+       "settledAt": "2026-06-01T11:26:52.800Z"
       }
      }
     ],
@@ -9171,7 +9173,10 @@
       "departsAt": "2026-06-01T11:22:36.000Z",
       "arrivesAt": "2026-06-01T11:23:19.200Z",
       "leavesAt": "2026-06-01T11:26:09.600Z",
-      "returnsAt": "2026-06-01T11:26:52.800Z"
+      "returnsAt": "2026-06-01T11:26:52.800Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:26:52.800Z",
+      "hungrySince": null
      }
     ],
     "forts": [],
@@ -11315,9 +11320,7 @@
      "garrison": {
       "spearman": 2
      },
-     "away": {
-      "spearman": 0
-     },
+     "away": {},
      "stance": "balanced",
      "besieged": false,
      "adminUpkeep": 0,
@@ -11338,13 +11341,13 @@
       "amounts": {
        "wood": 750,
        "stone": 800,
-       "grain": 473.8666666666667,
+       "grain": 750,
        "iron": 405
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 292,
+       "grain": 346,
        "stone": 300
       },
       "capacity": {
@@ -11563,9 +11566,7 @@
       "garrison": {
        "spearman": 2
       },
-      "away": {
-       "spearman": 0
-      },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -11586,13 +11587,13 @@
        "amounts": {
         "iron": 405,
         "wood": 750,
-        "grain": 473.8666666666667,
+        "grain": 750,
         "stone": 800
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -12028,7 +12029,10 @@
       "departsAt": "2026-06-01T11:22:36.000Z",
       "arrivesAt": "2026-06-01T11:23:19.200Z",
       "leavesAt": "2026-06-01T11:26:09.600Z",
-      "returnsAt": "2026-06-01T11:26:52.800Z"
+      "returnsAt": "2026-06-01T11:26:52.800Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:26:52.800Z",
+      "hungrySince": null
      }
     ],
     "forts": [],

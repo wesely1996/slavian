@@ -405,6 +405,14 @@ func _test_inbox() -> void:
 func _test_armies() -> void:
 	var defs := {"spearman": {"name": "Spearman"}, "horseman": {"name": "Horseman"}}
 	_check(ArmyText.units_text({"spearman": 20, "horseman": 0}, defs) == "Spearman ×20", "army units text")
+	# An army's grain: a day for 10 spearmen, then hunger.
+	var fed := {"units": {"units": {"spearman": {"upkeepPerHour": 1}}}, "armies": {"attrition": {"lossAfterHours": 8, "lostAfterHours": 24}}}
+	var marching := {"status": "stationed", "units": {"spearman": 10}, "supply": 240, "supplyAt": "2026-03-01T00:00:00.000Z", "hungrySince": null}
+	var t0 := TimeUtil.parse_iso("2026-03-01T00:00:00.000Z")
+	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 6 * 3600) == "Grain for 18h 00m", "army grain: %s" % ArmyText.supply_text(fed, marching, 1.0, t0 + 6 * 3600))
+	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 26 * 3600).begins_with("Out of food: marching slower · men start to die in 6h 00m"), "army out of food")
+	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600) == "Starving: losing men every hour · gone in 14h 00m", "army starving: %s" % ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600))
+	_check(ArmyText.supply_text(fed, {"status": "stationed", "units": {}, "supply": null}, 1.0, t0) == "", "an army its village feeds")
 	var army := {"orders": "support", "status": "stationed", "arrivesAt": "2026-01-01T00:00:00.000Z"}
 	_check(ArmyText.status(army, "Vesna", 0.0) == "Standing guard at Vesna", "army status")
 	var battle := {"rounds": [{"joined": [{"villageId": 3, "orders": "reinforce", "bonus": 0.18}]}, {}]}
@@ -626,7 +634,8 @@ func _test_local_villages() -> void:
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
 ## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
 ## army-scenario.json, expansion-scenario.json, endgame-scenario.json,
-## inbox-scenario.json, ember-scenario.json, generals-scenario.json).
+## inbox-scenario.json, ember-scenario.json, generals-scenario.json,
+## field-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
@@ -638,6 +647,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("inbox-scenario.json", "local inbox")
 	_replay_scenario("ember-scenario.json", "local embers")
 	_replay_scenario("generals-scenario.json", "local generals")
+	_replay_scenario("field-scenario.json", "local field armies")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

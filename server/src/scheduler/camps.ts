@@ -31,7 +31,7 @@ import { emptyResources, mapResources, type Resources } from '../sim/resources.j
 import { receive } from '../sim/logistics.js';
 import { loseAway } from '../sim/village.js';
 import { composeWave, rngFor } from '../sim/waves.js';
-import { armyLosses, sendHome, terrainOf } from './armies.js';
+import { armyLosses, holdHex, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
@@ -265,7 +265,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     );
   }
   if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
-  await sendHome(client, world, after, at, data);
+  // Cleared, the army stands on the camp's hex until it is moved or called home.
+  if (result.cleared && total(after.units) > 0) await holdHex(client, data, world, after, at);
+  else await sendHome(client, world, after, at, data);
   await tell(client, world, army.ownerAccountId, {
     kind: 'battle_result',
     tier: 'digest',

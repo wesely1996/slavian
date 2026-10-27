@@ -57,14 +57,14 @@ export const caravanHandlers: HandlerRegistry = {
   },
 
   // Home again. What doesn't fit in a full storehouse is lost.
-  async caravan_return({ client, world }, event) {
+  async caravan_return({ client, data, world }, event) {
     const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
     if (caravan.status !== 'returning') return;
     const village = await loadVillage(client, caravan.villageId);
-    const received = receive(village.state.ledger, event.dueAt, caravan.carriedBack ?? emptyResources());
-    // Its escort is home too.
+    // Its escort is home too, back on garrison rations.
     let state = village.state;
-    for (const [unit, n] of Object.entries(caravan.escort)) state = returnHome(state, unit, n);
+    for (const [unit, n] of Object.entries(caravan.escort)) state = returnHome(data, state, unit, n, event.dueAt, world.speed);
+    const received = receive(state.ledger, event.dueAt, caravan.carriedBack ?? emptyResources());
     await saveVillageState(client, village.id, { ...state, ledger: received.ledger });
     await markCaravanDone(client, caravan.id);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });

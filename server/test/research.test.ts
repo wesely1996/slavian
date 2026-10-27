@@ -50,7 +50,8 @@ describe('research effects', () => {
     expect(capacity(data, v.plots, { storage: 0.25 }).wood).toBeCloseTo(capacity(data, v.plots).wood * 1.25);
     const fed = { ...v, garrison: { spearman: 10 } };
     const lean = { ...fed, bonuses: { upkeep: -0.5 } };
-    expect(villageRates(data, lean, 1).grain - villageRates(data, fed, 1).grain).toBeCloseTo(5);
+    // Ten spearmen at home eat 5 grain an hour on garrison rations; half of that is saved.
+    expect(villageRates(data, lean, 1).grain - villageRates(data, fed, 1).grain).toBeCloseTo(2.5);
   });
 
   it('speed up building and training', () => {

@@ -217,7 +217,9 @@ static func production_per_hour(data: Dictionary, plots: Dictionary, world_speed
 static func village_rates(data: Dictionary, state: Dictionary, world_speed: float) -> Dictionary:
 	var bonuses := village_bonuses(data, state)
 	var rates := production_per_hour(data, state.plots, world_speed, state.besieged, bonuses)
-	var troops := upkeep_per_hour(data, units_fed(state), world_speed) * maxf(0.0, 1.0 + bonus(bonuses, "upkeep"))
+	# Troops at home and in training on garrison rations, units away in full.
+	var home := upkeep_per_hour(data, all_units(state.garrison, state.training), world_speed) * float(data.armies.supply.garrisonUpkeep)
+	var troops := (home + upkeep_per_hour(data, state.away, world_speed)) * maxf(0.0, 1.0 + bonus(bonuses, "upkeep"))
 	var upkeep := troops + float(state.adminUpkeep) * world_speed
 	rates.grain = rates.grain - upkeep
 	return rates
@@ -759,21 +761,40 @@ static func plunder(state: Dictionary, loot: Dictionary, at: int) -> Dictionary:
 
 ## Sends `count` units away from home (finished training counts as home):
 ## {"error"} when there aren't that many.
-static func send_away(state: Dictionary, unit: String, count: int, at: int) -> Dictionary:
+## Sends `count` units of `unit` away from home (they eat full rations away).
+static func send_away(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float) -> Dictionary:
 	var settled := complete_training(state, at)
 	var home := int(settled.garrison.get(unit, 0))
 	if home < count:
 		return rule("Only %d %s at home" % [home, unit])
+	var ledger: Dictionary = settled.ledger
 	settled.garrison[unit] = home - count
 	settled.away = add_units(settled.away, {unit: count})
+	settled.ledger = LocalLedger.with_rates(ledger, at, village_rates(data, settled, world_speed), ledger.capacity)
 	return settled
 
 
-## Units coming home from a mission.
-static func return_home(state: Dictionary, unit: String, count: int) -> Dictionary:
+## Units leaving the garrison for good, or as a field army (which carries
+## its own grain). Units finished training by `at` count as home.
+static func leave_garrison(data: Dictionary, state: Dictionary, units: Dictionary, at: int, world_speed: float) -> Dictionary:
+	var settled := complete_training(state, at)
+	var garrison: Dictionary = settled.garrison.duplicate()
+	for unit in units:
+		var home := int(garrison.get(unit, 0))
+		if home < int(units[unit]):
+			return rule("Only %d %s at home" % [home, unit])
+		garrison[unit] = home - int(units[unit])
+	settled.garrison = garrison
+	settled.ledger = LocalLedger.with_rates(settled.ledger, at, village_rates(data, settled, world_speed), settled.ledger.capacity)
+	return settled
+
+
+## Units coming home from a mission, back on garrison rations.
+static func return_home(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float) -> Dictionary:
 	var next := state.duplicate(true)
 	next.away[unit] = maxi(0, int(state.away.get(unit, 0)) - count)
 	next.garrison = add_units(state.garrison, {unit: count})
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
 	return next
 
 

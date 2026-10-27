@@ -3,11 +3,11 @@ import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
 import type { GameData } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
-import { inTransaction, type Db } from '../db/pool.js';
+import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
-import { getWorld } from '../db/worlds.js';
+import { getWorld, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
-import { dispatchArmy, sendHome } from '../scheduler/armies.js';
+import { disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
@@ -114,6 +114,52 @@ export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { ac
     await notifyWorld(client, { worldId: army.worldId, type: 'armies' });
     return back;
   });
+}
+
+// A change to one of the caller's armies, with the world locked.
+async function armyCommand<T>(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; armyId: number; now: Date },
+  action: string,
+  apply: (ctx: { client: DbClient; world: World; army: Army }) => Promise<T>,
+): Promise<T> {
+  const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM armies WHERE id = $1', [input.armyId]);
+  if (!rows[0]) throw new NotFoundError('No such army');
+  return withWorld(db, rows[0].world_id, input.now, deps, async (client) => {
+    const army = await loadArmy(client, input.armyId);
+    await authorize(client, {
+      worldId: army.worldId,
+      ownerAccountId: army.ownerAccountId,
+      actorAccountId: input.accountId,
+      at: input.now,
+      action,
+      villageId: army.homeVillageId,
+      refusal: 'Not your army',
+    });
+    const result = await apply({ client, world: await getWorld(client, army.worldId), army });
+    await notifyWorld(client, { worldId: army.worldId, type: 'armies' });
+    return result;
+  });
+}
+
+// Sends a standing army on: to a hex to hold, or into a village.
+export async function moveArmyCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; armyId: number; target?: Hex | undefined; villageId?: number | undefined; now: Date },
+): Promise<Army> {
+  return armyCommand(db, deps, input, 'moved an army', ({ client, world, army }) =>
+    moveArmy(client, deps.data, world, army, { hex: input.target, villageId: input.villageId }, input.now),
+  );
+}
+
+export async function disbandArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'disbanded an army', ({ client, world, army }) => disbandArmy(client, deps.data, world, army, input.now));
+}
+
+export async function resupplyArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'resupplied an army', ({ client, world, army }) => resupplyArmy(client, deps.data, world, army, input.now));
 }
 
 // How a village answers battles nearby.

@@ -31,6 +31,12 @@ export interface Army {
   arrivesAt: Date;
   leavesAt: Date | null;
   returnsAt: Date | null;
+  // Grain carried at supplyAt (null: an army from before supplies, fed by
+  // its home village), when the food ran out, and the next hunger check.
+  supply: number | null;
+  supplyAt: Date | null;
+  hungrySince: Date | null;
+  hungerAt: Date | null;
 }
 
 interface ArmyRow {
@@ -55,6 +61,10 @@ interface ArmyRow {
   arrives_at: Date;
   leaves_at: Date | null;
   returns_at: Date | null;
+  supply: number | null;
+  supply_at: Date | null;
+  hungry_since: Date | null;
+  hunger_at: Date | null;
 }
 
 function fromRow(row: ArmyRow): Army {
@@ -80,6 +90,10 @@ function fromRow(row: ArmyRow): Army {
     arrivesAt: row.arrives_at,
     leavesAt: row.leaves_at,
     returnsAt: row.returns_at,
+    supply: row.supply === null ? null : Number(row.supply),
+    supplyAt: row.supply_at,
+    hungrySince: row.hungry_since,
+    hungerAt: row.hunger_at,
   };
 }
 
@@ -88,12 +102,12 @@ export async function insertArmy(
   a: Pick<
     Army,
     'worldId' | 'ownerAccountId' | 'homeVillageId' | 'targetVillageId' | 'targetQ' | 'targetR' | 'heroAccountId' | 'orders' | 'units' | 'path' | 'departsAt' | 'arrivesAt'
-  > & { generalId?: number | null },
+  > & { generalId?: number | null; supply?: number | null; supplyAt?: Date | null },
 ): Promise<Army> {
   const { rows } = await client.query<ArmyRow>(
     `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at,
-       target_q, target_r, hero_account_id, general_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+       target_q, target_r, hero_account_id, general_id, supply, supply_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
     [
       a.worldId,
       a.ownerAccountId,
@@ -108,6 +122,8 @@ export async function insertArmy(
       a.targetR,
       a.heroAccountId,
       a.generalId ?? null,
+      a.supply ?? null,
+      a.supplyAt ?? null,
     ],
   );
   return fromRow(rows[0]!);
@@ -121,9 +137,32 @@ export async function loadArmy(client: DbClient, id: number): Promise<Army> {
 
 export async function saveArmy(client: DbClient, a: Army): Promise<void> {
   await client.query(
-    `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9
+    `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9,
+       orders = $10, target_village_id = $11, target_q = $12, target_r = $13, path = $14, departs_at = $15, arrives_at = $16,
+       supply = $17, supply_at = $18, hungry_since = $19, hunger_at = $20
      WHERE id = $1`,
-    [a.id, JSON.stringify(a.units), a.status, a.battleId, a.joinsRound, a.joinBonus, a.leavesAt, a.returnsAt, a.loot ? JSON.stringify(a.loot) : null],
+    [
+      a.id,
+      JSON.stringify(a.units),
+      a.status,
+      a.battleId,
+      a.joinsRound,
+      a.joinBonus,
+      a.leavesAt,
+      a.returnsAt,
+      a.loot ? JSON.stringify(a.loot) : null,
+      a.orders,
+      a.targetVillageId,
+      a.targetQ,
+      a.targetR,
+      JSON.stringify(a.path),
+      a.departsAt,
+      a.arrivesAt,
+      a.supply,
+      a.supplyAt,
+      a.hungrySince,
+      a.hungerAt,
+    ],
   );
 }
 
@@ -152,6 +191,12 @@ export async function armiesInBattle(client: DbClient, battleId: number): Promis
 }
 
 // On the road or abroad, plus the latest few that came home.
+// Armies out on the map carrying their own grain (not done), oldest first.
+export async function fieldArmies(client: DbClient, worldId: number): Promise<Army[]> {
+  const { rows } = await client.query<ArmyRow>(`SELECT * FROM armies WHERE world_id = $1 AND status <> 'done' AND supply IS NOT NULL ORDER BY id`, [worldId]);
+  return rows.map(fromRow);
+}
+
 export async function listArmies(client: DbClient, worldId: number, recent = 5): Promise<Army[]> {
   const { rows } = await client.query<ArmyRow>(
     `(SELECT * FROM armies WHERE world_id = $1 AND status <> 'done')

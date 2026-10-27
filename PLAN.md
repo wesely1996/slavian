@@ -258,7 +258,14 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - A general **leads an army** it marches with (beside the hero or alone), or **commands the garrison** of the village it stands in (the best one there). Generals travel between your villages.
 - **Only the hero is wounded:** a general whose side loses a battle is killed.
 
-**Coming next:** field armies that live on the map with their own grain supply and suffer attrition when it runs out (slower first, then losses, finally the whole army), garrisons eating half the grain, dismissing soldiers, then supply points, grain left in forts and caravan supply routes.
+### 6.9 Field armies and supply
+- **Armies live on the map.** One that holds a hex, clears a camp, explores a site or supports a village stays there until it is moved to another hex, marched into a settlement (joining the garrison of your own village) or called home. Reinforcements and harassers still ride home by themselves, and a beaten army retreats home.
+- **Garrisons** (troops at home and in training) eat half their grain upkeep. Units away on errands (scouts, settlers, caravan escorts) eat in full.
+- **An army carries its own grain:** it leaves with 24 game hours of its upkeep from the settlement it leaves (as much as there is), eats full upkeep from it, and its home village no longer feeds it. Any village it reaches or stands in fills it up again; what is left goes into the stores of the village it joins.
+- **Attrition** (`data/armies.json`): out of food, it marches 25% slower; 8 game hours later it loses 5% of each unit (rounded up) every hour; after a day without food it is lost. Its general dies, and the hero is carried home wounded.
+- Soldiers can be **dismissed** from a garrison, and a standing army can be **disbanded**.
+
+**Coming next:** supply points, grain left in forts, and caravan supply routes that keep them filled.
 
 ---
 

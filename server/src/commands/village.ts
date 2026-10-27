@@ -51,6 +51,7 @@ import {
   queueBuild,
   queueTraining,
   sendAway,
+  leaveGarrison,
   type BuildOrder,
   type QueuedBuild,
   type VillageState,
@@ -100,6 +101,21 @@ export async function ownVillageCommand<T>(
     await onboardingStep(client, deps.data, world, village.ownerAccountId, onboarding, input.now);
     return { village: await loadVillage(client, village.id), result };
   });
+}
+
+// Sends soldiers in the caller's village away for good.
+export async function dismissUnitsCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { units: Record<string, number> },
+): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'dismissed soldiers' }, async ({ world, village }) => {
+    const units = Object.fromEntries(Object.entries(input.units).filter(([, n]) => n > 0));
+    if (!Object.keys(units).length) throw new RuleError('Say who to dismiss');
+    for (const unit of Object.keys(units)) if (!deps.data.units.units[unit]) throw new RuleError(`Unknown unit "${unit}"`);
+    return { state: leaveGarrison(deps.data, village.state, units, input.now, world.speed), result: null };
+  });
+  return { village };
 }
 
 export async function queueBuildCommand(
@@ -156,7 +172,7 @@ export async function sendScoutsCommand(
     if (wave.worldId !== world.id) throw new NotFoundError(`Wave ${input.waveId} not found`);
     if (wave.status === 'dispersed' || wave.status === 'defeated') throw new RuleError('That horde has already scattered');
 
-    const state = sendAway(village.state, SCOUT_UNIT, input.count, input.now);
+    const state = sendAway(deps.data, village.state, SCOUT_UNIT, input.count, input.now, world.speed);
     const terrain = await loadLand(client, world.id);
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
@@ -266,7 +282,7 @@ export async function foundVillageCommand(
     const settlers = deps.data.expansion.settlersNeeded;
     let state: VillageState;
     try {
-      state = sendAway(village.state, SETTLER, settlers, input.now);
+      state = sendAway(deps.data, village.state, SETTLER, settlers, input.now, world.speed);
     } catch (error) {
       if (error instanceof NotEnoughUnitsError) throw new RuleError(`Founding a village takes ${settlers} settlers at home`);
       throw error;

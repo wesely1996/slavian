@@ -1719,13 +1719,17 @@ func _armies_section(village: Dictionary) -> void:
 			_tick(line, func() -> String: return ArmyText.status(army, target_name, Game.server_now()))
 		else:
 			line.text = tr("From %s, standing guard here") % from_name
+		if army.get("supply") != null and army.status != "done":
+			var food := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+			info.add_child(food)
+			_tick(food, func() -> String:
+				var hungry := ArmyText.out_of_food(Game.data, army, float(Game.world.speed), Game.server_now())
+				food.add_theme_color_override("font_color", UI.ERROR if hungry else UI.MUTED)
+				return ArmyText.supply_text(Game.data, army, float(Game.world.speed), Game.server_now()))
 		row.add_child(info)
+		_panel_body.add_child(row)
 		if mine and army.status == "stationed":
-			var army_id := int(army.id)
-			var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
-			recall.custom_minimum_size.x = 150
-			row.add_child(recall)
-		_panel_body.add_child(row))
+			_army_orders_row(army))
 
 	var rule: Dictionary = village.get("reinforce", {}) if village.get("reinforce") != null else {}
 	if rule.is_empty():
@@ -1790,6 +1794,8 @@ func _send_troops(village: Dictionary) -> void:
 		if _army_orders == "hold":
 			_army_orders = "support"
 		var kinds := ["support", "reinforce", "harass"]
+		if Game.is_mine(Game.villages.get(_army_to, {})):
+			kinds.append("garrison")
 		var kind_row := UI.hbox(8)
 		for kind in kinds:
 			var b := UI.button(String(kind).capitalize(), func() -> void:
@@ -1939,6 +1945,8 @@ func _hold_panel(terrain_id: String) -> void:
 		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, at_home)
+	if orders == "hold":
+		_move_here_rows(cell)
 
 
 ## A fort on the selected open hex, built from your village.
@@ -2189,6 +2197,59 @@ func _dismiss_general(general_id: int) -> void:
 		_status.text = response.error
 		return
 	Game.set_generals(Game.world_id(), Game.generals.filter(func(g: Dictionary) -> bool: return int(g.id) != general_id))
+
+
+## What a standing army can be told: come home, march into a village, take
+## on grain where it stands, or disband.
+func _army_orders_row(army: Dictionary) -> void:
+	var army_id := int(army.id)
+	var row := UI.hbox(8)
+	var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
+	row.add_child(recall)
+	var places: Array = Game.villages.values().filter(func(v: Dictionary) -> bool:
+		return army.targetVillageId == null or int(v.id) != int(army.targetVillageId))
+	places.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+	if not places.is_empty():
+		var labels := [tr("March into…")]
+		for v in places:
+			labels.append(tr("Join %s") % v.name if Game.is_mine(v) else tr("Guard %s") % v.name)
+		var into := UI.options(labels, 0)
+		into.item_selected.connect(func(i: int) -> void:
+			if i > 0:
+				_army_command(army_id, "move", {"villageId": int(places[i - 1].id)}))
+		row.add_child(into)
+	if army.targetVillageId != null and army.get("supply") != null:
+		row.add_child(UI.button(tr("Take on grain"), func() -> void: _army_command(army_id, "resupply", {})))
+	row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
+	_panel_body.add_child(row)
+
+
+func _army_command(army_id: int, action: String, body: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/armies/%d/%s" % [army_id, action], body)
+	if not response.ok:
+		_status.text = response.error
+
+
+## Your armies standing elsewhere, each with a button to march here and
+## hold this hex.
+func _move_here_rows(cell: Vector2i) -> void:
+	var standing := Game.armies.filter(func(a: Dictionary) -> bool:
+		return a.status == "stationed" and a.get("supply") != null and a.ownerAccountId != null and int(a.ownerAccountId) == Game.my_account_id() and ArmyText.held_hex(a) != cell)
+	if standing.is_empty():
+		return
+	_panel_body.add_child(UI.label(tr("Your armies standing elsewhere"), UI.SMALL_SIZE, UI.MUTED))
+	var defs: Dictionary = Game.data.units.units
+	for army in standing:
+		var army_id := int(army.id)
+		var row := UI.hbox()
+		var text := UI.label(tr("%s · %s") % [ArmyText.units_text(army.units, defs), ArmyText.target_name(army, Game.village_name)], UI.SMALL_SIZE)
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		var go := UI.button(tr("Move here"), func() -> void: _army_command(army_id, "move", {"target": {"q": cell.x, "r": cell.y}}))
+		go.custom_minimum_size.x = 150
+		row.add_child(go)
+		_panel_body.add_child(row)
 
 
 func _recall_army(army_id: int) -> void:
@@ -3333,6 +3394,29 @@ func _garrison_tab(village: Dictionary) -> void:
 			away.erase(unit)
 	if not away.is_empty():
 		_panel_body.add_child(UI.label(tr("Away: %s") % _units_text(away), UI.SMALL_SIZE, UI.MUTED))
+	_dismiss_section(village)
+
+
+## Soldiers sent home to their farms: they stop eating, and are gone.
+func _dismiss_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var home_units := Rules.garrison_at(village, Game.server_now())
+	if BattleText.total(home_units) == 0:
+		return
+	_panel_body.add_child(UI.label(tr("Dismiss soldiers"), UI.SMALL_SIZE, UI.MUTED))
+	_unit_pickers(home_units, true, "dismiss")
+	var go := UI.button(tr("Dismiss"), func() -> void: _dismiss_units(village_id, _picked_units(home_units)))
+	_panel_body.add_child(go)
+
+
+func _dismiss_units(village_id: int, units: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/dismiss" % village_id, {"units": units})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_army_units.clear()
+	Game.update_village(response.data.village)
 
 
 ## Who is in training, and what the village can train, a few to a page.
