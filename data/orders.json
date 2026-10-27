@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Standing orders run on their own every `checkMinutes` game minutes (divided by world speed) for villages that have any: repeat training keeps a unit topped up to a target, rebuild restores raided outposts to the best level they had, surplus sends whatever is above a share of storage to the vault (at least `minSurplus` in total) with the caravans at home, and supply routes keep a fort or supply point of the owner's topped up to a target of grain from the village's stores, sending grain with the caravans at home whenever at least `supplyMinLoad` is missing (counting grain already on the way).",
+  "_comment": "Standing orders run on their own every `checkMinutes` game minutes (divided by world speed) for villages that have any: repeat training keeps a unit topped up to a target, rebuild restores raided outposts to the best level they had, surplus sends whatever is above a share of storage to the vault (at least `minSurplus` in total) with the caravans at home, and supply routes keep a fort or supply point of the owner's topped up to a target of grain from the village's stores, sending grain with the caravans at home (at least `supplyMinLoad` at a time, counting grain already on the way).",
   "checkMinutes": 20,
   "maxPerVillage": 6,
   "minSurplus": 100,

@@ -286,13 +286,15 @@ static func supplied(army: Dictionary) -> bool:
 
 
 ## Notes when hunger next comes for an army and schedules it. An army
-## standing in a village is fed from its stores the moment its grain runs out.
+## standing in a village, or on a fort or supply point, is fed from its
+## stores the moment its grain runs out.
 static func plan_hunger(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
 	var next: Variant = null
 	if supplied(army):
 		var out: Variant = LocalSupply.out_of_food_at(server.data, army, world.speed)
 		var in_village: bool = army.status in ["stationed", "engaged"] and army.targetVillageId != null
-		next = out if in_village and out != null and int(out) > at else LocalSupply.next_check(server.data, army, at, world.speed)
+		var stocked: bool = in_village or (out != null and int(out) > at and not store_here(world, army).is_empty())
+		next = out if stocked and out != null and int(out) > at else LocalSupply.next_check(server.data, army, at, world.speed)
 	army.hungerAt = next
 	if next != null:
 		server.schedule(world, int(next), "army_hunger", {"armyId": army.id})
@@ -308,6 +310,58 @@ static func resupply(server: LocalServer, world: Dictionary, army: Dictionary, v
 	if grain > 0:
 		village.state.ledger = LocalLedger.spend(village.state.ledger, at, _grain_only(grain))
 	plan_hunger(server, world, army, at)
+
+
+## The grain a fort or supply point keeps at most.
+static func grain_capacity(data: Dictionary, kind: String) -> float:
+	return float(data.field.supplyPoint.grainCapacity if kind == "supply" else data.field.fort.grainCapacity)
+
+
+## The standing fort or supply point an army stands on, out in the field ({} if none).
+static func store_here(world: Dictionary, army: Dictionary) -> Dictionary:
+	if army.targetVillageId != null or not army.status in ["stationed", "engaged"]:
+		return {}
+	var fort := fort_at(world, Vector2i(army.targetQ, army.targetR))
+	return fort if not fort.is_empty() and fort.status == "standing" else {}
+
+
+## An army on a fort or supply point takes on what grain it can carry from it.
+static func resupply_from_store(server: LocalServer, world: Dictionary, army: Dictionary, store: Dictionary, at: int) -> void:
+	if not supplied(army):
+		return
+	var grain := minf(LocalSupply.room(server.data, army, at, world.speed), float(store.grain))
+	LocalSupply.add(server.data, army, grain, at, world.speed)
+	if grain > 0:
+		store.grain = float(store.grain) - grain
+	plan_hunger(server, world, army, at)
+
+
+## A standing army on a fort or supply point leaves up to `grain` of its own
+## supply in its stores: the army, or {"error"}.
+static func store_command(server: LocalServer, world: Dictionary, army: Dictionary, body: Dictionary, at: int) -> Dictionary:
+	var data := server.data
+	var grain: Variant = body.get("grain")
+	if not (grain is int or grain is float) or float(grain) != floorf(float(grain)) or float(grain) < 1 or float(grain) > 1000000:
+		return {"error": "Say how much grain to leave", "kind": "invalid"}
+	var refused := _standing(army)
+	if not refused.is_empty():
+		return refused
+	var store := store_here(world, army)
+	if store.is_empty():
+		return LocalVillage.rule("They stand on no fort or supply point")
+	if not supplied(army):
+		return LocalVillage.rule("Their village feeds them")
+	var room := grain_capacity(data, store.get("kind", "fort")) - float(store.grain)
+	if room <= 0:
+		return LocalVillage.rule("Its stores are full")
+	var amount := minf(minf(float(grain), LocalSupply.supply_left(data, army, at, world.speed)), room)
+	if amount <= 0:
+		return LocalVillage.rule("They have no grain to spare")
+	LocalSupply.settle(data, army, at, world.speed)
+	store.grain = float(store.grain) + amount
+	army.supply = float(army.supply) - amount
+	plan_hunger(server, world, army, at)
+	return army
 
 
 ## An army ends in a village of its owner: the troops join the garrison,
@@ -471,15 +525,21 @@ static func disband(server: LocalServer, world: Dictionary, army: Dictionary, at
 	return army
 
 
+## A standing army in a village, or on a fort or supply point, takes on
+## what grain it can from its stores.
 static func resupply_command(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> Dictionary:
 	var refused := _standing(army)
 	if not refused.is_empty():
 		return refused
-	if army.targetVillageId == null:
-		return LocalVillage.rule("They stand in no village")
+	var store := store_here(world, army) if army.targetVillageId == null else {}
+	if army.targetVillageId == null and store.is_empty():
+		return LocalVillage.rule("They stand in no village, fort or supply point")
 	if not supplied(army):
 		return LocalVillage.rule("Their village feeds them")
-	resupply(server, world, army, int(army.targetVillageId), at)
+	if not store.is_empty():
+		resupply_from_store(server, world, army, store, at)
+	else:
+		resupply(server, world, army, int(army.targetVillageId), at)
 	return army
 
 
@@ -491,9 +551,13 @@ static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	changed.append(["world"])
 	var data := server.data
-	# Standing in a village, it eats from the stores.
-	if army.status in ["stationed", "engaged"] and army.targetVillageId != null:
-		resupply(server, world, army, int(army.targetVillageId), at)
+	# Standing in a village, or on a fort or supply point, it eats from the stores.
+	var store := store_here(world, army)
+	if (army.status in ["stationed", "engaged"] and army.targetVillageId != null) or not store.is_empty():
+		if not store.is_empty():
+			resupply_from_store(server, world, army, store, at)
+		else:
+			resupply(server, world, army, int(army.targetVillageId), at)
 		if LocalSupply.supply_left(data, army, at, world.speed) > 0:
 			return
 	var strike := LocalSupply.strikes(data, army, at, world.speed)
@@ -633,6 +697,10 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 			var fort := fort_at(world, Vector2i(army.targetQ, army.targetR))
 			if not fort.is_empty():
 				fort.mannedAt = at
+			# A fort or supply point fills its supply, as a village would.
+			var store := store_here(world, army)
+			if not store.is_empty():
+				resupply_from_store(server, world, army, store, at)
 			intercept_at(server, world, Vector2i(army.targetQ, army.targetR), at)
 			return
 	if army.orders == "garrison":
@@ -791,7 +859,7 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 	for e in world.rivers:
 		rivers[LocalLand.edge_key(e.a, e.b)] = true
 	var fort := fort_at(world, cell)
-	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing",
+	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing" and fort.get("kind", "fort") == "fort",
 		LocalBattles.came_over_river(wave.path if wave.path != null else [], cell, rivers))
 	wave.status = "battling"
 	var defenders := {}
@@ -849,7 +917,7 @@ static func march_on(server: LocalServer, world: Dictionary, wave: Dictionary, c
 	wave.path = late.path
 	wave.arrivesAt = late.arrivesAt
 	world.events = world.events.filter(func(e: Dictionary) -> bool:
-		return not (e.status == "pending" and e.type in ["outpost_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	server.schedule(world, int(late.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, since_spawn)
 	plan_intercepts(server, world, wave, since_spawn + 1)
@@ -862,43 +930,50 @@ static func fort_cost(data: Dictionary, bonuses: Dictionary) -> Dictionary:
 	return LocalVillage.resources(func(kind: String) -> int: return LocalWaves.js_round(float(data.field.fort.cost[kind]) * factor))
 
 
-## Builds a fort near the village: the fort, or {"error"} / {"missing"}.
-static func build_fort(server: LocalServer, world: Dictionary, village: Dictionary, cell: Vector2i, at: int) -> Dictionary:
+## Builds a fort (or a supply point) near the village: the fort, or
+## {"error"} / {"missing"}.
+static func build_fort(server: LocalServer, world: Dictionary, village: Dictionary, cell: Vector2i, at: int, kind := "fort") -> Dictionary:
 	var data := server.data
-	var rules: Dictionary = data.field.fort
+	var rules: Dictionary = data.field.supplyPoint if kind == "supply" else data.field.fort
+	var what := "supply point" if kind == "supply" else "fort"
 	var distance := HexMath.distance(cell, Vector2i(village.q, village.r))
 	if distance == 0 or distance > int(rules.range):
-		return LocalVillage.rule("Forts go within %d hexes of the village" % int(rules.range))
+		return LocalVillage.rule(("Supply points go within %d hexes of the village" if kind == "supply" else "Forts go within %d hexes of the village") % int(rules.range))
 	var terrain: Variant = world.hexes.get(LocalLand.key(cell))
 	if terrain == null or terrain == "holy_city" or data.terrain.terrain[terrain].moveCost == null:
-		return LocalVillage.rule("No fort can stand there")
+		return LocalVillage.rule("No %s can stand there" % what)
 	if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == cell.x and int(v.r) == cell.y):
 		return LocalVillage.rule("There is a village there")
 	for v in world.villages:
 		for plot in LocalVillage.outpost_plots(v.state.plots):
 			if LocalVillage.outpost_hex(plot) == cell:
 				return LocalVillage.rule("There is an outpost there")
-	if not fort_at(world, cell).is_empty():
-		return LocalVillage.rule("There is a fort there already")
+	var there := fort_at(world, cell)
+	if not there.is_empty():
+		return LocalVillage.rule("There is a supply point there already" if there.get("kind", "fort") == "supply" else "There is a fort there already")
 	if not camp_at(world, cell).is_empty():
 		return LocalVillage.rule("A camp stands there; clear it first")
 	if site_at(world, cell).get("status") == "unexplored":
 		return LocalVillage.rule("An ancient site lies there")
-	var ledger := LocalLedger.spend(village.state.ledger, at, fort_cost(data, village.state.bonuses))
+	var cost: Dictionary = data.field.supplyPoint.cost if kind == "supply" else fort_cost(data, village.state.bonuses)
+	var ledger := LocalLedger.spend(village.state.ledger, at, cost)
 	if ledger.has("missing"):
 		return ledger
 	village.state.ledger = ledger
-	var fort := {"id": world.next.fort, "ownerAccountId": village.ownerAccountId, "villageId": village.id, "q": cell.x, "r": cell.y,
-		"status": "building", "completesAt": LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed), "mannedAt": null}
+	var fort := {"id": world.next.fort, "kind": kind, "ownerAccountId": village.ownerAccountId, "villageId": village.id, "q": cell.x, "r": cell.y,
+		"status": "building", "completesAt": LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed), "mannedAt": null, "grain": 0.0}
 	world.next.fort += 1
 	world.forts.append(fort)
 	server.schedule(world, int(fort.completesAt), "fort_complete", {"fortId": fort.id})
+	# Hordes on the march may pass it and burn it.
+	if kind == "supply":
+		LocalHordes.supply_point_placed(server, world, fort, at)
 	return fort
 
 
 static func fort_view(f: Dictionary) -> Dictionary:
-	return {"id": f.id, "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
-		"completesAt": LocalTime.iso(f.completesAt)}
+	return {"id": f.id, "kind": f.get("kind", "fort"), "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
+		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0)}
 
 
 static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -906,6 +981,11 @@ static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dict
 	if fort.is_empty() or fort.status != "building":
 		return
 	fort.status = "standing"
+	changed.append(["world"])
+	if fort.get("kind", "fort") == "supply":
+		LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "build_done", "tier": "digest", "title": "Supply point at ({q}, {r}) finished",
+			"body": "Armies standing there fill up from its grain; supply routes keep it stocked.", "vars": {"q": fort.q, "r": fort.r}}, int(event.dueAt))
+		return
 	_plan_fort_check(server, world, int(fort.id), int(event.dueAt))
 	LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "build_done", "tier": "digest", "title": "Fort at ({q}, {r}) finished",
 		"body": "Armies holding it fight from behind its walls.", "vars": {"q": fort.q, "r": fort.r}}, int(event.dueAt))

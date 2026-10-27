@@ -121,8 +121,9 @@ static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, vil
 	return {}
 
 
-## Outposts within `reach` of a route, with when the horde first comes that
-## close (ms after departure). `outposts`: [{villageId, plot, cell}].
+## Outposts (or supply points) within `reach` of a route, with when the
+## horde first comes that close (ms after departure). `outposts`:
+## [{villageId, plot, cell}] (or [{fortId, cell}]).
 static func raids_along(path: Array, outposts: Array, reach: int, from_ms := 0) -> Array:
 	var raids: Array = []
 	for outpost in outposts:
@@ -359,7 +360,8 @@ static func fear_of(server: LocalServer, world: Dictionary) -> Dictionary:
 	return weighted
 
 
-## Raids on every standing outpost near the rest of a march.
+## Raids on every standing outpost and every supply point near the rest
+## of a march.
 static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary, from_ms: int) -> void:
 	var outposts: Array = []
 	for v in world.villages:
@@ -367,6 +369,29 @@ static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary,
 			if int(v.state.plots[plot].level) > 0:
 				outposts.append({"villageId": v.id, "plot": plot, "cell": LocalVillage.outpost_hex(plot)})
 	schedule_raids(server, world, wave, outposts, from_ms)
+	schedule_supply_raids(server, world, wave, world.forts, from_ms)
+
+
+## A supply point has just been placed: hordes still on the march may pass it.
+static func supply_point_placed(server: LocalServer, world: Dictionary, point: Dictionary, at: int) -> void:
+	var marching: Array = world.waves.filter(func(w: Dictionary) -> bool: return w.status == "marching")
+	marching.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.index) < int(b.index))
+	for wave in marching:
+		schedule_supply_raids(server, world, wave, [point], at - int(wave.spawnAt))
+
+
+static func schedule_supply_raids(server: LocalServer, world: Dictionary, wave: Dictionary, points: Array, from_ms: int) -> void:
+	if wave.path == null:
+		return
+	var targets: Array = []
+	for f in points:
+		if f.get("kind", "fort") == "supply":
+			targets.append({"fortId": f.id, "cell": Vector2i(f.q, f.r)})
+	var reach := int(server.data.enemies.fronts[wave.front].personality.raidReach)
+	for raid in raids_along(wave.path, targets, reach, from_ms):
+		var payload := {"waveId": wave.id, "fortId": raid.fortId}
+		if not server.pending(world, "supply_raid", payload):
+			server.schedule(world, int(wave.spawnAt) + int(raid.atMs), "supply_raid", payload)
 
 
 ## An outpost has just been (re)built: hordes still on the march may pass it.

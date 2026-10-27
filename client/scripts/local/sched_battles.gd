@@ -683,7 +683,7 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 	wave.endsAt = null
 	# Its timetable changed: raids and intercepts planned on the old road go.
 	world.events = world.events.filter(func(e: Dictionary) -> bool:
-		return not (e.status == "pending" and e.type in ["outpost_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	server.schedule(world, int(march.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, since_spawn + 1)
 	LocalArmies.plan_intercepts(server, world, wave, since_spawn + 1)
@@ -815,6 +815,23 @@ static func on_outpost_raid(server: LocalServer, world: Dictionary, event: Dicti
 		"body": "The outpost at ({q}, {r}) is down to level {level}." if int(after.level) > 0 else "The outpost at ({q}, {r}) lies in ruins.",
 		"vars": {"village": village.name, "q": cell.x, "r": cell.y, "level": int(after.level)}}, int(event.dueAt))
 	changed.append(["village", village.id])
+	changed.append(["world"])
+
+
+## A horde comes by a supply point: with no army standing on it, it burns.
+static func on_supply_raid(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var p: Dictionary = event.payload
+	var wave := server.find_wave(world, int(p.waveId))
+	if wave.is_empty() or not wave.status in RAIDING:
+		return
+	var point := LocalArmies.find_fort(world, int(p.fortId))
+	if point.is_empty() or point.get("kind", "fort") != "supply":
+		return
+	if not LocalArmies.armies_holding(world, Vector2i(point.q, point.r), ["stationed", "engaged"]).is_empty():
+		return
+	world.forts.erase(point)
+	LocalInbox.tell(server, world, point.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "A horde burned the supply point at ({q}, {r})",
+		"body": "Its {grain} grain burned with it.", "vars": {"q": point.q, "r": point.r, "grain": floori(float(point.grain))}}, int(event.dueAt))
 	changed.append(["world"])
 
 

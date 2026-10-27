@@ -648,6 +648,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("ember-scenario.json", "local embers")
 	_replay_scenario("generals-scenario.json", "local generals")
 	_replay_scenario("field-scenario.json", "local field armies")
+	_replay_scenario("supply-scenario.json", "local supply")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

@@ -351,7 +351,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if general.has("ok"):
 			return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
 		return {"status": 200, "data": {"general": LocalGenerals.view(data, general), "serverTime": LocalTime.iso(now)}}
-	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply"]:
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply", "store"]:
 		var found := LocalArmies.find_army(world, int(parts[2]))
 		if found.is_empty():
 			return _fail(404, "not_found", "No such army")
@@ -361,6 +361,8 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				moved = LocalArmies.move(self, world, found, body, now)
 			"disband":
 				moved = LocalArmies.disband(self, world, found, now)
+			"store":
+				moved = LocalArmies.store_command(self, world, found, body, now)
 			_:
 				moved = LocalArmies.resupply_command(self, world, found, now)
 		if moved.has("error"):
@@ -399,7 +401,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return {"status": 200, "data": world_view(world, now)}
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
-		if village.ruin != null and not action in ["rebuild", "armies", "forts", "crossings", "roads"]:
+		if village.ruin != null and not action in ["rebuild", "armies", "forts", "supply-points", "crossings", "roads"]:
 			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
 		var result: Dictionary
 		var step := ""
@@ -488,7 +490,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalScouting.found_village(self, world, village, body, now)
 				if result.has("expedition"):
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
-			"armies", "forts", "crossings", "roads":
+			"armies", "forts", "supply-points", "crossings", "roads":
 				return _field_command(world, village, action, body, now, changed)
 			"caravans", "caravans/fetch":
 				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
@@ -537,8 +539,8 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 	match action:
 		"armies":
 			result = LocalArmies.send_army(self, world, village, body, now)
-		"forts":
-			result = LocalArmies.build_fort(self, world, village, Vector2i(int(body.get("q", 0)), int(body.get("r", 0))), now)
+		"forts", "supply-points":
+			result = LocalArmies.build_fort(self, world, village, Vector2i(int(body.get("q", 0)), int(body.get("r", 0))), now, "supply" if action == "supply-points" else "fort")
 		"crossings", "roads":
 			var a: Dictionary = body.get("a", {})
 			var b: Dictionary = body.get("b", {})
@@ -552,7 +554,7 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 	match action:
 		"armies":
 			return {"status": 200, "data": {"army": LocalArmies.army_view(result), "serverTime": LocalTime.iso(now)}}
-		"forts":
+		"forts", "supply-points":
 			return {"status": 200, "data": {"fort": LocalArmies.fort_view(result), "serverTime": LocalTime.iso(now)}}
 	return {"status": 200, "data": world_view(world, now)}
 
@@ -799,6 +801,10 @@ func _on_village_rebuilt(world: Dictionary, event: Dictionary, changed: Array) -
 
 func _on_outpost_raid(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalBattles.on_outpost_raid(self, world, event, changed)
+
+
+func _on_supply_raid(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalBattles.on_supply_raid(self, world, event, changed)
 
 
 func _on_camp_grow(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1215,6 +1221,11 @@ func _load_all() -> void:
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
+			# Worlds saved before supply points and grain in forts.
+			for f in world.forts:
+				f.merge({"kind": "fort", "grain": 0.0})
+			for c in world.caravans:
+				c.merge({"destinationFortId": null})
 			world.hexes = _by_row(world.hexes)
 			for w in world.waves:
 				w.merge({"initial": w.composition.duplicate()})

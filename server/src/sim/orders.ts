@@ -37,11 +37,11 @@ export function validateOrder(data: GameData, order: StandingOrder): StandingOrd
 
 // The grain to send on a supply route now: what the store lacks of
 // `target` (counting what is on the way), trimmed to what the village has
-// and its caravans at home can carry; 0 when too little is missing.
+// and its caravans at home can carry; 0 when that is too little to bother.
 export function supplyLoad(data: GameData, input: { target: number; stored: number; onTheWay: number; capacity: number; grain: number; canCarry: number }): number {
   const missing = Math.floor(Math.min(input.target, input.capacity) - input.stored - input.onTheWay);
-  if (missing < data.orders.supplyMinLoad) return 0;
-  return Math.max(0, Math.min(missing, Math.floor(input.grain), Math.floor(input.canCarry)));
+  const load = Math.min(missing, Math.floor(input.grain), Math.floor(input.canCarry));
+  return load < data.orders.supplyMinLoad ? 0 : load;
 }
 
 // How many to train now to work towards `target`, counting units at home,
