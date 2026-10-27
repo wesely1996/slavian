@@ -1,6 +1,7 @@
 // Caravans on the scheduler: caravan_arrive unloads (or loads, when
 // fetching from the vault) at the far end; caravan_return brings home
 // whatever the caravan carries back. vault_upgrade finishes a vault level.
+// A caravan on a supply route fills a fort or supply point's grain store.
 import { z } from 'zod';
 import { loadCaravan, markCaravanDone, markReturning } from '../db/caravans.js';
 import { notifyWorld } from '../db/notify.js';
@@ -8,6 +9,8 @@ import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
 import { emptyResources } from '../sim/resources.js';
+import { loadFort, setFortGrain } from '../db/forts.js';
+import { grainCapacity } from '../sim/field.js';
 import { tell } from './notices.js';
 import { planAmbushes } from './camps.js';
 import { returnHome } from '../sim/village.js';
@@ -21,7 +24,16 @@ export const caravanHandlers: HandlerRegistry = {
     const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
     if (caravan.status !== 'outbound') return;
     let carriedBack = emptyResources();
-    if (caravan.destinationVillageId === null) {
+    if (caravan.destinationFortId !== null) {
+      // A supply route: grain goes into the store as far as it fits; the
+      // rest (everything, if the store is gone) comes back.
+      const fort = await loadFort(client, caravan.destinationFortId);
+      const room = fort?.status === 'standing' ? Math.max(0, grainCapacity(data, fort.kind) - fort.grain) : 0;
+      const grain = Math.min(room, caravan.cargo.grain);
+      if (fort && grain > 0) await setFortGrain(client, fort.id, fort.grain + grain);
+      carriedBack = { ...caravan.cargo, grain: caravan.cargo.grain - grain };
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+    } else if (caravan.destinationVillageId === null) {
       const vault = await loadVault(client, world.id);
       if (caravan.kind === 'deliver') {
         const stored = store(vault.amounts, vaultCapacity(data, vault.level), caravan.cargo);

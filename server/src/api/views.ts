@@ -291,8 +291,10 @@ export function caravanView(caravan: Caravan) {
   return {
     id: caravan.id,
     villageId: caravan.villageId,
-    // null: the Holy City vault.
+    // null: the Holy City vault (unless destinationFortId names the fort
+    // or supply point it fills).
     destinationVillageId: caravan.destinationVillageId,
+    destinationFortId: caravan.destinationFortId,
     kind: caravan.kind,
     caravans: caravan.caravans,
     cargo: caravan.cargo,
@@ -501,12 +503,15 @@ export async function armiesView(client: DbClient, worldId: number) {
 export function fortView(fort: Fort) {
   return {
     id: fort.id,
+    // 'fort', or 'supply' for a supply point; both keep grain for armies.
+    kind: fort.kind,
     ownerAccountId: fort.ownerAccountId,
     villageId: fort.villageId,
     q: fort.q,
     r: fort.r,
     status: fort.status,
     completesAt: fort.completesAt.toISOString(),
+    grain: fort.grain,
   };
 }
 

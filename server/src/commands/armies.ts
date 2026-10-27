@@ -7,7 +7,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
-import { disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome } from '../scheduler/armies.js';
+import { disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, stockStore } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
@@ -62,6 +62,16 @@ export async function buildFortCommand(db: Db, deps: SchedulerDeps, input: { acc
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a fort', villageId: village.id });
     return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now);
+  });
+}
+
+// Builds a supply point (a grain store for armies) near the caller's village.
+export async function buildSupplyPointCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; villageId: number; cell: Hex; now: Date }): Promise<Fort> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a supply point', villageId: village.id });
+    return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now, 'supply');
   });
 }
 
@@ -160,6 +170,11 @@ export async function disbandArmyCommand(db: Db, deps: SchedulerDeps, input: { a
 
 export async function resupplyArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
   return armyCommand(db, deps, input, 'resupplied an army', ({ client, world, army }) => resupplyArmy(client, deps.data, world, army, input.now));
+}
+
+// A standing army on a fort or supply point leaves grain in its stores.
+export async function stockStoreCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; grain: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'left grain in a store', ({ client, world, army }) => stockStore(client, deps.data, world, army, input.grain, input.now));
 }
 
 // How a village answers battles nearby.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Field battles: an army holding a hex fights any horde whose route crosses it. Ambush: on `ambush.terrain`, with the army in place `ambush.prepMinutes` game minutes before the horde arrives, the defenders' first round hits `ambush.bonus` harder and the horde fights it without its stance. Choke point: a passable hex with at least `choke.minBlockedNeighbors` impassable neighbours; attackers hit `choke.attackerFactor` as hard there, and Hold the Line gains `choke.holdTheLineDefense` defense. River: a horde that crossed a river into the hex it fights in (over a bridge; nothing crosses elsewhere) hits `river.attackerFactor` as hard, at walls or in the field. Forts are built within `fort.range` hexes of a village and give armies holding them `fort.defenseBonus` defense. Bridges are built over a river edge within `bridge.range` hexes of a village (game seconds, divided by world speed); until one stands nothing crosses there, hordes included. Roads are built between two neighbouring hexes within `road.range` of a village; moving along one costs `road.factor` of the terrain, for players and the human hordes alike, but the Monsters of the North keep off them.",
+  "_comment": "Field battles: an army holding a hex fights any horde whose route crosses it. Ambush: on `ambush.terrain`, with the army in place `ambush.prepMinutes` game minutes before the horde arrives, the defenders' first round hits `ambush.bonus` harder and the horde fights it without its stance. Choke point: a passable hex with at least `choke.minBlockedNeighbors` impassable neighbours; attackers hit `choke.attackerFactor` as hard there, and Hold the Line gains `choke.holdTheLineDefense` defense. River: a horde that crossed a river into the hex it fights in (over a bridge; nothing crosses elsewhere) hits `river.attackerFactor` as hard, at walls or in the field. Forts are built within `fort.range` hexes of a village and give armies holding them `fort.defenseBonus` defense; each keeps up to `fort.grainCapacity` grain. Supply points are built like forts (within `supplyPoint.range` hexes, paid from the village, standing after `supplyPoint.buildSeconds`) and keep up to `supplyPoint.grainCapacity` grain, but give no defense. An army that arrives at or stands on a fort or supply point fills up from its grain as it would in a village, and a standing army can leave grain there from its own supply. A horde that passes within its raid reach of a supply point (built or being built) burns it, grain and all, unless an army stands on it; forts keep their grain behind their walls. Bridges are built over a river edge within `bridge.range` hexes of a village (game seconds, divided by world speed); until one stands nothing crosses there, hordes included. Roads are built between two neighbouring hexes within `road.range` of a village; moving along one costs `road.factor` of the terrain, for players and the human hordes alike, but the Monsters of the North keep off them.",
   "ambush": { "terrain": ["forest", "hills", "swamp"], "prepMinutes": 60, "bonus": 0.3 },
   "choke": { "minBlockedNeighbors": 3, "attackerFactor": 0.7, "holdTheLineDefense": 0.3 },
   "river": { "attackerFactor": 0.8 },
@@ -8,7 +8,14 @@
     "range": 4,
     "cost": { "wood": 600, "stone": 900, "grain": 200, "iron": 200 },
     "buildSeconds": 3600,
-    "defenseBonus": 0.3
+    "defenseBonus": 0.3,
+    "grainCapacity": 3000
+  },
+  "supplyPoint": {
+    "range": 5,
+    "cost": { "wood": 300, "stone": 150, "grain": 100, "iron": 0 },
+    "buildSeconds": 1800,
+    "grainCapacity": 6000
   },
   "bridge": {
     "range": 4,

@@ -14,7 +14,7 @@ import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
-import { fortAt, insertFort, loadFort, markFortStanding, type Fort } from '../db/forts.js';
+import { fortAt, insertFort, loadFort, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
 import { campAt } from '../db/camps.js';
 import { siteAt } from '../db/sites.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
@@ -46,7 +46,7 @@ import { finishWave, planFortCheck } from './camps.js';
 import { holdForQuiet } from './waves.js';
 import { bridgeQuest } from './bridge.js';
 import { tell, tellOwner } from './notices.js';
-import { planRaids } from './outposts.js';
+import { planRaids, supplyPointPlaced } from './outposts.js';
 import { record } from '../db/telemetry.js';
 
 export const interceptPayload = z.object({ waveId: z.number().int(), q: z.number().int(), r: z.number().int(), atMs: z.number() });
@@ -100,14 +100,15 @@ export async function interceptAt(client: DbClient, _data: GameData, world: Worl
 export async function cancelPlans(client: DbClient, worldId: number, waveId: number): Promise<void> {
   await client.query(
     `UPDATE scheduled_events SET status = 'done', processed_at = now(), error = 'superseded'
-     WHERE world_id = $1 AND status = 'pending' AND type IN ('outpost_raid', 'field_intercept') AND payload @> $2::jsonb`,
+     WHERE world_id = $1 AND status = 'pending' AND type IN ('outpost_raid', 'supply_raid', 'field_intercept') AND payload @> $2::jsonb`,
     [worldId, JSON.stringify({ waveId })],
   );
 }
 
+// A standing fort (not a supply point) on the hex.
 async function standingFort(client: DbClient, worldId: number, cell: Hex): Promise<Fort | null> {
   const fort = await fortAt(client, worldId, cell.q, cell.r);
-  return fort?.status === 'standing' ? fort : null;
+  return fort?.status === 'standing' && fort.kind === 'fort' ? fort : null;
 }
 
 async function owners(armies: readonly Army[]): Promise<number[]> {
@@ -350,24 +351,27 @@ export function fortCost(data: GameData, bonuses: Record<string, number>): Resou
   return mapResources((kind) => Math.round(data.field.fort.cost[kind] * factor));
 }
 
-// Builds a fort on a hex near the village, paid from its stores.
-export async function buildFort(client: DbClient, data: GameData, world: World, villageId: number, cell: Hex, at: Date): Promise<Fort> {
-  const rules = data.field.fort;
+// Builds a fort (or a supply point) on a hex near the village, paid from its stores.
+export async function buildFort(client: DbClient, data: GameData, world: World, villageId: number, cell: Hex, at: Date, kind: FortKind = 'fort'): Promise<Fort> {
+  const rules = kind === 'supply' ? data.field.supplyPoint : data.field.fort;
+  const what = kind === 'supply' ? 'supply point' : 'fort';
   const village = await loadVillage(client, villageId);
   const distance = hexDistance(cell, hex(village.q, village.r));
-  if (distance === 0 || distance > rules.range) throw new RuleError(`Forts go within ${rules.range} hexes of the village`);
+  if (distance === 0 || distance > rules.range) throw new RuleError(kind === 'supply' ? `Supply points go within ${rules.range} hexes of the village` : `Forts go within ${rules.range} hexes of the village`);
   const terrain = (await terrainOf(client, world.id)).get(`${cell.q},${cell.r}`);
-  if (!terrain || terrain === 'holy_city' || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No fort can stand there');
+  if (!terrain || terrain === 'holy_city' || data.terrain.terrain[terrain].moveCost === null) throw new RuleError(`No ${what} can stand there`);
   const villages = await listVillages(client, world.id);
   if (villages.some((v) => v.q === cell.q && v.r === cell.r)) throw new RuleError('There is a village there');
   const outposts = villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => outpostHex(plot)!));
   if (outposts.some((o) => o.q === cell.q && o.r === cell.r)) throw new RuleError('There is an outpost there');
-  if (await fortAt(client, world.id, cell.q, cell.r)) throw new RuleError('There is a fort there already');
+  const there = await fortAt(client, world.id, cell.q, cell.r);
+  if (there) throw new RuleError(there.kind === 'supply' ? 'There is a supply point there already' : 'There is a fort there already');
   if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
   if ((await siteAt(client, world.id, cell.q, cell.r))?.status === 'unexplored') throw new RuleError('An ancient site lies there');
-  const cost = fortCost(data, village.state.bonuses);
+  const cost = kind === 'supply' ? data.field.supplyPoint.cost : fortCost(data, village.state.bonuses);
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, cost) });
   const fort = await insertFort(client, {
+    kind,
     worldId: world.id,
     ownerAccountId: village.ownerAccountId,
     villageId: village.id,
@@ -377,6 +381,8 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   });
   const payload: FortPayload = { fortId: fort.id };
   await scheduleEvent(client, world.id, fort.completesAt, 'fort_complete', payload);
+  // Hordes on the march may pass it and burn it.
+  if (kind === 'supply') await supplyPointPlaced(client, data, world, fort, at);
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
   return fort;
@@ -466,6 +472,17 @@ export const fieldHandlers: HandlerRegistry = {
     const fort = await loadFort(client, fortPayload.parse(event.payload).fortId);
     if (!fort || fort.status !== 'building') return;
     await markFortStanding(client, fort.id);
+    if (fort.kind === 'supply') {
+      await tell(client, world, fort.ownerAccountId, {
+        kind: 'build_done',
+        tier: 'digest',
+        title: 'Supply point at ({q}, {r}) finished',
+        body: 'Armies standing there fill up from its grain; supply routes keep it stocked.',
+        vars: { q: fort.q, r: fort.r },
+      }, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      return;
+    }
     await planFortCheck(client, data, world, fort.id, event.dueAt);
     await tell(client, world, fort.ownerAccountId, {
       kind: 'build_done',

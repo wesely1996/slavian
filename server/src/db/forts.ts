@@ -1,7 +1,11 @@
 import type { DbClient } from './pool.js';
 
+// A fort, or a supply point (a grain store with no walls).
+export type FortKind = 'fort' | 'supply';
+
 export interface Fort {
   id: number;
+  kind: FortKind;
   worldId: number;
   ownerAccountId: number | null;
   villageId: number | null;
@@ -11,10 +15,13 @@ export interface Fort {
   completesAt: Date;
   // The last time an army held it.
   mannedAt: Date | null;
+  // Grain kept there for armies standing on it.
+  grain: number;
 }
 
 interface FortRow {
   id: number;
+  kind: FortKind;
   world_id: number;
   owner_account_id: number | null;
   village_id: number | null;
@@ -23,11 +30,13 @@ interface FortRow {
   status: 'building' | 'standing';
   completes_at: Date;
   manned_at: Date | null;
+  grain: number;
 }
 
 function fromRow(row: FortRow): Fort {
   return {
     id: row.id,
+    kind: row.kind,
     worldId: row.world_id,
     ownerAccountId: row.owner_account_id,
     villageId: row.village_id,
@@ -36,13 +45,14 @@ function fromRow(row: FortRow): Fort {
     status: row.status,
     completesAt: row.completes_at,
     mannedAt: row.manned_at,
+    grain: row.grain,
   };
 }
 
-export async function insertFort(client: DbClient, f: Pick<Fort, 'worldId' | 'ownerAccountId' | 'villageId' | 'q' | 'r' | 'completesAt'>): Promise<Fort> {
+export async function insertFort(client: DbClient, f: Pick<Fort, 'kind' | 'worldId' | 'ownerAccountId' | 'villageId' | 'q' | 'r' | 'completesAt'>): Promise<Fort> {
   const { rows } = await client.query<FortRow>(
-    `INSERT INTO forts (world_id, owner_account_id, village_id, q, r, completes_at, manned_at) VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING *`,
-    [f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt],
+    `INSERT INTO forts (kind, world_id, owner_account_id, village_id, q, r, completes_at, manned_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $7) RETURNING *`,
+    [f.kind, f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt],
   );
   return fromRow(rows[0]!);
 }
@@ -72,4 +82,8 @@ export async function markFortManned(client: DbClient, id: number, at: Date): Pr
 
 export async function deleteFort(client: DbClient, id: number): Promise<void> {
   await client.query('DELETE FROM forts WHERE id = $1', [id]);
+}
+
+export async function setFortGrain(client: DbClient, id: number, grain: number): Promise<void> {
+  await client.query('UPDATE forts SET grain = $2 WHERE id = $1', [id, grain]);
 }

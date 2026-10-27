@@ -3,7 +3,9 @@
 // (an army out of food losing men, or lost). Battles (battles.ts, field.ts)
 // use the helpers here to fold armies into the defenders and to call in
 // reinforcements. Armies carry their own grain (sim/supply.ts); armies from
-// before that (supply null) are fed by their home village.
+// before that (supply null) are fed by their home village. Forts and supply
+// points keep grain too: an army standing on one fills up from it as it
+// would in a village, and can leave grain there.
 import { loadLand } from '../db/rivers.js';
 import type { Land } from '../sim/land.js';
 import { z } from 'zod';
@@ -35,7 +37,8 @@ import { deliverLoot, stormCamp } from './camps.js';
 import { arriveAtSite } from './sites.js';
 import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
-import { fortAt, markFortManned } from '../db/forts.js';
+import { fortAt, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
+import { grainCapacity } from '../sim/field.js';
 
 export const armyPayload = z.object({ armyId: z.number().int() });
 export type ArmyPayload = z.infer<typeof armyPayload>;
@@ -247,12 +250,48 @@ export async function disbandArmy(client: DbClient, data: GameData, world: World
   return gone;
 }
 
-// A standing army in a village takes on what grain it can from its stores.
+// A standing army in a village, or on a fort or supply point, takes on
+// what grain it can from its stores.
 export async function resupplyArmy(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
   standing(army);
-  if (army.targetVillageId === null) throw new RuleError('They stand in no village');
+  const store = army.targetVillageId === null ? await storeHere(client, army) : null;
+  if (army.targetVillageId === null && !store) throw new RuleError('They stand in no village, fort or supply point');
   if (!supplied(army)) throw new RuleError('Their village feeds them');
-  return resupply(client, data, world, army, army.targetVillageId, at);
+  return store ? resupplyFromStore(client, data, world, army, store, at) : resupply(client, data, world, army, army.targetVillageId!, at);
+}
+
+// A standing army on a fort or supply point leaves up to `grain` of its own
+// supply in its stores (as much as it has, and as fits).
+export async function stockStore(client: DbClient, data: GameData, world: World, army: Army, grain: number, at: Date): Promise<Army> {
+  standing(army);
+  const store = await storeHere(client, army);
+  if (!store) throw new RuleError('They stand on no fort or supply point');
+  const fed = supplied(army);
+  if (!fed) throw new RuleError('Their village feeds them');
+  const room = grainCapacity(data, store.kind) - store.grain;
+  if (room <= 0) throw new RuleError('Its stores are full');
+  const amount = Math.min(grain, supplyLeft(data, fed, at, world.speed), room);
+  if (amount <= 0) throw new RuleError('They have no grain to spare');
+  const settled = settleSupply(data, fed, at, world.speed);
+  await setFortGrain(client, store.id, store.grain + amount);
+  return planHunger(client, data, world, { ...settled, supply: settled.supply - amount }, at);
+}
+
+// The standing fort or supply point an army stands on, out in the field.
+async function storeHere(client: DbClient, army: Army): Promise<Fort | null> {
+  if (army.targetVillageId !== null || (army.status !== 'stationed' && army.status !== 'engaged')) return null;
+  const fort = await fortAt(client, army.worldId, army.targetQ, army.targetR);
+  return fort?.status === 'standing' ? fort : null;
+}
+
+// An army on a fort or supply point takes on what grain it can carry from it.
+async function resupplyFromStore(client: DbClient, data: GameData, world: World, army: Army, store: Fort, at: Date): Promise<Army> {
+  const fed = supplied(army);
+  if (!fed) return army;
+  const grain = Math.min(supplyRoom(data, fed, at, world.speed), store.grain);
+  const settled = addSupply(data, fed, grain, at, world.speed);
+  if (grain > 0) await setFortGrain(client, store.id, store.grain - grain);
+  return planHunger(client, data, world, settled, at);
 }
 
 function grainOnly(grain: number): Resources {
@@ -264,13 +303,15 @@ function supplied(army: Army): (Army & Supplied) | null {
 }
 
 // Saves when hunger next comes for an army and schedules it (nothing while
-// it is fed for good, or carries no supply). An army standing in a village
-// is fed from its stores the moment its own grain runs out.
+// it is fed for good, or carries no supply). An army standing in a village,
+// or on a fort or supply point, is fed from its stores the moment its own
+// grain runs out.
 export async function planHunger(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
   const fed = supplied(army);
   const out = fed ? outOfFoodAt(data, fed, world.speed) : null;
   const inVillage = (army.status === 'stationed' || army.status === 'engaged') && army.targetVillageId !== null;
-  const next = fed ? (inVillage && out && out > at ? out : nextHungerCheck(data, fed, at, world.speed)) : null;
+  const stocked = inVillage || (out !== null && out > at && (await storeHere(client, army)) !== null);
+  const next = fed ? (stocked && out && out > at ? out : nextHungerCheck(data, fed, at, world.speed)) : null;
   const planned: Army = { ...army, hungerAt: next };
   await saveArmy(client, planned);
   if (next) await scheduleEvent(client, world.id, next, 'army_hunger', { armyId: army.id } satisfies ArmyPayload);
@@ -449,9 +490,13 @@ export const armyHandlers: HandlerRegistry = {
       return;
     }
     if (army.orders === 'hold') {
-      await saveArmy(client, { ...army, status: 'stationed' });
+      const stationed: Army = { ...army, status: 'stationed' };
+      await saveArmy(client, stationed);
       const fort = await fortAt(client, world.id, army.targetQ, army.targetR);
       if (fort) await markFortManned(client, fort.id, event.dueAt);
+      // A fort or supply point fills its supply, as a village would.
+      const store = await storeHere(client, stationed);
+      if (store) await resupplyFromStore(client, data, world, stationed, store, event.dueAt);
       await interceptAt(client, data, world, hex(army.targetQ, army.targetR), event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
@@ -492,10 +537,11 @@ export const armyHandlers: HandlerRegistry = {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId).catch(() => null);
     const fed = army && supplied(army);
     if (!army || !fed || army.status === 'done' || !army.hungerAt || army.hungerAt.getTime() !== event.dueAt.getTime()) return;
-    // Standing in a village, it eats from the stores.
+    // Standing in a village, or on a fort or supply point, it eats from the stores.
     let current: Army = army;
-    if ((army.status === 'stationed' || army.status === 'engaged') && army.targetVillageId !== null) {
-      current = await resupply(client, data, world, army, army.targetVillageId, event.dueAt);
+    const store = await storeHere(client, army);
+    if (((army.status === 'stationed' || army.status === 'engaged') && army.targetVillageId !== null) || store) {
+      current = store ? await resupplyFromStore(client, data, world, army, store, event.dueAt) : await resupply(client, data, world, army, army.targetVillageId!, event.dueAt);
       if (supplyLeft(data, supplied(current)!, event.dueAt, world.speed) > 0) return;
     }
     const strike = hungerStrikes(data, supplied(current)!, event.dueAt, world.speed);

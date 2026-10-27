@@ -3,7 +3,6 @@
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { dispatchCaravan } from '../commands/logistics.js';
-import { caravansOut } from '../db/caravans.js';
 import { countVillagesOwned } from '../db/expeditions.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
@@ -13,8 +12,11 @@ import { loadVillage, saveVillageState, type Village } from '../db/villages.js';
 import type { World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { CARAVAN_YARD, caravanCapacity, caravansAt, total } from '../sim/logistics.js';
-import { rebuildTargets, surplusLoad, trainCount, type StandingOrder } from '../sim/orders.js';
-import { amountsAt, InsufficientResourcesError, spend } from '../sim/resources.js';
+import { rebuildTargets, supplyLoad, surplusLoad, trainCount, type StandingOrder } from '../sim/orders.js';
+import { amountsAt, InsufficientResourcesError, mapResources, spend } from '../sim/resources.js';
+import { caravansOut, grainOnTheWay } from '../db/caravans.js';
+import { loadFort } from '../db/forts.js';
+import { grainCapacity } from '../sim/field.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { completeTraining, outpostHex, queueBuild, queueTraining, unitsFed, type VillageState } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -88,6 +90,23 @@ async function runOrder(
   if (yard < 1) throw new RuleError('Build a Caravan Yard first');
   const free = caravansAt(data, yard) - (await caravansOut(client, village.id));
   const capacity = caravanCapacity(data, await effectiveBonuses(client, data, { ...village, state }));
+
+  if (spec.kind === 'supply') {
+    const fort = await loadFort(client, spec.fortId);
+    if (!fort || fort.worldId !== world.id || fort.ownerAccountId !== village.ownerAccountId) throw new RuleError('That fort or supply point is gone');
+    const where = `(${fort.q}, ${fort.r})`;
+    if (fort.status !== 'standing') throw new RuleError(`The store at ${where} is still being built`);
+    const goal = Math.min(spec.target, grainCapacity(data, fort.kind));
+    const onTheWay = await grainOnTheWay(client, fort.id);
+    if (Math.floor(goal - fort.grain - onTheWay) < data.orders.supplyMinLoad) return { state, result: `${goal} grain kept at ${where}` };
+    if (free <= 0) return { state, result: 'All caravans are out' };
+    const grain = supplyLoad(data, { target: spec.target, stored: fort.grain, onTheWay, capacity: grainCapacity(data, fort.kind), grain: amountsAt(state.ledger, at).grain, canCarry: free * capacity });
+    if (grain <= 0) return { state, result: 'Waiting for resources' };
+    const load = mapResources((kind) => (kind === 'grain' ? grain : 0));
+    await dispatchCaravan(client, data, world, { ...village, state }, 'deliver', { destinationVillageId: null, destinationFortId: fort.id, load }, at);
+    return { state: { ...state, ledger: spend(state.ledger, at, load) }, result: `Sent ${grain} grain to ${where}` };
+  }
+
   const load = surplusLoad(data, amountsAt(state.ledger, at), state.ledger.capacity, spec.share, free * capacity);
   if (!load) {
     return { state, result: free > 0 ? `Nothing above ${Math.round(spec.share * 100)}% of storage` : 'All caravans are out' };

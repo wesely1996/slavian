@@ -1,3 +1,4 @@
+import { loadFort } from '../db/forts.js';
 import { deleteOrder, insertOrder, listOrders, type StoredOrder } from '../db/orders.js';
 import { authorize } from '../db/delegations.js';
 import { notifyWorld } from '../db/notify.js';
@@ -39,8 +40,15 @@ export async function placeOrderCommand(
     if (existing.length >= deps.data.orders.maxPerVillage) {
       throw new RuleError(`A village keeps at most ${deps.data.orders.maxPerVillage} standing orders`);
     }
+    if (spec.kind === 'supply') {
+      const fort = await loadFort(client, spec.fortId);
+      if (!fort || fort.worldId !== worldId || fort.ownerAccountId !== village.ownerAccountId) throw new RuleError('No fort or supply point of yours there');
+    }
     const same = existing.find(
-      (o) => o.spec.kind === spec.kind && (spec.kind !== 'train' || (o.spec.kind === 'train' && o.spec.unit === spec.unit)),
+      (o) =>
+        o.spec.kind === spec.kind &&
+        (spec.kind !== 'train' || (o.spec.kind === 'train' && o.spec.unit === spec.unit)) &&
+        (spec.kind !== 'supply' || (o.spec.kind === 'supply' && o.spec.fortId === spec.fortId)),
     );
     if (same) throw new RuleError('This village already has that order; cancel it first');
     const order = await insertOrder(client, { worldId, villageId: village.id, spec, createdAt: input.now });

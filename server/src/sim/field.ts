@@ -76,3 +76,8 @@ export function cameOverRiver(path: readonly { q: number; r: number }[], cell: H
   const i = path.findIndex((s) => s.q === cell.q && s.r === cell.r);
   return i > 0 && rivers.has(edgeKey(path[i - 1]!, cell));
 }
+
+// The grain a fort or supply point keeps at most.
+export function grainCapacity(data: GameData, kind: 'fort' | 'supply'): number {
+  return kind === 'supply' ? data.field.supplyPoint.grainCapacity : data.field.fort.grainCapacity;
+}
