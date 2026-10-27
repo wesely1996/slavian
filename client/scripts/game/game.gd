@@ -12,6 +12,7 @@ signal caravans_changed
 signal expeditions_changed
 signal research_changed
 signal heroes_changed
+signal generals_changed
 signal orders_changed
 signal inbox_changed
 signal armies_changed
@@ -64,6 +65,8 @@ var fear: Dictionary[Vector2i, float] = {}
 var orders: Array = []
 ## Every player's hero (see server heroView).
 var heroes: Array = []
+## Every player's generals (see server generalView).
+var generals: Array = []
 ## Enemy leaders, living and fallen, one alive per front (server leaderView).
 var leaders: Array = []
 ## Which of your villages the screens show (0: the first).
@@ -123,6 +126,7 @@ func set_world(new_world: Dictionary) -> void:
 	expeditions = new_world.get("expeditions", [])
 	research = new_world.get("research", [])
 	heroes = new_world.get("heroes", [])
+	generals = new_world.get("generals", [])
 	leaders = new_world.get("leaders", [])
 	orders = new_world.get("orders", [])
 	armies = new_world.get("armies", [])
@@ -257,6 +261,28 @@ func set_heroes(world_id_: int, new_heroes: Array) -> void:
 		return
 	heroes = new_heroes
 	heroes_changed.emit()
+
+
+func set_generals(world_id_: int, new_generals: Array) -> void:
+	if world_id_ != world_id():
+		return
+	generals = new_generals
+	generals_changed.emit()
+
+
+func my_generals() -> Array:
+	return generals.filter(func(g: Dictionary) -> bool: return int(g.accountId) == my_account_id())
+
+
+## The general commanding a village's garrison: the best at home there.
+func general_at(village_id: int) -> Dictionary:
+	var best: Dictionary = {}
+	for g in generals:
+		if g.status != "home" or g.villageId == null or int(g.villageId) != village_id:
+			continue
+		if best.is_empty() or int(g.level) > int(best.level) or (int(g.level) == int(best.level) and int(g.id) < int(best.id)):
+			best = g
+	return best
 
 
 func my_hero() -> Dictionary:

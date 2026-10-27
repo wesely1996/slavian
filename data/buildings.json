@@ -200,6 +200,21 @@
       "timeGrowth": 1.55,
       "kind": "center"
     },
+    "heroes_hall": {
+      "name": "Hero's Hall",
+      "description": "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and every few levels allow another general.",
+      "maxLevel": 10,
+      "cost": {
+        "wood": 180,
+        "stone": 160,
+        "grain": 100,
+        "iron": 80
+      },
+      "costGrowth": 1.6,
+      "buildSeconds": 200,
+      "timeGrowth": 1.55,
+      "kind": "center"
+    },
     "scout_lodge": {
       "name": "Scout Lodge",
       "description": "Trains scouts, who ride out to see a horde before it arrives.",

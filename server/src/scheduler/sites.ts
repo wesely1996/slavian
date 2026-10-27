@@ -7,6 +7,9 @@ import type { GameData } from '../data/index.js';
 import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
 import { heroWithArmy, loadHero, saveHero, type Hero } from '../db/heroes.js';
+import { generalWithArmy } from '../db/generals.js';
+import { generalBonuses } from '../sim/generals.js';
+import { generalAfterBattle } from './generals.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { addScroll, listScrolls, listSites, loadSite, markExplored, saveGuardians, siteAt, insertSites, type Site } from '../db/sites.js';
@@ -83,7 +86,9 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
   if (total(site.guardians) > 0) {
     const home = await loadVillage(client, army.homeVillageId);
     const hero = await heroWithArmy(client, army.id);
-    const bonuses = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+    const general = await generalWithArmy(client, army.id);
+    const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+    const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     const result = assault(data, {
       army: army.units,
       armyStats: playerStats(data, bonuses, false),
@@ -130,6 +135,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
         at,
       });
     }
+    if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
     await notifyWorld(client, { worldId: world.id, type: 'battles' });
     if (!result.cleared || total(explorers.units) === 0) {
       await sendHome(client, world, explorers, at, data);

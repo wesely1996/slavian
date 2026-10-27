@@ -7,6 +7,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import type { World } from '../db/worlds.js';
 import { gainXp, heroFactor, rollDrop, woundMs } from '../sim/heroes.js';
+import { hallLevelAt } from './generals.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 
@@ -27,7 +28,7 @@ export async function heroAfterBattle(
     const item = rollDrop(data, next, world.seed, result.battleId);
     if (item) next = { ...next, inventory: [...next.inventory, item] };
   } else {
-    const woundedUntil = new Date(result.at.getTime() + woundMs(data, world.speed, hero.kind));
+    const woundedUntil = new Date(result.at.getTime() + woundMs(data, world.speed, hero.kind, await hallLevelAt(client, hero.villageId)));
     next = { ...next, status: 'wounded', woundedUntil };
     const payload: HeroPayload = { accountId: hero.accountId };
     await scheduleEvent(client, world.id, woundedUntil, 'hero_recover', payload);

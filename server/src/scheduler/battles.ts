@@ -28,6 +28,9 @@ import {
 import { amountsAt } from '../sim/resources.js';
 import { breachWalls, completeTraining, joinGarrison, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { heroAt } from '../db/heroes.js';
+import { generalAt } from '../db/generals.js';
+import { generalBonuses } from '../sim/generals.js';
+import { generalAfterBattle } from './generals.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -122,12 +125,15 @@ export const battleHandlers: HandlerRegistry = {
     const state = completeTraining(village.state, at);
 
     const round = battle.round + 1;
-    // The hero standing in the village leads its garrison.
+    // The hero standing in the village leads its garrison, with the general
+    // commanding it.
     const hero = await heroAt(client, village.id);
+    const general = await generalAt(client, village.id);
     // The horde's leader drives it on, hardest against a village they hate.
     const led = await hordeStats(client, data, wave, enemyStats(data, wave.front), village.id);
     const own = againstFront(villageBonuses(data, state), wave.front);
-    const bonuses = hero ? combine(own, heroBonuses(data, hero)) : own;
+    const heroic = hero ? combine(own, heroBonuses(data, hero)) : own;
+    const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     // The garrison fights alongside armies sent to help; armies joining this
     // round bring their pincer or harassment bonus.
     const engaged = await armiesInBattle(client, battle.id);
@@ -321,6 +327,10 @@ export const battleHandlers: HandlerRegistry = {
     if (hero && outcome !== 'ongoing') {
       const kills = total(battle.attackerInitial) - total(attackerNow);
       await heroAfterBattle(client, data, world, hero, { kills, won: outcome !== 'raided', battleId: battle.id, at });
+    }
+    if (general && outcome !== 'ongoing') {
+      const kills = total(battle.attackerInitial) - total(attackerNow);
+      await generalAfterBattle(client, data, world, general, { kills, won: outcome !== 'raided', at });
     }
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'battles' });

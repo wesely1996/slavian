@@ -14,6 +14,7 @@ import { siteHandlers } from './sites.js';
 import { bridgeHandlers } from './bridge.js';
 import { ritualHandlers } from './ritual.js';
 import { heroHandlers } from './heroes.js';
+import { generalHandlers } from './generals.js';
 import { questHandlers } from './quests.js';
 import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
@@ -82,6 +83,7 @@ export const handlers: HandlerRegistry = {
   ...expeditionHandlers,
   ...researchHandlers,
   ...heroHandlers,
+  ...generalHandlers,
   ...questHandlers,
   ...orderHandlers,
   ...noticeHandlers,

@@ -168,7 +168,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
+	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
 	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
@@ -626,7 +626,7 @@ func _test_local_villages() -> void:
 ## Hordes setting out, battles and what follows (data/fixtures/wave-scenario.json,
 ## battle-scenario.json, raze-scenario.json, logistics-scenario.json,
 ## army-scenario.json, expansion-scenario.json, endgame-scenario.json,
-## inbox-scenario.json, ember-scenario.json).
+## inbox-scenario.json, ember-scenario.json, generals-scenario.json).
 func _test_local_waves() -> void:
 	_replay_scenario("wave-scenario.json", "local waves")
 	_replay_scenario("battle-scenario.json", "local battles")
@@ -637,6 +637,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("endgame-scenario.json", "local endgame")
 	_replay_scenario("inbox-scenario.json", "local inbox")
 	_replay_scenario("ember-scenario.json", "local embers")
+	_replay_scenario("generals-scenario.json", "local generals")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -979,6 +980,10 @@ func _test_walls() -> void:
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
 	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
 	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2h 00m earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
+	# A Hero's Hall keeps one general, and one more every two levels.
+	var heroes := {"heroes": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("heroes.json")))}
+	_check(GeneralText.limit(heroes, [1]) == 1 and GeneralText.limit(heroes, [3]) == 2 and GeneralText.limit(heroes, [9]) == 5 and GeneralText.limit(heroes, [1, 2, 0]) == 2, "generals a Hall keeps")
+	_check(GeneralText.hall_gives(heroes, 3) == "keeps 2 generals · the hero heals 24% faster", "a Hall's level: %s" % GeneralText.hall_gives(heroes, 3))
 	# The warning is in game hours, which pass 10 times faster in a speed-10 world.
 	_check(WallText.tower_effect(data, "watchtower", 2, 10.0).begins_with("Warns of a horde 12m 00s earlier."), "watchtower effect at speed 10: %s" % WallText.tower_effect(data, "watchtower", 2, 10.0))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")

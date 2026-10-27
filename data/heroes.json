@@ -9,6 +9,20 @@
     "growth": 1.35
   },
   "dropChance": 0.4,
+  "generals": {
+    "_comment": "Generals (voivodes): lesser heroes recruited at a Hero's Hall. They have levels but no skills, gear or quests. A general leads an army it marches with, or commands the garrison of the village it stands in (the highest-level general at home there); `effectsPerLevel` x its level adds to the research effects of those troops, alongside the hero's. XP comes from enemies killed in its battles (level L needs levelXp.base x growth^(L-1) to reach L+1). Only the hero is wounded: a general whose side loses a battle is killed. Recruiting costs `cost` x costGrowth^(generals the player already has) and takes recruitHours game hours. A player may have `perHall` generals for each Hero's Hall plus one more every `hallLevelsPerGeneral` levels of it. Each Hero's Hall level cuts the time the hero spends wounded in that village by `hallRecoveryPerLevel`.",
+    "names": ["Radoslav", "Vyshata", "Putyata", "Svenald", "Pretich", "Volchy Khvost", "Blud", "Dobrogost", "Gostomysl", "Zhiroslav", "Velimir", "Rogvolod", "Tverdislav", "Ostromir", "Miroslava", "Dobrava"],
+    "speed": 6,
+    "maxLevel": 10,
+    "levelXp": { "base": 40, "growth": 1.4 },
+    "effectsPerLevel": { "attack.all": 0.02, "defense.all": 0.02 },
+    "cost": { "wood": 250, "stone": 200, "grain": 250, "iron": 100 },
+    "costGrowth": 1.5,
+    "recruitHours": 2,
+    "perHall": 1,
+    "hallLevelsPerGeneral": 2,
+    "hallRecoveryPerLevel": 0.08
+  },
   "names": [
     "Dobrynya",
     "Ilya",

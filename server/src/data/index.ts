@@ -370,6 +370,20 @@ const heroesFileSchema = z.object({
   maxLevel: z.number().int().positive(),
   levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
   dropChance: z.number().min(0).max(1),
+  // Lesser heroes recruited at a Hero's Hall (sim/generals.ts).
+  generals: z.object({
+    names: z.array(z.string()).min(1),
+    speed: z.number().positive(),
+    maxLevel: z.number().int().positive(),
+    levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
+    effectsPerLevel: effectsSchema,
+    cost: resourcesSchema,
+    costGrowth: z.number().min(1),
+    recruitHours: z.number().positive(),
+    perHall: z.number().int().min(0),
+    hallLevelsPerGeneral: z.number().int().positive(),
+    hallRecoveryPerLevel: z.number().min(0).max(0.1),
+  }),
   names: z.array(z.string()).min(1),
   branches: z.record(z.string(), z.string()),
   skills: z.record(
@@ -815,6 +829,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     if (buildings[field]?.kind !== 'field') throw new Error(`Village field "${field}" is not a field building`);
   }
   if (!buildings.academy.research) throw new Error('buildings.json: the academy needs its research per hour');
+  if (buildings.heroes_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "heroes_hall"');
   if (buildings.market?.kind !== 'center') throw new Error('buildings.json needs a center building "market"');
   for (const [id, def] of Object.entries(buildings)) {
     for (const needed of Object.keys(def.requires ?? {})) {

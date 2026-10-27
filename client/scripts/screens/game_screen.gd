@@ -72,6 +72,8 @@ var _army_units: Dictionary[String, int] = {}
 var _army_orders := "support"
 ## Hold form: whether your hero leads the army.
 var _army_hero := false
+## The general picked to lead the next army sent (0: none).
+var _army_general := 0
 ## Standing order forms: repeat training and the surplus share.
 var _repeat_unit := "spearman"
 ## The training building whose troops the Train tab shows.
@@ -122,6 +124,7 @@ func _ready() -> void:
 	Live.expeditions_updated.connect(Game.set_expeditions)
 	Live.research_updated.connect(Game.set_research)
 	Live.heroes_updated.connect(Game.set_heroes)
+	Live.generals_updated.connect(Game.set_generals)
 	Live.orders_updated.connect(Game.set_orders)
 	Live.inbox_updated.connect(Game.set_inbox)
 	Live.armies_updated.connect(Game.set_armies)
@@ -131,6 +134,7 @@ func _ready() -> void:
 	Game.inbox_changed.connect(_on_inbox_changed)
 	Game.orders_changed.connect(_on_waves_changed)
 	Game.heroes_changed.connect(_on_waves_changed)
+	Game.generals_changed.connect(_on_waves_changed)
 	Game.research_changed.connect(_on_waves_changed)
 	Game.expeditions_changed.connect(_on_waves_changed)
 	Game.caravans_changed.connect(_on_waves_changed)
@@ -170,6 +174,7 @@ func _exit_tree() -> void:
 	Live.expeditions_updated.disconnect(Game.set_expeditions)
 	Live.research_updated.disconnect(Game.set_research)
 	Live.heroes_updated.disconnect(Game.set_heroes)
+	Live.generals_updated.disconnect(Game.set_generals)
 	Live.orders_updated.disconnect(Game.set_orders)
 	Live.inbox_updated.disconnect(Game.set_inbox)
 	Live.armies_updated.disconnect(Game.set_armies)
@@ -1797,9 +1802,12 @@ func _send_troops(village: Dictionary) -> void:
 		_panel_body.add_child(kind_row)
 		body = {"targetVillageId": _army_to, "orders": _army_orders}
 	_unit_pickers(home_units, false, "send")
+	_general_picker(village_id)
 	var go := UI.button(tr("Send"), func() -> void:
 		var order := body.duplicate()
 		order.units = _picked_units(home_units)
+		if _ready_general(village_id) > 0:
+			order.generalId = _ready_general(village_id)
 		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, home_units)
@@ -1867,6 +1875,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	_army_units.clear()
 	_forget_drafts(["units:", "send:", "escort:"])
 	_army_hero = false
+	_army_general = 0
 	Game.note_server_time(response.data.serverTime)
 
 
@@ -1922,8 +1931,12 @@ func _hold_panel(terrain_id: String) -> void:
 			_army_hero = not _army_hero
 			_rebuild_panel())
 		_panel_body.add_child(lead)
+	_general_picker(village_id)
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
-		_send_army(village_id, {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready}))
+		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready}
+		if _ready_general(village_id) > 0:
+			order.generalId = _ready_general(village_id)
+		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, at_home)
 
@@ -2071,6 +2084,111 @@ func _build_crossing(village_id: int, a: Vector2i, b: Vector2i) -> void:
 		_status.text = response.error
 		return
 	Game.set_world(response.data)
+
+
+# --- Generals -------------------------------------------------------------------
+
+## Your generals ready in a village, and a choice of which leads the next
+## army (or none).
+func _general_picker(village_id: int) -> void:
+	var ready := Game.my_generals().filter(func(g: Dictionary) -> bool: return g.status == "home" and g.villageId != null and int(g.villageId) == village_id)
+	if ready.is_empty():
+		return
+	var labels := [tr("No general")]
+	var selected := 0
+	for i in ready.size():
+		labels.append(tr("%s (Lv %d) leads it") % [ready[i].name, int(ready[i].level)])
+		if int(ready[i].id) == _army_general:
+			selected = i + 1
+	var picker := UI.options(labels, selected)
+	picker.item_selected.connect(func(i: int) -> void: _army_general = 0 if i == 0 else int(ready[i - 1].id))
+	_panel_body.add_child(picker)
+
+
+## The picked general, if still ready in the village (0: none).
+func _ready_general(village_id: int) -> int:
+	for g in Game.my_generals():
+		if int(g.id) == _army_general and g.status == "home" and g.villageId != null and int(g.villageId) == village_id:
+			return _army_general
+	return 0
+
+
+## The Hero's Hall: your generals, where they are, and recruiting another.
+func _generals_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var mine := Game.my_generals()
+	var halls := Game.my_villages().map(func(v: Dictionary) -> int: return int(v.get("levels", {}).get("heroes_hall", 0)))
+	var keeps := GeneralText.limit(Game.data, halls)
+	_panel_body.add_child(UI.label(tr("Generals: %d of %d") % [mine.size(), keeps], UI.SMALL_SIZE + 2))
+	_panel_body.add_child(UI.label(tr("A general leads an army it marches with, or commands the garrison of the village it stands in. A general whose side loses a battle is killed."), UI.SMALL_SIZE, UI.MUTED))
+	var places := Game.my_villages()
+	for general in mine:
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var xp := tr("Lv %d · %d/%d XP") % [int(general.level), int(general.xp), int(general.xpToNext)] if general.get("xpToNext") != null else tr("Lv %d") % int(general.level)
+		info.add_child(UI.label(tr("%s · %s · %s") % [general.name, xp, GeneralText.bonuses(general)], UI.SMALL_SIZE))
+		var where := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		info.add_child(where)
+		var place := Game.village_name(general.villageId)
+		_tick(where, func() -> String: return GeneralText.whereabouts(general, place, Game.server_now()))
+		row.add_child(info)
+		var general_id := int(general.id)
+		if general.status == "home" and places.size() > 1:
+			var others := places.filter(func(v: Dictionary) -> bool: return general.villageId == null or int(v.id) != int(general.villageId))
+			var to := UI.options(others.map(func(v: Dictionary) -> String: return tr("Send to %s") % v.name), 0)
+			to.item_selected.connect(func(i: int) -> void: _move_general(general_id, int(others[i].id)))
+			row.add_child(to)
+		if general.status != "with_army":
+			var dismiss := UI.button(tr("Dismiss"), func() -> void: _dismiss_general(general_id))
+			dismiss.custom_minimum_size.x = 130
+			row.add_child(dismiss)
+		_panel_body.add_child(row)
+	var cost := GeneralText.recruit_cost(Game.data, mine.size())
+	var row := UI.hbox()
+	var cost_line := UI.rich()
+	cost_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(cost_line)
+	var recruit := UI.primary(tr("Recruit"), func() -> void: _recruit_general(village_id))
+	recruit.custom_minimum_size.x = 160
+	row.add_child(recruit)
+	_panel_body.add_child(row)
+	var full := mine.size() >= keeps
+	var wait := TimeUtil.format_duration(float(Game.data.heroes.generals.recruitHours) * 3600.0 / float(Game.world.speed))
+	var text := tr("A general: %s · %s") % [UI.costs(cost), wait]
+	_tick(cost_line, func() -> String:
+		var home: Dictionary = Game.villages.get(village_id, village)
+		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+		recruit.disabled = full or not affordable
+		return text + (tr("  (raise a Hero's Hall for more)") if full else ""))
+
+
+func _recruit_general(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/generals" % village_id, {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.update_village(response.data.village)
+	Game.set_generals(Game.world_id(), Game.generals + [response.data.general])
+
+
+func _move_general(general_id: int, village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/generals/%d/move" % general_id, {"villageId": village_id})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_generals(Game.world_id(), Game.generals.map(func(g: Dictionary) -> Dictionary: return response.data.general if int(g.id) == general_id else g))
+
+
+func _dismiss_general(general_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/generals/%d/dismiss" % general_id, {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_generals(Game.world_id(), Game.generals.filter(func(g: Dictionary) -> bool: return int(g.id) != general_id))
 
 
 func _recall_army(army_id: int) -> void:
@@ -2921,6 +3039,8 @@ func _plot_section(village: Dictionary) -> void:
 		_build_row(village, _plot, building, target, tr("Build") if level == 0 and int(planned.level) == 0 else tr("Upgrade"))
 	if building == "market" and level > 0:
 		_market_section(village, level)
+	if building == "heroes_hall" and level > 0:
+		_generals_section(village)
 	_demolish_row(village, building, level)
 	if building == Rules.HALL:
 		_abandon_row(village)
@@ -3141,6 +3261,9 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 		var resource: String = def.production.resource
 		return tr("%s +%d/h now, +%d/h at level %d") % [UI.resource_name(resource),
 			roundi(Rules.field_production(def, level, speed)), roundi(Rules.field_production(def, level + 1, speed)), level + 1]
+	if building == "heroes_hall":
+		var text := GeneralText.hall_gives(Game.data, level)
+		return text.left(1).to_upper() + text.substr(1) + (tr("; level %d: %s") % [level + 1, GeneralText.hall_gives(Game.data, level + 1)] if level < int(def.maxLevel) else "")
 	if building == Rules.HALL:
 		var total := int(Game.data.buildings.village.centerSlots)
 		var text := tr("%d of %d building slots open, build queue %d.") % [Rules.unlocked_slots(Game.data, level), total, Rules.queue_limit(Game.data, level)]
@@ -3188,6 +3311,9 @@ func _garrison_tab(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_stance_picker(village)
 	_hero_line(village_id)
+	var commander := Game.general_at(village_id)
+	if not commander.is_empty():
+		_panel_body.add_child(UI.label(tr("%s (Lv %d) commands this garrison: %s") % [commander.name, int(commander.level), GeneralText.bonuses(commander)], UI.SMALL_SIZE, UI.MUTED))
 	var recommended := Rules.recommended_garrison(Game.data, Game.villages_owned(int(village.ownerAccountId)))
 	var guard := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(guard)

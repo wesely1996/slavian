@@ -18,6 +18,9 @@ import { fortAt, insertFort, loadFort, markFortStanding, type Fort } from '../db
 import { campAt } from '../db/camps.js';
 import { siteAt } from '../db/sites.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
+import { generalWithArmy, type General } from '../db/generals.js';
+import { generalBonuses } from '../sim/generals.js';
+import { generalAfterBattle } from './generals.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
@@ -177,8 +180,15 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   // The holders fight with their owner's research and the hero leading them.
   let hero: Hero | null = null;
   for (const army of engaged) hero ??= await heroWithArmy(client, army.id);
+  // And the best general among them.
+  let general: General | null = null;
+  for (const army of engaged) {
+    const g = await generalWithArmy(client, army.id);
+    if (g && (!general || g.level > general.level)) general = g;
+  }
   const research = againstFront(leader?.state.bonuses ?? {}, wave.front);
-  const bonuses = hero ? combine(research, heroBonuses(data, hero)) : research;
+  const heroic = hero ? combine(research, heroBonuses(data, hero)) : research;
+  const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
   const ground: Setup = { ambush: !!battle.setup.ambush, choke: !!battle.setup.choke, fort: !!battle.setup.fort, river: !!battle.setup.river };
   const factors = setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
@@ -260,6 +270,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       const led = await heroWithArmy(client, army.id);
       if (!led) continue;
       await heroAfterBattle(client, data, world, won ? led : { ...led, villageId: army.homeVillageId, armyId: null }, { kills, won, battleId: battle.id, at });
+    }
+    for (const army of armies) {
+      const commander = await generalWithArmy(client, army.id);
+      if (commander) await generalAfterBattle(client, data, world, commander, { kills, won, at });
     }
     for (const army of armies) {
       if (won && total(army.units)) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });

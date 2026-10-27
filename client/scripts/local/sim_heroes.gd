@@ -164,8 +164,10 @@ static func roll_drop(data: Dictionary, hero: Dictionary, seed_value: int, battl
 	return candidates[floori(rng.next() * candidates.size())]
 
 
-static func wound_ms(data: Dictionary, world_speed: float, kind: Variant = null) -> int:
-	return LocalWaves.js_round((float(data.heroes.woundHours) * 3600000.0 * hero_factor(data, kind, "woundTime")) / world_speed)
+## How long a wound keeps the hero down; a Hero's Hall (of `hall_level`) in
+## the village it lies in shortens it.
+static func wound_ms(data: Dictionary, world_speed: float, kind: Variant = null, hall_level := 0) -> int:
+	return LocalWaves.js_round((float(data.heroes.woundHours) * 3600000.0 * hero_factor(data, kind, "woundTime") * LocalGenerals.hall_recovery(data, hall_level)) / world_speed)
 
 
 # --- Quests (sim/quests.ts) -------------------------------------------------------

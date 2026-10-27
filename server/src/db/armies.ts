@@ -16,6 +16,8 @@ export interface Army {
   targetQ: number;
   targetR: number;
   heroAccountId: number | null;
+  // The general leading it.
+  generalId: number | null;
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
@@ -40,6 +42,7 @@ interface ArmyRow {
   target_q: number;
   target_r: number;
   hero_account_id: number | null;
+  general_id: number | null;
   orders: ArmyOrders;
   units: Record<string, number>;
   status: ArmyStatus;
@@ -64,6 +67,7 @@ function fromRow(row: ArmyRow): Army {
     targetQ: row.target_q,
     targetR: row.target_r,
     heroAccountId: row.hero_account_id,
+    generalId: row.general_id === null ? null : Number(row.general_id),
     orders: row.orders,
     units: row.units,
     status: row.status,
@@ -84,12 +88,12 @@ export async function insertArmy(
   a: Pick<
     Army,
     'worldId' | 'ownerAccountId' | 'homeVillageId' | 'targetVillageId' | 'targetQ' | 'targetR' | 'heroAccountId' | 'orders' | 'units' | 'path' | 'departsAt' | 'arrivesAt'
-  >,
+  > & { generalId?: number | null },
 ): Promise<Army> {
   const { rows } = await client.query<ArmyRow>(
     `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at,
-       target_q, target_r, hero_account_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+       target_q, target_r, hero_account_id, general_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
     [
       a.worldId,
       a.ownerAccountId,
@@ -103,6 +107,7 @@ export async function insertArmy(
       a.targetQ,
       a.targetR,
       a.heroAccountId,
+      a.generalId ?? null,
     ],
   );
   return fromRow(rows[0]!);
