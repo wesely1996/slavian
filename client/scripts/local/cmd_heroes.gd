@@ -214,7 +214,7 @@ static func on_hero_quest(server: LocalServer, world: Dictionary, event: Diction
 	hero.status = "home"
 	hero.quest = null
 	if wounded:
-		var until := at + LocalHeroes.wound_ms(data, world.speed, hero.kind)
+		var until := at + LocalHeroes.wound_ms(data, world.speed, hero.kind, LocalGenerals.hall_level_at(server, world, hero.villageId))
 		hero.status = "wounded"
 		hero.woundedUntil = LocalTime.iso(until)
 		server.schedule(world, until, "hero_recover", {"accountId": hero.accountId})

@@ -34,6 +34,7 @@ export async function sendArmyCommand(
     units: Record<string, number>;
     orders: ArmyOrders;
     withHero?: boolean | undefined;
+    generalId?: number | undefined;
     now: Date;
   },
 ): Promise<Army> {
@@ -48,6 +49,7 @@ export async function sendArmyCommand(
       units: input.units,
       orders: input.orders,
       withHero: input.withHero,
+      generalId: input.generalId,
       at: input.now,
     });
   });

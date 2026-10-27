@@ -250,6 +250,15 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - **Skill tree** with three branches (e.g. Warlord, Warden, Wayfinder) *(tunable)*.
 - **Gear slots** (weapon, armor, amulet, banner, mount) from ancient sites, lairs and camps. Some items form sets.
 - **Defeated = wounded** for several hours, then back. Never permanently dead.
+- A **Hero's Hall** in a village heals the hero faster there (8% a level).
+
+### 6.8 Generals
+- Lesser heroes recruited at a **Hero's Hall** (`data/heroes.json`, `generals`). A player keeps one general per Hall, plus one more every two of its levels.
+- They have levels (from kills) but no skills, gear or quests. Each level adds +2% attack and defense to the troops they lead.
+- A general **leads an army** it marches with (beside the hero or alone), or **commands the garrison** of the village it stands in (the best one there). Generals travel between your villages.
+- **Only the hero is wounded:** a general whose side loses a battle is killed.
+
+**Coming next:** field armies that live on the map with their own grain supply and suffer attrition when it runs out (slower first, then losses, finally the whole army), garrisons eating half the grain, dismissing soldiers, then supply points, grain left in forts and caravan supply routes.
 
 ---
 

@@ -4,6 +4,7 @@
 // strengths, weaknesses and traits count in all of the player's villages.
 import type { GameData, HeroSlot } from '../data/index.js';
 import { RuleError } from '../errors.js';
+import { hallRecovery } from './generals.js';
 import { createRng } from './rng.js';
 import type { Bonuses } from './research.js';
 
@@ -119,6 +120,8 @@ export function rollDrop(data: GameData, hero: HeroState, seed: number, battleId
   return candidates[Math.floor(rng() * candidates.length)]!;
 }
 
-export function woundMs(data: GameData, worldSpeed: number, kind: string | null = null): number {
-  return Math.round((data.heroes.woundHours * 3_600_000 * heroFactor(data, kind, 'woundTime')) / worldSpeed);
+// How long a wound keeps the hero down; a Hero's Hall (of `hallLevel`) in
+// the village it lies in shortens it.
+export function woundMs(data: GameData, worldSpeed: number, kind: string | null = null, hallLevel = 0): number {
+  return Math.round((data.heroes.woundHours * 3_600_000 * heroFactor(data, kind, 'woundTime') * hallRecovery(data, hallLevel)) / worldSpeed);
 }

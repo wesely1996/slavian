@@ -237,9 +237,19 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		if home.state.besieged:
 			return LocalVillage.rule("%s won't leave in the middle of a battle" % hero.name)
 		hero_account = hero.accountId
+	var general_id: Variant = null
+	if order.get("generalId") != null:
+		var general := LocalGenerals.find(world, int(order.generalId))
+		if general.is_empty() or int(general.accountId) != int(home.ownerAccountId):
+			return LocalVillage.rule("No such general")
+		if general.status != "home" or general.villageId == null or int(general.villageId) != int(home.id):
+			return LocalVillage.rule("%s is not ready in %s" % [general.name, home.name])
+		if home.state.besieged:
+			return LocalVillage.rule("%s won't leave in the middle of a battle" % general.name)
+		general_id = general.id
 	var army := {"id": world.next.army, "ownerAccountId": home.ownerAccountId, "homeVillageId": home.id,
 		"targetVillageId": null if order.orders in ["hold", "clear", "explore"] else order.get("targetVillageId"),
-		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "orders": order.orders, "units": units, "status": "marching",
+		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
 		"leavesAt": null, "returnsAt": null}
 	world.next.army += 1
@@ -249,13 +259,18 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		hero.status = "with_army"
 		hero.villageId = null
 		hero.armyId = army.id
+	if general_id != null:
+		var general := LocalGenerals.find(world, int(general_id))
+		general.status = "with_army"
+		general.villageId = null
+		general.armyId = army.id
 	home.state = state
 	server.schedule(world, int(army.arrivesAt), "army_arrive", {"armyId": army.id})
 	return army
 
 
 ## Turns an army for home along the road it came. An army with no one left
-## is done; its hero is carried home wounded.
+## is done; its hero is carried home wounded, and its general is dead.
 static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> Dictionary:
 	if LocalBattle.total(army.units) == 0:
 		army.status = "done"
@@ -264,12 +279,15 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 		army.returnsAt = at
 		var hero := hero_with_army(world, int(army.id))
 		if not hero.is_empty():
-			var wounded_until := at + LocalHeroes.wound_ms(server.data, world.speed, hero.kind)
+			var wounded_until := at + LocalHeroes.wound_ms(server.data, world.speed, hero.kind, LocalGenerals.hall_level_at(server, world, army.homeVillageId))
 			hero.status = "wounded"
 			hero.villageId = army.homeVillageId
 			hero.armyId = null
 			hero.woundedUntil = LocalTime.iso(wounded_until)
 			server.schedule(world, wounded_until, "hero_recover", {"accountId": hero.accountId})
+		var general := LocalGenerals.general_with_army(world, int(army.id))
+		if not general.is_empty():
+			LocalGenerals.kill(server, world, general, at)
 		return army
 	army.status = "returning"
 	army.battleId = null
@@ -398,6 +416,11 @@ static func on_army_return(server: LocalServer, world: Dictionary, event: Dictio
 		hero.status = "home"
 		hero.villageId = home.id
 		hero.armyId = null
+	var general := LocalGenerals.general_with_army(world, int(army.id))
+	if not general.is_empty():
+		general.status = "home"
+		general.villageId = home.id
+		general.armyId = null
 	changed.append(["village", home.id])
 	changed.append(["world"])
 
@@ -411,7 +434,7 @@ static func send_army(server: LocalServer, world: Dictionary, village: Dictionar
 		return {"error": "Give the army its units and orders", "kind": "invalid"}
 	return dispatch_army(server, world, {"homeVillageId": village.id, "targetVillageId": body.get("targetVillageId"),
 		"targetHex": Vector2i(int(target.q), int(target.r)) if target is Dictionary else null, "units": units, "orders": body.orders,
-		"withHero": body.get("withHero", false), "at": now})
+		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "at": now})
 
 
 ## Calls an army standing guard or holding a hex home.
@@ -853,7 +876,8 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		return
 	var home := server.find_village(world, int(army.homeVillageId))
 	var hero := hero_with_army(world, int(army.id))
-	var bonuses: Dictionary = LocalHeroes.combine(home.state.bonuses, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else home.state.bonuses
+	var general := LocalGenerals.general_with_army(world, int(army.id))
+	var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
 	var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), home.state.stance, camp.units, camp.front, int(world.seed), int(camp.id))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
@@ -881,6 +905,8 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 			hero.villageId = army.homeVillageId
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
+	if not general.is_empty():
+		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.cleared, "at": at})
 	send_home(server, world, after, at)
 	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else "bandit camp", int(camp.q), int(camp.r)]
 	var body := "{kills} of them fell; {defenders} still hold it."
@@ -904,7 +930,8 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 	if LocalBattle.total(site.guardians) > 0:
 		var home := server.find_village(world, int(army.homeVillageId))
 		var hero := hero_with_army(world, int(army.id))
-		var bonuses: Dictionary = LocalHeroes.combine(home.state.bonuses, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else home.state.bonuses
+		var general := LocalGenerals.general_with_army(world, int(army.id))
+		var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
 		var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), home.state.stance, site.guardians, "north",
 			int(world.seed), int(site.id) + 0x5000)
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
@@ -919,6 +946,8 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 				hero.villageId = army.homeVillageId
 				hero.armyId = null
 			LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
+		if not general.is_empty():
+			LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.cleared, "at": at})
 		if not result.cleared or LocalBattle.total(explorers.units) == 0:
 			send_home(server, world, explorers, at)
 			LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "Guardians drove your army from the {where}",
@@ -1010,9 +1039,16 @@ static func armies_view(world: Dictionary) -> Array:
 	return shown.map(army_view)
 
 
+## The research effects of troops led by `hero` and `general` (either may
+## be {}).
+static func _led_bonuses(data: Dictionary, own: Dictionary, hero: Dictionary, general: Dictionary) -> Dictionary:
+	var heroic: Dictionary = LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
+	return LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
+
+
 static func army_view(a: Dictionary) -> Dictionary:
 	return {"id": a.id, "ownerAccountId": a.ownerAccountId, "homeVillageId": a.homeVillageId, "targetVillageId": a.targetVillageId,
-		"target": [a.targetQ, a.targetR], "heroAccountId": a.heroAccountId, "orders": a.orders, "loot": a.loot, "units": a.units,
+		"target": [a.targetQ, a.targetR], "heroAccountId": a.heroAccountId, "generalId": a.get("generalId"), "orders": a.orders, "loot": a.loot, "units": a.units,
 		"status": a.status, "battleId": a.battleId, "path": a.path.map(func(s: Dictionary) -> Array: return [s.q, s.r, s.atMs]),
 		"departsAt": LocalTime.iso(a.departsAt), "arrivesAt": LocalTime.iso(a.arrivesAt),
 		"leavesAt": LocalTime.iso(a.leavesAt) if a.leavesAt != null else null, "returnsAt": LocalTime.iso(a.returnsAt) if a.returnsAt != null else null}

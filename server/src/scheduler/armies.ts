@@ -9,6 +9,8 @@ import type { GameData, TerrainId } from '../data/index.js';
 import { armiesAt, insertArmy, loadArmy, loadReinforceRule, saveArmy, type Army } from '../db/armies.js';
 import { addDefenders, loadBattle, type Battle } from '../db/battles.js';
 import { heroWithArmy, loadHero, saveHero } from '../db/heroes.js';
+import { generalWithArmy, loadGeneral, saveGeneral } from '../db/generals.js';
+import { hallLevelAt, killGeneral } from './generals.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
@@ -46,6 +48,8 @@ export interface ArmyOrder {
   orders: ArmyOrders;
   // The owner's hero, standing in the home village, leads it.
   withHero?: boolean | undefined;
+  // One of the owner's generals at home in the village leads it.
+  generalId?: number | undefined;
   at: Date;
 }
 
@@ -87,6 +91,14 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     if (home.state.besieged) throw new RuleError(`${hero.name} won't leave in the middle of a battle`);
     heroAccountId = hero.accountId;
   }
+  let generalId: number | null = null;
+  if (input.generalId !== undefined) {
+    const general = await loadGeneral(client, input.generalId).catch(() => null);
+    if (!general || general.accountId !== home.ownerAccountId) throw new RuleError('No such general');
+    if (general.status !== 'home' || general.villageId !== home.id) throw new RuleError(`${general.name} is not ready in ${home.name}`);
+    if (home.state.besieged) throw new RuleError(`${general.name} won't leave in the middle of a battle`);
+    generalId = general.id;
+  }
   const army = await insertArmy(client, {
     worldId: world.id,
     ownerAccountId: home.ownerAccountId,
@@ -95,6 +107,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     targetQ: to.q,
     targetR: to.r,
     heroAccountId,
+    generalId,
     orders: input.orders,
     units,
     path,
@@ -106,6 +119,11 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     await saveHero(client, { ...hero, status: 'with_army', villageId: null, armyId: army.id });
     await notifyWorld(client, { worldId: world.id, type: 'heroes' });
   }
+  if (generalId !== null) {
+    const general = await loadGeneral(client, generalId);
+    await saveGeneral(client, { ...general, status: 'with_army', villageId: null, armyId: army.id });
+    await notifyWorld(client, { worldId: world.id, type: 'generals' });
+  }
   await saveVillageState(client, home.id, state);
   const payload: ArmyPayload = { armyId: army.id };
   await scheduleEvent(client, world.id, army.arrivesAt, 'army_arrive', payload);
@@ -115,18 +133,20 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
 }
 
 // Turns an army for home, along the road it came. An army with no one left
-// is done; its hero is carried home wounded.
+// is done; its hero is carried home wounded, and its general is dead.
 export async function sendHome(client: DbClient, world: World, army: Army, at: Date, data?: GameData): Promise<Army> {
   if (total(army.units) === 0) {
     const gone: Army = { ...army, status: 'done', battleId: null, leavesAt: at, returnsAt: at };
     await saveArmy(client, gone);
     const hero = await heroWithArmy(client, army.id);
     if (hero && data) {
-      const woundedUntil = new Date(at.getTime() + woundMs(data, world.speed, hero.kind));
+      const woundedUntil = new Date(at.getTime() + woundMs(data, world.speed, hero.kind, await hallLevelAt(client, army.homeVillageId)));
       await saveHero(client, { ...hero, status: 'wounded', villageId: army.homeVillageId, armyId: null, woundedUntil });
       await scheduleEvent(client, world.id, woundedUntil, 'hero_recover', { accountId: hero.accountId });
       await notifyWorld(client, { worldId: world.id, type: 'heroes' });
     }
+    const general = await generalWithArmy(client, army.id);
+    if (general) await killGeneral(client, world, general, at);
     return gone;
   }
   const back: Army = {
@@ -249,6 +269,11 @@ export const armyHandlers: HandlerRegistry = {
     if (hero) {
       await saveHero(client, { ...hero, status: 'home', villageId: home.id, armyId: null });
       await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+    }
+    const general = await generalWithArmy(client, army.id);
+    if (general) {
+      await saveGeneral(client, { ...general, status: 'home', villageId: home.id, armyId: null });
+      await notifyWorld(client, { worldId: world.id, type: 'generals' });
     }
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: home.id });
     await notifyWorld(client, { worldId: world.id, type: 'armies' });

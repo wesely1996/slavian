@@ -12,6 +12,9 @@ import { campAt, insertCamp, listCamps, loadCamp, markCleared, saveCampUnits, ty
 import { loadCaravan, recordAmbush, type Caravan } from '../db/caravans.js';
 import { deleteFort, listForts, loadFort, markFortManned } from '../db/forts.js';
 import { heroWithArmy } from '../db/heroes.js';
+import { generalWithArmy } from '../db/generals.js';
+import { generalBonuses } from '../sim/generals.js';
+import { generalAfterBattle } from './generals.js';
 import { listSites } from '../db/sites.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -196,7 +199,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   }
   const home = await loadVillage(client, army.homeVillageId);
   const hero = await heroWithArmy(client, army.id);
-  const bonuses = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+  const general = await generalWithArmy(client, army.id);
+  const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+  const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
   const result = assault(data, {
     army: army.units,
     armyStats: playerStats(data, bonuses, false),
@@ -259,6 +264,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
       { kills, won: result.cleared, battleId: battle.id, at },
     );
   }
+  if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
   await sendHome(client, world, after, at, data);
   await tell(client, world, army.ownerAccountId, {
     kind: 'battle_result',

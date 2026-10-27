@@ -11,6 +11,7 @@ import { loadVillage, saveVillageState } from '../db/villages.js';
 import type { World } from '../db/worlds.js';
 import { total } from '../sim/battle.js';
 import { gainXp, woundMs } from '../sim/heroes.js';
+import { hallLevelAt } from './generals.js';
 import { hex } from '../sim/hex.js';
 import { receive } from '../sim/logistics.js';
 import type { Front } from '../sim/mapgen.js';
@@ -181,7 +182,7 @@ export const questHandlers: HandlerRegistry = {
     const wounded = questWounds(quest, world.seed, accountId, new Date(quest.departsAt));
     let back: Hero = { ...after, ...gainXp(data, after, questXp(data, quest, after.kind)), status: 'home', quest: null };
     if (wounded) {
-      const woundedUntil = new Date(event.dueAt.getTime() + woundMs(data, world.speed, after.kind));
+      const woundedUntil = new Date(event.dueAt.getTime() + woundMs(data, world.speed, after.kind, await hallLevelAt(client, after.villageId)));
       back = { ...back, status: 'wounded', woundedUntil };
       const payload: HeroPayload = { accountId };
       await scheduleEvent(client, world.id, woundedUntil, 'hero_recover', payload);

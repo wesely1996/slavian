@@ -5,6 +5,7 @@ import { onboardingStep } from '../scheduler/onboarding.js';
 import { authorize } from '../db/delegations.js';
 import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import { effectiveBonuses, listHeroes, loadHero, saveHero } from '../db/heroes.js';
+import { listGenerals, saveGeneral } from '../db/generals.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
 import { listResearch, loadResearchPoints, saveResearchPoints, startResearch, type ResearchEntry } from '../db/research.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
@@ -439,6 +440,9 @@ export async function abandonVillageCommand(db: Db, deps: SchedulerDeps, input: 
     }
     const hero = (await listHeroes(client, world.id)).find((h) => h.villageId === village.id);
     if (hero?.status === 'traveling') throw new RuleError(`${hero.name} is on the way there`);
+    const generals = (await listGenerals(client, world.id)).filter((g) => g.villageId === village.id);
+    const coming = generals.find((g) => g.status === 'traveling');
+    if (coming) throw new RuleError(`${coming.name} is on the way there`);
 
     if (researchPerHour(deps.data, village.state.plots, world.speed) > 0) {
       await settleResearchPoints(client, deps.data, world, input.accountId, input.now);
@@ -448,10 +452,12 @@ export async function abandonVillageCommand(db: Db, deps: SchedulerDeps, input: 
     await saveVault(client, { ...vault, amounts: store(vault.amounts, vaultCapacity(deps.data, vault.level), refund).amounts });
     await saveVillageState(client, to.id, joinGarrison(deps.data, completeTraining(to.state, input.now), state.garrison, input.now, world.speed));
     if (hero) await saveHero(client, { ...hero, villageId: to.id });
+    for (const general of generals) await saveGeneral(client, { ...general, villageId: to.id });
     await client.query("DELETE FROM scheduled_events WHERE status = 'pending' AND type = 'orders_check' AND payload->>'villageId' = $1::text", [village.id]);
     await client.query('DELETE FROM villages WHERE id = $1', [village.id]);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: to.id });
     await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+    await notifyWorld(client, { worldId: world.id, type: 'generals' });
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
   return { worldId };

@@ -213,15 +213,18 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	var state := LocalVillage.complete_training(village.state, at)
 
 	var round := int(battle.round) + 1
-	# The hero standing in the village leads its garrison.
+	# The hero standing in the village leads its garrison, with the general
+	# commanding it.
 	var hero := hero_at(world, int(village.id))
+	var general := LocalGenerals.general_at(world, int(village.id))
 	# The horde's leader drives it on, hardest against a village they hate.
 	var led := horde_stats(server, world, wave, LocalBattle.enemy_stats(data, wave.front), village.id)
 	var own := LocalVillage.village_bonuses(data, state)
 	if wave.front == "north" and float(own.get("coldDefense", 0.0)) != 0.0:
 		own = own.duplicate()
 		own["defense.all"] = float(own.get("defense.all", 0.0)) + float(own.coldDefense)
-	var bonuses := LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
+	var heroic := LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
+	var bonuses := LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
 	# The garrison fights alongside armies sent to help; armies joining this
 	# round bring their pincer or harassment bonus.
 	var engaged := LocalArmies.armies_in_battle(world, int(battle.id))
@@ -396,6 +399,9 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	if not hero.is_empty() and outcome != "ongoing":
 		hero_after_battle(server, world, hero, {"kills": LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now),
 			"won": outcome != "raided", "battleId": battle.id, "at": at})
+	if not general.is_empty() and outcome != "ongoing":
+		LocalGenerals.after_battle(server, world, general, {"kills": LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now),
+			"won": outcome != "raided", "at": at})
 	changed.append(["village", village.id])
 	changed.append(["world"])
 	return true
@@ -422,7 +428,14 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	if wave.front == "north" and float(research.get("coldDefense", 0.0)) != 0.0:
 		research = research.duplicate()
 		research["defense.all"] = float(research.get("defense.all", 0.0)) + float(research.coldDefense)
-	var bonuses: Dictionary = LocalHeroes.combine(research, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else research
+	# And the best general among them.
+	var general: Dictionary = {}
+	for army in engaged:
+		var g := LocalGenerals.general_with_army(world, int(army.id))
+		if not g.is_empty() and (general.is_empty() or int(g.level) > int(general.level)):
+			general = g
+	var heroic: Dictionary = LocalHeroes.combine(research, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else research
+	var bonuses: Dictionary = LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
 	var ground: Dictionary = battle.setup
 	var first := round == 1
 	var ambush: bool = ground.get("ambush", false) == true
@@ -502,6 +515,10 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				led.villageId = army.homeVillageId
 				led.armyId = null
 			hero_after_battle(server, world, led, {"kills": kills, "won": won, "battleId": battle.id, "at": at})
+		for army in armies:
+			var commander := LocalGenerals.general_with_army(world, int(army.id))
+			if not commander.is_empty():
+				LocalGenerals.after_battle(server, world, commander, {"kills": kills, "won": won, "at": at})
 		for army in armies:
 			if won and LocalBattle.total(army.units) > 0:
 				army.status = "stationed"
@@ -944,7 +961,7 @@ static func hero_after_battle(server: LocalServer, world: Dictionary, hero: Dict
 		if item != null:
 			next.inventory = next.inventory + [item]
 	else:
-		var wounded_until := int(result.at) + LocalHeroes.wound_ms(data, world.speed, hero.kind)
+		var wounded_until := int(result.at) + LocalHeroes.wound_ms(data, world.speed, hero.kind, LocalGenerals.hall_level_at(server, world, hero.villageId))
 		next.status = "wounded"
 		next.woundedUntil = LocalTime.iso(wounded_until)
 		server.schedule(world, wounded_until, "hero_recover", {"accountId": hero.accountId})

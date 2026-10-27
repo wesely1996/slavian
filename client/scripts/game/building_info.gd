@@ -32,6 +32,8 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 		for key in def.effects:
 			scaled[key] = float(def.effects[key]) * level
 		parts.append(HeroText.effects(scaled))
+	if building == "heroes_hall":
+		parts.append(GeneralText.hall_gives(data, level))
 	if building == "caravan_yard":
 		var count := level * int(data.logistics.caravan.caravansPerYardLevel)
 		parts.append(UI.tn("%d caravan", "%d caravans", count) % count)

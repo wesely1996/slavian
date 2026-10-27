@@ -1157,7 +1157,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
-MILITARY_BUILDINGS = ["stables", "shooting_range"]
+MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
 FIELDS = ["woodcutter", "quarry", "farm", "iron_mine"]
 WALL_TOWERS = ["archer_tower", "gate_tower", "ballista", "murder_holes", "ditch", "watchtower"]
 
@@ -1264,6 +1264,14 @@ def building(kind, stage):
             s.circle(tx, foot - 22, 6.5, "#c9614a", stroke="none", sw=0)
             s.circle(tx, foot - 22, 2.5, "#f4ead2", stroke="none", sw=0)
         sign(s, 108, 62, "bow")
+    elif kind == "heroes_hall":
+        # A tall timber hall hung with the shields of its generals.
+        house(s, 56, 110, 62 * big, 32 * big, roof="red" if stage < 3 else "slate", wall="wood" if stage < 3 else "plaster", windows=2)
+        for i in range(stage + 1):
+            sx = 30 + i * 12
+            s.circle(sx, 92, 5.5, s.rad([(0, "#c9614a"), (1, "#6e2a1f")]), stroke="none", sw=0)
+            s.circle(sx, 92, 5.5, "none", stroke="#f2cf72", sw=1.5)
+        banner_pole(s, 104, 110, 40 + stage * 8, "#b48a2e")
     elif kind == "scout_lodge":
         h = [0, 34, 46, 56][stage]
         soft_shadow(s, 66, 112, 26, 6, 0.35)

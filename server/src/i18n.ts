@@ -80,6 +80,12 @@ const SERBIAN: Record<string, string> = {
 	'{name} is wounded': '{name} je ranjen',
 	'Back on their feet in a few hours.': 'Na nogama za nekoliko sati.',
 	'{name} reached level {level}': '{name} je stigao do nivoa {level}',
+	// Generals
+	'{name} answers your call': '{name} se odaziva tvom pozivu',
+	'A new general stands ready.': 'Novi general je spreman.',
+	'{name} fell in battle': '{name} je pao u bici',
+	"Recruit another at a Hero's Hall.": 'Unajmi drugog u Dvorani junaka.',
+	'The troops they lead fight a little harder.': 'Trupe koje predvodi bore se malo žešće.',
 	// Hero quests
 	'{name} is back from: {quest}': '{name} se vratio sa zadatka: {quest}',
 	'{name} came back wounded from: {quest}': '{name} se vratio ranjen sa zadatka: {quest}',

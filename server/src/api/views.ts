@@ -24,6 +24,8 @@ import { listCaravans, type Caravan } from '../db/caravans.js';
 import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
+import { listGenerals, type General } from '../db/generals.js';
+import { generalBonuses, generalXpToNext } from '../sim/generals.js';
 import { listOrders, type StoredOrder } from '../db/orders.js';
 import { listArmies, type Army } from '../db/armies.js';
 import { listNotifications, unreadCount, type Notification } from '../db/notifications.js';
@@ -402,6 +404,33 @@ export async function heroesView(client: DbClient, data: GameData, worldId: numb
   return out;
 }
 
+// Generals are visible to the whole group.
+export function generalView(data: GameData, general: General) {
+  return {
+    id: general.id,
+    accountId: general.accountId,
+    name: general.name,
+    status: general.status,
+    // Where it stands (or is recruited, or heading).
+    villageId: general.villageId,
+    // Leading this army (status 'with_army').
+    armyId: general.armyId,
+    level: general.level,
+    xp: general.xp,
+    xpToNext: general.level >= data.heroes.generals.maxLevel ? null : generalXpToNext(data, general.level),
+    // What it adds to the troops it leads.
+    bonuses: generalBonuses(data, general),
+    path: general.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
+    departsAt: general.departsAt?.toISOString() ?? null,
+    // Ready (recruiting) or arriving (traveling).
+    until: general.until?.toISOString() ?? null,
+  };
+}
+
+export async function generalsView(client: DbClient, data: GameData, worldId: number) {
+  return (await listGenerals(client, worldId)).map((g) => generalView(data, g));
+}
+
 export function orderView(order: StoredOrder) {
   return {
     id: order.id,
@@ -444,6 +473,7 @@ export function armyView(army: Army) {
     targetVillageId: army.targetVillageId,
     target: [army.targetQ, army.targetR],
     heroAccountId: army.heroAccountId,
+    generalId: army.generalId,
     orders: army.orders,
     // Carried home from a cleared camp.
     loot: army.loot,
@@ -512,6 +542,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const expeditions = await expeditionsView(client, world.id);
   const research = await researchListView(client, world.id);
   const heroes = await heroesView(client, data, world.id, at);
+  const generals = await generalsView(client, data, world.id);
   const leaders = await leadersView(client, data, world.id);
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
@@ -570,6 +601,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     expeditions,
     research,
     heroes,
+    generals,
     leaders,
     orders,
     armies,

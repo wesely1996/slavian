@@ -492,6 +492,10 @@ static func abandon_village(server: LocalServer, world: Dictionary, village: Dic
 			hero = h
 	if not hero.is_empty() and hero.status == "traveling":
 		return LocalVillage.rule("%s is on the way there" % hero.name)
+	var generals: Array = world.generals.filter(func(g: Dictionary) -> bool: return g.villageId != null and int(g.villageId) == id)
+	for g in generals:
+		if g.status == "traveling":
+			return LocalVillage.rule("%s is on the way there" % g.name)
 
 	if LocalVillage.research_per_hour(data, village.state.plots, world.speed) > 0:
 		LocalResearch.settle_points(server, world, int(village.ownerAccountId), now)
@@ -500,6 +504,8 @@ static func abandon_village(server: LocalServer, world: Dictionary, village: Dic
 	to.state = LocalVillage.join_garrison(data, LocalVillage.complete_training(to.state, now), state.garrison, now, world.speed)
 	if not hero.is_empty():
 		hero.villageId = to.id
+	for g in generals:
+		g.villageId = to.id
 	# What goes with the village's row (ON DELETE CASCADE), and what forgets it
 	# (ON DELETE SET NULL).
 	var other := func(key: String) -> Callable:
