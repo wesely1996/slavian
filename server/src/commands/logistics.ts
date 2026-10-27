@@ -37,12 +37,12 @@ export interface CaravanOrder {
 }
 
 // Sends the escort away with the caravan (they come back with it).
-function withEscort(data: GameData, state: VillageState, escort: Record<string, number> | undefined, at: Date): VillageState {
+function withEscort(data: GameData, state: VillageState, escort: Record<string, number> | undefined, at: Date, worldSpeed: number): VillageState {
   let next = state;
   for (const [unit, n] of Object.entries(escort ?? {})) {
     if (n <= 0) continue;
     if (!fighters(data, { [unit]: 1 })[unit]) throw new RuleError(`${data.units.units[unit]?.name ?? unit} can't guard caravans`);
-    next = sendAway(next, unit, n, at);
+    next = sendAway(data, next, unit, n, at, worldSpeed);
   }
   return next;
 }
@@ -104,7 +104,7 @@ export async function sendCaravanCommand(
   input: VillageCommandInput & CaravanOrder,
 ): Promise<{ village: Village; caravan: Caravan }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent a caravan' }, async ({ client, world, village }) => {
-    const escorted = withEscort(deps.data, village.state, input.escort, input.now);
+    const escorted = withEscort(deps.data, village.state, input.escort, input.now, world.speed);
     const caravan = await dispatchCaravan(client, deps.data, world, village, 'deliver', input, input.now);
     const state: VillageState = { ...escorted, ledger: spend(escorted.ledger, input.now, input.load) };
     // A gift: to the vault or a teammate's village, not one's own.
@@ -123,7 +123,7 @@ export async function fetchFromVaultCommand(
   input: VillageCommandInput & { load: Resources; escort?: Record<string, number> | undefined },
 ): Promise<{ village: Village; caravan: Caravan }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent caravans to the vault' }, async ({ client, world, village }) => {
-    const state = withEscort(deps.data, village.state, input.escort, input.now);
+    const state = withEscort(deps.data, village.state, input.escort, input.now, world.speed);
     const caravan = await dispatchCaravan(
       client,
       deps.data,

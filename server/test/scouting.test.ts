@@ -107,21 +107,23 @@ describe('units away', () => {
 
   it('sends only units that are home, counting finished training', () => {
     const { state, ready } = withScouts(4);
-    expect(() => sendAway(state, 'scout', 1, new Date(ready.getTime() - 1e9))).toThrow(RuleError);
-    const away = sendAway(state, 'scout', 3, ready);
+    expect(() => sendAway(data, state, 'scout', 1, new Date(ready.getTime() - 1e9), 1)).toThrow(RuleError);
+    const away = sendAway(data, state, 'scout', 3, ready, 1);
     expect(away.garrison.scout).toBe(1);
     expect(away.away.scout).toBe(3);
-    expect(() => sendAway(away, 'scout', 2, ready)).toThrow(/Only 1 scout/);
+    expect(() => sendAway(data, away, 'scout', 2, ready, 1)).toThrow(/Only 1 scout/);
   });
 
-  it('keeps feeding units away, stops for the dead, and brings survivors home', () => {
+  it('feeds units away in full and at home on garrison rations, stops for the dead, and brings survivors home', () => {
     const { state, ready } = withScouts(4);
-    const away = sendAway(state, 'scout', 4, ready);
-    expect(away.ledger.ratesPerHour.grain).toBe(state.ledger.ratesPerHour.grain);
+    const half = data.armies.supply.garrisonUpkeep;
+    const away = sendAway(data, state, 'scout', 4, ready, 1);
+    expect(away.ledger.ratesPerHour.grain).toBeCloseTo(state.ledger.ratesPerHour.grain - 4 * (1 - half));
     const lost = loseAway(data, away, 'scout', 1, ready, 1);
-    expect(lost.ledger.ratesPerHour.grain).toBe(state.ledger.ratesPerHour.grain + 1);
-    const back = returnHome(lost, 'scout', 3);
+    expect(lost.ledger.ratesPerHour.grain).toBeCloseTo(away.ledger.ratesPerHour.grain + 1);
+    const back = returnHome(data, lost, 'scout', 3, ready, 1);
     expect(back.garrison.scout).toBe(3);
     expect(back.away.scout).toBe(0);
+    expect(back.ledger.ratesPerHour.grain).toBeCloseTo(state.ledger.ratesPerHour.grain + half);
   });
 });

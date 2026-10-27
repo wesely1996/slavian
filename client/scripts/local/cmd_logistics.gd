@@ -97,7 +97,7 @@ static func receive(ledger: Dictionary, at: int, load: Dictionary) -> Dictionary
 # --- Commands (commands/logistics.ts) --------------------------------------------
 
 ## Sends the escort away with the caravan, or {"error"}.
-static func _with_escort(data: Dictionary, state: Dictionary, escort: Dictionary, at: int) -> Dictionary:
+static func _with_escort(data: Dictionary, state: Dictionary, escort: Dictionary, at: int, world_speed: float) -> Dictionary:
 	var next := state
 	for unit in escort:
 		var n := int(escort[unit])
@@ -106,7 +106,7 @@ static func _with_escort(data: Dictionary, state: Dictionary, escort: Dictionary
 		var def: Variant = data.units.units.get(unit)
 		if def == null or not def.family in ["infantry", "archers", "cavalry"] or unit == "settler":
 			return LocalVillage.rule("%s can't guard caravans" % (def.name if def != null else unit))
-		next = LocalVillage.send_away(next, unit, n, at)
+		next = LocalVillage.send_away(data, next, unit, n, at, world_speed)
 		if next.has("error"):
 			return next
 	return next
@@ -171,7 +171,7 @@ static func send_caravan(server: LocalServer, world: Dictionary, village: Dictio
 	var order := _order(body)
 	if order.has("error"):
 		return order
-	var escorted := _with_escort(server.data, village.state, order.escort, now)
+	var escorted := _with_escort(server.data, village.state, order.escort, now, world.speed)
 	if escorted.has("error"):
 		return escorted
 	var caravan := dispatch(server, world, village, "deliver", order, now)
@@ -196,7 +196,7 @@ static func fetch_from_vault(server: LocalServer, world: Dictionary, village: Di
 	if order.has("error"):
 		return order
 	order.destinationVillageId = null
-	var state := _with_escort(server.data, village.state, order.escort, now)
+	var state := _with_escort(server.data, village.state, order.escort, now, world.speed)
 	if state.has("error"):
 		return state
 	var caravan := dispatch(server, world, village, "fetch", order, now)
@@ -288,10 +288,11 @@ static func on_caravan_return(server: LocalServer, world: Dictionary, event: Dic
 		return
 	var village := server.find_village(world, int(caravan.villageId))
 	var back: Variant = caravan.carriedBack
-	var received := receive(village.state.ledger, int(event.dueAt), back if back != null else {"wood": 0, "stone": 0, "grain": 0, "iron": 0})
+	# Its escort is home too, back on garrison rations.
 	var state: Dictionary = village.state
 	for unit in caravan.escort:
-		state = LocalVillage.return_home(state, unit, int(caravan.escort[unit]))
+		state = LocalVillage.return_home(server.data, state, unit, int(caravan.escort[unit]), int(event.dueAt), world.speed)
+	var received := receive(state.ledger, int(event.dueAt), back if back != null else {"wood": 0, "stone": 0, "grain": 0, "iron": 0})
 	state = state.duplicate()
 	state.ledger = received.ledger
 	village.state = state

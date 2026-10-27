@@ -19,6 +19,7 @@ import { stagesStanding } from '../sim/bridge.js';
 import { fighters } from '../sim/armies.js';
 import { afterQuiet, presetOf, waveFactor, type GroupPower } from '../sim/difficulty.js';
 import { unitsFed } from '../sim/village.js';
+import { fieldArmies } from '../db/armies.js';
 import { hex } from '../sim/hex.js';
 import { startBattle } from './battles.js';
 import { beginRampage, moveOn, startHolyCityBattle } from './horde.js';
@@ -50,6 +51,10 @@ export async function groupPower(client: DbClient, data: GameData, world: World,
   let armyAttack = 0;
   for (const village of villages) {
     for (const [unit, n] of Object.entries(fighters(data, unitsFed(village.state)))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
+  }
+  // Armies out on the map count too.
+  for (const army of await fieldArmies(client, world.id)) {
+    for (const [unit, n] of Object.entries(fighters(data, army.units))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
   }
   const bridgeStages = stagesStanding(await findBridge(client, world.id));
   return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyAttack, waveIndex, bridgeStages };

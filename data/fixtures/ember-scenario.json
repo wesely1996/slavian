@@ -383,7 +383,7 @@
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": -32,
+       "grain": 184,
        "stone": 300
       },
       "capacity": {
@@ -640,7 +640,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 184,
         "stone": 300
        },
        "capacity": {
@@ -3237,7 +3237,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 184,
         "stone": 300
        },
        "capacity": {
@@ -5700,7 +5700,10 @@
      "departsAt": "2026-06-01T11:38:00.000Z",
      "arrivesAt": "2026-06-01T11:39:12.000Z",
      "leavesAt": null,
-     "returnsAt": null
+     "returnsAt": null,
+     "supply": 192,
+     "supplyAt": "2026-06-01T11:38:00.000Z",
+     "hungrySince": null
     },
     "serverTime": "2026-06-01T11:38:00.000Z"
    }
@@ -5882,11 +5885,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -5905,15 +5906,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -5922,7 +5923,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -6225,9 +6226,9 @@
       "accountId": 1,
       "kind": "dobrynya",
       "name": "Dobrynya",
-      "status": "home",
-      "villageId": 1,
-      "armyId": null,
+      "status": "with_army",
+      "villageId": null,
+      "armyId": 1,
       "level": 1,
       "xp": 3,
       "xpToNext": 30,
@@ -6241,38 +6242,7 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": [
-       {
-        "id": "23:ambush",
-        "kind": "ambush",
-        "front": "south",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "23:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 2,
-        "distance": 4,
-        "hours": 5.333333333333333,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "23:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       }
-      ]
+      "offers": []
      }
     ],
     "generals": [],
@@ -6316,12 +6286,17 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
+      },
       "units": {
        "spearman": 8
       },
-      "status": "done",
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -6357,8 +6332,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 192,
+      "supplyAt": "2026-06-01T11:38:00.000Z",
+      "hungrySince": null
      }
     ],
     "forts": [],
@@ -8588,11 +8566,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -8611,15 +8587,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -8628,7 +8604,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -8931,9 +8907,9 @@
       "accountId": 1,
       "kind": "dobrynya",
       "name": "Dobrynya",
-      "status": "home",
-      "villageId": 1,
-      "armyId": null,
+      "status": "with_army",
+      "villageId": null,
+      "armyId": 1,
       "level": 1,
       "xp": 3,
       "xpToNext": 30,
@@ -8947,38 +8923,7 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": [
-       {
-        "id": "24:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       },
-       {
-        "id": "24:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "24:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 2,
-        "distance": 4,
-        "hours": 5.333333333333333,
-        "xp": 35,
-        "risk": 0.15
-       }
-      ]
+      "offers": []
      }
     ],
     "generals": [],
@@ -9022,12 +8967,17 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
+      },
       "units": {
        "spearman": 8
       },
-      "status": "done",
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -9063,8 +9013,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 192,
+      "supplyAt": "2026-06-01T11:38:00.000Z",
+      "hungrySince": null
      }
     ],
     "forts": [],
@@ -11294,11 +11247,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -11317,15 +11268,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -11334,7 +11285,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -11637,9 +11588,9 @@
       "accountId": 1,
       "kind": "dobrynya",
       "name": "Dobrynya",
-      "status": "home",
-      "villageId": 1,
-      "armyId": null,
+      "status": "with_army",
+      "villageId": null,
+      "armyId": 1,
       "level": 1,
       "xp": 3,
       "xpToNext": 30,
@@ -11653,38 +11604,7 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": [
-       {
-        "id": "25:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       },
-       {
-        "id": "25:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 2,
-        "distance": 4,
-        "hours": 5.333333333333333,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "25:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       }
-      ]
+      "offers": []
      }
     ],
     "generals": [],
@@ -11728,12 +11648,17 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
+      },
       "units": {
        "spearman": 8
       },
-      "status": "done",
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -11769,8 +11694,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 192,
+      "supplyAt": "2026-06-01T11:38:00.000Z",
+      "hungrySince": null
      }
     ],
     "forts": [],
@@ -14000,11 +13928,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -14023,15 +13949,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -14040,7 +13966,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -14343,9 +14269,9 @@
       "accountId": 1,
       "kind": "dobrynya",
       "name": "Dobrynya",
-      "status": "home",
-      "villageId": 1,
-      "armyId": null,
+      "status": "with_army",
+      "villageId": null,
+      "armyId": 1,
       "level": 1,
       "xp": 3,
       "xpToNext": 30,
@@ -14359,38 +14285,7 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": [
-       {
-        "id": "26:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       },
-       {
-        "id": "26:ambush",
-        "kind": "ambush",
-        "front": "south",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "26:hoard",
-        "kind": "hoard",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
-       }
-      ]
+      "offers": []
      }
     ],
     "generals": [],
@@ -14434,12 +14329,17 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
-      "units": {
-       "spearman": 8
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
       },
-      "status": "done",
+      "units": {
+       "spearman": 6
+      },
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -14475,8 +14375,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T12:17:36.000Z",
+      "hungrySince": "2026-06-01T12:06:48.000Z"
      }
     ],
     "forts": [],
@@ -16706,11 +16609,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -16729,15 +16630,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -16746,7 +16647,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -17049,7 +16950,7 @@
       "accountId": 1,
       "kind": "dobrynya",
       "name": "Dobrynya",
-      "status": "home",
+      "status": "wounded",
       "villageId": 1,
       "armyId": null,
       "level": 1,
@@ -17063,7 +16964,7 @@
       "path": null,
       "departsAt": null,
       "arrivesAt": null,
-      "woundedUntil": null,
+      "woundedUntil": "2026-06-01T12:34:24.000Z",
       "quest": null,
       "offers": [
        {
@@ -17140,11 +17041,14 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
-      "units": {
-       "spearman": 8
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
       },
+      "units": {},
       "status": "done",
       "battleId": null,
       "path": [
@@ -17181,8 +17085,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": "2026-06-01T12:24:48.000Z",
+      "returnsAt": "2026-06-01T12:24:48.000Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T12:24:48.000Z",
+      "hungrySince": "2026-06-01T12:06:48.000Z"
      }
     ],
     "forts": [],
@@ -19412,11 +19319,9 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 8
-      },
-      "away": {
        "spearman": 0
       },
+      "away": {},
       "stance": "balanced",
       "besieged": false,
       "adminUpkeep": 0,
@@ -19435,15 +19340,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 598,
+        "iron": 545,
         "wood": 1000,
-        "grain": 316.6666666666666,
+        "grain": 748.5333333333332,
         "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -32,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -19452,7 +19357,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:40:24.000Z"
+       "settledAt": "2026-06-01T11:38:00.000Z"
       }
      }
     ],
@@ -19846,11 +19751,14 @@
       ],
       "heroAccountId": 1,
       "generalId": null,
-      "orders": "clear",
-      "loot": null,
-      "units": {
-       "spearman": 8
+      "orders": "hold",
+      "loot": {
+       "iron": 48,
+       "wood": 90,
+       "grain": 90,
+       "stone": 90
       },
+      "units": {},
       "status": "done",
       "battleId": null,
       "path": [
@@ -19887,8 +19795,11 @@
       ],
       "departsAt": "2026-06-01T11:38:00.000Z",
       "arrivesAt": "2026-06-01T11:39:12.000Z",
-      "leavesAt": "2026-06-01T11:39:12.000Z",
-      "returnsAt": "2026-06-01T11:40:24.000Z"
+      "leavesAt": "2026-06-01T12:24:48.000Z",
+      "returnsAt": "2026-06-01T12:24:48.000Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T12:24:48.000Z",
+      "hungrySince": "2026-06-01T12:06:48.000Z"
      }
     ],
     "forts": [],
@@ -21948,6 +21859,15 @@
    "response": {
     "notifications": [
      {
+      "id": 11,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Zaslavl starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T12:24:48.000Z",
+      "read": false
+     },
+     {
       "id": 10,
       "kind": "battle_result",
       "tier": "digest",
@@ -22038,7 +21958,7 @@
       "read": false
      }
     ],
-    "unread": 10,
+    "unread": 11,
     "serverTime": "2026-06-01T12:38:00.000Z"
    }
   }

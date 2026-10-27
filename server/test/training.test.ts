@@ -109,7 +109,8 @@ describe('queueTraining', () => {
     const state = withBarracks();
     const at = state.ledger.settledAt;
     const { state: after } = queueTraining(data, state, 'spearman', 10, at, 1);
-    expect(after.ledger.ratesPerHour.grain).toBe(state.ledger.ratesPerHour.grain - 10);
+    // On garrison rations: half their upkeep.
+    expect(after.ledger.ratesPerHour.grain).toBe(state.ledger.ratesPerHour.grain - 10 * data.armies.supply.garrisonUpkeep);
     // Finishing training moves units home without changing upkeep.
     const done = completeTraining(after, batchCompletesAt(after.training[0]!));
     expect(done.garrison).toEqual({ spearman: 10 });

@@ -127,7 +127,7 @@ static func send_scouts(server: LocalServer, world: Dictionary, village: Diction
 		return {"error": "Wave %d not found" % int(body.get("waveId", 0)), "kind": "not_found"}
 	if wave.status in ["dispersed", "defeated"]:
 		return LocalVillage.rule("That horde has already scattered")
-	var state := LocalVillage.send_away(village.state, SCOUT, int(count), now)
+	var state := LocalVillage.send_away(data, village.state, SCOUT, int(count), now, world.speed)
 	if state.has("error"):
 		return state
 	var land := LocalHordes.land_of(world)
@@ -175,7 +175,7 @@ static func on_scout_return(server: LocalServer, world: Dictionary, event: Dicti
 	if mission.is_empty() or mission.status != "returning":
 		return
 	var village := server.find_village(world, int(mission.villageId))
-	village.state = LocalVillage.return_home(village.state, SCOUT, int(mission.survivors if mission.survivors != null else 0))
+	village.state = LocalVillage.return_home(server.data, village.state, SCOUT, int(mission.survivors if mission.survivors != null else 0), int(event.dueAt), world.speed)
 	mission.status = "done"
 	changed.append(["village", village.id])
 	changed.append(["world"])
@@ -221,7 +221,7 @@ static func found_village(server: LocalServer, world: Dictionary, village: Dicti
 	if world.expeditions.any(func(e: Dictionary) -> bool: return int(e.q) == cell.x and int(e.r) == cell.y and e.status == "outbound"):
 		return LocalVillage.rule("Settlers are already on their way there")
 	var settlers := int(data.expansion.settlersNeeded)
-	var state := LocalVillage.send_away(village.state, SETTLER, settlers, now)
+	var state := LocalVillage.send_away(data, village.state, SETTLER, settlers, now, world.speed)
 	if state.has("error"):
 		return LocalVillage.rule("Founding a village takes %d settlers at home" % settlers)
 	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), home, cell, float(data.units.units[SETTLER].speed), world.speed)
@@ -287,7 +287,7 @@ static func on_settlers_return(server: LocalServer, world: Dictionary, event: Di
 	if expedition.is_empty() or expedition.status != "returning":
 		return
 	var home := server.find_village(world, int(expedition.villageId))
-	home.state = LocalVillage.return_home(home.state, SETTLER, int(expedition.settlers))
+	home.state = LocalVillage.return_home(server.data, home.state, SETTLER, int(expedition.settlers), int(event.dueAt), world.speed)
 	expedition.status = "done"
 	changed.append(["village", home.id])
 	changed.append(["world"])

@@ -21,7 +21,7 @@ import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import { listCamps } from '../db/camps.js';
 import { distanceShare, placeSites, rollFind, type Find } from '../sim/sites.js';
-import { armyLosses, sendHome } from './armies.js';
+import { armyLosses, holdHex, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
@@ -220,7 +220,8 @@ export const siteHandlers: HandlerRegistry = {
     if (find.type === 'resources') after = { ...army, loot: find.resources };
     await claimFind(client, data, world, site, army.ownerAccountId, ownerHero, find, event.dueAt);
     if (after !== army) await saveArmy(client, after);
-    await sendHome(client, world, after, event.dueAt, data);
+    // Searched, the army stands on the site's hex until it is moved or called home.
+    await holdHex(client, data, world, after, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },

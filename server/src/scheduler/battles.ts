@@ -36,7 +36,7 @@ import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { hordeStats, leaderAfter } from './leaders.js';
-import { armyLosses, rallyToBattle, sendHome } from './armies.js';
+import { armyLosses, planHunger, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits, splitLosses } from '../sim/armies.js';
 import { fieldRound } from './field.js';
@@ -239,7 +239,8 @@ export const battleHandlers: HandlerRegistry = {
     for (const army of armies) {
       if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
       else if (outcome !== 'ongoing') {
-        await saveArmy(client, total(army.units) ? { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 } : { ...army, status: 'done' });
+        if (total(army.units)) await planHunger(client, data, world, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 }, at);
+        else await saveArmy(client, { ...army, status: 'done' });
       } else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
     }
     if (engaged.length) await notifyWorld(client, { worldId: world.id, type: 'armies' });

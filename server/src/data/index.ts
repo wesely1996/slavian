@@ -462,6 +462,15 @@ const notificationsFileSchema = z.object({
 
 const armiesFileSchema = z.object({
   version: z.number().int(),
+  // Field armies carry their own grain (sim/supply.ts).
+  supply: z.object({ hours: z.number().positive(), garrisonUpkeep: z.number().min(0).max(1) }),
+  attrition: z.object({
+    slowFactor: z.number().positive().max(1),
+    lossAfterHours: z.number().min(0),
+    lossShare: z.number().positive().max(1),
+    checkHours: z.number().positive(),
+    lostAfterHours: z.number().positive(),
+  }),
   pincer: z.object({ minAngle: z.number().min(0).max(180), maxBonus: z.number().nonnegative(), scale: z.number().nonnegative() }),
   harass: z.object({
     minCavalryShare: z.number().min(0).max(1),

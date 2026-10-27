@@ -80,6 +80,9 @@ const SERBIAN: Record<string, string> = {
 	'{name} is wounded': '{name} je ranjen',
 	'Back on their feet in a few hours.': 'Na nogama za nekoliko sati.',
 	'{name} reached level {level}': '{name} je stigao do nivoa {level}',
+	// Field armies
+	'An army from {village} starved': 'Vojska iz sela {village} je umrla od gladi',
+	'With no food left it scattered; none of them will come back.': 'Bez hrane se razbežala; niko od njih se neće vratiti.',
 	// Generals
 	'{name} answers your call': '{name} se odaziva tvom pozivu',
 	'A new general stands ready.': 'Novi general je spreman.',

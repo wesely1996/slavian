@@ -241,7 +241,9 @@ export function unitsFed(state: Pick<VillageState, 'garrison' | 'training' | 'aw
 }
 
 // Net rates: production minus grain upkeep for every unit the village
-// feeds. Grain can go negative; the ledger floors amounts at zero.
+// feeds: troops at home and in training on garrison rations, units away
+// (scouts, settlers, escorts) in full. Field armies carry their own grain.
+// Grain can go negative; the ledger floors amounts at zero.
 export function villageRates(
   data: GameData,
   state: Pick<VillageState, 'plots' | 'besieged' | 'garrison' | 'training' | 'away' | 'adminUpkeep' | 'bonuses'>,
@@ -249,7 +251,8 @@ export function villageRates(
 ): Resources {
   const bonuses = villageBonuses(data, state);
   const rates = productionPerHour(data, state.plots, worldSpeed, state.besieged, bonuses);
-  const troops = upkeepPerHour(data, unitsFed(state), worldSpeed) * Math.max(0, 1 + bonus(bonuses, 'upkeep'));
+  const home = upkeepPerHour(data, allUnits(state.garrison, state.training), worldSpeed) * data.armies.supply.garrisonUpkeep;
+  const troops = (home + upkeepPerHour(data, state.away, worldSpeed)) * Math.max(0, 1 + bonus(bonuses, 'upkeep'));
   const upkeep = troops + state.adminUpkeep * worldSpeed;
   return { ...rates, grain: rates.grain - upkeep };
 }
@@ -644,17 +647,28 @@ export function completeTraining(state: VillageState, at: Date): VillageState {
 
 export class NotEnoughUnitsError extends RuleError {}
 
-// Sends `count` units of `unit` away from home. Units finished training by
-// `at` count as home.
-export function sendAway(state: VillageState, unit: string, count: number, at: Date): VillageState {
+// Sends `count` units of `unit` away from home (they eat full rations
+// away). Units finished training by `at` count as home.
+export function sendAway(data: GameData, state: VillageState, unit: string, count: number, at: Date, worldSpeed: number): VillageState {
   const settled = completeTraining(state, at);
   const home = settled.garrison[unit] ?? 0;
   if (home < count) throw new NotEnoughUnitsError(`Only ${home} ${unit} at home`);
-  return {
-    ...settled,
-    garrison: { ...settled.garrison, [unit]: home - count },
-    away: addUnits(settled.away, { [unit]: count }),
-  };
+  const next = { ...settled, garrison: { ...settled.garrison, [unit]: home - count }, away: addUnits(settled.away, { [unit]: count }) };
+  return { ...next, ledger: withRates(settled.ledger, at, villageRates(data, next, worldSpeed), settled.ledger.capacity) };
+}
+
+// Units leaving the garrison for good, or as a field army (which carries
+// its own grain). Units finished training by `at` count as home.
+export function leaveGarrison(data: GameData, state: VillageState, units: Units, at: Date, worldSpeed: number): VillageState {
+  const settled = completeTraining(state, at);
+  const garrison: Record<string, number> = { ...settled.garrison };
+  for (const [unit, count] of Object.entries(units)) {
+    const home = garrison[unit] ?? 0;
+    if (home < count) throw new NotEnoughUnitsError(`Only ${home} ${unit} at home`);
+    garrison[unit] = home - count;
+  }
+  const next = { ...settled, garrison };
+  return { ...next, ledger: withRates(settled.ledger, at, villageRates(data, next, worldSpeed), settled.ledger.capacity) };
 }
 
 // Units away that will never come back (killed): they stop eating now.
@@ -664,13 +678,14 @@ export function loseAway(data: GameData, state: VillageState, unit: string, coun
   return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
 }
 
-// Units coming home from a mission.
-export function returnHome(state: VillageState, unit: string, count: number): VillageState {
-  return {
+// Units coming home from a mission, back on garrison rations.
+export function returnHome(data: GameData, state: VillageState, unit: string, count: number, at: Date, worldSpeed: number): VillageState {
+  const next = {
     ...state,
     away: { ...state.away, [unit]: Math.max(0, (state.away[unit] ?? 0) - count) },
     garrison: addUnits(state.garrison, { [unit]: count }),
   };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), state.ledger.capacity) };
 }
 
 // Garrison losses in battle: the dead stop eating from `at`.
