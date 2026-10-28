@@ -39,7 +39,7 @@ static func caravans_for(data: Dictionary, load: Dictionary, bonuses: Dictionary
 ## The road between two hexes: [{q, r, atMs}], or null when none leads there.
 static func road_route(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, hexes_per_hour: float, world_speed: float) -> Variant:
 	var move_cost := LocalLand.move_cost_on(data, land)
-	var path: Variant = LocalLand.find_path(from, to, move_cost, float(data.field.road.factor))
+	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_road(data))
 	if path == null:
 		return null
 	var ms_per_cost := LocalTime.MS_PER_HOUR / hexes_per_hour / world_speed

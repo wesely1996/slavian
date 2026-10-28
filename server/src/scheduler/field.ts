@@ -5,7 +5,7 @@
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
 import { WATER } from '../sim/mapgen.js';
-import { insertRoad, markRoadStanding, roadEdge, type RoadEdge } from '../db/roads.js';
+import { insertRoad, markRoadStanding, markRoadUpgrading, roadEdge, type RoadEdge } from '../db/roads.js';
 import { canCross } from '../sim/land.js';
 import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
 import { againstFront } from '../sim/clans.js';
@@ -411,7 +411,8 @@ export async function buildCrossing(client: DbClient, data: GameData, world: Wor
   return (await riverEdge(client, world.id, a, b))!;
 }
 
-// Builds a road between two neighbouring hexes near the village.
+// Builds a road between two neighbouring hexes near the village, or
+// improves the standing road there to its next level.
 export async function buildRoad(client: DbClient, data: GameData, world: World, villageId: number, a: Hex, b: Hex, at: Date): Promise<RoadEdge> {
   const rules = data.field.road;
   const village = await loadVillage(client, villageId);
@@ -424,10 +425,15 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
     if (!type || data.terrain.terrain[type].moveCost === null) throw new RuleError('No road can run there');
   }
   if (!canCross(land, a, b)) throw new RuleError('A river lies between; build a bridge first');
-  if (await roadEdge(client, world.id, a, b)) throw new RuleError('A road already runs there');
-  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, rules.cost) });
-  const completesAt = new Date(at.getTime() + (rules.buildSeconds * 1000) / world.speed);
-  await insertRoad(client, world.id, a, b, village.id, completesAt);
+  const existing = await roadEdge(client, world.id, a, b);
+  if (existing?.status === 'building') throw new RuleError('A road is being built there');
+  if (existing?.status === 'upgrading') throw new RuleError('That road is being improved');
+  if (existing && existing.level >= rules.levels.length) throw new RuleError('That road is as good as it gets');
+  const level = rules.levels[existing ? existing.level : 0]!;
+  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, level.cost) });
+  const completesAt = new Date(at.getTime() + (level.buildSeconds * 1000) / world.speed);
+  if (existing) await markRoadUpgrading(client, world.id, a, b, village.id, completesAt);
+  else await insertRoad(client, world.id, a, b, village.id, completesAt);
   await scheduleEvent(client, world.id, completesAt, 'road_built', { aq: a.q, ar: a.r, bq: b.q, br: b.r });
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -438,8 +444,8 @@ export const fieldHandlers: HandlerRegistry = {
   async road_built({ client, world }, event) {
     const { aq, ar, bq, br } = crossingPayload.parse(event.payload);
     const road = await roadEdge(client, world.id, hex(aq, ar), hex(bq, br));
-    if (!road || road.status !== 'building') return;
-    await markRoadStanding(client, world.id, road.a, road.b);
+    if (!road || road.status === 'standing') return;
+    await markRoadStanding(client, world.id, road.a, road.b, road.status === 'upgrading' ? road.level + 1 : road.level);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 

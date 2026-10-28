@@ -583,8 +583,9 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
           hexes: await loadHexes(client, world.id),
           // [aq, ar, bq, br, crossing]: river edges, and their bridges ('standing', 'building' or 'none').
           rivers: (await listRiverEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.crossing, e.size]),
-          // [aq, ar, bq, br, status]: roads ('standing' or 'building').
-          roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status]),
+          // [aq, ar, bq, br, status, level]: roads ('building', 'standing',
+          // or 'upgrading': standing at `level` while improved to the next).
+          roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level]),
         };
   return {
     ...worldSummary(world),

@@ -1858,12 +1858,27 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     let w = (await road({ a: home, b: next })).body;
     expect(w.map.roads).toHaveLength(1);
     expect(w.map.roads[0][4]).toBe('building');
-    expect((await road({ a: next, b: home })).body.message).toMatch(/already/);
-    now = new Date(now.getTime() + (scheduler.data.field.road.buildSeconds * 1000) / 10);
-    await tick(db, now, scheduler);
-    w = (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
-    expect(w.map.roads[0][4]).toBe('standing');
-    expect(await march()).toBe(Math.round(offRoad * scheduler.data.field.road.factor));
+    expect((await road({ a: next, b: home })).body.message).toMatch(/being built/);
+    const levels = scheduler.data.field.road.levels;
+    const done = async (level: number) => {
+      now = new Date(now.getTime() + (levels[level - 1]!.buildSeconds * 1000) / 10);
+      await tick(db, now, scheduler);
+      return (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body.map.roads[0];
+    };
+    expect(await done(1)).toEqual([...w.map.roads[0].slice(0, 4), 'standing', 1]);
+    expect(await march()).toBe(Math.round(offRoad * levels[0]!.factor));
+    // Improved twice: each level faster, and the road keeps its level while
+    // the work goes on.
+    w = (await road({ a: next, b: home })).body;
+    expect(w.map.roads[0].slice(4)).toEqual(['upgrading', 1]);
+    expect(await march()).toBe(Math.round(offRoad * levels[0]!.factor));
+    expect((await road({ a: home, b: next })).body.message).toMatch(/being improved/);
+    expect((await done(2)).slice(4)).toEqual(['standing', 2]);
+    expect(await march()).toBe(Math.round(offRoad * levels[1]!.factor));
+    await road({ a: home, b: next });
+    expect((await done(3)).slice(4)).toEqual(['standing', 3]);
+    expect(await march()).toBe(Math.round(offRoad * levels[2]!.factor));
+    expect((await road({ a: home, b: next })).body.message).toMatch(/as good as it gets/);
   });
 
   it('fights at the walls: siege works, battering, towers and a breach', villagesFirst(async () => {

@@ -174,14 +174,16 @@ func _draw() -> void:
 
 
 ## A road between two hex centres: a dirt track, faded while being built.
+## A road, wider at each level; faded while first being built.
 func _draw_road(road: Array) -> void:
 	var a := HexMath.to_pixel(Vector2i(int(road[0]), int(road[1])), hex_size)
 	var b := HexMath.to_pixel(Vector2i(int(road[2]), int(road[3])), hex_size)
-	var tint := Color.WHITE if String(road[4]) == "standing" else Color(1, 1, 1, 0.45)
-	draw_line(a, b, ROAD_EDGE * Color(1, 1, 1, tint.a), hex_size * 0.15, true)
-	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.09, true)
-	draw_circle(a, hex_size * 0.045, ROAD_COLOR * tint)
-	draw_circle(b, hex_size * 0.045, ROAD_COLOR * tint)
+	var tint := Color(1, 1, 1, 0.45) if String(road[4]) == "building" else Color.WHITE
+	var wide := 1.0 + 0.3 * float((int(road[5]) if road.size() > 5 else 1) - 1)
+	draw_line(a, b, ROAD_EDGE * Color(1, 1, 1, tint.a), hex_size * 0.15 * wide, true)
+	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.09 * wide, true)
+	draw_circle(a, hex_size * 0.045 * wide, ROAD_COLOR * tint)
+	draw_circle(b, hex_size * 0.045 * wide, ROAD_COLOR * tint)
 
 
 ## A river along the edge between two hexes, and its bridge if one stands

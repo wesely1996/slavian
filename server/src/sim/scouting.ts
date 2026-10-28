@@ -2,7 +2,7 @@
 // survivors' report is as precise as their number allows. Everything is
 // seeded by the world seed and mission id, so a mission resolves the same
 // way every time.
-import { moveCostOn, type Land } from './land.js';
+import { fastestRoad, moveCostOn, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
@@ -70,7 +70,7 @@ export function scoutTravelMs(
   bonuses: Bonuses = {},
 ): number {
   const moveCost = moveCostOn(data, terrain);
-  const path = findPath(from, to, moveCost, data.field.road.factor);
+  const path = findPath(from, to, moveCost, fastestRoad(data));
   // Off-road targets (e.g. a horde standing in impassable terrain): count
   // straight-line distance over rough ground.
   const cost = path ? path.slice(1).reduce((sum, cell, i) => sum + moveCost(path[i]!, cell)!, 0) : hexDistance(from, to) * 2;

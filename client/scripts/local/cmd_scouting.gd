@@ -37,7 +37,7 @@ static func scout_target(data: Dictionary, terrain: Dictionary, wave: Dictionary
 ## Real-time ms for scouts to walk from `from` to `to`.
 static func scout_travel_ms(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, world_speed: float, bonuses: Dictionary = {}) -> int:
 	var move_cost := LocalLand.move_cost_on(data, land)
-	var path: Variant = LocalLand.find_path(from, to, move_cost, float(data.field.road.factor))
+	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_road(data))
 	var cost := 0.0
 	if path != null:
 		for i in range(1, path.size()):
