@@ -21,9 +21,15 @@ export function armyUpkeep(data: GameData, units: Units, worldSpeed: number): nu
   return upkeepPerHour(data, units, worldSpeed);
 }
 
-// Grain for `supply.hours` game hours of an army's upkeep.
+// The grain an army carries when full: each unit its own `supplyHours`
+// game hours of its upkeep (data/units.json).
 export function fullSupply(data: GameData, units: Units): number {
-  return upkeepPerHour(data, units, 1) * data.armies.supply.hours;
+  let total = 0;
+  for (const [unit, count] of Object.entries(units)) {
+    const def = data.units.units[unit];
+    if (def) total += def.upkeepPerHour * def.supplyHours * count;
+  }
+  return total;
 }
 
 export function supplyLeft(data: GameData, army: Supplied, at: Date, worldSpeed: number): number {

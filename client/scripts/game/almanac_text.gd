@@ -41,8 +41,8 @@ static func _units(data: Dictionary) -> Array:
 	for id in units:
 		var u: Dictionary = units[id]
 		var where := UI.t("%s level %d") % [UI.t(data.buildings.buildings[u.building].name), int(u.requiresLevel)]
-		var text := UI.t("%s · attack %d · defense %d · speed %d hexes/h · carries %d · eats %d grain/h · trained at %s") % [
-			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.speed), int(u.carry), int(u.upkeepPerHour), where]
+		var text := UI.t("%s · attack %d · defense %d · speed %d hexes/h · carries %d · eats %d grain/h · food for %d h on the march · trained at %s") % [
+			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.speed), int(u.carry), int(u.upkeepPerHour), int(u.get("supplyHours", 0)), where]
 		if u.get("counters") != null:
 			var strong := PackedStringArray()
 			for target in u.counters:

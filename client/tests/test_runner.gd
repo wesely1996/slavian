@@ -457,6 +457,12 @@ func _test_field() -> void:
 	var start := TimeUtil.parse_iso("2026-06-01T00:00:00Z")
 	_check(is_equal_approx(ArmyText.supply_left(units, fed, 1.0, start + 6 * 3600.0), 36.0), "an army's grain left after six hours")
 	_check(ArmyText.supply_left(units, fed, 1.0, start + 30 * 3600.0) == 0.0, "none left once it has run out")
+	var udata := {"units": {"units": {"spearman": {"upkeepPerHour": 1, "supplyHours": 24}, "horseman": {"upkeepPerHour": 2, "supplyHours": 36}}},
+		"armies": {"attrition": {"slowFactor": 0.75, "lossAfterHours": 8, "lossShare": 0.05, "lostAfterHours": 24}}}
+	_check(ArmyText.full_supply(udata, {"spearman": 2, "horseman": 1}) == 120.0 and ArmyText.upkeep(udata, {"spearman": 2, "horseman": 1}) == 4.0, "an army's full load: each unit its own hours")
+	_check(ArmyText.fatigue(udata, fed, 1.0, start + 6 * 3600.0) == 0.0 and ArmyText.fatigue_text(udata, fed, 1.0, start) == "Fed: no fatigue", "fed: no fatigue")
+	_check(is_equal_approx(ArmyText.fatigue(udata, fed, 1.0, start + 30 * 3600.0), 0.25) and ArmyText.fatigue_text(udata, fed, 1.0, start + 30 * 3600.0).begins_with("Hungry"), "six hours hungry: a quarter worn, slower")
+	_check(ArmyText.fatigue_text(udata, fed, 1.0, start + 40 * 3600.0).begins_with("Starving") and ArmyText.fatigue(udata, fed, 1.0, start + 60 * 3600.0) == 1.0, "starving, then lost")
 	var hold := {"orders": "hold", "status": "stationed", "targetVillageId": null, "target": [2, -1]}
 	_check(ArmyText.held_hex(hold) == Vector2i(2, -1), "held hex")
 	_check(ArmyText.status(hold, ArmyText.target_name(hold, func(_id: Variant) -> String: return "?"), 0.0) == "Holding (2, -1)", "hold status")

@@ -86,6 +86,10 @@ var _supply_fort := 0
 var _supply_target := 1000
 ## What the bottom panel shows: "hex" (the selected hex) or "threats".
 var _panel_mode := "hex"
+## The army whose sheet is open, and the one waiting for a hex to march to
+## (0: none).
+var _army_id := 0
+var _army_moving := 0
 ## The side tab open on each sheet ("threats", "hero", …), and the page each
 ## paged list is on.
 var _side: Dictionary[String, String] = {}
@@ -1146,6 +1150,15 @@ func _rebuild_panel() -> void:
 		_road_from = Vector2i.MAX
 		hex_map.show_road_targets([])
 		_status.text = ""
+	# Likewise an army waiting to be told where to march.
+	if _panel_mode != "army":
+		if _army_moving != 0:
+			_army_moving = 0
+			_status.text = ""
+		hex_map.select_army(0)
+	if _panel_mode == "army":
+		_army_panel()
+		return
 	if _panel_mode == "run":
 		_run_panel()
 		return
@@ -1732,6 +1745,8 @@ func _armies_section(village: Dictionary) -> void:
 				food.add_theme_color_override("font_color", UI.ERROR if hungry else UI.MUTED)
 				return ArmyText.supply_text(Game.data, army, float(Game.world.speed), Game.server_now()))
 		row.add_child(info)
+		var view_id := int(army.id)
+		row.add_child(UI.button(tr("View"), func() -> void: _open_army(view_id)))
 		_panel_body.add_child(row)
 		if mine and army.status == "stationed":
 			_army_orders_row(army))
@@ -1924,6 +1939,8 @@ func _hold_panel(terrain_id: String) -> void:
 		var where := ArmyText.target_name(army, Game.village_name)
 		_tick(line, func() -> String: return ArmyText.status(army, where, Game.server_now()))
 		row.add_child(info)
+		var view_id := int(army.id)
+		row.add_child(UI.button(tr("View"), func() -> void: _open_army(view_id)))
 		if army.ownerAccountId != null and int(army.ownerAccountId) == Game.my_account_id() and army.status == "stationed":
 			var army_id := int(army.id)
 			var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
@@ -2236,6 +2253,142 @@ func _dismiss_general(general_id: int) -> void:
 		_status.text = response.error
 		return
 	Game.set_generals(Game.world_id(), Game.generals.filter(func(g: Dictionary) -> bool: return int(g.id) != general_id))
+
+
+# --- An army's own sheet ----------------------------------------------------------
+
+func _open_army(army_id: int) -> void:
+	_army_id = army_id
+	_army_moving = 0
+	_panel_mode = "army"
+	hex_map.select_army(army_id)
+	_rebuild_panel()
+
+
+func _find_army(army_id: int) -> Dictionary:
+	for army in Game.armies:
+		if int(army.id) == army_id:
+			return army
+	return {}
+
+
+## A thin gauge (0..1), gold for grain or red for fatigue.
+func _gauge(color: Color) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 10)
+	bar.max_value = 1.0
+	bar.step = 0.0
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	fill.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("fill", fill)
+	return bar
+
+
+## An army: where it is and what it does, each kind of troop with what it
+## eats and how long it can carry food, the grain it carries, its fatigue
+## (from hunger), the store where it stands, and its orders. Moving it:
+## a button, then the hex (or village) tapped on the map.
+func _army_panel() -> void:
+	var army := _find_army(_army_id)
+	var top := UI.hbox()
+	if not army.is_empty() and Art.has("unit/" + ArmyText.main_unit(army)):
+		top.add_child(UI.icon("unit/" + ArmyText.main_unit(army), 40))
+	var title := UI.label(tr("Army from %s") % Game.village_name(army.homeVillageId) if not army.is_empty() else tr("Army"), UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UI.button(tr("Close"), func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	if army.is_empty() or army.status == "done":
+		_panel_body.add_child(UI.label(tr("This army is no more: it came home, was disbanded or was lost."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var data := Game.data
+	var speed := float(Game.world.speed)
+	var defs: Dictionary = data.units.units
+	var target := ArmyText.target_name(army, Game.village_name)
+	var where := UI.label("", UI.SMALL_SIZE)
+	_panel_body.add_child(where)
+	_tick(where, func() -> String: return ArmyText.status(army, target, Game.server_now()))
+	var led := PackedStringArray()
+	for hero in Game.heroes:
+		if army.get("heroAccountId") != null and int(hero.accountId) == int(army.heroAccountId):
+			led.append(hero.name)
+	for general in Game.generals:
+		if army.get("generalId") != null and int(general.id) == int(army.generalId):
+			led.append(general.name)
+	if not led.is_empty():
+		_panel_body.add_child(UI.label(tr("Led by %s") % ", ".join(led), UI.SMALL_SIZE, UI.MUTED))
+
+	# The troops: what each eats, and how long each can carry its food.
+	_panel_body.add_child(UI.label(tr("Troops"), UI.HEADING_SIZE))
+	for unit in army.units:
+		if int(army.units[unit]) <= 0:
+			continue
+		var def: Dictionary = defs.get(unit, {})
+		var row := UI.hbox(10)
+		if Art.has("unit/%s" % unit):
+			row.add_child(UI.icon("unit/%s" % unit, 36))
+		var words := UI.vbox(0)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(tr("%s ×%d") % [tr(def.get("name", unit)), int(army.units[unit])], UI.SMALL_SIZE))
+		words.add_child(UI.label(tr("Eats %s grain a game hour each · carries %d hours of food") % [_grain_number(float(def.get("upkeepPerHour", 0))), int(def.get("supplyHours", 0))], UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(words)
+		_panel_body.add_child(row)
+
+	# Its grain, and how worn it is for want of it.
+	_panel_body.add_child(UI.label(tr("Supply"), UI.HEADING_SIZE))
+	var eats := ArmyText.upkeep(data, army.units)
+	if army.get("supply") == null:
+		_panel_body.add_child(UI.label(tr("Fed by its home village: %s grain a game hour.") % _grain_number(eats), UI.SMALL_SIZE, UI.MUTED))
+	else:
+		var full := ArmyText.full_supply(data, army.units)
+		var grain_bar := _gauge(HexMap.GRAIN_COLOR)
+		_panel_body.add_child(grain_bar)
+		var grain := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(grain)
+		_tick(grain, func() -> String:
+			var left := ArmyText.supply_left(data, army, speed, Game.server_now())
+			grain_bar.value = left / full if full > 0 else 0.0
+			return tr("Grain %d of %d · eats %s a game hour") % [floori(left), floori(full), _grain_number(eats)])
+		var lasts := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(lasts)
+		_tick(lasts, func() -> String: return ArmyText.supply_text(data, army, speed, Game.server_now()))
+	var tired_row := UI.hbox(8)
+	tired_row.add_child(UI.label(tr("Fatigue"), UI.SMALL_SIZE))
+	var tired_bar := _gauge(UI.ERROR)
+	tired_row.add_child(tired_bar)
+	_panel_body.add_child(UI.with_info(tired_row, tr("Fatigue comes from hunger alone: out of food an army marches slower, after a while it loses men every hour, and after a day it is lost.")))
+	var tired := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(tired)
+	_tick(tired, func() -> String:
+		tired_bar.value = ArmyText.fatigue(data, army, speed, Game.server_now())
+		tired.add_theme_color_override("font_color", UI.ERROR if tired_bar.value > 0 else UI.MUTED)
+		return ArmyText.fatigue_text(data, army, speed, Game.server_now()))
+	# The store where it stands.
+	var store := Game.fort_at(ArmyText.held_hex(army)) if army.status in ["stationed", "engaged"] else {}
+	if not store.is_empty() and store.status == "standing":
+		var place := tr("Supply point") if store.get("kind", "fort") == "supply" else tr("Fort")
+		_panel_body.add_child(UI.label(tr("%s here: %d of %d grain") % [place, floori(float(store.get("grain", 0))), int(FieldRules.grain_capacity(data, store.get("kind", "fort")))], UI.SMALL_SIZE))
+
+	# Orders, for your own army standing still.
+	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	if not mine or army.status != "stationed":
+		return
+	_panel_body.add_child(UI.label(tr("Orders"), UI.HEADING_SIZE))
+	var army_id := int(army.id)
+	_panel_body.add_child(UI.button(tr("Move: tap a hex or a village"), func() -> void:
+		_army_moving = army_id
+		_status.text = tr("Tap the hex (or village) for the army to march to."), "icon/map"))
+	_army_orders_row(army)
+
+
+## Grain as it reads best: whole numbers bare, else one decimal.
+func _grain_number(value: float) -> String:
+	return str(int(value)) if is_equal_approx(value, roundf(value)) else "%.1f" % value
 
 
 ## What a standing army can be told: come home, march into a village, take
@@ -4093,7 +4246,18 @@ func _queue_build(village_id: int, plot: String, building: String) -> void:
 # --- Events ------------------------------------------------------------------
 
 func _on_map_tapped(world_position: Vector2) -> void:
-	var cell := hex_map.local_to_hex(hex_map.to_local(world_position))
+	var local := hex_map.to_local(world_position)
+	var cell := hex_map.local_to_hex(local)
+	# Moving an army: the hex tapped (or the village on it) is where it goes.
+	if _army_moving != 0:
+		var army_id := _army_moving
+		_army_moving = 0
+		_status.text = ""
+		if hex_map.has_hex(cell):
+			var village := Game.village_at(cell)
+			_army_command(army_id, "move", {"villageId": int(village.id)} if not village.is_empty() else {"target": {"q": cell.x, "r": cell.y}})
+		_rebuild_panel()
+		return
 	# Laying a road: the hex tapped is where it goes (anything else cancels).
 	if _road_from != Vector2i.MAX:
 		var from := _road_from
@@ -4104,6 +4268,11 @@ func _on_map_tapped(world_position: Vector2) -> void:
 		if picked:
 			_build_road(_road_village, from, cell)
 			return
+	# An army's marker: its own sheet.
+	var tapped_army := hex_map.army_at(local, Game.server_now()) if _road_from == Vector2i.MAX else 0
+	if tapped_army != 0:
+		_open_army(tapped_army)
+		return
 	if hex_map.has_hex(cell):
 		_select(cell)
 
@@ -4283,6 +4452,10 @@ func _forces_armies() -> void:
 			_select(cell))
 		show.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(show)
+		var view_id := int(army.id)
+		var view := UI.button(tr("View"), func() -> void: _open_army(view_id))
+		view.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(view)
 		_panel_body.add_child(row))
 
 

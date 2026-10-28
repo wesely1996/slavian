@@ -21,6 +21,7 @@ const SETTLERS_COLOR := Color("#e8e2d0")
 const HERO_COLOR := Color("#9b7bd4")
 const ARMY_COLOR := Color("#5b8fd6")
 const FORT_COLOR := Color("#8b6a45")
+const GRAIN_COLOR := Color("#e2b33c")
 const SITE_COLOR := Color("#d9b85c")
 ## Sides, for banners and outlines.
 const MINE_COLOR := Color("#4caf50")
@@ -87,6 +88,15 @@ func hex_to_local(cell: Vector2i) -> Vector2:
 
 func select(cell: Vector2i) -> void:
 	selected = cell
+	queue_redraw()
+
+
+## The army whose sheet is open (0: none): ringed on the map.
+var selected_army := 0
+
+
+func select_army(army_id: int) -> void:
+	selected_army = army_id
 	queue_redraw()
 
 
@@ -301,9 +311,43 @@ func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
 	draw_polyline(diamond, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
+## Where an army's marker is drawn (Vector2.INF: not on the map).
+func army_position(army: Dictionary, now: float) -> Vector2:
+	if army.status == "done":
+		return Vector2.INF
+	var p := ArmyText.progress(army, now)
+	if not p.is_empty():
+		return HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	if army.status in ["stationed", "engaged"] and ArmyText.held_hex(army) != Vector2i.MAX:
+		return HexMath.to_pixel(ArmyText.held_hex(army), hex_size) + Vector2(hex_size * 0.36, hex_size * 0.3)
+	if army.status in ["stationed", "engaged"]:
+		var village: Dictionary = Game.villages.get(int(army.targetVillageId), {})
+		if not village.is_empty():
+			return HexMath.to_pixel(Vector2i(int(village.q), int(village.r)), hex_size) + Vector2(-hex_size * 0.42, hex_size * 0.38)
+	return Vector2.INF
+
+
+## The id of the army whose marker is under `local` (0: none): the
+## nearest, your own before others'.
+func army_at(local: Vector2, now: float) -> int:
+	var best := 0
+	var best_d := INF
+	var best_mine := false
+	for army in Game.armies:
+		var pos := army_position(army, now)
+		if pos == Vector2.INF or pos.distance_to(local) > hex_size * 0.3:
+			continue
+		var d := pos.distance_to(local)
+		var mine := int(army.get("ownerAccountId", -1)) == Game.my_account_id()
+		if (mine and not best_mine) or (mine == best_mine and d < best_d):
+			best = int(army.id)
+			best_d = d
+			best_mine = mine
+	return best
+
+
 ## An army: a blue shield on the road, or beside the village it guards.
 func _draw_army(army: Dictionary, now: float) -> void:
-	var pos := Vector2.INF
 	var p := ArmyText.progress(army, now)
 	var mine := int(army.get("ownerAccountId", -1)) == Game.my_account_id()
 	if mine:
@@ -312,16 +356,11 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	var held := ArmyText.held_hex(army)
 	if mine and held != Vector2i.MAX and army.status in ["marching", "stationed", "engaged"] and army.orders == "hold":
 		_draw_ambush(held, army.status != "marching")
-	if not p.is_empty():
-		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
-	elif army.status in ["stationed", "engaged"] and ArmyText.held_hex(army) != Vector2i.MAX:
-		pos = HexMath.to_pixel(ArmyText.held_hex(army), hex_size) + Vector2(hex_size * 0.36, hex_size * 0.3)
-	elif army.status in ["stationed", "engaged"]:
-		var village: Dictionary = Game.villages.get(int(army.targetVillageId), {})
-		if not village.is_empty():
-			pos = HexMath.to_pixel(Vector2i(int(village.q), int(village.r)), hex_size) + Vector2(-hex_size * 0.42, hex_size * 0.38)
+	var pos := army_position(army, now)
 	if pos == Vector2.INF:
 		return
+	if int(army.id) == selected_army:
+		draw_arc(pos, hex_size * 0.34, 0.0, TAU, 32, SELECTION_COLOR, 3.0, true)
 	var side := MINE_COLOR if int(army.get("ownerAccountId", -1)) == Game.my_account_id() else ALLY_COLOR
 	if Art.has("unit/" + ArmyText.main_unit(army)):
 		draw_circle(pos, hex_size * 0.27, side)
@@ -379,9 +418,26 @@ func _draw_camp(camp: Dictionary) -> void:
 
 
 ## A fort: a squat tower with battlements, faded while being built. A
-## supply point: a stack of grain sacks under a roof.
+## supply point: a stack of grain sacks under a roof. A standing one shows
+## how full its grain store is.
 func _draw_fort(fort: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(fort.q), int(fort.r)), hex_size)
+	if fort.status == "standing":
+		_draw_grain_bar(c + Vector2(0, hex_size * 0.62), float(fort.get("grain", 0)) / FieldRules.grain_capacity(Game.data, fort.get("kind", "fort")))
+	_draw_fort_body(fort, c)
+
+
+## A grain gauge under a store: gold for what it holds.
+func _draw_grain_bar(at: Vector2, full: float) -> void:
+	var w := hex_size * 0.8
+	var h := hex_size * 0.1
+	var box := Rect2(at - Vector2(w / 2.0, h / 2.0), Vector2(w, h))
+	draw_rect(box, Color(0, 0, 0, 0.55))
+	draw_rect(Rect2(box.position, Vector2(w * clampf(full, 0.0, 1.0), h)), GRAIN_COLOR)
+	draw_rect(box, VILLAGE_OUTLINE_COLOR, false, 1.5)
+
+
+func _draw_fort_body(fort: Dictionary, c: Vector2) -> void:
 	var supply: bool = fort.get("kind", "fort") == "supply"
 	var art := "map/supply_point" if supply else "map/fort"
 	if Art.has(art):
