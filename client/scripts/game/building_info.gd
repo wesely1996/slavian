@@ -116,6 +116,7 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 		UI.t("Only %s") % ClanText.title(data, def.clan) if def.get("clan") != null else ""))
 	box.add_child(UI.label(UI.t("%s · attack %d · defense %d") % [family.capitalize(), int(def.attack), int(def.defense)], UI.SMALL_SIZE))
 	box.add_child(UI.label(UI.t("Speed %d hexes/h · carries %d · eats %d grain/h") % [int(def.speed), int(def.carry), int(def.upkeepPerHour)], UI.SMALL_SIZE))
+	box.add_child(UI.label(UI.t("Marches out with food for %d game hours") % int(def.get("supplyHours", 0)), UI.SMALL_SIZE))
 	var counters: Dictionary = data.battle.counters
 	# Its own counters, or its family's.
 	var strong: Dictionary = def.counters if def.get("counters") != null else counters.get(family, {})

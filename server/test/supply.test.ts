@@ -12,11 +12,19 @@ describe('army supply', () => {
   const army = { units: { spearman: 10 }, supply: fullSupply(data, { spearman: 10 }), supplyAt: T0, hungrySince: null };
 
   it('carries a day of food and eats it', () => {
-    expect(army.supply).toBe(10 * data.armies.supply.hours);
+    expect(army.supply).toBe(10 * data.units.units.spearman!.supplyHours);
     expect(supplyLeft(data, army, at(6), 1)).toBeCloseTo(army.supply - 60);
     expect(hungry(data, army, at(23), 1)).toBe(false);
     expect(hungry(data, army, at(24), 1)).toBe(true);
     expect(supplySpeedFactor(data, army, at(25), 1)).toBe(data.armies.attrition.slowFactor);
+  });
+
+  it('carries what each unit carries: riders more than foot, light foot more than heavy', () => {
+    const hours = (unit: string) => fullSupply(data, { [unit]: 1 }) / data.units.units[unit]!.upkeepPerHour;
+    expect(hours('horseman')).toBeGreaterThan(hours('spearman'));
+    expect(hours('skirmisher')).toBeGreaterThan(hours('spearman'));
+    expect(hours('spearman')).toBeGreaterThan(hours('large_shield'));
+    expect(fullSupply(data, { spearman: 2, horseman: 1 })).toBe(2 * fullSupply(data, { spearman: 1 }) + fullSupply(data, { horseman: 1 }));
   });
 
   it('starts to lose men hours after the food runs out, then every hour, and is lost after a day', () => {

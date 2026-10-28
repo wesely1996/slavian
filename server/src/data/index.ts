@@ -120,6 +120,8 @@ const unitSchema = z.object({
   costGrowthPerVillage: z.number().min(1).optional(),
   trainSeconds: z.number().positive(),
   upkeepPerHour: z.number().nonnegative(),
+  // Game hours of its own upkeep it carries when it marches out with an army.
+  supplyHours: z.number().positive(),
   speed: z.number().positive(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
@@ -465,7 +467,7 @@ const notificationsFileSchema = z.object({
 const armiesFileSchema = z.object({
   version: z.number().int(),
   // Field armies carry their own grain (sim/supply.ts).
-  supply: z.object({ hours: z.number().positive(), garrisonUpkeep: z.number().min(0).max(1) }),
+  supply: z.object({ garrisonUpkeep: z.number().min(0).max(1) }),
   attrition: z.object({
     slowFactor: z.number().positive().max(1),
     lossAfterHours: z.number().min(0),

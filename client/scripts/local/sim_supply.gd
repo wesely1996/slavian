@@ -11,9 +11,15 @@ static func army_upkeep(data: Dictionary, units: Dictionary, world_speed: float)
 	return LocalVillage.upkeep_per_hour(data, units, world_speed)
 
 
-## Grain for `supply.hours` game hours of an army's upkeep.
+## The grain an army carries when full: each unit its own `supplyHours`
+## game hours of its upkeep (data/units.json).
 static func full_supply(data: Dictionary, units: Dictionary) -> float:
-	return LocalVillage.upkeep_per_hour(data, units, 1.0) * float(data.armies.supply.hours)
+	var total := 0.0
+	for unit in units:
+		var def: Variant = data.units.units.get(unit)
+		if def != null:
+			total += float(def.upkeepPerHour) * float(def.supplyHours) * int(units[unit])
+	return total
 
 
 static func supply_left(data: Dictionary, army: Dictionary, at: int, world_speed: float) -> float:
