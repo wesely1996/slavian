@@ -275,16 +275,16 @@ export interface OutpostTarget {
   readonly cell: Hex;
 }
 
-// Outposts within `reach` hexes of a route, each with the time (ms after
-// departure) the horde first comes that close. Steps before `fromMs` are
-// already behind it.
-export function raidsAlong(
+// Outposts (or supply points) within `reach` hexes of a route, each with
+// the time (ms after departure) the horde first comes that close. Steps
+// before `fromMs` are already behind it.
+export function raidsAlong<T extends { readonly cell: Hex }>(
   path: readonly PathStep[],
-  outposts: readonly OutpostTarget[],
+  outposts: readonly T[],
   reach: number,
   fromMs = 0,
-): (OutpostTarget & { atMs: number })[] {
-  const raids: (OutpostTarget & { atMs: number })[] = [];
+): (T & { atMs: number })[] {
+  const raids: (T & { atMs: number })[] = [];
   for (const outpost of outposts) {
     const step = path.find((s) => s.atMs >= fromMs && hexDistance(hex(s.q, s.r), outpost.cell) <= reach);
     if (step) raids.push({ ...outpost, atMs: step.atMs });

@@ -376,13 +376,22 @@ func _draw_camp(camp: Dictionary) -> void:
 	draw_line(c + Vector2(0, -r * 0.1), c + Vector2(0, r * 0.7), VILLAGE_OUTLINE_COLOR, 2.0)
 
 
-## A fort: a squat tower with battlements, faded while being built.
+## A fort: a squat tower with battlements, faded while being built. A
+## supply point: a stack of grain sacks under a roof.
 func _draw_fort(fort: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(fort.q), int(fort.r)), hex_size)
-	if Art.has("map/fort"):
+	var supply: bool = fort.get("kind", "fort") == "supply"
+	var art := "map/supply_point" if supply else "map/fort"
+	if Art.has(art):
 		var side := MINE_COLOR if int(fort.get("ownerAccountId", -1)) == Game.my_account_id() else ALLY_COLOR
 		_draw_ring(c + Vector2(0, hex_size * 0.42), hex_size * 1.2, side)
-		_draw_art("map/fort", c, hex_size * 1.1, Color.WHITE if fort.status == "standing" else Color(1, 1, 1, 0.5))
+		_draw_art(art, c, hex_size * 1.1, Color.WHITE if fort.status == "standing" else Color(1, 1, 1, 0.5))
+		return
+	if supply:
+		var color := FORT_COLOR if fort.status == "standing" else RUINS_COLOR
+		for offset in [Vector2(-0.14, 0.1), Vector2(0.14, 0.1), Vector2(0, -0.08)]:
+			draw_circle(c + offset * hex_size, hex_size * 0.12, color)
+			draw_arc(c + offset * hex_size, hex_size * 0.12, 0, TAU, 16, VILLAGE_OUTLINE_COLOR, 2.0)
 		return
 	var w := hex_size * 0.3
 	var h := hex_size * 0.26

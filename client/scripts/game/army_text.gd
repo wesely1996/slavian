@@ -83,6 +83,15 @@ static func supply_text(data: Dictionary, army: Dictionary, speed: float, now: f
 	return UI.t("Starving: losing men every hour · gone in %s") % TimeUtil.format_duration(maxf(0.0, float(a.lostAfterHours) - hours) * 3600.0 / speed)
 
 
+## The grain an army carries now (0 for one its home village feeds).
+static func supply_left(data: Dictionary, army: Dictionary, speed: float, now: float) -> float:
+	var out := _out_of_food_at(data, army, speed)
+	if out < 0 or now >= out:
+		return 0.0 if out >= 0 or army.get("supply") == null else float(army.supply)
+	var at := TimeUtil.parse_iso(String(army.supplyAt))
+	return float(army.supply) * (out - now) / maxf(1.0, out - at)
+
+
 ## Whether an army carrying its own grain has run out of it.
 static func out_of_food(data: Dictionary, army: Dictionary, speed: float, now: float) -> bool:
 	var out := _out_of_food_at(data, army, speed)

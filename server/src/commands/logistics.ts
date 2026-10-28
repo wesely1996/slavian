@@ -4,6 +4,7 @@ import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
+import { loadFort } from '../db/forts.js';
 import { loadVault, saveVault, type Vault } from '../db/vaults.js';
 import { loadVillage, type Village } from '../db/villages.js';
 import { loadHexes, type World } from '../db/worlds.js';
@@ -28,9 +29,11 @@ import { RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { sendAway, type VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
-// Where a caravan goes: an allied village, or the vault when null.
+// Where a caravan goes: an allied village, or the vault when null (or, on
+// a supply route, a fort or supply point).
 export interface CaravanOrder {
   destinationVillageId: number | null;
+  destinationFortId?: number | undefined;
   load: Resources;
   // Troops guarding it against camps on the road.
   escort?: Record<string, number> | undefined;
@@ -66,7 +69,11 @@ export async function dispatchCaravan(
   }
 
   let to: Hex = HOLY_CITY;
-  if (order.destinationVillageId !== null) {
+  if (order.destinationFortId !== undefined) {
+    const fort = await loadFort(client, order.destinationFortId);
+    if (!fort || fort.worldId !== world.id) throw new NotFoundError('No such fort or supply point');
+    to = hex(fort.q, fort.r);
+  } else if (order.destinationVillageId !== null) {
     if (order.destinationVillageId === village.id) throw new RuleError('Send it to another village');
     const destination = await loadVillage(client, order.destinationVillageId).catch(() => null);
     if (!destination || destination.worldId !== world.id) throw new NotFoundError('No such village in this world');
@@ -80,6 +87,7 @@ export async function dispatchCaravan(
     worldId: world.id,
     villageId: village.id,
     destinationVillageId: order.destinationVillageId,
+    destinationFortId: order.destinationFortId ?? null,
     kind,
     caravans: needed,
     cargo: order.load,

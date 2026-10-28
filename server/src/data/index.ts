@@ -449,6 +449,8 @@ const ordersFileSchema = z.object({
   checkMinutes: z.number().positive(),
   maxPerVillage: z.number().int().positive(),
   minSurplus: z.number().nonnegative(),
+  // Supply routes send grain once at least this much is missing.
+  supplyMinLoad: z.number().int().positive(),
   surplusShare: z.object({ min: z.number().min(0).max(1), max: z.number().min(0).max(1) }),
 });
 
@@ -500,6 +502,15 @@ const fieldFileSchema = z.object({
     cost: resourcesSchema,
     buildSeconds: z.number().positive(),
     defenseBonus: z.number().nonnegative(),
+    // Grain a fort keeps for armies holding it.
+    grainCapacity: z.number().int().positive(),
+  }),
+  // Supply points: grain stores on the map, built like forts.
+  supplyPoint: z.object({
+    range: z.number().int().positive(),
+    cost: resourcesSchema,
+    buildSeconds: z.number().positive(),
+    grainCapacity: z.number().int().positive(),
   }),
   // Bridges players build over river edges (M5 step 3).
   bridge: z.object({

@@ -25,6 +25,16 @@ static func validate(data: Dictionary, spec: Dictionary) -> Dictionary:
 			if not (share >= float(bounds.min) and share <= float(bounds.max)):
 				return LocalVillage.rule("Keep between %d%% and %d%% of storage" % [LocalWaves.js_round(float(bounds.min) * 100), LocalWaves.js_round(float(bounds.max) * 100)])
 			return {"kind": "surplus", "share": spec.share}
+		"supply":
+			var fort_id: Variant = spec.get("fortId")
+			var target: Variant = spec.get("target")
+			if not (fort_id is int or fort_id is float) or float(fort_id) != floorf(float(fort_id)) or float(fort_id) < 1 \
+					or not (target is int or target is float) or float(target) != floorf(float(target)):
+				return {"error": "Say which fort or supply point to keep stocked, and how full", "kind": "invalid"}
+			var most := maxi(int(data.field.fort.grainCapacity), int(data.field.supplyPoint.grainCapacity))
+			if int(target) < int(data.orders.supplyMinLoad) or int(target) > most:
+				return LocalVillage.rule("Keep between %d and %d grain there" % [int(data.orders.supplyMinLoad), most])
+			return {"kind": "supply", "fortId": int(fort_id), "target": int(target)}
 	return {"error": "Unknown order", "kind": "invalid"}
 
 
@@ -53,6 +63,24 @@ static func surplus_load(data: Dictionary, amounts: Dictionary, capacity: Dictio
 		return above
 	var scale := can_carry / total
 	return LocalVillage.resources(func(kind: String) -> int: return floori(int(above[kind]) * scale))
+
+
+## The grain to send on a supply route now: what the store lacks of the
+## target (counting what is on the way), trimmed to what the village has
+## and its caravans at home can carry; 0 when that is too little to bother.
+static func supply_load(data: Dictionary, target: float, stored: float, on_the_way: float, capacity: float, grain: float, can_carry: float) -> int:
+	var missing := floori(minf(target, capacity) - stored - on_the_way)
+	var load := mini(mini(missing, floori(grain)), floori(can_carry))
+	return 0 if load < int(data.orders.supplyMinLoad) else load
+
+
+## Grain on its way into a fort or supply point.
+static func grain_on_the_way(world: Dictionary, fort_id: int) -> float:
+	var n := 0.0
+	for c in world.caravans:
+		if c.get("destinationFortId") != null and int(c.destinationFortId) == fort_id and c.status == "outbound":
+			n += float(c.cargo.grain)
+	return n
 
 
 static func _check_ms(data: Dictionary, world_speed: float) -> int:
@@ -107,6 +135,31 @@ static func _run_order(server: LocalServer, world: Dictionary, village: Dictiona
 	var with_state := village.duplicate()
 	with_state.state = state
 	var capacity := LocalLogistics.caravan_capacity(data, LocalLogistics.effective_bonuses(server, world, with_state))
+	if spec.kind == "supply":
+		var fort := LocalArmies.find_fort(world, int(spec.fortId))
+		if fort.is_empty() or fort.ownerAccountId == null or int(fort.ownerAccountId) != int(village.ownerAccountId):
+			return LocalVillage.rule("That fort or supply point is gone")
+		var where := "(%d, %d)" % [int(fort.q), int(fort.r)]
+		if fort.status != "standing":
+			return LocalVillage.rule("The store at %s is still being built" % where)
+		var room := LocalArmies.grain_capacity(data, fort.get("kind", "fort"))
+		var goal := mini(int(spec.target), int(room))
+		var on_the_way := grain_on_the_way(world, int(fort.id))
+		if floori(goal - float(fort.grain) - on_the_way) < int(data.orders.supplyMinLoad):
+			return {"state": state, "result": "%d grain kept at %s" % [goal, where]}
+		if free <= 0:
+			return {"state": state, "result": "All caravans are out"}
+		var grain := supply_load(data, float(spec.target), float(fort.grain), on_the_way, room, float(LocalLedger.amounts_at(state.ledger, at).grain), free * capacity)
+		if grain <= 0:
+			return {"state": state, "result": "Waiting for resources"}
+		var cargo := {"wood": 0, "stone": 0, "grain": grain, "iron": 0}
+		var sent := LocalLogistics.dispatch(server, world, with_state, "deliver", {"destinationVillageId": null, "destinationFortId": fort.id, "load": cargo}, at)
+		if sent.has("error"):
+			return sent
+		LocalLogistics.set_out(server, world, sent, at)
+		var stocked := state.duplicate()
+		stocked.ledger = LocalLedger.spend(state.ledger, at, cargo)
+		return {"state": stocked, "result": "Sent %d grain to %s" % [grain, where]}
 	var load: Variant = surplus_load(data, LocalLedger.amounts_at(state.ledger, at), state.ledger.capacity, float(spec.share), free * capacity)
 	if load == null:
 		return {"state": state, "result": "Nothing above %d%% of storage" % LocalWaves.js_round(float(spec.share) * 100) if free > 0 else "All caravans are out"}
@@ -160,8 +213,12 @@ static func place(server: LocalServer, world: Dictionary, village: Dictionary, b
 	var existing := orders_of(world, int(village.id))
 	if existing.size() >= int(data.orders.maxPerVillage):
 		return LocalVillage.rule("A village keeps at most %d standing orders" % int(data.orders.maxPerVillage))
+	if spec.kind == "supply":
+		var fort := LocalArmies.find_fort(world, int(spec.fortId))
+		if fort.is_empty() or fort.ownerAccountId == null or int(fort.ownerAccountId) != int(village.ownerAccountId):
+			return LocalVillage.rule("No fort or supply point of yours there")
 	for o in existing:
-		if o.spec.kind == spec.kind and (spec.kind != "train" or o.spec.unit == spec.unit):
+		if o.spec.kind == spec.kind and (spec.kind != "train" or o.spec.unit == spec.unit) and (spec.kind != "supply" or int(o.spec.fortId) == int(spec.fortId)):
 			return LocalVillage.rule("This village already has that order; cancel it first")
 	var order := {"id": world.next.order, "villageId": village.id, "spec": spec, "lastResult": null, "lastRunAt": null, "createdAt": now}
 	world.next.order += 1

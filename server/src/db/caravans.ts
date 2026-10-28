@@ -10,8 +10,10 @@ export interface Caravan {
   id: number;
   worldId: number;
   villageId: number;
-  // null: the Holy City vault.
+  // null: the Holy City vault, unless it goes to a fort or supply point.
   destinationVillageId: number | null;
+  // A fort or supply point whose store it fills (a supply route).
+  destinationFortId: number | null;
   kind: CaravanKind;
   caravans: number;
   cargo: Resources;
@@ -42,6 +44,7 @@ interface CaravanRow {
   world_id: number;
   village_id: number;
   destination_village_id: number | null;
+  destination_fort_id: number | null;
   kind: CaravanKind;
   caravans: number;
   cargo: Resources;
@@ -61,6 +64,7 @@ function fromRow(row: CaravanRow): Caravan {
     worldId: row.world_id,
     villageId: row.village_id,
     destinationVillageId: row.destination_village_id,
+    destinationFortId: row.destination_fort_id === null ? null : Number(row.destination_fort_id),
     kind: row.kind,
     caravans: row.caravans,
     cargo: row.cargo,
@@ -81,12 +85,13 @@ export async function insertCaravan(
 ): Promise<Caravan> {
   const { rows } = await client.query<CaravanRow>(
     `INSERT INTO caravans
-       (world_id, village_id, destination_village_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+       (world_id, village_id, destination_village_id, destination_fort_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
     [
       caravan.worldId,
       caravan.villageId,
       caravan.destinationVillageId,
+      caravan.destinationFortId,
       caravan.kind,
       caravan.caravans,
       JSON.stringify(caravan.cargo),
@@ -155,4 +160,13 @@ export async function recordAmbush(
     carriedBack ? JSON.stringify(carriedBack) : null,
     JSON.stringify(escort),
   ]);
+}
+
+// Grain on its way into a fort or supply point.
+export async function grainOnTheWay(client: DbClient, fortId: number): Promise<number> {
+  const { rows } = await client.query<{ n: number | null }>(
+    `SELECT sum((cargo->>'grain')::double precision) AS n FROM caravans WHERE destination_fort_id = $1 AND status = 'outbound'`,
+    [fortId],
+  );
+  return Number(rows[0]?.n ?? 0);
 }

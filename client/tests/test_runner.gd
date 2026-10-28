@@ -426,7 +426,8 @@ func _test_field() -> void:
 		"field": {
 			"ambush": {"terrain": ["forest"], "prepMinutes": 60, "bonus": 0.3},
 			"choke": {"minBlockedNeighbors": 3, "attackerFactor": 0.7, "holdTheLineDefense": 0.3},
-			"fort": {"range": 4, "defenseBonus": 0.3},
+			"fort": {"range": 4, "defenseBonus": 0.3, "grainCapacity": 3000},
+			"supplyPoint": {"range": 5, "grainCapacity": 6000},
 		},
 	}
 	var terrain := {Vector2i.ZERO: "forest"}
@@ -437,12 +438,25 @@ func _test_field() -> void:
 	for cell in HexMath.spiral(Vector2i.ZERO, 1):
 		open[cell] = "plains"
 	_check(not FieldRules.is_choke_point(data, open, Vector2i.ZERO), "open plains are no choke point")
-	var lines := FieldRules.ground(data, terrain, Vector2i.ZERO, {"status": "standing"}, 10.0)
-	_check(lines.size() == 3 and lines[0].begins_with("Ambush ground: +30%") and lines[2] == "Fort: +30% defense.", "ground: %s" % lines)
+	var lines := FieldRules.ground(data, terrain, Vector2i.ZERO, {"status": "standing", "grain": 120.6}, 10.0)
+	_check(lines.size() == 4 and lines[0].begins_with("Ambush ground: +30%") and lines[2] == "Fort: +30% defense." and lines[3] == "Grain kept here: 120 of 3000.", "ground: %s" % lines)
+	var store := FieldRules.ground(data, open, Vector2i.ZERO, {"kind": "supply", "status": "standing", "grain": 0}, 10.0)
+	_check(store == PackedStringArray(["Supply point: armies here fill up from its grain.", "Grain kept here: 0 of 6000."]), "supply point ground: %s" % store)
+	_check(FieldRules.ground(data, open, Vector2i.ZERO, {"kind": "supply", "status": "building", "grain": 0}, 10.0) == PackedStringArray(["Supply point being built."]), "a supply point being built keeps no grain yet")
 	var village := {"q": 0, "r": 3, "name": "Vesna"}
 	_check(FieldRules.fort_problem(data, village, Vector2i(0, 3), "plains", false).begins_with("Forts go within 4"), "no fort on the village")
 	_check(FieldRules.fort_problem(data, village, Vector2i.ZERO, "mountain", false) == "No fort can stand here.", "no fort on a mountain")
 	_check(FieldRules.fort_problem(data, village, Vector2i.ZERO, "forest", false) == "", "fort in the forest")
+	_check(FieldRules.fort_problem(data, village, Vector2i(0, -2), "plains", false, "supply") == "", "supply points reach five hexes")
+	_check(FieldRules.fort_problem(data, village, Vector2i(0, -2), "plains", false).begins_with("Forts go within 4"), "forts only four")
+	var stores := [{"id": 3, "kind": "supply", "q": 1, "r": -2}]
+	_check(OrderText.describe({"kind": "supply", "fortId": 3, "target": 900}, {}, stores) == "Keep 900 grain in the supply point at (1, -2)", "supply route words")
+	_check(OrderText.describe({"kind": "supply", "fortId": 4, "target": 900}, {}, stores) == "Keep 900 grain in a store that is gone", "supply route to a burned store")
+	var units := {"units": {"units": {"spearman": {"upkeepPerHour": 1}}}}
+	var fed := {"status": "stationed", "units": {"spearman": 2}, "supply": 48.0, "supplyAt": "2026-06-01T00:00:00Z", "hungrySince": null}
+	var start := TimeUtil.parse_iso("2026-06-01T00:00:00Z")
+	_check(is_equal_approx(ArmyText.supply_left(units, fed, 1.0, start + 6 * 3600.0), 36.0), "an army's grain left after six hours")
+	_check(ArmyText.supply_left(units, fed, 1.0, start + 30 * 3600.0) == 0.0, "none left once it has run out")
 	var hold := {"orders": "hold", "status": "stationed", "targetVillageId": null, "target": [2, -1]}
 	_check(ArmyText.held_hex(hold) == Vector2i(2, -1), "held hex")
 	_check(ArmyText.status(hold, ArmyText.target_name(hold, func(_id: Variant) -> String: return "?"), 0.0) == "Holding (2, -1)", "hold status")
@@ -648,6 +662,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("ember-scenario.json", "local embers")
 	_replay_scenario("generals-scenario.json", "local generals")
 	_replay_scenario("field-scenario.json", "local field armies")
+	_replay_scenario("supply-scenario.json", "local supply")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

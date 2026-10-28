@@ -7,7 +7,10 @@ import { outpostPlots, type VillageState } from './village.js';
 export type StandingOrder =
   | { kind: 'train'; unit: string; batch: number; target: number }
   | { kind: 'rebuild' }
-  | { kind: 'surplus'; share: number };
+  | { kind: 'surplus'; share: number }
+  // A supply route: keep the fort or supply point `fortId` stocked to
+  // `target` grain, sent by caravan from the order's village.
+  | { kind: 'supply'; fortId: number; target: number };
 
 export function validateOrder(data: GameData, order: StandingOrder): StandingOrder {
   if (order.kind === 'train') {
@@ -23,7 +26,22 @@ export function validateOrder(data: GameData, order: StandingOrder): StandingOrd
       throw new RuleError(`Keep between ${Math.round(min * 100)}% and ${Math.round(max * 100)}% of storage`);
     }
   }
+  if (order.kind === 'supply') {
+    const most = Math.max(data.field.fort.grainCapacity, data.field.supplyPoint.grainCapacity);
+    if (!Number.isInteger(order.target) || order.target < data.orders.supplyMinLoad || order.target > most) {
+      throw new RuleError(`Keep between ${data.orders.supplyMinLoad} and ${most} grain there`);
+    }
+  }
   return order;
+}
+
+// The grain to send on a supply route now: what the store lacks of
+// `target` (counting what is on the way), trimmed to what the village has
+// and its caravans at home can carry; 0 when that is too little to bother.
+export function supplyLoad(data: GameData, input: { target: number; stored: number; onTheWay: number; capacity: number; grain: number; canCarry: number }): number {
+  const missing = Math.floor(Math.min(input.target, input.capacity) - input.stored - input.onTheWay);
+  const load = Math.min(missing, Math.floor(input.grain), Math.floor(input.canCarry));
+  return load < data.orders.supplyMinLoad ? 0 : load;
 }
 
 // How many to train now to work towards `target`, counting units at home,

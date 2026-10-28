@@ -8,6 +8,8 @@ import { cancelOrderCommand, placeOrderCommand } from '../commands/orders.js';
 import {
   buildCrossingCommand,
   buildFortCommand,
+  buildSupplyPointCommand,
+  stockStoreCommand,
   buildRoadCommand,
   disbandArmyCommand,
   moveArmyCommand,
@@ -127,6 +129,8 @@ const orderBody = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('train'), unit: z.string().min(1).max(64), batch: z.number().int(), target: z.number().int() }),
   z.object({ kind: z.literal('rebuild') }),
   z.object({ kind: z.literal('surplus'), share: z.number() }),
+  // Keep a fort or supply point topped up to `target` grain from this village.
+  z.object({ kind: z.literal('supply'), fortId: z.number().int().positive(), target: z.number().int() }),
 ]);
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const minuteOfDay = z.number().int().min(0).max(1439);
@@ -164,6 +168,8 @@ const armyBody = z.object({
   generalId: z.number().int().positive().optional(),
 });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
+// Grain a standing army leaves in a fort or supply point.
+const stockBody = z.object({ grain: z.number().int().positive().max(1_000_000) });
 const armyMoveBody = z.object({ target: hexBody.optional(), villageId: z.number().int().positive().optional() });
 const dismissBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)) });
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
@@ -662,6 +668,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 
+  app.post('/v1/armies/:id/store', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { grain } = stockBody.parse(request.body);
+    const army = await stockStoreCommand(db, scheduler, { accountId: account.id, armyId: id, grain, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
   app.post('/v1/villages/:id/dismiss', async (request) => {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
@@ -682,6 +696,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = hexBody.parse(request.body);
     const fort = await buildFortCommand(db, scheduler, { accountId: account.id, villageId: id, cell: body, now: clock() });
+    return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/supply-points', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = hexBody.parse(request.body);
+    const fort = await buildSupplyPointCommand(db, scheduler, { accountId: account.id, villageId: id, cell: body, now: clock() });
     return { fort: fortView(fort), serverTime: clock().toISOString() };
   });
 

@@ -148,6 +148,10 @@ const SERBIAN: Record<string, string> = {
 	'Armies holding it fight from behind its walls.': 'Vojska koja ga drži bori se iza njegovih zidina.',
 	'The outpost at ({q}, {r}) is down to level {level}.': 'Ispostava na ({q}, {r}) je spala na nivo {level}.',
 	'The outpost at ({q}, {r}) lies in ruins.': 'Ispostava na ({q}, {r}) leži u ruševinama.',
+	'Supply point at ({q}, {r}) finished': 'Žitnica na ({q}, {r}) je završena',
+	'Armies standing there fill up from its grain; supply routes keep it stocked.': 'Vojske koje tamo stoje uzimaju njeno žito; putevi snabdevanja je drže punom.',
+	'A horde burned the supply point at ({q}, {r})': 'Horda je spalila žitnicu na ({q}, {r})',
+	'Its {grain} grain burned with it.': 'Njenih {grain} žita izgorelo je s njom.',
 	// Bridge, settlers, sites, delegation
 	'Next: {stage}.': 'Sledeće: {stage}.',
 	'Beasts of the North have made a lair by the road their last horde took. {stage} needs it cleared.':

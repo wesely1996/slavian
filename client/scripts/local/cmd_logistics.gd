@@ -137,7 +137,12 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	if int(needed) > free:
 		return LocalVillage.rule("That takes %d caravan%s; %d at home" % [needed, "" if int(needed) == 1 else "s", maxi(0, free)])
 	var to := Vector2i.ZERO
-	if order.destinationVillageId != null:
+	if order.get("destinationFortId") != null:
+		var fort := LocalArmies.find_fort(world, int(order.destinationFortId))
+		if fort.is_empty():
+			return {"error": "No such fort or supply point", "kind": "not_found"}
+		to = Vector2i(fort.q, fort.r)
+	elif order.destinationVillageId != null:
 		if int(order.destinationVillageId) == int(village.id):
 			return LocalVillage.rule("Send it to another village")
 		var destination := server.find_village(world, int(order.destinationVillageId))
@@ -152,7 +157,7 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	for unit in order.get("escort", {}):
 		if int(order.escort[unit]) > 0:
 			escort[unit] = int(order.escort[unit])
-	return {"villageId": village.id, "destinationVillageId": order.destinationVillageId, "kind": kind,
+	return {"villageId": village.id, "destinationVillageId": order.destinationVillageId, "destinationFortId": order.get("destinationFortId"), "kind": kind,
 		"caravans": needed, "cargo": order.load.duplicate(), "carriedBack": null, "status": "outbound", "path": path, "departsAt": now,
 		"arrivesAt": now + travel, "returnsAt": now + 2 * travel, "escort": escort, "ambush": null}
 
@@ -253,7 +258,17 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 	if caravan.is_empty() or caravan.status != "outbound":
 		return
 	var carried_back := {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
-	if caravan.destinationVillageId == null:
+	if caravan.get("destinationFortId") != null:
+		# A supply route: grain goes into the store as far as it fits; the
+		# rest (everything, if the store is gone) comes back.
+		var fort := LocalArmies.find_fort(world, int(caravan.destinationFortId))
+		var room := maxf(0.0, LocalArmies.grain_capacity(data, fort.get("kind", "fort")) - float(fort.grain)) if not fort.is_empty() and fort.status == "standing" else 0.0
+		var grain := minf(room, float(caravan.cargo.grain))
+		if not fort.is_empty() and grain > 0:
+			fort.grain = float(fort.grain) + grain
+		carried_back = caravan.cargo.duplicate()
+		carried_back.grain = float(caravan.cargo.grain) - grain
+	elif caravan.destinationVillageId == null:
 		var vault: Dictionary = world.vault
 		if caravan.kind == "deliver":
 			var stored := store(vault.amounts, vault_capacity(data, int(vault.level)), caravan.cargo)
@@ -438,7 +453,7 @@ static func caravans_view(world: Dictionary) -> Array:
 
 
 static func caravan_view(c: Dictionary) -> Dictionary:
-	return {"id": c.id, "villageId": c.villageId, "destinationVillageId": c.destinationVillageId, "kind": c.kind, "caravans": c.caravans,
+	return {"id": c.id, "villageId": c.villageId, "destinationVillageId": c.destinationVillageId, "destinationFortId": c.get("destinationFortId"), "kind": c.kind, "caravans": c.caravans,
 		"cargo": c.cargo, "carriedBack": c.carriedBack, "status": c.status, "path": c.path.map(func(s: Dictionary) -> Array: return [s.q, s.r, s.atMs]),
 		"departsAt": LocalTime.iso(c.departsAt), "arrivesAt": LocalTime.iso(c.arrivesAt), "returnsAt": LocalTime.iso(c.returnsAt),
 		"escort": c.escort, "ambush": c.ambush}
