@@ -3751,6 +3751,16 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/orders/1/cancel",
+   "body": {},
+   "status": 200,
+   "response": {
+    "ok": true,
+    "serverTime": "2026-06-01T08:45:00.000Z"
+   }
+  },
+  {
    "advance": 9516000
   },
   {
@@ -3948,10 +3958,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 495,
-        "wood": 1000,
-        "grain": 271.35,
-        "stone": 960
+        "iron": 132.5,
+        "wood": 57.5,
+        "grain": 12.433333333333334,
+        "stone": 235
        },
        "ratesPerHour": {
         "iron": 150,
@@ -3965,7 +3975,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:10:09.600Z"
+       "settledAt": "2026-06-01T08:45:38.400Z"
       }
      }
     ],
@@ -4295,17 +4305,7 @@
       "diedAt": null
      }
     ],
-    "orders": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "kind": "supply",
-      "fortId": 1,
-      "target": 400,
-      "lastResult": "400 grain kept at (-1, 2)",
-      "lastRunAt": "2026-06-01T11:23:36.000Z"
-     }
-    ],
+    "orders": [],
     "armies": [
      {
       "id": 2,
@@ -4358,10 +4358,8 @@
       "generalId": null,
       "orders": "hold",
       "loot": null,
-      "units": {
-       "spearman": 3
-      },
-      "status": "stationed",
+      "units": {},
+      "status": "done",
       "battleId": null,
       "path": [
        [
@@ -4377,11 +4375,11 @@
       ],
       "departsAt": "2026-06-01T08:43:00.000Z",
       "arrivesAt": "2026-06-01T08:43:28.800Z",
-      "leavesAt": null,
-      "returnsAt": null,
-      "supply": 72,
-      "supplyAt": "2026-06-01T11:09:00.000Z",
-      "hungrySince": null
+      "leavesAt": "2026-06-01T11:04:49.600Z",
+      "returnsAt": "2026-06-01T11:04:49.600Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:04:49.600Z",
+      "hungrySince": "2026-06-01T10:52:49.600Z"
      }
     ],
     "forts": [
@@ -4394,7 +4392,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 399.56666666666655
+      "grain": 0
      }
     ],
     "camps": [
@@ -4487,7 +4485,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 9,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
@@ -4496,7 +4494,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 72,
+       "grain": 312,
        "stone": 0
       },
       "carriedBack": {
@@ -4518,161 +4516,9 @@
         28800
        ]
       ],
-      "departsAt": "2026-06-01T11:09:12.000Z",
-      "arrivesAt": "2026-06-01T11:09:40.800Z",
-      "returnsAt": "2026-06-01T11:10:09.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 8,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:40:24.000Z",
-      "arrivesAt": "2026-06-01T10:40:52.800Z",
-      "returnsAt": "2026-06-01T10:41:21.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 7,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:11:36.000Z",
-      "arrivesAt": "2026-06-01T10:12:04.800Z",
-      "returnsAt": "2026-06-01T10:12:33.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 6,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 77,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:42:48.000Z",
-      "arrivesAt": "2026-06-01T09:43:16.800Z",
-      "returnsAt": "2026-06-01T09:43:45.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 5,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 53,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:24:00.000Z",
-      "arrivesAt": "2026-06-01T09:24:28.800Z",
-      "returnsAt": "2026-06-01T09:24:57.600Z",
+      "departsAt": "2026-06-01T08:40:48.000Z",
+      "arrivesAt": "2026-06-01T08:41:16.800Z",
+      "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
       "ambush": null
      }
@@ -6782,7 +6628,7 @@
        "amounts": {
         "iron": 527.5,
         "wood": 700,
-        "grain": 240.4666666666667,
+        "grain": 752.4666666666666,
         "stone": 850
        },
        "ratesPerHour": {
@@ -7100,17 +6946,7 @@
       "diedAt": null
      }
     ],
-    "orders": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "kind": "supply",
-      "fortId": 1,
-      "target": 400,
-      "lastResult": "400 grain kept at (-1, 2)",
-      "lastRunAt": "2026-06-01T11:28:00.000Z"
-     }
-    ],
+    "orders": [],
     "armies": [
      {
       "id": 2,
@@ -7163,10 +6999,8 @@
       "generalId": null,
       "orders": "hold",
       "loot": null,
-      "units": {
-       "spearman": 3
-      },
-      "status": "stationed",
+      "units": {},
+      "status": "done",
       "battleId": null,
       "path": [
        [
@@ -7182,11 +7016,11 @@
       ],
       "departsAt": "2026-06-01T08:43:00.000Z",
       "arrivesAt": "2026-06-01T08:43:28.800Z",
-      "leavesAt": null,
-      "returnsAt": null,
-      "supply": 72,
-      "supplyAt": "2026-06-01T11:09:00.000Z",
-      "hungrySince": null
+      "leavesAt": "2026-06-01T11:04:49.600Z",
+      "returnsAt": "2026-06-01T11:04:49.600Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:04:49.600Z",
+      "hungrySince": "2026-06-01T10:52:49.600Z"
      }
     ],
     "forts": [
@@ -7199,7 +7033,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 399.56666666666655
+      "grain": 0
      }
     ],
     "camps": [
@@ -7307,7 +7141,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 9,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
@@ -7316,7 +7150,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 72,
+       "grain": 312,
        "stone": 0
       },
       "carriedBack": {
@@ -7338,161 +7172,9 @@
         28800
        ]
       ],
-      "departsAt": "2026-06-01T11:09:12.000Z",
-      "arrivesAt": "2026-06-01T11:09:40.800Z",
-      "returnsAt": "2026-06-01T11:10:09.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 8,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:40:24.000Z",
-      "arrivesAt": "2026-06-01T10:40:52.800Z",
-      "returnsAt": "2026-06-01T10:41:21.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 7,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:11:36.000Z",
-      "arrivesAt": "2026-06-01T10:12:04.800Z",
-      "returnsAt": "2026-06-01T10:12:33.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 6,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 77,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:42:48.000Z",
-      "arrivesAt": "2026-06-01T09:43:16.800Z",
-      "returnsAt": "2026-06-01T09:43:45.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 5,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 53,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:24:00.000Z",
-      "arrivesAt": "2026-06-01T09:24:28.800Z",
-      "returnsAt": "2026-06-01T09:24:57.600Z",
+      "departsAt": "2026-06-01T08:40:48.000Z",
+      "arrivesAt": "2026-06-01T08:41:16.800Z",
+      "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
       "ambush": null
      }
@@ -9760,7 +9442,7 @@
        "amounts": {
         "iron": 382.5,
         "wood": 265,
-        "grain": 61.43333333333334,
+        "grain": 645.4333333333333,
         "stone": 60
        },
        "ratesPerHour": {
@@ -10078,17 +9760,7 @@
       "diedAt": null
      }
     ],
-    "orders": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "kind": "supply",
-      "fortId": 1,
-      "target": 400,
-      "lastResult": "400 grain kept at (-1, 2)",
-      "lastRunAt": "2026-06-01T11:47:12.000Z"
-     }
-    ],
+    "orders": [],
     "armies": [
      {
       "id": 3,
@@ -10179,10 +9851,8 @@
       "generalId": null,
       "orders": "hold",
       "loot": null,
-      "units": {
-       "spearman": 3
-      },
-      "status": "stationed",
+      "units": {},
+      "status": "done",
       "battleId": null,
       "path": [
        [
@@ -10198,11 +9868,11 @@
       ],
       "departsAt": "2026-06-01T08:43:00.000Z",
       "arrivesAt": "2026-06-01T08:43:28.800Z",
-      "leavesAt": null,
-      "returnsAt": null,
-      "supply": 72,
-      "supplyAt": "2026-06-01T11:37:48.000Z",
-      "hungrySince": null
+      "leavesAt": "2026-06-01T11:04:49.600Z",
+      "returnsAt": "2026-06-01T11:04:49.600Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:04:49.600Z",
+      "hungrySince": "2026-06-01T10:52:49.600Z"
      }
     ],
     "forts": [
@@ -10215,7 +9885,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 399.56666666666655
+      "grain": 0
      },
      {
       "id": 3,
@@ -10334,7 +10004,7 @@
     "run": null,
     "caravans": [
      {
-      "id": 10,
+      "id": 1,
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
@@ -10343,7 +10013,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 72,
+       "grain": 312,
        "stone": 0
       },
       "carriedBack": {
@@ -10365,161 +10035,9 @@
         28800
        ]
       ],
-      "departsAt": "2026-06-01T11:38:00.000Z",
-      "arrivesAt": "2026-06-01T11:38:28.800Z",
-      "returnsAt": "2026-06-01T11:38:57.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 9,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T11:09:12.000Z",
-      "arrivesAt": "2026-06-01T11:09:40.800Z",
-      "returnsAt": "2026-06-01T11:10:09.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 8,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:40:24.000Z",
-      "arrivesAt": "2026-06-01T10:40:52.800Z",
-      "returnsAt": "2026-06-01T10:41:21.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 7,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 72,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T10:11:36.000Z",
-      "arrivesAt": "2026-06-01T10:12:04.800Z",
-      "returnsAt": "2026-06-01T10:12:33.600Z",
-      "escort": {},
-      "ambush": null
-     },
-     {
-      "id": 6,
-      "villageId": 1,
-      "destinationVillageId": null,
-      "destinationFortId": 1,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 77,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -1,
-        2,
-        28800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:42:48.000Z",
-      "arrivesAt": "2026-06-01T09:43:16.800Z",
-      "returnsAt": "2026-06-01T09:43:45.600Z",
+      "departsAt": "2026-06-01T08:40:48.000Z",
+      "arrivesAt": "2026-06-01T08:41:16.800Z",
+      "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
       "ambush": null
      }
@@ -12413,7 +11931,7 @@
    "response": {
     "notifications": [
      {
-      "id": 10,
+      "id": 11,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 1) finished",
@@ -12422,7 +11940,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -12431,7 +11949,7 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -12440,7 +11958,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "outpost_raided",
       "tier": "push",
       "title": "A horde burned the supply point at (0, -3)",
@@ -12449,12 +11967,21 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "build_done",
       "tier": "digest",
       "title": "Supply point at (0, -3) finished",
       "body": "Armies standing there fill up from its grain; supply routes keep it stocked.",
       "createdAt": "2026-06-01T11:24:12.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T11:04:49.600Z",
       "read": false
      },
      {
@@ -12503,7 +12030,7 @@
       "read": false
      }
     ],
-    "unread": 10,
+    "unread": 11,
     "serverTime": "2026-06-01T11:47:12.000Z"
    }
   }

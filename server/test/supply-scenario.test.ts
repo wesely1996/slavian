@@ -1,8 +1,8 @@
 // Supply points, grain in forts and supply routes in a solo session: a
 // supply point built (and the ones refused), a supply route that waits for
 // it to stand and then sends grain by caravan; an army standing on it that
-// fills up there, leaves grain and takes it back, and eats from it when its
-// own grain runs out; a supply point on the first horde's road burned as it
+// fills up there, leaves grain and takes it back, and eats it empty once
+// the route is stopped; a supply point on the first horde's road burned as it
 // passes; and grain left in a fort.
 import { hex, hexDistance, neighbors } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
@@ -40,7 +40,7 @@ scenario('supply-scenario.json', START, async ({ started, now, play }) => {
   // target; placed, it waits until the supply point stands, then sends grain.
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: 99, target: 1000 } });
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 10 } });
-  await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 400 } });
+  const route = (await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 400 } })).body.order;
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 300 } });
   await play({ advance: 3 * MINUTE });
   await play({ method: 'GET', path: world });
@@ -59,9 +59,11 @@ scenario('supply-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: `/v1/armies/${open.id}/resupply`, body: {} });
   await play({ method: 'POST', path: `/v1/armies/${open.id}/move`, body: { villageId: 1 } });
 
-  // The first horde sets out; a supply point on its road, with no army on
-  // it, burns as it passes. The army on the first one eats from its stores
-  // when its own grain runs out.
+  // The route stops. The first horde sets out; a supply point on its road,
+  // with no army on it, burns as it passes. The army on the first one eats
+  // from its stores whenever its own grain runs out, until they are empty
+  // and it starves.
+  await play({ method: 'POST', path: `/v1/villages/1/orders/${route.id}/cancel`, body: {} });
   await play({ advance: Math.max(MINUTE, spawnAt - now().getTime() + 2 * MINUTE) });
   const wave = (await play({ method: 'GET', path: world })).body.waves[0];
   const road = (wave.path ?? []) as [number, number, number][];
