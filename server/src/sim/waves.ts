@@ -5,7 +5,7 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to its
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
-import { canCross, onRoad, type Land } from './land.js';
+import { canCross, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -173,7 +173,7 @@ export function routeFrom(
   const roads = input.front !== 'north';
   const stepCost = (from: Hex, to: Hex): number | null => {
     const cost = canCross(terrain, from, to) ? moveCost(to) : null;
-    return cost !== null && roads && onRoad(terrain, from, to) ? cost * data.field.road.factor : cost;
+    return cost !== null && roads ? cost * roadFactor(data, roadLevel(terrain, from, to)) : cost;
   };
   const searchCost = (from: Hex, to: Hex): number | null => {
     const cost = stepCost(from, to);
@@ -184,7 +184,7 @@ export function routeFrom(
   let holy: { path: Hex[]; cost: number } | null = null;
   let cheapestVillage = Infinity;
   for (const target of input.targets) {
-    const path = findPath(input.from, target.cell, searchCost, roads ? data.field.road.factor : 1);
+    const path = findPath(input.from, target.cell, searchCost, roads ? fastestRoad(data) : 1);
     if (!path) continue;
     const road = path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
     const cost = road + rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0);

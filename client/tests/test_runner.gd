@@ -663,6 +663,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("generals-scenario.json", "local generals")
 	_replay_scenario("field-scenario.json", "local field armies")
 	_replay_scenario("supply-scenario.json", "local supply")
+	_replay_scenario("road-scenario.json", "local roads")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -920,6 +921,8 @@ func _test_rivers() -> void:
 	_check(HeroText.quest_terms({"hours": 4.0, "risk": 0.25, "xp": 40}, 1.0).ends_with("· 25% risk · +40 XP"), "quest terms")
 	_check(RiverText.size_of([0, 0, 1, 0, "none", 3]) == 3 and RiverText.size_of([0, 0, 1, 0, "none"]) == 1, "river size")
 	_check(RiverText.roads_at([[0, 0, 1, 0, "standing"], [0, 1, 0, 0, "building"]], Vector2i(0, 0)) == {Vector2i(1, 0): "standing", Vector2i(0, 1): "building"}, "roads at a hex")
+	_check(RiverText.road_levels_at([[0, 0, 1, 0, "upgrading", 2], [0, 1, 0, 0, "standing"]], Vector2i(0, 0)) == {Vector2i(1, 0): 2, Vector2i(0, 1): 1}, "road levels at a hex")
+	_check(RiverText.road_speeds({"field": {"road": {"levels": [{"factor": 0.5}, {"factor": 0.35}, {"factor": 0.25}]}}}) == "50% · 35% · 25%", "road speeds")
 	var rdata := {"field": {"road": {"range": 4}}, "terrain": {"terrain": {"plains": {"moveCost": 1}, "lake": {"moveCost": null}}}}
 	var rterrain := {Vector2i(0, 0): "plains", Vector2i(1, 0): "plains", Vector2i(0, 1): "lake"}
 	_check(RiverText.road_problem(rdata, rterrain, [], Vector2i(0, 0), Vector2i(0, 0), Vector2i(1, 0)) == "", "road can run")

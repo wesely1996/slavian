@@ -2054,27 +2054,53 @@ func _road_section(cell: Vector2i) -> void:
 		return
 	var home := _my_village()
 	var roads := RiverText.roads_at(Game.roads, cell)
+	var levels := RiverText.road_levels_at(Game.roads, cell)
+	var road_levels: Array = Game.data.field.road.levels
 	var names := ["E", "NE", "NW", "W", "SW", "SE"]  # tr
 	var open: Array[int] = []
+	# Standing roads from here your village may improve.
+	var better: Array[int] = []
 	var built := PackedStringArray()
 	for i in 6:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		var buildable: bool = not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other) == ""
 		if roads.has(other):
-			built.append("%s%s" % [tr(names[i]), "" if roads[other] == "standing" else tr(" (being built)")])
-		elif not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other) == "":
+			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being improved)")}.get(roads[other], "")
+			built.append("%s%s%s" % [tr(names[i]), tr(" (level %d)") % int(levels[other]) if roads[other] != "building" else "", state])
+			if buildable and roads[other] == "standing" and int(levels[other]) < road_levels.size():
+				better.append(i)
+		elif buildable:
 			open.append(i)
 	if built.is_empty() and open.is_empty():
 		return
-	_panel_body.add_child(UI.with_info(UI.label(tr("Roads"), UI.HEADING_SIZE), tr("Roads halve the march for everyone on them, the human hordes too, but the beasts of the North keep off them.")))
+	_panel_body.add_child(UI.with_info(UI.label(tr("Roads"), UI.HEADING_SIZE),
+		tr("Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. Each level is faster; the march takes %s of the time.") % RiverText.road_speeds(Game.data)))
 	if not built.is_empty():
 		_panel_body.add_child(UI.label(tr("Roads run %s.") % ", ".join(built), UI.SMALL_SIZE))
+	var village_id := int(home.id) if not home.is_empty() else 0
+	for i in better:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		var next := int(levels[other]) + 1
+		var step: Dictionary = road_levels[next - 1]
+		var row := UI.hbox()
+		var line := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(line)
+		var improve := UI.button(tr("Improve"), func() -> void: _build_road(village_id, cell, other))
+		improve.custom_minimum_size.x = 130
+		row.add_child(improve)
+		_panel_body.add_child(row)
+		var step_text := tr("%s to level %d: %s · %s") % [tr(names[i]), next, UI.costs(step.cost), TimeUtil.format_duration(float(step.buildSeconds) / float(Game.world.speed))]
+		_tick(line, func() -> String:
+			var current: Dictionary = Game.villages.get(village_id, home)
+			improve.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), step.cost)
+			return step_text)
 	if open.is_empty():
 		return
 	# One button; then the hex the road goes to is tapped on the map.
-	var cost: Dictionary = Game.data.field.road.cost
+	var cost: Dictionary = road_levels[0].cost
 	var info := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 	_panel_body.add_child(info)
-	var village_id := int(home.id)
 	var targets: Array = open.map(func(i: int) -> Vector2i: return cell + HexMath.DIRECTIONS[i])
 	var build := UI.button(tr("Build a road"), func() -> void:
 		_road_from = cell
@@ -2082,7 +2108,7 @@ func _road_section(cell: Vector2i) -> void:
 		hex_map.show_road_targets(targets)
 		_status.text = tr("Tap the hex next to this one to build the road to."), "icon/map")
 	_panel_body.add_child(build)
-	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.road.buildSeconds) / float(Game.world.speed))]
+	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(road_levels[0].buildSeconds) / float(Game.world.speed))]
 	_tick(info, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
 		build.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)

@@ -981,7 +981,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	var roads: Array = []
 	for e in world.roads:
 		var ab := _ordered(e.a, e.b)
-		roads.append([ab[0].x, ab[0].y, ab[1].x, ab[1].y, e.status])
+		roads.append([ab[0].x, ab[0].y, ab[1].x, ab[1].y, e.status, int(e.get("level", 1))])
 	roads.sort_custom(by_ends)
 	return {
 		"id": world.id, "name": world.name, "status": world.status, "inviteCode": null, "speed": world.speed,
@@ -1221,6 +1221,9 @@ func _load_all() -> void:
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
+			# Roads from before road levels: level 1, as fast as they were.
+			for e in world.roads:
+				e.merge({"level": 1})
 			# Worlds saved before supply points and grain in forts.
 			for f in world.forts:
 				f.merge({"kind": "fort", "grain": 0.0})

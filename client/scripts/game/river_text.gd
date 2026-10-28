@@ -44,7 +44,9 @@ static func bridge_problem(data: Dictionary, home: Vector2i, a: Vector2i, b: Vec
 	return ""
 
 
-## Roads between neighbouring hexes: [aq, ar, bq, br, status] in Game.roads.
+## Roads between neighbouring hexes: [aq, ar, bq, br, status, level] in
+## Game.roads (status "building", "standing" or "upgrading": standing at
+## `level` while it is improved to the next).
 ## The neighbours of `cell` a road runs to: {Vector2i: status}.
 static func roads_at(roads: Array, cell: Vector2i) -> Dictionary:
 	var out := {}
@@ -56,6 +58,29 @@ static func roads_at(roads: Array, cell: Vector2i) -> Dictionary:
 		elif b == cell:
 			out[a] = String(e[4])
 	return out
+
+
+## The level of each road from `cell`: {Vector2i: level} (1 for roads
+## from before road levels).
+static func road_levels_at(roads: Array, cell: Vector2i) -> Dictionary:
+	var out := {}
+	for e in roads:
+		var a := Vector2i(int(e[0]), int(e[1]))
+		var b := Vector2i(int(e[2]), int(e[3]))
+		var level := int(e[5]) if e.size() > 5 else 1
+		if a == cell:
+			out[b] = level
+		elif b == cell:
+			out[a] = level
+	return out
+
+
+## The share of the march a road of each level takes, as "50% · 35% · 25%".
+static func road_speeds(data: Dictionary) -> String:
+	var parts := PackedStringArray()
+	for level in data.field.road.levels:
+		parts.append("%d%%" % roundi(float(level.factor) * 100.0))
+	return " · ".join(parts)
 
 
 ## Why no road can be built from a to b from `home`, or "".

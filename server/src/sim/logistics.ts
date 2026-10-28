@@ -1,7 +1,7 @@
 // Caravans and the Holy City vault. A caravan leaves its village with a
 // load (or empty, to fetch from the vault), unloads at the other end and
 // walks home; whatever didn't fit rides back with it.
-import { moveCostOn, type Land } from './land.js';
+import { fastestRoad, moveCostOn, type Land } from './land.js';
 import type { GameData, TerrainId } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { findPath, hex, hexKey, type Hex } from './hex.js';
@@ -47,7 +47,7 @@ export function roadRoute(
   worldSpeed: number,
 ): PathStep[] {
   const moveCost = moveCostOn(data, terrain);
-  const path = findPath(from, to, moveCost, data.field.road.factor);
+  const path = findPath(from, to, moveCost, fastestRoad(data));
   if (!path) throw new RuleError('No road leads there');
   const msPerCost = MS_PER_HOUR / hexesPerHour / worldSpeed;
   let atMs = 0;

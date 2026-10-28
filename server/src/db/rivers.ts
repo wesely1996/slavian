@@ -84,6 +84,6 @@ export async function setCrossing(
 export async function loadLand(client: DbClient, worldId: number): Promise<Land> {
   const terrain = new Map((await loadHexes(client, worldId)).map(([q, r, t]) => [`${q},${r}`, t] as const));
   const blocked = (await listRiverEdges(client, worldId)).filter((e) => e.crossing !== 'standing').map((e) => edgeKey(e.a, e.b));
-  const roads = (await listRoadEdges(client, worldId)).filter((e) => e.status === 'standing').map((e) => edgeKey(e.a, e.b));
+  const roads = (await listRoadEdges(client, worldId)).filter((e) => e.status !== 'building').map((e) => [edgeKey(e.a, e.b), e.level] as const);
   return landOf(terrain, blocked, roads);
 }

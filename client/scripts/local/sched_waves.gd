@@ -19,7 +19,7 @@ static func march_speed(data: Dictionary, front: String, composition: Dictionary
 	return slowest
 
 
-## The land: {"terrain": {"q,r": id}, "blocked": {edge key}, "roads": {edge key}}.
+## The land: {"terrain": {"q,r": id}, "blocked": {edge key}, "roads": {edge key: level}}.
 static func land_of(world: Dictionary) -> Dictionary:
 	var blocked := {}
 	for e in world.rivers:
@@ -27,8 +27,8 @@ static func land_of(world: Dictionary) -> Dictionary:
 			blocked[LocalLand.edge_key(e.a, e.b)] = true
 	var roads := {}
 	for e in world.roads:
-		if e.status == "standing":
-			roads[LocalLand.edge_key(e.a, e.b)] = true
+		if e.status != "building":
+			roads[LocalLand.edge_key(e.a, e.b)] = int(e.get("level", 1))
 	return {"terrain": world.hexes, "blocked": blocked, "roads": roads}
 
 
@@ -38,7 +38,6 @@ static func land_of(world: Dictionary) -> Dictionary:
 static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targets: Array, front: String, composition: Dictionary,
 		fear: Dictionary, rng: LocalRng, start_ms: float, world_speed: float) -> Variant:
 	var rules: Dictionary = data.horde
-	var road_factor := float(data.field.road.factor)
 	var roads := front != "north"
 	var step_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var type: Variant = land.terrain.get(LocalLand.key(b))
@@ -47,7 +46,7 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		var cost: Variant = data.terrain.terrain[type].moveCost
 		if cost == null:
 			return -1.0
-		return float(cost) * road_factor if roads and land.roads.has(LocalLand.edge_key(a, b)) else float(cost)
+		return float(cost) * LocalLand.road_factor(data, int(land.roads.get(LocalLand.edge_key(a, b), 0))) if roads else float(cost)
 	var search_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var cost: float = step_cost.call(a, b)
 		return -1.0 if cost < 0.0 else cost + float(rules.fear.pathWeight) * float(fear.get(LocalLand.key(b), 0.0))
@@ -56,7 +55,7 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 	var holy: Variant = null
 	var cheapest_village := INF
 	for target in targets:
-		var path: Variant = LocalLand.find_path(from, target.cell, search_cost, road_factor if roads else 1.0)
+		var path: Variant = LocalLand.find_path(from, target.cell, search_cost, LocalLand.fastest_road(data) if roads else 1.0)
 		if path == null:
 			continue
 		var road := 0.0

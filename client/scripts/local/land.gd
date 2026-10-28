@@ -123,8 +123,25 @@ class _Heap:
 		_priorities[b] = p
 
 
+## sim/land.ts roadFactor: the share of the terrain's move cost a road of
+## `level` costs (1: no road).
+static func road_factor(data: Dictionary, level: int) -> float:
+	var levels: Array = data.field.road.levels
+	return 1.0 if level <= 0 else float(levels[mini(level, levels.size()) - 1].factor)
+
+
+## sim/land.ts fastestRoad: the cheapest a step can be (the path search's
+## lower bound).
+static func fastest_road(data: Dictionary) -> float:
+	var best := 1.0
+	for level in data.field.road.levels:
+		best = minf(best, float(level.factor))
+	return best
+
+
 ## sim/land.ts moveCostOn: the cost of entering `to`, or -1 where it is
-## impassable or a river lies between. `land`: {terrain, blocked, roads}.
+## impassable or a river lies between. `land`: {terrain, blocked, roads
+## (edge key -> level)}.
 static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> Callable:
 	return func(from: Vector2i, to: Vector2i) -> float:
 		var type: Variant = land.terrain.get(key(to))
@@ -133,4 +150,4 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> C
 		var cost: Variant = data.terrain.terrain[type].moveCost
 		if cost == null:
 			return -1.0
-		return float(cost) * float(data.field.road.factor) if roads and land.roads.has(edge_key(from, to)) else float(cost)
+		return float(cost) * road_factor(data, int(land.roads.get(edge_key(from, to), 0))) if roads else float(cost)

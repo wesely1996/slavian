@@ -7,8 +7,8 @@ import { hexKey, neighbors, type Hex, type StepCost } from './hex.js';
 export interface Land extends ReadonlyMap<string, TerrainId> {
   // Edge keys (edgeKey) of rivers without a standing bridge.
   readonly blocked?: ReadonlySet<string>;
-  // Edge keys of standing roads.
-  readonly roads?: ReadonlySet<string>;
+  // The level of each standing road, by edge key.
+  readonly roads?: ReadonlyMap<string, number>;
 }
 
 // One key for the edge between two neighbouring hexes, whichever way round.
@@ -22,8 +22,21 @@ export function canCross(land: Land, from: Hex, to: Hex): boolean {
   return !land.blocked?.has(edgeKey(from, to));
 }
 
-export function onRoad(land: Land, from: Hex, to: Hex): boolean {
-  return land.roads?.has(edgeKey(from, to)) ?? false;
+// The level of the road between two hexes (0: none).
+export function roadLevel(land: Land, from: Hex, to: Hex): number {
+  return land.roads?.get(edgeKey(from, to)) ?? 0;
+}
+
+// The share of the terrain's move cost a road of `level` costs (1: none).
+export function roadFactor(data: GameData, level: number): number {
+  const levels = data.field.road.levels;
+  return level <= 0 ? 1 : levels[Math.min(level, levels.length) - 1]!.factor;
+}
+
+// The cheapest a step can be: along the best road there is (the path
+// search's lower bound).
+export function fastestRoad(data: GameData): number {
+  return Math.min(...data.field.road.levels.map((l) => l.factor));
 }
 
 // The terrain's move cost of entering `to`, or null when it is impassable
@@ -35,15 +48,15 @@ export function moveCostOn(data: GameData, land: Land, roads = true): StepCost {
     if (type === undefined || !canCross(land, from, to)) return null;
     const cost = data.terrain.terrain[type].moveCost;
     if (cost === null) return null;
-    return roads && onRoad(land, from, to) ? cost * data.field.road.factor : cost;
+    return roads ? cost * roadFactor(data, roadLevel(land, from, to)) : cost;
   };
 }
 
-// Terrain plus blocked river edges and roads, as one Land.
-export function landOf(terrain: ReadonlyMap<string, TerrainId>, blocked: Iterable<string>, roads: Iterable<string> = []): Land {
-  const land = new Map(terrain) as Map<string, TerrainId> & { blocked?: ReadonlySet<string>; roads?: ReadonlySet<string> };
+// Terrain plus blocked river edges and roads ([edge key, level]), as one Land.
+export function landOf(terrain: ReadonlyMap<string, TerrainId>, blocked: Iterable<string>, roads: Iterable<readonly [string, number]> = []): Land {
+  const land = new Map(terrain) as Map<string, TerrainId> & { blocked?: ReadonlySet<string>; roads?: ReadonlyMap<string, number> };
   land.blocked = new Set(blocked);
-  land.roads = new Set(roads);
+  land.roads = new Map(roads);
   return land;
 }
 

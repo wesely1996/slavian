@@ -1079,7 +1079,8 @@ static func build_crossing(server: LocalServer, world: Dictionary, village: Dict
 	return edge
 
 
-## Builds a road between two neighbouring hexes near the village.
+## Builds a road between two neighbouring hexes near the village, or
+## improves the standing road there to its next level.
 static func build_road(server: LocalServer, world: Dictionary, village: Dictionary, a: Vector2i, b: Vector2i, at: int) -> Dictionary:
 	var data := server.data
 	var rules: Dictionary = data.field.road
@@ -1094,16 +1095,28 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 			return LocalVillage.rule("No road can run there")
 	if LocalHordes.land_of(world).blocked.has(LocalLand.edge_key(a, b)):
 		return LocalVillage.rule("A river lies between; build a bridge first")
-	if not _road_edge(world, a, b).is_empty():
-		return LocalVillage.rule("A road already runs there")
-	var ledger := LocalLedger.spend(village.state.ledger, at, rules.cost)
+	var existing := _road_edge(world, a, b)
+	if existing.get("status") == "building":
+		return LocalVillage.rule("A road is being built there")
+	if existing.get("status") == "upgrading":
+		return LocalVillage.rule("That road is being improved")
+	if not existing.is_empty() and int(existing.level) >= rules.levels.size():
+		return LocalVillage.rule("That road is as good as it gets")
+	var level: Dictionary = rules.levels[int(existing.level) if not existing.is_empty() else 0]
+	var ledger := LocalLedger.spend(village.state.ledger, at, level.cost)
 	if ledger.has("missing"):
 		return ledger
 	village.state.ledger = ledger
-	var ends := LocalServer._ordered(a, b)
-	var completes_at := LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed)
-	var road := {"a": ends[0], "b": ends[1], "status": "building", "builtBy": village.id, "completesAt": completes_at}
-	world.roads.append(road)
+	var completes_at := LocalTime.ms(at + (float(level.buildSeconds) * 1000.0) / world.speed)
+	var road := existing
+	if road.is_empty():
+		var ends := LocalServer._ordered(a, b)
+		road = {"a": ends[0], "b": ends[1], "status": "building", "level": 1, "builtBy": village.id, "completesAt": completes_at}
+		world.roads.append(road)
+	else:
+		road.status = "upgrading"
+		road.builtBy = village.id
+		road.completesAt = completes_at
 	server.schedule(world, completes_at, "road_built", {"aq": a.x, "ar": a.y, "bq": b.x, "br": b.y})
 	return road
 
@@ -1111,8 +1124,10 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 static func on_road_built(_server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
 	var road := _road_edge(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
-	if road.is_empty() or road.status != "building":
+	if road.is_empty() or road.status == "standing":
 		return
+	if road.status == "upgrading":
+		road.level = int(road.level) + 1
 	road.status = "standing"
 	road.completesAt = null
 	changed.append(["world"])

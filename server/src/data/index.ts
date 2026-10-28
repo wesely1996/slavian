@@ -518,12 +518,13 @@ const fieldFileSchema = z.object({
     cost: resourcesSchema,
     buildSeconds: z.number().positive(),
   }),
-  // Roads between neighbouring hexes (M5 step 4): `factor` of the move cost.
+  // Roads between neighbouring hexes (M5 step 4), built and then improved
+  // level by level: each level's `factor` of the move cost.
   road: z.object({
     range: z.number().int().positive(),
-    factor: z.number().positive().max(1),
-    cost: resourcesSchema,
-    buildSeconds: z.number().positive(),
+    levels: z
+      .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive() }))
+      .min(1),
   }),
 });
 
