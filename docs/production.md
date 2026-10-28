@@ -37,10 +37,14 @@ same machine.
 
 ## Updates
 
-**Releases deploy themselves.** Pushing a version tag (`git tag v0.2.0
-origin/main && git push origin v0.2.0`) runs `release.yml`: CI, the APK
-release, the server image `slavian-server:v0.2.0`, and then the **Deploy to
-production** job. It SSHes to the VPS and runs `ops/production/deploy.sh
+**Releases deploy themselves.** Run **Actions → Release → Run workflow** on
+`main` (the version defaults to `config/version` in `client/project.godot`;
+the workflow makes the tag), or push a version tag (`git tag v0.2.0
+origin/main && git push origin v0.2.0`). Either runs `release.yml`: CI, the
+release with the APK attached, the server image `slavian-server:v0.2.0`, and
+then the **Deploy to production** job. Don't make the release by hand in
+GitHub's UI: a published release is immutable, so the APK can't be added to
+it. It SSHes to the VPS and runs `ops/production/deploy.sh
 v0.2.0`. The script checks out the tag, pins `SLAVIAN_TAG` in `.env`, pulls
 and restarts, and waits up to two minutes for the server to be healthy and
 answer `https://<DOMAIN>/health`. If it doesn't, the previous image runs

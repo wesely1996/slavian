@@ -8,6 +8,12 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      version:
+        description: The version a release builds (release.yml); empty for a dev build
+        type: string
+        required: false
+        default: ''
     outputs:
       apk_artifact:
         description: Name of the uploaded debug APK artifact
@@ -116,23 +122,29 @@ jobs:
 
       - name: Version
         id: version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           base=$(sed -n 's/^config\/version="\(.*\)"/\1/p' client/project.godot)
           sha=$(git rev-parse --short HEAD)
           # Minutes since 2026-01-01: always increasing, so every build installs over the last one.
           code=$(( ($(date +%s) - 1767225600) / 60 ))
           name="${base}-dev.${sha}"
-          # A release tag (release.yml) builds the tagged version: the tag
-          # wins over config/version (a release made in GitHub's UI doesn't
-          # bump it), so the game shows the version it was released as.
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            name="${GITHUB_REF_NAME#v}"
+          # A release (release.yml: its version, or a pushed tag) builds that
+          # version: it wins over config/version, so the game shows the
+          # version it was released as.
+          release="$RELEASE_VERSION"
+          if [[ -z "$release" && "$GITHUB_REF" == refs/tags/v* ]]; then
+            release="${GITHUB_REF_NAME#v}"
+          fi
+          if [[ -n "$release" ]]; then
+            name="$release"
             if [[ ! "$name" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
-              echo "::error::Tag $GITHUB_REF_NAME is not a version like v1.2.3"
+              echo "::error::v$name is not a version like v1.2.3"
               exit 1
             fi
             if [[ "$name" != "$base" ]]; then
-              echo "::warning::Tag $GITHUB_REF_NAME differs from config/version $base in client/project.godot; building $name. Bump config/version on main."
+              echo "::warning::Version $name differs from config/version $base in client/project.godot; building $name. Bump config/version on main."
               sed -i "s|^config/version=.*|config/version=\"$name\"|" client/project.godot
             fi
           fi

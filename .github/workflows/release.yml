@@ -1,32 +1,85 @@
 name: Release
 
-# Pushing a version tag (v0.1.0), or making a release in GitHub's UI (with
-# immutable releases on, that release can't get the APK attached), runs
-# CI on the tagged commit (building the tag's version; bump config/version in
-# client/project.godot on main to match), then publishes the APK
-# as a GitHub release (not a pre-release, so cleanup-dev-builds.yml keeps
-# it) and the server image as ghcr.io/<owner>/slavian-server:<version>,
-# then deploys that version to the production server (job "deploy").
-#   git tag v0.1.0 origin/main && git push origin v0.1.0
+# Makes a release: CI on the release's commit (building its version; bump
+# config/version in client/project.godot on main to match), then the APK
+# published as a GitHub release (not a pre-release, so
+# cleanup-dev-builds.yml keeps it) with the APK attached, the server image
+# as ghcr.io/<owner>/slavian-server:<tag>, and that version deployed to the
+# production server (job "deploy"). Either:
+#   - Actions > Release > Run workflow on main (the version defaults to
+#     config/version): the workflow makes the tag and the release itself;
+#   - or push a tag: git tag v0.1.0 origin/main && git push origin v0.1.0
+# Don't make the release in GitHub's UI: with immutable releases on, a
+# published release takes no more files, so the APK can't be attached.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, like 0.5.2 (empty takes config/version in client/project.godot)
+        required: false
+        default: ''
 
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release-${{ inputs.version || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
+  # The release's tag: the one pushed, or (run from the button) v<version>,
+  # made here on the commit the workflow runs on. A tag pushed with the
+  # workflow's own token starts no second run.
+  tag:
+    name: Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag
+        id: tag
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            version="${INPUT_VERSION#v}"
+            if [[ -z "$version" ]]; then
+              version=$(sed -n 's/^config\/version="\(.*\)"/\1/p' client/project.godot)
+            fi
+            if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::$version is not a version like 1.2.3"
+              exit 1
+            fi
+            tag="v$version"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "::error::Tag $tag already exists; bump config/version (or give another version) for a new release."
+              exit 1
+            fi
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          else
+            tag="$GITHUB_REF_NAME"
+            version="${tag#v}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
   ci:
+    needs: tag
     uses: ./.github/workflows/ci.yml
+    with:
+      version: ${{ needs.tag.outputs.version }}
     secrets: inherit
 
   publish:
     name: Publish release
-    needs: ci
+    needs: [tag, ci]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -39,30 +92,36 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.tag.outputs.tag }}
           VERSION_NAME: ${{ needs.ci.outputs.version_name }}
         run: |
-          # A release made by hand in GitHub's UI (which also makes the tag)
-          # gets the APK added; otherwise the release is made here. With
-          # immutable releases on, a published release takes no more files:
-          # the APK stays in this run's artifacts and the deploy goes ahead.
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            if ! gh release upload "$GITHUB_REF_NAME" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber; then
-              echo "::warning::Could not add the APK to release $GITHUB_REF_NAME (immutable once published). Push the tag instead of making the release in GitHub's UI; the APK is in this run's artifacts."
-              echo "APK not attached to [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME): it is in this run's artifacts." >> "$GITHUB_STEP_SUMMARY"
+          # Made here, with the APK on it (gh uploads it to a draft, then
+          # publishes, so immutable releases keep it). A draft made by hand
+          # in GitHub's UI on this tag gets the APK, then is published. A
+          # release already published by hand takes no more files: the APK
+          # stays in this run's artifacts and the deploy goes ahead.
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG"
+          if draft=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null); then
+            if ! gh release upload "$TAG" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber; then
+              echo "::warning::Could not add the APK to release $TAG: it was published by hand in GitHub's UI and is immutable. Next time use Actions > Release > Run workflow (or push the tag) and let the workflow make the release. The APK is in this run's artifacts."
+              echo "APK not attached to [$TAG]($url): it was published by hand and is immutable. It is in this run's artifacts; next time use Actions > Release > Run workflow." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
+            if [[ "$draft" == "true" ]]; then
+              gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+            fi
           else
-            gh release create "$GITHUB_REF_NAME" dist/*.apk \
+            gh release create "$TAG" dist/*.apk \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --title "Slavian ${VERSION_NAME}" \
               --generate-notes
           fi
-          echo "Published [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published [$TAG]($url) with the APK" >> "$GITHUB_STEP_SUMMARY"
 
   server-image:
     name: Publish server image
-    needs: ci
+    needs: [tag, ci]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,7 +143,7 @@ jobs:
           file: server/Dockerfile
           push: true
           tags: |
-            ${{ steps.image.outputs.name }}:${{ github.ref_name }}
+            ${{ steps.image.outputs.name }}:${{ needs.tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -94,14 +153,15 @@ jobs:
   # Secrets: DEPLOY_HOST, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS (docs/production.md).
   deploy:
     name: Deploy to production
-    needs: server-image
+    needs: [tag, server-image]
     runs-on: ubuntu-latest
     environment:
       name: production
       url: ${{ vars.PRODUCTION_URL }}
     steps:
-      - name: Deploy ${{ github.ref_name }}
+      - name: Deploy ${{ needs.tag.outputs.tag }}
         env:
+          TAG: ${{ needs.tag.outputs.tag }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
@@ -115,5 +175,5 @@ jobs:
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "root@$DEPLOY_HOST" "$GITHUB_REF_NAME"
-          echo "Deployed $GITHUB_REF_NAME to $DEPLOY_HOST" >> "$GITHUB_STEP_SUMMARY"
+            "root@$DEPLOY_HOST" "$TAG"
+          echo "Deployed $TAG to $DEPLOY_HOST" >> "$GITHUB_STEP_SUMMARY"
