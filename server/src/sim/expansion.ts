@@ -1,6 +1,7 @@
 // Founding new villages with settlers.
 import type { GameData, TerrainId } from '../data/index.js';
-import { hex, hexDistance, hexKey, type Hex } from './hex.js';
+import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
+import { START_RING } from './mapgen.js';
 
 export const SETTLER = 'settler';
 
@@ -41,4 +42,32 @@ export function adminUpkeepFor(data: GameData, villagesOwned: number): number {
 export function recommendedGarrison(data: GameData, villagesOwned: number): number {
   const { base, perVillage } = data.expansion.recommendedGarrison;
   return base + perVillage * Math.max(0, villagesOwned - 1);
+}
+
+// Where a player who joins a run under way founds their village: free,
+// settleable ground at least `minVillageDistance` from every village, on
+// the ring nearest the starting ring that has any, and there the spot
+// farthest from the other villages (ties: the ring's order). `reachable`
+// says whether a road leads from a hex to the Holy City.
+export function joinSite(
+  data: GameData,
+  terrain: ReadonlyMap<string, TerrainId>,
+  villages: readonly Hex[],
+  taken: ReadonlySet<string>,
+  reachable: (cell: Hex) => boolean,
+): Hex | null {
+  const rules = data.expansion;
+  const radius = Math.max(0, ...[...terrain.keys()].map((key) => { const [q, r] = key.split(',').map(Number); return hexDistance(hex(q!, r!), hex(0, 0)); }));
+  const nearest = (cell: Hex) => Math.min(Infinity, ...villages.map((v) => hexDistance(v, cell)));
+  for (let d = Math.max(START_RING, rules.minHolyCityDistance); d <= radius; d++) {
+    let best: Hex | null = null;
+    for (const cell of ring(hex(0, 0), d)) {
+      const type = terrain.get(hexKey(cell));
+      if (!type || !data.terrain.terrain[type].settleable || taken.has(hexKey(cell))) continue;
+      if (nearest(cell) < rules.minVillageDistance || (best && nearest(cell) <= nearest(best))) continue;
+      if (reachable(cell)) best = cell;
+    }
+    if (best) return best;
+  }
+  return null;
 }

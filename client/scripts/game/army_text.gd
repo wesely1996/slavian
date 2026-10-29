@@ -80,7 +80,7 @@ static func supply_text(data: Dictionary, army: Dictionary, speed: float, now: f
 	var hours := (now - out) * speed / 3600.0
 	if hours < float(a.lossAfterHours):
 		return UI.t("Out of food: marching slower · men start to die in %s") % TimeUtil.format_duration((float(a.lossAfterHours) - hours) * 3600.0 / speed)
-	return UI.t("Starving: losing men every hour · gone in %s") % TimeUtil.format_duration(maxf(0.0, float(a.lostAfterHours) - hours) * 3600.0 / speed)
+	return UI.t("Starving: losing men every %s · gone in %s") % [TimeUtil.format_duration(float(a.checkHours) * 3600.0 / speed), TimeUtil.format_duration(maxf(0.0, float(a.lostAfterHours) - hours) * 3600.0 / speed)]
 
 
 ## The grain an army carries now (0 for one its home village feeds).
@@ -132,7 +132,7 @@ static func fatigue_text(data: Dictionary, army: Dictionary, speed: float, now: 
 	var hours := (now - out) * speed / 3600.0
 	if hours < float(a.lossAfterHours):
 		return UI.t("Hungry: marching %d%% slower") % roundi((1.0 - float(a.slowFactor)) * 100.0)
-	return UI.t("Starving: losing %d%% of its men every hour") % roundi(float(a.lossShare) * 100.0)
+	return UI.t("Starving: losing %d%% of its men every %s") % [roundi(float(a.lossShare) * 100.0), TimeUtil.format_duration(float(a.checkHours) * 3600.0 / speed)]
 
 
 ## Whether an army carrying its own grain has run out of it.

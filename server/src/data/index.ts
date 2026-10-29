@@ -135,6 +135,9 @@ const unitSchema = z.object({
 const unitsFileSchema = z.object({
   version: z.number().int(),
   trainingQueueLimit: z.number().int().positive(),
+  // One more training batch for every few levels of each of these buildings.
+  trainingSlotBuildings: z.array(z.string()),
+  buildingLevelsPerTrainingSlot: z.number().int().positive(),
   maxBatch: z.number().int().positive(),
   trainingSpeedup: z.number().positive().max(1),
   units: z.record(z.string(), unitSchema),
@@ -450,6 +453,8 @@ const ordersFileSchema = z.object({
   version: z.number().int(),
   checkMinutes: z.number().positive(),
   maxPerVillage: z.number().int().positive(),
+  // One more standing order every this many Elder's Hall levels.
+  hallLevelsPerOrder: z.number().int().positive(),
   minSurplus: z.number().nonnegative(),
   // Supply routes send grain once at least this much is missing.
   supplyMinLoad: z.number().int().positive(),

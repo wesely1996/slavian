@@ -51,6 +51,21 @@ static func queue_limit(data: Dictionary, level: int) -> int:
 	return int(v.baseQueueLimit) + level / int(v.hallLevelsPerQueueSlot)
 
 
+## Training batches a village may have waiting: one more for every few
+## levels of each military building (server sim/village.ts).
+static func training_queue_limit(data: Dictionary, levels: Dictionary) -> int:
+	var u: Dictionary = data.units
+	var limit := int(u.trainingQueueLimit)
+	for b in u.get("trainingSlotBuildings", []):
+		limit += int(levels.get(b, 0)) / int(u.buildingLevelsPerTrainingSlot)
+	return limit
+
+
+## Standing orders a village may keep: one more every few Hall levels.
+static func orders_limit(data: Dictionary, hall: int) -> int:
+	return int(data.orders.maxPerVillage) + hall / int(data.orders.get("hallLevelsPerOrder", 3))
+
+
 static func hall_speedup(data: Dictionary, level: int) -> float:
 	return pow(float(data.buildings.village.hallBuildSpeedup), maxi(0, level - 1))
 

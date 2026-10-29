@@ -178,6 +178,13 @@ export function unlockedSlots(data: GameData, hallLevel: number): number {
   return Math.min(v.centerSlots, v.slotsUnlockedAtStart + v.slotsPerHallLevel * Math.max(0, hallLevel - 1));
 }
 
+// Training batches a village may have waiting: one more for every few
+// levels of each military building.
+export function trainingQueueLimit(data: GameData, levels: Readonly<Record<string, number>>): number {
+  const u = data.units;
+  return u.trainingQueueLimit + u.trainingSlotBuildings.reduce((sum, b) => sum + Math.floor((levels[b] ?? 0) / u.buildingLevelsPerTrainingSlot), 0);
+}
+
 export function buildQueueLimit(data: GameData, hallLevel: number): number {
   const v = data.buildings.village;
   return v.baseQueueLimit + Math.floor(hallLevel / v.hallLevelsPerQueueSlot);
@@ -614,7 +621,7 @@ export function queueTraining(
   if (buildingLevel < def.requiresLevel) {
     throw new RuleError(`${def.name} needs ${buildingDef(data, def.building).name} level ${def.requiresLevel}`);
   }
-  if (state.training.length >= data.units.trainingQueueLimit) throw new RuleError('Training queue is full');
+  if (state.training.length >= trainingQueueLimit(data, state.levels)) throw new RuleError('Training queue is full');
 
   const cost = unitCost(data, unit, count, villagesOwned);
   const paid = spend(state.ledger, at, cost);

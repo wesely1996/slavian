@@ -102,7 +102,8 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
         [world.id, wave.id, delay],
       );
       await notifyWorld(client, { worldId: world.id, type: 'waves' });
-      return { body: 'The next horde from the {front} sets out {hours} game hours later.', vars: { front: quest.front ?? '', hours: data.quests.kinds.ambush.delayHours ?? 0 } };
+      // Told in real minutes, at any world speed.
+      return { body: 'The next horde from the {front} sets out {minutes} minutes later.', vars: { front: quest.front ?? '', minutes: Math.round(delay / 60_000) } };
     }
     case 'scout': {
       const wave = await nextWave(client, world.id, quest.front);

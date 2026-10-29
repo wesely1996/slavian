@@ -71,7 +71,7 @@ export async function runOnce(
     speed: opts.speed,
     difficulty: opts.difficulty,
   });
-  for (const account of accounts.slice(1)) await joinWorldCommand(db, { account, inviteCode: created.inviteCode! });
+  for (const account of accounts.slice(1)) await joinWorldCommand(db, deps, { account, inviteCode: created.inviteCode!, now });
   // A fixed map, so two tunings can be compared on the same worlds.
   if (opts.mapSeed !== undefined) await db.query('UPDATE worlds SET seed = $2 WHERE id = $1', [created.id, opts.mapSeed]);
   const world = await startWorldCommand(db, deps, { account: accounts[0]!, worldId: created.id, now });

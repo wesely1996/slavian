@@ -96,7 +96,8 @@ const createWorldBody = z.object({
   speed: z.number().min(1).max(100).default(1),
   difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
-const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
+// A run under way can be joined too: the clan and hero chosen go with it.
+const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.string().max(32).optional(), hero: z.string().max(32).optional() });
 // `plot` targets a field, center slot, the walls ("w"), a wall slot ("t0")
 // or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
@@ -439,7 +440,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.post('/v1/worlds/join', async (request) => {
     const account = await authenticate(db, request);
     const body = joinWorldBody.parse(request.body);
-    const world = await joinWorldCommand(db, { account, inviteCode: body.inviteCode });
+    const world = await joinWorldCommand(db, scheduler, { account, inviteCode: body.inviteCode, clan: body.clan, hero: body.hero, now: clock() });
     return fullWorldView(world.id);
   });
 

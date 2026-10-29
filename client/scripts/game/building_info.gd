@@ -20,7 +20,10 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 		"outpost":
 			parts.append(UI.t("yields ×%.2f") % pow(float(def.get("yieldGrowth", 1.0)), level - 1))
 	if building == Rules.HALL:
-		parts.append(UI.t("%d slots · queue %d · %d outposts") % [Rules.unlocked_slots(data, level), Rules.queue_limit(data, level), Rules.outpost_limit(data, level)])
+		parts.append(UI.t("%d slots · queue %d · %d outposts · %d standing orders") % [Rules.unlocked_slots(data, level), Rules.queue_limit(data, level), Rules.outpost_limit(data, level), Rules.orders_limit(data, level)])
+	var per_slot := int(data.units.get("buildingLevelsPerTrainingSlot", 0))
+	if building in data.units.get("trainingSlotBuildings", []) and per_slot > 0 and level / per_slot > 0:
+		parts.append(UI.t("+%d training queue") % (level / per_slot))
 		var faster := roundi((1.0 - Rules.hall_speedup(data, level)) * 100.0)
 		if faster > 0:
 			parts.append(UI.t("builds %d%% faster") % faster)
@@ -115,8 +118,9 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	box.add_child(_head("unit/%s" % unit, UI.t(def.name), UI.t(String(def.get("description", ""))),
 		UI.t("Only %s") % ClanText.title(data, def.clan) if def.get("clan") != null else ""))
 	box.add_child(UI.label(UI.t("%s · attack %d · defense %d") % [family.capitalize(), int(def.attack), int(def.defense)], UI.SMALL_SIZE))
-	box.add_child(UI.label(UI.t("Speed %d hexes/h · carries %d · eats %d grain/h") % [int(def.speed), int(def.carry), int(def.upkeepPerHour)], UI.SMALL_SIZE))
-	box.add_child(UI.label(UI.t("Marches out with food for %d game hours") % int(def.get("supplyHours", 0)), UI.SMALL_SIZE))
+	# Real time: a faster world marches and eats faster.
+	box.add_child(UI.label(UI.t("Speed %s hexes/h · carries %d · eats %s grain/h") % [UI.number(float(def.speed) * speed), int(def.carry), UI.number(float(def.upkeepPerHour) * speed)], UI.SMALL_SIZE))
+	box.add_child(UI.label(UI.t("Marches out with food for %s") % TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed), UI.SMALL_SIZE))
 	var counters: Dictionary = data.battle.counters
 	# Its own counters, or its family's.
 	var strong: Dictionary = def.counters if def.get("counters") != null else counters.get(family, {})

@@ -97,6 +97,34 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(body.terrain.terrain.plains.settleable).toBe(true);
   });
 
+  it('lets a player join a run under way, with a village of their own', async () => {
+    const host = await guest('Lada');
+    const late = await guest('Dobro');
+    const third = await guest('Zvezda');
+    const created = await call('POST', '/v1/worlds', host.token, { name: 'Late', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    const started = (await call('POST', `/v1/worlds/${worldId}/start`, host.token)).body;
+    expect(started.villages).toHaveLength(1);
+    now = new Date(now.getTime() + 30 * 60_000);
+
+    const joined = await call('POST', '/v1/worlds/join', late.token, { inviteCode: created.body.inviteCode, clan: Object.keys(scheduler.data.clans.clans)[0], hero: 'vasilisa' });
+    expect(joined.status).toBe(200);
+    expect(joined.body.status).toBe('running');
+    const mine = joined.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === late.accountId);
+    const theirs = joined.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === host.accountId);
+    expect(mine).toBeDefined();
+    expect(hexDistance(hex(mine.q, mine.r), hex(theirs.q, theirs.r))).toBeGreaterThanOrEqual(scheduler.data.expansion.minVillageDistance);
+    expect(hexDistance(hex(mine.q, mine.r), hex(0, 0))).toBeGreaterThanOrEqual(2);
+    const member = joined.body.members.find((m: { accountId: number }) => m.accountId === late.accountId);
+    expect(member).toMatchObject({ heroKind: 'vasilisa', clan: Object.keys(scheduler.data.clans.clans)[0] });
+    expect(joined.body.heroes.some((h: { accountId: number }) => h.accountId === late.accountId)).toBe(true);
+    // The host hears of it; the world is now full; joining again is a no-op.
+    const inbox = (await call('GET', `/v1/worlds/${worldId}/notifications`, host.token)).body;
+    expect(inbox.notifications.some((n: { title: string }) => n.title.includes('Dobro joined the run'))).toBe(true);
+    expect((await call('POST', '/v1/worlds/join', third.token, { inviteCode: created.body.inviteCode })).body.message).toMatch(/full/);
+    expect((await call('POST', '/v1/worlds/join', late.token, { inviteCode: created.body.inviteCode })).status).toBe(200);
+  });
+
   it('runs the lobby -> start -> build flow for two players', async () => {
     const vesna = await guest('Vesna');
     const bogdan = await guest('Bogdan');

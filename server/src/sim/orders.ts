@@ -12,6 +12,11 @@ export type StandingOrder =
   // `target` grain, sent by caravan from the order's village.
   | { kind: 'supply'; fortId: number; target: number };
 
+// Standing orders a village may keep: one more every few Hall levels.
+export function ordersLimit(data: GameData, hallLevel: number): number {
+  return data.orders.maxPerVillage + Math.floor(hallLevel / data.orders.hallLevelsPerOrder);
+}
+
 export function validateOrder(data: GameData, order: StandingOrder): StandingOrder {
   if (order.kind === 'train') {
     if (!data.units.units[order.unit]) throw new RuleError(`Unknown unit "${order.unit}"`);

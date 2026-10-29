@@ -9,7 +9,8 @@ import { NotFoundError, RuleError } from '../errors.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { ensureOrdersCheck, runOrders } from '../scheduler/orders.js';
 import { withWorld } from '../scheduler/world.js';
-import { validateOrder, type StandingOrder } from '../sim/orders.js';
+import { ordersLimit, validateOrder, type StandingOrder } from '../sim/orders.js';
+import { HALL } from '../sim/village.js';
 
 interface OrderInput {
   accountId: number;
@@ -37,9 +38,8 @@ export async function placeOrderCommand(
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'placed a standing order', villageId: village.id });
     const spec = validateOrder(deps.data, input.spec);
     const existing = await listOrders(client, { villageId: village.id });
-    if (existing.length >= deps.data.orders.maxPerVillage) {
-      throw new RuleError(`A village keeps at most ${deps.data.orders.maxPerVillage} standing orders`);
-    }
+    const limit = ordersLimit(deps.data, village.state.levels[HALL] ?? 0);
+    if (existing.length >= limit) throw new RuleError(`A village keeps at most ${limit} standing orders; a bigger Elder's Hall keeps more`);
     if (spec.kind === 'supply') {
       const fort = await loadFort(client, spec.fortId);
       if (!fort || fort.worldId !== worldId || fort.ownerAccountId !== village.ownerAccountId) throw new RuleError('No fort or supply point of yours there');
