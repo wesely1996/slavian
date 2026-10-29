@@ -45,8 +45,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -486,6 +486,10 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				if result.has("mission"):
 					extra = ["mission", LocalScouting.mission_view(result.mission)]
 					step = "scout"
+			"scout/ruins":
+				result = LocalScouting.search_ruins(self, world, village, body, now)
+				if result.has("search"):
+					extra = ["search", LocalScouting.ruin_search_view(result.search)]
 			"found":
 				result = LocalScouting.found_village(self, world, village, body, now)
 				if result.has("expedition"):
@@ -503,7 +507,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
-		if action in ["research", "rebuild", "caravans", "caravans/fetch", "scout", "found", "market/sell", "generals"]:
+		if action in ["research", "rebuild", "caravans", "caravans/fetch", "scout", "scout/ruins", "found", "market/sell", "generals"]:
 			changed.append(["world"])
 		if step != "":
 			onboarding_step(world, int(village.ownerAccountId), step, now, changed)
@@ -888,6 +892,10 @@ func _on_scout_return(world: Dictionary, event: Dictionary, changed: Array) -> v
 	LocalScouting.on_scout_return(self, world, event, changed)
 
 
+func _on_ruin_search(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalScouting.on_ruin_search(self, world, event, changed)
+
+
 func _on_settlers_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalScouting.on_settlers_arrive(self, world, event, changed)
 
@@ -989,7 +997,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"sanctity": world.sanctity, "embers": world.embers, "difficulty": world.difficulty, "quietHours": _quiet_window(world),
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
-		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "battles": _battles_view(world), "raids": _raids_view(world),
+		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "ruinSearches": LocalScouting.ruin_searches_view(world), "battles": _battles_view(world), "raids": _raids_view(world),
 		"expeditions": LocalScouting.expeditions_view(world),
 		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "generals": world.generals.map(func(g: Dictionary) -> Dictionary: return LocalGenerals.view(data, g)), "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
 		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
@@ -1215,6 +1223,9 @@ func _load_all() -> void:
 				"notification": 1, "general": 1})
 			# Worlds saved before generals.
 			world.merge({"generals": []})
+			# Worlds saved before ruin searches.
+			world.merge({"ruinSearches": []})
+			world.next.merge({"ruinSearch": 1})
 			for a in world.armies:
 				a.merge({"generalId": null})
 				# Armies from before supplies: fed by their home village.

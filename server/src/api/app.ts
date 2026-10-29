@@ -35,6 +35,7 @@ import {
   rebuildCommand,
   sellGearCommand,
   sendScoutsCommand,
+  searchRuinsCommand,
   setStanceCommand,
   startResearchCommand,
   trainUnitsCommand,
@@ -64,6 +65,7 @@ import {
   orderView,
   researchView,
   missionView,
+  ruinSearchView,
   vaultView,
   villageView,
   worldSummary,
@@ -96,7 +98,8 @@ const createWorldBody = z.object({
   speed: z.number().min(1).max(100).default(1),
   difficulty: z.enum(DIFFICULTIES).default('normal'),
 });
-const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16) });
+// A run under way can be joined too: the clan and hero chosen go with it.
+const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.string().max(32).optional(), hero: z.string().max(32).optional() });
 // `plot` targets a field, center slot, the walls ("w"), a wall slot ("t0")
 // or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
@@ -176,6 +179,7 @@ const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.numbe
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
+const ruinSearchBody = z.object({ count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
   const header = request.headers.authorization ?? '';
@@ -439,7 +443,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.post('/v1/worlds/join', async (request) => {
     const account = await authenticate(db, request);
     const body = joinWorldBody.parse(request.body);
-    const world = await joinWorldCommand(db, { account, inviteCode: body.inviteCode });
+    const world = await joinWorldCommand(db, scheduler, { account, inviteCode: body.inviteCode, clan: body.clan, hero: body.hero, now: clock() });
     return fullWorldView(world.id);
   });
 
@@ -507,6 +511,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       now: clock(),
     });
     return { village: villageView(village), mission: missionView(mission), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/scout/ruins', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = ruinSearchBody.parse(request.body);
+    const { village, search } = await searchRuinsCommand(db, scheduler, { accountId: account.id, villageId: id, count: body.count, now: clock() });
+    return { village: villageView(village), search: ruinSearchView(search), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/rename', async (request) => {

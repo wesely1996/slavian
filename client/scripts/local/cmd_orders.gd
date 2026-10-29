@@ -38,6 +38,11 @@ static func validate(data: Dictionary, spec: Dictionary) -> Dictionary:
 	return {"error": "Unknown order", "kind": "invalid"}
 
 
+## Standing orders a village may keep (sim/orders.ts ordersLimit).
+static func orders_limit(data: Dictionary, hall: int) -> int:
+	return int(data.orders.maxPerVillage) + floori(hall / float(data.orders.hallLevelsPerOrder))
+
+
 static func train_count(spec: Dictionary, have: int) -> int:
 	return maxi(0, mini(int(spec.batch), int(spec.target) - have))
 
@@ -211,8 +216,9 @@ static func place(server: LocalServer, world: Dictionary, village: Dictionary, b
 	if spec.has("error"):
 		return spec
 	var existing := orders_of(world, int(village.id))
-	if existing.size() >= int(data.orders.maxPerVillage):
-		return LocalVillage.rule("A village keeps at most %d standing orders" % int(data.orders.maxPerVillage))
+	var limit := orders_limit(data, int(village.state.levels.get(LocalVillage.HALL, 0)))
+	if existing.size() >= limit:
+		return LocalVillage.rule("A village keeps at most %d standing orders; a bigger Elder's Hall keeps more" % limit)
 	if spec.kind == "supply":
 		var fort := LocalArmies.find_fort(world, int(spec.fortId))
 		if fort.is_empty() or fort.ownerAccountId == null or int(fort.ownerAccountId) != int(village.ownerAccountId):

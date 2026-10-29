@@ -321,6 +321,15 @@ static func unlocked_slots(data: Dictionary, hall: int) -> int:
 	return mini(int(v.centerSlots), int(v.slotsUnlockedAtStart) + int(v.slotsPerHallLevel) * maxi(0, hall - 1))
 
 
+## Training batches a village may have waiting (sim/village.ts trainingQueueLimit).
+static func training_queue_limit(data: Dictionary, levels: Dictionary) -> int:
+	var u: Dictionary = data.units
+	var limit := int(u.trainingQueueLimit)
+	for b in u.trainingSlotBuildings:
+		limit += floori(int(levels.get(b, 0)) / float(u.buildingLevelsPerTrainingSlot))
+	return limit
+
+
 static func build_queue_limit(data: Dictionary, hall: int) -> int:
 	var v: Dictionary = data.buildings.village
 	return int(v.baseQueueLimit) + floori(hall / float(v.hallLevelsPerQueueSlot))
@@ -640,7 +649,7 @@ static func queue_training(data: Dictionary, state: Dictionary, unit: String, co
 	var level := int(state.levels.get(def.building, 0))
 	if level < int(def.requiresLevel):
 		return rule("%s needs %s level %d" % [def.name, build_def(data, def.building).name, int(def.requiresLevel)])
-	if state.training.size() >= int(data.units.trainingQueueLimit):
+	if state.training.size() >= training_queue_limit(data, state.levels):
 		return rule("Training queue is full")
 	var paid := LocalLedger.spend(state.ledger, at, unit_cost(data, unit, count, villages_owned))
 	if paid.has("missing"):

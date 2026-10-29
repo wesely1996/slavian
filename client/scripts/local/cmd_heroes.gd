@@ -149,8 +149,9 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 			for e in world.events:
 				if e.status == "pending" and e.type in ["wave_spawn", "wave_warning"] and int(e.payload.get("waveId", -1)) == int(wave.id):
 					e.dueAt = int(e.dueAt) + delay
-			return {"body": "The next horde from the {front} sets out {hours} game hours later.",
-				"vars": {"front": quest.front if quest.front != null else "", "hours": data.quests.kinds.ambush.get("delayHours", 0)}}
+			# Told in real minutes, at any world speed.
+			return {"body": "The next horde from the {front} sets out {minutes} minutes later.",
+				"vars": {"front": quest.front if quest.front != null else "", "minutes": LocalWaves.js_round(delay / 60000.0)}}
 		"scout":
 			var wave := _next_wave(world, quest.front)
 			if wave.is_empty():

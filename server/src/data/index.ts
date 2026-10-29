@@ -135,6 +135,9 @@ const unitSchema = z.object({
 const unitsFileSchema = z.object({
   version: z.number().int(),
   trainingQueueLimit: z.number().int().positive(),
+  // One more training batch for every few levels of each of these buildings.
+  trainingSlotBuildings: z.array(z.string()),
+  buildingLevelsPerTrainingSlot: z.number().int().positive(),
   maxBatch: z.number().int().positive(),
   trainingSpeedup: z.number().positive().max(1),
   units: z.record(z.string(), unitSchema),
@@ -201,6 +204,15 @@ const scoutingFileSchema = z.object({
   survival: z.partialRecord(z.enum(FRONTS), z.number().min(0).max(1)),
   defaultSurvival: z.number().min(0).max(1),
   maxScouts: z.number().int().positive(),
+  // Scouts sent to search the land around their village for a forgotten ruin.
+  ruinSearch: z.object({
+    minScouts: z.number().int().positive(),
+    hours: z.number().positive(),
+    range: z.number().int().positive(),
+    spacing: z.number().int().nonnegative(),
+    chancePerScout: z.number().min(0).max(1),
+    maxChance: z.number().min(0).max(1),
+  }),
   tiers: z
     .array(
       z.object({
@@ -450,6 +462,8 @@ const ordersFileSchema = z.object({
   version: z.number().int(),
   checkMinutes: z.number().positive(),
   maxPerVillage: z.number().int().positive(),
+  // One more standing order every this many Elder's Hall levels.
+  hallLevelsPerOrder: z.number().int().positive(),
   minSurplus: z.number().nonnegative(),
   // Supply routes send grain once at least this much is missing.
   supplyMinLoad: z.number().int().positive(),

@@ -283,6 +283,11 @@ static func clear(node: Node) -> void:
 		child.queue_free()
 
 
+## A number as it reads best: whole numbers bare, else one decimal.
+static func number(value: float) -> String:
+	return str(roundi(value)) if is_equal_approx(value, roundf(value)) else "%.1f" % value
+
+
 static func signed(value: float) -> String:
 	return ("+%d" if value >= 0 else "−%d") % absi(roundi(value))
 

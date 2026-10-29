@@ -585,8 +585,15 @@ func _create_world(world_name: String, max_players: int, speed: int, difficulty 
 	_handle_world_response(await _with_choices(response))
 
 
+## Joins a lobby, or a run under way (where the clan and hero chosen go
+## with the request: the village is founded at once).
 func _join_world(code: String) -> void:
-	var response := await Api.post_json("/v1/worlds/join", {"inviteCode": code})
+	var body := {"inviteCode": code}
+	if _choice.clan != null:
+		body.clan = _choice.clan
+	if _choice.hero != null:
+		body.hero = _choice.hero
+	var response := await Api.post_json("/v1/worlds/join", body)
 	_handle_world_response(await _with_choices(response))
 
 

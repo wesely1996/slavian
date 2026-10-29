@@ -123,7 +123,8 @@ export async function hordeWins(
   return decision;
 }
 
-async function takenHexes(client: DbClient, worldId: number): Promise<Set<string>> {
+// Every hex something stands on: villages, outposts, forts, camps and sites.
+export async function takenHexes(client: DbClient, worldId: number): Promise<Set<string>> {
   const taken = new Set<string>();
   for (const v of await listVillages(client, worldId)) {
     taken.add(hexKey(hex(v.q, v.r)));

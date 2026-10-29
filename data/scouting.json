@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Chance that each scout survives reaching a wave, per front. Report tiers by surviving scouts: sizeError / unitError are the relative width of the ranges reported (0 = exact). revealsStance: the report includes the wave's battle stance.",
+  "_comment": "Chance that each scout survives reaching a wave, per front. Report tiers by surviving scouts: sizeError / unitError are the relative width of the ranges reported (0 = exact). revealsStance: the report includes the wave's battle stance. Scouts can also search for ruins: `ruinSearch.minScouts` or more leave the village for `ruinSearch.hours` game hours, and when they are back they have found a forgotten ruin (a new ancient site within `ruinSearch.range` hexes of the village, on free ground that suits a kind of site, at least `ruinSearch.spacing` from other sites) with a chance of `chancePerScout` per scout, at most `maxChance`.",
   "survival": {
     "north": 0.75,
     "east": 0.65,
@@ -9,6 +9,7 @@
   },
   "defaultSurvival": 0.8,
   "maxScouts": 20,
+  "ruinSearch": { "minScouts": 2, "hours": 3, "range": 5, "spacing": 3, "chancePerScout": 0.15, "maxChance": 0.9 },
   "tiers": [
     {
       "name": "rough",

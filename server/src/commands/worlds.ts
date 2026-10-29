@@ -39,6 +39,11 @@ import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
 import { record } from '../db/telemetry.js';
 import { townName } from '../sim/names.js';
+import { joinSite } from '../sim/expansion.js';
+import { hex } from '../sim/hex.js';
+import { roadRoute } from '../sim/logistics.js';
+import { loadLand } from '../db/rivers.js';
+import { takenHexes } from '../scheduler/horde.js';
 import { createRng } from '../sim/rng.js';
 
 // No 0/O, 1/I/L: invite codes get read aloud and typed on phones.
@@ -80,20 +85,77 @@ export async function createWorldCommand(
   }
 }
 
-export async function joinWorldCommand(db: Db, input: { account: Account; inviteCode: string }): Promise<World> {
+// Joins a world by its invite code: in the lobby, or a run under way, where
+// the newcomer (with the clan and hero they chose, if still free) founds a
+// village of their own at once.
+export async function joinWorldCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; inviteCode: string; clan?: string | undefined; hero?: string | undefined; now: Date },
+): Promise<World> {
   return inTransaction(db, async (client) => {
     const found = await findWorldByInviteCode(client, normalizeInviteCode(input.inviteCode));
     if (!found) throw new NotFoundError('No world with that invite code');
     await lockWorld(client, found.id);
     const world = await getWorld(client, found.id);
     if (await isMember(client, world.id, input.account.id)) return world;
-    if (world.status !== 'lobby') throw new RuleError('This world has already started');
+    if (world.status !== 'lobby' && world.status !== 'running') throw new RuleError('This run is over');
     const members = await listMembers(client, world.id);
     if (members.length >= world.maxPlayers) throw new RuleError('This world is full');
-    await addMember(client, world.id, input.account.id);
+    if (world.status === 'running') {
+      // Catch the world up first, so the newcomer starts from now.
+      await drainWorld(client, world.id, input.now, deps);
+      await lateJoin(client, deps, world, input, members);
+    } else {
+      await addMember(client, world.id, input.account.id);
+    }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
-    return world;
+    return getWorld(client, world.id);
   });
+}
+
+// A newcomer to a run under way: a member with their clan and hero (if
+// still free), a village on free ground near the starting ring, a hero,
+// their bonuses and daily digest; the others hear of it.
+async function lateJoin(
+  client: DbClient,
+  deps: SchedulerDeps,
+  world: World,
+  input: { account: Account; clan?: string | undefined; hero?: string | undefined; now: Date },
+  members: readonly Member[],
+): Promise<void> {
+  const data = deps.data;
+  const land = await loadLand(client, world.id);
+  const villages = await listVillages(client, world.id);
+  const site = joinSite(data, land, villages.map((v) => hex(v.q, v.r)), await takenHexes(client, world.id), (cell) => {
+    try {
+      roadRoute(data, land, cell, hex(0, 0), 1, 1);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+  if (!site) throw new RuleError('There is no free ground left for another village');
+  await addMember(client, world.id, input.account.id);
+  if (input.clan && data.clans.clans[input.clan]) await setClan(client, world.id, input.account.id, input.clan);
+  if (input.hero && data.heroes.roster[input.hero] && !members.some((m) => m.heroKind === input.hero)) {
+    await setHeroKind(client, world.id, input.account.id, input.hero);
+  }
+  const taken = villages.map((v) => v.name);
+  const name = townName(data, taken, createRng((world.seed ^ 0x7a11 ^ Math.imul(members.length + 1, 0x9e3779b1)) >>> 0));
+  await insertVillage(client, { worldId: world.id, ownerAccountId: input.account.id, name, q: site.q, r: site.r, state: newVillage(data, input.now, world.speed) });
+  await ensureHeroes(client, data, world.id);
+  await refreshBonuses(client, data, world, [input.account.id], input.now);
+  await ensureDigests(client, world, input.now);
+  for (const member of members) {
+    await tell(client, world, member.accountId, {
+      kind: 'world',
+      tier: 'digest',
+      title: '{player} joined the run',
+      body: 'They founded {village} at ({q}, {r}).',
+      vars: { player: input.account.displayName, village: name, q: site.q, r: site.r },
+    }, input.now);
+  }
 }
 
 // Generates the map for the actual number of players and founds a village

@@ -224,7 +224,7 @@ func _test_village_layout() -> void:
 	var base_data := {"heroes": {"speed": 6, "woundHours": 8, "slots": ["weapon", "armor", "amulet"],
 		"roster": {"x": {"effects": {"heroSpeed": 0.25}, "traits": [{"effects": {"woundTime": -0.5}}]}}}}
 	var base := HeroText.base_stats(base_data, {"kind": "x", "gear": {"weapon": "a", "armor": null}, "skillPoints": 2}, 2.0)
-	_check(base == PackedStringArray(["Rides 7.5 hexes an hour", "Wounded for 2h 00m after a lost fight", "Gear: 1 of 3 slots worn", "2 skill points to spend"]),
+	_check(base == PackedStringArray(["Rides 15 hexes an hour", "Wounded for 2h 00m after a lost fight", "Gear: 1 of 3 slots worn", "2 skill points to spend"]),
 		"a hero's own numbers: speed and wounds with its gifts, at world speed: %s" % base)
 
 
@@ -406,12 +406,12 @@ func _test_armies() -> void:
 	var defs := {"spearman": {"name": "Spearman"}, "horseman": {"name": "Horseman"}}
 	_check(ArmyText.units_text({"spearman": 20, "horseman": 0}, defs) == "Spearman ×20", "army units text")
 	# An army's grain: a day for 10 spearmen, then hunger.
-	var fed := {"units": {"units": {"spearman": {"upkeepPerHour": 1}}}, "armies": {"attrition": {"lossAfterHours": 8, "lostAfterHours": 24}}}
+	var fed := {"units": {"units": {"spearman": {"upkeepPerHour": 1}}}, "armies": {"attrition": {"lossAfterHours": 8, "lostAfterHours": 24, "checkHours": 1}}}
 	var marching := {"status": "stationed", "units": {"spearman": 10}, "supply": 240, "supplyAt": "2026-03-01T00:00:00.000Z", "hungrySince": null}
 	var t0 := TimeUtil.parse_iso("2026-03-01T00:00:00.000Z")
 	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 6 * 3600) == "Grain for 18h 00m", "army grain: %s" % ArmyText.supply_text(fed, marching, 1.0, t0 + 6 * 3600))
 	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 26 * 3600).begins_with("Out of food: marching slower · men start to die in 6h 00m"), "army out of food")
-	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600) == "Starving: losing men every hour · gone in 14h 00m", "army starving: %s" % ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600))
+	_check(ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600) == "Starving: losing men every 1h 00m · gone in 14h 00m", "army starving: %s" % ArmyText.supply_text(fed, marching, 1.0, t0 + 34 * 3600))
 	_check(ArmyText.supply_text(fed, {"status": "stationed", "units": {}, "supply": null}, 1.0, t0) == "", "an army its village feeds")
 	var army := {"orders": "support", "status": "stationed", "arrivesAt": "2026-01-01T00:00:00.000Z"}
 	_check(ArmyText.status(army, "Vesna", 0.0) == "Standing guard at Vesna", "army status")
@@ -458,7 +458,7 @@ func _test_field() -> void:
 	_check(is_equal_approx(ArmyText.supply_left(units, fed, 1.0, start + 6 * 3600.0), 36.0), "an army's grain left after six hours")
 	_check(ArmyText.supply_left(units, fed, 1.0, start + 30 * 3600.0) == 0.0, "none left once it has run out")
 	var udata := {"units": {"units": {"spearman": {"upkeepPerHour": 1, "supplyHours": 24}, "horseman": {"upkeepPerHour": 2, "supplyHours": 36}}},
-		"armies": {"attrition": {"slowFactor": 0.75, "lossAfterHours": 8, "lossShare": 0.05, "lostAfterHours": 24}}}
+		"armies": {"attrition": {"slowFactor": 0.75, "lossAfterHours": 8, "lossShare": 0.05, "lostAfterHours": 24, "checkHours": 1}}}
 	_check(ArmyText.full_supply(udata, {"spearman": 2, "horseman": 1}) == 120.0 and ArmyText.upkeep(udata, {"spearman": 2, "horseman": 1}) == 4.0, "an army's full load: each unit its own hours")
 	_check(ArmyText.fatigue(udata, fed, 1.0, start + 6 * 3600.0) == 0.0 and ArmyText.fatigue_text(udata, fed, 1.0, start) == "Fed: no fatigue", "fed: no fatigue")
 	_check(is_equal_approx(ArmyText.fatigue(udata, fed, 1.0, start + 30 * 3600.0), 0.25) and ArmyText.fatigue_text(udata, fed, 1.0, start + 30 * 3600.0).begins_with("Hungry"), "six hours hungry: a quarter worn, slower")
@@ -544,8 +544,8 @@ func _test_run() -> void:
 	_check(RunText.ritual_line({"status": "running", "ritualAt": "2025-12-31T23:00:00.000Z"}, now) == "Ritual Night", "ritual under way")
 	var run := {"days": 12.5, "wavesBeaten": 9, "wavesFaced": 11, "battlesWon": 14, "campsCleared": 3, "sitesExplored": 4, "scrolls": 2, "villagesFounded": 5, "villagesLost": 1}
 	var lines := RunText.stats(run)
-	_check(lines[0] == "12.5 days" and lines[1] == "Hordes beaten: 9 of 11", "run stats: %s" % lines)
-	_check(RunText.stats({"days": 3.0, "wavesBeaten": 0, "wavesFaced": 0, "battlesWon": 0, "campsCleared": 0, "sitesExplored": 0, "scrolls": 0, "villagesFounded": 1, "villagesLost": 0})[0] == "3 days", "whole days")
+	_check(lines[0] == "Lasted %s" % TimeUtil.format_duration(12.5 * 86400.0) and lines[1] == "Hordes beaten: 9 of 11", "run stats: %s" % lines)
+	_check(RunText.stats({"days": 3.0, "wavesBeaten": 0, "wavesFaced": 0, "battlesWon": 0, "campsCleared": 0, "sitesExplored": 0, "scrolls": 0, "villagesFounded": 1, "villagesLost": 0}, 24.0)[0] == "Lasted %s" % TimeUtil.format_duration(3.0 * 3600.0), "a run's length in real time")
 	_check(RunText.member_line({"displayName": "Mila", "villages": 3, "villagesLost": 1}) == "Mila: 3 villages, 1 lost", "member line")
 	_check(RunText.member_line({"displayName": "Rusa", "villages": 1, "villagesLost": 0}) == "Rusa: 1 village", "member line one")
 
@@ -670,6 +670,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("field-scenario.json", "local field armies")
 	_replay_scenario("supply-scenario.json", "local supply")
 	_replay_scenario("road-scenario.json", "local roads")
+	_replay_scenario("ruins-scenario.json", "local ruin searches")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

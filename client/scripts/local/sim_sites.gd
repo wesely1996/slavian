@@ -112,3 +112,39 @@ static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: 
 			return {"type": "ember"}
 	return {"type": "resources", "resources": LocalVillage.resources(func(k: String) -> int:
 		return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance)))}
+
+
+## What scouts searching around `center` turn up, seeded by the search
+## (sim/sites.ts searchRuin): a placed site, or {} when the roll fails or
+## there is no free ground for one. `taken` is {"q,r": true}; `sites` cells.
+static func search_ruin(data: Dictionary, terrain: Dictionary, radius: int, center: Vector2i, taken: Dictionary, sites: Array, scouts: int, seed_value: int) -> Dictionary:
+	var rules: Dictionary = data.scouting.ruinSearch
+	var rng := LocalRng.new((seed_value ^ 0x7417) & MASK)
+	if rng.next() >= minf(float(rules.maxChance), float(rules.chancePerScout) * scouts):
+		return {}
+	var kinds: Dictionary = data.sites.kinds
+	var usable: Array = []
+	for d in range(1, int(rules.range) + 1):
+		for cell in HexMath.ring(center, d):
+			var key := "%d,%d" % [cell.x, cell.y]
+			var type: String = terrain.get(key, "")
+			if type == "" or type == "holy_city" or data.terrain.terrain[type].moveCost == null or taken.has(key):
+				continue
+			var fits := false
+			for k in kinds.values():
+				if type in k.terrain:
+					fits = true
+			if not fits or sites.any(func(s: Vector2i) -> bool: return HexMath.distance(s, cell) < int(rules.spacing)):
+				continue
+			usable.append({"cell": cell, "type": type})
+	if usable.is_empty():
+		return {}
+	var picked: Dictionary = usable[floori(rng.next() * usable.size())]
+	var fitting: Array = []
+	for id in kinds:
+		if picked.type in kinds[id].terrain:
+			fitting.append(id)
+	var kind: String = fitting[floori(rng.next() * fitting.size())]
+	var watched := rng.next() < float(kinds[kind].guardianChance)
+	return {"kind": kind, "q": picked.cell.x, "r": picked.cell.y,
+		"guardians": guardians_for(data, picked.cell, radius, (seed_value ^ 0x9e37) & MASK) if watched else {}}

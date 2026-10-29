@@ -2,7 +2,7 @@
 // them, what exploring one finds, and what the group's scrolls give.
 // Numbers in data/sites.json and data/lore.json.
 import type { GameData, TerrainId } from '../data/index.js';
-import { hex, hexDistance, hexKey, type Hex } from './hex.js';
+import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
 import { composeWave } from './waves.js';
@@ -118,4 +118,42 @@ export function loreBonuses(data: GameData, scrolls: Iterable<string>): Record<s
 
 export function siteKey(site: { q: number; r: number }): string {
   return hexKey(hex(site.q, site.r));
+}
+
+// What scouts searching around `center` turn up, seeded by the search: a
+// forgotten ruin on free ground within `ruinSearch.range` that suits a kind
+// of site, at least `spacing` from the other sites; null when the roll
+// fails or there is no such ground.
+export function searchRuin(
+  data: GameData,
+  input: {
+    terrain: ReadonlyMap<string, TerrainId>;
+    radius: number;
+    center: Hex;
+    taken: ReadonlySet<string>;
+    sites: readonly Hex[];
+    scouts: number;
+    seed: number;
+  },
+): PlacedSite | null {
+  const rules = data.scouting.ruinSearch;
+  const rng = createRng((input.seed ^ 0x7417) >>> 0);
+  if (rng() >= Math.min(rules.maxChance, rules.chancePerScout * input.scouts)) return null;
+  const kinds = Object.entries(data.sites.kinds);
+  const usable: { cell: Hex; type: TerrainId }[] = [];
+  for (let d = 1; d <= rules.range; d++) {
+    for (const cell of ring(input.center, d)) {
+      const type = input.terrain.get(hexKey(cell));
+      if (!type || type === 'holy_city' || data.terrain.terrain[type].moveCost === null || input.taken.has(hexKey(cell))) continue;
+      if (!kinds.some(([, k]) => k.terrain.includes(type))) continue;
+      if (input.sites.some((s) => hexDistance(s, cell) < rules.spacing)) continue;
+      usable.push({ cell, type });
+    }
+  }
+  if (!usable.length) return null;
+  const { cell, type } = usable[Math.floor(rng() * usable.length)]!;
+  const fitting = kinds.filter(([, k]) => k.terrain.includes(type)).map(([id]) => id);
+  const kind = fitting[Math.floor(rng() * fitting.length)]!;
+  const watched = rng() < data.sites.kinds[kind]!.guardianChance;
+  return { kind, q: cell.q, r: cell.r, guardians: watched ? guardiansFor(data, cell, input.radius, (input.seed ^ 0x9e37) >>> 0) : {} };
 }

@@ -76,8 +76,8 @@ DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:m
 | `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle, logistics, expansion, research, hero and standing-order settings). |
 | `POST` | `/v1/worlds` | Create a world (lobby) with an invite code: `{ name, maxPlayers, speed, difficulty }` (`story`, `normal`, `hard` or `nightmare`). |
 | `PUT` | `/v1/worlds/:id/quiet` | Host only: the group's quiet hours `{ start, end, utcOffsetMinutes }` (minutes after local midnight; `null` start/end: none). Hordes arriving inside them wait until they end. |
-| `POST` | `/v1/worlds/join` | Join by invite code. |
-| `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, recent battles, map, the Kalinov Bridge, `ritualAt` (when Ritual Night's hordes set out) and, once a run is won or lost, `endedAt` and a `run` summary. A finished run stays readable; every command in it answers "This run is over". |
+| `POST` | `/v1/worlds/join` | Join by `{ inviteCode, clan?, hero? }`, in the lobby or while the run is under way (a village is founded for the newcomer). |
+| `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, ruin searches, recent battles, map, the Kalinov Bridge, `ritualAt` (when Ritual Night's hordes set out) and, once a run is won or lost, `endedAt` and a `run` summary. A finished run stays readable; every command in it answers "This run is over". |
 | `POST` | `/v1/worlds/:id/start` | Host only: generate the map and found everyone's village. |
 | `POST` | `/v1/villages/:id/build` | Build on a plot: `{ plot }` upgrades what stands there (fields `f0`…`f11`, center slots `c0`…`c11`, outposts `o<q>,<r>`), `{ plot, building }` constructs in an empty slot. `{ building }` alone picks the plot. |
 | `POST` | `/v1/villages/:id/outposts` | Claim the resource hex `{ q, r }` (within 2 hexes) and start building an outpost there. |
@@ -107,6 +107,7 @@ DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:m
 | `POST` | `/v1/worlds/:id/bridge/ritual` | Forge the ritual torc (spends Embers) for a stage whose quest asks for it. |
 | `POST` | `/v1/villages/:id/train` | Train `{ unit, count }` units (needs the unit's building). |
 | `POST` | `/v1/villages/:id/scout` | Send `{ waveId, count }` scouts at a wave; the report is shared with the group. |
+| `POST` | `/v1/villages/:id/scout/ruins` | Send `{ count }` scouts (at least 2) to search around the village for a forgotten ruin; they come back with a new site or nothing. Searches are in the world's `ruinSearches`. |
 | `POST` | `/v1/villages/:id/stance` | Set the garrison's battle stance: `defensive`, `balanced`, `offensive` or `hold_the_line`. |
 | `GET` | `/v1/live` | WebSocket. Send `{"type":"subscribe","worldId":1}`; receive `village` / `world` / `waves` (with the enemy leaders) / `scouting` / `battles` / `raids` / `caravans` (caravans and the vault) / `expeditions` (settlers) / `research` / `heroes` / `orders` / `armies` (armies and forts) updates, and your own `notifications`. |
 
