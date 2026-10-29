@@ -101,6 +101,7 @@ var _run_seen := false
 var _threat_button: Button
 ## Chosen number of scouts to send, per wave id.
 var _scout_counts: Dictionary[int, int] = {}
+var _ruin_scouts: Dictionary[int, int] = {}
 ## Chosen batch size per unit, kept while the panel rebuilds.
 var _train_counts: Dictionary[String, int] = {}
 var _status: Label
@@ -3666,7 +3667,61 @@ func _garrison_tab(village: Dictionary) -> void:
 			away.erase(unit)
 	if not away.is_empty():
 		_panel_body.add_child(UI.label(tr("Away: %s") % _units_text(away), UI.SMALL_SIZE, UI.MUTED))
+	_ruin_search_section(village)
 	_dismiss_section(village)
+
+
+## Scouts sent to search the land around the village for a forgotten ruin,
+## and what the last ones found.
+func _ruin_search_section(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var searches: Array = Game.world.get("ruinSearches", []).filter(func(s: Dictionary) -> bool: return int(s.villageId) == village_id)
+	if int(village.levels.get("scout_lodge", 0)) < 1 and searches.is_empty():
+		return
+	var rules: Dictionary = Game.data.scouting.ruinSearch
+	var duration := TimeUtil.format_duration(float(rules.hours) * 3600.0 / float(Game.world.speed))
+	_panel_body.add_child(UI.with_info(UI.label(tr("Search for ruins"), UI.SMALL_SIZE, UI.MUTED),
+		tr("Scouts search the land up to %d hexes around the village for %s. Each scout gives a %d%% chance of finding a forgotten ruin (at most %d%%), which then waits to be explored.") % [
+			int(rules.range), duration, roundi(float(rules.chancePerScout) * 100.0), roundi(float(rules.maxChance) * 100.0)]))
+	for search in searches:
+		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(line)
+		if search.status == "out":
+			_tick(line, func() -> String:
+				return tr("%d scouts searching · back in %s") % [int(search.scouts), TimeUtil.format_duration(TimeUtil.parse_iso(search.returnsAt) - Game.server_now())])
+			continue
+		var site: Dictionary = {}
+		for s in Game.world.get("sites", []):
+			if search.siteId != null and int(s.id) == int(search.siteId):
+				site = s
+		if site.is_empty():
+			line.text = tr("%d scouts came back empty-handed") % int(search.scouts)
+		else:
+			line.text = tr("%d scouts found a %s at (%d, %d)") % [int(search.scouts), tr(Game.data.sites.kinds.get(site.kind, {}).get("name", site.kind)), int(site.q), int(site.r)]
+	if int(village.levels.get("scout_lodge", 0)) < 1:
+		return
+	var at_home := int(Rules.garrison_at(village, Game.server_now()).get("scout", 0))
+	var least := int(rules.minScouts)
+	var most := maxi(least, mini(int(Game.data.scouting.maxScouts), at_home))
+	var count := clampi(_ruin_scouts.get(village_id, mini(maxi(at_home, least), 5)), least, most)
+	var row := UI.hbox()
+	_panel_body.add_child(row)
+	row.add_child(_number_field("ruins:%d" % village_id, count, least, most, func(n: int) -> void: _ruin_scouts[village_id] = n))
+	var send := UI.button(tr_n("Send to search (%d home)", "Send to search (%d home)", at_home) % at_home, func() -> void:
+		_search_ruins(village_id, clampi(int(_ruin_scouts.get(village_id, count)), least, most)))
+	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	send.disabled = at_home < least
+	row.add_child(send)
+
+
+func _search_ruins(village_id: int, count: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/scout/ruins" % village_id, {"count": count})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 ## Soldiers sent home to their farms: they stop eating, and are gone.

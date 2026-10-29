@@ -34,6 +34,7 @@ import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
+import { listRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { heroQuestOffers } from '../scheduler/quests.js';
@@ -210,6 +211,19 @@ export function missionView(mission: ScoutMission) {
 
 export async function scoutingView(client: DbClient, worldId: number) {
   return (await listMissions(client, worldId)).map(missionView);
+}
+
+// Scouts out searching for ruins, and the latest back (siteId: what they found).
+export function ruinSearchView(search: RuinSearch) {
+  return {
+    id: search.id,
+    villageId: search.villageId,
+    scouts: search.scouts,
+    status: search.status,
+    departsAt: search.departsAt.toISOString(),
+    returnsAt: search.returnsAt.toISOString(),
+    siteId: search.foundSiteId,
+  };
 }
 
 // Battles are fought in the open: both sides' numbers are visible.
@@ -547,6 +561,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, data, world);
   const scouting = await scoutingView(client, world.id);
+  const ruinSearches = (await listRuinSearches(client, world.id)).map(ruinSearchView);
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);
   const expeditions = await expeditionsView(client, world.id);
@@ -607,6 +622,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     villages: villages.map(villageView),
     waves,
     scouting,
+    ruinSearches,
     battles,
     raids,
     expeditions,

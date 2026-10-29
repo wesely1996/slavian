@@ -331,6 +331,7 @@ The Order is a fictional faction with its own symbols. No real denomination, scr
 - Kurgans, sunken shrines, old hillforts, stone idols, frozen ruins.
 - Scouts (and later armies with a hero) explore them over real time.
 - Outcomes: **hero gear**, resources, **Svarog's Ember**, **lore scrolls**, bridge quest items, or a guardian fight.
+- **Searching for ruins:** a village with a Scout Lodge sends 2–20 scouts to search the land up to 5 hexes around it for 3 game hours (`ruinSearch` in `data/scouting.json`). When they are back they have found a forgotten ruin with a 15% chance per scout (at most 90%): a new site on free ground that suits a kind of site, at least 3 hexes from other sites, guarded like any other. The owner hears either way.
 
 ### 8.2 Research (Q26)
 - **Per-player tech tree** of ~30 techs researched in the Academy, in branches: Economy, Military, Fortification, Scouting, Faith.
@@ -381,6 +382,8 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 
 ### 11.2 Queues & standing orders (Q23)
 - **Order queue limit per village** = a number of orders (not a time span) that grows with village size *(tunable: e.g. 3 → 8)*.
+  - **Training queue:** 1 batch, plus 1 for every 5 levels of the Barracks, the Shooting Range and the Stables (`trainingSlotBuildings` and `buildingLevelsPerTrainingSlot` in `data/units.json`).
+  - **Standing orders** (repeat training, rebuilding outposts, surplus to the vault, supply routes): 3 per village, plus 1 for every 3 Elder's Hall levels (`maxPerVillage` and `hallLevelsPerOrder` in `data/orders.json`).
 - **Standing orders:** repeat training, auto-rebuild after raid/raze, reinforcement rules, auto-caravan surplus to the vault above a threshold, supply routes that keep a fort or supply point stocked with grain.
 
 ### 11.3 Notifications (Q23)
@@ -699,7 +702,13 @@ Art may be generated at first, as long as the style is consistent: clean and sim
       - **Embers:** Story runs stalled at the last stages for want of Svarog's Embers (fewer camps, few lairs, a lair's Ember only a 75% chance). Now a lair rises when a stage opens wanting Embers the group lacks, and a cleared lair always holds one while the bridge lacks one (`ember-scenario` covers it on both engines). Story, 2 players: 1 of 4 won before, 3 of 4 after.
       - **Numbers:** with lairs bringing Embers, Normal won 79% (19 of 24 runs, 1–4 players); Normal's hordes are now 10% bigger (`waveScale` 1.1), and it wins 75% (18 of 24: solo 4/6, 2 players 5/6, 3 players 4/6, 4 players 5/6), at the top of the target.
       - **Caveat:** six runs per player count give a wide margin (about ±35%); a run takes minutes, so these are the honest limits for now. Solo misses are mostly bots stalling on a quest (a site, a choke) rather than losses; losses come late (day 50 and on), on Ritual Night or with the bridge stuck. The closed test (step 28) checks this with people.
-28. [ ] **Closed test:** friends play a full run; fix what they find.
+28. [x] **Fixes after 0.5.1** (asked for after step 27):
+    - Every explanation in the game reads in real time, not game time (speeds, upkeep, food carried, starvation, repeat-training checks, the almanac, run length, the ambush quest). The watchtower's rule stays as it was; its text already read in real time.
+    - Report a bug opens in the side sheet, with Send and Cancel. The repeat-training form keeps its numbers on their own rows. The Train tab picks the building from a dropdown of the ones built.
+    - Training queue and standing orders grow with the village (§11.2).
+    - **Join after the start:** an invite code works while a run is under way; the newcomer's village is founded on free settleable ground away from the others (`joinSite` in `sim/expansion.ts`), with a hero and the group's bonuses, and the group hears of it.
+    - **Searching for ruins** (§8.1): scouts sent from the Troops tab; `ruins-scenario` plays it in both engines.
+29. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.

@@ -196,6 +196,79 @@ static func mission_view(m: Dictionary) -> Dictionary:
 		"departsAt": LocalTime.iso(m.departsAt), "arrivesAt": LocalTime.iso(m.arrivesAt), "returnsAt": LocalTime.iso(m.returnsAt), "report": m.report}
 
 
+# --- Ruin searches ---------------------------------------------------------------------------
+
+## Scouts sent to search the land around the village for a forgotten ruin
+## (commands/village.ts searchRuinsCommand).
+static func search_ruins(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	var rules: Dictionary = data.scouting.ruinSearch
+	var max_scouts := int(data.scouting.maxScouts)
+	var count := float(body.get("count", 0))
+	if count != floorf(count) or count < int(rules.minScouts) or count > max_scouts:
+		return LocalVillage.rule("Send between %d and %d scouts" % [int(rules.minScouts), max_scouts])
+	var state := LocalVillage.send_away(data, village.state, SCOUT, int(count), now, world.speed)
+	if state.has("error"):
+		return state
+	var search := {"id": world.next.ruinSearch, "villageId": village.id, "scouts": int(count), "status": "out", "departsAt": now,
+		"returnsAt": now + LocalWaves.js_round(float(rules.hours) * 3600000.0 / float(world.speed)), "foundSiteId": null}
+	world.next.ruinSearch += 1
+	world.ruinSearches.append(search)
+	server.schedule(world, int(search.returnsAt), "ruin_search", {"searchId": search.id})
+	return {"state": state, "search": search}
+
+
+## Scouts back from searching: with a new site, or nothing (scheduler/scouting.ts ruin_search).
+static func on_ruin_search(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var data := server.data
+	var search: Dictionary = {}
+	for s in world.ruinSearches:
+		if int(s.id) == int(event.payload.searchId):
+			search = s
+	if search.is_empty() or search.status != "out":
+		return
+	var village := server.find_village(world, int(search.villageId))
+	if not village.is_empty():
+		var taken := LocalBattles.taken_hexes(world)
+		for f in world.forts:
+			taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+		var seed_value: int = (int(world.seed) ^ LocalRng.imul(int(search.id), 0x2c1b3c6d)) & 0xffffffff
+		var placed := LocalSites.search_ruin(data, world.hexes, int(world.radius), Vector2i(village.q, village.r), taken,
+			world.sites.map(func(s: Dictionary) -> Vector2i: return Vector2i(s.q, s.r)), int(search.scouts), seed_value)
+		if not placed.is_empty():
+			search.foundSiteId = world.next.site
+			world.sites.append({"id": world.next.site, "kind": placed.kind, "q": placed.q, "r": placed.r, "guardians": placed.guardians, "guardiansSeen": false,
+				"status": "unexplored", "exploredBy": null, "find": null, "exploredAt": null})
+			world.next.site += 1
+		village.state = LocalVillage.return_home(data, village.state, SCOUT, int(search.scouts), int(event.dueAt), world.speed)
+		if placed.is_empty():
+			LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "site", "tier": "digest", "title": "Scouts from {village} found no ruins",
+				"body": "They searched the land around it and came back empty-handed.", "vars": {"village": village.name}}, int(event.dueAt))
+		else:
+			LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "site", "tier": "digest", "title": "Scouts from {village} found a forgotten ruin",
+				"body": "A {site} lies at ({q}, {r}). Send an army to explore it.",
+				"vars": {"village": village.name, "site": data.sites.kinds.get(placed.kind, {}).get("name", placed.kind), "q": placed.q, "r": placed.r}}, int(event.dueAt))
+		changed.append(["village", village.id])
+	search.status = "done"
+	changed.append(["world"])
+
+
+## Searches still out, plus the five latest back, newest first (db/ruinSearches.ts).
+static func ruin_searches_view(world: Dictionary) -> Array:
+	var done: Array = world.ruinSearches.filter(func(s: Dictionary) -> bool: return s.status == "done")
+	done.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.returnsAt) > int(b.returnsAt) or (int(a.returnsAt) == int(b.returnsAt) and int(a.id) > int(b.id)))
+	var shown: Array = world.ruinSearches.filter(func(s: Dictionary) -> bool: return s.status == "out") + done.slice(0, 5)
+	shown.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.departsAt) > int(b.departsAt) or (int(a.departsAt) == int(b.departsAt) and int(a.id) > int(b.id)))
+	return shown.map(ruin_search_view)
+
+
+static func ruin_search_view(s: Dictionary) -> Dictionary:
+	return {"id": s.id, "villageId": s.villageId, "scouts": s.scouts, "status": s.status, "departsAt": LocalTime.iso(s.departsAt),
+		"returnsAt": LocalTime.iso(s.returnsAt), "siteId": s.foundSiteId}
+
+
 # --- Settlers -------------------------------------------------------------------------------
 
 static func _outposts(world: Dictionary) -> Dictionary:

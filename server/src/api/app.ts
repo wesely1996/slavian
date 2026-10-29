@@ -35,6 +35,7 @@ import {
   rebuildCommand,
   sellGearCommand,
   sendScoutsCommand,
+  searchRuinsCommand,
   setStanceCommand,
   startResearchCommand,
   trainUnitsCommand,
@@ -64,6 +65,7 @@ import {
   orderView,
   researchView,
   missionView,
+  ruinSearchView,
   vaultView,
   villageView,
   worldSummary,
@@ -177,6 +179,7 @@ const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.numbe
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
+const ruinSearchBody = z.object({ count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
   const header = request.headers.authorization ?? '';
@@ -508,6 +511,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       now: clock(),
     });
     return { village: villageView(village), mission: missionView(mission), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/scout/ruins', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = ruinSearchBody.parse(request.body);
+    const { village, search } = await searchRuinsCommand(db, scheduler, { accountId: account.id, villageId: id, count: body.count, now: clock() });
+    return { village: villageView(village), search: ruinSearchView(search), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/rename', async (request) => {

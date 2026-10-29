@@ -204,6 +204,15 @@ const scoutingFileSchema = z.object({
   survival: z.partialRecord(z.enum(FRONTS), z.number().min(0).max(1)),
   defaultSurvival: z.number().min(0).max(1),
   maxScouts: z.number().int().positive(),
+  // Scouts sent to search the land around their village for a forgotten ruin.
+  ruinSearch: z.object({
+    minScouts: z.number().int().positive(),
+    hours: z.number().positive(),
+    range: z.number().int().positive(),
+    spacing: z.number().int().nonnegative(),
+    chancePerScout: z.number().min(0).max(1),
+    maxChance: z.number().min(0).max(1),
+  }),
   tiers: z
     .array(
       z.object({

@@ -1,3 +1,5 @@
+import { insertRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
+import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
 import type { OnboardingStep } from '../data/index.js';
@@ -194,6 +196,30 @@ export async function sendScoutsCommand(
     return { state, result: mission, onboarding: 'scout' };
   });
   return { village, mission: result };
+}
+
+// Sends scouts from the caller's village to search the land around it for a
+// forgotten ruin; they are back after `ruinSearch.hours` game hours.
+export async function searchRuinsCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { count: number },
+): Promise<{ village: Village; search: RuinSearch }> {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent scouts to search for ruins' }, async ({ client, world, village }) => {
+    const rules = deps.data.scouting.ruinSearch;
+    const max = deps.data.scouting.maxScouts;
+    if (!Number.isInteger(input.count) || input.count < rules.minScouts || input.count > max) {
+      throw new RuleError(`Send between ${rules.minScouts} and ${max} scouts`);
+    }
+    const state = sendAway(deps.data, village.state, SCOUT_UNIT, input.count, input.now, world.speed);
+    const returnsAt = new Date(input.now.getTime() + Math.round((rules.hours * 3_600_000) / world.speed));
+    const search = await insertRuinSearch(client, { worldId: world.id, villageId: village.id, scouts: input.count, departsAt: input.now, returnsAt });
+    const payload: RuinSearchPayload = { searchId: search.id };
+    await scheduleEvent(client, world.id, returnsAt, 'ruin_search', payload);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    return { state, result: search };
+  });
+  return { village, search: result };
 }
 
 // Sets how the village's garrison fights; takes effect from the next round.
