@@ -5,6 +5,8 @@ extends Node
 
 ## The player in every solo world.
 const ACCOUNT_ID := 1
+## The speeds a solo world can be played at, whatever it was started with.
+const SPEEDS: Array[float] = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
 
 var server: LocalServer
 ## The solo world being played (0: none, the real server answers).
@@ -34,7 +36,7 @@ func open(id: int) -> Dictionary:
 	if world.is_empty():
 		return {}
 	server.language = TranslationServer.get_locale()
-	var answer := server.handle(id, "GET", "/v1/worlds/%d" % id, null, LocalTime.now())
+	var answer := server.handle(id, "GET", "/v1/worlds/%d" % id, null, now_of(world))
 	return answer.data if int(answer.status) == 200 else {}
 
 
@@ -59,9 +61,76 @@ func respond(method: int, path: String, body: Variant) -> Dictionary:
 		HTTPClient.METHOD_PATCH: "PATCH", HTTPClient.METHOD_DELETE: "DELETE"}.get(method, "GET")
 	server.language = TranslationServer.get_locale()
 	var told := _told()
-	var answer := server.handle(world_id, verb, path, body, LocalTime.now())
+	var answer := server.handle(world_id, verb, path, body, now_of(server.worlds.get(world_id, {})))
 	_announce.call_deferred(answer.get("changed", []), told)
 	return answer
+
+
+# --- Game speed --------------------------------------------------------------------------
+# A solo world keeps the speed it was started with: every rule and every
+# time already set counts with it. Playing it faster or slower makes its
+# clock run faster or slower than the device's instead: `clock` holds where
+# the world's clock stood at a moment of the device's clock, and the speed it
+# is played at since. A world never sped up has none, and runs on the
+# device's clock.
+
+## The time now in a solo world, on its own clock.
+func now_of(world: Dictionary) -> int:
+	var clock: Variant = world.get("clock")
+	if not clock is Dictionary:
+		return LocalTime.now()
+	return int(clock.gameAt) + int(float(LocalTime.now() - int(clock.realAt)) * float(clock.speed) / float(world.speed))
+
+
+## The speed the open solo world is played at (1 when none is open).
+func speed() -> float:
+	var world: Dictionary = server.worlds.get(world_id, {})
+	if world.is_empty():
+		return 1.0
+	var clock: Variant = world.get("clock")
+	return float(clock.speed) if clock is Dictionary else float(world.speed)
+
+
+## How fast the open solo world's clock runs against the device's.
+func rate() -> float:
+	var world: Dictionary = server.worlds.get(world_id, {})
+	return speed() / float(world.speed) if not world.is_empty() else 1.0
+
+
+## Plays the open solo world at `value` from now on. Its peaceful hours go:
+## its clock no longer keeps the hours of the day.
+func set_speed(value: float) -> void:
+	var world: Dictionary = server.worlds.get(world_id, {})
+	if world.is_empty() or not SPEEDS.any(func(s: float) -> bool: return is_equal_approx(s, value)) or world.status != "running":
+		return
+	var now := now_of(world)
+	var changed: Array = []
+	var told := _told()
+	server.drain(world, now, changed)
+	var clock: Variant = world.get("clock")
+	world.clock = {"realAt": LocalTime.now(), "gameAt": now, "speed": value,
+		"startedReal": int(clock.startedReal) if clock is Dictionary else int(world.startedAt)}
+	world.quietStart = null
+	world.quietEnd = null
+	server.save(world)
+	Game.note_server_time(LocalTime.iso(now))
+	Game.set_time_rate(rate())
+	changed.append(["world"])
+	_announce(changed, told)
+
+
+## How long the open solo world's run has gone on (or went on, once over),
+## in the player's time.
+func run_seconds() -> float:
+	var world: Dictionary = server.worlds.get(world_id, {})
+	if world.is_empty() or world.startedAt == null:
+		return 0.0
+	var clock: Variant = world.get("clock")
+	var end: int = int(world.endedAt) if world.get("endedAt") != null else now_of(world)
+	if not clock is Dictionary:
+		return (end - int(world.startedAt)) / 1000.0
+	var end_real := int(clock.realAt) + (end - int(clock.gameAt)) * float(world.speed) / float(clock.speed)
+	return (end_real - int(clock.startedReal)) / 1000.0
 
 
 ## How many notices the world holds, to see whether something was told.
@@ -86,7 +155,7 @@ func _process(delta: float) -> void:
 		return
 	var changed: Array = []
 	var told := _told()
-	if server.drain(world, LocalTime.now(), changed) > 0:
+	if server.drain(world, now_of(world), changed) > 0:
 		server.save(world)
 		_announce(changed, told)
 
@@ -100,7 +169,7 @@ func _announce(changed: Array, told := -1) -> void:
 	if _told() != told or changed.any(func(item: Array) -> bool: return item[0] == "inbox"):
 		var inbox := LocalInbox.inbox_view(world, ACCOUNT_ID)
 		Live.inbox_updated.emit(world_id, inbox.notifications, int(inbox.unread))
-	var now := LocalTime.now()
+	var now := now_of(world)
 	Game.note_server_time(LocalTime.iso(now))
 	var seen := {}
 	for item in changed:

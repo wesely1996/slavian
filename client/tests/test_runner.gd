@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_local_waves()
 	_test_local_notices()
 	_test_local_saves()
+	_test_game_speed()
 	_test_sound_cues()
 	_test_george_bar()
 	_test_time_util()
@@ -721,6 +722,46 @@ func _test_local_saves() -> void:
 	_check(not again.worlds.has(-1) and LocalServer.new(data, dir).worlds.keys() == [-2], "a deleted solo world is gone from the device")
 	for file in DirAccess.get_files_at(dir):
 		DirAccess.remove_absolute(dir.path_join(file))
+
+
+## A solo world played faster or slower: its clock runs at the speed chosen
+## against the device's, the rules keep the world's own speed, and what the
+## screens show is told in the player's time.
+func _test_game_speed() -> void:
+	TimeUtil.rate = 2.0
+	_check(TimeUtil.format_duration(240) == "2m 00s", "game durations are told in the player's time: %s" % TimeUtil.format_duration(240))
+	_check(TimeUtil.format_real(240) == "4m 00s", "the player's own durations stay as they are")
+	_check(is_equal_approx(TimeUtil.per_real_hour(10.0), 20.0), "a rate per game hour is twice that per hour of the player's time")
+	TimeUtil.rate = 1.0
+	var local: Node = root.get_node("Local")
+	var kept: LocalServer = local.server
+	local.server = LocalServer.new(LocalData.load_data(), "")
+	var started := LocalTime.now()
+	var world: Dictionary = local.server.start_world({"name": "Speed", "seed": 7, "speed": 10}, 1, started)
+	local.world_id = int(world.id)
+	world.quietStart = 22 * 60
+	world.quietEnd = 6 * 60
+	_check(absi(local.now_of(world) - LocalTime.now()) < 1000, "a world never sped up runs on the device's clock")
+	_check(is_equal_approx(local.speed(), 10.0) and is_equal_approx(local.rate(), 1.0), "it plays at the speed it was started with")
+	local.set_speed(100.0)
+	_check(is_equal_approx(local.speed(), 100.0) and is_equal_approx(local.rate(), 10.0), "played at 100×, its clock runs 10 times as fast: %s" % local.rate())
+	_check(is_equal_approx(float(root.get_node("Game").time_rate), 10.0) and is_equal_approx(TimeUtil.rate, 10.0), "and so does the screens' clock")
+	_check(world.quietStart == null and world.quietEnd == null, "its peaceful hours go")
+	_check(int(world.speed) == 10, "its own speed, which the rules count with, stays")
+	world.clock.realAt = int(world.clock.realAt) - 60000
+	world.clock.startedReal = int(world.clock.startedReal) - 60000
+	var ahead: int = local.now_of(world) - int(world.clock.gameAt)
+	_check(absi(ahead - 600000) < 2000, "a minute of the player's time moves it ten minutes on its clock: %d" % ahead)
+	_check(absf(local.run_seconds() - 60.0) < 2.0, "the run has gone on a minute of the player's time: %s" % local.run_seconds())
+	local.set_speed(3.0)
+	_check(is_equal_approx(local.speed(), 100.0), "only the speeds on offer can be picked")
+	local.set_speed(0.5)
+	_check(is_equal_approx(local.rate(), 0.05), "half speed: a twentieth of the world's own pace")
+	var back: Dictionary = LocalServer._decode(JSON.parse_string(JSON.stringify(LocalServer._encode(world))))
+	_check(back.clock is Dictionary and is_equal_approx(float(back.clock.speed), 0.5), "the speed is saved with the world")
+	local.server = kept
+	local.world_id = 0
+	root.get_node("Game").set_time_rate(1.0)
 
 
 ## Notices rendered as the server renders them, in English and Serbian

@@ -223,8 +223,8 @@ func _process(delta: float) -> void:
 			var share := clampf(float(amounts[kind]) / capacity, 0.0, 1.0) if capacity > 0.0 else 0.0
 			_resource_bars[kind].value = share
 			_resource_bars[kind].modulate = Color(1.6, 0.6, 0.55) if share >= 0.95 else Color.WHITE
-			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %ds)") % [UI.resource_name(kind), UI.signed(rate), Ledger.seconds_to_next(Game.server_now())]
-			_rate_labels[kind].text = tr("%s/min") % _per_minute(rate)
+			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %s)") % [UI.resource_name(kind), UI.signed(TimeUtil.per_real_hour(rate)), TimeUtil.format_duration(Ledger.seconds_to_next(Game.server_now()))]
+			_rate_labels[kind].text = tr("%s/min") % _per_minute(TimeUtil.per_real_hour(rate))
 			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
@@ -1120,7 +1120,7 @@ func _run_panel() -> void:
 	_panel_body.add_child(UI.label(tr(ending.story), UI.SMALL_SIZE, UI.MUTED))
 	var run: Variant = Game.world.get("run")
 	if run is Dictionary:
-		for line in RunText.stats(run, float(Game.world.speed)):
+		for line in RunText.stats(run, float(Game.world.speed), Local.run_seconds() if Local.is_active() else -1.0):
 			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
 		_panel_body.add_child(UI.label(tr("The group"), UI.HEADING_SIZE))
 		for member in run.members:
@@ -1630,7 +1630,7 @@ func _academy_tab(village: Dictionary) -> void:
 	_panel_body.add_child(points)
 	_tick(points, func() -> String:
 		var research := Game.my_research()
-		return tr("Research: %d (+%d per hour from your Academies)") % [floori(research.points), roundi(research.perHour)])
+		return tr("Research: %d (+%d per hour from your Academies)") % [floori(research.points), roundi(TimeUtil.per_real_hour(research.perHour))])
 	if not current.is_empty():
 		var done_at := TimeUtil.parse_iso(current.completesAt)
 		var line := UI.label("", UI.SMALL_SIZE)
@@ -2341,7 +2341,7 @@ func _army_panel() -> void:
 		var words := UI.vbox(0)
 		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		words.add_child(UI.label(tr("%s ×%d") % [tr(def.get("name", unit)), int(army.units[unit])], UI.SMALL_SIZE))
-		words.add_child(UI.label(tr("Each eats %s grain an hour · carries food for %s") % [UI.number(float(def.get("upkeepPerHour", 0)) * speed), TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed)], UI.SMALL_SIZE, UI.MUTED))
+		words.add_child(UI.label(tr("Each eats %s grain an hour · carries food for %s") % [UI.number(TimeUtil.per_real_hour(float(def.get("upkeepPerHour", 0)) * speed)), TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed)], UI.SMALL_SIZE, UI.MUTED))
 		row.add_child(words)
 		_panel_body.add_child(row)
 
@@ -2349,7 +2349,7 @@ func _army_panel() -> void:
 	_panel_body.add_child(UI.label(tr("Supply"), UI.HEADING_SIZE))
 	var eats := ArmyText.upkeep(data, army.units)
 	if army.get("supply") == null:
-		_panel_body.add_child(UI.label(tr("Fed by its home village: %s grain an hour.") % UI.number(eats * speed), UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(UI.label(tr("Fed by its home village: %s grain an hour.") % UI.number(TimeUtil.per_real_hour(eats * speed)), UI.SMALL_SIZE, UI.MUTED))
 	else:
 		var full := ArmyText.full_supply(data, army.units)
 		var grain_bar := _gauge(HexMap.GRAIN_COLOR)
@@ -2359,7 +2359,7 @@ func _army_panel() -> void:
 		_tick(grain, func() -> String:
 			var left := ArmyText.supply_left(data, army, speed, Game.server_now())
 			grain_bar.value = left / full if full > 0 else 0.0
-			return tr("Grain %d of %d · eats %s an hour") % [floori(left), floori(full), UI.number(eats * speed)])
+			return tr("Grain %d of %d · eats %s an hour") % [floori(left), floori(full), UI.number(TimeUtil.per_real_hour(eats * speed))])
 		var lasts := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		_panel_body.add_child(lasts)
 		_tick(lasts, func() -> String: return ArmyText.supply_text(data, army, speed, Game.server_now()))
@@ -2982,7 +2982,7 @@ func _yield_text(amounts: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
 		if float(amounts[kind]) > 0.0:
-			parts.append(tr("%s +%d/h") % [UI.resource_name(kind), roundi(float(amounts[kind]))])
+			parts.append(tr("%s +%d/h") % [UI.resource_name(kind), roundi(TimeUtil.per_real_hour(float(amounts[kind])))])
 	return ", ".join(parts) if not parts.is_empty() else tr("nothing")
 
 
@@ -3594,7 +3594,7 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	if def.has("production"):
 		var resource: String = def.production.resource
 		return tr("%s +%d/h now, +%d/h at level %d") % [UI.resource_name(resource),
-			roundi(Rules.field_production(def, level, speed)), roundi(Rules.field_production(def, level + 1, speed)), level + 1]
+			roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed))), roundi(TimeUtil.per_real_hour(Rules.field_production(def, level + 1, speed))), level + 1]
 	if building == "heroes_hall":
 		var text := GeneralText.hall_gives(Game.data, level)
 		return text.left(1).to_upper() + text.substr(1) + (tr("; level %d: %s") % [level + 1, GeneralText.hall_gives(Game.data, level + 1)] if level < int(def.maxLevel) else "")
@@ -3616,7 +3616,7 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 		return tr("Holds %d of each resource above the base; the village keeps %d in all") % [roundi(base * (pow(float(def.capacityGrowth), level) - 1.0)), total]
 	if def.has("research"):
 		var research: Dictionary = def.research
-		var per_hour := func(l: int) -> int: return roundi(float(research.basePerHour) * pow(float(research.growth), l - 1) * speed) if l > 0 else 0
+		var per_hour := func(l: int) -> int: return roundi(TimeUtil.per_real_hour(float(research.basePerHour) * pow(float(research.growth), l - 1) * speed)) if l > 0 else 0
 		return tr("Research +%d/h now, +%d/h at level %d") % [per_hour.call(level), per_hour.call(level + 1), level + 1]
 	if building == "market":
 		return tr("Trades at %d%% now, %d%% at level %d") % [roundi(Rules.market_rate(Game.data, level) * 100.0), roundi(Rules.market_rate(Game.data, level + 1) * 100.0), level + 1]
@@ -3810,7 +3810,7 @@ func _train_tab(village: Dictionary) -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
 		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
-		info.add_child(UI.label(tr("%s · atk %d · def %d · %s grain/h") % [def.family.capitalize(), def.attack, def.defense, UI.number(float(def.upkeepPerHour) * float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED))
+		info.add_child(UI.label(tr("%s · atk %d · def %d · %s grain/h") % [def.family.capitalize(), def.attack, def.defense, UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))], UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(card)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
@@ -4027,6 +4027,28 @@ func _group_tab() -> void:
 	_clan_section()
 
 
+## A solo world can be played faster when there is time, and slower for the
+## night: everything in it keeps pace, from builds to the hordes.
+func _speed_section() -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Game speed"), UI.HEADING_SIZE),
+		tr("Everything in the world runs at this speed, the hordes too: an hour of the game passes in an hour divided by it. Speed up when you have time to play, slow down before you sleep.")))
+	var current := Local.speed()
+	_panel_body.add_child(UI.label(tr("Now %s×") % UI.number(current), UI.SMALL_SIZE, UI.MUTED))
+	var row: HBoxContainer = null
+	for i in Local.SPEEDS.size():
+		if i % 4 == 0:
+			row = UI.hbox(8)
+			_panel_body.add_child(row)
+		var value: float = Local.SPEEDS[i]
+		var b := UI.button("%s×" % UI.number(value), func() -> void:
+			Local.set_speed(value)
+			_rebuild_panel())
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.x = 0
+		b.disabled = is_equal_approx(value, current) or Game.world.get("status") != "running"
+		row.add_child(b)
+
+
 ## Quiet hours: no horde arrives in them (it waits outside until they end),
 ## so nothing falls while you sleep. The host sets them (in solo, you).
 func _quiet_section() -> void:
@@ -4055,9 +4077,13 @@ func _quiet_section() -> void:
 	_panel_body.add_child(quiet_row)
 
 
-## The world's settings: its peaceful hours; report a bug, or leave it.
+## The world's settings: its peaceful hours (in solo, its speed); report a
+## bug, or leave it.
 func _leave_tab() -> void:
-	_quiet_section()
+	if Local.is_active():
+		_speed_section()
+	else:
+		_quiet_section()
 	# A bug report carries the current game state with the player's message.
 	_panel_body.add_child(UI.button(tr("Report a bug"), _report_bug, "icon/help"))
 	_leave_section()

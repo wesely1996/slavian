@@ -72,16 +72,29 @@ var leaders: Array = []
 ## Which of your villages the screens show (0: the first).
 var current_village_id := 0
 
-## Server clock minus local clock, in seconds.
-var _clock_offset := 0.0
+## The server's clock: what it read at a moment of the device's clock, and
+## how fast it runs from there (1; a solo world played faster or slower
+## runs at its own pace, Local.rate).
+var _clock_at := 0.0
+var _clock_real := 0.0
+var time_rate := 1.0
 
 
 func server_now() -> float:
-	return Time.get_unix_time_from_system() + _clock_offset
+	return _clock_at + (Time.get_unix_time_from_system() - _clock_real) * time_rate
 
 
 func note_server_time(iso: String) -> void:
-	_clock_offset = TimeUtil.parse_iso(iso) - Time.get_unix_time_from_system()
+	_clock_at = TimeUtil.parse_iso(iso)
+	_clock_real = Time.get_unix_time_from_system()
+
+
+## How fast the clock runs; durations on screen follow it (TimeUtil.rate).
+func set_time_rate(rate: float) -> void:
+	_clock_at = server_now()
+	_clock_real = Time.get_unix_time_from_system()
+	time_rate = rate
+	TimeUtil.rate = rate
 
 
 func world_id() -> int:
@@ -112,6 +125,7 @@ func set_world(new_world: Dictionary) -> void:
 	Local.world_id = int(new_world.get("id", 0)) if int(new_world.get("id", 0)) < 0 else 0
 	if new_world.has("serverTime"):
 		note_server_time(new_world.serverTime)
+	set_time_rate(Local.rate())
 	var world_map: Variant = new_world.get("map")
 	rivers = world_map.get("rivers", []) if world_map is Dictionary else []
 	roads = world_map.get("roads", []) if world_map is Dictionary else []

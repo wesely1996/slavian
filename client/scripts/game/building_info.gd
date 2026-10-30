@@ -11,7 +11,7 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 	var def: Dictionary = data.buildings.buildings[building]
 	var parts := PackedStringArray()
 	if def.has("production"):
-		parts.append(UI.t("%s +%d/h") % [UI.resource_name(String(def.production.resource)), roundi(Rules.field_production(def, level, speed))])
+		parts.append(UI.t("%s +%d/h") % [UI.resource_name(String(def.production.resource)), roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed)))])
 	match String(def.kind):
 		"wall":
 			parts.append(UI.t("%s, %d to batter down") % [WallText.tier(data, level), WallText.integrity(data, level)])
@@ -119,7 +119,7 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 		UI.t("Only %s") % ClanText.title(data, def.clan) if def.get("clan") != null else ""))
 	box.add_child(UI.label(UI.t("%s · attack %d · defense %d") % [family.capitalize(), int(def.attack), int(def.defense)], UI.SMALL_SIZE))
 	# Real time: a faster world marches and eats faster.
-	box.add_child(UI.label(UI.t("Speed %s hexes/h · carries %d · eats %s grain/h") % [UI.number(float(def.speed) * speed), int(def.carry), UI.number(float(def.upkeepPerHour) * speed)], UI.SMALL_SIZE))
+	box.add_child(UI.label(UI.t("Speed %s hexes/h · carries %d · eats %s grain/h") % [UI.number(TimeUtil.per_real_hour(float(def.speed) * speed)), int(def.carry), UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * speed))], UI.SMALL_SIZE))
 	box.add_child(UI.label(UI.t("Marches out with food for %s") % TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed), UI.SMALL_SIZE))
 	var counters: Dictionary = data.battle.counters
 	# Its own counters, or its family's.
