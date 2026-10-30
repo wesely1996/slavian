@@ -32,6 +32,8 @@ export interface Wave {
   ritual: boolean;
   // The front's leader at its head (db/leaders.ts), if any.
   leaderId: number | null;
+  // Share added to its attack and defense for ambushes and harassment.
+  hatred: number;
 }
 
 interface WaveRow {
@@ -55,6 +57,7 @@ interface WaveRow {
   initial: Composition | null;
   ritual: boolean;
   leader_id: number | null;
+  hatred: number | null;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -78,6 +81,7 @@ function fromRow(row: WaveRow): Wave {
     initial: row.initial ?? row.composition,
     ritual: row.ritual,
     leaderId: row.leader_id,
+    hatred: Number(row.hatred ?? 0),
   };
 }
 
@@ -123,6 +127,11 @@ export async function markMarching(client: DbClient, id: number, march: March): 
 
 export async function markArrived(client: DbClient, id: number, endsAt: Date): Promise<void> {
   await client.query("UPDATE waves SET status = 'arrived', ends_at = $2 WHERE id = $1", [id, endsAt]);
+}
+
+// A horde grows to hate: `amount` more.
+export async function addHatred(client: DbClient, id: number, amount: number): Promise<void> {
+  await client.query('UPDATE waves SET hatred = hatred + $2::double precision WHERE id = $1', [id, amount]);
 }
 
 // Ritual Night replaces the waves still to come.

@@ -132,6 +132,15 @@ static func _record_round(battle: Dictionary, log: Dictionary, end: Variant) -> 
 ## The horde's unit stats under its leader, striking `village_id`
 ## (scheduler/leaders.ts hordeStats): {stats, nerve, loot}.
 static func horde_stats(server: LocalServer, world: Dictionary, wave: Dictionary, base: Callable, village_id: Variant) -> Dictionary:
+	# Its hatred (horde.json hatred) adds to its attack and defense.
+	var hatred := float(wave.get("hatred", 0.0))
+	if hatred > 0:
+		var unhated := base
+		base = func(unit: String) -> Dictionary:
+			var s: Dictionary = unhated.call(unit).duplicate()
+			s.attack = float(s.attack) * (1.0 + hatred)
+			s.defense = float(s.defense) * (1.0 + hatred)
+			return s
 	if wave.leaderId == null:
 		return {"stats": base, "nerve": 0.0, "loot": 0.0}
 	var leader := _leader(world, int(wave.leaderId))
@@ -299,6 +308,10 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		if not leaving.call(a):
 			defenders_now = LocalCamps.add_units(defenders_now, a.units)
 	wave.composition = attacker_now
+	# Every harassing strike makes the horde hate the more.
+	var strikes := joining.filter(func(a: Dictionary) -> bool: return a.orders == "harass").size()
+	if strikes > 0:
+		wave.hatred = float(wave.get("hatred", 0.0)) + strikes * float(data.horde.hatred.perHarass)
 
 	var outcome := LocalBattle.battle_outcome(data, {
 		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
@@ -862,7 +875,11 @@ static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dicti
 	var exact := float(rules.perWave) * float(data.difficulty.presets[world.difficulty].campRate)
 	var roll := LocalWaves.rng_for(int(world.seed), int(wave.index), 0xcb).next()
 	var per_wave := floori(exact) + (1 if roll < exact - floorf(exact) else 0)
-	var count := mini(per_wave, int(rules.max) - active)
+	# A horde that came to hate leaves more camps behind, beyond the limit:
+	# the whole part of hatred x campChance surely, the rest by chance.
+	var hate := float(wave.get("hatred", 0.0)) * float(data.horde.hatred.campChance)
+	var hated := floori(hate) + (1 if LocalWaves.rng_for(int(world.seed), int(wave.index), 0xcc).next() < hate - floorf(hate) else 0)
+	var count := maxi(0, mini(per_wave, int(rules.max) - active)) + hated
 	if count <= 0 or wave.path == null:
 		return
 	var villages: Array = world.villages.map(func(v: Dictionary) -> Vector2i: return Vector2i(v.q, v.r))

@@ -3265,145 +3265,153 @@ msgstr ""
 msgid "%s front · %s threat%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4301
-msgid "Appears in %s"
+#: client/scripts/screens/game_screen.gd:4299
+msgid "Hatred: +%d%% attack and defense"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4304
-msgid " · expected at %s in %s"
+#: client/scripts/screens/game_screen.gd:4300
+msgid "Every ambush that delays this horde and every harassing strike against it make it hate the more. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance). Ambushing it again is riskier, and worth more."
 msgstr ""
 
 #: client/scripts/screens/game_screen.gd:4307
+msgid "Appears in %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:4310
+msgid " · expected at %s in %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:4313
 msgid "Marching on %s · arrives in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4309
+#: client/scripts/screens/game_screen.gd:4315
 msgid "At the gates of %s · leaves in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4311
+#: client/scripts/screens/game_screen.gd:4317
 msgid "Burning %s · done in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4314
+#: client/scripts/screens/game_screen.gd:4320
 msgid "Fighting at %s · round %d of %d · %d of them left"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4335
+#: client/scripts/screens/game_screen.gd:4341
 msgid "Scouts from %s: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4345
+#: client/scripts/screens/game_screen.gd:4351
 msgid "%d scouts en route · report in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4346
+#: client/scripts/screens/game_screen.gd:4352
 msgid "Scouts heading home · back in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4358
+#: client/scripts/screens/game_screen.gd:4364
 msgid "Send scouts (%d home)"
 msgid_plural "Send scouts (%d home)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/game_screen.gd:4472
+#: client/scripts/screens/game_screen.gd:4478
 msgid "● live"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4472
+#: client/scripts/screens/game_screen.gd:4478
 msgid "○ offline"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4511
+#: client/scripts/screens/game_screen.gd:4517
 msgid "All troops"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4512
+#: client/scripts/screens/game_screen.gd:4518
 msgid "By village"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4546
+#: client/scripts/screens/game_screen.gd:4552
 msgid "No troops yet. Train them in a village's Troops tab."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4558
+#: client/scripts/screens/game_screen.gd:4564
 msgid "%d at home · %d out · %d in training"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4563
+#: client/scripts/screens/game_screen.gd:4569
 msgid "%d in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4575
+#: client/scripts/screens/game_screen.gd:4581
 msgid "At home: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4586
+#: client/scripts/screens/game_screen.gd:4592
 msgid "Training: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4589
+#: client/scripts/screens/game_screen.gd:4595
 msgid "Open"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4603
+#: client/scripts/screens/game_screen.gd:4609
 msgid "No armies out. Send them from a village's Troops tab, or from a hex on the map."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4612
+#: client/scripts/screens/game_screen.gd:4618
 msgid "From %s to %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4643
+#: client/scripts/screens/game_screen.gd:4649
 msgid "Open the hero"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4672
+#: client/scripts/screens/game_screen.gd:4678
 msgid "Danger is pushed to your phone; everything else waits for the daily digest."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4681
+#: client/scripts/screens/game_screen.gd:4687
 msgid "Messages"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4682
+#: client/scripts/screens/game_screen.gd:4688
 msgid "Settings"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4687
+#: client/scripts/screens/game_screen.gd:4693
 msgid "Nothing yet."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4704
+#: client/scripts/screens/game_screen.gd:4710
 msgid "Quiet hours %s–%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4704
+#: client/scripts/screens/game_screen.gd:4710
 msgid "No quiet hours"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4707
+#: client/scripts/screens/game_screen.gd:4713
 msgid "On"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4712
+#: client/scripts/screens/game_screen.gd:4718
 msgid "From −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4712
+#: client/scripts/screens/game_screen.gd:4718
 msgid "From +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4712
+#: client/scripts/screens/game_screen.gd:4718
 msgid "Until −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4712
+#: client/scripts/screens/game_screen.gd:4718
 msgid "Until +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4721
+#: client/scripts/screens/game_screen.gd:4727
 msgid "Daily digest at %s"
 msgstr ""
 

@@ -146,12 +146,14 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 				return {"body": "The road lay empty: that horde had already set out."}
 			var delay := LocalWaves.js_round((float(data.quests.kinds.ambush.get("delayHours", 0)) * LocalTime.MS_PER_HOUR) / world.speed)
 			wave.spawnAt = int(wave.spawnAt) + delay
+			# Held up, it hates the more.
+			wave.hatred = float(wave.get("hatred", 0.0)) + float(data.horde.hatred.perAmbush)
 			for e in world.events:
 				if e.status == "pending" and e.type in ["wave_spawn", "wave_warning"] and int(e.payload.get("waveId", -1)) == int(wave.id):
 					e.dueAt = int(e.dueAt) + delay
 			# Told in real minutes, at any world speed.
-			return {"body": "The next horde from the {front} sets out {minutes} minutes later.",
-				"vars": {"front": quest.front if quest.front != null else "", "minutes": LocalWaves.js_round(delay / 60000.0)}}
+			return {"body": "The next horde from the {front} sets out {minutes} minutes later, hating you the more: +{hatred}% attack and defense.",
+				"vars": {"front": quest.front if quest.front != null else "", "minutes": LocalWaves.js_round(delay / 60000.0), "hatred": LocalWaves.js_round(float(wave.hatred) * 100.0)}}
 		"scout":
 			var wave := _next_wave(world, quest.front)
 			if wave.is_empty():

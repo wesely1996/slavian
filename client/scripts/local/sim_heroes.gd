@@ -129,9 +129,13 @@ static func quest_offers(data: Dictionary, world: Dictionary, hero: Dictionary, 
 		var front: Variant = world.fronts[floori(rng.next() * world.fronts.size())] if kind in ["ambush", "scout"] else null
 		var site: Variant = nearest if kind == "ruins" else null
 		var distance := HexMath.distance(home, Vector2i(site.q, site.r)) if site != null else int(def.distance)
+		# An ambush on a horde that hates already: riskier, and worth more.
+		var hatred := float(world.get("hatred", {}).get(front, 0.0)) if kind == "ambush" and front != null else 0.0
 		offers.append({
 			"id": id, "kind": kind, "front": front, "siteId": site.id if site != null else null,
-			"distance": distance, "hours": float(def.hours) + (2 * distance) / speed, "xp": int(def.xp), "risk": float(def.risk),
+			"distance": distance, "hours": float(def.hours) + (2 * distance) / speed,
+			"xp": LocalWaves.js_round(float(def.xp) * (1.0 + hatred * float(def.get("hatredXp", 0)))),
+			"risk": minf(float(def.get("maxRisk", 1)), float(def.risk) + hatred * float(def.get("hatredRisk", 0))),
 		})
 	return offers
 

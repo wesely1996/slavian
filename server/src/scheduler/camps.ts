@@ -90,7 +90,11 @@ async function spawnAfterWave(client: DbClient, data: GameData, world: World, wa
   const rules = data.camps.spawn;
   // The limit is per front, so one front's bandits never crowd out another's lairs.
   const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front).length;
-  const count = Math.min(campsPerWave(data, world.difficulty, rngFor(world.seed, wave.index, 0xcb)()), rules.max - active);
+  // A horde that came to hate leaves more camps behind, beyond the limit:
+  // the whole part of hatred x campChance surely, the rest by chance.
+  const hate = wave.hatred * data.horde.hatred.campChance;
+  const hated = Math.floor(hate) + (rngFor(world.seed, wave.index, 0xcc)() < hate - Math.floor(hate) ? 1 : 0);
+  const count = Math.max(0, Math.min(campsPerWave(data, world.difficulty, rngFor(world.seed, wave.index, 0xcb)()), rules.max - active)) + hated;
   if (count <= 0 || !wave.path) return;
   const villages = (await listVillages(client, world.id)).map((v) => hex(v.q, v.r));
   const sites = spawnSites(data, {
