@@ -4178,55 +4178,55 @@
         [
          0,
          -9,
-         54000
+         43200
         ],
         [
          0,
          -8,
-         90000
+         72000
         ],
         [
          0,
          -7,
-         108000
+         86400
         ],
         [
          0,
          -6,
-         126000
+         100800
         ],
         [
          0,
          -5,
-         144000
+         115200
         ],
         [
          0,
          -4,
-         162000
+         129600
         ],
         [
          0,
          -3,
-         180000
+         144000
         ],
         [
          0,
          -2,
-         198000
+         158400
         ],
         [
          0,
          -1,
-         216000
+         172800
         ],
         [
          0,
          0,
-         234000
+         187200
         ]
        ],
-       "arrivesAt": "2026-06-01T13:39:15.900Z"
+       "arrivesAt": "2026-06-01T13:38:29.100Z"
       }
      }
     ],
@@ -6763,65 +6763,65 @@
         [
          0,
          -9,
-         54000
+         43200
         ],
         [
          0,
          -8,
-         90000
+         72000
         ],
         [
          0,
          -7,
-         108000
+         86400
         ],
         [
          0,
          -6,
-         126000
+         100800
         ],
         [
          0,
          -5,
-         144000
+         115200
         ],
         [
          0,
          -4,
-         162000
+         129600
         ],
         [
          -1,
          -3,
-         180000
+         144000
         ],
         [
          -2,
          -2,
-         198000
+         158400
         ],
         [
          -2,
          -1,
-         216000
+         172800
         ],
         [
          -2,
          0,
-         234000
+         187200
         ],
         [
          -2,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:40:09.900Z"
+       "arrivesAt": "2026-06-01T13:39:12.300Z"
       }
      }
     ],
@@ -6841,20 +6841,19 @@
       "setup": {
        "guard": {
         "archer": 10,
-        "spearman": 20
+        "spearman": 19
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
       },
-      "attackerNow": {
-       "leshy_thrall": 1
-      },
+      "attackerNow": {},
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -6863,11 +6862,25 @@
        {
         "at": "2026-06-01T11:25:30.000Z",
         "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 30,
+        "attackerLeft": 2,
+        "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 6,
-         "leshy_thrall": 2
+         "rusalka": 2,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T11:25:48.000Z",
+        "round": 2,
+        "attackerLeft": 0,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "rusalka": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -6875,7 +6888,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:30.000Z"
+      "endedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "raids": [],
@@ -6944,7 +6957,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 10,
+      "xp": 0,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -6953,15 +6966,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "alive",
-      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "status": "dead",
+      "woundedUntil": null,
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 0,
+      "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": null
+      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -7153,7 +7166,7 @@
      [
       0,
       0,
-      11.6
+      11.8
      ]
     ],
     "delegations": [],
@@ -9584,65 +9597,65 @@
         [
          0,
          -9,
-         54000
+         43200
         ],
         [
          0,
          -8,
-         90000
+         72000
         ],
         [
          0,
          -7,
-         108000
+         86400
         ],
         [
          0,
          -6,
-         126000
+         100800
         ],
         [
          0,
          -5,
-         144000
+         115200
         ],
         [
          0,
          -4,
-         162000
+         129600
         ],
         [
          -1,
          -3,
-         180000
+         144000
         ],
         [
          -2,
          -2,
-         198000
+         158400
         ],
         [
          -2,
          -1,
-         216000
+         172800
         ],
         [
          -2,
          0,
-         234000
+         187200
         ],
         [
          -2,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:40:09.900Z"
+       "arrivesAt": "2026-06-01T13:39:12.300Z"
       }
      }
     ],
@@ -9662,20 +9675,19 @@
       "setup": {
        "guard": {
         "archer": 10,
-        "spearman": 20
+        "spearman": 19
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
       },
-      "attackerNow": {
-       "leshy_thrall": 1
-      },
+      "attackerNow": {},
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -9684,11 +9696,25 @@
        {
         "at": "2026-06-01T11:25:30.000Z",
         "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 30,
+        "attackerLeft": 2,
+        "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 6,
-         "leshy_thrall": 2
+         "rusalka": 2,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T11:25:48.000Z",
+        "round": 2,
+        "attackerLeft": 0,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "rusalka": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -9696,7 +9722,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:30.000Z"
+      "endedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "raids": [],
@@ -9765,7 +9791,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 10,
+      "xp": 0,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -9774,15 +9800,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "alive",
-      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "status": "dead",
+      "woundedUntil": null,
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 0,
+      "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": null
+      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -10024,7 +10050,7 @@
      [
       0,
       0,
-      11.6
+      11.8
      ]
     ],
     "delegations": [],
@@ -11959,7 +11985,7 @@
    "response": {
     "notifications": [
      {
-      "id": 11,
+      "id": 12,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 1) finished",
@@ -11968,12 +11994,21 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T11:25:30.000Z",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T11:25:48.000Z",
+      "read": false
+     },
+     {
+      "id": 10,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Vyrgan the Hungry has fallen",
+      "body": "Vyrgan the Hungry died with the last of the horde after 1 battles. Another will rise to take their place.",
+      "createdAt": "2026-06-01T11:25:48.000Z",
       "read": false
      },
      {
@@ -12058,7 +12093,7 @@
       "read": false
      }
     ],
-    "unread": 11,
+    "unread": 12,
     "serverTime": "2026-06-01T11:47:12.000Z"
    }
   }

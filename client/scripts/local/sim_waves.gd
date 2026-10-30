@@ -46,14 +46,31 @@ static func wave_size(data: Dictionary, index: int, player_count: int) -> int:
 	return maxi(1, js_round(float(w.baseUnits) * pow(float(w.growthPerWave), index) * players))
 
 
-## Splits the size between the front's units by weight, the rest at random.
-static func compose_wave(data: Dictionary, front: String, index: int, size: int, seed_value: int, player_count := 1) -> Dictionary:
-	var units: Array = []
+## The units a wave of `index` draws from, with their weights: a tier joins
+## from tiers.minWave, and each tier unlocked after a unit's own halves (by
+## tiers.fade) how common it is.
+static func wave_units(data: Dictionary, front: String, index: int, player_count := 1) -> Array:
+	var tiers: Dictionary = data.enemies.tiers
+	var unlocked := 0
+	for wave in tiers.minWave:
+		if int(wave) <= index:
+			unlocked += 1
+	var out: Array = []
 	var defs: Dictionary = data.enemies.fronts[front].units
 	for id in defs:
 		var def: Dictionary = defs[id]
-		if float(def.weight) > 0 and int(def.minWave) <= index and int(def.get("minPlayers", 1) if def.get("minPlayers") != null else 1) <= player_count:
-			units.append([id, float(def.weight)])
+		var tier := int(def.get("tier", 0)) if def.get("tier") != null else 0
+		var from := int(tiers.minWave[tier - 1]) if tier > 0 else int(def.get("minWave", 0))
+		# Engines built on site (weight 0) never set out with a wave.
+		if float(def.weight) <= 0 or from > index or int(def.get("minPlayers", 1) if def.get("minPlayers") != null else 1) > player_count:
+			continue
+		out.append([id, float(def.weight) * pow(float(tiers.fade), unlocked - tier) if tier > 0 else float(def.weight)])
+	return out
+
+
+## Splits the size between the front's units by weight, the rest at random.
+static func compose_wave(data: Dictionary, front: String, index: int, size: int, seed_value: int, player_count := 1) -> Dictionary:
+	var units := wave_units(data, front, index, player_count)
 	var total_weight := 0.0
 	for u in units:
 		total_weight += u[1]

@@ -131,63 +131,71 @@ msgstr ""
 msgid "Counters"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:102
+#: client/scripts/game/almanac_text.gd:107
+msgid "Tier %d (from wave %d): %s"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:113
+msgid "Engines: %s"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:114
 msgid "%s (%s front)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:102
+#: client/scripts/game/almanac_text.gd:114
 msgid "%s Units: %s."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:122
 msgid "%s (%s)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:122
 msgid "%s %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:119
+#: client/scripts/game/almanac_text.gd:131
 msgid "impassable"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:119
+#: client/scripts/game/almanac_text.gd:131
 msgid "move cost %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "%s · %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "villages can be founded here"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "no villages"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:126
+#: client/scripts/game/almanac_text.gd:138
 msgid "The Kalinov Bridge"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:127
+#: client/scripts/game/almanac_text.gd:139
 msgid "Ritual Night"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:128
+#: client/scripts/game/almanac_text.gd:140
 msgid "Winning"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:128
+#: client/scripts/game/almanac_text.gd:140
 msgid "%s: the Holy City still stands when Ritual Night's last horde is done."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:141
 msgid "Losing"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:141
 msgid "%s: its Sanctity reaches 0."
 msgstr ""
 
@@ -4610,11 +4618,15 @@ msgid "Beasts and creatures of the old forests. Erratic and savage; they fight o
 msgstr ""
 
 #: data/enemies.json
-msgid "Grey Wolf"
+msgid "Leshy's Thrall"
 msgstr ""
 
 #: data/enemies.json
-msgid "Leshy's Thrall"
+msgid "Rusalka"
+msgstr ""
+
+#: data/enemies.json
+msgid "Grey Wolf"
 msgstr ""
 
 #: data/enemies.json
@@ -4622,15 +4634,31 @@ msgid "Cave Bear"
 msgstr ""
 
 #: data/enemies.json
-msgid "Volkolak"
-msgstr ""
-
-#: data/enemies.json
 msgid "Upyr"
 msgstr ""
 
 #: data/enemies.json
+msgid "Volkolak"
+msgstr ""
+
+#: data/enemies.json
 msgid "Likho"
+msgstr ""
+
+#: data/enemies.json
+msgid "Storm Vila"
+msgstr ""
+
+#: data/enemies.json
+msgid "Black Boar"
+msgstr ""
+
+#: data/enemies.json
+msgid "Div"
+msgstr ""
+
+#: data/enemies.json
+msgid "Firebird"
 msgstr ""
 
 #: data/enemies.json
@@ -4646,7 +4674,7 @@ msgid "Fast horse archers out of the steppe. They raid rather than stay, burn ou
 msgstr ""
 
 #: data/enemies.json
-msgid "Steppe Raider"
+msgid "Steppe Levy"
 msgstr ""
 
 #: data/enemies.json
@@ -4654,7 +4682,7 @@ msgid "Horse Archer"
 msgstr ""
 
 #: data/enemies.json
-msgid "Lancer"
+msgid "Steppe Raider"
 msgstr ""
 
 #: data/enemies.json
@@ -4662,7 +4690,35 @@ msgid "Steppe Shaman"
 msgstr ""
 
 #: data/enemies.json
+msgid "Kipchak Bowman"
+msgstr ""
+
+#: data/enemies.json
+msgid "Lancer"
+msgstr ""
+
+#: data/enemies.json
+msgid "Kurgan Guard"
+msgstr ""
+
+#: data/enemies.json
+msgid "Fire Archer"
+msgstr ""
+
+#: data/enemies.json
 msgid "Khan's Guard"
+msgstr ""
+
+#: data/enemies.json
+msgid "Bagatur"
+msgstr ""
+
+#: data/enemies.json
+msgid "Khan's Marksman"
+msgstr ""
+
+#: data/enemies.json
+msgid "Steppe Cataphract"
 msgstr ""
 
 #: data/enemies.json
@@ -4686,11 +4742,43 @@ msgid "Crossbowman"
 msgstr ""
 
 #: data/enemies.json
-msgid "Knight-Brother"
+msgid "Mounted Sergeant"
 msgstr ""
 
 #: data/enemies.json
 msgid "Inquisitor"
+msgstr ""
+
+#: data/enemies.json
+msgid "Arbalester"
+msgstr ""
+
+#: data/enemies.json
+msgid "Knight-Brother"
+msgstr ""
+
+#: data/enemies.json
+msgid "Templar of the Throne"
+msgstr ""
+
+#: data/enemies.json
+msgid "Pavise Crossbowman"
+msgstr ""
+
+#: data/enemies.json
+msgid "Grand Knight"
+msgstr ""
+
+#: data/enemies.json
+msgid "Champion of the Throne"
+msgstr ""
+
+#: data/enemies.json
+msgid "Fire Priest"
+msgstr ""
+
+#: data/enemies.json
+msgid "Lord Marshal"
 msgstr ""
 
 #: data/enemies.json

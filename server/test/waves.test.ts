@@ -60,10 +60,31 @@ describe('wave schedule', () => {
       const composition = composeWave(data, 'north', index, size, 99);
       expect(Object.values(composition).reduce((a, b) => a + b, 0)).toBe(size);
       for (const unit of Object.keys(composition)) {
-        expect(data.enemies.fronts.north!.units[unit]!.minWave).toBeLessThanOrEqual(index);
+        const def = data.enemies.fronts.north!.units[unit]!;
+        expect(def.tier ? data.enemies.tiers.minWave[def.tier - 1]! : def.minWave).toBeLessThanOrEqual(index);
       }
     }
     expect(composeWave(data, 'north', 0, 50, 1).likho).toBeUndefined();
+  });
+
+  it('brings in troops by tier, the older tiers fading as newer ones join', () => {
+    const tiers = data.enemies.tiers.minWave;
+    for (const front of ['north', 'east', 'south', 'west'] as const) {
+      const units = Object.values(data.enemies.fronts[front]!.units).filter((u) => u.tier);
+      // An infantry, an archer and a cavalry unit in each of four tiers.
+      for (const tier of [1, 2, 3, 4]) {
+        expect(units.filter((u) => u.tier === tier).map((u) => u.family).sort()).toEqual(['archers', 'cavalry', 'infantry']);
+      }
+    }
+    const tierOf = (unit: string) => data.enemies.fronts.east!.units[unit]!.tier ?? 0;
+    const share = (index: number, tier: number) => {
+      const wave = composeWave(data, 'east', index, 1000, 7);
+      return Object.entries(wave).filter(([unit]) => tierOf(unit) === tier).reduce((sum, [, n]) => sum + n, 0) / 1000;
+    };
+    expect(share(tiers[1]! - 1, 2)).toBe(0);
+    expect(share(tiers[1]!, 2)).toBeGreaterThan(0);
+    expect(share(tiers[3]!, 1)).toBeLessThan(share(tiers[1]! - 1, 1) / 4);
+    expect(share(tiers[3]!, 4)).toBeGreaterThan(0.2);
   });
 
   it('gives every front its own roster, some units only for bigger groups', () => {
@@ -74,8 +95,8 @@ describe('wave schedule', () => {
       expect(roster.personality.nerve).toBeGreaterThan(0);
     }
     // The zmey and the Order's southern siege rams wait for groups of three.
-    expect(composeWave(data, 'north', 9, 500, 5, 2).zmey_whelp).toBeUndefined();
-    expect(composeWave(data, 'north', 9, 500, 5, 3).zmey_whelp).toBeGreaterThan(0);
+    expect(composeWave(data, 'north', 10, 500, 5, 2).zmey_whelp).toBeUndefined();
+    expect(composeWave(data, 'north', 10, 500, 5, 3).zmey_whelp).toBeGreaterThan(0);
     expect(composeWave(data, 'south', 9, 500, 5, 1).siege_ram).toBeUndefined();
     // Nomads ride: their slowest unit outpaces the Order's.
     expect(marchSpeed(data, 'east', composeWave(data, 'east', 9, 200, 5, 6))).toBeGreaterThan(

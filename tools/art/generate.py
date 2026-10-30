@@ -832,9 +832,13 @@ def troop(s, pale, weapon, mark, tier):
 # madder, so a glance tells theirs from ours (gold). Kinds that share a
 # shape share its drawing.
 ENEMY_UNITS = {
-    "north": ["grey_wolf", "leshy_thrall", "cave_bear", "volkolak", "upyr", "likho", "zmey_whelp"],
-    "east": ["steppe_raider", "horse_archer", "lancer", "shaman", "khans_guard", "scaling_ladders"],
-    "order": ["zealot", "crossbowman", "knight_brother", "inquisitor", "siege_ram", "catapult", "siege_tower"],
+    "north": ["grey_wolf", "leshy_thrall", "cave_bear", "volkolak", "upyr", "likho", "zmey_whelp",
+              "rusalka", "vila", "black_boar", "div", "firebird"],
+    "east": ["steppe_raider", "horse_archer", "lancer", "shaman", "khans_guard", "scaling_ladders",
+             "steppe_levy", "kipchak_bowman", "kurgan_guard", "fire_archer", "bagatur", "khans_marksman", "cataphract"],
+    "order": ["zealot", "crossbowman", "knight_brother", "inquisitor", "siege_ram", "catapult", "siege_tower",
+              "sergeant_rider", "arbalester", "templar", "pavise_crossbowman", "grand_knight", "throne_champion",
+              "fire_priest", "lord_marshal"],
 }
 ENEMY_RIM = ("#d98a7a", "#8e2f26", "#3e1410")
 
@@ -919,6 +923,112 @@ def enemy(kind):
     elif kind == "inquisitor":
         s.rect(58, 60, 12, 42, pale, stroke="none", sw=0, rx=3)
         s.path("M64,20 Q84,40 74,58 L54,58 Q44,40 64,20 Z", s.lin([(0, "#ffd27a"), (0.6, "#e8642c"), (1, "#8e2f26")]), stroke="none", sw=0)
+    elif kind == "rusalka":
+        # A water maiden: long hair over a wave, a stone to hurl.
+        s.path("M64,24 Q84,30 82,56 Q80,80 92,98 L36,98 Q48,80 46,56 Q44,30 64,24 Z", pale, stroke="none", sw=0)
+        s.path("M28,98 Q40,88 52,98 Q64,108 76,98 Q88,88 100,98", "none", stroke="#7fb6cf", sw=4)
+        s.circle(98, 40, 8, "#bdb29b", stroke="none", sw=0)
+    elif kind == "vila":
+        # A storm vila: wings and a lightning bolt.
+        s.path("M64,40 Q40,20 18,34 Q36,44 40,60 Q52,52 64,58 Q76,52 88,60 Q92,44 110,34 Q88,20 64,40 Z", pale, stroke="none", sw=0)
+        s.poly([(66, 52), (54, 78), (66, 76), (58, 104), (80, 70), (68, 72), (76, 52)], s.lin([(0, "#fff1b0"), (1, "#e2b33c")]), stroke="none", sw=0)
+    elif kind == "black_boar":
+        s.path("M24,78 Q30,46 64,42 Q96,42 104,66 L108,80 Q90,92 64,92 Q36,92 24,78 Z", pale, stroke="none", sw=0)
+        s.path("M98,74 Q112,70 110,58 Q104,66 96,66 Z", "#e6dcc2", stroke="none", sw=0)
+        s.circle(88, 60, 3, "#c9614a", stroke="none", sw=0)
+        for x in (40, 52, 64):
+            s.line(x, 44, x - 4, 32, stroke=pale, sw=3)
+    elif kind == "div":
+        # A giant Div: horned head over huge shoulders.
+        s.path("M24,104 Q28,70 44,62 L84,62 Q100,70 104,104 Z", pale, stroke="none", sw=0)
+        s.circle(64, 50, 18, pale, stroke="none", sw=0)
+        for side in (-1, 1):
+            s.path(f"M{64 + side * 12},38 Q{64 + side * 28},26 {64 + side * 24},12", "none", stroke="#e6dcc2", sw=5)
+        for x in (57, 71):
+            s.circle(x, 50, 3, "#c9614a", stroke="none", sw=0)
+    elif kind == "firebird":
+        fire = s.lin([(0, "#fff1b0"), (0.5, "#ffb347"), (1, "#c2410c")], 0, 0, 1, 1)
+        s.path("M64,30 Q76,40 74,58 Q96,50 110,30 Q104,64 78,74 Q92,88 100,106 Q76,94 64,80 Q52,94 28,106 Q36,88 50,74 Q24,64 18,30 Q32,50 54,58 Q52,40 64,30 Z", fire, stroke="none", sw=0)
+        s.circle(64, 46, 3, "#1d232c", stroke="none", sw=0)
+    elif kind == "steppe_levy":
+        s.line(42, 100, 82, 28, stroke="#c9a16e", sw=5)
+        s.poly([(82, 28), (90, 18), (88, 34)], pale, stroke="none", sw=0)
+        s.circle(52, 66, 16, pale, stroke="none", sw=0)
+        s.circle(52, 66, 5, "#8e2f26", stroke="none", sw=0)
+    elif kind == "kipchak_bowman":
+        s.path("M44,24 Q20,62 44,100", "none", stroke=pale, sw=5)
+        s.path("M44,24 Q58,62 44,100", "none", stroke="#d9cfb8", sw=1.5)
+        s.line(36, 62, 100, 62, stroke=pale, sw=3.5)
+        s.poly([(100, 62), (90, 56), (90, 68)], pale, stroke="none", sw=0)
+        s.path("M78,24 L98,24 L94,40 L82,40 Z", red, stroke="none", sw=0)
+    elif kind == "kurgan_guard":
+        s.path("M28,100 L64,30 L100,100 Z", s.lin([(0, "#c9b48a"), (1, "#6b5a3a")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.path("M48,100 L48,70 Q64,58 80,70 L80,100 Z", pale, stroke="none", sw=0)
+        s.line(64, 52, 64, 100, stroke="#8e2f26", sw=3)
+    elif kind == "fire_archer":
+        s.path("M40,24 Q78,62 40,100", "none", stroke=pale, sw=5)
+        s.line(40, 24, 40, 100, stroke="#d9cfb8", sw=1.5)
+        s.line(34, 62, 92, 62, stroke=pale, sw=3.5)
+        s.path("M92,62 Q104,50 100,40 Q110,52 108,62 Q110,74 98,82 Q104,70 92,62 Z", s.lin([(0, "#ffd27a"), (1, "#e8642c")]), stroke="none", sw=0)
+    elif kind == "bagatur":
+        s.path("M40,104 Q40,64 64,56 Q88,64 88,104 Z", pale, stroke="none", sw=0)
+        s.path("M44,52 Q64,20 84,52 Z", "#b48a2e", stroke="none", sw=0)
+        s.line(64, 24, 64, 12, stroke="#b48a2e", sw=3)
+        s.line(92, 104, 104, 40, stroke=pale, sw=5)
+        s.path("M104,40 Q118,48 108,62 Q104,52 100,50 Z", pale, stroke="none", sw=0)
+    elif kind == "khans_marksman":
+        s.path("M48,22 Q86,62 48,102", "none", stroke="#b48a2e", sw=6)
+        s.line(48, 22, 48, 102, stroke="#d9cfb8", sw=1.5)
+        s.line(38, 62, 100, 62, stroke=pale, sw=3.5)
+        s.poly([(100, 62), (90, 56), (90, 68)], pale, stroke="none", sw=0)
+        s.circle(78, 30, 7, "#b48a2e", stroke="none", sw=0)
+    elif kind == "cataphract":
+        horse_head(s, pale)
+        for y in (60, 70, 80, 90):
+            s.line(52, y, 74, y + 4, stroke="#8d98a6", sw=3)
+        s.line(98, 100, 98, 16, stroke="#e6dcc2", sw=4)
+        s.poly([(98, 16), (104, 28), (92, 28)], pale, stroke="none", sw=0)
+    elif kind == "sergeant_rider":
+        horse_head(s, pale)
+        s.rect(86, 70, 18, 24, red, stroke="none", sw=0, rx=3)
+        s.line(95, 72, 95, 92, stroke=pale, sw=2)
+    elif kind == "arbalester":
+        s.line(64, 24, 64, 104, stroke=pale, sw=7)
+        s.path("M26,50 Q64,30 102,50", "none", stroke=pale, sw=6)
+        s.line(26, 50, 64, 74, stroke="#d9cfb8", sw=1.5)
+        s.line(102, 50, 64, 74, stroke="#d9cfb8", sw=1.5)
+        s.circle(64, 92, 8, "none", stroke="#8d98a6", sw=3)
+    elif kind == "templar":
+        s.path("M36,28 L92,28 L92,66 Q92,96 64,108 Q36,96 36,66 Z", pale, stroke="none", sw=0)
+        s.rect(60, 36, 8, 56, red, stroke="none", sw=0)
+        s.rect(46, 50, 36, 8, red, stroke="none", sw=0)
+    elif kind == "pavise_crossbowman":
+        s.rect(30, 30, 46, 72, pale, stroke="none", sw=0, rx=10)
+        s.line(53, 34, 53, 98, stroke="#b48a2e", sw=3)
+        s.line(82, 40, 82, 100, stroke="#d9cfb8", sw=5)
+        s.path("M66,56 Q82,46 100,56", "none", stroke="#d9cfb8", sw=4)
+    elif kind == "grand_knight":
+        horse_head(s, pale)
+        s.path("M52,30 L58,12 L64,26 L70,10 L76,26 L82,12 L84,32 Z", "#b48a2e", stroke="none", sw=0)
+        s.line(100, 104, 100, 30, stroke="#e6dcc2", sw=4)
+        s.poly([(100, 30), (116, 36), (100, 44)], red, stroke="none", sw=0)
+    elif kind == "throne_champion":
+        s.line(64, 104, 64, 26, stroke=pale, sw=7)
+        s.poly([(58, 30), (64, 12), (70, 30)], pale, stroke="none", sw=0)
+        s.line(42, 80, 86, 80, stroke="#b48a2e", sw=6)
+        s.path("M44,40 L52,26 L58,38 L64,22 L70,38 L76,26 L84,40 Z", "#b48a2e", stroke="none", sw=0)
+    elif kind == "fire_priest":
+        s.path("M40,104 Q44,60 64,52 Q84,60 88,104 Z", pale, stroke="none", sw=0)
+        s.path("M64,14 Q86,34 76,50 L52,50 Q42,34 64,14 Z", s.lin([(0, "#ffd27a"), (0.6, "#e8642c"), (1, "#8e2f26")]), stroke="none", sw=0)
+        s.rect(60, 66, 8, 28, red, stroke="none", sw=0)
+        s.rect(52, 74, 24, 7, red, stroke="none", sw=0)
+    elif kind == "lord_marshal":
+        horse_head(s, pale)
+        s.path("M50,30 L56,10 L64,24 L72,8 L80,24 L88,10 L90,32 Z", "#e2b33c", stroke="none", sw=0)
+        s.line(100, 104, 100, 20, stroke="#e6dcc2", sw=3)
+        s.path("M100,22 L120,28 L100,40 Z", "#e2b33c", stroke="none", sw=0)
+        for y in (64, 76, 88):
+            s.line(50, y, 72, y + 4, stroke="#b48a2e", sw=3)
     elif kind == "siege_ram":
         s.path("M24,64 L64,36 L104,64 Z", pale, stroke="none", sw=0)
         s.rect(20, 66, 88, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=4)
