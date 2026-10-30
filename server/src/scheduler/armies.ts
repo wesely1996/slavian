@@ -27,7 +27,7 @@ import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { roadRoute } from '../sim/logistics.js';
 import { completeTraining, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
-import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, type Supplied } from '../sim/supply.js';
+import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
 import { amountsAt, mapResources, spend, type Resources } from '../sim/resources.js';
 import { receive } from '../sim/logistics.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -195,6 +195,7 @@ export async function moveArmy(
     }
     throw new RuleError('They are already there');
   }
+  army = await setOff(client, data, world, army, at);
   const fed = supplied(army);
   const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
   const path = roadRoute(data, await terrainOf(client, world.id), here, dest, speed, world.speed);
@@ -302,6 +303,15 @@ function supplied(army: Army): (Army & Supplied) | null {
   return army.supply === null || army.supplyAt === null ? null : (army as Army & Supplied);
 }
 
+// An army setting off leaves behind the grain it carries beyond its full
+// supply; hunger comes sooner, so it is planned again.
+async function setOff(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  const fed = supplied(army);
+  if (!fed) return army;
+  const trimmed = trimSupply(data, fed, at, world.speed);
+  return trimmed === fed ? army : planHunger(client, data, world, trimmed, at);
+}
+
 // Saves when hunger next comes for an army and schedules it (nothing while
 // it is fed for good, or carries no supply). An army standing in a village,
 // or on a fort or supply point, is fed from its stores the moment its own
@@ -389,6 +399,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
     if (general) await killGeneral(client, world, general, at);
     return gone;
   }
+  if (data) army = await setOff(client, data, world, army, at);
   // An army that moved on from where it first went takes the road home
   // from where it stands (drawn backwards, as every road home is).
   let path = army.path;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { addSupply, fullSupply, hungerStrikes, hungry, nextHungerCheck, settleSupply, supplyLeft, supplySpeedFactor } from '../src/sim/supply.js';
+import { addSupply, fullSupply, hungerStrikes, hungry, nextHungerCheck, settleSupply, supplyLeft, supplySpeedFactor, trimSupply } from '../src/sim/supply.js';
 
 const data = loadGameData();
 const T0 = new Date('2026-03-01T00:00:00Z');
@@ -25,6 +25,18 @@ describe('army supply', () => {
     expect(hours('skirmisher')).toBeGreaterThan(hours('spearman'));
     expect(hours('spearman')).toBeGreaterThan(hours('large_shield'));
     expect(fullSupply(data, { spearman: 2, horseman: 1 })).toBe(2 * fullSupply(data, { spearman: 1 }) + fullSupply(data, { horseman: 1 }));
+  });
+
+  it('leaves the grain of the fallen behind when it sets off', () => {
+    // Half the men fell: the survivors still carry everyone's grain.
+    const thinned = { ...army, units: { spearman: 5 } };
+    const full = fullSupply(data, thinned.units);
+    expect(supplyLeft(data, thinned, at(2), 1)).toBeGreaterThan(full);
+    const trimmed = trimSupply(data, thinned, at(2), 1);
+    expect(trimmed.supply).toBe(full);
+    expect(trimmed.supplyAt).toEqual(at(2));
+    // Within its full supply, nothing changes.
+    expect(trimSupply(data, army, at(2), 1)).toBe(army);
   });
 
   it('starts to lose men hours after the food runs out, then every hour, and is lost after a day', () => {

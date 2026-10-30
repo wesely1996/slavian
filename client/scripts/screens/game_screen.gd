@@ -2359,7 +2359,13 @@ func _army_panel() -> void:
 		_tick(grain, func() -> String:
 			var left := ArmyText.supply_left(data, army, speed, Game.server_now())
 			grain_bar.value = left / full if full > 0 else 0.0
-			return tr("Grain %d of %d · eats %s an hour") % [floori(left), floori(full), UI.number(TimeUtil.per_real_hour(eats * speed))])
+			var eats_text := UI.number(TimeUtil.per_real_hour(eats * speed))
+			# Grain over the full supply (the fallen's share) is shown apart:
+			# it is left behind when the army sets off.
+			if floori(left) > floori(full):
+				return tr("Grain %d (+%d) of %d · eats %s an hour") % [floori(full), floori(left) - floori(full), floori(full), eats_text] \
+					+ "\n" + tr("The extra grain is left behind when they march off.")
+			return tr("Grain %d of %d · eats %s an hour") % [floori(left), floori(full), eats_text])
 		var lasts := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		_panel_body.add_child(lasts)
 		_tick(lasts, func() -> String: return ArmyText.supply_text(data, army, speed, Game.server_now()))

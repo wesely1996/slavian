@@ -60,6 +60,18 @@ static func add(data: Dictionary, army: Dictionary, grain: float, at: int, world
 	army.hungrySince = null
 
 
+## An army setting off carries no more than its full supply: what its
+## fallen left over while it stood still is left behind (settled first).
+## Whether any was left.
+static func trim(data: Dictionary, army: Dictionary, at: int, world_speed: float) -> bool:
+	var full := full_supply(data, army.units)
+	if supply_left(data, army, at, world_speed) <= full:
+		return false
+	settle(data, army, at, world_speed)
+	army.supply = full
+	return true
+
+
 static func room(data: Dictionary, army: Dictionary, at: int, world_speed: float) -> float:
 	return maxf(0.0, full_supply(data, army.units) - supply_left(data, army, at, world_speed))
 
