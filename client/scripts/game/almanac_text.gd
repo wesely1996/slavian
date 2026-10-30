@@ -96,10 +96,22 @@ static func _hordes(data: Dictionary) -> Array:
 	var fronts: Dictionary = data.enemies.fronts
 	for front in fronts:
 		var f: Dictionary = fronts[front]
-		var names := PackedStringArray()
+		# Its troops by tier, as they join the hordes; then its engines.
+		var lines := PackedStringArray()
+		for tier in range(1, 5):
+			var names := PackedStringArray()
+			for unit in f.units:
+				if int(f.units[unit].get("tier", 0) if f.units[unit].get("tier") != null else 0) == tier:
+					names.append(UI.t(f.units[unit].name))
+			if not names.is_empty():
+				lines.append(UI.t("Tier %d (from wave %d): %s") % [tier, int(data.enemies.tiers.minWave[tier - 1]) + 1, ", ".join(names)])
+		var engines := PackedStringArray()
 		for unit in f.units:
-			names.append(UI.t(f.units[unit].name))
-		out.append([UI.t("%s (%s front)") % [UI.t(f.faction), String(front).capitalize()], UI.t("%s Units: %s.") % [UI.t(f.signature), ", ".join(names)], WaveMath.front_icon(String(front))])
+			if f.units[unit].get("tier") == null:
+				engines.append(UI.t(f.units[unit].name))
+		if not engines.is_empty():
+			lines.append(UI.t("Engines: %s") % ", ".join(engines))
+		out.append([UI.t("%s (%s front)") % [UI.t(f.faction), String(front).capitalize()], UI.t("%s Units: %s.") % [UI.t(f.signature), "; ".join(lines)], WaveMath.front_icon(String(front))])
 	return out
 
 

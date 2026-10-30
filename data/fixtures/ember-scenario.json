@@ -842,60 +842,60 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          -1,
-         216000
+         172800
         ],
         [
          0,
          0,
-         234000
+         187200
         ]
        ],
-       "arrivesAt": "2026-06-01T13:50:43.804Z"
+       "arrivesAt": "2026-06-01T13:49:57.004Z"
       }
      }
     ],
@@ -3359,70 +3359,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -3441,8 +3441,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -3450,8 +3450,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -3465,11 +3466,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -3478,8 +3480,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -6039,70 +6042,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -6121,15 +6124,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -6138,20 +6142,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -6178,8 +6174,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -6187,8 +6183,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -6202,11 +6199,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -6215,8 +6213,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -8723,70 +8722,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -8805,15 +8804,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -8822,20 +8822,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -8862,8 +8854,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -8871,8 +8863,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -8886,11 +8879,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -8899,8 +8893,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -11407,70 +11402,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -11489,15 +11484,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -11506,20 +11502,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -11546,8 +11534,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -11555,8 +11543,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -11570,11 +11559,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -11583,8 +11573,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -14091,70 +14082,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -14173,15 +14164,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -14190,20 +14182,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -14230,8 +14214,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -14239,8 +14223,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -14254,11 +14239,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -14267,8 +14253,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -16775,70 +16762,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -16857,15 +16844,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -16874,20 +16862,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -16914,8 +16894,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -16923,8 +16903,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -16938,11 +16919,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -16951,8 +16933,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -19488,70 +19471,70 @@
         [
          9,
          -8,
-         54000
+         43200
         ],
         [
          8,
          -7,
-         72000
+         57600
         ],
         [
          7,
          -7,
-         90000
+         72000
         ],
         [
          6,
          -6,
-         108000
+         86400
         ],
         [
          5,
          -5,
-         126000
+         100800
         ],
         [
          4,
          -4,
-         144000
+         115200
         ],
         [
          3,
          -3,
-         162000
+         129600
         ],
         [
          3,
          -2,
-         180000
+         144000
         ],
         [
          2,
          -1,
-         198000
+         158400
         ],
         [
          1,
          0,
-         216000
+         172800
         ],
         [
          0,
          1,
-         234000
+         187200
         ],
         [
          -1,
          1,
-         252000
+         201600
         ],
         [
          -2,
          2,
-         288000
+         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T13:51:37.804Z"
+       "arrivesAt": "2026-06-01T13:50:40.204Z"
       }
      }
     ],
@@ -19570,15 +19553,16 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "grey_wolf": 4,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -19587,20 +19571,12 @@
        {
         "at": "2026-06-01T11:39:12.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 8,
-        "attackerLosses": {
-         "grey_wolf": 2
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 2,
         "attackerLeft": 3,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -19627,8 +19603,8 @@
       "r": 0,
       "setup": {
        "guard": {
-        "archer": 9,
-        "spearman": 20
+        "archer": 10,
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -19636,8 +19612,9 @@
       "round": 2,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "grey_wolf": 6,
-       "leshy_thrall": 3
+       "rusalka": 2,
+       "grey_wolf": 5,
+       "leshy_thrall": 2
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -19651,11 +19628,12 @@
         "attackerLeft": 3,
         "defenderLeft": 29,
         "attackerLosses": {
-         "grey_wolf": 5,
+         "rusalka": 1,
+         "grey_wolf": 4,
          "leshy_thrall": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
@@ -19664,8 +19642,9 @@
         "attackerLeft": 0,
         "defenderLeft": 29,
         "attackerLosses": {
+         "rusalka": 1,
          "grey_wolf": 1,
-         "leshy_thrall": 2
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }

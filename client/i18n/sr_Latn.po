@@ -133,63 +133,71 @@ msgstr "%s pobeđuje %s (×%.1f)"
 msgid "Counters"
 msgstr "Protivmere"
 
-#: client/scripts/game/almanac_text.gd:102
+#: client/scripts/game/almanac_text.gd:107
+msgid "Tier %d (from wave %d): %s"
+msgstr "Rang %d (od talasa %d): %s"
+
+#: client/scripts/game/almanac_text.gd:113
+msgid "Engines: %s"
+msgstr "Sprave: %s"
+
+#: client/scripts/game/almanac_text.gd:114
 msgid "%s (%s front)"
 msgstr "%s (strana: %s)"
 
-#: client/scripts/game/almanac_text.gd:102
+#: client/scripts/game/almanac_text.gd:114
 msgid "%s Units: %s."
 msgstr "%s Jedinice: %s."
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:122
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:122
 msgid "%s %s"
 msgstr "%s %s"
 
-#: client/scripts/game/almanac_text.gd:119
+#: client/scripts/game/almanac_text.gd:131
 msgid "impassable"
 msgstr "neprohodno"
 
-#: client/scripts/game/almanac_text.gd:119
+#: client/scripts/game/almanac_text.gd:131
 msgid "move cost %s"
 msgstr "cena kretanja %s"
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "%s · %s"
 msgstr "%s · %s"
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "villages can be founded here"
 msgstr "ovde se mogu osnovati sela"
 
-#: client/scripts/game/almanac_text.gd:120
+#: client/scripts/game/almanac_text.gd:132
 msgid "no villages"
 msgstr "nema sela"
 
-#: client/scripts/game/almanac_text.gd:126
+#: client/scripts/game/almanac_text.gd:138
 msgid "The Kalinov Bridge"
 msgstr "Kalinov most"
 
-#: client/scripts/game/almanac_text.gd:127
+#: client/scripts/game/almanac_text.gd:139
 msgid "Ritual Night"
 msgstr "Obredna noć"
 
-#: client/scripts/game/almanac_text.gd:128
+#: client/scripts/game/almanac_text.gd:140
 msgid "Winning"
 msgstr "Pobeda"
 
-#: client/scripts/game/almanac_text.gd:128
+#: client/scripts/game/almanac_text.gd:140
 msgid "%s: the Holy City still stands when Ritual Night's last horde is done."
 msgstr "%s: Sveti grad još stoji kada padne poslednja horda Obredne noći."
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:141
 msgid "Losing"
 msgstr "Poraz"
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:141
 msgid "%s: its Sanctity reaches 0."
 msgstr "%s: njegova svetost padne na 0."
 
@@ -4627,28 +4635,48 @@ msgid "Beasts and creatures of the old forests. Erratic and savage; they fight o
 msgstr "Zveri i stvorenja starih šuma. Nepredvidive i divlje; bore se i kad više nema smisla."
 
 #: data/enemies.json
-msgid "Grey Wolf"
-msgstr "Sivi vuk"
-
-#: data/enemies.json
 msgid "Leshy's Thrall"
 msgstr "Lešijev rob"
+
+#: data/enemies.json
+msgid "Rusalka"
+msgstr "Rusalka"
+
+#: data/enemies.json
+msgid "Grey Wolf"
+msgstr "Sivi vuk"
 
 #: data/enemies.json
 msgid "Cave Bear"
 msgstr "Pećinski medved"
 
 #: data/enemies.json
-msgid "Volkolak"
-msgstr "Vukodlak"
-
-#: data/enemies.json
 msgid "Upyr"
 msgstr "Upir"
 
 #: data/enemies.json
+msgid "Volkolak"
+msgstr "Vukodlak"
+
+#: data/enemies.json
 msgid "Likho"
 msgstr "Liho"
+
+#: data/enemies.json
+msgid "Storm Vila"
+msgstr "Vila oluje"
+
+#: data/enemies.json
+msgid "Black Boar"
+msgstr "Crni vepar"
+
+#: data/enemies.json
+msgid "Div"
+msgstr "Div"
+
+#: data/enemies.json
+msgid "Firebird"
+msgstr "Žar-ptica"
 
 #: data/enemies.json
 msgid "Zmey Whelp"
@@ -4663,24 +4691,52 @@ msgid "Fast horse archers out of the steppe. They raid rather than stay, burn ou
 msgstr "Brzi konjički strelci iz stepe. Radije pljačkaju nego da ostanu, pale ispostave daleko od svog puta i odnose više."
 
 #: data/enemies.json
-msgid "Steppe Raider"
-msgstr "Stepski pljačkaš"
+msgid "Steppe Levy"
+msgstr "Stepski ustanik"
 
 #: data/enemies.json
 msgid "Horse Archer"
 msgstr "Konjički strelac"
 
 #: data/enemies.json
-msgid "Lancer"
-msgstr "Kopljonoša"
+msgid "Steppe Raider"
+msgstr "Stepski pljačkaš"
 
 #: data/enemies.json
 msgid "Steppe Shaman"
 msgstr "Stepski šaman"
 
 #: data/enemies.json
+msgid "Kipchak Bowman"
+msgstr "Kipčački strelac"
+
+#: data/enemies.json
+msgid "Lancer"
+msgstr "Kopljonoša"
+
+#: data/enemies.json
+msgid "Kurgan Guard"
+msgstr "Kurganska straža"
+
+#: data/enemies.json
+msgid "Fire Archer"
+msgstr "Ognjeni strelac"
+
+#: data/enemies.json
 msgid "Khan's Guard"
 msgstr "Kanova straža"
+
+#: data/enemies.json
+msgid "Bagatur"
+msgstr "Bagatur"
+
+#: data/enemies.json
+msgid "Khan's Marksman"
+msgstr "Kanov strelac"
+
+#: data/enemies.json
+msgid "Steppe Cataphract"
+msgstr "Stepski katafrakt"
 
 #: data/enemies.json
 msgid "Scaling Ladder"
@@ -4703,12 +4759,44 @@ msgid "Crossbowman"
 msgstr "Samostrelac"
 
 #: data/enemies.json
-msgid "Knight-Brother"
-msgstr "Vitez-brat"
+msgid "Mounted Sergeant"
+msgstr "Konjički narednik"
 
 #: data/enemies.json
 msgid "Inquisitor"
 msgstr "Inkvizitor"
+
+#: data/enemies.json
+msgid "Arbalester"
+msgstr "Arbalestar"
+
+#: data/enemies.json
+msgid "Knight-Brother"
+msgstr "Vitez-brat"
+
+#: data/enemies.json
+msgid "Templar of the Throne"
+msgstr "Templar prestola"
+
+#: data/enemies.json
+msgid "Pavise Crossbowman"
+msgstr "Samostrelac sa pavezom"
+
+#: data/enemies.json
+msgid "Grand Knight"
+msgstr "Veliki vitez"
+
+#: data/enemies.json
+msgid "Champion of the Throne"
+msgstr "Šampion prestola"
+
+#: data/enemies.json
+msgid "Fire Priest"
+msgstr "Ognjeni sveštenik"
+
+#: data/enemies.json
+msgid "Lord Marshal"
+msgstr "Lord maršal"
 
 #: data/enemies.json
 msgid "Siege Ram"

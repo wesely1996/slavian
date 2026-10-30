@@ -152,7 +152,10 @@ const enemyUnitSchema = z.object({
   family: z.enum(UNIT_FAMILIES),
   // 0: never in a wave of its own (an engine built on site).
   weight: z.number().nonnegative(),
-  minWave: z.number().int().nonnegative(),
+  // A tier (1-4) joins the hordes from tiers.minWave; a unit with none
+  // (a siege engine) from its own minWave.
+  tier: z.number().int().min(1).max(4).optional(),
+  minWave: z.number().int().nonnegative().default(0),
   // Only groups of at least this many players see it.
   minPlayers: z.number().int().positive().optional(),
   attack: z.number().nonnegative(),
@@ -168,6 +171,9 @@ const enemyUnitSchema = z.object({
 
 const enemiesFileSchema = z.object({
   version: z.number().int(),
+  // When each tier joins the hordes (wave index), and how much a unit's
+  // weight shrinks for each tier unlocked after its own.
+  tiers: z.object({ minWave: z.array(z.number().int().nonnegative()).length(4), fade: z.number().positive().max(1) }),
   fronts: z.partialRecord(
     z.enum(FRONTS),
     z.object({

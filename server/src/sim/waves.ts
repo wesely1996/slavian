@@ -90,23 +90,36 @@ export function waveSize(data: GameData, index: number, playerCount: number): nu
 
 // Splits the wave size between the front's units by weight. Whole units by
 // weight first; the remainder is drawn at random, weighted.
-export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number, playerCount = 1): Composition {
-  const units = Object.entries(data.enemies.fronts[front]!.units).filter(
+// The units a wave of `index` draws from, with their weights: a tier joins
+// from tiers.minWave, and each tier unlocked after a unit's own halves (by
+// tiers.fade) how common it is.
+export function waveUnits(data: GameData, front: Front, index: number, playerCount = 1): [string, number][] {
+  const tiers = data.enemies.tiers;
+  const unlocked = tiers.minWave.filter((wave) => wave <= index).length;
+  const out: [string, number][] = [];
+  for (const [id, def] of Object.entries(data.enemies.fronts[front]!.units)) {
+    const from = def.tier ? tiers.minWave[def.tier - 1]! : def.minWave;
     // Engines built on site (weight 0) never set out with a wave.
-    ([, def]) => def.weight > 0 && def.minWave <= index && (def.minPlayers ?? 1) <= playerCount,
-  );
-  const totalWeight = units.reduce((sum, [, def]) => sum + def.weight, 0);
+    if (def.weight <= 0 || from > index || (def.minPlayers ?? 1) > playerCount) continue;
+    out.push([id, def.tier ? def.weight * tiers.fade ** (unlocked - def.tier) : def.weight]);
+  }
+  return out;
+}
+
+export function composeWave(data: GameData, front: Front, index: number, size: number, seed: number, playerCount = 1): Composition {
+  const units = waveUnits(data, front, index, playerCount);
+  const totalWeight = units.reduce((sum, [, weight]) => sum + weight, 0);
   const composition: Composition = {};
   let assigned = 0;
-  for (const [id, def] of units) {
-    const count = Math.floor((size * def.weight) / totalWeight);
+  for (const [id, weight] of units) {
+    const count = Math.floor((size * weight) / totalWeight);
     if (count > 0) composition[id] = count;
     assigned += count;
   }
   const rng = rngFor(seed, index, 0xc0);
   for (; assigned < size; assigned++) {
     let roll = rng() * totalWeight;
-    const [id] = units.find(([, def]) => (roll -= def.weight) < 0) ?? units.at(-1)!;
+    const [id] = units.find(([, weight]) => (roll -= weight) < 0) ?? units.at(-1)!;
     composition[id] = (composition[id] ?? 0) + 1;
   }
   return composition;
