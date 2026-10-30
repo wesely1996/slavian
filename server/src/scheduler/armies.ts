@@ -6,6 +6,7 @@
 // before that (supply null) are fed by their home village. Forts and supply
 // points keep grain too: an army standing on one fills up from it as it
 // would in a village, and can leave grain there.
+import { wagonsIn } from '../sim/field.js';
 import { loadLand } from '../db/rivers.js';
 import type { Land } from '../sim/land.js';
 import { z } from 'zod';
@@ -27,6 +28,7 @@ import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { roadRoute } from '../sim/logistics.js';
 import { completeTraining, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
+import { reserveOf, storeFromArmy, takeForArmy, topUpReserve } from '../sim/reserve.js';
 import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
 import { amountsAt, mapResources, spend, type Resources } from '../sim/resources.js';
 import { receive } from '../sim/logistics.js';
@@ -91,10 +93,11 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     if (input.orders === 'garrison' && target.ownerAccountId !== home.ownerAccountId) throw new RuleError('Troops only join the garrisons of your own villages');
     to = hex(target.q, target.r);
   }
-  // The troops leave the garrison with what grain the village can spare.
+  // The troops leave the garrison with what grain the military reserve
+  // can spare; the granary is not touched.
   let state = leaveGarrison(data, home.state, units, input.at, world.speed);
-  const grain = Math.min(fullSupply(data, units), amountsAt(state.ledger, input.at).grain);
-  state = { ...state, ledger: spend(state.ledger, input.at, grainOnly(grain)) };
+  const grain = Math.min(fullSupply(data, units), reserveOf(state));
+  state = takeForArmy(state, grain);
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
   const speed = armySpeed(data, units) * supplySpeedFactor(data, supplied, input.at, world.speed);
   const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed);
@@ -208,6 +211,7 @@ export async function moveArmy(
     path,
     status: 'marching',
     battleId: null,
+    wagonFortAt: null,
     departsAt: at,
     arrivesAt: new Date(at.getTime() + path.at(-1)!.atMs),
     leavesAt: null,
@@ -261,6 +265,20 @@ export async function resupplyArmy(client: DbClient, data: GameData, world: Worl
   return store ? resupplyFromStore(client, data, world, army, store, at) : resupply(client, data, world, army, army.targetVillageId!, at);
 }
 
+// A standing army holding open ground draws its wagons into a ring: a
+// wagon fort, ready after field.json wagonFort.setupMinutes (game minutes),
+// until it moves.
+export async function circleWagons(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  standing(army);
+  if (army.orders !== 'hold' || army.targetVillageId !== null) throw new RuleError('Only an army holding open ground circles its wagons');
+  if (wagonsIn(data, army.units) === 0) throw new RuleError('They have no wagons');
+  if (army.wagonFortAt) throw new RuleError('Their wagons are already in a ring');
+  if (await fortAt(client, world.id, army.targetQ, army.targetR)) throw new RuleError('There is a fort or supply point there already');
+  const ringed: Army = { ...army, wagonFortAt: new Date(at.getTime() + Math.round((data.field.wagonFort.setupMinutes * 60_000) / world.speed)) };
+  await saveArmy(client, ringed);
+  return ringed;
+}
+
 // A standing army on a fort or supply point leaves up to `grain` of its own
 // supply in its stores (as much as it has, and as fits).
 export async function stockStore(client: DbClient, data: GameData, world: World, army: Army, grain: number, at: Date): Promise<Army> {
@@ -304,10 +322,25 @@ function supplied(army: Army): (Army & Supplied) | null {
 }
 
 // An army setting off leaves behind the grain it carries beyond its full
-// supply; hunger comes sooner, so it is planned again.
+// supply, or fills up from the military reserve of the village it leaves;
+// either way hunger comes at another time, so it is planned again.
 async function setOff(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
-  const fed = supplied(army);
+  let fed = supplied(army);
   if (!fed) return army;
+  // Ordered out of a village of its owner's it stood in, it fills up from
+  // the military reserve there (not one sent home from a battle: the battle
+  // keeps the village's stores).
+  const inVillage = army.status === 'stationed' && army.targetVillageId !== null;
+  const village = inVillage ? await loadVillage(client, army.targetVillageId!) : null;
+  if (village && village.ownerAccountId === army.ownerAccountId) {
+    const grain = Math.min(supplyRoom(data, fed, at, world.speed), reserveOf(village.state));
+    if (grain > 0) {
+      await saveVillageState(client, village.id, takeForArmy(village.state, grain));
+      await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+      fed = addSupply(data, fed, grain, at, world.speed);
+      return planHunger(client, data, world, fed, at);
+    }
+  }
   const trimmed = trimSupply(data, fed, at, world.speed);
   return trimmed === fed ? army : planHunger(client, data, world, trimmed, at);
 }
@@ -351,7 +384,9 @@ async function joinVillage(client: DbClient, data: GameData, world: World, army:
   let state = completeTraining(village.state, at);
   if (fed) {
     state = joinGarrison(data, state, army.units, at, world.speed);
-    const load = mapResources((kind) => (army.loot?.[kind] ?? 0) + (kind === 'grain' ? supplyLeft(data, fed, at, world.speed) : 0));
+    // Its grain into the military reserve first; loot into the stores.
+    state = topUpReserve(data, storeFromArmy(data, state, supplyLeft(data, fed, at, world.speed), at), at);
+    const load = mapResources((kind) => army.loot?.[kind] ?? 0);
     state = { ...state, ledger: receive(state.ledger, at, load).ledger };
     await saveVillageState(client, village.id, state);
     await saveArmy(client, { ...army, status: 'done', loot: null, supply: 0, supplyAt: at, hungerAt: null });
@@ -414,6 +449,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
     path,
     status: 'returning',
     battleId: null,
+    wagonFortAt: null,
     leavesAt: at,
     returnsAt: new Date(at.getTime() + path.at(-1)!.atMs),
   };

@@ -27,6 +27,8 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 		var faster := roundi((1.0 - Rules.hall_speedup(data, level)) * 100.0)
 		if faster > 0:
 			parts.append(UI.t("builds %d%% faster") % faster)
+	if building in data.armies.reserve.buildings:
+		parts.append(UI.t("keeps %d grain for armies") % roundi(float(data.armies.reserve.grainPerLevel) * level))
 	if def.has("capacityGrowth"):
 		var base := float(data.buildings.village.baseCapacity)
 		parts.append(UI.t("stores %d of each") % roundi(base * pow(float(def.capacityGrowth), level)))
@@ -121,6 +123,11 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	# Real time: a faster world marches and eats faster.
 	box.add_child(UI.label(UI.t("Speed %s hexes/h · carries %d · eats %s grain/h") % [UI.number(TimeUtil.per_real_hour(float(def.speed) * speed)), int(def.carry), UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * speed))], UI.SMALL_SIZE))
 	box.add_child(UI.label(UI.t("Marches out with food for %s") % TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed), UI.SMALL_SIZE))
+	if float(def.get("supplyGrain", 0)) > 0:
+		box.add_child(UI.label(UI.t("Its wagon carries %d more grain for the army") % int(def.supplyGrain), UI.SMALL_SIZE))
+	if def.get("wagon", false) == true:
+		box.add_child(UI.label(UI.t("No soldier: holding open ground, the wagons make a wagon fort (+%d%% defense for each wagon per %d soldiers, at most +%d%%)") % [
+			roundi(float(data.field.wagonFort.bonusPerWagon) * 100.0), int(data.field.wagonFort.menPerWagon), roundi(float(data.field.wagonFort.maxBonus) * 100.0)], UI.SMALL_SIZE))
 	var counters: Dictionary = data.battle.counters
 	# Its own counters, or its family's.
 	var strong: Dictionary = def.counters if def.get("counters") != null else counters.get(family, {})

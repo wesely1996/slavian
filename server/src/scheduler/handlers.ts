@@ -1,3 +1,4 @@
+import { topUpReserve } from '../sim/reserve.js';
 import { z } from 'zod';
 import { notifyWorld } from '../db/notify.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
@@ -49,7 +50,8 @@ export const handlers: HandlerRegistry = {
     if (data.buildings.buildings[payload.building]?.research && village.ownerAccountId !== null) {
       await settleResearchPoints(client, data, world, village.ownerAccountId, event.dueAt);
     }
-    const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
+    // A finished level tops up the military reserve (it may hold more now).
+    const state = topUpReserve(data, completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed), event.dueAt);
     await saveVillageState(client, village.id, state);
     const def = data.buildings.buildings[payload.building];
     const big = payload.building === 'elder_hall' || payload.targetLevel >= data.notifications.bigBuildLevel;
@@ -68,10 +70,11 @@ export const handlers: HandlerRegistry = {
   },
 
   // A batch finished: move its units into the garrison.
-  async training_complete({ client, world }, event) {
+  async training_complete({ client, data, world }, event) {
     const payload = trainingCompletePayload.parse(event.payload);
     const village = await loadVillage(client, payload.villageId);
-    await saveVillageState(client, village.id, completeTraining(village.state, event.dueAt));
+    // New troops: the military reserve is topped up for them.
+    await saveVillageState(client, village.id, topUpReserve(data, completeTraining(village.state, event.dueAt), event.dueAt));
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   },
 

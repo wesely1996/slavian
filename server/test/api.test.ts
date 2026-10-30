@@ -1028,7 +1028,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
     const village = async (id: number) => (await world()).villages.find((v: { id: number }) => v.id === id);
     const roundMs = (15 * 60_000) / 10;
-    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}' WHERE id = $1`, [a.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', reserve = 1000 WHERE id = $1`, [a.id]);
     await db.query(`UPDATE villages SET garrison = '{"spearman": 10, "archer": 10}' WHERE id = $1`, [b.id]);
     expect(a.reinforce).toEqual({ share: 0.5, range: 4 });
     expect((await call('PUT', `/v1/villages/${a.id}/reinforce`, vid.token, { share: 0, range: 4 })).status).toBe(200);
@@ -1081,7 +1081,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Next horde hits Vid: Ola's village sends half its troops (auto-reinforce).
     await call('PUT', `/v1/villages/${b.id}/reinforce`, ola.token, { share: 0.5, range: 8 });
     await db.query(`UPDATE villages SET garrison = '{"spearman": 20}' WHERE id = $1`, [b.id]);
-    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}' WHERE id = $1`, [a.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', reserve = 1000 WHERE id = $1`, [a.id]);
     const second = (await world()).waves.find((x: { status: string }) => x.status === 'scheduled');
     now = new Date(second.spawnAt);
     await tick(db, now, scheduler);

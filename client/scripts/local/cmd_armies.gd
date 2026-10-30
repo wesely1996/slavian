@@ -223,12 +223,13 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 			if order.orders == "garrison" and int(target.ownerAccountId) != int(home.ownerAccountId):
 				return LocalVillage.rule("Troops only join the garrisons of your own villages")
 			to = Vector2i(target.q, target.r)
-	# The troops leave the garrison with what grain the village can spare.
+	# The troops leave the garrison with what grain the military reserve
+	# can spare; the granary is not touched.
 	var state := LocalVillage.leave_garrison(data, home.state, units, at, world.speed)
 	if state.has("error"):
 		return state
-	var grain := minf(LocalSupply.full_supply(data, units), float(LocalLedger.amounts_at(state.ledger, at).grain))
-	state.ledger = LocalLedger.spend(state.ledger, at, _grain_only(grain))
+	var grain := minf(LocalSupply.full_supply(data, units), LocalReserve.of(state))
+	state = LocalReserve.take_for_army(state, grain)
 	var supplied := {"units": units, "supply": grain, "supplyAt": at, "hungrySince": null}
 	var speed := army_speed(data, units) * LocalSupply.speed_factor(data, supplied, at, world.speed)
 	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(home.q, home.r), to, speed, world.speed)
@@ -256,7 +257,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		"targetVillageId": null if order.orders in ["hold", "clear", "explore"] else order.get("targetVillageId"),
 		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
-		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null}
+		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null, "wagonFortAt": null}
 	world.next.army += 1
 	world.armies.append(army)
 	if hero_account != null:
@@ -301,9 +302,24 @@ static func plan_hunger(server: LocalServer, world: Dictionary, army: Dictionary
 
 
 ## An army setting off leaves behind the grain it carries beyond its full
-## supply; hunger comes sooner, so it is planned again.
+## supply, or fills up from the military reserve of the village it leaves;
+## either way hunger comes at another time, so it is planned again.
 static func _set_off(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
-	if supplied(army) and LocalSupply.trim(server.data, army, at, world.speed):
+	if not supplied(army):
+		return
+	# Ordered out of a village of its owner's it stood in, it fills up from
+	# the military reserve there (not one sent home from a battle: the
+	# battle keeps the village's stores).
+	var in_village: bool = army.status == "stationed" and army.targetVillageId != null
+	var village := server.find_village(world, int(army.targetVillageId)) if in_village else {}
+	if not village.is_empty() and village.ownerAccountId != null and int(village.ownerAccountId) == int(army.ownerAccountId):
+		var grain := minf(LocalSupply.room(server.data, army, at, world.speed), LocalReserve.of(village.state))
+		if grain > 0:
+			village.state = LocalReserve.take_for_army(village.state, grain)
+			LocalSupply.add(server.data, army, grain, at, world.speed)
+			plan_hunger(server, world, army, at)
+			return
+	if LocalSupply.trim(server.data, army, at, world.speed):
 		plan_hunger(server, world, army, at)
 
 
@@ -380,10 +396,11 @@ static func join_village(server: LocalServer, world: Dictionary, army: Dictionar
 	var state := LocalVillage.complete_training(village.state, at)
 	if supplied(army):
 		state = LocalVillage.join_garrison(data, state, army.units, at, world.speed)
-		var left := LocalSupply.supply_left(data, army, at, world.speed)
+		# Its grain into the military reserve first; loot into the stores.
+		state = LocalReserve.top_up(data, LocalReserve.store_from_army(data, state, LocalSupply.supply_left(data, army, at, world.speed), at), at)
 		var loot: Variant = army.loot
 		var load := LocalVillage.resources(func(kind: String) -> float:
-			return (float(loot.get(kind, 0)) if loot != null else 0.0) + (left if kind == "grain" else 0.0))
+			return float(loot.get(kind, 0)) if loot != null else 0.0)
 		state.ledger = LocalLogistics.receive(state.ledger, at, load).ledger
 		village.state = state
 		army.status = "done"
@@ -485,6 +502,7 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 	army.path = path
 	army.status = "marching"
 	army.battleId = null
+	army.wagonFortAt = null
 	army.departsAt = at
 	army.arrivesAt = at + int(path[-1].atMs)
 	army.leavesAt = null
@@ -610,6 +628,7 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 		army.path = LocalLogistics.road_route(server.data, LocalHordes.land_of(world), Vector2i(home.q, home.r), Vector2i(army.targetQ, army.targetR), speed, world.speed)
 	army.status = "returning"
 	army.battleId = null
+	army.wagonFortAt = null
 	army.leavesAt = at
 	army.returnsAt = at + int(army.path[-1].atMs)
 	server.schedule(world, int(army.returnsAt), "army_return", {"armyId": army.id})
@@ -839,6 +858,57 @@ static func plan_intercepts(server: LocalServer, world: Dictionary, wave: Dictio
 	schedule_intercepts(server, world, wave, held_hexes(world), from_ms)
 
 
+## Whether a unit is a wagon (a Military Caravan), not a soldier.
+static func is_wagon(data: Dictionary, unit: String) -> bool:
+	return data.units.units.get(unit, {}).get("wagon", false) == true
+
+
+static func wagons_in(data: Dictionary, units: Dictionary) -> int:
+	var n := 0
+	for unit in units:
+		if is_wagon(data, unit):
+			n += int(units[unit])
+	return n
+
+
+## The defense a wagon fort gives the armies holding a hex (field.json
+## wagonFort): the wagons of those whose ring stands ready by `at`, for
+## each `menPerWagon` soldiers of them all, at most `maxBonus`.
+static func wagon_fort_bonus(data: Dictionary, holders: Array, at: int) -> float:
+	var rules: Dictionary = data.field.wagonFort
+	var wagons := 0
+	var soldiers := 0
+	for army in holders:
+		var n := wagons_in(data, army.units)
+		if army.get("wagonFortAt") != null and int(army.wagonFortAt) <= at:
+			wagons += n
+		for unit in army.units:
+			soldiers += int(army.units[unit])
+		soldiers -= n
+	if wagons == 0:
+		return 0.0
+	return minf(float(rules.maxBonus), (float(rules.bonusPerWagon) * wagons) / maxf(1.0, ceilf(soldiers / float(rules.menPerWagon))))
+
+
+## A standing army holding open ground draws its wagons into a ring: a
+## wagon fort, ready after field.json wagonFort.setupMinutes (game
+## minutes), until it moves.
+static func circle_wagons(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> Dictionary:
+	var refused := _standing(army)
+	if not refused.is_empty():
+		return refused
+	if army.orders != "hold" or army.targetVillageId != null:
+		return LocalVillage.rule("Only an army holding open ground circles its wagons")
+	if wagons_in(server.data, army.units) == 0:
+		return LocalVillage.rule("They have no wagons")
+	if army.get("wagonFortAt") != null:
+		return LocalVillage.rule("Their wagons are already in a ring")
+	if not fort_at(world, Vector2i(army.targetQ, army.targetR)).is_empty():
+		return LocalVillage.rule("There is a fort or supply point there already")
+	army.wagonFortAt = at + LocalWaves.js_round((float(server.data.field.wagonFort.setupMinutes) * 60000.0) / world.speed)
+	return army
+
+
 ## An army has just taken up a hex: hordes still to pass it will meet it.
 static func intercept_at(server: LocalServer, world: Dictionary, cell: Vector2i, at: int) -> void:
 	var active: Array = world.waves.filter(func(w: Dictionary) -> bool: return w.status == "marching")
@@ -870,6 +940,9 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 	var fort := fort_at(world, cell)
 	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing" and fort.get("kind", "fort") == "fort",
 		LocalBattles.came_over_river(wave.path if wave.path != null else [], cell, rivers))
+	var ring := wagon_fort_bonus(data, holders, at)
+	if ring > 0:
+		setup.wagonFort = ring
 	wave.status = "battling"
 	var defenders := {}
 	for a in holders:
@@ -883,8 +956,8 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		army.joinBonus = 0
 	server.schedule(world, at + LocalBattle.round_ms(data, world.speed), "battle_round", {"battleId": battle.id})
 	var ground: Array = []
-	for pair in [["ambush", "an ambush"], ["choke", "a choke point"], ["fort", "a fort"], ["river", "a river crossing"]]:
-		if setup[pair[0]]:
+	for pair in [["ambush", "an ambush"], ["choke", "a choke point"], ["fort", "a fort"], ["wagonFort", "a wagon fort"], ["river", "a river crossing"]]:
+		if setup.get(pair[0], false):
 			ground.append(pair[1])
 	var text := ", ".join(ground)
 	for owner in owners(holders):
@@ -1401,4 +1474,5 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"departsAt": LocalTime.iso(a.departsAt), "arrivesAt": LocalTime.iso(a.arrivesAt),
 		"leavesAt": LocalTime.iso(a.leavesAt) if a.leavesAt != null else null, "returnsAt": LocalTime.iso(a.returnsAt) if a.returnsAt != null else null,
 		"supply": a.get("supply"), "supplyAt": LocalTime.iso(a.supplyAt) if a.get("supplyAt") != null else null,
-		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null}
+		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null,
+		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null}

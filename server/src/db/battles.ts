@@ -45,6 +45,8 @@ export interface BattleSetup {
   siege?: { engine: string; count: number; readyAt: string };
   // The horde crossed a river (over a bridge) into the fight.
   river?: boolean;
+  // The defense a wagon fort gives the holders (sim/field.ts).
+  wagonFort?: number;
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

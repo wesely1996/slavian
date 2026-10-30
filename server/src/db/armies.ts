@@ -37,6 +37,8 @@ export interface Army {
   supplyAt: Date | null;
   hungrySince: Date | null;
   hungerAt: Date | null;
+  // When its wagons stand ready in a ring, a wagon fort (null: none).
+  wagonFortAt: Date | null;
 }
 
 interface ArmyRow {
@@ -65,6 +67,7 @@ interface ArmyRow {
   supply_at: Date | null;
   hungry_since: Date | null;
   hunger_at: Date | null;
+  wagon_fort_at: Date | null;
 }
 
 function fromRow(row: ArmyRow): Army {
@@ -94,6 +97,7 @@ function fromRow(row: ArmyRow): Army {
     supplyAt: row.supply_at,
     hungrySince: row.hungry_since,
     hungerAt: row.hunger_at,
+    wagonFortAt: row.wagon_fort_at,
   };
 }
 
@@ -139,7 +143,7 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
   await client.query(
     `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9,
        orders = $10, target_village_id = $11, target_q = $12, target_r = $13, path = $14, departs_at = $15, arrives_at = $16,
-       supply = $17, supply_at = $18, hungry_since = $19, hunger_at = $20
+       supply = $17, supply_at = $18, hungry_since = $19, hunger_at = $20, wagon_fort_at = $21
      WHERE id = $1`,
     [
       a.id,
@@ -162,6 +166,7 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
       a.supplyAt,
       a.hungrySince,
       a.hungerAt,
+      a.wagonFortAt,
     ],
   );
 }
