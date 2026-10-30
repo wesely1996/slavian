@@ -73,6 +73,14 @@ export function addSupply<A extends Supplied>(data: GameData, army: A, grain: nu
   return { ...settled, supply: settled.supply + grain, hungrySince: null };
 }
 
+// An army setting off carries no more than its full supply: what its
+// fallen left over while it stood still is left behind (settled first).
+export function trimSupply<A extends Supplied>(data: GameData, army: A, at: Date, worldSpeed: number): A {
+  const full = fullSupply(data, army.units);
+  if (supplyLeft(data, army, at, worldSpeed) <= full) return army;
+  return { ...settleSupply(data, army, at, worldSpeed), supply: full };
+}
+
 // How much more the army can take on: up to its full supply.
 export function supplyRoom(data: GameData, army: Supplied, at: Date, worldSpeed: number): number {
   return Math.max(0, fullSupply(data, army.units) - supplyLeft(data, army, at, worldSpeed));

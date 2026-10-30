@@ -300,6 +300,13 @@ static func plan_hunger(server: LocalServer, world: Dictionary, army: Dictionary
 		server.schedule(world, int(next), "army_hunger", {"armyId": army.id})
 
 
+## An army setting off leaves behind the grain it carries beyond its full
+## supply; hunger comes sooner, so it is planned again.
+static func _set_off(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if supplied(army) and LocalSupply.trim(server.data, army, at, world.speed):
+		plan_hunger(server, world, army, at)
+
+
 ## An army at a village takes on what grain it can carry from its stores.
 static func resupply(server: LocalServer, world: Dictionary, army: Dictionary, village_id: int, at: int) -> void:
 	if not supplied(army):
@@ -466,6 +473,7 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 			join_village(server, world, army, int(target_village), at)
 			return army
 		return LocalVillage.rule("They are already there")
+	_set_off(server, world, army, at)
 	var speed := army_speed(data, army.units) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
 	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), here, dest, speed, world.speed)
 	if path == null:
@@ -593,6 +601,7 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 		if not general.is_empty():
 			LocalGenerals.kill(server, world, general, at)
 		return army
+	_set_off(server, world, army, at)
 	# An army that moved on from where it first went takes the road home from
 	# where it stands (drawn backwards, as every road home is).
 	var home := server.find_village(world, int(army.homeVillageId))
