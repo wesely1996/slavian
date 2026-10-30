@@ -32,7 +32,7 @@ static func base_stats(data: Dictionary, hero: Dictionary, world_speed: float) -
 			worn += 1
 	var points := int(hero.get("skillPoints", 0))
 	return PackedStringArray([
-		UI.t("Rides %s hexes an hour") % String.num(speed * world_speed, 1).trim_suffix(".0"),
+		UI.t("Rides %s hexes an hour") % String.num(TimeUtil.per_real_hour(speed * world_speed), 1).trim_suffix(".0"),
 		UI.t("Wounded for %s after a lost fight") % TimeUtil.format_duration(wound_seconds),
 		UI.t("Gear: %d of %d slots worn") % [worn, data.heroes.slots.size()],
 		UI.t("%d %s to spend") % [points, UI.tn("skill point", "skill points", points)],

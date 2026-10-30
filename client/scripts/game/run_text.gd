@@ -24,10 +24,11 @@ static func ritual_line(world: Dictionary, now: float) -> String:
 
 
 ## The run's summary as lines for the end screen.
-## `speed` is the world's: the run's length is told in real time.
-static func stats(run: Dictionary, speed := 1.0) -> PackedStringArray:
+## `speed` is the world's: the run's length is told in real time, or
+## `seconds` of it when known (a solo world played at other speeds).
+static func stats(run: Dictionary, speed := 1.0, seconds := -1.0) -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append(UI.t("Lasted %s") % TimeUtil.format_duration(float(run.days) * 86400.0 / speed))
+	lines.append(UI.t("Lasted %s") % TimeUtil.format_real(seconds if seconds >= 0.0 else float(run.days) * 86400.0 / speed))
 	lines.append(UI.t("Hordes beaten: %d of %d") % [int(run.wavesBeaten), int(run.wavesFaced)])
 	lines.append(UI.t("Battles won: %d · camps cleared: %d") % [int(run.battlesWon), int(run.campsCleared)])
 	lines.append(UI.t("Ancient sites explored: %d · lore scrolls: %d") % [int(run.sitesExplored), int(run.scrolls)])

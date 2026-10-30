@@ -19,6 +19,14 @@ change: they keep calling `Api` and listening to `Live`.
 - **Scheduler:** the same event types as `server/src/scheduler`. Due events
   run in time order when the world opens, so a closed game catches up, and
   from `_process` while it is open.
+- **Game speed:** a solo world can be played at 0.5× to 100× whatever it was
+  started with (World settings). Its own `speed`, which every rule counts
+  with, never changes; its clock runs faster or slower than the device's
+  instead (`clock` in the save: where it stood at a moment of the device's
+  clock, and the speed since; `LocalHost.now_of`). The screens' clock
+  follows (`Game.time_rate`), and durations and rates per hour on screen are
+  told in the player's time (`TimeUtil.rate`). Changing it clears the
+  peaceful hours: the world's clock no longer keeps the hours of the day.
 - **Rules:** `server/src/sim`, `scheduler` and `commands` ported line by
   line to GDScript, with the same names, so a change on one side is easy to
   find on the other.

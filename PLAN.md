@@ -708,7 +708,8 @@ Art may be generated at first, as long as the style is consistent: clean and sim
     - Training queue and standing orders grow with the village (§11.2).
     - **Join after the start:** an invite code works while a run is under way; the newcomer's village is founded on free settleable ground away from the others (`joinSite` in `sim/expansion.ts`), with a hero and the group's bonuses, and the group hears of it.
     - **Searching for ruins** (§8.1): scouts sent from the Troops tab; `ruins-scenario` plays it in both engines.
-29. [ ] **Closed test:** friends play a full run; fix what they find.
+29. [x] **Game speed in single player** (asked for after step 28): a solo world can be played at 0.5×, 1×, 2×, 5×, 10×, 20×, 50× or 100× from World settings, faster when there is time and slower for the night. The world keeps the speed it started with, which every rule counts with; its clock runs faster or slower than the device's instead, so nothing already under way needs recounting. Countdowns, durations and rates per hour on screen follow; the run's length is counted in the player's time. Its peaceful hours go when the speed changes. Multiplayer worlds keep their speed.
+30. [ ] **Closed test:** friends play a full run; fix what they find.
 
 ### M0/M1 first tasks
 1. Repo skeleton (layout above), TypeScript server with lint/test, Godot project, `data/` with schemas.
