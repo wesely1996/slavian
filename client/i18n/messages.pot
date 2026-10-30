@@ -3475,421 +3475,425 @@ msgstr ""
 msgid "Defend a world together, each from their own phone."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:362
+#: client/scripts/screens/start_screen.gd:353
+msgid "The picture book shown before your first game: what a run is and how to win it."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:367
 msgid "Continue: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:376
+#: client/scripts/screens/start_screen.gd:381
 msgid "No solo worlds yet. Start one; it plays on this device."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:390
+#: client/scripts/screens/start_screen.gd:395
 msgid "Sure? Delete"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:390
+#: client/scripts/screens/start_screen.gd:395
 msgid "Delete"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:405
+#: client/scripts/screens/start_screen.gd:410
 msgid "World name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:405
+#: client/scripts/screens/start_screen.gd:410
 msgid "A solo world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:406
+#: client/scripts/screens/start_screen.gd:411
 msgid "Speed and difficulty"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:412
+#: client/scripts/screens/start_screen.gd:417
 msgid "Start a solo world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:415
+#: client/scripts/screens/start_screen.gd:420
 msgid "You"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:444
+#: client/scripts/screens/start_screen.gd:449
 msgid "Choose a hero and a clan first"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:461
+#: client/scripts/screens/start_screen.gd:466
 msgid "That solo world is gone."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:471
+#: client/scripts/screens/start_screen.gd:476
 msgid "Pick the name your group will see. You play as a guest; no email or password."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:475
+#: client/scripts/screens/start_screen.gd:480
 msgid "Loading…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:486
+#: client/scripts/screens/start_screen.gd:491
 msgid "The server can't be reached. Solo worlds play on all the same."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:487
+#: client/scripts/screens/start_screen.gd:492
 msgid "Retry"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:491
+#: client/scripts/screens/start_screen.gd:496
 msgid "Your worlds"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:493
+#: client/scripts/screens/start_screen.gd:498
 msgid "None yet. Create one or join with a code."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:503
+#: client/scripts/screens/start_screen.gd:508
 msgid "In the lobby"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:509
+#: client/scripts/screens/start_screen.gd:514
 msgid "Create a world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:519
+#: client/scripts/screens/start_screen.gd:524
 msgid "Your name"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:520
+#: client/scripts/screens/start_screen.gd:525
 msgid "e.g. Vesna"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:522
+#: client/scripts/screens/start_screen.gd:527
 msgid "Play as guest"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:526
+#: client/scripts/screens/start_screen.gd:531
 msgid "%s's world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:527
+#: client/scripts/screens/start_screen.gd:532
 msgid "Players, speed and difficulty"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:529
+#: client/scripts/screens/start_screen.gd:534
 msgid "%d player"
 msgid_plural "%d players"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/start_screen.gd:535
+#: client/scripts/screens/start_screen.gd:540
 msgid "Create world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:543
+#: client/scripts/screens/start_screen.gd:548
 msgid "Invite code"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:543
+#: client/scripts/screens/start_screen.gd:548
 msgid "Ask the host for the six-character code"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:546
+#: client/scripts/screens/start_screen.gd:551
 msgid "Join"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:668
+#: client/scripts/screens/start_screen.gd:673
 msgid "Account: not signed in"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:670
+#: client/scripts/screens/start_screen.gd:675
 msgid "Account: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:670
+#: client/scripts/screens/start_screen.gd:675
 msgid "Account: signed in"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:672
+#: client/scripts/screens/start_screen.gd:677
 msgid "Language: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:673
+#: client/scripts/screens/start_screen.gd:678
 msgid "Text size: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:674
+#: client/scripts/screens/start_screen.gd:679
 msgid "Sound: music %d%%, effects %d%%"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:676
+#: client/scripts/screens/start_screen.gd:681
 msgid "Notifications: all on"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:676
+#: client/scripts/screens/start_screen.gd:681
 msgid "Notifications: all off"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:676
+#: client/scripts/screens/start_screen.gd:681
 msgid "Notifications: %d of %d on"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:712
+#: client/scripts/screens/start_screen.gd:717
 msgid "Music"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:713
+#: client/scripts/screens/start_screen.gd:718
 msgid "Sound effects"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:723
+#: client/scripts/screens/start_screen.gd:728
 msgid "Notifications come to the Android app."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:725
+#: client/scripts/screens/start_screen.gd:730
 msgid "Notifications aren't allowed for Slavian on this phone."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:726
+#: client/scripts/screens/start_screen.gd:731
 msgid "Allow notifications"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:729
+#: client/scripts/screens/start_screen.gd:734
 msgid "Only worlds played with friends send them; a solo world sends none."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:731
+#: client/scripts/screens/start_screen.gd:736
 msgid "Hordes on the way"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:731
+#: client/scripts/screens/start_screen.gd:736
 msgid "A horde will reach your village within hours."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:732
+#: client/scripts/screens/start_screen.gd:737
 msgid "Battles at your villages"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:732
+#: client/scripts/screens/start_screen.gd:737
 msgid "Under attack, burning or razed."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:733
+#: client/scripts/screens/start_screen.gd:738
 msgid "Raided outposts"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:733
+#: client/scripts/screens/start_screen.gd:738
 msgid "A horde took what an outpost held."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:734
+#: client/scripts/screens/start_screen.gd:739
 msgid "Big buildings finished"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:734
+#: client/scripts/screens/start_screen.gd:739
 msgid "Elder's Hall levels and buildings reaching a high level."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:735
+#: client/scripts/screens/start_screen.gd:740
 msgid "The bridge and the wilds"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:735
+#: client/scripts/screens/start_screen.gd:740
 msgid "Bridge stages, Ritual Night, camps and bandits."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:736
+#: client/scripts/screens/start_screen.gd:741
 msgid "Daily digest"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:736
+#: client/scripts/screens/start_screen.gd:741
 msgid "Everything else, summed up once a day."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:784
+#: client/scripts/screens/start_screen.gd:789
 msgid "%s: %d%%"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:801
+#: client/scripts/screens/start_screen.gd:806
 msgid "Slavian keeps as little as it can: the name you choose (or a guest name), your sign-in sessions, and the state of the worlds you play in. There is no advertising, no tracking and no sharing with third parties. Push notifications use your device token only to reach you. You can download what is kept about you and delete your account at any time from this screen. Deletion removes the account, its sessions, memberships and device tokens."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:810
+#: client/scripts/screens/start_screen.gd:815
 msgid "Solo worlds need no account. To play with friends, pick a name and play as a guest."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:814
+#: client/scripts/screens/start_screen.gd:819
 msgid "Signed in as"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:822
+#: client/scripts/screens/start_screen.gd:827
 msgid "Sign out"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:825
+#: client/scripts/screens/start_screen.gd:830
 msgid "Your data"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:826
+#: client/scripts/screens/start_screen.gd:831
 msgid "Export my data"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:830
+#: client/scripts/screens/start_screen.gd:835
 msgid "Delete my account"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:852
+#: client/scripts/screens/start_screen.gd:857
 msgid "Could not write the export file."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:856
+#: client/scripts/screens/start_screen.gd:861
 msgid "Your data is saved to %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:862
+#: client/scripts/screens/start_screen.gd:867
 msgid "Tap again to delete your account and all its data."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:878
+#: client/scripts/screens/start_screen.gd:883
 msgid "How a run goes"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:878
+#: client/scripts/screens/start_screen.gd:883
 msgid "Report a problem"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:879
+#: client/scripts/screens/start_screen.gd:884
 msgid "Support the game"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:879
+#: client/scripts/screens/start_screen.gd:884
 msgid "Privacy policy"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:892
+#: client/scripts/screens/start_screen.gd:897
 msgid "In a world, the quest card shows the way, and the almanac explains the rest."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:893
+#: client/scripts/screens/start_screen.gd:898
 msgid "Open the picture book"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:896
+#: client/scripts/screens/start_screen.gd:901
 msgid "Sign in as a guest (Settings, Account) to send a report."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:932
+#: client/scripts/screens/start_screen.gd:937
 msgid "Could not load the server costs."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:938
+#: client/scripts/screens/start_screen.gd:943
 msgid "This month (%s): server costs %s, donations %s."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:943
+#: client/scripts/screens/start_screen.gd:948
 msgid "Carried to next month: %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:946
+#: client/scripts/screens/start_screen.gd:951
 msgid "Buy me a coffee"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:953
+#: client/scripts/screens/start_screen.gd:958
 msgid "Thank you; the report is sent."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:961
+#: client/scripts/screens/start_screen.gd:966
 msgid "Music for the map and the menu, the village, battles, victory and defeat"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:962
+#: client/scripts/screens/start_screen.gd:967
 msgid "Music when a horde is near"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:963
+#: client/scripts/screens/start_screen.gd:968
 msgid "The war horn"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:971
+#: client/scripts/screens/start_screen.gd:976
 msgid "Music and sound"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:971
+#: client/scripts/screens/start_screen.gd:976
 msgid "Built with"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:990
+#: client/scripts/screens/start_screen.gd:995
 msgid "Made by"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:996
+#: client/scripts/screens/start_screen.gd:1001
 msgid "All under CC0, given freely. Thank you."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1026
+#: client/scripts/screens/start_screen.gd:1031
 msgid "Copy"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1028
+#: client/scripts/screens/start_screen.gd:1033
 msgid "Invite code copied."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1029
+#: client/scripts/screens/start_screen.gd:1034
 msgid "Share"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1030
+#: client/scripts/screens/start_screen.gd:1035
 msgid "Join my world in Slavian with the invite code %s (Play with friends, Join with a code)."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1031
+#: client/scripts/screens/start_screen.gd:1036
 msgid "Share the invite code"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1032
+#: client/scripts/screens/start_screen.gd:1037
 msgid "Invite copied: paste it in a message to your group."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1034
+#: client/scripts/screens/start_screen.gd:1039
 msgid "%d of %d players joined"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1035
+#: client/scripts/screens/start_screen.gd:1040
 msgid "Share the code with your group: they join with it from Play with friends."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1037
+#: client/scripts/screens/start_screen.gd:1042
 msgid " (host)"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1042
+#: client/scripts/screens/start_screen.gd:1047
 msgid "Start the world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1044
+#: client/scripts/screens/start_screen.gd:1049
 msgid "Waiting for the host to start…"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1049
+#: client/scripts/screens/start_screen.gd:1054
 msgid "Sure? Leave this world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1049
+#: client/scripts/screens/start_screen.gd:1054
 msgid "Leave this world"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1057
+#: client/scripts/screens/start_screen.gd:1062
 msgid "Tap again to leave. If you host it, the next player in the lobby will."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1104
+#: client/scripts/screens/start_screen.gd:1109
 msgid "Clan"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1143
+#: client/scripts/screens/start_screen.gd:1148
 msgid "Tap a hero to read about them."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1153
+#: client/scripts/screens/start_screen.gd:1158
 msgid "Rides with %s"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1170
+#: client/scripts/screens/start_screen.gd:1175
 msgid "Tap a clan to read about it."
 msgstr ""
 
