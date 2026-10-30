@@ -7,7 +7,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
-import { disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, stockStore } from '../scheduler/armies.js';
+import { circleWagons, disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, stockStore } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
@@ -170,6 +170,11 @@ export async function disbandArmyCommand(db: Db, deps: SchedulerDeps, input: { a
 
 export async function resupplyArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
   return armyCommand(db, deps, input, 'resupplied an army', ({ client, world, army }) => resupplyArmy(client, deps.data, world, army, input.now));
+}
+
+// A standing army on open ground draws its wagons into a wagon fort.
+export async function circleWagonsCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'circled its wagons', ({ client, world, army }) => circleWagons(client, deps.data, world, army, input.now));
 }
 
 // A standing army on a fort or supply point leaves grain in its stores.

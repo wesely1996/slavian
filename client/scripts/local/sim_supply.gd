@@ -12,13 +12,14 @@ static func army_upkeep(data: Dictionary, units: Dictionary, world_speed: float)
 
 
 ## The grain an army carries when full: each unit its own `supplyHours`
-## game hours of its upkeep (data/units.json).
+## game hours of its upkeep, and a wagon its `supplyGrain` on top
+## (data/units.json).
 static func full_supply(data: Dictionary, units: Dictionary) -> float:
 	var total := 0.0
 	for unit in units:
 		var def: Variant = data.units.units.get(unit)
 		if def != null:
-			total += float(def.upkeepPerHour) * float(def.supplyHours) * int(units[unit])
+			total += (float(def.upkeepPerHour) * float(def.supplyHours) + float(def.get("supplyGrain", 0))) * int(units[unit])
 	return total
 
 

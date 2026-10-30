@@ -15,6 +15,7 @@ import {
   moveArmyCommand,
   recallArmyCommand,
   resupplyArmyCommand,
+  circleWagonsCommand,
   sendArmyCommand,
   setReinforceCommand,
 } from '../commands/armies.js';
@@ -677,6 +678,13 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
     const army = await resupplyArmyCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/wagon-fort', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const army = await circleWagonsCommand(db, scheduler, { accountId: account.id, armyId: id, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 

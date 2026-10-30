@@ -122,6 +122,10 @@ const unitSchema = z.object({
   upkeepPerHour: z.number().nonnegative(),
   // Game hours of its own upkeep it carries when it marches out with an army.
   supplyHours: z.number().positive(),
+  // Grain it carries on top of that (a Military Caravan's wagon).
+  supplyGrain: z.number().nonnegative().optional(),
+  // A wagon, no soldier: it can be drawn into a wagon fort (field.json).
+  wagon: z.boolean().optional(),
   speed: z.number().positive(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
@@ -482,6 +486,8 @@ const armiesFileSchema = z.object({
   version: z.number().int(),
   // Field armies carry their own grain (sim/supply.ts).
   supply: z.object({ garrisonUpkeep: z.number().min(0).max(1) }),
+  // Grain kept for armies in the military buildings, per level of each.
+  reserve: z.object({ buildings: z.array(z.string()), grainPerLevel: z.number().nonnegative() }),
   attrition: z.object({
     slowFactor: z.number().positive().max(1),
     lossAfterHours: z.number().min(0),
@@ -513,6 +519,13 @@ const fieldFileSchema = z.object({
   }),
   // A horde that crossed a river (over a bridge) into the fight.
   river: z.object({ attackerFactor: z.number().positive().max(1) }),
+  // Wagons drawn into a ring on open ground.
+  wagonFort: z.object({
+    setupMinutes: z.number().nonnegative(),
+    bonusPerWagon: z.number().nonnegative(),
+    menPerWagon: z.number().int().positive(),
+    maxBonus: z.number().nonnegative(),
+  }),
   fort: z.object({
     range: z.number().int().positive(),
     cost: resourcesSchema,

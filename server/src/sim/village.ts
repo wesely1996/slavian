@@ -69,6 +69,8 @@ export interface VillageState {
   readonly adminUpkeep: number;
   // The owner's research effects (see research.ts).
   readonly bonuses: Bonuses;
+  // Grain kept for armies in the military buildings (reserve.ts).
+  readonly reserve?: number;
 }
 
 const MS_PER_SECOND = 1000;

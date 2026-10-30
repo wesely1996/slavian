@@ -169,6 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
+     "reserve": 0,
      "reinforce": {
       "share": 0.5,
       "range": 4
@@ -358,6 +359,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
+     "reserve": 200,
      "reinforce": {
       "share": 0.5,
       "range": 4
@@ -377,7 +379,7 @@
       "amounts": {
        "iron": 50,
        "wood": 220,
-       "grain": 333.33333333333326,
+       "grain": 133.33333333333331,
        "stone": 320
       },
       "ratesPerHour": {
@@ -558,6 +560,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
+     "reserve": 200,
      "reinforce": {
       "share": 0.5,
       "range": 4
@@ -569,7 +572,7 @@
       "amounts": {
        "wood": 295,
        "stone": 370,
-       "grain": 363.99999999999994,
+       "grain": 163.99999999999997,
        "iron": 75
       },
       "ratesPerHour": {
@@ -667,7 +670,8 @@
      "returnsAt": null,
      "supply": 48,
      "supplyAt": "2026-06-01T08:30:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:30:00.000Z"
    }
@@ -762,7 +766,8 @@
      "returnsAt": null,
      "supply": 48,
      "supplyAt": "2026-06-01T08:30:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:35:00.000Z"
    }
@@ -814,7 +819,8 @@
      "returnsAt": null,
      "supply": 48,
      "supplyAt": "2026-06-01T08:30:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:40:00.000Z"
    }
@@ -1007,6 +1013,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
+      "reserve": 200,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -1018,7 +1025,7 @@
        "amounts": {
         "iron": 100,
         "wood": 370,
-        "grain": 395.2,
+        "grain": 195.19999999999996,
         "stone": 420
        },
        "ratesPerHour": {
@@ -1299,7 +1306,8 @@
       "returnsAt": null,
       "supply": 0,
       "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      }
     ],
     "forts": [],
@@ -3325,7 +3333,8 @@
      "returnsAt": null,
      "supply": 24,
      "supplyAt": "2026-06-01T08:45:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:45:00.000Z"
    }
@@ -3381,7 +3390,8 @@
      "returnsAt": null,
      "supply": 72,
      "supplyAt": "2026-06-01T08:45:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:45:00.000Z"
    }
@@ -3429,7 +3439,8 @@
      "returnsAt": "2026-06-01T08:50:00.000Z",
      "supply": 24,
      "supplyAt": "2026-06-01T08:45:00.000Z",
-     "hungrySince": null
+     "hungrySince": null,
+     "wagonFortAt": null
     },
     "serverTime": "2026-06-01T08:50:00.000Z"
    }
@@ -3632,6 +3643,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
+      "reserve": 104,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -3643,7 +3655,7 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 319.0333333333333,
+        "grain": 215.0333333333333,
         "stone": 445
        },
        "ratesPerHour": {
@@ -3924,7 +3936,8 @@
       "returnsAt": null,
       "supply": 72,
       "supplyAt": "2026-06-01T08:45:00.000Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      },
      {
       "id": 2,
@@ -3960,7 +3973,8 @@
       "returnsAt": "2026-06-01T08:50:00.000Z",
       "supply": 24,
       "supplyAt": "2026-06-01T08:45:00.000Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      },
      {
       "id": 1,
@@ -3998,7 +4012,8 @@
       "returnsAt": null,
       "supply": 0,
       "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      }
     ],
     "forts": [],
@@ -6161,6 +6176,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
+      "reserve": 104,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -6172,7 +6188,7 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 319.0333333333333,
+        "grain": 215.0333333333333,
         "stone": 445
        },
        "ratesPerHour": {
@@ -6451,7 +6467,8 @@
       "returnsAt": "2026-06-01T09:25:48.000Z",
       "supply": 0,
       "supplyAt": "2026-06-01T09:25:48.000Z",
-      "hungrySince": "2026-06-01T09:13:48.000Z"
+      "hungrySince": "2026-06-01T09:13:48.000Z",
+      "wagonFortAt": null
      },
      {
       "id": 2,
@@ -6487,7 +6504,8 @@
       "returnsAt": "2026-06-01T08:50:00.000Z",
       "supply": 24,
       "supplyAt": "2026-06-01T08:45:00.000Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      },
      {
       "id": 1,
@@ -6525,7 +6543,8 @@
       "returnsAt": null,
       "supply": 0,
       "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      }
     ],
     "forts": [],
@@ -8688,6 +8707,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
+      "reserve": 104,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -8699,7 +8719,7 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 319.0333333333333,
+        "grain": 215.0333333333333,
         "stone": 445
        },
        "ratesPerHour": {
@@ -8978,7 +8998,8 @@
       "returnsAt": "2026-06-01T09:25:48.000Z",
       "supply": 0,
       "supplyAt": "2026-06-01T09:25:48.000Z",
-      "hungrySince": "2026-06-01T09:13:48.000Z"
+      "hungrySince": "2026-06-01T09:13:48.000Z",
+      "wagonFortAt": null
      },
      {
       "id": 2,
@@ -9014,7 +9035,8 @@
       "returnsAt": "2026-06-01T08:50:00.000Z",
       "supply": 24,
       "supplyAt": "2026-06-01T08:45:00.000Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      },
      {
       "id": 1,
@@ -9052,7 +9074,8 @@
       "returnsAt": null,
       "supply": 0,
       "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null
+      "hungrySince": null,
+      "wagonFortAt": null
      }
     ],
     "forts": [],

@@ -61,6 +61,40 @@ static func fort_problem(data: Dictionary, village: Dictionary, cell: Vector2i, 
 	return ""
 
 
+## Wagons (Military Caravans) among `units`: no soldiers.
+static func wagons_in(data: Dictionary, units: Dictionary) -> int:
+	var n := 0
+	for unit in units:
+		if data.units.units.get(unit, {}).get("wagon", false) == true:
+			n += int(units[unit])
+	return n
+
+
+## The defense an army's wagon fort gives it (field.json wagonFort; with
+## other armies on the hex the server counts them all): its wagons for
+## each `menPerWagon` soldiers, at most `maxBonus`.
+static func wagon_fort_bonus(data: Dictionary, units: Dictionary) -> float:
+	var rules: Dictionary = data.field.wagonFort
+	var wagons := wagons_in(data, units)
+	if wagons == 0:
+		return 0.0
+	var soldiers := 0
+	for unit in units:
+		soldiers += int(units[unit])
+	soldiers -= wagons
+	return minf(float(rules.maxBonus), float(rules.bonusPerWagon) * wagons / maxf(1.0, ceilf(soldiers / float(rules.menPerWagon))))
+
+
+## The grain a village's military reserve keeps at most (data/armies.json
+## reserve; server sim/reserve.ts reserveCapacity).
+static func reserve_capacity(data: Dictionary, plots: Dictionary) -> float:
+	var levels := 0
+	for plot in plots.values():
+		if plot.get("building") != null and String(plot.building) in data.armies.reserve.buildings:
+			levels += int(plot.level)
+	return float(levels) * float(data.armies.reserve.grainPerLevel)
+
+
 ## The grain a fort or supply point keeps at most (data/field.json).
 static func grain_capacity(data: Dictionary, kind: String) -> float:
 	return float(data.field.supplyPoint.grainCapacity if kind == "supply" else data.field.fort.grainCapacity)

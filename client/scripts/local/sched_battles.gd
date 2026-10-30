@@ -443,6 +443,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var hold_defense := 1.0
 	if ground.get("fort", false):
 		hold_defense += float(data.field.fort.defenseBonus)
+	hold_defense += float(ground.get("wagonFort", 0))
 	if ground.get("choke", false) and stance == "hold_the_line":
 		hold_defense += float(data.field.choke.holdTheLineDefense)
 	var hold_attack := (1.0 + float(data.field.ambush.bonus) + float(bonuses.get("ambush", 0.0))) if ambush and first else 1.0

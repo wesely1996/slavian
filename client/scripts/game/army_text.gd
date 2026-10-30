@@ -106,7 +106,7 @@ static func full_supply(data: Dictionary, units: Dictionary) -> float:
 	var total := 0.0
 	for unit in units:
 		var def: Dictionary = data.units.units.get(unit, {})
-		total += float(def.get("upkeepPerHour", 0)) * float(def.get("supplyHours", 0)) * int(units[unit])
+		total += (float(def.get("upkeepPerHour", 0)) * float(def.get("supplyHours", 0)) + float(def.get("supplyGrain", 0))) * int(units[unit])
 	return total
 
 

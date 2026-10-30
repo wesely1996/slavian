@@ -184,6 +184,7 @@ const SERBIAN: Record<string, string> = {
 	'an ambush': 'zasedu',
 	'a choke point': 'tesnac',
 	'a fort': 'utvrdu',
+	'a wagon fort': 'kolski tabor',
 	'a river crossing': 'rečni prelaz',
 	'That hex is not on the map': 'To polje nije na mapi',
 	'Too close to the Holy City': 'Preblizu Svetom gradu',

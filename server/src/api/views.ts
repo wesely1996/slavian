@@ -1,5 +1,6 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
+import { reserveOf } from '../sim/reserve.js';
 import { researchPerHour } from '../sim/village.js';
 import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
@@ -65,6 +66,9 @@ export interface VillageView {
   adminUpkeep: number;
   // The owner's research effects.
   bonuses: Record<string, number>;
+  // Grain kept for armies leaving (the military reserve; its most follows
+  // from the plots, sim/reserve.ts reserveCapacity).
+  reserve: number;
   // Troops sent to battles nearby: this share, within this many hexes.
   reinforce: { share: number; range: number } | null;
   // Razed: what stood (plots), since when, and while rebuilding when it
@@ -105,6 +109,7 @@ export function villageView(village: Village): VillageView {
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
+    reserve: reserveOf(village.state),
     reinforce: village.reinforce ?? null,
     ruin: village.ruin ?? null,
     refuge: village.refuge === true,
@@ -507,6 +512,8 @@ export function armyView(army: Army) {
     supply: army.supply,
     supplyAt: army.supplyAt?.toISOString() ?? null,
     hungrySince: army.hungrySince?.toISOString() ?? null,
+    // When its wagons stand ready in a ring (a wagon fort), or null.
+    wagonFortAt: army.wagonFortAt?.toISOString() ?? null,
   };
 }
 

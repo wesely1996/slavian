@@ -351,7 +351,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if general.has("ok"):
 			return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
 		return {"status": 200, "data": {"general": LocalGenerals.view(data, general), "serverTime": LocalTime.iso(now)}}
-	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply", "store"]:
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply", "store", "wagon-fort"]:
 		var found := LocalArmies.find_army(world, int(parts[2]))
 		if found.is_empty():
 			return _fail(404, "not_found", "No such army")
@@ -363,6 +363,8 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				moved = LocalArmies.disband(self, world, found, now)
 			"store":
 				moved = LocalArmies.store_command(self, world, found, body, now)
+			"wagon-fort":
+				moved = LocalArmies.circle_wagons(self, world, found, now)
 			_:
 				moved = LocalArmies.resupply_command(self, world, found, now)
 		if moved.has("error"):
@@ -738,7 +740,8 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	var done := LocalVillage.complete_build(data, village.state, plot, int(p.targetLevel), int(event.dueAt), world.speed)
 	if done.has("error"):
 		return
-	village.state = done
+	# A finished level tops up the military reserve (it may hold more now).
+	village.state = LocalReserve.top_up(data, done, int(event.dueAt))
 	var def: Variant = data.buildings.buildings.get(p.building)
 	var big: bool = p.building == "elder_hall" or int(p.targetLevel) >= int(data.notifications.bigBuildLevel)
 	LocalInbox.tell(self, world, village.ownerAccountId, {"kind": "build_done", "tier": "push" if big else "digest",
@@ -940,7 +943,8 @@ func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array)
 	var village := find_village(world, int(event.payload.villageId))
 	if village.is_empty():
 		return
-	village.state = LocalVillage.complete_training(village.state, int(event.dueAt))
+	# New troops: the military reserve is topped up for them.
+	village.state = LocalReserve.top_up(data, LocalVillage.complete_training(village.state, int(event.dueAt)), int(event.dueAt))
 	changed.append(["village", village.id])
 
 
@@ -1023,7 +1027,7 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 		"id": village.id, "worldId": world.id, "ownerAccountId": village.ownerAccountId, "name": village.name, "q": village.q, "r": village.r,
 		"plots": s.plots.duplicate(true), "levels": s.levels.duplicate(), "queue": queue, "garrison": s.garrison.duplicate(),
 		"away": s.away.duplicate(), "stance": s.stance, "besieged": s.besieged, "adminUpkeep": s.adminUpkeep,
-		"bonuses": s.bonuses.duplicate(), "reinforce": village.reinforce, "ruin": village.ruin, "refuge": village.refuge == true,
+		"bonuses": s.bonuses.duplicate(), "reserve": LocalReserve.of(s), "reinforce": village.reinforce, "ruin": village.ruin, "refuge": village.refuge == true,
 		"training": training,
 		"resources": {"amounts": s.ledger.amounts, "ratesPerHour": s.ledger.ratesPerHour, "capacity": s.ledger.capacity,
 			"settledAt": LocalTime.iso(s.ledger.settledAt)},
@@ -1230,6 +1234,8 @@ func _load_all() -> void:
 				a.merge({"generalId": null})
 				# Armies from before supplies: fed by their home village.
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
+				# Armies saved before wagon forts.
+				a.merge({"wagonFortAt": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			# Roads from before road levels: level 1, as fast as they were.

@@ -1727,6 +1727,11 @@ func _armies_section(village: Dictionary) -> void:
 		var guarding: bool = army.targetVillageId != null and int(army.targetVillageId) == village_id and army.status in ["stationed", "engaged"] and int(army.homeVillageId) != village_id
 		return mine or guarding)
 	_panel_body.add_child(UI.label(tr("Armies"), UI.HEADING_SIZE))
+	# The military reserve: the grain armies leaving take (never the granary).
+	var reserve_cap := FieldRules.reserve_capacity(Game.data, village.get("plots", {}))
+	if reserve_cap > 0 or float(village.get("reserve", 0)) > 0:
+		_panel_body.add_child(UI.with_info(UI.label(tr("Military reserve: %d of %d grain") % [floori(float(village.get("reserve", 0))), floori(reserve_cap)], UI.SMALL_SIZE),
+			tr("Armies leaving take their grain from here, never from the granary; troops at home eat from the granary. The barracks, shooting range and stables keep %d grain each level; the reserve fills from the granary when a building or a training batch is done, and from what armies bring home.") % int(Game.data.armies.reserve.grainPerLevel)))
 	if here.is_empty():
 		_panel_body.add_child(UI.label(tr("No armies out from here, and none standing guard."), UI.SMALL_SIZE, UI.MUTED))
 	_paged("armies", here, 6 if _roomy() else 3, func(army: Dictionary) -> void:
@@ -2341,7 +2346,10 @@ func _army_panel() -> void:
 		var words := UI.vbox(0)
 		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		words.add_child(UI.label(tr("%s ×%d") % [tr(def.get("name", unit)), int(army.units[unit])], UI.SMALL_SIZE))
-		words.add_child(UI.label(tr("Each eats %s grain an hour · carries food for %s") % [UI.number(TimeUtil.per_real_hour(float(def.get("upkeepPerHour", 0)) * speed)), TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed)], UI.SMALL_SIZE, UI.MUTED))
+		var food := tr("Each eats %s grain an hour · carries food for %s") % [UI.number(TimeUtil.per_real_hour(float(def.get("upkeepPerHour", 0)) * speed)), TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed)]
+		if float(def.get("supplyGrain", 0)) > 0:
+			food += " · " + tr("each wagon %d grain more") % int(def.supplyGrain)
+		words.add_child(UI.label(food, UI.SMALL_SIZE, UI.MUTED))
 		row.add_child(words)
 		_panel_body.add_child(row)
 
@@ -2386,6 +2394,17 @@ func _army_panel() -> void:
 	if not store.is_empty() and store.status == "standing":
 		var place := tr("Supply point") if store.get("kind", "fort") == "supply" else tr("Fort")
 		_panel_body.add_child(UI.label(tr("%s here: %d of %d grain") % [place, floori(float(store.get("grain", 0))), int(FieldRules.grain_capacity(data, store.get("kind", "fort")))], UI.SMALL_SIZE))
+	# Its wagons drawn into a ring.
+	if army.get("wagonFortAt") != null and army.status in ["stationed", "engaged"]:
+		var ring_at := TimeUtil.parse_iso(String(army.wagonFortAt))
+		var ring := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(ring)
+		_tick(ring, func() -> String:
+			var bonus := roundi(FieldRules.wagon_fort_bonus(data, army.units) * 100.0)
+			var left := ring_at - Game.server_now()
+			if left > 0:
+				return tr("Wagon fort: ready in %s (+%d%% defense)") % [TimeUtil.format_duration(left), bonus]
+			return tr("Wagon fort: +%d%% defense") % bonus)
 
 	# Orders, for your own army standing still.
 	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
@@ -2423,6 +2442,23 @@ func _army_orders_row(army: Dictionary) -> void:
 	row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
 	_panel_body.add_child(row)
 	_store_row(army)
+	_wagon_row(army)
+
+
+## For your army holding open ground with wagons: draw them into a ring.
+func _wagon_row(army: Dictionary) -> void:
+	var data := Game.data
+	if army.orders != "hold" or army.targetVillageId != null or army.get("wagonFortAt") != null:
+		return
+	if FieldRules.wagons_in(data, army.units) == 0 or not Game.fort_at(ArmyText.held_hex(army)).is_empty():
+		return
+	var army_id := int(army.id)
+	var rules: Dictionary = data.field.wagonFort
+	var circle := UI.button(tr("Circle the wagons (+%d%% defense)") % roundi(FieldRules.wagon_fort_bonus(data, army.units) * 100.0),
+		func() -> void: _army_command(army_id, "wagon-fort", {}))
+	_panel_body.add_child(UI.with_info(circle, tr("The wagons are drawn into a ring, ready in %s: +%d%% defense for each wagon per %d soldiers, at most +%d%%. The ring breaks up when the army moves.") % [
+		TimeUtil.format_duration(float(rules.setupMinutes) * 60.0 / float(Game.world.speed)), roundi(float(rules.bonusPerWagon) * 100.0),
+		int(rules.menPerWagon), roundi(float(rules.maxBonus) * 100.0)]))
 
 
 ## For your army standing on a fort or supply point: take on grain from

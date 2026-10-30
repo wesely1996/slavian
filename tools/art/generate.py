@@ -694,6 +694,18 @@ def unit(kind):
         for x in (40, 88):
             s.circle(x, 92, 9, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
             s.circle(x, 92, 3, "#1d232c", stroke="none", sw=0)
+    elif kind == "supply_wagon":
+        # A covered wagon with a sheaf of grain on its hood.
+        s.path("M26,72 Q30,34 64,32 Q98,34 102,72 Z", pale, stroke="none", sw=0)
+        for x in (46, 64, 82):
+            s.line(x, 36, x, 72, stroke="#bdb29b", sw=2)
+        s.rect(22, 72, 84, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+        for x in (38, 90):
+            s.circle(x, 92, 10, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+            s.circle(x, 92, 3, "#1d232c", stroke="none", sw=0)
+        for dx in (-6, 0, 6):
+            s.line(64, 58, 64 + dx, 40, stroke="#e2b33c", sw=3)
+        s.line(58, 52, 70, 52, stroke="#b48a2e", sw=3)
     elif kind == "river_barge":
         s.path("M24,74 L104,74 L92,92 L36,92 Z", s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0)
         s.line(62, 74, 62, 24, stroke=pale, sw=4)
@@ -1816,7 +1828,7 @@ def assets():
     out["map/outpost"] = outpost()
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
         out[f"site/{kind}"] = site(kind)
-    for kind in ["spearman", "archer", "horseman", "scout", "settler", "forest_archer", "river_barge", "border_rider"]:
+    for kind in ["spearman", "archer", "horseman", "scout", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon"]:
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)
