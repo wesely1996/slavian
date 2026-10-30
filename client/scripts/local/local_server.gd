@@ -1076,7 +1076,7 @@ func _wave_view(w: Dictionary, forecast := {}) -> Dictionary:
 		"arrivesAt": LocalTime.iso(w.arrivesAt) if w.arrivesAt != null else null,
 		"endsAt": LocalTime.iso(w.endsAt) if w.endsAt != null else null,
 		"rampageEndsAt": LocalTime.iso(w.rampageEndsAt) if w.rampageEndsAt != null else null,
-		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId,
+		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId, "hatred": float(w.get("hatred", 0.0)),
 		"forecast": null if forecast.is_empty() else {
 			"spawn": {"q": forecast.spawn.x, "r": forecast.spawn.y}, "targetVillageId": forecast.targetVillageId,
 			"path": forecast.path.map(func(step: Dictionary) -> Array: return [step.q, step.r, step.atMs]),
@@ -1103,17 +1103,27 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 		if v.id == hero.villageId:
 			home = v
 	var fronts: Array = []
+	# Each front's next horde, and how much it hates already.
+	var next_of := {}
 	for w in world.waves:
-		if w.status == "scheduled" and not w.front in fronts:
+		if w.status != "scheduled":
+			continue
+		if not w.front in fronts:
 			fronts.append(w.front)
+		var first: Variant = next_of.get(w.front)
+		if first == null or int(w.spawnAt) < int(first.spawnAt) or (int(w.spawnAt) == int(first.spawnAt) and int(w.id) < int(first.id)):
+			next_of[w.front] = w
 	fronts.sort()
+	var hatred := {}
+	for front in next_of:
+		hatred[front] = float(next_of[front].get("hatred", 0.0))
 	var sites: Array = []
 	for s in world.sites:
 		if s.status == "unexplored" and _total(s.guardians) == 0:
 			sites.append({"id": s.id, "q": s.q, "r": s.r})
 	var owned: Array = hero.inventory + hero.gear.values()
 	var gear_left: bool = data.heroes.items.keys().any(func(item: String) -> bool: return not item in owned)
-	var quest_world := {"seed": world.seed, "speed": world.speed, "startedAt": world.startedAt, "fronts": fronts, "sites": sites, "gearLeft": gear_left}
+	var quest_world := {"seed": world.seed, "speed": world.speed, "startedAt": world.startedAt, "fronts": fronts, "hatred": hatred, "sites": sites, "gearLeft": gear_left}
 	return LocalHeroes.quest_offers(data, quest_world, hero, Vector2i(home.q, home.r), now, hero.questsDone)
 
 

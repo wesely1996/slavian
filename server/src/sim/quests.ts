@@ -34,6 +34,8 @@ export interface QuestWorld {
   readonly startedAt: Date;
   // Fronts with a horde not yet set out.
   readonly fronts: readonly Front[];
+  // How much each front's next horde hates already (horde.json hatred).
+  readonly hatred?: Partial<Record<Front, number>>;
   // Ancient sites nobody has searched and nothing guards.
   readonly sites: readonly { id: number; q: number; r: number }[];
   // Whether gear the hero doesn't have is left.
@@ -86,6 +88,8 @@ export function questOffers(
     const front = kind === 'ambush' || kind === 'scout' ? world.fronts[Math.floor(rng() * world.fronts.length)]! : null;
     const site = kind === 'ruins' ? nearest! : null;
     const distance = site ? hexDistance(home, site) : def.distance;
+    // An ambush on a horde that hates already: riskier, and worth more.
+    const hatred = kind === 'ambush' && front ? (world.hatred?.[front] ?? 0) : 0;
     offers.push({
       id,
       kind,
@@ -93,8 +97,8 @@ export function questOffers(
       siteId: site?.id ?? null,
       distance,
       hours: def.hours + (2 * distance) / speed,
-      xp: def.xp,
-      risk: def.risk,
+      xp: Math.round(def.xp * (1 + hatred * (def.hatredXp ?? 0))),
+      risk: Math.min(def.maxRisk ?? 1, def.risk + hatred * (def.hatredRisk ?? 0)),
     });
   }
   return offers;

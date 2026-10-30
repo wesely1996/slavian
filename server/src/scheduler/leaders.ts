@@ -28,6 +28,15 @@ export async function assignLeader(client: DbClient, data: GameData, world: Worl
   return leader;
 }
 
+// A horde's hatred (horde.json hatred) adds to its attack and defense.
+function hatedStats(base: (unit: string) => UnitStats, hatred: number): (unit: string) => UnitStats {
+  if (hatred <= 0) return base;
+  return (unit) => {
+    const stats = base(unit);
+    return { ...stats, attack: stats.attack * (1 + hatred), defense: stats.defense * (1 + hatred) };
+  };
+}
+
 // The horde's unit stats under its leader, striking `villageId`.
 export async function hordeStats(
   client: DbClient,
@@ -36,6 +45,7 @@ export async function hordeStats(
   base: (unit: string) => UnitStats,
   villageId: number | null,
 ): Promise<{ stats: (unit: string) => UnitStats; nerve: number; loot: number }> {
+  base = hatedStats(base, wave.hatred);
   if (wave.leaderId === null) return { stats: base, nerve: 0, loot: 0 };
   const leader = await loadLeader(client, wave.leaderId);
   const effects = leaderEffects(data, leader);

@@ -456,6 +456,10 @@ const questKindSchema = z.object({
   xp: z.number().int().nonnegative(),
   risk: z.number().min(0).max(1),
   delayHours: z.number().positive().optional(),
+  // Ambush: risk and XP grow with the targeted horde's hatred.
+  hatredRisk: z.number().nonnegative().optional(),
+  hatredXp: z.number().nonnegative().optional(),
+  maxRisk: z.number().min(0).max(1).optional(),
   resources: z.object({ wood: z.number(), stone: z.number(), grain: z.number(), iron: z.number() }).optional(),
 });
 
@@ -568,6 +572,8 @@ export type FieldData = z.infer<typeof fieldFileSchema>;
 
 const hordeFileSchema = z.object({
   version: z.number().int(),
+  // How much stronger a horde grows for ambushes and harassment.
+  hatred: z.object({ perAmbush: z.number().nonnegative(), perHarass: z.number().nonnegative(), campChance: z.number().nonnegative() }),
   fear: z.object({
     perDefeat: z.number().nonnegative(),
     perUnitLost: z.number().nonnegative(),

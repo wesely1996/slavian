@@ -151,6 +151,8 @@ export function waveView(wave: Wave, forecast: March | null = null) {
     ritual: wave.ritual,
     // The enemy leader at its head (see leaders), if any.
     leaderId: wave.leaderId,
+    // Added to its attack and defense for ambushes and harassment.
+    hatred: wave.hatred,
     // A scheduled wave: where it is expected to set out from, its target,
     // its road (as path) and its arrival, were it to set out today.
     forecast: forecast

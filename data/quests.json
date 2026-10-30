@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Hero quests (PLAN.md M5 step 22). The hero offers `offers` quests at a time, new ones every `refreshHours` game hours. A quest takes the road there and back (`distance` hexes each way at the hero's speed; for ruins, the way to the site) plus `hours` on the spot; the hero then comes home with `xp` (times its heroXp) or, with chance `risk`, wounded. ambush: the next horde from the front sets out `delayHours` later. scout: a full report on the next horde from the front. caravan: `resources` (times 1 + `perLevel` x (level - 1)) to the hero's village. hoard: a piece of gear the hero doesn't have. ruins: the hero searches an unguarded ancient site.",
+  "_comment": "Hero quests (PLAN.md M5 step 22). The hero offers `offers` quests at a time, new ones every `refreshHours` game hours. A quest takes the road there and back (`distance` hexes each way at the hero's speed; for ruins, the way to the site) plus `hours` on the spot; the hero then comes home with `xp` (times its heroXp) or, with chance `risk`, wounded. ambush: the next horde from the front sets out `delayHours` later, and hates the more for it (horde.json hatred); the more that horde already hates, the riskier the ambush (`hatredRisk` x its hatred added to `risk`, at most `maxRisk`) and the more XP it gives (x 1 + `hatredXp` x its hatred). scout: a full report on the next horde from the front. caravan: `resources` (times 1 + `perLevel` x (level - 1)) to the hero's village. hoard: a piece of gear the hero doesn't have. ruins: the hero searches an unguarded ancient site.",
   "offers": 3,
   "refreshHours": 8,
   "perLevel": 0.1,
@@ -8,7 +8,7 @@
     "ambush": {
       "name": "Ambush the horde's road",
       "description": "Fell trees across the road and burn the fords: the next horde from the {front} sets out later.",
-      "hours": 4, "distance": 5, "xp": 40, "risk": 0.25, "delayHours": 6
+      "hours": 4, "distance": 5, "xp": 40, "risk": 0.25, "delayHours": 6, "hatredRisk": 0.6, "hatredXp": 3, "maxRisk": 0.7
     },
     "scout": {
       "name": "Ride beyond the border",
