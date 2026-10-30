@@ -346,6 +346,11 @@ func _play_page() -> void:
 	_continue_button()
 	_door(tr("Play solo"), tr("On this device, alone against the hordes. No connection needed."), "solo", "icon/village")
 	_door(tr("Play with friends"), tr("Defend a world together, each from their own phone."), "friends", "icon/troops")
+	# The picture book from the first Play, again whenever wanted.
+	var tutorial := UI.button(tr("Tutorial"), _picture_book.bind(Callable()), "icon/help")
+	tutorial.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tutorial.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_content.add_child(UI.with_info(tutorial, tr("The picture book shown before your first game: what a run is and how to win it.")))
 
 
 ## The world played last, one tap away.
