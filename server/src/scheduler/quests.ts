@@ -77,6 +77,27 @@ export async function startQuest(client: DbClient, data: GameData, world: World,
   return away;
 }
 
+// The quest called off: the hero turns for home where it is (on the way
+// there it comes back as far as it went; at the place, from there) and
+// brings nothing back. One already on the way home can't call it off.
+export async function cancelQuest(client: DbClient, data: GameData, world: World, hero: Hero, at: Date): Promise<Hero> {
+  const quest = hero.quest;
+  if (hero.status !== 'questing' || !quest) throw new RuleError(`${hero.name} is on no quest`);
+  if (quest.cancelled) throw new RuleError(`${hero.name} is already on the way home`);
+  const elapsed = at.getTime() - new Date(quest.departsAt).getTime();
+  const roadHours = (quest.hours - data.quests.kinds[quest.kind].hours) / 2;
+  const outMs = questMs({ hours: roadHours }, world.speed);
+  const homeward = new Date(quest.returnsAt).getTime() - outMs;
+  if (at.getTime() >= homeward) throw new RuleError(`${hero.name} is already on the way home`);
+  const returnsAt = new Date(at.getTime() + Math.min(elapsed, outMs));
+  const turned: Hero = { ...hero, quest: { ...quest, cancelled: true, returnsAt: returnsAt.toISOString() } };
+  await saveHero(client, turned);
+  const payload: HeroPayload = { accountId: hero.accountId };
+  await scheduleEvent(client, world.id, returnsAt, 'hero_quest', payload);
+  await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  return turned;
+}
+
 // The next horde from a front that hasn't set out yet.
 async function nextWave(client: DbClient, worldId: number, front: Front | null) {
   const { rows } = await client.query<{ id: number; composition: Record<string, number>; stance: string; front: Front; hatred: number }>(
@@ -181,7 +202,13 @@ export const questHandlers: HandlerRegistry = {
     const { accountId } = heroPayload.parse(event.payload);
     const hero = await loadHero(client, world.id, accountId);
     const quest = hero.quest;
-    if (hero.status !== 'questing' || !quest || new Date(quest.returnsAt) > event.dueAt) return;
+    // (A quest called off comes home earlier: its old return does nothing.)
+    if (hero.status !== 'questing' || !quest || new Date(quest.returnsAt).getTime() !== event.dueAt.getTime()) return;
+    if (quest.cancelled) {
+      await saveHero(client, { ...hero, status: 'home', quest: null });
+      await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+      return;
+    }
     const told = await fulfil(client, data, world, hero, quest, event.dueAt);
     // Finds may have changed the hero (gear); start from what is stored.
     const after = await loadHero(client, world.id, accountId);

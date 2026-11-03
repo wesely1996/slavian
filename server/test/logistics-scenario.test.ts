@@ -3,7 +3,7 @@
 // refused), caravans to the Holy City vault and back, a vault upgrade
 // refused, the hero renamed and refused what it can't do yet, and a
 // caravan sent past the camp a beaten horde left by the road; caravans
-// turned on their way out.
+// turned on their way out; a hero's quest called off.
 import { MINUTE, scenario } from './scenario.js';
 
 const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Roads', displayName: 'You', speed: 50, difficulty: 'normal' };
@@ -63,4 +63,19 @@ scenario('logistics-scenario.json', START, async ({ play }) => {
   await reroute(999, { home: true });
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
+
+  // A quest called off on the way there: the hero turns for home, and can't
+  // call it off twice; one with no quest can't either.
+  await play({ method: 'POST', path: `${world}/hero/quest/cancel`, body: {} });
+  const hero = (await play({ method: 'GET', path: world })).body.heroes[0];
+  if (hero?.status === 'home' && hero.offers[0]) {
+    await play({ method: 'POST', path: `${world}/hero/quest`, body: { offer: hero.offers[0].id } });
+    await play({ advance: 20_000 });
+    await play({ method: 'POST', path: `${world}/hero/quest/cancel`, body: {} });
+    await play({ method: 'POST', path: `${world}/hero/quest/cancel`, body: {} });
+    await play({ advance: 30_000 });
+    await play({ method: 'GET', path: world });
+    await play({ advance: 10 * MINUTE });
+    await play({ method: 'GET', path: world });
+  }
 });

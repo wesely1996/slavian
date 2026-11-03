@@ -2937,6 +2937,12 @@ func _quest_section(hero: Dictionary) -> void:
 		var back := UI.label("", UI.SMALL_SIZE)
 		_panel_body.add_child(back)
 		_tick(back, func() -> String: return tr("Back in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(String(quest.returnsAt)) - Game.server_now()))
+		# Called off: it turns for home where it is, and brings nothing back.
+		if quest.get("cancelled", false) == true:
+			_panel_body.add_child(UI.label(tr("Called off: coming home empty-handed."), UI.SMALL_SIZE, UI.MUTED))
+		else:
+			_panel_body.add_child(UI.with_info(UI.button(tr("Call off the quest"), func() -> void: _hero_action("quest/cancel", {})),
+				tr("The hero turns for home where it is (as far back as it went, or from the place itself) and brings nothing back. Once on the way home, it can't be called off.")))
 		return
 	var offers: Array = hero.get("offers", [])
 	if offers.is_empty():

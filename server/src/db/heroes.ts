@@ -17,8 +17,9 @@ export interface Hero extends HeroState {
   woundedUntil: Date | null;
   // Leading this army (status 'with_army').
   armyId: number | null;
-  // The quest it is on (status 'questing'), with when it set out and returns.
-  quest: (QuestOffer & { departsAt: string; returnsAt: string }) | null;
+  // The quest it is on (status 'questing'), with when it set out and returns
+  // (cancelled: called off, it is only coming home).
+  quest: (QuestOffer & { departsAt: string; returnsAt: string; cancelled?: boolean }) | null;
   // Offers it already went on.
   questsDone: string[];
 }
