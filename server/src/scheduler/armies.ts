@@ -26,7 +26,8 @@ import { RuleError } from '../errors.js';
 import { approachAngle, armySpeed, joinBonus, shareOf, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
-import { roadRoute } from '../sim/logistics.js';
+import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
+import type { PathStep } from '../sim/waves.js';
 import { completeTraining, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
 import { reserveOf, storeFromArmy, takeForArmy, topUpReserve } from '../sim/reserve.js';
 import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
@@ -172,7 +173,9 @@ export async function moveArmy(
   to: { hex?: Hex | undefined; villageId?: number | undefined },
   at: Date,
 ): Promise<Army> {
-  standing(army);
+  // An army on the road can be turned too (not one in a battle).
+  const onTheRoad = army.status === 'marching' || army.status === 'returning';
+  if (!onTheRoad) standing(army);
   const here = hex(army.targetQ, army.targetR);
   let dest: Hex;
   let orders: ArmyOrders = 'hold';
@@ -190,7 +193,7 @@ export async function moveArmy(
     if (!terrain || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No army can stand there');
     if ((await listVillages(client, world.id)).some((v) => v.q === dest.q && v.r === dest.r)) throw new RuleError('That is a village; send them into it');
   }
-  if (dest.q === here.q && dest.r === here.r) {
+  if (!onTheRoad && dest.q === here.q && dest.r === here.r) {
     // Already standing in its owner's village: it joins the garrison now.
     if (orders === 'garrison') {
       await joinVillage(client, data, world, army, targetVillageId!, at);
@@ -198,10 +201,23 @@ export async function moveArmy(
     }
     throw new RuleError('They are already there');
   }
-  army = await setOff(client, data, world, army, at);
-  const fed = supplied(army);
-  const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
-  const path = roadRoute(data, await terrainOf(client, world.id), here, dest, speed, world.speed);
+  const land = await terrainOf(client, world.id);
+  let path: PathStep[];
+  let departsAt = at;
+  if (onTheRoad) {
+    // It finishes the hex it is crossing, then takes the new road; the road
+    // it came by stays (one coming home turns on that road, backwards).
+    const fed = supplied(army);
+    const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+    const road = army.status === 'returning' ? reversedRoute(army.path) : army.path;
+    departsAt = army.status === 'returning' ? army.leavesAt! : army.departsAt;
+    path = spliceRoute(road, at.getTime() - departsAt.getTime(), (from) => roadRoute(data, land, from, dest, speed, world.speed));
+  } else {
+    army = await setOff(client, data, world, army, at);
+    const fed = supplied(army);
+    const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+    path = roadRoute(data, land, here, dest, speed, world.speed);
+  }
   const moving: Army = {
     ...army,
     orders,
@@ -212,8 +228,8 @@ export async function moveArmy(
     status: 'marching',
     battleId: null,
     wagonFortAt: null,
-    departsAt: at,
-    arrivesAt: new Date(at.getTime() + path.at(-1)!.atMs),
+    departsAt,
+    arrivesAt: new Date(departsAt.getTime() + path.at(-1)!.atMs),
     leavesAt: null,
     returnsAt: null,
   };
@@ -224,7 +240,7 @@ export async function moveArmy(
 
 function standing(army: Army): void {
   if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
-  if (army.status !== 'stationed') throw new RuleError('Only armies standing still can be given new orders');
+  if (army.status !== 'stationed') throw new RuleError('Only armies standing still can be given these orders');
 }
 
 // A standing army disbanded: its troops go home to their farms, and
@@ -525,7 +541,8 @@ export async function armyLosses(client: DbClient, data: GameData, world: World,
 export const armyHandlers: HandlerRegistry = {
   async army_arrive({ client, data, world }, event) {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
-    if (army.status !== 'marching') return;
+    // Turned on the road since: a later arrival is planned.
+    if (army.status !== 'marching' || army.arrivesAt.getTime() !== event.dueAt.getTime()) return;
     if (army.orders === 'explore') {
       await arriveAtSite(client, data, world, army, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
@@ -572,7 +589,7 @@ export const armyHandlers: HandlerRegistry = {
 
   async army_return({ client, data, world }, event) {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
-    if (army.status !== 'returning') return;
+    if (army.status !== 'returning' || army.returnsAt?.getTime() !== event.dueAt.getTime()) return;
     // The troops join the garrison; loot from a cleared camp and what grain
     // is left go into the stores.
     await joinVillage(client, data, world, army, army.homeVillageId, event.dueAt);

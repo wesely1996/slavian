@@ -37,6 +37,36 @@ static func caravans_for(data: Dictionary, load: Dictionary, bonuses: Dictionary
 
 
 ## The road between two hexes: [{q, r, atMs}], or null when none leads there.
+## A road taken backwards (a road home is drawn backwards from the far
+## end): the same hexes from the last, timed from leaving it
+## (sim/logistics.ts reversedRoute).
+static func reversed_route(path: Array) -> Array:
+	var total := int(path[-1].atMs) if not path.is_empty() else 0
+	var out: Array = []
+	for i in range(path.size() - 1, -1, -1):
+		out.append({"q": path[i].q, "r": path[i].r, "atMs": total - int(path[i].atMs)})
+	return out
+
+
+## Turning something on the road `elapsed_ms` after it set out: it finishes
+## the hex it is crossing, then takes the road `next` gives from that hex
+## (or null: none); the steps already taken stay (sim/logistics.ts spliceRoute).
+static func splice_route(path: Array, elapsed_ms: int, next: Callable) -> Variant:
+	var i := path.size() - 1
+	for k in path.size():
+		if int(path[k].atMs) >= elapsed_ms:
+			i = k
+			break
+	var turn: Dictionary = path[i]
+	var onward: Variant = next.call(Vector2i(int(turn.q), int(turn.r)))
+	if onward == null:
+		return null
+	var out: Array = path.slice(0, i + 1)
+	for k in range(1, onward.size()):
+		out.append({"q": onward[k].q, "r": onward[k].r, "atMs": int(turn.atMs) + int(onward[k].atMs)})
+	return out
+
+
 static func road_route(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, hexes_per_hour: float, world_speed: float) -> Variant:
 	var move_cost := LocalLand.move_cost_on(data, land)
 	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_road(data))

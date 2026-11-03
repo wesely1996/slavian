@@ -1070,7 +1070,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     if (guard.status === 'stationed') {
       const recalled = await call('POST', `/v1/armies/${guard.id}/recall`, vid.token);
       expect(recalled.body.army.status).toBe('returning');
-      expect((await call('POST', `/v1/armies/${guard.id}/recall`, vid.token)).body.message).toMatch(/standing guard/);
+      expect((await call('POST', `/v1/armies/${guard.id}/recall`, vid.token)).body.message).toMatch(/already on their way home/);
       now = new Date(recalled.body.army.returnsAt);
       await tick(db, now, scheduler);
       const home = await village(a.id);
@@ -1099,6 +1099,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       JSON.stringify({ armyId: help.id }),
       new Date(now.getTime() + 1),
     ]);
+    await db.query('UPDATE armies SET arrives_at = $2 WHERE id = $1', [help.id, new Date(now.getTime() + 1)]);
     now = new Date(now.getTime() + roundMs);
     await tick(db, now, scheduler);
     w = await world();
@@ -1214,7 +1215,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const next = (await world()).waves.find((x: { id: number }) => x.id === second.id);
     const [q2, r2, atMs2] = holdable(next.path);
     const lone = await send({ target: { q: q2, r: r2 }, units: { spearman: 1 }, orders: 'hold' });
+    // It gets there at once (its arrival and the event that brings it).
     await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type = 'army_arrive' AND status = 'pending' AND world_id = $1`, [worldId, new Date(now.getTime() + 1)]);
+    await db.query('UPDATE armies SET arrives_at = $2 WHERE id = $1', [lone.body.army.id, new Date(now.getTime() + 1)]);
     now = new Date(new Date(next.spawnAt).getTime() + atMs2);
     await tick(db, now, scheduler);
     let fight = (await world()).battles.find((x: { q: number; r: number; status: string }) => x.q === q2 && x.r === r2 && x.status === 'ongoing');

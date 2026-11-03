@@ -28,7 +28,7 @@ scenario('field-scenario.json', START, async ({ started, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/dismiss', body: { units: { spearman: 99 } } });
   await play({ method: 'POST', path: '/v1/villages/1/dismiss', body: { units: {} } });
 
-  // An army holds a hex, can't be moved while marching, then moves on and
+  // An army holds a hex, is turned while marching, then moves on and
   // marches back into the garrison.
   const held = (await army({ orders: 'hold', target: { q: first.q, r: first.r }, units: { spearman: 2 } })).body.army;
   await play({ method: 'POST', path: `/v1/armies/${held.id}/move`, body: { target: { q: second.q, r: second.r } } });
