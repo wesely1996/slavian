@@ -2054,6 +2054,66 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     socket.close();
   });
 
+  it('keeps a group chat: members write, read and get new messages live', async () => {
+    const ana = await guest('Ana');
+    const boris = await guest('Boris');
+    const outsider = await guest('Stranger');
+    const created = await call('POST', '/v1/worlds', ana.token, { name: 'Chat', maxPlayers: 3, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', boris.token, { inviteCode: created.body.inviteCode });
+
+    const socket = new WebSocket(`ws://${baseUrl}/v1/live`, { headers: { authorization: `Bearer ${boris.token}` } });
+    const messages: { type: string; [key: string]: unknown }[] = [];
+    socket.on('message', (raw) => messages.push(JSON.parse(raw.toString())));
+    await new Promise((resolve) => socket.once('open', resolve));
+    socket.send(JSON.stringify({ type: 'subscribe', worldId }));
+    const waitFor = async (predicate: (m: (typeof messages)[number]) => boolean) => {
+      for (let i = 0; i < 250; i++) {
+        const found = messages.find(predicate);
+        if (found) return found;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      throw new Error(`Timed out; got ${JSON.stringify(messages)}`);
+    };
+    await waitFor((m) => m.type === 'subscribed');
+
+    // One line of plain text, not empty, not too long; members only.
+    expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: '   ' })).status).toBe(400);
+    expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: 'x'.repeat(501) })).status).toBe(400);
+    expect((await call('POST', `/v1/worlds/${worldId}/chat`, outsider.token, { body: 'hi' })).status).toBe(404);
+    expect((await call('GET', `/v1/worlds/${worldId}/chat`, outsider.token)).status).toBe(404);
+    const sent = await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: '  Hold the\nford!  ' });
+    expect(sent.status).toBe(200);
+    expect(sent.body.message).toMatchObject({ accountId: ana.accountId, name: 'Ana', body: 'Hold the ford!' });
+    const pushed = await waitFor((m) => m.type === 'chat');
+    expect((pushed.message as { id: number }).id).toBe(sent.body.message.id);
+
+    // Boris has one unread; reading clears it. Ana's own is read.
+    const seen = (await call('GET', `/v1/worlds/${worldId}/chat`, boris.token)).body;
+    expect(seen.messages.map((m: { body: string }) => m.body)).toEqual(['Hold the ford!']);
+    expect(seen.unread).toBe(1);
+    expect((await call('GET', `/v1/worlds/${worldId}/chat`, ana.token)).body.unread).toBe(0);
+    const read = await call('POST', `/v1/worlds/${worldId}/chat/read`, boris.token, { id: sent.body.message.id });
+    expect(read.body).toEqual({ lastReadId: sent.body.message.id, unread: 0 });
+
+    // A few at a time; then, a while later, more; older ones page back.
+    for (let i = 1; i < 5; i++) expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: `line ${i}` })).status).toBe(200);
+    const flood = await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: 'too fast' });
+    expect(flood.status).toBe(400);
+    expect(flood.body.message).toMatch(/Slow down/);
+    now = new Date(now.getTime() + 11_000);
+    for (let i = 5; i < 60; i++) {
+      if (i % 5 === 0) now = new Date(now.getTime() + 11_000);
+      await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: `line ${i}` });
+    }
+    const page = (await call('GET', `/v1/worlds/${worldId}/chat`, boris.token)).body;
+    expect(page.messages).toHaveLength(50);
+    expect(page.messages.at(-1).body).toBe('line 59');
+    const older = (await call('GET', `/v1/worlds/${worldId}/chat?before=${page.messages[0].id}`, boris.token)).body;
+    expect(older.messages.map((m: { body: string }) => m.body)).toEqual(['Hold the ford!', ...Array.from({ length: 9 }, (_, i) => `line ${i + 1}`)]);
+    socket.close();
+  });
+
   it('rejects live connections without a token', async () => {
     const socket = new WebSocket(`ws://${baseUrl}/v1/live`);
     const status = await new Promise<number>((resolve) => socket.once('unexpected-response', (_, res) => resolve(res.statusCode ?? 0)));

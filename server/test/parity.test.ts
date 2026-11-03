@@ -32,6 +32,9 @@ const SERVER_ONLY: Record<string, string> = {
   'POST /v1/worlds/:id/leave': 'leaving a group (a solo world is deleted instead)',
   'PUT /v1/worlds/:id/delegation': 'delegating to a teammate',
   'DELETE /v1/worlds/:id/delegation': 'delegating to a teammate',
+  'GET /v1/worlds/:id/chat': 'the group chat (a solo world has none)',
+  'POST /v1/worlds/:id/chat': 'the group chat (a solo world has none)',
+  'POST /v1/worlds/:id/chat/read': 'the group chat (a solo world has none)',
 };
 
 // Every route the API declares, as "METHOD /path/:param".

@@ -22,6 +22,7 @@ func _initialize() -> void:
 	_test_local_notices()
 	_test_local_saves()
 	_test_game_speed()
+	_test_chat()
 	_test_sound_cues()
 	_test_george_bar()
 	_test_time_util()
@@ -729,6 +730,25 @@ func _test_local_saves() -> void:
 ## A solo world played faster or slower: its clock runs at the speed chosen
 ## against the device's, the rules keep the world's own speed, and what the
 ## screens show is told in the player's time.
+func _test_chat() -> void:
+	var game: Node = root.get_node("Game")
+	var now := TimeUtil.parse_iso("2026-06-01T10:05:00.000Z")
+	var message := {"id": 3, "accountId": 7, "name": "Ana", "body": "Hold the ford!", "at": "2026-06-01T10:00:00.000Z"}
+	_check(ChatText.header(message, false, now).begins_with("Ana · "), "chat: a message is headed by its writer")
+	_check(ChatText.header(message, true, now).begins_with("You · "), "chat: your own says You")
+	# Another's message is unread; one already there or your own is not counted.
+	game.world = {"id": 9}
+	game.set_chat(9, [], 0, 0)
+	game.add_chat(9, message)
+	game.add_chat(9, message)
+	_check(game.chat.size() == 1 and game.chat_unread == 1, "chat: a message arrives once, unread")
+	game.add_chat(8, {"id": 4, "accountId": 7, "name": "Ana", "body": "x", "at": message.at})
+	_check(game.chat.size() == 1, "chat: another world's message is ignored")
+	game.read_chat(3)
+	_check(game.chat_unread == 0 and game.chat_last_read == 3, "chat: read up to the newest")
+	game.world = {}
+
+
 func _test_game_speed() -> void:
 	TimeUtil.rate = 2.0
 	_check(TimeUtil.format_duration(240) == "2m 00s", "game durations are told in the player's time: %s" % TimeUtil.format_duration(240))

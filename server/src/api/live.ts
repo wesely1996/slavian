@@ -17,6 +17,7 @@
 //                   { "type": "orders", "worldId", "orders", "serverTime" }
 //                   { "type": "armies", "worldId", "armies", "forts", "serverTime" }
 //                   { "type": "notifications", "worldId", "notifications", "unread", "serverTime" } (yours only)
+//                   { "type": "chat", "worldId", "message", "serverTime" }
 //                   { "type": "error", "message" }
 import type { WebSocket } from 'ws';
 import { z } from 'zod';
@@ -109,6 +110,11 @@ export class LiveHub {
     const sockets = this.subscribers.get(event.worldId);
     if (!sockets || sockets.size === 0) return;
     if (event.type === 'notifications') return this.dispatchInbox(event.worldId, event.accountId, sockets);
+    // A chat message comes whole: no need to read anything.
+    if (event.type === 'chat') {
+      for (const socket of sockets) send(socket, { type: 'chat', worldId: event.worldId, message: event.message, serverTime: this.clock().toISOString() });
+      return;
+    }
     try {
       const message = await inTransaction(this.db, async (client) => {
         const serverTime = this.clock().toISOString();

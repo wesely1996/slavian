@@ -30,6 +30,7 @@ var _rate_labels: Dictionary[String, Label] = {}
 var _view := "map"
 var _view_button: Button
 var _inbox_button: Button
+var _chat_button: Button
 ## Notification settings as the server last sent them.
 var _prefs: Dictionary = {}
 var _spacer: Control
@@ -137,11 +138,13 @@ func _ready() -> void:
 	Live.generals_updated.connect(Game.set_generals)
 	Live.orders_updated.connect(Game.set_orders)
 	Live.inbox_updated.connect(Game.set_inbox)
+	Live.chat_received.connect(Game.add_chat)
 	Live.armies_updated.connect(Game.set_armies)
 	Live.forts_updated.connect(Game.set_forts)
 	Game.armies_changed.connect(_on_waves_changed)
 	Game.forts_changed.connect(_on_waves_changed)
 	Game.inbox_changed.connect(_on_inbox_changed)
+	Game.chat_changed.connect(_on_chat_changed)
 	Game.orders_changed.connect(_on_waves_changed)
 	Game.heroes_changed.connect(_on_waves_changed)
 	Game.generals_changed.connect(_on_waves_changed)
@@ -187,6 +190,7 @@ func _exit_tree() -> void:
 	Live.generals_updated.disconnect(Game.set_generals)
 	Live.orders_updated.disconnect(Game.set_orders)
 	Live.inbox_updated.disconnect(Game.set_inbox)
+	Live.chat_received.disconnect(Game.add_chat)
 	Live.armies_updated.disconnect(Game.set_armies)
 	Live.forts_updated.disconnect(Game.set_forts)
 
@@ -291,6 +295,12 @@ func _build_ui() -> void:
 	_inbox_button.theme_type_variation = "WoodIconButton"
 	_inbox_button.tooltip_text = tr("Inbox")
 	bar.add_child(_inbox_button)
+	# The group chat: a group's worlds only.
+	_chat_button = UI.button("", _show_chat, "icon/chat")
+	_chat_button.theme_type_variation = "WoodIconButton"
+	_chat_button.tooltip_text = tr("Chat")
+	_chat_button.visible = not Local.is_active()
+	bar.add_child(_chat_button)
 	# The tutorial, shown or hidden at any time.
 	var tutorial := UI.button("", _toggle_tutorial, "icon/help")
 	tutorial.theme_type_variation = "WoodIconButton"
@@ -1179,6 +1189,9 @@ func _rebuild_panel() -> void:
 		return
 	if _panel_mode == "inbox":
 		_inbox_panel()
+		return
+	if _panel_mode == "chat":
+		_chat_panel()
 		return
 	if _panel_mode == "forces":
 		_forces_panel()
@@ -4486,6 +4499,7 @@ func _refetch_world() -> void:
 	if response.ok:
 		Game.set_world(response.data)
 	_refetch_inbox()
+	_refetch_chat()
 
 
 func _refetch_inbox() -> void:
@@ -4649,6 +4663,100 @@ func _forces_hero() -> void:
 	_panel_body.add_child(UI.button(tr("Open the hero"), func() -> void:
 		_panel_mode = "hero"
 		_rebuild_panel(), "icon/profile"))
+
+
+# --- Chat --------------------------------------------------------------------
+
+func _refetch_chat() -> void:
+	if Local.is_active():
+		return
+	var world_id := Game.world_id()
+	var response := await Api.get_json("/v1/worlds/%d/chat" % world_id)
+	if response.ok:
+		Game.set_chat(world_id, response.data.messages, int(response.data.lastReadId), int(response.data.unread))
+
+
+func _show_chat() -> void:
+	_panel_mode = "chat"
+	_rebuild_panel()
+	_read_chat()
+	# Scrolled to the newest message once the panel is laid out.
+	await get_tree().process_frame
+	_scroll.scroll_vertical = int(_scroll.get_v_scroll_bar().max_value)
+
+
+## Everything shown is read.
+func _read_chat() -> void:
+	if Game.chat.is_empty() or Game.chat_unread == 0:
+		return
+	var last := int(Game.chat[-1].id)
+	Game.read_chat(last)
+	await Api.post_json("/v1/worlds/%d/chat/read" % Game.world_id(), {"id": last})
+
+
+func _on_chat_changed() -> void:
+	_chat_button.text = str(Game.chat_unread) if Game.chat_unread > 0 else ""
+	if _panel_mode != "chat":
+		return
+	var at_bottom := _scroll.scroll_vertical >= int(_scroll.get_v_scroll_bar().max_value - _scroll.size.y) - 8
+	_rebuild_panel()
+	_read_chat()
+	if at_bottom:
+		await get_tree().process_frame
+		_scroll.scroll_vertical = int(_scroll.get_v_scroll_bar().max_value)
+
+
+func _chat_panel() -> void:
+	var top := UI.hbox()
+	var title := UI.label(tr("Chat"), UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UI.button(tr("Close"), func() -> void:
+		_panel_mode = "hex"
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	if Game.chat_more:
+		_panel_body.add_child(UI.button(tr("Earlier messages"), _older_chat))
+	if Game.chat.is_empty():
+		_panel_body.add_child(UI.label(tr("No messages yet: say hello to your group."), UI.SMALL_SIZE, UI.MUTED))
+	var now := Game.server_now()
+	for message in Game.chat:
+		var mine: bool = message.get("accountId") != null and int(message.accountId) == Game.my_account_id()
+		_panel_body.add_child(UI.label(ChatText.header(message, mine, now), UI.SMALL_SIZE, UI.GOOD if mine else UI.ACCENT))
+		_panel_body.add_child(UI.label(String(message.body)))
+	# What you write: Enter or Send.
+	var row := UI.hbox(8)
+	var field := _draft_field("chat", tr("Write to your group"), "")
+	field.max_length = ChatText.MAX_LENGTH
+	field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	field.text_submitted.connect(func(_text: String) -> void: _send_chat(field))
+	row.add_child(field)
+	row.add_child(UI.button(tr("Send"), func() -> void: _send_chat(field)))
+	_panel_body.add_child(row)
+
+
+func _send_chat(field: LineEdit) -> void:
+	var text := field.text.strip_edges()
+	if text == "":
+		return
+	_status.text = ""
+	var world_id := Game.world_id()
+	var response := await Api.post_json("/v1/worlds/%d/chat" % world_id, {"body": text})
+	if not response.ok:
+		_status.text = response.error
+		return
+	_drafts.erase("chat")
+	_focused_draft = "chat"
+	Game.add_chat(world_id, response.data.message)
+
+
+func _older_chat() -> void:
+	if Game.chat.is_empty():
+		return
+	var world_id := Game.world_id()
+	var response := await Api.get_json("/v1/worlds/%d/chat?before=%d" % [world_id, int(Game.chat[0].id)])
+	if response.ok:
+		Game.add_older_chat(world_id, response.data.messages)
 
 
 # --- Inbox -------------------------------------------------------------------

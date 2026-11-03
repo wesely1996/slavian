@@ -162,6 +162,9 @@ def icon(kind):
     elif kind == "inbox":
         stroke("M8,16 L56,16 L56,48 L8,48 Z")
         stroke("M8,18 L32,36 L56,18", 3.5)
+    elif kind == "chat":
+        stroke("M10,14 L54,14 L54,42 L28,42 L16,54 L18,42 L10,42 Z")
+        stroke("M20,24 L44,24 M20,32 L38,32", 3.5)
     elif kind == "threat":
         stroke("M14,50 L46,18 M40,14 L50,24 M18,40 L24,46")
         stroke("M50,50 L18,18 M24,14 L14,24 M46,40 L40,46")
@@ -229,7 +232,7 @@ def icon(kind):
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music"]
+UI_ICONS = ["back", "map", "village", "inbox", "chat", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------
