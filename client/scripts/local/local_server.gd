@@ -975,7 +975,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	for w in world.waves:
 		if not w.status in ["dispersed", "defeated", "settled"]:
 			waves.append(_wave_view(w, forecasts.get(w.id, {})))
-	waves.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.index < b.index)
+	waves.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.index < b.index or (a.index == b.index and a.id < b.id))
 	var heroes: Array = []
 	for h in world.heroes:
 		heroes.append(_hero_view(world, h, now))
@@ -1095,7 +1095,7 @@ func _wave_view(w: Dictionary, forecast := {}) -> Dictionary:
 		"arrivesAt": LocalTime.iso(w.arrivesAt) if w.arrivesAt != null else null,
 		"endsAt": LocalTime.iso(w.endsAt) if w.endsAt != null else null,
 		"rampageEndsAt": LocalTime.iso(w.rampageEndsAt) if w.rampageEndsAt != null else null,
-		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId, "hatred": float(w.get("hatred", 0.0)),
+		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId, "hatred": float(w.get("hatred", 0.0)), "bandOf": w.get("bandOf"),
 		"forecast": null if forecast.is_empty() else {
 			"spawn": {"q": forecast.spawn.x, "r": forecast.spawn.y}, "targetVillageId": forecast.targetVillageId,
 			"path": forecast.path.map(func(step: Dictionary) -> Array: return [step.q, step.r, step.atMs]),
@@ -1125,7 +1125,7 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 	# Each front's next horde, and how much it hates already.
 	var next_of := {}
 	for w in world.waves:
-		if w.status != "scheduled":
+		if w.status != "scheduled" or w.get("bandOf") != null:
 			continue
 		if not w.front in fronts:
 			fronts.append(w.front)

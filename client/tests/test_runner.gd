@@ -825,6 +825,10 @@ func _replay_scenario(file: String, name: String) -> void:
 				world.embers = int(step.set.embers)
 			if step.set.has("vault"):
 				world.vault.amounts = LocalServer._decode(step.set.vault)
+			if step.set.has("waveHatred"):
+				for w in world.waves:
+					if int(w.index) == int(step.set.waveHatred.index) and w.get("bandOf") == null:
+						w.hatred = float(step.set.waveHatred.hatred)
 			continue
 		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
 		var label := "%s %d %s %s" % [name, i, step.method, step.path]

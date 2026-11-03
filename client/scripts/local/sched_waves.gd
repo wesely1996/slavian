@@ -93,7 +93,7 @@ static func targets_of(villages: Array) -> Array:
 	return out
 
 
-static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, villages: Array, seed_value: int, depart_at: int, world_speed: float, fear: Dictionary) -> Dictionary:
+static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, villages: Array, seed_value: int, depart_at: int, world_speed: float, fear: Dictionary, targets_override: Variant = null) -> Dictionary:
 	var spawn_terrain: Array = data.enemies.fronts[wave.front].spawnTerrain
 	var candidates: Array = []
 	for key in land.terrain:
@@ -109,7 +109,7 @@ static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, vil
 		var swap: Vector2i = candidates[i]
 		candidates[i] = candidates[j]
 		candidates[j] = swap
-	var targets := targets_of(villages)
+	var targets: Array = targets_override if targets_override != null else targets_of(villages)
 	for spawn in candidates.slice(0, MAX_SPAWN_CANDIDATES):
 		var route: Variant = route_from(data, land, spawn, targets, wave.front, wave.composition, fear,
 			LocalWaves.rng_for(seed_value, int(wave.index), 0x7a), 0.0, world_speed)
@@ -285,6 +285,10 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	if wave.is_empty() or wave.status != "scheduled":
 		return
 	var at := int(event.dueAt)
+	if wave.get("bandOf") != null:
+		send_band(server, world, wave, at)
+		changed.append(["world"])
+		return
 	assign_leader(server, world, wave, at)
 	LocalCamps.camps_join(server, world, wave)
 	wave.composition = LocalStore.stored(wave.composition)
@@ -317,6 +321,60 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 				last = w
 		server.announce_wave(world, int(last.index) + 1, int(last.spawnAt))
 	changed.append(["world"])
+
+
+## A horde grows to hate (scheduler/waves.ts angerHorde): each time its
+## hatred passes another whole 100%, it sends out a band of its troops.
+static func anger_horde(server: LocalServer, world: Dictionary, wave: Dictionary, amount: float, at: int) -> void:
+	var before := float(wave.get("hatred", 0.0))
+	wave.hatred = before + amount
+	for i in LocalWaves.hatred_crossings(before, before + amount):
+		var split := LocalWaves.split_band(wave.composition, float(server.data.horde.hatred.bandShare))
+		if split.band.is_empty():
+			return
+		wave.composition = split.rest
+		var band := {"id": world.next.wave, "index": wave.index, "front": wave.front, "status": "scheduled", "threat": LocalWaves.threat_of(server.data, split.band),
+			"stance": wave.stance, "composition": split.band, "initial": split.band.duplicate(), "spawnAt": at,
+			"spawn": null, "targetVillageId": null, "path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [],
+			"ritual": false, "leaderId": null, "hatred": 0.0, "bandOf": wave.id}
+		world.next.wave += 1
+		world.waves.append(band)
+		server.schedule(world, at, "wave_spawn", {"waveId": band.id})
+
+
+## A band sets out (scheduler/waves.ts sendBand): from where its horde is
+## (or the horde's wilds, if it hasn't set out) to the nearest player
+## village, not the one the horde is after; with none, it scatters.
+static func send_band(server: LocalServer, world: Dictionary, band: Dictionary, at: int) -> void:
+	var data := server.data
+	var horde := server.find_wave(world, int(band.bandOf))
+	var land := land_of(world)
+	var targets: Array = []
+	for v in world.villages:
+		if v.ruin == null and v.ownerAccountId != null and (horde.targetVillageId == null or int(v.id) != int(horde.targetVillageId)):
+			targets.append({"id": v.id, "cell": Vector2i(v.q, v.r)})
+	var from: Variant = null if horde.status == "scheduled" else LocalWaves.wave_hex_at(horde, at)
+	var march: Dictionary = {}
+	if not targets.is_empty() and from != null:
+		var route: Variant = route_from(data, land, from, targets, band.front, band.composition, {}, LocalWaves.rng_for(int(world.seed), int(band.index), 0x7b), 0.0, world.speed)
+		if route != null:
+			march = {"spawn": from, "targetVillageId": route.targetVillageId, "path": route.path, "arrivesAt": at + int(route.arrivesMs)}
+	elif not targets.is_empty():
+		march = plan_march(data, land, band, [], int(world.seed), at, world.speed, {}, targets)
+	if march.is_empty():
+		band.status = "dispersed"
+		band.endsAt = at
+		return
+	march = hold_for_quiet(world, int(band.spawnAt), march)
+	band.status = "marching"
+	band.spawn = {"q": march.spawn.x, "r": march.spawn.y}
+	band.targetVillageId = march.targetVillageId
+	band.path = march.path
+	band.arrivesAt = march.arrivesAt
+	server.schedule(world, int(band.arrivesAt), "wave_arrive", {"waveId": band.id})
+	plan_raids(server, world, band, 0)
+	LocalArmies.plan_intercepts(server, world, band)
+	plan_warning(server, world, band, at)
 
 
 ## A march arriving in the group's quiet hours waits outside until they end.

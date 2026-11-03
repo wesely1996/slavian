@@ -10,9 +10,9 @@ import type { GameData, TerrainId } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
-import { insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, type Wave } from '../db/waves.js';
+import { addHatred, endWave, insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, setWaveStrength, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
-import { planMarch, planWave, type March, type PathStep, type PlannedWave, type WaveContext } from '../sim/waves.js';
+import { hatredCrossings, planMarch, planWave, routeFrom, rngFor, splitBand, threatOf, waveHexAt, type March, type PathStep, type PlannedWave, type Target, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
 import { findBridge } from '../db/bridges.js';
 import { stagesStanding } from '../sim/bridge.js';
@@ -140,10 +140,73 @@ export async function forecastMarches(client: DbClient, data: GameData, world: W
   return forecasts;
 }
 
+// A horde grows to hate (horde.json hatred): each time its hatred passes
+// another whole 100%, it sends out a band of its troops.
+export async function angerHorde(client: DbClient, data: GameData, world: World, waveId: number, amount: number, at: Date): Promise<void> {
+  const before = (await loadWave(client, waveId)).hatred;
+  await addHatred(client, waveId, amount);
+  for (let i = hatredCrossings(before, before + amount); i > 0; i--) {
+    const wave = await loadWave(client, waveId);
+    const { band, rest } = splitBand(wave.composition, data.horde.hatred.bandShare);
+    if (Object.keys(band).length === 0) return;
+    await setWaveStrength(client, wave.id, rest);
+    const planned: PlannedWave = { index: wave.index, front: wave.front, spawnAt: at, composition: band, threat: threatOf(data, band), stance: wave.stance };
+    const created = await insertWave(client, world.id, planned, false, wave.id);
+    const payload: WavePayload = { waveId: created.id };
+    await scheduleEvent(client, world.id, at, 'wave_spawn', payload);
+  }
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+}
+
+// A band sets out: from where its horde is (or the horde's wilds, if it
+// hasn't set out) to the nearest player village, not the one the horde is
+// after. With none to go to, it scatters.
+async function sendBand(client: DbClient, data: GameData, world: World, band: Wave, at: Date): Promise<void> {
+  const horde = await loadWave(client, band.bandOf!);
+  const terrain = await loadLand(client, world.id);
+  const targets: Target[] = (await listVillages(client, world.id))
+    .filter((v) => !v.ruin && v.ownerAccountId !== null && v.id !== horde.targetVillageId)
+    .map((v) => ({ id: v.id, cell: hex(v.q, v.r) }));
+  const from = horde.status === 'scheduled' ? null : waveHexAt(horde, at);
+  let march: March | null = null;
+  if (targets.length > 0 && from) {
+    const route = routeFrom(data, {
+      terrain,
+      from,
+      targets,
+      front: band.front,
+      composition: band.composition,
+      rng: rngFor(world.seed, band.index, 0x7b),
+      startMs: 0,
+      worldSpeed: world.speed,
+    });
+    if (route) march = { spawn: from, targetVillageId: route.targetVillageId, path: route.path, arrivesAt: new Date(at.getTime() + route.arrivesMs) };
+  } else if (targets.length > 0) {
+    try {
+      march = planMarch(data, { terrain, radius: world.radius ?? 0, wave: asPlanned(band), villages: [], seed: world.seed, departAt: at, worldSpeed: world.speed, targets });
+    } catch {
+      march = null;
+    }
+  }
+  if (!march) {
+    await endWave(client, band.id, 'dispersed', at);
+    await notifyWorld(client, { worldId: world.id, type: 'waves' });
+    return;
+  }
+  await markMarching(client, band.id, holdForQuiet(world, band.spawnAt, march));
+  const payload: WavePayload = { waveId: band.id };
+  await scheduleEvent(client, world.id, (await loadWave(client, band.id)).arrivesAt!, 'wave_arrive', payload);
+  await planRaids(client, data, world, band.id);
+  await planIntercepts(client, world, band.id);
+  await planWaveWarning(client, data, world, band.id, at);
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+}
+
 export const waveHandlers: HandlerRegistry = {
   async wave_spawn({ client, data, world }, event) {
     let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'scheduled') return;
+    if (wave.bandOf !== null) return sendBand(client, data, world, wave, event.dueAt);
     // The front's leader takes its head, if free to.
     await assignLeader(client, data, world, wave, event.dueAt);
     // Camps of its front send part of themselves along.

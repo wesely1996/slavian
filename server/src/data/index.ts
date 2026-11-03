@@ -575,7 +575,7 @@ export type FieldData = z.infer<typeof fieldFileSchema>;
 const hordeFileSchema = z.object({
   version: z.number().int(),
   // How much stronger a horde grows for ambushes and harassment.
-  hatred: z.object({ perAmbush: z.number().nonnegative(), perHarass: z.number().nonnegative(), campChance: z.number().nonnegative() }),
+  hatred: z.object({ perAmbush: z.number().nonnegative(), perHarass: z.number().nonnegative(), campChance: z.number().nonnegative(), bandShare: z.number().min(0).max(1) }),
   fear: z.object({
     perDefeat: z.number().nonnegative(),
     perUnitLost: z.number().nonnegative(),

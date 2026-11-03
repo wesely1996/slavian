@@ -13,6 +13,9 @@ scenario('hatred-scenario.json', START, async ({ started, now, play }) => {
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
 
+  // Hating already, the first horde is near the edge: the first ambush
+  // tips it over 100%, and it sends a band out from its wilds.
+  await play({ set: { waveHatred: { index: 0, hatred: 0.95 } } });
   // The hero takes every ambush on the first horde's front it is offered
   // while that horde is yet to set out.
   let ambushes = 0;

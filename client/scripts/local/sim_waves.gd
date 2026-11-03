@@ -95,6 +95,48 @@ static func compose_wave(data: Dictionary, front: String, index: int, size: int,
 	return composition
 
 
+## The band a hating horde sends out (sim/waves.ts splitBand): `share` of
+## each of its units (rounded down), or one of its most numerous if that is
+## none; and what is left. {band, rest}.
+static func split_band(composition: Dictionary, share: float) -> Dictionary:
+	var band := {}
+	var total := 0
+	for unit in composition:
+		total += int(composition[unit])
+		var taken := floori(int(composition[unit]) * share)
+		if taken > 0:
+			band[unit] = taken
+	if band.is_empty() and total >= 2:
+		var most := ""
+		for unit in composition:
+			if most == "" or int(composition[unit]) > int(composition[most]) or (int(composition[unit]) == int(composition[most]) and String(unit) < most):
+				most = unit
+		band[most] = 1
+	var rest := {}
+	for unit in composition:
+		var left := int(composition[unit]) - int(band.get(unit, 0))
+		if left > 0:
+			rest[unit] = left
+	return {"band": band, "rest": rest}
+
+
+## How many whole hundreds of hatred a rise passes (sim/waves.ts).
+static func hatred_crossings(before: float, after: float) -> int:
+	return maxi(0, floori(after + 1e-9) - floori(before + 1e-9))
+
+
+## The hex a horde on the march is in at `at` (the last it entered).
+static func wave_hex_at(wave: Dictionary, at: int) -> Variant:
+	if wave.get("path") == null or wave.path.is_empty():
+		return null
+	var elapsed := at - int(wave.spawnAt)
+	var step: Dictionary = wave.path[0]
+	for s in wave.path:
+		if int(s.atMs) <= elapsed:
+			step = s
+	return Vector2i(int(step.q), int(step.r))
+
+
 static func threat_of(data: Dictionary, composition: Dictionary) -> String:
 	var count := 0
 	for n in composition.values():

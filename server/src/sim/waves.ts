@@ -125,6 +125,39 @@ export function composeWave(data: GameData, front: Front, index: number, size: n
   return composition;
 }
 
+// The band a hating horde sends out: `share` of each of its units (rounded
+// down), or one of its most numerous if that is none; and what is left.
+export function splitBand(composition: Composition, share: number): { band: Composition; rest: Composition } {
+  const band: Composition = {};
+  for (const [unit, n] of Object.entries(composition)) {
+    const taken = Math.floor(n * share);
+    if (taken > 0) band[unit] = taken;
+  }
+  const total = Object.values(composition).reduce((sum, n) => sum + n, 0);
+  if (Object.keys(band).length === 0 && total >= 2) {
+    const [most] = Object.entries(composition).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]!;
+    band[most] = 1;
+  }
+  const rest: Composition = {};
+  for (const [unit, n] of Object.entries(composition)) if (n - (band[unit] ?? 0) > 0) rest[unit] = n - (band[unit] ?? 0);
+  return { band, rest };
+}
+
+// How many whole hundreds of hatred a rise from `before` to `after` passes.
+export function hatredCrossings(before: number, after: number): number {
+  const whole = (x: number) => Math.floor(x + 1e-9);
+  return Math.max(0, whole(after) - whole(before));
+}
+
+// The hex a horde on the march is in at `at` (the last it entered).
+export function waveHexAt(wave: { spawnAt: Date; path: readonly PathStep[] | null }, at: Date): Hex | null {
+  if (!wave.path?.length) return null;
+  const elapsed = at.getTime() - wave.spawnAt.getTime();
+  let step = wave.path[0]!;
+  for (const s of wave.path) if (s.atMs <= elapsed) step = s;
+  return hex(step.q, step.r);
+}
+
 export function threatOf(data: GameData, composition: Composition): string {
   const count = Object.values(composition).reduce((sum, n) => sum + n, 0);
   const level = data.waves.threatLevels.find((t) => t.maxUnits === null || count <= t.maxUnits);
@@ -238,6 +271,8 @@ export function planMarch(
     departAt: Date;
     worldSpeed: number;
     fear?: ReadonlyMap<string, number>;
+    // Where it may go (default: the villages and the Holy City).
+    targets?: readonly Target[];
   },
 ): March {
   const { terrain, wave } = input;
@@ -258,7 +293,7 @@ export function planMarch(
     [candidates[i], candidates[j]] = [candidates[j]!, candidates[i]!];
   }
 
-  const targets = targetsOf(input.villages);
+  const targets = input.targets ?? targetsOf(input.villages);
   for (const spawn of candidates.slice(0, MAX_SPAWN_CANDIDATES)) {
     const route = routeFrom(data, {
       terrain,

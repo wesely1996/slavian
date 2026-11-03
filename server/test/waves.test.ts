@@ -4,13 +4,16 @@ import { hex, hexDistance, hexKey } from '../src/sim/hex.js';
 import { frontOf, generateMap } from '../src/sim/mapgen.js';
 import {
   composeWave,
+  hatredCrossings,
   marchSpeed,
   planMarch,
   planWave,
   raidsAlong,
   spawnTime,
+  splitBand,
   threatOf,
   waveFronts,
+  waveHexAt,
   waveSize,
   type WaveContext,
 } from '../src/sim/waves.js';
@@ -209,5 +212,35 @@ describe('outpost raids', () => {
   it('ignores the part of the route already behind the horde', () => {
     expect(raidsAlong(path, [outpost(1, -6)], 1, 500)).toEqual([{ ...outpost(1, -6), atMs: 1000 }]);
     expect(raidsAlong(path, [outpost(1, -6)], 1, 1500)).toEqual([]);
+  });
+});
+
+describe('bands of a hating horde', () => {
+  it('takes a tenth of each unit, or one of the most numerous, and leaves the rest', () => {
+    expect(splitBand({ grey_wolf: 30, leshy_thrall: 12, rusalka: 5 }, 0.1)).toEqual({
+      band: { grey_wolf: 3, leshy_thrall: 1 },
+      rest: { grey_wolf: 27, leshy_thrall: 11, rusalka: 5 },
+    });
+    expect(splitBand({ grey_wolf: 3, rusalka: 5 }, 0.1)).toEqual({ band: { rusalka: 1 }, rest: { grey_wolf: 3, rusalka: 4 } });
+    expect(splitBand({ grey_wolf: 1 }, 0.1).band).toEqual({});
+  });
+
+  it('counts each whole hundred of hatred passed', () => {
+    expect(hatredCrossings(0.95, 1.05)).toBe(1);
+    expect(hatredCrossings(0.9, 1.0000000000000002)).toBe(1);
+    expect(hatredCrossings(0.9 + 0.1 - 1e-15, 1.1)).toBe(0);
+    expect(hatredCrossings(0.5, 2.6)).toBe(2);
+    expect(hatredCrossings(1.2, 1.9)).toBe(0);
+  });
+
+  it('finds where a horde on the march is', () => {
+    const spawnAt = new Date('2026-01-01T00:00:00Z');
+    const path = [
+      { q: 0, r: 0, atMs: 0 },
+      { q: 1, r: 0, atMs: 1000 },
+      { q: 2, r: 0, atMs: 2000 },
+    ];
+    expect(waveHexAt({ spawnAt, path }, new Date(spawnAt.getTime() + 1500))).toEqual({ q: 1, r: 0 });
+    expect(waveHexAt({ spawnAt, path: null }, spawnAt)).toBeNull();
   });
 });

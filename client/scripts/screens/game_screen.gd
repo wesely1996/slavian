@@ -4370,7 +4370,11 @@ func _set_quiet(start: Variant, end: Variant) -> void:
 
 
 func _wave_entry(wave: Dictionary) -> void:
-	_panel_body.add_child(UI.label(tr("Wave %d · %s") % [int(wave.index) + 1, tr(Game.front_faction(wave.front))]))
+	if wave.get("bandOf") != null:
+		# A band its hating horde sent out after a village.
+		_panel_body.add_child(UI.label(tr("A band of horde %d · %s") % [int(wave.index) + 1, tr(Game.front_faction(wave.front))]))
+	else:
+		_panel_body.add_child(UI.label(tr("Wave %d · %s") % [int(wave.index) + 1, tr(Game.front_faction(wave.front))]))
 	var scouted := Game.missions_for(int(wave.id)).any(func(m: Dictionary) -> bool: return m.report != null)
 	var known := "" if scouted else tr(" · composition unknown")
 	var threat_row := UI.hbox(8)
@@ -4384,7 +4388,7 @@ func _wave_entry(wave: Dictionary) -> void:
 	if hatred > 0:
 		var camps := hatred * float(Game.data.horde.hatred.campChance)
 		_panel_body.add_child(UI.with_info(UI.label(tr("Hatred: +%d%% attack and defense") % roundi(hatred * 100.0), UI.SMALL_SIZE, UI.ERROR),
-			tr("Every ambush that delays this horde and every harassing strike against it make it hate the more. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance). Ambushing it again is riskier, and worth more.") % UI.number(camps)))
+			tr("Every ambush that delays this horde and every harassing strike against it make it hate the more. Each time its hatred passes another 100%%, it sends a band of %d%% of its troops against the nearest village. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance). Ambushing it again is riskier, and worth more.") % [roundi(float(Game.data.horde.hatred.bandShare) * 100.0), UI.number(camps)]))
 	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:

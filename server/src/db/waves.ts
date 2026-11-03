@@ -34,6 +34,8 @@ export interface Wave {
   leaderId: number | null;
   // Share added to its attack and defense for ambushes and harassment.
   hatred: number;
+  // The horde it broke away from, for a band a hating horde sent out.
+  bandOf: number | null;
 }
 
 interface WaveRow {
@@ -58,6 +60,7 @@ interface WaveRow {
   ritual: boolean;
   leader_id: number | null;
   hatred: number | null;
+  band_of: number | string | null;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -82,14 +85,15 @@ function fromRow(row: WaveRow): Wave {
     ritual: row.ritual,
     leaderId: row.leader_id,
     hatred: Number(row.hatred ?? 0),
+    bandOf: row.band_of === null || row.band_of === undefined ? null : Number(row.band_of),
   };
 }
 
-export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave, ritual = false): Promise<Wave> {
+export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave, ritual = false, bandOf: number | null = null): Promise<Wave> {
   const { rows } = await client.query<WaveRow>(
-    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial, ritual)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $6, $8) RETURNING *`,
-    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt, ritual],
+    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial, ritual, band_of)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $6, $8, $9) RETURNING *`,
+    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt, ritual, bandOf],
   );
   return fromRow(rows[0]!);
 }
@@ -102,7 +106,7 @@ export async function loadWave(client: DbClient, id: number): Promise<Wave> {
 
 export async function lastWave(client: DbClient, worldId: number): Promise<Wave | null> {
   const { rows } = await client.query<WaveRow>(
-    'SELECT * FROM waves WHERE world_id = $1 ORDER BY index DESC LIMIT 1',
+    'SELECT * FROM waves WHERE world_id = $1 AND band_of IS NULL ORDER BY index DESC LIMIT 1',
     [worldId],
   );
   return rows[0] ? fromRow(rows[0]) : null;
@@ -111,7 +115,7 @@ export async function lastWave(client: DbClient, worldId: number): Promise<Wave 
 // Waves players should know about: everything still on the board.
 export async function listActiveWaves(client: DbClient, worldId: number): Promise<Wave[]> {
   const { rows } = await client.query<WaveRow>(
-    "SELECT * FROM waves WHERE world_id = $1 AND status NOT IN ('dispersed', 'defeated', 'settled') ORDER BY index",
+    "SELECT * FROM waves WHERE world_id = $1 AND status NOT IN ('dispersed', 'defeated', 'settled') ORDER BY index, id",
     [worldId],
   );
   return rows.map(fromRow);
