@@ -995,7 +995,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const noon = new Date('2026-07-01T12:00:00Z');
     // Older tests' notifications are long sent; only hers are pending.
     await db.query(`UPDATE notifications SET pushed_at = now() WHERE account_id <> $1`, [mira.accountId]);
-    await db.query(`UPDATE notifications SET created_at = $1 WHERE account_id = $2`, [new Date(noon.getTime() - 60_000), mira.accountId]);
+    // Only the pushes: moving a digest notice past the world's clock would keep it out of every digest.
+    await db.query(`UPDATE notifications SET created_at = $1 WHERE account_id = $2 AND tier = 'push'`, [new Date(noon.getTime() - 60_000), mira.accountId]);
     expect(await pushPending(db, scheduler.data, null, new Date('2026-07-01T23:00:00Z'))).toBe(0);
     await db.query(`UPDATE notifications SET pushed_at = NULL WHERE account_id = $1`, [mira.accountId]);
     expect(await pushPending(db, scheduler.data, sender, new Date('2026-07-01T23:00:00Z'))).toBe(0);
