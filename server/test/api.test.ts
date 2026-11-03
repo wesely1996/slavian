@@ -1034,9 +1034,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     box = await inbox();
     const digests = box.notifications.filter((n: { kind: string }) => n.kind === 'digest');
     expect(digests[0]).toMatchObject({ tier: 'push', title: 'Today in Notices' });
-    // Read from the table: the inbox is a page, and daily events crowd it.
-    const { rows: summed } = await db.query<{ body: string }>(`SELECT body FROM notifications WHERE account_id = $1 AND kind = 'digest'`, [mira.accountId]);
-    expect(summed.some((d) => /1 build finished/.test(d.body))).toBe(true);
+    // The build was summed up in a digest (read from the table: the inbox is
+    // a page, and daily events crowd it).
+    const { rows: summed } = await db.query<{ body: string }>(
+      `SELECT d.body FROM notifications n JOIN notifications d ON d.id = n.digest_id WHERE n.account_id = $1 AND n.kind = 'build_done'`,
+      [mira.accountId],
+    );
+    expect(summed.map((d) => d.body)).toEqual(expect.arrayContaining([expect.stringMatching(/\d+ builds? finished/)]));
     const { rows: left } = await db.query(
       `SELECT 1 FROM notifications WHERE account_id = $1 AND tier = 'digest' AND digest_id IS NULL AND created_at <= $2`,
       [mira.accountId, now],
