@@ -11,6 +11,7 @@ import { expeditionHandlers } from './expeditions.js';
 import { fieldHandlers } from './field.js';
 import { hordeHandlers } from './horde.js';
 import { campHandlers } from './camps.js';
+import { mapEventHandlers } from './mapEvents.js';
 import { siteHandlers } from './sites.js';
 import { bridgeHandlers } from './bridge.js';
 import { ritualHandlers } from './ritual.js';
@@ -95,6 +96,7 @@ export const handlers: HandlerRegistry = {
   ...fieldHandlers,
   ...hordeHandlers,
   ...campHandlers,
+  ...mapEventHandlers,
   ...siteHandlers,
   ...bridgeHandlers,
   ...ritualHandlers,

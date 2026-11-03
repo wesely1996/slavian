@@ -1324,6 +1324,13 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	if result.cleared:
 		camp.status = "cleared"
 		after.loot = camp_loot(data, camp.units)
+		# Captives freed: troops join the army, goods ride home with it.
+		if camp.kind == "captives" and camp.get("reward") != null:
+			if camp.reward.has("units"):
+				after.units = LocalCamps.add_units(after.units, camp.reward.units)
+			else:
+				var loot: Dictionary = after.loot
+				after.loot = LocalVillage.resources(func(k: String) -> float: return float(loot.get(k, 0)) + float(camp.reward.resources[k]))
 		# A lair holds an Ember by chance, and always while the bridge lacks one.
 		var lucky := LocalWaves.rng_for(int(world.seed), int(camp.id), 0xe3).next() < float(data.camps.loot.emberChance)
 		var bridge: Dictionary = world.get("bridge", {})
@@ -1348,13 +1355,13 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		hold_hex(server, world, after, at)
 	else:
 		send_home(server, world, after, at)
-	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else "bandit camp", int(camp.q), int(camp.r)]
+	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else ("captives' camp" if camp.kind == "captives" else "bandit camp"), int(camp.q), int(camp.r)]
 	var body := "{kills} of them fell; {defenders} still hold it."
 	if result.cleared:
 		body = "It carries home {loot} resources and a Svarog's Ember for the group." if ember else "It carries home {loot} resources."
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
 		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
-		"vars": {"where": where, "loot": int(LocalLogistics.total(camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
+		"vars": {"where": where, "loot": int(LocalLogistics.total(after.loot if result.cleared and after.get("loot") != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
 
 
 # --- Ancient sites (scheduler/sites.ts) -----------------------------------------------
@@ -1460,7 +1467,7 @@ static func on_site_explored(server: LocalServer, world: Dictionary, event: Dict
 	var owner_hero: Dictionary = leader if not leader.is_empty() else (hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 	var gear: Array = owner_hero.inventory + owner_hero.gear.values() if not owner_hero.is_empty() else []
 	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius)),
-		LocalResearch.scrolls(world), gear)
+		LocalResearch.scrolls(world), gear, float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0)
 	if find.type == "resources":
 		army.loot = find.resources
 	claim_find(server, world, site, army.ownerAccountId, owner_hero, find, at, changed)

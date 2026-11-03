@@ -437,7 +437,7 @@ static func plan_ambushes(server: LocalServer, world: Dictionary, caravan: Dicti
 			var s: Dictionary = caravan.path[i]
 			path.append({"q": s.q, "r": s.r, "atMs": travel - int(s.atMs)})
 	var best: Dictionary = {}
-	var camps: Array = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active")
+	var camps: Array = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.kind != "captives")
 	camps.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.id < b.id)
 	for camp in camps:
 		var cell := Vector2i(camp.q, camp.r)

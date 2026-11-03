@@ -1303,7 +1303,24 @@
       "q": 1,
       "r": 1,
       "size": 4,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "south",
+      "q": -7,
+      "r": 6,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 4
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -1316,7 +1333,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -1327,7 +1346,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -1338,7 +1359,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -1349,7 +1372,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -1360,7 +1385,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -3759,7 +3786,24 @@
       "q": 1,
       "r": 1,
       "size": 4,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "south",
+      "q": -7,
+      "r": 6,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 4
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -3772,7 +3816,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -3783,7 +3829,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -3794,7 +3842,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -3805,7 +3855,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -3816,18 +3868,22 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 1,
-      "r": 4,
+      "kind": "kurgan",
+      "q": -1,
+      "r": 6,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -6745,7 +6801,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:55:00.000Z",
       "returnsAt": "2026-06-01T08:58:36.000Z",
-      "siteId": 8
+      "siteId": 9
      },
      {
       "id": 4,
@@ -6856,7 +6912,24 @@
       "q": 1,
       "r": 1,
       "size": 5,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "south",
+      "q": -7,
+      "r": 6,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 4
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -6869,7 +6942,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -6880,7 +6955,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -6891,7 +6968,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -6902,7 +6981,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -6913,40 +6994,61 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 1,
-      "r": 4,
+      "kind": "kurgan",
+      "q": -1,
+      "r": 6,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 7,
       "kind": "stone_idol",
       "q": -6,
-      "r": 5,
+      "r": 3,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 8,
-      "kind": "old_hillfort",
-      "q": -2,
-      "r": -1,
+      "kind": "kurgan",
+      "q": -8,
+      "r": 3,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
+     },
+     {
+      "id": 9,
+      "kind": "sunken_shrine",
+      "q": 1,
+      "r": 2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -8883,25 +8985,34 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 10,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Old Hillfort lies at (-2, -1). Send an army to explore it.",
+      "body": "A Sunken Shrine lies at (1, 2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
      {
-      "id": 7,
+      "id": 9,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-8, 3)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-6, 5). Send an army to explore it.",
+      "body": "A Stone Idol lies at (-6, 3). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -8910,11 +9021,20 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Sunken Shrine lies at (1, 4). Send an army to explore it.",
+      "body": "A Kurgan lies at (-1, 6). Send an army to explore it.",
+      "createdAt": "2026-06-01T08:43:36.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Scouts from Mirogost found no ruins",
+      "body": "They searched the land around it and came back empty-handed.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
@@ -8922,9 +9042,9 @@
       "id": 4,
       "kind": "site",
       "tier": "digest",
-      "title": "Scouts from Mirogost found no ruins",
-      "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:43:36.000Z",
+      "title": "Captives are held at (-7, 6)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
@@ -8955,7 +9075,7 @@
       "read": false
      }
     ],
-    "unread": 8,
+    "unread": 10,
     "serverTime": "2026-06-01T09:00:00.000Z"
    }
   },
@@ -8966,25 +9086,34 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 10,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Old Hillfort lies at (-2, -1). Send an army to explore it.",
+      "body": "A Sunken Shrine lies at (1, 2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
      {
-      "id": 7,
+      "id": 9,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-8, 3)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-6, 5). Send an army to explore it.",
+      "body": "A Stone Idol lies at (-6, 3). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -8993,11 +9122,20 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Sunken Shrine lies at (1, 4). Send an army to explore it.",
+      "body": "A Kurgan lies at (-1, 6). Send an army to explore it.",
+      "createdAt": "2026-06-01T08:43:36.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Scouts from Mirogost found no ruins",
+      "body": "They searched the land around it and came back empty-handed.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
@@ -9005,9 +9143,9 @@
       "id": 4,
       "kind": "site",
       "tier": "digest",
-      "title": "Scouts from Mirogost found no ruins",
-      "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:43:36.000Z",
+      "title": "Captives are held at (-7, 6)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
@@ -9038,7 +9176,7 @@
       "read": false
      }
     ],
-    "unread": 8,
+    "unread": 10,
     "serverTime": "2026-06-01T09:00:00.000Z"
    }
   }

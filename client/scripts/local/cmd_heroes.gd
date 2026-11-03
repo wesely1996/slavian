@@ -217,7 +217,7 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 			if site.is_empty() or site.status == "explored" or LocalBattle.total(site.guardians) > 0:
 				return {"body": "Someone had been there first."}
 			var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius)),
-				LocalResearch.scrolls(world), hero.inventory + hero.gear.values())
+				LocalResearch.scrolls(world), hero.inventory + hero.gear.values(), float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0)
 			if find.type == "resources":
 				home.state.ledger = LocalLogistics.receive(home.state.ledger, at, find.resources).ledger
 				changed.append(["village", home.id])

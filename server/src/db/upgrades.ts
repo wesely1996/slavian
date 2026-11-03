@@ -4,6 +4,7 @@ import type { GameData } from '../data/index.js';
 import { HALL_PLOT, plotsFromLegacyLevels, withWallPlots, type Plot } from '../sim/village.js';
 import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
+import { ensureMapEvents } from '../scheduler/mapEvents.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { assignHeroKinds, ensureHeroes } from './heroes.js';
 import { refreshBonuses } from '../scheduler/research.js';
@@ -83,6 +84,14 @@ export async function upgradeDigests(db: Db, now: Date): Promise<void> {
   await inTransaction(db, async (client) => {
     const { rows } = await client.query<{ id: number }>(`SELECT id FROM worlds WHERE status <> 'lobby'`);
     for (const { id } of rows) await ensureDigests(client, await getWorld(client, id), now);
+  });
+}
+
+// Running worlds started before daily map events: the next day's planned.
+export async function upgradeMapEvents(db: Db, data: GameData, now: Date): Promise<void> {
+  await inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number }>(`SELECT id FROM worlds WHERE status = 'running'`);
+    for (const { id } of rows) await ensureMapEvents(client, data, await getWorld(client, id), now);
   });
 }
 

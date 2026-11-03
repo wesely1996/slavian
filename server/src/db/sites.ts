@@ -13,6 +13,10 @@ export interface Site {
   exploredBy: number | null;
   find: Find | null;
   exploredAt: Date | null;
+  // A hard ruin (a daily event): stronger guardians, richer finds; and when
+  // it goes if nobody comes.
+  hard?: boolean;
+  endsAt?: Date | null;
 }
 
 interface SiteRow {
@@ -27,6 +31,8 @@ interface SiteRow {
   explored_by: number | null;
   find: Find | null;
   explored_at: Date | null;
+  hard: boolean;
+  ends_at: Date | null;
 }
 
 function fromRow(row: SiteRow): Site {
@@ -42,6 +48,8 @@ function fromRow(row: SiteRow): Site {
     exploredBy: row.explored_by,
     find: row.find,
     exploredAt: row.explored_at,
+    hard: row.hard ?? false,
+    endsAt: row.ends_at ?? null,
   };
 }
 
@@ -55,6 +63,20 @@ export async function insertSites(client: DbClient, worldId: number, sites: read
       JSON.stringify(site.guardians),
     ]);
   }
+}
+
+// A hard ruin a daily event raises.
+export async function insertHardSite(client: DbClient, worldId: number, site: PlacedSite, endsAt: Date): Promise<number> {
+  const { rows } = await client.query<{ id: string }>(
+    'INSERT INTO sites (world_id, kind, q, r, guardians, hard, ends_at) VALUES ($1, $2, $3, $4, $5, true, $6) RETURNING id',
+    [worldId, site.kind, site.q, site.r, JSON.stringify(site.guardians), endsAt],
+  );
+  return Number(rows[0]!.id);
+}
+
+// Gone unexplored: a daily event's time is up.
+export async function deleteSite(client: DbClient, id: number): Promise<void> {
+  await client.query('DELETE FROM sites WHERE id = $1', [id]);
 }
 
 export async function listSites(client: DbClient, worldId: number): Promise<Site[]> {

@@ -1013,11 +1013,20 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await call('PATCH', '/v1/me/notifications', mira.token, { pushOff: [] });
 
     // The digest at 20:00 sums up the rest.
-    const { rows } = await db.query<{ due_at: Date }>(
+    const pendingDigests = async () => (await db.query<{ due_at: Date }>(
       `SELECT due_at FROM scheduled_events WHERE world_id = $1 AND type = 'daily_digest' AND status = 'pending'`,
       [worldId],
-    );
+    )).rows;
+    let rows = await pendingDigests();
     expect(rows).toHaveLength(1);
+    // The first one was planned at the default hour (18:00), before she set
+    // hers; depending on when the world started it may still be to come.
+    if (rows[0]!.due_at.getUTCHours() !== 20) {
+      now = new Date(Math.max(rows[0]!.due_at.getTime(), now.getTime()));
+      await tick(db, now, scheduler);
+      rows = await pendingDigests();
+      expect(rows).toHaveLength(1);
+    }
     // After the first one, digests come at her digest hour (20:00).
     expect(rows[0]!.due_at.getUTCHours()).toBe(20);
     now = new Date(Math.max(rows[0]!.due_at.getTime(), now.getTime()));

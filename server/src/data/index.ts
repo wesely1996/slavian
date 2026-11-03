@@ -787,6 +787,28 @@ export type BuildingsData = z.infer<typeof buildingsFileSchema>;
 export type TerrainDef = z.infer<typeof terrainSchema>;
 export type TerrainData = z.infer<typeof terrainFileSchema>;
 
+// Daily map events (data/events.json).
+const eventsFileSchema = z.object({
+  version: z.number().int(),
+  everyHours: z.number().positive(),
+  lastsHours: z.number().positive(),
+  range: z.object({ min: z.number().int().positive(), max: z.number().int().positive() }),
+  kinds: z.object({
+    captives: z.object({
+      weight: z.number().nonnegative(),
+      guards: z.number().int().positive(),
+      growthPerDay: z.number().nonnegative(),
+      unitsChance: z.number().min(0).max(1),
+      units: z.array(z.string()).min(1),
+      count: z.number().int().positive(),
+      countPerDay: z.number().nonnegative(),
+      resources: resourcesSchema,
+    }),
+    ruin: z.object({ weight: z.number().nonnegative(), guardianFactor: z.number().positive(), lootFactor: z.number().positive() }),
+  }),
+});
+export type EventsData = z.infer<typeof eventsFileSchema>;
+
 export interface GameData {
   buildings: BuildingsData;
   terrain: TerrainData;
@@ -808,6 +830,7 @@ export interface GameData {
   armies: ArmiesData;
   field: FieldData;
   horde: HordeData;
+  events: EventsData;
   camps: CampsData;
   difficulty: DifficultyData;
   sites: SitesData;
@@ -840,6 +863,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     armies: armiesFileSchema.parse(read('armies.json')),
     field: fieldFileSchema.parse(read('field.json')),
     horde: hordeFileSchema.parse(read('horde.json')),
+    events: eventsFileSchema.parse(read('events.json')),
     camps: campsFileSchema.parse(read('camps.json')),
     difficulty: difficultyFileSchema.parse(read('difficulty.json')),
     sites: sitesFileSchema.parse(read('sites.json')),

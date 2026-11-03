@@ -856,9 +856,11 @@ static func create_camp(server: LocalServer, world: Dictionary, camp: Dictionary
 	created.merge(camp.duplicate(true), true)
 	world.next.camp += 1
 	world.camps.append(created)
-	server.schedule(world, LocalTime.ms(at + (float(server.data.camps.growth.everyHours) * LocalTime.MS_PER_HOUR) / world.speed), "camp_grow",
-		{"campId": created.id})
-	LocalLogistics.plan_ambushes_for(server, world, at)
+	# Captives' guards only hold them: they don't grow or waylay caravans.
+	if created.kind != "captives":
+		server.schedule(world, LocalTime.ms(at + (float(server.data.camps.growth.everyHours) * LocalTime.MS_PER_HOUR) / world.speed), "camp_grow",
+			{"campId": created.id})
+		LocalLogistics.plan_ambushes_for(server, world, at)
 	return created
 
 
@@ -874,7 +876,7 @@ static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dicti
 		return
 	var data := server.data
 	var rules: Dictionary = data.camps.spawn
-	var active: int = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.front == wave.front).size()
+	var active: int = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.front == wave.front and c.kind != "captives").size()
 	var exact := float(rules.perWave) * float(data.difficulty.presets[world.difficulty].campRate)
 	var roll := LocalWaves.rng_for(int(world.seed), int(wave.index), 0xcb).next()
 	var per_wave := floori(exact) + (1 if roll < exact - floorf(exact) else 0)

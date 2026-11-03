@@ -36,8 +36,24 @@ static func decision(battle: Dictionary) -> String:
 
 ## "Bandit camp of the Nomad Horde · 24 strong"
 static func camp(camp_: Dictionary, faction: String) -> String:
-	var kind := UI.t("Monster lair") if camp_.kind == "lair" else UI.t("Bandit camp")
+	var kind := UI.t("Monster lair") if camp_.kind == "lair" else (UI.t("Captives' camp") if camp_.kind == "captives" else UI.t("Bandit camp"))
 	return UI.t("%s of the %s · %d strong") % [kind, UI.t(faction), int(camp_.size)]
+
+
+## What freeing a camp's captives brings: "Free them: 9 Axe Levies join
+## the army" / "Free them: their goods, 600 resources, come home".
+static func captives(data: Dictionary, reward: Variant) -> String:
+	if not reward is Dictionary:
+		return ""
+	if reward.has("units"):
+		var parts := PackedStringArray()
+		for unit in reward.units:
+			parts.append("%d %s" % [int(reward.units[unit]), UI.t(data.units.units.get(unit, {}).get("name", unit))])
+		return UI.t("Free them: %s join the army that does") % ", ".join(parts)
+	var amount := 0
+	for kind in reward.resources:
+		amount += int(reward.resources[kind])
+	return UI.t("Free them: their goods, %d resources, come home with the army") % amount
 
 
 ## "Sanctity 87 / 100"

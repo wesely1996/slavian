@@ -869,7 +869,9 @@
       "q": -2,
       "r": 5,
       "size": 3,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -882,7 +884,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -893,7 +897,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -904,7 +910,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -915,7 +923,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -926,7 +936,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -3290,7 +3302,27 @@
       "q": -2,
       "r": 5,
       "size": 4,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -3303,7 +3335,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -3314,7 +3348,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -3325,7 +3361,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -3336,7 +3374,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -3347,7 +3387,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -5837,7 +5879,27 @@
       "q": -2,
       "r": 5,
       "size": 4,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -5850,7 +5912,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -5861,7 +5925,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -5872,7 +5938,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -5883,7 +5951,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -5894,7 +5964,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -8392,7 +8464,27 @@
       "q": -2,
       "r": 5,
       "size": 4,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -8405,7 +8497,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -8416,7 +8510,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -8427,7 +8523,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -8438,7 +8536,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -8449,7 +8549,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -10870,7 +10972,27 @@
       "q": -2,
       "r": 5,
       "size": 5,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -10883,7 +11005,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -10894,7 +11018,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -10905,7 +11031,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -10916,7 +11044,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -10927,7 +11057,22 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
@@ -13348,7 +13493,27 @@
       "q": -2,
       "r": 5,
       "size": 5,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -13361,7 +13526,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -13372,7 +13539,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -13383,7 +13552,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -13394,7 +13565,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -13405,7 +13578,22 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
@@ -15826,7 +16014,27 @@
       "q": -2,
       "r": 5,
       "size": 5,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 2,
+      "kind": "captives",
+      "front": "north",
+      "q": 2,
+      "r": -1,
+      "size": 6,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 100,
+        "wood": 150,
+        "grain": 150,
+        "stone": 150
+       }
+      },
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -15839,7 +16047,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -15850,7 +16060,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -15861,7 +16073,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -15872,7 +16086,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -15883,7 +16099,22 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
@@ -18304,7 +18535,9 @@
       "q": -2,
       "r": 5,
       "size": 6,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -18317,7 +18550,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -18328,7 +18563,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -18339,7 +18576,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -18350,7 +18589,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -18361,7 +18602,35 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": -1,
+      "r": -2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z"
      }
     ],
     "lore": [],
@@ -20859,7 +21128,9 @@
       "q": -2,
       "r": 5,
       "size": 6,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -20872,7 +21143,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -20883,7 +21156,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -20894,7 +21169,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -20905,7 +21182,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -20916,7 +21195,35 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": -1,
+      "r": -2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z"
      }
     ],
     "lore": [],
@@ -23334,7 +23641,9 @@
       "q": -2,
       "r": 5,
       "size": 6,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -23347,7 +23656,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -23358,7 +23669,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -23369,7 +23682,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -23380,7 +23695,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -23391,7 +23708,35 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 1,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:55:12.000Z"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": -1,
+      "r": -2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z"
      }
     ],
     "lore": [],
@@ -25904,25 +26249,64 @@
       "q": -2,
       "r": 5,
       "size": 10,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      },
      {
-      "id": 2,
+      "id": 3,
+      "kind": "captives",
+      "front": "south",
+      "q": 1,
+      "r": 6,
+      "size": 14,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 9
+       }
+      },
+      "endsAt": "2026-06-01T11:50:24.000Z"
+     },
+     {
+      "id": 4,
+      "kind": "captives",
+      "front": "south",
+      "q": -1,
+      "r": 8,
+      "size": 15,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 250,
+        "wood": 375,
+        "grain": 375,
+        "stone": 375
+       }
+      },
+      "endsAt": "2026-06-01T12:19:12.000Z"
+     },
+     {
+      "id": 5,
       "kind": "lair",
       "front": "north",
       "q": 6,
       "r": -8,
       "size": 6,
-      "waveId": 1
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      },
      {
-      "id": 3,
+      "id": 6,
       "kind": "lair",
       "front": "north",
       "q": 0,
       "r": -4,
       "size": 6,
-      "waveId": 1
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -25935,7 +26319,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -25946,7 +26332,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -25957,7 +26345,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -25968,7 +26358,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -25979,7 +26371,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -28705,34 +29099,72 @@
       "q": -2,
       "r": 5,
       "size": 8,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      },
      {
-      "id": 2,
+      "id": 5,
       "kind": "lair",
       "front": "north",
       "q": 6,
       "r": -8,
       "size": 8,
-      "waveId": 1
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      },
      {
-      "id": 3,
+      "id": 6,
       "kind": "lair",
       "front": "north",
       "q": 0,
       "r": -4,
       "size": 8,
-      "waveId": 1
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      },
      {
-      "id": 4,
+      "id": 8,
+      "kind": "captives",
+      "front": "north",
+      "q": -6,
+      "r": 1,
+      "size": 18,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 12
+       }
+      },
+      "endsAt": "2026-06-01T13:16:48.000Z"
+     },
+     {
+      "id": 9,
       "kind": "bandit",
       "front": "south",
       "q": 0,
       "r": -1,
       "size": 7,
-      "waveId": 2
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 10,
+      "kind": "captives",
+      "front": "south",
+      "q": 0,
+      "r": 7,
+      "size": 20,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "spearman": 13
+       }
+      },
+      "endsAt": "2026-06-01T13:45:36.000Z"
      }
     ],
     "sites": [
@@ -28745,7 +29177,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -28756,7 +29190,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -28767,7 +29203,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -28778,7 +29216,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -28789,7 +29229,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -32020,43 +32462,71 @@
       "q": -2,
       "r": 5,
       "size": 12,
-      "waveId": null
-     },
-     {
-      "id": 2,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 8,
-      "waveId": 1
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 0,
-      "r": -4,
-      "size": 8,
-      "waveId": 1
-     },
-     {
-      "id": 4,
-      "kind": "bandit",
-      "front": "south",
-      "q": 0,
-      "r": -1,
-      "size": 11,
-      "waveId": 2
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
      },
      {
       "id": 5,
       "kind": "lair",
       "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 8,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "lair",
+      "front": "north",
+      "q": 0,
+      "r": -4,
+      "size": 8,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 9,
+      "kind": "bandit",
+      "front": "south",
+      "q": 0,
+      "r": -1,
+      "size": 11,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 12,
+      "kind": "lair",
+      "front": "north",
       "q": 1,
       "r": -1,
       "size": 10,
-      "waveId": 4
+      "waveId": 4,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 13,
+      "kind": "captives",
+      "front": "north",
+      "q": -8,
+      "r": 3,
+      "size": 26,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 425,
+        "wood": 638,
+        "grain": 638,
+        "stone": 638
+       }
+      },
+      "endsAt": "2026-06-01T15:40:48.000Z"
      }
     ],
     "sites": [
@@ -32069,7 +32539,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -32080,7 +32552,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -32091,7 +32565,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -32102,7 +32578,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -32113,7 +32591,22 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
+     },
+     {
+      "id": 11,
+      "kind": "sunken_shrine",
+      "q": 4,
+      "r": 2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T15:12:00.000Z"
      }
     ],
     "lore": [],
@@ -34037,7 +34530,34 @@
    "response": {
     "notifications": [
      {
-      "id": 33,
+      "id": 47,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (-8, 3)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T14:43:12.000Z",
+      "read": false
+     },
+     {
+      "id": 46,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (4, 2)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T14:14:24.000Z",
+      "read": false
+     },
+     {
+      "id": 45,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-7, 5)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T13:45:36.000Z",
+      "read": false
+     },
+     {
+      "id": 44,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -34046,7 +34566,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 43,
       "kind": "leader",
       "tier": "digest",
       "title": "Mara the Hungry has fallen",
@@ -34055,7 +34575,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 42,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -34064,7 +34584,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 41,
       "kind": "leader",
       "tier": "digest",
       "title": "Mara the Hungry grows stronger",
@@ -34073,7 +34593,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 40,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -34082,7 +34602,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 39,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -34091,7 +34611,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 38,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -34100,7 +34620,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 37,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -34109,7 +34629,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 36,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -34118,7 +34638,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 35,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -34127,7 +34647,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 34,
       "kind": "leader",
       "tier": "digest",
       "title": "Mara the Hungry grows stronger",
@@ -34136,7 +34656,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 33,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -34145,7 +34665,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 32,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -34154,7 +34674,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 31,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -34163,7 +34683,25 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 30,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (4, 2)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T13:16:48.000Z",
+      "read": false
+     },
+     {
+      "id": 29,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (0, 7)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T12:48:00.000Z",
+      "read": false
+     },
+     {
+      "id": 28,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -34172,7 +34710,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 27,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -34181,7 +34719,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 26,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -34190,7 +34728,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 25,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -34199,7 +34737,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 24,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -34208,7 +34746,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 23,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -34217,7 +34755,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 22,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -34226,7 +34764,25 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 21,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (-6, 1)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T12:19:12.000Z",
+      "read": false
+     },
+     {
+      "id": 20,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (1, 4)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T11:50:24.000Z",
+      "read": false
+     },
+     {
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -34235,7 +34791,7 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 18,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry has fallen",
@@ -34244,7 +34800,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -34253,7 +34809,43 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 16,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (-1, 8)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 15,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (1, 6)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T10:52:48.000Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-8, 6)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-3, -2)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T09:55:12.000Z",
+      "read": false
+     },
+     {
+      "id": 12,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is back from: Ambush the horde's road",
@@ -34262,7 +34854,25 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 11,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-1, -2)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 10,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (1, 0)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya came back wounded from: Ambush the horde's road",
@@ -34271,70 +34881,16 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
       "body": "The horde was beaten after 1 rounds.",
       "createdAt": "2026-06-01T08:39:48.000Z",
       "read": false
-     },
-     {
-      "id": 6,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "Vruchiy is under attack",
-      "body": "A horde of 1 is fighting your garrison of 6.",
-      "createdAt": "2026-06-01T08:39:30.000Z",
-      "read": false
-     },
-     {
-      "id": 5,
-      "kind": "wave_soon",
-      "tier": "push",
-      "title": "A horde is coming to Vruchiy",
-      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
-      "createdAt": "2026-06-01T08:36:48.000Z",
-      "read": false
-     },
-     {
-      "id": 4,
-      "kind": "hero",
-      "tier": "digest",
-      "title": "Dobrynya is back from: Ambush the horde's road",
-      "body": "The next horde from the north sets out 7 minutes later, hating you the more: +105% attack and defense.",
-      "createdAt": "2026-06-01T08:36:48.000Z",
-      "read": false
-     },
-     {
-      "id": 3,
-      "kind": "onboarding",
-      "tier": "digest",
-      "title": "Done: Train defenders",
-      "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:20:00.000Z",
-      "read": false
-     },
-     {
-      "id": 2,
-      "kind": "build_done",
-      "tier": "digest",
-      "title": "Barracks level 1 in Vruchiy",
-      "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:03.000Z",
-      "read": false
-     },
-     {
-      "id": 1,
-      "kind": "onboarding",
-      "tier": "digest",
-      "title": "Done: Raise a building",
-      "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:00:00.000Z",
-      "read": false
      }
     ],
-    "unread": 33,
+    "unread": 47,
     "serverTime": "2026-06-01T14:48:12.000Z"
    }
   }

@@ -89,7 +89,16 @@ export function placeSites(
 // further out), a piece of gear, an Ember, or a scroll the group lacks.
 export function rollFind(
   data: GameData,
-  input: { kind: string; seed: number; siteId: number; distance: number; foundScrolls: ReadonlySet<string>; ownedGear: ReadonlySet<string> },
+  input: {
+    kind: string;
+    seed: number;
+    siteId: number;
+    distance: number;
+    foundScrolls: ReadonlySet<string>;
+    ownedGear: ReadonlySet<string>;
+    // A hard ruin's resources are worth this many times as much.
+    lootFactor?: number;
+  },
 ): Find {
   const rng = createRng((input.seed ^ Math.imul(input.siteId + 1, 0x2c1b3c6d) ^ 0xf1d) >>> 0);
   const weights = data.sites.kinds[input.kind]!.finds;
@@ -104,7 +113,7 @@ export function rollFind(
   if (type === 'gear') return { type, item: gear[Math.floor(rng() * gear.length)]! };
   if (type === 'scroll') return { type, scroll: scrolls[Math.floor(rng() * scrolls.length)]! };
   if (type === 'ember') return { type };
-  return { type: 'resources', resources: mapResources((kind) => Math.round(data.sites.loot[kind] * (1 + input.distance))) };
+  return { type: 'resources', resources: mapResources((kind) => Math.round(data.sites.loot[kind] * (1 + input.distance) * (input.lootFactor ?? 1))) };
 }
 
 // What the group's scrolls add to every player's bonuses.

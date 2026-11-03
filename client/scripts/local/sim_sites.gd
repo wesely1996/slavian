@@ -84,7 +84,7 @@ static func place_sites(data: Dictionary, terrain: Dictionary, radius: int, star
 
 ## What exploring a site turns up, seeded by the site: {type: "resources",
 ## resources} | {type: "gear", item} | {type: "scroll", scroll} | {type: "ember"}.
-static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: int, distance: float, found_scrolls: Array, owned_gear: Array) -> Dictionary:
+static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: int, distance: float, found_scrolls: Array, owned_gear: Array, loot_factor := 1.0) -> Dictionary:
 	var rng := LocalRng.new((seed_value ^ LocalRng.imul(site_id + 1, 0x2c1b3c6d) ^ 0xf1d) & 0xffffffff)
 	var weights: Dictionary = data.sites.kinds[kind].finds
 	var scrolls: Array = data.lore.scrolls.keys().filter(func(s: String) -> bool: return not s in found_scrolls)
@@ -111,7 +111,7 @@ static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: 
 		"ember":
 			return {"type": "ember"}
 	return {"type": "resources", "resources": LocalVillage.resources(func(k: String) -> int:
-		return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance)))}
+		return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance) * loot_factor))}
 
 
 ## What scouts searching around `center` turn up, seeded by the search
