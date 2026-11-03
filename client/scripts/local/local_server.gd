@@ -45,8 +45,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -405,6 +405,13 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		var action := "/".join(parts.slice(3))
 		if action == "orders" or action.begins_with("orders/"):
 			return _order_command(world, village, parts, body, now, changed)
+		if parts.size() == 5 and parts[3] == "shipyards":
+			var yard := LocalEvents.pay(self, world, village, int(parts[4]), now)
+			if yard.has("error"):
+				return _rule_answer(yard)
+			changed.append(["village", village.id])
+			changed.append(["world"])
+			return {"status": 200, "data": world_view(world, now)}
 		if action == "abandon":
 			var gone := LocalLogistics.abandon_village(self, world, village, now)
 			if gone.has("error"):
@@ -925,6 +932,14 @@ func _on_map_event_end(world: Dictionary, event: Dictionary, changed: Array) -> 
 	LocalEvents.on_map_event_end(self, world, event, changed)
 
 
+func _on_shipyard_raid(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEvents.on_shipyard_raid(self, world, event, changed)
+
+
+func _on_shipyard_done(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEvents.on_shipyard_done(self, world, event, changed)
+
+
 func _on_ruin_search(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalScouting.on_ruin_search(self, world, event, changed)
 
@@ -1037,6 +1052,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "generals": world.generals.map(func(g: Dictionary) -> Dictionary: return LocalGenerals.view(data, g)), "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
 		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
 			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
+		"shipyards": world.get("shipyards", []).map(LocalEvents.shipyard_view),
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads},
@@ -1272,6 +1288,9 @@ func _load_all() -> void:
 			# Worlds saved before ruin searches.
 			world.merge({"ruinSearches": []})
 			world.next.merge({"ruinSearch": 1})
+			# Worlds saved before shipyards.
+			world.merge({"shipyards": []})
+			world.next.merge({"shipyard": 1})
 			for a in world.armies:
 				a.merge({"generalId": null})
 				# Armies from before supplies: fed by their home village.

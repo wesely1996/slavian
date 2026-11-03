@@ -2,12 +2,15 @@ class_name LocalEvents
 extends RefCounted
 ## Daily map events for the local engine (server/src/sim/events.ts and
 ## scheduler/mapEvents.ts): each game day after the first, captives held in
-## a camp or a hard ruin rise near one of the players' villages, and go
-## after a while unless an army is on its way.
+## a camp, a hard ruin or a shipyard rise near one of the players' villages,
+## and go after a while unless an army is on its way (or, for a shipyard,
+## someone sent resources). A paid-for shipyard builds its boat, struck by
+## raiders on the way; a finished boat makes its river a fast lane.
 
 
 ## The event of `day`, or {} when there is nowhere to put it: {kind, cell,
-## front, guards, reward} for captives, {kind, cell, site} for a ruin.
+## front, guards, reward} for captives, {kind, cell, site} for a ruin,
+## {kind, cell, edge: {a, b}, front, raiders} for a shipyard.
 static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int) -> Dictionary:
 	var rules: Dictionary = data.events
 	var rng := LocalRng.new((int(world.seed) ^ LocalRng.imul(day + 1, 0x632be5ab)) & 0xffffffff)
@@ -15,7 +18,19 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 		return {}
 	var captives: Dictionary = rules.kinds.captives
 	var ruin: Dictionary = rules.kinds.ruin
-	var kind := "captives" if rng.next() * (float(captives.weight) + float(ruin.weight)) < float(captives.weight) else "ruin"
+	var shipyard: Dictionary = rules.kinds.shipyard
+	var pick := rng.next() * (float(captives.weight) + float(ruin.weight) + float(shipyard.weight))
+	var kind := "captives" if pick < float(captives.weight) else ("ruin" if pick < float(captives.weight) + float(ruin.weight) else "shipyard")
+	# Each bank hex's river edges, in edge-key order.
+	var rivers: Array = world.rivers.duplicate()
+	rivers.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return LocalLand.edge_key(x.a, x.b) < LocalLand.edge_key(y.a, y.b))
+	var banks := {}
+	for e in rivers:
+		for end in [e.a, e.b]:
+			if not banks.has(LocalLand.key(end)):
+				banks[LocalLand.key(end)] = []
+			banks[LocalLand.key(end)].append(e)
+	var yards: Array = world.get("shipyards", []).map(func(y: Dictionary) -> Vector2i: return Vector2i(y.q, y.r))
 	var center: Vector2i = villages[floori(rng.next() * villages.size())]
 	var taken := LocalBattles.taken_hexes(world)
 	var sites: Array = world.sites.map(func(s: Dictionary) -> Vector2i: return Vector2i(s.q, s.r))
@@ -29,15 +44,23 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 				continue
 			if kind == "ruin" and sites.any(func(s: Vector2i) -> bool: return HexMath.distance(s, cell) < 2):
 				continue
+			if kind == "shipyard" and (not banks.has(LocalLand.key(cell)) or yards.any(func(y: Vector2i) -> bool: return HexMath.distance(y, cell) < 2)):
+				continue
 			usable.append([cell, type])
 	if usable.is_empty():
 		return {}
 	var picked: Array = usable[floori(rng.next() * usable.size())]
 	var cell: Vector2i = picked[0]
 	var grown := 1.0 + float(captives.growthPerDay) * (day - 1)
+	var own := LocalMapgen.front_of(cell)
+	var front: String = own if own in world.activeFronts else String(world.activeFronts[0])
+	if kind == "shipyard":
+		var raiders := LocalWaves.compose_wave(data, front, day, LocalWaves.js_round(float(shipyard.raiders) * grown), (int(world.seed) ^ day ^ 0x5a17) & 0xffffffff, world.members.size())
+		var edge: Dictionary = banks[LocalLand.key(cell)][0]
+		# Stored as the server does (db/rivers.ts): the end with the smaller key first.
+		var ends: Array = [edge.a, edge.b] if LocalLand.key(edge.a) < LocalLand.key(edge.b) else [edge.b, edge.a]
+		return {"kind": kind, "cell": cell, "edge": {"a": ends[0], "b": ends[1]}, "front": front, "raiders": raiders}
 	if kind == "captives":
-		var own := LocalMapgen.front_of(cell)
-		var front: String = own if own in world.activeFronts else String(world.activeFronts[0])
 		var guards := LocalWaves.compose_wave(data, front, day, LocalWaves.js_round(float(captives.guards) * grown), (int(world.seed) ^ day) & 0xffffffff, world.members.size())
 		var reward: Dictionary
 		if rng.next() < float(captives.unitsChance):
@@ -97,12 +120,26 @@ static func on_map_event(server: LocalServer, world: Dictionary, event: Dictiona
 		world.next.site += 1
 		world.sites.append(created)
 		server.schedule(world, ends_at, "map_event_end", {"siteId": created.id})
+	elif planned.get("kind") == "shipyard":
+		world.merge({"shipyards": []})
+		world.next.merge({"shipyard": 1})
+		var yard := {"id": world.next.shipyard, "q": planned.cell.x, "r": planned.cell.y, "edge": planned.edge, "status": "open",
+			"cost": data.events.kinds.shipyard.cost.duplicate(), "paid": {"wood": 0, "stone": 0, "grain": 0, "iron": 0},
+			"front": planned.front, "raiders": planned.raiders, "raids": 0, "endsAt": ends_at, "completesAt": null, "nextRaidAt": null}
+		world.next.shipyard += 1
+		world.shipyards.append(yard)
+		server.schedule(world, ends_at, "map_event_end", {"shipyardId": yard.id})
 	if not planned.is_empty():
 		var vars := {"q": planned.cell.x, "r": planned.cell.y}
-		LocalInbox.tell_everyone(server, world, {"kind": "site", "tier": "digest", "title": "Captives are held at ({q}, {r})",
-			"body": "Clear the camp to free them, before they are taken away.", "vars": vars} if planned.kind == "captives" else
-			{"kind": "site", "tier": "digest", "title": "A forbidding ruin rises at ({q}, {r})",
-			"body": "Strong guardians watch it, and rich finds lie within, for a while.", "vars": vars}, at)
+		var notice := {"kind": "site", "tier": "digest", "title": "Captives are held at ({q}, {r})",
+			"body": "Clear the camp to free them, before they are taken away.", "vars": vars}
+		if planned.kind == "ruin":
+			notice = {"kind": "site", "tier": "digest", "title": "A forbidding ruin rises at ({q}, {r})",
+				"body": "Strong guardians watch it, and rich finds lie within, for a while.", "vars": vars}
+		elif planned.kind == "shipyard":
+			notice = {"kind": "site", "tier": "digest", "title": "Boatwrights wait at ({q}, {r})",
+				"body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.", "vars": vars}
+		LocalInbox.tell_everyone(server, world, notice, at)
 		changed.append(["world"])
 	server.schedule(world, at + _hours_ms(float(data.events.everyHours), world.speed), "map_event", {"day": day + 1})
 
@@ -130,4 +167,125 @@ static func on_map_event_end(_server: LocalServer, world: Dictionary, event: Dic
 		if LocalArmies.armies_holding(world, Vector2i(site.q, site.r), ["marching", "engaged", "stationed"]).any(func(a: Dictionary) -> bool: return a.orders == "explore"):
 			return
 		world.sites.erase(site)
+	if p.get("shipyardId") != null:
+		var yard := find_shipyard(world, int(p.shipyardId))
+		# Gone only if nobody has sent anything.
+		if yard.is_empty() or yard.status != "open" or LocalBattle.total(yard.paid) > 0:
+			return
+		world.shipyards.erase(yard)
 	changed.append(["world"])
+
+
+static func find_shipyard(world: Dictionary, id: int) -> Dictionary:
+	for y in world.get("shipyards", []):
+		if int(y.id) == id:
+			return y
+	return {}
+
+
+## Raiders strike the shipyard: the armies standing on it fight them one
+## after another; if none drives them off, work is lost.
+static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var data := server.data
+	var yard := find_shipyard(world, int(event.payload.shipyardId))
+	if yard.is_empty() or yard.status != "building" or yard.nextRaidAt == null or int(yard.nextRaidAt) != int(event.dueAt):
+		return
+	var rules: Dictionary = data.events.kinds.shipyard
+	var at := int(event.dueAt)
+	var raiders: Dictionary = yard.raiders.duplicate()
+	var where := {"q": yard.q, "r": yard.r}
+	var holding: Array = LocalArmies.armies_holding(world, Vector2i(yard.q, yard.r), ["stationed"])
+	for i in holding.size():
+		if LocalBattle.total(raiders) == 0:
+			break
+		var army: Dictionary = holding[i]
+		var home := server.find_village(world, int(army.homeVillageId))
+		var result := LocalArmies.repel_raid(data, army.units, LocalBattle.player_stats(data, home.state.bonuses, false), home.state.stance,
+			raiders, String(rules.raiderStance), String(yard.front), int(world.seed), int(yard.id) * 64 + int(yard.raids) * 8 + i)
+		var lost := {}
+		for unit in army.units:
+			var n := int(army.units[unit]) - int(result.armyNow.get(unit, 0))
+			if n > 0:
+				lost[unit] = n
+		LocalArmies.army_losses(server, world, army, lost, at)
+		var kills := LocalBattle.total(raiders) - LocalBattle.total(result.raidersNow)
+		raiders = {} if result.held else result.raidersNow
+		if not (result.held and LocalBattle.total(army.units) > 0):
+			LocalArmies.send_home(server, world, army, at)
+		var vars := where.duplicate()
+		vars.merge({"kills": kills, "lost": LocalBattle.total(lost)})
+		LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
+			"title": "Your army drove the raiders off the shipyard at ({q}, {r})" if result.held else "Raiders broke your army at the shipyard at ({q}, {r})",
+			"body": "{kills} of them fell, for {lost} of yours.", "vars": vars}, at)
+	var held := LocalBattle.total(raiders) == 0
+	var completes_at := int(yard.completesAt) if held else int(yard.completesAt) + _hours_ms(float(rules.setbackHours), world.speed)
+	var next := at + _hours_ms(float(rules.raidEveryHours), world.speed)
+	yard.raids = int(yard.raids) + 1
+	yard.completesAt = completes_at
+	yard.nextRaidAt = next if next < completes_at else null
+	if not held:
+		server.schedule(world, completes_at, "shipyard_done", {"shipyardId": yard.id})
+		var vars := where.duplicate()
+		vars.merge({"hours": rules.setbackHours})
+		LocalInbox.tell_everyone(server, world, {"kind": "site", "tier": "push", "title": "Raiders burned work at the shipyard at ({q}, {r})",
+			"body": "The boat is set back {hours} hours. Armies standing there fight the next raiders.", "vars": vars}, at)
+	if yard.nextRaidAt != null:
+		server.schedule(world, int(yard.nextRaidAt), "shipyard_raid", {"shipyardId": yard.id})
+	changed.append(["world"])
+
+
+## The boat is done: from now on its river is a fast lane.
+static func on_shipyard_done(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var yard := find_shipyard(world, int(event.payload.shipyardId))
+	if yard.is_empty() or yard.status != "building" or yard.completesAt == null or int(yard.completesAt) != int(event.dueAt):
+		return
+	yard.status = "done"
+	yard.nextRaidAt = null
+	LocalInbox.tell_everyone(server, world, {"kind": "build_done", "tier": "digest", "title": "The boat at ({q}, {r}) is ready",
+		"body": "Armies, caravans and scouts move fast between hexes along its river.", "vars": {"q": yard.q, "r": yard.r}}, int(event.dueAt))
+	changed.append(["world"])
+
+
+## A village sends what the shipyard still needs (as much as it has); once
+## it is all paid, the boat is begun, and raiders come. The shipyard, or
+## {error}.
+static func pay(server: LocalServer, world: Dictionary, village: Dictionary, shipyard_id: int, at: int) -> Dictionary:
+	var rules: Dictionary = server.data.events.kinds.shipyard
+	var yard := find_shipyard(world, shipyard_id)
+	if yard.is_empty():
+		return {"error": "No such shipyard in this world"}
+	if yard.status != "open":
+		return {"error": "The boat is already paid for"}
+	if HexMath.distance(Vector2i(village.q, village.r), Vector2i(yard.q, yard.r)) > int(rules.range):
+		return {"error": "Villages within %d hexes send to a shipyard" % int(rules.range)}
+	var have := LocalLedger.amounts_at(village.state.ledger, at)
+	var sent := LocalVillage.resources(func(k: String) -> int: return maxi(0, mini(int(yard.cost[k]) - int(yard.paid[k]), floori(float(have[k])))))
+	if LocalBattle.total(sent) == 0:
+		return {"error": "The village has nothing the shipyard needs"}
+	village.state.ledger = LocalLedger.spend(village.state.ledger, at, sent)
+	var all_paid := true
+	for k in sent:
+		yard.paid[k] = int(yard.paid[k]) + int(sent[k])
+		if int(yard.paid[k]) < int(yard.cost[k]):
+			all_paid = false
+	if all_paid:
+		var completes_at := at + _hours_ms(float(rules.buildHours), world.speed)
+		var raid := at + _hours_ms(float(rules.raidEveryHours), world.speed)
+		yard.status = "building"
+		yard.completesAt = completes_at
+		yard.nextRaidAt = raid if raid < completes_at else null
+		server.schedule(world, completes_at, "shipyard_done", {"shipyardId": yard.id})
+		if yard.nextRaidAt != null:
+			server.schedule(world, int(yard.nextRaidAt), "shipyard_raid", {"shipyardId": yard.id})
+		LocalInbox.tell_everyone(server, world, {"kind": "site", "tier": "push", "title": "The boat at ({q}, {r}) is begun",
+			"body": "Raiders will come every {every} hours until it is done; armies standing there fight them.",
+			"vars": {"q": yard.q, "r": yard.r, "every": rules.raidEveryHours}}, at)
+	return yard
+
+
+static func shipyard_view(y: Dictionary) -> Dictionary:
+	return {"id": y.id, "q": y.q, "r": y.r, "edge": [y.edge.a.x, y.edge.a.y, y.edge.b.x, y.edge.b.y], "status": y.status,
+		"cost": y.cost, "paid": y.paid, "raiders": LocalBattle.total(y.raiders), "raids": y.raids,
+		"endsAt": LocalTime.iso(y.endsAt) if y.endsAt != null else null,
+		"completesAt": LocalTime.iso(y.completesAt) if y.completesAt != null else null,
+		"nextRaidAt": LocalTime.iso(y.nextRaidAt) if y.nextRaidAt != null else null}

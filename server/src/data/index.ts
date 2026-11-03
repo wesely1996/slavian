@@ -805,6 +805,17 @@ const eventsFileSchema = z.object({
       resources: resourcesSchema,
     }),
     ruin: z.object({ weight: z.number().nonnegative(), guardianFactor: z.number().positive(), lootFactor: z.number().positive() }),
+    shipyard: z.object({
+      weight: z.number().nonnegative(),
+      cost: resourcesSchema,
+      range: z.number().int().positive(),
+      buildHours: z.number().positive(),
+      raidEveryHours: z.number().positive(),
+      setbackHours: z.number().nonnegative(),
+      raiders: z.number().int().positive(),
+      raiderStance: z.enum(STANCES),
+      laneSpeed: z.number().min(1),
+    }),
   }),
 });
 export type EventsData = z.infer<typeof eventsFileSchema>;

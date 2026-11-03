@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Daily map events (PLAN.md). Hours are game hours (divided by world speed). Every `everyHours` from the start of a run (the first after its first day), an event rises on passable open land `range.min` to `range.max` hexes from one of the players' villages, and goes after `lastsHours` unless an army is already on its way to it. `kinds` are picked by weight. captives: a camp (kind 'captives') of `guards` of the land's front, more each day (x 1 + `growthPerDay` x (day - 1)), holding captives: freeing them (clearing the camp) brings, with chance `unitsChance`, `count` (+ `countPerDay` a day) of one of `units` into the army that freed them, or else `resources` (x 1 + `growthPerDay` x (day - 1)) carried home with it; it doesn't grow, join hordes or ambush caravans. ruin: a hard ancient site (sites.json) watched by `guardianFactor` times its usual guardians, whose resources are worth `lootFactor` times as much.",
+  "_comment": "Daily map events (PLAN.md). Hours are game hours (divided by world speed). Every `everyHours` from the start of a run (the first after its first day), an event rises on passable open land `range.min` to `range.max` hexes from one of the players' villages, and goes after `lastsHours` unless an army is already on its way to it. `kinds` are picked by weight. captives: a camp (kind 'captives') of `guards` of the land's front, more each day (x 1 + `growthPerDay` x (day - 1)), holding captives: freeing them (clearing the camp) brings, with chance `unitsChance`, `count` (+ `countPerDay` a day) of one of `units` into the army that freed them, or else `resources` (x 1 + `growthPerDay` x (day - 1)) carried home with it; it doesn't grow, join hordes or ambush caravans. ruin: a hard ancient site (sites.json) watched by `guardianFactor` times its usual guardians, whose resources are worth `lootFactor` times as much. shipyard: a group project on a river bank (a hex beside a river edge): any player sends resources from a village within `range` hexes until `cost` is paid (if nobody has sent anything when its time is up, it goes); then the boat takes `buildHours` to build, and every `raidEveryHours` raiders (`raiders` of the land's front, more each day like the captives' guards) strike it in `raiderStance`: armies standing on its hex defend it one after another, and if they don't drive them off, `setbackHours` of work are lost. When the boat is done, armies, caravans and scouts stepping between two hexes beside that river (every river edge joined to the one it was built on) move `laneSpeed` times as fast, for good.",
   "everyHours": 24,
   "lastsHours": 48,
   "range": { "min": 3, "max": 7 },
@@ -15,6 +15,17 @@
       "countPerDay": 1,
       "resources": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 }
     },
-    "ruin": { "weight": 1, "guardianFactor": 3, "lootFactor": 2 }
+    "ruin": { "weight": 1, "guardianFactor": 3, "lootFactor": 2 },
+    "shipyard": {
+      "weight": 1,
+      "cost": { "wood": 900, "stone": 300, "grain": 300, "iron": 150 },
+      "range": 8,
+      "buildHours": 24,
+      "raidEveryHours": 8,
+      "setbackHours": 6,
+      "raiders": 5,
+      "raiderStance": "offensive",
+      "laneSpeed": 3
+    }
   }
 }

@@ -57,6 +57,9 @@ var armies: Array = []
 var forts: Array = []
 ## Bandit camps and monster lairs: {id, kind, front, q, r, size}.
 var camps: Array = []
+## Shipyards (a daily event), and the steps (edge keys) finished boats sail.
+var shipyards: Array = []
+var lanes: Dictionary = {}
 ## Ancient sites (see server worldView) and the group's lore scrolls.
 var sites: Array = []
 var lore: Array = []
@@ -156,6 +159,8 @@ func set_world(new_world: Dictionary) -> void:
 	armies = new_world.get("armies", [])
 	forts = new_world.get("forts", [])
 	camps = new_world.get("camps", [])
+	shipyards = new_world.get("shipyards", [])
+	lanes = _lanes(rivers)
 	sites = new_world.get("sites", [])
 	lore = new_world.get("lore", [])
 	var new_bridge: Variant = new_world.get("bridge")
@@ -235,6 +240,26 @@ func scrolls() -> Dictionary:
 	for entry in lore:
 		found[entry.scroll] = true
 	return found
+
+
+func shipyard_at(cell: Vector2i) -> Dictionary:
+	for yard in shipyards:
+		if Vector2i(int(yard.q), int(yard.r)) == cell:
+			return yard
+	return {}
+
+
+## The steps finished boats sail (sim/land.ts riverLanes), from the map's
+## rivers ([aq, ar, bq, br, …]).
+func _lanes(world_rivers: Array) -> Dictionary:
+	var edges: Array = world_rivers.map(func(e: Array) -> Dictionary: return {"a": Vector2i(int(e[0]), int(e[1])), "b": Vector2i(int(e[2]), int(e[3]))})
+	var out := {}
+	for yard in shipyards:
+		if yard.status == "done":
+			var e: Array = yard.edge
+			for k in LocalLand.river_lanes(edges, Vector2i(int(e[0]), int(e[1])), Vector2i(int(e[2]), int(e[3]))):
+				out[k] = true
+	return out
 
 
 func camp_at(cell: Vector2i) -> Dictionary:

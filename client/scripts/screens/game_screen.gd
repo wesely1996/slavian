@@ -1292,7 +1292,7 @@ func _paged(list: String, items: Array, per_page: int, each: Callable) -> void:
 
 ## A daily event's lines: what it brings, and how long it waits (it goes
 ## then, unless an army is already on its way).
-func _event_lines(event: Dictionary, brings: String) -> void:
+func _event_lines(event: Dictionary, brings: String, unless := false) -> void:
 	if brings != "":
 		_panel_body.add_child(UI.label(brings, UI.SMALL_SIZE, UI.GOOD))
 	if event.get("endsAt") == null:
@@ -1302,7 +1302,9 @@ func _event_lines(event: Dictionary, brings: String) -> void:
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:
 		var left := ends_at - Game.server_now()
-		return tr("Gone in %s, unless an army is on its way") % TimeUtil.format_duration(left) if left > 0 else tr("Going…"))
+		if left <= 0:
+			return tr("Going…")
+		return (tr("Gone in %s, unless someone sends resources") if unless else tr("Gone in %s, unless an army is on its way")) % TimeUtil.format_duration(left))
 
 
 ## What the selected empty hex is (laid out at the top of its sheet), and
@@ -1323,6 +1325,9 @@ func _terrain_panel() -> Array:
 		_panel_body.add_child(UI.label(HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 		return [["bridge", "ui/hero", tr("Kalinov Bridge"), _bridge_panel], ["vault", "icon/coin", tr("Vault"), _vault_panel]]
 	var parts := []
+	var yard := Game.shipyard_at(_selected)
+	if not yard.is_empty():
+		parts.append(["shipyard", "icon/coin", tr("Shipyard"), _shipyard_panel.bind(yard)])
 	var holder := Game.outpost_owner(_selected)
 	var site := Game.site_at(_selected)
 	if not holder.is_empty():
@@ -1339,6 +1344,61 @@ func _terrain_panel() -> Array:
 	parts.append(["fort", "map/fort", tr("Build a fort"), _fort_panel.bind(id)])
 	parts.append(["supply", "map/supply_point", tr("Build a supply point"), _fort_panel.bind(id, "supply")])
 	return parts
+
+
+## A shipyard (a daily event): what the boat still needs and who can send
+## it; while it is built, when it is done and when raiders come; once done,
+## the river it sails.
+func _shipyard_panel(yard: Dictionary) -> void:
+	var rules: Dictionary = Game.data.events.kinds.shipyard
+	var speed := int(rules.laneSpeed)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Shipyard"), UI.HEADING_SIZE),
+		tr("A group project: once the boat is built, armies, caravans and scouts move %d× as fast between hexes along this river.") % speed))
+	if yard.status == "done":
+		_panel_body.add_child(UI.label(tr("The boat sails this river: marches along it go %d× as fast.") % speed, UI.SMALL_SIZE, UI.GOOD))
+		return
+	if yard.status == "building":
+		var done_at := TimeUtil.parse_iso(String(yard.completesAt))
+		var line := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String: return tr("The boat is being built · ready in %s") % TimeUtil.format_duration(done_at - Game.server_now()))
+		if yard.get("nextRaidAt") != null:
+			var raid_at := TimeUtil.parse_iso(String(yard.nextRaidAt))
+			var raiders := int(yard.raiders)
+			var warn := UI.label("", UI.SMALL_SIZE, UI.ERROR)
+			_panel_body.add_child(warn)
+			_tick(warn, func() -> String: return tr("%d raiders strike in %s") % [raiders, TimeUtil.format_duration(raid_at - Game.server_now())])
+		_panel_body.add_child(UI.label(tr("Armies standing here fight the raiders; if none drives them off, %d hours of work are lost.") % int(rules.setbackHours), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var parts := PackedStringArray()
+	var any_paid := false
+	for kind in ["wood", "stone", "grain", "iron"]:
+		if int(yard.cost[kind]) > 0:
+			parts.append(tr("%s %d/%d") % [UI.resource_name(kind), int(yard.paid[kind]), int(yard.cost[kind])])
+		any_paid = any_paid or int(yard.paid[kind]) > 0
+	_panel_body.add_child(UI.label(tr("Paid: %s") % " · ".join(parts), UI.SMALL_SIZE))
+	_panel_body.add_child(UI.label(tr("When it is paid for, the boat takes %d hours to build, and raiders come every %d hours.") % [int(rules.buildHours), int(rules.raidEveryHours)], UI.SMALL_SIZE, UI.MUTED))
+	if not any_paid:
+		_event_lines(yard, "", true)
+	var cell := Vector2i(int(yard.q), int(yard.r))
+	var sent := false
+	for village in Game.my_villages():
+		if village.get("ruin") == null and HexMath.distance(Vector2i(int(village.q), int(village.r)), cell) <= int(rules.range):
+			var village_id := int(village.id)
+			var yard_id := int(yard.id)
+			_panel_body.add_child(UI.button(tr("Send what it needs from %s") % village.name, func() -> void: _pay_shipyard(village_id, yard_id)))
+			sent = true
+	if not sent:
+		_panel_body.add_child(UI.label(tr("Villages within %d hexes can send to it.") % int(rules.range), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _pay_shipyard(village_id: int, yard_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/shipyards/%d" % [village_id, yard_id], {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 ## An outpost on the selected hex: what it gathers; yours can be upgraded,

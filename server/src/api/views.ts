@@ -5,6 +5,7 @@ import { researchPerHour } from '../sim/village.js';
 import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
+import { listShipyards } from '../db/shipyards.js';
 import { listRiverEdges } from '../db/rivers.js';
 import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
 import { runSummary } from '../db/runs.js';
@@ -610,6 +611,22 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     hard: s.hard ?? false,
     endsAt: s.endsAt?.toISOString() ?? null,
   }));
+  // Shipyards (a daily event): what the boat costs and what is paid, while
+  // it is built when raiders come next, and the river edge it sails from.
+  const shipyards = (await listShipyards(client, world.id)).map((s) => ({
+    id: s.id,
+    q: s.q,
+    r: s.r,
+    edge: [s.edge.a.q, s.edge.a.r, s.edge.b.q, s.edge.b.r],
+    status: s.status,
+    cost: s.cost,
+    paid: s.paid,
+    raiders: total(s.raiders),
+    raids: s.raids,
+    endsAt: s.endsAt?.toISOString() ?? null,
+    completesAt: s.completesAt?.toISOString() ?? null,
+    nextRaidAt: s.nextRaidAt?.toISOString() ?? null,
+  }));
   const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
   const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
@@ -662,6 +679,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     // Ancient sites, and the group's lore scrolls.
     sites,
     lore,
+    shipyards,
     // The Kalinov Bridge (see sim/bridge.ts).
     bridge,
     // [q, r, fear]: where hordes were beaten, and how much they remember it.

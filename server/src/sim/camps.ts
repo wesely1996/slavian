@@ -192,3 +192,45 @@ export function ambush(
 export function passesCamp(data: GameData, path: readonly PathStep[], camp: Hex): PathStep | null {
   return path.find((s) => hexDistance({ q: s.q, r: s.r }, camp) <= data.camps.ambush.reach) ?? null;
 }
+
+// Raiders strike an army standing guard (a shipyard's raid): the raiders
+// attack in `raiderStance`, the army defends in its own. Held: the raiders
+// broke.
+export function repelRaid(
+  data: GameData,
+  input: {
+    army: Units;
+    armyStats: (unit: string) => UnitStats;
+    armyStance: Parameters<typeof battleOutcome>[1]['defenderStance'];
+    raiders: Units;
+    raiderStance: Parameters<typeof battleOutcome>[1]['attackerStance'];
+    front: Front;
+    seed: number;
+    id: number;
+  },
+): { held: boolean; armyNow: Units; raidersNow: Units } {
+  const raiderStats = enemyStats(data, input.front);
+  let armyNow = { ...input.army };
+  let raidersNow = { ...input.raiders };
+  for (let round = 1; round <= data.battle.maxRounds; round++) {
+    const result = resolveRound(
+      data,
+      { units: raidersNow, stance: input.raiderStance, stats: raiderStats, home: false },
+      { units: armyNow, stance: input.armyStance, stats: input.armyStats, home: false },
+      battleRng(input.seed, input.id + 0x20000, round),
+    );
+    raidersNow = subtractUnits(raidersNow, result.attackerLosses);
+    armyNow = subtractUnits(armyNow, result.defenderLosses);
+    const outcome = battleOutcome(data, {
+      round,
+      attackerStance: input.raiderStance,
+      attackerInitial: input.raiders,
+      attackerNow: raidersNow,
+      defenderStance: input.armyStance,
+      defenderInitial: input.army,
+      defenderNow: armyNow,
+    });
+    if (outcome !== 'ongoing') return { held: outcome === 'defended', armyNow, raidersNow };
+  }
+  return { held: false, armyNow, raidersNow };
+}

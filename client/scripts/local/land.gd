@@ -139,9 +139,58 @@ static func fastest_road(data: Dictionary) -> float:
 	return best
 
 
+## sim/land.ts laneFactor: the share of the terrain's move cost a step
+## along a boat's river costs.
+static func lane_factor(data: Dictionary) -> float:
+	return 1.0 / float(data.events.kinds.shipyard.laneSpeed)
+
+
+## sim/land.ts fastestStep: the cheapest step players can take on this land.
+static func fastest_step(data: Dictionary, land: Dictionary) -> float:
+	return minf(fastest_road(data), lane_factor(data)) if not land.get("lanes", {}).is_empty() else fastest_road(data)
+
+
+## sim/land.ts riverLanes: the steps (edge keys, sorted) a boat built on the
+## river edge a-b sails: between neighbouring hexes on the banks of every
+## river edge joined to it through a shared bank hex. `rivers`: [{a, b}].
+static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i) -> Array:
+	var by_hex := {}
+	for i in rivers.size():
+		for end in [rivers[i].a, rivers[i].b]:
+			if not by_hex.has(key(end)):
+				by_hex[key(end)] = []
+			by_hex[key(end)].append(i)
+	var start := -1
+	for i in rivers.size():
+		if edge_key(rivers[i].a, rivers[i].b) == edge_key(a, b):
+			start = i
+			break
+	if start < 0:
+		return []
+	var seen := {start: true}
+	var queue: Array = [start]
+	var banks := {}
+	while not queue.is_empty():
+		var e: Dictionary = rivers[queue.pop_front()]
+		for end in [e.a, e.b]:
+			banks[key(end)] = end
+			for next in by_hex.get(key(end), []):
+				if not seen.has(next):
+					seen[next] = true
+					queue.append(next)
+	var lanes := {}
+	for k in banks:
+		for n in HexMath.neighbors(banks[k]):
+			if banks.has(key(n)):
+				lanes[edge_key(banks[k], n)] = true
+	var out: Array = lanes.keys()
+	out.sort()
+	return out
+
+
 ## sim/land.ts moveCostOn: the cost of entering `to`, or -1 where it is
 ## impassable or a river lies between. `land`: {terrain, blocked, roads
-## (edge key -> level)}.
+## (edge key -> level), lanes (edge key -> true)}.
 static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> Callable:
 	return func(from: Vector2i, to: Vector2i) -> float:
 		var type: Variant = land.terrain.get(key(to))
@@ -150,4 +199,7 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> C
 		var cost: Variant = data.terrain.terrain[type].moveCost
 		if cost == null:
 			return -1.0
-		return float(cost) * road_factor(data, int(land.roads.get(edge_key(from, to), 0))) if roads else float(cost)
+		if not roads:
+			return float(cost)
+		var road := road_factor(data, int(land.roads.get(edge_key(from, to), 0)))
+		return float(cost) * (minf(road, lane_factor(data)) if land.get("lanes", {}).has(edge_key(from, to)) else road)

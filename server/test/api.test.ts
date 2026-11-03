@@ -481,7 +481,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await db.query(`UPDATE villages SET amounts = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`, [village.id]);
 
     expect((await claim(village.q, village.r)).body.message).toMatch(/within 2 hexes/);
-    expect((await claim(village.q + 5, village.r)).body.message).toMatch(/within 2 hexes|not on the map/);
+    expect((await claim(village.q + 100, village.r)).body.message).toMatch(/within 2 hexes|not on the map/);
     // A bigger Elder's Hall allows a second outpost.
     const hall = await call('POST', `/v1/villages/${village.id}/build`, zora.token, { plot: 'c0' });
     now = new Date(hall.body.village.queue[0].completesAt);
@@ -1034,7 +1034,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     box = await inbox();
     const digests = box.notifications.filter((n: { kind: string }) => n.kind === 'digest');
     expect(digests[0]).toMatchObject({ tier: 'push', title: 'Today in Notices' });
-    expect(digests.some((d: { body: string }) => /1 build finished/.test(d.body))).toBe(true);
+    // Read from the table: the inbox is a page, and daily events crowd it.
+    const { rows: summed } = await db.query<{ body: string }>(`SELECT body FROM notifications WHERE account_id = $1 AND kind = 'digest'`, [mira.accountId]);
+    expect(summed.some((d) => /1 build finished/.test(d.body))).toBe(true);
     const { rows: left } = await db.query(
       `SELECT 1 FROM notifications WHERE account_id = $1 AND tier = 'digest' AND digest_id IS NULL AND created_at <= $2`,
       [mira.accountId, now],

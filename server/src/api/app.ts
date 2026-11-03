@@ -12,6 +12,7 @@ import {
   buildSupplyPointCommand,
   stockStoreCommand,
   buildRoadCommand,
+  payShipyardCommand,
   disbandArmyCommand,
   moveArmyCommand,
   recallArmyCommand,
@@ -153,6 +154,7 @@ const orderBody = z.discriminatedUnion('kind', [
   // Keep a fort or supply point topped up to `target` grain from this village.
   z.object({ kind: z.literal('supply'), fortId: z.number().int().positive(), target: z.number().int() }),
 ]);
+const shipyardParams = z.object({ id: z.coerce.number().int().positive(), shipyardId: z.coerce.number().int().positive() });
 const orderParams = z.object({ id: z.coerce.number().int().positive(), orderId: z.coerce.number().int().positive() });
 const minuteOfDay = z.number().int().min(0).max(1439);
 // From the vault into the bridge's open stage.
@@ -802,6 +804,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = crossingBody.parse(request.body);
     await buildCrossingCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  app.post('/v1/villages/:id/shipyards/:shipyardId', async (request) => {
+    const account = await authenticate(db, request);
+    const { id, shipyardId } = shipyardParams.parse(request.params);
+    await payShipyardCommand(db, scheduler, { accountId: account.id, villageId: id, shipyardId, now: clock() });
     const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
     return fullWorldView(Number(worldId));
   });
