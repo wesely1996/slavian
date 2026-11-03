@@ -311,7 +311,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	# Every harassing strike makes the horde hate the more.
 	var strikes := joining.filter(func(a: Dictionary) -> bool: return a.orders == "harass").size()
 	if strikes > 0:
-		wave.hatred = float(wave.get("hatred", 0.0)) + strikes * float(data.horde.hatred.perHarass)
+		LocalHordes.anger_horde(server, world, wave, strikes * float(data.horde.hatred.perHarass), at)
 
 	var outcome := LocalBattle.battle_outcome(data, {
 		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
@@ -869,6 +869,9 @@ static func occupied_hexes(world: Dictionary) -> Dictionary:
 
 ## A wave is over: new camps of its front rise near its road.
 static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
+	# A band leaves no camps behind.
+	if wave.get("bandOf") != null:
+		return
 	var data := server.data
 	var rules: Dictionary = data.camps.spawn
 	var active: int = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.front == wave.front).size()

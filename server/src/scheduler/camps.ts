@@ -87,6 +87,8 @@ export async function createCamp(
 
 // A wave is over: new camps of its front rise near its road.
 async function spawnAfterWave(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
+  // A band leaves no camps behind.
+  if (wave.bandOf !== null) return;
   const rules = data.camps.spawn;
   // The limit is per front, so one front's bandits never crowd out another's lairs.
   const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front).length;
@@ -140,7 +142,7 @@ export async function placeStarterCamps(client: DbClient, data: GameData, world:
 export async function revealLair(client: DbClient, data: GameData, world: World, at: Date): Promise<boolean> {
   if ((await listCamps(client, world.id)).some((c) => c.kind === 'lair')) return false;
   const { rows } = await client.query<{ id: number }>(
-    "SELECT id FROM waves WHERE world_id = $1 AND front = 'north' AND path IS NOT NULL ORDER BY index DESC LIMIT 1",
+    "SELECT id FROM waves WHERE world_id = $1 AND front = 'north' AND path IS NOT NULL AND band_of IS NULL ORDER BY index DESC LIMIT 1",
     [world.id],
   );
   if (!rows[0]) return false;

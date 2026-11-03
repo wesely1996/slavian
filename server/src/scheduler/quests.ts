@@ -1,6 +1,6 @@
 // Hero quests on the scheduler (sim/quests.ts): a quest sends the hero away
 // (status 'questing') and hero_quest brings it home with what it went for.
-import { addHatred } from '../db/waves.js';
+import { angerHorde } from './waves.js';
 import type { GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { loadHero, saveHero, type Hero } from '../db/heroes.js';
@@ -33,7 +33,7 @@ const DONE_KEPT = 30;
 async function questWorld(client: DbClient, data: GameData, world: World, hero: Hero): Promise<QuestWorld> {
   // Each front's next horde, and how much it hates already.
   const { rows } = await client.query<{ front: Front; hatred: number }>(
-    "SELECT DISTINCT ON (front) front, hatred FROM waves WHERE world_id = $1 AND status = 'scheduled' ORDER BY front, spawn_at, id",
+    "SELECT DISTINCT ON (front) front, hatred FROM waves WHERE world_id = $1 AND status = 'scheduled' AND band_of IS NULL ORDER BY front, spawn_at, id",
     [world.id],
   );
   const sites = (await listSites(client, world.id)).filter((s) => s.status === 'unexplored' && total(s.guardians) === 0);
@@ -101,7 +101,7 @@ export async function cancelQuest(client: DbClient, data: GameData, world: World
 // The next horde from a front that hasn't set out yet.
 async function nextWave(client: DbClient, worldId: number, front: Front | null) {
   const { rows } = await client.query<{ id: number; composition: Record<string, number>; stance: string; front: Front; hatred: number }>(
-    `SELECT id, composition, stance, front, hatred FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled'
+    `SELECT id, composition, stance, front, hatred FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled' AND band_of IS NULL
      ORDER BY spawn_at, id LIMIT 1`,
     [worldId, front],
   );
@@ -121,7 +121,7 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
       const delay = Math.round(((data.quests.kinds.ambush.delayHours ?? 0) * MS_PER_HOUR) / world.speed);
       await client.query(`UPDATE waves SET spawn_at = spawn_at + make_interval(secs => $2::double precision / 1000) WHERE id = $1`, [wave.id, delay]);
       // Held up, it hates the more.
-      await addHatred(client, wave.id, data.horde.hatred.perAmbush);
+      await angerHorde(client, data, world, wave.id, data.horde.hatred.perAmbush, at);
       await client.query(
         `UPDATE scheduled_events SET due_at = due_at + make_interval(secs => $3::double precision / 1000)
          WHERE world_id = $1 AND status = 'pending' AND type IN ('wave_spawn', 'wave_warning') AND (payload->>'waveId')::bigint = $2`,

@@ -11,7 +11,8 @@ import { riverKeys } from '../db/rivers.js';
 import { cameOverRiver } from '../sim/field.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import { loadWave, markBattling, setWaveStrength, type Wave, addHatred } from '../db/waves.js';
+import { loadWave, markBattling, setWaveStrength, type Wave } from '../db/waves.js';
+import { angerHorde } from './waves.js';
 import { finishWave } from './camps.js';
 import type { World } from '../db/worlds.js';
 import {
@@ -208,7 +209,7 @@ export const battleHandlers: HandlerRegistry = {
     await setWaveStrength(client, wave.id, attackerNow);
     // Every harassing strike makes the horde hate the more.
     const strikes = joining.filter((a) => a.orders === 'harass').length;
-    if (strikes > 0) await addHatred(client, wave.id, strikes * data.horde.hatred.perHarass);
+    if (strikes > 0) await angerHorde(client, data, world, wave.id, strikes * data.horde.hatred.perHarass, at);
 
     const outcome = battleOutcome(data, {
       round,

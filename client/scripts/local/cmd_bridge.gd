@@ -107,7 +107,7 @@ static func reveal_lair(server: LocalServer, world: Dictionary, at: int) -> bool
 		return false
 	var wave: Dictionary = {}
 	for w in world.waves:
-		if w.front == "north" and w.path != null and (wave.is_empty() or int(w.index) > int(wave.index)):
+		if w.front == "north" and w.path != null and w.get("bandOf") == null and (wave.is_empty() or int(w.index) > int(wave.index)):
 			wave = w
 	if wave.is_empty():
 		return false

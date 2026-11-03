@@ -152,7 +152,7 @@ static func cancel_quest(server: LocalServer, world: Dictionary, hero: Dictionar
 static func _next_wave(world: Dictionary, front: Variant) -> Dictionary:
 	var best: Dictionary = {}
 	for w in world.waves:
-		if w.front == front and w.status == "scheduled":
+		if w.front == front and w.status == "scheduled" and w.get("bandOf") == null:
 			if best.is_empty() or int(w.spawnAt) < int(best.spawnAt) or (int(w.spawnAt) == int(best.spawnAt) and int(w.id) < int(best.id)):
 				best = w
 	return best
@@ -170,7 +170,7 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 			var delay := LocalWaves.js_round((float(data.quests.kinds.ambush.get("delayHours", 0)) * LocalTime.MS_PER_HOUR) / world.speed)
 			wave.spawnAt = int(wave.spawnAt) + delay
 			# Held up, it hates the more.
-			wave.hatred = float(wave.get("hatred", 0.0)) + float(data.horde.hatred.perAmbush)
+			LocalHordes.anger_horde(server, world, wave, float(data.horde.hatred.perAmbush), at)
 			for e in world.events:
 				if e.status == "pending" and e.type in ["wave_spawn", "wave_warning"] and int(e.payload.get("waveId", -1)) == int(wave.id):
 					e.dueAt = int(e.dueAt) + delay

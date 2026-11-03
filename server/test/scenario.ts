@@ -29,8 +29,15 @@ export interface ScenarioStart {
 // Requests use the local engine's ids ("/v1/villages/1/build"); `advance`
 // moves the clock on and runs what fell due; `set` jumps the world ahead
 // where play would take too long (the bridge's state, the group's Ember,
-// the vault's stock), and the client test makes the same change.
-export type WorldSet = { bridge?: Record<string, unknown>; embers?: number; vault?: Record<string, number> };
+// the vault's stock, a horde's hatred), and the client test makes the same
+// change.
+export type WorldSet = {
+  bridge?: Record<string, unknown>;
+  embers?: number;
+  vault?: Record<string, number>;
+  // A horde's hatred, by its wave index.
+  waveHatred?: { index: number; hatred: number };
+};
 export type Step = { advance?: number; method?: string; path?: string; body?: unknown; set?: WorldSet };
 
 export interface Session {
@@ -88,6 +95,9 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
             if (step.set.vault) {
               await db.query('INSERT INTO vaults (world_id) VALUES ($1) ON CONFLICT DO NOTHING', [world.id]);
               await db.query('UPDATE vaults SET amounts = $2 WHERE world_id = $1', [world.id, JSON.stringify(step.set.vault)]);
+            }
+            if (step.set.waveHatred) {
+              await db.query('UPDATE waves SET hatred = $3 WHERE world_id = $1 AND index = $2 AND band_of IS NULL', [world.id, step.set.waveHatred.index, step.set.waveHatred.hatred]);
             }
             recorded.push({ set: step.set });
             return { status: 200, body: null };

@@ -153,6 +153,8 @@ export function waveView(wave: Wave, forecast: March | null = null) {
     leaderId: wave.leaderId,
     // Added to its attack and defense for ambushes and harassment.
     hatred: wave.hatred,
+    // The horde it broke away from, for a band a hating horde sent out.
+    bandOf: wave.bandOf,
     // A scheduled wave: where it is expected to set out from, its target,
     // its road (as path) and its arrival, were it to set out today.
     forecast: forecast
