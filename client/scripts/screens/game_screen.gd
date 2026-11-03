@@ -18,6 +18,11 @@ var _selected := Vector2i.MAX
 var _since_refresh := 0.0
 
 var _live_label: Label
+## The top band of wood, and the words its buttons show at full width (they
+## fold to icons when the band would be wider than the screen: _fit_bar).
+var _top: PanelContainer
+var _view_label := ""
+var _live_text := ""
 var _resource_labels: Dictionary[String, Label] = {}
 ## Under each stock: how full the storehouse is, and its limit.
 var _resource_bars: Dictionary[String, ProgressBar] = {}
@@ -262,6 +267,7 @@ func _build_ui() -> void:
 	# next threat.
 	var top := UI.wood(14)
 	top.add_theme_stylebox_override("panel", _top_style())
+	_top = top
 	root.add_child(top)
 	var top_rows := UI.vbox(10)
 	top.add_child(top_rows)
@@ -281,7 +287,9 @@ func _build_ui() -> void:
 	_live_label = UI.label("", UI.SMALL_SIZE)
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	bar.add_child(_live_label)
-	_view_button = UI.button(tr("Village"), _toggle_view, "icon/village")
+	_view_label = tr("Village")
+	_view_button = UI.button(_view_label, _toggle_view, "icon/village")
+	_view_button.tooltip_text = _view_label
 	_view_button.theme_type_variation = "WoodButton"
 	_view_button.visible = not _my_village().is_empty()
 	bar.add_child(_view_button)
@@ -443,9 +451,7 @@ func _build_ui() -> void:
 ## limits are left out (the bar under each still shows how full it is).
 func _fit_resources() -> void:
 	var parent := _resources.get_parent_control()
-	var room := parent.size.x if parent != null else 0.0
-	if room <= 0.0:
-		room = get_viewport().get_visible_rect().size.x
+	var room := _top_room()
 	# In landscape it shares the title row with the buttons.
 	if parent is HBoxContainer:
 		for other in parent.get_children():
@@ -457,6 +463,41 @@ func _fit_resources() -> void:
 	var show := need <= room - 8.0
 	for kind in Ledger.KINDS:
 		_capacity_labels[kind].visible = show
+
+
+## The room across the top band: the screen's width less the band's margins
+## (never the band's own width, which a too-wide row has already stretched).
+func _top_room() -> float:
+	var room := get_viewport().get_visible_rect().size.x
+	if _top != null:
+		room -= _top.get_theme_stylebox("panel").get_minimum_size().x
+	return room
+
+
+## The title row never pushes the screen wider than the phone: when its
+## buttons don't fit (a group's world has chat and the live mark too), the
+## Village/Map button shows only its icon, then the live mark only its dot.
+func _fit_bar() -> void:
+	if _top == null or _view_button == null:
+		return
+	var bar := _view_button.get_parent() as HBoxContainer
+	_view_button.text = _view_label
+	_live_label.text = _live_text
+	var room := _top_room()
+	if _row_need(bar) > room:
+		_view_button.text = ""
+	if _row_need(bar) > room:
+		_live_label.text = _live_text.left(1)
+
+
+func _row_need(row: HBoxContainer) -> float:
+	var need := 0.0
+	var shown := 0
+	for c in row.get_children():
+		if c is Control and (c as Control).visible:
+			need += (c as Control).get_combined_minimum_size().x
+			shown += 1
+	return need + row.get_theme_constant("separation") * maxi(0, shown - 1)
 
 
 func _text_width(label: Label) -> float:
@@ -477,6 +518,8 @@ func _arrange() -> void:
 	# Centre the map in the part the sheet leaves uncovered.
 	camera.view_offset = Vector2(-_panel.custom_minimum_size.x / 2.0, 0) if landscape else Vector2(0, -area.y * 0.1)
 	_place_quest_card.call_deferred()
+	_fit_resources.call_deferred()
+	_fit_bar.call_deferred()
 
 
 func _move_panel(landscape: bool, area: Vector2) -> void:
@@ -686,7 +729,10 @@ func _set_view(view: String) -> void:
 	_view = view
 	_renaming = false
 	var on_map := view == "map"
-	_view_button.text = tr("Village") if on_map else tr("Map")
+	_view_label = tr("Village") if on_map else tr("Map")
+	_view_button.text = _view_label
+	_view_button.tooltip_text = _view_label
+	_fit_bar()
 	_view_button.icon = Art.texture("icon/village" if on_map else "icon/map")
 	hex_map.visible = on_map
 	_spacer.visible = on_map
@@ -4672,7 +4718,9 @@ func _on_village_changed(_village_id: int) -> void:
 
 
 func _on_live_connection(connected: bool) -> void:
-	_live_label.text = tr("● live") if connected else tr("○ offline")
+	_live_text = tr("● live") if connected else tr("○ offline")
+	_live_label.text = _live_text
+	_fit_bar()
 	_live_label.add_theme_color_override("font_color", Color("#8fc4a6") if connected else UiTheme.ON_WOOD_MUTED)
 	if connected:
 		_refetch_world()
@@ -4694,6 +4742,7 @@ func _refetch_inbox() -> void:
 
 func _on_inbox_changed() -> void:
 	_inbox_button.text = str(Game.unread) if Game.unread > 0 else ""
+	_fit_bar()
 	if _panel_mode == "inbox":
 		_rebuild_panel()
 

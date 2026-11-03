@@ -60,6 +60,7 @@ const PAGE_TITLES := {
 
 var _status: Label
 var _content: VBoxContainer
+var _version: Label
 var _layout: BoxContainer
 var _hero: Control
 var _logo: TextureRect
@@ -111,10 +112,16 @@ func _ready() -> void:
 	var sheet_box := UI.panel(1.0, 0)
 	sheet_box.add_theme_stylebox_override("panel", UiTheme.sheet_style(24))
 	_frame.add_child(sheet_box)
+	var sheet_column := UI.vbox(8)
+	sheet_box.add_child(sheet_column)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sheet_box.add_child(scroll)
+	sheet_column.add_child(scroll)
+	# The app's version, at the foot of the main menu.
+	_version = UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE)
+	_version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sheet_column.add_child(_version)
 	var body := UI.vbox(18)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
@@ -264,6 +271,7 @@ func _render(page: String) -> void:
 	if page != "lobby":
 		_leave_armed = false
 	UI.clear(_content)
+	_version.visible = page == "home"
 	if page != "home":
 		var top := UI.hbox(14)
 		var back := UI.button(tr("Back"), _back, "icon/back")
@@ -337,9 +345,6 @@ func _home_page() -> void:
 	var quit := UI.button(tr("Quit"), func() -> void: get_tree().quit(), "icon/quit")
 	quit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(quit)
-	var version := UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE, UI.MUTED)
-	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_content.add_child(version)
 
 
 # --- Play --------------------------------------------------------------------
