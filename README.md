@@ -95,6 +95,7 @@ DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:m
 | `POST` | `/v1/villages/:id/caravans/fetch` | Send empty caravans to bring `{ load }` back from the vault. |
 | `POST` | `/v1/worlds/:id/hero/move` · `/skills` · `/equip` · `/unequip` · `/rename` | Your hero: travel to `{ villageId }` (one of yours), learn `{ skill }`, wear `{ item }`, take off `{ slot }`, rename `{ name }`. |
 | `GET` · `POST` | `/v1/worlds/:id/notifications` · `/notifications/read` | Your inbox in a world (newest first, unread count) / mark it read. |
+| `GET` · `POST` | `/v1/worlds/:id/chat` (`?before=id`) · `/chat` `{ body }` · `/chat/read` `{ id }` | The group chat of a group's world: the latest 50 messages (older ones before an id), how far you read and your unread count / send one line (1–500 characters, at most 5 every 10 seconds) / mark it read up to an id. New messages come live as `{ type: "chat", message }`. |
 | `GET` · `PATCH` | `/v1/me/notifications` | Quiet hours `{ quietStart, quietEnd }` (minutes after local midnight, or null), `utcOffsetMinutes`, `digestHour`. |
 | `POST` | `/v1/me/devices` | Register a phone's push token `{ token, platform }` (see [docs/push.md](docs/push.md)). |
 | `POST` | `/v1/worlds/:id/vault/upgrade` | Enlarge the vault, paid from the vault. |

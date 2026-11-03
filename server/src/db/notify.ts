@@ -1,3 +1,4 @@
+import type { ChatMessage } from './chat.js';
 import type { DbClient } from './pool.js';
 
 // Postgres NOTIFY channel announcing that something in a world changed. It
@@ -20,6 +21,8 @@ export type WorldEvent =
   | { worldId: number; type: 'generals' }
   | { worldId: number; type: 'orders' }
   | { worldId: number; type: 'armies' }
+  // A new group chat message, carried whole (db/chat.ts).
+  | { worldId: number; type: 'chat'; message: ChatMessage }
   // For one player only (their inbox).
   | { worldId: number; type: 'notifications'; accountId: number };
 

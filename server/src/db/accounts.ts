@@ -63,7 +63,7 @@ export async function deleteAccount(client: DbClient, accountId: number): Promis
  * Everything kept about an account, for its owner to download (GET
  * /v1/me/export, docs/privacy.md): the account with its settings, the worlds
  * it plays in, its villages, armies, heroes and research, its inbox, its
- * phones, its hand-overs and its bug reports. Session tokens are left out:
+ * phones, its hand-overs, its bug reports and what it wrote in group chats. Session tokens are left out:
  * only their hashes are kept, and they are of no use to anyone.
  */
 export async function exportAccount(client: DbClient, accountId: number): Promise<Record<string, unknown>> {
@@ -83,5 +83,6 @@ export async function exportAccount(client: DbClient, accountId: number): Promis
     devices: await rows('SELECT to_jsonb(d) AS row FROM devices d WHERE d.account_id = $1'),
     delegations: await rows('SELECT to_jsonb(d) AS row FROM delegations d WHERE d.owner_account_id = $1 OR d.delegate_account_id = $1'),
     reports: await rows('SELECT to_jsonb(r) AS row FROM reports r WHERE r.account_id = $1 ORDER BY r.id'),
+    chat: await rows('SELECT to_jsonb(c) AS row FROM chat_messages c WHERE c.account_id = $1 ORDER BY c.id'),
   };
 }

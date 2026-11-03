@@ -1,4 +1,5 @@
 import websocket from '@fastify/websocket';
+import { insertChatMessage, lastReadId, listChatMessages, markChatRead, sentSince, unreadCount } from '../db/chat.js';
 import { delegateCommand, endDelegationCommand } from '../commands/delegation.js';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z, ZodError } from 'zod';
@@ -84,6 +85,17 @@ export interface AppDeps {
 
 const displayName = z.string().trim().min(1).max(32);
 const idParams = z.object({ id: z.coerce.number().int().positive() });
+// The group chat: one line of plain text (control characters become spaces).
+const CHAT_MAX = 500;
+const CHAT_BURST = { messages: 5, seconds: 10 };
+const chatBody = z.object({
+  body: z
+    .string()
+    .transform((text) => text.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim())
+    .pipe(z.string().min(1, 'Write something first').max(CHAT_MAX, `At most ${CHAT_MAX} characters`)),
+});
+const chatQuery = z.object({ before: z.coerce.number().int().positive().optional() });
+const chatReadBody = z.object({ id: z.number().int().nonnegative() });
 
 const guestBody = z.object({ displayName: displayName.optional() }).default({});
 const renameBody = z.object({ name: displayName });
@@ -470,6 +482,50 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     await leaveWorldCommand(db, scheduler, { account, worldId: id, now: clock() });
     return { ok: true };
+  });
+
+  // The group chat: the latest messages (older ones with ?before=id), what
+  // you have read, and how many from others you haven't.
+  app.get('/v1/worlds/:id/chat', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { before } = chatQuery.parse(request.query);
+    await requireMember(account, id);
+    return inTransaction(db, async (client) => ({
+      messages: await listChatMessages(client, id, 50, before ?? null),
+      lastReadId: await lastReadId(client, id, account.id),
+      unread: await unreadCount(client, id, account.id),
+      serverTime: clock().toISOString(),
+    }));
+  });
+
+  app.post('/v1/worlds/:id/chat', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { body } = chatBody.parse(request.body);
+    await requireMember(account, id);
+    const now = clock();
+    const message = await inTransaction(db, async (client) => {
+      const recent = await sentSince(client, id, account.id, new Date(now.getTime() - CHAT_BURST.seconds * 1000));
+      if (recent >= CHAT_BURST.messages) throw new RuleError('Slow down: a few messages at a time');
+      const sent = await insertChatMessage(client, { worldId: id, accountId: account.id, name: account.displayName, body, at: now });
+      // Your own message is read.
+      await markChatRead(client, id, account.id, sent.id);
+      await notifyWorld(client, { worldId: id, type: 'chat', message: sent });
+      return sent;
+    });
+    return { message, serverTime: now.toISOString() };
+  });
+
+  app.post('/v1/worlds/:id/chat/read', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { id: upTo } = chatReadBody.parse(request.body);
+    await requireMember(account, id);
+    return inTransaction(db, async (client) => ({
+      lastReadId: await markChatRead(client, id, account.id, upTo),
+      unread: await unreadCount(client, id, account.id),
+    }));
   });
 
   app.post('/v1/villages/:id/build', async (request) => {

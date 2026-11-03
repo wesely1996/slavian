@@ -15,8 +15,12 @@ signal heroes_changed
 signal generals_changed
 signal orders_changed
 signal inbox_changed
+signal chat_changed
 signal armies_changed
 signal forts_changed
+
+## Chat messages the server sends at a time (api/app.ts).
+const CHAT_PAGE := 50
 
 var data: Dictionary = {}
 var world: Dictionary = {}
@@ -41,6 +45,12 @@ var research: Array = []
 ## Your notifications in this world, newest first, and how many are unread.
 var inbox: Array = []
 var unread := 0
+## The group chat (a group's worlds): messages oldest first, how far you
+## have read, the unread ones from others, and whether older ones are left.
+var chat: Array = []
+var chat_last_read := 0
+var chat_unread := 0
+var chat_more := false
 ## Armies on the road or abroad, then the latest that came home.
 var armies: Array = []
 ## Forts, built or being built (see server fortView).
@@ -265,6 +275,46 @@ func set_inbox(world_id_: int, notifications: Array, unread_count: int) -> void:
 	inbox = notifications
 	unread = unread_count
 	inbox_changed.emit()
+
+
+## The latest chat messages (GET /v1/worlds/:id/chat).
+func set_chat(world_id_: int, messages: Array, last_read: int, unread_count: int) -> void:
+	if world_id_ != world_id():
+		return
+	chat = messages
+	chat_last_read = last_read
+	chat_unread = unread_count
+	chat_more = messages.size() >= CHAT_PAGE
+	chat_changed.emit()
+
+
+## Older messages, fetched by scrolling back.
+func add_older_chat(world_id_: int, messages: Array) -> void:
+	if world_id_ != world_id():
+		return
+	chat = messages + chat
+	chat_more = messages.size() >= CHAT_PAGE
+	chat_changed.emit()
+
+
+## A new message (live, or the one you just sent): another's is unread.
+func add_chat(world_id_: int, message: Dictionary) -> void:
+	if world_id_ != world_id() or chat.any(func(m: Dictionary) -> bool: return int(m.id) == int(message.id)):
+		return
+	chat.append(message)
+	var mine: bool = message.get("accountId") != null and int(message.accountId) == my_account_id()
+	if mine:
+		chat_last_read = maxi(chat_last_read, int(message.id))
+	elif int(message.id) > chat_last_read:
+		chat_unread += 1
+	chat_changed.emit()
+
+
+## Everything up to the newest message read.
+func read_chat(last_read: int) -> void:
+	chat_last_read = maxi(chat_last_read, last_read)
+	chat_unread = 0
+	chat_changed.emit()
 
 
 func set_orders(world_id_: int, new_orders: Array) -> void:

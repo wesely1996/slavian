@@ -17,6 +17,7 @@ signal heroes_updated(world_id: int, heroes: Array)
 signal generals_updated(world_id: int, generals: Array)
 signal orders_updated(world_id: int, orders: Array)
 signal inbox_updated(world_id: int, notifications: Array, unread: int)
+signal chat_received(world_id: int, message: Dictionary)
 signal armies_updated(world_id: int, armies: Array)
 signal forts_updated(world_id: int, forts: Array)
 
@@ -109,6 +110,8 @@ func _handle(text: String) -> void:
 			forts_updated.emit(int(message.worldId), message.get("forts", []))
 		"notifications":
 			inbox_updated.emit(int(message.worldId), message.notifications, int(message.unread))
+		"chat":
+			chat_received.emit(int(message.worldId), message.message)
 		"orders":
 			orders_updated.emit(int(message.worldId), message.orders)
 		"heroes":
