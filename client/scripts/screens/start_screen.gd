@@ -44,6 +44,8 @@ const PAGE_TITLES := {
 		"Language",  # tr
 	"text_size":
 		"Text size",  # tr
+	"orientation":
+		"Screen",  # tr
 	"sound":
 		"Sound",  # tr
 	"notifications":
@@ -286,6 +288,7 @@ func _render(page: String) -> void:
 		"settings": _settings_page()
 		"language": _language_page()
 		"text_size": _text_size_page()
+		"orientation": _orientation_page()
 		"sound": _sound_page()
 		"notifications": _notifications_page()
 		"account": _account_page()
@@ -676,6 +679,7 @@ func _settings_page() -> void:
 	_door(account, "", "account", "icon/profile")
 	_door(tr("Language: %s") % language, "", "language", "icon/research")
 	_door(tr("Text size: %s") % size, "", "text_size", "icon/settings")
+	_door(tr("Screen: locked upright") if Session.orientation_locked else tr("Screen: turns with the phone"), "", "orientation", "icon/settings")
 	_door(tr("Sound: music %d%%, effects %d%%") % [roundi(Session.music_volume * 100.0), roundi(Session.effects_volume * 100.0)], "", "sound", "icon/music")
 	var off := Session.push_off.size()
 	_door(tr("Notifications: all on") if off == 0 else (tr("Notifications: all off") if off >= InboxText.PUSH_TOPICS.size() else tr("Notifications: %d of %d on") % [InboxText.PUSH_TOPICS.size() - off, InboxText.PUSH_TOPICS.size()]), "", "notifications", "icon/inbox")
@@ -711,6 +715,20 @@ func _text_size_page() -> void:
 		size_pick.custom_minimum_size = Vector2(76, 76)
 		sizes.add_child(size_pick)
 	_content.add_child(sizes)
+
+
+## Locked upright (the default), or turning with the phone into landscape.
+func _orientation_page() -> void:
+	for entry in [[true, tr("Lock upright")], [false, tr("Turn with the phone")]]:
+		var locked: bool = entry[0]
+		var pick := UI.button(entry[1], func() -> void:
+			Session.set_orientation_locked(locked)
+			_render("orientation"))
+		pick.theme_type_variation = "TabButton"
+		pick.disabled = Session.orientation_locked == locked
+		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_content.add_child(pick)
+	_content.add_child(UI.label(tr("Turned on its side, the game lays itself out in landscape: the map wide, the details beside it."), UI.SMALL_SIZE, UI.MUTED))
 
 
 func _sound_page() -> void:

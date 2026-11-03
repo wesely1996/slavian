@@ -33,6 +33,9 @@ var push_sync := false
 ## Whether the intro picture book has been seen (it opens before the first
 ## game).
 var intro_seen := false
+## Whether the screen stays upright (the default) or turns with the phone,
+## landscape included.
+var orientation_locked := true
 
 
 func _ready() -> void:
@@ -50,11 +53,13 @@ func _ready() -> void:
 		push_decided = config.get_value("session", "push_decided", false)
 		push_sync = config.get_value("session", "push_sync", false)
 		intro_seen = config.get_value("session", "intro_seen", false)
+		orientation_locked = config.get_value("session", "orientation_locked", true)
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
 	UiTheme.set_text_size(text_size)
 	UiTheme.apply()
+	apply_orientation()
 	var window := get_tree().root
 	UiTheme.fit(window)
 	window.size_changed.connect(func() -> void: UiTheme.fit(window))
@@ -81,6 +86,7 @@ func save() -> void:
 	config.set_value("session", "push_decided", push_decided)
 	config.set_value("session", "push_sync", push_sync)
 	config.set_value("session", "intro_seen", intro_seen)
+	config.set_value("session", "orientation_locked", orientation_locked)
 	config.save(PATH)
 
 
@@ -115,6 +121,20 @@ func set_text_size(size: String) -> void:
 	# Rebuild the theme: its default and button font sizes follow the scale.
 	UiTheme.apply()
 	save()
+
+
+func set_orientation_locked(locked: bool) -> void:
+	orientation_locked = locked
+	apply_orientation()
+	save()
+
+
+## Upright, or turning with the phone (the sensor picks portrait or
+## landscape; the screens lay themselves out for either). Phones only: a
+## desktop window is shaped by its owner.
+func apply_orientation() -> void:
+	if OS.has_feature("mobile"):
+		DisplayServer.screen_set_orientation(DisplayServer.SCREEN_PORTRAIT if orientation_locked else DisplayServer.SCREEN_SENSOR)
 
 
 func is_logged_in() -> bool:
