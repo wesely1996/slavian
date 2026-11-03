@@ -3383,14 +3383,39 @@ func _queue_section(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(tr("Build queue (%d/%d)") % [queue.size(), limit], UI.SMALL_SIZE, UI.MUTED))
 	if queue.is_empty():
 		_panel_body.add_child(UI.label(tr("Nothing under construction."), UI.SMALL_SIZE, UI.MUTED))
+	# A build can be called off for most of what it cost (more with a
+	# higher Elder's Hall); later levels of the same plot go with it.
+	var rule: Dictionary = Game.data.buildings.village.get("cancelRefund", {"base": 0.8, "perHallLevel": 0.02})
+	var share := roundi(minf(1.0, float(rule.base) + float(rule.perHallLevel) * maxi(0, Rules.hall_level(village) - 1)) * 100.0)
+	var village_id := int(village.id)
 	for item in queue:
 		var done_at := TimeUtil.parse_iso(item.completesAt)
 		var text := tr("%s → Lv %d") % [tr(_building_def(item.building).name), int(item.targetLevel)]
+		var row := UI.hbox(8)
 		var line := UI.label()
-		_panel_body.add_child(line)
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(line)
 		_tick(line, func() -> String:
 			var left := done_at - Game.server_now()
 			return tr("%s   %s") % [text, TimeUtil.format_duration(left) if left > 0 else tr("finishing…")])
+		if Game.is_mine(village):
+			var plot := String(item.plot)
+			var level := int(item.targetLevel)
+			var cancel := UI.button(tr("Cancel"), func() -> void: _cancel_build(village_id, plot, level))
+			cancel.tooltip_text = tr("Call it off: %d%% of what it cost comes back.") % share
+			row.add_child(cancel)
+		_panel_body.add_child(row)
+
+
+func _cancel_build(village_id: int, plot: String, level: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/build/cancel" % village_id, {"plot": plot, "targetLevel": level})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _outposts_section(village: Dictionary) -> void:

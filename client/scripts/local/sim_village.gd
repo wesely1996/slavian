@@ -532,6 +532,74 @@ static func refund_of(data: Dictionary, plots: Dictionary, share: float) -> Dict
 
 ## Tears down the building on a center or wall slot, for a share of what it
 ## cost: {state, refund} or {"error"}.
+## The share of a build's cost a cancelled build gives back (sim/village.ts
+## cancelRefundShare).
+static func cancel_refund_share(data: Dictionary, hall_level: int) -> float:
+	var rule: Dictionary = data.buildings.village.cancelRefund
+	return minf(1.0, float(rule.base) + float(rule.perHallLevel) * maxi(0, hall_level - 1))
+
+
+## Calls off a build in the queue (sim/village.ts cancelBuild): it goes,
+## with any later level of the same plot (and wall slots its walls would
+## have opened), and gives back a share of what each cost. {state, refund,
+## moved (the builds whose finish changed)}, or {"error"}.
+static func cancel_build(data: Dictionary, state: Dictionary, plot: String, target_level: int, at: int) -> Dictionary:
+	var k := -1
+	for i in state.queue.size():
+		if state.queue[i].plot == plot and int(state.queue[i].targetLevel) == target_level:
+			k = i
+			break
+	if k < 0:
+		return rule("That build is not in the queue")
+	var gone := {}
+	for i in range(k, state.queue.size()):
+		if state.queue[i].plot == plot:
+			gone[i] = true
+	if plot == WALL_PLOT:
+		# Towers waiting for a wall slot these walls would have opened.
+		var walls := int(state.plots.get(WALL_PLOT, {}).get("level", 0))
+		for i in state.queue.size():
+			if state.queue[i].plot == WALL_PLOT and not gone.has(i):
+				walls = maxi(walls, int(state.queue[i].targetLevel))
+		for i in state.queue.size():
+			var slot := tower_index(String(state.queue[i].plot))
+			if slot >= 0 and int(state.plots.get(state.queue[i].plot, {}).get("level", 0)) == 0 and slot >= open_tower_slots(data, walls):
+				gone[i] = true
+	var share := cancel_refund_share(data, int(state.levels.get(HALL, 0)))
+	var refund := {"wood": 0.0, "stone": 0.0, "grain": 0.0, "iron": 0.0}
+	for i in gone:
+		var cost := level_cost(build_def(data, state.queue[i].building), int(state.queue[i].targetLevel))
+		for kind in refund:
+			refund[kind] += float(cost[kind])
+	var back := resources(func(kind: String) -> float: return floorf(refund[kind] * share))
+	# The rest move up, each as long as it was.
+	var queue: Array = []
+	var moved: Array = []
+	for i in state.queue.size():
+		if gone.has(i):
+			continue
+		var item: Dictionary = state.queue[i]
+		var starts_at: int
+		if queue.is_empty():
+			starts_at = int(item.startsAt) if int(item.startsAt) <= at else at
+		else:
+			starts_at = int(queue[-1].completesAt)
+		var next := item.duplicate()
+		next.startsAt = starts_at
+		next.completesAt = starts_at + int(item.completesAt) - int(item.startsAt)
+		if int(next.completesAt) != int(item.completesAt):
+			moved.append(next)
+		queue.append(next)
+	var after := state.duplicate(true)
+	after.queue = queue
+	# An outpost never raised leaves its hex free.
+	var raising: Variant = state.plots.get(plot)
+	if outpost_hex(plot) != Vector2i.MAX and raising != null and int(raising.level) == 0 and not queue.any(func(q: Dictionary) -> bool: return q.plot == plot):
+		after.plots.erase(plot)
+	after.ledger = LocalLogistics.receive(state.ledger, at, back).ledger
+	return {"state": after, "refund": back, "moved": moved}
+
+
 static func demolish(data: Dictionary, state: Dictionary, plot: String, at: int, world_speed: float) -> Dictionary:
 	var current: Variant = state.plots.get(plot)
 	if current == null or current.building == null or int(current.level) <= 0:

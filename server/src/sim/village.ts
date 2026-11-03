@@ -473,6 +473,61 @@ export function refundOf(data: GameData, plots: Plots, share: number): Resources
   return mapResources((kind) => Math.floor(sum[kind] * share));
 }
 
+// The share of a build's cost a cancelled build gives back: `base`, plus
+// `perHallLevel` for each Elder's Hall level above the first, at most all.
+export function cancelRefundShare(data: GameData, hallLevel: number): number {
+  const rule = data.buildings.village.cancelRefund;
+  return Math.min(1, rule.base + rule.perHallLevel * Math.max(0, hallLevel - 1));
+}
+
+// Calls off a build in the queue (the one under way or one waiting): it goes,
+// with any later level of the same plot (and wall slots its walls would have
+// opened), and gives back a share of what each cost (what fits the stores).
+// The builds after it move up; `moved` are those whose finish changed.
+export function cancelBuild(
+  data: GameData,
+  state: VillageState,
+  plot: string,
+  targetLevel: number,
+  at: Date,
+): { state: VillageState; refund: Resources; moved: QueuedBuild[] } {
+  const k = state.queue.findIndex((item) => item.plot === plot && item.targetLevel === targetLevel);
+  if (k < 0) throw new RuleError('That build is not in the queue');
+  const gone = new Set<QueuedBuild>(state.queue.filter((item, i) => i >= k && item.plot === plot));
+  if (plot === WALL_PLOT) {
+    // Towers waiting for a wall slot these walls would have opened.
+    const walls = Math.max(state.plots[WALL_PLOT]?.level ?? 0, ...state.queue.filter((item) => item.plot === WALL_PLOT && !gone.has(item)).map((item) => item.targetLevel));
+    for (const item of state.queue) {
+      const slot = towerIndex(item.plot);
+      if (slot !== null && (state.plots[item.plot]?.level ?? 0) === 0 && slot >= openTowerSlots(data, walls)) gone.add(item);
+    }
+  }
+  const share = cancelRefundShare(data, state.levels[HALL] ?? 0);
+  const refund = mapResources(() => 0);
+  for (const item of gone) {
+    const cost = levelCost(buildingDef(data, item.building), item.targetLevel);
+    for (const kind of Object.keys(refund) as (keyof Resources)[]) refund[kind] += cost[kind];
+  }
+  const back = mapResources((kind) => Math.floor(refund[kind] * share));
+  // The rest move up, each as long as it was.
+  const queue: QueuedBuild[] = [];
+  const moved: QueuedBuild[] = [];
+  for (const item of state.queue) {
+    if (gone.has(item)) continue;
+    const startsAt = queue.length === 0 ? (item.startsAt <= at ? item.startsAt : at) : queue.at(-1)!.completesAt;
+    const next = { ...item, startsAt, completesAt: new Date(startsAt.getTime() + item.completesAt.getTime() - item.startsAt.getTime()) };
+    if (next.completesAt.getTime() !== item.completesAt.getTime()) moved.push(next);
+    queue.push(next);
+  }
+  // An outpost never raised leaves its hex free.
+  let plots = state.plots;
+  const raising = state.plots[plot];
+  if (outpostHex(plot) && raising && raising.level === 0 && !queue.some((item) => item.plot === plot)) {
+    plots = Object.fromEntries(Object.entries(state.plots).filter(([id]) => id !== plot));
+  }
+  return { state: { ...state, plots, queue, ledger: receive(state.ledger, at, back).ledger }, refund: back, moved };
+}
+
 // Tears down the building on a center or wall slot: the slot is free again
 // and the village gets back a share of what it cost (what fits its stores).
 export function demolish(data: GameData, state: VillageState, plot: string, at: Date, worldSpeed: number): { state: VillageState; refund: Resources } {

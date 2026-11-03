@@ -450,6 +450,15 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					extra = ["research", LocalResearch.research_view(result.research)]
 			"rebuild":
 				result = LocalResearch.rebuild(self, world, village, now)
+			"build/cancel":
+				var target: Variant = body.get("targetLevel")
+				if not body.get("plot") is String or not (target is float or target is int) or float(target) != floorf(float(target)) or float(target) < 1:
+					return _fail(400, "invalid_request", "Give a plot and a level")
+				result = LocalVillage.cancel_build(data, village.state, String(body.plot), int(target), now)
+				if result.has("refund"):
+					extra = ["refund", result.refund]
+					for item in result.moved:
+						schedule(world, int(item.completesAt), "build_complete", {"villageId": village.id, "plot": item.plot, "building": item.building, "targetLevel": item.targetLevel})
 			"demolish":
 				var plot := String(body.get("plot", ""))
 				if not RegEx.create_from_string("^([fc]\\d{1,2}|w|t\\d{1,2})$").search(plot):
@@ -741,7 +750,8 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	if village.is_empty() or village.ruin != null:
 		return
 	var plot: String = p.get("plot", "")
-	if not village.state.queue.any(func(item: Dictionary) -> bool: return item.plot == plot and int(item.targetLevel) == int(p.targetLevel)):
+	# Cancelled, or moved up (a later event of its own finishes it).
+	if not village.state.queue.any(func(item: Dictionary) -> bool: return item.plot == plot and int(item.targetLevel) == int(p.targetLevel) and int(item.completesAt) == int(event.dueAt)):
 		return
 	# An Academy's level changes what research comes in from now on.
 	if data.buildings.buildings.get(p.building, {}).get("research") != null and village.ownerAccountId != null:

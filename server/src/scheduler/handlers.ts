@@ -44,8 +44,9 @@ export const handlers: HandlerRegistry = {
     // Razed before it was finished.
     if (village.ruin) return;
     const plot = payload.plot ?? village.state.queue[0]?.plot ?? '';
-    // A raid or raze cleared the queue before it was finished.
-    if (!village.state.queue.some((item) => item.plot === plot && item.targetLevel === payload.targetLevel)) return;
+    // A raid or raze cleared the queue before it was finished, or it was
+    // cancelled, or moved up (a later event of its own finishes it).
+    if (!village.state.queue.some((item) => item.plot === plot && item.targetLevel === payload.targetLevel && item.completesAt.getTime() === event.dueAt.getTime())) return;
     // An Academy's level changes what research comes in from now on.
     if (data.buildings.buildings[payload.building]?.research && village.ownerAccountId !== null) {
       await settleResearchPoints(client, data, world, village.ownerAccountId, event.dueAt);
