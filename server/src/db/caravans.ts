@@ -118,6 +118,23 @@ export async function markReturning(client: DbClient, id: number, carriedBack: R
   ]);
 }
 
+// A caravan turned on the road: its new road, times and destination, and
+// (turned back home) its status and what it carries back.
+export async function saveCaravanRoute(client: DbClient, caravan: Caravan): Promise<void> {
+  await client.query(
+    `UPDATE caravans SET path = $2, arrives_at = $3, returns_at = $4, destination_village_id = $5, status = $6, carried_back = $7 WHERE id = $1`,
+    [
+      caravan.id,
+      JSON.stringify(caravan.path),
+      caravan.arrivesAt,
+      caravan.returnsAt,
+      caravan.destinationVillageId,
+      caravan.status,
+      caravan.carriedBack ? JSON.stringify(caravan.carriedBack) : null,
+    ],
+  );
+}
+
 export async function markCaravanDone(client: DbClient, id: number): Promise<void> {
   await client.query(`UPDATE caravans SET status = 'done' WHERE id = $1`, [id]);
 }

@@ -24,7 +24,7 @@ import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand } from '../commands/heroes.js';
 import { heroQuestOffers } from '../scheduler/quests.js';
 import type { Hero } from '../db/heroes.js';
-import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand } from '../commands/logistics.js';
+import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
 import {
   abandonOutpostCommand,
   abandonVillageCommand,
@@ -133,6 +133,8 @@ const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: 
 const escortSchema = z.record(z.string().max(64), z.number().int().min(0).max(100_000)).optional();
 const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema, escort: escortSchema });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
+// A caravan turned on its way out: home, or to a village (null: the vault).
+const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const crossingBody = z.object({ a: hexBody, b: hexBody });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
@@ -838,6 +840,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = caravanBody.parse(request.body);
     const { village, caravan } = await sendCaravanCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { village: villageView(village), caravan: caravanView(caravan), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/caravans/:id/reroute', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const turn = rerouteBody.parse(request.body);
+    const caravan = await rerouteCaravanCommand(db, scheduler, { accountId: account.id, caravanId: id, turn, now: clock() });
+    return { caravan: caravanView(caravan), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/caravans/fetch', async (request) => {

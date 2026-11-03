@@ -275,6 +275,66 @@ static func upgrade_vault(server: LocalServer, world: Dictionary, now: int) -> D
 
 # --- The scheduler (scheduler/caravans.ts) ---------------------------------------
 
+## Turns a caravan on its way out (commands/logistics.ts
+## rerouteCaravanCommand): `body` {home: true}, or {villageId} (null: the
+## vault) for one carrying goods out, not on a supply route. It finishes the
+## hex it is crossing, then comes home with its goods or takes the new road;
+## ambushes on its road are planned anew. The caravan, or {"error"}.
+static func reroute(server: LocalServer, world: Dictionary, caravan: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	if caravan.status != "outbound":
+		return LocalVillage.rule("Only caravans on their way out can be turned")
+	var village := server.find_village(world, int(caravan.villageId))
+	var elapsed := now - int(caravan.departsAt)
+	if body.get("home", false) == true:
+		# It goes back from the hex it is crossing, with what it took out (a
+		# caravan fetching from the vault carries nothing yet).
+		var back: Array = splice_route(caravan.path, elapsed, func(from: Vector2i) -> Variant: return [{"q": from.x, "r": from.y, "atMs": 0}])
+		var there := int(back[-1].atMs)
+		caravan.path = back
+		caravan.status = "returning"
+		caravan.carriedBack = caravan.cargo.duplicate() if caravan.kind == "deliver" else {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+		caravan.arrivesAt = int(caravan.departsAt) + there
+		caravan.returnsAt = int(caravan.departsAt) + 2 * there
+	else:
+		if not body.has("villageId"):
+			return {"error": "Say where it should go", "kind": "invalid"}
+		if caravan.kind != "deliver" or caravan.get("destinationFortId") != null:
+			return LocalVillage.rule("This caravan can only be turned back")
+		var to: Variant = body.villageId
+		if (to == null and caravan.destinationVillageId == null) or (to != null and caravan.destinationVillageId != null and int(to) == int(caravan.destinationVillageId)):
+			return LocalVillage.rule("It is already on its way there")
+		var dest := Vector2i.ZERO
+		if to != null:
+			if int(to) == int(village.id):
+				return LocalVillage.rule("Turn it back to bring it home")
+			var destination := server.find_village(world, int(to))
+			if destination.is_empty():
+				return {"error": "No such village in this world", "kind": "not_found"}
+			dest = Vector2i(destination.q, destination.r)
+		var bonuses := effective_bonuses(server, world, village)
+		var land := LocalHordes.land_of(world)
+		var path: Variant = splice_route(caravan.path, elapsed, func(from: Vector2i) -> Variant:
+			return caravan_route(data, land, from, dest, world.speed, bonuses))
+		if path == null:
+			return LocalVillage.rule("No road leads there")
+		var travel := int(path[-1].atMs)
+		caravan.path = path
+		caravan.destinationVillageId = int(to) if to != null else null
+		caravan.arrivesAt = int(caravan.departsAt) + travel
+		caravan.returnsAt = int(caravan.departsAt) + 2 * travel
+	# Camps lying in wait on the old road wait in vain.
+	world.events = world.events.filter(func(e: Dictionary) -> bool:
+		return not (e.status == "pending" and e.type == "caravan_ambush" and int(e.payload.get("caravanId", -1)) == int(caravan.id)))
+	if caravan.status == "returning":
+		server.schedule(world, int(caravan.returnsAt), "caravan_return", {"caravanId": caravan.id})
+		plan_ambushes(server, world, caravan, "back", now)
+	else:
+		server.schedule(world, int(caravan.arrivesAt), "caravan_arrive", {"caravanId": caravan.id})
+		plan_ambushes(server, world, caravan, "out", now)
+	return caravan
+
+
 static func find_caravan(world: Dictionary, id: int) -> Dictionary:
 	for c in world.caravans:
 		if int(c.id) == id:
@@ -285,7 +345,8 @@ static func find_caravan(world: Dictionary, id: int) -> Dictionary:
 static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var data := server.data
 	var caravan := find_caravan(world, int(event.payload.caravanId))
-	if caravan.is_empty() or caravan.status != "outbound":
+	# Turned on the road since: a later arrival is planned, or none.
+	if caravan.is_empty() or caravan.status != "outbound" or int(caravan.arrivesAt) != int(event.dueAt):
 		return
 	var carried_back := {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	if caravan.get("destinationFortId") != null:
@@ -329,7 +390,7 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 ## Home again. What doesn't fit in a full storehouse is lost.
 static func on_caravan_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var caravan := find_caravan(world, int(event.payload.caravanId))
-	if caravan.is_empty() or caravan.status != "returning":
+	if caravan.is_empty() or caravan.status != "returning" or int(caravan.returnsAt) != int(event.dueAt):
 		return
 	var village := server.find_village(world, int(caravan.villageId))
 	var back: Variant = caravan.carriedBack

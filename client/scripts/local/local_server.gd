@@ -371,6 +371,15 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(moved)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(moved), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "caravans" and parts[3] == "reroute":
+		var caravan := LocalLogistics.find_caravan(world, int(parts[2]))
+		if caravan.is_empty():
+			return _fail(404, "not_found", "No such caravan")
+		var turned := LocalLogistics.reroute(self, world, caravan, body if body is Dictionary else {}, now)
+		if turned.has("error"):
+			return _rule_answer(turned)
+		changed.append(["world"])
+		return {"status": 200, "data": {"caravan": LocalLogistics.caravan_view(turned), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "recall":
 		var army := LocalArmies.recall(self, world, int(parts[2]), now)
 		if army.has("error"):

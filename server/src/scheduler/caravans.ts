@@ -22,7 +22,8 @@ export type CaravanPayload = z.infer<typeof caravanPayload>;
 export const caravanHandlers: HandlerRegistry = {
   async caravan_arrive({ client, data, world }, event) {
     const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
-    if (caravan.status !== 'outbound') return;
+    // Turned on the road since: a later arrival is planned, or none.
+    if (caravan.status !== 'outbound' || caravan.arrivesAt.getTime() !== event.dueAt.getTime()) return;
     let carriedBack = emptyResources();
     if (caravan.destinationFortId !== null) {
       // A supply route: grain goes into the store as far as it fits; the
@@ -71,7 +72,7 @@ export const caravanHandlers: HandlerRegistry = {
   // Home again. What doesn't fit in a full storehouse is lost.
   async caravan_return({ client, data, world }, event) {
     const caravan = await loadCaravan(client, caravanPayload.parse(event.payload).caravanId);
-    if (caravan.status !== 'returning') return;
+    if (caravan.status !== 'returning' || caravan.returnsAt.getTime() !== event.dueAt.getTime()) return;
     const village = await loadVillage(client, caravan.villageId);
     // Its escort is home too, back on garrison rations.
     let state = village.state;

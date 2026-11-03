@@ -610,6 +610,26 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const home = (await world()).villages.find((v: { id: number }) => v.id === mine.id);
     expect(home.resources.amounts.wood).toBeGreaterThanOrEqual(woodBefore + 300);
 
+    // Turned on the road: headed for the vault, sent on to Ola instead; Ola
+    // can't turn Vid's caravan. It brings its load to her.
+    const turning = await send({ load: load(100) });
+    now = new Date(now.getTime() + 1000);
+    expect((await call('POST', `/v1/caravans/${turning.body.caravan.id}/reroute`, ola.token, { villageId: theirs.id })).status).toBe(403);
+    const sentOn = await call('POST', `/v1/caravans/${turning.body.caravan.id}/reroute`, vid.token, { villageId: theirs.id });
+    expect(sentOn.body.caravan).toMatchObject({ status: 'outbound', destinationVillageId: theirs.id });
+    expect(sentOn.body.caravan.path[0]).toEqual(turning.body.caravan.path[0]);
+    await db.query(`UPDATE villages SET amounts = '{"wood": 0, "stone": 0, "grain": 0, "iron": 0}', settled_at = $2 WHERE id = $1`, [theirs.id, now]);
+    const olaWood = 0;
+    now = new Date(turning.body.caravan.arrivesAt);
+    await tick(db, now, scheduler);
+    // Its old arrival at the vault does nothing.
+    expect((await world()).vault.amounts.wood).toBe(200);
+    now = new Date(sentOn.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    w = await world();
+    expect(w.villages.find((v: { id: number }) => v.id === theirs.id).resources.amounts.wood).toBeGreaterThanOrEqual(olaWood + 100);
+    expect(w.caravans.find((c: { id: number }) => c.id === turning.body.caravan.id).status).toBe('done');
+
     // Enlarging the vault is paid from the vault.
     expect((await call('POST', `/v1/worlds/${worldId}/vault/upgrade`, ola.token)).body.message).toMatch(/needs more wood, stone, grain, iron/);
     await db.query(`UPDATE vaults SET amounts = '{"wood": 3000, "stone": 3000, "grain": 3000, "iron": 3000}' WHERE world_id = $1`, [worldId]);
