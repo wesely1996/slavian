@@ -230,6 +230,7 @@ func _process(delta: float) -> void:
 			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %s)") % [UI.resource_name(kind), UI.signed(TimeUtil.per_real_hour(rate)), TimeUtil.format_duration(Ledger.seconds_to_next(Game.server_now()))]
 			_rate_labels[kind].text = tr("%s/min") % _per_minute(TimeUtil.per_real_hour(rate))
 			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
+		_fit_resources()
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
 	if hex_map.has_moving_hordes():
@@ -337,6 +338,8 @@ func _build_ui() -> void:
 		var rate := UI.label("", 18)
 		rate.theme_type_variation = "OnWoodMuted"
 		rate.autowrap_mode = TextServer.AUTOWRAP_OFF
+		# Never wider than the screen: in the last resort the rate trims.
+		rate.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		numbers.add_child(rate)
 		var full := ProgressBar.new()
 		full.show_percentage = false
@@ -433,6 +436,31 @@ func _build_ui() -> void:
 	_main.resized.connect(_place_quest_card)
 	get_viewport().size_changed.connect(_arrange)
 	_arrange()
+
+
+## The resource strip never pushes the screen wider than the phone: when
+## the stocks and limits don't fit (big stores on a narrow screen), the
+## limits are left out (the bar under each still shows how full it is).
+func _fit_resources() -> void:
+	var parent := _resources.get_parent_control()
+	var room := parent.size.x if parent != null else 0.0
+	if room <= 0.0:
+		room = get_viewport().get_visible_rect().size.x
+	# In landscape it shares the title row with the buttons.
+	if parent is HBoxContainer:
+		for other in parent.get_children():
+			if other != _resources and other is Control and (other as Control).visible:
+				room -= (other as Control).get_combined_minimum_size().x + 8.0
+	var need := _stores_button.custom_minimum_size.x
+	for kind in Ledger.KINDS:
+		need += 4 + 36 + 8 + maxf(_text_width(_resource_labels[kind]) + 2 + _text_width(_capacity_labels[kind]), _text_width(_rate_labels[kind]))
+	var show := need <= room - 8.0
+	for kind in Ledger.KINDS:
+		_capacity_labels[kind].visible = show
+
+
+func _text_width(label: Label) -> float:
+	return label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x
 
 
 ## The sheet beside the map in landscape, under it in portrait.
