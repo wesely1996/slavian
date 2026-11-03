@@ -109,3 +109,22 @@ export function receive(ledger: ResourceLedger, at: Date, load: Resources): { le
     leftover: mapResources((kind) => load[kind] - stored[kind]),
   };
 }
+
+// A road taken backwards (a road home is drawn backwards from the far end):
+// the same hexes from the last, timed from leaving it.
+export function reversedRoute(path: readonly PathStep[]): PathStep[] {
+  const total = path.at(-1)?.atMs ?? 0;
+  return [...path].reverse().map((step) => ({ q: step.q, r: step.r, atMs: total - step.atMs }));
+}
+
+// Turning something on the road `elapsedMs` after it set out: it finishes
+// the hex it is crossing (or turns at once where it has just come in), then
+// takes `next`, a road from that hex timed from 0. The steps already taken
+// stay, so whatever is drawn or turned home along it still finds them.
+export function spliceRoute(path: readonly PathStep[], elapsedMs: number, next: (from: Hex) => PathStep[]): PathStep[] {
+  let i = path.findIndex((step) => step.atMs >= elapsedMs);
+  if (i < 0) i = path.length - 1;
+  const turn = path[i]!;
+  const onward = next({ q: turn.q, r: turn.r });
+  return [...path.slice(0, i + 1), ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turn.atMs + step.atMs }))];
+}

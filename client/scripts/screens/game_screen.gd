@@ -1965,7 +1965,7 @@ func _hold_panel(terrain_id: String) -> void:
 		row.add_child(info)
 		var view_id := int(army.id)
 		row.add_child(UI.button(tr("View"), func() -> void: _open_army(view_id)))
-		if army.ownerAccountId != null and int(army.ownerAccountId) == Game.my_account_id() and army.status == "stationed":
+		if army.ownerAccountId != null and int(army.ownerAccountId) == Game.my_account_id() and army.status in ["stationed", "marching"]:
 			var army_id := int(army.id)
 			var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
 			recall.custom_minimum_size.x = 150
@@ -2419,9 +2419,10 @@ func _army_panel() -> void:
 				return tr("Wagon fort: ready in %s (+%d%% defense)") % [TimeUtil.format_duration(left), bonus]
 			return tr("Wagon fort: +%d%% defense") % bonus)
 
-	# Orders, for your own army standing still.
+	# Orders, for your own army standing still or on the road (turned where
+	# it is: it finishes the hex it is crossing first).
 	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
-	if not mine or army.status != "stationed":
+	if not mine or not army.status in ["stationed", "marching", "returning"]:
 		return
 	_panel_body.add_child(UI.label(tr("Orders"), UI.HEADING_SIZE))
 	var army_id := int(army.id)
@@ -2431,13 +2432,14 @@ func _army_panel() -> void:
 	_army_orders_row(army)
 
 
-## What a standing army can be told: come home, march into a village, take
-## on grain where it stands, or disband.
+## What an army can be told: come home, march into a village, and, standing
+## still, take on grain where it stands or disband.
 func _army_orders_row(army: Dictionary) -> void:
 	var army_id := int(army.id)
+	var standing: bool = army.status == "stationed"
 	var row := UI.hbox(8)
-	var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
-	row.add_child(recall)
+	if army.status != "returning":
+		row.add_child(UI.button(tr("Call home"), func() -> void: _recall_army(army_id)))
 	var places: Array = Game.villages.values().filter(func(v: Dictionary) -> bool:
 		return army.targetVillageId == null or int(v.id) != int(army.targetVillageId))
 	places.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
@@ -2450,12 +2452,14 @@ func _army_orders_row(army: Dictionary) -> void:
 			if i > 0:
 				_army_command(army_id, "move", {"villageId": int(places[i - 1].id)}))
 		row.add_child(into)
-	if army.targetVillageId != null and army.get("supply") != null:
+	if standing and army.targetVillageId != null and army.get("supply") != null:
 		row.add_child(UI.button(tr("Take on grain"), func() -> void: _army_command(army_id, "resupply", {})))
-	row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
+	if standing:
+		row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
 	_panel_body.add_child(row)
-	_store_row(army)
-	_wagon_row(army)
+	if standing:
+		_store_row(army)
+		_wagon_row(army)
 
 
 ## For your army holding open ground with wagons: draw them into a ring.

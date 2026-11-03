@@ -119,8 +119,16 @@ export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { ac
       refusal: 'Not your army',
     });
     if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
-    if (army.status !== 'stationed') throw new RuleError('Only armies standing guard can be called home');
-    const back = await sendHome(client, await getWorld(client, army.worldId), army, input.now, deps.data);
+    if (army.status === 'returning') throw new RuleError('They are already on their way home');
+    const world = await getWorld(client, army.worldId);
+    // One on the march turns for home where it is, into the garrison.
+    const back =
+      army.status === 'marching'
+        ? await moveArmy(client, deps.data, world, army, { villageId: army.homeVillageId }, input.now)
+        : army.status === 'stationed'
+          ? await sendHome(client, world, army, input.now, deps.data)
+          : null;
+    if (!back) throw new RuleError('Only armies out in the field can be called home');
     await notifyWorld(client, { worldId: army.worldId, type: 'armies' });
     return back;
   });

@@ -454,14 +454,16 @@ static func _standing(army: Dictionary) -> Dictionary:
 	if army.status == "engaged":
 		return LocalVillage.rule("That army is in the middle of a battle")
 	if army.status != "stationed":
-		return LocalVillage.rule("Only armies standing still can be given new orders")
+		return LocalVillage.rule("Only armies standing still can be given these orders")
 	return {}
 
 
 ## Where a standing army goes next: a hex to hold, or a village.
 static func move(server: LocalServer, world: Dictionary, army: Dictionary, body: Dictionary, at: int) -> Dictionary:
 	var data := server.data
-	var refused := _standing(army)
+	# An army on the road can be turned too (not one in a battle).
+	var on_the_road: bool = army.status in ["marching", "returning"]
+	var refused := {} if on_the_road else _standing(army)
 	if not refused.is_empty():
 		return refused
 	var here := Vector2i(army.targetQ, army.targetR)
@@ -485,14 +487,26 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 			return LocalVillage.rule("No army can stand there")
 		if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == dest.x and int(v.r) == dest.y):
 			return LocalVillage.rule("That is a village; send them into it")
-	if dest == here:
+	if not on_the_road and dest == here:
 		if orders == "garrison":
 			join_village(server, world, army, int(target_village), at)
 			return army
 		return LocalVillage.rule("They are already there")
-	_set_off(server, world, army, at)
-	var speed := army_speed(data, army.units) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), here, dest, speed, world.speed)
+	var land := LocalHordes.land_of(world)
+	var path: Variant
+	var departs_at := at
+	if on_the_road:
+		# It finishes the hex it is crossing, then takes the new road; the road
+		# it came by stays (one coming home turns on that road, backwards).
+		var speed := army_speed(data, army.units) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
+		var road: Array = LocalLogistics.reversed_route(army.path) if army.status == "returning" else army.path
+		departs_at = int(army.leavesAt) if army.status == "returning" else int(army.departsAt)
+		path = LocalLogistics.splice_route(road, at - departs_at, func(from: Vector2i) -> Variant:
+			return LocalLogistics.road_route(data, land, from, dest, speed, world.speed))
+	else:
+		_set_off(server, world, army, at)
+		var speed := army_speed(data, army.units) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
+		path = LocalLogistics.road_route(data, land, here, dest, speed, world.speed)
 	if path == null:
 		return LocalVillage.rule("No road leads there")
 	army.orders = orders
@@ -503,8 +517,8 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 	army.status = "marching"
 	army.battleId = null
 	army.wagonFortAt = null
-	army.departsAt = at
-	army.arrivesAt = at + int(path[-1].atMs)
+	army.departsAt = departs_at
+	army.arrivesAt = departs_at + int(path[-1].atMs)
 	army.leavesAt = null
 	army.returnsAt = null
 	server.schedule(world, int(army.arrivesAt), "army_arrive", {"armyId": army.id})
@@ -709,7 +723,8 @@ static func army_losses(server: LocalServer, world: Dictionary, army: Dictionary
 
 static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var army := find_army(world, int(event.payload.armyId))
-	if army.is_empty() or army.status != "marching":
+	# Turned on the road since: a later arrival is planned.
+	if army.is_empty() or army.status != "marching" or int(army.arrivesAt) != int(event.dueAt):
 		return
 	var at := int(event.dueAt)
 	changed.append(["world"])
@@ -752,7 +767,7 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 
 static func on_army_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var army := find_army(world, int(event.payload.armyId))
-	if army.is_empty() or army.status != "returning":
+	if army.is_empty() or army.status != "returning" or army.returnsAt == null or int(army.returnsAt) != int(event.dueAt):
 		return
 	# The troops join the garrison; loot and what grain is left go into the stores.
 	join_village(server, world, army, int(army.homeVillageId), int(event.dueAt))
@@ -779,8 +794,13 @@ static func recall(server: LocalServer, world: Dictionary, army_id: int, now: in
 		return {"error": "No such army", "kind": "not_found"}
 	if army.status == "engaged":
 		return LocalVillage.rule("That army is in the middle of a battle")
+	if army.status == "returning":
+		return LocalVillage.rule("They are already on their way home")
+	# One on the march turns for home where it is, into the garrison.
+	if army.status == "marching":
+		return move(server, world, army, {"villageId": army.homeVillageId}, now)
 	if army.status != "stationed":
-		return LocalVillage.rule("Only armies standing guard can be called home")
+		return LocalVillage.rule("Only armies out in the field can be called home")
 	return send_home(server, world, army, now)
 
 

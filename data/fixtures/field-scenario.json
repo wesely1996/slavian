@@ -685,10 +685,48 @@
      "r": 1
     }
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "Only armies standing still can be given new orders"
+    "army": {
+     "id": 1,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -1,
+      1
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "loot": null,
+     "units": {
+      "spearman": 2
+     },
+     "status": "marching",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -1,
+       1,
+       28800
+      ]
+     ],
+     "departsAt": "2026-06-01T08:30:00.000Z",
+     "arrivesAt": "2026-06-01T08:30:28.800Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 48,
+     "supplyAt": "2026-06-01T08:30:00.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null
+    },
+    "serverTime": "2026-06-01T08:30:00.000Z"
    }
   },
   {
@@ -713,10 +751,48 @@
      "r": 2
     }
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "They are already there"
+    "army": {
+     "id": 1,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -1,
+      2
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "loot": null,
+     "units": {
+      "spearman": 2
+     },
+     "status": "marching",
+     "battleId": null,
+     "path": [
+      [
+       -1,
+       1,
+       0
+      ],
+      [
+       -1,
+       2,
+       28800
+      ]
+     ],
+     "departsAt": "2026-06-01T08:35:00.000Z",
+     "arrivesAt": "2026-06-01T08:35:28.800Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 48,
+     "supplyAt": "2026-06-01T08:30:00.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null
+    },
+    "serverTime": "2026-06-01T08:35:00.000Z"
    }
   },
   {
@@ -751,17 +827,12 @@
      "path": [
       [
        -1,
-       2,
-       0
-      ],
-      [
-       -1,
        1,
-       28800
+       0
       ]
      ],
      "departsAt": "2026-06-01T08:35:00.000Z",
-     "arrivesAt": "2026-06-01T08:35:28.800Z",
+     "arrivesAt": "2026-06-01T08:35:00.000Z",
      "leavesAt": null,
      "returnsAt": null,
      "supply": 48,
@@ -3454,7 +3525,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Only armies standing still can be given new orders"
+    "message": "Only armies standing still can be given these orders"
    }
   },
   {
@@ -11067,7 +11138,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Only armies standing still can be given new orders"
+    "message": "Only armies standing still can be given these orders"
    }
   },
   {

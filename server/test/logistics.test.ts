@@ -6,6 +6,8 @@ import {
   caravansAt,
   caravansFor,
   receive,
+  reversedRoute,
+  spliceRoute,
   store,
   vaultCapacity,
   vaultUpgradeCost,
@@ -68,5 +70,37 @@ describe('the vault', () => {
     expect(after.amounts).toEqual(res(1000, 300));
     expect(after.settledAt).toEqual(later);
     expect(leftover).toEqual(res(150, 0));
+  });
+});
+
+describe('turning on the road', () => {
+  const road = [
+    { q: 0, r: 0, atMs: 0 },
+    { q: 1, r: 0, atMs: 100 },
+    { q: 2, r: 0, atMs: 200 },
+  ];
+  const next = (from: { q: number; r: number }) => [
+    { ...from, atMs: 0 },
+    { q: from.q, r: from.r + 1, atMs: 50 },
+  ];
+
+  it('finishes the hex it is crossing, then takes the new road, keeping the road behind', () => {
+    expect(spliceRoute(road, 60, next)).toEqual([
+      { q: 0, r: 0, atMs: 0 },
+      { q: 1, r: 0, atMs: 100 },
+      { q: 1, r: 1, atMs: 150 },
+    ]);
+    // Just come into a hex: it turns there.
+    expect(spliceRoute(road, 100, next).at(-1)).toEqual({ q: 1, r: 1, atMs: 150 });
+    // Past the end: from the last hex.
+    expect(spliceRoute(road, 500, next).at(-1)).toEqual({ q: 2, r: 1, atMs: 250 });
+  });
+
+  it('reads a road backwards for one coming home', () => {
+    expect(reversedRoute(road)).toEqual([
+      { q: 2, r: 0, atMs: 0 },
+      { q: 1, r: 0, atMs: 100 },
+      { q: 0, r: 0, atMs: 200 },
+    ]);
   });
 });
