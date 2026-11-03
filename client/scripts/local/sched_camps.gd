@@ -45,7 +45,7 @@ static func camps_join(server: LocalServer, world: Dictionary, wave: Dictionary)
 	var camps: Array = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active")
 	camps.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.id < b.id)
 	for camp in camps:
-		if camp.front != wave.front:
+		if camp.front != wave.front or camp.kind == "captives":
 			continue
 		var fed := feed(server.data, camp.units)
 		if total(fed.sent) == 0:

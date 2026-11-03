@@ -213,6 +213,7 @@ export const siteHandlers: HandlerRegistry = {
       seed: world.seed,
       siteId: site.id,
       distance: distanceShare(hex(site.q, site.r), world.radius ?? 0),
+      lootFactor: site.hard ? data.events.kinds.ruin.lootFactor : 1,
       foundScrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
       ownedGear: new Set(ownerHero ? [...ownerHero.inventory, ...Object.values(ownerHero.gear)] : []),
     });

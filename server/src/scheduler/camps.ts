@@ -73,14 +73,17 @@ export async function createCamp(
   client: DbClient,
   data: GameData,
   world: World,
-  camp: Pick<Camp, 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId'>,
+  camp: Pick<Camp, 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId'> & Partial<Pick<Camp, 'reward' | 'endsAt'>>,
   at: Date,
 ): Promise<Camp> {
-  const created = await insertCamp(client, { ...camp, worldId: world.id, createdAt: at });
-  await scheduleEvent(client, world.id, new Date(at.getTime() + hoursMs(data.camps.growth.everyHours, world.speed)), 'camp_grow', {
-    campId: created.id,
-  });
-  await planAmbushesFor(client, data, world, created, at);
+  const created = await insertCamp(client, { reward: null, endsAt: null, ...camp, worldId: world.id, createdAt: at });
+  // Captives' guards only hold them: they don't grow or waylay caravans.
+  if (created.kind !== 'captives') {
+    await scheduleEvent(client, world.id, new Date(at.getTime() + hoursMs(data.camps.growth.everyHours, world.speed)), 'camp_grow', {
+      campId: created.id,
+    });
+    await planAmbushesFor(client, data, world, created, at);
+  }
   await notifyWorld(client, { worldId: world.id, type: 'world' });
   return created;
 }
@@ -91,7 +94,7 @@ async function spawnAfterWave(client: DbClient, data: GameData, world: World, wa
   if (wave.bandOf !== null) return;
   const rules = data.camps.spawn;
   // The limit is per front, so one front's bandits never crowd out another's lairs.
-  const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front).length;
+  const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front && c.kind !== 'captives').length;
   // A horde that came to hate leaves more camps behind, beyond the limit:
   // the whole part of hatred x campChance surely, the rest by chance.
   const hate = wave.hatred * data.horde.hatred.campChance;
@@ -185,7 +188,7 @@ export async function afterSettling(client: DbClient, data: GameData, world: Wor
 export async function campsJoin(client: DbClient, data: GameData, world: World, wave: Wave): Promise<void> {
   let composition = wave.composition;
   for (const camp of await listCamps(client, world.id)) {
-    if (camp.front !== wave.front) continue;
+    if (camp.front !== wave.front || camp.kind === 'captives') continue;
     const { sent, kept } = feed(data, camp.units);
     if (total(sent) === 0) continue;
     composition = addUnits(composition, sent);
@@ -247,11 +250,16 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   for (const [unit, n] of Object.entries(army.units)) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
   let after = await armyLosses(client, data, world, army, lost, at);
   const kills = total(camp.units) - total(result.campNow);
-  const where = `${camp.kind === 'lair' ? 'lair' : 'bandit camp'} at (${camp.q}, ${camp.r})`;
+  const where = `${camp.kind === 'lair' ? 'lair' : camp.kind === 'captives' ? "captives' camp" : 'bandit camp'} at (${camp.q}, ${camp.r})`;
   let ember = false;
   if (result.cleared) {
     await markCleared(client, camp.id);
     after = { ...after, loot: campLoot(data, camp.units) };
+    // Captives freed: troops join the army, goods ride home with it.
+    if (camp.kind === 'captives' && camp.reward) {
+      if ('units' in camp.reward) after = { ...after, units: addUnits(after.units, camp.reward.units) };
+      else after = { ...after, loot: mapResources((kind) => (after.loot?.[kind] ?? 0) + (camp.reward as { resources: Resources }).resources[kind]) };
+    }
     // A lair holds an Ember by chance, and always while the bridge lacks one.
     const lucky = rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
     ember = camp.kind === 'lair' && (lucky || (await embersShort(client, data, world.id)));
@@ -283,7 +291,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
         ? "It carries home {loot} resources and a Svarog's Ember for the group."
         : 'It carries home {loot} resources.'
       : '{kills} of them fell; {defenders} still hold it.',
-    vars: { where, loot: total(campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
+    vars: { where, loot: total(result.cleared && after.loot ? after.loot : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -312,6 +320,7 @@ export async function planAmbushes(client: DbClient, data: GameData, world: Worl
   const travelMs = caravan.path.at(-1)!.atMs;
   let best: { campId: number; at: Date } | null = null;
   for (const camp of await listCamps(client, world.id)) {
+    if (camp.kind === 'captives') continue;
     const cell = hex(camp.q, camp.r);
     const path = leg === 'out' ? caravan.path : [...caravan.path].reverse().map((s) => ({ ...s, atMs: travelMs - s.atMs }));
     const step = passesCamp(data, path, cell);

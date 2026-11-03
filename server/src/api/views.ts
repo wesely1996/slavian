@@ -583,7 +583,18 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
-  const camps = (await listCamps(client, world.id)).map((c) => ({ id: c.id, kind: c.kind, front: c.front, q: c.q, r: c.r, size: total(c.units), waveId: c.waveId }));
+  // Captives (a daily event) carry what freeing them brings, and when they go.
+  const camps = (await listCamps(client, world.id)).map((c) => ({
+    id: c.id,
+    kind: c.kind,
+    front: c.front,
+    q: c.q,
+    r: c.r,
+    size: total(c.units),
+    waveId: c.waveId,
+    reward: c.reward ?? null,
+    endsAt: c.endsAt?.toISOString() ?? null,
+  }));
   const sites = (await listSites(client, world.id)).map((s) => ({
     id: s.id,
     kind: s.kind,
@@ -595,6 +606,9 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     exploredBy: s.exploredBy,
     find: s.find,
     exploredAt: s.exploredAt?.toISOString() ?? null,
+    // A hard ruin (a daily event), and when it goes if nobody comes.
+    hard: s.hard ?? false,
+    endsAt: s.endsAt?.toISOString() ?? null,
   }));
   const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
   const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);

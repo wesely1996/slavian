@@ -405,9 +405,11 @@ func _draw_site(site: Dictionary) -> void:
 ## A bandit camp or monster lair: a tent in its faction's colour.
 func _draw_camp(camp: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(camp.q), int(camp.r)), hex_size)
-	if Art.has("map/camp_" + String(camp.kind)):
-		_draw_ring(c + Vector2(0, hex_size * 0.4), hex_size * 1.2, ENEMY_COLOR)
-		_draw_art("map/camp_" + String(camp.kind), c, hex_size * 1.15)
+	# Captives are held in a bandit camp.
+	var art := "map/camp_" + ("bandit" if camp.kind == "captives" else String(camp.kind))
+	if Art.has(art):
+		_draw_ring(c + Vector2(0, hex_size * 0.4), hex_size * 1.2, ENEMY_COLOR if camp.kind != "captives" else UI.GOOD)
+		_draw_art(art, c, hex_size * 1.15)
 		return
 	var r := hex_size * 0.32
 	var tent := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, r * 0.7), c + Vector2(-r, r * 0.7)])

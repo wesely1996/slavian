@@ -1290,6 +1290,21 @@ func _paged(list: String, items: Array, per_page: int, each: Callable) -> void:
 		_panel_body.add_child(page[1])
 
 
+## A daily event's lines: what it brings, and how long it waits (it goes
+## then, unless an army is already on its way).
+func _event_lines(event: Dictionary, brings: String) -> void:
+	if brings != "":
+		_panel_body.add_child(UI.label(brings, UI.SMALL_SIZE, UI.GOOD))
+	if event.get("endsAt") == null:
+		return
+	var ends_at := TimeUtil.parse_iso(String(event.endsAt))
+	var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(line)
+	_tick(line, func() -> String:
+		var left := ends_at - Game.server_now()
+		return tr("Gone in %s, unless an army is on its way") % TimeUtil.format_duration(left) if left > 0 else tr("Going…"))
+
+
 ## What the selected empty hex is (laid out at the top of its sheet), and
 ## the parts of its sheet: [[key, art id, name, fill], …] for _hex_panel.
 func _terrain_panel() -> Array:
@@ -1301,6 +1316,7 @@ func _terrain_panel() -> Array:
 	var camp := Game.camp_at(_selected)
 	if not camp.is_empty():
 		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
+		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward")))
 	if Game.fear.has(_selected):
 		_panel_body.add_child(UI.label(tr("Hordes fear this place: they were beaten here (%.0f).") % Game.fear[_selected], UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
@@ -1985,6 +2001,8 @@ func _hold_panel(terrain_id: String) -> void:
 		_panel_body.add_child(UI.with_info(UI.label(tr(kind.get("name", tr("Ancient site"))), UI.HEADING_SIZE), tr(kind.get("description", ""))))
 		var explorer := Game.member_name(int(site.exploredBy)) if site.get("exploredBy") != null else "?"
 		_panel_body.add_child(UI.label(SiteText.status(Game.data, site, explorer), UI.SMALL_SIZE, UI.ACCENT))
+		if site.status == "unexplored":
+			_event_lines(site, "")
 	var title := tr("Explore it") if exploring else (tr("Hold this hex") if camp.is_empty() else tr("Clear this camp"))
 	_panel_body.add_child(UI.with_info(UI.label(title, UI.HEADING_SIZE), ArmyText.order_text(orders)))
 	for line in FieldRules.ground(Game.data, Game.terrain, cell, fort, float(Game.world.speed)) if camp.is_empty() and not exploring else PackedStringArray():

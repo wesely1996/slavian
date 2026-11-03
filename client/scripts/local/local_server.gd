@@ -78,6 +78,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"stageStartedAt": LocalTime.iso(now), "sanctityAtStart": world.sanctity, "status": "open", "raisedAt": null}
 	_announce_first_waves(world)
 	LocalInbox.ensure_digests(self, world, now)
+	LocalEvents.ensure(self, world, now)
 	world.hexes = _by_row(world.hexes)
 	worlds[id] = world
 	save(world)
@@ -721,6 +722,8 @@ static func _js_number(value: Variant) -> String:
 ## time (a handler may schedule an earlier one).
 func drain(world: Dictionary, until: int, changed: Array) -> int:
 	var processed := 0
+	# Worlds saved before daily map events: the next day's planned.
+	LocalEvents.ensure(self, world, until)
 	# A finished run (won or lost) stands still.
 	while processed < 10000 and not world.status in ["won", "lost"]:
 		var next: Dictionary = {}
@@ -914,6 +917,14 @@ func _on_scout_return(world: Dictionary, event: Dictionary, changed: Array) -> v
 	LocalScouting.on_scout_return(self, world, event, changed)
 
 
+func _on_map_event(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEvents.on_map_event(self, world, event, changed)
+
+
+func _on_map_event_end(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEvents.on_map_event_end(self, world, event, changed)
+
+
 func _on_ruin_search(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalScouting.on_ruin_search(self, world, event, changed)
 
@@ -983,7 +994,8 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	for s in world.sites:
 		sites.append({"id": s.id, "kind": s.kind, "q": s.q, "r": s.r, "status": s.status,
 			"guardians": _total(s.guardians) if s.guardiansSeen else null, "exploredBy": s.exploredBy, "find": s.find,
-			"exploredAt": LocalTime.iso(s.exploredAt) if s.exploredAt != null else null})
+			"exploredAt": LocalTime.iso(s.exploredAt) if s.exploredAt != null else null,
+			"hard": s.get("hard", false), "endsAt": LocalTime.iso(s.endsAt) if s.get("endsAt") != null else null})
 	var members: Array = []
 	for m in world.members:
 		var settled: Variant = m.get("researchSettledAt")
@@ -1195,7 +1207,8 @@ func _camps_view(world: Dictionary) -> Array:
 	var out: Array = []
 	for c in world.camps:
 		if c.status == "active":
-			out.append({"id": c.id, "kind": c.kind, "front": c.front, "q": c.q, "r": c.r, "size": _total(c.units), "waveId": c.waveId})
+			out.append({"id": c.id, "kind": c.kind, "front": c.front, "q": c.q, "r": c.r, "size": _total(c.units), "waveId": c.waveId,
+				"reward": c.get("reward"), "endsAt": LocalTime.iso(c.endsAt) if c.get("endsAt") != null else null})
 	return out
 
 

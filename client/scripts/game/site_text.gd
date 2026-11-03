@@ -34,6 +34,8 @@ static func guardians(site: Dictionary) -> String:
 static func status(data: Dictionary, site: Dictionary, explorer: String) -> String:
 	if site.status == "explored":
 		return UI.t("Explored by %s: found %s") % [explorer, find(data, site.find)]
+	if site.get("hard", false) == true:
+		return UI.t("A forbidding ruin: strong guardians, rich finds · %s") % guardians(site)
 	return UI.t("Unexplored · %s") % guardians(site)
 
 

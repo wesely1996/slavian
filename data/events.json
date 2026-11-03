@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "_comment": "Daily map events (PLAN.md). Hours are game hours (divided by world speed). Every `everyHours` from the start of a run (the first after its first day), an event rises on passable open land `range.min` to `range.max` hexes from one of the players' villages, and goes after `lastsHours` unless an army is already on its way to it. `kinds` are picked by weight. captives: a camp (kind 'captives') of `guards` of the land's front, more each day (x 1 + `growthPerDay` x (day - 1)), holding captives: freeing them (clearing the camp) brings, with chance `unitsChance`, `count` (+ `countPerDay` a day) of one of `units` into the army that freed them, or else `resources` (x 1 + `growthPerDay` x (day - 1)) carried home with it; it doesn't grow, join hordes or ambush caravans. ruin: a hard ancient site (sites.json) watched by `guardianFactor` times its usual guardians, whose resources are worth `lootFactor` times as much.",
+  "everyHours": 24,
+  "lastsHours": 48,
+  "range": { "min": 3, "max": 7 },
+  "kinds": {
+    "captives": {
+      "weight": 1,
+      "guards": 6,
+      "growthPerDay": 0.25,
+      "unitsChance": 0.5,
+      "units": ["spearman", "archer", "axe_levy"],
+      "count": 4,
+      "countPerDay": 1,
+      "resources": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 }
+    },
+    "ruin": { "weight": 1, "guardianFactor": 3, "lootFactor": 2 }
+  }
+}

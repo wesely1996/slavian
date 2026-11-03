@@ -963,7 +963,42 @@
       "q": -2,
       "r": 5,
       "size": 10,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "captives",
+      "front": "south",
+      "q": 1,
+      "r": 6,
+      "size": 14,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 9
+       }
+      },
+      "endsAt": "2026-06-01T11:50:24.000Z"
+     },
+     {
+      "id": 4,
+      "kind": "captives",
+      "front": "south",
+      "q": -1,
+      "r": 8,
+      "size": 15,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 250,
+        "wood": 375,
+        "grain": 375,
+        "stone": 375
+       }
+      },
+      "endsAt": "2026-06-01T12:19:12.000Z"
      }
     ],
     "sites": [
@@ -976,7 +1011,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -987,7 +1024,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -998,7 +1037,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -1009,7 +1050,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -1020,7 +1063,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -3489,7 +3534,42 @@
       "q": -2,
       "r": 5,
       "size": 10,
-      "waveId": null
+      "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "captives",
+      "front": "south",
+      "q": 1,
+      "r": 6,
+      "size": 14,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 9
+       }
+      },
+      "endsAt": "2026-06-01T11:50:24.000Z"
+     },
+     {
+      "id": 4,
+      "kind": "captives",
+      "front": "south",
+      "q": -1,
+      "r": 8,
+      "size": 15,
+      "waveId": null,
+      "reward": {
+       "resources": {
+        "iron": 250,
+        "wood": 375,
+        "grain": 375,
+        "stone": 375
+       }
+      },
+      "endsAt": "2026-06-01T12:19:12.000Z"
      }
     ],
     "sites": [
@@ -3502,7 +3582,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 2,
@@ -3513,7 +3595,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 3,
@@ -3524,7 +3608,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 4,
@@ -3535,7 +3621,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 5,
@@ -3546,7 +3634,9 @@
       "guardians": null,
       "exploredBy": null,
       "find": null,
-      "exploredAt": null
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null
      }
     ],
     "lore": [],
@@ -5459,6 +5549,69 @@
    "response": {
     "notifications": [
      {
+      "id": 10,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (-1, 8)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (1, 6)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T10:52:48.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-8, 6)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-3, -2)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T09:55:12.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (-1, -2)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "site",
+      "tier": "digest",
+      "title": "A forbidding ruin rises at (1, 0)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Captives are held at (2, -1)",
+      "body": "Clear the camp to free them, before they are taken away.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
+      "read": false
+     },
+     {
       "id": 3,
       "kind": "onboarding",
       "tier": "digest",
@@ -5486,7 +5639,7 @@
       "read": false
      }
     ],
-    "unread": 3,
+    "unread": 10,
     "serverTime": "2026-06-01T11:24:12.000Z"
    }
   }
