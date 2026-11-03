@@ -78,6 +78,20 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
     { advance: 30 * MINUTE },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c3', building: 'barracks' } },
     { method: 'GET', path: '/v1/worlds/-1' },
+    // Builds called off: a farm's two levels queued behind a woodcutter;
+    // cancelling the first farm level takes the second with it and moves
+    // the next build up; cancelling what isn't queued is refused.
+    { advance: 30 * MINUTE },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f0' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f1' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f1' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f2' } },
+    { method: 'GET', path: '/v1/worlds/-1' },
+    { method: 'POST', path: '/v1/villages/1/build/cancel', body: { plot: 'f9', targetLevel: 1 } },
+    { method: 'POST', path: '/v1/villages/1/build/cancel', body: { plot: 'f1', targetLevel: 1 } },
+    { method: 'POST', path: '/v1/villages/1/build/cancel', body: { plot: 'f0', targetLevel: 2 } },
+    { advance: 30 * MINUTE },
+    { method: 'GET', path: '/v1/worlds/-1' },
   ];
   for (const step of steps) await play(step);
 });

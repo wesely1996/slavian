@@ -57,6 +57,7 @@ import {
   type BuildOrder,
   type QueuedBuild,
   type VillageState,
+  cancelBuild,
 } from '../sim/village.js';
 
 export interface VillageCommandInput {
@@ -265,6 +266,24 @@ export async function claimOutpostCommand(
     return { state, result: queued, onboarding: 'outpost' };
   });
   return { village, queued: result };
+}
+
+// Calls off a build in the queue: a share of its cost back; the builds
+// after it move up (their finishing events come sooner).
+export async function cancelBuildCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { plot: string; targetLevel: number },
+): Promise<{ village: Village; refund: Resources }> {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'cancelled a build' }, async ({ client, world, village }) => {
+    const { state, refund, moved } = cancelBuild(deps.data, village.state, input.plot, input.targetLevel, input.now);
+    for (const item of moved) {
+      const payload: BuildCompletePayload = { villageId: village.id, plot: item.plot, building: item.building, targetLevel: item.targetLevel };
+      await scheduleEvent(client, world.id, item.completesAt, 'build_complete', payload);
+    }
+    return { state, result: refund };
+  });
+  return { village, refund: result };
 }
 
 export async function abandonOutpostCommand(

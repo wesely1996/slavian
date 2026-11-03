@@ -83,6 +83,8 @@ const buildingsFileSchema = z.object({
     baseOutposts: z.number().int().nonnegative(),
     hallLevelsPerOutpost: z.number().int().positive(),
     demolishRefund: z.number().min(0).max(1),
+    // What a cancelled build gives back: base, plus per Hall level above 1.
+    cancelRefund: z.object({ base: z.number().min(0).max(1), perHallLevel: z.number().min(0) }),
     abandonRefund: z.number().min(0).max(1),
     market: z.object({ baseRate: z.number().positive(), ratePerLevel: z.number().nonnegative(), gearValue: resourcesSchema }),
   }),

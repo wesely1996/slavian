@@ -42,6 +42,7 @@ import {
   startResearchCommand,
   trainUnitsCommand,
   tradeCommand,
+  cancelBuildCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
@@ -117,6 +118,7 @@ const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.
 // or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
 // `building`.
+const cancelBuildBody = z.object({ plot: z.string().min(1).max(32), targetLevel: z.number().int().positive() });
 const buildBody = z
   .object({
     plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2}|o-?\d{1,3},-?\d{1,3})$/).optional(),
@@ -543,6 +545,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       now: clock(),
     });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/build/cancel', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = cancelBuildBody.parse(request.body);
+    const { village, refund } = await cancelBuildCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), refund, serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/train', async (request) => {
