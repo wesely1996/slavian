@@ -19,7 +19,8 @@ static func march_speed(data: Dictionary, front: String, composition: Dictionary
 	return slowest
 
 
-## The land: {"terrain": {"q,r": id}, "blocked": {edge key}, "roads": {edge key: level}}.
+## The land: {"terrain": {"q,r": id}, "blocked": {edge key}, "roads": {edge key: level},
+## "lanes": {edge key} (along the rivers finished boats sail)}.
 static func land_of(world: Dictionary) -> Dictionary:
 	var blocked := {}
 	for e in world.rivers:
@@ -29,7 +30,12 @@ static func land_of(world: Dictionary) -> Dictionary:
 	for e in world.roads:
 		if e.status != "building":
 			roads[LocalLand.edge_key(e.a, e.b)] = int(e.get("level", 1))
-	return {"terrain": world.hexes, "blocked": blocked, "roads": roads}
+	var lanes := {}
+	for s in world.get("shipyards", []):
+		if s.status == "done":
+			for k in LocalLand.river_lanes(world.rivers, s.edge.a, s.edge.b):
+				lanes[k] = true
+	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes}
 
 
 ## The cheapest target from `from`: road cost plus fear, plus extra for the

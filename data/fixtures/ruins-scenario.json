@@ -1306,21 +1306,6 @@
       "waveId": null,
       "reward": null,
       "endsAt": null
-     },
-     {
-      "id": 2,
-      "kind": "captives",
-      "front": "south",
-      "q": -7,
-      "r": 6,
-      "size": 6,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 4
-       }
-      },
-      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -1388,9 +1373,23 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
+     },
+     {
+      "id": 6,
+      "kind": "sunken_shrine",
+      "q": -6,
+      "r": 1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -3702,7 +3701,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:40:00.000Z",
       "returnsAt": "2026-06-01T08:43:36.000Z",
-      "siteId": 6
+      "siteId": 7
      },
      {
       "id": 1,
@@ -3789,21 +3788,6 @@
       "waveId": null,
       "reward": null,
       "endsAt": null
-     },
-     {
-      "id": 2,
-      "kind": "captives",
-      "front": "south",
-      "q": -7,
-      "r": 6,
-      "size": 6,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 4
-       }
-      },
-      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -3874,9 +3858,22 @@
      },
      {
       "id": 6,
+      "kind": "sunken_shrine",
+      "q": -6,
+      "r": 1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z"
+     },
+     {
+      "id": 7,
       "kind": "kurgan",
-      "q": -1,
-      "r": 6,
+      "q": -3,
+      "r": 7,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
@@ -3887,6 +3884,7 @@
      }
     ],
     "lore": [],
+    "shipyards": [],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -6810,7 +6808,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:50:00.000Z",
       "returnsAt": "2026-06-01T08:53:36.000Z",
-      "siteId": 7
+      "siteId": 8
      },
      {
       "id": 3,
@@ -6828,7 +6826,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:40:00.000Z",
       "returnsAt": "2026-06-01T08:43:36.000Z",
-      "siteId": 6
+      "siteId": 7
      },
      {
       "id": 1,
@@ -6915,21 +6913,6 @@
       "waveId": null,
       "reward": null,
       "endsAt": null
-     },
-     {
-      "id": 2,
-      "kind": "captives",
-      "front": "south",
-      "q": -7,
-      "r": 6,
-      "size": 6,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 4
-       }
-      },
-      "endsAt": "2026-06-01T09:26:24.000Z"
      }
     ],
     "sites": [
@@ -7000,22 +6983,22 @@
      },
      {
       "id": 6,
-      "kind": "kurgan",
-      "q": -1,
-      "r": 6,
+      "kind": "sunken_shrine",
+      "q": -6,
+      "r": 1,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
-      "hard": false,
-      "endsAt": null
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z"
      },
      {
       "id": 7,
-      "kind": "stone_idol",
-      "q": -6,
-      "r": 3,
+      "kind": "kurgan",
+      "q": -3,
+      "r": 7,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
@@ -7026,22 +7009,22 @@
      },
      {
       "id": 8,
-      "kind": "kurgan",
-      "q": -8,
-      "r": 3,
+      "kind": "stone_idol",
+      "q": -2,
+      "r": -2,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
+      "hard": false,
+      "endsAt": null
      },
      {
       "id": 9,
-      "kind": "sunken_shrine",
-      "q": 1,
-      "r": 2,
+      "kind": "old_hillfort",
+      "q": -4,
+      "r": 5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
@@ -7052,6 +7035,37 @@
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": 5,
+      "r": -5,
+      "edge": [
+       4,
+       -5,
+       5,
+       -5
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -8989,7 +9003,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Sunken Shrine lies at (1, 2). Send an army to explore it.",
+      "body": "A Old Hillfort lies at (-4, 5). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
@@ -8997,8 +9011,8 @@
       "id": 9,
       "kind": "site",
       "tier": "digest",
-      "title": "A forbidding ruin rises at (-8, 3)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "title": "Boatwrights wait at (5, -5)",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
@@ -9007,7 +9021,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-6, 3). Send an army to explore it.",
+      "body": "A Stone Idol lies at (-2, -2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
@@ -9025,7 +9039,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Kurgan lies at (-1, 6). Send an army to explore it.",
+      "body": "A Kurgan lies at (-3, 7). Send an army to explore it.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
@@ -9042,8 +9056,8 @@
       "id": 4,
       "kind": "site",
       "tier": "digest",
-      "title": "Captives are held at (-7, 6)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "title": "A forbidding ruin rises at (-6, 1)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
@@ -9090,7 +9104,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Sunken Shrine lies at (1, 2). Send an army to explore it.",
+      "body": "A Old Hillfort lies at (-4, 5). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
@@ -9098,8 +9112,8 @@
       "id": 9,
       "kind": "site",
       "tier": "digest",
-      "title": "A forbidding ruin rises at (-8, 3)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "title": "Boatwrights wait at (5, -5)",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
@@ -9108,7 +9122,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-6, 3). Send an army to explore it.",
+      "body": "A Stone Idol lies at (-2, -2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
@@ -9126,7 +9140,7 @@
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Kurgan lies at (-1, 6). Send an army to explore it.",
+      "body": "A Kurgan lies at (-3, 7). Send an army to explore it.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
@@ -9143,8 +9157,8 @@
       "id": 4,
       "kind": "site",
       "tier": "digest",
-      "title": "Captives are held at (-7, 6)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "title": "A forbidding ruin rises at (-6, 1)",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },

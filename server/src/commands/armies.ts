@@ -15,6 +15,8 @@ import type { Hex } from '../sim/hex.js';
 import type { Fort } from '../db/forts.js';
 import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
 import type { RoadEdge } from '../db/roads.js';
+import type { Shipyard } from '../db/shipyards.js';
+import { payShipyard } from '../scheduler/mapEvents.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [villageId]);
@@ -100,6 +102,20 @@ export async function buildRoadCommand(
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a road', villageId: village.id });
     return buildRoad(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
+  });
+}
+
+// Sends what a shipyard still needs from the caller's village.
+export async function payShipyardCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; shipyardId: number; now: Date },
+): Promise<Shipyard> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent resources to a shipyard', villageId: village.id });
+    return payShipyard(client, deps.data, await getWorld(client, worldId), village.id, input.shipyardId, input.now);
   });
 }
 

@@ -31,6 +31,7 @@ const RIVER_COLOR := Color("#4a86a3")
 const RIVER_BANK := Color(0.1, 0.16, 0.12, 0.45)
 const RIVER_GLINT := Color(0.75, 0.88, 0.92, 0.45)
 const PLANK_COLOR := Color("#b07a45")
+const LANE_COLOR := Color(0.95, 0.8, 0.35, 0.85)
 const ROAD_COLOR := Color("#a8906a")
 const ROAD_EDGE := Color(0.18, 0.14, 0.09, 0.35)
 ## Each front's emblem (art id "faction/<emblem>").
@@ -155,6 +156,8 @@ func _draw() -> void:
 		_draw_fort(fort)
 	for camp in Game.camps:
 		_draw_camp(camp)
+	for yard in Game.shipyards:
+		_draw_shipyard(yard)
 	for site in Game.sites:
 		if site.status == "unexplored":
 			_draw_site(site)
@@ -196,6 +199,22 @@ func _draw_road(road: Array) -> void:
 	draw_circle(b, hex_size * 0.045 * wide, ROAD_COLOR * tint)
 
 
+## A shipyard: a boat on the bank, ringed while it waits to be paid for
+## (good) or is being built (warning); a finished one is drawn plainly.
+func _draw_shipyard(yard: Dictionary) -> void:
+	var c := HexMath.to_pixel(Vector2i(int(yard.q), int(yard.r)), hex_size)
+	var r := hex_size * 0.32
+	var hull := PackedVector2Array([c + Vector2(-r, 0), c + Vector2(r, 0), c + Vector2(r * 0.6, r * 0.45), c + Vector2(-r * 0.6, r * 0.45)])
+	var tint := Color(1, 1, 1, 0.6) if yard.status == "building" else Color.WHITE
+	draw_colored_polygon(hull, PLANK_COLOR * tint)
+	hull.append(hull[0])
+	draw_polyline(hull, VILLAGE_OUTLINE_COLOR, 2.0)
+	draw_line(c, c + Vector2(0, -r * 1.1), VILLAGE_OUTLINE_COLOR, 2.0)
+	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r * 1.05), c + Vector2(r * 0.6, -r * 0.2), c + Vector2(0, -r * 0.2)]), Color(0.95, 0.92, 0.85) * tint)
+	if yard.status != "done":
+		_draw_ring(c, hex_size * 0.9, UI.GOOD if yard.status == "open" else UI.ACCENT)
+
+
 ## A river along the edge between two hexes, and its bridge if one stands
 ## (faded while being built).
 func _draw_river(edge: Array) -> void:
@@ -212,6 +231,9 @@ func _draw_river(edge: Array) -> void:
 	draw_line(ends[0].lerp(ends[1], 0.15), ends[0].lerp(ends[1], 0.85), RIVER_GLINT, hex_size * 0.03 * wide, true)
 	draw_circle(ends[0], hex_size * 0.065 * wide, RIVER_COLOR)
 	draw_circle(ends[1], hex_size * 0.065 * wide, RIVER_COLOR)
+	# A river a finished boat sails: a golden thread down it.
+	if Game.lanes.has(LocalLand.edge_key(a, b)):
+		draw_line(ends[0], ends[1], LANE_COLOR, hex_size * 0.05 * wide, true)
 	if String(edge[4]) == "none":
 		return
 	var mid: Vector2 = (ends[0] + ends[1]) / 2.0

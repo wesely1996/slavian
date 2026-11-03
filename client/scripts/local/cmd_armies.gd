@@ -1277,6 +1277,25 @@ static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, ar
 	return {"cleared": false, "rounds": rounds, "armyNow": army_now, "campNow": camp_now}
 
 
+## sim/camps.ts repelRaid: raiders strike an army standing guard; held
+## when the raiders broke. {held, armyNow, raidersNow}.
+static func repel_raid(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, raiders: Dictionary, raider_stance: String,
+		front: String, seed_value: int, id: int) -> Dictionary:
+	var raider_stats := LocalBattle.enemy_stats(data, front)
+	var army_now := army.duplicate()
+	var raiders_now := raiders.duplicate()
+	for round in range(1, int(data.battle.maxRounds) + 1):
+		var result := LocalBattle.resolve_round(data, {"units": raiders_now, "stance": raider_stance, "stats": raider_stats, "home": false},
+			{"units": army_now, "stance": army_stance, "stats": army_stats, "home": false}, LocalBattle.battle_rng(seed_value, id + 0x20000, round))
+		raiders_now = LocalCamps.subtract_units(raiders_now, result.attackerLosses)
+		army_now = LocalCamps.subtract_units(army_now, result.defenderLosses)
+		var outcome := LocalBattle.battle_outcome(data, {"round": round, "attackerStance": raider_stance, "attackerInitial": raiders, "attackerNow": raiders_now,
+			"defenderStance": army_stance, "defenderInitial": army, "defenderNow": army_now})
+		if outcome != "ongoing":
+			return {"held": outcome == "defended", "armyNow": army_now, "raidersNow": raiders_now}
+	return {"held": false, "armyNow": army_now, "raidersNow": raiders_now}
+
+
 static func camp_loot(data: Dictionary, units: Dictionary) -> Dictionary:
 	var n := LocalBattle.total(units)
 	return LocalVillage.resources(func(kind: String) -> int: return LocalWaves.js_round(float(data.camps.loot.perUnit[kind]) * n))

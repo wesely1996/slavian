@@ -1459,6 +1459,7 @@
      }
     ],
     "lore": [],
+    "shipyards": [],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -3991,6 +3992,7 @@
      }
     ],
     "lore": [],
+    "shipyards": [],
     "bridge": {
      "stage": 4,
      "embers": 2,
@@ -6458,22 +6460,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 4,
      "embers": 2,
@@ -8941,22 +8961,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -11829,22 +11867,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -14883,22 +14939,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -17956,22 +18030,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -21029,22 +21121,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -24102,22 +24212,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -27175,22 +27303,40 @@
       "exploredAt": null,
       "hard": false,
       "endsAt": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 1,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": "2026-06-01T09:55:12.000Z"
      }
     ],
     "lore": [],
+    "shipyards": [
+     {
+      "id": 1,
+      "q": -1,
+      "r": 4,
+      "edge": [
+       -1,
+       4,
+       0,
+       3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "raiders": 6,
+      "raids": 0,
+      "endsAt": "2026-06-01T09:55:12.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 5,
      "embers": 2,
@@ -29290,8 +29436,8 @@
       "id": 5,
       "kind": "site",
       "tier": "digest",
-      "title": "A forbidding ruin rises at (1, 0)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "title": "Boatwrights wait at (-1, 4)",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },

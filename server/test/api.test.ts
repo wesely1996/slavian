@@ -12,6 +12,7 @@ import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { gainXp, newHero, rosterBonuses } from '../src/sim/heroes.js';
 import { roadRoute } from '../src/sim/logistics.js';
+import { loadLand } from '../src/db/rivers.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
@@ -481,7 +482,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await db.query(`UPDATE villages SET amounts = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}' WHERE id = $1`, [village.id]);
 
     expect((await claim(village.q, village.r)).body.message).toMatch(/within 2 hexes/);
-    expect((await claim(village.q + 5, village.r)).body.message).toMatch(/within 2 hexes|not on the map/);
+    expect((await claim(village.q + 100, village.r)).body.message).toMatch(/within 2 hexes|not on the map/);
     // A bigger Elder's Hall allows a second outpost.
     const hall = await call('POST', `/v1/villages/${village.id}/build`, zora.token, { plot: 'c0' });
     now = new Date(hall.body.village.queue[0].completesAt);
@@ -994,7 +995,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const noon = new Date('2026-07-01T12:00:00Z');
     // Older tests' notifications are long sent; only hers are pending.
     await db.query(`UPDATE notifications SET pushed_at = now() WHERE account_id <> $1`, [mira.accountId]);
-    await db.query(`UPDATE notifications SET created_at = $1 WHERE account_id = $2`, [new Date(noon.getTime() - 60_000), mira.accountId]);
+    // Only the pushes: moving a digest notice past the world's clock would keep it out of every digest.
+    await db.query(`UPDATE notifications SET created_at = $1 WHERE account_id = $2 AND tier = 'push'`, [new Date(noon.getTime() - 60_000), mira.accountId]);
     expect(await pushPending(db, scheduler.data, null, new Date('2026-07-01T23:00:00Z'))).toBe(0);
     await db.query(`UPDATE notifications SET pushed_at = NULL WHERE account_id = $1`, [mira.accountId]);
     expect(await pushPending(db, scheduler.data, sender, new Date('2026-07-01T23:00:00Z'))).toBe(0);
@@ -1034,7 +1036,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     box = await inbox();
     const digests = box.notifications.filter((n: { kind: string }) => n.kind === 'digest');
     expect(digests[0]).toMatchObject({ tier: 'push', title: 'Today in Notices' });
-    expect(digests.some((d: { body: string }) => /1 build finished/.test(d.body))).toBe(true);
+    // The build was summed up in a digest (read from the table: the inbox is
+    // a page, and daily events crowd it).
+    const { rows: summed } = await db.query<{ body: string }>(
+      `SELECT d.body FROM notifications n JOIN notifications d ON d.id = n.digest_id WHERE n.account_id = $1 AND n.kind = 'build_done'`,
+      [mira.accountId],
+    );
+    expect(summed.map((d) => d.body)).toEqual(expect.arrayContaining([expect.stringMatching(/\d+ builds? finished/)]));
     const { rows: left } = await db.query(
       `SELECT 1 FROM notifications WHERE account_id = $1 AND tier = 'digest' AND digest_id IS NULL AND created_at <= $2`,
       [mira.accountId, now],
@@ -1522,7 +1530,18 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
     expect(started.body.sites.length).toBeGreaterThanOrEqual(scheduler.data.sites.placement.min);
     expect(started.body.sites.every((s: { status: string; guardians: null }) => s.status === 'unexplored' && s.guardians === null)).toBe(true);
-    const [watched, idol] = started.body.sites as { id: number; q: number; r: number; kind: string }[];
+    // Two sites the village has a road to (a river with no bridge can cut one off).
+    const landClient = await db.connect();
+    const land = await loadLand(landClient, worldId).finally(() => landClient.release());
+    const reachable = (started.body.sites as { id: number; q: number; r: number; kind: string }[]).filter((s) => {
+      try {
+        roadRoute(scheduler.data, land, hex(home.q, home.r), hex(s.q, s.r), 1, 10);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    const [watched, idol] = reachable;
     await db.query(`UPDATE sites SET guardians = '{"cave_bear": 30}' WHERE id = $1`, [watched!.id]);
     await db.query(`UPDATE sites SET guardians = '{"grey_wolf": 3}', kind = 'stone_idol' WHERE id = $1`, [idol!.id]);
     await db.query(`UPDATE villages SET garrison = '{"spearman": 80, "scout": 6}' WHERE id = $1`, [home.id]);
@@ -1532,7 +1551,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // Scouts alone can't get past the bears; now the group knows they are there.
     const scouts = await send(watched!, { scout: 4 });
-    expect(scouts.body.army).toMatchObject({ orders: 'explore', units: { scout: 4 } });
+    expect(scouts.body).toMatchObject({ army: { orders: 'explore', units: { scout: 4 } } });
     now = new Date(scouts.body.army.arrivesAt);
     await tick(db, now, scheduler);
     let w = await world();

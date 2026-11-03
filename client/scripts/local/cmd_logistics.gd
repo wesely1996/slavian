@@ -69,7 +69,7 @@ static func splice_route(path: Array, elapsed_ms: int, next: Callable) -> Varian
 
 static func road_route(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, hexes_per_hour: float, world_speed: float) -> Variant:
 	var move_cost := LocalLand.move_cost_on(data, land)
-	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_road(data))
+	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_step(data, land))
 	if path == null:
 		return null
 	var ms_per_cost := LocalTime.MS_PER_HOUR / hexes_per_hour / world_speed
