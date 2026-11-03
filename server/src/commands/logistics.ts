@@ -1,6 +1,6 @@
 import type { GameData, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
-import { caravansOut, insertCaravan, type Caravan } from '../db/caravans.js';
+import { caravansOut, insertCaravan, loadCaravan, saveCaravanRoute, type Caravan } from '../db/caravans.js';
 import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
@@ -21,6 +21,7 @@ import {
   caravansAt,
   caravansFor,
   HOLY_CITY,
+  spliceRoute,
   vaultUpgradeCost,
   vaultUpgradeMs,
   withdraw,
@@ -102,6 +103,88 @@ export async function dispatchCaravan(
   await planAmbushes(client, data, world, caravan, 'out', now);
   await notifyWorld(client, { worldId: world.id, type: 'caravans' });
   return caravan;
+}
+
+// Where a caravan on its way out is turned: home, or (one carrying goods
+// out, not on a supply route) another village or the vault (null).
+export type CaravanTurn = { home: true } | { villageId: number | null };
+
+// Turns a caravan on its way out: it finishes the hex it is crossing, then
+// comes home along the road it took with its goods, or takes a new road to
+// another village or the vault. The road behind it stays, so the way home
+// still runs back along it. Ambushes on its road are planned anew.
+export async function rerouteCaravanCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; caravanId: number; turn: CaravanTurn; now: Date },
+): Promise<Caravan> {
+  const { rows } = await db.query<{ village_id: number }>('SELECT village_id FROM caravans WHERE id = $1', [input.caravanId]);
+  if (!rows[0]) throw new NotFoundError('No such caravan');
+  const { result } = await ownVillageCommand(
+    db,
+    deps,
+    { accountId: input.accountId, villageId: rows[0].village_id, now: input.now, action: 'turned a caravan' },
+    async ({ client, world, village }) => {
+      const caravan = await loadCaravan(client, input.caravanId);
+      if (caravan.status !== 'outbound') throw new RuleError('Only caravans on their way out can be turned');
+      const elapsed = input.now.getTime() - caravan.departsAt.getTime();
+      let turned: Caravan;
+      if ('home' in input.turn) {
+        // It goes back from the hex it is crossing, with what it took out
+        // (a caravan fetching from the vault carries nothing yet).
+        const path = spliceRoute(caravan.path, elapsed, (from) => [{ ...from, atMs: 0 }]);
+        const there = path.at(-1)!.atMs;
+        turned = {
+          ...caravan,
+          path,
+          status: 'returning',
+          carriedBack: caravan.kind === 'deliver' ? caravan.cargo : { wood: 0, stone: 0, grain: 0, iron: 0 },
+          arrivesAt: new Date(caravan.departsAt.getTime() + there),
+          returnsAt: new Date(caravan.departsAt.getTime() + 2 * there),
+        };
+      } else {
+        if (caravan.kind !== 'deliver' || caravan.destinationFortId !== null) throw new RuleError('This caravan can only be turned back');
+        const to = input.turn.villageId;
+        if (to === caravan.destinationVillageId) throw new RuleError('It is already on its way there');
+        let dest: Hex = HOLY_CITY;
+        if (to !== null) {
+          if (to === village.id) throw new RuleError('Turn it back to bring it home');
+          const destination = await loadVillage(client, to).catch(() => null);
+          if (!destination || destination.worldId !== world.id) throw new NotFoundError('No such village in this world');
+          dest = hex(destination.q, destination.r);
+        }
+        const bonuses = await effectiveBonuses(client, deps.data, village);
+        const land = await loadLand(client, world.id);
+        const path = spliceRoute(caravan.path, elapsed, (from) => caravanRoute(deps.data, land, from, dest, world.speed, bonuses));
+        const travel = path.at(-1)!.atMs;
+        turned = {
+          ...caravan,
+          path,
+          destinationVillageId: to,
+          arrivesAt: new Date(caravan.departsAt.getTime() + travel),
+          returnsAt: new Date(caravan.departsAt.getTime() + 2 * travel),
+        };
+      }
+      await saveCaravanRoute(client, turned);
+      // Camps lying in wait on the old road wait in vain.
+      await client.query(
+        `UPDATE scheduled_events SET status = 'done', processed_at = now(), error = 'superseded'
+         WHERE world_id = $1 AND status = 'pending' AND type = 'caravan_ambush' AND payload @> $2::jsonb`,
+        [world.id, JSON.stringify({ caravanId: caravan.id })],
+      );
+      const payload: CaravanPayload = { caravanId: caravan.id };
+      if (turned.status === 'returning') {
+        await scheduleEvent(client, world.id, turned.returnsAt, 'caravan_return', payload);
+        await planAmbushes(client, deps.data, world, turned, 'back', input.now);
+      } else {
+        await scheduleEvent(client, world.id, turned.arrivesAt, 'caravan_arrive', payload);
+        await planAmbushes(client, deps.data, world, turned, 'out', input.now);
+      }
+      await notifyWorld(client, { worldId: world.id, type: 'caravans' });
+      return { state: village.state, result: turned };
+    },
+  );
+  return result;
 }
 
 // Loads resources from the caravan's village and sends them to an ally or

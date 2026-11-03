@@ -2,7 +2,8 @@
 // session (docs/local-engine.md, part 5): a tech learned (and the ones
 // refused), caravans to the Holy City vault and back, a vault upgrade
 // refused, the hero renamed and refused what it can't do yet, and a
-// caravan sent past the camp a beaten horde left by the road.
+// caravan sent past the camp a beaten horde left by the road; caravans
+// turned on their way out.
 import { MINUTE, scenario } from './scenario.js';
 
 const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Roads', displayName: 'You', speed: 50, difficulty: 'normal' };
@@ -36,6 +37,30 @@ scenario('logistics-scenario.json', START, async ({ play }) => {
   await play({ advance: 180 * MINUTE });
   await play({ method: 'GET', path: world });
   await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: null, load: load(100, 0, 100) } });
+  await play({ advance: 10 * MINUTE });
+  await play({ method: 'GET', path: world });
+
+  // Caravans turned on their way out: one to the vault can't be sent where
+  // it already goes, nor home but by turning back; turned back, it brings
+  // its goods home and can't be turned again. One fetching from the vault
+  // can only turn back.
+  const reroute = (id: number, body: object) => play({ method: 'POST', path: `/v1/caravans/${id}/reroute`, body });
+  const out = (await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: null, load: load(60, 0, 40) } })).body.caravan;
+  await play({ advance: 20_000 });
+  if (out) {
+    await reroute(out.id, { villageId: null });
+    await reroute(out.id, { villageId: 1 });
+    await reroute(out.id, { home: true });
+    await reroute(out.id, { home: true });
+  }
+  await play({ advance: 5 * MINUTE });
+  const fetching = (await play({ method: 'POST', path: '/v1/villages/1/caravans/fetch', body: { load: load(50) } })).body.caravan;
+  await play({ advance: 20_000 });
+  if (fetching) {
+    await reroute(fetching.id, { villageId: 1 });
+    await reroute(fetching.id, { home: true });
+  }
+  await reroute(999, { home: true });
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
 });

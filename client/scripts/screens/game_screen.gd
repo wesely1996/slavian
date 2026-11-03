@@ -1583,7 +1583,46 @@ func _caravan_trips(village_id: int) -> void:
 		_tick(line, func() -> String: return CaravanText.describe(caravan, village_id, Game.server_now()))
 		var ambushed := HordeText.ambush(caravan.get("ambush"))
 		if ambushed != "":
-			_panel_body.add_child(UI.label(ambushed, UI.SMALL_SIZE, UI.ERROR)))
+			_panel_body.add_child(UI.label(ambushed, UI.SMALL_SIZE, UI.ERROR))
+		_caravan_turns(caravan, village_id))
+
+
+## For a caravan of this village on its way out: turn it back, or (one
+## carrying goods, not on a supply route) send it somewhere else; it
+## finishes the hex it is crossing first.
+func _caravan_turns(caravan: Dictionary, village_id: int) -> void:
+	if int(caravan.villageId) != village_id or caravan.status != "outbound":
+		return
+	var caravan_id := int(caravan.id)
+	var row := UI.hbox(8)
+	row.add_child(UI.button(tr("Turn back"), func() -> void: _reroute_caravan(caravan_id, {"home": true})))
+	if caravan.kind == "deliver" and caravan.get("destinationFortId") == null:
+		var targets: Array = [null]
+		var labels := [tr("Send to…")]
+		if caravan.destinationVillageId != null:
+			labels.append(tr("Holy City vault"))
+			targets.append(0)
+		for v in Game.villages.values():
+			if int(v.id) != village_id and (caravan.destinationVillageId == null or int(v.id) != int(caravan.destinationVillageId)):
+				labels.append(String(v.name))
+				targets.append(int(v.id))
+		if targets.size() > 1:
+			var to := UI.options(labels, 0)
+			to.item_selected.connect(func(i: int) -> void:
+				if i > 0:
+					_reroute_caravan(caravan_id, {"villageId": targets[i] if int(targets[i]) != 0 else null}))
+			row.add_child(to)
+	_panel_body.add_child(row)
+
+
+func _reroute_caravan(caravan_id: int, body: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/caravans/%d/reroute" % caravan_id, body)
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	_refetch_world()
 
 
 func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort: Dictionary) -> void:
