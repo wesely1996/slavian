@@ -125,6 +125,29 @@ static func start_quest(server: LocalServer, world: Dictionary, hero: Dictionary
 	return away
 
 
+## The quest called off (scheduler/quests.ts cancelQuest): the hero turns
+## for home where it is and brings nothing back; one already on the way
+## home can't call it off.
+static func cancel_quest(server: LocalServer, world: Dictionary, hero: Dictionary, now: int) -> Dictionary:
+	var quest: Variant = hero.get("quest")
+	if hero.status != "questing" or quest == null:
+		return LocalVillage.rule("%s is on no quest" % hero.name)
+	if quest.get("cancelled", false) == true:
+		return LocalVillage.rule("%s is already on the way home" % hero.name)
+	var elapsed := now - LocalTime.parse(quest.departsAt)
+	var road_hours := (float(quest.hours) - float(server.data.quests.kinds[quest.kind].hours)) / 2.0
+	var out_ms := LocalHeroes.quest_ms({"hours": road_hours}, world.speed)
+	var homeward := LocalTime.parse(quest.returnsAt) - out_ms
+	if now >= homeward:
+		return LocalVillage.rule("%s is already on the way home" % hero.name)
+	var returns_at := now + mini(elapsed, out_ms)
+	var turned := hero.duplicate(true)
+	turned.quest.cancelled = true
+	turned.quest.returnsAt = LocalTime.iso(returns_at)
+	server.schedule(world, returns_at, "hero_quest", {"accountId": hero.accountId})
+	return turned
+
+
 ## The next horde from a front that hasn't set out yet.
 static func _next_wave(world: Dictionary, front: Variant) -> Dictionary:
 	var best: Dictionary = {}
@@ -208,7 +231,13 @@ static func on_hero_quest(server: LocalServer, world: Dictionary, event: Diction
 	var hero := LocalArmies.hero_of(world, int(event.payload.accountId))
 	var quest: Variant = hero.get("quest")
 	var at := int(event.dueAt)
-	if hero.status != "questing" or quest == null or LocalTime.parse(quest.returnsAt) > at:
+	# (A quest called off comes home earlier: its old return does nothing.)
+	if hero.status != "questing" or quest == null or LocalTime.parse(quest.returnsAt) != at:
+		return
+	if quest.get("cancelled", false) == true:
+		hero.status = "home"
+		hero.quest = null
+		changed.append(["world"])
 		return
 	var told := _fulfil(server, world, hero, quest, at, changed)
 	var name: String = hero.name
@@ -255,6 +284,8 @@ static func command(server: LocalServer, world: Dictionary, account_id: int, act
 			next = move(server, world, hero, int(body.get("villageId", 0)), now)
 		"quest":
 			next = start_quest(server, world, hero, String(body.get("offer", "")), now)
+		"quest/cancel":
+			next = cancel_quest(server, world, hero, now)
 		_:
 			return {"error": "Not in single player yet", "kind": "local"}
 	if next.has("error"):

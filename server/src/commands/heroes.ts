@@ -8,7 +8,7 @@ import { getWorld, loadHexes, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { HeroPayload } from '../scheduler/heroes.js';
-import { startQuest } from '../scheduler/quests.js';
+import { startQuest, cancelQuest } from '../scheduler/quests.js';
 import { withWorld } from '../scheduler/world.js';
 import { equip, heroFactor, learnSkill, unequip } from '../sim/heroes.js';
 import { hex } from '../sim/hex.js';
@@ -40,6 +40,11 @@ async function heroCommand(
 // Sends the hero on one of the quests it is offered.
 export async function startQuestCommand(db: Db, deps: SchedulerDeps, input: HeroCommandInput & { offer: string }): Promise<Hero> {
   return heroCommand(db, deps, input, ({ client, world, hero }) => startQuest(client, deps.data, world, hero, input.offer, input.now));
+}
+
+// Calls off the hero's quest: it turns for home.
+export async function cancelQuestCommand(db: Db, deps: SchedulerDeps, input: HeroCommandInput): Promise<Hero> {
+  return heroCommand(db, deps, input, ({ client, world, hero }) => cancelQuest(client, deps.data, world, hero, input.now));
 }
 
 // Sends the hero to another of the caller's villages.

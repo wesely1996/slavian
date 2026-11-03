@@ -21,7 +21,7 @@ import {
   setReinforceCommand,
 } from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
-import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand } from '../commands/heroes.js';
+import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
 import { heroQuestOffers } from '../scheduler/quests.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
@@ -143,6 +143,7 @@ const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
 const heroUnequipBody = z.object({ slot: z.enum(HERO_SLOTS) });
 const heroRenameBody = z.object({ name: displayName });
 const heroQuestBody = z.object({ offer: z.string().min(1).max(40) });
+const emptyBody = z.object({}).default({});
 const orderBody = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('train'), unit: z.string().min(1).max(64), batch: z.number().int(), target: z.number().int() }),
   z.object({ kind: z.literal('rebuild') }),
@@ -666,6 +667,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     return { hero: heroView(scheduler.data, hero, offers), serverTime: clock().toISOString() };
   }
   app.post('/v1/worlds/:id/hero/quest', (request) => heroRoute(request, heroQuestBody, (input) => startQuestCommand(db, scheduler, input)));
+  app.post('/v1/worlds/:id/hero/quest/cancel', (request) => heroRoute(request, emptyBody, (input) => cancelQuestCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/move', (request) => heroRoute(request, heroMoveBody, (input) => moveHeroCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/skills', (request) => heroRoute(request, heroSkillBody, (input) => learnSkillCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/equip', (request) => heroRoute(request, heroEquipBody, (input) => equipCommand(db, scheduler, input)));

@@ -316,8 +316,8 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		var view := world_view(world, now)
 		view.claimed = claimed
 		return {"status": 200, "data": view}
-	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "hero":
-		var hero := LocalHeroCommands.command(self, world, int(world.hostAccountId), parts[4], body, now)
+	if method == "POST" and parts.size() in [5, 6] and parts[1] == "worlds" and parts[3] == "hero":
+		var hero := LocalHeroCommands.command(self, world, int(world.hostAccountId), "/".join(parts.slice(4)), body, now)
 		if hero.has("error"):
 			return _rule_answer(hero)
 		changed.append(["world"])
