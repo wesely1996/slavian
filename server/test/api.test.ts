@@ -12,6 +12,7 @@ import { total } from '../src/sim/battle.js';
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { gainXp, newHero, rosterBonuses } from '../src/sim/heroes.js';
 import { roadRoute } from '../src/sim/logistics.js';
+import { loadLand } from '../src/db/rivers.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
@@ -1528,7 +1529,18 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vesna.token)).body;
     expect(started.body.sites.length).toBeGreaterThanOrEqual(scheduler.data.sites.placement.min);
     expect(started.body.sites.every((s: { status: string; guardians: null }) => s.status === 'unexplored' && s.guardians === null)).toBe(true);
-    const [watched, idol] = started.body.sites as { id: number; q: number; r: number; kind: string }[];
+    // Two sites the village has a road to (a river with no bridge can cut one off).
+    const landClient = await db.connect();
+    const land = await loadLand(landClient, worldId).finally(() => landClient.release());
+    const reachable = (started.body.sites as { id: number; q: number; r: number; kind: string }[]).filter((s) => {
+      try {
+        roadRoute(scheduler.data, land, hex(home.q, home.r), hex(s.q, s.r), 1, 10);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    const [watched, idol] = reachable;
     await db.query(`UPDATE sites SET guardians = '{"cave_bear": 30}' WHERE id = $1`, [watched!.id]);
     await db.query(`UPDATE sites SET guardians = '{"grey_wolf": 3}', kind = 'stone_idol' WHERE id = $1`, [idol!.id]);
     await db.query(`UPDATE villages SET garrison = '{"spearman": 80, "scout": 6}' WHERE id = $1`, [home.id]);
@@ -1538,7 +1550,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // Scouts alone can't get past the bears; now the group knows they are there.
     const scouts = await send(watched!, { scout: 4 });
-    expect(scouts.body.army).toMatchObject({ orders: 'explore', units: { scout: 4 } });
+    expect(scouts.body).toMatchObject({ army: { orders: 'explore', units: { scout: 4 } } });
     now = new Date(scouts.body.army.arrivesAt);
     await tick(db, now, scheduler);
     let w = await world();
