@@ -4,6 +4,7 @@
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
 import { onboardingStep } from './onboarding.js';
+import { rewardEvent } from './eventOutcomes.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
@@ -294,6 +295,8 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
       : '{kills} of them fell; {defenders} still hold it.',
     vars: { where, loot: total(result.cleared && after.loot ? after.loot : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
+  // Captives freed: the event's bounty.
+  if (result.cleared && camp.kind === 'captives') await rewardEvent(client, data, world, army.ownerAccountId, { title: 'You freed the captives at ({q}, {r})', vars: { q: camp.q, r: camp.r } }, at);
   await notifyWorld(client, { worldId: world.id, type: 'battles' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }

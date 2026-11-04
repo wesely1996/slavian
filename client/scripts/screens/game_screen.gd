@@ -4872,6 +4872,23 @@ func _on_inbox_changed() -> void:
 	_fit_bar()
 	if _panel_mode == "inbox":
 		_rebuild_panel()
+	_pop_events()
+
+
+## Daily map events, as they rise, are done or are left undone: each new
+## event notice in a popup (the last few, oldest on top).
+func _pop_events() -> void:
+	var world_id := Game.world_id()
+	var seen := Session.world_mark(world_id, "event_seen")
+	var fresh: Array = Game.inbox.filter(func(n: Dictionary) -> bool: return n.get("kind") == "event" and not n.get("read", false) and int(n.id) > seen)
+	if fresh.is_empty():
+		return
+	fresh.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) > int(b.id))
+	Session.set_world_mark(world_id, "event_seen", int(fresh[0].id))
+	Sound.effect("horn")
+	# Added newest first, so the oldest lies on top and is read first.
+	for n in fresh.slice(0, 3):
+		_show_note(String(n.title), String(n.body), tr("Onward"))
 
 
 # --- Forces ------------------------------------------------------------------

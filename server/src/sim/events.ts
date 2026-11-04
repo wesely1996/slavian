@@ -6,7 +6,7 @@ import type { CampReward } from '../db/camps.js';
 import { hexDistance, hexKey, ring, type Hex } from './hex.js';
 import { edgeKey } from './land.js';
 import { frontOf, type Front } from './mapgen.js';
-import { mapResources } from './resources.js';
+import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
 import { guardiansFor, type PlacedSite } from './sites.js';
 import { composeWave, type Composition } from './waves.js';
@@ -15,6 +15,19 @@ export type MapEventPlan =
   | { kind: 'captives'; cell: Hex; front: Front; guards: Composition; reward: CampReward }
   | { kind: 'ruin'; cell: Hex; site: PlacedSite }
   | { kind: 'shipyard'; cell: Hex; edge: { a: Hex; b: Hex }; front: Front; raiders: Composition };
+
+// The front an event at `cell` belongs to: the land it rose in, or the first
+// active one.
+export function eventFront(cell: Hex, activeFronts: readonly Front[]): Front {
+  const own = frontOf(cell);
+  return activeFronts.includes(own) ? own : activeFronts[0]!;
+}
+
+// An event's bounty on `day` of the run (events.json reward).
+export function eventBounty(data: GameData, day: number): Resources {
+  const grown = 1 + data.events.reward.growthPerDay * (Math.max(1, day) - 1);
+  return mapResources((k) => Math.round(data.events.reward.resources[k] * grown));
+}
 
 // The event of `day` (1: the first, a game day into the run), or null when
 // there is nowhere to put it.
@@ -62,8 +75,7 @@ export function planMapEvent(
   if (usable.length === 0) return null;
   const { cell, type } = usable[Math.floor(rng() * usable.length)]!;
   const grown = 1 + captives.growthPerDay * (input.day - 1);
-  const own = frontOf(cell);
-  const front = input.activeFronts.includes(own) ? own : input.activeFronts[0]!;
+  const front = eventFront(cell, input.activeFronts);
   if (kind === 'shipyard') {
     const raiders = composeWave(data, front, input.day, Math.round(shipyard.raiders * grown), (input.seed ^ input.day ^ 0x5a17) >>> 0, input.players);
     return { kind, cell, edge: banks.get(hexKey(cell))![0]!, front, raiders };

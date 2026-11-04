@@ -51,6 +51,7 @@ export const SERBIAN_LABELS: Record<string, string> = {
   settlers: 'izveštaji doseljenika',
   hero: 'vesti o junacima',
   leader: 'vesti o neprijateljskim vođama',
+  event: 'događaji',
 };
 
 export function digestSummary(kinds: readonly string[], language = 'en'): string {
@@ -68,6 +69,7 @@ export function digestSummary(kinds: readonly string[], language = 'en'): string
     settlers: ['settlers report', 'settlers reports'],
     hero: ['hero report', 'hero reports'],
     leader: ['word of an enemy leader', 'words of enemy leaders'],
+    event: ['event', 'events'],
   };
   const counts = new Map<string, number>();
   for (const kind of kinds) counts.set(kind, (counts.get(kind) ?? 0) + 1);
