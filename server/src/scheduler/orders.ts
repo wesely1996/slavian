@@ -9,7 +9,7 @@ import { notifyWorld } from '../db/notify.js';
 import { listOrders, recordOrderRun } from '../db/orders.js';
 import type { DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import type { World } from '../db/worlds.js';
+import { addBought, boughtCount, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { CARAVAN_YARD, caravanCapacity, caravansAt, total } from '../sim/logistics.js';
 import { rebuildTargets, supplyLoad, surplusLoad, trainCount, type StandingOrder } from '../sim/orders.js';
@@ -81,7 +81,9 @@ async function runOrder(
     const count = trainCount(spec, unitsFed(state)[spec.unit] ?? 0);
     if (count === 0) return { state, result: `${spec.target} ${name} kept` };
     const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
-    const { state: next, batch } = queueTraining(data, state, spec.unit, count, at, world.speed, owned);
+    const bought = await boughtCount(client, world.id, village.ownerAccountId!, spec.unit);
+    const { state: next, batch } = queueTraining(data, state, spec.unit, data.units.units[spec.unit]?.oneAtATime ? 1 : count, at, world.speed, owned, bought);
+    if (data.units.units[spec.unit]?.costStep) await addBought(client, world.id, village.ownerAccountId!, spec.unit, batch.count);
     await scheduleEvent(client, world.id, batchCompletesAt(batch), 'training_complete', { villageId: village.id });
     return { state: next, result: `Training ${count} ${name}` };
   }

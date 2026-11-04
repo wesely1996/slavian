@@ -10,7 +10,10 @@ export interface ScoutMission {
   villageId: number;
   waveId: number;
   sent: number;
+  // Scouts sent by kind, and those that came through (null: not yet).
+  units: Record<string, number>;
   survivors: number | null;
+  survivorUnits: Record<string, number> | null;
   status: MissionStatus;
   target: { q: number; r: number };
   departsAt: Date;
@@ -25,7 +28,9 @@ interface MissionRow {
   village_id: number;
   wave_id: number;
   sent: number;
+  units: Record<string, number> | null;
   survivors: number | null;
+  survivor_units: Record<string, number> | null;
   status: MissionStatus;
   target_q: number;
   target_r: number;
@@ -42,7 +47,10 @@ function fromRow(row: MissionRow): ScoutMission {
     villageId: row.village_id,
     waveId: row.wave_id,
     sent: row.sent,
+    // Missions from before scout kinds sent plain scouts.
+    units: row.units ?? { scout: row.sent },
     survivors: row.survivors,
+    survivorUnits: row.survivor_units ?? (row.survivors === null ? null : { scout: row.survivors }),
     status: row.status,
     target: { q: row.target_q, r: row.target_r },
     departsAt: row.departs_at,
@@ -54,11 +62,11 @@ function fromRow(row: MissionRow): ScoutMission {
 
 export async function insertMission(
   client: DbClient,
-  mission: Omit<ScoutMission, 'id' | 'survivors' | 'status' | 'report'>,
+  mission: Omit<ScoutMission, 'id' | 'survivors' | 'survivorUnits' | 'status' | 'report'>,
 ): Promise<ScoutMission> {
   const { rows } = await client.query<MissionRow>(
-    `INSERT INTO scout_missions (world_id, village_id, wave_id, sent, target_q, target_r, departs_at, arrives_at, returns_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+    `INSERT INTO scout_missions (world_id, village_id, wave_id, sent, target_q, target_r, departs_at, arrives_at, returns_at, units)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
     [
       mission.worldId,
       mission.villageId,
@@ -69,6 +77,7 @@ export async function insertMission(
       mission.departsAt,
       mission.arrivesAt,
       mission.returnsAt,
+      JSON.stringify(mission.units),
     ],
   );
   return fromRow(rows[0]!);
@@ -80,10 +89,10 @@ export async function loadMission(client: DbClient, id: number): Promise<ScoutMi
   return fromRow(rows[0]);
 }
 
-export async function recordReport(client: DbClient, id: number, report: ScoutReport): Promise<void> {
+export async function recordReport(client: DbClient, id: number, report: ScoutReport, survivorUnits: Record<string, number>): Promise<void> {
   await client.query(
-    "UPDATE scout_missions SET status = 'returning', survivors = $2, report = $3 WHERE id = $1",
-    [id, report.survivors, JSON.stringify(report)],
+    "UPDATE scout_missions SET status = 'returning', survivors = $2, report = $3, survivor_units = $4 WHERE id = $1",
+    [id, report.survivors, JSON.stringify(report), JSON.stringify(survivorUnits)],
   );
 }
 

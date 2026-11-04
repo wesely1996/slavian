@@ -4,6 +4,7 @@
 // for a shipyard, someone has sent resources). A paid-for shipyard builds
 // its boat (shipyard_done), struck by raiders (shipyard_raid) on the way.
 import { z } from 'zod';
+import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, saveArmy } from '../db/armies.js';
 import { deleteCamp, loadCamp } from '../db/camps.js';
@@ -124,10 +125,12 @@ export const mapEventHandlers: HandlerRegistry = {
     const where = { q: shipyard.q, r: shipyard.r };
     for (const [i, army] of (await armiesHolding(client, world.id, shipyard.q, shipyard.r, ['stationed'])).entries()) {
       if (total(raiders) === 0) break;
+      // Scouts alone stand aside.
+      if (total(combatants(data, army.units)) === 0) continue;
       const home = await loadVillage(client, army.homeVillageId);
       const result = repelRaid(data, {
-        army: army.units,
-        armyStats: playerStats(data, home.state.bonuses, false),
+        army: combatants(data, army.units),
+        armyStats: withIntel(data, army.units, playerStats(data, home.state.bonuses, false)),
         armyStance: army.stance,
         raiders,
         raiderStance: rules.raiderStance,
@@ -136,7 +139,7 @@ export const mapEventHandlers: HandlerRegistry = {
         id: shipyard.id * 64 + shipyard.raids * 8 + i,
       });
       const lost: Record<string, number> = {};
-      for (const [unit, n] of Object.entries(army.units)) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
+      for (const [unit, n] of Object.entries(combatants(data, army.units))) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
       const after = await armyLosses(client, data, world, army, lost, at);
       const kills = total(raiders) - total(result.raidersNow);
       raiders = result.held ? {} : result.raidersNow;

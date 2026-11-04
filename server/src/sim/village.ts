@@ -690,11 +690,16 @@ export function queueTraining(
   at: Date,
   worldSpeed: number,
   villagesOwned = 1,
+  bought = 0,
 ): { state: VillageState; batch: TrainingBatch } {
   const def = data.units.units[unit];
   if (!def) throw new RuleError(`Unknown unit "${unit}"`);
   if (!Number.isInteger(count) || count < 1 || count > data.units.maxBatch) {
     throw new RuleError(`Train between 1 and ${data.units.maxBatch} at a time`);
+  }
+  if (def.oneAtATime && count !== 1) throw new RuleError(`${def.name}s train one at a time`);
+  if (def.oneAtATime && state.training.some((b) => b.unit === unit && batchCompletesAt(b) > at)) {
+    throw new RuleError(`A ${def.name} is already in training here`);
   }
   if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can train a ${def.name}`);
   const buildingLevel = state.levels[def.building] ?? 0;
@@ -703,7 +708,7 @@ export function queueTraining(
   }
   if (state.training.length >= trainingQueueLimit(data, state.levels)) throw new RuleError('Training queue is full');
 
-  const cost = unitCost(data, unit, count, villagesOwned);
+  const cost = unitCost(data, unit, count, villagesOwned, bought);
   const paid = spend(state.ledger, at, cost);
   const last = state.training.at(-1);
   const startsAt = last && batchCompletesAt(last) > at ? batchCompletesAt(last) : at;
@@ -718,12 +723,14 @@ export function queueTraining(
   return { state: { ...state, ledger, training }, batch };
 }
 
-// What `count` units cost an owner of `villagesOwned` villages: settlers
-// get dearer with every village.
-export function unitCost(data: GameData, unit: string, count: number, villagesOwned = 1): Resources {
+// What `count` units cost an owner of `villagesOwned` villages who has
+// bought `bought` of them: settlers get dearer with every village, and
+// every few bought (costStep).
+export function unitCost(data: GameData, unit: string, count: number, villagesOwned = 1, bought = 0): Resources {
   const def = data.units.units[unit];
   if (!def) throw new RuleError(`Unknown unit "${unit}"`);
-  const factor = (def.costGrowthPerVillage ?? 1) ** Math.max(0, villagesOwned - 1);
+  const step = def.costStep ? def.costStep.growth ** Math.floor(bought / def.costStep.every) : 1;
+  const factor = (def.costGrowthPerVillage ?? 1) ** Math.max(0, villagesOwned - 1) * step;
   return mapResources((kind) => Math.round(def.cost[kind] * factor) * count);
 }
 

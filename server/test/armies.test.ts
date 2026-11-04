@@ -9,10 +9,13 @@ describe('armies', () => {
   it('march with fighters only, at the slowest pace', () => {
     expect(fighters(data, { spearman: 5, scout: 3, settler: 1, horseman: 0 })).toEqual({ spearman: 5 });
     expect(armySpeed(data, { spearman: 5, horseman: 2 })).toBe(Math.min(data.units.units.spearman!.speed, data.units.units.horseman!.speed));
-    expect(() => validateArmy(data, { scout: 2 }, 'support')).toThrow(/don't march/);
+    expect(() => validateArmy(data, { scout: 2 }, 'support')).toThrow(/at least one soldier/);
     expect(() => validateArmy(data, { spearman: 0 }, 'support')).toThrow(/at least one/);
     expect(() => validateArmy(data, { spearman: 10, horseman: 2 }, 'harass')).toThrow(/mostly cavalry/);
     expect(validateArmy(data, { spearman: 1, horseman: 4 }, 'harass')).toEqual({ spearman: 1, horseman: 4 });
+    // Scouts march along (they don't count against the cavalry share), never as soldiers.
+    expect(validateArmy(data, { horseman: 4, scout: 3, pathfinder: 1 }, 'harass')).toEqual({ horseman: 4, scout: 3, pathfinder: 1 });
+    expect(() => validateArmy(data, { settler: 1, spearman: 1 }, 'hold')).toThrow(/don't march/);
     expect(shareOf(data, { spearman: 9, archer: 1, scout: 4 }, 0.5)).toEqual({ spearman: 4 });
   });
 

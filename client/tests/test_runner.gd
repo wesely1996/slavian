@@ -678,6 +678,8 @@ func _test_local_waves() -> void:
 	_replay_scenario("shipyard-scenario.json", "local shipyards and river lanes")
 	_replay_scenario("road-scenario.json", "local roads")
 	_replay_scenario("ruins-scenario.json", "local ruin searches")
+	_replay_scenario("stance-scenario.json", "local army stances")
+	_replay_scenario("scouts-scenario.json", "local scouts, assassins and intel")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -827,6 +829,9 @@ func _replay_scenario(file: String, name: String) -> void:
 				world.embers = int(step.set.embers)
 			if step.set.has("vault"):
 				world.vault.amounts = LocalServer._decode(step.set.vault)
+			if step.set.has("garrison"):
+				for unit in step.set.garrison:
+					world.villages[0].state.garrison[unit] = int(step.set.garrison[unit])
 			if step.set.has("waveHatred"):
 				for w in world.waves:
 					if int(w.index) == int(step.set.waveHatred.index) and w.get("bandOf") == null:

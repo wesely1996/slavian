@@ -113,7 +113,7 @@ static func card(data: Dictionary, building: String, speed: float, time_factor :
 
 ## The card for `unit`: what it is for, its strengths, what it costs and
 ## how long it trains with the training building at `building_level`.
-static func unit_card(data: Dictionary, unit: String, speed: float, building_level := 1, villages_owned := 1, time_factor := 1.0) -> Control:
+static func unit_card(data: Dictionary, unit: String, speed: float, building_level := 1, villages_owned := 1, time_factor := 1.0, bought := 0) -> Control:
 	var def: Dictionary = data.units.units[unit]
 	var family := String(def.family)
 	var box := UI.vbox(8)
@@ -125,6 +125,13 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	box.add_child(UI.label(UI.t("Marches out with food for %s") % TimeUtil.format_duration(float(def.get("supplyHours", 0)) * 3600.0 / speed), UI.SMALL_SIZE))
 	if float(def.get("supplyGrain", 0)) > 0:
 		box.add_child(UI.label(UI.t("Its wagon carries %d more grain for the army") % int(def.supplyGrain), UI.SMALL_SIZE))
+	# A scout: how often hordes catch it, what it is worth, and an assassin's knife.
+	var scouting: Variant = def.get("scouting")
+	if scouting is Dictionary:
+		box.add_child(UI.label(UI.t("Never fights. Caught %d%% as often as a scout; worth %d in a report or with an army") % [
+			roundi(float(scouting.stealth) * 100.0), int(scouting.intel)], UI.SMALL_SIZE))
+		if float(scouting.get("assassinate", 0)) > 0:
+			box.add_child(UI.label(UI.t("Reaching a horde, each has a %d%% chance to kill its leader") % roundi(float(scouting.assassinate) * 100.0), UI.SMALL_SIZE, UiTheme.GOLD))
 	if def.get("wagon", false) == true:
 		box.add_child(UI.label(UI.t("No soldier: holding open ground, the wagons make a wagon fort (+%d%% defense for each wagon per %d soldiers, at most +%d%%)") % [
 			roundi(float(data.field.wagonFort.bonusPerWagon) * 100.0), int(data.field.wagonFort.menPerWagon), roundi(float(data.field.wagonFort.maxBonus) * 100.0)], UI.SMALL_SIZE))
@@ -137,7 +144,7 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 		if counters[attacker].has(family):
 			box.add_child(UI.label(UI.t("Weak against %s") % attacker, UI.SMALL_SIZE, UI.ERROR))
 	var seconds := float(def.trainSeconds) * pow(float(data.units.trainingSpeedup), maxi(0, building_level - 1)) * time_factor / speed
-	box.add_child(UI.rich(UI.t("%s each · trains in %s") % [UI.costs(Rules.unit_cost(def, 1, villages_owned), 22), TimeUtil.format_duration(seconds)], UI.SMALL_SIZE, UiTheme.INK))
+	box.add_child(UI.rich(UI.t("%s each · trains in %s") % [UI.costs(Rules.unit_cost(def, 1, villages_owned, bought), 22), TimeUtil.format_duration(seconds)], UI.SMALL_SIZE, UiTheme.INK))
 	box.add_child(UI.label(UI.t("Trained at %s level %d") % [UI.t(data.buildings.buildings[def.building].name), int(def.requiresLevel)], UI.SMALL_SIZE, UI.MUTED))
 	return box
 

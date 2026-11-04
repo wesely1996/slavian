@@ -24,7 +24,7 @@ static func units_text(units: Dictionary, defs: Dictionary) -> String:
 
 
 ## "Supporting Vesna · arrives in 3m", from the point of view of its owner.
-static func status(army: Dictionary, target_name: String, now: float) -> String:
+static func status(army: Dictionary, target_name: String, now: float, search_ends := 0.0) -> String:
 	var verb: String = {
 		"support": UI.t("Supporting"),
 		"reinforce": UI.t("Reinforcing"),
@@ -39,6 +39,8 @@ static func status(army: Dictionary, target_name: String, now: float) -> String:
 			return UI.t("%s %s · arrives in %s") % [verb, target_name, TimeUtil.format_duration(TimeUtil.parse_iso(army.arrivesAt) - now)]
 		"stationed":
 			if army.orders == "explore":
+				if search_ends > now:
+					return UI.t("Searching the site at %s · done in %s") % [target_name, TimeUtil.format_duration(search_ends - now)]
 				return UI.t("Searching the site at %s") % target_name
 			return (UI.t("Holding %s") if army.orders == "hold" else UI.t("Standing guard at %s")) % target_name
 		"engaged":
@@ -47,6 +49,25 @@ static func status(army: Dictionary, target_name: String, now: float) -> String:
 			var loot := UI.t(" with loot") if army.get("loot") is Dictionary else ""
 			return UI.t("Coming home from %s%s · %s") % [target_name, loot, TimeUtil.format_duration(TimeUtil.parse_iso(army.returnsAt) - now)]
 	return UI.t("Back from %s") % target_name
+
+
+## When an army searching a site is done (unix seconds; 0: not searching):
+## the search starts as it arrives and takes the site's exploreHours, the
+## less the more of them (sites.json search).
+static func search_ends(data: Dictionary, army: Dictionary, site: Dictionary, world_speed: float) -> float:
+	if army.orders != "explore" or army.status != "stationed" or site.is_empty():
+		return 0.0
+	return TimeUtil.parse_iso(army.arrivesAt) + search_seconds(data, String(site.kind), army.units, world_speed)
+
+
+## Real-time seconds `units` take to search a site of `kind` (sim/sites.ts searchMs).
+static func search_seconds(data: Dictionary, kind: String, units: Dictionary, world_speed: float) -> float:
+	var count := 0
+	for unit in units:
+		count += maxi(0, int(units[unit]))
+	var rules: Dictionary = data.sites.get("search", {"perUnit": 0.0, "minShare": 1.0})
+	var share := maxf(float(rules.minShare), 1.0 / (1.0 + float(rules.perUnit) * maxi(0, count - 1)))
+	return float(data.sites.kinds.get(kind, {}).get("exploreHours", 0)) * 3600.0 * share / world_speed
 
 
 ## When it gets there and when it is home again: on the march, the arrival

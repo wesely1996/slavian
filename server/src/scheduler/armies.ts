@@ -6,6 +6,7 @@
 // before that (supply null) are fed by their home village. Forts and supply
 // points keep grain too: an army standing on one fills up from it as it
 // would in a village, and can leave grain there.
+import { combatants } from '../sim/scouting.js';
 import { wagonsIn } from '../sim/field.js';
 import { loadLand } from '../db/rivers.js';
 import type { Land } from '../sim/land.js';
@@ -487,7 +488,7 @@ async function joinBattle(client: DbClient, data: GameData, world: World, army: 
   const bonus = joinBonus(data, { orders: army.orders, armySize: total(army.units), hordeSize: total(wave.composition), angle });
   const joined: Army = { ...army, status: 'engaged', battleId: battle.id, joinsRound: battle.round + 1, joinBonus: bonus, engagedUnits: army.units };
   await planHunger(client, data, world, joined, at);
-  await addDefenders(client, battle.id, army.units);
+  await addDefenders(client, battle.id, combatants(data, army.units));
   return joined;
 }
 
@@ -503,7 +504,7 @@ export async function rallyToBattle(
 ): Promise<void> {
   for (const army of await armiesAt(client, village.id, ['stationed'])) {
     await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
-    await addDefenders(client, battle.id, army.units);
+    await addDefenders(client, battle.id, combatants(data, army.units));
   }
   for (const other of await listVillages(client, world.id)) {
     if (other.id === village.id || other.state.besieged) continue;

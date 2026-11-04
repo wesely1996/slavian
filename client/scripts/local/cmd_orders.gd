@@ -124,9 +124,14 @@ static func _run_order(server: LocalServer, world: Dictionary, village: Dictiona
 			if count == 0:
 				return {"state": state, "result": "%d %s kept" % [int(spec.target), name]}
 			var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
-			var queued := LocalVillage.queue_training(data, state, spec.unit, count, at, world.speed, owned)
+			var member := server.member_of(world, int(village.ownerAccountId))
+			var bought := int(member.get("bought", {}).get(spec.unit, 0))
+			var one: bool = data.units.units.get(spec.unit, {}).get("oneAtATime", false)
+			var queued := LocalVillage.queue_training(data, state, spec.unit, 1 if one else count, at, world.speed, owned, bought)
 			if queued.has("error") or queued.has("missing"):
 				return queued
+			if data.units.units.get(spec.unit, {}).get("costStep") != null:
+				server.add_bought(member, spec.unit, int(queued.batch.count))
 			server.schedule(world, LocalVillage.batch_completes_at(queued.batch), "training_complete", {"villageId": village.id})
 			return {"state": queued.state, "result": "Training %d %s" % [count, name]}
 	var yard := int(state.levels.get(LocalLogistics.CARAVAN_YARD, 0))

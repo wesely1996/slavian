@@ -722,18 +722,29 @@ static func per_unit_ms(data: Dictionary, unit: String, building_level: int, wor
 	return maxi(1, LocalWaves.js_round((float(def.trainSeconds) * 1000.0 * speedup) / world_speed))
 
 
-static func unit_cost(data: Dictionary, unit: String, count: int, villages_owned := 1) -> Dictionary:
+## village.ts unitCost: dearer with every village, and (costStep) for every
+## few the player has bought.
+static func unit_cost(data: Dictionary, unit: String, count: int, villages_owned := 1, bought := 0) -> Dictionary:
 	var def: Dictionary = data.units.units[unit]
-	var factor := pow(float(def.get("costGrowthPerVillage", 1) if def.get("costGrowthPerVillage") != null else 1), maxi(0, villages_owned - 1))
+	var step := 1.0
+	if def.get("costStep") != null:
+		step = pow(float(def.costStep.growth), floori(float(bought) / float(def.costStep.every)))
+	var factor := pow(float(def.get("costGrowthPerVillage", 1) if def.get("costGrowthPerVillage") != null else 1), maxi(0, villages_owned - 1)) * step
 	return resources(func(kind: String) -> int: return LocalWaves.js_round(float(def.cost[kind]) * factor) * count)
 
 
-static func queue_training(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float, villages_owned := 1) -> Dictionary:
+static func queue_training(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float, villages_owned := 1, bought := 0) -> Dictionary:
 	var def: Variant = data.units.units.get(unit)
 	if def == null:
 		return rule("Unknown unit \"%s\"" % unit)
 	if count < 1 or count > int(data.units.maxBatch):
 		return rule("Train between 1 and %d at a time" % int(data.units.maxBatch))
+	if def.get("oneAtATime", false) and count != 1:
+		return rule("%ss train one at a time" % def.name)
+	if def.get("oneAtATime", false):
+		for b in state.training:
+			if b.unit == unit and batch_completes_at(b) > at:
+				return rule("A %s is already in training here" % def.name)
 	if def.get("clan") != null and not has_clan(state.bonuses, def.clan):
 		return rule("Only %s can train a %s" % [clan_name(data, def.clan), def.name])
 	var level := int(state.levels.get(def.building, 0))
@@ -741,7 +752,7 @@ static func queue_training(data: Dictionary, state: Dictionary, unit: String, co
 		return rule("%s needs %s level %d" % [def.name, build_def(data, def.building).name, int(def.requiresLevel)])
 	if state.training.size() >= training_queue_limit(data, state.levels):
 		return rule("Training queue is full")
-	var paid := LocalLedger.spend(state.ledger, at, unit_cost(data, unit, count, villages_owned))
+	var paid := LocalLedger.spend(state.ledger, at, unit_cost(data, unit, count, villages_owned, bought))
 	if paid.has("missing"):
 		return paid
 	var starts_at := at

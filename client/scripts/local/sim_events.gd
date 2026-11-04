@@ -199,12 +199,16 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 		if LocalBattle.total(raiders) == 0:
 			break
 		var army: Dictionary = holding[i]
+		# Scouts alone stand aside; with an army they tell it what it faces.
+		var fighting := LocalScouting.combatants(data, army.units)
+		if LocalBattle.total(fighting) == 0:
+			continue
 		var home := server.find_village(world, int(army.homeVillageId))
-		var result := LocalArmies.repel_raid(data, army.units, LocalBattle.player_stats(data, home.state.bonuses, false), army.get("stance", "balanced"),
+		var result := LocalArmies.repel_raid(data, fighting, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, home.state.bonuses, false)), army.get("stance", "balanced"),
 			raiders, String(rules.raiderStance), String(yard.front), int(world.seed), int(yard.id) * 64 + int(yard.raids) * 8 + i)
 		var lost := {}
-		for unit in army.units:
-			var n := int(army.units[unit]) - int(result.armyNow.get(unit, 0))
+		for unit in fighting:
+			var n := int(fighting[unit]) - int(result.armyNow.get(unit, 0))
 			if n > 0:
 				lost[unit] = n
 		LocalArmies.army_losses(server, world, army, lost, at)

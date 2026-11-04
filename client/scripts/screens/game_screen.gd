@@ -108,7 +108,8 @@ var _pages: Dictionary[String, int] = {}
 var _run_seen := false
 var _threat_button: Button
 ## Chosen number of scouts to send, per wave id.
-var _scout_counts: Dictionary[int, int] = {}
+## Scouts picked to send, by "wave id:unit".
+var _scout_counts: Dictionary[String, int] = {}
 var _ruin_scouts: Dictionary[int, int] = {}
 ## Chosen batch size per unit, kept while the panel rebuilds.
 var _train_counts: Dictionary[String, int] = {}
@@ -1956,7 +1957,7 @@ func _armies_section(village: Dictionary) -> void:
 		var target_name := ArmyText.target_name(army, Game.village_name)
 		var from_name := Game.village_name(army.homeVillageId)
 		if mine:
-			_tick(line, func() -> String: return ArmyText.status(army, target_name, Game.server_now()))
+			_tick(line, func() -> String: return ArmyText.status(army, target_name, Game.server_now(), _search_ends(army)))
 		else:
 			line.text = tr("From %s, standing guard here") % from_name
 		if army.get("supply") != null and army.status != "done":
@@ -2049,7 +2050,7 @@ func _send_troops(village: Dictionary) -> void:
 		kind_row.add_child(UI.info(ArmyText.order_text(_army_orders)))
 		_panel_body.add_child(kind_row)
 		body = {"targetVillageId": _army_to, "orders": _army_orders}
-	_unit_pickers(home_units, false, "send")
+	_unit_pickers(home_units, true, "send")
 	_general_picker(village_id)
 	var fights: bool = body.orders != "garrison"
 	if fights:
@@ -2167,7 +2168,7 @@ func _hold_panel(terrain_id: String) -> void:
 		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		info.add_child(line)
 		var where := ArmyText.target_name(army, Game.village_name)
-		_tick(line, func() -> String: return ArmyText.status(army, where, Game.server_now()))
+		_tick(line, func() -> String: return ArmyText.status(army, where, Game.server_now(), _search_ends(army)))
 		row.add_child(info)
 		var view_id := int(army.id)
 		row.add_child(UI.button(tr("View"), func() -> void: _open_army(view_id)))
@@ -2182,7 +2183,7 @@ func _hold_panel(terrain_id: String) -> void:
 	var village_id := int(home.id)
 	_panel_body.add_child(UI.label(tr("Send from %s") % home.name, UI.SMALL_SIZE, UI.MUTED))
 	var at_home := Rules.garrison_at(home, Game.server_now())
-	_unit_pickers(at_home, exploring)
+	_unit_pickers(at_home, true)
 	var hero := Game.my_hero()
 	var hero_ready: bool = not hero.is_empty() and hero.status == "home" and hero.villageId != null and int(hero.villageId) == village_id
 	if hero_ready:
@@ -2543,7 +2544,18 @@ func _army_panel() -> void:
 	var target := ArmyText.target_name(army, Game.village_name)
 	var where := UI.label("", UI.SMALL_SIZE)
 	_panel_body.add_child(where)
-	_tick(where, func() -> String: return ArmyText.status(army, target, Game.server_now()))
+	# Searching a site: how far along the search is.
+	var search_done := _search_ends(army)
+	var search_bar: ProgressBar = null
+	var search_span := 0.0
+	if search_done > 0.0:
+		search_span = ArmyText.search_seconds(Game.data, String(Game.site_at(ArmyText.held_hex(army)).get("kind", "")), army.units, float(Game.world.speed))
+		search_bar = _gauge(UI.ACCENT)
+		_panel_body.add_child(search_bar)
+	_tick(where, func() -> String:
+		if search_bar != null and is_instance_valid(search_bar):
+			search_bar.value = clampf(1.0 - (search_done - Game.server_now()) / search_span, 0.0, 1.0) if search_span > 0.0 else 1.0
+		return ArmyText.status(army, target, Game.server_now(), search_done))
 	var led := PackedStringArray()
 	for hero in Game.heroes:
 		if army.get("heroAccountId") != null and int(hero.accountId) == int(army.heroAccountId):
@@ -2553,6 +2565,12 @@ func _army_panel() -> void:
 			led.append(general.name)
 	if not led.is_empty():
 		_panel_body.add_child(UI.label(tr("Led by %s") % ", ".join(led), UI.SMALL_SIZE, UI.MUTED))
+	# Its scouts: they never fight, but tell it what it faces.
+	var intel := _intel_bonus(army.units)
+	if intel > 0.0:
+		_panel_body.add_child(UI.with_info(UI.label(tr("Scouts: +%d%% attack and defense") % roundi(intel * 100.0), UI.SMALL_SIZE, UI.ACCENT),
+			tr("Scouts with an army never fight, but it fights the better for knowing the enemy: +%d%% for each scout (pathfinders count two, assassins three), at most +%d%%.") % [
+				roundi(float(Game.data.scouting.intel.perPoint) * 100.0), roundi(float(Game.data.scouting.intel.max) * 100.0)]))
 	# Its stance: yours can be changed while it is out, not in a battle.
 	var own: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
 	var stance: String = army.get("stance", "balanced")
@@ -2648,6 +2666,21 @@ func _army_panel() -> void:
 		_army_moving = army_id
 		_status.text = tr("Tap the hex (or village) for the army to march to."), "icon/map"))
 	_army_orders_row(army)
+
+
+## What an army's scouts add to its attack and defense (sim/scouting.ts intelBonus).
+func _intel_bonus(units: Dictionary) -> float:
+	var intel := 0.0
+	for unit in units:
+		var def: Dictionary = Game.data.units.units.get(unit, {})
+		if def.get("family") == "scout" and int(units[unit]) > 0:
+			intel += int(units[unit]) * float(def.get("scouting", {}).get("intel", 1))
+	return minf(float(Game.data.scouting.intel.max), float(Game.data.scouting.intel.perPoint) * intel)
+
+
+## When an army searching a site is done (0: not searching).
+func _search_ends(army: Dictionary) -> float:
+	return ArmyText.search_ends(Game.data, army, Game.site_at(ArmyText.held_hex(army)), float(Game.world.speed))
 
 
 ## What an army can be told: come home, march into a village, and, standing
@@ -3892,7 +3925,7 @@ func _unit_card(village: Dictionary, unit: String) -> Callable:
 	return func() -> Control:
 		var def: Dictionary = Game.data.units.units[unit]
 		return BuildingInfo.unit_card(Game.data, unit, float(Game.world.speed), maxi(1, int(village.levels.get(def.building, 1))),
-			Game.villages_owned(int(village.ownerAccountId)), ResearchRules.time_factor(village.get("bonuses", {}), "trainTime"))
+			Game.villages_owned(int(village.ownerAccountId)), ResearchRules.time_factor(village.get("bonuses", {}), "trainTime"), Game.bought(int(village.ownerAccountId), unit))
 
 
 ## What a building does at its level, and at the next one.
@@ -4129,8 +4162,14 @@ func _train_tab(village: Dictionary) -> void:
 		# How many: typed in; the cost and the button follow as it is typed.
 		var row := UI.hbox()
 		info.add_child(row)
-		row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, max_batch, func(n: int) -> void:
+		# Some (settlers) train one at a time, and dearer every few bought.
+		var one: bool = def.get("oneAtATime", false)
+		if one:
+			_train_counts[unit] = 1
+		row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, 1 if one else max_batch, func(n: int) -> void:
 			_train_counts[unit] = n))
+		if def.get("costStep") != null:
+			info.add_child(UI.label(tr("One at a time; dearer for every %d bought (%d so far).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED))
 		var train := UI.primary(tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
 		train.custom_minimum_size.x = 120
 		row.add_child(train)
@@ -4138,7 +4177,7 @@ func _train_tab(village: Dictionary) -> void:
 			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)
 		var owned := Game.villages_owned(int(village.ownerAccountId))
 		_tick(cost_line, func() -> String:
-			var cost := Rules.unit_cost(def, int(_train_counts.get(unit, 1)), owned)
+			var cost := Rules.unit_cost(def, int(_train_counts.get(unit, 1)), owned, Game.bought(int(village.ownerAccountId), unit))
 			var current: Dictionary = Game.villages.get(village_id, village)
 			var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
 			train.disabled = queue_full or not affordable
@@ -4648,6 +4687,9 @@ func _scouting_section(wave: Dictionary) -> void:
 		var by := Game.village_name(latest.villageId)
 		_panel_body.add_child(UI.label(tr("Scouts from %s: %s") % [by, ScoutText.survivors(latest.report)], UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(UI.label(ScoutText.describe(latest.report), UI.SMALL_SIZE))
+		var slain := ScoutText.slain(latest.report)
+		if slain != "":
+			_panel_body.add_child(UI.label(slain, UI.SMALL_SIZE, UiTheme.GOLD))
 	for mission in missions:
 		if mission.status == "done":
 			continue
@@ -4663,22 +4705,42 @@ func _scouting_section(wave: Dictionary) -> void:
 	if home.is_empty() or int(home.levels.get("scout_lodge", 0)) < 1:
 		return
 	var village_id := int(home.id)
-	var at_home := int(Rules.garrison_at(home, Game.server_now()).get("scout", 0))
-	var max_scouts := mini(int(Game.data.scouting.maxScouts), maxi(at_home, 1))
-	var count := clampi(_scout_counts.get(wave_id, mini(at_home, 3)), 1, max_scouts)
-	var row := UI.hbox()
-	_panel_body.add_child(row)
-	row.add_child(_number_field("scouts:%d" % wave_id, count, 1, max_scouts, func(n: int) -> void: _scout_counts[wave_id] = n))
-	var send := UI.button(tr_n("Send scouts (%d home)", "Send scouts (%d home)", at_home) % at_home, func() -> void:
-		_send_scouts(village_id, wave_id, clampi(int(_scout_counts.get(wave_id, count)), 1, max_scouts)))
-	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	send.disabled = at_home < 1
-	row.add_child(send)
+	# How many of each kind of scout to send (all go together, at the pace
+	# of the slowest).
+	var garrison := Rules.garrison_at(home, Game.server_now())
+	var kinds: Array = Game.data.units.units.keys().filter(func(unit: String) -> bool:
+		return Game.data.units.units[unit].family == "scout" and int(garrison.get(unit, 0)) > 0)
+	if kinds.is_empty():
+		_panel_body.add_child(UI.label(tr("No scouts at home."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var max_scouts := int(Game.data.scouting.maxScouts)
+	for unit in kinds:
+		var have := int(garrison[unit])
+		var key := "%d:%s" % [wave_id, unit]
+		var count := clampi(int(_scout_counts.get(key, mini(have, 3) if unit == "scout" else 0)), 0, mini(have, max_scouts))
+		_scout_counts[key] = count
+		var row := UI.hbox(8)
+		row.tooltip_text = tr(Game.data.units.units[unit].name)
+		if Art.has("unit/%s" % unit):
+			row.add_child(UI.icon("unit/%s" % unit, 40))
+		row.add_child(_number_field("scouts:" + key, count, 0, mini(have, max_scouts), func(n: int) -> void: _scout_counts[key] = n))
+		var of := UI.label(tr("%s · %d home") % [tr(Game.data.units.units[unit].name), have], UI.SMALL_SIZE, UI.MUTED)
+		of.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(of)
+		_panel_body.add_child(row)
+	var send := UI.button(tr("Send scouts"), func() -> void:
+		var units := {}
+		for unit in kinds:
+			var n := int(_scout_counts.get("%d:%s" % [wave_id, unit], 0))
+			if n > 0:
+				units[unit] = n
+		_send_scouts(village_id, wave_id, units))
+	_panel_body.add_child(send)
 
 
-func _send_scouts(village_id: int, wave_id: int, count: int) -> void:
+func _send_scouts(village_id: int, wave_id: int, units: Dictionary) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/scout" % village_id, {"waveId": wave_id, "count": count})
+	var response := await Api.post_json("/v1/villages/%d/scout" % village_id, {"waveId": wave_id, "units": units})
 	if not response.ok:
 		_status.text = response.error
 		return

@@ -46,6 +46,7 @@ import {
   type Decision,
 } from '../sim/horde.js';
 import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
+import { combatants } from '../sim/scouting.js';
 import { capacity, levelsOf, newVillage, outpostHex, outpostPlots, researchPerHour, villageRates, type VillageState } from '../sim/village.js';
 import { withRates } from '../sim/resources.js';
 import { rngFor, routeFrom, targetsOf } from '../sim/waves.js';
@@ -278,7 +279,7 @@ export async function startHolyCityBattle(client: DbClient, data: GameData, worl
     (a) => a.targetVillageId === null && a.targetQ === 0 && a.targetR === 0 && a.status === 'stationed',
   );
   const defenders: Record<string, number> = { ...guard };
-  for (const army of holders) for (const [unit, n] of Object.entries(army.units)) defenders[unit] = (defenders[unit] ?? 0) + n;
+  for (const army of holders) for (const [unit, n] of Object.entries(combatants(data, army.units))) defenders[unit] = (defenders[unit] ?? 0) + n;
   const battle = await insertBattle(client, {
     worldId: world.id,
     waveId: wave.id,

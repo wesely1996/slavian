@@ -1,3 +1,4 @@
+import { searchMs } from '../src/sim/sites.js';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
@@ -670,10 +671,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(lodge.body.village.queue[0].completesAt);
     await tick(db, now, scheduler);
     await rich();
-    const trained = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 3 });
-    expect(trained.status).toBe(200);
-    now = new Date(trained.body.village.training[0].completesAt);
+    // Settlers train one at a time, and not while another is in training.
+    expect((await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 3 })).body.message).toMatch(/one at a time/);
+    const trainOne = async () => {
+      const trained = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
+      expect(trained.status).toBe(200);
+      return trained;
+    };
+    const first = await trainOne();
+    expect((await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 })).body.message).toMatch(/already in training/);
+    now = new Date(first.body.village.training.at(-1).completesAt);
     await tick(db, now, scheduler);
+    for (let i = 0; i < 2; i++) {
+      const next = await trainOne();
+      now = new Date(next.body.village.training.at(-1).completesAt);
+      await tick(db, now, scheduler);
+    }
 
     const sent = await found(site[0], site[1], 'Vesna');
     expect(sent.status).toBe(200);
@@ -691,19 +704,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages.find((v: { id: number }) => v.id === home.id).away.settler ?? 0).toBe(0);
     expect(world.expeditions[0]).toMatchObject({ status: 'founded', foundedVillageId: second.id });
 
-    // A second village makes the next settlers dearer.
+    // A second village makes the next settlers dearer, and so do the three
+    // bought.
     await rich();
     const before = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.villages.find((v: { id: number }) => v.id === home.id);
     const dearer = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
     const spentWood = before.resources.amounts.wood - dearer.body.village.resources.amounts.wood;
-    expect(spentWood).toBeGreaterThan(scheduler.data.units.units.settler!.cost.wood * 1.4);
+    expect(spentWood).toBe(Math.round(scheduler.data.units.units.settler!.cost.wood * 1.5 * 1.5));
 
     // Settlers find their site taken: they come home.
     now = new Date(dearer.body.village.training.at(-1).completesAt);
     await tick(db, now, scheduler);
-    await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 2 });
-    now = new Date(now.getTime() + 3_600_000);
-    await tick(db, now, scheduler);
+    for (let i = 0; i < 2; i++) {
+      await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
+      now = new Date(now.getTime() + 3_600_000);
+      await tick(db, now, scheduler);
+    }
     // Not on an ancient site or a camp, where no village can be founded.
     const camps = new Set((await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.camps.map((c: { q: number; r: number }) => `${c.q},${c.r}`));
     const other = (started.body.map.hexes as [number, number, string][]).find(
@@ -1073,7 +1089,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // Vid sends 20 spearmen to stand guard at Ola's village.
     const send = (body: object) => call('POST', `/v1/villages/${a.id}/armies`, vid.token, body);
-    expect((await send({ targetVillageId: b.id, units: { scout: 1 }, orders: 'support' })).body.message).toMatch(/don't march/);
+    // Scouts march along, but not alone.
+    expect((await send({ targetVillageId: b.id, units: { scout: 1 }, orders: 'support' })).body.message).toMatch(/at least one soldier/);
     expect((await send({ targetVillageId: a.id, units: { spearman: 1 }, orders: 'support' })).body.message).toMatch(/another village/);
     expect((await send({ targetVillageId: b.id, units: { spearman: 99 }, orders: 'support' })).body.message).toMatch(/Only 30/);
     const sent = await send({ targetVillageId: b.id, units: { spearman: 20 }, orders: 'support' });
@@ -1549,13 +1566,15 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       call('POST', `/v1/villages/${home.id}/armies`, vesna.token, { target: { q: target.q, r: target.r }, units, orders: 'explore', ...extra });
     expect((await send({ q: home.q, r: home.r }, { scout: 1 })).body.message).toMatch(/no ancient site/);
 
-    // Scouts alone can't get past the bears; now the group knows they are there.
+    // Scouts alone don't fight the bears: they count them and turn back, and
+    // now the group knows they are there.
     const scouts = await send(watched!, { scout: 4 });
     expect(scouts.body).toMatchObject({ army: { orders: 'explore', units: { scout: 4 } } });
     now = new Date(scouts.body.army.arrivesAt);
     await tick(db, now, scheduler);
     let w = await world();
-    expect(w.battles.find((b: { siteId: number }) => b.siteId === watched!.id)).toMatchObject({ status: 'repelled' });
+    expect(w.battles.find((b: { siteId: number }) => b.siteId === watched!.id)).toBeUndefined();
+    expect(w.armies.find((a: { id: number }) => a.id === scouts.body.army.id)).toMatchObject({ status: 'returning', units: { scout: 4 } });
     expect(w.sites.find((s: { id: number }) => s.id === watched!.id)).toMatchObject({ status: 'unexplored', guardians: 30 });
 
     // An army led by the hero beats the wolves at the idol, searches it and finds a scroll.
@@ -1621,7 +1640,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const scouts = await call('POST', `/v1/villages/${home.id}/armies`, rusa.token, { target: { q: site.q, r: site.r }, units: { scout: 3 }, orders: 'explore' });
     now = new Date(scouts.body.army.arrivesAt);
     await tick(db, now, scheduler);
-    now = new Date(now.getTime() + (scheduler.data.sites.kinds[site.kind]!.exploreHours * 3_600_000) / 10);
+    // Three scouts search a little faster than one.
+    now = new Date(now.getTime() + searchMs(scheduler.data, site.kind, { scout: 3 }, 10));
     await tick(db, now, scheduler);
     w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
     expect(w.bridge.quests.site).toBe(now.toISOString());

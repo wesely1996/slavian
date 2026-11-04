@@ -37,6 +37,9 @@ export type WorldSet = {
   vault?: Record<string, number>;
   // A horde's hatred, by its wave index.
   waveHatred?: { index: number; hatred: number };
+  // Units standing in the player's (first) village, by unit (their upkeep
+  // counts from the village's next change).
+  garrison?: Record<string, number>;
 };
 export type Step = { advance?: number; method?: string; path?: string; body?: unknown; set?: WorldSet };
 
@@ -98,6 +101,12 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
             }
             if (step.set.waveHatred) {
               await db.query('UPDATE waves SET hatred = $3 WHERE world_id = $1 AND index = $2 AND band_of IS NULL', [world.id, step.set.waveHatred.index, step.set.waveHatred.hatred]);
+            }
+            if (step.set.garrison) {
+              await db.query(
+                'UPDATE villages SET garrison = garrison || $2::jsonb WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)',
+                [world.id, JSON.stringify(step.set.garrison)],
+              );
             }
             recorded.push({ set: step.set });
             return { status: 200, body: null };

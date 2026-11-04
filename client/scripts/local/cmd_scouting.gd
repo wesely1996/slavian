@@ -34,8 +34,54 @@ static func scout_target(data: Dictionary, terrain: Dictionary, wave: Dictionary
 	return best if best != null else from
 
 
-## Real-time ms for scouts to walk from `from` to `to`.
-static func scout_travel_ms(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, world_speed: float, bonuses: Dictionary = {}) -> int:
+## The scout kinds (family scout), in units.json order.
+static func scout_kinds(data: Dictionary) -> Array:
+	return data.units.units.keys().filter(func(unit: String) -> bool: return data.units.units[unit].family == "scout")
+
+
+static func is_scout(data: Dictionary, unit: String) -> bool:
+	return data.units.units.get(unit, {}).get("family") == "scout"
+
+
+## sim/scouting.ts intelOf: what scouts are worth to a report or an army.
+static func intel_of(data: Dictionary, units: Dictionary) -> float:
+	var sum := 0.0
+	for unit in units:
+		if int(units[unit]) > 0 and is_scout(data, unit):
+			var scouting: Variant = data.units.units[unit].get("scouting")
+			sum += int(units[unit]) * (float(scouting.intel) if scouting != null else 1.0)
+	return sum
+
+
+## sim/scouting.ts intelBonus: what an army's scouts add to its attack and defense.
+static func intel_bonus(data: Dictionary, units: Dictionary) -> float:
+	return minf(float(data.scouting.intel.max), float(data.scouting.intel.perPoint) * intel_of(data, units))
+
+
+## sim/scouting.ts withIntel: an army's stats with its scouts' intel bonus.
+static func with_intel(data: Dictionary, units: Dictionary, stats: Callable) -> Callable:
+	var f := 1.0 + intel_bonus(data, units)
+	if f == 1.0:
+		return stats
+	return func(unit: String) -> Dictionary:
+		var st: Dictionary = stats.call(unit).duplicate()
+		st.attack = float(st.attack) * f
+		st.defense = float(st.defense) * f
+		return st
+
+
+## sim/scouting.ts combatants: the units that fight (all but scouts).
+static func combatants(data: Dictionary, units: Dictionary) -> Dictionary:
+	var out := {}
+	for unit in units:
+		if int(units[unit]) > 0 and not is_scout(data, unit):
+			out[unit] = int(units[unit])
+	return out
+
+
+## Real-time ms for scouts to walk from `from` to `to`, at the pace of the
+## slowest sent.
+static func scout_travel_ms(data: Dictionary, land: Dictionary, from: Vector2i, to: Vector2i, world_speed: float, bonuses: Dictionary = {}, units: Dictionary = {SCOUT: 1}) -> int:
 	var move_cost := LocalLand.move_cost_on(data, land)
 	var path: Variant = LocalLand.find_path(from, to, move_cost, LocalLand.fastest_step(data, land))
 	var cost := 0.0
@@ -45,7 +91,13 @@ static func scout_travel_ms(data: Dictionary, land: Dictionary, from: Vector2i, 
 	else:
 		# Off-road targets: straight-line distance over rough ground.
 		cost = HexMath.distance(from, to) * 2.0
-	var speed := float(data.units.units[SCOUT].speed) * (1.0 + float(bonuses.get("scoutSpeed", 0.0)))
+	var slowest := INF
+	for unit in units:
+		if int(units[unit]) > 0:
+			slowest = minf(slowest, float(data.units.units[unit].speed))
+	if slowest == INF:
+		slowest = float(data.units.units[SCOUT].speed)
+	var speed := slowest * (1.0 + float(bonuses.get("scoutSpeed", 0.0)))
 	return maxi(1, LocalWaves.js_round(((cost / speed) * LocalTime.MS_PER_HOUR) / world_speed))
 
 
@@ -53,15 +105,40 @@ static func _rng(seed_value: int, mission_id: int, salt: int) -> LocalRng:
 	return LocalRng.new((seed_value ^ LocalRng.imul(mission_id + 1, 0x85ebca6b) ^ salt) & 0xffffffff)
 
 
-static func survivors_of(data: Dictionary, front: String, sent: int, seed_value: int, mission_id: int, bonuses: Dictionary = {}) -> int:
+## sim/scouting.ts survivingScouts: which scouts come through, kind by kind;
+## each is caught with the front's chance scaled by its stealth.
+static func surviving_scouts(data: Dictionary, front: String, sent: Dictionary, seed_value: int, mission_id: int, bonuses: Dictionary = {}) -> Dictionary:
 	var base := float(data.scouting.survival.get(front, data.scouting.defaultSurvival))
-	var chance := minf(0.98, base + float(bonuses.get("scoutSurvival", 0.0)))
 	var rng := _rng(seed_value, mission_id, 0x17)
-	var survivors := 0
-	for i in sent:
-		if rng.next() < chance:
-			survivors += 1
-	return survivors
+	var out := {}
+	for unit in scout_kinds(data):
+		var n := int(sent.get(unit, 0))
+		if n <= 0:
+			continue
+		var scouting: Variant = data.units.units[unit].get("scouting")
+		var stealth := float(scouting.stealth) if scouting != null else 1.0
+		var chance := minf(0.98, 1.0 - (1.0 - base) * stealth + float(bonuses.get("scoutSurvival", 0.0)))
+		var survivors := 0
+		for i in n:
+			if rng.next() < chance:
+				survivors += 1
+		out[unit] = survivors
+	return out
+
+
+## sim/scouting.ts assassinates: whether the assassins among the survivors
+## kill the horde's leader.
+static func assassinates(data: Dictionary, survivors: Dictionary, seed_value: int, mission_id: int) -> bool:
+	var rng := _rng(seed_value, mission_id, 0x5a)
+	for unit in scout_kinds(data):
+		var scouting: Variant = data.units.units[unit].get("scouting")
+		var chance := float(scouting.get("assassinate", 0.0)) if scouting != null else 0.0
+		if chance <= 0.0:
+			continue
+		for i in int(survivors.get(unit, 0)):
+			if rng.next() < chance:
+				return true
+	return false
 
 
 ## A range around `value` that always contains it, the true value placed
@@ -74,12 +151,14 @@ static func _range(value: int, error: float, rng: LocalRng) -> Dictionary:
 
 
 static func scout_report(data: Dictionary, front: String, composition: Dictionary, stance: String, sent: int, survivors: int, dispersed: bool,
-		seed_value: int, mission_id: int) -> Dictionary:
+		seed_value: int, mission_id: int, intel := -1.0) -> Dictionary:
 	var report := {"sent": sent, "survivors": survivors, "dispersed": dispersed}
 	var tier: Variant = null
 	var tiers: Array = data.scouting.tiers
+	# Tiers by the survivors' intel (one a scout).
+	var worth := float(survivors) if intel < 0.0 else intel
 	for i in range(tiers.size() - 1, -1, -1):
-		if survivors >= int(tiers[i].minSurvivors):
+		if worth >= float(tiers[i].minSurvivors):
 			tier = tiers[i]
 			break
 	if tier == null or dispersed:
@@ -109,7 +188,7 @@ static func scout_report(data: Dictionary, front: String, composition: Dictionar
 # --- Scouts ------------------------------------------------------------------------------
 
 static func insert_mission(world: Dictionary, mission: Dictionary) -> Dictionary:
-	var m := {"id": world.next.mission, "survivors": null, "status": "outbound", "report": null}
+	var m := {"id": world.next.mission, "survivors": null, "survivorUnits": null, "status": "outbound", "report": null}
 	m.merge(mission)
 	world.next.mission += 1
 	world.missions.append(m)
@@ -119,22 +198,40 @@ static func insert_mission(world: Dictionary, mission: Dictionary) -> Dictionary
 static func send_scouts(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
 	var data := server.data
 	var max_scouts := int(data.scouting.maxScouts)
-	var count := float(body.get("count", 0))
-	if count != floorf(count) or count < 1 or count > max_scouts:
+	# Scouts by kind (units), or (count) that many plain scouts.
+	var asked: Variant = body.get("units")
+	if not asked is Dictionary:
+		asked = {SCOUT: body.get("count", 0)}
+	var units := {}
+	for unit in asked:
+		var n := float(asked[unit])
+		if n != floorf(n) or n < 0:
+			return {"error": "Scout counts are whole numbers", "kind": "invalid"}
+		if n > 0:
+			units[unit] = int(n)
+	for unit in units:
+		if not is_scout(data, unit):
+			return LocalVillage.rule("%s don't go scouting" % data.units.units.get(unit, {}).get("name", unit))
+	var count := 0
+	for unit in units:
+		count += int(units[unit])
+	if count < 1 or count > max_scouts:
 		return LocalVillage.rule("Send between 1 and %d scouts" % max_scouts)
 	var wave := server.find_wave(world, int(body.get("waveId", 0)))
 	if wave.is_empty():
 		return {"error": "Wave %d not found" % int(body.get("waveId", 0)), "kind": "not_found"}
 	if wave.status in ["dispersed", "defeated"]:
 		return LocalVillage.rule("That horde has already scattered")
-	var state := LocalVillage.send_away(data, village.state, SCOUT, int(count), now, world.speed)
-	if state.has("error"):
-		return state
+	var state: Dictionary = village.state
+	for unit in units:
+		state = LocalVillage.send_away(data, state, unit, int(units[unit]), now, world.speed)
+		if state.has("error"):
+			return state
 	var land := LocalHordes.land_of(world)
 	var home := Vector2i(village.q, village.r)
 	var target := scout_target(data, world.hexes, wave, home, now)
-	var travel := scout_travel_ms(data, land, home, target, world.speed, LocalLogistics.effective_bonuses(server, world, village))
-	var mission := insert_mission(world, {"villageId": village.id, "waveId": wave.id, "sent": int(count), "target": {"q": target.x, "r": target.y},
+	var travel := scout_travel_ms(data, land, home, target, world.speed, LocalLogistics.effective_bonuses(server, world, village), units)
+	var mission := insert_mission(world, {"villageId": village.id, "waveId": wave.id, "sent": count, "units": units, "target": {"q": target.x, "r": target.y},
 		"departsAt": now, "arrivesAt": now + travel, "returnsAt": now + 2 * travel})
 	server.schedule(world, int(mission.arrivesAt), "scout_arrive", {"missionId": mission.id})
 	return {"state": state, "mission": mission}
@@ -156,18 +253,40 @@ static func on_scout_arrive(server: LocalServer, world: Dictionary, event: Dicti
 	# A horde that already scattered can't hurt anyone.
 	var dispersed: bool = wave.status in ["dispersed", "defeated"]
 	var village := server.find_village(world, int(mission.villageId))
-	var survivors := int(mission.sent) if dispersed else survivors_of(data, wave.front, int(mission.sent), int(world.seed), int(mission.id),
+	var sent: Dictionary = mission_units(mission)
+	var came: Dictionary = sent.duplicate() if dispersed else surviving_scouts(data, wave.front, sent, int(world.seed), int(mission.id),
 		LocalLogistics.effective_bonuses(server, world, village))
-	var report := scout_report(data, wave.front, wave.composition, wave.stance, int(mission.sent), survivors, dispersed, int(world.seed), int(mission.id))
+	var survivors := 0
+	for unit in came:
+		survivors += int(came[unit])
+	# Assassins who reach a horde led by a leader may kill them.
+	var slain := ""
+	if not dispersed and wave.leaderId != null and assassinates(data, came, int(world.seed), int(mission.id)):
+		slain = LocalBattles.slay_leader(server, world, wave, String(village.name), int(event.dueAt))
+	var report := scout_report(data, wave.front, wave.composition, wave.stance, int(mission.sent), survivors, dispersed, int(world.seed), int(mission.id), intel_of(data, came))
+	if slain != "":
+		report.leaderSlain = slain
 	mission.status = "returning"
 	mission.survivors = survivors
+	mission.survivorUnits = came
 	mission.report = report
-	var lost := int(mission.sent) - survivors
-	if lost > 0:
-		village.state = LocalVillage.lose_away(data, village.state, SCOUT, lost, int(event.dueAt), world.speed)
+	var state: Dictionary = village.state
+	var lost_any := false
+	for unit in sent:
+		var lost := int(sent[unit]) - int(came.get(unit, 0))
+		if lost > 0:
+			state = LocalVillage.lose_away(data, state, unit, lost, int(event.dueAt), world.speed)
+			lost_any = true
+	if lost_any:
+		village.state = state
 		changed.append(["village", village.id])
 	server.schedule(world, int(mission.returnsAt), "scout_return", {"missionId": mission.id})
 	changed.append(["world"])
+
+
+## Scouts sent by kind (missions from before scout kinds sent plain scouts).
+static func mission_units(mission: Dictionary) -> Dictionary:
+	return mission.units if mission.get("units") is Dictionary else {SCOUT: int(mission.sent)}
 
 
 static func on_scout_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -175,7 +294,12 @@ static func on_scout_return(server: LocalServer, world: Dictionary, event: Dicti
 	if mission.is_empty() or mission.status != "returning":
 		return
 	var village := server.find_village(world, int(mission.villageId))
-	village.state = LocalVillage.return_home(server.data, village.state, SCOUT, int(mission.survivors if mission.survivors != null else 0), int(event.dueAt), world.speed)
+	var came: Variant = mission.get("survivorUnits")
+	if not came is Dictionary:
+		came = {SCOUT: int(mission.survivors if mission.survivors != null else 0)}
+	for unit in came:
+		if int(came[unit]) > 0:
+			village.state = LocalVillage.return_home(server.data, village.state, unit, int(came[unit]), int(event.dueAt), world.speed)
 	mission.status = "done"
 	changed.append(["village", village.id])
 	changed.append(["world"])
@@ -192,7 +316,7 @@ static func missions_view(server: LocalServer, world: Dictionary) -> Array:
 
 
 static func mission_view(m: Dictionary) -> Dictionary:
-	return {"id": m.id, "villageId": m.villageId, "waveId": m.waveId, "sent": m.sent, "status": m.status, "target": m.target,
+	return {"id": m.id, "villageId": m.villageId, "waveId": m.waveId, "sent": m.sent, "units": mission_units(m), "status": m.status, "target": m.target,
 		"departsAt": LocalTime.iso(m.departsAt), "arrivesAt": LocalTime.iso(m.arrivesAt), "returnsAt": LocalTime.iso(m.returnsAt), "report": m.report}
 
 

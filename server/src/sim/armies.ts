@@ -36,9 +36,10 @@ export function cavalryShare(data: GameData, units: Units): number {
   return cavalry / all;
 }
 
-// Who may go: fighters, and scouts too when exploring a site.
-function marches(data: GameData, unit: string, orders: ArmyOrders): boolean {
-  return !!fighters(data, { [unit]: 1 })[unit] || (orders === 'explore' && data.units.units[unit]?.family === 'scout');
+// Who may go: fighters, and scouts (who never fight, but tell the army
+// what it faces).
+function marches(data: GameData, unit: string, _orders: ArmyOrders): boolean {
+  return !!fighters(data, { [unit]: 1 })[unit] || data.units.units[unit]?.family === 'scout';
 }
 
 // Checks an army about to set out.
@@ -48,8 +49,9 @@ export function validateArmy(data: GameData, units: Units, orders: ArmyOrders): 
     if (n > 0 && !marches(data, unit, orders)) throw new RuleError(`${data.units.units[unit]?.name ?? unit} don't march with armies`);
   }
   const army = Object.fromEntries(Object.entries(units).filter(([unit, n]) => n > 0 && marches(data, unit, orders)));
-  if (total(army) === 0) throw new RuleError('Send at least one soldier');
-  if (orders === 'harass' && cavalryShare(data, army) < data.armies.harass.minCavalryShare) {
+  // Scouts alone only explore.
+  if (total(army) === 0 || (orders !== 'explore' && total(fighters(data, army)) === 0)) throw new RuleError('Send at least one soldier');
+  if (orders === 'harass' && cavalryShare(data, fighters(data, army)) < data.armies.harass.minCavalryShare) {
     throw new RuleError(`Harassing takes mostly cavalry (${Math.round(data.armies.harass.minCavalryShare * 100)}% or more)`);
   }
   return army;

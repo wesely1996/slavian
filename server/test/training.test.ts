@@ -11,7 +11,7 @@ import {
   upkeepPerHour,
   type TrainingBatch,
 } from '../src/sim/training.js';
-import { completeBuild, completeTraining, newVillage, queueBuild, queueTraining } from '../src/sim/village.js';
+import { completeBuild, completeTraining, newVillage, queueBuild, queueTraining, unitCost } from '../src/sim/village.js';
 
 const data = loadGameData();
 const T0 = new Date('2026-02-01T12:00:00Z');
@@ -63,6 +63,15 @@ describe('training batches', () => {
     expect(perUnitMs(data, 'spearman', 1, 1)).toBe(60_000);
     expect(perUnitMs(data, 'spearman', 3, 1)).toBe(Math.round(60_000 * 0.9 ** 2));
     expect(perUnitMs(data, 'spearman', 1, 10)).toBe(6_000);
+  });
+});
+
+describe('settlers', () => {
+  it('cost more for every three bought, and train one at a time', () => {
+    const def = data.units.units.settler!;
+    expect(unitCost(data, 'settler', 1, 1, 2).wood).toBe(def.cost.wood);
+    expect(unitCost(data, 'settler', 1, 1, 3).wood).toBe(Math.round(def.cost.wood * 1.5));
+    expect(unitCost(data, 'settler', 1, 2, 6).wood).toBe(Math.round(def.cost.wood * 1.5 * 1.5 ** 2));
   });
 });
 

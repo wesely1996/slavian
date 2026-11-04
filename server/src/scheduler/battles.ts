@@ -42,6 +42,7 @@ import { armyLosses, planHunger, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits } from '../sim/armies.js';
 import { fallBack, fieldRound } from './field.js';
+import { combatants, withIntel } from '../sim/scouting.js';
 import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
@@ -70,7 +71,7 @@ export async function startBattle(
   await markBattling(client, wave.id);
   // Walls must be battered down; a horde without the siege to do it in time
   // builds engines first, and the assault waits for them.
-  const setup: BattleSetup = { home: { initial: state.garrison } };
+  const setup: BattleSetup = { home: { initial: combatants(data, state.garrison) } };
   if (cameOverRiver(wave.path ?? [], { q: village.q, r: village.r }, await riverKeys(client, world.id))) setup.river = true;
   let composition = wave.composition;
   let firstRound = at.getTime() + roundMs(data, world.speed);
@@ -95,7 +96,7 @@ export async function startBattle(
     setup,
     attackerStance: wave.stance,
     attackerInitial: composition,
-    defenderInitial: state.garrison,
+    defenderInitial: combatants(data, state.garrison),
     startedAt: at,
   });
   const payload: BattlePayload = { battleId: battle.id };
@@ -141,8 +142,9 @@ export const battleHandlers: HandlerRegistry = {
     // Each fights in its own stance; a garrison that broke fights no more.
     const engaged = await armiesInBattle(client, battle.id);
     const homeBroken = battle.setup.home?.broken === true;
-    const garrison = homeBroken ? {} : state.garrison;
-    const forces = [garrison, ...engaged.map((a) => a.units)];
+    // Scouts never fight; an army's tell it what it faces (intel).
+    const garrison = homeBroken ? {} : combatants(data, state.garrison);
+    const forces = [garrison, ...engaged.map((a) => combatants(data, a.units))];
     const joining = engaged.filter((a) => a.joinsRound === round);
     const surge = 1 + joining.reduce((sum, a) => sum + a.joinBonus, 0);
     const baseStats = playerStats(data, bonuses, true);
@@ -162,6 +164,11 @@ export const battleHandlers: HandlerRegistry = {
     const held = standing ? heldBack(data, over) : 1;
     // A horde that came over a river into the fight strikes weaker.
     const river = battle.setup.river ? data.field.river.attackerFactor : 1;
+    const defenderStats = (unit: string) => {
+      const base = baseStats(unit);
+      const shooting = base.family === 'archers' ? walls.archers : 1;
+      return { ...base, attack: base.attack * surge * walls.attack * shooting, defense: base.defense * walls.defense };
+    };
     const result = resolveRound(
       data,
       {
@@ -176,13 +183,12 @@ export const battleHandlers: HandlerRegistry = {
       {
         units: defenders,
         stance: state.stance,
-        stats: (unit) => {
-          const base = baseStats(unit);
-          const shooting = base.family === 'archers' ? walls.archers : 1;
-          return { ...base, attack: base.attack * surge * walls.attack * shooting, defense: base.defense * walls.defense };
-        },
+        stats: defenderStats,
         home: true,
-        groups: [{ units: garrison, stance: state.stance }, ...engaged.map((a) => ({ units: a.units, stance: a.stance }))],
+        groups: [
+          { units: garrison, stance: state.stance },
+          ...engaged.map((a) => ({ units: combatants(data, a.units), stance: a.stance, stats: withIntel(data, a.units, defenderStats) })),
+        ],
       },
       rng,
     );
@@ -209,10 +215,10 @@ export const battleHandlers: HandlerRegistry = {
       armies.push(await armyLosses(client, data, world, army, losses, at));
     }
     const leaving = (a: Army) => a.orders === 'harass' && a.joinsRound === round;
-    const garrisonNow = homeBroken ? {} : villageState.garrison;
+    const garrisonNow = homeBroken ? {} : combatants(data, villageState.garrison);
     const defendersNow = armies
       .filter((a) => !leaving(a))
-      .reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...garrisonNow });
+      .reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units)), { ...garrisonNow });
     await setWaveStrength(client, wave.id, attackerNow);
     // Every harassing strike makes the horde hate the more.
     const strikes = joining.filter((a) => a.orders === 'harass').length;
@@ -229,12 +235,15 @@ export const battleHandlers: HandlerRegistry = {
       attackerNerve: personality(data, wave).nerve * (1 + led.nerve),
       defenderGroups: [
         { stance: state.stance, initial: battle.setup.home?.initial ?? battle.defenderInitial, now: garrisonNow },
-        ...armies.filter((a) => !leaving(a)).map((a) => ({ stance: a.stance, initial: a.engagedUnits ?? a.units, now: a.units })),
+        ...armies.filter((a) => !leaving(a)).map((a) => ({ stance: a.stance, initial: combatants(data, a.engagedUnits ?? a.units), now: combatants(data, a.units) })),
       ],
     });
     // While the fight goes on, an army that broke falls back home beaten,
     // and a garrison that broke fights no more.
-    const breaks = (a: Army) => outcome === 'ongoing' && !leaving(a) && total(a.units) > 0 && broken(data, a.stance, a.engagedUnits ?? a.units, a.units);
+    const breaks = (a: Army) =>
+      outcome === 'ongoing' && !leaving(a) && total(combatants(data, a.units)) > 0 && broken(data, a.stance, combatants(data, a.engagedUnits ?? a.units), combatants(data, a.units));
+    // Scouts left without fighters ride home.
+    const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units)) === 0;
     const homeBroke = outcome === 'ongoing' && !homeBroken && total(garrisonNow) > 0 && broken(data, state.stance, battle.setup.home?.initial ?? battle.defenderInitial, garrisonNow);
     if (homeBroke) setup = { ...setup, home: { initial: battle.setup.home?.initial ?? battle.defenderInitial, broken: true } };
     if (setup !== battle.setup) await saveSetup(client, battle.id, setup);
@@ -247,10 +256,10 @@ export const battleHandlers: HandlerRegistry = {
       defenderLeft: total(defendersNow),
       ...(joining.length
         ? {
-            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: a.units, bonus: a.joinBonus, stance: a.stance })),
+            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: combatants(data, a.units), bonus: a.joinBonus, stance: a.stance })),
           }
         : {}),
-      ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: a.units })) } : {}),
+      ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units) })) } : {}),
       ...(homeBroke ? { homeBroke: true } : {}),
       ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
       ...(total(smashed) ? { smashed } : {}),
@@ -262,7 +271,7 @@ export const battleHandlers: HandlerRegistry = {
     const kills = total(battle.attackerInitial) - total(attackerNow);
     for (const army of armies) {
       if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
-      else if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
+      else if (leaving(army) || spent(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
       else if (outcome !== 'ongoing') {
         if (total(army.units)) await planHunger(client, data, world, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 }, at);
         else await saveArmy(client, { ...army, status: 'done' });

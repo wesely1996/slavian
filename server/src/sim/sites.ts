@@ -166,3 +166,11 @@ export function searchRuin(
   const watched = rng() < data.sites.kinds[kind]!.guardianChance;
   return { kind, q: cell.q, r: cell.r, guardians: watched ? guardiansFor(data, cell, input.radius, (input.seed ^ 0x9e37) >>> 0) : {} };
 }
+
+// Real-time ms an army of `units` takes to search a site of `kind`: the
+// more of them, the faster (sites.json search).
+export function searchMs(data: GameData, kind: string, units: Readonly<Record<string, number>>, worldSpeed: number): number {
+  const count = Object.values(units).reduce((sum, n) => sum + Math.max(0, n), 0);
+  const share = Math.max(data.sites.search.minShare, 1 / (1 + data.sites.search.perUnit * Math.max(0, count - 1)));
+  return (data.sites.kinds[kind]!.exploreHours * 3_600_000 * share) / worldSpeed;
+}

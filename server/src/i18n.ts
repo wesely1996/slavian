@@ -104,6 +104,9 @@ const SERBIAN: Record<string, string> = {
 	'Searched the {site}.': 'Pretražio je: {site}.',
 	'A new skill point to spend.': 'Novi poen veštine za trošenje.',
 	'{leader} has fallen': '{leader} je pao',
+	'{leader} was slain': '{leader} je ubijen',
+	"Assassins from {village} killed {leader} in the horde's camp. Another will rise to take their place.":
+		'Ubice iz {village} ubile su {leader} u logoru horde. Drugi će se podići na njegovo mesto.',
 	'{leader} died with the last of the horde after {battles} battles. Another will rise to take their place.':
 		'{leader} je umro sa poslednjim delom horde posle {battles} bitaka. Drugi će ustati na njegovo mesto.',
 	'{leader} grows stronger': '{leader} jača',
