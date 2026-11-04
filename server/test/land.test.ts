@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, type TerrainId } from '../src/data/index.js';
 import { hex } from '../src/sim/hex.js';
-import { edgeKey, landOf, moveCostOn } from '../src/sim/land.js';
+import { edgeKey, landOf, moveCostOn, roadLink } from '../src/sim/land.js';
 import { routeFrom } from '../src/sim/waves.js';
 
 const data = loadGameData();
@@ -12,6 +12,25 @@ function strip(): Map<string, TerrainId> {
 }
 
 describe('land', () => {
+  it('links an outpost to its village by the fewest road steps, averaging their bonus', () => {
+    const v = hex(0, 0);
+    const a = hex(1, 0);
+    const b = hex(2, -1);
+    const bonus = data.field.road.levels.map((l) => l.outpostBonus);
+    // No road, or a road that stops short: no link.
+    expect(roadLink(data, new Map(), b, v)).toBe(0);
+    expect(roadLink(data, new Map([[edgeKey(v, a), 3]]), b, v)).toBe(0);
+    // Two steps, levels 1 and 3: their average.
+    const two = new Map([[edgeKey(v, a), 1], [edgeKey(a, b), 3]]);
+    expect(roadLink(data, two, b, v)).toBeCloseTo((bonus[0]! + bonus[2]!) / 2);
+    // A longer, better road round doesn't count over the shorter one ...
+    const round = new Map([...two, [edgeKey(b, hex(2, 0)), 3], [edgeKey(hex(2, 0), hex(1, 1)), 3], [edgeKey(hex(1, 1), hex(0, 1)), 3], [edgeKey(hex(0, 1), v), 3]]);
+    expect(roadLink(data, round, b, v)).toBeCloseTo((bonus[0]! + bonus[2]!) / 2);
+    // ... but of two as short, the better built does.
+    const twin = new Map([...two, [edgeKey(v, hex(1, -1)), 3], [edgeKey(hex(1, -1), b), 2]]);
+    expect(roadLink(data, twin, b, v)).toBeCloseTo((bonus[2]! + bonus[1]!) / 2);
+  });
+
   it('blocks river edges and makes roads cheaper, the more so the better the road', () => {
     const land = landOf(strip(), [edgeKey(hex(2, 0), hex(3, 0))], [[edgeKey(hex(0, 0), hex(1, 0)), 1], [edgeKey(hex(4, 0), hex(5, 0)), 3]]);
     const cost = moveCostOn(data, land);

@@ -11,7 +11,9 @@ import { insertRaid } from '../db/raids.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
 import { listActiveWaves, loadWave, type Wave } from '../db/waves.js';
 import type { World } from '../db/worlds.js';
-import { outpostHex, outpostPlots, raidOutpost } from '../sim/village.js';
+import { outpostHex, outpostPlots, raidOutpost, withRoadLinks } from '../sim/village.js';
+import { roadLink } from '../sim/land.js';
+import { standingRoads } from '../db/roads.js';
 import { raidsAlong, type OutpostTarget } from '../sim/waves.js';
 import { tell } from './notices.js';
 import { armiesHolding } from '../db/armies.js';
@@ -28,6 +30,19 @@ export type OutpostRaidPayload = z.infer<typeof outpostRaidPayload>;
 // Hordes still able to raid: on the march, or fighting / camped at the end
 // of their route.
 const RAIDING = new Set<Wave['status']>(['marching', 'battling', 'arrived']);
+
+// The roads have changed: every outpost's road link to its village anew.
+export async function relinkOutposts(client: DbClient, data: GameData, world: World, at: Date): Promise<void> {
+  const roads = await standingRoads(client, world.id);
+  for (const village of await listVillages(client, world.id)) {
+    if (!outpostPlots(village.state.plots).length) continue;
+    const home = hex(village.q, village.r);
+    const next = withRoadLinks(data, village.state, (cell) => roadLink(data, roads, cell, home), at, world.speed);
+    if (next === village.state) continue;
+    await saveVillageState(client, village.id, next);
+    await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+  }
+}
 
 function standingOutposts(villages: readonly Village[]): OutpostTarget[] {
   return villages.flatMap((village) =>

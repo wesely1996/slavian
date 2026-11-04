@@ -42,6 +42,11 @@ export async function listRoadEdges(client: DbClient, worldId: number): Promise<
   }));
 }
 
+// The level of each road that stands (or is being improved), by edge key.
+export async function standingRoads(client: DbClient, worldId: number): Promise<Map<string, number>> {
+  return new Map((await listRoadEdges(client, worldId)).filter((e) => e.status !== 'building').map((e) => [edgeKey(e.a, e.b), e.level] as const));
+}
+
 export async function roadEdge(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<RoadEdge | null> {
   const key = edgeKey(a, b);
   return (await listRoadEdges(client, worldId)).find((e) => edgeKey(e.a, e.b) === key) ?? null;

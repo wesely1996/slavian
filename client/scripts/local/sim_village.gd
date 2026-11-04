@@ -209,7 +209,7 @@ static func production_per_hour(data: Dictionary, plots: Dictionary, world_speed
 		elif def.get("yields") != null and not besieged:
 			var gathered := outpost_yield(def, plot.get("terrain"), int(plot.level), world_speed)
 			for kind in KINDS:
-				rates[kind] += gathered[kind] * outpost_factor
+				rates[kind] += gathered[kind] * (outpost_factor + float(plot.get("road", 0.0)))
 	return resources(func(kind: String) -> float: return rates[kind] * production_factor(bonuses, kind))
 
 
@@ -656,7 +656,7 @@ static func sell_gear(data: Dictionary, state: Dictionary, at: int) -> Dictionar
 
 
 ## Claims a resource hex and queues its outpost: {state, queued} or {"error"}.
-## `site`: {cell, terrain, home, taken: {"q,r": true}}.
+## `site`: {cell, terrain, home, taken: {"q,r": true}, road (the road link)}.
 static func claim_outpost(data: Dictionary, state: Dictionary, site: Dictionary, at: int, world_speed: float) -> Dictionary:
 	var def: Dictionary = build_def(data, OUTPOST)
 	var range_ := int(data.buildings.village.outpostRange)
@@ -673,7 +673,29 @@ static func claim_outpost(data: Dictionary, state: Dictionary, site: Dictionary,
 	var plot := outpost_plot(site.cell)
 	var claimed := state.duplicate(true)
 	claimed.plots[plot] = {"building": OUTPOST, "level": 0, "terrain": site.terrain}
+	if float(site.get("road", 0.0)) > 0.0:
+		claimed.plots[plot].road = float(site.road)
 	return queue_build(data, claimed, {"plot": plot}, at, world_speed)
+
+
+## village.ts withRoadLinks: each outpost's road link (`link` of its hex) set
+## anew, with new rates from `at`; the same state when nothing changed.
+static func with_road_links(data: Dictionary, state: Dictionary, link: Callable, at: int, world_speed: float) -> Dictionary:
+	var next := {}
+	for id in outpost_plots(state.plots):
+		var road: float = link.call(outpost_hex(id))
+		if float(state.plots[id].get("road", 0.0)) == road:
+			continue
+		if next.is_empty():
+			next = state.duplicate(true)
+		if road > 0.0:
+			next.plots[id].road = road
+		else:
+			next.plots[id].erase("road")
+	if next.is_empty():
+		return state
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
 
 
 static func abandon_outpost(data: Dictionary, state: Dictionary, plot: String, at: int, world_speed: float) -> Dictionary:

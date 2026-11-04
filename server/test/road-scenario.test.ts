@@ -1,7 +1,8 @@
 // Road levels in a solo session: a road built beside the village, then
 // improved twice, each level faster to march along; refused while it is
 // being built or improved, and once it is as good as it gets. An army
-// marches along it at each level.
+// marches along it at each level. An outpost on the road's far hex
+// gathers more with each level of the road that joins it to the village.
 import { neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -15,7 +16,9 @@ scenario('road-scenario.json', START, async ({ started, play }) => {
     const t = terrain.get(`${q},${r}`);
     return t !== undefined && t !== 'holy_city' && scheduler.data.terrain.terrain[t as keyof typeof scheduler.data.terrain.terrain].moveCost !== null;
   };
-  const next = neighbors(hex(home.q, home.r)).find((n) => passable(n.q, n.r))!;
+  const yields = scheduler.data.buildings.buildings.outpost!.yields ?? {};
+  const free = (q: number, r: number) => !started.sites.some((s: { q: number; r: number }) => s.q === q && s.r === r);
+  const next = neighbors(hex(home.q, home.r)).find((n) => passable(n.q, n.r) && free(n.q, n.r) && yields[terrain.get(`${n.q},${n.r}`) as keyof typeof yields])!;
   const road = () => play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: next.q, r: next.r } } });
   // An army out to the next hex and back into the village: how long the road takes.
   const march = async () => {
@@ -30,6 +33,10 @@ scenario('road-scenario.json', START, async ({ started, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 2 } });
   await play({ advance: 10 * MINUTE });
   await march();
+  // The outpost, before there is a road.
+  await play({ method: 'POST', path: '/v1/villages/1/outposts', body: { q: next.q, r: next.r } });
+  await play({ advance: 10 * MINUTE });
+  await play({ method: 'GET', path: world });
 
   // Built, then improved: each level waits for the work before it.
   await road();

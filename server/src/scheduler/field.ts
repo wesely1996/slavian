@@ -39,6 +39,7 @@ import { outpostHex, outpostPlots } from '../sim/village.js';
 import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { relinkOutposts } from './outposts.js';
 import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
 import { hordeStats, leaderAfter } from './leaders.js';
@@ -449,11 +450,13 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
 }
 
 export const fieldHandlers: HandlerRegistry = {
-  async road_built({ client, world }, event) {
+  async road_built({ client, data, world }, event) {
     const { aq, ar, bq, br } = crossingPayload.parse(event.payload);
     const road = await roadEdge(client, world.id, hex(aq, ar), hex(bq, br));
     if (!road || road.status === 'standing') return;
     await markRoadStanding(client, world.id, road.a, road.b, road.status === 'upgrading' ? road.level + 1 : road.level);
+    // Outposts joined to their village by it gather more.
+    await relinkOutposts(client, data, world, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 

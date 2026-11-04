@@ -564,7 +564,7 @@ const fieldFileSchema = z.object({
   road: z.object({
     range: z.number().int().positive(),
     levels: z
-      .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive() }))
+      .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive(), outpostBonus: z.number().min(0) }))
       .min(1),
   }),
 });

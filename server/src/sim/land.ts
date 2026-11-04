@@ -118,3 +118,37 @@ export function commonNeighbors(a: Hex, b: Hex): Hex[] {
   const around = new Set(neighbors(b).map(hexKey));
   return neighbors(a).filter((n) => around.has(hexKey(n)));
 }
+
+// What a road link to the village adds to an outpost's yield (0: none):
+// over the fewest road steps from `from` to `to` (of those, the best
+// built), the average of each step's level `outpostBonus`. `roads`: the
+// level of each standing road, by edge key.
+export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, from: Hex, to: Hex): number {
+  const levels = data.field.road.levels;
+  const gain = (level: number) => levels[Math.min(level, levels.length) - 1]!.outpostBonus;
+  const goal = hexKey(to);
+  const best = new Map<string, { steps: number; sum: number }>([[hexKey(from), { steps: 0, sum: 0 }]]);
+  let layer: Hex[] = [from];
+  for (let steps = 1; layer.length && !(best.get(goal)); steps++) {
+    const next: Hex[] = [];
+    for (const cell of layer) {
+      const here = best.get(hexKey(cell))!;
+      for (const n of neighbors(cell)) {
+        const level = roads.get(edgeKey(cell, n)) ?? 0;
+        if (level <= 0) continue;
+        const k = hexKey(n);
+        const seen = best.get(k);
+        const sum = here.sum + gain(level);
+        if (!seen) {
+          best.set(k, { steps, sum });
+          next.push(n);
+        } else if (seen.steps === steps && sum > seen.sum) {
+          best.set(k, { steps, sum });
+        }
+      }
+    }
+    layer = next;
+  }
+  const link = best.get(goal);
+  return link && link.steps > 0 ? link.sum / link.steps : 0;
+}
