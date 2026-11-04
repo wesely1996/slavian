@@ -1901,6 +1901,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -4454,6 +4460,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "support",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 2
@@ -5109,6 +5116,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -5322,6 +5335,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "support",
+      "stance": "balanced",
       "loot": null,
       "units": {
        "spearman": 2
@@ -7417,6 +7431,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "support",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 2
@@ -7870,6 +7885,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -7944,7 +7965,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -8007,6 +8035,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -10651,6 +10685,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -10725,7 +10765,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -10788,6 +10835,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -13463,6 +13516,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -13537,7 +13596,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -13600,6 +13666,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -16249,6 +16321,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 13,
+         "spearman": 26
+        }
+       },
        "guard": {
         "archer": 13,
         "spearman": 25
@@ -16256,14 +16334,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 2,
        "grey_wolf": 6,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 13,
        "spearman": 26
@@ -16282,23 +16363,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T13:39:05.100Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 38,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T13:38:29.100Z",
-      "endedAt": "2026-06-01T13:39:05.100Z"
+      "endedAt": "2026-06-01T13:38:47.100Z"
      },
      {
       "id": 4,
@@ -16311,6 +16381,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -16385,7 +16461,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -16448,6 +16531,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -16597,6 +16686,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 3,
+      "front": "north",
+      "name": "Mara",
+      "title": "Mara the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T14:14:47.100Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 2,
       "front": "south",
       "name": "Lothar",
@@ -16647,31 +16761,6 @@
       "kills": 1,
       "grudgeVillageId": null,
       "diedAt": "2026-06-01T11:25:30.000Z"
-     },
-     {
-      "id": 3,
-      "front": "north",
-      "name": "Mara",
-      "title": "Mara the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T13:39:05.100Z"
      }
     ],
     "orders": [],
@@ -16832,7 +16921,7 @@
      [
       0,
       0,
-      23.2
+      22.8
      ]
     ],
     "delegations": [],
@@ -19466,6 +19555,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 15,
+         "spearman": 30
+        }
+       },
        "guard": {
         "archer": 14,
         "spearman": 29
@@ -19481,7 +19576,7 @@
        "inquisitor": 2,
        "crossbowman": 2,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "attackerNow": {
        "zealot": 11,
@@ -19489,7 +19584,7 @@
        "inquisitor": 2,
        "crossbowman": 1,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "defenderInitial": {
        "archer": 15,
@@ -19499,7 +19594,7 @@
        {
         "at": "2026-06-01T15:04:51.553Z",
         "round": 1,
-        "attackerLeft": 19,
+        "attackerLeft": 18,
         "defenderLeft": 43,
         "attackerLosses": {
          "zealot": 2,
@@ -19526,7 +19621,11 @@
       "villageId": 3,
       "q": -1,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {}
+       }
+      },
       "status": "raided",
       "round": 1,
       "attackerStance": "hold_the_line",
@@ -19536,7 +19635,7 @@
        "inquisitor": 2,
        "crossbowman": 2,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "attackerNow": {
        "zealot": 11,
@@ -19544,14 +19643,14 @@
        "inquisitor": 2,
        "crossbowman": 1,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T15:03:57.553Z",
         "round": 1,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
@@ -19582,7 +19681,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 2
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "hold_the_line",
@@ -19600,7 +19706,7 @@
        "inquisitor": 2,
        "crossbowman": 1,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "defenderInitial": {
        "settler": 0,
@@ -19610,9 +19716,11 @@
        {
         "at": "2026-06-01T14:59:09.553Z",
         "round": 1,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 1,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "sergeant_rider": 1
+        },
         "defenderLosses": {
          "spearman": 1
         }
@@ -19620,7 +19728,7 @@
        {
         "at": "2026-06-01T14:59:27.553Z",
         "round": 2,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {
@@ -19650,6 +19758,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 13,
+         "spearman": 26
+        }
+       },
        "guard": {
         "archer": 13,
         "spearman": 25
@@ -19657,14 +19771,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 2,
        "grey_wolf": 6,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 13,
        "spearman": 26
@@ -19683,23 +19800,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T13:39:05.100Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 38,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T13:38:29.100Z",
-      "endedAt": "2026-06-01T13:39:05.100Z"
+      "endedAt": "2026-06-01T13:38:47.100Z"
      },
      {
       "id": 4,
@@ -19712,6 +19818,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -19786,7 +19898,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -19849,6 +19968,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -19949,7 +20074,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 1,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -19997,6 +20122,31 @@
     ],
     "generals": [],
     "leaders": [
+     {
+      "id": 3,
+      "front": "north",
+      "name": "Mara",
+      "title": "Mara the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T14:14:47.100Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
      {
       "id": 2,
       "front": "south",
@@ -20050,31 +20200,6 @@
       "kills": 1,
       "grudgeVillageId": null,
       "diedAt": "2026-06-01T11:25:30.000Z"
-     },
-     {
-      "id": 3,
-      "front": "north",
-      "name": "Mara",
-      "title": "Mara the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T13:39:05.100Z"
      }
     ],
     "orders": [],
@@ -20223,7 +20348,7 @@
      [
       0,
       0,
-      13.9
+      13.7
      ]
     ],
     "delegations": [],
@@ -22815,14 +22940,20 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 15,
+         "spearman": 30
+        }
+       },
        "guard": {
-        "archer": 11,
-        "spearman": 29
+        "archer": 12,
+        "spearman": 28
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 8,
+      "round": 7,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
        "zealot": 13,
@@ -22830,7 +22961,7 @@
        "inquisitor": 2,
        "crossbowman": 2,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "attackerNow": {},
       "defenderInitial": {
@@ -22841,7 +22972,7 @@
        {
         "at": "2026-06-01T15:04:51.553Z",
         "round": 1,
-        "attackerLeft": 19,
+        "attackerLeft": 18,
         "defenderLeft": 43,
         "attackerLosses": {
          "zealot": 2,
@@ -22855,23 +22986,22 @@
        {
         "at": "2026-06-01T15:05:09.553Z",
         "round": 2,
-        "attackerLeft": 16,
+        "attackerLeft": 14,
         "defenderLeft": 43,
         "attackerLosses": {
-         "zealot": 2,
-         "sergeant_rider": 1
+         "zealot": 3,
+         "inquisitor": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T15:05:27.553Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 42,
         "attackerLosses": {
          "zealot": 2,
          "arbalester": 1,
-         "inquisitor": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -22881,7 +23011,7 @@
        {
         "at": "2026-06-01T15:05:45.553Z",
         "round": 4,
-        "attackerLeft": 9,
+        "attackerLeft": 8,
         "defenderLeft": 41,
         "attackerLosses": {
          "zealot": 2
@@ -22893,10 +23023,11 @@
        {
         "at": "2026-06-01T15:06:03.553Z",
         "round": 5,
-        "attackerLeft": 6,
+        "attackerLeft": 4,
         "defenderLeft": 41,
         "attackerLosses": {
          "zealot": 1,
+         "arbalester": 1,
          "crossbowman": 1,
          "knight_brother": 1
         },
@@ -22905,34 +23036,22 @@
        {
         "at": "2026-06-01T15:06:21.553Z",
         "round": 6,
-        "attackerLeft": 3,
+        "attackerLeft": 1,
         "defenderLeft": 40,
         "attackerLosses": {
-         "zealot": 2,
-         "inquisitor": 1
+         "zealot": 3
         },
         "defenderLosses": {
-         "archer": 1
+         "spearman": 1
         }
        },
        {
         "at": "2026-06-01T15:06:39.553Z",
         "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 40,
-        "attackerLosses": {
-         "zealot": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T15:06:57.553Z",
-        "round": 8,
         "attackerLeft": 0,
         "defenderLeft": 40,
         "attackerLosses": {
-         "zealot": 1,
-         "arbalester": 1
+         "inquisitor": 1
         },
         "defenderLosses": {}
        }
@@ -22940,7 +23059,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T15:04:33.553Z",
-      "endedAt": "2026-06-01T15:06:57.553Z"
+      "endedAt": "2026-06-01T15:06:39.553Z"
      },
      {
       "id": 7,
@@ -22952,7 +23071,11 @@
       "villageId": 3,
       "q": -1,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {}
+       }
+      },
       "status": "raided",
       "round": 1,
       "attackerStance": "hold_the_line",
@@ -22962,7 +23085,7 @@
        "inquisitor": 2,
        "crossbowman": 2,
        "knight_brother": 1,
-       "sergeant_rider": 2
+       "sergeant_rider": 1
       },
       "attackerNow": {},
       "defenderInitial": {},
@@ -22970,7 +23093,7 @@
        {
         "at": "2026-06-01T15:03:57.553Z",
         "round": 1,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
@@ -23001,7 +23124,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 2
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "hold_the_line",
@@ -23022,9 +23152,11 @@
        {
         "at": "2026-06-01T14:59:09.553Z",
         "round": 1,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 1,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "sergeant_rider": 1
+        },
         "defenderLosses": {
          "spearman": 1
         }
@@ -23032,7 +23164,7 @@
        {
         "at": "2026-06-01T14:59:27.553Z",
         "round": 2,
-        "attackerLeft": 21,
+        "attackerLeft": 20,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {
@@ -23062,6 +23194,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 13,
+         "spearman": 26
+        }
+       },
        "guard": {
         "archer": 13,
         "spearman": 25
@@ -23069,14 +23207,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 2,
        "grey_wolf": 6,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 13,
        "spearman": 26
@@ -23095,23 +23236,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T13:39:05.100Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 38,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T13:38:29.100Z",
-      "endedAt": "2026-06-01T13:39:05.100Z"
+      "endedAt": "2026-06-01T13:38:47.100Z"
      },
      {
       "id": 4,
@@ -23124,6 +23254,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 21
@@ -23198,7 +23334,14 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 0,
+         "spearman": 3
+        }
+       }
+      },
       "status": "raided",
       "round": 2,
       "attackerStance": "balanced",
@@ -23261,6 +23404,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -23361,7 +23510,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 1,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -23410,6 +23559,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 3,
+      "front": "north",
+      "name": "Mara",
+      "title": "Mara the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T14:14:47.100Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 1,
       "front": "north",
       "name": "Vyrgan",
@@ -23433,31 +23607,6 @@
       "kills": 1,
       "grudgeVillageId": null,
       "diedAt": "2026-06-01T11:25:30.000Z"
-     },
-     {
-      "id": 3,
-      "front": "north",
-      "name": "Mara",
-      "title": "Mara the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T13:39:05.100Z"
      },
      {
       "id": 2,
@@ -23486,7 +23635,7 @@
       "razed": 1,
       "kills": 12,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T15:06:57.553Z"
+      "diedAt": "2026-06-01T15:06:39.553Z"
      }
     ],
     "orders": [],
@@ -23663,7 +23812,7 @@
      [
       0,
       0,
-      28.3
+      27.9
      ]
     ],
     "delegations": [],
@@ -25568,7 +25717,7 @@
    "response": {
     "notifications": [
      {
-      "id": 51,
+      "id": 50,
       "kind": "site",
       "tier": "digest",
       "title": "Captives are held at (-1, -4)",
@@ -25577,7 +25726,7 @@
       "read": false
      },
      {
-      "id": 50,
+      "id": 49,
       "kind": "site",
       "tier": "digest",
       "title": "Boatwrights wait at (-7, 1)",
@@ -25586,34 +25735,34 @@
       "read": false
      },
      {
-      "id": 49,
+      "id": 48,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 8 rounds.",
-      "createdAt": "2026-06-01T15:06:57.553Z",
-      "read": false
-     },
-     {
-      "id": 48,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Brother Lothar has fallen",
-      "body": "Brother Lothar died with the last of the horde after 6 battles. Another will rise to take their place.",
-      "createdAt": "2026-06-01T15:06:57.553Z",
+      "body": "The horde was beaten at its walls after 7 rounds.",
+      "createdAt": "2026-06-01T15:06:39.553Z",
       "read": false
      },
      {
       "id": 47,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "A horde is at the Holy City",
-      "body": "22 of them against its guard of 45.",
-      "createdAt": "2026-06-01T15:04:33.553Z",
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Brother Lothar has fallen",
+      "body": "Brother Lothar died with the last of the horde after 6 battles. Another will rise to take their place.",
+      "createdAt": "2026-06-01T15:06:39.553Z",
       "read": false
      },
      {
       "id": 46,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "21 of them against its guard of 45.",
+      "createdAt": "2026-06-01T15:04:33.553Z",
+      "read": false
+     },
+     {
+      "id": 45,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -25622,7 +25771,7 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 44,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -25631,16 +25780,16 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 43,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 21 is fighting your garrison of 0.",
+      "body": "A horde of 20 is fighting your garrison of 0.",
       "createdAt": "2026-06-01T15:03:39.553Z",
       "read": false
      },
      {
-      "id": 43,
+      "id": 42,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -25649,7 +25798,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 41,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -25658,7 +25807,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 40,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -25667,7 +25816,7 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 39,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -25676,7 +25825,7 @@
       "read": false
      },
      {
-      "id": 39,
+      "id": 38,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -25685,7 +25834,7 @@
       "read": false
      },
      {
-      "id": 38,
+      "id": 37,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -25694,7 +25843,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 36,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -25703,7 +25852,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 35,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -25712,7 +25861,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 34,
       "kind": "site",
       "tier": "digest",
       "title": "Captives are held at (-5, -2)",
@@ -25721,7 +25870,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 33,
       "kind": "site",
       "tier": "digest",
       "title": "A forbidding ruin rises at (1, 4)",
@@ -25730,7 +25879,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 32,
       "kind": "site",
       "tier": "digest",
       "title": "Boatwrights wait at (-8, 6)",
@@ -25739,21 +25888,12 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 31,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 2 rounds.",
-      "createdAt": "2026-06-01T13:39:05.100Z",
-      "read": false
-     },
-     {
-      "id": 31,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Mara the Hungry has fallen",
-      "body": "Mara the Hungry died with the last of the horde after 1 battles. Another will rise to take their place.",
-      "createdAt": "2026-06-01T13:39:05.100Z",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T13:38:47.100Z",
       "read": false
      },
      {
@@ -25926,9 +26066,18 @@
       "body": "Clear the camp to free them, before they are taken away.",
       "createdAt": "2026-06-01T11:21:36.000Z",
       "read": false
+     },
+     {
+      "id": 11,
+      "kind": "settlers",
+      "tier": "digest",
+      "title": "Novgorod founded",
+      "body": "Your settlers built a new village.",
+      "createdAt": "2026-06-01T11:02:06.000Z",
+      "read": false
      }
     ],
-    "unread": 51,
+    "unread": 50,
     "serverTime": "2026-06-01T15:50:00.000Z"
    }
   }

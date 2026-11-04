@@ -3463,6 +3463,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 3
@@ -3520,6 +3521,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 2
@@ -3585,6 +3587,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 3
@@ -3635,6 +3638,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 3
@@ -3695,6 +3699,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 3
@@ -3767,6 +3772,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "garrison",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 2
@@ -4374,6 +4380,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "garrison",
+      "stance": "balanced",
       "loot": null,
       "units": {
        "spearman": 2
@@ -4413,6 +4420,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "hold",
+      "stance": "balanced",
       "loot": null,
       "units": {},
       "status": "done",
@@ -6930,6 +6938,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -6937,14 +6951,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -6963,23 +6980,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -7048,7 +7054,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 0,
+      "xp": 10,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -7057,15 +7063,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": null,
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
       "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -7082,6 +7088,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "garrison",
+      "stance": "balanced",
       "loot": null,
       "units": {
        "spearman": 2
@@ -7121,6 +7128,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "hold",
+      "stance": "balanced",
       "loot": null,
       "units": {},
       "status": "done",
@@ -7305,7 +7313,7 @@
      [
       0,
       0,
-      11.8
+      11.4
      ]
     ],
     "delegations": [],
@@ -9289,6 +9297,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 1
@@ -9342,6 +9351,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 1
@@ -9390,6 +9400,7 @@
      "heroAccountId": null,
      "generalId": null,
      "orders": "hold",
+     "stance": "balanced",
      "loot": null,
      "units": {
       "spearman": 1
@@ -9816,6 +9827,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -9823,14 +9840,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -9849,23 +9869,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -9934,7 +9943,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 0,
+      "xp": 10,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -9943,15 +9952,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": null,
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
       "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -9968,6 +9977,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "hold",
+      "stance": "balanced",
       "loot": null,
       "units": {
        "spearman": 1
@@ -10007,6 +10017,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "garrison",
+      "stance": "balanced",
       "loot": null,
       "units": {
        "spearman": 2
@@ -10046,6 +10057,7 @@
       "heroAccountId": null,
       "generalId": null,
       "orders": "hold",
+      "stance": "balanced",
       "loot": null,
       "units": {},
       "status": "done",
@@ -10241,7 +10253,7 @@
      [
       0,
       0,
-      11.8
+      11.4
      ]
     ],
     "delegations": [],
@@ -12176,7 +12188,7 @@
    "response": {
     "notifications": [
      {
-      "id": 19,
+      "id": 18,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 1) finished",
@@ -12185,21 +12197,12 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 17,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 2 rounds.",
-      "createdAt": "2026-06-01T11:25:48.000Z",
-      "read": false
-     },
-     {
-      "id": 17,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Vyrgan the Hungry has fallen",
-      "body": "Vyrgan the Hungry died with the last of the horde after 1 battles. Another will rise to take their place.",
-      "createdAt": "2026-06-01T11:25:48.000Z",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T11:25:30.000Z",
       "read": false
      },
      {
@@ -12347,7 +12350,7 @@
       "read": false
      }
     ],
-    "unread": 19,
+    "unread": 18,
     "serverTime": "2026-06-01T11:47:12.000Z"
    }
   }

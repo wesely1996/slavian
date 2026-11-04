@@ -80,6 +80,8 @@ var _army_orders := "support"
 var _army_hero := false
 ## The general picked to lead the next army sent (0: none).
 var _army_general := 0
+## The stance picked for the next army sent ("": its village's).
+var _army_stance := ""
 ## Standing order forms: repeat training and the surplus share.
 var _repeat_unit := "spearman"
 ## The training building whose troops the Train tab shows.
@@ -2049,11 +2051,16 @@ func _send_troops(village: Dictionary) -> void:
 		body = {"targetVillageId": _army_to, "orders": _army_orders}
 	_unit_pickers(home_units, false, "send")
 	_general_picker(village_id)
+	var fights: bool = body.orders != "garrison"
+	if fights:
+		_army_stance_picker(village)
 	var go := UI.button(tr("Send"), func() -> void:
 		var order := body.duplicate()
 		order.units = _picked_units(home_units)
 		if _ready_general(village_id) > 0:
 			order.generalId = _ready_general(village_id)
+		if fights:
+			order.stance = _army_stance
 		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, home_units)
@@ -2122,6 +2129,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	_forget_drafts(["units:", "send:", "escort:"])
 	_army_hero = false
 	_army_general = 0
+	_army_stance = ""
 	Game.note_server_time(response.data.serverTime)
 
 
@@ -2183,8 +2191,9 @@ func _hold_panel(terrain_id: String) -> void:
 			_rebuild_panel())
 		_panel_body.add_child(lead)
 	_general_picker(village_id)
+	_army_stance_picker(home)
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
-		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready}
+		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance}
 		if _ready_general(village_id) > 0:
 			order.generalId = _ready_general(village_id)
 		_send_army(village_id, order))
@@ -2544,6 +2553,17 @@ func _army_panel() -> void:
 			led.append(general.name)
 	if not led.is_empty():
 		_panel_body.add_child(UI.label(tr("Led by %s") % ", ".join(led), UI.SMALL_SIZE, UI.MUTED))
+	# Its stance: yours can be changed while it is out, not in a battle.
+	var own: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	var stance: String = army.get("stance", "balanced")
+	if own and army.status in ["stationed", "marching"]:
+		_panel_body.add_child(UI.label(tr("Stance"), UI.HEADING_SIZE))
+		var stance_army := int(army.id)
+		_stance_grid(stance, func(next: String) -> void: _set_army_stance(stance_army, next))
+	else:
+		_panel_body.add_child(UI.label(_stance_text(stance), UI.SMALL_SIZE, UI.MUTED))
+		if own and army.status == "engaged":
+			_panel_body.add_child(UI.label(tr("Its stance can't be changed in the middle of a battle."), UI.SMALL_SIZE, UI.MUTED))
 
 	# The troops: what each eats, and how long each can carry its food.
 	_panel_body.add_child(UI.label(tr("Troops"), UI.HEADING_SIZE))
@@ -4129,22 +4149,60 @@ func _train_tab(village: Dictionary) -> void:
 
 
 func _stance_picker(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Stance when attacked"), UI.SMALL_SIZE, UI.MUTED),
+		tr("How the garrison fights, and the stance new armies take. Risk against reward: the earlier a stance breaks, the harder it hits or holds.")))
+	_stance_grid(village.get("stance", "balanced"), func(stance: String) -> void: _set_stance(village_id, stance))
+
+
+## A button for each stance (the current one pressed), and what it does.
+func _stance_grid(current: String, pick: Callable, enabled := true) -> void:
 	var stances: Dictionary = Game.data.battle.stances
-	var current: String = village.get("stance", "balanced")
-	_panel_body.add_child(UI.label(tr("Stance when attacked"), UI.SMALL_SIZE, UI.MUTED))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	_panel_body.add_child(grid)
 	for stance in stances:
-		var button := UI.button(tr(stances[stance].name), func() -> void: _set_stance(int(village.id), stance))
+		var button := UI.button(tr(stances[stance].name), func() -> void: pick.call(stance))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = stance == current
+		button.disabled = stance == current or not enabled
 		grid.add_child(button)
-	var def: Dictionary = stances[current]
+	_panel_body.add_child(UI.label(_stance_text(current), UI.SMALL_SIZE, UI.MUTED))
+
+
+## A stance's numbers: what it gives, and when it breaks.
+func _stance_text(stance: String) -> String:
+	var def: Dictionary = Game.data.battle.stances[stance]
 	var breaks := tr("never breaks") if def.retreatAt == null else tr("breaks at %d%% losses") % roundi(float(def.retreatAt) * 100.0)
-	_panel_body.add_child(UI.label(tr("%s: attack ×%.2f, defense ×%.2f, %s.") % [tr(def.name), def.attack, def.defense, breaks], UI.SMALL_SIZE, UI.MUTED))
+	return tr("%s: attack ×%.2f, defense ×%.2f, %s.") % [tr(def.name), def.attack, def.defense, breaks]
+
+
+## The stance a new army fights in (its village's to begin with).
+func _army_stance_picker(village: Dictionary) -> void:
+	var stances: Array = Game.data.battle.stances.keys()
+	if not _army_stance in stances:
+		_army_stance = village.get("stance", "balanced")
+	var row := UI.hbox(8)
+	row.add_child(UI.label(tr("Stance"), UI.SMALL_SIZE))
+	var picker := UI.options(stances.map(func(s: String) -> String: return tr(Game.data.battle.stances[s].name)), stances.find(_army_stance))
+	picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	picker.item_selected.connect(func(i: int) -> void:
+		_army_stance = stances[i]
+		_rebuild_panel())
+	row.add_child(picker)
+	row.add_child(UI.info(tr("Each army fights in its own stance and breaks on its own losses: one that breaks falls back home beaten (its hero wounded, its general killed) while the others fight on.")))
+	_panel_body.add_child(row)
+	_panel_body.add_child(UI.label(_stance_text(_army_stance), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _set_army_stance(army_id: int, stance: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/armies/%d/stance" % army_id, {"stance": stance})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
 
 
 func _set_stance(village_id: int, stance: String) -> void:

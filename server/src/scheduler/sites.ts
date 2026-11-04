@@ -92,7 +92,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     const result = assault(data, {
       army: army.units,
       armyStats: playerStats(data, bonuses, false),
-      armyStance: home.state.stance,
+      armyStance: army.stance,
       camp: site.guardians,
       front: 'north',
       seed: world.seed,

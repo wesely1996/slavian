@@ -47,56 +47,83 @@ static func battle_rng(seed_value: int, battle_id: int, round: int) -> LocalRng:
 	return LocalRng.new((seed_value ^ LocalRng.imul(battle_id + 1, 0xcc9e2d51) ^ LocalRng.imul(round + 1, 0x1b873593)) & 0xffffffff)
 
 
-## Kills `from` inflicts on `to` this round, by unit type. A side:
-## {units, stance, stats: Callable, home}.
-static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng) -> Dictionary:
+## A side's forces: its groups ({units, stance, stats?}) when it fights in
+## groups, else the side itself as one.
+static func _groups(side: Dictionary) -> Array:
+	return side.groups if side.has("groups") else [{"units": side.units, "stance": side.stance}]
+
+
+## Kills `from` inflicts on `to` this round, by unit type, for each of
+## `to`'s groups. A side: {units, stance, stats: Callable, home, groups?}.
+static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng) -> Array:
 	var battle: Dictionary = data.battle
+	var strikers := _groups(from)
+	var groups := _groups(to)
+	var result: Array = []
+	for g in groups:
+		result.append({})
 	var targets: Array = []
 	var target_total := 0
-	for unit in to.units:
-		if int(to.units[unit]) > 0:
-			targets.append(unit)
-			target_total += int(to.units[unit])
-	var result := {}
+	for i in groups.size():
+		for unit in groups[i].units:
+			if int(groups[i].units[unit]) > 0:
+				targets.append([i, unit, int(groups[i].units[unit])])
+				target_total += int(groups[i].units[unit])
 	if target_total == 0:
 		return result
-	var from_stance: Dictionary = battle.stances[from.stance]
-	var to_stance: Dictionary = battle.stances[to.stance]
-	var matchup := float(battle.matchups.get(from.stance, {}).get(to.stance, 1.0))
-	for target in targets:
-		var target_count := int(to.units[target])
-		var stats: Dictionary = to.stats.call(target)
+	for t in targets:
+		var group: Dictionary = groups[t[0]]
+		var target: String = t[1]
+		var target_count: int = t[2]
+		var stats: Dictionary = (group.stats if group.has("stats") else to.stats).call(target)
 		var damage := 0.0
-		for unit in from.units:
-			var count := int(from.units[unit])
-			if count <= 0:
-				continue
-			var attacker: Dictionary = from.stats.call(unit)
-			var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
-			damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
+		for striker in strikers:
+			var from_stance: Dictionary = battle.stances[striker.stance]
+			var matchup := float(battle.matchups.get(striker.stance, {}).get(group.stance, 1.0))
+			var striker_stats: Callable = striker.stats if striker.has("stats") else from.stats
+			for unit in striker.units:
+				var count := int(striker.units[unit])
+				if count <= 0:
+					continue
+				var attacker: Dictionary = striker_stats.call(unit)
+				var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
+				damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
 		var share := float(target_count) / target_total
 		var variance := 1.0 + float(battle.variance) * (rng.next() * 2.0 - 1.0)
-		var toughness := maxf(1.0, float(stats.defense)) * float(to_stance.defense) * (float(battle.homeBonus) if to.home else 1.0)
+		var toughness := maxf(1.0, float(stats.defense)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
 		var expected := (damage * share * variance * float(battle.casualtyScale)) / toughness
 		# Round randomly so small fights still take losses on average.
 		var whole := floori(expected) + (1 if rng.next() < expected - floorf(expected) else 0)
 		var dead := mini(target_count, whole)
 		if dead > 0:
-			result[target] = dead
+			result[t[0]][target] = int(result[t[0]].get(target, 0)) + dead
 	return result
 
 
+static func _merged(losses: Array) -> Dictionary:
+	var out := {}
+	for l in losses:
+		for unit in l:
+			out[unit] = int(out.get(unit, 0)) + int(l[unit])
+	return out
+
+
 ## Simultaneous: both sides strike with the numbers they had at the start.
+## With defender groups, also their losses by group (defenderGroupLosses).
 static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng) -> Dictionary:
-	var attacker_losses := _kills(data, defender, attacker, rng)
-	return {"attackerLosses": attacker_losses, "defenderLosses": _kills(data, attacker, defender, rng)}
+	var attacker_losses := _merged(_kills(data, defender, attacker, rng))
+	var by_group := _kills(data, attacker, defender, rng)
+	var result := {"attackerLosses": attacker_losses, "defenderLosses": _merged(by_group)}
+	if defender.has("groups"):
+		result.defenderGroupLosses = by_group
+	return result
 
 
 static func subtract_units(units: Dictionary, losses: Dictionary) -> Dictionary:
 	return LocalCamps.subtract_units(units, losses)
 
 
-static func _broken(data: Dictionary, stance: String, initial: Dictionary, now: Dictionary, nerve := 1.0) -> bool:
+static func broken(data: Dictionary, stance: String, initial: Dictionary, now: Dictionary, nerve := 1.0) -> bool:
 	var base: Variant = data.battle.stances[stance].retreatAt
 	if base == null:
 		return false
@@ -112,9 +139,18 @@ static func battle_outcome(data: Dictionary, input: Dictionary) -> String:
 		return "defended"
 	if total(input.defenderNow) == 0:
 		return "raided"
-	if _broken(data, input.attackerStance, input.attackerInitial, input.attackerNow, float(input.get("attackerNerve", 1.0))):
+	if broken(data, input.attackerStance, input.attackerInitial, input.attackerNow, float(input.get("attackerNerve", 1.0))):
 		return "defended"
-	if _broken(data, input.defenderStance, input.defenderInitial, input.defenderNow):
+	if input.has("defenderGroups"):
+		# Defenders in groups, each breaking on its own: they lose once none
+		# still stands.
+		var standing := false
+		for g in input.defenderGroups:
+			if total(g.now) > 0 and not broken(data, g.stance, g.initial, g.now):
+				standing = true
+		if not standing:
+			return "raided"
+	elif broken(data, input.defenderStance, input.defenderInitial, input.defenderNow):
 		return "raided"
 	return "defended" if int(input.round) >= int(data.battle.maxRounds) else "ongoing"
 

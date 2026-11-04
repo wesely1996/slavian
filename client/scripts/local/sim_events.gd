@@ -200,7 +200,7 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 			break
 		var army: Dictionary = holding[i]
 		var home := server.find_village(world, int(army.homeVillageId))
-		var result := LocalArmies.repel_raid(data, army.units, LocalBattle.player_stats(data, home.state.bonuses, false), home.state.stance,
+		var result := LocalArmies.repel_raid(data, army.units, LocalBattle.player_stats(data, home.state.bonuses, false), army.get("stance", "balanced"),
 			raiders, String(rules.raiderStance), String(yard.front), int(world.seed), int(yard.id) * 64 + int(yard.raids) * 8 + i)
 		var lost := {}
 		for unit in army.units:

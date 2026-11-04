@@ -14,8 +14,13 @@ export interface RoundLog {
   defenderLosses: Record<string, number>;
   attackerLeft: number;
   defenderLeft: number;
-  // Armies that fought for the first time this round, with their bonus.
-  joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number }[];
+  // Armies that fought for the first time this round, with their bonus
+  // (and stance).
+  joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number; stance?: string }[];
+  // Armies that broke this round and fell back home, and whether the home
+  // force (garrison, guard) broke.
+  broke?: { armyId: number; villageId: number; stance: string; units: Record<string, number> }[];
+  homeBroke?: boolean;
   // At walls: what is left of them after the round, whether it fell this
   // round, and the engines the ballistae smashed (also in attackerLosses).
   wallLeft?: number;
@@ -47,6 +52,9 @@ export interface BattleSetup {
   river?: boolean;
   // The defense a wagon fort gives the holders (sim/field.ts).
   wagonFort?: number;
+  // The home force (a village's garrison, the Holy City's guard): what it
+  // started with, and whether it has broken (it fights no more).
+  home?: { initial: Record<string, number>; broken?: boolean };
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

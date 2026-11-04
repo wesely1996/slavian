@@ -211,10 +211,12 @@ Infantry trains in the **Barracks**, archers and throwers in the **Shooting Rang
 ### 6.2 Stances (Q22)
 | Stance | Effect *(tunable)* |
 |---|---|
-| **Defensive** | +defense, −damage, fewer losses, retreats early |
-| **Balanced** | No modifiers |
-| **Offensive** | +damage, +losses, chases fleeing enemies |
-| **Hold the Line** | Never retreats, big bonus at choke points/walls, heavy losses if broken |
+| **Offensive** | ×1.4 attack, ×0.9 defense; breaks at 35% losses |
+| **Defensive** | ×0.9 attack, ×1.35 defense; breaks at 45% losses |
+| **Balanced** | No modifiers; breaks at 60% losses |
+| **Hold the Line** | ×0.9 attack, ×1.05 defense, bonus at choke points; never breaks |
+
+**Risk against reward:** the earlier a stance breaks, the more it gives. Hordes use the same table. **Every army has its own stance**: picked when it is sent (the village's stance to begin with) and changed while it is out, but not in the middle of a battle or on its way home. In a battle each army fights in its own stance and breaks on its own losses (since it joined): one that breaks falls back home beaten (its hero carried home wounded, its general killed) while the others fight on. A village's garrison fights in the village's stance (the Holy City's guard in its own); one that breaks fights no more. The defenders lose once every army and the garrison have broken or fallen.
 
 Enemy hordes also have stances. They are hidden until scouted. A **visible matchup table** in the almanac shows the stance-vs-stance modifiers.
 

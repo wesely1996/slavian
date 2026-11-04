@@ -255,7 +255,8 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		general_id = general.id
 	var army := {"id": world.next.army, "ownerAccountId": home.ownerAccountId, "homeVillageId": home.id,
 		"targetVillageId": null if order.orders in ["hold", "clear", "explore"] else order.get("targetVillageId"),
-		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders, "units": units, "status": "marching",
+		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders,
+		"stance": String(order.stance) if order.get("stance") != null else String(home.state.stance), "engagedUnits": null, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
 		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null, "wagonFortAt": null}
 	world.next.army += 1
@@ -666,6 +667,7 @@ static func join_battle(server: LocalServer, world: Dictionary, army: Dictionary
 	army.battleId = battle.id
 	army.joinsRound = int(battle.round) + 1
 	army.joinBonus = bonus
+	army.engagedUnits = army.units.duplicate()
 	plan_hunger(server, world, army, at)
 	_add_defenders(battle, army.units)
 
@@ -685,6 +687,7 @@ static func rally_to_battle(server: LocalServer, world: Dictionary, battle: Dict
 		army.battleId = battle.id
 		army.joinsRound = 1
 		army.joinBonus = 0
+		army.engagedUnits = army.units.duplicate()
 		_add_defenders(battle, army.units)
 	for other in world.villages:
 		if int(other.id) == int(village.id) or other.state.besieged:
@@ -782,9 +785,25 @@ static func send_army(server: LocalServer, world: Dictionary, village: Dictionar
 	var units: Variant = body.get("units")
 	if not units is Dictionary or not String(body.get("orders", "")) in ["support", "reinforce", "harass", "hold", "clear", "explore", "garrison"]:
 		return {"error": "Give the army its units and orders", "kind": "invalid"}
+	if body.get("stance") != null and not String(body.stance) in server.data.battle.stances:
+		return {"error": "Unknown stance", "kind": "invalid"}
 	return dispatch_army(server, world, {"homeVillageId": village.id, "targetVillageId": body.get("targetVillageId"),
 		"targetHex": Vector2i(int(target.q), int(target.r)) if target is Dictionary else null, "units": units, "orders": body.orders,
-		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "at": now})
+		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "stance": body.get("stance"), "at": now})
+
+
+## commands/armies.ts armyStanceCommand: an army's battle stance; not in the
+## middle of a battle.
+static func set_stance(world: Dictionary, army_id: int, stance: String) -> Dictionary:
+	var army := find_army(world, army_id)
+	if army.is_empty():
+		return {"error": "No such army", "kind": "not_found"}
+	if army.status == "engaged":
+		return LocalVillage.rule("That army is in the middle of a battle")
+	if army.status == "returning" or army.status == "done":
+		return LocalVillage.rule("Only armies out in the field take a stance")
+	army.stance = stance
+	return army
 
 
 ## Calls an army standing guard or holding a hex home.
@@ -974,6 +993,7 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		army.battleId = battle.id
 		army.joinsRound = 1
 		army.joinBonus = 0
+		army.engagedUnits = army.units.duplicate()
 	server.schedule(world, at + LocalBattle.round_ms(data, world.speed), "battle_round", {"battleId": battle.id})
 	var ground: Array = []
 	for pair in [["ambush", "an ambush"], ["choke", "a choke point"], ["fort", "a fort"], ["wagonFort", "a wagon fort"], ["river", "a river crossing"]]:
@@ -1350,7 +1370,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var hero := hero_with_army(world, int(army.id))
 	var general := LocalGenerals.general_with_army(world, int(army.id))
 	var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
-	var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), home.state.stance, camp.units, camp.front, int(world.seed), int(camp.id))
+	var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
@@ -1415,7 +1435,7 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		var hero := hero_with_army(world, int(army.id))
 		var general := LocalGenerals.general_with_army(world, int(army.id))
 		var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
-		var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), home.state.stance, site.guardians, "north",
+		var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), army.get("stance", "balanced"), site.guardians, "north",
 			int(world.seed), int(site.id) + 0x5000)
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},
@@ -1532,7 +1552,8 @@ static func _led_bonuses(data: Dictionary, own: Dictionary, hero: Dictionary, ge
 
 static func army_view(a: Dictionary) -> Dictionary:
 	return {"id": a.id, "ownerAccountId": a.ownerAccountId, "homeVillageId": a.homeVillageId, "targetVillageId": a.targetVillageId,
-		"target": [a.targetQ, a.targetR], "heroAccountId": a.heroAccountId, "generalId": a.get("generalId"), "orders": a.orders, "loot": a.loot, "units": a.units,
+		"target": [a.targetQ, a.targetR], "heroAccountId": a.heroAccountId, "generalId": a.get("generalId"), "orders": a.orders,
+		"stance": a.get("stance", "balanced"), "loot": a.loot, "units": a.units,
 		"status": a.status, "battleId": a.battleId, "path": a.path.map(func(s: Dictionary) -> Array: return [s.q, s.r, s.atMs]),
 		"departsAt": LocalTime.iso(a.departsAt), "arrivesAt": LocalTime.iso(a.arrivesAt),
 		"leavesAt": LocalTime.iso(a.leavesAt) if a.leavesAt != null else null, "returnsAt": LocalTime.iso(a.returnsAt) if a.returnsAt != null else null,

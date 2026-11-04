@@ -18,6 +18,7 @@ import type { World } from '../db/worlds.js';
 import {
   battleOutcome,
   battleRng,
+  broken,
   enemyStats,
   playerStats,
   raidLoot,
@@ -39,8 +40,8 @@ import { heroAfterBattle } from './heroes.js';
 import { hordeStats, leaderAfter } from './leaders.js';
 import { armyLosses, planHunger, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
-import { addUnits, splitLosses } from '../sim/armies.js';
-import { fieldRound } from './field.js';
+import { addUnits } from '../sim/armies.js';
+import { fallBack, fieldRound } from './field.js';
 import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
@@ -69,7 +70,7 @@ export async function startBattle(
   await markBattling(client, wave.id);
   // Walls must be battered down; a horde without the siege to do it in time
   // builds engines first, and the assault waits for them.
-  const setup: BattleSetup = {};
+  const setup: BattleSetup = { home: { initial: state.garrison } };
   if (cameOverRiver(wave.path ?? [], { q: village.q, r: village.r }, await riverKeys(client, world.id))) setup.river = true;
   let composition = wave.composition;
   let firstRound = at.getTime() + roundMs(data, world.speed);
@@ -137,8 +138,11 @@ export const battleHandlers: HandlerRegistry = {
     const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     // The garrison fights alongside armies sent to help; armies joining this
     // round bring their pincer or harassment bonus.
+    // Each fights in its own stance; a garrison that broke fights no more.
     const engaged = await armiesInBattle(client, battle.id);
-    const forces = [state.garrison, ...engaged.map((a) => a.units)];
+    const homeBroken = battle.setup.home?.broken === true;
+    const garrison = homeBroken ? {} : state.garrison;
+    const forces = [garrison, ...engaged.map((a) => a.units)];
     const joining = engaged.filter((a) => a.joinsRound === round);
     const surge = 1 + joining.reduce((sum, a) => sum + a.joinBonus, 0);
     const baseStats = playerStats(data, bonuses, true);
@@ -178,6 +182,7 @@ export const battleHandlers: HandlerRegistry = {
           return { ...base, attack: base.attack * surge * walls.attack * shooting, defense: base.defense * walls.defense };
         },
         home: true,
+        groups: [{ units: garrison, stance: state.stance }, ...engaged.map((a) => ({ units: a.units, stance: a.stance }))],
       },
       rng,
     );
@@ -185,11 +190,12 @@ export const battleHandlers: HandlerRegistry = {
     const attackerNow = subtractUnits(wave.composition, attackerLosses);
     // The horde batters the walls with what came at them this round.
     let wallLeft: number | undefined;
+    let setup: BattleSetup = battle.setup;
     if (standing) {
       wallLeft = Math.max(0, Math.round(wall.integrity - siegeDamage(data, wave.front, assault, state.plots)));
-      await saveSetup(client, battle.id, { ...battle.setup, wall: { ...wall, integrity: wallLeft } });
+      setup = { ...setup, wall: { ...wall, integrity: wallLeft } };
     }
-    const shares = splitLosses(result.defenderLosses, forces);
+    const shares = result.defenderGroupLosses!;
     let villageState = loseGarrison(data, state, shares[0]!, at, world.speed);
     let defenderLosses: Record<string, number> = { ...shares[0]! };
     const armies: Army[] = [];
@@ -203,9 +209,10 @@ export const battleHandlers: HandlerRegistry = {
       armies.push(await armyLosses(client, data, world, army, losses, at));
     }
     const leaving = (a: Army) => a.orders === 'harass' && a.joinsRound === round;
+    const garrisonNow = homeBroken ? {} : villageState.garrison;
     const defendersNow = armies
       .filter((a) => !leaving(a))
-      .reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...villageState.garrison });
+      .reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...garrisonNow });
     await setWaveStrength(client, wave.id, attackerNow);
     // Every harassing strike makes the horde hate the more.
     const strikes = joining.filter((a) => a.orders === 'harass').length;
@@ -220,7 +227,17 @@ export const battleHandlers: HandlerRegistry = {
       defenderInitial: battle.defenderInitial,
       defenderNow: defendersNow,
       attackerNerve: personality(data, wave).nerve * (1 + led.nerve),
+      defenderGroups: [
+        { stance: state.stance, initial: battle.setup.home?.initial ?? battle.defenderInitial, now: garrisonNow },
+        ...armies.filter((a) => !leaving(a)).map((a) => ({ stance: a.stance, initial: a.engagedUnits ?? a.units, now: a.units })),
+      ],
     });
+    // While the fight goes on, an army that broke falls back home beaten,
+    // and a garrison that broke fights no more.
+    const breaks = (a: Army) => outcome === 'ongoing' && !leaving(a) && total(a.units) > 0 && broken(data, a.stance, a.engagedUnits ?? a.units, a.units);
+    const homeBroke = outcome === 'ongoing' && !homeBroken && total(garrisonNow) > 0 && broken(data, state.stance, battle.setup.home?.initial ?? battle.defenderInitial, garrisonNow);
+    if (homeBroke) setup = { ...setup, home: { initial: battle.setup.home?.initial ?? battle.defenderInitial, broken: true } };
+    if (setup !== battle.setup) await saveSetup(client, battle.id, setup);
     const log: RoundLog = {
       round,
       at: at.toISOString(),
@@ -230,9 +247,11 @@ export const battleHandlers: HandlerRegistry = {
       defenderLeft: total(defendersNow),
       ...(joining.length
         ? {
-            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: a.units, bonus: a.joinBonus })),
+            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: a.units, bonus: a.joinBonus, stance: a.stance })),
           }
         : {}),
+      ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: a.units })) } : {}),
+      ...(homeBroke ? { homeBroke: true } : {}),
       ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
       ...(total(smashed) ? { smashed } : {}),
       ...(over > 0 ? { over: Math.round(over * 100) / 100 } : {}),
@@ -240,8 +259,10 @@ export const battleHandlers: HandlerRegistry = {
     };
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard and reinforcements go home.
+    const kills = total(battle.attackerInitial) - total(attackerNow);
     for (const army of armies) {
-      if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
+      if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
+      else if (leaving(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
       else if (outcome !== 'ongoing') {
         if (total(army.units)) await planHunger(client, data, world, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 }, at);
         else await saveArmy(client, { ...army, status: 'done' });

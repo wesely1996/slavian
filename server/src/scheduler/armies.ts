@@ -10,7 +10,7 @@ import { wagonsIn } from '../sim/field.js';
 import { loadLand } from '../db/rivers.js';
 import type { Land } from '../sim/land.js';
 import { z } from 'zod';
-import type { GameData, TerrainId } from '../data/index.js';
+import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { armiesAt, insertArmy, loadArmy, loadReinforceRule, saveArmy, type Army } from '../db/armies.js';
 import { addDefenders, loadBattle, type Battle } from '../db/battles.js';
 import { heroWithArmy, loadHero, saveHero } from '../db/heroes.js';
@@ -63,6 +63,8 @@ export interface ArmyOrder {
   withHero?: boolean | undefined;
   // One of the owner's generals at home in the village leads it.
   generalId?: number | undefined;
+  // Its battle stance (absent: the village's).
+  stance?: Stance | undefined;
   at: Date;
 }
 
@@ -130,6 +132,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     heroAccountId,
     generalId,
     orders: input.orders,
+    stance: input.stance ?? home.state.stance,
     units,
     path,
     departsAt: input.at,
@@ -482,7 +485,7 @@ async function joinBattle(client: DbClient, data: GameData, world: World, army: 
   const armyStep = army.path.at(-2);
   const angle = hordeStep && armyStep ? approachAngle(villageHex, hex(hordeStep.q, hordeStep.r), hex(armyStep.q, armyStep.r)) : 0;
   const bonus = joinBonus(data, { orders: army.orders, armySize: total(army.units), hordeSize: total(wave.composition), angle });
-  const joined: Army = { ...army, status: 'engaged', battleId: battle.id, joinsRound: battle.round + 1, joinBonus: bonus };
+  const joined: Army = { ...army, status: 'engaged', battleId: battle.id, joinsRound: battle.round + 1, joinBonus: bonus, engagedUnits: army.units };
   await planHunger(client, data, world, joined, at);
   await addDefenders(client, battle.id, army.units);
   return joined;
@@ -499,7 +502,7 @@ export async function rallyToBattle(
   at: Date,
 ): Promise<void> {
   for (const army of await armiesAt(client, village.id, ['stationed'])) {
-    await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0 });
+    await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
     await addDefenders(client, battle.id, army.units);
   }
   for (const other of await listVillages(client, world.id)) {

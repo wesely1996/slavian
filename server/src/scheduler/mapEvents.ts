@@ -128,7 +128,7 @@ export const mapEventHandlers: HandlerRegistry = {
       const result = repelRaid(data, {
         army: army.units,
         armyStats: playerStats(data, home.state.bonuses, false),
-        armyStance: home.state.stance,
+        armyStance: army.stance,
         raiders,
         raiderStance: rules.raiderStance,
         front: shipyard.front as Front,
