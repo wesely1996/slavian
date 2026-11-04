@@ -108,6 +108,19 @@ func tutorial_flag(world_id: int, key: String) -> bool:
 	return bool(tutorial.get(str(world_id), {}).get(key, false))
 
 
+## A number kept per world beside the tutorial flags (e.g. the last event
+## notice shown in a popup).
+func world_mark(world_id: int, key: String) -> int:
+	return int(tutorial.get(str(world_id), {}).get(key, 0))
+
+
+func set_world_mark(world_id: int, key: String, value: int) -> void:
+	var state: Dictionary = tutorial.get(str(world_id), {})
+	state[key] = value
+	tutorial[str(world_id)] = state
+	save()
+
+
 func set_tutorial_flag(world_id: int, key: String, value: bool) -> void:
 	var state: Dictionary = tutorial.get(str(world_id), {})
 	state[key] = value

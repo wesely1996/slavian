@@ -28,6 +28,7 @@ import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
 import { bridgeQuest } from './bridge.js';
+import { rewardEvent } from './eventOutcomes.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -210,6 +211,8 @@ export async function claimFind(
       vars: { name, q: site.q, r: site.r, find: findText(data, find) },
     }, at);
   }
+  // A forbidding ruin searched: the event's bounty.
+  if (site.hard) await rewardEvent(client, data, world, accountId, { title: 'You searched the forbidding ruin at ({q}, {r})', vars: { q: site.q, r: site.r } }, at);
 }
 
 export const siteHandlers: HandlerRegistry = {

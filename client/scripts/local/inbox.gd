@@ -147,6 +147,7 @@ static func digest_summary(kinds: Array, language: String) -> String:
 		"battle_result": ["battle report", "battle reports"], "caravan_delivered": ["caravan delivery", "caravan deliveries"],
 		"settlers": ["settlers report", "settlers reports"], "hero": ["hero report", "hero reports"],
 		"leader": ["word of an enemy leader", "words of enemy leaders"],
+		"event": ["event", "events"],
 	}
 	return ", ".join(counts.keys().map(func(kind: String) -> String:
 		var names: Array = english.get(kind, ["update", "updates"])

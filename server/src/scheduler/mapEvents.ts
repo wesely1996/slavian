@@ -1,7 +1,8 @@
 // Daily map events on the scheduler (data/events.json, sim/events.ts):
 // map_event raises the day's event and plans the next day's; map_event_end
 // takes it away again when its time is up, unless an army is on its way (or,
-// for a shipyard, someone has sent resources). A paid-for shipyard builds
+// for a shipyard, someone has sent resources), and the horde hates the more
+// for it (scheduler/eventOutcomes.ts). A paid-for shipyard builds
 // its boat (shipyard_done), struck by raiders (shipyard_raid) on the way.
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
@@ -18,12 +19,13 @@ import { RuleError } from '../errors.js';
 import { playerStats, total } from '../sim/battle.js';
 import { repelRaid } from '../sim/camps.js';
 import { listMembers, loadHexes, type World } from '../db/worlds.js';
-import { planMapEvent } from '../sim/events.js';
+import { eventFront, planMapEvent } from '../sim/events.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
 import { amountsAt, mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { armyLosses, sendHome } from './armies.js';
 import { createCamp } from './camps.js';
+import { bountyTotal, failEvent, rewardEvent } from './eventOutcomes.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { takenHexes } from './horde.js';
 import { tell } from './notices.js';
@@ -79,37 +81,40 @@ export const mapEventHandlers: HandlerRegistry = {
       await scheduleEvent(client, world.id, endsAt, 'map_event_end', { shipyardId });
     }
     if (plan) {
-      const vars = { q: plan.cell.q, r: plan.cell.r };
+      const vars = { q: plan.cell.q, r: plan.cell.r, front: eventFront(plan.cell, world.activeFronts), bounty: bountyTotal(data, world, at) };
       await tellAll(client, world, plan.kind === 'captives'
-        ? { kind: 'site', tier: 'digest', title: 'Captives are held at ({q}, {r})', body: 'Clear the camp to free them, before they are taken away.', vars }
+        ? { kind: 'event', tier: 'push', title: 'Captives are held at ({q}, {r})', body: 'Clear the camp to free them before they are taken away, for a bounty of at least {bounty} resources. If they are taken, the next horde from the {front} hates you the more.', vars }
         : plan.kind === 'ruin'
-          ? { kind: 'site', tier: 'digest', title: 'A forbidding ruin rises at ({q}, {r})', body: 'Strong guardians watch it, and rich finds lie within, for a while.', vars }
-          : { kind: 'site', tier: 'digest', title: 'Boatwrights wait at ({q}, {r})', body: 'Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.', vars }, at);
+          ? { kind: 'event', tier: 'push', title: 'A forbidding ruin rises at ({q}, {r})', body: 'Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least {bounty} resources; left alone, it rouses the next horde from the {front}.', vars }
+          : { kind: 'event', tier: 'push', title: 'Boatwrights wait at ({q}, {r})', body: 'Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least {bounty} resources for everyone. If nobody does, the next horde from the {front} hates you the more.', vars }, at);
       await notifyWorld(client, { worldId: world.id, type: 'world' });
     }
     await scheduleEvent(client, world.id, new Date(at.getTime() + hoursMs(data.events.everyHours, world.speed)), 'map_event', { day: day + 1 });
   },
 
   // Its time is up: gone, unless an army is already on its way to it.
-  async map_event_end({ client, world }, event) {
+  async map_event_end({ client, data, world }, event) {
     const { campId, siteId, shipyardId } = mapEventEndPayload.parse(event.payload);
     if (campId !== undefined) {
       const camp = await loadCamp(client, campId);
       if (!camp || camp.status !== 'active') return;
       if ((await armiesHolding(client, world.id, camp.q, camp.r, ['marching', 'engaged'])).some((a) => a.orders === 'clear')) return;
       await deleteCamp(client, camp.id);
+      await failEvent(client, data, world, camp.front as Front, 'The captives at ({q}, {r}) were taken away', { q: camp.q, r: camp.r }, event.dueAt);
     }
     if (siteId !== undefined) {
       const site = await loadSite(client, siteId);
       if (!site || site.status !== 'unexplored') return;
       if ((await armiesHolding(client, world.id, site.q, site.r, ['marching', 'engaged', 'stationed'])).some((a) => a.orders === 'explore')) return;
       await deleteSite(client, site.id);
+      await failEvent(client, data, world, eventFront(hex(site.q, site.r), world.activeFronts), 'The forbidding ruin at ({q}, {r}) sank back into the earth', { q: site.q, r: site.r }, event.dueAt);
     }
     if (shipyardId !== undefined) {
       const shipyard = await loadShipyard(client, shipyardId);
       // Gone only if nobody has sent anything.
       if (!shipyard || shipyard.status !== 'open' || total(shipyard.paid) > 0) return;
       await deleteShipyard(client, shipyard.id);
+      await failEvent(client, data, world, shipyard.front as Front, 'The boatwrights at ({q}, {r}) gave up and left', { q: shipyard.q, r: shipyard.r }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
@@ -168,11 +173,18 @@ export const mapEventHandlers: HandlerRegistry = {
   },
 
   // The boat is done: from now on its river is a fast lane.
-  async shipyard_done({ client, world }, event) {
+  // Every member gets the bounty.
+  async shipyard_done({ client, data, world }, event) {
     const shipyard = await loadShipyard(client, shipyardPayload.parse(event.payload).shipyardId);
     if (!shipyard || shipyard.status !== 'building' || shipyard.completesAt?.getTime() !== event.dueAt.getTime()) return;
     await saveShipyard(client, { ...shipyard, status: 'done', nextRaidAt: null });
-    await tellAll(client, world, { kind: 'build_done', tier: 'digest', title: 'The boat at ({q}, {r}) is ready', body: 'Armies, caravans and scouts move fast between hexes along its river.', vars: { q: shipyard.q, r: shipyard.r } }, event.dueAt);
+    for (const member of await listMembers(client, world.id)) {
+      await rewardEvent(client, data, world, member.accountId, {
+        title: 'The boat at ({q}, {r}) is ready',
+        body: "Armies, caravans and scouts move fast between hexes along its river. The boatwrights' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.",
+        vars: { q: shipyard.q, r: shipyard.r },
+      }, event.dueAt);
+    }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 };

@@ -5365,7 +5365,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -5558,8 +5558,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "9:ruins",
@@ -7840,7 +7840,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -7934,7 +7934,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -8023,8 +8023,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "12:caravan",
@@ -10315,7 +10315,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -10409,7 +10409,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -10508,8 +10508,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 88,
+        "risk": 0.49
        },
        {
         "id": "15:scout",
@@ -12806,7 +12806,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -12900,7 +12900,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -15283,7 +15283,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -15352,7 +15352,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -17852,7 +17852,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.6000000000000001,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -17921,7 +17921,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -20419,7 +20419,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -20598,13 +20598,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -20623,11 +20623,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -20638,31 +20637,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -20670,7 +20720,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -20877,7 +20927,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 8,
+      "xp": 10,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -20889,12 +20939,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -20946,6 +20996,17 @@
       "front": "south",
       "q": 0,
       "r": -1,
+      "size": 7,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
       "size": 7,
       "waveId": 2,
       "reward": null,
@@ -23176,7 +23237,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -23270,7 +23331,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -23355,13 +23416,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -23380,11 +23441,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -23395,31 +23455,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -23427,7 +23538,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -23595,8 +23706,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        }
       ]
      }
@@ -23634,7 +23745,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 8,
+      "xp": 10,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -23646,12 +23757,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -23710,6 +23821,17 @@
      },
      {
       "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 8,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 9,
       "kind": "captives",
       "front": "south",
       "q": 0,
@@ -25935,7 +26057,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -26029,7 +26151,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -26114,13 +26236,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -26139,11 +26261,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -26154,31 +26275,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -26186,7 +26358,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -26344,8 +26516,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "34:caravan",
@@ -26393,7 +26565,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 8,
+      "xp": 10,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -26405,12 +26577,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -26454,6 +26626,17 @@
      },
      {
       "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 9,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 9,
       "kind": "captives",
       "front": "south",
       "q": 0,
@@ -26468,7 +26651,7 @@
       "endsAt": "2026-06-01T13:45:36.000Z"
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "captives",
       "front": "north",
       "q": 4,
@@ -28993,7 +29176,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -29187,7 +29370,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -29198,11 +29381,11 @@
        {
         "at": "2026-06-01T13:44:39.900Z",
         "round": 1,
-        "attackerLeft": 5,
+        "attackerLeft": 7,
         "defenderLeft": 38,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 8,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -29240,7 +29423,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -29294,7 +29477,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -29337,13 +29520,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -29362,11 +29545,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -29377,31 +29559,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -29409,7 +29642,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -29619,7 +29852,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 8,
+      "xp": 10,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -29631,12 +29864,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -29679,7 +29912,18 @@
       "endsAt": null
      },
      {
-      "id": 9,
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 10,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 10,
       "kind": "captives",
       "front": "north",
       "q": 4,
@@ -29697,7 +29941,7 @@
       "endsAt": "2026-06-01T14:14:24.000Z"
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "lair",
       "front": "north",
       "q": 1,
@@ -29826,7 +30070,7 @@
      [
       0,
       0,
-      23.9
+      23.5
      ]
     ],
     "delegations": [],
@@ -32245,7 +32489,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -32324,7 +32568,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -32439,7 +32683,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -32450,11 +32694,11 @@
        {
         "at": "2026-06-01T13:44:39.900Z",
         "round": 1,
-        "attackerLeft": 5,
+        "attackerLeft": 7,
         "defenderLeft": 38,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 8,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -32492,7 +32736,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -32546,7 +32790,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -32589,13 +32833,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -32614,11 +32858,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -32629,31 +32872,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -32661,7 +32955,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -32819,8 +33113,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 88,
+        "risk": 0.49
        },
        {
         "id": "40:scout",
@@ -32871,7 +33165,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 8,
+      "xp": 10,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -32883,12 +33177,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -32931,7 +33225,18 @@
       "endsAt": null
      },
      {
-      "id": 10,
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 11,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 11,
       "kind": "lair",
       "front": "north",
       "q": 1,
@@ -33073,7 +33378,7 @@
      [
       0,
       0,
-      23.9
+      23.5
      ]
     ],
     "delegations": [],
@@ -35513,7 +35818,7 @@
       ],
       "ritual": false,
       "leaderId": 2,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": null
      },
@@ -35533,7 +35838,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -35713,18 +36018,18 @@
       "round": 1,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
-       "zealot": 13,
+       "zealot": 17,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 14,
+       "zealot": 18,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
@@ -35733,7 +36038,7 @@
        {
         "at": "2026-06-01T14:59:27.553Z",
         "round": 1,
-        "attackerLeft": 24,
+        "attackerLeft": 29,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
@@ -35787,7 +36092,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -35798,11 +36103,11 @@
        {
         "at": "2026-06-01T13:44:39.900Z",
         "round": 1,
-        "attackerLeft": 5,
+        "attackerLeft": 7,
         "defenderLeft": 38,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 8,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -35840,7 +36145,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -35894,7 +36199,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -35937,13 +36242,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -35962,11 +36267,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -35977,31 +36281,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -36009,7 +36364,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -36218,25 +36573,26 @@
       "front": "south",
       "name": "Lothar",
       "title": "Brother Lothar",
-      "level": 2,
-      "xp": 26,
-      "xpToNext": 28,
+      "level": 3,
+      "xp": 0,
+      "xpToNext": 39,
       "skills": {
+       "dread": 1,
        "thick_hide": 1
       },
       "effects": {
        "attack": 0,
        "defense": 0.04,
-       "nerve": 0,
+       "nerve": 0.06,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "woundedUntil": "2026-06-01T13:01:11.357Z",
       "battles": 3,
       "wins": 2,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 8,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -36279,7 +36635,18 @@
       "endsAt": null
      },
      {
-      "id": 10,
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 7,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 11,
       "kind": "lair",
       "front": "north",
       "q": 1,
@@ -36290,7 +36657,7 @@
       "endsAt": null
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "captives",
       "front": "north",
       "q": -8,
@@ -36409,7 +36776,7 @@
      [
       0,
       0,
-      14.3
+      14.1
      ]
     ],
     "delegations": [],
@@ -38828,7 +39195,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.6000000000000001,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -39007,23 +39374,28 @@
         }
        },
        "guard": {
-        "archer": 12,
-        "spearman": 29
+        "archer": 7,
+        "spearman": 24
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 8,
+      "round": 12,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
-       "zealot": 14,
+       "zealot": 18,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "zealot": 3,
+       "inquisitor": 2,
+       "crossbowman": 1,
+       "knight_brother": 1
+      },
       "defenderInitial": {
        "archer": 15,
        "spearman": 30
@@ -39032,7 +39404,7 @@
        {
         "at": "2026-06-01T15:00:21.553Z",
         "round": 1,
-        "attackerLeft": 22,
+        "attackerLeft": 27,
         "defenderLeft": 43,
         "attackerLosses": {
          "zealot": 2,
@@ -39046,84 +39418,136 @@
        {
         "at": "2026-06-01T15:00:39.553Z",
         "round": 2,
-        "attackerLeft": 19,
-        "defenderLeft": 43,
+        "attackerLeft": 25,
+        "defenderLeft": 41,
         "attackerLosses": {
-         "zealot": 2,
-         "inquisitor": 1
+         "zealot": 2
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T15:00:57.553Z",
         "round": 3,
-        "attackerLeft": 13,
-        "defenderLeft": 42,
+        "attackerLeft": 21,
+        "defenderLeft": 39,
         "attackerLosses": {
          "zealot": 2,
          "arbalester": 1,
-         "inquisitor": 1,
-         "crossbowman": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "archer": 1,
+         "spearman": 1
         }
        },
        {
         "at": "2026-06-01T15:01:15.553Z",
         "round": 4,
-        "attackerLeft": 11,
-        "defenderLeft": 41,
+        "attackerLeft": 20,
+        "defenderLeft": 37,
         "attackerLosses": {
-         "zealot": 2
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:01:33.553Z",
+        "round": 5,
+        "attackerLeft": 18,
+        "defenderLeft": 35,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:01:51.553Z",
+        "round": 6,
+        "attackerLeft": 15,
+        "defenderLeft": 34,
+        "attackerLosses": {
+         "zealot": 1,
+         "inquisitor": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "archer": 1
         }
        },
        {
-        "at": "2026-06-01T15:01:33.553Z",
-        "round": 5,
-        "attackerLeft": 8,
-        "defenderLeft": 41,
-        "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1,
-         "knight_brother": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T15:01:51.553Z",
-        "round": 6,
-        "attackerLeft": 4,
-        "defenderLeft": 41,
-        "attackerLosses": {
-         "zealot": 2,
-         "inquisitor": 1,
-         "knight_brother": 1
-        },
-        "defenderLosses": {}
-       },
-       {
         "at": "2026-06-01T15:02:09.553Z",
         "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 41,
+        "attackerLeft": 14,
+        "defenderLeft": 34,
         "attackerLosses": {
-         "zealot": 2
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T15:02:27.553Z",
         "round": 8,
-        "attackerLeft": 0,
-        "defenderLeft": 41,
+        "attackerLeft": 13,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:02:45.553Z",
+        "round": 9,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
          "zealot": 1,
          "arbalester": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:03:03.553Z",
+        "round": 10,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T15:03:21.553Z",
+        "round": 11,
+        "attackerLeft": 9,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T15:03:39.553Z",
+        "round": 12,
+        "attackerLeft": 7,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1,
+         "knight_brother": 1
         },
         "defenderLosses": {}
        }
@@ -39131,7 +39555,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T15:00:03.553Z",
-      "endedAt": "2026-06-01T15:02:27.553Z"
+      "endedAt": "2026-06-01T15:03:39.553Z"
      },
      {
       "id": 7,
@@ -39152,20 +39576,25 @@
       "round": 1,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
-       "zealot": 13,
+       "zealot": 17,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "zealot": 3,
+       "inquisitor": 2,
+       "crossbowman": 1,
+       "knight_brother": 1
+      },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T14:59:27.553Z",
         "round": 1,
-        "attackerLeft": 24,
+        "attackerLeft": 29,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
@@ -39219,7 +39648,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -39230,11 +39659,11 @@
        {
         "at": "2026-06-01T13:44:39.900Z",
         "round": 1,
-        "attackerLeft": 5,
+        "attackerLeft": 7,
         "defenderLeft": 38,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 8,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -39272,7 +39701,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -39326,7 +39755,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -39369,13 +39798,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -39394,11 +39823,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -39409,31 +39837,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -39441,7 +39920,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -39650,27 +40129,28 @@
       "front": "south",
       "name": "Lothar",
       "title": "Brother Lothar",
-      "level": 2,
-      "xp": 26,
-      "xpToNext": 28,
+      "level": 3,
+      "xp": 13,
+      "xpToNext": 39,
       "skills": {
+       "dread": 1,
        "thick_hide": 1
       },
       "effects": {
        "attack": 0,
        "defense": 0.04,
-       "nerve": 0,
+       "nerve": 0.06,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "status": "alive",
+      "woundedUntil": "2026-06-01T15:39:39.553Z",
       "battles": 4,
       "wins": 2,
       "losses": 2,
       "razed": 0,
-      "kills": 6,
+      "kills": 22,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T15:02:27.553Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -39711,7 +40191,18 @@
       "endsAt": null
      },
      {
-      "id": 10,
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 8,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 11,
       "kind": "lair",
       "front": "north",
       "q": 1,
@@ -39722,7 +40213,7 @@
       "endsAt": null
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "captives",
       "front": "north",
       "q": -8,
@@ -39858,7 +40349,7 @@
      [
       0,
       0,
-      29.3
+      28.7
      ]
     ],
     "delegations": [],
@@ -42277,7 +42768,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.8,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -42456,23 +42947,28 @@
         }
        },
        "guard": {
-        "archer": 12,
-        "spearman": 29
+        "archer": 7,
+        "spearman": 24
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 8,
+      "round": 12,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
-       "zealot": 14,
+       "zealot": 18,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "zealot": 3,
+       "inquisitor": 2,
+       "crossbowman": 1,
+       "knight_brother": 1
+      },
       "defenderInitial": {
        "archer": 15,
        "spearman": 30
@@ -42481,7 +42977,7 @@
        {
         "at": "2026-06-01T15:00:21.553Z",
         "round": 1,
-        "attackerLeft": 22,
+        "attackerLeft": 27,
         "defenderLeft": 43,
         "attackerLosses": {
          "zealot": 2,
@@ -42495,84 +42991,136 @@
        {
         "at": "2026-06-01T15:00:39.553Z",
         "round": 2,
-        "attackerLeft": 19,
-        "defenderLeft": 43,
+        "attackerLeft": 25,
+        "defenderLeft": 41,
         "attackerLosses": {
-         "zealot": 2,
-         "inquisitor": 1
+         "zealot": 2
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T15:00:57.553Z",
         "round": 3,
-        "attackerLeft": 13,
-        "defenderLeft": 42,
+        "attackerLeft": 21,
+        "defenderLeft": 39,
         "attackerLosses": {
          "zealot": 2,
          "arbalester": 1,
-         "inquisitor": 1,
-         "crossbowman": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
-         "archer": 1
+         "archer": 1,
+         "spearman": 1
         }
        },
        {
         "at": "2026-06-01T15:01:15.553Z",
         "round": 4,
-        "attackerLeft": 11,
-        "defenderLeft": 41,
+        "attackerLeft": 20,
+        "defenderLeft": 37,
         "attackerLosses": {
-         "zealot": 2
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:01:33.553Z",
+        "round": 5,
+        "attackerLeft": 18,
+        "defenderLeft": 35,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:01:51.553Z",
+        "round": 6,
+        "attackerLeft": 15,
+        "defenderLeft": 34,
+        "attackerLosses": {
+         "zealot": 1,
+         "inquisitor": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "archer": 1
         }
        },
        {
-        "at": "2026-06-01T15:01:33.553Z",
-        "round": 5,
-        "attackerLeft": 8,
-        "defenderLeft": 41,
-        "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1,
-         "knight_brother": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T15:01:51.553Z",
-        "round": 6,
-        "attackerLeft": 4,
-        "defenderLeft": 41,
-        "attackerLosses": {
-         "zealot": 2,
-         "inquisitor": 1,
-         "knight_brother": 1
-        },
-        "defenderLosses": {}
-       },
-       {
         "at": "2026-06-01T15:02:09.553Z",
         "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 41,
+        "attackerLeft": 14,
+        "defenderLeft": 34,
         "attackerLosses": {
-         "zealot": 2
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T15:02:27.553Z",
         "round": 8,
-        "attackerLeft": 0,
-        "defenderLeft": 41,
+        "attackerLeft": 13,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:02:45.553Z",
+        "round": 9,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
          "zealot": 1,
          "arbalester": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T15:03:03.553Z",
+        "round": 10,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T15:03:21.553Z",
+        "round": 11,
+        "attackerLeft": 9,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T15:03:39.553Z",
+        "round": 12,
+        "attackerLeft": 7,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 1,
+         "knight_brother": 1
         },
         "defenderLosses": {}
        }
@@ -42580,7 +43128,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T15:00:03.553Z",
-      "endedAt": "2026-06-01T15:02:27.553Z"
+      "endedAt": "2026-06-01T15:03:39.553Z"
      },
      {
       "id": 7,
@@ -42601,20 +43149,25 @@
       "round": 1,
       "attackerStance": "hold_the_line",
       "attackerInitial": {
-       "zealot": 13,
+       "zealot": 17,
        "arbalester": 2,
        "inquisitor": 3,
-       "crossbowman": 3,
+       "crossbowman": 4,
        "knight_brother": 2,
        "sergeant_rider": 1
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "zealot": 3,
+       "inquisitor": 2,
+       "crossbowman": 1,
+       "knight_brother": 1
+      },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T14:59:27.553Z",
         "round": 1,
-        "attackerLeft": 24,
+        "attackerLeft": 29,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
@@ -42668,7 +43221,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -42679,11 +43232,11 @@
        {
         "at": "2026-06-01T13:44:39.900Z",
         "round": 1,
-        "attackerLeft": 5,
+        "attackerLeft": 7,
         "defenderLeft": 38,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 8,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -42721,7 +43274,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -42775,7 +43328,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {},
@@ -42818,13 +43371,13 @@
         }
        },
        "guard": {
-        "archer": 11,
-        "spearman": 22
+        "archer": 9,
+        "spearman": 18
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 4,
+      "round": 8,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 12,
@@ -42843,11 +43396,10 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 14,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
+         "zealot": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -42858,31 +43410,82 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 33,
+        "attackerLeft": 12,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 6,
-        "defenderLeft": 33,
+        "attackerLeft": 11,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 1
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 33,
+        "attackerLeft": 9,
+        "defenderLeft": 30,
         "attackerLosses": {
-         "zealot": 3
+         "zealot": 2
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:17.357Z",
+        "round": 5,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T12:24:35.357Z",
+        "round": 6,
+        "attackerLeft": 6,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:24:53.357Z",
+        "round": 7,
+        "attackerLeft": 5,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T12:25:11.357Z",
+        "round": 8,
+        "attackerLeft": 3,
+        "defenderLeft": 27,
+        "attackerLosses": {
+         "zealot": 2
         },
         "defenderLosses": {}
        }
@@ -42890,7 +43493,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T12:22:47.357Z",
-      "endedAt": "2026-06-01T12:23:59.357Z"
+      "endedAt": "2026-06-01T12:25:11.357Z"
      },
      {
       "id": 2,
@@ -43038,8 +43641,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 136,
+        "risk": 0.7
        },
        {
         "id": "50:ruins",
@@ -43099,27 +43702,28 @@
       "front": "south",
       "name": "Lothar",
       "title": "Brother Lothar",
-      "level": 2,
-      "xp": 26,
-      "xpToNext": 28,
+      "level": 3,
+      "xp": 13,
+      "xpToNext": 39,
       "skills": {
+       "dread": 1,
        "thick_hide": 1
       },
       "effects": {
        "attack": 0,
        "defense": 0.04,
-       "nerve": 0,
+       "nerve": 0.06,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": "2026-06-01T12:59:59.357Z",
+      "status": "alive",
+      "woundedUntil": "2026-06-01T15:39:39.553Z",
       "battles": 4,
       "wins": 2,
       "losses": 2,
       "razed": 0,
-      "kills": 6,
+      "kills": 22,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T15:02:27.553Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -43160,7 +43764,18 @@
       "endsAt": null
      },
      {
-      "id": 10,
+      "id": 8,
+      "kind": "bandit",
+      "front": "south",
+      "q": 1,
+      "r": 0,
+      "size": 9,
+      "waveId": 2,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 11,
       "kind": "lair",
       "front": "north",
       "q": 1,
@@ -43171,7 +43786,7 @@
       "endsAt": null
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "captives",
       "front": "north",
       "q": -1,
@@ -43307,7 +43922,7 @@
      [
       0,
       0,
-      29.3
+      28.7
      ]
     ],
     "delegations": [],
@@ -45203,52 +45818,70 @@
    "response": {
     "notifications": [
      {
-      "id": 46,
-      "kind": "site",
-      "tier": "digest",
+      "id": 60,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-1, -4)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 6650 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T15:40:48.000Z",
       "read": false
      },
      {
-      "id": 45,
-      "kind": "site",
-      "tier": "digest",
+      "id": 59,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (-8, 3) were taken away",
+      "body": "The next horde from the north hates you the more for it: +80% attack and defense.",
+      "createdAt": "2026-06-01T15:40:48.000Z",
+      "read": false
+     },
+     {
+      "id": 58,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-7, 1)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 6300 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T15:12:00.000Z",
       "read": false
      },
      {
-      "id": 44,
+      "id": 57,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (4, -2) sank back into the earth",
+      "body": "The next horde from the north hates you the more for it: +60% attack and defense.",
+      "createdAt": "2026-06-01T15:12:00.000Z",
+      "read": false
+     },
+     {
+      "id": 56,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 8 rounds.",
-      "createdAt": "2026-06-01T15:02:27.553Z",
+      "body": "The horde was beaten at its walls after 12 rounds.",
+      "createdAt": "2026-06-01T15:03:39.553Z",
       "read": false
      },
      {
-      "id": 43,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Brother Lothar has fallen",
-      "body": "Brother Lothar died with the last of the horde after 4 battles. Another will rise to take their place.",
-      "createdAt": "2026-06-01T15:02:27.553Z",
-      "read": false
-     },
-     {
-      "id": 42,
+      "id": 55,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
-      "body": "25 of them against its guard of 45.",
+      "body": "30 of them against its guard of 45.",
       "createdAt": "2026-06-01T15:00:03.553Z",
       "read": false
      },
      {
-      "id": 41,
+      "id": 54,
+      "kind": "leader",
+      "tier": "digest",
+      "title": "Brother Lothar grows stronger",
+      "body": "Brother Lothar is now level 3.",
+      "createdAt": "2026-06-01T14:59:27.553Z",
+      "read": false
+     },
+     {
+      "id": 53,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -45257,16 +45890,16 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 52,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 24 is fighting your garrison of 0.",
+      "body": "A horde of 29 is fighting your garrison of 0.",
       "createdAt": "2026-06-01T14:59:09.553Z",
       "read": false
      },
      {
-      "id": 39,
+      "id": 51,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -45275,34 +45908,61 @@
       "read": false
      },
      {
-      "id": 38,
-      "kind": "site",
-      "tier": "digest",
+      "id": 50,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-8, 3)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 5950 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T14:43:12.000Z",
       "read": false
      },
      {
-      "id": 37,
-      "kind": "site",
-      "tier": "digest",
+      "id": 49,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-6, 0) gave up and left",
+      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T14:43:12.000Z",
+      "read": false
+     },
+     {
+      "id": 48,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (4, -2)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 5600 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T14:14:24.000Z",
       "read": false
      },
      {
-      "id": 36,
-      "kind": "site",
-      "tier": "digest",
+      "id": 47,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (4, 1) were taken away",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T14:14:24.000Z",
+      "read": false
+     },
+     {
+      "id": 46,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-6, 0)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 5250 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T13:45:36.000Z",
       "read": false
      },
      {
-      "id": 35,
+      "id": 45,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (0, 7) were taken away",
+      "body": "The next horde from the south hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T13:45:36.000Z",
+      "read": false
+     },
+     {
+      "id": 44,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -45311,7 +45971,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 43,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -45320,7 +45980,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 42,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -45329,7 +45989,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 41,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -45338,7 +45998,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 40,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -45347,7 +46007,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 39,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -45356,7 +46016,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 38,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -45365,7 +46025,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 37,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -45374,7 +46034,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 36,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -45383,7 +46043,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 35,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -45392,7 +46052,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 34,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -45401,7 +46061,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 33,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -45410,7 +46070,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 32,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -45419,43 +46079,61 @@
       "read": false
      },
      {
-      "id": 22,
-      "kind": "site",
-      "tier": "digest",
+      "id": 31,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (4, 1)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 4900 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T13:16:48.000Z",
       "read": false
      },
      {
-      "id": 21,
-      "kind": "site",
-      "tier": "digest",
+      "id": 30,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (-6, 1) were taken away",
+      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T13:16:48.000Z",
+      "read": false
+     },
+     {
+      "id": 29,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (0, 7)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 4550 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T12:48:00.000Z",
       "read": false
      },
      {
-      "id": 20,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 4 rounds.",
-      "createdAt": "2026-06-01T12:23:59.357Z",
+      "id": 28,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (1, 4) sank back into the earth",
+      "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T12:48:00.000Z",
       "read": false
      },
      {
-      "id": 19,
+      "id": 27,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 8 rounds.",
+      "createdAt": "2026-06-01T12:25:11.357Z",
+      "read": false
+     },
+     {
+      "id": 26,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
       "body": "Brother Lothar is now level 2.",
-      "createdAt": "2026-06-01T12:23:59.357Z",
+      "createdAt": "2026-06-01T12:25:11.357Z",
       "read": false
      },
      {
-      "id": 18,
+      "id": 25,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -45464,7 +46142,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 24,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -45473,7 +46151,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 23,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -45482,7 +46160,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 22,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -45491,79 +46169,16 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 21,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
       "body": "The low south horde arrives within the hour. Check the garrison and its stance.",
       "createdAt": "2026-06-01T12:19:36.557Z",
       "read": false
-     },
-     {
-      "id": 13,
-      "kind": "site",
-      "tier": "digest",
-      "title": "Captives are held at (-6, 1)",
-      "body": "Clear the camp to free them, before they are taken away.",
-      "createdAt": "2026-06-01T12:19:12.000Z",
-      "read": false
-     },
-     {
-      "id": 12,
-      "kind": "site",
-      "tier": "digest",
-      "title": "A forbidding ruin rises at (1, 4)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
-      "createdAt": "2026-06-01T11:50:24.000Z",
-      "read": false
-     },
-     {
-      "id": 11,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T11:25:30.000Z",
-      "read": false
-     },
-     {
-      "id": 10,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "A horde is at the Holy City",
-      "body": "9 of them against its guard of 30.",
-      "createdAt": "2026-06-01T11:25:12.000Z",
-      "read": false
-     },
-     {
-      "id": 9,
-      "kind": "site",
-      "tier": "digest",
-      "title": "Captives are held at (-1, 8)",
-      "body": "Clear the camp to free them, before they are taken away.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
-      "read": false
-     },
-     {
-      "id": 8,
-      "kind": "site",
-      "tier": "digest",
-      "title": "Captives are held at (1, 6)",
-      "body": "Clear the camp to free them, before they are taken away.",
-      "createdAt": "2026-06-01T10:52:48.000Z",
-      "read": false
-     },
-     {
-      "id": 7,
-      "kind": "site",
-      "tier": "digest",
-      "title": "Boatwrights wait at (-3, -4)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
-      "createdAt": "2026-06-01T10:24:00.000Z",
-      "read": false
      }
     ],
-    "unread": 46,
+    "unread": 60,
     "serverTime": "2026-06-01T16:00:00.000Z"
    }
   }

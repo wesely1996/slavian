@@ -52,8 +52,7 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 	var picked: Array = usable[floori(rng.next() * usable.size())]
 	var cell: Vector2i = picked[0]
 	var grown := 1.0 + float(captives.growthPerDay) * (day - 1)
-	var own := LocalMapgen.front_of(cell)
-	var front: String = own if own in world.activeFronts else String(world.activeFronts[0])
+	var front := event_front(world, cell)
 	if kind == "shipyard":
 		var raiders := LocalWaves.compose_wave(data, front, day, LocalWaves.js_round(float(shipyard.raiders) * grown), (int(world.seed) ^ day ^ 0x5a17) & 0xffffffff, world.members.size())
 		var edge: Dictionary = banks[LocalLand.key(cell)][0]
@@ -79,6 +78,55 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 	for unit in base:
 		guardians[unit] = LocalWaves.js_round(int(base[unit]) * float(ruin.guardianFactor))
 	return {"kind": kind, "cell": cell, "site": {"kind": site_kind, "q": cell.x, "r": cell.y, "guardians": guardians}}
+
+
+## The front an event at `cell` belongs to: the land it rose in, or the
+## first active one (sim/events.ts eventFront).
+static func event_front(world: Dictionary, cell: Vector2i) -> String:
+	var own := LocalMapgen.front_of(cell)
+	return own if own in world.activeFronts else String(world.activeFronts[0])
+
+
+## The bounty an event done at `at` brings (scheduler/eventOutcomes.ts).
+static func bounty_at(data: Dictionary, world: Dictionary, at: int) -> Dictionary:
+	var day := 1
+	if world.startedAt != null:
+		day = maxi(1, floori(float(at - int(world.startedAt)) / _hours_ms(float(data.events.everyHours), world.speed)))
+	var grown := 1.0 + float(data.events.reward.growthPerDay) * (day - 1)
+	return LocalVillage.resources(func(k: String) -> int: return LocalWaves.js_round(float(data.events.reward.resources[k]) * grown))
+
+
+## The bounty, to the player's first standing village, and the notice of it
+## (scheduler/eventOutcomes.ts rewardEvent).
+static func reward(server: LocalServer, world: Dictionary, account_id: Variant, notice: Dictionary, at: int, changed: Array) -> void:
+	if account_id == null:
+		return
+	var bounty := bounty_at(server.data, world, at)
+	var home_id: Variant = server.reward(world, int(account_id), bounty, at, changed)
+	var vars: Dictionary = notice.vars.duplicate()
+	vars.merge({"village": server.find_village(world, int(home_id)).name if home_id != null else ""}, true)
+	vars.merge(bounty, true)
+	LocalInbox.tell(server, world, account_id, {"kind": "event", "tier": "push", "title": notice.title,
+		"body": notice.get("body", "Bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.") if home_id != null else "Done, with no village left to take the bounty.",
+		"vars": vars}, at)
+
+
+## Left undone: the next horde of the front hates the more, and everyone is
+## told (scheduler/eventOutcomes.ts failEvent).
+static func fail(server: LocalServer, world: Dictionary, front: String, title: String, vars: Dictionary, at: int) -> void:
+	var wave := LocalHeroCommands._next_wave(world, front)
+	var amount := float(server.data.events.failure.hatred)
+	var angered := not wave.is_empty() and amount > 0
+	var hatred := 0
+	if not wave.is_empty():
+		hatred = LocalWaves.js_round((float(wave.get("hatred", 0.0)) + amount) * 100)
+	if angered:
+		LocalHordes.anger_horde(server, world, wave, amount, at)
+	var told := vars.duplicate()
+	told.merge({"front": front, "hatred": hatred}, true)
+	LocalInbox.tell_everyone(server, world, {"kind": "event", "tier": "push", "title": title,
+		"body": "The next horde from the {front} hates you the more for it: +{hatred}% attack and defense." if angered else "Nothing more came of it.",
+		"vars": told}, at)
 
 
 static func _hours_ms(hours: float, world_speed: float) -> int:
@@ -130,22 +178,22 @@ static func on_map_event(server: LocalServer, world: Dictionary, event: Dictiona
 		world.shipyards.append(yard)
 		server.schedule(world, ends_at, "map_event_end", {"shipyardId": yard.id})
 	if not planned.is_empty():
-		var vars := {"q": planned.cell.x, "r": planned.cell.y}
-		var notice := {"kind": "site", "tier": "digest", "title": "Captives are held at ({q}, {r})",
-			"body": "Clear the camp to free them, before they are taken away.", "vars": vars}
+		var vars := {"q": planned.cell.x, "r": planned.cell.y, "front": event_front(world, planned.cell), "bounty": LocalBattle.total(bounty_at(data, world, at))}
+		var notice := {"kind": "event", "tier": "push", "title": "Captives are held at ({q}, {r})",
+			"body": "Clear the camp to free them before they are taken away, for a bounty of at least {bounty} resources. If they are taken, the next horde from the {front} hates you the more.", "vars": vars}
 		if planned.kind == "ruin":
-			notice = {"kind": "site", "tier": "digest", "title": "A forbidding ruin rises at ({q}, {r})",
-				"body": "Strong guardians watch it, and rich finds lie within, for a while.", "vars": vars}
+			notice = {"kind": "event", "tier": "push", "title": "A forbidding ruin rises at ({q}, {r})",
+				"body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least {bounty} resources; left alone, it rouses the next horde from the {front}.", "vars": vars}
 		elif planned.kind == "shipyard":
-			notice = {"kind": "site", "tier": "digest", "title": "Boatwrights wait at ({q}, {r})",
-				"body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.", "vars": vars}
+			notice = {"kind": "event", "tier": "push", "title": "Boatwrights wait at ({q}, {r})",
+				"body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least {bounty} resources for everyone. If nobody does, the next horde from the {front} hates you the more.", "vars": vars}
 		LocalInbox.tell_everyone(server, world, notice, at)
 		changed.append(["world"])
 	server.schedule(world, at + _hours_ms(float(data.events.everyHours), world.speed), "map_event", {"day": day + 1})
 
 
 ## Its time is up: gone, unless an army is already on its way to it.
-static func on_map_event_end(_server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
 	if p.get("campId") != null:
 		var camp: Dictionary = {}
@@ -157,6 +205,7 @@ static func on_map_event_end(_server: LocalServer, world: Dictionary, event: Dic
 		if LocalArmies.armies_holding(world, Vector2i(camp.q, camp.r), ["marching", "engaged"]).any(func(a: Dictionary) -> bool: return a.orders == "clear"):
 			return
 		world.camps.erase(camp)
+		fail(server, world, String(camp.front), "The captives at ({q}, {r}) were taken away", {"q": camp.q, "r": camp.r}, int(event.dueAt))
 	if p.get("siteId") != null:
 		var site: Dictionary = {}
 		for s in world.sites:
@@ -167,12 +216,14 @@ static func on_map_event_end(_server: LocalServer, world: Dictionary, event: Dic
 		if LocalArmies.armies_holding(world, Vector2i(site.q, site.r), ["marching", "engaged", "stationed"]).any(func(a: Dictionary) -> bool: return a.orders == "explore"):
 			return
 		world.sites.erase(site)
+		fail(server, world, event_front(world, Vector2i(site.q, site.r)), "The forbidding ruin at ({q}, {r}) sank back into the earth", {"q": site.q, "r": site.r}, int(event.dueAt))
 	if p.get("shipyardId") != null:
 		var yard := find_shipyard(world, int(p.shipyardId))
 		# Gone only if nobody has sent anything.
 		if yard.is_empty() or yard.status != "open" or LocalBattle.total(yard.paid) > 0:
 			return
 		world.shipyards.erase(yard)
+		fail(server, world, String(yard.front), "The boatwrights at ({q}, {r}) gave up and left", {"q": yard.q, "r": yard.r}, int(event.dueAt))
 	changed.append(["world"])
 
 
@@ -245,8 +296,11 @@ static func on_shipyard_done(server: LocalServer, world: Dictionary, event: Dict
 		return
 	yard.status = "done"
 	yard.nextRaidAt = null
-	LocalInbox.tell_everyone(server, world, {"kind": "build_done", "tier": "digest", "title": "The boat at ({q}, {r}) is ready",
-		"body": "Armies, caravans and scouts move fast between hexes along its river.", "vars": {"q": yard.q, "r": yard.r}}, int(event.dueAt))
+	# Every member gets the bounty.
+	for member in world.members:
+		reward(server, world, member.accountId, {"title": "The boat at ({q}, {r}) is ready",
+			"body": "Armies, caravans and scouts move fast between hexes along its river. The boatwrights' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.",
+			"vars": {"q": yard.q, "r": yard.r}}, int(event.dueAt), changed)
 	changed.append(["world"])
 
 

@@ -805,6 +805,8 @@ const eventsFileSchema = z.object({
   everyHours: z.number().positive(),
   lastsHours: z.number().positive(),
   range: z.object({ min: z.number().int().positive(), max: z.number().int().positive() }),
+  reward: z.object({ resources: resourcesSchema, growthPerDay: z.number().nonnegative() }),
+  failure: z.object({ hatred: z.number().nonnegative() }),
   kinds: z.object({
     captives: z.object({
       weight: z.number().nonnegative(),

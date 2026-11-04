@@ -1422,6 +1422,9 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
 		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
 		"vars": {"where": where, "loot": int(LocalLogistics.total(after.loot if result.cleared and after.get("loot") != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
+	# Captives freed: the event's bounty.
+	if result.cleared and camp.kind == "captives":
+		LocalEvents.reward(server, world, army.ownerAccountId, {"title": "You freed the captives at ({q}, {r})", "vars": {"q": camp.q, "r": camp.r}}, at, changed)
 
 
 # --- Ancient sites (scheduler/sites.ts) -----------------------------------------------
@@ -1514,6 +1517,9 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 			"title": "The {name} at ({q}, {r}) gave up {find}",
 			"body": data.lore.scrolls.get(find.scroll, {}).get("description", "") if scroll else "Explored and done.",
 			"vars": {"name": name, "q": site.q, "r": site.r, "find": find_text(data, find)}}, at)
+	# A forbidding ruin searched: the event's bounty.
+	if site.get("hard", false):
+		LocalEvents.reward(server, world, account_id, {"title": "You searched the forbidding ruin at ({q}, {r})", "vars": {"q": site.q, "r": site.r}}, at, changed)
 
 
 static func find_text(data: Dictionary, find: Dictionary) -> String:

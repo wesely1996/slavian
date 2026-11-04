@@ -34,7 +34,7 @@ export async function onboardingStep(
 
 // Gives a reward to the player's first standing village, all of it (a
 // reward may fill the stores past their capacity). Returns that village's id.
-async function reward(client: DbClient, world: World, accountId: number, amounts: Resources, at: Date): Promise<number | null> {
+export async function reward(client: DbClient, world: World, accountId: number, amounts: Resources, at: Date): Promise<number | null> {
   const home = (await listVillages(client, world.id)).filter((v) => v.ownerAccountId === accountId && !v.ruin).sort((a, b) => a.id - b.id)[0];
   if (!home) return null;
   const ledger = settle(home.state.ledger, at);

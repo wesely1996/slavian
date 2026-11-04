@@ -738,7 +738,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": 1,
-      "hatred": 0,
+      "hatred": 0.6000000000000001,
       "bandOf": null,
       "forecast": null
      },
@@ -758,7 +758,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -941,8 +941,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 88,
+        "risk": 0.49
        },
        {
         "id": "21:hoard",
@@ -3338,7 +3338,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -3539,11 +3539,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -3557,7 +3557,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -3691,6 +3691,17 @@
       "front": "north",
       "q": 3,
       "r": -2,
+      "size": 6,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
       "size": 6,
       "waveId": 1,
       "reward": null,
@@ -6093,7 +6104,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -6382,11 +6393,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -6400,7 +6411,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -6562,6 +6573,17 @@
        }
       },
       "endsAt": "2026-06-01T12:19:12.000Z"
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 6,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -8881,7 +8903,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -8955,7 +8977,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -9170,11 +9192,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -9188,7 +9210,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -9350,6 +9372,17 @@
        }
       },
       "endsAt": "2026-06-01T12:19:12.000Z"
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 7,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -11669,7 +11702,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -11743,7 +11776,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -11958,11 +11991,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -11976,7 +12009,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -12138,6 +12171,17 @@
        }
       },
       "endsAt": "2026-06-01T12:19:12.000Z"
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 7,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -14457,7 +14501,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -14531,7 +14575,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -14746,11 +14790,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -14764,7 +14808,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -14926,6 +14970,17 @@
        }
       },
       "endsAt": "2026-06-01T12:19:12.000Z"
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 7,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null
      }
     ],
     "sites": [
@@ -17245,7 +17300,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.6000000000000001,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -17319,7 +17374,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -17534,11 +17589,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -17552,7 +17607,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -17697,6 +17752,17 @@
       "r": 3,
       "size": 12,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 8,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -20047,7 +20113,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.6000000000000001,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -20121,7 +20187,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -20336,11 +20402,11 @@
        {
         "at": "2026-06-01T11:25:01.200Z",
         "round": 1,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -20354,7 +20420,7 @@
         "defenderLeft": 29,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
+         "grey_wolf": 2,
          "leshy_thrall": 1
         },
         "defenderLosses": {}
@@ -20408,8 +20474,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 112,
+        "risk": 0.6100000000000001
        },
        {
         "id": "28:caravan",
@@ -20528,6 +20594,17 @@
       "r": 3,
       "size": 12,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 5,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -6,
+      "size": 8,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -22647,7 +22724,7 @@
    "response": {
     "notifications": [
      {
-      "id": 20,
+      "id": 27,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Zaslavl starved",
@@ -22656,25 +22733,43 @@
       "read": false
      },
      {
-      "id": 19,
-      "kind": "site",
-      "tier": "digest",
+      "id": 26,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-6, -1)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 4200 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T12:19:12.000Z",
       "read": false
      },
      {
-      "id": 18,
-      "kind": "site",
-      "tier": "digest",
+      "id": 25,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (-5, 9) were taken away",
+      "body": "The next horde from the south hates you the more for it: +60% attack and defense.",
+      "createdAt": "2026-06-01T12:19:12.000Z",
+      "read": false
+     },
+     {
+      "id": 24,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-6, 1)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 3850 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T11:50:24.000Z",
       "read": false
      },
      {
-      "id": 17,
+      "id": 23,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-8, 3) gave up and left",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T11:50:24.000Z",
+      "read": false
+     },
+     {
+      "id": 22,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army cleared the lair at (3, -2)",
@@ -22683,7 +22778,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 21,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Clear your first camp",
@@ -22692,7 +22787,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 20,
       "kind": "bridge",
       "tier": "push",
       "title": "The Oak Piers stands",
@@ -22701,7 +22796,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -22710,7 +22805,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 18,
       "kind": "leader",
       "tier": "digest",
       "title": "Navka the Hungry has fallen",
@@ -22719,7 +22814,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -22728,7 +22823,7 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 16,
       "kind": "bridge",
       "tier": "digest",
       "title": "Raising The Oak Piers",
@@ -22737,65 +22832,110 @@
       "read": false
      },
      {
-      "id": 10,
-      "kind": "site",
-      "tier": "digest",
+      "id": 15,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-5, 9)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3500 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T11:21:36.000Z",
       "read": false
      },
      {
-      "id": 9,
-      "kind": "site",
-      "tier": "digest",
+      "id": 14,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (-1, 4) sank back into the earth",
+      "body": "The next horde from the south hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-8, 3)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 3150 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T10:52:48.000Z",
       "read": false
      },
      {
-      "id": 8,
-      "kind": "site",
-      "tier": "digest",
+      "id": 12,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (3, -1) sank back into the earth",
+      "body": "The next horde from the north hates you the more for it: +60% attack and defense.",
+      "createdAt": "2026-06-01T10:52:48.000Z",
+      "read": false
+     },
+     {
+      "id": 11,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (-1, 4)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2800 resources; left alone, it rouses the next horde from the south.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
      {
-      "id": 7,
-      "kind": "site",
-      "tier": "digest",
+      "id": 10,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (4, 1) sank back into the earth",
+      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (3, -1)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2450 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },
      {
-      "id": 6,
-      "kind": "site",
-      "tier": "digest",
+      "id": 8,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-7, 2) gave up and left",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T09:55:12.000Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (4, 1)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2100 resources; left alone, it rouses the next horde from the north.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (-5, 9) were taken away",
+      "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T09:26:24.000Z",
       "read": false
      },
      {
       "id": 5,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-7, 2)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
      {
       "id": 4,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-5, 9)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 1400 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
@@ -22827,7 +22967,7 @@
       "read": false
      }
     ],
-    "unread": 20,
+    "unread": 27,
     "serverTime": "2026-06-01T12:38:00.000Z"
    }
   }

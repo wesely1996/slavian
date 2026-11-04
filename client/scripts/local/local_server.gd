@@ -697,19 +697,19 @@ func _claim_onboarding(world: Dictionary, step: String, now: int, changed: Array
 	if member.onboardingClaimed.has(step):
 		return LocalVillage.rule("That reward is already claimed")
 	member.onboardingClaimed[step] = LocalTime.iso(now)
-	var village_id: Variant = _reward(world, int(member.accountId), def.reward, now, changed)
+	var village_id: Variant = reward(world, int(member.accountId), def.reward, now, changed)
 	var finale := false
 	var all_claimed: bool = data.onboarding.steps.all(func(s: Dictionary) -> bool: return member.onboardingClaimed.has(s.id))
 	if all_claimed and not member.onboardingClaimed.has("finale"):
 		member.onboardingClaimed["finale"] = LocalTime.iso(now)
-		_reward(world, int(member.accountId), data.onboarding.finale.reward, now, changed)
+		reward(world, int(member.accountId), data.onboarding.finale.reward, now, changed)
 		finale = true
 	changed.append(["world"])
 	return {"villageId": village_id, "finale": finale}
 
 
 ## A reward, all of it, to the player's first standing village.
-func _reward(world: Dictionary, account_id: int, amounts: Dictionary, now: int, changed: Array) -> Variant:
+func reward(world: Dictionary, account_id: int, amounts: Dictionary, now: int, changed: Array) -> Variant:
 	var home: Dictionary = {}
 	for v in world.villages:
 		if int(v.ownerAccountId) == account_id and v.ruin == null and (home.is_empty() or v.id < home.id):

@@ -4121,7 +4121,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": 1,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": null
      },
@@ -4141,7 +4141,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -4210,7 +4210,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -6779,7 +6779,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -6848,7 +6848,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -9669,7 +9669,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.4,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -9738,7 +9738,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -9923,8 +9923,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "23:caravan",
@@ -12192,7 +12192,7 @@
    "response": {
     "notifications": [
      {
-      "id": 18,
+      "id": 23,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 1) finished",
@@ -12201,7 +12201,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 22,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -12210,7 +12210,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 21,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -12219,7 +12219,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 20,
       "kind": "outpost_raided",
       "tier": "push",
       "title": "A horde burned the supply point at (0, -3)",
@@ -12228,7 +12228,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 19,
       "kind": "build_done",
       "tier": "digest",
       "title": "Supply point at (0, -3) finished",
@@ -12237,34 +12237,61 @@
       "read": false
      },
      {
-      "id": 13,
-      "kind": "site",
-      "tier": "digest",
+      "id": 18,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-1, 8)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3500 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T11:21:36.000Z",
       "read": false
      },
      {
-      "id": 12,
-      "kind": "site",
-      "tier": "digest",
+      "id": 17,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-3, -4) gave up and left",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 16,
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (1, 6)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3150 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T10:52:48.000Z",
       "read": false
      },
      {
-      "id": 11,
-      "kind": "site",
-      "tier": "digest",
+      "id": 15,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-7, 6) gave up and left",
+      "body": "The next horde from the south hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T10:52:48.000Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-3, -4)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2800 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
      {
-      "id": 10,
+      "id": 13,
+      "kind": "event",
+      "tier": "push",
+      "title": "The forbidding ruin at (2, -2) sank back into the earth",
+      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
+      "read": false
+     },
+     {
+      "id": 12,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -12273,29 +12300,47 @@
       "read": false
      },
      {
-      "id": 9,
-      "kind": "site",
-      "tier": "digest",
+      "id": 11,
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-7, 6)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },
      {
-      "id": 8,
-      "kind": "site",
-      "tier": "digest",
+      "id": 10,
+      "kind": "event",
+      "tier": "push",
+      "title": "The boatwrights at (-1, 4) gave up and left",
+      "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
+      "createdAt": "2026-06-01T09:55:12.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (2, -2)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2100 resources; left alone, it rouses the next horde from the north.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (2, -1) were taken away",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T09:26:24.000Z",
       "read": false
      },
      {
       "id": 7,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
@@ -12310,10 +12355,10 @@
      },
      {
       "id": 5,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (2, -1)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 1400 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
@@ -12354,7 +12399,7 @@
       "read": false
      }
     ],
-    "unread": 18,
+    "unread": 23,
     "serverTime": "2026-06-01T11:47:12.000Z"
    }
   }

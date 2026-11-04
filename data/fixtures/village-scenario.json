@@ -21998,7 +21998,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -22102,8 +22102,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "9:caravan",
@@ -25402,7 +25402,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -25506,8 +25506,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "9:caravan",
@@ -28351,7 +28351,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -28445,8 +28445,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "10:hoard",
@@ -30518,7 +30518,7 @@
    "response": {
     "notifications": [
      {
-      "id": 21,
+      "id": 22,
       "kind": "build_done",
       "tier": "digest",
       "title": "Woodcutter level 1 in Kitezh",
@@ -30527,11 +30527,20 @@
       "read": false
      },
      {
-      "id": 20,
-      "kind": "site",
-      "tier": "digest",
+      "id": 21,
+      "kind": "event",
+      "tier": "push",
       "title": "A forbidding ruin rises at (-1, 7)",
-      "body": "Strong guardians watch it, and rich finds lie within, for a while.",
+      "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2100 resources; left alone, it rouses the next horde from the south.",
+      "createdAt": "2026-06-01T15:12:00.000Z",
+      "read": false
+     },
+     {
+      "id": 20,
+      "kind": "event",
+      "tier": "push",
+      "title": "The captives at (-1, 7) were taken away",
+      "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T15:12:00.000Z",
       "read": false
      },
@@ -30591,10 +30600,10 @@
      },
      {
       "id": 13,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Boatwrights wait at (-9, 9)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river.",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T12:48:00.000Z",
       "read": false
      },
@@ -30627,10 +30636,10 @@
      },
      {
       "id": 9,
-      "kind": "site",
-      "tier": "digest",
+      "kind": "event",
+      "tier": "push",
       "title": "Captives are held at (-1, 7)",
-      "body": "Clear the camp to free them, before they are taken away.",
+      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 1400 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
@@ -30707,7 +30716,7 @@
       "read": false
      }
     ],
-    "unread": 21,
+    "unread": 22,
     "serverTime": "2026-06-01T16:22:17.000Z"
    }
   }
