@@ -1,5 +1,5 @@
 import type { RiverEdge } from '../sim/mapgen.js';
-import { listRoadEdges } from './roads.js';
+import { standingRoads } from './roads.js';
 import { edgeKey, landOf, riverLanes, type Land } from '../sim/land.js';
 import { listShipyards } from './shipyards.js';
 import { hex, type Hex } from '../sim/hex.js';
@@ -87,7 +87,7 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   const terrain = new Map((await loadHexes(client, worldId)).map(([q, r, t]) => [`${q},${r}`, t] as const));
   const rivers = await listRiverEdges(client, worldId);
   const blocked = rivers.filter((e) => e.crossing !== 'standing').map((e) => edgeKey(e.a, e.b));
-  const roads = (await listRoadEdges(client, worldId)).filter((e) => e.status !== 'building').map((e) => [edgeKey(e.a, e.b), e.level] as const);
+  const roads = await standingRoads(client, worldId);
   const lanes = (await listShipyards(client, worldId)).filter((s) => s.status === 'done').flatMap((s) => riverLanes(rivers, s.edge));
   return landOf(terrain, blocked, roads, lanes);
 }

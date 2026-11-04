@@ -1223,7 +1223,7 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 	return road
 
 
-static func on_road_built(_server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
+static func on_road_built(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
 	var road := _road_edge(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
 	if road.is_empty() or road.status == "standing":
@@ -1232,7 +1232,24 @@ static func on_road_built(_server: LocalServer, world: Dictionary, event: Dictio
 		road.level = int(road.level) + 1
 	road.status = "standing"
 	road.completesAt = null
+	# Outposts joined to their village by it gather more.
+	relink_outposts(server, world, int(event.dueAt), changed)
 	changed.append(["world"])
+
+
+## scheduler/outposts.ts relinkOutposts: every outpost's road link anew.
+static func relink_outposts(server: LocalServer, world: Dictionary, at: int, changed: Array) -> void:
+	var roads: Dictionary = LocalHordes.land_of(world).roads
+	for village in world.villages:
+		if LocalVillage.outpost_plots(village.state.plots).is_empty():
+			continue
+		var home := Vector2i(village.q, village.r)
+		var link := func(cell: Vector2i) -> float: return LocalLand.road_link(server.data, roads, cell, home)
+		var next := LocalVillage.with_road_links(server.data, village.state, link, at, world.speed)
+		if next == village.state:
+			continue
+		village.state = next
+		changed.append(["village", village.id])
 
 
 ## A bridge stands: from now on, roads (and hordes) may cross there.

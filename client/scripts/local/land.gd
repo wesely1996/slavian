@@ -139,6 +139,37 @@ static func fastest_road(data: Dictionary) -> float:
 	return best
 
 
+## sim/land.ts roadLink: what a road link to the village adds to an
+## outpost's yield (0: none): over the fewest road steps from `from` to `to`
+## (of those, the best built), the average of each step's level
+## `outpostBonus`. `roads`: edge key -> level of each standing road.
+static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: Vector2i) -> float:
+	var levels: Array = data.field.road.levels
+	var goal := key(to)
+	var best := {key(from): {"steps": 0, "sum": 0.0}}
+	var layer: Array = [from]
+	var steps := 1
+	while not layer.is_empty() and not best.has(goal):
+		var next: Array = []
+		for cell in layer:
+			var here: Dictionary = best[key(cell)]
+			for n in HexMath.neighbors(cell):
+				var level := int(roads.get(edge_key(cell, n), 0))
+				if level <= 0:
+					continue
+				var k := key(n)
+				var sum := float(here.sum) + float(levels[mini(level, levels.size()) - 1].outpostBonus)
+				if not best.has(k):
+					best[k] = {"steps": steps, "sum": sum}
+					next.append(n)
+				elif int(best[k].steps) == steps and sum > float(best[k].sum):
+					best[k] = {"steps": steps, "sum": sum}
+		layer = next
+		steps += 1
+	var link: Variant = best.get(goal)
+	return float(link.sum) / float(link.steps) if link != null and int(link.steps) > 0 else 0.0
+
+
 ## sim/land.ts laneFactor: the share of the terrain's move cost a step
 ## along a boat's river costs.
 static func lane_factor(data: Dictionary) -> float:

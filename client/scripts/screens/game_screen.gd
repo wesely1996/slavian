@@ -1495,6 +1495,13 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 	if holder.get("besieged", false) and level > 0:
 		line += tr(" (not while %s is under siege)") % holder.name
 	_panel_body.add_child(UI.label(line, UI.SMALL_SIZE, UI.MUTED))
+	# A road link to the village: more gathered (data/field.json road levels).
+	var road := float(holds.get("road", 0.0))
+	if road > 0.0:
+		_panel_body.add_child(UI.label(tr("Joined to %s by road: +%d%% gathered") % [holder.name, roundi(road * 100.0)], UI.SMALL_SIZE, UI.MUTED))
+	elif mine:
+		var best := float(Game.data.field.road.levels[-1].outpostBonus)
+		_panel_body.add_child(UI.label(tr("Join it to %s by road to gather up to +%d%%: the better the roads, the more.") % [holder.name, roundi(best * 100.0)], UI.SMALL_SIZE, UI.MUTED))
 	if not mine:
 		return
 	var def := _building_def(Rules.OUTPOST)

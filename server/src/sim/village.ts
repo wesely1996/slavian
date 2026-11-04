@@ -38,6 +38,9 @@ export interface Plot {
   // and the best level they ever reached (what a rebuild order restores).
   readonly terrain?: TerrainId;
   readonly peak?: number;
+  // Outposts joined to the village by roads: the share added to their
+  // yield (land.ts roadLink; absent: no road link).
+  readonly road?: number;
 }
 export type Plots = Readonly<Record<string, Plot>>;
 
@@ -238,7 +241,7 @@ export function productionPerHour(
       rates[def.production.resource] += def.production.basePerHour * def.production.growth ** (plot.level - 1) * worldSpeed;
     } else if (def.yields && !besieged) {
       const gathered = outpostYield(def, plot.terrain, plot.level, worldSpeed);
-      for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind] * outpostFactor;
+      for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind] * (outpostFactor + (plot.road ?? 0));
     }
   }
   return mapResources((kind) => rates[kind] * productionFactor(bonuses, kind));
@@ -583,6 +586,8 @@ export interface OutpostSite {
   readonly home: Hex;
   // Hexes that already hold a village or anyone's outpost ("q,r" keys).
   readonly taken: ReadonlySet<string>;
+  // The road link to the village (land.ts roadLink).
+  readonly road?: number;
 }
 
 // Claims a resource hex near the village and queues its outpost's first
@@ -607,8 +612,26 @@ export function claimOutpost(
     throw new RuleError(`This village can hold ${limit} outpost${limit === 1 ? '' : 's'}; upgrade the Elder's Hall for more`);
   }
   const plot = outpostPlot(site.cell);
-  const claimed = { ...state, plots: { ...state.plots, [plot]: { building: OUTPOST, level: 0, terrain: site.terrain } } };
+  const road = site.road ?? 0;
+  const claimed = { ...state, plots: { ...state.plots, [plot]: { building: OUTPOST, level: 0, terrain: site.terrain, ...(road > 0 ? { road } : {}) } } };
   return queueBuild(data, claimed, { plot }, at, worldSpeed);
+}
+
+// The roads have changed: each outpost's road link (`link` of its hex) is
+// set anew, with new rates from `at`. The same state when nothing changed.
+export function withRoadLinks(data: GameData, state: VillageState, link: (cell: Hex) => number, at: Date, worldSpeed: number): VillageState {
+  let plots: Record<string, Plot> | null = null;
+  for (const id of outpostPlots(state.plots)) {
+    const current = state.plots[id]!;
+    const road = link(outpostHex(id)!);
+    if ((current.road ?? 0) === road) continue;
+    const { road: _old, ...rest } = current;
+    plots ??= { ...state.plots };
+    plots[id] = road > 0 ? { ...rest, road } : rest;
+  }
+  if (!plots) return state;
+  const next = { ...state, plots };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed)) };
 }
 
 // Gives up an outpost (or its ruins). Not while it is being built.
