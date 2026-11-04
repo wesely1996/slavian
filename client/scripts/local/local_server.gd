@@ -42,7 +42,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"difficulty": String(params.get("difficulty", "normal")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
-			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null}],
+			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
@@ -614,7 +614,11 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 
 func _train(world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
 	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
-	var result := LocalVillage.queue_training(data, village.state, String(body.get("unit", "")), int(body.get("count", 0)), now, world.speed, owned)
+	var unit := String(body.get("unit", ""))
+	var member := member_of(world, int(village.ownerAccountId))
+	var result := LocalVillage.queue_training(data, village.state, unit, int(body.get("count", 0)), now, world.speed, owned, int(member.get("bought", {}).get(unit, 0)))
+	if result.has("state") and data.units.units.get(unit, {}).get("costStep") != null:
+		add_bought(member, unit, int(result.batch.count))
 	if result.has("state"):
 		schedule(world, LocalVillage.batch_completes_at(result.batch), "training_complete", {"villageId": village.id})
 	return result
@@ -640,6 +644,23 @@ func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, no
 		var q: Dictionary = result.queued
 		schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
 	return result
+
+
+## A player of the world (world_members).
+func member_of(world: Dictionary, account_id: int) -> Dictionary:
+	for m in world.members:
+		if int(m.accountId) == account_id:
+			return m
+	return {}
+
+
+## db/worlds.ts addBought: a unit bought that grows dearer.
+func add_bought(member: Dictionary, unit: String, count: int) -> void:
+	if member.is_empty():
+		return
+	if not member.has("bought"):
+		member.bought = {}
+	member.bought[unit] = int(member.bought.get(unit, 0)) + count
 
 
 func find_village(world: Dictionary, id: int) -> Dictionary:
@@ -1025,7 +1046,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	for m in world.members:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
-			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed,
+			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
 			"research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
@@ -1293,6 +1314,9 @@ func _load_all() -> void:
 				"armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
 			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1,
 				"notification": 1, "general": 1})
+			# Worlds saved before players counted what they bought.
+			for m in world.members:
+				m.merge({"bought": {}})
 			# Worlds saved before generals.
 			world.merge({"generals": []})
 			# Worlds saved before ruin searches.

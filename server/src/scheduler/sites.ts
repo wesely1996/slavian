@@ -3,6 +3,7 @@
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
 import { z } from 'zod';
+import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
 import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
@@ -20,7 +21,7 @@ import { assault } from '../sim/camps.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import { listCamps } from '../db/camps.js';
-import { distanceShare, placeSites, rollFind, type Find } from '../sim/sites.js';
+import { distanceShare, placeSites, rollFind, searchMs, type Find } from '../sim/sites.js';
 import { armyLosses, holdHex, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
@@ -83,6 +84,20 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     return;
   }
   let explorers = army;
+  // Scouts alone don't fight guardians: they count them and turn back.
+  if (total(site.guardians) > 0 && total(combatants(data, army.units)) === 0) {
+    await saveGuardians(client, site.id, site.guardians);
+    await sendHome(client, world, army, at, data);
+    await tell(client, world, army.ownerAccountId, {
+      kind: 'battle_result',
+      tier: 'digest',
+      title: 'Guardians drove your army from the {where}',
+      body: '{kills} of them fell; {remaining} still watch it.',
+      vars: { where: data.sites.kinds[site.kind]?.name ?? 'site', kills: 0, remaining: total(site.guardians) },
+    }, at);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    return;
+  }
   if (total(site.guardians) > 0) {
     const home = await loadVillage(client, army.homeVillageId);
     const hero = await heroWithArmy(client, army.id);
@@ -90,8 +105,8 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
     const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     const result = assault(data, {
-      army: army.units,
-      armyStats: playerStats(data, bonuses, false),
+      army: combatants(data, army.units),
+      armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
       armyStance: army.stance,
       camp: site.guardians,
       front: 'north',
@@ -123,7 +138,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       await recordRound(client, battle.id, log, last ? { status: result.cleared ? 'cleared' : 'repelled', at, loot: null } : null);
     }
     const lost: Record<string, number> = {};
-    for (const [unit, n] of Object.entries(army.units)) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
+    for (const [unit, n] of Object.entries(combatants(data, army.units))) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
     explorers = await armyLosses(client, data, world, army, lost, at);
     await saveGuardians(client, site.id, result.cleared ? {} : result.campNow);
     const kills = total(site.guardians) - total(result.campNow);
@@ -152,7 +167,8 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
   }
   // Search the site.
   await saveArmy(client, { ...explorers, status: 'stationed', battleId: null });
-  const doneAt = new Date(at.getTime() + (data.sites.kinds[site.kind]!.exploreHours * MS_PER_HOUR) / world.speed);
+  // The more hands, the faster.
+  const doneAt = new Date(at.getTime() + searchMs(data, site.kind, explorers.units, world.speed));
   const payload: ExplorePayload = { armyId: army.id, siteId: site.id };
   await scheduleEvent(client, world.id, doneAt, 'site_explored', payload);
   await notifyWorld(client, { worldId: world.id, type: 'world' });

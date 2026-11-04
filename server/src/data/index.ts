@@ -120,6 +120,14 @@ const unitSchema = z.object({
   requiresLevel: z.number().int().positive(),
   cost: resourcesSchema,
   costGrowthPerVillage: z.number().min(1).optional(),
+  // Dearer by `growth` for every `every` of them the player has bought.
+  costStep: z.object({ every: z.number().int().positive(), growth: z.number().min(1) }).optional(),
+  // Trains one at a time, and not while another is in training there.
+  oneAtATime: z.boolean().optional(),
+  // A scout's worth (family scout): scouting.json.
+  scouting: z
+    .object({ stealth: z.number().min(0), intel: z.number().nonnegative(), assassinate: z.number().min(0).max(1).optional() })
+    .optional(),
   trainSeconds: z.number().positive(),
   upkeepPerHour: z.number().nonnegative(),
   // Game hours of its own upkeep it carries when it marches out with an army.
@@ -216,6 +224,8 @@ const scoutingFileSchema = z.object({
   survival: z.partialRecord(z.enum(FRONTS), z.number().min(0).max(1)),
   defaultSurvival: z.number().min(0).max(1),
   maxScouts: z.number().int().positive(),
+  // What scouts marching with an army add to its attack and defense.
+  intel: z.object({ perPoint: z.number().nonnegative(), max: z.number().nonnegative() }),
   // Scouts sent to search the land around their village for a forgotten ruin.
   ruinSearch: z.object({
     minScouts: z.number().int().positive(),
@@ -655,6 +665,8 @@ export type DifficultyData = z.infer<typeof difficultyFileSchema>;
 
 const sitesFileSchema = z.object({
   version: z.number().int(),
+  // More hands search faster (sim/sites.ts searchMs).
+  search: z.object({ perUnit: z.number().nonnegative(), minShare: z.number().min(0).max(1) }),
   placement: z.object({
     perPlayer: z.number().int().nonnegative(),
     min: z.number().int().nonnegative(),

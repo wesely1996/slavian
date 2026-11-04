@@ -4,9 +4,18 @@ import { validateArmy } from '../src/sim/armies.js';
 import { hex, hexDistance, hexKey } from '../src/sim/hex.js';
 import { generateMap } from '../src/sim/mapgen.js';
 import { researchProblem } from '../src/sim/research.js';
-import { distanceShare, loreBonuses, placeSites, rollFind } from '../src/sim/sites.js';
+import { distanceShare, loreBonuses, placeSites, rollFind, searchMs } from '../src/sim/sites.js';
 
 const data = loadGameData();
+
+describe('site searches', () => {
+  it('go faster the more units search, down to a floor', () => {
+    const full = (data.sites.kinds.kurgan!.exploreHours * 3_600_000) / 2;
+    expect(searchMs(data, 'kurgan', { spearman: 1 }, 2)).toBe(full);
+    expect(searchMs(data, 'kurgan', { spearman: 11 }, 2)).toBeCloseTo(full / (1 + data.sites.search.perUnit * 10));
+    expect(searchMs(data, 'kurgan', { spearman: 500, scout: 20 }, 2)).toBeCloseTo(full * data.sites.search.minShare);
+  });
+});
 
 describe('ancient sites', () => {
   const map = generateMap(data, 77, 3);
@@ -46,7 +55,7 @@ describe('ancient sites', () => {
 
   it('let scouts explore, and scrolls boost the group or unlock rare techs', () => {
     expect(validateArmy(data, { scout: 3 }, 'explore')).toEqual({ scout: 3 });
-    expect(() => validateArmy(data, { scout: 3 }, 'clear')).toThrow(/don't march/);
+    expect(() => validateArmy(data, { scout: 3 }, 'clear')).toThrow(/at least one soldier/);
     expect(loreBonuses(data, ['perun_oath', 'dazhbog_hymn'])).toEqual({ 'attack.all': 0.05, 'defense.all': 0.05 });
     const input = { academyLevel: 5, done: new Set<string>(), researching: false };
     expect(researchProblem(data, 'wind_riders', input)).toMatch(/Winds of Stribog/);

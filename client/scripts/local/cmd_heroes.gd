@@ -187,10 +187,11 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 				if int(t.minSurvivors) > int(best.minSurvivors):
 					best = t
 			var sent := int(best.minSurvivors)
-			var mission := LocalScouting.insert_mission(world, {"villageId": home.id, "waveId": wave.id, "sent": sent, "target": {"q": home.q, "r": home.r},
+			var mission := LocalScouting.insert_mission(world, {"villageId": home.id, "waveId": wave.id, "sent": sent, "units": {"scout": sent}, "target": {"q": home.q, "r": home.r},
 				"departsAt": LocalTime.parse(quest.departsAt), "arrivesAt": at, "returnsAt": at})
 			mission.report = LocalScouting.scout_report(data, wave.front, wave.composition, wave.stance, sent, sent, false, int(world.seed), int(mission.id))
 			mission.survivors = sent
+			mission.survivorUnits = {"scout": sent}
 			mission.status = "done"
 			return {"body": "A full report on the next horde from the {front} is in the threats panel.",
 				"vars": {"front": quest.front if quest.front != null else ""}}

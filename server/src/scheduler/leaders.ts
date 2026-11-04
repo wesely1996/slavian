@@ -97,3 +97,26 @@ export async function leaderAfter(client: DbClient, data: GameData, world: World
   }
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
 }
+
+// Assassins killed the horde's leader in its camp: dead, and the horde goes
+// on without them (sim/scouting.ts assassinates). Their title, or null if
+// they were already dead.
+export async function slayLeader(client: DbClient, data: GameData, world: World, wave: Wave, village: string, at: Date): Promise<string | null> {
+  if (wave.leaderId === null) return null;
+  const leader = await loadLeader(client, wave.leaderId);
+  if (leader.status === 'dead') return null;
+  const title = leaderTitle(data, wave.front, leader);
+  await saveLeader(client, { ...leader, status: 'dead', diedAt: at });
+  await client.query('UPDATE waves SET leader_id = NULL WHERE id = $1', [wave.id]);
+  for (const member of await listMembers(client, world.id)) {
+    await tell(client, world, member.accountId, {
+      kind: 'leader',
+      tier: 'digest',
+      title: '{leader} was slain',
+      body: "Assassins from {village} killed {leader} in the horde's camp. Another will rise to take their place.",
+      vars: { leader: title, village },
+    }, at);
+  }
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+  return title;
+}

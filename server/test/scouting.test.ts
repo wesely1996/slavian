@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
 import { hex } from '../src/sim/hex.js';
 import { generateMap } from '../src/sim/mapgen.js';
-import { scoutReport, scoutTarget, scoutTravelMs, survivorsOf } from '../src/sim/scouting.js';
+import { assassinates, combatants, intelBonus, intelOf, scoutReport, scoutTarget, scoutTravelMs, survivingScouts, survivorsOf } from '../src/sim/scouting.js';
 import { completeBuild, loseAway, newVillage, queueBuild, queueTraining, returnHome, sendAway } from '../src/sim/village.js';
 import { RuleError } from '../src/errors.js';
 
@@ -19,6 +19,43 @@ describe('scout survival', () => {
     for (let mission = 0; mission < 400; mission++) survived += survivorsOf(data, 'north', 10, 5, mission);
     expect(survived / 4000).toBeGreaterThan(0.7);
     expect(survived / 4000).toBeLessThan(0.8);
+  });
+});
+
+describe('scout kinds', () => {
+  it('better scouts are caught less often', () => {
+    let plain = 0;
+    let pathfinders = 0;
+    for (let id = 1; id <= 200; id++) {
+      plain += survivingScouts(data, 'east', { scout: 10 }, 5, id).scout ?? 0;
+      pathfinders += survivingScouts(data, 'east', { pathfinder: 10 }, 5, id).pathfinder ?? 0;
+    }
+    const caught = 1 - data.scouting.survival.east!;
+    expect(plain / 2000).toBeCloseTo(1 - caught, 1);
+    expect(pathfinders / 2000).toBeCloseTo(1 - caught * data.units.units.pathfinder!.scouting!.stealth, 1);
+    // Plain scouts alone come through as before.
+    expect(survivingScouts(data, 'north', { scout: 8 }, 77, 3).scout).toBe(survivorsOf(data, 'north', 8, 77, 3));
+  });
+
+  it('are worth their intel to a report and to an army, which they never fight for', () => {
+    expect(intelOf(data, { scout: 2, pathfinder: 1, assassin: 1, spearman: 9 })).toBe(2 + 2 + 3);
+    // Two pathfinders and an assassin's intel (7) is worth a detailed report.
+    expect(scoutReport(data, { front: 'north', composition, stance: 'offensive', sent: 3, survivors: 3, intel: 7, dispersed: false, seed: 77, missionId: 1 }).tier).toBe('exact');
+    expect(intelBonus(data, { scout: 2 })).toBeCloseTo(2 * data.scouting.intel.perPoint);
+    expect(intelBonus(data, { assassin: 20 })).toBe(data.scouting.intel.max);
+    expect(combatants(data, { spearman: 3, scout: 2, assassin: 1 })).toEqual({ spearman: 3 });
+    // The pace of the slowest sent.
+    const map = generateMap(data, 99, 2);
+    const from = map.startSites[0]!;
+    const to = map.startSites[1]!;
+    expect(scoutTravelMs(data, map.terrain, from, to, 1, {}, { pathfinder: 1 })).toBeLessThan(scoutTravelMs(data, map.terrain, from, to, 1, {}, { pathfinder: 1, scout: 1 }));
+  });
+
+  it('assassins sometimes kill the leader; plain scouts never', () => {
+    let kills = 0;
+    for (let id = 1; id <= 400; id++) if (assassinates(data, { assassin: 1 }, 9, id)) kills++;
+    expect(kills / 400).toBeCloseTo(data.units.units.assassin!.scouting!.assassinate!, 1);
+    for (let id = 1; id <= 50; id++) expect(assassinates(data, { scout: 20, pathfinder: 20 }, 9, id)).toBe(false);
   });
 });
 

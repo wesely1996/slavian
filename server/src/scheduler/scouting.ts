@@ -6,7 +6,8 @@ import { effectiveBonuses } from '../db/heroes.js';
 import { loadMission, markMissionDone, recordReport } from '../db/scouting.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { loadWave } from '../db/waves.js';
-import { SCOUT_UNIT, scoutReport, survivorsOf } from '../sim/scouting.js';
+import { SCOUT_UNIT, assassinates, intelOf, scoutReport, survivingScouts } from '../sim/scouting.js';
+import { slayLeader } from './leaders.js';
 import { loseAway, returnHome } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { finishRuinSearch, loadRuinSearch } from '../db/ruinSearches.js';
@@ -74,24 +75,34 @@ export const scoutingHandlers: HandlerRegistry = {
     // A horde that already scattered can't hurt anyone.
     const dispersed = wave.status === 'dispersed' || wave.status === 'defeated';
     const village = await loadVillage(client, mission.villageId);
-    const survivors = dispersed
-      ? mission.sent
-      : survivorsOf(data, wave.front, mission.sent, world.seed, mission.id, await effectiveBonuses(client, data, village));
+    const came = dispersed
+      ? mission.units
+      : survivingScouts(data, wave.front, mission.units, world.seed, mission.id, await effectiveBonuses(client, data, village));
+    const survivors = Object.values(came).reduce((sum, n) => sum + n, 0);
+    // Assassins who reach a horde led by a leader may kill them.
+    const slain = !dispersed && wave.leaderId !== null && assassinates(data, came, world.seed, mission.id)
+      ? await slayLeader(client, data, world, wave, village.name, event.dueAt)
+      : null;
     const report = scoutReport(data, {
       front: wave.front,
       composition: wave.composition,
       stance: wave.stance,
       sent: mission.sent,
       survivors,
+      intel: intelOf(data, came),
       dispersed,
       seed: world.seed,
       missionId: mission.id,
     });
-    await recordReport(client, mission.id, report);
+    await recordReport(client, mission.id, slain ? { ...report, leaderSlain: slain } : report, came);
 
-    const lost = mission.sent - survivors;
-    if (lost > 0) {
-      await saveVillageState(client, village.id, loseAway(data, village.state, SCOUT_UNIT, lost, event.dueAt, world.speed));
+    let state = village.state;
+    for (const [unit, n] of Object.entries(mission.units)) {
+      const lost = n - (came[unit] ?? 0);
+      if (lost > 0) state = loseAway(data, state, unit, lost, event.dueAt, world.speed);
+    }
+    if (state !== village.state) {
+      await saveVillageState(client, village.id, state);
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     }
     const payload: MissionPayload = { missionId: mission.id };
@@ -103,7 +114,9 @@ export const scoutingHandlers: HandlerRegistry = {
     const mission = await loadMission(client, missionPayload.parse(event.payload).missionId);
     if (mission.status !== 'returning') return;
     const village = await loadVillage(client, mission.villageId);
-    await saveVillageState(client, village.id, returnHome(data, village.state, SCOUT_UNIT, mission.survivors ?? 0, event.dueAt, world.speed));
+    let state = village.state;
+    for (const [unit, n] of Object.entries(mission.survivorUnits ?? {})) if (n > 0) state = returnHome(data, state, unit, n, event.dueAt, world.speed);
+    await saveVillageState(client, village.id, state);
     await markMissionDone(client, mission.id);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     await notifyWorld(client, { worldId: world.id, type: 'scouting' });

@@ -210,6 +210,8 @@ export function missionView(mission: ScoutMission) {
     villageId: mission.villageId,
     waveId: mission.waveId,
     sent: mission.sent,
+    // Scouts sent by kind.
+    units: mission.units,
     status: mission.status,
     target: mission.target,
     departsAt: mission.departsAt.toISOString(),
@@ -655,6 +657,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
       heroKind: m.heroKind,
       onboarding: m.onboarding,
       onboardingClaimed: m.onboardingClaimed,
+      // Units bought that grow dearer (units.json costStep): unit -> count.
+      bought: m.bought,
       // Research their Academies brought in by settledAt (null: none yet),
       // and what comes in per hour since.
       research: {

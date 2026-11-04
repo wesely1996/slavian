@@ -99,6 +99,8 @@ export interface Member {
   // Research their Academies brought in, as of researchSettledAt.
   researchPoints: number;
   researchSettledAt: Date | null;
+  // Units bought that grow dearer (units.json costStep): unit -> count.
+  bought: Record<string, number>;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -111,13 +113,29 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
-            m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt"
+            m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,
     [worldId],
   );
   return rows;
+}
+
+// How many of `unit` a player has bought (units.json costStep).
+export async function boughtCount(client: DbClient, worldId: number, accountId: number, unit: string): Promise<number> {
+  const { rows } = await client.query<{ n: number | null }>(
+    "SELECT (bought ->> $3)::int AS n FROM world_members WHERE world_id = $1 AND account_id = $2",
+    [worldId, accountId, unit],
+  );
+  return rows[0]?.n ?? 0;
+}
+
+export async function addBought(client: DbClient, worldId: number, accountId: number, unit: string, count: number): Promise<void> {
+  await client.query(
+    "UPDATE world_members SET bought = bought || jsonb_build_object($3::text, COALESCE((bought ->> $3)::int, 0) + $4) WHERE world_id = $1 AND account_id = $2",
+    [worldId, accountId, unit, count],
+  );
 }
 
 // Quitting before the start: the player is simply gone from the lobby.

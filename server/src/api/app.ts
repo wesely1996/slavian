@@ -201,7 +201,13 @@ const dismissBody = z.object({ units: z.record(z.string().max(64), z.number().in
 const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
-const scoutBody = z.object({ waveId: z.number().int().positive(), count: z.number().int().positive() });
+// Scouts by kind (units), or (count) that many plain scouts.
+const scoutBody = z
+  .object({
+    waveId: z.number().int().positive(),
+    count: z.number().int().min(0).optional(),
+    units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)).optional(),
+  });
 const ruinSearchBody = z.object({ count: z.number().int().positive() });
 
 export async function authenticate(db: Db, request: FastifyRequest): Promise<Account> {
@@ -582,7 +588,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       accountId: account.id,
       villageId: id,
       waveId: body.waveId,
-      count: body.count,
+      units: body.units ?? { scout: body.count ?? 0 },
       now: clock(),
     });
     return { village: villageView(village), mission: missionView(mission), serverTime: clock().toISOString() };

@@ -520,6 +520,14 @@ func my_research() -> Dictionary:
 	return {"points": 0.0, "perHour": 0.0}
 
 
+## How many of `unit` a player has bought (units that grow dearer: costStep).
+func bought(account_id: int, unit: String) -> int:
+	for member in world.get("members", []):
+		if int(member.accountId) == account_id:
+			return int(member.get("bought", {}).get(unit, 0))
+	return 0
+
+
 func member_name(account_id: int) -> String:
 	for member in world.get("members", []):
 		if int(member.accountId) == account_id:

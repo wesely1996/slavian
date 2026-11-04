@@ -29,8 +29,15 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
     await play({ advance: 20 * MINUTE });
     const answer = await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
     if (answer.status === 200) settlers++;
+    // One at a time: not two at once, nor while one is in training.
+    if (answer.status === 200 && settlers === 1) {
+      await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 2 } });
+      await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
+    }
   }
   await play({ advance: 20 * MINUTE });
+  // The fourth costs half as much again (three bought).
+  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
   await play({ method: 'POST', path: '/v1/villages/1/found', body: { q: spot.q, r: spot.r, name: 'Novgorod' } });
   await play({ advance: 30 * MINUTE });
   const founded = (await play({ method: 'GET', path: world })).body;

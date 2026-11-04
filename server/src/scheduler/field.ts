@@ -39,6 +39,7 @@ import { outpostHex, outpostPlots } from '../sim/village.js';
 import { armyLosses, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { combatants, withIntel } from '../sim/scouting.js';
 import { relinkOutposts } from './outposts.js';
 import { personality } from './battles.js';
 import { hordeBeaten } from './horde.js';
@@ -141,7 +142,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     setup,
     attackerStance: wave.stance,
     attackerInitial: wave.composition,
-    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), {}),
+    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units)), {}),
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
@@ -216,12 +217,16 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   };
   const factorsFor = (stance: Stance) => setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const factors = factorsFor('balanced');
-  const groups = [...(guard ? [{ units: guardForce, stance: guardStance }] : []), ...engaged.map((a) => ({ units: a.units, stance: a.stance }))];
   const holderBase = playerStats(data, bonuses, false);
   const statsFor = (stance: Stance) => {
     const f = factorsFor(stance);
     return (unit: string) => ({ ...holderBase(unit), attack: holderBase(unit).attack * f.holderAttack, defense: holderBase(unit).defense * f.holderDefense });
   };
+  // Scouts never fight; an army's tell it what it faces (intel).
+  const groups = [
+    ...(guard ? [{ units: guardForce, stance: guardStance, stats: statsFor(guardStance) }] : []),
+    ...engaged.map((a) => ({ units: combatants(data, a.units), stance: a.stance, stats: withIntel(data, a.units, statsFor(a.stance)) })),
+  ];
   const chief = await hordeStats(client, data, wave, enemyStats(data, wave.front), null);
   const hordeBase = chief.stats;
   const result = resolveRound(
@@ -238,7 +243,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       stance: groups[0]?.stance ?? 'balanced',
       stats: statsFor('balanced'),
       home: holy,
-      groups: groups.map((g) => ({ ...g, stats: statsFor(g.stance) })),
+      groups,
     },
     battleRng(world.seed, battle.id, round),
   );
@@ -250,7 +255,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const armies: Army[] = [];
   for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i + offset]!, at));
   const guardFighting = guardNow && !guardBroken ? guardNow : {};
-  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...guardFighting });
+  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units)), { ...guardFighting });
 
   const outcome = battleOutcome(data, {
     round,
@@ -263,12 +268,15 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     attackerNerve: personality(data, wave).nerve * (1 + chief.nerve),
     defenderGroups: [
       ...(guard ? [{ stance: guardStance, initial: battle.setup.home?.initial ?? battle.defenderInitial, now: guardFighting }] : []),
-      ...armies.map((a) => ({ stance: a.stance, initial: a.engagedUnits ?? a.units, now: a.units })),
+      ...armies.map((a) => ({ stance: a.stance, initial: combatants(data, a.engagedUnits ?? a.units), now: combatants(data, a.units) })),
     ],
   });
   // While the fight goes on, an army that broke falls back home beaten,
   // and a guard that broke fights no more.
-  const breaks = (a: Army) => outcome === 'ongoing' && total(a.units) > 0 && broken(data, a.stance, a.engagedUnits ?? a.units, a.units);
+  const breaks = (a: Army) =>
+    outcome === 'ongoing' && total(combatants(data, a.units)) > 0 && broken(data, a.stance, combatants(data, a.engagedUnits ?? a.units), combatants(data, a.units));
+  // Scouts left without fighters ride home.
+  const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units)) === 0;
   const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
   const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
   if (guardNow) await saveSetup(client, battle.id, { ...battle.setup, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
@@ -279,7 +287,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderLosses: result.defenderLosses,
     attackerLeft: total(attackerNow),
     defenderLeft: total(defendersNow),
-    ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: a.units })) } : {}),
+    ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units) })) } : {}),
     ...(homeBroke ? { homeBroke: true } : {}),
   };
 
@@ -287,6 +295,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     const kills = total(battle.attackerInitial) - total(attackerNow);
     for (const army of armies) {
       if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
+      else if (spent(army)) await sendHome(client, world, army, at, data);
       else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
     }
     await recordRound(client, battle.id, log, null);

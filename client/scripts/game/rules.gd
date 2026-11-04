@@ -248,10 +248,14 @@ static func garrison_at(village: Dictionary, at_unix: float) -> Dictionary:
 	return units
 
 
-## What `count` units cost an owner of `villages_owned` villages: settlers
-## get dearer with every village (server unitCost).
-static func unit_cost(def: Dictionary, count: int, villages_owned := 1) -> Dictionary:
-	var factor := pow(float(def.get("costGrowthPerVillage", 1.0)), maxi(0, villages_owned - 1))
+## What `count` units cost an owner of `villages_owned` villages who has
+## bought `bought` of them: settlers get dearer with every village, and every
+## few bought (server unitCost).
+static func unit_cost(def: Dictionary, count: int, villages_owned := 1, bought := 0) -> Dictionary:
+	var step := 1.0
+	if def.get("costStep") != null:
+		step = pow(float(def.costStep.growth), floori(float(bought) / float(def.costStep.every)))
+	var factor := pow(float(def.get("costGrowthPerVillage", 1.0)), maxi(0, villages_owned - 1)) * step
 	var cost := {}
 	for kind in Ledger.KINDS:
 		cost[kind] = roundi(float(def.cost[kind]) * factor) * count

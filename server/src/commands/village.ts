@@ -17,7 +17,7 @@ import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { getWorld, loadHexes, type World } from '../db/worlds.js';
+import { addBought, boughtCount, getWorld, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { ExpeditionPayload } from '../scheduler/expeditions.js';
@@ -29,7 +29,7 @@ import { roadRoute, store, vaultCapacity } from '../sim/logistics.js';
 import { ACADEMY, researchCost, researchMs, researchProblem } from '../sim/research.js';
 import { spend, type ResourceKind, type Resources } from '../sim/resources.js';
 import { loadVault, saveVault } from '../db/vaults.js';
-import { SCOUT_UNIT, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
+import { SCOUT_UNIT, isScout, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
 import { startRebuild } from '../scheduler/horde.js';
 import { campAt } from '../db/camps.js';
@@ -153,7 +153,9 @@ export async function trainUnitsCommand(
 ): Promise<{ village: Village; batch: TrainingBatch }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'queued training' }, async ({ client, world, village }) => {
     const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
-    const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned);
+    const bought = await boughtCount(client, world.id, village.ownerAccountId!, input.unit);
+    const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned, bought);
+    if (deps.data.units.units[input.unit]?.costStep) await addBought(client, world.id, village.ownerAccountId!, input.unit, input.count);
     const payload: TrainingCompletePayload = { villageId: village.id };
     await scheduleEvent(client, world.id, batchCompletesAt(batch), 'training_complete', payload);
     return { state, result: batch, onboarding: 'train' };
@@ -166,28 +168,33 @@ export async function trainUnitsCommand(
 export async function sendScoutsCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: VillageCommandInput & { waveId: number; count: number },
+  input: VillageCommandInput & { waveId: number; units: Record<string, number> },
 ): Promise<{ village: Village; mission: ScoutMission }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent scouts' }, async ({ client, world, village }) => {
     const max = deps.data.scouting.maxScouts;
-    if (!Number.isInteger(input.count) || input.count < 1 || input.count > max) {
-      throw new RuleError(`Send between 1 and ${max} scouts`);
+    const units = Object.fromEntries(Object.entries(input.units).filter(([, n]) => n > 0));
+    for (const unit of Object.keys(units)) {
+      if (!isScout(deps.data, unit)) throw new RuleError(`${deps.data.units.units[unit]?.name ?? unit} don't go scouting`);
     }
+    const count = Object.values(units).reduce((sum, n) => sum + n, 0);
+    if (count < 1 || count > max) throw new RuleError(`Send between 1 and ${max} scouts`);
     const wave = await loadWave(client, input.waveId);
     if (wave.worldId !== world.id) throw new NotFoundError(`Wave ${input.waveId} not found`);
     if (wave.status === 'dispersed' || wave.status === 'defeated') throw new RuleError('That horde has already scattered');
 
-    const state = sendAway(deps.data, village.state, SCOUT_UNIT, input.count, input.now, world.speed);
+    let state = village.state;
+    for (const [unit, n] of Object.entries(units)) state = sendAway(deps.data, state, unit, n, input.now, world.speed);
     const terrain = await loadLand(client, world.id);
     const home = hex(village.q, village.r);
     const target = scoutTarget(deps.data, terrain, wave, home, input.now);
-    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, await effectiveBonuses(client, deps.data, village));
+    const travelMs = scoutTravelMs(deps.data, terrain, home, target, world.speed, await effectiveBonuses(client, deps.data, village), units);
     const arrivesAt = new Date(input.now.getTime() + travelMs);
     const mission = await insertMission(client, {
       worldId: world.id,
       villageId: village.id,
       waveId: wave.id,
-      sent: input.count,
+      sent: count,
+      units,
       target,
       departsAt: input.now,
       arrivesAt,

@@ -5,6 +5,7 @@
 // them, which carry their loot home.
 import { onboardingStep } from './onboarding.js';
 import { z } from 'zod';
+import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
@@ -212,8 +213,8 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
   const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
   const result = assault(data, {
-    army: army.units,
-    armyStats: playerStats(data, bonuses, false),
+    army: combatants(data, army.units),
+    armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
     armyStance: army.stance,
     camp: camp.units,
     front: camp.front as Front,
@@ -247,7 +248,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     await recordRound(client, battle.id, log, last ? { status: result.cleared ? 'cleared' : 'repelled', at, loot } : null);
   }
   const lost: Record<string, number> = {};
-  for (const [unit, n] of Object.entries(army.units)) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
+  for (const [unit, n] of Object.entries(combatants(data, army.units))) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
   let after = await armyLosses(client, data, world, army, lost, at);
   const kills = total(camp.units) - total(result.campNow);
   const where = `${camp.kind === 'lair' ? 'lair' : camp.kind === 'captives' ? "captives' camp" : 'bandit camp'} at (${camp.q}, ${camp.r})`;

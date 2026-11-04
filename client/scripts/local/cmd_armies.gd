@@ -40,8 +40,9 @@ static func cavalry_share(data: Dictionary, units: Dictionary) -> float:
 	return float(cavalry) / all
 
 
-static func _marches(data: Dictionary, unit: String, orders: String) -> bool:
-	return not fighters(data, {unit: 1}).is_empty() or (orders == "explore" and data.units.units.get(unit, {}).get("family") == "scout")
+## Fighters, and scouts (who never fight, but tell the army what it faces).
+static func _marches(data: Dictionary, unit: String, _orders: String) -> bool:
+	return not fighters(data, {unit: 1}).is_empty() or data.units.units.get(unit, {}).get("family") == "scout"
 
 
 ## Checks an army about to set out: its units, or {"error"}.
@@ -56,9 +57,10 @@ static func validate_army(data: Dictionary, units: Dictionary, orders: String) -
 	for unit in units:
 		if int(units[unit]) > 0 and _marches(data, unit, orders):
 			army[unit] = int(units[unit])
-	if LocalBattle.total(army) == 0:
+	# Scouts alone only explore.
+	if LocalBattle.total(army) == 0 or (orders != "explore" and LocalBattle.total(fighters(data, army)) == 0):
 		return LocalVillage.rule("Send at least one soldier")
-	if orders == "harass" and cavalry_share(data, army) < float(data.armies.harass.minCavalryShare):
+	if orders == "harass" and cavalry_share(data, fighters(data, army)) < float(data.armies.harass.minCavalryShare):
 		return LocalVillage.rule("Harassing takes mostly cavalry (%d%% or more)" % LocalWaves.js_round(float(data.armies.harass.minCavalryShare) * 100))
 	return army
 
@@ -669,7 +671,7 @@ static func join_battle(server: LocalServer, world: Dictionary, army: Dictionary
 	army.joinBonus = bonus
 	army.engagedUnits = army.units.duplicate()
 	plan_hunger(server, world, army, at)
-	_add_defenders(battle, army.units)
+	_add_defenders(battle, LocalScouting.combatants(server.data, army.units))
 
 
 static func _add_defenders(battle: Dictionary, units: Dictionary) -> void:
@@ -688,7 +690,7 @@ static func rally_to_battle(server: LocalServer, world: Dictionary, battle: Dict
 		army.joinsRound = 1
 		army.joinBonus = 0
 		army.engagedUnits = army.units.duplicate()
-		_add_defenders(battle, army.units)
+		_add_defenders(battle, LocalScouting.combatants(server.data, army.units))
 	for other in world.villages:
 		if int(other.id) == int(village.id) or other.state.besieged:
 			continue
@@ -985,7 +987,7 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 	wave.status = "battling"
 	var defenders := {}
 	for a in holders:
-		defenders = LocalCamps.add_units(defenders, a.units)
+		defenders = LocalCamps.add_units(defenders, LocalScouting.combatants(data, a.units))
 	var battle := LocalBattles.insert_battle(world, {"waveId": wave.id, "villageId": null, "q": cell.x, "r": cell.y, "setup": setup,
 		"attackerStance": wave.stance, "attackerInitial": wave.composition, "defenderInitial": defenders, "startedAt": at})
 	for army in holders:
@@ -1370,11 +1372,13 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var hero := hero_with_army(world, int(army.id))
 	var general := LocalGenerals.general_with_army(world, int(army.id))
 	var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
-	var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id))
+	# Scouts never fight; they tell the army what it faces (intel).
+	var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
+		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
-	var after := army_losses(server, world, army, _losses(army, result.armyNow), at)
+	var after := army_losses(server, world, army, _losses({"units": LocalScouting.combatants(data, army.units)}, result.armyNow), at)
 	var kills := LocalBattle.total(camp.units) - LocalBattle.total(result.campNow)
 	var ember := false
 	if result.cleared:
@@ -1422,6 +1426,16 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 
 # --- Ancient sites (scheduler/sites.ts) -----------------------------------------------
 
+## sim/sites.ts searchMs: real-time ms an army of `units` takes to search a
+## site of `kind`; the more of them, the faster.
+static func search_ms(data: Dictionary, kind: String, units: Dictionary, world_speed: float) -> float:
+	var count := 0
+	for unit in units:
+		count += maxi(0, int(units[unit]))
+	var share := maxf(float(data.sites.search.minShare), 1.0 / (1.0 + float(data.sites.search.perUnit) * maxi(0, count - 1)))
+	return (float(data.sites.kinds[kind].exploreHours) * LocalTime.MS_PER_HOUR * share) / world_speed
+
+
 ## An army sent to explore has reached the site.
 static func arrive_at_site(server: LocalServer, world: Dictionary, army: Dictionary, at: int, _changed: Array) -> void:
 	var data := server.data
@@ -1430,17 +1444,25 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		send_home(server, world, army, at)
 		return
 	var explorers := army
+	# Scouts alone don't fight guardians: they count them and turn back.
+	if LocalBattle.total(site.guardians) > 0 and LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
+		site.guardiansSeen = true
+		send_home(server, world, army, at)
+		LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "Guardians drove your army from the {where}",
+			"body": "{kills} of them fell; {remaining} still watch it.",
+			"vars": {"where": data.sites.kinds.get(site.kind, {}).get("name", "site"), "kills": 0, "remaining": LocalBattle.total(site.guardians)}}, at)
+		return
 	if LocalBattle.total(site.guardians) > 0:
 		var home := server.find_village(world, int(army.homeVillageId))
 		var hero := hero_with_army(world, int(army.id))
 		var general := LocalGenerals.general_with_army(world, int(army.id))
 		var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
-		var result := assault(data, army.units, LocalBattle.player_stats(data, bonuses, false), army.get("stance", "balanced"), site.guardians, "north",
-			int(world.seed), int(site.id) + 0x5000)
+		var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
+			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000)
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},
 			result, at, "cleared" if result.cleared else "repelled", null)
-		explorers = army_losses(server, world, army, _losses(army, result.armyNow), at)
+		explorers = army_losses(server, world, army, _losses({"units": LocalScouting.combatants(data, army.units)}, result.armyNow), at)
 		var kills := LocalBattle.total(site.guardians) - LocalBattle.total(result.campNow)
 		site.guardians = {} if result.cleared else result.campNow
 		site.guardiansSeen = true
@@ -1460,7 +1482,8 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 	# Search the site.
 	explorers.status = "stationed"
 	explorers.battleId = null
-	var done_at := LocalTime.ms(at + (float(data.sites.kinds[site.kind].exploreHours) * LocalTime.MS_PER_HOUR) / world.speed)
+	# The more hands, the faster.
+	var done_at := LocalTime.ms(at + search_ms(data, String(site.kind), explorers.units, world.speed))
 	server.schedule(world, done_at, "site_explored", {"armyId": army.id, "siteId": site.id})
 
 

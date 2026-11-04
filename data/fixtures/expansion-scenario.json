@@ -625,6 +625,32 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "settler",
+    "count": 2
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "Settlers train one at a time"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "settler",
+    "count": 1
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A Settler is already in training here"
+   }
+  },
+  {
    "advance": 1200000
   },
   {
@@ -1119,6 +1145,25 @@
   },
   {
    "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "settler",
+    "count": 1
+   },
+   "status": 400,
+   "response": {
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":95,\"grain\":326.00000000000006,\"iron\":85}",
+    "missing": {
+     "wood": 0,
+     "stone": 95,
+     "grain": 326.00000000000006,
+     "iron": 85
+    }
+   }
+  },
+  {
+   "method": "POST",
    "path": "/v1/villages/1/found",
    "body": {
     "q": -6,
@@ -1389,6 +1434,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -4559,6 +4607,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -7516,6 +7567,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -7968,7 +8022,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -7984,7 +8037,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [
@@ -10316,6 +10368,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -10768,7 +10823,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -10784,7 +10838,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [
@@ -13147,6 +13200,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -13599,7 +13655,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -13615,7 +13670,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [
@@ -15952,6 +16006,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -16464,7 +16521,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -16480,7 +16536,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [
@@ -18852,6 +18907,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -19684,7 +19742,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 2
         }
        }
@@ -19709,7 +19766,6 @@
        "sergeant_rider": 1
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 2
       },
       "rounds": [
@@ -19901,7 +19957,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -19917,7 +19972,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [
@@ -22279,6 +22333,9 @@
        "train": "2026-06-01T08:40:00.000Z"
       },
       "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
       "research": {
        "points": 0,
        "perHour": 0,
@@ -23127,7 +23184,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 2
         }
        }
@@ -23145,7 +23201,6 @@
       },
       "attackerNow": {},
       "defenderInitial": {
-       "settler": 0,
        "spearman": 2
       },
       "rounds": [
@@ -23337,7 +23392,6 @@
       "setup": {
        "home": {
         "initial": {
-         "settler": 0,
          "spearman": 3
         }
        }
@@ -23353,7 +23407,6 @@
        "zealot": 3
       },
       "defenderInitial": {
-       "settler": 0,
        "spearman": 3
       },
       "rounds": [

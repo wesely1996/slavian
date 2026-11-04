@@ -25,6 +25,12 @@ static func survivors(report: Dictionary) -> String:
 	return UI.t("%d of %d scouts returned") % [report.survivors, report.sent]
 
 
+## Assassins killed the horde's leader: who ("" when they didn't).
+static func slain(report: Dictionary) -> String:
+	var who: Variant = report.get("leaderSlain")
+	return UI.t("Our assassins killed %s in the horde's camp.") % who if who is String and who != "" else ""
+
+
 static func _range(value: Dictionary) -> String:
 	var low := int(value.min)
 	var high := int(value.max)

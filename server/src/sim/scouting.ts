@@ -32,6 +32,57 @@ export interface ScoutReport {
   readonly stance: Stance | null;
   // The horde had scattered before the scouts arrived.
   readonly dispersed: boolean;
+  // Assassins killed the horde's leader (their title then).
+  readonly leaderSlain?: string;
+}
+
+// The scout kinds (family scout), in the order of units.json.
+export function scoutKinds(data: GameData): string[] {
+  return Object.keys(data.units.units).filter((unit) => data.units.units[unit]!.family === 'scout');
+}
+
+export function isScout(data: GameData, unit: string): boolean {
+  return data.units.units[unit]?.family === 'scout';
+}
+
+// What scouts are worth to a report or an army: their units' intel.
+export function intelOf(data: GameData, units: Readonly<Record<string, number>>): number {
+  let sum = 0;
+  for (const [unit, n] of Object.entries(units)) if (n > 0 && isScout(data, unit)) sum += n * (data.units.units[unit]!.scouting?.intel ?? 1);
+  return sum;
+}
+
+// What an army's scouts add to its attack and defense.
+export function intelBonus(data: GameData, units: Readonly<Record<string, number>>): number {
+  return Math.min(data.scouting.intel.max, data.scouting.intel.perPoint * intelOf(data, units));
+}
+
+// An army's stats with its scouts' intel bonus.
+export function withIntel<S extends { attack: number; defense: number }>(
+  data: GameData,
+  units: Readonly<Record<string, number>>,
+  stats: (unit: string) => S,
+): (unit: string) => S {
+  const f = 1 + intelBonus(data, units);
+  if (f === 1) return stats;
+  return (unit) => {
+    const s = stats(unit);
+    return { ...s, attack: s.attack * f, defense: s.defense * f };
+  };
+}
+
+// The units that fight: all but scouts.
+export function combatants(data: GameData, units: Readonly<Record<string, number>>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(units)) if (n > 0 && !isScout(data, unit)) out[unit] = n;
+  return out;
+}
+
+// The scouts among `units`.
+export function scoutsIn(data: GameData, units: Readonly<Record<string, number>>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(units)) if (n > 0 && isScout(data, unit)) out[unit] = n;
+  return out;
 }
 
 // Where a wave can be found at `at`: on the march, at its target, or (not
@@ -68,13 +119,17 @@ export function scoutTravelMs(
   to: Hex,
   worldSpeed: number,
   bonuses: Bonuses = {},
+  units: Readonly<Record<string, number>> = { [SCOUT_UNIT]: 1 },
 ): number {
   const moveCost = moveCostOn(data, terrain);
   const path = findPath(from, to, moveCost, fastestStep(data, terrain));
   // Off-road targets (e.g. a horde standing in impassable terrain): count
   // straight-line distance over rough ground.
   const cost = path ? path.slice(1).reduce((sum, cell, i) => sum + moveCost(path[i]!, cell)!, 0) : hexDistance(from, to) * 2;
-  const speed = data.units.units[SCOUT_UNIT]!.speed * (1 + bonus(bonuses, 'scoutSpeed'));
+  // At the pace of the slowest sent.
+  const sent = Object.keys(units).filter((unit) => (units[unit] ?? 0) > 0);
+  const slowest = Math.min(...(sent.length ? sent : [SCOUT_UNIT]).map((unit) => data.units.units[unit]!.speed));
+  const speed = slowest * (1 + bonus(bonuses, 'scoutSpeed'));
   return Math.max(1, Math.round(((cost / speed) * MS_PER_HOUR) / worldSpeed));
 }
 
@@ -90,12 +145,43 @@ export function survivorsOf(
   missionId: number,
   bonuses: Bonuses = {},
 ): number {
+  return survivingScouts(data, front, { [SCOUT_UNIT]: sent }, seed, missionId, bonuses)[SCOUT_UNIT] ?? 0;
+}
+
+// Which of the scouts sent come through, kind by kind (in units.json
+// order): each is caught with the front's chance scaled by its stealth.
+export function survivingScouts(
+  data: GameData,
+  front: Front,
+  sent: Readonly<Record<string, number>>,
+  seed: number,
+  missionId: number,
+  bonuses: Bonuses = {},
+): Record<string, number> {
   const base = data.scouting.survival[front] ?? data.scouting.defaultSurvival;
-  const chance = Math.min(0.98, base + bonus(bonuses, 'scoutSurvival'));
   const rng = rngFor(seed, missionId, 0x17);
-  let survivors = 0;
-  for (let i = 0; i < sent; i++) if (rng() < chance) survivors++;
-  return survivors;
+  const out: Record<string, number> = {};
+  for (const unit of scoutKinds(data)) {
+    const n = sent[unit] ?? 0;
+    if (n <= 0) continue;
+    const stealth = data.units.units[unit]!.scouting?.stealth ?? 1;
+    const chance = Math.min(0.98, 1 - (1 - base) * stealth + bonus(bonuses, 'scoutSurvival'));
+    let survivors = 0;
+    for (let i = 0; i < n; i++) if (rng() < chance) survivors++;
+    out[unit] = survivors;
+  }
+  return out;
+}
+
+// Whether the assassins among the survivors kill the horde's leader.
+export function assassinates(data: GameData, survivors: Readonly<Record<string, number>>, seed: number, missionId: number): boolean {
+  const rng = rngFor(seed, missionId, 0x5a);
+  for (const unit of scoutKinds(data)) {
+    const chance = data.units.units[unit]!.scouting?.assassinate ?? 0;
+    if (chance <= 0) continue;
+    for (let i = 0; i < (survivors[unit] ?? 0); i++) if (rng() < chance) return true;
+  }
+  return false;
 }
 
 // A range of relative width `error` around `value` that always contains it,
@@ -118,13 +204,16 @@ export function scoutReport(
     stance: Stance;
     sent: number;
     survivors: number;
+    // The survivors' intel (absent: one a scout).
+    intel?: number;
     dispersed: boolean;
     seed: number;
     missionId: number;
   },
 ): ScoutReport {
   const base = { sent: input.sent, survivors: input.survivors, dispersed: input.dispersed };
-  const tier = [...data.scouting.tiers].reverse().find((t) => input.survivors >= t.minSurvivors);
+  const intel = input.intel ?? input.survivors;
+  const tier = [...data.scouting.tiers].reverse().find((t) => intel >= t.minSurvivors);
   if (!tier || input.dispersed) return { ...base, tier: 'none', size: null, units: [], stance: null };
 
   const names = data.enemies.fronts[input.front]!.units;

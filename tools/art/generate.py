@@ -691,6 +691,22 @@ def unit(kind):
         s.circle(64, 62, 14, s.rad([(0, "#7fb6cf"), (1, "#2b5a70")]), stroke="none", sw=0)
         s.circle(64, 62, 6, "#11151a", stroke="none", sw=0)
         s.circle(60, 58, 2.5, "#ffffff", stroke="none", sw=0)
+    elif kind == "pathfinder":
+        # An eye over a trail of footprints.
+        s.path("M30,50 Q64,22 98,50 Q64,78 30,50 Z", pale, stroke="none", sw=0)
+        s.circle(64, 50, 11, s.rad([(0, "#9cbf6a"), (1, "#3f6b35")]), stroke="none", sw=0)
+        s.circle(64, 50, 5, "#11151a", stroke="none", sw=0)
+        s.circle(61, 47, 2, "#ffffff", stroke="none", sw=0)
+        for x, y in [(50, 98), (60, 86), (70, 96), (80, 84)]:
+            s.ellipse(x, y, 4, 6, pale, stroke="none", sw=0, opacity=0.85)
+    elif kind == "assassin":
+        # A dagger, point down, with a drop of blood.
+        s.poly([(78, 30), (86, 38), (50, 84), (44, 90), (46, 82)], pale, stroke="none", sw=0)
+        s.line(62, 46, 70, 54, stroke="#bdb29b", sw=1.5)
+        s.line(74, 26, 94, 46, stroke=s.lin([(0, "#f3d98f"), (1, "#7a5a17")], 0, 0, 1, 1), sw=7)
+        s.line(84, 36, 98, 22, stroke="#594027", sw=7)
+        s.circle(100, 20, 5, "#e2b33c", stroke="none", sw=0)
+        s.path("M42,94 Q36,104 42,108 Q48,104 42,94 Z", "#b5452f", stroke="none", sw=0)
     elif kind == "settler":
         s.path("M28,74 Q64,30 100,74 Z", pale, stroke="none", sw=0)
         s.rect(26, 74, 76, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
@@ -1941,7 +1957,7 @@ def assets():
     out["map/outpost"] = outpost()
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
         out[f"site/{kind}"] = site(kind)
-    for kind in ["spearman", "archer", "horseman", "scout", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon"]:
+    for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon"]:
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)

@@ -140,6 +140,7 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
         villageId: home.id,
         waveId: wave.id,
         sent: best.minSurvivors,
+        units: { scout: best.minSurvivors },
         target: { q: home.q, r: home.r },
         departsAt: new Date(quest.departsAt),
         arrivesAt: at,
@@ -155,7 +156,7 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
         seed: world.seed,
         missionId: mission.id,
       });
-      await recordReport(client, mission.id, report);
+      await recordReport(client, mission.id, report, { scout: best.minSurvivors });
       await markMissionDone(client, mission.id);
       await notifyWorld(client, { worldId: world.id, type: 'scouting' });
       return { body: 'A full report on the next horde from the {front} is in the threats panel.', vars: { front: quest.front ?? '' } };
