@@ -11,7 +11,7 @@ import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/r
 import { againstFront } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
 import { z } from 'zod';
-import type { GameData } from '../data/index.js';
+import type { GameData, Stance } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
 import { fortAt, insertFort, loadFort, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
@@ -28,8 +28,8 @@ import { listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, 
 import { runLost } from './ritual.js';
 import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
-import { addUnits, splitLosses } from '../sim/armies.js';
-import { battleOutcome, battleRng, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total } from '../sim/battle.js';
+import { addUnits } from '../sim/armies.js';
+import { battleOutcome, battleRng, broken, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total } from '../sim/battle.js';
 import { cameOverRiver, setupAt, setupFactors, stepInto, wagonFortBonus, type Setup } from '../sim/field.js';
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
@@ -144,7 +144,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), {}),
     startedAt: at,
   });
-  for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0 });
+  for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
   const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort', setup.wagonFort && 'a wagon fort', setup.river && 'a river crossing']
     .filter(Boolean)
@@ -170,6 +170,16 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
   return battle;
 }
 
+// An army that broke falls back home beaten: its hero carried home
+// wounded, its general killed (data/battle.json).
+export async function fallBack(client: DbClient, data: GameData, world: World, army: Army, input: { kills: number; battleId: number; at: Date }): Promise<void> {
+  const led = await heroWithArmy(client, army.id);
+  if (led) await heroAfterBattle(client, data, world, { ...led, villageId: army.homeVillageId, armyId: null }, { kills: input.kills, won: false, battleId: input.battleId, at: input.at });
+  const commander = await generalWithArmy(client, army.id);
+  if (commander) await generalAfterBattle(client, data, world, commander, { kills: input.kills, won: false, at: input.at });
+  await sendHome(client, world, army, input.at, data);
+}
+
 // One round of a field battle (battle_round for a battle with no village):
 // on open ground, or at the Holy City, whose guard fights beside any armies
 // holding it, behind its walls.
@@ -180,7 +190,11 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const holy = battle.setup.holyCity === true;
   const guard = holy ? (battle.setup.guard ?? {}) : null;
   const leader = engaged[0] ? await loadVillage(client, engaged[0].homeVillageId) : null;
-  const stance = holy ? data.horde.holyCity.stance : (leader?.state.stance ?? 'balanced');
+  // Each army fights in its own stance, the Holy City's guard in its own;
+  // a guard that broke fights no more.
+  const guardStance = data.horde.holyCity.stance;
+  const guardBroken = battle.setup.home?.broken === true;
+  const guardForce = guard && !guardBroken ? guard : {};
   // The holders fight with their owner's research and the hero leading them.
   let hero: Hero | null = null;
   for (const army of engaged) hero ??= await heroWithArmy(client, army.id);
@@ -200,9 +214,14 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     river: !!battle.setup.river,
     wagonFort: battle.setup.wagonFort ?? 0,
   };
-  const factors = setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
-  const forces = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)];
+  const factorsFor = (stance: Stance) => setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
+  const factors = factorsFor('balanced');
+  const groups = [...(guard ? [{ units: guardForce, stance: guardStance }] : []), ...engaged.map((a) => ({ units: a.units, stance: a.stance }))];
   const holderBase = playerStats(data, bonuses, false);
+  const statsFor = (stance: Stance) => {
+    const f = factorsFor(stance);
+    return (unit: string) => ({ ...holderBase(unit), attack: holderBase(unit).attack * f.holderAttack, defense: holderBase(unit).defense * f.holderDefense });
+  };
   const chief = await hordeStats(client, data, wave, enemyStats(data, wave.front), null);
   const hordeBase = chief.stats;
   const result = resolveRound(
@@ -215,37 +234,44 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       home: false,
     },
     {
-      units: forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {}),
-      stance,
-      stats: (unit) => ({
-        ...holderBase(unit),
-        attack: holderBase(unit).attack * factors.holderAttack,
-        defense: holderBase(unit).defense * factors.holderDefense,
-      }),
+      units: groups.reduce<Record<string, number>>((sum, g) => addUnits(sum, g.units), {}),
+      stance: groups[0]?.stance ?? 'balanced',
+      stats: statsFor('balanced'),
       home: holy,
+      groups: groups.map((g) => ({ ...g, stats: statsFor(g.stance) })),
     },
     battleRng(world.seed, battle.id, round),
   );
   const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
   await setWaveStrength(client, wave.id, attackerNow);
-  const shares = splitLosses(result.defenderLosses, forces);
+  const shares = result.defenderGroupLosses!;
   const guardNow = guard ? subtractUnits(guard, shares[0]!) : null;
-  if (guardNow) await saveSetup(client, battle.id, { ...battle.setup, guard: guardNow });
   const offset = guard ? 1 : 0;
   const armies: Army[] = [];
   for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i + offset]!, at));
-  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...(guardNow ?? {}) });
+  const guardFighting = guardNow && !guardBroken ? guardNow : {};
+  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, a.units), { ...guardFighting });
 
   const outcome = battleOutcome(data, {
     round,
     attackerStance: battle.attackerStance,
     attackerInitial: battle.attackerInitial,
     attackerNow,
-    defenderStance: stance,
+    defenderStance: groups[0]?.stance ?? 'balanced',
     defenderInitial: battle.defenderInitial,
     defenderNow: defendersNow,
     attackerNerve: personality(data, wave).nerve * (1 + chief.nerve),
+    defenderGroups: [
+      ...(guard ? [{ stance: guardStance, initial: battle.setup.home?.initial ?? battle.defenderInitial, now: guardFighting }] : []),
+      ...armies.map((a) => ({ stance: a.stance, initial: a.engagedUnits ?? a.units, now: a.units })),
+    ],
   });
+  // While the fight goes on, an army that broke falls back home beaten,
+  // and a guard that broke fights no more.
+  const breaks = (a: Army) => outcome === 'ongoing' && total(a.units) > 0 && broken(data, a.stance, a.engagedUnits ?? a.units, a.units);
+  const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
+  const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
+  if (guardNow) await saveSetup(client, battle.id, { ...battle.setup, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
   const log: RoundLog = {
     round,
     at: at.toISOString(),
@@ -253,10 +279,16 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderLosses: result.defenderLosses,
     attackerLeft: total(attackerNow),
     defenderLeft: total(defendersNow),
+    ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: a.units })) } : {}),
+    ...(homeBroke ? { homeBroke: true } : {}),
   };
 
   if (outcome === 'ongoing') {
-    for (const army of armies) await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
+    const kills = total(battle.attackerInitial) - total(attackerNow);
+    for (const army of armies) {
+      if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
+      else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
+    }
     await recordRound(client, battle.id, log, null);
     await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
   } else {

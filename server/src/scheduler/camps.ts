@@ -214,7 +214,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   const result = assault(data, {
     army: army.units,
     armyStats: playerStats(data, bonuses, false),
-    armyStance: home.state.stance,
+    armyStance: army.stance,
     camp: camp.units,
     front: camp.front as Front,
     seed: world.seed,

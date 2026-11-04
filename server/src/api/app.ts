@@ -16,6 +16,7 @@ import {
   disbandArmyCommand,
   moveArmyCommand,
   recallArmyCommand,
+  armyStanceCommand,
   resupplyArmyCommand,
   circleWagonsCommand,
   sendArmyCommand,
@@ -189,6 +190,8 @@ const armyBody = z.object({
   withHero: z.boolean().optional(),
   // One of the caller's generals at home in the village leads it.
   generalId: z.number().int().positive().optional(),
+  // Its battle stance (absent: the village's).
+  stance: z.enum(STANCES).optional(),
 });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
 // Grain a standing army leaves in a fort or supply point.
@@ -774,6 +777,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { units } = dismissBody.parse(request.body);
     const { village } = await dismissUnitsCommand(db, scheduler, { accountId: account.id, villageId: id, units, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/stance', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { stance } = stanceBody.parse(request.body);
+    const army = await armyStanceCommand(db, scheduler, { accountId: account.id, armyId: id, stance, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/armies/:id/recall', async (request) => {

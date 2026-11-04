@@ -1,7 +1,7 @@
-import { loadArmy, saveReinforceRule, type Army } from '../db/armies.js';
+import { loadArmy, saveArmy, saveReinforceRule, type Army } from '../db/armies.js';
 import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
-import type { GameData } from '../data/index.js';
+import type { GameData, Stance } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
@@ -37,6 +37,7 @@ export async function sendArmyCommand(
     orders: ArmyOrders;
     withHero?: boolean | undefined;
     generalId?: number | undefined;
+    stance?: Stance | undefined;
     now: Date;
   },
 ): Promise<Army> {
@@ -52,6 +53,7 @@ export async function sendArmyCommand(
       orders: input.orders,
       withHero: input.withHero,
       generalId: input.generalId,
+      stance: input.stance,
       at: input.now,
     });
   });
@@ -186,6 +188,17 @@ export async function moveArmyCommand(
   return armyCommand(db, deps, input, 'moved an army', ({ client, world, army }) =>
     moveArmy(client, deps.data, world, army, { hex: input.target, villageId: input.villageId }, input.now),
   );
+}
+
+// An army's battle stance; not in the middle of a battle.
+export async function armyStanceCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; stance: Stance; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'set an army\'s stance', async ({ client, army }) => {
+    if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
+    if (army.status === 'returning' || army.status === 'done') throw new RuleError('Only armies out in the field take a stance');
+    const next = { ...army, stance: input.stance };
+    await saveArmy(client, next);
+    return next;
+  });
 }
 
 export async function disbandArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {

@@ -501,6 +501,8 @@ export function armyView(army: Army) {
     heroAccountId: army.heroAccountId,
     generalId: army.generalId,
     orders: army.orders,
+    // Its own battle stance.
+    stance: army.stance,
     // Carried home from a cleared camp.
     loot: army.loot,
     units: army.units,

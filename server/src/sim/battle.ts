@@ -23,11 +23,23 @@ export interface Side {
   readonly stats: (unit: string) => UnitStats;
   // Fighting at home (behind your own village) toughens defense.
   readonly home: boolean;
+  // The side's forces when they fight apart, each in its own stance (a
+  // village's garrison, each army): `units` and `stance` are then unused.
+  readonly groups?: readonly Group[];
+}
+
+export interface Group {
+  readonly units: Units;
+  readonly stance: Stance;
+  // Its own stats in place of the side's.
+  readonly stats?: (unit: string) => UnitStats;
 }
 
 export interface RoundResult {
   readonly attackerLosses: Record<string, number>;
   readonly defenderLosses: Record<string, number>;
+  // By group, when the defenders fight in groups.
+  readonly defenderGroupLosses?: Record<string, number>[];
 }
 
 export type Outcome = 'ongoing' | 'defended' | 'raided';
@@ -62,41 +74,58 @@ export function battleRng(seed: number, battleId: number, round: number): () => 
   return createRng((seed ^ Math.imul(battleId + 1, 0xcc9e2d51) ^ Math.imul(round + 1, 0x1b873593)) >>> 0);
 }
 
-// Kills `from` inflicts on `to` this round, by unit type.
-function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<string, number> {
+function groupsOf(side: Side): Group[] {
+  return side.groups ? [...side.groups] : [{ units: side.units, stance: side.stance }];
+}
+
+// Kills `from` inflicts on `to` this round, by unit type, for each of
+// `to`'s groups.
+function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<string, number>[] {
   const { battle } = data;
-  const targets = Object.entries(to.units).filter(([, n]) => n > 0);
-  const targetTotal = targets.reduce((sum, [, n]) => sum + n, 0);
-  const result: Record<string, number> = {};
+  const strikers = groupsOf(from);
+  const groups = groupsOf(to);
+  const result: Record<string, number>[] = groups.map(() => ({}));
+  const targets = groups.flatMap((g, i) => Object.entries(g.units).filter(([, n]) => n > 0).map(([unit, n]) => ({ i, unit, n })));
+  const targetTotal = targets.reduce((sum, t) => sum + t.n, 0);
   if (targetTotal === 0) return result;
 
-  const fromStance = battle.stances[from.stance];
-  const toStance = battle.stances[to.stance];
-  const matchup = battle.matchups[from.stance]?.[to.stance] ?? 1;
-  for (const [target, targetCount] of targets) {
-    const stats = to.stats(target);
+  for (const { i, unit: target, n: targetCount } of targets) {
+    const group = groups[i]!;
+    const stats = (group.stats ?? to.stats)(target);
     let damage = 0;
-    for (const [unit, count] of Object.entries(from.units)) {
-      if (count <= 0) continue;
-      const attacker = from.stats(unit);
-      const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
-      damage += count * attacker.attack * fromStance.attack * matchup * counter;
+    for (const striker of strikers) {
+      const fromStance = battle.stances[striker.stance];
+      const matchup = battle.matchups[striker.stance]?.[group.stance] ?? 1;
+      for (const [unit, count] of Object.entries(striker.units)) {
+        if (count <= 0) continue;
+        const attacker = (striker.stats ?? from.stats)(unit);
+        const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
+        damage += count * attacker.attack * fromStance.attack * matchup * counter;
+      }
     }
     const share = targetCount / targetTotal;
     const variance = 1 + battle.variance * (rng() * 2 - 1);
-    const toughness = Math.max(1, stats.defense) * toStance.defense * (to.home ? battle.homeBonus : 1);
+    const toughness = Math.max(1, stats.defense) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
     const expected = (damage * share * variance * battle.casualtyScale) / toughness;
     // Round randomly so small fights still take losses on average.
     const whole = Math.floor(expected) + (rng() < expected - Math.floor(expected) ? 1 : 0);
     const dead = Math.min(targetCount, whole);
-    if (dead > 0) result[target] = dead;
+    if (dead > 0) result[i]![target] = (result[i]![target] ?? 0) + dead;
   }
   return result;
 }
 
+function merged(losses: readonly Record<string, number>[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const l of losses) for (const [unit, n] of Object.entries(l)) out[unit] = (out[unit] ?? 0) + n;
+  return out;
+}
+
 export function resolveRound(data: GameData, attacker: Side, defender: Side, rng: () => number): RoundResult {
   // Simultaneous: both sides strike with the numbers they had at the start.
-  return { attackerLosses: kills(data, defender, attacker, rng), defenderLosses: kills(data, attacker, defender, rng) };
+  const attackerLosses = merged(kills(data, defender, attacker, rng));
+  const byGroup = kills(data, attacker, defender, rng);
+  return { attackerLosses, defenderLosses: merged(byGroup), ...(defender.groups ? { defenderGroupLosses: byGroup } : {}) };
 }
 
 export function subtractUnits(units: Units, losses: Units): Record<string, number> {
@@ -109,7 +138,7 @@ export function subtractUnits(units: Units, losses: Units): Record<string, numbe
 }
 
 // `nerve` scales the stance's retreat threshold (a faction's discipline).
-function broken(data: GameData, stance: Stance, initial: Units, now: Units, nerve = 1): boolean {
+export function broken(data: GameData, stance: Stance, initial: Units, now: Units, nerve = 1): boolean {
   const base = data.battle.stances[stance].retreatAt;
   const retreatAt = base === null ? null : Math.min(MAX_RETREAT_AT, base * nerve);
   const start = total(initial);
@@ -128,12 +157,17 @@ export function battleOutcome(
     defenderInitial: Units;
     defenderNow: Units;
     attackerNerve?: number;
+    // Defenders fighting in groups, each breaking on its own (in place of
+    // defenderStance and defenderInitial): they lose once none still stands.
+    defenderGroups?: readonly { stance: Stance; initial: Units; now: Units }[];
   },
 ): Outcome {
   if (total(input.attackerNow) === 0) return 'defended';
   if (total(input.defenderNow) === 0) return 'raided';
   if (broken(data, input.attackerStance, input.attackerInitial, input.attackerNow, input.attackerNerve)) return 'defended';
-  if (broken(data, input.defenderStance, input.defenderInitial, input.defenderNow)) return 'raided';
+  if (input.defenderGroups) {
+    if (input.defenderGroups.every((g) => total(g.now) === 0 || broken(data, g.stance, g.initial, g.now))) return 'raided';
+  } else if (broken(data, input.defenderStance, input.defenderInitial, input.defenderNow)) return 'raided';
   return input.round >= data.battle.maxRounds ? 'defended' : 'ongoing';
 }
 

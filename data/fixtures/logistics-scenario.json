@@ -6720,6 +6720,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -6727,14 +6733,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -6753,23 +6762,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -6847,7 +6845,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 0,
+      "xp": 10,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -6856,15 +6854,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": null,
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
       "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -7013,7 +7011,7 @@
      [
       0,
       0,
-      11.8
+      11.4
      ]
     ],
     "delegations": [],
@@ -9619,6 +9617,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -9626,14 +9630,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -9652,23 +9659,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -9746,7 +9742,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 0,
+      "xp": 10,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -9755,15 +9751,15 @@
        "nerve": 0,
        "loot": 0
       },
-      "status": "dead",
-      "woundedUntil": null,
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
       "kills": 1,
       "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
+      "diedAt": null
      }
     ],
     "orders": [],
@@ -9912,7 +9908,7 @@
      [
       0,
       0,
-      11.8
+      11.4
      ]
     ],
     "delegations": [],
@@ -13033,6 +13029,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -13040,14 +13042,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -13066,23 +13071,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -13155,6 +13149,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 2,
       "front": "south",
       "name": "Lothar",
@@ -13178,31 +13197,6 @@
       "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "name": "Vyrgan",
-      "title": "Vyrgan the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -13348,7 +13342,7 @@
      [
       0,
       0,
-      7.1
+      6.8
      ]
     ],
     "delegations": [],
@@ -15922,6 +15916,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -15929,14 +15929,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -15955,23 +15958,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -16044,6 +16036,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 2,
       "front": "south",
       "name": "Lothar",
@@ -16067,31 +16084,6 @@
       "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "name": "Vyrgan",
-      "title": "Vyrgan the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -16237,7 +16229,7 @@
      [
       0,
       0,
-      7.1
+      6.8
      ]
     ],
     "delegations": [],
@@ -18966,6 +18958,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -18973,14 +18971,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -18999,23 +19000,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -19088,6 +19078,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 2,
       "front": "south",
       "name": "Lothar",
@@ -19111,31 +19126,6 @@
       "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "name": "Vyrgan",
-      "title": "Vyrgan the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -19281,7 +19271,7 @@
      [
       0,
       0,
-      7.1
+      6.8
      ]
     ],
     "delegations": [],
@@ -21784,6 +21774,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 12,
+         "spearman": 23
+        }
+       },
        "guard": {
         "archer": 11,
         "spearman": 22
@@ -21799,7 +21795,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 3,
+       "zealot": 2,
        "crossbowman": 1
       },
       "defenderInitial": {
@@ -21810,10 +21806,11 @@
        {
         "at": "2026-06-01T12:23:05.357Z",
         "round": 1,
-        "attackerLeft": 13,
+        "attackerLeft": 12,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 2,
+         "crossbowman": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
@@ -21824,7 +21821,7 @@
        {
         "at": "2026-06-01T12:23:23.357Z",
         "round": 2,
-        "attackerLeft": 10,
+        "attackerLeft": 9,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 2,
@@ -21835,18 +21832,17 @@
        {
         "at": "2026-06-01T12:23:41.357Z",
         "round": 3,
-        "attackerLeft": 7,
+        "attackerLeft": 6,
         "defenderLeft": 33,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1
+         "zealot": 3
         },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T12:23:59.357Z",
         "round": 4,
-        "attackerLeft": 4,
+        "attackerLeft": 3,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 3
@@ -21869,7 +21865,11 @@
       "villageId": 1,
       "q": -2,
       "r": 2,
-      "setup": {},
+      "setup": {
+       "home": {
+        "initial": {}
+       }
+      },
       "status": "raided",
       "round": 1,
       "attackerStance": "balanced",
@@ -21879,7 +21879,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 3,
+       "zealot": 2,
        "crossbowman": 1
       },
       "defenderInitial": {},
@@ -21919,6 +21919,12 @@
       "q": 0,
       "r": 0,
       "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
        "guard": {
         "archer": 10,
         "spearman": 19
@@ -21926,14 +21932,17 @@
        "holyCity": true
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
        "grey_wolf": 4,
        "leshy_thrall": 2
       },
-      "attackerNow": {},
+      "attackerNow": {
+       "rusalka": 1,
+       "leshy_thrall": 1
+      },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
@@ -21952,23 +21961,12 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T11:25:48.000Z",
-        "round": 2,
-        "attackerLeft": 0,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:25:12.000Z",
-      "endedAt": "2026-06-01T11:25:48.000Z"
+      "endedAt": "2026-06-01T11:25:30.000Z"
      }
     ],
     "raids": [],
@@ -22041,6 +22039,31 @@
     "generals": [],
     "leaders": [
      {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T12:01:30.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
       "id": 2,
       "front": "south",
       "name": "Lothar",
@@ -22066,31 +22089,6 @@
       "kills": 2,
       "grudgeVillageId": null,
       "diedAt": null
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "name": "Vyrgan",
-      "title": "Vyrgan the Hungry",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "dead",
-      "woundedUntil": null,
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": "2026-06-01T11:25:48.000Z"
      }
     ],
     "orders": [],
@@ -22247,7 +22245,7 @@
      [
       0,
       0,
-      19.5
+      19.4
      ]
     ],
     "delegations": [],
@@ -24349,7 +24347,7 @@
    "response": {
     "notifications": [
      {
-      "id": 24,
+      "id": 23,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -24358,7 +24356,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 22,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -24367,7 +24365,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 21,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -24376,7 +24374,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 20,
       "kind": "hero",
       "tier": "digest",
       "title": "Ilya is wounded",
@@ -24385,7 +24383,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -24394,7 +24392,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 18,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -24403,7 +24401,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 17,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -24412,7 +24410,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 16,
       "kind": "site",
       "tier": "digest",
       "title": "Captives are held at (-6, 1)",
@@ -24421,7 +24419,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 15,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Gift a teammate",
@@ -24430,7 +24428,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 14,
       "kind": "site",
       "tier": "digest",
       "title": "A forbidding ruin rises at (1, 4)",
@@ -24439,21 +24437,12 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 13,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 2 rounds.",
-      "createdAt": "2026-06-01T11:25:48.000Z",
-      "read": false
-     },
-     {
-      "id": 13,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Vyrgan the Hungry has fallen",
-      "body": "Vyrgan the Hungry died with the last of the horde after 1 battles. Another will rise to take their place.",
-      "createdAt": "2026-06-01T11:25:48.000Z",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T11:25:30.000Z",
       "read": false
      },
      {
@@ -24565,7 +24554,7 @@
       "read": false
      }
     ],
-    "unread": 24,
+    "unread": 23,
     "serverTime": "2026-06-01T12:31:30.000Z"
    }
   }

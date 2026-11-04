@@ -27,6 +27,9 @@ static func units_at(battle: Dictionary, round: int) -> Dictionary:
 		for army in joined:
 			if army.orders == "harass":
 				_subtract(defender, army.units)
+		# Armies that broke fall back with what they have left.
+		for army in entry.get("broke", []):
+			_subtract(defender, army.get("units", {}))
 	return {"attacker": attacker, "defender": defender}
 
 
@@ -157,6 +160,10 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 	var share_ours := ours / maxf(1.0, BattleText.total(before.defender))
 	if entry.has("smashed"):
 		lines.append(UI.t("Our ballistae smashed %s.") % units_text(data, entry.smashed))
+	for army in entry.get("broke", []):
+		lines.append(UI.t("The army from %s broke and fell back home.") % village_name.call(army.villageId))
+	if entry.get("homeBroke", false):
+		lines.append(UI.t("The Holy City's guard broke and fights no more.") if battle.get("setup", {}).get("holyCity", false) else UI.t("The garrison broke and fights no more."))
 	var walls := WallText.round_text(battle, entry)
 	if walls != "":
 		lines.append(walls)

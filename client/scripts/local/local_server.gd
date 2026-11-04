@@ -381,6 +381,14 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(turned)
 		changed.append(["world"])
 		return {"status": 200, "data": {"caravan": LocalLogistics.caravan_view(turned), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "stance":
+		if not String(body.get("stance", "")) in data.battle.stances:
+			return _fail(400, "invalid_request", "Unknown stance")
+		var army := LocalArmies.set_stance(world, int(parts[2]), String(body.stance))
+		if army.has("error"):
+			return _rule_answer(army)
+		changed.append(["world"])
+		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "recall":
 		var army := LocalArmies.recall(self, world, int(parts[2]), now)
 		if army.has("error"):
@@ -1294,7 +1302,9 @@ func _load_all() -> void:
 			world.merge({"shipyards": []})
 			world.next.merge({"shipyard": 1})
 			for a in world.armies:
-				a.merge({"generalId": null})
+				# Armies from before their own stances: their village's.
+				var home_village := find_village(world, int(a.homeVillageId))
+				a.merge({"generalId": null, "stance": home_village.state.get("stance", "balanced") if not home_village.is_empty() else "balanced", "engagedUnits": null})
 				# Armies from before supplies: fed by their home village.
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 				# Armies saved before wagon forts.
