@@ -5,6 +5,7 @@ import { HALL_PLOT, plotsFromLegacyLevels, withWallPlots, type Plot } from '../s
 import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
+import { ensurePrune } from '../scheduler/prune.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { assignHeroKinds, ensureHeroes } from './heroes.js';
 import { refreshBonuses } from '../scheduler/research.js';
@@ -91,7 +92,12 @@ export async function upgradeDigests(db: Db, now: Date): Promise<void> {
 export async function upgradeMapEvents(db: Db, data: GameData, now: Date): Promise<void> {
   await inTransaction(db, async (client) => {
     const { rows } = await client.query<{ id: number }>(`SELECT id FROM worlds WHERE status = 'running'`);
-    for (const { id } of rows) await ensureMapEvents(client, data, await getWorld(client, id), now);
+    for (const { id } of rows) {
+      const world = await getWorld(client, id);
+      await ensureMapEvents(client, data, world, now);
+      // And daily pruning.
+      await ensurePrune(client, world, now);
+    }
   });
 }
 

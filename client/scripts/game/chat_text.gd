@@ -3,7 +3,7 @@ extends RefCounted
 ## Words for the group chat (screens/game_screen.gd).
 
 ## The longest message the server takes (api/app.ts CHAT_MAX).
-const MAX_LENGTH := 500
+const MAX_LENGTH := 126
 
 
 ## "Ana · 5m ago" above a message ("You" for your own).

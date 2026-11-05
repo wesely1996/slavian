@@ -213,8 +213,9 @@ static func run_summary(world: Dictionary) -> Variant:
 		"days": LocalWaves.js_round((float(end - int(world.startedAt)) * world.speed) / 86400000.0 * 10) / 10.0,
 		"wavesBeaten": count.call(world.waves, func(w: Dictionary) -> bool: return w.status == "defeated"),
 		"wavesFaced": count.call(world.waves, func(w: Dictionary) -> bool: return w.spawn != null),
-		"battlesWon": count.call(world.battles, func(b: Dictionary) -> bool: return b.status in ["defended", "cleared", "repelled"]),
-		"campsCleared": count.call(world.camps, func(c: Dictionary) -> bool: return c.status == "cleared"),
+		# What daily pruning took away still counts (prune.gd).
+		"battlesWon": count.call(world.battles, func(b: Dictionary) -> bool: return b.status in ["defended", "cleared", "repelled"]) + int(world.get("pruned", {}).get("battlesWon", 0)),
+		"campsCleared": count.call(world.camps, func(c: Dictionary) -> bool: return c.status == "cleared") + int(world.get("pruned", {}).get("campsCleared", 0)),
 		"sitesExplored": count.call(world.sites, func(s: Dictionary) -> bool: return s.status == "explored"),
 		"scrolls": world.lore.size(),
 		"villagesFounded": founded,

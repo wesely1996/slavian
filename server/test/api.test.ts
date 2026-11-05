@@ -2150,7 +2150,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     // One line of plain text, not empty, not too long; members only.
     expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: '   ' })).status).toBe(400);
-    expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: 'x'.repeat(501) })).status).toBe(400);
+    expect((await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: 'x'.repeat(127) })).status).toBe(400);
     expect((await call('POST', `/v1/worlds/${worldId}/chat`, outsider.token, { body: 'hi' })).status).toBe(404);
     expect((await call('GET', `/v1/worlds/${worldId}/chat`, outsider.token)).status).toBe(404);
     const sent = await call('POST', `/v1/worlds/${worldId}/chat`, ana.token, { body: '  Hold the\nford!  ' });

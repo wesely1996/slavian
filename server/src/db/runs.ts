@@ -35,13 +35,16 @@ export async function runSummary(client: DbClient, world: World): Promise<RunSum
      ORDER BY m.joined_at, m.account_id`,
     [world.id],
   );
+  // What daily pruning took away still counts (scheduler/prune.ts).
+  const { rows: tallied } = await client.query<{ pruned: { battlesWon?: number; campsCleared?: number } }>('SELECT pruned FROM worlds WHERE id = $1', [world.id]);
+  const pruned = tallied[0]?.pruned ?? {};
   return {
     outcome: world.status,
     days: Math.round(((end.getTime() - world.startedAt.getTime()) * world.speed) / 86_400_000 * 10) / 10,
     wavesBeaten: await count(client, "SELECT count(*)::int AS n FROM waves WHERE world_id = $1 AND status = 'defeated'", world.id),
     wavesFaced: await count(client, "SELECT count(*)::int AS n FROM waves WHERE world_id = $1 AND spawn_q IS NOT NULL", world.id),
-    battlesWon: await count(client, "SELECT count(*)::int AS n FROM battles WHERE world_id = $1 AND status IN ('defended', 'cleared', 'repelled')", world.id),
-    campsCleared: await count(client, "SELECT count(*)::int AS n FROM camps WHERE world_id = $1 AND status = 'cleared'", world.id),
+    battlesWon: await count(client, "SELECT count(*)::int AS n FROM battles WHERE world_id = $1 AND status IN ('defended', 'cleared', 'repelled')", world.id) + (pruned.battlesWon ?? 0),
+    campsCleared: await count(client, "SELECT count(*)::int AS n FROM camps WHERE world_id = $1 AND status = 'cleared'", world.id) + (pruned.campsCleared ?? 0),
     sitesExplored: await count(client, "SELECT count(*)::int AS n FROM sites WHERE world_id = $1 AND status = 'explored'", world.id),
     scrolls: await count(client, 'SELECT count(*)::int AS n FROM lore WHERE world_id = $1', world.id),
     villagesFounded: members.reduce((n, m) => n + m.villages, 0),
