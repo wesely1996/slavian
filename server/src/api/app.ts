@@ -89,7 +89,7 @@ export interface AppDeps {
 const displayName = z.string().trim().min(1).max(32);
 const idParams = z.object({ id: z.coerce.number().int().positive() });
 // The group chat: one line of plain text (control characters become spaces).
-const CHAT_MAX = 500;
+const CHAT_MAX = 126;
 const CHAT_BURST = { messages: 5, seconds: 10 };
 const chatBody = z.object({
   body: z

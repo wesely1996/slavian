@@ -79,6 +79,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	_announce_first_waves(world)
 	LocalInbox.ensure_digests(self, world, now)
 	LocalEvents.ensure(self, world, now)
+	LocalPrune.ensure(self, world, now)
 	world.hexes = _by_row(world.hexes)
 	worlds[id] = world
 	save(world)
@@ -762,6 +763,7 @@ func drain(world: Dictionary, until: int, changed: Array) -> int:
 	var processed := 0
 	# Worlds saved before daily map events: the next day's planned.
 	LocalEvents.ensure(self, world, until)
+	LocalPrune.ensure(self, world, until)
 	# A finished run (won or lost) stands still.
 	while processed < 10000 and not world.status in ["won", "lost"]:
 		var next: Dictionary = {}
@@ -957,6 +959,10 @@ func _on_scout_return(world: Dictionary, event: Dictionary, changed: Array) -> v
 
 func _on_map_event(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalEvents.on_map_event(self, world, event, changed)
+
+
+func _on_world_prune(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalPrune.on_world_prune(self, world, event, changed)
 
 
 func _on_map_event_end(world: Dictionary, event: Dictionary, changed: Array) -> void:

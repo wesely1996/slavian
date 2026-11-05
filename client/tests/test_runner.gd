@@ -680,6 +680,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("ruins-scenario.json", "local ruin searches")
 	_replay_scenario("stance-scenario.json", "local army stances")
 	_replay_scenario("scouts-scenario.json", "local scouts, assassins and intel")
+	_replay_scenario("prune-scenario.json", "local daily pruning")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

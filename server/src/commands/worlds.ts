@@ -8,6 +8,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { ensureHeroes } from '../db/heroes.js';
 import { ensureDigests, tell } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
+import { ensurePrune } from '../scheduler/prune.js';
 import { insertVillage, listVillages } from '../db/villages.js';
 import { placeStarterCamps } from '../scheduler/camps.js';
 import {
@@ -203,6 +204,7 @@ export async function startWorldCommand(
     await announceFirstWaves(client, deps.data, started);
     await ensureDigests(client, started, input.now);
     await ensureMapEvents(client, deps.data, started, input.now);
+    await ensurePrune(client, started, input.now);
     await record(client, world.id, 'run_start', { players: members.length, difficulty: started.difficulty, speed: started.speed, fronts: map.activeFronts }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     return started;
