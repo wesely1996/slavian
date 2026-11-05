@@ -22,6 +22,10 @@ signal armies_updated(world_id: int, armies: Array)
 signal forts_updated(world_id: int, forts: Array)
 
 const RETRY_MIN_SEC := 1.0
+## Room for one whole message: a running world's view outgrows the
+## WebSocket's 64 KiB default, and a message past it closes the connection
+## (1009, message too big), losing every update sent with it.
+const INBOUND_BUFFER_BYTES := 32 * 1024 * 1024
 const RETRY_MAX_SEC := 30.0
 
 var connected := false
@@ -53,6 +57,7 @@ func stop() -> void:
 
 func _open() -> void:
 	_socket = WebSocketPeer.new()
+	_socket.inbound_buffer_size = INBOUND_BUFFER_BYTES
 	_subscribe_sent = false
 	_socket.handshake_headers = PackedStringArray(["Authorization: Bearer " + Session.token])
 	if _socket.connect_to_url(Session.live_url()) != OK:
