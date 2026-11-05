@@ -2470,7 +2470,9 @@ func _recruit_general(village_id: int) -> void:
 		_status.text = response.error
 		return
 	Game.update_village(response.data.village)
-	Game.set_generals(Game.world_id(), Game.generals + [response.data.general])
+	# The live update may have brought it already: in place of that, not beside it.
+	var general: Dictionary = response.data.general
+	Game.set_generals(Game.world_id(), Game.generals.filter(func(g: Dictionary) -> bool: return int(g.id) != int(general.id)) + [general])
 
 
 func _move_general(general_id: int, village_id: int) -> void:
