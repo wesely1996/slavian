@@ -436,6 +436,15 @@ func current_village() -> Dictionary:
 	return mine[0] if not mine.is_empty() else {}
 
 
+## A caravan a request just sent or turned, in place of the one it was (the
+## live update follows, but the screens needn't wait for it).
+func put_caravan(caravan: Dictionary) -> void:
+	var next := caravans.filter(func(c: Dictionary) -> bool: return int(c.id) != int(caravan.id))
+	next.push_front(caravan)
+	caravans = next
+	caravans_changed.emit()
+
+
 func set_logistics(world_id_: int, new_caravans: Array, new_vault: Dictionary) -> void:
 	if world_id_ != world_id():
 		return

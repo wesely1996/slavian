@@ -1799,6 +1799,8 @@ func _send_caravan(village_id: int, destination: int, cargo: Dictionary, escort:
 	_forget_drafts(["load:", "escort:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+	if response.data.get("caravan") is Dictionary:
+		Game.put_caravan(response.data.caravan)
 
 
 func _fetch_from_vault(village_id: int, cargo: Dictionary, escort: Dictionary) -> void:
@@ -1811,6 +1813,8 @@ func _fetch_from_vault(village_id: int, cargo: Dictionary, escort: Dictionary) -
 	_forget_drafts(["load:", "escort:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+	if response.data.get("caravan") is Dictionary:
+		Game.put_caravan(response.data.caravan)
 
 
 ## Your research: what you study now, then every branch of the tree. Shows
