@@ -42,6 +42,8 @@ scenario('supply-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 10 } });
   const route = (await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 400 } })).body.order;
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'supply', fortId: point.id, target: 300 } });
+  // A caravan sent to the store itself takes grain only.
+  await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationFortId: point.id, load: { wood: 50, stone: 0, grain: 50, iron: 0 } } });
   await play({ advance: 3 * MINUTE });
   await play({ method: 'GET', path: world });
 

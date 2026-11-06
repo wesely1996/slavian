@@ -14,6 +14,8 @@ export interface Caravan {
   destinationVillageId: number | null;
   // A fort or supply point whose store it fills (a supply route).
   destinationFortId: number | null;
+  // A shipyard it brings resources to (a daily event's boat).
+  destinationShipyardId: number | null;
   kind: CaravanKind;
   caravans: number;
   cargo: Resources;
@@ -45,6 +47,7 @@ interface CaravanRow {
   village_id: number;
   destination_village_id: number | null;
   destination_fort_id: number | null;
+  destination_shipyard_id: number | null;
   kind: CaravanKind;
   caravans: number;
   cargo: Resources;
@@ -65,6 +68,7 @@ function fromRow(row: CaravanRow): Caravan {
     villageId: row.village_id,
     destinationVillageId: row.destination_village_id,
     destinationFortId: row.destination_fort_id === null ? null : Number(row.destination_fort_id),
+    destinationShipyardId: row.destination_shipyard_id == null ? null : Number(row.destination_shipyard_id),
     kind: row.kind,
     caravans: row.caravans,
     cargo: row.cargo,
@@ -85,8 +89,8 @@ export async function insertCaravan(
 ): Promise<Caravan> {
   const { rows } = await client.query<CaravanRow>(
     `INSERT INTO caravans
-       (world_id, village_id, destination_village_id, destination_fort_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+       (world_id, village_id, destination_village_id, destination_fort_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort, destination_shipyard_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
     [
       caravan.worldId,
       caravan.villageId,
@@ -100,6 +104,7 @@ export async function insertCaravan(
       caravan.arrivesAt,
       caravan.returnsAt,
       JSON.stringify(caravan.escort),
+      caravan.destinationShipyardId,
     ],
   );
   return fromRow(rows[0]!);

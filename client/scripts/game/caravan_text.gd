@@ -10,6 +10,8 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 		# A supply route: a fort or supply point (which may be gone by now).
 		var store := Game.fort_at_id(int(caravan.destinationFortId))
 		where = UI.t("the store at (%d, %d)") % [int(store.q), int(store.r)] if not store.is_empty() else UI.t("a store that is gone")
+	if caravan.get("destinationShipyardId") != null:
+		where = target_name({"kind": "shipyard", "id": int(caravan.destinationShipyardId)})
 	var cargo := _load_text(caravan.cargo)
 	if not outgoing:
 		var from := Game.village_name(caravan.villageId)
@@ -40,3 +42,24 @@ static func _load_text(amounts: Dictionary) -> String:
 		if int(amounts.get(kind, 0)) > 0:
 			parts.append(UI.t("%s %d") % [UI.resource_name(kind), int(amounts[kind])])
 	return ", ".join(parts) if not parts.is_empty() else UI.t("nothing")
+
+
+## Where a caravan goes (see GameScreen _caravan_limits for the shape of `target`).
+static func target_name(target: Dictionary) -> String:
+	match String(target.get("kind", "")):
+		"village":
+			var village: Dictionary = Game.villages.get(int(target.id), {})
+			if village.is_empty():
+				return UI.t("a village that is gone")
+			return UI.t("%s (%s)") % [village.name, Game.member_name(int(village.ownerAccountId))]
+		"fort":
+			var fort := Game.fort_at_id(int(target.id))
+			if fort.is_empty():
+				return UI.t("a store that is gone")
+			return (UI.t("the supply point at (%d, %d)") if fort.get("kind") == "supply" else UI.t("the fort at (%d, %d)")) % [int(fort.q), int(fort.r)]
+		"shipyard":
+			for yard in Game.shipyards:
+				if int(yard.id) == int(target.id):
+					return UI.t("the shipyard at (%d, %d)") % [int(yard.q), int(yard.r)]
+			return UI.t("a shipyard that is gone")
+	return UI.t("the Holy City vault")

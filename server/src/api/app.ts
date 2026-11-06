@@ -135,7 +135,14 @@ const amount = z.number().int().min(0).max(1_000_000);
 const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
 // No destination: the Holy City vault.
 const escortSchema = z.record(z.string().max(64), z.number().int().min(0).max(100_000)).optional();
-const caravanBody = z.object({ destinationVillageId: z.number().int().positive().nullable().default(null), load: loadSchema, escort: escortSchema });
+const caravanBody = z.object({
+  destinationVillageId: z.number().int().positive().nullable().default(null),
+  // Or a fort or supply point (grain for its store), or a shipyard (what its boat needs).
+  destinationFortId: z.number().int().positive().optional(),
+  destinationShipyardId: z.number().int().positive().optional(),
+  load: loadSchema,
+  escort: escortSchema,
+});
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
 // A caravan turned on its way out: home, or to a village (null: the vault).
 const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);

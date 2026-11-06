@@ -923,6 +923,24 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/caravans",
+   "body": {
+    "destinationFortId": 1,
+    "load": {
+     "wood": 50,
+     "stone": 0,
+     "grain": 50,
+     "iron": 0
+    }
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A fort's store takes only grain"
+   }
+  },
+  {
    "advance": 180000
   },
   {
@@ -1521,6 +1539,7 @@
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
+      "destinationShipyardId": null,
       "kind": "deliver",
       "caravans": 1,
       "cargo": {
@@ -4602,6 +4621,7 @@
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
+      "destinationShipyardId": null,
       "kind": "deliver",
       "caravans": 1,
       "cargo": {
@@ -7328,6 +7348,7 @@
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
+      "destinationShipyardId": null,
       "kind": "deliver",
       "caravans": 1,
       "cargo": {
@@ -10269,6 +10290,7 @@
       "villageId": 1,
       "destinationVillageId": null,
       "destinationFortId": 1,
+      "destinationShipyardId": null,
       "kind": "deliver",
       "caravans": 1,
       "cargo": {

@@ -5,6 +5,7 @@ import { effectiveBonuses } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { loadFort } from '../db/forts.js';
+import { loadShipyard } from '../db/shipyards.js';
 import { loadVault, saveVault, type Vault } from '../db/vaults.js';
 import { loadVillage, type Village } from '../db/villages.js';
 import { loadHexes, type World } from '../db/worlds.js';
@@ -26,7 +27,7 @@ import {
   vaultUpgradeMs,
   withdraw,
 } from '../sim/logistics.js';
-import { RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
+import { mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { sendAway, type VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
@@ -35,6 +36,8 @@ import { ownVillageCommand, type VillageCommandInput } from './village.js';
 export interface CaravanOrder {
   destinationVillageId: number | null;
   destinationFortId?: number | undefined;
+  // Or a shipyard, with what its boat still needs.
+  destinationShipyardId?: number | undefined;
   load: Resources;
   // Troops guarding it against camps on the road.
   escort?: Record<string, number> | undefined;
@@ -74,6 +77,16 @@ export async function dispatchCaravan(
     const fort = await loadFort(client, order.destinationFortId);
     if (!fort || fort.worldId !== world.id) throw new NotFoundError('No such fort or supply point');
     to = hex(fort.q, fort.r);
+    if (RESOURCE_KINDS.some((k) => k !== 'grain' && order.load[k] > 0)) throw new RuleError("A fort's store takes only grain");
+  } else if (order.destinationShipyardId !== undefined) {
+    const shipyard = await loadShipyard(client, order.destinationShipyardId);
+    if (!shipyard || shipyard.worldId !== world.id) throw new NotFoundError('No such shipyard in this world');
+    if (shipyard.status !== 'open') throw new RuleError('The boat is already paid for');
+    const need = mapResources((k) => Math.max(0, shipyard.cost[k] - shipyard.paid[k]));
+    if (RESOURCE_KINDS.some((k) => order.load[k] > need[k])) {
+      throw new RuleError(`The boat still needs ${need.wood} wood, ${need.stone} stone, ${need.grain} grain and ${need.iron} iron`);
+    }
+    to = hex(shipyard.q, shipyard.r);
   } else if (order.destinationVillageId !== null) {
     if (order.destinationVillageId === village.id) throw new RuleError('Send it to another village');
     const destination = await loadVillage(client, order.destinationVillageId).catch(() => null);
@@ -89,6 +102,7 @@ export async function dispatchCaravan(
     villageId: village.id,
     destinationVillageId: order.destinationVillageId,
     destinationFortId: order.destinationFortId ?? null,
+    destinationShipyardId: order.destinationShipyardId ?? null,
     kind,
     caravans: needed,
     cargo: order.load,
@@ -143,7 +157,7 @@ export async function rerouteCaravanCommand(
           returnsAt: new Date(caravan.departsAt.getTime() + 2 * there),
         };
       } else {
-        if (caravan.kind !== 'deliver' || caravan.destinationFortId !== null) throw new RuleError('This caravan can only be turned back');
+        if (caravan.kind !== 'deliver' || caravan.destinationFortId !== null || caravan.destinationShipyardId !== null) throw new RuleError('This caravan can only be turned back');
         const to = input.turn.villageId;
         if (to === caravan.destinationVillageId) throw new RuleError('It is already on its way there');
         let dest: Hex = HOLY_CITY;
@@ -200,7 +214,9 @@ export async function sendCaravanCommand(
     const state: VillageState = { ...escorted, ledger: spend(escorted.ledger, input.now, input.load) };
     // A gift: to the vault or a teammate's village, not one's own.
     const destination = input.destinationVillageId === null ? null : await loadVillage(client, input.destinationVillageId);
-    const gift = destination === null || destination.ownerAccountId !== village.ownerAccountId;
+    // (Not to a fort or a shipyard.)
+    const toVault = destination === null && input.destinationFortId === undefined && input.destinationShipyardId === undefined;
+    const gift = toVault || (destination !== null && destination.ownerAccountId !== village.ownerAccountId);
     return { state, result: caravan, onboarding: gift ? ('gift' as const) : null };
   });
   return { village, caravan: result };
