@@ -35,6 +35,7 @@ var _rate_labels: Dictionary[String, Label] = {}
 var _view := "map"
 var _view_button: Button
 var _inbox_button: Button
+var _tutorial_button: Button
 var _chat_button: Button
 ## Notification settings as the server last sent them.
 var _prefs: Dictionary = {}
@@ -87,6 +88,10 @@ var _army_general := 0
 ## The stance picked for the next army sent ("": its village's).
 var _army_stance := ""
 ## Standing order forms: repeat training and the surplus share.
+## The standing orders panel: making a new one (its village and kind).
+var _order_creating := false
+var _order_village := 0
+var _order_kind := "train"
 var _repeat_unit := "spearman"
 ## The training building whose troops the Train tab shows.
 var _train_building := "barracks"
@@ -307,6 +312,14 @@ func _build_ui() -> void:
 	forces.theme_type_variation = "WoodIconButton"
 	forces.tooltip_text = tr("Your forces")
 	bar.add_child(forces)
+	# Every standing order of yours, in one place.
+	var orders := UI.button("", func() -> void:
+		_panel_mode = "orders"
+		_order_creating = false
+		_rebuild_panel(), "icon/clock")
+	orders.theme_type_variation = "WoodIconButton"
+	orders.tooltip_text = tr("Standing orders")
+	bar.add_child(orders)
 	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
 	_inbox_button.theme_type_variation = "WoodIconButton"
 	_inbox_button.tooltip_text = tr("Inbox")
@@ -318,10 +331,10 @@ func _build_ui() -> void:
 	_chat_button.visible = not Local.is_active()
 	bar.add_child(_chat_button)
 	# The tutorial, shown or hidden at any time.
-	var tutorial := UI.button("", _toggle_tutorial, "icon/help")
-	tutorial.theme_type_variation = "WoodIconButton"
-	tutorial.tooltip_text = tr("Tutorial")
-	bar.add_child(tutorial)
+	_tutorial_button = UI.button("", _toggle_tutorial, "icon/help")
+	_tutorial_button.theme_type_variation = "WoodIconButton"
+	_tutorial_button.tooltip_text = tr("Tutorial")
+	bar.add_child(_tutorial_button)
 	# The resource strip: whose stores they are, then for each resource its
 	# icon, stock and limit, the hourly rate, and how full the store is.
 	_resources = UI.hbox(4)
@@ -495,6 +508,10 @@ func _fit_bar() -> void:
 		_view_button.text = ""
 	if _row_need(bar) > room:
 		_live_label.text = _live_text.left(1)
+	# Last, the tutorial's button goes (the almanac still opens it).
+	_tutorial_button.visible = true
+	if _row_need(bar) > room:
+		_tutorial_button.visible = false
 
 
 func _row_need(row: HBoxContainer) -> float:
@@ -1278,6 +1295,9 @@ func _rebuild_panel() -> void:
 	if _panel_mode == "chat":
 		_chat_panel()
 		return
+	if _panel_mode == "orders":
+		_orders_panel()
+		return
 	if _panel_mode == "forces":
 		_forces_panel()
 		return
@@ -1665,8 +1685,6 @@ func _caravans_section(village: Dictionary) -> void:
 	if int(village.levels.get("caravan_yard", 0)) >= 1 and not Game.camps.is_empty():
 		tabs.append(["escort", "unit/spearman", tr("Escort"), _caravan_escort.bind(village)])
 	tabs.append(["road", "icon/map", tr("On the road"), _caravan_trips.bind(village_id)])
-	tabs.append(["vault", "settlement/holy_city", tr("Surplus to the vault"), _surplus_order.bind(village_id)])
-	tabs.append(["supply", "map/supply_point", tr("Supply routes"), _supply_order.bind(village_id)])
 	_side_tabs("caravans", tabs, VILLAGE_TOP)
 
 
@@ -2899,13 +2917,78 @@ func _order_row(order: Dictionary) -> void:
 	_panel_body.add_child(row)
 
 
-## Repeat training: one order per unit, keeping a target count.
-func _repeat_order(village: Dictionary) -> void:
-	var village_id := int(village.id)
-	_panel_body.add_child(UI.label(tr("Repeat training (checked every %s)") % TimeUtil.format_duration(float(Game.data.orders.checkMinutes) * 60.0 / float(Game.world.speed)), UI.SMALL_SIZE, UI.MUTED))
+## Every standing order of yours, village by village, with a way to stop
+## each; "Create order" opens the form for a new one.
+func _orders_panel() -> void:
+	var top := UI.hbox()
+	var title := UI.label(tr("Standing orders"), UI.HEADING_SIZE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	if not _order_creating:
+		top.add_child(UI.primary(tr("Create order"), func() -> void:
+			_order_creating = true
+			_rebuild_panel()))
+	top.add_child(UI.button(tr("Close"), func() -> void:
+		_panel_mode = "hex"
+		_order_creating = false
+		_rebuild_panel()))
+	_panel_body.add_child(top)
+	_panel_body.add_child(UI.label(tr("They run on their own, checked every %s: repeat training, rebuilding raided outposts, surplus to the vault and supply routes.") % TimeUtil.format_duration(float(Game.data.orders.checkMinutes) * 60.0 / float(Game.world.speed)), UI.SMALL_SIZE, UI.MUTED))
+	var villages := Game.my_villages().filter(func(v: Dictionary) -> bool: return v.get("ruin") == null)
+	if villages.is_empty():
+		_panel_body.add_child(UI.label(tr("You have no village to give orders from."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	if _order_creating:
+		_order_form(villages)
+		return
+	for village in villages:
+		_panel_body.add_child(UI.label(String(village.name), UI.SMALL_SIZE + 4))
+		_orders_count(village)
+		var mine := Game.orders.filter(func(o: Dictionary) -> bool: return int(o.villageId) == int(village.id))
+		if mine.is_empty():
+			_panel_body.add_child(UI.label(tr("No standing orders."), UI.SMALL_SIZE, UI.MUTED))
+		for order in mine:
+			_order_row(order)
+
+
+## A new standing order: from which village, of what kind, and its details.
+func _order_form(villages: Array) -> void:
+	var ids := villages.map(func(v: Dictionary) -> int: return int(v.id))
+	if not _order_village in ids:
+		_order_village = int(Game.current_village().get("id", ids[0])) if int(Game.current_village().get("id", 0)) in ids else ids[0]
+	if villages.size() > 1:
+		var from := UI.options(villages.map(func(v: Dictionary) -> String: return tr("From %s") % v.name), ids.find(_order_village))
+		from.item_selected.connect(func(i: int) -> void:
+			_order_village = ids[i]
+			_rebuild_panel())
+		_panel_body.add_child(from)
+	var village: Dictionary = Game.villages.get(_order_village, villages[0])
+	var kinds := ["train", "rebuild", "surplus", "supply"]
+	var names := [tr("Repeat training"), tr("Rebuild raided outposts"), tr("Surplus to the vault"), tr("Supply route")]
+	var kind := UI.options(names, maxi(0, kinds.find(_order_kind)))
+	kind.item_selected.connect(func(i: int) -> void:
+		_order_kind = kinds[i]
+		_rebuild_panel())
+	_panel_body.add_child(kind)
 	_orders_count(village)
-	for order in Game.orders_of(village_id, "train"):
-		_order_row(order)
+	match _order_kind:
+		"train":
+			_train_order_form(village)
+		"rebuild":
+			_rebuild_order_form(int(village.id))
+		"surplus":
+			_surplus_order_form(int(village.id))
+		"supply":
+			_supply_order_form(int(village.id))
+	_panel_body.add_child(UI.button(tr("Cancel"), func() -> void:
+		_order_creating = false
+		_rebuild_panel()))
+
+
+## Repeat training: one order per unit, keeping a target count.
+func _train_order_form(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.label(tr("Keeps a unit topped up: when fewer are ready, it trains more."), UI.SMALL_SIZE, UI.MUTED))
 	var units: Dictionary = Game.data.units.units
 	var names := units.keys()
 	var picker := UI.options(names.map(func(u: String) -> String: return tr(units[u].name)), maxi(0, names.find(_repeat_unit)))
@@ -2917,11 +3000,10 @@ func _repeat_order(village: Dictionary) -> void:
 	_panel_body.add_child(_number_row(tr("Keep"), _number_field("repeat:target", _repeat_target, 1, 999, func(n: int) -> void: _repeat_target = n), tr("ready")))
 	_panel_body.add_child(_number_row(tr("Train"), _number_field("repeat:batch", _repeat_batch, 1, int(Game.data.units.maxBatch), func(n: int) -> void: _repeat_batch = n), tr("at a time")))
 	var unit := _repeat_unit
-	var place := UI.button(tr("Keep %s topped up") % tr(units[unit].name), func() -> void:
+	var place := UI.primary(tr("Keep %s topped up") % tr(units[unit].name), func() -> void:
 		_place_order(village_id, {"kind": "train", "unit": unit, "batch": mini(_repeat_batch, _repeat_target), "target": _repeat_target}))
 	place.disabled = not Game.orders_of(village_id, "train").filter(func(o: Dictionary) -> bool: return o.unit == unit).is_empty()
 	_panel_body.add_child(place)
-
 
 ## A number field between two words on one line ("Keep [20] ready"): the
 ## words never wrap, the first in a column of its own width.
@@ -2948,22 +3030,18 @@ func _orders_count(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(tr("Standing orders: %d of %d (one more every %d Elder's Hall levels)") % [have, most, int(Game.data.orders.hallLevelsPerOrder)], UI.SMALL_SIZE, UI.ERROR if have >= most else UI.MUTED))
 
 
-func _rebuild_order(village_id: int) -> void:
-	_orders_count(Game.villages.get(village_id, {"id": village_id, "levels": {}}))
-	var existing := Game.orders_of(village_id, "rebuild")
-	if existing.is_empty():
-		_panel_body.add_child(UI.button(tr("Rebuild raided outposts automatically"), func() -> void: _place_order(village_id, {"kind": "rebuild"})))
-	for order in existing:
-		_order_row(order)
+func _rebuild_order_form(village_id: int) -> void:
+	_panel_body.add_child(UI.label(tr("Rebuilds the village's raided outposts to the best level they had."), UI.SMALL_SIZE, UI.MUTED))
+	if not Game.orders_of(village_id, "rebuild").is_empty():
+		_panel_body.add_child(UI.label(tr("This village already does."), UI.SMALL_SIZE, UI.GOOD))
+		return
+	_panel_body.add_child(UI.primary(tr("Rebuild raided outposts automatically"), func() -> void: _place_order(village_id, {"kind": "rebuild"})))
 
 
-func _surplus_order(village_id: int) -> void:
-	var existing := Game.orders_of(village_id, "surplus")
-	_panel_body.add_child(UI.with_info(UI.label(tr("Surplus to the vault"), UI.HEADING_SIZE), tr("Caravans take what is above this share of storage to the Holy City vault.")))
-	_orders_count(Game.villages.get(village_id, {"id": village_id, "levels": {}}))
-	for order in existing:
-		_order_row(order)
-	if not existing.is_empty():
+func _surplus_order_form(village_id: int) -> void:
+	_panel_body.add_child(UI.label(tr("Caravans take what is above this share of storage to the Holy City vault."), UI.SMALL_SIZE, UI.MUTED))
+	if not Game.orders_of(village_id, "surplus").is_empty():
+		_panel_body.add_child(UI.label(tr("This village already does."), UI.SMALL_SIZE, UI.GOOD))
 		return
 	var limits: Dictionary = Game.data.orders.surplusShare
 	var row := UI.hbox(8)
@@ -2973,20 +3051,14 @@ func _surplus_order(village_id: int) -> void:
 	var text := UI.label(tr("% of storage"), UI.SMALL_SIZE)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "surplus", "share": _surplus_share / 100.0}))
-	place.custom_minimum_size.x = 110
-	row.add_child(place)
 	_panel_body.add_child(row)
+	_panel_body.add_child(UI.primary(tr("Start"), func() -> void: _place_order(village_id, {"kind": "surplus", "share": _surplus_share / 100.0})))
 
 
 ## Supply routes: keep one of your forts or supply points stocked with
 ## grain from this village, by caravan.
-func _supply_order(village_id: int) -> void:
-	_panel_body.add_child(UI.with_info(UI.label(tr("Supply routes"), UI.HEADING_SIZE),
-		tr("Caravans from this village keep a fort or supply point of yours filled with grain up to the amount you set, whenever at least %d is missing.") % int(Game.data.orders.supplyMinLoad)))
-	_orders_count(Game.villages.get(village_id, {"id": village_id, "levels": {}}))
-	for order in Game.orders_of(village_id, "supply"):
-		_order_row(order)
+func _supply_order_form(village_id: int) -> void:
+	_panel_body.add_child(UI.label(tr("Caravans from this village keep a fort or supply point of yours filled with grain up to the amount you set, whenever at least %d is missing.") % int(Game.data.orders.supplyMinLoad), UI.SMALL_SIZE, UI.MUTED))
 	var stores: Array = Game.forts.filter(func(f: Dictionary) -> bool:
 		return f.ownerAccountId != null and int(f.ownerAccountId) == Game.my_account_id())
 	if stores.is_empty():
@@ -3009,12 +3081,11 @@ func _supply_order(village_id: int) -> void:
 	var text := UI.label(tr("grain there"), UI.SMALL_SIZE)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	var fort_id := _supply_fort
-	var place := UI.button(tr("Start"), func() -> void: _place_order(village_id, {"kind": "supply", "fortId": fort_id, "target": _supply_target}))
-	place.custom_minimum_size.x = 110
-	place.disabled = Game.orders_of(village_id, "supply").any(func(o: Dictionary) -> bool: return int(o.fortId) == fort_id)
-	row.add_child(place)
 	_panel_body.add_child(row)
+	var fort_id := _supply_fort
+	var place := UI.primary(tr("Start"), func() -> void: _place_order(village_id, {"kind": "supply", "fortId": fort_id, "target": _supply_target}))
+	place.disabled = Game.orders_of(village_id, "supply").any(func(o: Dictionary) -> bool: return int(o.fortId) == fort_id)
+	_panel_body.add_child(place)
 
 
 func _place_order(village_id: int, spec: Dictionary) -> void:
@@ -3023,6 +3094,8 @@ func _place_order(village_id: int, spec: Dictionary) -> void:
 	if not response.ok:
 		_status.text = response.error
 		return
+	# Placed: back to the list, where it now stands.
+	_order_creating = false
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -3728,8 +3801,6 @@ func _outposts_section(village: Dictionary) -> void:
 	_panel_body.add_child(UI.label(tr("Outposts (%d/%d)") % [plots.size(), limit], UI.SMALL_SIZE, UI.MUTED))
 	if village.get("besieged", false):
 		_panel_body.add_child(UI.label(tr("Under siege: outposts produce nothing until the battle ends."), UI.SMALL_SIZE, UI.ERROR))
-	if not plots.is_empty():
-		_rebuild_order(int(village.id))
 	if plots.is_empty():
 		_panel_body.add_child(UI.label(tr("None yet. Tap a forest, plains, hills, mountain or lake hex within %d of the village on the map to claim one.") % int(Game.data.buildings.village.outpostRange), UI.SMALL_SIZE, UI.MUTED))
 	var speed := float(Game.world.speed)
@@ -4067,7 +4138,6 @@ func _troops_section(village: Dictionary) -> void:
 	var hall := Rules.hall_level(village)
 	_side_tabs("troops", [["garrison", Art.settlement_id(hall), tr("Garrison"), _garrison_tab.bind(village)],
 		["train", "unit/spearman", tr("Train"), _train_tab.bind(village)],
-		["orders", "icon/clock", tr("Repeat training"), _repeat_order.bind(village)],
 		["armies", "icon/troops", tr("Armies"), _armies_section.bind(village)],
 		["send", "unit/border_rider", tr("Send troops"), _send_troops.bind(village)]], VILLAGE_TOP)
 
