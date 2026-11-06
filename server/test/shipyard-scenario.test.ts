@@ -17,18 +17,29 @@ scenario('shipyard-scenario.json', START, async ({ play }) => {
   const world = '/v1/worlds/-1';
   const view = async (): Promise<View> => (await play({ method: 'GET', path: world })).body;
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c3', building: 'caravan_yard' } });
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
   await play({ advance: 15 * MINUTE });
 
-  // Days go by until boatwrights wait somewhere; the village sends what it
-  // can each day until the boat is paid for, and the spearmen go to stand
-  // guard (they are there before the first raiders).
+  // Days go by until boatwrights wait somewhere. The first day, a caravan
+  // takes them part of what they need (more than they need is refused);
+  // after that the village sends what it can each day until the boat is
+  // paid for, and the spearmen go to stand guard (they are there before
+  // the first raiders).
   let shipyard: View | undefined;
+  let caravan = false;
   for (let day = 1; day <= 12; day++) {
     await play({ advance: DAY });
     shipyard = (await view()).shipyards.find((s: View) => s.status !== 'done');
-    if (shipyard) {
+    if (shipyard && !caravan) {
+      caravan = true;
+      const send = (load: object) => play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationShipyardId: shipyard!.id, load } });
+      await send({ wood: 0, stone: 0, grain: 0, iron: 151 });
+      await send({ wood: 200, stone: 100, grain: 0, iron: 0 });
+      await play({ advance: 2 * HOUR });
+      await view();
+    } else if (shipyard) {
       await play({ method: 'POST', path: `/v1/villages/1/shipyards/${shipyard.id}` });
       shipyard = (await view()).shipyards.find((s: View) => s.id === shipyard!.id);
       if (shipyard?.status === 'building') break;

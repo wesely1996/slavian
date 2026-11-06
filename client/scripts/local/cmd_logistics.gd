@@ -172,6 +172,20 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 		if fort.is_empty():
 			return {"error": "No such fort or supply point", "kind": "not_found"}
 		to = Vector2i(fort.q, fort.r)
+		for k in ["wood", "stone", "iron"]:
+			if int(order.load.get(k, 0)) > 0:
+				return LocalVillage.rule("A fort's store takes only grain")
+	elif order.get("destinationShipyardId") != null:
+		var boatyard := LocalEvents.find_shipyard(world, int(order.destinationShipyardId))
+		if boatyard.is_empty():
+			return {"error": "No such shipyard in this world", "kind": "not_found"}
+		if boatyard.status != "open":
+			return LocalVillage.rule("The boat is already paid for")
+		var need := LocalVillage.resources(func(k: String) -> int: return maxi(0, int(boatyard.cost[k]) - int(boatyard.paid[k])))
+		for k in LocalLedger.KINDS:
+			if int(order.load.get(k, 0)) > int(need[k]):
+				return LocalVillage.rule("The boat still needs %d wood, %d stone, %d grain and %d iron" % [need.wood, need.stone, need.grain, need.iron])
+		to = Vector2i(boatyard.q, boatyard.r)
 	elif order.destinationVillageId != null:
 		if int(order.destinationVillageId) == int(village.id):
 			return LocalVillage.rule("Send it to another village")
@@ -187,7 +201,8 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	for unit in order.get("escort", {}):
 		if int(order.escort[unit]) > 0:
 			escort[unit] = int(order.escort[unit])
-	return {"villageId": village.id, "destinationVillageId": order.destinationVillageId, "destinationFortId": order.get("destinationFortId"), "kind": kind,
+	return {"villageId": village.id, "destinationVillageId": order.destinationVillageId, "destinationFortId": order.get("destinationFortId"),
+		"destinationShipyardId": order.get("destinationShipyardId"), "kind": kind,
 		"caravans": needed, "cargo": order.load.duplicate(), "carriedBack": null, "status": "outbound", "path": path, "departsAt": now,
 		"arrivesAt": now + travel, "returnsAt": now + 2 * travel, "escort": escort, "ambush": null}
 
@@ -221,7 +236,9 @@ static func send_caravan(server: LocalServer, world: Dictionary, village: Dictio
 	escorted.ledger = ledger
 	set_out(server, world, caravan, now)
 	var destination: Dictionary = server.find_village(world, int(order.destinationVillageId)) if order.destinationVillageId != null else {}
-	var gift: bool = destination.is_empty() or int(destination.ownerAccountId) != int(village.ownerAccountId)
+	# (Not to a fort or a shipyard.)
+	var to_vault: bool = destination.is_empty() and order.get("destinationFortId") == null and order.get("destinationShipyardId") == null
+	var gift: bool = to_vault or (not destination.is_empty() and int(destination.ownerAccountId) != int(village.ownerAccountId))
 	return {"state": escorted, "caravan": caravan, "onboarding": "gift" if gift else ""}
 
 
@@ -249,7 +266,12 @@ static func _order(body: Dictionary) -> Dictionary:
 	for kind in LocalLedger.KINDS:
 		full[kind] = load.get(kind, 0)
 	var escort: Variant = body.get("escort", {})
-	return {"destinationVillageId": body.get("destinationVillageId"), "load": full, "escort": escort if escort is Dictionary else {}}
+	var order := {"destinationVillageId": body.get("destinationVillageId"), "load": full, "escort": escort if escort is Dictionary else {}}
+	# Or a fort or supply point, or a shipyard.
+	for key in ["destinationFortId", "destinationShipyardId"]:
+		if body.get(key) != null:
+			order[key] = int(body[key])
+	return order
 
 
 ## Any member can start the vault's next level, paid from the vault.
@@ -299,7 +321,7 @@ static func reroute(server: LocalServer, world: Dictionary, caravan: Dictionary,
 	else:
 		if not body.has("villageId"):
 			return {"error": "Say where it should go", "kind": "invalid"}
-		if caravan.kind != "deliver" or caravan.get("destinationFortId") != null:
+		if caravan.kind != "deliver" or caravan.get("destinationFortId") != null or caravan.get("destinationShipyardId") != null:
 			return LocalVillage.rule("This caravan can only be turned back")
 		var to: Variant = body.villageId
 		if (to == null and caravan.destinationVillageId == null) or (to != null and caravan.destinationVillageId != null and int(to) == int(caravan.destinationVillageId)):
@@ -359,6 +381,17 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 			fort.grain = float(fort.grain) + grain
 		carried_back = caravan.cargo.duplicate()
 		carried_back.grain = float(caravan.cargo.grain) - grain
+	elif caravan.get("destinationShipyardId") != null:
+		# A shipyard takes what its boat still needs; the rest (everything,
+		# if it is paid for or gone) comes back.
+		var yard := LocalEvents.find_shipyard(world, int(caravan.destinationShipyardId))
+		if not yard.is_empty() and yard.status == "open":
+			var sent := LocalVillage.resources(func(k: String) -> int: return maxi(0, mini(int(caravan.cargo[k]), int(yard.cost[k]) - int(yard.paid[k]))))
+			if total(sent) > 0:
+				LocalEvents.pay_into(server, world, yard, sent, int(event.dueAt))
+			carried_back = LocalVillage.resources(func(k: String) -> int: return int(caravan.cargo[k]) - int(sent[k]))
+		else:
+			carried_back = caravan.cargo.duplicate()
 	elif caravan.destinationVillageId == null:
 		var vault: Dictionary = world.vault
 		if caravan.kind == "deliver":
@@ -544,7 +577,8 @@ static func caravans_view(world: Dictionary) -> Array:
 
 
 static func caravan_view(c: Dictionary) -> Dictionary:
-	return {"id": c.id, "villageId": c.villageId, "destinationVillageId": c.destinationVillageId, "destinationFortId": c.get("destinationFortId"), "kind": c.kind, "caravans": c.caravans,
+	return {"id": c.id, "villageId": c.villageId, "destinationVillageId": c.destinationVillageId, "destinationFortId": c.get("destinationFortId"),
+		"destinationShipyardId": c.get("destinationShipyardId"), "kind": c.kind, "caravans": c.caravans,
 		"cargo": c.cargo, "carriedBack": c.carriedBack, "status": c.status, "path": c.path.map(func(s: Dictionary) -> Array: return [s.q, s.r, s.atMs]),
 		"departsAt": LocalTime.iso(c.departsAt), "arrivesAt": LocalTime.iso(c.arrivesAt), "returnsAt": LocalTime.iso(c.returnsAt),
 		"escort": c.escort, "ambush": c.ambush}

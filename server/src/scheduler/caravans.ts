@@ -1,14 +1,17 @@
 // Caravans on the scheduler: caravan_arrive unloads (or loads, when
 // fetching from the vault) at the far end; caravan_return brings home
 // whatever the caravan carries back. vault_upgrade finishes a vault level.
-// A caravan on a supply route fills a fort or supply point's grain store.
+// A caravan on a supply route fills a fort or supply point's grain store;
+// one sent to a shipyard pays toward its boat.
 import { z } from 'zod';
 import { loadCaravan, markCaravanDone, markReturning } from '../db/caravans.js';
 import { notifyWorld } from '../db/notify.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
-import { emptyResources } from '../sim/resources.js';
+import { emptyResources, mapResources } from '../sim/resources.js';
+import { loadShipyard } from '../db/shipyards.js';
+import { payIntoShipyard } from './mapEvents.js';
 import { loadFort, setFortGrain } from '../db/forts.js';
 import { grainCapacity } from '../sim/field.js';
 import { tell } from './notices.js';
@@ -34,6 +37,17 @@ export const caravanHandlers: HandlerRegistry = {
       if (fort && grain > 0) await setFortGrain(client, fort.id, fort.grain + grain);
       carriedBack = { ...caravan.cargo, grain: caravan.cargo.grain - grain };
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
+    } else if (caravan.destinationShipyardId !== null) {
+      // A shipyard takes what its boat still needs; the rest (everything,
+      // if it is paid for or gone) comes back.
+      const shipyard = await loadShipyard(client, caravan.destinationShipyardId);
+      if (shipyard && shipyard.status === 'open') {
+        const sent = mapResources((k) => Math.max(0, Math.min(caravan.cargo[k], shipyard.cost[k] - shipyard.paid[k])));
+        if (total(sent) > 0) await payIntoShipyard(client, data, world, shipyard, sent, event.dueAt);
+        carriedBack = mapResources((k) => caravan.cargo[k] - sent[k]);
+      } else {
+        carriedBack = { ...caravan.cargo };
+      }
     } else if (caravan.destinationVillageId === null) {
       const vault = await loadVault(client, world.id);
       if (caravan.kind === 'deliver') {

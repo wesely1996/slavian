@@ -111,8 +111,10 @@ export const mapEventHandlers: HandlerRegistry = {
     }
     if (shipyardId !== undefined) {
       const shipyard = await loadShipyard(client, shipyardId);
-      // Gone only if nobody has sent anything.
+      // Gone only if nobody has sent anything, nor has a caravan on its way.
       if (!shipyard || shipyard.status !== 'open' || total(shipyard.paid) > 0) return;
+      const { rows: coming } = await client.query("SELECT 1 FROM caravans WHERE destination_shipyard_id = $1 AND status = 'outbound'", [shipyard.id]);
+      if (coming.length) return;
       await deleteShipyard(client, shipyard.id);
       await failEvent(client, data, world, shipyard.front as Front, 'The boatwrights at ({q}, {r}) gave up and left', { q: shipyard.q, r: shipyard.r }, event.dueAt);
     }
@@ -206,6 +208,15 @@ export async function payShipyard(client: DbClient, data: GameData, world: World
   const sent: Resources = mapResources((k) => Math.max(0, Math.min(shipyard.cost[k] - shipyard.paid[k], Math.floor(have[k]))));
   if (total(sent) === 0) throw new RuleError('The village has nothing the shipyard needs');
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, sent) });
+  const after = await payIntoShipyard(client, data, world, shipyard, sent, at);
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+  return after;
+}
+
+// Resources reach an open shipyard (from a village nearby, or by caravan):
+// once it is all paid, the boat is begun, and raiders come.
+export async function payIntoShipyard(client: DbClient, data: GameData, world: World, shipyard: Shipyard, sent: Resources, at: Date): Promise<Shipyard> {
+  const rules = data.events.kinds.shipyard;
   const paid = mapResources((k) => shipyard.paid[k] + sent[k]);
   let after: Shipyard = { ...shipyard, paid };
   if (RESOURCE_KINDS.every((k) => paid[k] >= shipyard.cost[k])) {
@@ -217,7 +228,6 @@ export async function payShipyard(client: DbClient, data: GameData, world: World
     await tellAll(client, world, { kind: 'site', tier: 'push', title: 'The boat at ({q}, {r}) is begun', body: 'Raiders will come every {every} hours until it is done; armies standing there fight them.', vars: { q: shipyard.q, r: shipyard.r, every: rules.raidEveryHours } }, at);
   }
   await saveShipyard(client, after);
-  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
   return after;
 }

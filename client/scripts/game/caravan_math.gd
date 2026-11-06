@@ -57,3 +57,4 @@ static func vault_upgrade_cost(data: Dictionary, target_level: int) -> Dictionar
 static func vault_upgrade_seconds(data: Dictionary, target_level: int, world_speed: float) -> float:
 	var v: Dictionary = data.logistics.vault
 	return float(v.upgradeSeconds) * pow(float(v.timeGrowth), target_level - 2) / world_speed
+

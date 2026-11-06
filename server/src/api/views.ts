@@ -321,6 +321,8 @@ export function caravanView(caravan: Caravan) {
     // or supply point it fills).
     destinationVillageId: caravan.destinationVillageId,
     destinationFortId: caravan.destinationFortId,
+    // A shipyard it brings resources to.
+    destinationShipyardId: caravan.destinationShipyardId,
     kind: caravan.kind,
     caravans: caravan.caravans,
     cargo: caravan.cargo,

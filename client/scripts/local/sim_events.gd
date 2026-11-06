@@ -219,8 +219,10 @@ static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dict
 		fail(server, world, event_front(world, Vector2i(site.q, site.r)), "The forbidding ruin at ({q}, {r}) sank back into the earth", {"q": site.q, "r": site.r}, int(event.dueAt))
 	if p.get("shipyardId") != null:
 		var yard := find_shipyard(world, int(p.shipyardId))
-		# Gone only if nobody has sent anything.
+		# Gone only if nobody has sent anything, nor has a caravan on its way.
 		if yard.is_empty() or yard.status != "open" or LocalBattle.total(yard.paid) > 0:
+			return
+		if world.caravans.any(func(c: Dictionary) -> bool: return c.get("destinationShipyardId") != null and int(c.destinationShipyardId) == int(yard.id) and c.status == "outbound"):
 			return
 		world.shipyards.erase(yard)
 		fail(server, world, String(yard.front), "The boatwrights at ({q}, {r}) gave up and left", {"q": yard.q, "r": yard.r}, int(event.dueAt))
@@ -321,9 +323,17 @@ static func pay(server: LocalServer, world: Dictionary, village: Dictionary, shi
 	if LocalBattle.total(sent) == 0:
 		return {"error": "The village has nothing the shipyard needs"}
 	village.state.ledger = LocalLedger.spend(village.state.ledger, at, sent)
+	return pay_into(server, world, yard, sent, at)
+
+
+## Resources reach an open shipyard (from a village nearby, or by caravan):
+## once it is all paid, the boat is begun, and raiders come
+## (scheduler/mapEvents.ts payIntoShipyard).
+static func pay_into(server: LocalServer, world: Dictionary, yard: Dictionary, sent: Dictionary, at: int) -> Dictionary:
+	var rules: Dictionary = server.data.events.kinds.shipyard
 	var all_paid := true
-	for k in sent:
-		yard.paid[k] = int(yard.paid[k]) + int(sent[k])
+	for k in LocalLedger.KINDS:
+		yard.paid[k] = int(yard.paid[k]) + int(sent.get(k, 0))
 		if int(yard.paid[k]) < int(yard.cost[k]):
 			all_paid = false
 	if all_paid:
