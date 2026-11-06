@@ -1287,13 +1287,16 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(late.status).toBe('marching');
     expect(new Date(late.arrivesAt).getTime()).toBe(new Date(next.arrivesAt).getTime() + (now.getTime() - (new Date(next.spawnAt).getTime() + atMs2)));
     expect(['returning', 'done']).toContain(w.armies.find((x: { id: number }) => x.id === lone.body.army.id).status);
-    // The old arrival time passes quietly; the new one starts the village battle.
+    // The old arrival time passes quietly; the new one starts the village
+    // battle. (This horde's battle: on some maps another horde reaches the
+    // village in between.)
+    const atHome = (x: { villageId: number | null; waveId: number | null }) => x.villageId === home.id && x.waveId === second.id;
     now = new Date(next.arrivesAt);
     await tick(db, now, scheduler);
-    expect((await world()).battles.some((x: { villageId: number | null }) => x.villageId === home.id)).toBe(false);
+    expect((await world()).battles.some(atHome)).toBe(false);
     now = new Date(late.arrivesAt);
     await tick(db, now, scheduler);
-    expect((await world()).battles.some((x: { villageId: number | null }) => x.villageId === home.id)).toBe(true);
+    expect((await world()).battles.some(atHome)).toBe(true);
   });
 
   it('hordes raid or raze, roam on, settle into camps and strike the Holy City', async () => {
