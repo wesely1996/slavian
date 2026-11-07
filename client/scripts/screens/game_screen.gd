@@ -1416,7 +1416,7 @@ func _event_lines(event: Dictionary, brings: String, unless := false) -> void:
 ## the parts of its sheet: [[key, art id, name, fill], …] for _hex_panel.
 func _terrain_panel() -> Array:
 	var id: String = Game.terrain.get(_selected, "")
-	_panel_body.add_child(UI.label(Terrain.display_name(id, Game.data), UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label(tr("%s (%d, %d)") % [Terrain.display_name(id, Game.data), _selected.x, _selected.y], UI.HEADING_SIZE))
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
 	if distance > 0:
 		_panel_body.add_child(UI.label(tr_n("%d hex from the Holy City.", "%d hexes from the Holy City.", distance) % distance, UI.SMALL_SIZE, UI.MUTED))
@@ -1462,17 +1462,31 @@ func _shipyard_panel(yard: Dictionary) -> void:
 	if yard.status == "done":
 		_panel_body.add_child(UI.label(tr("The boat sails this river: marches along it go %d× as fast.") % speed, UI.SMALL_SIZE, UI.GOOD))
 		return
+	var speed_f := float(Game.world.speed)
 	if yard.status == "building":
 		var done_at := TimeUtil.parse_iso(String(yard.completesAt))
 		var line := UI.label("", UI.SMALL_SIZE)
 		_panel_body.add_child(line)
-		_tick(line, func() -> String: return tr("The boat is being built · ready in %s") % TimeUtil.format_duration(done_at - Game.server_now()))
+		var built := _gauge(UI.ACCENT)
+		_panel_body.add_child(built)
+		_tick(line, func() -> String:
+			var now := Game.server_now()
+			if is_instance_valid(built):
+				built.value = EventText.build_share(Game.data, yard, now, speed_f)
+			return tr("The boat is %d%% built · ready in %s") % [roundi(EventText.build_share(Game.data, yard, now, speed_f) * 100.0), TimeUtil.format_duration(done_at - now)])
 		if yard.get("nextRaidAt") != null:
+			# The raiders coming: drawn in black on the map, closing in on the yard.
 			var raid_at := TimeUtil.parse_iso(String(yard.nextRaidAt))
 			var raiders := int(yard.raiders)
 			var warn := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 			_panel_body.add_child(warn)
-			_tick(warn, func() -> String: return tr("%d raiders strike in %s") % [raiders, TimeUtil.format_duration(raid_at - Game.server_now())])
+			var closing := _gauge(Color(0.08, 0.08, 0.08))
+			_panel_body.add_child(closing)
+			_tick(warn, func() -> String:
+				var now := Game.server_now()
+				if is_instance_valid(closing):
+					closing.value = maxf(0.0, EventText.raid_share(Game.data, yard, now, speed_f))
+				return tr("%d raiders strike here in %s") % [raiders, TimeUtil.format_duration(raid_at - now)])
 		_panel_body.add_child(UI.label(tr("Armies standing here fight the raiders; if none drives them off, %d hours of work are lost.") % int(rules.setbackHours), UI.SMALL_SIZE, UI.MUTED))
 		return
 	var parts := PackedStringArray()
@@ -1482,6 +1496,9 @@ func _shipyard_panel(yard: Dictionary) -> void:
 			parts.append(tr("%s %d/%d") % [UI.resource_name(kind), int(yard.paid[kind]), int(yard.cost[kind])])
 		any_paid = any_paid or int(yard.paid[kind]) > 0
 	_panel_body.add_child(UI.label(tr("Paid: %s") % " · ".join(parts), UI.SMALL_SIZE))
+	var paid_bar := _gauge(UI.GOOD)
+	paid_bar.value = EventText.paid_share(yard)
+	_panel_body.add_child(paid_bar)
 	_panel_body.add_child(UI.label(tr("When it is paid for, the boat takes %d hours to build, and raiders come every %d hours.") % [int(rules.buildHours), int(rules.raidEveryHours)], UI.SMALL_SIZE, UI.MUTED))
 	if not any_paid:
 		_event_lines(yard, "", true)
@@ -4485,6 +4502,7 @@ func _threats_panel() -> void:
 		_rebuild_panel(), "icon/research"))
 	_panel_body.add_child(top)
 	var tabs := [["hordes", "icon/threat", tr("Hordes"), _hordes_tab]]
+	tabs.append(["events", "map/camp_bandit", tr("Events"), _events_tab])
 	var living := Game.leaders.filter(func(chief: Dictionary) -> bool: return chief.status != "dead")
 	if not Game.leaders.is_empty():
 		var front := String((living[0] if not living.is_empty() else Game.leaders[0]).front)
@@ -4515,6 +4533,45 @@ func _hordes_tab() -> void:
 	if Game.waves.is_empty():
 		_panel_body.add_child(UI.label(tr("No waves announced."), UI.SMALL_SIZE, UI.MUTED))
 	_paged("waves", Game.waves, 2 if _roomy() else 1, _wave_entry)
+
+
+## The daily events still going: captives, forbidding ruins, shipyards;
+## each with how it stands and a button that shows it on the map.
+func _events_tab() -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Events"), UI.HEADING_SIZE),
+		tr("Every day something rises on the map near a village: captives to free, a forbidding ruin to search, a shipyard to pay for and defend. Each brings a bounty; one left undone makes the next horde hate you more.")))
+	var events := EventText.active(Game.camps, Game.sites, Game.shipyards)
+	if events.is_empty():
+		_panel_body.add_child(UI.label(tr("No events on the map now."), UI.SMALL_SIZE, UI.MUTED))
+	_paged("events", events, 4 if _roomy() else 3, _event_entry)
+
+
+func _event_entry(event: Dictionary) -> void:
+	var row := UI.hbox()
+	var text := UI.vbox(2)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(UI.label(EventText.title(event), UI.SMALL_SIZE))
+	var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_child(line)
+	# A shipyard: how much is paid, then how far the boat is built.
+	var bar: ProgressBar = null
+	if event.kind == "shipyard":
+		bar = _gauge(UI.ACCENT if event.item.status == "building" else UI.GOOD)
+		text.add_child(bar)
+	_tick(line, func() -> String:
+		var now := Game.server_now()
+		if bar != null and is_instance_valid(bar):
+			bar.value = EventText.build_share(Game.data, event.item, now, float(Game.world.speed)) if event.item.status == "building" else EventText.paid_share(event.item)
+		return EventText.state(Game.data, event, now, float(Game.world.speed)))
+	row.add_child(text)
+	var cell: Vector2i = event.cell
+	var show_button := UI.button(tr("Show on map"), func() -> void:
+		_set_view("map")
+		_go_to(cell))
+	show_button.custom_minimum_size.x = 150
+	row.add_child(show_button)
+	_panel_body.add_child(row)
 
 
 ## How the battles went, newest first.

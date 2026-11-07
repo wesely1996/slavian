@@ -172,5 +172,19 @@ export function searchRuin(
 export function searchMs(data: GameData, kind: string, units: Readonly<Record<string, number>>, worldSpeed: number): number {
   const count = Object.values(units).reduce((sum, n) => sum + Math.max(0, n), 0);
   const share = Math.max(data.sites.search.minShare, 1 / (1 + data.sites.search.perUnit * Math.max(0, count - 1)));
-  return (data.sites.kinds[kind]!.exploreHours * 3_600_000 * share) / worldSpeed;
+  // Without scouts to read the ground it takes the longer.
+  const slow = scoutsIn(data, units) > 0 ? 1 : data.sites.search.noScoutsFactor;
+  return (data.sites.kinds[kind]!.exploreHours * 3_600_000 * share * slow) / worldSpeed;
+}
+
+// How many scouts (of any kind) are among `units`.
+export function scoutsIn(data: GameData, units: Readonly<Record<string, number>>): number {
+  return Object.entries(units).reduce((sum, [unit, n]) => sum + (data.units.units[unit]?.family === 'scout' ? Math.max(0, n) : 0), 0);
+}
+
+// What scouts along on a search find besides the site's find: a share of
+// its loot, more with every scout (sites.json search.scoutLoot).
+export function scoutLoot(data: GameData, scouts: number, distance: number, lootFactor = 1): Resources {
+  const share = Math.min(data.sites.search.scoutLoot.max, data.sites.search.scoutLoot.perScout * scouts);
+  return mapResources((kind) => Math.round(data.sites.loot[kind] * (1 + distance) * lootFactor * share));
 }

@@ -1,7 +1,8 @@
 // Armies turned on the road in a solo session: one marching out sent to
 // another hex halfway, one marching called home, one coming home sent out
 // again to hold a hex, and one in the middle of turning told to go where it
-// already heads.
+// already heads. Then standing armies moved onto the starter camp (they
+// storm it) and onto an ancient site (they search it, slowly without scouts).
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -57,5 +58,19 @@ scenario('reroute-scenario.json', START, async ({ started, play }) => {
   await play({ advance: 20_000 });
   await move(first.id, { target: { q: far[0], r: far[1] } });
   await play({ advance: 10 * MINUTE });
+  const standing = (await play({ method: 'GET', path: world })).body;
+
+  // Moved onto the camp, it storms it; another moved onto a site explores it.
+  const camp = standing.camps[0] as { q: number; r: number } | undefined;
+  if (camp) await move(first.id, { target: { q: camp.q, r: camp.r } });
+  const site = (standing.sites as { q: number; r: number; status: string }[])
+    .filter((s) => s.status === 'unexplored')
+    .sort((a, b) => hexDistance(hex(a.q, a.r), hex(home.q, home.r)) - hexDistance(hex(b.q, b.r), hex(home.q, home.r)))[0];
+  const third = (await army({ orders: 'hold', target: { q: near[0], r: near[1] }, units: { spearman: 3 } })).body.army;
+  await play({ advance: 10 * MINUTE });
+  if (site) await move(third.id, { target: { q: site.q, r: site.r } });
+  await play({ advance: 20 * MINUTE });
+  await play({ method: 'GET', path: world });
+  await play({ advance: 3 * 60 * MINUTE });
   await play({ method: 'GET', path: world });
 });

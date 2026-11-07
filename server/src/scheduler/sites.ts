@@ -21,7 +21,8 @@ import { assault } from '../sim/camps.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import { listCamps } from '../db/camps.js';
-import { distanceShare, placeSites, rollFind, searchMs, type Find } from '../sim/sites.js';
+import { distanceShare, placeSites, rollFind, scoutLoot, scoutsIn, searchMs, type Find } from '../sim/sites.js';
+import { mapResources } from '../sim/resources.js';
 import { armyLosses, holdHex, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
@@ -227,17 +228,23 @@ export const siteHandlers: HandlerRegistry = {
     }
     const leader = await heroWithArmy(client, army.id);
     const ownerHero = leader ?? (army.ownerAccountId !== null ? await loadHero(client, world.id, army.ownerAccountId).catch(() => null) : null);
+    const distance = distanceShare(hex(site.q, site.r), world.radius ?? 0);
+    const lootFactor = site.hard ? data.events.kinds.ruin.lootFactor : 1;
     const find = rollFind(data, {
       kind: site.kind,
       seed: world.seed,
       siteId: site.id,
-      distance: distanceShare(hex(site.q, site.r), world.radius ?? 0),
-      lootFactor: site.hard ? data.events.kinds.ruin.lootFactor : 1,
+      distance,
+      lootFactor,
       foundScrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
       ownedGear: new Set(ownerHero ? [...ownerHero.inventory, ...Object.values(ownerHero.gear)] : []),
     });
+    // Scouts along find more besides: resources carried home with the find.
+    const extra = scoutLoot(data, scoutsIn(data, army.units), distance, lootFactor);
+    const found = find.type === 'resources' ? find.resources : null;
+    const loot = found || total(extra) > 0 ? mapResources((kind) => (found?.[kind] ?? 0) + extra[kind]) : null;
     let after = army;
-    if (find.type === 'resources') after = { ...army, loot: find.resources };
+    if (loot) after = { ...army, loot };
     await claimFind(client, data, world, site, army.ownerAccountId, ownerHero, find, event.dueAt);
     if (after !== army) await saveArmy(client, after);
     // Searched, the army stands on the site's hex until it is moved or called home.

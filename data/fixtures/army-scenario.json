@@ -10039,7 +10039,12 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
-      "loot": null,
+      "loot": {
+       "iron": 33,
+       "wood": 52,
+       "grain": 39,
+       "stone": 52
+      },
       "units": {},
       "status": "done",
       "battleId": null,
@@ -13285,7 +13290,12 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
-      "loot": null,
+      "loot": {
+       "iron": 33,
+       "wood": 52,
+       "grain": 39,
+       "stone": 52
+      },
       "units": {},
       "status": "done",
       "battleId": null,

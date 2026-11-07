@@ -44,6 +44,7 @@ func _initialize() -> void:
 	_test_horde()
 	_test_group()
 	_test_sites()
+	_test_events()
 	_test_bridge()
 	_test_run()
 	_test_clans()
@@ -504,6 +505,22 @@ func _test_group() -> void:
 	_check(GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}) == "Hordes hold off 22:00–06:00 (UTC+02:00)", "quiet hours: %s" % GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}))
 	_check(GroupText.offset_text(-300) == "UTC−05:00", "negative offset")
 	_check(GroupText.difficulty({"difficulty": {"presets": {"hard": {"name": "Hard"}}}}, "hard") == "Hard", "difficulty name")
+
+
+func _test_events() -> void:
+	var data := {"events": {"kinds": {"shipyard": {"buildHours": 24, "raidEveryHours": 8}}}}
+	var now := TimeUtil.parse_iso("2026-06-01T12:00:00.000Z")
+	var yard := {"q": 2, "r": -1, "status": "building", "cost": {"wood": 900, "stone": 300}, "paid": {"wood": 900, "stone": 300},
+		"completesAt": "2026-06-02T00:00:00.000Z", "nextRaidAt": "2026-06-01T14:00:00.000Z", "raiders": 5}
+	_check(is_equal_approx(EventText.build_share(data, yard, now, 1.0), 0.5), "boat half built")
+	_check(is_equal_approx(EventText.raid_share(data, yard, now, 1.0), 0.75), "raiders three quarters of the way")
+	_check(is_equal_approx(EventText.paid_share({"cost": {"wood": 900, "stone": 300}, "paid": {"wood": 300, "stone": 0}}), 0.25), "a quarter paid")
+	_check(EventText.raid_share(data, {"status": "open"}, now, 1.0) < 0.0, "no raiders while it is paid for")
+	var events := EventText.active([{"kind": "captives", "q": -2, "r": 1, "endsAt": "2026-06-01T13:00:00.000Z"}, {"kind": "bandit", "q": 0, "r": 3}],
+		[{"q": 4, "r": 0, "status": "unexplored", "hard": true, "endsAt": "2026-06-02T13:00:00.000Z"}, {"q": 5, "r": 0, "status": "unexplored"}], [yard])
+	_check(events.size() == 3, "captives, a hard ruin and a shipyard are events")
+	_check(events[0].kind == "captives" and events[1].kind == "shipyard" and events[2].kind == "ruin", "soonest first")
+	_check(EventText.title(events[0]) == "Captives at (-2, 1)", "event title with its hex")
 
 
 func _test_sites() -> void:

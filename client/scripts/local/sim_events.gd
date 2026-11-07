@@ -353,7 +353,7 @@ static func pay_into(server: LocalServer, world: Dictionary, yard: Dictionary, s
 
 static func shipyard_view(y: Dictionary) -> Dictionary:
 	return {"id": y.id, "q": y.q, "r": y.r, "edge": [y.edge.a.x, y.edge.a.y, y.edge.b.x, y.edge.b.y], "status": y.status,
-		"cost": y.cost, "paid": y.paid, "raiders": LocalBattle.total(y.raiders), "raids": y.raids,
+		"cost": y.cost, "paid": y.paid, "front": y.front, "raiders": LocalBattle.total(y.raiders), "raids": y.raids,
 		"endsAt": LocalTime.iso(y.endsAt) if y.endsAt != null else null,
 		"completesAt": LocalTime.iso(y.completesAt) if y.completesAt != null else null,
 		"nextRaidAt": LocalTime.iso(y.nextRaidAt) if y.nextRaidAt != null else null}
