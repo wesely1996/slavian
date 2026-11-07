@@ -196,6 +196,8 @@ export async function moveArmy(
     const terrain = (await terrainOf(client, world.id)).get(`${dest.q},${dest.r}`);
     if (!terrain || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No army can stand there');
     if ((await listVillages(client, world.id)).some((v) => v.q === dest.q && v.r === dest.r)) throw new RuleError('That is a village; send them into it');
+    // Sent onto a camp it storms it; onto a site not yet searched, it explores.
+    orders = await ordersAt(client, data, world, army, dest);
   }
   if (!onTheRoad && dest.q === here.q && dest.r === here.r) {
     // Already standing in its owner's village: it joins the garrison now.
@@ -240,6 +242,18 @@ export async function moveArmy(
   await saveArmy(client, moving);
   await scheduleEvent(client, world.id, moving.arrivesAt, 'army_arrive', { armyId: army.id } satisfies ArmyPayload);
   return moving;
+}
+
+// What an army sent onto a hex does there: storm a camp, explore an
+// ancient site nobody has searched yet, or hold it.
+async function ordersAt(client: DbClient, data: GameData, world: World, army: Army, dest: Hex): Promise<ArmyOrders> {
+  const fights = total(combatants(data, army.units)) > 0;
+  if (await campAt(client, world.id, dest.q, dest.r)) {
+    if (!fights) throw new RuleError('Scouts alone don\'t storm camps');
+    return 'clear';
+  }
+  const site = await siteAt(client, world.id, dest.q, dest.r);
+  return site && site.status !== 'explored' ? 'explore' : 'hold';
 }
 
 function standing(army: Army): void {

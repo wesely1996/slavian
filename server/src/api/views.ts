@@ -627,6 +627,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     status: s.status,
     cost: s.cost,
     paid: s.paid,
+    // The land whose raiders strike it.
+    front: s.front,
     raiders: total(s.raiders),
     raids: s.raids,
     endsAt: s.endsAt?.toISOString() ?? null,

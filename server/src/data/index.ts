@@ -665,8 +665,14 @@ export type DifficultyData = z.infer<typeof difficultyFileSchema>;
 
 const sitesFileSchema = z.object({
   version: z.number().int(),
-  // More hands search faster (sim/sites.ts searchMs).
-  search: z.object({ perUnit: z.number().nonnegative(), minShare: z.number().min(0).max(1) }),
+  // More hands search faster (sim/sites.ts searchMs); without scouts it
+  // takes noScoutsFactor times as long, and scouts bring extra loot.
+  search: z.object({
+    perUnit: z.number().nonnegative(),
+    minShare: z.number().min(0).max(1),
+    noScoutsFactor: z.number().min(1),
+    scoutLoot: z.object({ perScout: z.number().nonnegative(), max: z.number().nonnegative() }),
+  }),
   placement: z.object({
     perPlayer: z.number().int().nonnegative(),
     min: z.number().int().nonnegative(),

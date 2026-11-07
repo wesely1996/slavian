@@ -67,7 +67,13 @@ static func search_seconds(data: Dictionary, kind: String, units: Dictionary, wo
 		count += maxi(0, int(units[unit]))
 	var rules: Dictionary = data.sites.get("search", {"perUnit": 0.0, "minShare": 1.0})
 	var share := maxf(float(rules.minShare), 1.0 / (1.0 + float(rules.perUnit) * maxi(0, count - 1)))
-	return float(data.sites.kinds.get(kind, {}).get("exploreHours", 0)) * 3600.0 * share / world_speed
+	# Without scouts it takes noScoutsFactor times as long.
+	var scouts := 0
+	for unit in units:
+		if data.units.units.get(unit, {}).get("family", "") == "scout":
+			scouts += maxi(0, int(units[unit]))
+	var slow := 1.0 if scouts > 0 else float(rules.get("noScoutsFactor", 1.0))
+	return float(data.sites.kinds.get(kind, {}).get("exploreHours", 0)) * 3600.0 * share * slow / world_speed
 
 
 ## When it gets there and when it is home again: on the march, the arrival

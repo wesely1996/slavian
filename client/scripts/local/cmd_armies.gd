@@ -490,6 +490,15 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 			return LocalVillage.rule("No army can stand there")
 		if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == dest.x and int(v.r) == dest.y):
 			return LocalVillage.rule("That is a village; send them into it")
+		# Sent onto a camp it storms it; onto a site not yet searched, it explores.
+		if not camp_at(world, dest).is_empty():
+			if LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
+				return LocalVillage.rule("Scouts alone don't storm camps")
+			orders = "clear"
+		else:
+			var site := site_at(world, dest)
+			if not site.is_empty() and site.status != "explored":
+				orders = "explore"
 	if not on_the_road and dest == here:
 		if orders == "garrison":
 			join_village(server, world, army, int(target_village), at)
@@ -1436,7 +1445,27 @@ static func search_ms(data: Dictionary, kind: String, units: Dictionary, world_s
 	for unit in units:
 		count += maxi(0, int(units[unit]))
 	var share := maxf(float(data.sites.search.minShare), 1.0 / (1.0 + float(data.sites.search.perUnit) * maxi(0, count - 1)))
-	return (float(data.sites.kinds[kind].exploreHours) * LocalTime.MS_PER_HOUR * share) / world_speed
+	# Without scouts to read the ground it takes the longer.
+	var slow := 1.0 if scouts_in(data, units) > 0 else float(data.sites.search.noScoutsFactor)
+	return (float(data.sites.kinds[kind].exploreHours) * LocalTime.MS_PER_HOUR * share * slow) / world_speed
+
+
+## sim/sites.ts scoutsIn: how many scouts (of any kind) are among `units`.
+static func scouts_in(data: Dictionary, units: Dictionary) -> int:
+	var n := 0
+	for unit in units:
+		if data.units.units.get(unit, {}).get("family", "") == "scout":
+			n += maxi(0, int(units[unit]))
+	return n
+
+
+## sim/sites.ts scoutLoot: what scouts along on a search find besides the
+## site's find, more with every scout.
+static func scout_loot(data: Dictionary, scouts: int, distance: float, loot_factor := 1.0) -> Dictionary:
+	var rules: Dictionary = data.sites.search.scoutLoot
+	var share := minf(float(rules.max), float(rules.perScout) * scouts)
+	return LocalVillage.resources(func(k: String) -> int:
+		return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance) * loot_factor * share))
 
 
 ## An army sent to explore has reached the site.
@@ -1551,10 +1580,14 @@ static func on_site_explored(server: LocalServer, world: Dictionary, event: Dict
 	var leader := hero_with_army(world, int(army.id))
 	var owner_hero: Dictionary = leader if not leader.is_empty() else (hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 	var gear: Array = owner_hero.inventory + owner_hero.gear.values() if not owner_hero.is_empty() else []
-	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius)),
-		LocalResearch.scrolls(world), gear, float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0)
-	if find.type == "resources":
-		army.loot = find.resources
+	var distance := LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius))
+	var loot_factor := float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0
+	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), distance, LocalResearch.scrolls(world), gear, loot_factor)
+	# Scouts along find more besides: resources carried home with the find.
+	var extra := scout_loot(data, scouts_in(data, army.units), distance, loot_factor)
+	if find.type == "resources" or LocalLogistics.total(extra) > 0:
+		var found: Dictionary = find.resources if find.type == "resources" else {}
+		army.loot = LocalVillage.resources(func(k: String) -> int: return int(found.get(k, 0)) + int(extra[k]))
 	claim_find(server, world, site, army.ownerAccountId, owner_hero, find, at, changed)
 	# Searched, the army stands on the site's hex until it is moved or called home.
 	hold_hex(server, world, army, at)

@@ -4,16 +4,25 @@ import { validateArmy } from '../src/sim/armies.js';
 import { hex, hexDistance, hexKey } from '../src/sim/hex.js';
 import { generateMap } from '../src/sim/mapgen.js';
 import { researchProblem } from '../src/sim/research.js';
-import { distanceShare, loreBonuses, placeSites, rollFind, searchMs } from '../src/sim/sites.js';
+import { distanceShare, loreBonuses, placeSites, rollFind, scoutLoot, scoutsIn, searchMs } from '../src/sim/sites.js';
 
 const data = loadGameData();
 
 describe('site searches', () => {
   it('go faster the more units search, down to a floor', () => {
     const full = (data.sites.kinds.kurgan!.exploreHours * 3_600_000) / 2;
-    expect(searchMs(data, 'kurgan', { spearman: 1 }, 2)).toBe(full);
-    expect(searchMs(data, 'kurgan', { spearman: 11 }, 2)).toBeCloseTo(full / (1 + data.sites.search.perUnit * 10));
+    expect(searchMs(data, 'kurgan', { scout: 1 }, 2)).toBe(full);
+    expect(searchMs(data, 'kurgan', { spearman: 10, scout: 1 }, 2)).toBeCloseTo(full / (1 + data.sites.search.perUnit * 10));
     expect(searchMs(data, 'kurgan', { spearman: 500, scout: 20 }, 2)).toBeCloseTo(full * data.sites.search.minShare);
+  });
+
+  it('take longer without scouts, who bring extra loot', () => {
+    const slow = data.sites.search.noScoutsFactor;
+    expect(searchMs(data, 'kurgan', { spearman: 11 }, 2)).toBeCloseTo(searchMs(data, 'kurgan', { spearman: 10, scout: 1 }, 2) * slow);
+    expect(scoutsIn(data, { spearman: 4, scout: 2, pathfinder: 1 })).toBe(3);
+    expect(scoutLoot(data, 0, 0).wood).toBe(0);
+    expect(scoutLoot(data, 2, 0).wood).toBe(Math.round(data.sites.loot.wood * 2 * data.sites.search.scoutLoot.perScout));
+    expect(scoutLoot(data, 99, 0).wood).toBe(Math.round(data.sites.loot.wood * data.sites.search.scoutLoot.max));
   });
 });
 

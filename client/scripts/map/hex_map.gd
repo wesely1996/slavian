@@ -27,6 +27,8 @@ const SITE_COLOR := Color("#d9b85c")
 const MINE_COLOR := Color("#4caf50")
 const ALLY_COLOR := Color("#3f7fd6")
 const ENEMY_COLOR := Color("#d0453a")
+## Raiders of a daily event (not a horde): black.
+const RAIDER_COLOR := Color("#141414")
 const RIVER_COLOR := Color("#4a86a3")
 const RIVER_BANK := Color(0.1, 0.16, 0.12, 0.45)
 const RIVER_GLINT := Color(0.75, 0.88, 0.92, 0.45)
@@ -211,8 +213,41 @@ func _draw_shipyard(yard: Dictionary) -> void:
 	draw_polyline(hull, VILLAGE_OUTLINE_COLOR, 2.0)
 	draw_line(c, c + Vector2(0, -r * 1.1), VILLAGE_OUTLINE_COLOR, 2.0)
 	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r * 1.05), c + Vector2(r * 0.6, -r * 0.2), c + Vector2(0, -r * 0.2)]), Color(0.95, 0.92, 0.85) * tint)
-	if yard.status != "done":
-		_draw_ring(c, hex_size * 0.9, UI.GOOD if yard.status == "open" else UI.ACCENT)
+	if yard.status == "done":
+		return
+	_draw_ring(c, hex_size * 0.9, UI.GOOD if yard.status == "open" else UI.ACCENT)
+	# How far along it is: paid for (green), then built (gold).
+	var now := Game.server_now()
+	var speed := float(Game.world.get("speed", 1))
+	if yard.status == "open":
+		_draw_bar(c + Vector2(0, hex_size * 0.62), EventText.paid_share(yard), UI.GOOD)
+		return
+	_draw_bar(c + Vector2(0, hex_size * 0.62), EventText.build_share(Game.data, yard, now, speed), GRAIN_COLOR)
+	# The next raiders, in black: they close in from the wilds (away from
+	# the Holy City) over the hours between raids, and strike when they reach it.
+	var closing := EventText.raid_share(Game.data, yard, now, speed)
+	if closing < 0.0:
+		return
+	var out := c.normalized() if c.length() > 0.0 else Vector2.UP
+	var start := c + out * hex_size * 2.6
+	var end := c + out * hex_size * 0.75
+	var pos := start.lerp(end, closing)
+	draw_dashed_line(pos, c + out * hex_size * 0.45, RAIDER_COLOR, hex_size * 0.06, hex_size * 0.16, true)
+	draw_circle(pos, hex_size * 0.36, RAIDER_COLOR)
+	draw_arc(pos, hex_size * 0.36, 0.0, TAU, 24, Color(0.85, 0.82, 0.75), 2.0)
+	var emblem := "faction/" + String(EMBLEMS.get(String(yard.get("front", "north")), "north"))
+	if Art.has(emblem):
+		_draw_art(emblem, pos, hex_size * 0.6, Color(0.75, 0.72, 0.68))
+
+
+## A gauge under something on the map (0..1) in `color`.
+func _draw_bar(at: Vector2, full: float, color: Color) -> void:
+	var w := hex_size * 0.8
+	var h := hex_size * 0.1
+	var box := Rect2(at - Vector2(w / 2.0, h / 2.0), Vector2(w, h))
+	draw_rect(box, Color(0, 0, 0, 0.55))
+	draw_rect(Rect2(box.position, Vector2(w * clampf(full, 0.0, 1.0), h)), color)
+	draw_rect(box, VILLAGE_OUTLINE_COLOR, false, 1.5)
 
 
 ## A river along the edge between two hexes, and its bridge if one stands
@@ -453,12 +488,7 @@ func _draw_fort(fort: Dictionary) -> void:
 
 ## A grain gauge under a store: gold for what it holds.
 func _draw_grain_bar(at: Vector2, full: float) -> void:
-	var w := hex_size * 0.8
-	var h := hex_size * 0.1
-	var box := Rect2(at - Vector2(w / 2.0, h / 2.0), Vector2(w, h))
-	draw_rect(box, Color(0, 0, 0, 0.55))
-	draw_rect(Rect2(box.position, Vector2(w * clampf(full, 0.0, 1.0), h)), GRAIN_COLOR)
-	draw_rect(box, VILLAGE_OUTLINE_COLOR, false, 1.5)
+	_draw_bar(at, full, GRAIN_COLOR)
 
 
 func _draw_fort_body(fort: Dictionary, c: Vector2) -> void:
