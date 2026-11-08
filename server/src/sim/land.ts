@@ -54,8 +54,9 @@ export function fastestStep(data: GameData, land: Land): number {
 
 // The steps a boat built on `edge` sails: between any two neighbouring
 // hexes on the banks of its river (every river edge joined to it through a
-// shared bank hex).
-export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex; b: Hex }): string[] {
+// shared bank hex) and, with `terrain`, across every lake it reaches: the
+// lake's hexes, its shores, and the rivers that flow into it join, and so on.
+export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex; b: Hex }, terrain?: ReadonlyMap<string, TerrainId>): string[] {
   const byHex = new Map<string, number[]>();
   rivers.forEach((e, i) => {
     for (const end of [e.a, e.b]) byHex.set(hexKey(end), [...(byHex.get(hexKey(end)) ?? []), i]);
@@ -64,22 +65,34 @@ export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex
   if (start < 0) return [];
   const seen = new Set([start]);
   const queue = [start];
-  const banks = new Map<string, Hex>();
-  while (queue.length) {
-    const e = rivers[queue.shift()!]!;
-    for (const end of [e.a, e.b]) {
-      banks.set(hexKey(end), end);
-      for (const next of byHex.get(hexKey(end)) ?? []) {
-        if (!seen.has(next)) {
-          seen.add(next);
-          queue.push(next);
-        }
+  // Bank and shore hexes, and lake hexes: all on the water.
+  const water = new Map<string, Hex>();
+  const lakes = new Set<string>();
+  const isLake = (cell: Hex) => terrain?.get(hexKey(cell)) === 'lake';
+  // A hex on the water: the rivers along it join, and a lake beside it is
+  // sailed whole, its shores with it.
+  const reach = (cell: Hex) => {
+    const k = hexKey(cell);
+    if (water.has(k)) return;
+    water.set(k, cell);
+    if (isLake(cell)) lakes.add(k);
+    for (const next of byHex.get(k) ?? []) {
+      if (!seen.has(next)) {
+        seen.add(next);
+        queue.push(next);
       }
     }
+    for (const n of neighbors(cell)) {
+      if (isLake(cell) ? terrain!.has(hexKey(n)) : isLake(n)) reach(n);
+    }
+  };
+  while (queue.length) {
+    const e = rivers[queue.shift()!]!;
+    for (const end of [e.a, e.b]) reach(end);
   }
   const lanes = new Set<string>();
-  for (const bank of banks.values()) {
-    for (const n of neighbors(bank)) if (banks.has(hexKey(n))) lanes.add(edgeKey(bank, n));
+  for (const cell of water.values()) {
+    for (const n of neighbors(cell)) if (water.has(hexKey(n))) lanes.add(edgeKey(cell, n));
   }
   return [...lanes].sort();
 }
@@ -91,7 +104,9 @@ export function moveCostOn(data: GameData, land: Land, roads = true): StepCost {
   return (from, to) => {
     const type = land.get(hexKey(to));
     if (type === undefined || !canCross(land, from, to)) return null;
-    const cost = data.terrain.terrain[type].moveCost;
+    // A lake is crossed only by boat.
+    const sailed = roads && type === 'lake' && !!land.lanes?.has(edgeKey(from, to));
+    const cost = sailed ? data.events.kinds.shipyard.lakeMoveCost : data.terrain.terrain[type].moveCost;
     if (cost === null) return null;
     if (!roads) return cost;
     const road = roadFactor(data, roadLevel(land, from, to));

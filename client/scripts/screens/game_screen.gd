@@ -76,6 +76,9 @@ var _road_village := 0
 ## leaves from, while the map waits for the tap).
 var _caravan_target := {"kind": "vault"}
 var _caravan_picking := 0
+## The sheet that was open when the caravan's target began to be picked:
+## opening another drops the picking.
+var _caravan_pick_mode := ""
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 ## Army form: destination (village id; 0: the Holy City), troops and orders.
 var _army_to := 0
@@ -584,6 +587,10 @@ func _fit_sheet() -> void:
 	var area := get_viewport().get_visible_rect().size
 	if area.x > area.y * 1.05:
 		return
+	# Picking a hex on the map: the sheet shrinks to a line, so the map has room.
+	if _picking():
+		_scroll.custom_minimum_size.y = PICKING_HEIGHT
+		return
 	var tall := _panel_mode != "hex" or (_view == "village" and _tab != "village")
 	_scroll.custom_minimum_size.y = area.y * (0.58 if tall else 0.36)
 	# The tutorial's card folds while a tall sheet leaves the map little room.
@@ -594,6 +601,31 @@ func _fit_sheet() -> void:
 
 
 var _sheet_tall := false
+## The sheet's height while a hex is being picked on the map.
+const PICKING_HEIGHT := 96.0
+
+
+## Whether the map waits for a tap: where an army marches or a caravan goes.
+func _picking() -> bool:
+	return _army_moving != 0 or _caravan_picking != 0
+
+
+## The sheet while a hex is picked: what to tap, and Cancel.
+func _picking_panel() -> void:
+	var row := UI.hbox()
+	var text := UI.label(tr("Tap the hex (or village) for the army to march to.") if _army_moving != 0 else
+		tr("Tap where the caravan goes: a village or outpost, the Holy City, a shipyard, or a fort or supply point."), UI.SMALL_SIZE)
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var cancel := UI.button(tr("Cancel"), func() -> void:
+		_army_moving = 0
+		_caravan_picking = 0
+		_status.text = ""
+		_rebuild_panel())
+	cancel.custom_minimum_size.x = 140
+	row.add_child(cancel)
+	_panel_body.add_child(row)
 
 
 ## How tall the sheet's scrolling part is.
@@ -1259,7 +1291,6 @@ func _rebuild_panel() -> void:
 	UI.clear(_panel_body)
 	_clearing = false
 	_ticking.clear()
-	_fit_sheet()
 	# A road being laid is dropped once the sheet shows something else.
 	if _road_from != Vector2i.MAX and _panel_mode != "hex":
 		_road_from = Vector2i.MAX
@@ -1271,6 +1302,13 @@ func _rebuild_panel() -> void:
 			_army_moving = 0
 			_status.text = ""
 		hex_map.select_army(0)
+	if _caravan_picking != 0 and _panel_mode != _caravan_pick_mode:
+		_caravan_picking = 0
+		_status.text = ""
+	_fit_sheet()
+	if _picking():
+		_picking_panel()
+		return
 	if _panel_mode == "army":
 		_army_panel()
 		return
@@ -1899,7 +1937,8 @@ func _caravan_limits(target: Dictionary) -> Dictionary:
 func _pick_caravan_target(village_id: int) -> void:
 	_set_view("map")
 	_caravan_picking = village_id
-	_status.text = tr("Tap where the caravan goes: a village or outpost, the Holy City, a shipyard, or a fort or supply point.")
+	_caravan_pick_mode = _panel_mode
+	_rebuild_panel()
 
 
 func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escort: Dictionary) -> void:
@@ -2791,7 +2830,7 @@ func _army_panel() -> void:
 	var army_id := int(army.id)
 	_panel_body.add_child(UI.button(tr("Move: tap a hex or a village"), func() -> void:
 		_army_moving = army_id
-		_status.text = tr("Tap the hex (or village) for the army to march to."), "icon/map"))
+		_rebuild_panel(), "icon/map"))
 	_army_orders_row(army)
 
 

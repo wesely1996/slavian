@@ -45,6 +45,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_events()
+	_test_lake_lanes()
 	_test_bridge()
 	_test_run()
 	_test_clans()
@@ -505,6 +506,28 @@ func _test_group() -> void:
 	_check(GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}) == "Hordes hold off 22:00–06:00 (UTC+02:00)", "quiet hours: %s" % GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}))
 	_check(GroupText.offset_text(-300) == "UTC−05:00", "negative offset")
 	_check(GroupText.difficulty({"difficulty": {"presets": {"hard": {"name": "Hard"}}}}, "hard") == "Hard", "difficulty name")
+
+
+func _test_lake_lanes() -> void:
+	var data := {"terrain": {"terrain": {"plains": {"moveCost": 1}, "lake": {"moveCost": null}}},
+		"field": {"road": {"levels": [{"factor": 0.5}]}}, "events": {"kinds": {"shipyard": {"laneSpeed": 3, "lakeMoveCost": 1}}}}
+	var terrain := {}
+	for q in range(0, 8):
+		for r in range(-1, 2):
+			terrain["%d,%d" % [q, r]] = "plains"
+	terrain["3,0"] = "lake"
+	terrain["4,0"] = "lake"
+	var rivers := [{"a": Vector2i(1, 0), "b": Vector2i(2, 0)}, {"a": Vector2i(5, 0), "b": Vector2i(6, 0)}]
+	_check(LocalLand.river_lanes(rivers, Vector2i(1, 0), Vector2i(2, 0)) == ["1,0|2,0"], "a river alone without terrain")
+	var lanes := LocalLand.river_lanes(rivers, Vector2i(1, 0), Vector2i(2, 0), terrain)
+	_check("3,0|4,0" in lanes and "5,0|6,0" in lanes and not "6,0|7,0" in lanes, "a boat sails the lake and the river leaving it")
+	var lane_set := {}
+	for k in lanes:
+		lane_set[k] = true
+	var cost := LocalLand.move_cost_on(data, {"terrain": terrain, "blocked": {}, "roads": {}, "lanes": lane_set})
+	_check(is_equal_approx(cost.call(Vector2i(2, 0), Vector2i(3, 0)), 1.0 / 3.0), "a lake crossed by boat")
+	var dry := LocalLand.move_cost_on(data, {"terrain": terrain, "blocked": {}, "roads": {}, "lanes": {}})
+	_check(dry.call(Vector2i(2, 0), Vector2i(3, 0)) < 0.0, "no lake without a boat")
 
 
 func _test_events() -> void:

@@ -183,8 +183,10 @@ static func fastest_step(data: Dictionary, land: Dictionary) -> float:
 
 ## sim/land.ts riverLanes: the steps (edge keys, sorted) a boat built on the
 ## river edge a-b sails: between neighbouring hexes on the banks of every
-## river edge joined to it through a shared bank hex. `rivers`: [{a, b}].
-static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i) -> Array:
+## river edge joined to it through a shared bank hex and, with `terrain`
+## ({"q,r": id}), across every lake it reaches (its hexes and shores, and
+## the rivers flowing into it). `rivers`: [{a, b}].
+static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i, terrain := {}) -> Array:
 	var by_hex := {}
 	for i in rivers.size():
 		for end in [rivers[i].a, rivers[i].b]:
@@ -198,25 +200,37 @@ static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i) -> Array:
 			break
 	if start < 0:
 		return []
-	var seen := {start: true}
-	var queue: Array = [start]
-	var banks := {}
-	while not queue.is_empty():
-		var e: Dictionary = rivers[queue.pop_front()]
+	var state := {"seen": {start: true}, "queue": [start], "water": {}}
+	while not state.queue.is_empty():
+		var e: Dictionary = rivers[state.queue.pop_front()]
 		for end in [e.a, e.b]:
-			banks[key(end)] = end
-			for next in by_hex.get(key(end), []):
-				if not seen.has(next):
-					seen[next] = true
-					queue.append(next)
+			_reach(end, by_hex, terrain, state)
+	var water: Dictionary = state.water
 	var lanes := {}
-	for k in banks:
-		for n in HexMath.neighbors(banks[k]):
-			if banks.has(key(n)):
-				lanes[edge_key(banks[k], n)] = true
+	for k in water:
+		for n in HexMath.neighbors(water[k]):
+			if water.has(key(n)):
+				lanes[edge_key(water[k], n)] = true
 	var out: Array = lanes.keys()
 	out.sort()
 	return out
+
+
+## A hex on the water (riverLanes): the rivers along it join, and a lake
+## beside it is sailed whole, its shores with it.
+static func _reach(cell: Vector2i, by_hex: Dictionary, terrain: Dictionary, state: Dictionary) -> void:
+	var k := key(cell)
+	if state.water.has(k):
+		return
+	state.water[k] = cell
+	for next in by_hex.get(k, []):
+		if not state.seen.has(next):
+			state.seen[next] = true
+			state.queue.append(next)
+	var lake: bool = terrain.get(k) == "lake"
+	for n in HexMath.neighbors(cell):
+		if (terrain.has(key(n)) if lake else terrain.get(key(n)) == "lake"):
+			_reach(n, by_hex, terrain, state)
 
 
 ## sim/land.ts moveCostOn: the cost of entering `to`, or -1 where it is
@@ -227,7 +241,9 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> C
 		var type: Variant = land.terrain.get(key(to))
 		if type == null or land.blocked.has(edge_key(from, to)):
 			return -1.0
-		var cost: Variant = data.terrain.terrain[type].moveCost
+		# A lake is crossed only by boat.
+		var sailed: bool = roads and type == "lake" and land.get("lanes", {}).has(edge_key(from, to))
+		var cost: Variant = data.events.kinds.shipyard.lakeMoveCost if sailed else data.terrain.terrain[type].moveCost
 		if cost == null:
 			return -1.0
 		if not roads:

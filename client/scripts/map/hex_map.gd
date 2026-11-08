@@ -124,6 +124,7 @@ func _draw() -> void:
 		_draw_road(road)
 	for edge in Game.rivers:
 		_draw_river(edge)
+	_draw_lake_lanes()
 
 	if Game.terrain.has(Vector2i.ZERO):
 		if not _draw_art("settlement/holy_city", Vector2.ZERO, hex_size * 1.5):
@@ -276,6 +277,23 @@ func _draw_river(edge: Array) -> void:
 	var tint := Color.WHITE if String(edge[4]) == "standing" else Color(1, 1, 1, 0.5)
 	draw_line(mid - across * hex_size * 0.3, mid + across * hex_size * 0.3, VILLAGE_OUTLINE_COLOR * tint, hex_size * 0.3)
 	draw_line(mid - across * hex_size * 0.27, mid + across * hex_size * 0.27, PLANK_COLOR * tint, hex_size * 0.22)
+
+
+## Where a finished boat sails across a lake: a golden thread between the
+## hexes it crosses.
+func _draw_lake_lanes() -> void:
+	for k in Game.lanes:
+		var ends := String(k).split("|")
+		var a := _cell_of(ends[0])
+		var b := _cell_of(ends[1])
+		if Game.terrain.get(a, "") != "lake" and Game.terrain.get(b, "") != "lake":
+			continue
+		draw_line(HexMath.to_pixel(a, hex_size), HexMath.to_pixel(b, hex_size), LANE_COLOR, hex_size * 0.05, true)
+
+
+func _cell_of(text: String) -> Vector2i:
+	var parts := text.split(",")
+	return Vector2i(int(parts[0]), int(parts[1]))
 
 
 ## The corners shared with the neighbour in direction i (E, NE, NW, W, SW, SE).
