@@ -3946,7 +3946,8 @@
      "supply": 168,
      "supplyAt": "2026-06-01T11:22:36.000Z",
      "hungrySince": null,
-     "wagonFortAt": null
+     "wagonFortAt": null,
+     "returnHome": false
     },
     "serverTime": "2026-06-01T11:22:36.000Z"
    }
@@ -4564,7 +4565,8 @@
       "supply": 149.48333333333332,
       "supplyAt": "2026-06-01T11:25:51.600Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": false
      }
     ],
     "forts": [],
@@ -6656,7 +6658,8 @@
      "supply": 120,
      "supplyAt": "2026-06-01T11:28:12.000Z",
      "hungrySince": null,
-     "wagonFortAt": null
+     "wagonFortAt": null,
+     "returnHome": false
     },
     "serverTime": "2026-06-01T11:28:12.000Z"
    }
@@ -6686,7 +6689,8 @@
     "units": {
      "spearman": 2,
      "scout": 1
-    }
+    },
+    "returnHome": true
    },
    "status": 200,
    "response": {
@@ -6739,7 +6743,8 @@
      "supply": 32,
      "supplyAt": "2026-06-01T11:28:12.000Z",
      "hungrySince": null,
-     "wagonFortAt": null
+     "wagonFortAt": null,
+     "returnHome": true
     },
     "serverTime": "2026-06-01T11:28:12.000Z"
    }
@@ -7330,7 +7335,8 @@
       "supply": 32,
       "supplyAt": "2026-06-01T11:28:12.000Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": true
      },
      {
       "id": 1,
@@ -7380,7 +7386,8 @@
       "supply": 120,
       "supplyAt": "2026-06-01T11:28:12.000Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": false
      }
     ],
     "forts": [],
@@ -9644,8 +9651,8 @@
       },
       "queue": [],
       "garrison": {
-       "scout": 0,
-       "spearman": 11
+       "scout": 1,
+       "spearman": 13
       },
       "away": {
        "scout": 0
@@ -9669,15 +9676,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 269.99999999999994,
-        "wood": 702.5,
-        "grain": 278.7666666666666,
-        "stone": 685
+        "iron": 312.99999999999994,
+        "wood": 784.5,
+        "grain": 344.8515416666666,
+        "stone": 757
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 103,
+        "grain": 22,
         "stone": 300
        },
        "capacity": {
@@ -9686,7 +9693,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:28:55.200Z"
+       "settledAt": "2026-06-01T11:32:54.763Z"
       }
      }
     ],
@@ -10037,15 +10044,13 @@
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "hold",
+      "orders": "explore",
       "stance": "balanced",
-      "loot": {
-       "iron": 33,
-       "wood": 52,
-       "grain": 39,
-       "stone": 52
+      "loot": null,
+      "units": {
+       "scout": 1,
+       "spearman": 2
       },
-      "units": {},
       "status": "done",
       "battleId": null,
       "path": [
@@ -10072,12 +10077,13 @@
       ],
       "departsAt": "2026-06-01T11:28:12.000Z",
       "arrivesAt": "2026-06-01T11:28:55.200Z",
-      "leavesAt": "2026-06-01T11:51:48.000Z",
-      "returnsAt": "2026-06-01T11:51:48.000Z",
+      "leavesAt": "2026-06-01T11:32:11.563Z",
+      "returnsAt": "2026-06-01T11:32:54.763Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T11:51:48.000Z",
-      "hungrySince": "2026-06-01T11:41:00.000Z",
-      "wagonFortAt": null
+      "supplyAt": "2026-06-01T11:32:54.763Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": true
      },
      {
       "id": 1,
@@ -10127,7 +10133,8 @@
       "supply": 0,
       "supplyAt": "2026-06-01T11:28:55.200Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": false
      }
     ],
     "forts": [],
@@ -12316,7 +12323,8 @@
      "supply": 72,
      "supplyAt": "2026-06-01T11:58:12.000Z",
      "hungrySince": null,
-     "wagonFortAt": null
+     "wagonFortAt": null,
+     "returnHome": false
     },
     "serverTime": "2026-06-01T11:58:12.000Z"
    }
@@ -12526,7 +12534,7 @@
       },
       "queue": [],
       "garrison": {
-       "scout": 0,
+       "scout": 1,
        "spearman": 3
       },
       "away": {
@@ -12551,15 +12559,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 557.5,
-        "wood": 760,
-        "grain": 562.7833333333332,
-        "stone": 760
+        "iron": 595.5,
+        "wood": 778,
+        "grain": 568.1515416666666,
+        "stone": 778
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 319,
+        "grain": 292,
         "stone": 300
        },
        "capacity": {
@@ -12568,7 +12576,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T12:23:16.157Z"
+       "settledAt": "2026-06-01T12:23:34.157Z"
       }
      }
     ],
@@ -12769,20 +12777,20 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 20
+        "spearman": 21
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 5,
+      "round": 4,
       "attackerStance": "balanced",
       "attackerInitial": {
-       "zealot": 11,
+       "zealot": 10,
        "crossbowman": 3,
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 3
       },
       "defenderInitial": {
        "archer": 12,
@@ -12790,9 +12798,9 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T12:24:17.357Z",
+        "at": "2026-06-01T12:24:35.357Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 11,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 2,
@@ -12804,9 +12812,9 @@
         }
        },
        {
-        "at": "2026-06-01T12:24:35.357Z",
+        "at": "2026-06-01T12:24:53.357Z",
         "round": 2,
-        "attackerLeft": 9,
+        "attackerLeft": 8,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 1,
@@ -12816,9 +12824,9 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:24:53.357Z",
+        "at": "2026-06-01T12:25:11.357Z",
         "round": 3,
-        "attackerLeft": 6,
+        "attackerLeft": 5,
         "defenderLeft": 32,
         "attackerLosses": {
          "zealot": 2,
@@ -12829,32 +12837,21 @@
         }
        },
        {
-        "at": "2026-06-01T12:25:11.357Z",
+        "at": "2026-06-01T12:25:29.357Z",
         "round": 4,
-        "attackerLeft": 4,
-        "defenderLeft": 30,
+        "attackerLeft": 3,
+        "defenderLeft": 31,
         "attackerLosses": {
          "zealot": 2
         },
         "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
+         "archer": 1
         }
-       },
-       {
-        "at": "2026-06-01T12:25:29.357Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 30,
-        "attackerLosses": {
-         "zealot": 2
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T12:23:59.357Z",
+      "startedAt": "2026-06-01T12:24:17.357Z",
       "endedAt": "2026-06-01T12:25:29.357Z"
      },
      {
@@ -12870,12 +12867,12 @@
       "setup": {
        "home": {
         "initial": {
-         "spearman": 9
+         "spearman": 11
         }
        }
       },
       "status": "raided",
-      "round": 5,
+      "round": 6,
       "attackerStance": "balanced",
       "attackerInitial": {
        "zealot": 10,
@@ -12883,17 +12880,17 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 3
       },
       "defenderInitial": {
-       "spearman": 9
+       "spearman": 11
       },
       "rounds": [
        {
         "at": "2026-06-01T12:22:04.157Z",
         "round": 1,
         "attackerLeft": 14,
-        "defenderLeft": 7,
+        "defenderLeft": 9,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 2
@@ -12903,7 +12900,7 @@
         "at": "2026-06-01T12:22:22.157Z",
         "round": 2,
         "attackerLeft": 14,
-        "defenderLeft": 6,
+        "defenderLeft": 8,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -12913,7 +12910,7 @@
         "at": "2026-06-01T12:22:40.157Z",
         "round": 3,
         "attackerLeft": 14,
-        "defenderLeft": 5,
+        "defenderLeft": 7,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -12922,9 +12919,11 @@
        {
         "at": "2026-06-01T12:22:58.157Z",
         "round": 4,
-        "attackerLeft": 14,
-        "defenderLeft": 4,
-        "attackerLosses": {},
+        "attackerLeft": 13,
+        "defenderLeft": 6,
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {
          "spearman": 1
         }
@@ -12932,19 +12931,29 @@
        {
         "at": "2026-06-01T12:23:16.157Z",
         "round": 5,
-        "attackerLeft": 14,
-        "defenderLeft": 3,
+        "attackerLeft": 13,
+        "defenderLeft": 5,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
         }
+       },
+       {
+        "at": "2026-06-01T12:23:34.157Z",
+        "round": 6,
+        "attackerLeft": 13,
+        "defenderLeft": 3,
+        "attackerLosses": {},
+        "defenderLosses": {
+         "spearman": 2
+        }
        }
       ],
       "loot": {
-       "iron": 175,
-       "wood": 240,
-       "grain": 177,
-       "stone": 240
+       "iron": 170,
+       "wood": 222,
+       "grain": 162,
+       "stone": 222
       },
       "decision": {
        "choice": "raid",
@@ -12953,7 +12962,7 @@
        ]
       },
       "startedAt": "2026-06-01T12:21:46.157Z",
-      "endedAt": "2026-06-01T12:23:16.157Z"
+      "endedAt": "2026-06-01T12:23:34.157Z"
      },
      {
       "id": 2,
@@ -13122,7 +13131,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 2,
-      "xp": 9,
+      "xp": 10,
       "xpToNext": 41,
       "skillPoints": 1,
       "skills": {},
@@ -13203,7 +13212,7 @@
       "name": "Lothar",
       "title": "Brother Lothar",
       "level": 2,
-      "xp": 10,
+      "xp": 11,
       "xpToNext": 28,
       "skills": {
        "thick_hide": 1
@@ -13220,7 +13229,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 11,
+      "kills": 12,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -13275,7 +13284,8 @@
       "supply": 0,
       "supplyAt": "2026-06-01T11:59:38.400Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": false
      },
      {
       "id": 2,
@@ -13288,15 +13298,13 @@
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "hold",
+      "orders": "explore",
       "stance": "balanced",
-      "loot": {
-       "iron": 33,
-       "wood": 52,
-       "grain": 39,
-       "stone": 52
+      "loot": null,
+      "units": {
+       "scout": 1,
+       "spearman": 2
       },
-      "units": {},
       "status": "done",
       "battleId": null,
       "path": [
@@ -13323,12 +13331,13 @@
       ],
       "departsAt": "2026-06-01T11:28:12.000Z",
       "arrivesAt": "2026-06-01T11:28:55.200Z",
-      "leavesAt": "2026-06-01T11:51:48.000Z",
-      "returnsAt": "2026-06-01T11:51:48.000Z",
+      "leavesAt": "2026-06-01T11:32:11.563Z",
+      "returnsAt": "2026-06-01T11:32:54.763Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T11:51:48.000Z",
-      "hungrySince": "2026-06-01T11:41:00.000Z",
-      "wagonFortAt": null
+      "supplyAt": "2026-06-01T11:32:54.763Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": true
      },
      {
       "id": 1,
@@ -13378,7 +13387,8 @@
       "supply": 0,
       "supplyAt": "2026-06-01T11:28:55.200Z",
       "hungrySince": null,
-      "wagonFortAt": null
+      "wagonFortAt": null,
+      "returnHome": false
      }
     ],
     "forts": [],
@@ -13563,7 +13573,7 @@
      [
       0,
       0,
-      12.6
+      12.2
      ]
     ],
     "delegations": [],
@@ -15491,7 +15501,7 @@
    "response": {
     "notifications": [
      {
-      "id": 38,
+      "id": 37,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -15500,7 +15510,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 36,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (1, 4) sank back into the earth",
@@ -15509,20 +15519,11 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 35,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 5 rounds.",
-      "createdAt": "2026-06-01T12:25:29.357Z",
-      "read": false
-     },
-     {
-      "id": 35,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Brother Lothar grows stronger",
-      "body": "Brother Lothar is now level 2.",
+      "body": "The horde was beaten at its walls after 4 rounds.",
       "createdAt": "2026-06-01T12:25:29.357Z",
       "read": false
      },
@@ -15531,8 +15532,8 @@
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
-      "body": "15 of them against its guard of 35.",
-      "createdAt": "2026-06-01T12:23:59.357Z",
+      "body": "14 of them against its guard of 35.",
+      "createdAt": "2026-06-01T12:24:17.357Z",
       "read": false
      },
      {
@@ -15541,29 +15542,38 @@
       "tier": "digest",
       "title": "Dobrynya is wounded",
       "body": "Back on their feet in a few hours.",
-      "createdAt": "2026-06-01T12:23:16.157Z",
+      "createdAt": "2026-06-01T12:23:34.157Z",
       "read": false
      },
      {
       "id": 32,
-      "kind": "battle_result",
+      "kind": "leader",
       "tier": "digest",
-      "title": "Vruchiy was raided",
-      "body": "The horde carried off 832 resources after 5 rounds.",
-      "createdAt": "2026-06-01T12:23:16.157Z",
+      "title": "Brother Lothar grows stronger",
+      "body": "Brother Lothar is now level 2.",
+      "createdAt": "2026-06-01T12:23:34.157Z",
       "read": false
      },
      {
       "id": 31,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "Vruchiy is under attack",
-      "body": "A horde of 14 is fighting your garrison of 9.",
-      "createdAt": "2026-06-01T12:21:46.157Z",
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy was raided",
+      "body": "The horde carried off 776 resources after 6 rounds.",
+      "createdAt": "2026-06-01T12:23:34.157Z",
       "read": false
      },
      {
       "id": 30,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 14 is fighting your garrison of 12.",
+      "createdAt": "2026-06-01T12:21:46.157Z",
+      "read": false
+     },
+     {
+      "id": 29,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -15572,7 +15582,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 28,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-6, 1)",
@@ -15581,7 +15591,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 27,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-1, 8) were taken away",
@@ -15590,7 +15600,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 26,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is back from: Search the ruins",
@@ -15599,7 +15609,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 25,
       "kind": "site",
       "tier": "digest",
       "title": "The Sunken Shrine at (3, 0) gave up 1755 resources",
@@ -15608,21 +15618,12 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 24,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
       "body": "2 of them fell; 9 still hold it.",
       "createdAt": "2026-06-01T11:58:55.200Z",
-      "read": false
-     },
-     {
-      "id": 24,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T11:51:48.000Z",
       "read": false
      },
      {
@@ -15833,7 +15834,7 @@
       "read": false
      }
     ],
-    "unread": 38,
+    "unread": 37,
     "serverTime": "2026-06-01T12:58:12.000Z"
    }
   }

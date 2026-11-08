@@ -298,6 +298,10 @@ static func on_shipyard_done(server: LocalServer, world: Dictionary, event: Dict
 		return
 	yard.status = "done"
 	yard.nextRaidAt = null
+	# Armies guarding it that were told to come home once done turn back.
+	for army in LocalArmies.armies_holding(world, Vector2i(yard.q, yard.r), ["stationed"]):
+		if army.get("returnHome", false):
+			LocalArmies.send_home(server, world, army, int(event.dueAt))
 	# Every member gets the bounty.
 	for member in world.members:
 		reward(server, world, member.accountId, {"title": "The boat at ({q}, {r}) is ready",

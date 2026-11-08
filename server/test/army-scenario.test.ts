@@ -47,7 +47,7 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
     .filter((s: { status: string; guardians: number | null }) => s.status === 'unexplored')
     .sort((a: { q: number; r: number }, b: { q: number; r: number }) => hexDistance(hex(a.q, a.r), hex(home.q, home.r)) - hexDistance(hex(b.q, b.r), hex(home.q, home.r)))[0];
   await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: site.q, r: site.r } });
-  await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'explore', target: { q: site.q, r: site.r }, units: { spearman: 2, scout: 1 } } });
+  await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'explore', target: { q: site.q, r: site.r }, units: { spearman: 2, scout: 1 }, returnHome: true } });
   const next = neighbors(hex(home.q, home.r)).find((n) => passable(n.q, n.r))!;
   await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: next.q, r: next.r } } });
   await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: next.q, r: next.r } });

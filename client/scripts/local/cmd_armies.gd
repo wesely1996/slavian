@@ -260,7 +260,8 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders,
 		"stance": String(order.stance) if order.get("stance") != null else String(home.state.stance), "engagedUnits": null, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
-		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null, "wagonFortAt": null}
+		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null, "wagonFortAt": null,
+		"returnHome": bool(order.get("returnHome", false))}
 	world.next.army += 1
 	world.armies.append(army)
 	if hero_account != null:
@@ -434,11 +435,46 @@ static func join_village(server: LocalServer, world: Dictionary, army: Dictionar
 
 ## An army done with its errand stands on the hex it reached, holding it.
 static func hold_hex(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	# Told to come home once done, it does.
+	if not stays_out(world, army):
+		send_home(server, world, army, at)
+		return
 	army.status = "stationed"
 	army.orders = "hold"
 	army.targetVillageId = null
 	army.battleId = null
 	intercept_at(server, world, Vector2i(army.targetQ, army.targetR), at)
+
+
+## scheduler/armies.ts staysOut: whether an army done with its errand stays
+## where it is: always, unless told to come home once done; and even then
+## while it guards a shipyard whose boat isn't finished.
+static func stays_out(world: Dictionary, army: Dictionary) -> bool:
+	if not army.get("returnHome", false):
+		return true
+	if army.targetVillageId != null:
+		return false
+	for s in world.get("shipyards", []):
+		if int(s.q) == int(army.targetQ) and int(s.r) == int(army.targetR) and s.status != "done":
+			return true
+	return false
+
+
+## scheduler/armies.ts setReturnHome: whether an army comes home by itself
+## once its errand is done; switched on for one standing with its errand
+## done, it turns home now.
+static func set_return_home(server: LocalServer, world: Dictionary, army_id: int, on: bool, at: int) -> Dictionary:
+	var army := find_army(world, army_id)
+	if army.is_empty():
+		return {"error": "No such army", "kind": "not_found"}
+	if army.status == "returning" or army.status == "done":
+		return LocalVillage.rule("They are already on their way home")
+	if not String(army.orders) in ["support", "hold", "clear", "explore"]:
+		return LocalVillage.rule("They come home by themselves")
+	army.returnHome = on
+	if on and army.status == "stationed" and army.orders != "explore" and not stays_out(world, army):
+		send_home(server, world, army, at)
+	return army
 
 
 ## An army lost for good (starved): the hero carried home wounded, the
@@ -750,6 +786,10 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 			storm_camp(server, world, army, at, changed)
 			return
 		"hold":
+			# Told to come home once there (and not guarding a shipyard), it turns back.
+			if not stays_out(world, army):
+				send_home(server, world, army, at)
+				return
 			army.status = "stationed"
 			var fort := fort_at(world, Vector2i(army.targetQ, army.targetR))
 			if not fort.is_empty():
@@ -772,7 +812,7 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 			break
 	if not ongoing.is_empty() and ongoing.waveId != null:
 		join_battle(server, world, army, ongoing, server.find_wave(world, int(ongoing.waveId)), at)
-	elif army.orders == "support":
+	elif army.orders == "support" and not army.get("returnHome", false):
 		army.status = "stationed"
 		plan_hunger(server, world, army, at)
 	else:
@@ -800,7 +840,8 @@ static func send_army(server: LocalServer, world: Dictionary, village: Dictionar
 		return {"error": "Unknown stance", "kind": "invalid"}
 	return dispatch_army(server, world, {"homeVillageId": village.id, "targetVillageId": body.get("targetVillageId"),
 		"targetHex": Vector2i(int(target.q), int(target.r)) if target is Dictionary else null, "units": units, "orders": body.orders,
-		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "stance": body.get("stance"), "at": now})
+		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "stance": body.get("stance"),
+		"returnHome": body.get("returnHome", false) == true, "at": now})
 
 
 ## commands/armies.ts armyStanceCommand: an army's battle stance; not in the
@@ -1621,4 +1662,5 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"leavesAt": LocalTime.iso(a.leavesAt) if a.leavesAt != null else null, "returnsAt": LocalTime.iso(a.returnsAt) if a.returnsAt != null else null,
 		"supply": a.get("supply"), "supplyAt": LocalTime.iso(a.supplyAt) if a.get("supplyAt") != null else null,
 		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null,
-		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null}
+		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null,
+		"returnHome": a.get("returnHome", false)}

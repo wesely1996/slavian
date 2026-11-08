@@ -86,6 +86,8 @@ var _army_units: Dictionary[String, int] = {}
 var _army_orders := "support"
 ## Hold form: whether your hero leads the army.
 var _army_hero := false
+## Whether the army being sent comes home by itself once its errand is done.
+var _army_return := false
 ## The general picked to lead the next army sent (0: none).
 var _army_general := 0
 ## The stance picked for the next army sent ("": its village's).
@@ -2219,9 +2221,15 @@ func _send_troops(village: Dictionary) -> void:
 	var fights: bool = body.orders != "garrison"
 	if fights:
 		_army_stance_picker(village)
+	# Support and holding stay until called home, unless told to come back once done.
+	var stays: bool = body.orders in ["support", "hold"]
+	if stays:
+		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), false), func(on: bool) -> void: _army_return = on))
 	var go := UI.button(tr("Send"), func() -> void:
 		var order := body.duplicate()
 		order.units = _picked_units(home_units)
+		if stays:
+			order.returnHome = _army_return
 		if _ready_general(village_id) > 0:
 			order.generalId = _ready_general(village_id)
 		if fights:
@@ -2357,8 +2365,9 @@ func _hold_panel(terrain_id: String) -> void:
 		_panel_body.add_child(lead)
 	_general_picker(village_id)
 	_army_stance_picker(home)
+	_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(orders, not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
-		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance}
+		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance, "returnHome": _army_return}
 		if _ready_general(village_id) > 0:
 			order.generalId = _ready_general(village_id)
 		_send_army(village_id, order))
@@ -2828,10 +2837,24 @@ func _army_panel() -> void:
 		return
 	_panel_body.add_child(UI.label(tr("Orders"), UI.HEADING_SIZE))
 	var army_id := int(army.id)
+	if army.orders in ["support", "hold", "clear", "explore"]:
+		var on: bool = army.get("returnHome", false)
+		_panel_body.add_child(_return_check(on, ArmyText.return_text(String(army.orders), not Game.shipyard_at(ArmyText.held_hex(army)).is_empty()), func(next: bool) -> void:
+			_army_command(army_id, "return-home", {"returnHome": next})))
 	_panel_body.add_child(UI.button(tr("Move: tap a hex or a village"), func() -> void:
 		_army_moving = army_id
 		_rebuild_panel(), "icon/map"))
 	_army_orders_row(army)
+
+
+## The "come home when done" checkbox, with what it means for these orders.
+func _return_check(on: bool, explain: String, changed: Callable) -> Control:
+	var box := CheckBox.new()
+	box.text = tr("Come home when done")
+	box.button_pressed = on
+	box.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+	box.toggled.connect(func(pressed: bool) -> void: changed.call(pressed))
+	return UI.with_info(box, explain)
 
 
 ## What an army's scouts add to its attack and defense (sim/scouting.ts intelBonus).

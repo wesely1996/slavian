@@ -36,7 +36,7 @@ import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
-import { armyLosses, sendHome, terrainOf } from './armies.js';
+import { armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { combatants, withIntel } from '../sim/scouting.js';
@@ -327,7 +327,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       if (commander) await generalAfterBattle(client, data, world, commander, { kills, won, at });
     }
     for (const army of armies) {
-      if (won && total(army.units)) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });
+      // Won, it holds on (one told to come home once done, unless it guards a shipyard, turns back).
+      if (won && total(army.units) && (await staysOut(client, world, army))) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });
       else await sendHome(client, world, army, at, data);
     }
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });

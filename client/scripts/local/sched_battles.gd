@@ -369,7 +369,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	for army in armies:
 		if breaks.call(army):
 			fall_back(server, world, army, kills, int(battle.id), at)
-		elif leaving.call(army) or spent.call(army) or (outcome != "ongoing" and army.orders != "support"):
+		elif leaving.call(army) or spent.call(army) or (outcome != "ongoing" and (army.orders != "support" or army.get("returnHome", false))):
 			LocalArmies.send_home(server, world, army, at)
 		elif outcome != "ongoing":
 			if LocalBattle.total(army.units) > 0:
@@ -623,7 +623,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 			if not commander.is_empty():
 				LocalGenerals.after_battle(server, world, commander, {"kills": kills, "won": won, "at": at})
 		for army in armies:
-			if won and LocalBattle.total(army.units) > 0:
+			if won and LocalBattle.total(army.units) > 0 and LocalArmies.stays_out(world, army):
 				army.status = "stationed"
 				army.battleId = null
 				army.joinsRound = null

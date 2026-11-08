@@ -382,6 +382,14 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(turned)
 		changed.append(["world"])
 		return {"status": 200, "data": {"caravan": LocalLogistics.caravan_view(turned), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "return-home":
+		if not body is Dictionary or not body.get("returnHome") is bool:
+			return _fail(400, "invalid_request", "Say whether they come home")
+		var army := LocalArmies.set_return_home(self, world, int(parts[2]), bool(body.returnHome), now)
+		if army.has("error"):
+			return _rule_answer(army)
+		changed.append(["world"])
+		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "stance":
 		if not String(body.get("stance", "")) in data.battle.stances:
 			return _fail(400, "invalid_request", "Unknown stance")
@@ -1339,6 +1347,8 @@ func _load_all() -> void:
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 				# Armies saved before wagon forts.
 				a.merge({"wagonFortAt": null})
+				# Armies saved before coming home once done.
+				a.merge({"returnHome": false})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			# Roads from before road levels: level 1, as fast as they were.

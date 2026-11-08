@@ -525,6 +525,8 @@ export function armyView(army: Army) {
     hungrySince: army.hungrySince?.toISOString() ?? null,
     // When its wagons stand ready in a ring (a wagon fort), or null.
     wagonFortAt: army.wagonFortAt?.toISOString() ?? null,
+    // It comes home by itself once its errand is done.
+    returnHome: army.returnHome,
   };
 }
 
