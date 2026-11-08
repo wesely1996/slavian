@@ -7,7 +7,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
-import { circleWagons, disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, stockStore } from '../scheduler/armies.js';
+import { circleWagons, disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, setReturnHome, stockStore } from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
@@ -38,6 +38,7 @@ export async function sendArmyCommand(
     withHero?: boolean | undefined;
     generalId?: number | undefined;
     stance?: Stance | undefined;
+    returnHome?: boolean | undefined;
     now: Date;
   },
 ): Promise<Army> {
@@ -54,6 +55,7 @@ export async function sendArmyCommand(
       withHero: input.withHero,
       generalId: input.generalId,
       stance: input.stance,
+      returnHome: input.returnHome,
       at: input.now,
     });
   });
@@ -199,6 +201,12 @@ export async function armyStanceCommand(db: Db, deps: SchedulerDeps, input: { ac
     await saveArmy(client, next);
     return next;
   });
+}
+
+// Whether an army comes home by itself once its errand is done; one whose
+// errand is already done (standing guard, holding a hex) turns home now.
+export async function armyReturnHomeCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; returnHome: boolean; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'told an army when to come home', ({ client, world, army }) => setReturnHome(client, deps.data, world, army, input.returnHome, input.now));
 }
 
 export async function disbandArmyCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; now: Date }): Promise<Army> {

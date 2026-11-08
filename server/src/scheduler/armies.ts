@@ -42,6 +42,7 @@ import { arriveAtSite } from './sites.js';
 import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
 import { fortAt, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
+import { listShipyards } from '../db/shipyards.js';
 import { grainCapacity } from '../sim/field.js';
 
 export const armyPayload = z.object({ armyId: z.number().int() });
@@ -66,6 +67,8 @@ export interface ArmyOrder {
   generalId?: number | undefined;
   // Its battle stance (absent: the village's).
   stance?: Stance | undefined;
+  // It comes home by itself once its errand is done.
+  returnHome?: boolean | undefined;
   at: Date;
 }
 
@@ -134,6 +137,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     generalId,
     orders: input.orders,
     stance: input.stance ?? home.state.stance,
+    returnHome: input.returnHome ?? false,
     units,
     path,
     departsAt: input.at,
@@ -161,10 +165,21 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
 // An army done with its errand stands on the hex it reached, holding it,
 // until it is moved, sent into a settlement or called home.
 export async function holdHex(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  // Told to come home once done, it does.
+  if (!(await staysOut(client, world, army))) return sendHome(client, world, army, at, data);
   const holding: Army = { ...army, status: 'stationed', orders: 'hold', targetVillageId: null, battleId: null };
   await saveArmy(client, holding);
   await interceptAt(client, data, world, hex(army.targetQ, army.targetR), at);
   return holding;
+}
+
+// Whether an army done with its errand stays where it is: always, unless
+// it was told to come home once done; and even then while it guards a
+// shipyard whose boat isn't finished (it comes home when the boat is).
+export async function staysOut(client: DbClient, world: World, army: Army): Promise<boolean> {
+  if (!army.returnHome) return true;
+  if (army.targetVillageId !== null) return false;
+  return (await listShipyards(client, world.id)).some((s) => s.q === army.targetQ && s.r === army.targetR && s.status !== 'done');
 }
 
 // Where a standing army goes next: a hex to hold, or a village (its owner's
@@ -254,6 +269,19 @@ async function ordersAt(client: DbClient, data: GameData, world: World, army: Ar
   }
   const site = await siteAt(client, world.id, dest.q, dest.r);
   return site && site.status !== 'explored' ? 'explore' : 'hold';
+}
+
+// Whether an army comes home by itself once its errand is done. Switched
+// on for one standing with its errand done, it turns home now (one still
+// searching a site or guarding an unfinished boat waits until it is done).
+export async function setReturnHome(client: DbClient, data: GameData, world: World, army: Army, on: boolean, at: Date): Promise<Army> {
+  if (army.status === 'returning' || army.status === 'done') throw new RuleError('They are already on their way home');
+  if (!['support', 'hold', 'clear', 'explore'].includes(army.orders)) throw new RuleError('They come home by themselves');
+  const next: Army = { ...army, returnHome: on };
+  await saveArmy(client, next);
+  const searching = army.orders === 'explore';
+  if (on && army.status === 'stationed' && !searching && !(await staysOut(client, world, next))) return sendHome(client, world, next, at, data);
+  return next;
 }
 
 function standing(army: Army): void {
@@ -572,6 +600,12 @@ export const armyHandlers: HandlerRegistry = {
       return;
     }
     if (army.orders === 'hold') {
+      // Told to come home once there (and not guarding a shipyard), it turns back.
+      if (!(await staysOut(client, world, army))) {
+        await sendHome(client, world, army, event.dueAt, data);
+        await notifyWorld(client, { worldId: world.id, type: 'armies' });
+        return;
+      }
       const stationed: Army = { ...army, status: 'stationed' };
       await saveArmy(client, stationed);
       const fort = await fortAt(client, world.id, army.targetQ, army.targetR);
@@ -597,7 +631,7 @@ export const armyHandlers: HandlerRegistry = {
     const ongoing = rows[0] ? await loadBattle(client, rows[0].id) : null;
     if (ongoing?.waveId) {
       await joinBattle(client, data, world, arrived, ongoing, await loadWave(client, ongoing.waveId), event.dueAt);
-    } else if (army.orders === 'support') {
+    } else if (army.orders === 'support' && !army.returnHome) {
       await planHunger(client, data, world, { ...arrived, status: 'stationed' }, event.dueAt);
     } else {
       await sendHome(client, world, arrived, event.dueAt, data);

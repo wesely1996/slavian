@@ -15,6 +15,18 @@ static func order_text(order: String) -> String:
 	}.get(order, order)
 
 
+## What "come home when done" means for `order` (at a shipyard: `shipyard`).
+static func return_text(order: String, shipyard: bool) -> String:
+	if shipyard:
+		return UI.t("Come home when done: they guard the shipyard against its raiders until the boat is finished, then march home with what they carry.")
+	return {
+		"support": UI.t("Come home when done: they march to the village, fight its battle if one is on, then come home instead of standing guard."),
+		"hold": UI.t("Come home when done: they march to the hex and straight back, instead of holding it."),
+		"clear": UI.t("Come home when done: once the camp is cleared they bring its loot home instead of holding its hex."),
+		"explore": UI.t("Come home when done: once the guardians are beaten and the site searched, they bring what they found home."),
+	}.get(order, UI.t("Come home when done: once their errand is done they march home by themselves."))
+
+
 static func units_text(units: Dictionary, defs: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for unit in units:

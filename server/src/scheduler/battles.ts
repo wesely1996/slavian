@@ -267,11 +267,12 @@ export const battleHandlers: HandlerRegistry = {
       ...(engaged.length ? { garrisonLosses: shares[0]! } : {}),
     };
     // Armies after the round: harassers ride home; when the battle is over,
-    // support stays on guard and reinforcements go home.
+    // support stays on guard (unless told to come home once done) and
+    // reinforcements go home.
     const kills = total(battle.attackerInitial) - total(attackerNow);
     for (const army of armies) {
       if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
-      else if (leaving(army) || spent(army) || (outcome !== 'ongoing' && army.orders !== 'support')) await sendHome(client, world, army, at, data);
+      else if (leaving(army) || spent(army) || (outcome !== 'ongoing' && (army.orders !== 'support' || army.returnHome))) await sendHome(client, world, army, at, data);
       else if (outcome !== 'ongoing') {
         if (total(army.units)) await planHunger(client, data, world, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 }, at);
         else await saveArmy(client, { ...army, status: 'done' });

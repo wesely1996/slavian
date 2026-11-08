@@ -3,6 +3,9 @@
 // again to hold a hex, and one in the middle of turning told to go where it
 // already heads. Then standing armies moved onto the starter camp (they
 // storm it) and onto an ancient site (they search it, slowly without scouts).
+// Last, armies told to come home once done: one holding a hex comes straight
+// back, one sent to support the village it came from is refused, and one
+// standing is told to come home and turns back at once.
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -72,5 +75,20 @@ scenario('reroute-scenario.json', START, async ({ started, play }) => {
   await play({ advance: 20 * MINUTE });
   await play({ method: 'GET', path: world });
   await play({ advance: 3 * 60 * MINUTE });
+  const later = (await play({ method: 'GET', path: world })).body;
+
+  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
+  await play({ advance: 15 * MINUTE });
+  await army({ orders: 'hold', target: { q: near[0], r: near[1] }, units: { spearman: 2 }, returnHome: true });
+  const staying = (await army({ orders: 'hold', target: { q: other[0], r: other[1] }, units: { spearman: 2 } })).body.army;
+  await play({ advance: 10 * MINUTE });
+  await play({ method: 'GET', path: world });
+  if (staying) {
+    await play({ method: 'POST', path: `/v1/armies/${staying.id}/return-home`, body: { returnHome: true } });
+    await play({ method: 'POST', path: `/v1/armies/${staying.id}/return-home`, body: { returnHome: false } });
+  }
+  const standingArmy = (later.armies as { id: number; status: string }[]).find((a) => a.status === 'stationed');
+  if (standingArmy) await play({ method: 'POST', path: `/v1/armies/${standingArmy.id}/return-home`, body: { returnHome: true } });
+  await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
 });

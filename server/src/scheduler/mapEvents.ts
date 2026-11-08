@@ -180,6 +180,11 @@ export const mapEventHandlers: HandlerRegistry = {
     const shipyard = await loadShipyard(client, shipyardPayload.parse(event.payload).shipyardId);
     if (!shipyard || shipyard.status !== 'building' || shipyard.completesAt?.getTime() !== event.dueAt.getTime()) return;
     await saveShipyard(client, { ...shipyard, status: 'done', nextRaidAt: null });
+    // Armies guarding it that were told to come home once done turn back.
+    for (const army of await armiesHolding(client, world.id, shipyard.q, shipyard.r, ['stationed'])) {
+      if (army.returnHome) await sendHome(client, world, army, event.dueAt, data);
+    }
+    await notifyWorld(client, { worldId: world.id, type: 'armies' });
     for (const member of await listMembers(client, world.id)) {
       await rewardEvent(client, data, world, member.accountId, {
         title: 'The boat at ({q}, {r}) is ready',

@@ -17,6 +17,7 @@ import {
   moveArmyCommand,
   recallArmyCommand,
   armyStanceCommand,
+  armyReturnHomeCommand,
   resupplyArmyCommand,
   circleWagonsCommand,
   sendArmyCommand,
@@ -131,6 +132,7 @@ const plotBody = z.object({ plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2})$/)
 const tradeBody = z.object({ give: z.enum(RESOURCE_KINDS), get: z.enum(RESOURCE_KINDS), amount: z.number().int().positive().max(1_000_000) });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
+const returnHomeBody = z.object({ returnHome: z.boolean() });
 const amount = z.number().int().min(0).max(1_000_000);
 const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
 // No destination: the Holy City vault.
@@ -199,6 +201,8 @@ const armyBody = z.object({
   generalId: z.number().int().positive().optional(),
   // Its battle stance (absent: the village's).
   stance: z.enum(STANCES).optional(),
+  // It comes home by itself once its errand is done.
+  returnHome: z.boolean().optional(),
 });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
 // Grain a standing army leaves in a fort or supply point.
@@ -797,6 +801,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const { stance } = stanceBody.parse(request.body);
     const army = await armyStanceCommand(db, scheduler, { accountId: account.id, armyId: id, stance, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // Whether the army comes home by itself once its errand is done.
+  app.post('/v1/armies/:id/return-home', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { returnHome } = returnHomeBody.parse(request.body);
+    const army = await armyReturnHomeCommand(db, scheduler, { accountId: account.id, armyId: id, returnHome, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 
