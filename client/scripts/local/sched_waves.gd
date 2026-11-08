@@ -33,7 +33,7 @@ static func land_of(world: Dictionary) -> Dictionary:
 	var lanes := {}
 	for s in world.get("shipyards", []):
 		if s.status == "done":
-			for k in LocalLand.river_lanes(world.rivers, s.edge.a, s.edge.b):
+			for k in LocalLand.river_lanes(world.rivers, s.edge.a, s.edge.b, world.hexes):
 				lanes[k] = true
 	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes}
 

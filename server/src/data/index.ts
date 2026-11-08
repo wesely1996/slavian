@@ -835,6 +835,8 @@ const eventsFileSchema = z.object({
       raiders: z.number().int().positive(),
       raiderStance: z.enum(STANCES),
       laneSpeed: z.number().min(1),
+      // A lake on its river is sailed at this move cost (before the lane's speed).
+      lakeMoveCost: z.number().positive(),
     }),
   }),
 });

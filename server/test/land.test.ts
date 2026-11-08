@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, type TerrainId } from '../src/data/index.js';
 import { hex } from '../src/sim/hex.js';
-import { edgeKey, landOf, moveCostOn, roadLink } from '../src/sim/land.js';
+import { edgeKey, landOf, moveCostOn, riverLanes, roadLink } from '../src/sim/land.js';
 import { routeFrom } from '../src/sim/waves.js';
 
 const data = loadGameData();
@@ -12,6 +12,29 @@ function strip(): Map<string, TerrainId> {
 }
 
 describe('land', () => {
+  it('sails a boat across a lake on its river, and up the rivers flowing into it', () => {
+    const terrain = new Map<string, TerrainId>();
+    for (let q = 0; q <= 7; q++) for (let r = -1; r <= 1; r++) terrain.set(`${q},${r}`, 'plains');
+    terrain.set('3,0', 'lake');
+    terrain.set('4,0', 'lake');
+    // One river runs into the lake from the west, another leaves it to the east.
+    const rivers = [{ a: hex(1, 0), b: hex(2, 0) }, { a: hex(5, 0), b: hex(6, 0) }];
+    const plain = riverLanes(rivers, rivers[0]!);
+    expect(plain).toEqual([edgeKey(hex(1, 0), hex(2, 0))]);
+    const lanes = riverLanes(rivers, rivers[0]!, terrain);
+    expect(lanes).toContain(edgeKey(hex(2, 0), hex(3, 0)));
+    expect(lanes).toContain(edgeKey(hex(3, 0), hex(4, 0)));
+    expect(lanes).toContain(edgeKey(hex(4, 0), hex(5, 0)));
+    expect(lanes).toContain(edgeKey(hex(5, 0), hex(6, 0)));
+    expect(lanes).not.toContain(edgeKey(hex(6, 0), hex(7, 0)));
+    // Only a boat crosses the lake, at the lane's speed.
+    const cost = moveCostOn(data, landOf(terrain, [], [], lanes));
+    const shipyard = data.events.kinds.shipyard;
+    expect(cost(hex(2, 0), hex(3, 0))).toBeCloseTo(shipyard.lakeMoveCost / shipyard.laneSpeed);
+    expect(moveCostOn(data, landOf(terrain, []))(hex(2, 0), hex(3, 0))).toBeNull();
+    expect(moveCostOn(data, landOf(terrain, [], [], lanes), false)(hex(2, 0), hex(3, 0))).toBeNull();
+  });
+
   it('links an outpost to its village by the fewest road steps, averaging their bonus', () => {
     const v = hex(0, 0);
     const a = hex(1, 0);

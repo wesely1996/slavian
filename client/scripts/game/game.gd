@@ -160,7 +160,6 @@ func set_world(new_world: Dictionary) -> void:
 	forts = new_world.get("forts", [])
 	camps = new_world.get("camps", [])
 	shipyards = new_world.get("shipyards", [])
-	lanes = _lanes(rivers)
 	sites = new_world.get("sites", [])
 	lore = new_world.get("lore", [])
 	var new_bridge: Variant = new_world.get("bridge")
@@ -177,6 +176,7 @@ func set_world(new_world: Dictionary) -> void:
 	if map is Dictionary:
 		for cell in map.hexes:
 			terrain[Vector2i(int(cell[0]), int(cell[1]))] = cell[2]
+	lanes = _lanes(rivers)
 	world_changed.emit()
 
 
@@ -254,10 +254,14 @@ func shipyard_at(cell: Vector2i) -> Dictionary:
 func _lanes(world_rivers: Array) -> Dictionary:
 	var edges: Array = world_rivers.map(func(e: Array) -> Dictionary: return {"a": Vector2i(int(e[0]), int(e[1])), "b": Vector2i(int(e[2]), int(e[3]))})
 	var out := {}
+	# Lakes on a boat's river are sailed too.
+	var land := {}
+	for cell in terrain:
+		land[LocalLand.key(cell)] = terrain[cell]
 	for yard in shipyards:
 		if yard.status == "done":
 			var e: Array = yard.edge
-			for k in LocalLand.river_lanes(edges, Vector2i(int(e[0]), int(e[1])), Vector2i(int(e[2]), int(e[3]))):
+			for k in LocalLand.river_lanes(edges, Vector2i(int(e[0]), int(e[1])), Vector2i(int(e[2]), int(e[3])), land):
 				out[k] = true
 	return out
 
