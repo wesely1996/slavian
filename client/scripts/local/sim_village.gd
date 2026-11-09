@@ -859,8 +859,39 @@ static func lose_garrison(data: Dictionary, state: Dictionary, losses: Dictionar
 
 ## Of the garrison's fallen (`lost`), those its hospital saves: each gets up
 ## again with the hospital's chance, drawn unit by unit (by name).
-static func hospital_healed(bonuses: Dictionary, lost: Dictionary, rng: LocalRng) -> Dictionary:
-	var chance := minf(1.0, bonus(bonuses, "hospital"))
+## sim/village.ts healerChance: the chance healers among `units` give each
+## of their side's fallen: each one's perUnit, at most the best max.
+static func healer_chance(data: Dictionary, units: Dictionary) -> float:
+	var chance := 0.0
+	var cap := 0.0
+	for unit in units:
+		var heals: Variant = data.units.units.get(unit, {}).get("heals")
+		if not heals is Dictionary or int(units[unit]) <= 0:
+			continue
+		chance += float(heals.perUnit) * int(units[unit])
+		cap = maxf(cap, float(heals.max))
+	return minf(cap, chance)
+
+
+## sim/village.ts healFallen: each of the fallen gets up again by `chance`.
+static func heal_fallen(chance: float, lost: Dictionary, rng: LocalRng) -> Dictionary:
+	var healed := {}
+	if chance <= 0:
+		return healed
+	var units: Array = lost.keys()
+	units.sort()
+	for unit in units:
+		var saved := 0
+		for i in int(lost[unit]):
+			if rng.next() < chance:
+				saved += 1
+		if saved > 0:
+			healed[unit] = saved
+	return healed
+
+
+static func hospital_healed(bonuses: Dictionary, lost: Dictionary, rng: LocalRng, extra := 0.0) -> Dictionary:
+	var chance := minf(1.0, bonus(bonuses, "hospital") + extra)
 	var healed := {}
 	if chance <= 0:
 		return healed

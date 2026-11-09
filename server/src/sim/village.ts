@@ -813,8 +813,35 @@ export function loseGarrison(data: GameData, state: VillageState, losses: Units,
 
 // Of the garrison's fallen (`lost`), those its hospital saves: each gets up
 // again with the hospital's chance, drawn from `rng` unit by unit (by name).
-export function hospitalHealed(bonuses: Bonuses, lost: Units, rng: () => number): Record<string, number> {
-  const chance = Math.min(1, bonus(bonuses, 'hospital'));
+// The chance healers among `units` give each of their side's fallen
+// (units.json heals): each one's perUnit, at most the best max.
+export function healerChance(data: GameData, units: Units): number {
+  let chance = 0;
+  let cap = 0;
+  for (const [unit, n] of Object.entries(units)) {
+    const heals = data.units.units[unit]?.heals;
+    if (!heals || n <= 0) continue;
+    chance += heals.perUnit * n;
+    cap = Math.max(cap, heals.max);
+  }
+  return Math.min(cap, chance);
+}
+
+// Each of the fallen gets up again by `chance` (sorted by unit, rng in turn).
+export function healFallen(chance: number, lost: Units, rng: () => number): Record<string, number> {
+  const healed: Record<string, number> = {};
+  if (chance <= 0) return healed;
+  for (const unit of Object.keys(lost).sort()) {
+    let saved = 0;
+    for (let i = 0; i < lost[unit]!; i++) if (rng() < chance) saved++;
+    if (saved > 0) healed[unit] = saved;
+  }
+  return healed;
+}
+
+// The hospital, and shamans in the garrison (`extra`), put fallen back on their feet.
+export function hospitalHealed(bonuses: Bonuses, lost: Units, rng: () => number, extra = 0): Record<string, number> {
+  const chance = Math.min(1, bonus(bonuses, 'hospital') + extra);
   const healed: Record<string, number> = {};
   if (chance <= 0) return healed;
   for (const unit of Object.keys(lost).sort()) {

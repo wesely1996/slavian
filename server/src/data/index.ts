@@ -147,6 +147,9 @@ const unitSchema = z.object({
   counters: familyMultipliers.optional(),
   // A clan's own unit: only that clan trains it.
   clan: z.string().optional(),
+  // A healer (the Shaman): each one gives every soldier who falls beside it
+  // `perUnit` chance to get up again, at most `max`.
+  heals: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
 });
 
 const unitsFileSchema = z.object({

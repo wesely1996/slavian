@@ -29,7 +29,8 @@ import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
 import type { PathStep } from '../sim/waves.js';
-import { completeTraining, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
+import { completeTraining, healFallen, healerChance, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
+import { createRng } from '../sim/rng.js';
 import { reserveOf, storeFromArmy, takeForArmy, topUpReserve } from '../sim/reserve.js';
 import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
 import { amountsAt, mapResources, spend, type Resources } from '../sim/resources.js';
@@ -571,7 +572,22 @@ export async function rallyToBattle(
 
 // Losses an army took: its supply is settled first (the dead stop eating),
 // or, for an army from before supplies, its home village stops feeding them.
-export async function armyLosses(client: DbClient, data: GameData, world: World, army: Army, losses: Record<string, number>, at: Date): Promise<Army> {
+export async function armyLosses(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  army: Army,
+  fallen: Record<string, number>,
+  at: Date,
+  wounds = true,
+): Promise<Army> {
+  if (total(fallen) === 0) return army;
+  // Shamans with the army put some of those who fell in battle back on
+  // their feet (not the starving).
+  const chance = wounds ? healerChance(data, army.units) : 0;
+  const healed = healFallen(chance, fallen, createRng((world.seed ^ Math.imul(army.id + 1, 0x632be5ab) ^ (Math.floor(at.getTime() / 60_000) & 0xfffff)) >>> 0));
+  const losses: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(fallen)) if (n - (healed[unit] ?? 0) > 0) losses[unit] = n - (healed[unit] ?? 0);
   if (total(losses) === 0) return army;
   const fed = supplied(army);
   let before: Army = army;
@@ -672,7 +688,7 @@ export const armyHandlers: HandlerRegistry = {
     }
     const strike = hungerStrikes(data, supplied(current)!, event.dueAt, world.speed);
     const name = (await loadVillage(client, army.homeVillageId).catch(() => null))?.name ?? '';
-    const thinned = strike.lost ? current : await armyLosses(client, data, world, current, strike.losses, event.dueAt);
+    const thinned = strike.lost ? current : await armyLosses(client, data, world, current, strike.losses, event.dueAt, false);
     if (strike.lost || total(thinned.units) === 0) {
       await endArmy(client, data, world, thinned, event.dueAt);
       await tell(client, world, army.ownerAccountId, {

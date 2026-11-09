@@ -699,6 +699,16 @@ def unit(kind):
         s.circle(61, 47, 2, "#ffffff", stroke="none", sw=0)
         for x, y in [(50, 98), (60, 86), (70, 96), (80, 84)]:
             s.ellipse(x, y, 4, 6, pale, stroke="none", sw=0, opacity=0.85)
+    elif kind == "shaman":
+        # A staff hung with a bundle of herbs and a little drum.
+        s.line(48, 104, 80, 22, stroke=s.lin([(0, "#c9a77a"), (1, "#6e4b2c")], 0, 0, 1, 1), sw=5)
+        s.circle(80, 22, 5, pale, stroke="none", sw=0)
+        for dx in (-7, -2, 3, 8):
+            s.path(f"M{fmt(72 + dx)},34 Q{fmt(66 + dx * 1.4)},50 {fmt(70 + dx * 1.6)},62", "none", stroke=s.lin([(0, "#9cbf6a"), (1, "#4f7a34")]), sw=3)
+        s.circle(52, 72, 14, s.rad([(0, "#e3c27a"), (1, "#8c6640")], 0.35, 0.3, 0.8), stroke="none", sw=0)
+        s.circle(52, 72, 14, "none", stroke=pale, sw=2.5)
+        s.line(44, 66, 60, 78, stroke="#6e2a1f", sw=1.6)
+        s.line(44, 78, 60, 66, stroke="#6e2a1f", sw=1.6)
     elif kind == "assassin":
         # A dagger, point down, with a drop of blood.
         s.poly([(78, 30), (86, 38), (50, 84), (44, 90), (46, 82)], pale, stroke="none", sw=0)
@@ -1994,7 +2004,7 @@ def assets():
     out["map/outpost"] = outpost()
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
         out[f"site/{kind}"] = site(kind)
-    for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon"]:
+    for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon", "shaman"]:
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)
