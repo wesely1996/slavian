@@ -16,6 +16,6 @@ export async function decayFear(client: DbClient, worldId: number, factor: numbe
 }
 
 export async function loadFear(client: DbClient, worldId: number): Promise<Map<string, number>> {
-  const { rows } = await client.query<{ q: number; r: number; value: number }>('SELECT q, r, value FROM fear WHERE world_id = $1', [worldId]);
+  const { rows } = await client.query<{ q: number; r: number; value: number }>('SELECT q, r, value FROM fear WHERE world_id = $1 ORDER BY q, r', [worldId]);
   return new Map(rows.map((row) => [`${row.q},${row.r}`, row.value]));
 }

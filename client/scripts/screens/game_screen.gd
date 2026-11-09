@@ -2692,17 +2692,24 @@ func _generals_section(village: Dictionary) -> void:
 		var place := Game.village_name(general.villageId)
 		_tick(where, func() -> String: return GeneralText.whereabouts(general, place, Game.server_now()))
 		row.add_child(info)
+		_panel_body.add_child(row)
+		# What can be done with one not out with an army, on a line of its own.
 		var general_id := int(general.id)
+		var actions := UI.hbox(8)
 		if general.status == "home" and places.size() > 1:
 			var others := places.filter(func(v: Dictionary) -> bool: return general.villageId == null or int(v.id) != int(general.villageId))
 			var to := UI.options(others.map(func(v: Dictionary) -> String: return tr("Send to %s") % v.name), 0)
 			to.item_selected.connect(func(i: int) -> void: _move_general(general_id, int(others[i].id)))
-			row.add_child(to)
+			to.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			to.custom_minimum_size.x = 0
+			to.clip_text = true
+			actions.add_child(to)
 		if general.status != "with_army":
 			var dismiss := UI.button(tr("Dismiss"), func() -> void: _dismiss_general(general_id))
 			dismiss.custom_minimum_size.x = 130
-			row.add_child(dismiss)
-		_panel_body.add_child(row)
+			actions.add_child(dismiss)
+		if actions.get_child_count() > 0:
+			_panel_body.add_child(actions)
 	var cost := GeneralText.recruit_cost(Game.data, mine.size())
 	var row := UI.hbox()
 	var cost_line := UI.rich()
@@ -2710,6 +2717,7 @@ func _generals_section(village: Dictionary) -> void:
 	row.add_child(cost_line)
 	var recruit := UI.primary(tr("Recruit"), func() -> void: _recruit_general(village_id))
 	recruit.custom_minimum_size.x = 160
+	recruit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(recruit)
 	_panel_body.add_child(row)
 	var full := mine.size() >= keeps

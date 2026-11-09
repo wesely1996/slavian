@@ -849,7 +849,7 @@
       "front": "north",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -934,7 +934,7 @@
          216000
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
+       "arrivesAt": "2026-06-01T10:27:36.000Z"
       }
      },
      {
@@ -943,7 +943,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -1003,7 +1003,7 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
      }
     ],
@@ -3692,7 +3692,7 @@
       "front": "north",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -3777,7 +3777,7 @@
          216000
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
+       "arrivesAt": "2026-06-01T10:27:36.000Z"
       }
      },
      {
@@ -3786,7 +3786,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -3846,7 +3846,7 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
      }
     ],
@@ -6461,7 +6461,7 @@
       "front": "north",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -6546,7 +6546,7 @@
          216000
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
+       "arrivesAt": "2026-06-01T10:27:36.000Z"
       }
      },
      {
@@ -6555,7 +6555,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -6615,7 +6615,7 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
      }
     ],
@@ -9228,95 +9228,90 @@
       "id": 1,
       "index": 0,
       "front": "north",
-      "status": "scheduled",
+      "status": "marching",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
       "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null,
-      "hatred": 0.4,
+      "leaderId": 1,
+      "hatred": 0.2,
       "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
+      "forecast": null
      },
      {
       "id": 2,
@@ -9324,7 +9319,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -9384,7 +9379,91 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.2,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         0,
+         -3,
+         144000
+        ],
+        [
+         0,
+         -2,
+         158400
+        ],
+        [
+         0,
+         -1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
@@ -9433,8 +9512,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 88,
-        "risk": 0.49
+        "xp": 64,
+        "risk": 0.37
        },
        {
         "id": "15:scout",
@@ -9450,7 +9529,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
+      "razed": 0,
+      "kills": 0,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -12116,95 +12221,90 @@
       "id": 1,
       "index": 0,
       "front": "north",
-      "status": "scheduled",
+      "status": "marching",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
       "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
-      "leaderId": null,
-      "hatred": 0.45,
+      "leaderId": 1,
+      "hatred": 0.2,
       "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
+      "forecast": null
      },
      {
       "id": 2,
@@ -12212,7 +12312,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -12272,7 +12372,91 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.25,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         0,
+         -3,
+         144000
+        ],
+        [
+         0,
+         -2,
+         158400
+        ],
+        [
+         0,
+         -1,
+         172800
+        ],
+        [
+         0,
+         0,
+         187200
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
@@ -12393,8 +12577,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 94,
-        "risk": 0.52
+        "xp": 70,
+        "risk": 0.4
        },
        {
         "id": "15:scout",
@@ -12410,7 +12594,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
+      "razed": 0,
+      "kills": 0,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -14983,106 +15193,12 @@
     ],
     "waves": [
      {
-      "id": 1,
-      "index": 0,
-      "front": "north",
-      "status": "scheduled",
-      "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0.45,
-      "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
-     },
-     {
       "id": 2,
       "index": 1,
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -15142,7 +15258,101 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.25,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         -1,
+         -3,
+         144000
+        ],
+        [
+         -2,
+         -2,
+         158400
+        ],
+        [
+         -2,
+         -1,
+         172800
+        ],
+        [
+         -2,
+         0,
+         187200
+        ],
+        [
+         -2,
+         1,
+         201600
+        ],
+        [
+         -2,
+         2,
+         230400
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:25:26.400Z"
       }
      }
     ],
@@ -15150,7 +15360,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 3,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -15209,6 +15419,67 @@
       "decision": null,
       "startedAt": "2026-06-01T10:28:24.000Z",
       "endedAt": "2026-06-01T10:28:24.000Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": 1,
+      "waveId": 1,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
+       "guard": {
+        "archer": 9,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "leshy_thrall": 1
+      },
+      "defenderInitial": {
+       "archer": 10,
+       "spearman": 20
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T10:27:54.000Z",
+        "round": 1,
+        "attackerLeft": 3,
+        "defenderLeft": 28,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T10:27:36.000Z",
+      "endedAt": "2026-06-01T10:27:54.000Z"
      },
      {
       "id": 1,
@@ -15324,8 +15595,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 94,
-        "risk": 0.52
+        "xp": 70,
+        "risk": 0.4
        },
        {
         "id": "15:scout",
@@ -15341,7 +15612,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T11:03:54.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 2,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -15530,7 +15827,7 @@
          "name": "Olive Groves",
          "kills": 0,
          "stage": 1,
-         "battleId": 2,
+         "battleId": 3,
          "stronghold": false
         }
        ]
@@ -15662,6 +15959,17 @@
       "r": 5,
       "size": 8,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 6,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -15811,7 +16119,13 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [],
+    "fear": [
+     [
+      0,
+      0,
+      11.2
+     ]
+    ],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -17920,106 +18234,12 @@
     ],
     "waves": [
      {
-      "id": 1,
-      "index": 0,
-      "front": "north",
-      "status": "scheduled",
-      "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0.45,
-      "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
-     },
-     {
       "id": 2,
       "index": 1,
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -18079,7 +18299,101 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.25,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         -1,
+         -3,
+         144000
+        ],
+        [
+         -2,
+         -2,
+         158400
+        ],
+        [
+         -2,
+         -1,
+         172800
+        ],
+        [
+         -2,
+         0,
+         187200
+        ],
+        [
+         -2,
+         1,
+         201600
+        ],
+        [
+         -2,
+         2,
+         230400
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:25:26.400Z"
       }
      }
     ],
@@ -18087,7 +18401,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 3,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -18108,12 +18422,12 @@
       "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 14,
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 12,
        "leshy_thrall": 7
       },
@@ -18124,7 +18438,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 7,
         "attackerLosses": {
          "grey_wolf": 1
@@ -18136,7 +18450,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -18152,7 +18466,7 @@
       "endedAt": "2026-06-01T10:30:48.000Z"
      },
      {
-      "id": 2,
+      "id": 3,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -18211,6 +18525,67 @@
       "decision": null,
       "startedAt": "2026-06-01T10:28:24.000Z",
       "endedAt": "2026-06-01T10:28:24.000Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": 1,
+      "waveId": 1,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
+       "guard": {
+        "archer": 9,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "leshy_thrall": 1
+      },
+      "defenderInitial": {
+       "archer": 10,
+       "spearman": 20
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T10:27:54.000Z",
+        "round": 1,
+        "attackerLeft": 3,
+        "defenderLeft": 28,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T10:27:36.000Z",
+      "endedAt": "2026-06-01T10:27:54.000Z"
      },
      {
       "id": 1,
@@ -18326,8 +18701,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 94,
-        "risk": 0.52
+        "xp": 70,
+        "risk": 0.4
        },
        {
         "id": "15:scout",
@@ -18343,7 +18718,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T11:03:54.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 2,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -18532,7 +18933,7 @@
          "name": "Olive Groves",
          "kills": 0,
          "stage": 1,
-         "battleId": 2,
+         "battleId": 3,
          "stronghold": false
         }
        ]
@@ -18656,7 +19057,7 @@
          "name": "Monster Lair",
          "kills": 2,
          "stage": 2,
-         "battleId": 3,
+         "battleId": 4,
          "stronghold": true
         }
        ]
@@ -18673,6 +19074,17 @@
       "r": 5,
       "size": 8,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 6,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -18822,7 +19234,13 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [],
+    "fear": [
+     [
+      0,
+      0,
+      11.2
+     ]
+    ],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -20931,106 +21349,12 @@
     ],
     "waves": [
      {
-      "id": 1,
-      "index": 0,
-      "front": "north",
-      "status": "scheduled",
-      "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0.45,
-      "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
-     },
-     {
       "id": 2,
       "index": 1,
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -21090,7 +21414,101 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.25,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         -1,
+         -3,
+         144000
+        ],
+        [
+         -2,
+         -2,
+         158400
+        ],
+        [
+         -2,
+         -1,
+         172800
+        ],
+        [
+         -2,
+         0,
+         187200
+        ],
+        [
+         -2,
+         1,
+         201600
+        ],
+        [
+         -2,
+         2,
+         230400
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:25:26.400Z"
       }
      }
     ],
@@ -21098,7 +21516,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 3,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -21119,12 +21537,12 @@
       "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 14,
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 12,
        "leshy_thrall": 7
       },
@@ -21135,7 +21553,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 7,
         "attackerLosses": {
          "grey_wolf": 1
@@ -21147,7 +21565,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -21163,7 +21581,7 @@
       "endedAt": "2026-06-01T10:30:48.000Z"
      },
      {
-      "id": 2,
+      "id": 3,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -21222,6 +21640,67 @@
       "decision": null,
       "startedAt": "2026-06-01T10:28:24.000Z",
       "endedAt": "2026-06-01T10:28:24.000Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": 1,
+      "waveId": 1,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
+       "guard": {
+        "archer": 9,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "leshy_thrall": 1
+      },
+      "defenderInitial": {
+       "archer": 10,
+       "spearman": 20
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T10:27:54.000Z",
+        "round": 1,
+        "attackerLeft": 3,
+        "defenderLeft": 28,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T10:27:36.000Z",
+      "endedAt": "2026-06-01T10:27:54.000Z"
      },
      {
       "id": 1,
@@ -21354,7 +21833,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T11:03:54.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 2,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -21543,7 +22048,7 @@
          "name": "Olive Groves",
          "kills": 0,
          "stage": 1,
-         "battleId": 2,
+         "battleId": 3,
          "stronghold": false
         }
        ]
@@ -21662,7 +22167,7 @@
          "name": "Monster Lair",
          "kills": 2,
          "stage": 2,
-         "battleId": 3,
+         "battleId": 4,
          "stronghold": true
         }
        ]
@@ -21679,6 +22184,17 @@
       "r": 5,
       "size": 8,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 6,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -21828,7 +22344,13 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [],
+    "fear": [
+     [
+      0,
+      0,
+      11.2
+     ]
+    ],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -23937,106 +24459,12 @@
     ],
     "waves": [
      {
-      "id": 1,
-      "index": 0,
-      "front": "north",
-      "status": "scheduled",
-      "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0.45,
-      "bandOf": null,
-      "forecast": {
-       "spawn": {
-        "q": 9,
-        "r": -8
-       },
-       "targetVillageId": null,
-       "path": [
-        [
-         9,
-         -8,
-         0
-        ],
-        [
-         8,
-         -8,
-         43200
-        ],
-        [
-         7,
-         -8,
-         72000
-        ],
-        [
-         6,
-         -8,
-         86400
-        ],
-        [
-         5,
-         -8,
-         100800
-        ],
-        [
-         4,
-         -7,
-         115200
-        ],
-        [
-         3,
-         -6,
-         129600
-        ],
-        [
-         2,
-         -5,
-         144000
-        ],
-        [
-         1,
-         -4,
-         158400
-        ],
-        [
-         0,
-         -3,
-         172800
-        ],
-        [
-         0,
-         -2,
-         187200
-        ],
-        [
-         0,
-         -1,
-         201600
-        ],
-        [
-         0,
-         0,
-         216000
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:12.000Z"
-      }
-     },
-     {
       "id": 2,
       "index": 1,
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -24096,7 +24524,101 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.25,
+      "bandOf": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         -1,
+         -3,
+         144000
+        ],
+        [
+         -2,
+         -2,
+         158400
+        ],
+        [
+         -2,
+         -1,
+         172800
+        ],
+        [
+         -2,
+         0,
+         187200
+        ],
+        [
+         -2,
+         1,
+         201600
+        ],
+        [
+         -2,
+         2,
+         230400
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:25:26.400Z"
       }
      }
     ],
@@ -24104,7 +24626,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 3,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -24125,12 +24647,12 @@
       "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 14,
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
+       "rusalka": 8,
        "grey_wolf": 12,
        "leshy_thrall": 7
       },
@@ -24141,7 +24663,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 7,
         "attackerLosses": {
          "grey_wolf": 1
@@ -24153,7 +24675,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -24169,7 +24691,7 @@
       "endedAt": "2026-06-01T10:30:48.000Z"
      },
      {
-      "id": 2,
+      "id": 3,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -24228,6 +24750,67 @@
       "decision": null,
       "startedAt": "2026-06-01T10:28:24.000Z",
       "endedAt": "2026-06-01T10:28:24.000Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": 1,
+      "waveId": 1,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
+       "guard": {
+        "archer": 9,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "leshy_thrall": 1
+      },
+      "defenderInitial": {
+       "archer": 10,
+       "spearman": 20
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T10:27:54.000Z",
+        "round": 1,
+        "attackerLeft": 3,
+        "defenderLeft": 28,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T10:27:36.000Z",
+      "endedAt": "2026-06-01T10:27:54.000Z"
      },
      {
       "id": 1,
@@ -24343,8 +24926,8 @@
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 94,
-        "risk": 0.52
+        "xp": 70,
+        "risk": 0.4
        },
        {
         "id": "17:ruins",
@@ -24360,7 +24943,33 @@
      }
     ],
     "generals": [],
-    "leaders": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T11:03:54.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 2,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
     "orders": [],
     "armies": [
      {
@@ -24549,7 +25158,7 @@
          "name": "Olive Groves",
          "kills": 0,
          "stage": 1,
-         "battleId": 2,
+         "battleId": 3,
          "stronghold": false
         }
        ]
@@ -24668,7 +25277,7 @@
          "name": "Monster Lair",
          "kills": 2,
          "stage": 2,
-         "battleId": 3,
+         "battleId": 4,
          "stronghold": true
         }
        ]
@@ -24685,6 +25294,17 @@
       "r": 5,
       "size": 8,
       "waveId": null,
+      "reward": null,
+      "endsAt": null
+     },
+     {
+      "id": 3,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 6,
+      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -24834,7 +25454,13 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [],
+    "fear": [
+     [
+      0,
+      0,
+      11.2
+     ]
+    ],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -26728,7 +27354,7 @@
    "response": {
     "notifications": [
      {
-      "id": 15,
+      "id": 17,
       "kind": "battle_result",
       "tier": "push",
       "title": "Your raid was beaten at the Monster Lair",
@@ -26737,7 +27363,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 16,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -26746,12 +27372,30 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 15,
       "kind": "battle_result",
       "tier": "push",
       "title": "Your raid was beaten at the Olive Groves",
       "body": "It turns for home with 0 resources; 2 of its men fell.",
       "createdAt": "2026-06-01T10:28:24.000Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 1 rounds.",
+      "createdAt": "2026-06-01T10:27:54.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "9 of them against its guard of 30.",
+      "createdAt": "2026-06-01T10:27:36.000Z",
       "read": false
      },
      {
@@ -26777,7 +27421,7 @@
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -2) sank back into the earth",
-      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
@@ -26863,7 +27507,7 @@
       "read": false
      }
     ],
-    "unread": 15,
+    "unread": 17,
     "serverTime": "2026-06-01T10:48:48.000Z"
    }
   }

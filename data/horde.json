@@ -5,7 +5,7 @@
   "fear": {
     "perDefeat": 10,
     "perUnitLost": 0.2,
-    "decayPerWave": 0.6,
+    "decayPerWave": 0.815,
     "minimum": 0.5,
     "targetWeight": 1,
     "pathWeight": 0.5
@@ -16,7 +16,7 @@
     "recruitShare": 0.1
   },
   "raze": {
-    "graceWaves": 2,
+    "graceWaves": 5,
     "hours": 3,
     "minStrength": 1.5,
     "threshold": 1,
@@ -36,7 +36,7 @@
       "spearman": 20,
       "archer": 10
     },
-    "guardGrowthPerWave": 1.15,
+    "guardGrowthPerWave": 1.057,
     "stance": "defensive",
     "damagePerUnit": 0.5
   }

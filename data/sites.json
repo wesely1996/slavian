@@ -9,7 +9,7 @@
     "stone_idol": { "name": "Stone Idol", "terrain": ["plains", "forest", "steppe"], "exploreHours": 3, "guardianChance": 0.2, "finds": { "resources": 2, "gear": 1, "scroll": 3, "ember": 2 }, "description": "A four-faced idol, worn smooth by centuries of rain." },
     "frozen_ruin": { "name": "Frozen Ruin", "terrain": ["ice", "dark_forest"], "exploreHours": 8, "guardianChance": 0.7, "finds": { "resources": 2, "gear": 3, "scroll": 2, "ember": 4 }, "description": "Halls under the ice, warm at their heart." }
   },
-  "guardians": { "baseUnits": 10, "distanceGrowth": 1.5, "waveIndex": 2 },
+  "guardians": { "baseUnits": 10, "distanceGrowth": 1.5, "waveIndex": 5 },
   "search": { "perUnit": 0.05, "minShare": 0.25, "noScoutsFactor": 3, "scoutLoot": { "perScout": 0.1, "max": 0.5 } },
   "loot": { "wood": 400, "stone": 400, "grain": 300, "iron": 250 }
 }

@@ -401,7 +401,7 @@
    }
   },
   {
-   "advance": 10956000
+   "advance": 7500000
   },
   {
    "method": "GET",
@@ -627,7 +627,7 @@
       "front": "north",
       "status": "marching",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
       "spawn": {
        "q": 9,
        "r": -8
@@ -700,13 +700,13 @@
         216000
        ]
       ],
-      "arrivesAt": "2026-06-01T11:25:12.000Z",
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
       "leaderId": 1,
-      "hatred": 0.4,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": null
      },
@@ -716,7 +716,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -726,7 +726,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0.4,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -776,7 +776,7 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
      },
      {
@@ -785,7 +785,7 @@
       "front": "north",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T13:35:21.900Z",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -860,7 +860,7 @@
          187200
         ]
        ],
-       "arrivesAt": "2026-06-01T13:38:29.100Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
@@ -893,27 +893,7 @@
       "quest": null,
       "offers": [
        {
-        "id": "21:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "21:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 1,
-        "distance": 3,
-        "hours": 5,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "21:hoard",
+        "id": "15:hoard",
         "kind": "hoard",
         "front": null,
         "siteId": null,
@@ -921,6 +901,26 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "15:ambush",
+        "kind": "ambush",
+        "front": "north",
+        "siteId": null,
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 64,
+        "risk": 0.37
+       },
+       {
+        "id": "15:scout",
+        "kind": "scout",
+        "front": "north",
+        "siteId": null,
+        "distance": 6,
+        "hours": 5,
+        "xp": 25,
+        "risk": 0.15
        }
       ]
      }
@@ -963,43 +963,10 @@
       "front": "south",
       "q": -2,
       "r": 5,
-      "size": 10,
+      "size": 8,
       "waveId": null,
       "reward": null,
       "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "captives",
-      "front": "south",
-      "q": 1,
-      "r": 6,
-      "size": 14,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 9
-       }
-      },
-      "endsAt": "2026-06-01T11:50:24.000Z"
-     },
-     {
-      "id": 4,
-      "kind": "captives",
-      "front": "south",
-      "q": -1,
-      "r": 8,
-      "size": 15,
-      "waveId": null,
-      "reward": {
-       "resources": {
-        "iron": 250,
-        "wood": 375,
-        "grain": 375,
-        "stone": 375
-       }
-      },
-      "endsAt": "2026-06-01T12:19:12.000Z"
      }
     ],
     "sites": [
@@ -1070,7 +1037,68 @@
      }
     ],
     "lore": [],
-    "shipyards": [],
+    "shipyards": [
+     {
+      "id": 2,
+      "q": -7,
+      "r": 6,
+      "edge": [
+       -6,
+       5,
+       -7,
+       6
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "front": "south",
+      "raiders": 9,
+      "raids": 0,
+      "endsAt": "2026-06-01T10:52:48.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     },
+     {
+      "id": 3,
+      "q": -3,
+      "r": -4,
+      "edge": [
+       -3,
+       -4,
+       -4,
+       -3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "front": "north",
+      "raiders": 10,
+      "raids": 0,
+      "endsAt": "2026-06-01T11:21:36.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -2970,7 +2998,7 @@
      ],
      "roads": []
     },
-    "serverTime": "2026-06-01T11:22:36.000Z"
+    "serverTime": "2026-06-01T10:25:00.000Z"
    }
   },
   {
@@ -3200,7 +3228,7 @@
       "front": "north",
       "status": "marching",
       "threat": "Low",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
       "spawn": {
        "q": 9,
        "r": -8
@@ -3273,13 +3301,13 @@
         216000
        ]
       ],
-      "arrivesAt": "2026-06-01T11:25:12.000Z",
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
       "endsAt": null,
       "rampageEndsAt": null,
       "struck": [],
       "ritual": false,
       "leaderId": 1,
-      "hatred": 0.4,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": null
      },
@@ -3289,7 +3317,7 @@
       "front": "south",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T12:19:36.557Z",
+      "spawnAt": "2026-06-01T10:52:48.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -3299,7 +3327,7 @@
       "struck": [],
       "ritual": false,
       "leaderId": null,
-      "hatred": 0.4,
+      "hatred": 0.2,
       "bandOf": null,
       "forecast": {
        "spawn": {
@@ -3349,7 +3377,7 @@
          129600
         ]
        ],
-       "arrivesAt": "2026-06-01T12:21:46.157Z"
+       "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
      },
      {
@@ -3358,7 +3386,7 @@
       "front": "north",
       "status": "scheduled",
       "threat": "Low",
-      "spawnAt": "2026-06-01T13:35:21.900Z",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
       "spawn": null,
       "targetVillageId": null,
       "path": null,
@@ -3433,7 +3461,7 @@
          187200
         ]
        ],
-       "arrivesAt": "2026-06-01T13:38:29.100Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
@@ -3466,27 +3494,7 @@
       "quest": null,
       "offers": [
        {
-        "id": "21:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "21:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 1,
-        "distance": 3,
-        "hours": 5,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "21:hoard",
+        "id": "15:hoard",
         "kind": "hoard",
         "front": null,
         "siteId": null,
@@ -3494,6 +3502,26 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "15:ambush",
+        "kind": "ambush",
+        "front": "north",
+        "siteId": null,
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 64,
+        "risk": 0.37
+       },
+       {
+        "id": "15:scout",
+        "kind": "scout",
+        "front": "north",
+        "siteId": null,
+        "distance": 6,
+        "hours": 5,
+        "xp": 25,
+        "risk": 0.15
        }
       ]
      }
@@ -3536,43 +3564,10 @@
       "front": "south",
       "q": -2,
       "r": 5,
-      "size": 10,
+      "size": 8,
       "waveId": null,
       "reward": null,
       "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "captives",
-      "front": "south",
-      "q": 1,
-      "r": 6,
-      "size": 14,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 9
-       }
-      },
-      "endsAt": "2026-06-01T11:50:24.000Z"
-     },
-     {
-      "id": 4,
-      "kind": "captives",
-      "front": "south",
-      "q": -1,
-      "r": 8,
-      "size": 15,
-      "waveId": null,
-      "reward": {
-       "resources": {
-        "iron": 250,
-        "wood": 375,
-        "grain": 375,
-        "stone": 375
-       }
-      },
-      "endsAt": "2026-06-01T12:19:12.000Z"
      }
     ],
     "sites": [
@@ -3643,7 +3638,68 @@
      }
     ],
     "lore": [],
-    "shipyards": [],
+    "shipyards": [
+     {
+      "id": 2,
+      "q": -7,
+      "r": 6,
+      "edge": [
+       -6,
+       5,
+       -7,
+       6
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "front": "south",
+      "raiders": 9,
+      "raids": 0,
+      "endsAt": "2026-06-01T10:52:48.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     },
+     {
+      "id": 3,
+      "q": -3,
+      "r": -4,
+      "edge": [
+       -3,
+       -4,
+       -4,
+       -3
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "front": "north",
+      "raiders": 10,
+      "raids": 0,
+      "endsAt": "2026-06-01T11:21:36.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -5543,7 +5599,7 @@
      ],
      "roads": []
     },
-    "serverTime": "2026-06-01T11:24:12.000Z"
+    "serverTime": "2026-06-01T10:26:36.000Z"
    }
   },
   {
@@ -5552,42 +5608,6 @@
    "status": 200,
    "response": {
     "notifications": [
-     {
-      "id": 15,
-      "kind": "event",
-      "tier": "push",
-      "title": "Captives are held at (-1, 8)",
-      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3500 resources. If they are taken, the next horde from the south hates you the more.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
-      "read": false
-     },
-     {
-      "id": 14,
-      "kind": "event",
-      "tier": "push",
-      "title": "The boatwrights at (-3, -4) gave up and left",
-      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
-      "read": false
-     },
-     {
-      "id": 13,
-      "kind": "event",
-      "tier": "push",
-      "title": "Captives are held at (1, 6)",
-      "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3150 resources. If they are taken, the next horde from the south hates you the more.",
-      "createdAt": "2026-06-01T10:52:48.000Z",
-      "read": false
-     },
-     {
-      "id": 12,
-      "kind": "event",
-      "tier": "push",
-      "title": "The boatwrights at (-7, 6) gave up and left",
-      "body": "The next horde from the south hates you the more for it: +40% attack and defense.",
-      "createdAt": "2026-06-01T10:52:48.000Z",
-      "read": false
-     },
      {
       "id": 11,
       "kind": "event",
@@ -5602,7 +5622,7 @@
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -2) sank back into the earth",
-      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
+      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
@@ -5688,8 +5708,8 @@
       "read": false
      }
     ],
-    "unread": 15,
-    "serverTime": "2026-06-01T11:24:12.000Z"
+    "unread": 11,
+    "serverTime": "2026-06-01T10:26:36.000Z"
    }
   }
  ]
