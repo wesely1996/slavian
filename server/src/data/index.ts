@@ -794,6 +794,11 @@ const bridgeFileSchema = z.object({
         cost: resourcesSchema,
         embers: z.number().int().nonnegative(),
         quests: z.array(z.object({ kind: z.enum(BRIDGE_QUESTS), story: z.string() })),
+        // What every member gets when the stage stands: resources to their
+        // first village, and a blessing (effects, like research) for the run.
+        reward: z
+          .object({ resources: resourcesSchema, effects: z.record(z.string(), z.number()), name: z.string().optional() })
+          .default({ resources: { wood: 0, stone: 0, grain: 0, iron: 0 }, effects: {} }),
       }),
     )
     .min(1),

@@ -3267,9 +3267,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 200,
       "reinforce": {
@@ -3281,16 +3283,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 50,
-        "wood": 220,
-        "grain": 133.33333333333331,
-        "stone": 320
+        "iron": 997.5,
+        "wood": 2200,
+        "grain": 1759.6,
+        "stone": 2200
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 184,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 204,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -3298,7 +3300,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:20:00.000Z"
+       "settledAt": "2026-06-01T10:39:24.000Z"
       }
      }
     ],
@@ -6011,9 +6013,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -6025,16 +6029,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 400,
-        "wood": 1000,
-        "grain": 562.6666666666667,
-        "stone": 1000
+        "iron": 1000,
+        "wood": 2200,
+        "grain": 1759.6,
+        "stone": 2200
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -8758,9 +8762,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -8772,16 +8778,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 332.5,
-        "wood": 760,
-        "grain": 503.66666666666674,
-        "stone": 760
+        "iron": 760,
+        "wood": 1672,
+        "grain": 1337.6,
+        "stone": 1672
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -9107,10 +9113,10 @@
        }
       ],
       "loot": {
-       "iron": 105,
-       "wood": 240,
-       "grain": 159,
-       "stone": 240
+       "iron": 240,
+       "wood": 528,
+       "grain": 422,
+       "stone": 528
       },
       "decision": {
        "choice": "raid",
@@ -11713,9 +11719,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -11727,16 +11735,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 332.5,
-        "wood": 760,
-        "grain": 503.66666666666674,
-        "stone": 760
+        "iron": 760,
+        "wood": 1672,
+        "grain": 1337.6,
+        "stone": 1672
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -12062,10 +12070,10 @@
        }
       ],
       "loot": {
-       "iron": 105,
-       "wood": 240,
-       "grain": 159,
-       "stone": 240
+       "iron": 240,
+       "wood": 528,
+       "grain": 422,
+       "stone": 528
       },
       "decision": {
        "choice": "raid",
@@ -14668,9 +14676,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -14682,16 +14692,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 332.5,
-        "wood": 760,
-        "grain": 503.66666666666674,
-        "stone": 760
+        "iron": 760,
+        "wood": 1672,
+        "grain": 1337.6,
+        "stone": 1672
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -15017,10 +15027,10 @@
        }
       ],
       "loot": {
-       "iron": 105,
-       "wood": 240,
-       "grain": 159,
-       "stone": 240
+       "iron": 240,
+       "wood": 528,
+       "grain": 422,
+       "stone": 528
       },
       "decision": {
        "choice": "raid",
@@ -17623,9 +17633,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -17637,16 +17649,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 334.5,
-        "wood": 808,
-        "grain": 577.6666666666667,
-        "stone": 747
+        "iron": 688.75,
+        "wood": 1372,
+        "grain": 1097.6,
+        "stone": 1372
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -17951,10 +17963,10 @@
        }
       ],
       "loot": {
-       "iron": 73,
-       "wood": 177,
-       "grain": 126,
-       "stone": 163
+       "iron": 150,
+       "wood": 300,
+       "grain": 240,
+       "stone": 300
       },
       "decision": {
        "choice": "raid",
@@ -18086,10 +18098,10 @@
        }
       ],
       "loot": {
-       "iron": 105,
-       "wood": 240,
-       "grain": 159,
-       "stone": 240
+       "iron": 240,
+       "wood": 528,
+       "grain": 422,
+       "stone": 528
       },
       "decision": {
        "choice": "raid",
@@ -20772,9 +20784,11 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "buildTime": -0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "production.all": 0.05
       },
       "reserve": 8,
       "reinforce": {
@@ -20786,16 +20800,16 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 334.5,
-        "wood": 808,
-        "grain": 577.6666666666667,
-        "stone": 747
+        "iron": 688.75,
+        "wood": 1372,
+        "grain": 1097.6,
+        "stone": 1372
        },
        "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 400,
-        "stone": 300
+        "iron": 157.5,
+        "wood": 472.5,
+        "grain": 420,
+        "stone": 315
        },
        "capacity": {
         "iron": 1000,
@@ -21100,10 +21114,10 @@
        }
       ],
       "loot": {
-       "iron": 73,
-       "wood": 177,
-       "grain": 126,
-       "stone": 163
+       "iron": 150,
+       "wood": 300,
+       "grain": 240,
+       "stone": 300
       },
       "decision": {
        "choice": "raid",
@@ -21235,10 +21249,10 @@
        }
       ],
       "loot": {
-       "iron": 105,
-       "wood": 240,
-       "grain": 159,
-       "stone": 240
+       "iron": 240,
+       "wood": 528,
+       "grain": 422,
+       "stone": 528
       },
       "decision": {
        "choice": "raid",
@@ -23782,7 +23796,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Zaslavl was raided",
-      "body": "The horde carried off 539 resources after 1 rounds.",
+      "body": "The horde carried off 990 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:25:44.400Z",
       "read": false
      },
@@ -23863,7 +23877,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Zaslavl was raided",
-      "body": "The horde carried off 744 resources after 1 rounds.",
+      "body": "The horde carried off 1718 resources after 1 rounds.",
       "createdAt": "2026-06-01T10:55:58.800Z",
       "read": false
      },
@@ -23926,7 +23940,7 @@
       "kind": "bridge",
       "tier": "push",
       "title": "The Oak Piers stands",
-      "body": "Next: The Iron Span.",
+      "body": "The builders send 1200 wood, 1200 stone, 1200 grain and 600 iron, and the Blessing of the Bridge Wrights is on every village of the group. Next: The Iron Span.",
       "createdAt": "2026-06-01T10:39:24.000Z",
       "read": false
      },

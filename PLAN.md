@@ -385,6 +385,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
   - Craft a ritual item (needs Svarog's Ember).
   - Hold a strong point (a choke point or a fort) for a full battle.
 - Bridge progress increases wave difficulty (it is part of group power).
+- **Every stage that stands rewards the group** (`reward` in `data/bridge.json`): each member gets resources in their first village (800/800/800/400 for the first stage, rising to 2000/2000/2000/1000 for the fourth) and a **blessing** on all their villages for the rest of the run: +5% production (Foundation Stones), −10% build time, +5% defense, +5% attack. The bridge sheet shows what the open stage brings, so building it early pays.
 - **Stage 5 → Ritual Night:** all active fronts attack at once (respecting quiet hours). Surviving it with Sanctity above 0 **wins the run**.
 - **Loss:** Sanctity reaches 0.
 

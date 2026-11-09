@@ -171,7 +171,9 @@ func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 	var own := LocalHeroes.combine(LocalVillage.clan_bonuses(data, member.get("clan")), LocalHeroes.roster_bonuses(data, member.get("heroKind")))
 	var research := LocalResearch.bonuses_of(data, LocalResearch.known(world, account_id))
 	var lore := LocalResearch.lore_bonuses(data, LocalResearch.scrolls(world))
-	return LocalHeroes.combine(LocalHeroes.combine(research, lore), own)
+	# The blessings of the bridge's finished stages, for everyone.
+	var blessed := LocalBridge.bridge_bonuses(data, world.get("bridge"))
+	return LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(research, lore), blessed), own)
 
 
 func _ensure_sites(world: Dictionary) -> void:

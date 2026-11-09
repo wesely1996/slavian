@@ -1,3 +1,5 @@
+import { findBridge } from '../db/bridges.js';
+import { bridgeBonuses } from '../sim/bridge.js';
 // Research on the scheduler: research_complete marks the tech known and
 // gives every one of the player's villages its effects.
 import { clanBonuses } from '../sim/clans.js';
@@ -26,7 +28,9 @@ export async function playerBonuses(client: DbClient, data: GameData, worldId: n
   const scrolls = (await listScrolls(client, worldId)).map((s) => s.scroll);
   const member = (await listMembers(client, worldId)).find((m) => m.accountId === accountId);
   const own = combine(clanBonuses(data, member?.clan ?? null), rosterBonuses(data, member?.heroKind ?? null));
-  return combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), own);
+  // The blessings of the bridge's finished stages, for everyone.
+  const blessed = bridgeBonuses(data, await findBridge(client, worldId));
+  return combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own);
 }
 
 // Gives every village of `accountIds` its owner's current bonuses.

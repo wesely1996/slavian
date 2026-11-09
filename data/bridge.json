@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The Kalinov Bridge (PLAN.md §10), built in the Holy City in five stages. Each stage needs its cost in resources, drawn from the group's vault (caravans bring resources there), its embers (Svarog's Ember from lairs and ancient sites) and its quests, all done while the stage is open; it then takes buildHours game hours to raise. Each stage and each of its quests carries the story of why the bridge needs it. Quest kinds: site (explore an ancient site), lair (clear a monster lair), unscathed (a wave ends without the Holy City losing Sanctity since the stage began), choke (win a field battle at a choke point), ritual (craft a ritual item from ritualEmbers embers). Every finished stage makes waves powerPerStage bigger (group power). When the fifth stage stands, Ritual Night comes.",
+  "_comment": "The Kalinov Bridge (PLAN.md §10), built in the Holy City in five stages. Each stage needs its cost in resources, drawn from the group's vault (caravans bring resources there), its embers (Svarog's Ember from lairs and ancient sites) and its quests, all done while the stage is open; it then takes buildHours game hours to raise. Each stage and each of its quests carries the story of why the bridge needs it. Quest kinds: site (explore an ancient site), lair (clear a monster lair), unscathed (a wave ends without the Holy City losing Sanctity since the stage began), choke (win a field battle at a choke point), ritual (craft a ritual item from ritualEmbers embers). Every finished stage makes waves powerPerStage bigger (group power), and brings every member its reward: resources to their first village, and a blessing (effects, like research) that lasts the rest of the run. When the fifth stage stands, Ritual Night comes.",
   "story": "Beyond the Holy City the Kalinov Bridge crosses the Smorodina, the river of fire, from Nav to Yav, the living world, and every horde that comes walks over it. The volkhvs mean to raise it on from Yav to Prav, the realm of the gods: once the Ritual Arch joins it to Prav, the gods' light runs down the whole bridge and nothing from Nav can set foot on it again. The hordes know this, and will throw everything at the city on the night the arch is bound.",
   "buildHours": 12,
   "powerPerStage": 0.1,
@@ -15,6 +15,7 @@
         "iron": 1000
       },
       "embers": 0,
+      "reward": {"resources": {"wood": 800, "stone": 800, "grain": 800, "iron": 400}, "effects": {"production.all": 0.05}, "name": "Blessing of the Old Builders"},
       "quests": [
         {
           "kind": "site",
@@ -32,6 +33,7 @@
         "iron": 2000
       },
       "embers": 1,
+      "reward": {"resources": {"wood": 1200, "stone": 1200, "grain": 1200, "iron": 600}, "effects": {"buildTime": -0.1}, "name": "Blessing of the Bridge Wrights"},
       "quests": [
         {
           "kind": "lair",
@@ -49,6 +51,7 @@
         "iron": 5000
       },
       "embers": 1,
+      "reward": {"resources": {"wood": 1600, "stone": 1600, "grain": 1600, "iron": 800}, "effects": {"defense.all": 0.05}, "name": "Blessing of Svarog's Forge"},
       "quests": [
         {
           "kind": "unscathed",
@@ -70,6 +73,7 @@
         "iron": 6000
       },
       "embers": 1,
+      "reward": {"resources": {"wood": 2000, "stone": 2000, "grain": 2000, "iron": 1000}, "effects": {"attack.all": 0.05}, "name": "Blessing of Perun's Thunder"},
       "quests": [
         {
           "kind": "site",
@@ -91,6 +95,7 @@
         "iron": 8000
       },
       "embers": 2,
+      "reward": {"resources": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "effects": {}},
       "quests": [
         {
           "kind": "ritual",

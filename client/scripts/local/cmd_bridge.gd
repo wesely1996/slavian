@@ -76,14 +76,32 @@ static func on_bridge_raised(server: LocalServer, world: Dictionary, event: Dict
 	var at := int(event.dueAt)
 	if bridge.status != "raising" or bridge.raisedAt == null or LocalTime.parse(bridge.raisedAt) > at:
 		return
-	var name: String = LocalBridge.current_stage(data, bridge).name
+	var done: Dictionary = LocalBridge.current_stage(data, bridge)
+	var name: String = done.name
 	var next := raised(data, bridge, at, int(world.sanctity))
 	world.bridge = next
 	changed.append(["world"])
 	var next_stage: Variant = LocalBridge.current_stage(data, next)
-	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{name} stands",
-		"body": "The Kalinov Bridge is whole. Ritual Night is coming." if next.status == "complete" else "Next: {stage}.",
-		"vars": {"name": name, "stage": next_stage.name} if next_stage != null else {"name": name}}, at)
+	# Its reward: resources for every member, and its blessing from now on.
+	var prize: Dictionary = done.get("reward", {})
+	var gift: Dictionary = prize.get("resources", {"wood": 0, "stone": 0, "grain": 0, "iron": 0})
+	var blessing := String(prize.get("name", ""))
+	if LocalLogistics.total(gift) > 0:
+		for member in world.members:
+			server.reward(world, int(member.accountId), gift, at, changed)
+	if not prize.get("effects", {}).is_empty():
+		for member in world.members:
+			server.refresh_bonuses(world, int(member.accountId), at, changed)
+	var body := "Next: {stage}."
+	if next.status == "complete":
+		body = "The Kalinov Bridge is whole. Ritual Night is coming."
+	elif blessing != "":
+		body = "The builders send {wood} wood, {stone} stone, {grain} grain and {iron} iron, and the {blessing} is on every village of the group. Next: {stage}."
+	var vars := {"name": name}
+	if next_stage != null:
+		vars = {"name": name, "stage": next_stage.name, "blessing": blessing}
+		vars.merge(gift)
+	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{name} stands", "body": body, "vars": vars}, at)
 	if next.status == "complete":
 		call_ritual_night(server, world, at)
 	# A lair is wanted (for the quest, or for the Embers the group lacks) and
