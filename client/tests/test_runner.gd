@@ -45,6 +45,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_events()
+	_test_bridge_reward()
 	_test_raid_text()
 	_test_lake_lanes()
 	_test_bridge()
@@ -544,6 +545,16 @@ func _test_raid_text() -> void:
 	var battle := {"status": "repelled", "setup": {"raid": {"front": "east", "name": "Nomad Encampment", "stronghold": true}}}
 	_check(RaidText.report(battle, {"attacker": 5, "defender": 9}) == "Raid on the East: thrown back from the Nomad Encampment; 5 of them fell, we lost 9.", "raid report")
 	_check(RaidText.report({"status": "cleared", "setup": {}}, {"attacker": 1, "defender": 1}) == "", "not a raid battle")
+
+
+func _test_bridge_reward() -> void:
+	var stage := {"reward": {"resources": {"wood": 800, "stone": 0, "grain": 800, "iron": 400}, "effects": {"production.all": 0.05}, "name": "Blessing of the Old Builders"}}
+	var text := BridgeText.reward(stage)
+	_check(text.begins_with("When it stands: every member gets 800 wood, 800 grain, 400 iron; Blessing of the Old Builders for the rest of the run: +5%"), "bridge stage reward: %s" % text)
+	_check(BridgeText.reward({"reward": {"resources": {}, "effects": {}}}) == "", "no reward, no line")
+	var data := {"bridge": {"stages": [stage, {"reward": {"resources": {}, "effects": {"buildTime": -0.1}}}, {"reward": {"resources": {}, "effects": {"production.all": 0.05}}}]}}
+	var blessed := LocalBridge.bridge_bonuses(data, {"stage": 2})
+	_check(is_equal_approx(float(blessed.get("production.all", 0)), 0.05) and is_equal_approx(float(blessed.get("buildTime", 0)), -0.1), "blessings of the stages that stand")
 
 
 func _test_events() -> void:

@@ -164,6 +164,7 @@ const SERBIAN: Record<string, string> = {
 	'Its {grain} grain burned with it.': 'Njenih {grain} žita izgorelo je s njom.',
 	// Bridge, settlers, sites, delegation
 	'Next: {stage}.': 'Sledeće: {stage}.',
+	'The builders send {wood} wood, {stone} stone, {grain} grain and {iron} iron, and the {blessing} is on every village of the group. Next: {stage}.': 'Graditelji šalju {wood} drveta, {stone} kamena, {grain} žita i {iron} gvožđa, a {blessing} je nad svakim selom grupe. Sledeće: {stage}.',
 	'Beasts of the North have made a lair by the road their last horde took. {stage} needs it cleared.':
 		'Zveri Severa su napravile jazbinu kraj puta kojim je išla njihova poslednja horda. {stage} zahteva da se očisti.',
 	'The builders of {stage} remember a ruin nobody has searched yet. It is marked on the map.':

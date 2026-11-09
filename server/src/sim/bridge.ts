@@ -103,3 +103,13 @@ export function raised(data: GameData, bridge: BridgeState, at: Date, sanctity: 
 export function stagesStanding(bridge: BridgeState | null): number {
   return bridge?.stage ?? 0;
 }
+
+// The blessings of every stage that stands (bridge.json stages[].reward.effects).
+export function bridgeBonuses(data: GameData, bridge: Pick<BridgeState, 'stage'> | null): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!bridge) return out;
+  for (const stage of data.bridge.stages.slice(0, bridge.stage)) {
+    for (const [key, value] of Object.entries(stage.reward.effects)) out[key] = (out[key] ?? 0) + value;
+  }
+  return out;
+}

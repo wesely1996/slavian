@@ -60,3 +60,21 @@ static func quests(data: Dictionary, bridge: Dictionary) -> Array:
 		var def: Dictionary = data.bridge.quests.get(quest.kind, {})
 		out.append([bridge.quests.has(quest.kind), UI.t(def.get("name", quest.kind)), UI.t(quest.story)])
 	return out
+
+
+## What a stage brings when it stands: "Every member gets 800 wood, … ·
+## Blessing of the Old Builders: +5% all production" ("" for none).
+static func reward(stage: Dictionary) -> String:
+	var prize: Dictionary = stage.get("reward", {})
+	var parts := PackedStringArray()
+	var gift: Dictionary = prize.get("resources", {})
+	var amounts := PackedStringArray()
+	for kind in ["wood", "stone", "grain", "iron"]:
+		if int(gift.get(kind, 0)) > 0:
+			amounts.append("%d %s" % [int(gift[kind]), UI.resource_name(kind).to_lower()])
+	if not amounts.is_empty():
+		parts.append(UI.t("every member gets %s") % ", ".join(amounts))
+	var effects: Dictionary = prize.get("effects", {})
+	if not effects.is_empty():
+		parts.append(UI.t("%s for the rest of the run: %s") % [UI.t(String(prize.get("name", ""))), HeroText.effects(effects)])
+	return UI.t("When it stands: %s.") % "; ".join(parts) if not parts.is_empty() else ""

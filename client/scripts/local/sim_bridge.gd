@@ -60,3 +60,16 @@ static func start_raising(data: Dictionary, bridge: Dictionary, at: int, world_s
 	next.status = "raising"
 	next.raisedAt = LocalTime.iso(LocalTime.ms(at + (float(data.bridge.buildHours) * 3600000.0) / world_speed))
 	return next
+
+
+## sim/bridge.ts bridgeBonuses: the blessings of every stage that stands.
+static func bridge_bonuses(data: Dictionary, bridge: Variant) -> Dictionary:
+	var out := {}
+	if not bridge is Dictionary or bridge.is_empty():
+		return out
+	var stages: Array = data.bridge.stages
+	for i in mini(int(bridge.stage), stages.size()):
+		var effects: Dictionary = stages[i].get("reward", {}).get("effects", {})
+		for key in effects:
+			out[key] = float(out.get(key, 0.0)) + float(effects[key])
+	return out

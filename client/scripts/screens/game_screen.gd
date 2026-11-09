@@ -1632,6 +1632,12 @@ func _bridge_panel() -> void:
 		return
 	_panel_body.add_child(UI.with_info(UI.label(BridgeText.title(Game.data, bridge)), tr(stage.story)))
 	_panel_body.add_child(UI.label(BridgeText.progress(Game.data, bridge), UI.SMALL_SIZE))
+	# What raising it brings: building early pays.
+	var prize := BridgeText.reward(stage)
+	if prize != "":
+		var prize_label := UI.label(prize, UI.SMALL_SIZE, UI.GOOD)
+		prize_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_panel_body.add_child(prize_label)
 	for quest in BridgeText.quests(Game.data, bridge):
 		_panel_body.add_child(UI.with_info(UI.label(("✓ " if quest[0] else "○ ") + String(quest[1]), UI.SMALL_SIZE, UI.MUTED if quest[0] else UI.ACCENT), quest[2]))
 	if bridge.status == "raising":

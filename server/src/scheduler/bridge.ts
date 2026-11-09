@@ -1,3 +1,6 @@
+import { reward } from './onboarding.js';
+import { refreshBonuses } from './research.js';
+import { total } from '../sim/battle.js';
 // The Kalinov Bridge on the scheduler (PLAN.md §10): donations from the
 // vault, quests completed by what happens in the world, and bridge_raised
 // when a stage has been built.
@@ -111,17 +114,31 @@ export const bridgeHandlers: HandlerRegistry = {
   async bridge_raised({ client, data, world }, event) {
     const bridge = await findBridge(client, world.id);
     if (!bridge || bridge.status !== 'raising' || !bridge.raisedAt || new Date(bridge.raisedAt) > event.dueAt) return;
-    const name = currentStage(data, bridge)!.name;
+    const done = currentStage(data, bridge)!;
+    const name = done.name;
     const next = raised(data, bridge, event.dueAt, world.sanctity);
     await saveBridge(client, world.id, next);
     const nextStage = currentStage(data, next);
-    for (const member of await listMembers(client, world.id)) {
+    // Its reward: resources for every member, and its blessing from now on.
+    const members = await listMembers(client, world.id);
+    const gift = done.reward.resources;
+    const blessing = done.reward.name ?? '';
+    for (const member of members) {
+      if (total(gift) > 0) await reward(client, world, member.accountId, gift, event.dueAt);
+    }
+    if (Object.keys(done.reward.effects).length) await refreshBonuses(client, data, world, members.map((m) => m.accountId), event.dueAt);
+    for (const member of members) {
       await tell(client, world, member.accountId, {
         kind: 'bridge',
         tier: 'push',
         title: '{name} stands',
-        body: next.status === 'complete' ? 'The Kalinov Bridge is whole. Ritual Night is coming.' : 'Next: {stage}.',
-        vars: nextStage ? { name, stage: nextStage.name } : { name },
+        body:
+          next.status === 'complete'
+            ? 'The Kalinov Bridge is whole. Ritual Night is coming.'
+            : blessing
+              ? 'The builders send {wood} wood, {stone} stone, {grain} grain and {iron} iron, and the {blessing} is on every village of the group. Next: {stage}.'
+              : 'Next: {stage}.',
+        vars: nextStage ? { name, stage: nextStage.name, blessing, ...gift } : { name },
       }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
