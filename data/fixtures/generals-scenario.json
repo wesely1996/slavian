@@ -419,7 +419,9 @@
   {
    "method": "POST",
    "path": "/v1/villages/1/generals",
-   "body": {},
+   "body": {
+    "name": "  Ratibor the Bold "
+   },
    "status": 200,
    "response": {
     "village": {
@@ -601,7 +603,7 @@
     "general": {
      "id": 1,
      "accountId": 1,
-     "name": "Radoslav",
+     "name": "Ratibor the Bold",
      "status": "recruiting",
      "villageId": 1,
      "armyId": null,
@@ -628,7 +630,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Radoslav has not arrived yet"
+    "message": "Ratibor the Bold has not arrived yet"
    }
   },
   {
@@ -849,7 +851,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Radoslav is already there"
+    "message": "Ratibor the Bold is already there"
    }
   },
   {
@@ -1300,7 +1302,7 @@
      {
       "id": 1,
       "accountId": 1,
-      "name": "Radoslav",
+      "name": "Ratibor the Bold",
       "status": "home",
       "villageId": 1,
       "armyId": null,
@@ -3852,7 +3854,7 @@
      {
       "id": 1,
       "accountId": 1,
-      "name": "Radoslav",
+      "name": "Ratibor the Bold",
       "status": "home",
       "villageId": 1,
       "armyId": null,
@@ -6022,7 +6024,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Radoslav is leading an army; call it home first"
+    "message": "Ratibor the Bold is leading an army; call it home first"
    }
   },
   {
@@ -14973,7 +14975,7 @@
       "id": 16,
       "kind": "hero",
       "tier": "digest",
-      "title": "Radoslav fell in battle",
+      "title": "Ratibor the Bold fell in battle",
       "body": "Recruit another at a Hero's Hall.",
       "createdAt": "2026-06-01T10:28:33.600Z",
       "read": false
@@ -15063,7 +15065,7 @@
       "id": 6,
       "kind": "hero",
       "tier": "digest",
-      "title": "Radoslav answers your call",
+      "title": "Ratibor the Bold answers your call",
       "body": "A new general stands ready.",
       "createdAt": "2026-06-01T08:42:24.000Z",
       "read": false

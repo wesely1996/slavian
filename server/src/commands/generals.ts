@@ -15,7 +15,8 @@ import { spend } from '../sim/resources.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
 // Recruits a general at the caller's village, paid from its stores.
-export async function recruitGeneralCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput): Promise<{ village: Village; general: General }> {
+// Recruits a general in the caller's village, named `name` if given.
+export async function recruitGeneralCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput & { name?: string | undefined }): Promise<{ village: Village; general: General }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'recruited a general' }, async ({ client, world, village }) => {
     const owner = village.ownerAccountId!;
     const owned = (await listGenerals(client, world.id, owner)).length;
@@ -29,7 +30,7 @@ export async function recruitGeneralCommand(db: Db, deps: SchedulerDeps, input: 
       status: 'recruiting',
       villageId: village.id,
       until,
-      name: (id) => generalName(deps.data, id),
+      name: (id) => (input.name?.trim() ? input.name.trim() : generalName(deps.data, id)),
     });
     await scheduleEvent(client, world.id, until, 'general_ready', { generalId: general.id } satisfies GeneralPayload);
     await notifyWorld(client, { worldId: world.id, type: 'generals' });

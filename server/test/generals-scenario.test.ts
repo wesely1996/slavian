@@ -16,7 +16,8 @@ scenario('generals-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'heroes_hall' } });
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
   await play({ advance: 40 * MINUTE });
-  await play({ method: 'POST', path: '/v1/villages/1/generals', body: {} });
+  // Named by the player.
+  await play({ method: 'POST', path: '/v1/villages/1/generals', body: { name: '  Ratibor the Bold ' } });
   // Not here yet, and the Hall keeps only one.
   await play({ method: 'POST', path: '/v1/generals/1/move', body: { villageId: 1 } });
   await play({ method: 'POST', path: '/v1/villages/1/generals', body: {} });

@@ -529,7 +529,10 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				if result.state.has("error"):
 					return _rule_answer(result.state)
 			"generals":
-				result = LocalGenerals.recruit(self, world, village, now)
+				var given := String(body.get("name", "")) if body is Dictionary and body.get("name") is String else ""
+				if given.strip_edges().length() > 32:
+					return _fail(400, "invalid_request", "A general's name is at most 32 letters")
+				result = LocalGenerals.recruit(self, world, village, now, given)
 				if result.has("general"):
 					extra = ["general", LocalGenerals.view(data, result.general)]
 			"scout":

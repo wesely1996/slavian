@@ -152,7 +152,8 @@ static func on_general_arrive(_server: LocalServer, world: Dictionary, event: Di
 # --- Commands (commands/generals.ts) --------------------------------------------------------
 
 ## Recruits a general at the village, paid from its stores: {state, general}.
-static func recruit(server: LocalServer, world: Dictionary, village: Dictionary, now: int) -> Dictionary:
+## Recruits a general, named `given` if not empty (else from names.json).
+static func recruit(server: LocalServer, world: Dictionary, village: Dictionary, now: int, given := "") -> Dictionary:
 	var data := server.data
 	var owner := int(village.ownerAccountId)
 	var owned := owned_by(world, owner).size()
@@ -172,7 +173,7 @@ static func recruit(server: LocalServer, world: Dictionary, village: Dictionary,
 	state.ledger = ledger
 	var id := int(world.next.general)
 	world.next.general += 1
-	var general := {"id": id, "accountId": owner, "name": name_for(data, id), "status": "recruiting", "villageId": village.id,
+	var general := {"id": id, "accountId": owner, "name": given.strip_edges() if given.strip_edges() != "" else name_for(data, id), "status": "recruiting", "villageId": village.id,
 		"level": 1, "xp": 0, "armyId": null, "path": null, "departsAt": null, "until": now + recruit_ms(data, world.speed)}
 	world.generals.append(general)
 	server.schedule(world, int(general.until), "general_ready", {"generalId": id})
