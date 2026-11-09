@@ -746,7 +746,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.expeditions[0].status).toBe('done');
   });
 
-  it('researches in the Academy; a finished tech helps every village of its player', async () => {
+  it('researches in the Academy for the group: begun from the pool, paid by the members, it helps every village', async () => {
     const jarik = await guest('Jarik');
     const created = await call('POST', '/v1/worlds', jarik.token, { name: 'Research', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -763,17 +763,21 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     expect((await research('shield_wall')).body.message).toMatch(/Academy of level 2/);
     // Research comes in from the Academy, 30 an hour at level 1 (×10 world speed).
-    expect((await research('felling_axes')).body.message).toBe('Felling Axes takes 60 research; your Academies have brought in 0');
-    now = new Date(now.getTime() + 12 * 60_000);
+    expect((await research('felling_axes')).body.message).toBe("Felling Axes takes 120 research; the group's Academies have brought in 0");
+    now = new Date(now.getTime() + 24 * 60_000);
     const before = (await call('GET', `/v1/worlds/${worldId}`, jarik.token)).body.members[0].research;
     expect(before).toMatchObject({ points: 0, perHour: 300 });
     const started1 = await research('felling_axes');
     expect(started1.status).toBe(200);
-    expect(started1.body.research).toMatchObject({ accountId: jarik.accountId, tech: 'felling_axes', status: 'researching' });
+    // Begun: its resources are gathered first.
+    expect(started1.body.research).toMatchObject({ accountId: jarik.accountId, tech: 'felling_axes', status: 'funding', paid: { wood: 0, stone: 0, grain: 0, iron: 0 } });
     expect((await research('spear_drill')).body.message).toMatch(/one tech at a time/);
     const woodBefore = started1.body.village.resources.ratesPerHour.wood;
+    const funded = await call('POST', `/v1/villages/${village.id}/research/fund`, jarik.token, {});
+    expect(funded.body.research).toMatchObject({ status: 'researching', paid: scheduler.data.research.techs.felling_axes!.cost });
+    expect((await call('POST', `/v1/villages/${village.id}/research/fund`, jarik.token, {})).body.message).toMatch(/not gathering/);
 
-    now = new Date(started1.body.research.completesAt);
+    now = new Date(funded.body.research.completesAt);
     await tick(db, now, scheduler);
     const world = (await call('GET', `/v1/worlds/${worldId}`, jarik.token)).body;
     expect(world.research).toEqual([expect.objectContaining({ accountId: jarik.accountId, tech: 'felling_axes', status: 'done' })]);

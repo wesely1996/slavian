@@ -570,10 +570,239 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 92.5,
-       "stone": 75,
-       "grain": 310,
-       "iron": 87.5
+       "iron": 110,
+       "wood": 130,
+       "grain": 290,
+       "stone": 100
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:09.000Z"
+     }
+    },
+    "research": {
+     "accountId": 1,
+     "tech": "felling_axes",
+     "status": "funding",
+     "villageId": 1,
+     "startedAt": "2026-06-01T08:15:00.000Z",
+     "completesAt": "2026-06-01T08:15:00.000Z",
+     "cost": {
+      "iron": 180,
+      "wood": 450,
+      "grain": 240,
+      "stone": 300
+     },
+     "paid": {
+      "iron": 0,
+      "wood": 0,
+      "grain": 0,
+      "stone": 0
+     }
+    },
+    "serverTime": "2026-06-01T08:15:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/research",
+   "body": {
+    "tech": "two_field_rotation"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "The group's scholars are busy; one tech at a time"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/research",
+   "body": {
+    "tech": "nonsense"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "Unknown tech \"nonsense\""
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/research/fund",
+   "body": {},
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "academy"
+      },
+      "c3": {
+       "level": 1,
+       "building": "caravan_yard"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "academy": 1,
+      "elder_hall": 1,
+      "caravan_yard": 1
+     },
+     "queue": [],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reserve": 0,
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 0.5,
+       "stone": 0,
+       "grain": 150,
+       "iron": 0.5
       },
       "ratesPerHour": {
        "iron": 150,
@@ -593,36 +822,34 @@
     "research": {
      "accountId": 1,
      "tech": "felling_axes",
-     "status": "researching",
+     "status": "funding",
      "villageId": 1,
      "startedAt": "2026-06-01T08:15:00.000Z",
-     "completesAt": "2026-06-01T08:15:24.000Z"
+     "completesAt": "2026-06-01T08:15:00.000Z",
+     "cost": {
+      "iron": 180,
+      "wood": 450,
+      "grain": 240,
+      "stone": 300
+     },
+     "paid": {
+      "wood": 242,
+      "stone": 175,
+      "grain": 240,
+      "iron": 147
+     }
     },
     "serverTime": "2026-06-01T08:15:00.000Z"
    }
   },
   {
    "method": "POST",
-   "path": "/v1/villages/1/research",
-   "body": {
-    "tech": "two_field_rotation"
-   },
+   "path": "/v1/villages/1/research/fund",
+   "body": {},
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Your scholars are busy; one tech at a time"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/research",
-   "body": {
-    "tech": "nonsense"
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "Unknown tech \"nonsense\""
+    "message": "Vruchiy has none of what it still needs"
    }
   },
   {
@@ -640,10 +867,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":7.5,\"stone\":0,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":99.5,\"stone\":50,\"grain\":0,\"iron\":0}",
     "missing": {
-     "wood": 7.5,
-     "stone": 0,
+     "wood": 99.5,
+     "stone": 50,
      "grain": 0,
      "iron": 0
     }
@@ -818,10 +1045,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 87.5,
-       "wood": 92.5,
-       "grain": 310,
-       "stone": 75
+       "iron": 0.5,
+       "wood": 0.5,
+       "grain": 150,
+       "stone": 0
       },
       "ratesPerHour": {
        "iron": 150,
@@ -1064,7 +1291,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -1215,8 +1442,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06,
-       "production.wood": 0.1
+       "attack.cavalry": 0.06
       },
       "reserve": 0,
       "reinforce": {
@@ -1228,14 +1454,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 90,
-        "wood": 100.75,
-        "grain": 316.6666666666667,
-        "stone": 80
+        "iron": 3,
+        "wood": 8,
+        "grain": 156.66666666666666,
+        "stone": 5
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -1423,10 +1649,22 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:15:00.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 147,
+       "wood": 242,
+       "grain": 240,
+       "stone": 175
+      }
      }
     ],
     "heroes": [
@@ -3545,7 +3783,212 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Stone Splitting needs an Academy of level 2"
+    "message": "The group's scholars are busy; one tech at a time"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/research/fund",
+   "body": {},
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "academy"
+      },
+      "c3": {
+       "level": 1,
+       "building": "caravan_yard"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "academy": 1,
+      "elder_hall": 1,
+      "caravan_yard": 1
+     },
+     "queue": [],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reserve": 0,
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 17.5,
+       "stone": 25,
+       "grain": 350,
+       "iron": 42.5
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:45:00.000Z"
+     }
+    },
+    "research": {
+     "accountId": 1,
+     "tech": "felling_axes",
+     "status": "researching",
+     "villageId": 1,
+     "startedAt": "2026-06-01T08:15:00.000Z",
+     "completesAt": "2026-06-01T08:45:24.000Z",
+     "cost": {
+      "iron": 180,
+      "wood": 450,
+      "grain": 240,
+      "stone": 300
+     },
+     "paid": {
+      "wood": 450,
+      "stone": 300,
+      "grain": 240,
+      "iron": 180
+     }
+    },
+    "serverTime": "2026-06-01T08:45:00.000Z"
    }
   },
   {
@@ -3705,8 +4148,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06,
-      "production.wood": 0.1
+      "attack.cavalry": 0.06
      },
      "reserve": 0,
      "reinforce": {
@@ -3718,14 +4160,14 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 90,
-       "wood": 100.75,
-       "grain": 316.6666666666667,
-       "stone": 80
+       "iron": 42.5,
+       "wood": 17.5,
+       "grain": 350,
+       "stone": 25
       },
       "ratesPerHour": {
        "iron": 150,
-       "wood": 495.00000000000006,
+       "wood": 450,
        "grain": 400,
        "stone": 300
       },
@@ -3735,7 +4177,7 @@
        "grain": 1000,
        "stone": 1000
       },
-      "settledAt": "2026-06-01T08:16:26.400Z"
+      "settledAt": "2026-06-01T08:45:00.000Z"
      }
     },
     "caravan": {
@@ -3814,7 +4256,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -3978,10 +4420,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 165,
-        "wood": 348.25,
-        "grain": 516.6666666666667,
-        "stone": 230
+        "iron": 45,
+        "wood": 25.75,
+        "grain": 356.6666666666667,
+        "stone": 30
        },
        "ratesPerHour": {
         "iron": 150,
@@ -4176,7 +4618,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -6364,7 +6818,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -6528,10 +6982,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 331.5,
+        "iron": 275.5,
         "wood": 760,
         "grain": 741.6666666666666,
-        "stone": 615
+        "stone": 520
        },
        "ratesPerHour": {
         "iron": 150,
@@ -6868,10 +7322,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -6984,10 +7438,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -7129,10 +7583,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -7213,7 +7667,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -9645,10 +10111,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 336.5,
+       "iron": 280.5,
        "wood": 676.5,
        "grain": 655,
-       "stone": 625
+       "stone": 530
       },
       "ratesPerHour": {
        "iron": 150,
@@ -9742,7 +10208,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -9906,10 +10372,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 339,
+        "iron": 283,
         "wood": 684.75,
         "grain": 661.6666666666666,
-        "stone": 630
+        "stone": 535
        },
        "ratesPerHour": {
         "iron": 150,
@@ -10264,10 +10730,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -10380,10 +10846,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -10525,10 +10991,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -10609,7 +11075,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -13096,10 +13574,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 361.5,
+       "iron": 305.5,
        "wood": 699,
        "grain": 681.6666666666666,
-       "stone": 675
+       "stone": 580
       },
       "ratesPerHour": {
        "iron": 150,
@@ -13420,10 +13898,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 361.5,
+       "iron": 305.5,
        "wood": 759,
        "grain": 721.6666666666666,
-       "stone": 675
+       "stone": 580
       },
       "ratesPerHour": {
        "iron": 150,
@@ -13594,7 +14072,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -13758,10 +14236,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 376.5,
+        "iron": 320.5,
         "wood": 808.5,
         "grain": 761.6666666666666,
-        "stone": 705
+        "stone": 610
        },
        "ratesPerHour": {
         "iron": 150,
@@ -14215,10 +14693,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -14331,10 +14809,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -14476,10 +14954,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -14560,7 +15038,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -16993,7 +17483,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -17157,10 +17647,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 376.5,
+        "iron": 320.5,
         "wood": 808.5,
         "grain": 761.6666666666666,
-        "stone": 705
+        "stone": 610
        },
        "ratesPerHour": {
         "iron": 150,
@@ -17614,10 +18104,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -17730,10 +18220,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -17875,10 +18365,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -17959,7 +18449,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -20547,7 +21049,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -20711,10 +21213,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 376.5,
+        "iron": 320.5,
         "wood": 808.5,
         "grain": 761.6666666666666,
-        "stone": 705
+        "stone": 610
        },
        "ratesPerHour": {
         "iron": 150,
@@ -21168,10 +21670,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -21284,10 +21786,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -21429,10 +21931,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -21513,7 +22015,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -23939,7 +24453,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "research": {
-       "points": 315,
+       "points": 255,
        "perHour": 1500,
        "settledAt": "2026-06-01T08:15:00.000Z"
       }
@@ -24103,10 +24617,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 332,
+        "iron": 286,
         "wood": 738.25,
         "grain": 685,
-        "stone": 624
+        "stone": 546
        },
        "ratesPerHour": {
         "iron": 150,
@@ -24424,10 +24938,10 @@
        }
       ],
       "loot": {
-       "iron": 72,
+       "iron": 62,
        "wood": 161,
        "grain": 150,
-       "stone": 136
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -24597,10 +25111,10 @@
        }
       ],
       "loot": {
-       "iron": 104,
+       "iron": 86,
        "wood": 240,
        "grain": 233,
-       "stone": 194
+       "stone": 164
       },
       "decision": {
        "choice": "raid",
@@ -24713,10 +25227,10 @@
        }
       ],
       "loot": {
-       "iron": 80,
+       "iron": 63,
        "wood": 180,
        "grain": 172,
-       "stone": 146
+       "stone": 119
       },
       "decision": {
        "choice": "raid",
@@ -24858,10 +25372,10 @@
        }
       ],
       "loot": {
-       "iron": 117,
+       "iron": 88,
        "wood": 240,
        "grain": 240,
-       "stone": 210
+       "stone": 162
       },
       "decision": {
        "choice": "raid",
@@ -24942,7 +25456,19 @@
       "status": "done",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:15:24.000Z"
+      "completesAt": "2026-06-01T08:45:24.000Z",
+      "cost": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 180,
+       "wood": 450,
+       "grain": 240,
+       "stone": 300
+      }
      }
     ],
     "heroes": [
@@ -27381,7 +27907,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 519 resources after 1 rounds.",
+      "body": "The horde carried off 492 resources after 1 rounds.",
       "createdAt": "2026-06-01T12:22:37.200Z",
       "read": false
      },
@@ -27471,7 +27997,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 771 resources after 1 rounds.",
+      "body": "The horde carried off 723 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:53:49.200Z",
       "read": false
      },
@@ -27552,7 +28078,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 578 resources after 1 rounds.",
+      "body": "The horde carried off 534 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:25:44.400Z",
       "read": false
      },
@@ -27633,7 +28159,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 807 resources after 1 rounds.",
+      "body": "The horde carried off 730 resources after 1 rounds.",
       "createdAt": "2026-06-01T10:55:15.600Z",
       "read": false
      },

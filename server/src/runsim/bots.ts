@@ -7,7 +7,7 @@ import { buildFortCommand, recallArmyCommand, sendArmyCommand } from '../command
 import { listForts } from '../db/forts.js';
 import { sendCaravanCommand } from '../commands/logistics.js';
 import { placeOrderCommand } from '../commands/orders.js';
-import { foundVillageCommand, queueBuildCommand, rebuildCommand, setStanceCommand, startResearchCommand, trainUnitsCommand } from '../commands/village.js';
+import { foundVillageCommand, fundResearchCommand, queueBuildCommand, rebuildCommand, setStanceCommand, startResearchCommand, trainUnitsCommand } from '../commands/village.js';
 import type { GameData, TerrainId } from '../data/index.js';
 import { findBridge } from '../db/bridges.js';
 import { listCamps } from '../db/camps.js';
@@ -252,7 +252,14 @@ function fieldLevel(village: Village, field: string): number {
 }
 
 async function research(ctx: TurnContext, bot: Bot, village: Village): Promise<void> {
-  const entries = await read(ctx.db, (c) => listResearch(c, ctx.world.id, bot.accountId));
+  // The group's research: send what a tech being gathered for needs, or
+  // start the cheapest one when none is under way.
+  const entries = await read(ctx.db, (c) => listResearch(c, ctx.world.id));
+  if (entries.some((e) => e.status === 'funding')) {
+    stats.commands++;
+    await attempt(stats, () => fundResearchCommand(ctx.db, ctx.deps, { accountId: bot.accountId, villageId: village.id, now: ctx.now }));
+    return;
+  }
   if (entries.some((e) => e.status === 'researching')) return;
   const done = new Set(entries.filter((e) => e.status === 'done').map((e) => e.tech));
   const techs = Object.entries(ctx.deps.data.research.techs)

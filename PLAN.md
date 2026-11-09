@@ -53,7 +53,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | Q23 | Check-ins | Order queues limited by **order count per village** (grows with village size), standing orders, smart notifications + daily digest, teammate delegation. |
 | Q24 | Clans | 6 animal-named clans in Interslavic. Duplicates allowed. Each has some (not all) of: best resource, unique unit, unique building, bonus, weakness. |
 | Q25 | Heroes | One per player, picked from a roster of heroes with their own strengths, weaknesses, traits and portraits (step 21); leads one army, goes on quests (step 22), skill tree, gear from sites, wounded instead of killed. |
-| Q26 | Research | Per-player tree (~30 techs) + **lore scrolls** from sites for rare techs and group boosts. |
+| Q26 | Research | **Shared** group tree (40 techs) the members fund together + **lore scrolls** from sites for rare techs and group boosts. |
 | Q27 | Endgame | **Kalinov Bridge** in 5 stages (resources + quests). The final stage triggers **Ritual Night**: all active fronts attack at once. Survive it to win. |
 | Q28 | Difficulty | Waves scale with **group power** (villages, armies, bridge progress) + player count, with floors. Presets: Story, Normal, Hard, Nightmare. |
 | Q29 | Camps & lairs | **Spawn at the end of each wave**, giving a clearing window before the next. Uncleared camps reinforce the next wave on their nearest front and grow over time. Capped count. Loot on clear. |
@@ -351,9 +351,9 @@ The Order is a fictional faction with its own symbols. No real denomination, scr
 - **Searching for ruins:** a village with a Scout Lodge sends 2–20 scouts to search the land up to 5 hexes around it for 3 game hours (`ruinSearch` in `data/scouting.json`). When they are back they have found a forgotten ruin with a 15% chance per scout (at most 90%): a new site on free ground that suits a kind of site, at least 3 hexes from other sites, guarded like any other. The owner hears either way.
 
 ### 8.2 Research (Q26)
-- **Per-player tech tree** of ~30 techs researched in the Academy, in branches: Economy, Military, Fortification, Scouting, Faith.
+- **The group's tech tree** of 40 techs researched in the Academy, in branches: Economy, Military, Fortification, Scouting, Faith. Research is shared: every finished tech helps every village of every member. One tech at a time for the group: a member whose village has a high enough Academy begins it, paying its research from the group's pool (every member's Academies), and then any member sends its resources from any village ("Send what it needs"), as for the shipyard and the bridge; once it is all paid the scholars set to work. Techs cost three times what a player's own did, and twice the research.
 - **Lore scrolls** from sites unlock rare techs or grant **group-wide** boosts.
-- Per-player trees make it natural for teammates to specialize.
+- A shared tree makes the group pool its scholars and stores rather than research the same techs four times.
 
 ---
 

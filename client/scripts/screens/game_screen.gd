@@ -2002,30 +2002,41 @@ func _research_section(village: Dictionary) -> void:
 	_side_tabs("research", tabs, VILLAGE_TOP)
 
 
-## What you study now, and the group's lore scrolls.
+## What the group studies now (and what it still needs sent), and the
+## group's lore scrolls.
 func _academy_tab(village: Dictionary) -> void:
+	var village_id := int(village.id)
 	var academy := int(village.levels.get("academy", 0))
-	var mine := ResearchRules.progress(Game.research, Game.my_account_id())
-	var current: Dictionary = mine.current
+	var group := ResearchRules.group(Game.research)
+	var current: Dictionary = group.current
 	var techs: Dictionary = Game.data.research.techs
-	if academy < 1:
-		_panel_body.add_child(UI.label(tr("Build an Academy to research. Research belongs to you and helps all your villages."), UI.SMALL_SIZE, UI.MUTED))
-	else:
-		_panel_body.add_child(UI.label(tr("Academy Lv %d · %d of %d techs known") % [academy, mine.done.size(), techs.size()], UI.SMALL_SIZE, UI.MUTED))
-	# Research comes in from all your Academies; every tech takes some.
+	_panel_body.add_child(UI.with_info(UI.label(tr("Academy Lv %d · the group knows %d of %d techs") % [academy, group.done.size(), techs.size()], UI.SMALL_SIZE, UI.MUTED),
+		tr("Research is the group's: every tech helps every village of every member. One tech at a time: a member with a high enough Academy begins it with the group's research, then everyone sends its resources from any village; when it is all paid, the scholars set to work.")))
+	# Research comes in from every member's Academies; every tech takes some.
 	var points := UI.label("", UI.SMALL_SIZE)
 	_panel_body.add_child(points)
 	_tick(points, func() -> String:
-		var research := Game.my_research()
-		return tr("Research: %d (+%d per hour from your Academies)") % [floori(research.points), roundi(TimeUtil.per_real_hour(research.perHour))])
-	if not current.is_empty():
-		var done_at := TimeUtil.parse_iso(current.completesAt)
-		var line := UI.label("", UI.SMALL_SIZE)
-		_panel_body.add_child(line)
-		var tech_name: String = tr(techs[current.tech].name)
-		_tick(line, func() -> String: return tr("Researching %s · %s") % [tech_name, TimeUtil.format_duration(done_at - Game.server_now())])
-	elif academy >= 1:
-		_panel_body.add_child(UI.label(tr("Nothing being researched: pick a tech from a branch."), UI.SMALL_SIZE, UI.MUTED))
+		var pool := Game.group_research()
+		return tr("The group's research: %d (+%d per hour from every Academy)") % [floori(pool.points), roundi(TimeUtil.per_real_hour(pool.perHour))])
+	if current.is_empty():
+		_panel_body.add_child(UI.label(tr("Nothing being researched: pick a tech from a branch.") if academy >= 1 else tr("Build an Academy to begin research for the group."), UI.SMALL_SIZE, UI.MUTED))
+	else:
+		var tech_name: String = tr(techs.get(current.tech, {}).get("name", current.tech))
+		var starter := Game.member_name(int(current.accountId))
+		if current.status == "funding":
+			_panel_body.add_child(UI.label(tr("Gathering for %s (begun by %s)") % [tech_name, starter], UI.SMALL_SIZE, UI.ACCENT))
+			var bar := _gauge(UI.GOOD)
+			bar.value = ResearchRules.paid_share(current)
+			_panel_body.add_child(bar)
+			var left := ResearchRules.still_needed(current)
+			_panel_body.add_child(UI.rich(tr("Still needed: %s") % UI.costs(left)))
+			var send := UI.button(tr("Send what it needs from %s") % village.name, func() -> void: _fund_research(village_id), "icon/coin")
+			_panel_body.add_child(send)
+		else:
+			var done_at := TimeUtil.parse_iso(current.completesAt)
+			var line := UI.label("", UI.SMALL_SIZE)
+			_panel_body.add_child(line)
+			_tick(line, func() -> String: return tr("Researching %s · %s") % [tech_name, TimeUtil.format_duration(done_at - Game.server_now())])
 	if Game.lore.is_empty():
 		return
 	_panel_body.add_child(UI.label(tr("Lore scrolls of the group"), UI.HEADING_SIZE))
@@ -2036,14 +2047,13 @@ func _academy_tab(village: Dictionary) -> void:
 		_panel_body.add_child(UI.label(SiteText.scroll_effect(Game.data, entry.scroll), UI.SMALL_SIZE, UI.MUTED)))
 
 
-## One branch of the tree, a few techs to a page. Shows which teammates know
-## each tech, so the group can specialize.
+## One branch of the group's tree, a few techs to a page.
 func _research_branch(village: Dictionary, branch: String) -> void:
 	var village_id := int(village.id)
 	var academy := int(village.levels.get("academy", 0))
-	var mine := ResearchRules.progress(Game.research, Game.my_account_id())
-	var done: Dictionary = mine.done
-	var current: Dictionary = mine.current
+	var group := ResearchRules.group(Game.research)
+	var done: Dictionary = group.done
+	var current: Dictionary = group.current
 	var techs: Dictionary = Game.data.research.techs
 	var speed := float(Game.world.speed)
 	_panel_body.add_child(UI.label(tr(Game.data.research.branches[branch]), UI.HEADING_SIZE))
@@ -2055,13 +2065,13 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		var known := done.has(tech)
 		info.add_child(UI.label(("✓ " if known else "") + tr(def.name)))
 		info.add_child(UI.label(tr(def.description), UI.SMALL_SIZE, UI.MUTED))
-		var others := _who_knows(tech)
-		if not others.is_empty():
-			info.add_child(UI.label(tr("Known by %s") % ", ".join(others), UI.SMALL_SIZE, UI.MUTED))
 		var row := UI.hbox()
 		row.add_child(info)
 		_panel_body.add_child(row)
-		if known or (not current.is_empty() and current.tech == tech):
+		if known:
+			return
+		if not current.is_empty() and current.tech == tech:
+			info.add_child(UI.label(tr("Being gathered for: see the Academy") if current.status == "funding" else tr("Being researched"), UI.SMALL_SIZE, UI.ACCENT))
 			return
 		var problem := ResearchRules.problem(Game.data, tech, academy, done, not current.is_empty(), Game.scrolls())
 		var cost: Dictionary = def.cost
@@ -2069,26 +2079,30 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		var cost_line := UI.rich()
 		info.add_child(cost_line)
 		var duration := TimeUtil.format_duration(float(def.seconds) / speed)
-		var cost_text := tr("%s · %d research · %s") % [UI.costs(cost), needed, duration]
+		var cost_text := tr("%d research, then %s from the members · %s") % [needed, UI.costs(cost), duration]
 		if problem != "":
 			cost_line.text = tr("%s  (%s)") % [cost_text, problem.trim_suffix(".").to_lower()]
 			return
-		var button := UI.button(tr("Research"), func() -> void: _start_research(village_id, tech))
-		button.custom_minimum_size.x = 160
+		var button := UI.button(tr("Begin"), func() -> void: _start_research(village_id, tech))
+		button.custom_minimum_size.x = 140
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(button)
 		_tick(cost_line, func() -> String:
-			var home: Dictionary = Game.villages.get(village_id, village)
-			var scholarly: bool = Game.my_research().points >= needed
-			button.disabled = not scholarly or not Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+			var scholarly: bool = Game.group_research().points >= needed
+			button.disabled = not scholarly
 			return cost_text if scholarly else tr("%s  (not enough research)") % cost_text))
 
 
-func _who_knows(tech: String) -> PackedStringArray:
-	var names := PackedStringArray()
-	for entry in Game.research:
-		if entry.tech == tech and entry.status == "done" and int(entry.accountId) != Game.my_account_id():
-			names.append(Game.member_name(int(entry.accountId)))
-	return names
+func _fund_research(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/research/fund" % village_id, {})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("done")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
 
 
 func _start_research(village_id: int, tech: String) -> void:

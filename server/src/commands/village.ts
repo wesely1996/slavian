@@ -11,7 +11,7 @@ import { ForbiddenError, NotFoundError, RuleError } from '../errors.js';
 import { effectiveBonuses, listHeroes, loadHero, saveHero } from '../db/heroes.js';
 import { listGenerals, saveGeneral } from '../db/generals.js';
 import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } from '../db/expeditions.js';
-import { listResearch, loadResearchPoints, saveResearchPoints, startResearch, type ResearchEntry } from '../db/research.js';
+import { insertProject, listResearch, saveProject, type ResearchEntry } from '../db/research.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
@@ -21,13 +21,13 @@ import { addBought, boughtCount, getWorld, loadHexes, type World } from '../db/w
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { ExpeditionPayload } from '../scheduler/expeditions.js';
-import { settleResearchPoints, type ResearchPayload } from '../scheduler/research.js';
+import { groupKnown, groupPoints, settleResearchPoints, spendGroupPoints, type ResearchPayload } from '../scheduler/research.js';
 import type { MissionPayload } from '../scheduler/scouting.js';
 import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
 import { SETTLER, settleProblem } from '../sim/expansion.js';
 import { roadRoute, store, vaultCapacity } from '../sim/logistics.js';
 import { ACADEMY, researchCost, researchMs, researchProblem } from '../sim/research.js';
-import { spend, type ResourceKind, type Resources } from '../sim/resources.js';
+import { amountsAt, mapResources, spend, type ResourceKind, type Resources } from '../sim/resources.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { SCOUT_UNIT, isScout, scoutTarget, scoutTravelMs } from '../sim/scouting.js';
 import { withWorld } from '../scheduler/world.js';
@@ -370,45 +370,68 @@ export async function foundVillageCommand(
   return { village, expedition: result };
 }
 
-// Starts researching `tech` in the caller's village Academy, paid by the
-// village. Research belongs to the player: its effects reach all their
-// villages when it completes.
+// Starts the group researching `tech`, from the caller's village Academy:
+// it takes its research from the group's pool now, then waits for its
+// resources (fundResearchCommand). One tech at a time for the group.
 export async function startResearchCommand(
   db: Db,
   deps: SchedulerDeps,
   input: VillageCommandInput & { tech: string },
 ): Promise<{ village: Village; research: ResearchEntry }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'started research' }, async ({ client, world, village }) => {
-    const accountId = village.ownerAccountId!;
-    const entries = await listResearch(client, world.id, accountId);
+    const entries = await listResearch(client, world.id);
     const problem = researchProblem(deps.data, input.tech, {
       academyLevel: village.state.levels[ACADEMY] ?? 0,
-      done: new Set(entries.filter((e) => e.status === 'done').map((e) => e.tech)),
-      researching: entries.some((e) => e.status === 'researching'),
+      done: new Set(await groupKnown(client, world.id)),
+      researching: entries.some((e) => e.status !== 'done'),
       scrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
     });
     if (problem) throw new RuleError(problem);
-    // Research comes from all the player's Academies, resources from this village.
     const needed = researchCost(deps.data, input.tech);
-    const points = await settleResearchPoints(client, deps.data, world, accountId, input.now);
+    const points = await groupPoints(client, deps.data, world, input.now);
     if (points < needed) {
-      throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${needed} research; your Academies have brought in ${Math.floor(points)}`);
+      throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${needed} research; the group's Academies have brought in ${Math.floor(points)}`);
     }
-    const ledger = spend(village.state.ledger, input.now, deps.data.research.techs[input.tech]!.cost);
-    await saveResearchPoints(client, world.id, accountId, { amount: points - needed, settledAt: input.now });
-    const completesAt = new Date(input.now.getTime() + researchMs(deps.data, input.tech, world.speed, village.state.bonuses));
-    const research = await startResearch(client, {
+    await spendGroupPoints(client, deps.data, world, needed, input.now);
+    const research = await insertProject(client, {
       worldId: world.id,
-      accountId,
+      accountId: village.ownerAccountId!,
       tech: input.tech,
       villageId: village.id,
       startedAt: input.now,
-      completesAt,
+      cost: deps.data.research.techs[input.tech]!.cost,
     });
-    const payload: ResearchPayload = { accountId, tech: input.tech };
-    await scheduleEvent(client, world.id, completesAt, 'research_complete', payload);
     await notifyWorld(client, { worldId: world.id, type: 'research' });
-    return { state: { ...village.state, ledger }, result: research };
+    return { state: village.state, result: research };
+  });
+  return { village, research: result };
+}
+
+// Sends from the caller's village what it can of what the group's research
+// still needs; once it is all paid, the research begins.
+export async function fundResearchCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput): Promise<{ village: Village; research: ResearchEntry }> {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent resources to research' }, async ({ client, world, village }) => {
+    const project = (await listResearch(client, world.id)).find((e) => e.status === 'funding');
+    if (!project || !project.cost || !project.paid) throw new RuleError('The group is not gathering resources for any research');
+    const paid = project.paid;
+    const cost = project.cost;
+    const have = amountsAt(village.state.ledger, input.now);
+    const sent = mapResources((kind) => Math.max(0, Math.min(Math.floor(have[kind]), cost[kind] - paid[kind])));
+    if (Object.values(sent).every((n) => n <= 0)) throw new RuleError(`${village.name} has none of what it still needs`);
+    const ledger = spend(village.state.ledger, input.now, sent);
+    const now = mapResources((kind) => paid[kind] + sent[kind]);
+    const full = (Object.keys(cost) as (keyof typeof cost)[]).every((kind) => now[kind] >= cost[kind]);
+    let next: ResearchEntry = { ...project, paid: now };
+    if (full) {
+      // All paid: the research begins.
+      const completesAt = new Date(input.now.getTime() + researchMs(deps.data, project.tech, world.speed, village.state.bonuses));
+      next = { ...next, status: 'researching', completesAt };
+      const payload: ResearchPayload = { accountId: project.accountId, tech: project.tech };
+      await scheduleEvent(client, world.id, completesAt, 'research_complete', payload);
+    }
+    await saveProject(client, next);
+    await notifyWorld(client, { worldId: world.id, type: 'research' });
+    return { state: { ...village.state, ledger }, result: next };
   });
   return { village, research: result };
 }

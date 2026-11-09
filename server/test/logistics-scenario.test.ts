@@ -1,6 +1,6 @@
 // Research, caravans, the vault and the hero's own commands in a solo
-// session (docs/local-engine.md, part 5): a tech learned (and the ones
-// refused), caravans to the Holy City vault and back, a vault upgrade
+// session (docs/local-engine.md, part 5): a tech the group learns (its
+// resources sent in after it is begun, and the ones refused), caravans to the Holy City vault and back, a vault upgrade
 // refused, the hero renamed and refused what it can't do yet, and a
 // caravan sent past the camp a beaten horde left by the road; caravans
 // turned on their way out; a hero's quest called off.
@@ -17,6 +17,9 @@ scenario('logistics-scenario.json', START, async ({ play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/research', body: { tech: 'felling_axes' } });
   await play({ method: 'POST', path: '/v1/villages/1/research', body: { tech: 'two_field_rotation' } });
   await play({ method: 'POST', path: '/v1/villages/1/research', body: { tech: 'nonsense' } });
+  // The group's research: its resources are sent in after it is begun.
+  await play({ method: 'POST', path: '/v1/villages/1/research/fund', body: {} });
+  await play({ method: 'POST', path: '/v1/villages/1/research/fund', body: {} });
   await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: null, load: load(100, 50) } });
   await play({ method: 'POST', path: '/v1/villages/1/caravans/fetch', body: { load: load(100) } });
   await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: 1, load: load(10) } });
@@ -30,6 +33,7 @@ scenario('logistics-scenario.json', START, async ({ play }) => {
   await play({ advance: 30 * MINUTE });
   await play({ method: 'GET', path: world });
   await play({ method: 'POST', path: '/v1/villages/1/research', body: { tech: 'stone_splitting' } });
+  await play({ method: 'POST', path: '/v1/villages/1/research/fund', body: {} });
   await play({ method: 'POST', path: '/v1/villages/1/caravans/fetch', body: { load: load(150, 50) } });
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
