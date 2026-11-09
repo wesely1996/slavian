@@ -30517,6 +30517,252 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/demolish",
+   "body": {
+    "plot": "c1"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Kitezh",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 1,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "building": null,
+       "level": 0
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 1,
+       "building": "storehouse"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 1,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 1,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 1,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 1,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 1,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 1,
+       "building": "archer_tower"
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 1,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "o-1,2": {
+       "peak": 2,
+       "level": 2,
+       "terrain": "hills",
+       "building": "outpost"
+      }
+     },
+     "levels": {
+      "wall": 1,
+      "elder_hall": 1,
+      "barracks": 1,
+      "storehouse": 1,
+      "woodcutter": 1,
+      "quarry": 1,
+      "farm": 1,
+      "archer_tower": 1,
+      "iron_mine": 1
+     },
+     "queue": [],
+     "garrison": {
+      "spearman": 5
+     },
+     "away": {},
+     "stance": "defensive",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reserve": 200,
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 866,
+       "stone": 1029.3,
+       "grain": 1393.5,
+       "iron": 1139.8666666666666
+      },
+      "ratesPerHour": {
+       "wood": 390,
+       "stone": 261,
+       "grain": 353,
+       "iron": 164
+      },
+      "capacity": {
+       "wood": 1300,
+       "stone": 1300,
+       "grain": 1300,
+       "iron": 1300
+      },
+      "settledAt": "2026-06-01T16:22:17.000Z"
+     }
+    },
+    "refund": {
+     "wood": 60,
+     "stone": 50,
+     "grain": 20,
+     "iron": 10
+    },
+    "serverTime": "2026-06-01T16:22:17.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "fisherman_hut"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A Fisherman's Hut needs a village beside a lake or on a river"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "water_wheel"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A Water Wheel needs a village beside a lake or on a river"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "windmill"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A Windmill needs a village on hills"
+   }
+  },
+  {
    "method": "GET",
    "path": "/v1/worlds/-1/notifications",
    "status": 200,

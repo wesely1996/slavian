@@ -45,6 +45,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_events()
+	_test_village_site()
 	_test_group_research()
 	_test_bridge_reward()
 	_test_raid_text()
@@ -567,6 +568,15 @@ func _test_group_research() -> void:
 	_check(is_equal_approx(ResearchRules.paid_share(group.current), 900.0 / 1680.0), "share of a tech's cost paid")
 	_check(ResearchRules.still_needed(group.current) == {"stone": 600, "iron": 180}, "what a tech still needs")
 	_check(is_equal_approx(ResearchRules.paid_share({"status": "researching"}), 1.0), "research from before sharing counts as paid")
+
+
+func _test_village_site() -> void:
+	var terrain := {"0,0": "hills", "1,0": "lake", "5,5": "plains"}
+	_check(LocalVillage.village_site(terrain, [], Vector2i(0, 0)) == {"water": true, "hills": true}, "site beside a lake, on hills")
+	_check(LocalVillage.village_site(terrain, [{"a": Vector2i(5, 5), "b": Vector2i(6, 5)}], Vector2i(5, 5)).water, "site on a river")
+	var data := {"buildings": {"buildings": {"windmill": {"kind": "center", "site": "hills"}, "fisherman_hut": {"kind": "center", "site": "water"}, "mill": {"kind": "center"}}}}
+	var village := {"plots": {}, "queue": [], "bonuses": {}}
+	_check(Rules.constructible(data, village, "center", {"water": false, "hills": true}) == ["windmill", "mill"], "only what the land allows: %s" % [Rules.constructible(data, village, "center", {"water": false, "hills": true})])
 
 
 func _test_events() -> void:

@@ -136,7 +136,9 @@ static func planned_plot(village: Dictionary, plot: String) -> Dictionary:
 ## Buildings of `kind` ("center", or "tower" for a wall slot) that could go
 ## in an empty slot: not built or queued anywhere in the village yet, unless
 ## the village may have more than one.
-static func constructible(data: Dictionary, village: Dictionary, kind := "center") -> Array[String]:
+## `site`: what the land allows (Game.village_site), for buildings with a
+## `site`; those the land doesn't allow are left out.
+static func constructible(data: Dictionary, village: Dictionary, kind := "center", site: Dictionary = {}) -> Array[String]:
 	var taken := {}
 	for id in village.get("plots", {}):
 		var building: Variant = planned_plot(village, id).building
@@ -146,6 +148,8 @@ static func constructible(data: Dictionary, village: Dictionary, kind := "center
 	var buildings: Dictionary = data.buildings.buildings
 	for building in buildings:
 		var def: Dictionary = buildings[building]
+		if def.get("site") != null and not site.get(def.site, false):
+			continue
 		if def.kind == kind and (def.get("multiple", false) or not taken.has(building)) and ClanText.allowed(def, village.get("bonuses", {})):
 			result.append(building)
 	return result

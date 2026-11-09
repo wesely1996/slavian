@@ -2,7 +2,7 @@ import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js'
 import { openTowerSlots, towerIndex, towerPlot, WALL, WALL_PLOT } from './walls.js';
 import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
-import { hex, hexDistance, hexKey, spiral, type Hex } from './hex.js';
+import { hex, hexDistance, hexKey, neighbors, spiral, type Hex } from './hex.js';
 import { bonus, productionFactor, timeFactor, trainFactor, type Bonuses } from './research.js';
 import { receive } from './logistics.js';
 import {
@@ -378,12 +378,32 @@ function isUnlockedSlot(data: GameData, plot: string, hallLevel: number): boolea
 
 // Pays for and queues a construction or upgrade. Builds run one after
 // another, so the new item starts when the last queued one completes.
+// What the land around a village allows (buildings.json `site`): water
+// beside it (a lake next to it, or a river along one of its edges), and
+// hills under it.
+export interface VillageSite {
+  water: boolean;
+  hills: boolean;
+}
+
+export function villageSite(terrain: ReadonlyMap<string, string>, rivers: readonly { a: Hex; b: Hex }[], cell: Hex): VillageSite {
+  const key = hexKey(cell);
+  const water = neighbors(cell).some((n) => terrain.get(hexKey(n)) === 'lake') || rivers.some((e) => hexKey(e.a) === key || hexKey(e.b) === key);
+  return { water, hills: terrain.get(key) === 'hills' };
+}
+
+// The words for a site a building needs.
+export function siteText(site: 'water' | 'hills'): string {
+  return site === 'water' ? 'a village beside a lake or on a river' : 'a village on hills';
+}
+
 export function queueBuild(
   data: GameData,
   state: VillageState,
   order: BuildOrder | string,
   at: Date,
   worldSpeed: number,
+  site: VillageSite = { water: false, hills: false },
 ): { state: VillageState; queued: QueuedBuild } {
   const request: BuildOrder = typeof order === 'string' ? { building: order } : order;
   const hallLevel = state.levels[HALL] ?? 0;
@@ -412,6 +432,7 @@ export function queueBuild(
     if (slot === null && def.kind === 'tower') throw new RuleError(`${def.name} is built in a wall slot`);
     if (slot === null && def.kind !== 'center') throw new RuleError(`${def.name} is built on fields, not in the village`);
     if (def.clan && !hasClan(state.bonuses, def.clan)) throw new RuleError(`Only ${clanName(data, def.clan)} can build a ${def.name}`);
+    if (def.site && !site[def.site]) throw new RuleError(`A ${def.name} needs ${siteText(def.site)}`);
     const taken = !def.multiple && Object.keys(state.plots).some((id) => id !== plot && plannedPlot(state, id).building === building);
     if (taken) throw new RuleError(`This village already has a ${def.name}`);
     const missing = Object.entries(def.requires ?? {}).find(([needed, level]) => (state.levels[needed] ?? 0) < level);

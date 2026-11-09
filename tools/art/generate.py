@@ -1316,7 +1316,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall"]
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
 MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
@@ -1472,6 +1472,43 @@ def building(kind, stage):
             round_tower(s, 64 - w / 2, 114, 18, 52)
         if stage == 3:
             round_tower(s, 64 + w / 2, 114, 18, 52)
+    elif kind == "fisherman_hut":
+        # A hut on the bank, a pool of water before it, nets drying on a rack.
+        s.ellipse(86, 112, 34, 10, s.rad([(0, "#7fb6cf"), (0.6, "#3f7f9e"), (1, "#2a5a72")]), stroke="none", sw=0)
+        house(s, 44, 108, 40 * big, 22 * big, roof="thatch", wall="wood", windows=0)
+        s.line(80, 108, 80, 84, stroke="#6e4b2c", sw=2.5)
+        s.line(110, 106, 110, 84, stroke="#6e4b2c", sw=2.5)
+        s.line(78, 86, 112, 86, stroke="#8b5a2b", sw=2)
+        for i in range(3 + stage):
+            x = 82 + i * (26 / (2 + stage))
+            s.path(f"M{fmt(x)},86 Q{fmt(x + 2)},94 {fmt(x)},100", "none", stroke="#c9b48a", sw=1.2)
+        for i in range(stage):
+            s.ellipse(70 + i * 9, 116, 4, 1.6, "#d8dde0", stroke="none", sw=0)
+    elif kind == "water_wheel":
+        # A mill house by a stream, its wheel turning in the water.
+        s.rect(64, 108, 60, 10, s.lin([(0, "#7fb6cf"), (1, "#2a5a72")], 0, 0, 0, 1), stroke="none", sw=0, rx=3)
+        house(s, 46, 108, 46 * big, 28 * big, roof="red" if stage == 3 else "thatch", wall="wood" if stage < 2 else "plaster", windows=1)
+        r = 15 + stage * 2
+        cx, cy = 90, 104 - r * 0.4
+        s.circle(cx, cy, r, "none", stroke="#6e4b2c", sw=3.2)
+        s.circle(cx, cy, r * 0.32, "#8b5a2b", stroke="none", sw=0)
+        for i in range(8):
+            a = i * 3.14159 / 4
+            s.line(cx, cy, cx + math.cos(a) * r, cy + math.sin(a) * r, stroke="#8b5a2b", sw=2)
+            s.rect(cx + math.cos(a) * r - 2.5, cy + math.sin(a) * r - 2.5, 5, 5, "#a8794a", stroke="none", sw=0)
+    elif kind == "windmill":
+        # A tower mill on the hilltop, its four sails to the wind.
+        s.path("M14,118 Q64,84 118,118 Z", s.lin([(0, "#9fb35f"), (1, "#5f7a35")], 0, 0, 0, 1), stroke="none", sw=0)
+        h = 30 + stage * 6
+        s.poly([(54, 108), (74, 108), (70, 108 - h), (58, 108 - h)], s.lin([(0, "#e6dcc2"), (1, "#a39d93")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.poly([(55, 108 - h), (73, 108 - h), (64, 96 - h)], s.lin([(0, "#c9614a"), (1, "#6e2a1f")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.rect(61, 100, 6, 8, "#2b211a", stroke="none", sw=0, rx=1)
+        hub = (64, 100 - h)
+        for dx, dy in ((1, -1), (1, 1), (-1, 1), (-1, -1)):
+            tip = (hub[0] + dx * 30, hub[1] + dy * 30)
+            s.line(hub[0], hub[1], tip[0], tip[1], stroke="#6e4b2c", sw=2.4)
+            s.poly([(hub[0] + dx * 8, hub[1] + dy * 8), (tip[0], tip[1]), (tip[0] - dy * 6, tip[1] + dx * 6), (hub[0] + dx * 8 - dy * 5, hub[1] + dy * 8 + dx * 5)], "#c9ad78", stroke="#6e4b2c", sw=1.2, opacity=0.95)
+        s.circle(hub[0], hub[1], 3, "#4a3422", stroke="none", sw=0)
     elif kind == "longhouse_hall":
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):
