@@ -527,6 +527,8 @@ export function armyView(army: Army) {
     wagonFortAt: army.wagonFortAt?.toISOString() ?? null,
     // It comes home by itself once its errand is done.
     returnHome: army.returnHome,
+    // A raid beyond the map's edge: front, depth, stage reached, battles, finds.
+    raid: army.raid,
   };
 }
 

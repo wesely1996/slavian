@@ -48,6 +48,8 @@ export interface BattleSetup {
   // The walls (and the level of the moat before them) and what is left of them.
   wall?: { level: number; integrity: number; max: number; moat?: number };
   siege?: { engine: string; count: number; readyAt: string };
+  // A battle of a raid beyond the map's edge: the front, the field (or stronghold) and the stage.
+  raid?: { front: string; name: string; stronghold: boolean; stage: number };
   // The horde crossed a river (over a bridge) into the fight.
   river?: boolean;
   // The defense a wagon fort gives the holders (sim/field.ts).

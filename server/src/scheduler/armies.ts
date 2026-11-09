@@ -39,6 +39,7 @@ import { tell } from './notices.js';
 import { interceptAt } from './field.js';
 import { deliverLoot, stormCamp } from './camps.js';
 import { arriveAtSite } from './sites.js';
+import { reachEdge } from './raids.js';
 import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
 import { fortAt, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
@@ -87,6 +88,10 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     if (!input.targetHex) throw new RuleError('Say which camp to clear');
     to = input.targetHex;
     if (!(await campAt(client, world.id, to.q, to.r))) throw new RuleError('There is no camp there');
+  } else if (input.orders === 'raid') {
+    // To the map's edge (scheduler/raids.ts picks the hex).
+    if (!input.targetHex) throw new RuleError('Say where they leave the map');
+    to = input.targetHex;
   } else if (input.orders === 'hold') {
     if (!input.targetHex) throw new RuleError('Say which hex to hold');
     to = input.targetHex;
@@ -128,7 +133,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     worldId: world.id,
     ownerAccountId: home.ownerAccountId,
     homeVillageId: home.id,
-    targetVillageId: ['hold', 'clear', 'explore'].includes(input.orders) ? null : input.targetVillageId,
+    targetVillageId: ['hold', 'clear', 'explore', 'raid'].includes(input.orders) ? null : input.targetVillageId,
     supply: grain,
     supplyAt: input.at,
     targetQ: to.q,
@@ -591,6 +596,11 @@ export const armyHandlers: HandlerRegistry = {
     if (army.status !== 'marching' || army.arrivesAt.getTime() !== event.dueAt.getTime()) return;
     if (army.orders === 'explore') {
       await arriveAtSite(client, data, world, army, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      return;
+    }
+    if (army.orders === 'raid') {
+      await reachEdge(client, data, world, army, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
     }

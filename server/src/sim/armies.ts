@@ -6,7 +6,8 @@ import { hexToPixel, type Hex } from './hex.js';
 import type { Units } from './training.js';
 
 // `garrison`: marching into one of its owner's villages to join the garrison.
-export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear' | 'explore' | 'garrison';
+// `raid`: off beyond the map's edge to raid a front's lands (data/raids.json).
+export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear' | 'explore' | 'garrison' | 'raid';
 const FIGHTERS = new Set(['infantry', 'archers', 'cavalry']);
 
 export function total(units: Units): number {

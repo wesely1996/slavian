@@ -326,6 +326,13 @@ The Order is a fictional faction with its own symbols. No real denomination, scr
 - Capped number of active camps/lairs per world *(tunable)*.
 - **Clearing** gives loot: resources, sometimes gear, sometimes Svarog's Ember (lairs).
 
+### 7.5b Raids beyond the map's edge
+- A village's **Raid** tab sends an army against one of the world's fronts: it marches to the edge of the map on that side (the nearest hex of the last ring there) and goes into the enemy's lands (`data/raids.json`).
+- It fights a battle on each of 1 to 3 **fields** (picked when sending), one every 3 game hours, then **besieges the front's stronghold**: the North's Monster Lair, the East's Nomad Encampment, the South's Fortress of the Order, the West's Templar Keep. Each front has three fields whose ground favours one side or the other (e.g. the Open Steppe the nomads' attack, the Kurgan Ridge ours); the stronghold's defenders are 1.8× as many and fight behind walls (+40% defense, defensive stance). Enemies grow with each stage and with the waves so far.
+- A battle won brings resources per enemy killed (the front's loot factor), and the stronghold's stores when it falls, as much as the army can carry (30 per soldier, 400 per military caravan). The **North** gives only 30% of that, but every battle won there has a chance at hero gear, a lore scroll (rare research) or a Svarog's Ember, three times as likely at the Monster Lair.
+- Every battle won makes the next horde of that front hate the more (+5%, +15% more for sacking the stronghold). A battle lost turns the raid home with what it carries; it can be called home any time.
+- The army eats its own grain all the way, from the military reserve and its wagons; the tab shows what it can carry and how long its grain lasts against the hours beyond the edge. The army sheet tells each battle, finds and loot; battle reports show raid battles.
+
 ### 7.6 Difficulty (Q28)
 - Wave strength = f(**group power**, player count, bridge stage, wave index, preset), with a **floor** per preset so waves never become trivial.
 - Group power counts villages, total army strength and bridge progress. This stops unlimited expansion from out-growing the threat.

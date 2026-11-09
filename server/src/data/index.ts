@@ -640,6 +640,34 @@ const campsFileSchema = z.object({
   starter: z.object({ units: z.number().int().positive(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive() }),
 });
 export type CampsData = z.infer<typeof campsFileSchema>;
+// Raids beyond the map's edge (raids.json).
+const sideFactors = z.object({ attack: z.number().positive(), defense: z.number().positive() });
+const resourceAmounts = z.object({ wood: z.number().nonnegative(), stone: z.number().nonnegative(), grain: z.number().nonnegative(), iron: z.number().nonnegative() });
+const raidsFileSchema = z.object({
+  version: z.literal(1),
+  stageHours: z.number().positive(),
+  maxDepth: z.number().int().min(1),
+  fieldStance: z.enum(STANCES),
+  enemy: z.object({ baseUnits: z.number().positive(), growthPerStage: z.number().min(1), growthPerWave: z.number().min(1) }),
+  stronghold: z.object({ sizeFactor: z.number().positive(), walls: z.number().nonnegative(), stance: z.enum(STANCES) }),
+  loot: z.object({ perKill: resourceAmounts, stronghold: resourceAmounts }),
+  carry: z.object({ perSoldier: z.number().nonnegative(), perWagon: z.number().nonnegative() }),
+  hatred: z.object({ perBattle: z.number().nonnegative(), stronghold: z.number().nonnegative() }),
+  north: z.object({
+    resourceShare: z.number().min(0).max(1),
+    finds: z.object({ gear: z.number().min(0).max(1), scroll: z.number().min(0).max(1), ember: z.number().min(0).max(1) }),
+    strongholdFactor: z.number().positive(),
+  }),
+  fronts: z.record(
+    z.string(),
+    z.object({
+      fields: z.array(z.object({ name: z.string(), army: sideFactors, enemy: sideFactors })).min(1),
+      stronghold: z.string(),
+    }),
+  ),
+});
+export type RaidsData = z.infer<typeof raidsFileSchema>;
+
 
 export const DIFFICULTIES = ['story', 'normal', 'hard', 'nightmare'] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
@@ -865,6 +893,7 @@ export interface GameData {
   horde: HordeData;
   events: EventsData;
   camps: CampsData;
+  raids: RaidsData;
   difficulty: DifficultyData;
   sites: SitesData;
   lore: LoreData;
@@ -898,6 +927,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     horde: hordeFileSchema.parse(read('horde.json')),
     events: eventsFileSchema.parse(read('events.json')),
     camps: campsFileSchema.parse(read('camps.json')),
+    raids: raidsFileSchema.parse(read('raids.json')),
     difficulty: difficultyFileSchema.parse(read('difficulty.json')),
     sites: sitesFileSchema.parse(read('sites.json')),
     lore: loreFileSchema.parse(read('lore.json')),
