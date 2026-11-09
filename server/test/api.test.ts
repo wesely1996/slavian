@@ -269,8 +269,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(['Low', 'Moderate', 'High', 'Severe']).toContain(announced[0].threat);
     // Composition stays secret.
     expect(JSON.stringify(started.body)).not.toMatch(/composition|grey_wolf|leshy/);
-    // Grace period: one week of game time, at 10x speed.
-    expect(new Date(announced[0].spawnAt).getTime() - new Date(started.body.startedAt).getTime()).toBe((168 * 3_600_000) / 10);
+    // Grace period: five days of game time, at 10x speed.
+    expect(new Date(announced[0].spawnAt).getTime() - new Date(started.body.startedAt).getTime()).toBe((120 * 3_600_000) / 10);
 
     const getWaves = async () => (await call('GET', `/v1/worlds/${worldId}`, ratimir.token)).body.waves;
 

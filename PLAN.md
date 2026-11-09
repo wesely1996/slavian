@@ -59,7 +59,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 | Q29 | Camps & lairs | **Spawn at the end of each wave**, giving a clearing window before the next. Uncleared camps reinforce the next wave on their nearest front and grow over time. Capped count. Loot on clear. |
 | Q30 | The Church | A **fictional zealot order** ("the Order of the One Throne"). No real denomination, scripture or symbols. |
 | Q31 | Art | Godot 2D, stylized flat illustration, Slavic ornament UI frames, muted earth palette with bright threat accents. Placeholder art early. |
-| Q32 | Pacing | Week 1 grace period (camps/monsters only). Then a wave every 2–3 days. Soft deadline through escalation. World speed 1× / 2×. |
+| Q32 | Pacing | 5-day grace period (camps/monsters only). Then a wave every day. Soft deadline through escalation. World speed 1× / 2×. |
 | Q33 | Quiet hours | Group-set quiet window. Waves and battle starts never land inside it. |
 | Q34 | Simulation | Event scheduler, one writer per world, resources computed when read, all formulas server-side, shared JSON data. |
 | Q35 | Protocol | HTTPS commands, WebSocket state updates, FCM push. Server validation + rate limits as the only anti-cheat. |
@@ -293,8 +293,8 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 The Order is a fictional faction with its own symbols. No real denomination, scripture or real-world religious iconography is used.
 
 ### 7.2 Wave schedule (Q13, Q32, Q33)
-- **Week 1: grace period.** Only camps, lairs and wandering monsters. Guided quest chain runs during the first 48 h.
-- **From week 2:** one wave every **2–3 days** *(tunable)*, rotating fronts, escalating.
+- **First 5 days: grace period.** Only camps, lairs and wandering monsters. Guided quest chain runs during the first 48 h.
+- **From day 6:** one wave **every day** *(tunable)*, rotating fronts, escalating (per wave as fast per day as the old 2–3 day waves: 1.068× a wave, enemy tiers from waves 8, 15 and 25, the first 5 waves only raid on Normal).
 - **Public schedule:** front, ETA and a rough threat level. Shown on the map and in the timeline.
 - **Quiet hours:** no wave arrivals or battle starts inside the group's quiet window. Anything due inside it shifts to its end.
 - **Soft deadline:** waves keep escalating, so a slow group faces rising pressure but is never cut off by a timer.
@@ -597,7 +597,7 @@ Difficulty presets and world speed already exist (M3 step 6, M1).
 7. [x] **Headless simulator and first balance pass:** `npm run sim` (`server/src/runsim`) plays whole worlds with scripted bots (turtle, expander, balanced) through the real commands, scheduler and database on a simulated clock, across player counts and presets, and reports how each run ended (won, lost and to which front, or unfinished and on what), the bridge stage, Sanctity, villages and hordes. First pass:
    - **Bugs it found:** a raid didn't clear the village's build queue (it now does, like a raze); the rebuild order lost a queued outpost rebuild when a later one couldn't be paid for; completion events of cleared builds failed instead of passing.
    - **Content it ran out of:** Svarog's Embers (sites find one more often, lairs give one 75% of the time, the last two stages need 1 and 2), lairs (the camp limit is per front, 4 each, and a lair rises when a stage wants one and none stands), relics (a forgotten ruin appears when a stage wants one and every site was searched), choke points on horde roads (the strong-point quest also counts a battle won from a fort).
-   - **Pace:** waves grow 1.18× per wave (was 1.25×, which outran any economy by day 40; 1.15× never threatened). Balanced groups now win in 33–55 days or fall to Ritual Night itself.
+   - **Pace:** (with a wave every 2–3 days) waves grow 1.18× per wave (was 1.25×, which outran any economy by day 40; 1.15× never threatened). Balanced groups now win in 33–55 days or fall to Ritual Night itself.
    - **Still to do** (the bots, then the numbers): teammates coordinating strong points, late-game Ember gathering, enough runs per player count and preset for real win rates against the 60–75% target.
 
 ### M5 breakdown (each step is its own PR)

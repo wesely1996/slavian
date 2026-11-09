@@ -1,7 +1,7 @@
 {
   "version": 2,
   "_comment": "Enemy forces per front. siege: how hard a unit batters walls (walls.json); escalade: how many men a climbing engine (ladders, siege towers) carries over the walls a round, setupFactor how long it takes to build (x the front's siegeCraft); engine: what the front builds on site to breach them, siegeCraft how long that takes (0: never). Units come in tiers like the player's troops: each front has an infantry, an archer and a cavalry unit in each of four tiers, and a tier joins the hordes from wave index `tiers.minWave` (tier 1 first). weight sets how common a unit is in a wave; each tier unlocked after a unit's own multiplies its weight by `tiers.fade`, so later hordes are mostly the newest troops. Units with no tier (siege engines) keep their own minWave. minPlayers is the smallest group that sees a unit. speed is hexes per hour on plains, like player units. family drives counters in battle; stances weights how often a wave of this front takes each battle stance. personality: lootFactor scales what a raid carries off, raidReach is how far from its road a horde burns outposts, nerve scales its stance's retreat threshold (higher holds longer, capped at never breaking before 95%). razeBias and erratic feed the horde AI (data/horde.json).",
-  "tiers": { "minWave": [0, 3, 6, 10], "fade": 0.5 },
+  "tiers": { "minWave": [0, 8, 15, 25], "fade": 0.5 },
   "fronts": {
     "north": {
       "faction": "Monsters of the North",
@@ -66,9 +66,9 @@
         "throne_champion": { "name": "Champion of the Throne", "tier": 4, "weight": 0.4, "attack": 150, "defense": 150, "speed": 4, "family": "infantry" },
         "fire_priest": { "name": "Fire Priest", "tier": 4, "weight": 0.4, "attack": 120, "defense": 70, "speed": 4, "family": "archers" },
         "lord_marshal": { "name": "Lord Marshal", "tier": 4, "weight": 0.4, "attack": 160, "defense": 140, "speed": 6, "family": "cavalry" },
-        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "minPlayers": 3, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
-        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
-        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 5, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
+        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 10, "minPlayers": 3, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
+        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 15, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
+        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 13, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
       },
       "stances": { "hold_the_line": 4, "defensive": 2, "balanced": 3, "offensive": 1 }
     },
@@ -91,9 +91,9 @@
         "throne_champion": { "name": "Champion of the Throne", "tier": 4, "weight": 0.4, "attack": 150, "defense": 150, "speed": 4, "family": "infantry" },
         "fire_priest": { "name": "Fire Priest", "tier": 4, "weight": 0.4, "attack": 120, "defense": 70, "speed": 4, "family": "archers" },
         "lord_marshal": { "name": "Lord Marshal", "tier": 4, "weight": 0.6, "attack": 160, "defense": 140, "speed": 6, "family": "cavalry" },
-        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 4, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
-        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 6, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
-        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 5, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
+        "siege_ram": { "name": "Siege Ram", "weight": 0.3, "minWave": 10, "attack": 80, "defense": 70, "speed": 3, "family": "infantry", "siege": 40 },
+        "catapult": { "name": "Catapult", "weight": 0.2, "minWave": 15, "minPlayers": 2, "attack": 30, "defense": 20, "speed": 2, "family": "archers", "siege": 60 },
+        "siege_tower": { "name": "Siege Tower", "weight": 0.15, "minWave": 13, "minPlayers": 2, "attack": 10, "defense": 60, "speed": 2, "family": "infantry", "escalade": 30, "setupFactor": 1.5 }
       },
       "stances": { "hold_the_line": 3, "defensive": 2, "balanced": 3, "offensive": 2 }
     }

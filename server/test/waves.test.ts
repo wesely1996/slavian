@@ -32,15 +32,15 @@ describe('wave schedule', () => {
     expect(() => waveFronts(northOnly, ['south'])).toThrow();
   });
 
-  it('starts after the grace period, then every 2-3 days', () => {
+  it('starts after the grace period, then at the set interval', () => {
     const first = spawnTime(data, ctx, 0, null);
     expect(first.getTime() - T0.getTime()).toBe(data.waves.graceHours * HOUR);
     let previous = first;
     for (let index = 1; index < 10; index++) {
       const next = spawnTime(data, ctx, index, previous);
       const gap = (next.getTime() - previous.getTime()) / HOUR;
-      expect(gap).toBeGreaterThanOrEqual(48);
-      expect(gap).toBeLessThanOrEqual(72);
+      expect(gap).toBeGreaterThanOrEqual(data.waves.intervalHours[0]);
+      expect(gap).toBeLessThanOrEqual(data.waves.intervalHours[1]);
       previous = next;
     }
   });
@@ -53,7 +53,7 @@ describe('wave schedule', () => {
 
   it('grows with each wave and with more players', () => {
     expect(waveSize(data, 0, 1)).toBe(data.waves.baseUnits);
-    expect(waveSize(data, 4, 1)).toBeGreaterThan(waveSize(data, 3, 1));
+    expect(waveSize(data, 10, 1)).toBeGreaterThan(waveSize(data, 5, 1));
     expect(waveSize(data, 0, 4)).toBeGreaterThan(waveSize(data, 0, 1));
   });
 
@@ -98,8 +98,8 @@ describe('wave schedule', () => {
       expect(roster.personality.nerve).toBeGreaterThan(0);
     }
     // The zmey and the Order's southern siege rams wait for groups of three.
-    expect(composeWave(data, 'north', 10, 500, 5, 2).zmey_whelp).toBeUndefined();
-    expect(composeWave(data, 'north', 10, 500, 5, 3).zmey_whelp).toBeGreaterThan(0);
+    expect(composeWave(data, 'north', 30, 500, 5, 2).zmey_whelp).toBeUndefined();
+    expect(composeWave(data, 'north', 30, 500, 5, 3).zmey_whelp).toBeGreaterThan(0);
     expect(composeWave(data, 'south', 9, 500, 5, 1).siege_ram).toBeUndefined();
     // Nomads ride: their slowest unit outpaces the Order's.
     expect(marchSpeed(data, 'east', composeWave(data, 'east', 9, 200, 5, 6))).toBeGreaterThan(
