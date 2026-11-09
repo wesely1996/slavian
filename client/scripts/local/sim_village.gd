@@ -427,7 +427,26 @@ static func _resolve_plot(data: Dictionary, state: Dictionary, order: Dictionary
 
 
 ## Pays for and queues a build: {state, queued} or {"error"}.
-static func queue_build(data: Dictionary, state: Dictionary, order: Dictionary, at: int, world_speed: float) -> Dictionary:
+## sim/village.ts villageSite: water beside the village (a lake next to
+## it, or a river along one of its edges) and hills under it. `terrain`:
+## {"q,r": id}; `rivers`: [{a, b}].
+static func village_site(terrain: Dictionary, rivers: Array, cell: Vector2i) -> Dictionary:
+	var water := false
+	for n in HexMath.neighbors(cell):
+		if terrain.get("%d,%d" % [n.x, n.y]) == "lake":
+			water = true
+	for e in rivers:
+		if e.a == cell or e.b == cell:
+			water = true
+	return {"water": water, "hills": terrain.get("%d,%d" % [cell.x, cell.y]) == "hills"}
+
+
+## sim/village.ts siteText.
+static func site_text(site: String) -> String:
+	return "a village beside a lake or on a river" if site == "water" else "a village on hills"
+
+
+static func queue_build(data: Dictionary, state: Dictionary, order: Dictionary, at: int, world_speed: float, site: Dictionary = {}) -> Dictionary:
 	var hall := int(state.levels.get(HALL, 0))
 	if state.queue.size() >= build_queue_limit(data, hall):
 		return rule("Build queue is full")
@@ -464,6 +483,8 @@ static func queue_build(data: Dictionary, state: Dictionary, order: Dictionary, 
 			return rule("%s is built on fields, not in the village" % def.name)
 		if def.get("clan") != null and not has_clan(state.bonuses, def.clan):
 			return rule("Only %s can build a %s" % [clan_name(data, def.clan), def.name])
+		if def.get("site") != null and not site.get(def.site, false):
+			return rule("A %s needs %s" % [def.name, site_text(def.site)])
 		if not def.get("multiple", false):
 			for id in state.plots:
 				if id != plot and planned_plot(state, id).building == building:

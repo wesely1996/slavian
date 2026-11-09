@@ -4053,7 +4053,7 @@ func _plot_section(village: Dictionary) -> void:
 		return
 	if planned.building == null:
 		_panel_body.add_child(UI.label(tr("Empty wall slot") if on_walls else tr("Empty slot"), UI.HEADING_SIZE))
-		var options := Rules.constructible(Game.data, village, "tower" if on_walls else "center")
+		var options := Rules.constructible(Game.data, village, "tower" if on_walls else "center", Game.village_site(village))
 		if options.is_empty():
 			_panel_body.add_child(UI.label(tr("Every tower already stands on these walls.") if on_walls else tr("Every building already stands in this village."), UI.SMALL_SIZE, UI.MUTED))
 		_paged("plot options", options, 5 if _roomy() else 2, func(building: String) -> void:

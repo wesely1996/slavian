@@ -62,6 +62,9 @@ const buildingSchema = z.object({
   multiple: z.boolean().optional(),
   // Buildings (and their levels) the village needs before it can build this.
   requires: z.record(z.string(), z.number().int().positive()).optional(),
+  // Only where the land allows: 'water' (a village beside a lake or on a
+  // river) or 'hills' (a village on hills).
+  site: z.enum(['water', 'hills']).optional(),
   // The Academy: research per hour at level 1, times growth per level above.
   research: z.object({ basePerHour: z.number().positive(), growth: z.number().min(1) }).optional(),
 });

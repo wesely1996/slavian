@@ -1,3 +1,4 @@
+import { listRiverEdges } from '../db/rivers.js';
 import { insertRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { Stance, TerrainId } from '../data/index.js';
@@ -53,6 +54,7 @@ import {
   outpostPlot,
   outpostPlots,
   queueBuild,
+  villageSite,
   queueTraining,
   sendAway,
   leaveGarrison,
@@ -133,7 +135,10 @@ export async function queueBuildCommand(
       ...(input.plot ? { plot: input.plot } : {}),
       ...(input.building ? { building: input.building } : {}),
     };
-    const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed);
+    // What the land allows: water beside the village, hills under it.
+    const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t as string] as const));
+    const site = villageSite(terrain, await listRiverEdges(client, world.id), hex(village.q, village.r));
+    const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed, site);
     const payload: BuildCompletePayload = {
       villageId: village.id,
       plot: queued.plot,

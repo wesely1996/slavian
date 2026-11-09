@@ -1477,45 +1477,45 @@ msgstr ""
 msgid "A river lies between; build a bridge first"
 msgstr ""
 
-#: client/scripts/game/rules.gd:215
+#: client/scripts/game/rules.gd:219
 msgid "Outposts go within %d hexes of your village."
 msgstr ""
 
-#: client/scripts/game/rules.gd:217
+#: client/scripts/game/rules.gd:221
 msgid "Nothing to gather here."
 msgstr ""
 
-#: client/scripts/game/rules.gd:219
+#: client/scripts/game/rules.gd:223
 msgid "Already taken."
 msgstr ""
 
-#: client/scripts/game/rules.gd:222
+#: client/scripts/game/rules.gd:226
 msgid "Your village can hold %d outpost; upgrade the Elder's Hall for more."
 msgid_plural "Your village can hold %d outposts; upgrade the Elder's Hall for more."
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/game/rules.gd:272
+#: client/scripts/game/rules.gd:276
 msgid "That hex is not on the map."
 msgstr ""
 
-#: client/scripts/game/rules.gd:274
+#: client/scripts/game/rules.gd:278
 msgid "Villages can't be founded on %s."
 msgstr ""
 
-#: client/scripts/game/rules.gd:276
+#: client/scripts/game/rules.gd:280
 msgid "Settlers walk at most %d hexes from their village."
 msgstr ""
 
-#: client/scripts/game/rules.gd:278
+#: client/scripts/game/rules.gd:282
 msgid "Too close to the Holy City."
 msgstr ""
 
-#: client/scripts/game/rules.gd:281
+#: client/scripts/game/rules.gd:285
 msgid "Villages stand at least %d hexes apart."
 msgstr ""
 
-#: client/scripts/game/rules.gd:283
+#: client/scripts/game/rules.gd:287
 msgid "An outpost stands there."
 msgstr ""
 
@@ -4987,6 +4987,30 @@ msgstr ""
 
 #: data/buildings.json
 msgid "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again."
+msgstr ""
+
+#: data/buildings.json
+msgid "Fisherman's Hut"
+msgstr ""
+
+#: data/buildings.json
+msgid "Nets and weirs on the water beside the village bring in fish: grain every hour, more each level. Only for a village beside a lake or on a river."
+msgstr ""
+
+#: data/buildings.json
+msgid "Water Wheel"
+msgstr ""
+
+#: data/buildings.json
+msgid "The river turns the wheel and the wheel turns the work: 3% more of every resource and 3% faster building per level. Only for a village beside a lake or on a river."
+msgstr ""
+
+#: data/buildings.json
+msgid "Windmill"
+msgstr ""
+
+#: data/buildings.json
+msgid "Sails on the hilltop grind the grain finer: 6% more grain per level. Only for a village on hills."
 msgstr ""
 
 #: data/buildings.json

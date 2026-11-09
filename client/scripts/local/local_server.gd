@@ -626,7 +626,9 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 		order.plot = String(body.plot)
 	if body.get("building"):
 		order.building = String(body.building)
-	var result := LocalVillage.queue_build(data, village.state, order, now, world.speed)
+	# What the land allows: water beside the village, hills under it.
+	var site := LocalVillage.village_site(world.hexes, world.rivers, Vector2i(int(village.q), int(village.r)))
+	var result := LocalVillage.queue_build(data, village.state, order, now, world.speed, site)
 	if result.has("state"):
 		var q: Dictionary = result.queued
 		schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
