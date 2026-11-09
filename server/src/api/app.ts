@@ -21,6 +21,7 @@ import {
   resupplyArmyCommand,
   circleWagonsCommand,
   sendArmyCommand,
+  raidCommand,
   setReinforceCommand,
 } from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
@@ -203,6 +204,15 @@ const armyBody = z.object({
   stance: z.enum(STANCES).optional(),
   // It comes home by itself once its errand is done.
   returnHome: z.boolean().optional(),
+});
+// A raid beyond the map's edge on a front's side, `depth` fields deep.
+const raidBody = z.object({
+  front: z.enum(['north', 'east', 'south', 'west']),
+  depth: z.number().int().min(1).max(10),
+  units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
+  withHero: z.boolean().optional(),
+  generalId: z.number().int().positive().optional(),
+  stance: z.enum(STANCES).optional(),
 });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
 // Grain a standing army leaves in a fort or supply point.
@@ -726,6 +736,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = armyBody.parse(request.body);
     const army = await sendArmyCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/raids', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = raidBody.parse(request.body);
+    const army = await raidCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 

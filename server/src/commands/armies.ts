@@ -17,6 +17,8 @@ import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
 import type { RoadEdge } from '../db/roads.js';
 import type { Shipyard } from '../db/shipyards.js';
 import { payShipyard } from '../scheduler/mapEvents.js';
+import { startRaid } from '../scheduler/raids.js';
+import type { Front } from '../sim/mapgen.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [villageId]);
@@ -56,6 +58,39 @@ export async function sendArmyCommand(
       generalId: input.generalId,
       stance: input.stance,
       returnHome: input.returnHome,
+      at: input.now,
+    });
+  });
+}
+
+// Sends troops from the caller's village to raid a front's lands.
+export async function raidCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: {
+    accountId: number;
+    villageId: number;
+    front: Front;
+    depth: number;
+    units: Record<string, number>;
+    withHero?: boolean | undefined;
+    generalId?: number | undefined;
+    stance?: Stance | undefined;
+    now: Date;
+  },
+): Promise<Army> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client) => {
+    const home = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: home.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent a raid', villageId: home.id });
+    return startRaid(client, deps.data, await getWorld(client, worldId), {
+      homeVillageId: home.id,
+      front: input.front,
+      depth: input.depth,
+      units: input.units,
+      withHero: input.withHero,
+      generalId: input.generalId,
+      stance: input.stance,
       at: input.now,
     });
   });

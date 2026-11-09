@@ -88,6 +88,9 @@ var _army_orders := "support"
 var _army_hero := false
 ## Whether the army being sent comes home by itself once its errand is done.
 var _army_return := false
+## The raid being planned: the front it goes to and how many fields deep.
+var _raid_front := ""
+var _raid_depth := 1
 ## The general picked to lead the next army sent (0: none).
 var _army_general := 0
 ## The stance picked for the next army sent ("": its village's).
@@ -2292,6 +2295,93 @@ func _picked_units(home_units: Dictionary) -> Dictionary:
 	return chosen
 
 
+## A raid beyond the map's edge: the front, how many fields deep before
+## the stronghold, what it brings, how long it takes against the grain it
+## carries, and who goes.
+func _raid_tab(village: Dictionary) -> void:
+	var data := Game.data
+	var village_id := int(village.id)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Raid"), UI.HEADING_SIZE),
+		tr("An army marches to the edge of the map on a front's side and goes into the enemy's lands: it fights a battle on each field it crosses, then besieges the front's stronghold, and comes home with what it carries. A battle lost turns it home with what it has. Every battle won makes that front's next horde hate you the more. It eats its own grain all the way: military caravans carry more, and more loot.")))
+	var map: Variant = Game.world.get("map")
+	var fronts: Array = map.activeFronts if map is Dictionary else []
+	if fronts.is_empty():
+		return
+	if not _raid_front in fronts:
+		_raid_front = String(fronts[0])
+	var front_row := UI.hbox(8)
+	for front in fronts:
+		var b := UI.button(RaidText.front_name(String(front)).capitalize(), func() -> void:
+			_raid_front = String(front)
+			_rebuild_panel(), WaveMath.front_icon(String(front)))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.x = 0
+		b.disabled = _raid_front == front
+		front_row.add_child(b)
+	_panel_body.add_child(front_row)
+	var max_depth := int(data.raids.maxDepth)
+	_raid_depth = clampi(_raid_depth, 1, max_depth)
+	var depth_row := UI.hbox(8)
+	for depth in range(1, max_depth + 1):
+		var b := UI.button(tr_n("%d field", "%d fields", depth) % depth, func() -> void:
+			_raid_depth = depth
+			_rebuild_panel())
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.x = 0
+		b.disabled = _raid_depth == depth
+		depth_row.add_child(b)
+	_panel_body.add_child(depth_row)
+	_panel_body.add_child(UI.label(RaidText.plan(data, _raid_front, _raid_depth), UI.SMALL_SIZE, UI.ACCENT))
+	_panel_body.add_child(UI.label(RaidText.prize(_raid_front), UI.SMALL_SIZE, UI.MUTED))
+	var home_units := Rules.garrison_at(village, Game.server_now())
+	_unit_pickers(home_units, true, "raid")
+	var hero := Game.my_hero()
+	var hero_ready: bool = not hero.is_empty() and hero.status == "home" and hero.villageId != null and int(hero.villageId) == village_id
+	if hero_ready:
+		_panel_body.add_child(UI.button(tr("%s leads it: %s") % [hero.name, tr("yes") if _army_hero else tr("no")], func() -> void:
+			_army_hero = not _army_hero
+			_rebuild_panel()))
+	_general_picker(village_id)
+	_army_stance_picker(village)
+	# What it can carry, and how long its grain lasts against the time beyond the edge.
+	var sums := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	sums.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_panel_body.add_child(sums)
+	var depth_now := _raid_depth
+	_tick(sums, func() -> String:
+		var picked := _picked_units(home_units)
+		if picked.is_empty():
+			return ""
+		var eats := RaidText.upkeep(data, picked)
+		var grain := minf(LocalSupply.full_supply(data, picked), float(village.get("reserve", 0)))
+		var lasts := grain / eats if eats > 0.0 else INF
+		return tr("Carries up to %d loot · grain for about %s · %s of battles beyond the edge, besides the march there and back") % [
+			RaidText.capacity(data, picked), TimeUtil.format_duration(lasts * 3600.0 / float(Game.world.speed)) if lasts < INF else tr("ever"),
+			TimeUtil.format_duration(RaidText.stage_hours(data, depth_now) * 3600.0 / float(Game.world.speed))])
+	var front_now := _raid_front
+	var go := UI.button(tr("Raid %s") % RaidText.front_name(front_now), func() -> void:
+		var body := {"front": front_now, "depth": depth_now, "units": _picked_units(home_units), "withHero": _army_hero and hero_ready, "stance": _army_stance}
+		if _ready_general(village_id) > 0:
+			body.generalId = _ready_general(village_id)
+		_send_raid(village_id, body), "map/camp_bandit")
+	_panel_body.add_child(go)
+	_picked_hint(go, home_units)
+
+
+func _send_raid(village_id: int, body: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/raids" % village_id, body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	_army_units.clear()
+	_forget_drafts(["units:", "send:", "escort:", "raid:"])
+	_army_hero = false
+	_army_general = 0
+	_army_stance = ""
+	Game.note_server_time(response.data.serverTime)
+
+
 func _send_army(village_id: int, body: Dictionary) -> void:
 	_status.text = ""
 	var response := await Api.post_json("/v1/villages/%d/armies" % village_id, body)
@@ -2730,7 +2820,21 @@ func _army_panel() -> void:
 	_tick(where, func() -> String:
 		if search_bar != null and is_instance_valid(search_bar):
 			search_bar.value = clampf(1.0 - (search_done - Game.server_now()) / search_span, 0.0, 1.0) if search_span > 0.0 else 1.0
+		# Beyond the map's edge on a raid, not standing guard.
+		if army.get("raid") is Dictionary and army.status == "stationed" and army.orders == "raid":
+			return RaidText.progress(army)
 		return ArmyText.status(army, target, Game.server_now(), search_done))
+	# A raid: where it stands, its battles, what it found and carries.
+	if army.get("raid") is Dictionary:
+		var raid: Dictionary = army.raid
+		_panel_body.add_child(UI.label(tr("Raid on %s") % RaidText.front_name(String(raid.front)), UI.HEADING_SIZE))
+		_panel_body.add_child(UI.label(RaidText.plan(Game.data, String(raid.front), int(raid.depth)), UI.SMALL_SIZE, UI.MUTED))
+		for line in RaidText.battles(raid):
+			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
+		if not raid.get("finds", []).is_empty():
+			_panel_body.add_child(UI.label(tr("Found: %s") % ", ".join(raid.finds), UI.SMALL_SIZE, UI.GOOD))
+		var carried := int(LocalLogistics.total(army.loot)) if army.get("loot") is Dictionary else 0
+		_panel_body.add_child(UI.label(tr("Carries %d of %d loot") % [carried, RaidText.capacity(Game.data, army.units)], UI.SMALL_SIZE, UI.MUTED))
 	var led := PackedStringArray()
 	for hero in Game.heroes:
 		if army.get("heroAccountId") != null and int(hero.accountId) == int(army.heroAccountId):
@@ -4218,7 +4322,8 @@ func _troops_section(village: Dictionary) -> void:
 	_side_tabs("troops", [["garrison", Art.settlement_id(hall), tr("Garrison"), _garrison_tab.bind(village)],
 		["train", "unit/spearman", tr("Train"), _train_tab.bind(village)],
 		["armies", "icon/troops", tr("Armies"), _armies_section.bind(village)],
-		["send", "unit/border_rider", tr("Send troops"), _send_troops.bind(village)]], VILLAGE_TOP)
+		["send", "unit/border_rider", tr("Send troops"), _send_troops.bind(village)],
+		["raid", "map/camp_bandit", tr("Raid"), _raid_tab.bind(village)]], VILLAGE_TOP)
 
 
 ## Who guards the village and how they fight: the stance, the hero, the
@@ -4646,7 +4751,9 @@ func _reports_tab() -> void:
 
 
 func _battle_report(battle: Dictionary) -> void:
-	var report := HordeText.assault(battle, BattleText.losses(battle)) if battle.get("campId") != null or battle.get("siteId") != null else BattleText.outcome(battle, Game.battle_place(battle))
+	var report := RaidText.report(battle, BattleText.losses(battle))
+	if report == "":
+		report = HordeText.assault(battle, BattleText.losses(battle)) if battle.get("campId") != null or battle.get("siteId") != null else BattleText.outcome(battle, Game.battle_place(battle))
 	_panel_body.add_child(UI.label(report, UI.SMALL_SIZE))
 	var details := tr("%s horde, %d rounds") % [String(battle.attackerStance).replace("_", " ").capitalize(), int(battle.round)]
 	var ground := BattleText.setup_text(battle)

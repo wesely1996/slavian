@@ -207,6 +207,11 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 			to = target_hex
 			if camp_at(world, to).is_empty():
 				return LocalVillage.rule("There is no camp there")
+		"raid":
+			# To the map's edge (LocalRaids picks the hex).
+			if target_hex == null:
+				return LocalVillage.rule("Say where they leave the map")
+			to = target_hex
 		"hold":
 			if target_hex == null:
 				return LocalVillage.rule("Say which hex to hold")
@@ -256,7 +261,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 			return LocalVillage.rule("%s won't leave in the middle of a battle" % general.name)
 		general_id = general.id
 	var army := {"id": world.next.army, "ownerAccountId": home.ownerAccountId, "homeVillageId": home.id,
-		"targetVillageId": null if order.orders in ["hold", "clear", "explore"] else order.get("targetVillageId"),
+		"targetVillageId": null if order.orders in ["hold", "clear", "explore", "raid"] else order.get("targetVillageId"),
 		"targetQ": to.x, "targetR": to.y, "heroAccountId": hero_account, "generalId": general_id, "orders": order.orders,
 		"stance": String(order.stance) if order.get("stance") != null else String(home.state.stance), "engagedUnits": null, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
@@ -779,6 +784,9 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 	var at := int(event.dueAt)
 	changed.append(["world"])
 	match String(army.orders):
+		"raid":
+			LocalRaids.reach_edge(server, world, army, at)
+			return
 		"explore":
 			arrive_at_site(server, world, army, at, changed)
 			return
@@ -1663,4 +1671,4 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"supply": a.get("supply"), "supplyAt": LocalTime.iso(a.supplyAt) if a.get("supplyAt") != null else null,
 		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null,
 		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null,
-		"returnHome": a.get("returnHome", false)}
+		"returnHome": a.get("returnHome", false), "raid": a.get("raid")}

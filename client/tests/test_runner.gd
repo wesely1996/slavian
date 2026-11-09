@@ -45,6 +45,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_events()
+	_test_raid_text()
 	_test_lake_lanes()
 	_test_bridge()
 	_test_run()
@@ -530,6 +531,21 @@ func _test_lake_lanes() -> void:
 	_check(dry.call(Vector2i(2, 0), Vector2i(3, 0)) < 0.0, "no lake without a boat")
 
 
+func _test_raid_text() -> void:
+	var data := {"raids": {"stageHours": 3, "carry": {"perSoldier": 30, "perWagon": 400}, "fronts": {"east": {"stronghold": "Nomad Encampment"}}},
+		"units": {"units": {"spearman": {"family": "infantry", "upkeepPerHour": 1}, "scout": {"family": "scout", "upkeepPerHour": 1}, "supply_wagon": {"family": "cavalry", "supplyGrain": 200, "upkeepPerHour": 0.5}}}}
+	_check(RaidText.capacity(data, {"spearman": 10, "scout": 3, "supply_wagon": 2}) == 1100, "raid carry: soldiers and wagons, not scouts")
+	_check(RaidText.plan(data, "east", 2) == "2 fields, then the Nomad Encampment", "raid plan")
+	_check(is_equal_approx(RaidText.stage_hours(data, 2), 9.0), "raid hours beyond the edge")
+	_check(is_equal_approx(RaidText.upkeep(data, {"spearman": 4, "supply_wagon": 2}), 5.0), "raid upkeep")
+	var army := {"status": "stationed", "raid": {"front": "east", "depth": 2, "stage": 1, "battles": [{"name": "Open Steppe", "won": true, "stronghold": false, "kills": 12, "lost": 3}], "finds": []}}
+	_check(RaidText.progress(army) == "Beyond the edge: 1 of 3 battles fought", "raid progress")
+	_check(RaidText.battles(army.raid) == ["Won at the Open Steppe: 12 killed, 3 lost"], "raid battles")
+	var battle := {"status": "repelled", "setup": {"raid": {"front": "east", "name": "Nomad Encampment", "stronghold": true}}}
+	_check(RaidText.report(battle, {"attacker": 5, "defender": 9}) == "Raid on the East: thrown back from the Nomad Encampment; 5 of them fell, we lost 9.", "raid report")
+	_check(RaidText.report({"status": "cleared", "setup": {}}, {"attacker": 1, "defender": 1}) == "", "not a raid battle")
+
+
 func _test_events() -> void:
 	var data := {"events": {"kinds": {"shipyard": {"buildHours": 24, "raidEveryHours": 8}}}}
 	var now := TimeUtil.parse_iso("2026-06-01T12:00:00.000Z")
@@ -714,6 +730,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("wagons-scenario.json", "local wagons")
 	_replay_scenario("hatred-scenario.json", "local hatred")
 	_replay_scenario("reroute-scenario.json", "local rerouting")
+	_replay_scenario("raids-scenario.json", "local raids")
 	_replay_scenario("events-scenario.json", "local map events")
 	_replay_scenario("shipyard-scenario.json", "local shipyards and river lanes")
 	_replay_scenario("road-scenario.json", "local roads")

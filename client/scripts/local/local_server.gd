@@ -437,7 +437,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return {"status": 200, "data": world_view(world, now)}
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
-		if village.ruin != null and not action in ["rebuild", "armies", "forts", "supply-points", "crossings", "roads"]:
+		if village.ruin != null and not action in ["rebuild", "armies", "raids", "forts", "supply-points", "crossings", "roads"]:
 			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
 		var result: Dictionary
 		var step := ""
@@ -539,7 +539,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalScouting.found_village(self, world, village, body, now)
 				if result.has("expedition"):
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
-			"armies", "forts", "supply-points", "crossings", "roads":
+			"armies", "raids", "forts", "supply-points", "crossings", "roads":
 				return _field_command(world, village, action, body, now, changed)
 			"caravans", "caravans/fetch":
 				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
@@ -588,6 +588,12 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 	match action:
 		"armies":
 			result = LocalArmies.send_army(self, world, village, body, now)
+		"raids":
+			if not body is Dictionary or not String(body.get("front", "")) in ["north", "east", "south", "west"] or not body.get("units") is Dictionary:
+				return _fail(400, "invalid_request", "Say where the raid goes and who goes")
+			if body.get("stance") != null and not String(body.stance) in data.battle.stances:
+				return _fail(400, "invalid_request", "Unknown stance")
+			result = LocalRaids.start(self, world, village, body, now)
 		"forts", "supply-points":
 			result = LocalArmies.build_fort(self, world, village, Vector2i(int(body.get("q", 0)), int(body.get("r", 0))), now, "supply" if action == "supply-points" else "fort")
 		"crossings", "roads":
@@ -601,7 +607,7 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 	changed.append(["village", village.id])
 	changed.append(["world"])
 	match action:
-		"armies":
+		"armies", "raids":
 			return {"status": 200, "data": {"army": LocalArmies.army_view(result), "serverTime": LocalTime.iso(now)}}
 		"forts", "supply-points":
 			return {"status": 200, "data": {"fort": LocalArmies.fort_view(result), "serverTime": LocalTime.iso(now)}}
@@ -951,6 +957,10 @@ func _on_road_built(world: Dictionary, event: Dictionary, changed: Array) -> voi
 
 func _on_crossing_built(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalArmies.on_crossing_built(self, world, event, changed)
+
+
+func _on_raid_stage(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalRaids.on_raid_stage(self, world, event, changed)
 
 
 func _on_site_explored(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1347,8 +1357,8 @@ func _load_all() -> void:
 				a.merge({"supply": null, "supplyAt": null, "hungrySince": null, "hungerAt": null})
 				# Armies saved before wagon forts.
 				a.merge({"wagonFortAt": null})
-				# Armies saved before coming home once done.
-				a.merge({"returnHome": false})
+				# Armies saved before coming home once done, and before raids.
+				a.merge({"returnHome": false, "raid": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
 			# Roads from before road levels: level 1, as fast as they were.
