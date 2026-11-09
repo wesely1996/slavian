@@ -2731,11 +2731,18 @@ func _generals_section(village: Dictionary) -> void:
 		if actions.get_child_count() > 0:
 			_panel_body.add_child(actions)
 	var cost := GeneralText.recruit_cost(Game.data, mine.size())
+	# The new general's name: yours to give, or one of the old names.
+	var name_key := "general-name:%d" % village_id
+	var name_field := _draft_field(name_key, tr("Name (optional)"), "")
+	_panel_body.add_child(name_field)
 	var row := UI.hbox()
 	var cost_line := UI.rich()
 	cost_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(cost_line)
-	var recruit := UI.primary(tr("Recruit"), func() -> void: _recruit_general(village_id))
+	var recruit := UI.primary(tr("Recruit"), func() -> void:
+		var given := name_field.text.strip_edges()
+		_forget_drafts([name_key])
+		_recruit_general(village_id, given))
 	recruit.custom_minimum_size.x = 160
 	recruit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(recruit)
@@ -2750,9 +2757,9 @@ func _generals_section(village: Dictionary) -> void:
 		return text + (tr("  (raise a Hero's Hall for more)") if full else ""))
 
 
-func _recruit_general(village_id: int) -> void:
+func _recruit_general(village_id: int, given := "") -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/generals" % village_id, {})
+	var response := await Api.post_json("/v1/villages/%d/generals" % village_id, {"name": given} if given != "" else {})
 	if not response.ok:
 		_status.text = response.error
 		return

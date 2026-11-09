@@ -157,6 +157,7 @@ const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
 const heroUnequipBody = z.object({ slot: z.enum(HERO_SLOTS) });
 const heroRenameBody = z.object({ name: displayName });
+const generalRecruitBody = z.object({ name: z.string().trim().max(32).optional() });
 const heroQuestBody = z.object({ offer: z.string().min(1).max(40) });
 const emptyBody = z.object({}).default({});
 const orderBody = z.discriminatedUnion('kind', [
@@ -751,7 +752,9 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.post('/v1/villages/:id/generals', async (request) => {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
-    const { village, general } = await recruitGeneralCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
+    // An optional name for the new general (else one from names.json).
+    const { name } = generalRecruitBody.parse(request.body ?? {});
+    const { village, general } = await recruitGeneralCommand(db, scheduler, { accountId: account.id, villageId: id, name, now: clock() });
     return { village: villageView(village), general: generalView(scheduler.data, general), serverTime: clock().toISOString() };
   });
 
