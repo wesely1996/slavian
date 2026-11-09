@@ -657,7 +657,7 @@ static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictio
 	var home := server.find_village(world, int(army.homeVillageId))
 	var name: String = home.name if not home.is_empty() else ""
 	if not strike.lost:
-		army_losses(server, world, army, strike.losses, at)
+		army_losses(server, world, army, strike.losses, at, false)
 	if strike.lost or LocalBattle.total(army.units) == 0:
 		end_army(server, world, army, at)
 		LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "push", "title": "An army from {village} starved",
@@ -756,7 +756,19 @@ static func rally_to_battle(server: LocalServer, world: Dictionary, battle: Dict
 
 ## Losses an army took: its supply is settled first (the dead stop eating),
 ## or, for an army from before supplies, its home village stops feeding them.
-static func army_losses(server: LocalServer, world: Dictionary, army: Dictionary, losses: Dictionary, at: int) -> Dictionary:
+static func army_losses(server: LocalServer, world: Dictionary, army: Dictionary, fallen: Dictionary, at: int, wounds := true) -> Dictionary:
+	if LocalBattle.total(fallen) == 0:
+		return army
+	# Shamans with the army put some of those who fell in battle back on
+	# their feet (not the starving).
+	var chance := LocalVillage.healer_chance(server.data, army.units) if wounds else 0.0
+	var healed := LocalVillage.heal_fallen(chance, fallen,
+		LocalRng.new((int(world.seed) ^ LocalRng.imul(int(army.id) + 1, 0x632be5ab) ^ (floori(at / 60000.0) & 0xfffff)) & 0xffffffff))
+	var losses := {}
+	for unit in fallen:
+		var n := int(fallen[unit]) - int(healed.get(unit, 0))
+		if n > 0:
+			losses[unit] = n
 	if LocalBattle.total(losses) == 0:
 		return army
 	if supplied(army):

@@ -422,8 +422,10 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		var fallen := {}
 		for r in battle.rounds + [log]:
 			fallen = LocalCamps.add_units(fallen, r.get("garrisonLosses", r.defenderLosses))
+		# Shamans in the garrison tend them too.
+		var shamans := LocalVillage.healer_chance(data, village_state.garrison)
 		var healed := LocalVillage.hospital_healed(LocalVillage.village_bonuses(data, village_state), fallen,
-			LocalRng.new((int(world.seed) ^ LocalRng.imul(int(battle.id) + 1, 0x2545f491) ^ 0x4b) & 0xffffffff))
+			LocalRng.new((int(world.seed) ^ LocalRng.imul(int(battle.id) + 1, 0x2545f491) ^ 0x4b) & 0xffffffff), shamans)
 		var saved := LocalBattle.total(healed)
 		if saved > 0:
 			log.healed = healed
@@ -431,7 +433,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		_record_round(battle, log, {"status": "defended", "at": at, "loot": null})
 		horde_beaten(server, world, Vector2i(village.q, village.r), LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now))
 		LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "{village} held",
-			"body": "The horde was beaten after {rounds} rounds; the hospital saved {healed} of the fallen." if saved > 0 else "The horde was beaten after {rounds} rounds.",
+			"body": "The horde was beaten after {rounds} rounds; the hospital and shamans saved {healed} of the fallen." if saved > 0 else "The horde was beaten after {rounds} rounds.",
 			"vars": {"village": village.name, "rounds": round, "healed": saved}}, at)
 		finish_wave(server, world, wave, "defeated", at, changed)
 

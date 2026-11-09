@@ -28,7 +28,7 @@ import {
   total,
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
-import { breachWalls, completeTraining, joinGarrison, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
+import { breachWalls, completeTraining, joinGarrison, healerChance, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
 import { heroAt } from '../db/heroes.js';
 import { generalAt } from '../db/generals.js';
 import { generalBonuses } from '../sim/generals.js';
@@ -321,7 +321,9 @@ export const battleHandlers: HandlerRegistry = {
       villageState = setBesieged(data, villageState, false, at, world.speed);
       // The hospital puts some of the garrison's fallen back on their feet.
       const fallen = [...battle.rounds, log].reduce<Record<string, number>>((sum, r) => addUnits(sum, r.garrisonLosses ?? r.defenderLosses), {});
-      const healed = hospitalHealed(villageBonuses(data, villageState), fallen, createRng((world.seed ^ Math.imul(battle.id + 1, 0x2545f491) ^ 0x4b) >>> 0));
+      // Shamans in the garrison tend them too.
+      const shamans = healerChance(data, villageState.garrison);
+      const healed = hospitalHealed(villageBonuses(data, villageState), fallen, createRng((world.seed ^ Math.imul(battle.id + 1, 0x2545f491) ^ 0x4b) >>> 0), shamans);
       if (total(healed) > 0) {
         log.healed = healed;
         villageState = joinGarrison(data, villageState, healed, at, world.speed);
@@ -332,7 +334,7 @@ export const battleHandlers: HandlerRegistry = {
         kind: 'battle_result',
         tier: 'digest',
         title: '{village} held',
-        body: total(healed) > 0 ? 'The horde was beaten after {rounds} rounds; the hospital saved {healed} of the fallen.' : 'The horde was beaten after {rounds} rounds.',
+        body: total(healed) > 0 ? 'The horde was beaten after {rounds} rounds; the hospital and shamans saved {healed} of the fallen.' : 'The horde was beaten after {rounds} rounds.',
         vars: { village: village.name, rounds: round, healed: total(healed) },
       }, at);
       await finishWave(client, data, world, wave.id, 'defeated', at);

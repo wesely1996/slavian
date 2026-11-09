@@ -764,6 +764,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("hatred-scenario.json", "local hatred")
 	_replay_scenario("reroute-scenario.json", "local rerouting")
 	_replay_scenario("raids-scenario.json", "local raids")
+	_replay_scenario("shaman-scenario.json", "local shamans")
 	_replay_scenario("events-scenario.json", "local map events")
 	_replay_scenario("shipyard-scenario.json", "local shipyards and river lanes")
 	_replay_scenario("road-scenario.json", "local roads")
