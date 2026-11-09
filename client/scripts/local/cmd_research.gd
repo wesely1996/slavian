@@ -34,7 +34,7 @@ static func research_problem(data: Dictionary, tech: String, academy_level: int,
 	if tech in done:
 		return "%s is already known" % def.name
 	if researching:
-		return "Your scholars are busy; one tech at a time"
+		return "The group's scholars are busy; one tech at a time"
 	if def.get("requiresScroll") != null and not def.requiresScroll in scrolls:
 		var scroll: Variant = data.lore.scrolls.get(def.requiresScroll)
 		return "%s needs the %s scroll" % [def.name, scroll.name if scroll != null else def.requiresScroll]
@@ -108,40 +108,102 @@ static func entries(world: Dictionary, account_id: Variant = null) -> Array:
 	return out
 
 
-static func known(world: Dictionary, account_id: int) -> Array:
-	return entries(world, account_id).filter(func(e: Dictionary) -> bool: return e.status == "done").map(func(e: Dictionary) -> String: return e.tech)
+## Every tech the group knows, whoever started it (scheduler/research.ts
+## groupKnown); `_account_id` is kept for callers of old.
+static func known(world: Dictionary, _account_id: int = 0) -> Array:
+	var out := {}
+	for e in world.research:
+		if e.status == "done":
+			out[e.tech] = true
+	var techs: Array = out.keys()
+	techs.sort()
+	return techs
 
 
 static func scrolls(world: Dictionary) -> Array:
 	return world.lore.map(func(l: Dictionary) -> String: return l.scroll)
 
 
+## The group's pool: every member's research settled up to `at`
+## (scheduler/research.ts groupPoints).
+static func group_points(server: LocalServer, world: Dictionary, at: int) -> float:
+	var sum := 0.0
+	for m in world.members:
+		sum += settle_points(server, world, int(m.accountId), at)
+	return sum
+
+
+## Takes `amount` of research from the members in turn (by account).
+static func spend_group_points(server: LocalServer, world: Dictionary, amount: float, at: int) -> void:
+	var left := amount
+	var ids: Array = world.members.map(func(m: Dictionary) -> int: return int(m.accountId))
+	ids.sort()
+	for account in ids:
+		if left <= 0:
+			break
+		var have := settle_points(server, world, account, at)
+		var take := minf(have, left)
+		var m := member(world, account)
+		m.researchPoints = have - take
+		m.researchSettledAt = at
+		left -= take
+
+
+## commands/village.ts startResearchCommand: the group starts `tech` from
+## this village's Academy; its research comes from the pool now, its
+## resources from the members after.
 static func start_research(server: LocalServer, world: Dictionary, village: Dictionary, tech: String, now: int) -> Dictionary:
 	var data := server.data
-	var account := int(village.ownerAccountId)
-	var mine := entries(world, account)
-	var problem := research_problem(data, tech, int(village.state.levels.get(ACADEMY, 0)), known(world, account),
-		mine.any(func(e: Dictionary) -> bool: return e.status == "researching"), scrolls(world))
+	var problem := research_problem(data, tech, int(village.state.levels.get(ACADEMY, 0)), known(world),
+		world.research.any(func(e: Dictionary) -> bool: return e.status != "done"), scrolls(world))
 	if problem != "":
 		return LocalVillage.rule(problem)
-	# Research comes from all the player's Academies, resources from this village.
 	var needed := research_cost(data, tech)
-	var points := points_at(server, world, account, now)
-	if points < needed:
-		return LocalVillage.rule("%s takes %d research; your Academies have brought in %d" % [data.research.techs[tech].name, needed, floori(points)])
-	var ledger := LocalLedger.spend(village.state.ledger, now, data.research.techs[tech].cost)
+	var pool := 0.0
+	for m in world.members:
+		pool += points_at(server, world, int(m.accountId), now)
+	if pool < needed:
+		return LocalVillage.rule("%s takes %d research; the group's Academies have brought in %d" % [data.research.techs[tech].name, needed, floori(pool)])
+	group_points(server, world, now)
+	spend_group_points(server, world, needed, now)
+	var entry := {"accountId": int(village.ownerAccountId), "tech": tech, "status": "funding", "villageId": village.id, "startedAt": now,
+		"completesAt": now, "cost": data.research.techs[tech].cost.duplicate(), "paid": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
+	world.research.append(entry)
+	return {"state": village.state, "research": entry}
+
+
+## commands/village.ts fundResearchCommand: what this village can send of
+## what the group's research still needs; once all is paid it begins.
+static func fund(server: LocalServer, world: Dictionary, village: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	var project: Dictionary = {}
+	for e in world.research:
+		if e.status == "funding":
+			project = e
+	if project.is_empty() or project.get("cost") == null:
+		return LocalVillage.rule("The group is not gathering resources for any research")
+	var have := LocalLedger.amounts_at(village.state.ledger, now)
+	var sent := {}
+	var any := false
+	for kind in ["wood", "stone", "grain", "iron"]:
+		sent[kind] = maxi(0, mini(floori(float(have[kind])), int(project.cost[kind]) - int(project.paid[kind])))
+		any = any or sent[kind] > 0
+	if not any:
+		return LocalVillage.rule("%s has none of what it still needs" % village.name)
+	var ledger := LocalLedger.spend(village.state.ledger, now, sent)
 	if ledger.has("missing"):
 		return ledger
-	var m := member(world, account)
-	m.researchPoints = points - needed
-	m.researchSettledAt = now
-	var entry := {"accountId": account, "tech": tech, "status": "researching", "villageId": village.id, "startedAt": now,
-		"completesAt": now + research_ms(data, tech, world.speed, village.state.bonuses)}
-	world.research.append(entry)
-	server.schedule(world, int(entry.completesAt), "research_complete", {"accountId": account, "tech": tech})
+	var full := true
+	for kind in ["wood", "stone", "grain", "iron"]:
+		project.paid[kind] = int(project.paid[kind]) + sent[kind]
+		full = full and int(project.paid[kind]) >= int(project.cost[kind])
+	if full:
+		project.status = "researching"
+		project.completesAt = now + research_ms(data, project.tech, world.speed, village.state.bonuses)
+		server.schedule(world, int(project.completesAt), "research_complete", {"accountId": project.accountId, "tech": project.tech})
 	var state: Dictionary = village.state.duplicate()
 	state.ledger = ledger
-	return {"state": state, "research": entry}
+	return {"state": state, "research": project}
 
 
 static func on_research_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -149,17 +211,20 @@ static func on_research_complete(server: LocalServer, world: Dictionary, event: 
 	for e in world.research:
 		if int(e.accountId) == int(p.accountId) and e.tech == p.tech and e.status == "researching":
 			e.status = "done"
-			server.refresh_bonuses(world, int(p.accountId), int(event.dueAt), changed)
+			# The group's: every member's villages take its effects.
+			for m in world.members:
+				server.refresh_bonuses(world, int(m.accountId), int(event.dueAt), changed)
 			var def: Dictionary = server.data.research.techs.get(p.tech, {})
-			LocalInbox.tell(server, world, int(p.accountId), {"kind": "research_done", "tier": "digest", "title": "{tech} researched",
-				"body": def.get("description", ""), "vars": {"tech": def.get("name", p.tech)}}, int(event.dueAt))
+			for m in world.members:
+				LocalInbox.tell(server, world, int(m.accountId), {"kind": "research_done", "tier": "digest", "title": "{tech} researched",
+					"body": def.get("description", ""), "vars": {"tech": def.get("name", p.tech)}}, int(event.dueAt))
 			changed.append(["world"])
 			return
 
 
 static func research_view(e: Dictionary) -> Dictionary:
 	return {"accountId": e.accountId, "tech": e.tech, "status": e.status, "villageId": e.villageId,
-		"startedAt": LocalTime.iso(e.startedAt), "completesAt": LocalTime.iso(e.completesAt)}
+		"startedAt": LocalTime.iso(e.startedAt), "completesAt": LocalTime.iso(e.completesAt), "cost": e.get("cost"), "paid": e.get("paid")}
 
 
 ## Rebuilds a razed village: pays a share of what stood, and it stands

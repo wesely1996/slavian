@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "_comment": "Per-player research in the Academy. A tech needs an Academy of `academyLevel` in the village that starts it and every tech in `requires`; its cost is paid by that village. One tech at a time per player. Effects add up across a player's techs and apply to all their villages: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance). Seconds are game seconds (divided by world speed). A tech with requiresScroll can only be researched once the group has found that lore scroll (data/lore.json). Besides resources, a tech takes `researchPerSecond` research for every second it lasts, from what the player's Academies have brought in.",
-  "researchPerSecond": 0.05,
+  "_comment": "Shared research in the Academy: the group researches together, one tech at a time, and every finished tech's effects reach every member's villages. A member starts a tech from a village with an Academy of `academyLevel` once the group knows every tech in `requires` (and has found its lore scroll, `requiresScroll`): it costs `researchPerSecond` research for every second it lasts, taken from what the members' Academies have brought in (the group's pool, from the members in turn). Its `cost` in resources is then gathered from the members: any of them sends from any village what they can of what it still needs; once it is all paid the research begins and lasts `seconds` game seconds (divided by world speed). Effects add up across the group's techs: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance).",
+  "researchPerSecond": 0.1,
   "branches": {
     "economy": "Economy",
     "military": "Military",
@@ -16,10 +16,10 @@
       "academyLevel": 1,
       "requires": [],
       "cost": {
-        "wood": 150,
-        "stone": 100,
-        "grain": 80,
-        "iron": 60
+        "wood": 450,
+        "stone": 300,
+        "grain": 240,
+        "iron": 180
       },
       "seconds": 1200,
       "effects": {
@@ -33,10 +33,10 @@
       "academyLevel": 1,
       "requires": [],
       "cost": {
-        "wood": 120,
-        "stone": 100,
-        "grain": 150,
-        "iron": 40
+        "wood": 360,
+        "stone": 300,
+        "grain": 450,
+        "iron": 120
       },
       "seconds": 1200,
       "effects": {
@@ -52,10 +52,10 @@
         "felling_axes"
       ],
       "cost": {
-        "wood": 200,
-        "stone": 150,
-        "grain": 100,
-        "iron": 80
+        "wood": 600,
+        "stone": 450,
+        "grain": 300,
+        "iron": 240
       },
       "seconds": 2400,
       "effects": {
@@ -69,10 +69,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 200,
-        "stone": 200,
-        "grain": 100,
-        "iron": 60
+        "wood": 600,
+        "stone": 600,
+        "grain": 300,
+        "iron": 180
       },
       "seconds": 2400,
       "effects": {
@@ -86,10 +86,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 250,
-        "stone": 250,
-        "grain": 100,
-        "iron": 80
+        "wood": 750,
+        "stone": 750,
+        "grain": 300,
+        "iron": 240
       },
       "seconds": 2400,
       "effects": {
@@ -105,10 +105,10 @@
         "granary_lofts"
       ],
       "cost": {
-        "wood": 400,
-        "stone": 400,
-        "grain": 200,
-        "iron": 200
+        "wood": 1200,
+        "stone": 1200,
+        "grain": 600,
+        "iron": 600
       },
       "seconds": 4800,
       "effects": {
@@ -124,10 +124,10 @@
         "two_field_rotation"
       ],
       "cost": {
-        "wood": 350,
-        "stone": 300,
-        "grain": 250,
-        "iron": 150
+        "wood": 1050,
+        "stone": 900,
+        "grain": 750,
+        "iron": 450
       },
       "seconds": 4800,
       "effects": {
@@ -144,10 +144,10 @@
         "master_builders"
       ],
       "cost": {
-        "wood": 500,
-        "stone": 400,
-        "grain": 600,
-        "iron": 200
+        "wood": 1500,
+        "stone": 1200,
+        "grain": 1800,
+        "iron": 600
       },
       "seconds": 7200,
       "effects": {
@@ -161,10 +161,10 @@
       "academyLevel": 1,
       "requires": [],
       "cost": {
-        "wood": 150,
-        "stone": 80,
-        "grain": 100,
-        "iron": 120
+        "wood": 450,
+        "stone": 240,
+        "grain": 300,
+        "iron": 360
       },
       "seconds": 1200,
       "effects": {
@@ -180,10 +180,10 @@
         "spear_drill"
       ],
       "cost": {
-        "wood": 250,
-        "stone": 150,
-        "grain": 150,
-        "iron": 200
+        "wood": 750,
+        "stone": 450,
+        "grain": 450,
+        "iron": 600
       },
       "seconds": 2400,
       "effects": {
@@ -197,10 +197,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 300,
-        "stone": 100,
-        "grain": 150,
-        "iron": 200
+        "wood": 900,
+        "stone": 300,
+        "grain": 450,
+        "iron": 600
       },
       "seconds": 2400,
       "effects": {
@@ -214,10 +214,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 300,
-        "stone": 250,
-        "grain": 200,
-        "iron": 150
+        "wood": 900,
+        "stone": 750,
+        "grain": 600,
+        "iron": 450
       },
       "seconds": 2400,
       "effects": {
@@ -233,10 +233,10 @@
         "composite_bows"
       ],
       "cost": {
-        "wood": 300,
-        "stone": 200,
-        "grain": 400,
-        "iron": 300
+        "wood": 900,
+        "stone": 600,
+        "grain": 1200,
+        "iron": 900
       },
       "seconds": 4800,
       "effects": {
@@ -250,10 +250,10 @@
       "academyLevel": 3,
       "requires": [],
       "cost": {
-        "wood": 300,
-        "stone": 300,
-        "grain": 400,
-        "iron": 150
+        "wood": 900,
+        "stone": 900,
+        "grain": 1200,
+        "iron": 450
       },
       "seconds": 4800,
       "effects": {
@@ -267,10 +267,10 @@
       "academyLevel": 1,
       "requires": [],
       "cost": {
-        "wood": 200,
-        "stone": 150,
-        "grain": 80,
-        "iron": 60
+        "wood": 600,
+        "stone": 450,
+        "grain": 240,
+        "iron": 180
       },
       "seconds": 1200,
       "effects": {
@@ -284,10 +284,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 200,
-        "stone": 300,
-        "grain": 100,
-        "iron": 100
+        "wood": 600,
+        "stone": 900,
+        "grain": 300,
+        "iron": 300
       },
       "seconds": 2400,
       "effects": {
@@ -303,10 +303,10 @@
         "palisade_stakes"
       ],
       "cost": {
-        "wood": 350,
-        "stone": 450,
-        "grain": 150,
-        "iron": 150
+        "wood": 1050,
+        "stone": 1350,
+        "grain": 450,
+        "iron": 450
       },
       "seconds": 4800,
       "effects": {
@@ -322,10 +322,10 @@
         "watchtowers"
       ],
       "cost": {
-        "wood": 500,
-        "stone": 700,
-        "grain": 250,
-        "iron": 250
+        "wood": 1500,
+        "stone": 2100,
+        "grain": 750,
+        "iron": 750
       },
       "seconds": 7200,
       "effects": {
@@ -339,10 +339,10 @@
       "academyLevel": 1,
       "requires": [],
       "cost": {
-        "wood": 120,
-        "stone": 80,
-        "grain": 100,
-        "iron": 80
+        "wood": 360,
+        "stone": 240,
+        "grain": 300,
+        "iron": 240
       },
       "seconds": 1200,
       "effects": {
@@ -358,10 +358,10 @@
         "pathfinders"
       ],
       "cost": {
-        "wood": 200,
-        "stone": 150,
-        "grain": 150,
-        "iron": 120
+        "wood": 600,
+        "stone": 450,
+        "grain": 450,
+        "iron": 360
       },
       "seconds": 2400,
       "effects": {
@@ -375,10 +375,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 250,
-        "stone": 250,
-        "grain": 150,
-        "iron": 100
+        "wood": 750,
+        "stone": 750,
+        "grain": 450,
+        "iron": 300
       },
       "seconds": 2400,
       "effects": {
@@ -394,10 +394,10 @@
         "road_wardens"
       ],
       "cost": {
-        "wood": 350,
-        "stone": 250,
-        "grain": 200,
-        "iron": 250
+        "wood": 1050,
+        "stone": 750,
+        "grain": 600,
+        "iron": 750
       },
       "seconds": 4800,
       "effects": {
@@ -411,10 +411,10 @@
       "academyLevel": 2,
       "requires": [],
       "cost": {
-        "wood": 200,
-        "stone": 200,
-        "grain": 250,
-        "iron": 150
+        "wood": 600,
+        "stone": 600,
+        "grain": 750,
+        "iron": 450
       },
       "seconds": 2400,
       "effects": {
@@ -428,10 +428,10 @@
       "academyLevel": 3,
       "requires": [],
       "cost": {
-        "wood": 300,
-        "stone": 300,
-        "grain": 400,
-        "iron": 150
+        "wood": 900,
+        "stone": 900,
+        "grain": 1200,
+        "iron": 450
       },
       "seconds": 4800,
       "effects": {
@@ -447,10 +447,10 @@
         "mokosh_blessing"
       ],
       "cost": {
-        "wood": 400,
-        "stone": 400,
-        "grain": 500,
-        "iron": 200
+        "wood": 1200,
+        "stone": 1200,
+        "grain": 1500,
+        "iron": 600
       },
       "seconds": 7200,
       "effects": {
@@ -467,10 +467,10 @@
         "rite_of_perun"
       ],
       "cost": {
-        "wood": 600,
-        "stone": 600,
-        "grain": 400,
-        "iron": 500
+        "wood": 1800,
+        "stone": 1800,
+        "grain": 1200,
+        "iron": 1500
       },
       "seconds": 9600,
       "effects": {
@@ -485,10 +485,10 @@
       "requires": [],
       "requiresScroll": "stribog_winds",
       "cost": {
-        "wood": 600,
-        "stone": 400,
-        "grain": 600,
-        "iron": 500
+        "wood": 1800,
+        "stone": 1200,
+        "grain": 1800,
+        "iron": 1500
       },
       "seconds": 7200,
       "effects": {
@@ -504,10 +504,10 @@
       "requires": [],
       "requiresScroll": "svarog_rite",
       "cost": {
-        "wood": 500,
-        "stone": 600,
-        "grain": 400,
-        "iron": 900
+        "wood": 1500,
+        "stone": 1800,
+        "grain": 1200,
+        "iron": 2700
       },
       "seconds": 9000,
       "effects": {
@@ -515,6 +515,238 @@
         "defense.infantry": 0.1
       },
       "description": "Infantry strikes and holds 10% better. Needs the Rite of Svarog's Forge scroll."
+    },
+    "great_sawmills": {
+      "name": "Great Sawmills",
+      "branch": "economy",
+      "academyLevel": 4,
+      "requires": [
+        "felling_axes"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 1200,
+        "grain": 900,
+        "iron": 600
+      },
+      "seconds": 7200,
+      "effects": {
+        "production.wood": 0.15
+      },
+      "description": "Water-driven saws: woodcutters and forest outposts cut 15% more wood."
+    },
+    "quarry_wedges": {
+      "name": "Quarry Wedges",
+      "branch": "economy",
+      "academyLevel": 4,
+      "requires": [
+        "stone_splitting"
+      ],
+      "cost": {
+        "wood": 1200,
+        "stone": 1500,
+        "grain": 900,
+        "iron": 600
+      },
+      "seconds": 7200,
+      "effects": {
+        "production.stone": 0.15
+      },
+      "description": "Iron wedges and wet timber split the rock: quarries cut 15% more stone."
+    },
+    "deep_shafts": {
+      "name": "Deep Shafts",
+      "branch": "economy",
+      "academyLevel": 4,
+      "requires": [
+        "bog_iron"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 1500,
+        "grain": 900,
+        "iron": 600
+      },
+      "seconds": 7200,
+      "effects": {
+        "production.iron": 0.15
+      },
+      "description": "Timbered shafts reach the deeper ore: 15% more iron."
+    },
+    "royal_granaries": {
+      "name": "Royal Granaries",
+      "branch": "economy",
+      "academyLevel": 4,
+      "requires": [
+        "granary_lofts"
+      ],
+      "cost": {
+        "wood": 1800,
+        "stone": 1800,
+        "grain": 900,
+        "iron": 600
+      },
+      "seconds": 7200,
+      "effects": {
+        "storage": 0.25
+      },
+      "description": "Stone granaries and dry cellars hold a quarter more of everything."
+    },
+    "frontier_tithes": {
+      "name": "Frontier Tithes",
+      "branch": "economy",
+      "academyLevel": 5,
+      "requires": [
+        "frontier_steadings"
+      ],
+      "cost": {
+        "wood": 2100,
+        "stone": 1800,
+        "grain": 1500,
+        "iron": 900
+      },
+      "seconds": 9600,
+      "effects": {
+        "outpostYield": 0.25
+      },
+      "description": "Outposts send a fair tithe home: they yield 25% more."
+    },
+    "iron_scale_armour": {
+      "name": "Iron Scale Armour",
+      "branch": "military",
+      "academyLevel": 4,
+      "requires": [
+        "shield_wall"
+      ],
+      "cost": {
+        "wood": 1200,
+        "stone": 900,
+        "grain": 900,
+        "iron": 1800
+      },
+      "seconds": 7200,
+      "effects": {
+        "defense.all": 0.05,
+        "defense.infantry": 0.05
+      },
+      "description": "Scales of iron sewn on leather: +5% defense, and +5% more for infantry."
+    },
+    "lance_charges": {
+      "name": "Lance Charges",
+      "branch": "military",
+      "academyLevel": 4,
+      "requires": [
+        "horse_breeding"
+      ],
+      "cost": {
+        "wood": 1200,
+        "stone": 900,
+        "grain": 1500,
+        "iron": 1500
+      },
+      "seconds": 7200,
+      "effects": {
+        "attack.cavalry": 0.15
+      },
+      "description": "Couched lances and stirrups: cavalry strikes 15% harder."
+    },
+    "war_drums": {
+      "name": "War Drums",
+      "branch": "military",
+      "academyLevel": 5,
+      "requires": [
+        "drill_yards"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 1200,
+        "grain": 1200,
+        "iron": 1500
+      },
+      "seconds": 9600,
+      "effects": {
+        "attack.all": 0.05
+      },
+      "description": "The drums keep the line together: +5% attack for every troop."
+    },
+    "stone_keeps": {
+      "name": "Stone Keeps",
+      "branch": "fortification",
+      "academyLevel": 5,
+      "requires": [
+        "earthworks"
+      ],
+      "cost": {
+        "wood": 1800,
+        "stone": 2700,
+        "grain": 900,
+        "iron": 900
+      },
+      "seconds": 9600,
+      "effects": {
+        "homeDefense": 0.15,
+        "lootTaken": -0.15
+      },
+      "description": "A stone keep at the heart of every village: defenders at home +15%, and raiders carry off 15% less."
+    },
+    "night_runners": {
+      "name": "Night Runners",
+      "branch": "scouting",
+      "academyLevel": 3,
+      "requires": [
+        "woodcraft"
+      ],
+      "cost": {
+        "wood": 900,
+        "stone": 600,
+        "grain": 600,
+        "iron": 600
+      },
+      "seconds": 4800,
+      "effects": {
+        "scoutSurvival": 0.1,
+        "scoutSpeed": 0.1
+      },
+      "description": "Scouts who move by night: +10% survival and 10% faster."
+    },
+    "caravan_guilds": {
+      "name": "Caravan Guilds",
+      "branch": "scouting",
+      "academyLevel": 4,
+      "requires": [
+        "pack_harnesses"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 1200,
+        "grain": 900,
+        "iron": 900
+      },
+      "seconds": 7200,
+      "effects": {
+        "caravanSpeed": 0.15,
+        "caravanCapacity": 0.15
+      },
+      "description": "Guild drivers and spare teams: caravans travel 15% faster and carry 15% more."
+    },
+    "dazhbog_harvest": {
+      "name": "Dazhbog's Harvest",
+      "branch": "faith",
+      "academyLevel": 5,
+      "requires": [
+        "mokosh_blessing"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 1500,
+        "grain": 2100,
+        "iron": 900
+      },
+      "seconds": 9600,
+      "effects": {
+        "production.all": 0.05
+      },
+      "description": "Offerings to the sun bring good years: +5% of every resource."
     }
   }
 }

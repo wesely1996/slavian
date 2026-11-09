@@ -388,7 +388,12 @@ export function researchView(entry: ResearchEntry) {
     status: entry.status,
     villageId: entry.villageId,
     startedAt: entry.startedAt.toISOString(),
+    // While funding, not yet known (its start time).
     completesAt: entry.completesAt.toISOString(),
+    // The group's: what it costs and what has been sent (null: research from
+    // before it was shared).
+    cost: entry.cost,
+    paid: entry.paid,
   };
 }
 

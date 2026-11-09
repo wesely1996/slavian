@@ -1,23 +1,32 @@
 import type { DbClient } from './pool.js';
+import type { Resources } from '../sim/resources.js';
 
 export interface ResearchEntry {
   worldId: number;
+  // Who started it (the group's research: everyone gets it).
   accountId: number;
   tech: string;
-  status: 'researching' | 'done';
+  // funding: its resources are being gathered (completesAt not yet known).
+  status: 'funding' | 'researching' | 'done';
   villageId: number | null;
   startedAt: Date;
   completesAt: Date;
+  // What it costs and what the members have sent (null: research from
+  // before it was shared, paid when it began).
+  cost: Resources | null;
+  paid: Resources | null;
 }
 
 interface ResearchRow {
   world_id: number;
   account_id: number;
   tech: string;
-  status: 'researching' | 'done';
+  status: 'funding' | 'researching' | 'done';
   village_id: number | null;
   started_at: Date;
   completes_at: Date;
+  cost: Resources | null;
+  paid: Resources | null;
 }
 
 function fromRow(row: ResearchRow): ResearchEntry {
@@ -29,6 +38,8 @@ function fromRow(row: ResearchRow): ResearchEntry {
     villageId: row.village_id,
     startedAt: row.started_at,
     completesAt: row.completes_at,
+    cost: row.cost ?? null,
+    paid: row.paid ?? null,
   };
 }
 
@@ -41,13 +52,22 @@ export async function listResearch(client: DbClient, worldId: number, accountId?
   return rows.map(fromRow);
 }
 
-export async function startResearch(client: DbClient, entry: Omit<ResearchEntry, 'status'>): Promise<ResearchEntry> {
+// A tech the group starts: its resources are gathered first.
+export async function insertProject(client: DbClient, entry: Pick<ResearchEntry, 'worldId' | 'accountId' | 'tech' | 'villageId' | 'startedAt' | 'cost'>): Promise<ResearchEntry> {
   const { rows } = await client.query<ResearchRow>(
-    `INSERT INTO research (world_id, account_id, tech, status, village_id, started_at, completes_at)
-     VALUES ($1, $2, $3, 'researching', $4, $5, $6) RETURNING *`,
-    [entry.worldId, entry.accountId, entry.tech, entry.villageId, entry.startedAt, entry.completesAt],
+    `INSERT INTO research (world_id, account_id, tech, status, village_id, started_at, completes_at, cost, paid)
+     VALUES ($1, $2, $3, 'funding', $4, $5, $5, $6, $7) RETURNING *`,
+    [entry.worldId, entry.accountId, entry.tech, entry.villageId, entry.startedAt, JSON.stringify(entry.cost), JSON.stringify({ wood: 0, stone: 0, grain: 0, iron: 0 })],
   );
   return fromRow(rows[0]!);
+}
+
+// What a project has been sent, and (once paid) that it is being researched.
+export async function saveProject(client: DbClient, entry: ResearchEntry): Promise<void> {
+  await client.query(
+    'UPDATE research SET paid = $4, status = $5, completes_at = $6 WHERE world_id = $1 AND account_id = $2 AND tech = $3',
+    [entry.worldId, entry.accountId, entry.tech, JSON.stringify(entry.paid), entry.status, entry.completesAt],
+  );
 }
 
 export async function finishResearch(client: DbClient, worldId: number, accountId: number, tech: string): Promise<boolean> {

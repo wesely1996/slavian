@@ -526,6 +526,16 @@ func commands(village: Dictionary) -> bool:
 
 ## The player's research: what their Academies have brought in by now, and
 ## what comes in per hour.
+## The group's research pool: every member's Academies, all together.
+func group_research() -> Dictionary:
+	var points := 0.0
+	var per_hour := 0.0
+	for member in world.get("members", []):
+		points += ResearchRules.points(member, server_now())
+		per_hour += float(member.get("research", {}).get("perHour", 0))
+	return {"points": points, "perHour": per_hour}
+
+
 func my_research() -> Dictionary:
 	for member in world.get("members", []):
 		if int(member.accountId) == my_account_id():

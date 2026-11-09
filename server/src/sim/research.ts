@@ -54,7 +54,7 @@ export function researchProblem(
   const def: ResearchData['techs'][string] | undefined = data.research.techs[tech];
   if (!def) return `Unknown tech "${tech}"`;
   if (input.done.has(tech)) return `${def.name} is already known`;
-  if (input.researching) return 'Your scholars are busy; one tech at a time';
+  if (input.researching) return "The group's scholars are busy; one tech at a time";
   if (def.requiresScroll && !input.scrolls?.has(def.requiresScroll)) {
     return `${def.name} needs the ${data.lore.scrolls[def.requiresScroll]?.name ?? def.requiresScroll} scroll`;
   }

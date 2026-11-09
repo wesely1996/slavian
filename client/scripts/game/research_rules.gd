@@ -3,6 +3,44 @@ extends RefCounted
 ## Display-side copy of server/src/sim/research.ts.
 
 
+## Techs the group knows, and the one it is gathering for or researching
+## ({} if none): research is shared.
+static func group(research: Array) -> Dictionary:
+	var done := {}
+	var current := {}
+	for entry in research:
+		if entry.status == "done":
+			done[entry.tech] = true
+		elif current.is_empty() or entry.status == "funding":
+			current = entry
+	return {"done": done, "current": current}
+
+
+## How much of a tech's cost the members have sent (0..1; 1 for research
+## from before it was shared).
+static func paid_share(entry: Dictionary) -> float:
+	if not entry.get("cost") is Dictionary or not entry.get("paid") is Dictionary:
+		return 1.0
+	var cost := 0.0
+	var paid := 0.0
+	for kind in entry.cost:
+		cost += float(entry.cost[kind])
+		paid += minf(float(entry.paid.get(kind, 0)), float(entry.cost[kind]))
+	return 1.0 if cost <= 0.0 else paid / cost
+
+
+## What a tech being gathered for still needs.
+static func still_needed(entry: Dictionary) -> Dictionary:
+	var out := {}
+	if not entry.get("cost") is Dictionary or not entry.get("paid") is Dictionary:
+		return out
+	for kind in entry.cost:
+		var left := int(entry.cost[kind]) - int(entry.paid.get(kind, 0))
+		if left > 0:
+			out[kind] = left
+	return out
+
+
 ## Techs `account_id` knows, and the one they are researching ({} if none).
 static func progress(research: Array, account_id: int) -> Dictionary:
 	var done := {}

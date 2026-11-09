@@ -475,6 +475,10 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalResearch.start_research(self, world, village, String(body.get("tech", "")), now)
 				if result.has("research"):
 					extra = ["research", LocalResearch.research_view(result.research)]
+			"research/fund":
+				result = LocalResearch.fund(self, world, village, now)
+				if result.has("research"):
+					extra = ["research", LocalResearch.research_view(result.research)]
 			"rebuild":
 				result = LocalResearch.rebuild(self, world, village, now)
 			"build/cancel":
@@ -554,7 +558,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
-		if action in ["research", "rebuild", "caravans", "caravans/fetch", "scout", "scout/ruins", "found", "market/sell", "generals"]:
+		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "scout", "scout/ruins", "found", "market/sell", "generals"]:
 			changed.append(["world"])
 		if step != "":
 			onboarding_step(world, int(village.ownerAccountId), step, now, changed)

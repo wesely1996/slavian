@@ -44,6 +44,7 @@ import {
   searchRuinsCommand,
   setStanceCommand,
   startResearchCommand,
+  fundResearchCommand,
   trainUnitsCommand,
   tradeCommand,
   cancelBuildCommand,
@@ -886,6 +887,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const body = reinforceBody.parse(request.body);
     await setReinforceCommand(db, scheduler.data, { accountId: account.id, villageId: id, ...body });
     return { reinforce: body };
+  });
+
+  // Sends from the village what the group's research still needs.
+  app.post('/v1/villages/:id/research/fund', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { village, research } = await fundResearchCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
+    return { village: villageView(village), research: researchView(research), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/research', async (request) => {

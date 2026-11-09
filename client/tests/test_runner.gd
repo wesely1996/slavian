@@ -45,6 +45,7 @@ func _initialize() -> void:
 	_test_group()
 	_test_sites()
 	_test_events()
+	_test_group_research()
 	_test_bridge_reward()
 	_test_raid_text()
 	_test_lake_lanes()
@@ -555,6 +556,17 @@ func _test_bridge_reward() -> void:
 	var data := {"bridge": {"stages": [stage, {"reward": {"resources": {}, "effects": {"buildTime": -0.1}}}, {"reward": {"resources": {}, "effects": {"production.all": 0.05}}}]}}
 	var blessed := LocalBridge.bridge_bonuses(data, {"stage": 2})
 	_check(is_equal_approx(float(blessed.get("production.all", 0)), 0.05) and is_equal_approx(float(blessed.get("buildTime", 0)), -0.1), "blessings of the stages that stand")
+
+
+func _test_group_research() -> void:
+	var research := [{"accountId": 1, "tech": "felling_axes", "status": "done"}, {"accountId": 2, "tech": "spear_drill", "status": "done"},
+		{"accountId": 2, "tech": "bog_iron", "status": "funding", "cost": {"wood": 600, "stone": 600, "grain": 300, "iron": 180}, "paid": {"wood": 600, "stone": 0, "grain": 300, "iron": 0}}]
+	var group := ResearchRules.group(research)
+	_check(group.done.has("felling_axes") and group.done.has("spear_drill"), "research known by any member is the group's")
+	_check(group.current.tech == "bog_iron", "the group's tech under way")
+	_check(is_equal_approx(ResearchRules.paid_share(group.current), 900.0 / 1680.0), "share of a tech's cost paid")
+	_check(ResearchRules.still_needed(group.current) == {"stone": 600, "iron": 180}, "what a tech still needs")
+	_check(is_equal_approx(ResearchRules.paid_share({"status": "researching"}), 1.0), "research from before sharing counts as paid")
 
 
 func _test_events() -> void:
