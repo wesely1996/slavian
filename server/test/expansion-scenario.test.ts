@@ -38,17 +38,28 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
   await play({ advance: 20 * MINUTE });
   // The fourth costs half as much again (three bought).
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
+  // Settlers grow dearer: those still missing are given, so the village is founded.
+  await play({ set: { garrison: { settler: 3 } } });
   await play({ method: 'POST', path: '/v1/villages/1/found', body: { q: spot.q, r: spot.r, name: 'Novgorod' } });
   await play({ advance: 30 * MINUTE });
   const founded = (await play({ method: 'GET', path: world })).body;
   const second = founded.villages.find((v: { name: string }) => v.name === 'Novgorod');
   if (second) {
     await play({ method: 'POST', path: `${world}/hero/move`, body: { villageId: second.id } });
+    // A rally point: only one of the player's own settlements; once set,
+    // the spearmen trained at home march there as soon as they are done.
+    await play({ method: 'PUT', path: `${world}/rally`, body: { villageId: 999 } });
+    await play({ method: 'PUT', path: `${world}/rally`, body: { villageId: second.id } });
     await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 4 } });
     await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c4', building: 'caravan_yard' } });
     await play({ advance: 20 * MINUTE });
     await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: second.id, load: { wood: 100, stone: 0, grain: 50, iron: 0 } } });
+    await play({ method: 'GET', path: world });
+    await play({ method: 'PUT', path: `${world}/rally`, body: { villageId: null } });
     await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'support', targetVillageId: second.id, units: { spearman: 2 } } });
+    // No horde comes against it: nothing there to harass.
+    await play({ set: { garrison: { horseman: 3 } } });
+    await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'harass', targetVillageId: second.id, units: { horseman: 3 } } });
     await play({ method: 'PUT', path: `/v1/villages/${second.id}/reinforce`, body: { share: 1, range: 6 } });
     await play({ advance: 30 * MINUTE });
     const settled = (await play({ method: 'GET', path: world })).body;

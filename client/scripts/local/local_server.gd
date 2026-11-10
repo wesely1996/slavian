@@ -45,7 +45,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"difficulty": String(params.get("difficulty", "normal")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
-			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}}],
+			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
@@ -303,6 +303,21 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 	if method == "GET" and parts.size() == 3 and parts[1] == "worlds":
 		return {"status": 200, "data": world_view(world, now)}
 	# Quiet hours: no horde arrives in them (commands/worlds.ts setQuietHoursCommand).
+	# A rally point: one of the player's own settlements, or none
+	# (commands/worlds.ts setRallyCommand).
+	if method == "PUT" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "rally":
+		var to: Variant = body.get("villageId")
+		if not body.has("villageId") or not (to == null or ((to is int or to is float) and float(to) == floorf(float(to)) and float(to) > 0)):
+			return _fail(400, "invalid_request", "Invalid request")
+		if to != null:
+			var rallied := find_village(world, int(to))
+			if rallied.is_empty() or rallied.ownerAccountId == null or int(rallied.ownerAccountId) != int(world.hostAccountId) or rallied.ruin != null:
+				return _rule_answer(LocalVillage.rule("The rally point is one of your own settlements"))
+		for m in world.members:
+			if int(m.accountId) == int(world.hostAccountId):
+				m.rallyVillageId = null if to == null else int(to)
+		changed.append(["world"])
+		return {"status": 200, "data": world_view(world, now)}
 	if method == "PUT" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "quiet":
 		var start: Variant = body.get("start")
 		var end: Variant = body.get("end")
@@ -1068,8 +1083,11 @@ func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array)
 	var village := find_village(world, int(event.payload.villageId))
 	if village.is_empty():
 		return
+	var done: Array = village.state.training.filter(func(b: Dictionary) -> bool: return LocalVillage.batch_completes_at(b) <= int(event.dueAt))
 	# New troops: the military reserve is topped up for them.
 	village.state = LocalReserve.top_up(data, LocalVillage.complete_training(village.state, int(event.dueAt)), int(event.dueAt))
+	# They march on to the owner's rally point, if one is set.
+	LocalArmies.rally_trained(self, world, village, done, int(event.dueAt))
 	changed.append(["village", village.id])
 
 
@@ -1096,7 +1114,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:
@@ -1378,6 +1396,8 @@ func _load_all() -> void:
 			# Worlds saved before players counted what they bought.
 			for m in world.members:
 				m.merge({"bought": {}})
+				# Worlds saved before rally points.
+				m.merge({"rallyVillageId": null})
 			# Worlds saved before generals.
 			world.merge({"generals": []})
 			# Worlds saved before ruin searches.

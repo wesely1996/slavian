@@ -7,9 +7,12 @@ export type Units = Readonly<Record<string, number>>;
 
 export interface TrainingBatch {
   readonly unit: string;
+  // Still to finish (those done are counted into the garrison as they come).
   readonly count: number;
   readonly startsAt: Date;
   readonly perUnitMs: number;
+  // How many it was queued with (batches from before: unknown).
+  readonly size?: number;
 }
 
 export function batchCompletesAt(batch: TrainingBatch): Date {
@@ -21,11 +24,24 @@ export function finishedBy(batch: TrainingBatch, at: Date): number {
   return Math.max(0, Math.min(batch.count, Math.floor(elapsed / batch.perUnitMs)));
 }
 
+// The first level at which a building trains any unit (the Hospital's
+// Shaman needs level 2): its training speeds up from there.
+export function trainingFirstLevel(data: GameData, building: string): number {
+  const levels = Object.values(data.units.units).filter((u) => u.building === building).map((u) => u.requiresLevel ?? 1);
+  return levels.length ? Math.min(...levels) : 1;
+}
+
+// How much a training building's level shortens training: trainingSpeedup
+// for each level above the first it trains anything at.
+export function trainingSpeedFactor(data: GameData, building: string, buildingLevel: number): number {
+  return data.units.trainingSpeedup ** Math.max(0, buildingLevel - trainingFirstLevel(data, building));
+}
+
 // Real-time milliseconds per unit; the training building's level and the
 // world speed both shorten it.
 export function perUnitMs(data: GameData, unit: string, buildingLevel: number, worldSpeed: number, factor = 1): number {
   const def = data.units.units[unit]!;
-  const speedup = data.units.trainingSpeedup ** Math.max(0, buildingLevel - 1) * factor;
+  const speedup = trainingSpeedFactor(data, def.building, buildingLevel) * factor;
   return Math.max(1, Math.round((def.trainSeconds * 1000 * speedup) / worldSpeed));
 }
 

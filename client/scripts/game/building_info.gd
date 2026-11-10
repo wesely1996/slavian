@@ -50,8 +50,9 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 	# Where troops are trained: faster each level, and who it opens.
 	var trains := trained_at(data, building)
 	if not trains.is_empty():
-		if level > 1:
-			parts.append(UI.t("trains %d%% faster") % roundi((1.0 - pow(float(data.units.trainingSpeedup), level - 1)) * 100.0))
+		var faster := roundi((1.0 - LocalVillage.training_speed_factor(data, building, level)) * 100.0)
+		if faster > 0:
+			parts.append(UI.t("trains %d%% faster") % faster)
 		for unit in trains:
 			if int(data.units.units[unit].requiresLevel) == level:
 				parts.append(UI.t("opens %s") % UI.t(data.units.units[unit].name))
@@ -92,9 +93,12 @@ static func card(data: Dictionary, building: String, speed: float, time_factor :
 		var title := UI.label(heading, UI.SMALL_SIZE, UI.MUTED)
 		title.autowrap_mode = TextServer.AUTOWRAP_OFF
 		grid.add_child(title)
+	var current: Control = null
 	for at in range(1, int(def.maxLevel) + 1):
 		var here := at == level
 		var number := UI.label(str(at), UI.SMALL_SIZE, UI.GOOD if here else UiTheme.INK)
+		if here:
+			current = number
 		number.autowrap_mode = TextServer.AUTOWRAP_OFF
 		number.custom_minimum_size.x = 40
 		number.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -107,7 +111,8 @@ static func card(data: Dictionary, building: String, speed: float, time_factor :
 		what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		grid.add_child(what)
 	# The levels on a little scroll that unrolls over the card.
-	box.add_child(ScrollRoll.new(grid, 300.0))
+	# Rolled on to the building's current level.
+	box.add_child(ScrollRoll.new(grid, 300.0, current))
 	return box
 
 
@@ -143,7 +148,7 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	for attacker in counters:
 		if counters[attacker].has(family):
 			box.add_child(UI.label(UI.t("Weak against %s") % attacker, UI.SMALL_SIZE, UI.ERROR))
-	var seconds := float(def.trainSeconds) * pow(float(data.units.trainingSpeedup), maxi(0, building_level - 1)) * time_factor / speed
+	var seconds := float(def.trainSeconds) * LocalVillage.training_speed_factor(data, String(def.building), building_level) * time_factor / speed
 	box.add_child(UI.rich(UI.t("%s each · trains in %s") % [UI.costs(Rules.unit_cost(def, 1, villages_owned, bought), 22), TimeUtil.format_duration(seconds)], UI.SMALL_SIZE, UiTheme.INK))
 	box.add_child(UI.label(UI.t("Trained at %s level %d") % [UI.t(data.buildings.buildings[def.building].name), int(def.requiresLevel)], UI.SMALL_SIZE, UI.MUTED))
 	return box

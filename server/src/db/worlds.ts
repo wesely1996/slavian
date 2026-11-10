@@ -103,6 +103,8 @@ export interface Member {
   researchSettledAt: Date | null;
   // Units bought that grow dearer (units.json costStep): unit -> count.
   bought: Record<string, number>;
+  // Their rally point: the village their newly trained troops march to.
+  rallyVillageId: number | null;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -115,13 +117,27 @@ export async function addMember(client: DbClient, worldId: number, accountId: nu
 export async function listMembers(client: DbClient, worldId: number): Promise<Member[]> {
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
-            m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought
+            m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought,
+            m.rally_village_id AS "rallyVillageId"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,
     [worldId],
   );
   return rows;
+}
+
+// A player's rally point (null: none).
+export async function rallyPoint(client: DbClient, worldId: number, accountId: number): Promise<number | null> {
+  const { rows } = await client.query<{ id: number | null }>(
+    'SELECT rally_village_id AS id FROM world_members WHERE world_id = $1 AND account_id = $2',
+    [worldId, accountId],
+  );
+  return rows[0]?.id ?? null;
+}
+
+export async function setRallyPoint(client: DbClient, worldId: number, accountId: number, villageId: number | null): Promise<void> {
+  await client.query('UPDATE world_members SET rally_village_id = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, villageId]);
 }
 
 // How many of `unit` a player has bought (units.json costStep).

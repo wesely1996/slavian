@@ -9,7 +9,7 @@ import { ensureHeroes } from '../db/heroes.js';
 import { ensureDigests, tell } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
 import { ensurePrune } from '../scheduler/prune.js';
-import { insertVillage, listVillages } from '../db/villages.js';
+import { insertVillage, listVillages, loadVillage } from '../db/villages.js';
 import { placeStarterCamps } from '../scheduler/camps.js';
 import {
   addMember,
@@ -27,6 +27,7 @@ import {
   setHeroKind,
   setHost,
   setQuietHours,
+  setRallyPoint,
   type Member,
   type World,
 } from '../db/worlds.js';
@@ -261,6 +262,26 @@ export async function claimOnboardingCommand(
   return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (world.status !== 'running') throw new RuleError('The run is not under way');
     return claimOnboarding(client, deps.data, world, input.account.id, input.step, input.now);
+  });
+}
+
+// A player sets their rally point: one of their own villages, where every
+// batch trained in their other villages marches once done (null: none).
+export async function setRallyCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { account: Account; worldId: number; villageId: number | null; now: Date },
+): Promise<void> {
+  await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
+    if (!(await isMember(client, world.id, input.account.id))) throw new ForbiddenError('Not a member of this world');
+    if (input.villageId !== null) {
+      const village = await loadVillage(client, input.villageId).catch(() => null);
+      if (!village || village.worldId !== world.id || village.ownerAccountId !== input.account.id || village.ruin) {
+        throw new RuleError('The rally point is one of your own settlements');
+      }
+    }
+    await setRallyPoint(client, world.id, input.account.id, input.villageId);
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
 }
 

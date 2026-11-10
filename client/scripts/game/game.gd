@@ -561,6 +561,17 @@ func my_research() -> Dictionary:
 	return {"points": 0.0, "perHour": 0.0}
 
 
+## The player's rally point: the village their newly trained troops march to
+## (0: none).
+func rally_village(account_id: int = -1) -> int:
+	var who := my_account_id() if account_id < 0 else account_id
+	for member in world.get("members", []):
+		if int(member.accountId) == who:
+			var id: Variant = member.get("rallyVillageId")
+			return int(id) if id != null else 0
+	return 0
+
+
 ## How many of `unit` a player has bought (units that grow dearer: costStep).
 func bought(account_id: int, unit: String) -> int:
 	for member in world.get("members", []):

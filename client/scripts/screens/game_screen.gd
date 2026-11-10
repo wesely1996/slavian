@@ -35,8 +35,9 @@ var _rate_labels: Dictionary[String, Label] = {}
 var _view := "map"
 var _view_button: Button
 var _inbox_button: Button
+## Which of the inbox and the chat the shared button opened last.
+var _messages_tab := "inbox"
 var _tutorial_button: Button
-var _chat_button: Button
 ## Notification settings as the server last sent them.
 var _prefs: Dictionary = {}
 var _spacer: Control
@@ -331,16 +332,12 @@ func _build_ui() -> void:
 	orders.theme_type_variation = "WoodIconButton"
 	orders.tooltip_text = tr("Standing orders")
 	bar.add_child(orders)
-	_inbox_button = UI.button("", _show_inbox, "icon/inbox")
+	# Notices and the group chat share one button: it opens whichever has
+	# something new (the chat first), and the sheet switches between them.
+	_inbox_button = UI.button("", _show_messages, "icon/inbox")
 	_inbox_button.theme_type_variation = "WoodIconButton"
-	_inbox_button.tooltip_text = tr("Inbox")
+	_inbox_button.tooltip_text = tr("Inbox") if Local.is_active() else tr("Inbox and chat")
 	bar.add_child(_inbox_button)
-	# The group chat: a group's worlds only.
-	_chat_button = UI.button("", _show_chat, "icon/chat")
-	_chat_button.theme_type_variation = "WoodIconButton"
-	_chat_button.tooltip_text = tr("Chat")
-	_chat_button.visible = not Local.is_active()
-	bar.add_child(_chat_button)
 	# The tutorial, shown or hidden at any time.
 	_tutorial_button = UI.button("", _toggle_tutorial, "icon/help")
 	_tutorial_button.theme_type_variation = "WoodIconButton"
@@ -2228,7 +2225,13 @@ func _send_troops(village: Dictionary) -> void:
 	else:
 		if _army_orders == "hold":
 			_army_orders = "support"
-		var kinds := ["support", "reinforce", "harass"]
+		# Harassers strike a horde, never a friendly village: only where one
+		# fights or marches on it.
+		var kinds := ["support", "reinforce"]
+		if _horde_against(_army_to):
+			kinds.append("harass")
+		elif _army_orders == "harass":
+			_army_orders = "support"
 		if Game.is_mine(Game.villages.get(_army_to, {})):
 			kinds.append("garrison")
 		var kind_row := UI.hbox(8)
@@ -2326,16 +2329,13 @@ func _raid_tab(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_panel_body.add_child(UI.with_info(UI.label(tr("Raid"), UI.HEADING_SIZE),
 		tr("An army marches to the edge of the map on a front's side and goes into the enemy's lands: it fights a battle on each field it crosses, then besieges the front's stronghold, and comes home with what it carries. A battle lost turns it home with what it has. Every battle won makes that front's next horde hate you the more. It eats its own grain all the way: military caravans carry more, and more loot.")))
-	var mode_row := UI.hbox(8)
-	for strike in [false, true]:
-		var m := UI.button(tr("Strike a gathering horde") if strike else tr("Raid a front"), func() -> void:
-			_strike_mode = strike
-			_rebuild_panel())
-		m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		m.custom_minimum_size.x = 0
-		m.disabled = _strike_mode == strike
-		mode_row.add_child(m)
-	_panel_body.add_child(mode_row)
+	var gathering := Game.waves.filter(func(w: Dictionary) -> bool: return w.status == "scheduled" and w.get("bandOf") == null).size()
+	_choice_rows([
+		{"text": tr("Raid a front"), "selected": not _strike_mode, "pick": func() -> void: _strike_mode = false,
+			"info": tr("Into a front's lands: a battle on each field, then its stronghold; loot comes home.")},
+		{"text": tr("Strike a gathering horde"), "selected": _strike_mode, "pick": func() -> void: _strike_mode = true,
+			"info": tr_n("%d horde gathers beyond the edge: the earlier struck, the fewer of it, but behind walls.", "%d hordes gather beyond the edge: the earlier struck, the fewer of them, but behind walls.", gathering) % gathering},
+	])
 	if _strike_mode:
 		_strike_tab(village)
 		return
@@ -2345,28 +2345,26 @@ func _raid_tab(village: Dictionary) -> void:
 		return
 	if not _raid_front in fronts:
 		_raid_front = String(fronts[0])
-	var front_row := UI.hbox(8)
+	_panel_body.add_child(UI.label(tr("Which front"), UI.SMALL_SIZE, UI.MUTED))
+	var front_choices: Array = []
 	for front in fronts:
-		var b := UI.button(RaidText.front_name(String(front)).capitalize(), func() -> void:
-			_raid_front = String(front)
-			_rebuild_panel(), WaveMath.front_icon(String(front)))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size.x = 0
-		b.disabled = _raid_front == front
-		front_row.add_child(b)
-	_panel_body.add_child(front_row)
+		var hatred := roundi(float(Game.world.get("hatred", {}).get(front, 0.0)) * 100.0)
+		var stronghold := tr(String(data.raids.fronts.get(front, {}).get("stronghold", "")))
+		var loot := tr("hero gear, lore scrolls, Embers") if front == "north" else tr("resources")
+		front_choices.append({"text": RaidText.front_name(String(front)).capitalize(), "icon": WaveMath.front_icon(String(front)),
+			"selected": _raid_front == front, "pick": func() -> void: _raid_front = String(front),
+			"info": tr("%s · stronghold: %s · loot: %s · hatred now +%d%%") % [tr(Game.front_faction(String(front))), stronghold, loot, hatred]})
+	_choice_rows(front_choices)
 	var max_depth := int(data.raids.maxDepth)
 	_raid_depth = clampi(_raid_depth, 1, max_depth)
-	var depth_row := UI.hbox(8)
+	_panel_body.add_child(UI.label(tr("How deep"), UI.SMALL_SIZE, UI.MUTED))
+	var depth_choices: Array = []
 	for depth in range(1, max_depth + 1):
-		var b := UI.button(tr_n("%d field", "%d fields", depth) % depth, func() -> void:
-			_raid_depth = depth
-			_rebuild_panel())
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size.x = 0
-		b.disabled = _raid_depth == depth
-		depth_row.add_child(b)
-	_panel_body.add_child(depth_row)
+		var hate := roundi((float(data.raids.hatred.perBattle) * (depth + 1) + float(data.raids.hatred.stronghold)) * 100.0)
+		depth_choices.append({"text": tr_n("%d field", "%d fields", depth) % depth, "selected": _raid_depth == depth, "pick": func() -> void: _raid_depth = depth,
+			"info": tr("%d battles, the last at the stronghold's walls · about %s beyond the edge · up to +%d%% hatred if all are won") % [
+				depth + 1, TimeUtil.format_duration(RaidText.stage_hours(data, depth) * 3600.0 / float(Game.world.speed)), hate]})
+	_choice_rows(depth_choices)
 	_panel_body.add_child(UI.label(RaidText.plan(data, _raid_front, _raid_depth), UI.SMALL_SIZE, UI.ACCENT))
 	_panel_body.add_child(UI.label(RaidText.prize(_raid_front), UI.SMALL_SIZE, UI.MUTED))
 	var home_units := Rules.garrison_at(village, Game.server_now())
@@ -2404,6 +2402,24 @@ func _raid_tab(village: Dictionary) -> void:
 	_picked_hint(go, home_units)
 
 
+## Choices one under another, each a full-width button with a line of what
+## it means above it: {text, info, selected, pick, icon?}.
+func _choice_rows(choices: Array) -> void:
+	var list := UI.vbox(4)
+	for choice in choices:
+		var info := UI.label(String(choice.info), UI.SMALL_SIZE, UI.ACCENT if choice.selected else UI.MUTED)
+		info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		list.add_child(info)
+		var pick: Callable = choice.pick
+		var b := UI.button(String(choice.text), func() -> void:
+			pick.call()
+			_rebuild_panel(), String(choice.get("icon", "")))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.disabled = choice.selected
+		list.add_child(b)
+	_panel_body.add_child(list)
+
+
 ## The Raid tab's strike: a horde still gathering beyond the edge, hit
 ## before it sets out (data/raids.json strike).
 func _strike_tab(village: Dictionary) -> void:
@@ -2419,15 +2435,16 @@ func _strike_tab(village: Dictionary) -> void:
 	if not gathering.any(func(w: Dictionary) -> bool: return int(w.id) == _strike_wave):
 		_strike_wave = int(gathering[0].id)
 	var now := Game.server_now()
+	var choices: Array = []
 	for wave in gathering:
 		var left := TimeUtil.parse_iso(wave.spawnAt) - now
 		var share := RaidText.strike_share(data, left / 3600.0 * float(Game.world.speed))
-		var b := UI.button(tr("Horde of %s (%s threat): sets out in %s, about %d%% gathered") % [RaidText.front_name(String(wave.front)), tr(String(wave.threat)).to_lower(),
-			TimeUtil.format_duration(left), roundi(share * 100.0)], func() -> void:
-			_strike_wave = int(wave.id)
-			_rebuild_panel(), WaveMath.front_icon(String(wave.front)))
-		b.disabled = int(wave.id) == _strike_wave
-		_panel_body.add_child(b)
+		var hatred := roundi(float(Game.world.get("hatred", {}).get(wave.front, 0.0)) * 100.0)
+		choices.append({"text": tr("Horde of %s") % RaidText.front_name(String(wave.front)), "icon": WaveMath.front_icon(String(wave.front)),
+			"selected": int(wave.id) == _strike_wave, "pick": func() -> void: _strike_wave = int(wave.id),
+			"info": tr("%s threat · sets out in %s · about %d%% gathered · hatred now +%d%%") % [tr(String(wave.threat)).capitalize(),
+				TimeUtil.format_duration(left), roundi(share * 100.0), hatred]})
+	_choice_rows(choices)
 	var home_units := Rules.garrison_at(village, now)
 	_unit_pickers(home_units, true, "raid")
 	var hero := Game.my_hero()
@@ -4356,6 +4373,18 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 		return cost_text + (tr("  (queue full)") if queue_full else ""))
 
 
+## Whether a horde fights at a village or marches on it (cmd_armies.gd
+## horde_against).
+func _horde_against(village_id: int) -> bool:
+	for b in Game.battles:
+		if b.get("status") == "ongoing" and b.get("villageId") != null and int(b.villageId) == village_id:
+			return true
+	for w in Game.waves:
+		if w.get("status") in ["marching", "battling"] and w.get("targetVillageId") != null and int(w.targetVillageId) == village_id:
+			return true
+	return false
+
+
 ## Opens the card of `building` (BuildingInfo) with its build times in
 ## `village` (its Hall and research), `level` marked.
 func _building_card(village: Dictionary, building: String, level: int) -> Callable:
@@ -4557,6 +4586,8 @@ func _train_tab(village: Dictionary) -> void:
 			return tr("%s %d/%d   next %s · all %s") % [unit_name, done, batch.count,
 				TimeUtil.format_duration(next_at - now), TimeUtil.format_duration(done_at - now)])
 
+	_rally_row(village)
+
 	var queue_full := training.size() >= limit
 	var max_batch := int(Game.data.units.maxBatch)
 	var allowed := units.keys().filter(func(unit: String) -> bool: return ClanText.allowed(units[unit], village.get("bonuses", {})))
@@ -4617,7 +4648,7 @@ func _train_tab(village: Dictionary) -> void:
 		var train := UI.primary(tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
 		train.custom_minimum_size.x = 120
 		row.add_child(train)
-		var seconds := float(def.trainSeconds) * pow(float(Game.data.units.trainingSpeedup), maxi(0, building_level - 1)) \
+		var seconds := float(def.trainSeconds) * LocalVillage.training_speed_factor(Game.data, String(def.building), building_level) \
 			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)
 		var owned := Game.villages_owned(int(village.ownerAccountId))
 		_tick(cost_line, func() -> String:
@@ -5101,6 +5132,40 @@ func _leaders_section() -> void:
 		_panel_body.add_child(UI.label(tr("Fallen: %s") % ", ".join(fallen), UI.SMALL_SIZE, UI.MUTED))
 
 
+## The rally point, seen from one of the player's villages: where its new
+## troops march, and a button to make this village the rally point (or stop).
+func _rally_row(village: Dictionary) -> void:
+	if not Game.is_mine(village):
+		return
+	var village_id := int(village.id)
+	var rally := Game.rally_village()
+	var row := UI.hbox(8)
+	var text := tr("No rally point: new troops stay where they are trained.")
+	if rally == village_id:
+		text = tr("Rally point: troops trained in your other settlements march here once done.")
+	elif rally != 0:
+		text = tr("Rally point: %s. Troops trained here march there once done.") % Game.villages.get(rally, {}).get("name", "?")
+	var label := UI.label(text, UI.SMALL_SIZE, UI.ACCENT if rally != 0 else UI.MUTED)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	if rally == village_id:
+		row.add_child(UI.button(tr("Stop rallying"), func() -> void: _set_rally(null)))
+	else:
+		row.add_child(UI.button(tr("Rally here"), func() -> void: _set_rally(village_id)))
+	row.add_child(UI.info(tr("One of your settlements can be your rally point: every batch of troops trained in your other settlements marches there as soon as it is done, to join its garrison. Settlers stay home, and so do troops of a village under siege.")))
+	_panel_body.add_child(row)
+
+
+func _set_rally(village_id: Variant) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/rally" % Game.world_id(), {"villageId": village_id})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+	_rebuild_panel()
+
+
 func _set_quiet(start: Variant, end: Variant) -> void:
 	_status.text = ""
 	var offset := int(Time.get_time_zone_from_system().get("bias", 0))
@@ -5374,8 +5439,42 @@ func _refetch_inbox() -> void:
 		Game.set_inbox(Game.world_id(), response.data.notifications, int(response.data.unread))
 
 
+## The shared button's count: unread notices and chat messages together.
+func _update_messages_badge() -> void:
+	if _inbox_button == null:
+		return
+	var unread := Game.unread + (0 if Local.is_active() else Game.chat_unread)
+	_inbox_button.text = str(unread) if unread > 0 else ""
+
+
+## Opens the inbox or the chat: the one with something new (the chat first),
+## else the one open last.
+func _show_messages() -> void:
+	if not Local.is_active() and Game.chat_unread > 0:
+		_show_chat()
+	elif Game.unread > 0 or Local.is_active() or _messages_tab != "chat":
+		_show_inbox()
+	else:
+		_show_chat()
+
+
+## At the foot of the inbox and the chat: switch to the other (a group's
+## worlds only), each with its count of what is new.
+func _messages_switch(open: String) -> void:
+	if Local.is_active():
+		return
+	var row := UI.hbox(8)
+	for tab in [["inbox", "icon/inbox", tr("Notifications"), Game.unread, _show_inbox], ["chat", "icon/chat", tr("Chat"), Game.chat_unread, _show_chat]]:
+		var count := int(tab[3])
+		var b := UI.button(String(tab[2]) + (" (%d)" % count if count > 0 else ""), tab[4], String(tab[1]))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.disabled = tab[0] == open
+		row.add_child(b)
+	_panel_body.add_child(row)
+
+
 func _on_inbox_changed() -> void:
-	_inbox_button.text = str(Game.unread) if Game.unread > 0 else ""
+	_update_messages_badge()
 	_fit_bar()
 	if _panel_mode == "inbox":
 		_rebuild_panel()
@@ -5562,6 +5661,7 @@ func _refetch_chat() -> void:
 
 func _show_chat() -> void:
 	_panel_mode = "chat"
+	_messages_tab = "chat"
 	_rebuild_panel()
 	_read_chat()
 	# Scrolled to the newest message once the panel is laid out.
@@ -5579,7 +5679,10 @@ func _read_chat() -> void:
 
 
 func _on_chat_changed() -> void:
-	_chat_button.text = str(Game.chat_unread) if Game.chat_unread > 0 else ""
+	_update_messages_badge()
+	# The inbox's switch counts new chat messages.
+	if _panel_mode == "inbox":
+		_rebuild_panel()
 	if _panel_mode != "chat":
 		return
 	var at_bottom := _scroll.scroll_vertical >= int(_scroll.get_v_scroll_bar().max_value - _scroll.size.y) - 8
@@ -5617,6 +5720,7 @@ func _chat_panel() -> void:
 	row.add_child(field)
 	row.add_child(UI.button(tr("Send"), func() -> void: _send_chat(field)))
 	_panel_body.add_child(row)
+	_messages_switch("chat")
 
 
 func _send_chat(field: LineEdit) -> void:
@@ -5648,6 +5752,7 @@ func _older_chat() -> void:
 ## Opens the inbox: everything is read once seen.
 func _show_inbox() -> void:
 	_panel_mode = "inbox"
+	_messages_tab = "inbox"
 	_rebuild_panel()
 	if Game.unread > 0:
 		await Api.post_json("/v1/worlds/%d/notifications/read" % Game.world_id(), {})
@@ -5675,9 +5780,10 @@ func _inbox_panel() -> void:
 	# Push settings are for a group's worlds (a solo world sends none).
 	if _prefs.is_empty():
 		_inbox_messages()
-		return
-	_side_tabs("inbox", [["messages", "icon/inbox", tr("Messages"), _inbox_messages],
-		["settings", "icon/settings", tr("Settings"), _notification_settings]])
+	else:
+		_side_tabs("inbox", [["messages", "icon/inbox", tr("Messages"), _inbox_messages],
+			["settings", "icon/settings", tr("Settings"), _notification_settings]])
+	_messages_switch("inbox")
 
 
 func _inbox_messages() -> void:

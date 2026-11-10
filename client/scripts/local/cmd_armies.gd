@@ -20,6 +20,18 @@ static func fighters(data: Dictionary, units: Dictionary) -> Dictionary:
 	return out
 
 
+## Whether a horde fights at a village or marches on it (a battle under way
+## there, or a wave marching or fighting with it as its target).
+static func horde_against(world: Dictionary, village_id: int) -> bool:
+	for b in world.battles:
+		if b.status == "ongoing" and b.get("villageId") != null and int(b.villageId) == village_id:
+			return true
+	for w in world.waves:
+		if w.status in ["marching", "battling"] and w.get("targetVillageId") != null and int(w.targetVillageId) == village_id:
+			return true
+	return false
+
+
 ## Hexes per hour on plains: the slowest unit sets the pace.
 static func army_speed(data: Dictionary, units: Dictionary) -> float:
 	var slowest := INF
@@ -229,6 +241,10 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 				return LocalVillage.rule("No such village in this world")
 			if order.orders == "garrison" and int(target.ownerAccountId) != int(home.ownerAccountId):
 				return LocalVillage.rule("Troops only join the garrisons of your own villages")
+			# Harassers strike a horde, never a friendly village: only where
+			# one fights or marches on it.
+			if order.orders == "harass" and not horde_against(world, int(target.id)):
+				return LocalVillage.rule("No horde comes against %s to harass" % target.name)
 			to = Vector2i(target.q, target.r)
 	# The troops leave the garrison with what grain the military reserve
 	# can spare; the granary is not touched.
@@ -1684,3 +1700,36 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null,
 		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null,
 		"returnHome": a.get("returnHome", false), "raid": a.get("raid")}
+
+
+## Newly trained troops march to their owner's rally point (scheduler/
+## armies.ts rallyTrained): each batch done (`batches`, as they stood before
+## settling) sends as many of its unit as stand at home, up to its size, as
+## one army joining the garrison there. Troops that can't march (settlers),
+## or a village under siege, stay home.
+static func rally_trained(server: LocalServer, world: Dictionary, home: Dictionary, batches: Array, at: int) -> void:
+	var data := server.data
+	if home.ownerAccountId == null or home.state.besieged or batches.is_empty():
+		return
+	var rally: Variant = null
+	for m in world.members:
+		if int(m.accountId) == int(home.ownerAccountId):
+			rally = m.get("rallyVillageId")
+	if rally == null or int(rally) == int(home.id):
+		return
+	var target := server.find_village(world, int(rally))
+	if target.is_empty() or target.ownerAccountId == null or int(target.ownerAccountId) != int(home.ownerAccountId) or target.ruin != null:
+		return
+	var units := {}
+	for batch in batches:
+		var def: Dictionary = data.units.units.get(batch.unit, {})
+		var marches: bool = def.get("family") == "scout" or LocalBattle.total(fighters(data, {batch.unit: 1})) > 0
+		if not marches:
+			continue
+		var left := int(home.state.garrison.get(batch.unit, 0)) - int(units.get(batch.unit, 0))
+		var n := mini(left, int(batch.get("size", batch.count)))
+		if n > 0:
+			units[batch.unit] = int(units.get(batch.unit, 0)) + n
+	if LocalBattle.total(fighters(data, units)) == 0:
+		return
+	dispatch_army(server, world, {"homeVillageId": home.id, "targetVillageId": target.id, "units": units, "orders": "garrison", "at": at})

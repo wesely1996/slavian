@@ -675,6 +675,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
       onboardingClaimed: m.onboardingClaimed,
       // Units bought that grow dearer (units.json costStep): unit -> count.
       bought: m.bought,
+      // Their rally point: where newly trained troops march (null: none).
+      rallyVillageId: m.rallyVillageId,
       // Research their Academies brought in by settledAt (null: none yet),
       // and what comes in per hour since.
       research: {

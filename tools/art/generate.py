@@ -1326,7 +1326,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge"]
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge", "masons_guild", "workers_huts"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
 MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
@@ -1547,6 +1547,24 @@ def building(kind, stage):
             s.circle(118 + i * 2, 116 - i * 4, 2, "#c9a46a", stroke="none", sw=0)
         for i in range(stage):
             s.circle(64 + i * 5, 116, 2.6, "#6f6a61", stroke="none", sw=0)
+    elif kind == "masons_guild":
+        # A stone guildhall, a scaffold on its side and dressed blocks stacked by it.
+        house(s, 52, 110, 50 * big, 30 * big, roof="slate" if stage >= 2 else "thatch", wall="plaster" if stage == 3 else "wood", windows=stage)
+        for x in (88, 104):
+            s.line(x, 112, x, 74 - stage * 4, stroke="#6e4b2c", sw=2.2)
+        for y in range(80 - stage * 4, 112, 12):
+            s.line(86, y, 106, y, stroke="#8b5a2b", sw=1.8)
+        for i in range(stage + 1):
+            s.rect(16 + (i % 3) * 9, 108 - (i // 3) * 7, 8, 6, s.lin([(0, "#d8d0bf"), (1, "#8f877b")], 0, 0, 1, 1), stroke="#5f584f", sw=0.8)
+        s.line(18, 96, 30, 84, stroke="#6e4b2c", sw=2)
+        s.rect(26, 80, 8, 6, "#8f877b", stroke="none", sw=0, rx=1)
+    elif kind == "workers_huts":
+        # Little huts in a row, tools leaned by the doors, smoke from one.
+        for i in range(stage + 1):
+            x = 24 + i * 26
+            house(s, x, 112 - (i % 2) * 4, 22 * big, 14 * big, roof="thatch", wall="wood", windows=0)
+            s.line(x + 12, 112 - (i % 2) * 4, x + 16, 96 - (i % 2) * 4, stroke="#8b5a2b", sw=1.8)
+        s.path("M30,84 Q24,74 32,66 Q38,58 32,50", "none", stroke="#bfb7a8", sw=3, opacity=0.6)
     elif kind == "longhouse_hall":
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):

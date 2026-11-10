@@ -14,11 +14,15 @@ var max_height := 320.0
 var _paper: PanelContainer
 var _scroll: ScrollContainer
 var _content: Control
+## What on it to show first (the building's current level), if anything.
+var _focus: Control
+var _focused := false
 
 
-func _init(content: Control, height := 320.0) -> void:
+func _init(content: Control, height := 320.0, focus: Control = null) -> void:
 	max_height = height
 	_content = content
+	_focus = focus
 	add_theme_constant_override("separation", 0)
 	add_child(_Rod.new())
 	_paper = PanelContainer.new()
@@ -40,6 +44,9 @@ func _ready() -> void:
 		await get_tree().process_frame
 	if not is_inside_tree():
 		return
+	# Already rolled on to what it should show first.
+	if _focus != null and is_instance_valid(_focus):
+		_scroll.scroll_vertical = int(_focus.position.y)
 	var unroll := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	unroll.tween_property(_scroll, "custom_minimum_size:y", _length(), UNROLL_SEC)
 	# Rich text grows to its full height while it unrolls: follow it.
@@ -55,6 +62,9 @@ func _length() -> float:
 
 func _fit() -> void:
 	_scroll.custom_minimum_size.y = _length()
+	if _focus != null and is_instance_valid(_focus) and not _focused:
+		_focused = true
+		_scroll.scroll_vertical = int(_focus.position.y)
 
 
 ## Paper a shade lighter than the sheet under it, shadowed under the rods.
