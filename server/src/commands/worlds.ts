@@ -219,8 +219,7 @@ export async function setClanCommand(
   input: { account: Account; worldId: number; clan: string; now: Date },
 ): Promise<void> {
   if (!deps.data.clans.clans[input.clan]) throw new RuleError(`Unknown clan "${input.clan}"`);
-  await withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     const member = (await listMembers(client, world.id)).find((m) => m.accountId === input.account.id);
     if (!member) throw new ForbiddenError('You are not in this world');
     if (world.status !== 'lobby' && member.clan !== null) throw new RuleError('Your clan is chosen for this run');
@@ -240,8 +239,7 @@ export async function pickHeroCommand(
 ): Promise<void> {
   const def = deps.data.heroes.roster[input.kind];
   if (!def) throw new RuleError(`Unknown hero "${input.kind}"`);
-  await withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     const members = await listMembers(client, world.id);
     const member = members.find((m) => m.accountId === input.account.id);
     if (!member) throw new ForbiddenError('You are not in this world');
@@ -260,8 +258,7 @@ export async function claimOnboardingCommand(
   deps: SchedulerDeps,
   input: { account: Account; worldId: number; step: string; now: Date },
 ): Promise<{ villageId: number | null; finale: boolean }> {
-  return withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (world.status !== 'running') throw new RuleError('The run is not under way');
     return claimOnboarding(client, deps.data, world, input.account.id, input.step, input.now);
   });

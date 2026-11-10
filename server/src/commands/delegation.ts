@@ -4,7 +4,7 @@
 import { activeDelegations, endDelegation, setDelegation } from '../db/delegations.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db } from '../db/pool.js';
-import { getWorld, listMembers } from '../db/worlds.js';
+import { listMembers } from '../db/worlds.js';
 import { ForbiddenError, RuleError } from '../errors.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { tell } from '../scheduler/notices.js';
@@ -21,8 +21,7 @@ export async function delegateCommand(
   if (!Number.isInteger(input.days) || input.days < 1 || input.days > MAX_DELEGATION_DAYS) {
     throw new RuleError(`Hand over for 1 to ${MAX_DELEGATION_DAYS} days`);
   }
-  await withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (world.status !== 'running') throw new RuleError('This world is not running');
     const members = await listMembers(client, world.id);
     const me = members.find((m) => m.accountId === input.accountId);
@@ -56,8 +55,7 @@ export async function endDelegationCommand(
   deps: SchedulerDeps,
   input: { accountId: number; worldId: number; owner?: number | undefined; now: Date },
 ): Promise<void> {
-  await withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     const owner = input.owner ?? input.accountId;
     const delegation = (await activeDelegations(client, world.id, input.now)).find((d) => d.ownerAccountId === owner);
     if (!delegation || (owner !== input.accountId && delegation.delegateAccountId !== input.accountId)) {

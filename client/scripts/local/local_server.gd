@@ -14,6 +14,9 @@ const DIR := "user://local"
 
 ## {world id: world}, loaded from DIR on first use.
 var worlds: Dictionary = {}
+## Each world's map hexes as world_view sends them, by world id (the map never
+## changes once made, so they are built once).
+var _hex_views: Dictionary = {}
 var data: Dictionary = {}
 ## Where worlds are saved ("" keeps them in memory only, for tests).
 var save_dir := DIR
@@ -81,6 +84,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	LocalEvents.ensure(self, world, now)
 	LocalPrune.ensure(self, world, now)
 	world.hexes = _by_row(world.hexes)
+	_hex_views.erase(int(world.id))
 	worlds[id] = world
 	save(world)
 	return world
@@ -277,7 +281,8 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 		return _fail(404, "not_found", "No such solo world")
 	var parts := path.split("?")[0].split("/", false)
 	var changed: Array = []
-	drain(world, now, changed)
+	var next_event := int(world.next.event)
+	var processed := drain(world, now, changed)
 	as_stored(world)
 	# A finished run stays readable, but nothing more can be done in it
 	# (withWorld); the reinforce rule is set outside it.
@@ -287,7 +292,10 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 	else:
 		answer = _route(world, method, parts, body if body is Dictionary else {}, now, changed)
 	answer.changed = changed
-	save(world)
+	# A read that ran nothing due and scheduled nothing leaves the save as it
+	# was: no need to write it again.
+	if method != "GET" or processed > 0 or not changed.is_empty() or int(world.next.event) != next_event:
+		save(world)
 	return answer
 
 
@@ -1093,11 +1101,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	var villages: Array = []
 	for v in world.villages:
 		villages.append(village_view(world, v))
-	var hexes: Array = []
-	for key in world.hexes:
-		var parts: PackedStringArray = key.split(",")
-		hexes.append([int(parts[0]), int(parts[1]), world.hexes[key]])
-	hexes.sort_custom(func(a: Array, b: Array) -> bool: return a[1] < b[1] or (a[1] == b[1] and a[0] < b[0]))
+	var hexes: Array = _hexes_view(world)
 	var rivers: Array = []
 	for e in world.rivers:
 		var ab := _ordered(e.a, e.b)
@@ -1246,6 +1250,21 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 	return LocalHeroes.quest_offers(data, quest_world, hero, Vector2i(home.q, home.r), now, hero.questsDone)
 
 
+## [q, r, terrain] for every map hex, in the order the server reads them
+## (db/worlds.ts loadHexes), built once per world.
+func _hexes_view(world: Dictionary) -> Array:
+	var id := int(world.id)
+	if _hex_views.has(id) and _hex_views[id].size() == world.hexes.size():
+		return _hex_views[id]
+	var hexes: Array = []
+	for key in world.hexes:
+		var parts: PackedStringArray = key.split(",")
+		hexes.append([int(parts[0]), int(parts[1]), world.hexes[key]])
+	hexes.sort_custom(func(a: Array, b: Array) -> bool: return a[1] < b[1] or (a[1] == b[1] and a[0] < b[0]))
+	_hex_views[id] = hexes
+	return hexes
+
+
 ## Ongoing battles and the ten latest, newest first (api/views.ts).
 func _battles_view(world: Dictionary) -> Array:
 	var battles: Array = world.battles.duplicate()
@@ -1337,6 +1356,7 @@ func save(world: Dictionary) -> void:
 ## Forgets a world and removes its save.
 func delete_world(id: int) -> void:
 	worlds.erase(id)
+	_hex_views.erase(id)
 	if save_dir != "":
 		DirAccess.remove_absolute("%s/%d.json" % [save_dir, -id])
 
@@ -1389,6 +1409,14 @@ func _load_all() -> void:
 			world.hexes = _by_row(world.hexes)
 			for w in world.waves:
 				w.merge({"initial": w.composition.duplicate()})
+			# Worlds saved before hatred belonged to the front (migration
+			# 058): what the hordes yet to set out hated moves to their front.
+			if not world.has("hatred"):
+				world.hatred = {}
+				for w in world.waves:
+					if w.status == "scheduled" and w.get("bandOf") == null and float(w.get("hatred", 0.0)) > 0:
+						world.hatred[w.front] = float(world.hatred.get(w.front, 0.0)) + float(w.hatred)
+						w.hatred = 0.0
 			worlds[int(world.id)] = world
 
 

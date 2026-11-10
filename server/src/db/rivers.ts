@@ -55,6 +55,15 @@ export async function listRiverEdges(client: DbClient, worldId: number): Promise
   }));
 }
 
+// The river edges that touch one hex.
+export async function riverEdgesAt(client: DbClient, worldId: number, cell: Hex): Promise<{ a: Hex; b: Hex }[]> {
+  const { rows } = await client.query<{ aq: number; ar: number; bq: number; br: number }>(
+    'SELECT aq, ar, bq, br FROM river_edges WHERE world_id = $1 AND ((aq = $2 AND ar = $3) OR (bq = $2 AND br = $3))',
+    [worldId, cell.q, cell.r],
+  );
+  return rows.map((r) => ({ a: hex(r.aq, r.ar), b: hex(r.bq, r.br) }));
+}
+
 // Every river edge (edgeKey), bridged or not.
 export async function riverKeys(client: DbClient, worldId: number): Promise<Set<string>> {
   return new Set((await listRiverEdges(client, worldId)).map((e) => edgeKey(e.a, e.b)));

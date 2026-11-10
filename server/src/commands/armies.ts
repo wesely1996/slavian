@@ -45,10 +45,10 @@ export async function sendArmyCommand(
   },
 ): Promise<Army> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const home = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: home.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent an army', villageId: home.id });
-    return dispatchArmy(client, deps.data, await getWorld(client, worldId), {
+    return dispatchArmy(client, deps.data, world, {
       homeVillageId: home.id,
       targetVillageId: input.targetVillageId,
       targetHex: input.target,
@@ -80,10 +80,10 @@ export async function raidCommand(
   },
 ): Promise<Army> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const home = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: home.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent a raid', villageId: home.id });
-    return startRaid(client, deps.data, await getWorld(client, worldId), {
+    return startRaid(client, deps.data, world, {
       homeVillageId: home.id,
       front: input.front,
       depth: input.depth,
@@ -113,10 +113,10 @@ export async function strikeCommand(
   },
 ): Promise<Army> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const home = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: home.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'struck a gathering horde', villageId: home.id });
-    return startStrike(client, deps.data, await getWorld(client, worldId), {
+    return startStrike(client, deps.data, world, {
       homeVillageId: home.id,
       waveId: input.waveId,
       units: input.units,
@@ -131,20 +131,20 @@ export async function strikeCommand(
 // Builds a fort near the caller's village.
 export async function buildFortCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; villageId: number; cell: Hex; now: Date }): Promise<Fort> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a fort', villageId: village.id });
-    return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now);
+    return buildFort(client, deps.data, world, village.id, input.cell, input.now);
   });
 }
 
 // Builds a supply point (a grain store for armies) near the caller's village.
 export async function buildSupplyPointCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; villageId: number; cell: Hex; now: Date }): Promise<Fort> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a supply point', villageId: village.id });
-    return buildFort(client, deps.data, await getWorld(client, worldId), village.id, input.cell, input.now, 'supply');
+    return buildFort(client, deps.data, world, village.id, input.cell, input.now, 'supply');
   });
 }
 
@@ -155,10 +155,10 @@ export async function buildCrossingCommand(
   input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
 ): Promise<StoredRiverEdge> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a bridge', villageId: village.id });
-    return buildCrossing(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
+    return buildCrossing(client, deps.data, world, village.id, input.a, input.b, input.now);
   });
 }
 
@@ -169,10 +169,10 @@ export async function buildRoadCommand(
   input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
 ): Promise<RoadEdge> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a road', villageId: village.id });
-    return buildRoad(client, deps.data, await getWorld(client, worldId), village.id, input.a, input.b, input.now);
+    return buildRoad(client, deps.data, world, village.id, input.a, input.b, input.now);
   });
 }
 
@@ -183,10 +183,10 @@ export async function payShipyardCommand(
   input: { accountId: number; villageId: number; shipyardId: number; now: Date },
 ): Promise<Shipyard> {
   const worldId = await worldOfVillage(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'sent resources to a shipyard', villageId: village.id });
-    return payShipyard(client, deps.data, await getWorld(client, worldId), village.id, input.shipyardId, input.now);
+    return payShipyard(client, deps.data, world, village.id, input.shipyardId, input.now);
   });
 }
 

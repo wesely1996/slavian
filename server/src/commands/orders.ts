@@ -4,7 +4,6 @@ import { authorize } from '../db/delegations.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db } from '../db/pool.js';
 import { loadVillage, type Village } from '../db/villages.js';
-import { getWorld } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { ensureOrdersCheck, runOrders } from '../scheduler/orders.js';
@@ -32,8 +31,7 @@ export async function placeOrderCommand(
   input: OrderInput & { spec: StandingOrder },
 ): Promise<{ village: Village; order: StoredOrder }> {
   const worldId = await worldOf(db, input.villageId);
-  return withWorld(db, worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, worldId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'placed a standing order', villageId: village.id });
     const spec = validateOrder(deps.data, input.spec);
