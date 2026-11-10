@@ -22,6 +22,12 @@ static func prize(front: String) -> String:
 	return UI.t("Resources for every enemy killed, and the stronghold's stores if it falls, as much as the troops and wagons can carry.")
 
 
+## The share of a horde gathered at its encampment `hours_early` game hours
+## before it sets out (sim/raids.ts strikeShare).
+static func strike_share(data: Dictionary, hours_early: float) -> float:
+	return LocalRaids.strike_share(data, hours_early)
+
+
 ## What a raid of `units` can carry home (sim/raids.ts raidCapacity).
 static func capacity(data: Dictionary, units: Dictionary) -> int:
 	var carry := 0.0
@@ -86,6 +92,8 @@ static func report(battle: Dictionary, lost: Dictionary) -> String:
 		return ""
 	var name := UI.t(String(raid.name))
 	var won: bool = battle.status == "cleared"
+	if raid.get("strike", false):
+		return (UI.t("Strike on the horde of %s: broke it in its encampment; %d fell, we lost %d.") if won else UI.t("Strike on the horde of %s: thrown back from its encampment; %d of them fell, we lost %d.")) % [front_name(String(raid.front)), int(lost.attacker), int(lost.defender)]
 	if raid.get("stronghold", false):
 		return (UI.t("Raid on %s: sacked the %s; %d fell, we lost %d.") if won else UI.t("Raid on %s: thrown back from the %s; %d of them fell, we lost %d.")) % [front_name(String(raid.front)), name, int(lost.attacker), int(lost.defender)]
 	return (UI.t("Raid on %s: won at the %s; %d fell, we lost %d.") if won else UI.t("Raid on %s: beaten at the %s; %d of them fell, we lost %d.")) % [front_name(String(raid.front)), name, int(lost.attacker), int(lost.defender)]

@@ -75,6 +75,15 @@ async function announceWave(
   return wave;
 }
 
+// A horde wiped out before it set out (a strike on its encampment): the
+// next one is announced in its place, so as many stay announced ahead.
+export async function announceNext(client: DbClient, data: GameData, world: World): Promise<void> {
+  if ((await getWorld(client, world.id)).ritualAt) return;
+  const last = await lastWave(client, world.id);
+  if (!last || last.ritual) return;
+  await announceWave(client, data, world, await waveContext(client, world), last.index + 1, last.spawnAt);
+}
+
 // Called when a world starts.
 export async function announceFirstWaves(client: DbClient, data: GameData, world: World): Promise<void> {
   const ctx = await waveContext(client, world);
