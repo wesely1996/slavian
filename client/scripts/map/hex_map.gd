@@ -269,7 +269,7 @@ func _draw_river(edge: Array) -> void:
 	draw_circle(ends[1], hex_size * 0.065 * wide, RIVER_COLOR)
 	# A river a finished boat sails: a golden thread down it.
 	if Game.lanes.has(LocalLand.edge_key(a, b)):
-		draw_line(ends[0], ends[1], LANE_COLOR, hex_size * 0.05 * wide, true)
+		draw_dashed_line(ends[0], ends[1], LANE_COLOR, hex_size * 0.05 * wide, hex_size * 0.12, true)
 	if String(edge[4]) == "none":
 		return
 	var mid: Vector2 = (ends[0] + ends[1]) / 2.0
@@ -279,8 +279,8 @@ func _draw_river(edge: Array) -> void:
 	draw_line(mid - across * hex_size * 0.27, mid + across * hex_size * 0.27, PLANK_COLOR * tint, hex_size * 0.22)
 
 
-## Where a finished boat sails across a lake: a golden thread between the
-## hexes it crosses.
+## Where a finished boat sails across a lake: a dashed golden thread along
+## the edge between the hexes it crosses.
 func _draw_lake_lanes() -> void:
 	for k in Game.lanes:
 		var ends := String(k).split("|")
@@ -288,7 +288,11 @@ func _draw_lake_lanes() -> void:
 		var b := _cell_of(ends[1])
 		if Game.terrain.get(a, "") != "lake" and Game.terrain.get(b, "") != "lake":
 			continue
-		draw_line(HexMath.to_pixel(a, hex_size), HexMath.to_pixel(b, hex_size), LANE_COLOR, hex_size * 0.05, true)
+		var dir := RiverText.direction(a, b)
+		if dir < 0:
+			continue
+		var side := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
+		draw_dashed_line(side[0], side[1], LANE_COLOR, hex_size * 0.05, hex_size * 0.12, true)
 
 
 func _cell_of(text: String) -> Vector2i:
