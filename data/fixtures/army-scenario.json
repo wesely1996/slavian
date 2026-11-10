@@ -10173,9 +10173,9 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 2,
+       "rusalka": 1,
        "grey_wolf": 1,
-       "leshy_thrall": 2
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 7
@@ -10197,10 +10197,12 @@
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 5,
+        "attackerLeft": 3,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -10223,7 +10225,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 1,
-      "xp": 4,
+      "xp": 6,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -10564,7 +10566,7 @@
      [
       0,
       -1,
-      8.8
+      9.1
      ]
     ],
     "delegations": [],
@@ -12767,10 +12769,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 314,
-        "wood": 853,
-        "grain": 232.8182083333333,
-        "stone": 795
+        "iron": 328,
+        "wood": 890,
+        "grain": 242.8182083333333,
+        "stone": 829
        },
        "ratesPerHour": {
         "iron": 150,
@@ -13236,7 +13238,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 7,
+       "zealot": 5,
        "sergeant_rider": 1
       },
       "defenderInitial": {
@@ -13268,15 +13270,17 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 5,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:34:57.600Z",
         "round": 4,
-        "attackerLeft": 10,
+        "attackerLeft": 9,
         "defenderLeft": 5,
         "attackerLosses": {
          "zealot": 1
@@ -13286,7 +13290,7 @@
        {
         "at": "2026-06-01T11:44:57.600Z",
         "round": 5,
-        "attackerLeft": 8,
+        "attackerLeft": 7,
         "defenderLeft": 4,
         "attackerLosses": {
          "zealot": 1,
@@ -13299,19 +13303,21 @@
        {
         "at": "2026-06-01T11:54:57.600Z",
         "round": 6,
-        "attackerLeft": 8,
+        "attackerLeft": 6,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {
          "spearman": 1
         }
        }
       ],
       "loot": {
-       "iron": 54,
-       "wood": 147,
-       "grain": 40,
-       "stone": 137
+       "iron": 40,
+       "wood": 110,
+       "grain": 30,
+       "stone": 103
       },
       "decision": {
        "choice": "raid",
@@ -13347,9 +13353,9 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 2,
+       "rusalka": 1,
        "grey_wolf": 1,
-       "leshy_thrall": 2
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 7
@@ -13371,10 +13377,12 @@
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 5,
+        "attackerLeft": 3,
         "defenderLeft": 6,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -13397,7 +13405,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 9,
+      "xp": 13,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -13715,7 +13723,7 @@
       "front": "south",
       "q": -3,
       "r": 3,
-      "size": 8,
+      "size": 6,
       "waveId": 2,
       "reward": null,
       "endsAt": null
@@ -13837,7 +13845,7 @@
      [
       0,
       -1,
-      5.8
+      6.1
      ],
      [
       0,
@@ -15750,10 +15758,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":75,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":41,\"grain\":0,\"iron\":0}",
     "missing": {
      "wood": 0,
-     "stone": 75,
+     "stone": 41,
      "grain": 0,
      "iron": 0
     }
@@ -16082,7 +16090,7 @@
       "kind": "camp",
       "tier": "digest",
       "title": "Raiders made camp at (-3, 3)",
-      "body": "8 survivors of wave 2 settled there.",
+      "body": "6 survivors of wave 2 settled there.",
       "createdAt": "2026-06-01T11:54:57.600Z",
       "read": false
      },
@@ -16091,7 +16099,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 378 resources after 6 rounds.",
+      "body": "The horde carried off 283 resources after 6 rounds.",
       "createdAt": "2026-06-01T11:54:57.600Z",
       "read": false
      },

@@ -2784,6 +2784,7 @@ func _generals_section(village: Dictionary) -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var xp := tr("Lv %d · %d/%d XP") % [int(general.level), int(general.xp), int(general.xpToNext)] if general.get("xpToNext") != null else tr("Lv %d") % int(general.level)
 		info.add_child(UI.label(tr("%s · %s · %s") % [general.name, xp, GeneralText.bonuses(general)], UI.SMALL_SIZE))
+		info.add_child(_champion_line("general", int(general.level)))
 		var where := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		info.add_child(where)
 		var place := Game.village_name(general.villageId)
@@ -3482,6 +3483,7 @@ func _hero_stats(hero: Dictionary) -> void:
 		tr("Its own gifts count in all your villages; what its skills and gear add counts where it stands, and for the army it leads.")))
 	var xp_text := tr("XP %d / %d") % [int(hero.xp), int(hero.xpToNext)] if hero.xpToNext != null else tr("Highest level")
 	_panel_body.add_child(UI.label(tr("Level %d · %s") % [int(hero.level), xp_text], UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(_champion_line("hero", int(hero.level)))
 	for line in HeroText.base_stats(Game.data, hero, float(Game.world.speed)):
 		_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
 	var parts := HeroText.breakdown(Game.data, hero)
@@ -5131,6 +5133,15 @@ func _leaders_section() -> void:
 			_panel_body.add_child(UI.label(grudge, UI.SMALL_SIZE, UI.ERROR)))
 	if not fallen.is_empty():
 		_panel_body.add_child(UI.label(tr("Fallen: %s") % ", ".join(fallen), UI.SMALL_SIZE, UI.MUTED))
+
+
+## A hero's or general's own battle stats: it fights in the ranks.
+func _champion_line(id: String, level: int) -> Control:
+	var c := LocalBattle.champion_of(Game.data, id, level)
+	var text := tr("In battle: attack %d · defense %d · health %d") % [roundi(float(c.attack)), roundi(float(c.defense)), roundi(float(c.health))]
+	var why := tr("The hero fights in the ranks as a champion, striking like a band of soldiers. It commands the troops it stands with; struck down, it is carried home wounded and a general with it takes command.") if id == "hero" \
+		else tr("A general fights in the ranks too, a lesser champion than the hero. It commands the troops it stands with when no hero does, and takes command when the hero falls; struck down, it dies.")
+	return UI.with_info(UI.label(text, UI.SMALL_SIZE, UiTheme.GOLD), why)
 
 
 ## The rally point, seen from one of the player's villages: where its new

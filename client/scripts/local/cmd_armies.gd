@@ -1432,16 +1432,26 @@ static func on_crossing_built(server: LocalServer, world: Dictionary, event: Dic
 
 # --- Storming camps (scheduler/camps.ts, sim/camps.ts) ------------------------------
 
-## An army storms a camp (or a site's guardians): {cleared, rounds, armyNow, campNow}.
-static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, camp: Dictionary, front: String, seed_value: int, id: int) -> Dictionary:
+## An army storms a camp (or a site's guardians): {cleared, rounds, armyNow,
+## campNow, fallen}. `champions`: its hero and general fighting in its ranks;
+## `stats_without_hero`: its stats once the hero has fallen.
+static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, camp: Dictionary, front: String, seed_value: int, id: int,
+		champions: Array = [], stats_without_hero: Callable = Callable()) -> Dictionary:
 	var camp_stats := LocalBattle.enemy_stats(data, front)
 	var stance: String = data.camps.assault.stance
+	var fallen: Array = []
+	var fighting: Array = champions.duplicate()
+	var stats_now := func(unit: String) -> Dictionary:
+		return (stats_without_hero if "hero" in fallen and stats_without_hero.is_valid() else army_stats).call(unit)
 	var army_now := army.duplicate()
 	var camp_now := camp.duplicate()
 	var rounds: Array = []
 	for round in range(1, int(data.battle.maxRounds) + 1):
-		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": army_stats, "home": false},
+		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": stats_now, "home": false, "champions": fighting},
 			{"units": camp_now, "stance": stance, "stats": camp_stats, "home": true}, LocalBattle.battle_rng(seed_value, id + 0x10000, round))
+		for c in result.attackerFallen[0]:
+			fallen.append(c)
+		fighting = fighting.filter(func(c: Dictionary) -> bool: return not c.id in fallen)
 		army_now = LocalCamps.subtract_units(army_now, result.attackerLosses)
 		camp_now = LocalCamps.subtract_units(camp_now, result.defenderLosses)
 		rounds.append({"round": round, "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
@@ -1450,8 +1460,8 @@ static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, ar
 			"defenderStance": stance, "defenderInitial": camp, "defenderNow": camp_now})
 		# "raided": the defenders (the camp) broke; "defended": the army did.
 		if outcome != "ongoing":
-			return {"cleared": outcome == "raided", "rounds": rounds, "armyNow": army_now, "campNow": camp_now}
-	return {"cleared": false, "rounds": rounds, "armyNow": army_now, "campNow": camp_now}
+			return {"cleared": outcome == "raided", "rounds": rounds, "armyNow": army_now, "campNow": camp_now, "fallen": fallen}
+	return {"cleared": false, "rounds": rounds, "armyNow": army_now, "campNow": camp_now, "fallen": fallen}
 
 
 ## sim/camps.ts repelRaid: raiders strike an army standing guard; held
@@ -1510,9 +1520,11 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var hero := hero_with_army(world, int(army.id))
 	var general := LocalGenerals.general_with_army(world, int(army.id))
 	var bonuses := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
+	var succession := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 	# Scouts never fight; they tell the army what it faces (intel).
 	var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
-		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id))
+		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id),
+		LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
@@ -1541,12 +1553,14 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		server.onboarding_step(world, int(army.ownerAccountId), "camp", at, changed)
 	else:
 		camp.units = result.campNow
-	if not hero.is_empty():
+	# Champions struck down fell; the others share the outcome.
+	LocalChampions.fall(server, world, result.fallen, hero, general, army.homeVillageId, {"kills": kills, "battleId": battle.id, "at": at})
+	if not hero.is_empty() and not "hero" in result.fallen:
 		if not result.cleared:
 			hero.villageId = army.homeVillageId
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
-	if not general.is_empty():
+	if not general.is_empty() and not "general" in result.fallen:
 		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.cleared, "at": at})
 	# Cleared, the army stands on the camp's hex until it is moved or called home.
 	if result.cleared and LocalBattle.total(after.units) > 0:
@@ -1618,8 +1632,10 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		var hero := hero_with_army(world, int(army.id))
 		var general := LocalGenerals.general_with_army(world, int(army.id))
 		var bonuses := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
+		var succession := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 		var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
-			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000)
+			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000,
+			LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},
 			result, at, "cleared" if result.cleared else "repelled", null)
@@ -1627,12 +1643,14 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		var kills := LocalBattle.total(site.guardians) - LocalBattle.total(result.campNow)
 		site.guardians = {} if result.cleared else result.campNow
 		site.guardiansSeen = true
-		if not hero.is_empty():
+		# Champions struck down fell; the others share the outcome.
+		LocalChampions.fall(server, world, result.fallen, hero, general, army.homeVillageId, {"kills": kills, "battleId": battle.id, "at": at})
+		if not hero.is_empty() and not "hero" in result.fallen:
 			if not result.cleared:
 				hero.villageId = army.homeVillageId
 				hero.armyId = null
 			LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
-		if not general.is_empty():
+		if not general.is_empty() and not "general" in result.fallen:
 			LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.cleared, "at": at})
 		if not result.cleared or LocalBattle.total(explorers.units) == 0:
 			send_home(server, world, explorers, at)
@@ -1735,10 +1753,9 @@ static func armies_view(world: Dictionary) -> Array:
 
 
 ## The research effects of troops led by `hero` and `general` (either may
-## be {}).
+## be {}): the hero commands, else the general.
 static func _led_bonuses(data: Dictionary, own: Dictionary, hero: Dictionary, general: Dictionary) -> Dictionary:
-	var heroic: Dictionary = LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
-	return LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
+	return LocalChampions.command_bonuses(data, own, hero, general)
 
 
 static func army_view(a: Dictionary) -> Dictionary:

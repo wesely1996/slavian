@@ -19,6 +19,7 @@ import { addEmbers, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { playerStats, total } from '../sim/battle.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
+import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { generalBonuses } from '../sim/generals.js';
 import { hex } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
@@ -176,12 +177,15 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
   const hero = await heroWithArmy(client, army.id);
   const general = await generalWithArmy(client, army.id);
   const owned = villageBonuses(data, home.state);
-  const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
-  const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+  // The hero commands, else the general, who takes over if the hero falls.
+  const bonuses = commandBonuses(data, owned, hero, general);
+  const succession = commandBonuses(data, owned, null, general);
   const fighters = combatants(data, army.units);
   const result = raidBattle(data, {
     army: fighters,
     armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
+    statsWithoutHero: withIntel(data, army.units, playerStats(data, succession, false)),
+    champions: championsOf(data, hero, general),
     armyStance: army.stance,
     stage,
     front: wave.front,
@@ -216,10 +220,12 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
     const last = i === result.rounds.length - 1;
     await recordRound(client, battle.id, log, last ? { status: result.won ? 'cleared' : 'repelled', at, loot: null } : null);
   }
-  if (hero) {
+  // Champions struck down fell; the others share the outcome.
+  await championsFall(client, data, world, result.fallen, { hero, general, homeVillageId: army.homeVillageId }, { kills, battleId: battle.id, at });
+  if (hero && !result.fallen.includes('hero')) {
     await heroAfterBattle(client, data, world, result.won ? hero : { ...hero, villageId: army.homeVillageId, armyId: null }, { kills, won: result.won, battleId: battle.id, at });
   }
-  if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.won, at });
+  if (general && !result.fallen.includes('general')) await generalAfterBattle(client, data, world, general, { kills, won: result.won, at });
   // Its dead are gone from the horde.
   const left: Record<string, number> = {};
   for (const [unit, n] of Object.entries(wave.composition)) {
@@ -272,12 +278,15 @@ export const raidHandlers: HandlerRegistry = {
     const general = await generalWithArmy(client, army.id);
     // The home village's buildings count (a Ranch's riders).
     const owned = villageBonuses(data, home.state);
-    const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
-    const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+    // The hero commands, else the general, who takes over if the hero falls.
+    const bonuses = commandBonuses(data, owned, hero, general);
+    const succession = commandBonuses(data, owned, null, general);
     const fighters = combatants(data, army.units);
     const result = raidBattle(data, {
       army: fighters,
       armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
+      statsWithoutHero: withIntel(data, army.units, playerStats(data, succession, false)),
+      champions: championsOf(data, hero, general),
       armyStance: army.stance,
       stage,
       front,
@@ -315,10 +324,12 @@ export const raidHandlers: HandlerRegistry = {
       const last = i === result.rounds.length - 1;
       await recordRound(client, battle.id, log, last ? { status: result.won ? 'cleared' : 'repelled', at, loot: result.won ? loot : null } : null);
     }
-    if (hero) {
+    // Champions struck down fell; the others share the outcome.
+    await championsFall(client, data, world, result.fallen, { hero, general, homeVillageId: army.homeVillageId }, { kills, battleId: battle.id, at });
+    if (hero && !result.fallen.includes('hero')) {
       await heroAfterBattle(client, data, world, result.won ? hero : { ...hero, villageId: army.homeVillageId, armyId: null }, { kills, won: result.won, battleId: battle.id, at });
     }
-    if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.won, at });
+    if (general && !result.fallen.includes('general')) await generalAfterBattle(client, data, world, general, { kills, won: result.won, at });
     const finds: string[] = [];
     if (result.won) {
       await angerFront(client, data, world, front, data.raids.hatred.perBattle + (stage.stronghold ? data.raids.hatred.stronghold : 0), at);

@@ -2,7 +2,7 @@
 // edge on a front's side, fights `depth` field battles in the enemy's lands
 // and then besieges the front's stronghold, carrying home what it takes.
 import type { GameData, Stance, TerrainId } from '../data/index.js';
-import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type UnitStats } from './battle.js';
+import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
@@ -83,8 +83,20 @@ export function strikeStage(data: GameData, composition: Units, share: number): 
 // scales both sides; the stronghold's defenders fight from behind its walls.
 export function raidBattle(
   data: GameData,
-  input: { army: Units; armyStats: (unit: string) => UnitStats; armyStance: Stance; stage: RaidStage; front: Front; seed: number; id: number },
-): { won: boolean; rounds: { round: number; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units } {
+  input: {
+    army: Units;
+    armyStats: (unit: string) => UnitStats;
+    armyStance: Stance;
+    stage: RaidStage;
+    front: Front;
+    seed: number;
+    id: number;
+    // Its hero and general fighting in its ranks, and its stats once the
+    // hero has fallen (the general in command).
+    champions?: readonly Champion[];
+    statsWithoutHero?: (unit: string) => UnitStats;
+  },
+): { won: boolean; rounds: { round: number; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units; fallen: string[] } {
   const rules = data.raids;
   const field = input.stage.field;
   const walls = input.stage.stronghold ? 1 + rules.stronghold.walls : 1;
@@ -93,8 +105,10 @@ export function raidBattle(
     const s = base(unit);
     return { ...s, attack: s.attack * (field?.enemy.attack ?? 1), defense: s.defense * (field?.enemy.defense ?? 1) * walls };
   };
+  let champions = [...(input.champions ?? [])];
+  const fallen: string[] = [];
   const armyStatsAt = (unit: string): UnitStats => {
-    const s = input.armyStats(unit);
+    const s = (fallen.includes('hero') && input.statsWithoutHero ? input.statsWithoutHero : input.armyStats)(unit);
     return { ...s, attack: s.attack * (field?.army.attack ?? 1), defense: s.defense * (field?.army.defense ?? 1) };
   };
   const enemyStance = input.stage.stronghold ? rules.stronghold.stance : rules.fieldStance;
@@ -104,10 +118,12 @@ export function raidBattle(
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
-      { units: armyNow, stance: input.armyStance, stats: armyStatsAt, home: false },
+      { units: armyNow, stance: input.armyStance, stats: armyStatsAt, home: false, champions },
       { units: enemyNow, stance: enemyStance, stats: enemyStatsAt, home: input.stage.stronghold },
       battleRng(input.seed, input.id + 0x30000, round),
     );
+    for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
+    champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);
     enemyNow = subtractUnits(enemyNow, result.defenderLosses);
     rounds.push({ round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(enemyNow) });
@@ -120,9 +136,9 @@ export function raidBattle(
       defenderInitial: input.stage.enemy,
       defenderNow: enemyNow,
     });
-    if (outcome !== 'ongoing') return { won: outcome === 'raided', rounds, armyNow, enemyNow };
+    if (outcome !== 'ongoing') return { won: outcome === 'raided', rounds, armyNow, enemyNow, fallen };
   }
-  return { won: false, rounds, armyNow, enemyNow };
+  return { won: false, rounds, armyNow, enemyNow, fallen };
 }
 
 // How much an army can carry home: each fighting unit, and each military

@@ -33,6 +33,7 @@ import { battleOutcome, battleRng, broken, enemyStats, playerStats, resolveRound
 import { cameOverRiver, setupAt, setupFactors, stepInto, wagonFortBonus, type Setup } from '../sim/field.js';
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
+import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
@@ -206,8 +207,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     if (g && (!general || g.level > general.level)) general = g;
   }
   const research = againstFront(leader ? villageBonuses(data, leader.state) : {}, wave.front);
-  const heroic = hero ? combine(research, heroBonuses(data, hero)) : research;
-  const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+  // The hero commands, else the best general (who takes over when the hero falls).
+  const bonuses = commandBonuses(data, research, hero, general);
+  // Each army's hero and general fight in its ranks.
+  const armyLeaders = await Promise.all(engaged.map(async (a) => ({ hero: await heroWithArmy(client, a.id), general: await generalWithArmy(client, a.id) })));
   const ground: Setup = {
     ambush: !!battle.setup.ambush,
     choke: !!battle.setup.choke,
@@ -225,7 +228,12 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   // Scouts never fight; an army's tell it what it faces (intel).
   const groups = [
     ...(guard ? [{ units: guardForce, stance: guardStance, stats: statsFor(guardStance) }] : []),
-    ...engaged.map((a) => ({ units: combatants(data, a.units), stance: a.stance, stats: withIntel(data, a.units, statsFor(a.stance)) })),
+    ...engaged.map((a, i) => ({
+      units: combatants(data, a.units),
+      stance: a.stance,
+      stats: withIntel(data, a.units, statsFor(a.stance)),
+      champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general),
+    })),
   ];
   const chief = await hordeStats(client, data, wave, enemyStats(data, wave.front), null);
   const hordeBase = chief.stats;
@@ -252,6 +260,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const shares = result.defenderGroupLosses!;
   const guardNow = guard ? subtractUnits(guard, shares[0]!) : null;
   const offset = guard ? 1 : 0;
+  // Champions struck down fall: a hero carried home wounded, a general dead.
+  for (const [i, army] of engaged.entries()) {
+    await championsFall(client, data, world, result.defenderFallen[i + offset] ?? [], { ...armyLeaders[i]!, homeVillageId: army.homeVillageId }, { kills: 0, battleId: battle.id, at });
+  }
   const armies: Army[] = [];
   for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i + offset]!, at));
   const guardFighting = guardNow && !guardBroken ? guardNow : {};

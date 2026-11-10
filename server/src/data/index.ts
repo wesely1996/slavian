@@ -419,6 +419,13 @@ const leadersFileSchema = z.object({
   ),
 });
 
+const championSchema = z.object({
+  attack: z.number().nonnegative(),
+  defense: z.number().nonnegative(),
+  health: z.number().positive(),
+  growthPerLevel: z.number().nonnegative(),
+});
+
 const heroesFileSchema = z.object({
   version: z.number().int(),
   speed: z.number().positive(),
@@ -426,8 +433,11 @@ const heroesFileSchema = z.object({
   maxLevel: z.number().int().positive(),
   levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
   dropChance: z.number().min(0).max(1),
+  // The hero fighting in the ranks (sim/battle.ts Champion).
+  champion: championSchema,
   // Lesser heroes recruited at a Hero's Hall (sim/generals.ts).
   generals: z.object({
+    champion: championSchema,
     names: z.array(z.string()).min(1),
     speed: z.number().positive(),
     maxLevel: z.number().int().positive(),

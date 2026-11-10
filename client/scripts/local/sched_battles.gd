@@ -232,12 +232,16 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	if wave.front == "north" and float(own.get("coldDefense", 0.0)) != 0.0:
 		own = own.duplicate()
 		own["defense.all"] = float(own.get("defense.all", 0.0)) + float(own.coldDefense)
-	var heroic := LocalHeroes.combine(own, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else own
-	var bonuses := LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
+	# The hero commands, else the general (who takes over when the hero falls).
+	var bonuses := LocalChampions.command_bonuses(data, own, hero, general)
 	# The garrison fights alongside armies sent to help; armies joining this
 	# round bring their pincer or harassment bonus.
 	# Each fights in its own stance; a garrison that broke fights no more.
 	var engaged := LocalArmies.armies_in_battle(world, int(battle.id))
+	# Heroes and generals fight in the ranks: the village's with its
+	# garrison, each army's with it.
+	var army_leaders: Array = engaged.map(func(a: Dictionary) -> Array:
+		return [LocalArmies.hero_with_army(world, int(a.id)), LocalGenerals.general_with_army(world, int(a.id))])
 	var home_broken: bool = battle.setup.get("home", {}).get("broken", false)
 	# Scouts never fight; an army's tell it what it faces (intel).
 	var garrison: Dictionary = {} if home_broken else LocalScouting.combatants(data, state.garrison)
@@ -277,9 +281,11 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		s.attack = float(s.attack) * surge * float(walls.attack) * shooting
 		s.defense = float(s.defense) * float(walls.defense)
 		return s
-	var groups: Array = [{"units": garrison, "stance": state.stance}]
-	for a in engaged:
-		groups.append({"units": LocalScouting.combatants(data, a.units), "stance": a.get("stance", "balanced"), "stats": LocalScouting.with_intel(data, a.units, defender_stats)})
+	var groups: Array = [{"units": garrison, "stance": state.stance, "champions": [] if home_broken else LocalChampions.champions_of(data, hero, general)}]
+	for i in engaged.size():
+		var a: Dictionary = engaged[i]
+		groups.append({"units": LocalScouting.combatants(data, a.units), "stance": a.get("stance", "balanced"), "stats": LocalScouting.with_intel(data, a.units, defender_stats),
+			"champions": LocalChampions.champions_of(data, army_leaders[i][0], army_leaders[i][1])})
 	var result := LocalBattle.resolve_round(data,
 		{"units": assault, "stance": battle.attackerStance, "home": false, "stats": func(unit: String) -> Dictionary:
 			var s: Dictionary = led_stats.call(unit).duplicate()
@@ -297,6 +303,13 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		setup.wall.integrity = wall_left
 		battle.setup = setup
 	var shares: Array = result.defenderGroupLosses
+	# Champions struck down fall: a hero wounded (an army's carried home),
+	# a general dead; the general takes command from a fallen hero.
+	var fell := {"kills": 0, "battleId": battle.id, "at": at}
+	var home_fallen: Array = result.defenderFallen[0]
+	LocalChampions.fall(server, world, home_fallen, hero, general, null, fell)
+	for i in engaged.size():
+		LocalChampions.fall(server, world, result.defenderFallen[i + 1], army_leaders[i][0], army_leaders[i][1], engaged[i].homeVillageId, fell)
 	var village_state := LocalVillage.lose_garrison(data, state, shares[0], at, world.speed)
 	var defender_losses: Dictionary = shares[0].duplicate()
 	var armies: Array = []
@@ -447,10 +460,10 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	# A raiding horde moves on once the village is saved.
 	if outcome == "raided" and wave.status == "battling":
 		move_on(server, world, wave, Vector2i(village.q, village.r), at, changed)
-	if not hero.is_empty() and outcome != "ongoing":
+	if not hero.is_empty() and outcome != "ongoing" and not "hero" in home_fallen:
 		hero_after_battle(server, world, hero, {"kills": LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now),
 			"won": outcome != "raided", "battleId": battle.id, "at": at})
-	if not general.is_empty() and outcome != "ongoing":
+	if not general.is_empty() and outcome != "ongoing" and not "general" in home_fallen:
 		LocalGenerals.after_battle(server, world, general, {"kills": LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now),
 			"won": outcome != "raided", "at": at})
 	changed.append(["village", village.id])
@@ -503,8 +516,11 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		var g := LocalGenerals.general_with_army(world, int(army.id))
 		if not g.is_empty() and (general.is_empty() or int(g.level) > int(general.level)):
 			general = g
-	var heroic: Dictionary = LocalHeroes.combine(research, LocalHeroes.hero_bonuses(data, hero)) if not hero.is_empty() else research
-	var bonuses: Dictionary = LocalHeroes.combine(heroic, LocalGenerals.bonuses(data, general)) if not general.is_empty() else heroic
+	# The hero commands, else the best general (who takes over when the hero falls).
+	var bonuses: Dictionary = LocalChampions.command_bonuses(data, research, hero, general)
+	# Each army's hero and general fight in its ranks.
+	var army_leaders: Array = engaged.map(func(a: Dictionary) -> Array:
+		return [LocalArmies.hero_with_army(world, int(a.id)), LocalGenerals.general_with_army(world, int(a.id))])
 	var ground: Dictionary = battle.setup
 	var first := round == 1
 	var ambush: bool = ground.get("ambush", false) == true
@@ -528,10 +544,12 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	if guard != null:
 		var guard_force: Dictionary = {} if guard_broken else guard
 		groups.append({"units": guard_force, "stance": guard_stance, "stats": stats_for.call(guard_stance)})
-	for army in engaged:
+	for i in engaged.size():
+		var army: Dictionary = engaged[i]
 		var army_stance: String = army.get("stance", "balanced")
 		# Scouts never fight; an army's tell it what it faces (intel).
-		groups.append({"units": LocalScouting.combatants(data, army.units), "stance": army_stance, "stats": LocalScouting.with_intel(data, army.units, stats_for.call(army_stance))})
+		groups.append({"units": LocalScouting.combatants(data, army.units), "stance": army_stance, "stats": LocalScouting.with_intel(data, army.units, stats_for.call(army_stance)),
+			"champions": LocalChampions.champions_of(data, army_leaders[i][0], army_leaders[i][1])})
 	var chief := horde_stats(server, world, wave, LocalBattle.enemy_stats(data, wave.front), null)
 	var horde_base: Callable = chief.stats
 	var defenders := {}
@@ -550,6 +568,10 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var shares: Array = result.defenderGroupLosses
 	var guard_now: Variant = LocalCamps.subtract_units(guard, shares[0]) if guard != null else null
 	var offset := 1 if guard != null else 0
+	# Champions struck down fall: a hero carried home wounded, a general dead.
+	for i in engaged.size():
+		LocalChampions.fall(server, world, result.defenderFallen[i + offset], army_leaders[i][0], army_leaders[i][1], engaged[i].homeVillageId,
+			{"kills": 0, "battleId": battle.id, "at": at})
 	var armies: Array = []
 	for i in engaged.size():
 		armies.append(LocalArmies.army_losses(server, world, engaged[i], shares[i + offset], at))

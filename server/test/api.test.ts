@@ -321,11 +321,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const raided = world.battles[0];
     expect(raided).toMatchObject({ status: 'raided', round: 1 });
     expect(world.villages[0].queue).toEqual([]);
-    // The whole horde survived, so it carried off 30% of what was stored,
-    // scaled by its faction's greed (monsters care little for loot).
+    // It carried off 30% of what was stored, scaled by its faction's greed
+    // (monsters care little for loot) and by how much of it survived (the
+    // hero fights at home, a champion in the ranks).
     const left = world.villages[0].resources;
     expect(left.settledAt).toBe(now.toISOString());
-    const share = 0.3 * scheduler.data.enemies.fronts.north!.personality.lootFactor;
+    const startedWith = Object.values(raided.attackerInitial as Record<string, number>).reduce((a, b) => a + b, 0);
+    const surviving = raided.rounds[0].attackerLeft / startedWith;
+    const share = 0.3 * scheduler.data.enemies.fronts.north!.personality.lootFactor * surviving;
     for (const kind of ['wood', 'stone', 'grain', 'iron']) {
       const stored = left.amounts[kind] + raided.loot[kind];
       expect(Math.abs(raided.loot[kind] - Math.floor(stored * share))).toBeLessThanOrEqual(1);

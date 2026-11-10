@@ -27,6 +27,7 @@ import { mapResources } from '../sim/resources.js';
 import { armyLosses, holdHex, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
 import { bridgeQuest } from './bridge.js';
@@ -107,11 +108,14 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     const general = await generalWithArmy(client, army.id);
     // The home village's buildings count (a Ranch's riders).
     const owned = villageBonuses(data, home.state);
-    const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
-    const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+    // The hero commands, else the general, who takes over if the hero falls.
+    const bonuses = commandBonuses(data, owned, hero, general);
+    const succession = commandBonuses(data, owned, null, general);
     const result = assault(data, {
       army: combatants(data, army.units),
       armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
+      statsWithoutHero: withIntel(data, army.units, playerStats(data, succession, false)),
+      champions: championsOf(data, hero, general),
       armyStance: army.stance,
       camp: site.guardians,
       front: 'north',
@@ -147,7 +151,9 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     explorers = await armyLosses(client, data, world, army, lost, at);
     await saveGuardians(client, site.id, result.cleared ? {} : result.campNow);
     const kills = total(site.guardians) - total(result.campNow);
-    if (hero) {
+    // Champions struck down fell; the others share the outcome.
+    await championsFall(client, data, world, result.fallen, { hero, general, homeVillageId: army.homeVillageId }, { kills, battleId: battle.id, at });
+    if (hero && !result.fallen.includes('hero')) {
       await heroAfterBattle(client, data, world, result.cleared ? hero : { ...hero, villageId: army.homeVillageId, armyId: null }, {
         kills,
         won: result.cleared,
@@ -155,7 +161,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
         at,
       });
     }
-    if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
+    if (general && !result.fallen.includes('general')) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
     await notifyWorld(client, { worldId: world.id, type: 'battles' });
     if (!result.cleared || total(explorers.units) === 0) {
       await sendHome(client, world, explorers, at, data);

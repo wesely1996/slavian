@@ -29,8 +29,9 @@ import {
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
 import { breachWalls, completeTraining, joinGarrison, healerChance, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
-import { heroAt } from '../db/heroes.js';
-import { generalAt } from '../db/generals.js';
+import { heroAt, heroWithArmy } from '../db/heroes.js';
+import { generalAt, generalWithArmy } from '../db/generals.js';
+import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { generalBonuses } from '../sim/generals.js';
 import { generalAfterBattle } from './generals.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
@@ -135,12 +136,15 @@ export const battleHandlers: HandlerRegistry = {
     // The horde's leader drives it on, hardest against a village they hate.
     const led = await hordeStats(client, data, wave, enemyStats(data, wave.front), village.id);
     const own = againstFront(villageBonuses(data, state), wave.front);
-    const heroic = hero ? combine(own, heroBonuses(data, hero)) : own;
-    const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+    // The hero commands, else the general (who takes over when the hero falls).
+    const bonuses = commandBonuses(data, own, hero, general);
     // The garrison fights alongside armies sent to help; armies joining this
     // round bring their pincer or harassment bonus.
     // Each fights in its own stance; a garrison that broke fights no more.
     const engaged = await armiesInBattle(client, battle.id);
+    // Heroes and generals fight in the ranks: the village's with its
+    // garrison, each army's with it.
+    const armyLeaders = await Promise.all(engaged.map(async (a) => ({ hero: await heroWithArmy(client, a.id), general: await generalWithArmy(client, a.id) })));
     const homeBroken = battle.setup.home?.broken === true;
     // Scouts never fight; an army's tell it what it faces (intel).
     const garrison = homeBroken ? {} : combatants(data, state.garrison);
@@ -186,8 +190,13 @@ export const battleHandlers: HandlerRegistry = {
         stats: defenderStats,
         home: true,
         groups: [
-          { units: garrison, stance: state.stance },
-          ...engaged.map((a) => ({ units: combatants(data, a.units), stance: a.stance, stats: withIntel(data, a.units, defenderStats) })),
+          { units: garrison, stance: state.stance, champions: homeBroken ? [] : championsOf(data, hero, general) },
+          ...engaged.map((a, i) => ({
+            units: combatants(data, a.units),
+            stance: a.stance,
+            stats: withIntel(data, a.units, defenderStats),
+            champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general),
+          })),
         ],
       },
       rng,
@@ -202,6 +211,13 @@ export const battleHandlers: HandlerRegistry = {
       setup = { ...setup, wall: { ...wall, integrity: wallLeft } };
     }
     const shares = result.defenderGroupLosses!;
+    // Champions struck down fall: a hero wounded (an army's carried home),
+    // a general dead; the general takes command from a fallen hero.
+    const fell = { kills: 0, battleId: battle.id, at };
+    await championsFall(client, data, world, result.defenderFallen[0] ?? [], { hero, general, homeVillageId: null }, fell);
+    for (const [i, army] of engaged.entries()) {
+      await championsFall(client, data, world, result.defenderFallen[i + 1] ?? [], { ...armyLeaders[i]!, homeVillageId: army.homeVillageId }, fell);
+    }
     let villageState = loseGarrison(data, state, shares[0]!, at, world.speed);
     let defenderLosses: Record<string, number> = { ...shares[0]! };
     const armies: Army[] = [];
@@ -362,11 +378,12 @@ export const battleHandlers: HandlerRegistry = {
     if (outcome === 'raided' && (await loadWave(client, wave.id)).status === 'battling') {
       await moveOn(client, data, world, wave.id, hex(village.q, village.r), at);
     }
-    if (hero && outcome !== 'ongoing') {
+    const homeFallen = result.defenderFallen[0] ?? [];
+    if (hero && outcome !== 'ongoing' && !homeFallen.includes('hero')) {
       const kills = total(battle.attackerInitial) - total(attackerNow);
       await heroAfterBattle(client, data, world, hero, { kills, won: outcome !== 'raided', battleId: battle.id, at });
     }
-    if (general && outcome !== 'ongoing') {
+    if (general && outcome !== 'ongoing' && !homeFallen.includes('general')) {
       const kills = total(battle.attackerInitial) - total(attackerNow);
       await generalAfterBattle(client, data, world, general, { kills, won: outcome !== 'raided', at });
     }
