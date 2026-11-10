@@ -156,6 +156,11 @@ const unitSchema = z.object({
   // A pathfinder marching with an army takes `perUnit` of harsh terrain's
   // slowness off its march (at most `max`).
   pathfinding: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
+  // A siege engine: it rides in a transport before any foot soldier.
+  engine: z.boolean().optional(),
+  // Each one carries `engines` siege engines or else `infantry` foot
+  // soldiers (family infantry) of its army.
+  transports: z.object({ infantry: z.number().int().nonnegative(), engines: z.number().int().nonnegative() }).optional(),
 });
 
 const unitsFileSchema = z.object({

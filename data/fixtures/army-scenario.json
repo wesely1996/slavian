@@ -15910,6 +15910,159 @@
    }
   },
   {
+   "set": {
+    "garrison": {
+     "spearman": 10,
+     "large_caravan": 2,
+     "onager": 1
+    }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/armies",
+   "body": {
+    "orders": "hold",
+    "target": {
+     "q": -5,
+     "r": 3
+    },
+    "units": {
+     "spearman": 10,
+     "large_caravan": 1
+    }
+   },
+   "status": 200,
+   "response": {
+    "army": {
+     "id": 6,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -5,
+      3
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "loot": null,
+     "units": {
+      "spearman": 10,
+      "large_caravan": 1
+     },
+     "status": "marching",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -3,
+       2,
+       13714
+      ],
+      [
+       -4,
+       3,
+       27429
+      ],
+      [
+       -5,
+       3,
+       54857
+      ]
+     ],
+     "departsAt": "2026-06-01T12:00:36.000Z",
+     "arrivesAt": "2026-06-01T12:01:30.857Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 0,
+     "supplyAt": "2026-06-01T12:00:36.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null
+    },
+    "serverTime": "2026-06-01T12:00:36.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/armies",
+   "body": {
+    "orders": "hold",
+    "target": {
+     "q": -5,
+     "r": 3
+    },
+    "units": {
+     "onager": 1,
+     "large_caravan": 1
+    }
+   },
+   "status": 200,
+   "response": {
+    "army": {
+     "id": 7,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -5,
+      3
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "loot": null,
+     "units": {
+      "onager": 1,
+      "large_caravan": 1
+     },
+     "status": "marching",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -3,
+       2,
+       13714
+      ],
+      [
+       -4,
+       3,
+       27429
+      ],
+      [
+       -5,
+       3,
+       54857
+      ]
+     ],
+     "departsAt": "2026-06-01T12:00:36.000Z",
+     "arrivesAt": "2026-06-01T12:01:30.857Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 0,
+     "supplyAt": "2026-06-01T12:00:36.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null
+    },
+    "serverTime": "2026-06-01T12:00:36.000Z"
+   }
+  },
+  {
    "method": "GET",
    "path": "/v1/worlds/-1/notifications",
    "status": 200,

@@ -140,6 +140,10 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 			roundi(float(scouting.stealth) * 100.0), int(scouting.intel)], UI.SMALL_SIZE))
 		if float(scouting.get("assassinate", 0)) > 0:
 			box.add_child(UI.label(UI.t("Reaching a horde, each has a %d%% chance to kill its leader") % roundi(float(scouting.assassinate) * 100.0), UI.SMALL_SIZE, UiTheme.GOLD))
+	if def.get("transports") is Dictionary:
+		box.add_child(UI.label(UI.t("Carries %d siege engine or %d foot soldiers of its army (engines first, the slowest first): they ride at its pace instead of marching") % [int(def.transports.engines), int(def.transports.infantry)], UI.SMALL_SIZE, UiTheme.GOLD))
+	if def.get("engine", false) == true:
+		box.add_child(UI.label(UI.t("A siege engine: it rides in a Large Military Caravan before any foot soldier"), UI.SMALL_SIZE, UI.MUTED))
 	if def.get("wagon", false) == true:
 		box.add_child(UI.label(UI.t("No soldier: holding open ground, the wagons make a wagon fort (+%d%% defense for each wagon per %d soldiers, at most +%d%%)") % [
 			roundi(float(data.field.wagonFort.bonusPerWagon) * 100.0), int(data.field.wagonFort.menPerWagon), roundi(float(data.field.wagonFort.maxBonus) * 100.0)], UI.SMALL_SIZE))

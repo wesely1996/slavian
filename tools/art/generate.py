@@ -735,6 +735,20 @@ def unit(kind):
         for dx in (-6, 0, 6):
             s.line(64, 58, 64 + dx, 40, stroke="#e2b33c", sw=3)
         s.line(58, 52, 70, 52, stroke="#b48a2e", sw=3)
+    elif kind == "large_caravan":
+        # A long covered wagon, spears showing over its side, grain sacks behind.
+        s.path("M14,70 Q16,36 46,34 L82,34 Q112,36 114,70 Z", pale, stroke="none", sw=0)
+        for x in (34, 52, 70, 88, 104):
+            s.line(x, 37, x, 70, stroke="#bdb29b", sw=2)
+        for x in (40, 58, 76):
+            s.line(x, 40, x - 6, 14, stroke="#6e4b2c", sw=2.2)
+            s.poly([(x - 6, 14), (x - 9, 22), (x - 3, 21)], "#c9cfd6", stroke="none", sw=0)
+        s.rect(10, 70, 108, 12, s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0, rx=2)
+        for x in (26, 54, 82, 106):
+            s.circle(x, 92, 10, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
+            s.circle(x, 92, 3, "#1d232c", stroke="none", sw=0)
+        for dx in (-5, 0, 5):
+            s.line(98, 60, 98 + dx, 44, stroke="#e2b33c", sw=3)
     elif kind == "river_barge":
         s.path("M24,74 L104,74 L92,92 L36,92 Z", s.lin([(0, "#b78d5e"), (1, "#594027")], 0, 0, 0, 1), stroke="none", sw=0)
         s.line(62, 74, 62, 24, stroke=pale, sw=4)
@@ -2050,7 +2064,7 @@ def assets():
     out["map/outpost"] = outpost()
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
         out[f"site/{kind}"] = site(kind)
-    for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon", "shaman"]:
+    for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon", "large_caravan", "shaman"]:
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)

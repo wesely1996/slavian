@@ -47,12 +47,50 @@ static func terrain_relief(data: Dictionary, units: Dictionary) -> float:
 
 
 ## Hexes per hour on plains: the slowest unit sets the pace.
+## sim/armies.ts armySpeed: wagons that transport troops load siege engines
+## first, each wagon taking `engines` of them, then foot soldiers into the
+## wagons left, `infantry` a wagon; the slowest ride first. Those riding
+## don't set the pace.
 static func army_speed(data: Dictionary, units: Dictionary) -> float:
-	var slowest := INF
+	var walking := {}
 	for unit in units:
 		if int(units[unit]) > 0:
+			walking[unit] = int(units[unit])
+	var def := func(u: String) -> Dictionary: return data.units.units.get(u, {})
+	var engines: Array = walking.keys().filter(func(u: String) -> bool: return def.call(u).get("engine", false) == true)
+	var foot: Array = walking.keys().filter(func(u: String) -> bool: return def.call(u).get("family") == "infantry" and def.call(u).get("engine", false) != true)
+	var wagons: Array = walking.keys().filter(func(u: String) -> bool: return def.call(u).get("transports") is Dictionary)
+	wagons.sort()
+	var infantry_seats := 0
+	for wagon in wagons:
+		var per_wagon := int(def.call(wagon).transports.engines)
+		var count := int(walking[wagon])
+		var engines_left := 0
+		for u in engines:
+			engines_left += int(walking[u])
+		var loaded := mini(engines_left, count * per_wagon) if per_wagon > 0 else 0
+		_board(data, walking, engines, loaded)
+		infantry_seats += (count - (ceili(float(loaded) / per_wagon) if per_wagon > 0 else 0)) * int(def.call(wagon).transports.infantry)
+	_board(data, walking, foot, infantry_seats)
+	var slowest := INF
+	for unit in walking:
+		if int(walking[unit]) > 0:
 			slowest = minf(slowest, float(data.units.units.get(unit, {}).get("speed", 1)))
 	return slowest if slowest != INF else 1.0
+
+
+## Seats riders in `seats` places, the slowest first; what is left over.
+static func _board(data: Dictionary, walking: Dictionary, riders: Array, seats: int) -> int:
+	var order := riders.duplicate()
+	order.sort_custom(func(a: String, b: String) -> bool:
+		var sa := float(data.units.units.get(a, {}).get("speed", 1))
+		var sb := float(data.units.units.get(b, {}).get("speed", 1))
+		return sa < sb or (sa == sb and a < b))
+	for unit in order:
+		var riding := mini(seats, int(walking[unit]))
+		walking[unit] = int(walking[unit]) - riding
+		seats -= riding
+	return seats
 
 
 static func cavalry_share(data: Dictionary, units: Dictionary) -> float:
