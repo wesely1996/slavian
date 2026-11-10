@@ -71,7 +71,7 @@ describe('research effects', () => {
     expect(playerStats(data, bonuses)('spearman').attack).toBeCloseTo(spear.attack * 1.15);
     expect(playerStats(data, bonuses)('spearman').defense).toBeCloseTo(spear.defense * 1.05);
     expect(playerStats(data, bonuses, true)('spearman').defense).toBeCloseTo(spear.defense * 1.15);
-    expect(playerStats(data)('spearman')).toEqual({ family: 'infantry', attack: spear.attack, defense: spear.defense });
+    expect(playerStats(data)('spearman')).toEqual({ family: 'infantry', attack: spear.attack, defense: spear.defense, health: spear.health });
   });
 
   it('hide loot, load caravans fuller and keep scouts alive', () => {

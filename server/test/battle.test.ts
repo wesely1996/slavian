@@ -66,9 +66,12 @@ describe('a battle round', () => {
   });
 
   it('applies counters: spears beat cavalry (wolves), archers beat infantry (thralls)', () => {
-    // Kills × target defense measures damage dealt; the counter adds 50%.
-    const wolfDefense = data.enemies.fronts.north!.units.grey_wolf!.defense;
-    const thrallDefense = data.enemies.fronts.north!.units.leshy_thrall!.defense;
+    // Kills × what it takes to fell one (health over the share armor lets
+    // through) measures damage dealt; the counter adds 50%.
+    const north = data.enemies.fronts.north!.units;
+    const toughness = (unit: string) => (north[unit]!.health * (data.battle.armorConstant + north[unit]!.defense)) / data.battle.armorConstant;
+    const wolfDefense = toughness('grey_wolf');
+    const thrallDefense = toughness('leshy_thrall');
     const damage = (units: Record<string, number>, target: string, defense: number) =>
       averageKills(horde({ [target]: 200 }), garrison(units)).attackerLosses * defense;
 
@@ -80,7 +83,7 @@ describe('a battle round', () => {
     // riders twice as hard, ambushers hit archers (upyrs) and riders.
     const cutterRatio = damage({ horse_cutter: 20 }, 'grey_wolf', wolfDefense) / damage({ horse_cutter: 20 }, 'leshy_thrall', thrallDefense);
     expect(cutterRatio).toBeCloseTo(2, 1);
-    const upyrDefense = data.enemies.fronts.north!.units.upyr!.defense;
+    const upyrDefense = toughness('upyr');
     const ambushRatio = damage({ ambusher: 20 }, 'upyr', upyrDefense) / damage({ ambusher: 20 }, 'leshy_thrall', thrallDefense);
     expect(ambushRatio).toBeCloseTo(1.5, 1);
   });

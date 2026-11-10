@@ -990,12 +990,12 @@ func _test_onboarding_almanac() -> void:
 	_check(OnboardingText.how(data.onboarding.steps[0]) == PackedStringArray(["1. Tap Village.", "2. Tap a plot."]), "how-to lines")
 	_check(OnboardingText.reward(data.onboarding.steps[0]) == "Reward: Wood 150, Grain 100", "reward")
 	var full := {
-		"units": {"units": {"spearman": {"name": "Spearman", "family": "infantry", "building": "barracks", "requiresLevel": 1, "attack": 20, "defense": 40, "speed": 5, "carry": 40, "upkeepPerHour": 1}}},
+		"units": {"units": {"spearman": {"name": "Spearman", "family": "infantry", "building": "barracks", "requiresLevel": 1, "attack": 20, "defense": 40, "health": 285, "speed": 5, "carry": 40, "upkeepPerHour": 1}}},
 		"buildings": {"buildings": {"barracks": {"name": "Barracks", "kind": "center", "maxLevel": 10}}},
 		"battle": {"stances": {"hold_the_line": {"name": "Hold the Line", "attack": 0.9, "defense": 1.15, "retreatAt": null}}, "counters": {"infantry": {"cavalry": 1.5}}},
 	}
 	var units := AlmanacText.entries(full, "Units")
-	_check(units[0][0] == "Spearman" and units[0][1].begins_with("Infantry · attack 20 · defense 40"), "almanac unit: %s" % units[0][1])
+	_check(units[0][0] == "Spearman" and units[0][1].begins_with("Infantry · attack 20 · defense 40 · health 285"), "almanac unit: %s" % units[0][1])
 	_check(AlmanacText.entries(full, "Buildings")[0][1] == "Building in the village · up to level 10", "almanac building")
 	var stances := AlmanacText.entries(full, "Stances")
 	_check(stances[0][1] == "attack ×0.90 · defense ×1.15 · never breaks", "almanac stance: %s" % stances[0][1])

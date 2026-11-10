@@ -236,16 +236,19 @@ static func _reach(cell: Vector2i, by_hex: Dictionary, terrain: Dictionary, stat
 ## sim/land.ts moveCostOn: the cost of entering `to`, or -1 where it is
 ## impassable or a river lies between. `land`: {terrain, blocked, roads
 ## (edge key -> level), lanes (edge key -> true)}.
-static func move_cost_on(data: Dictionary, land: Dictionary, roads := true) -> Callable:
+## `relief`: the share of harsh terrain's slowness (move cost above 1) that
+## pathfinders marching along take off (units.json pathfinding).
+static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, relief := 0.0) -> Callable:
 	return func(from: Vector2i, to: Vector2i) -> float:
 		var type: Variant = land.terrain.get(key(to))
 		if type == null or land.blocked.has(edge_key(from, to)):
 			return -1.0
 		# A lake is crossed only by boat.
 		var sailed: bool = roads and type == "lake" and land.get("lanes", {}).has(edge_key(from, to))
-		var cost: Variant = data.events.kinds.shipyard.lakeMoveCost if sailed else data.terrain.terrain[type].moveCost
-		if cost == null:
+		var base: Variant = data.events.kinds.shipyard.lakeMoveCost if sailed else data.terrain.terrain[type].moveCost
+		if base == null:
 			return -1.0
+		var cost: float = 1.0 + (float(base) - 1.0) * (1.0 - relief) if not sailed and relief > 0.0 and float(base) > 1.0 else float(base)
 		if not roads:
 			return float(cost)
 		var road := road_factor(data, int(land.roads.get(edge_key(from, to), 0)))

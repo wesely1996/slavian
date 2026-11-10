@@ -28,9 +28,9 @@ static func defense_factor(bonuses: Dictionary, family: String, home: bool) -> f
 ## counters when the unit has its own in place of its family's.
 static func player_stats(data: Dictionary, bonuses: Dictionary = {}, home := false) -> Callable:
 	return func(unit: String) -> Dictionary:
-		var def: Dictionary = data.units.units.get(unit, {"attack": 0, "defense": 1, "family": "infantry"})
+		var def: Dictionary = data.units.units.get(unit, {"attack": 0, "defense": 1, "health": 1, "family": "infantry"})
 		var stats := {"family": def.family, "attack": float(def.attack) * attack_factor(bonuses, def.family),
-			"defense": float(def.defense) * defense_factor(bonuses, def.family, home)}
+			"defense": float(def.defense) * defense_factor(bonuses, def.family, home), "health": float(def.health)}
 		if def.get("counters") != null:
 			stats.counters = def.counters
 		return stats
@@ -39,8 +39,8 @@ static func player_stats(data: Dictionary, bonuses: Dictionary = {}, home := fal
 static func enemy_stats(data: Dictionary, front: String) -> Callable:
 	var units: Dictionary = data.enemies.fronts.get(front, {}).get("units", {})
 	return func(unit: String) -> Dictionary:
-		var def: Dictionary = units.get(unit, {"attack": 0, "defense": 1, "family": "infantry"})
-		return {"family": def.family, "attack": float(def.attack), "defense": float(def.defense)}
+		var def: Dictionary = units.get(unit, {"attack": 0, "defense": 1, "health": 1, "family": "infantry"})
+		return {"family": def.family, "attack": float(def.attack), "defense": float(def.defense), "health": float(def.health)}
 
 
 static func battle_rng(seed_value: int, battle_id: int, round: int) -> LocalRng:
@@ -90,8 +90,12 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 				damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
 		var share := float(target_count) / target_total
 		var variance := 1.0 + float(battle.variance) * (rng.next() * 2.0 - 1.0)
-		var toughness := maxf(1.0, float(stats.defense)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
-		var expected := (damage * share * variance * float(battle.casualtyScale)) / toughness
+		# Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
+		# Each of the target's health that lands (hardened by its stance and
+		# by fighting at home) fells one.
+		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense)))
+		var toughness := maxf(1.0, float(stats.health)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
+		var expected := (damage * share * variance * float(battle.casualtyScale) * lands) / toughness
 		# Round randomly so small fights still take losses on average.
 		var whole := floori(expected) + (1 if rng.next() < expected - floorf(expected) else 0)
 		var dead := mini(target_count, whole)
@@ -163,5 +167,7 @@ static func raid_loot(data: Dictionary, amounts: Dictionary, attacker_initial: D
 	return LocalVillage.resources(func(kind: String) -> int: return floori(float(amounts[kind]) * share * surviving + 1e-9))
 
 
-static func round_ms(data: Dictionary, world_speed: float) -> int:
-	return LocalWaves.js_round((float(data.battle.roundMinutes) * 60000.0) / world_speed)
+## A round takes roundMinutes of real time, whatever the world's speed, so
+## reinforcements have time to come.
+static func round_ms(data: Dictionary, _world_speed := 1.0) -> int:
+	return LocalWaves.js_round(float(data.battle.roundMinutes) * 60000.0)

@@ -100,14 +100,17 @@ export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex
 // The terrain's move cost of entering `to`, or null when it is impassable
 // or a river lies between; along a road it is cheaper, unless `roads` is
 // false (the Monsters of the North keep off them).
-export function moveCostOn(data: GameData, land: Land, roads = true): StepCost {
+// `relief`: the share of harsh terrain's slowness (move cost above 1) that
+// pathfinders marching along take off (units.json pathfinding).
+export function moveCostOn(data: GameData, land: Land, roads = true, relief = 0): StepCost {
   return (from, to) => {
     const type = land.get(hexKey(to));
     if (type === undefined || !canCross(land, from, to)) return null;
     // A lake is crossed only by boat.
     const sailed = roads && type === 'lake' && !!land.lanes?.has(edgeKey(from, to));
-    const cost = sailed ? data.events.kinds.shipyard.lakeMoveCost : data.terrain.terrain[type].moveCost;
-    if (cost === null) return null;
+    const base = sailed ? data.events.kinds.shipyard.lakeMoveCost : data.terrain.terrain[type].moveCost;
+    if (base === null) return null;
+    const cost = !sailed && relief > 0 && base > 1 ? 1 + (base - 1) * (1 - relief) : base;
     if (!roads) return cost;
     const road = roadFactor(data, roadLevel(land, from, to));
     return cost * (land.lanes?.has(edgeKey(from, to)) ? Math.min(road, laneFactor(data)) : road);

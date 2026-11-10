@@ -11,7 +11,10 @@ import { attackFactor, bonus, defenseFactor, type Bonuses } from './research.js'
 
 export interface UnitStats {
   readonly attack: number;
+  // Armor: it turns aside damage, less of it the more there is.
   readonly defense: number;
+  // How much damage it takes to fell one.
+  readonly health: number;
   readonly family: UnitFamily;
   // The unit's own counters, in place of its family's.
   readonly counters?: Partial<Record<UnitFamily, number>>;
@@ -55,11 +58,12 @@ export function total(units: Units): number {
 // defending one's own village.
 export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false): (unit: string) => UnitStats {
   return (unit) => {
-    const def = data.units.units[unit] ?? { attack: 0, defense: 1, family: 'infantry' as const };
+    const def = data.units.units[unit] ?? { attack: 0, defense: 1, health: 1, family: 'infantry' as const };
     return {
       family: def.family,
       attack: def.attack * attackFactor(bonuses, def.family),
       defense: def.defense * defenseFactor(bonuses, def.family, home),
+      health: def.health,
       ...('counters' in def && def.counters ? { counters: def.counters } : {}),
     };
   };
@@ -67,7 +71,7 @@ export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false)
 
 export function enemyStats(data: GameData, front: Front): (unit: string) => UnitStats {
   const units = data.enemies.fronts[front]?.units ?? {};
-  return (unit) => units[unit] ?? { attack: 0, defense: 1, family: 'infantry' };
+  return (unit) => units[unit] ?? { attack: 0, defense: 1, health: 1, family: 'infantry' };
 }
 
 export function battleRng(seed: number, battleId: number, round: number): () => number {
@@ -105,8 +109,12 @@ function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<
     }
     const share = targetCount / targetTotal;
     const variance = 1 + battle.variance * (rng() * 2 - 1);
-    const toughness = Math.max(1, stats.defense) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
-    const expected = (damage * share * variance * battle.casualtyScale) / toughness;
+    // Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
+    // Each of the target's health that lands (hardened by its stance and by
+    // fighting at home) fells one.
+    const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense));
+    const toughness = Math.max(1, stats.health) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
+    const expected = (damage * share * variance * battle.casualtyScale * lands) / toughness;
     // Round randomly so small fights still take losses on average.
     const whole = Math.floor(expected) + (rng() < expected - Math.floor(expected) ? 1 : 0);
     const dead = Math.min(targetCount, whole);
@@ -188,8 +196,10 @@ export function raidLoot(
   return mapResources((kind) => Math.floor(amounts[kind] * share * surviving + 1e-9));
 }
 
-export function roundMs(data: GameData, worldSpeed: number): number {
-  return Math.round((data.battle.roundMinutes * 60_000) / worldSpeed);
+// A round takes roundMinutes of real time, whatever the world's speed, so
+// reinforcements have time to come.
+export function roundMs(data: GameData): number {
+  return Math.round(data.battle.roundMinutes * 60_000);
 }
 
 // A wave's stance, weighted by its front's temperament.

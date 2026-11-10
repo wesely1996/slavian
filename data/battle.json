@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "_comment": "Rounds are game minutes (divided by world speed). Damage = count × attack × stance attack × matchup × counter × target share × variance; kills = damage × casualtyScale / (target defense × stance defense × home bonus). A side breaks once it has lost retreatAt of its starting units (null: never): risk against reward, the earlier a stance breaks the more it gives. On the players' side every army fights in its own stance and breaks on its own losses (since it joined the battle), falling back home beaten (its hero wounded, its general killed) while the others fight on; a village's garrison fights in the village's stance, and a garrison that breaks stops fighting. The defenders lose once every army and the garrison has broken or fallen.",
-  "roundMinutes": 15,
+  "_comment": "A round takes roundMinutes of real time, whatever the world speed, so reinforcements can come. Damage = count × attack × stance attack × matchup × counter × target share × variance × casualtyScale; the target's defense is armor, letting armorConstant / (armorConstant + defense) of it through (as armor does in an RPG); what lands, over the target's health (units.json, enemies.json) × stance defense × home bonus, is how many fall. A side breaks once it has lost retreatAt of its starting units (null: never): risk against reward, the earlier a stance breaks the more it gives. On the players' side every army fights in its own stance and breaks on its own losses (since it joined the battle), falling back home beaten (its hero wounded, its general killed) while the others fight on; a village's garrison fights in the village's stance, and a garrison that breaks stops fighting. The defenders lose once every army and the garrison has broken or fallen.",
+  "roundMinutes": 10,
   "maxRounds": 12,
-  "casualtyScale": 0.1,
+  "casualtyScale": 1,
+  "armorConstant": 100,
   "homeBonus": 1.2,
   "variance": 0.1,
   "raidShare": 0.3,

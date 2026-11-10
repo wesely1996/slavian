@@ -293,7 +293,7 @@ export async function startHolyCityBattle(client: DbClient, data: GameData, worl
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
-  await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
+  await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', { battleId: battle.id });
   for (const member of await listMembers(client, world.id)) {
     await tell(client, world, member.accountId, {
       kind: 'under_attack',

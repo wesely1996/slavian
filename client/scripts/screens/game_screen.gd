@@ -731,7 +731,7 @@ func _battle_panel() -> void:
 	var story := BattleStory.opening(Game.data, battle, ctx) if _battle_round == 0 else BattleStory.narrate(Game.data, battle, _battle_round, ctx)
 	_panel_body.add_child(UI.label(story))
 	if battle.status == "ongoing" and _battle_round >= count:
-		_panel_body.add_child(UI.label(tr("The fight goes on; the next round comes in %s.") % TimeUtil.format_duration(float(Game.data.battle.roundMinutes) * 60.0 / float(Game.world.speed)), UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(UI.label(tr("The fight goes on; the next round comes in %s.") % TimeUtil.format_duration(float(Game.data.battle.roundMinutes) * 60.0), UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.button(tr("Back to the map"), func() -> void: _set_view("map"), "icon/map"))
 
 
@@ -4626,7 +4626,8 @@ func _train_tab(village: Dictionary) -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
 		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
-		info.add_child(UI.label(tr("%s · atk %d · def %d · %s grain/h") % [def.family.capitalize(), def.attack, def.defense, UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))], UI.SMALL_SIZE, UI.MUTED))
+		info.add_child(UI.label(tr("%s · atk %d · def %d · hp %d · speed %s hexes/h · %s grain/h") % [def.family.capitalize(), def.attack, def.defense, int(def.health),
+			UI.number(TimeUtil.per_real_hour(float(def.speed) * float(Game.world.speed))), UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))], UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(card)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))

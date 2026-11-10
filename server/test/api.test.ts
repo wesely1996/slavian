@@ -305,7 +305,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle.attackerStance).toBeTruthy();
 
     // Work started just before the round; the raid will burn it.
-    const roundAt = now.getTime() + (15 * 60_000) / 10;
+    const roundAt = now.getTime() + scheduler.data.battle.roundMinutes * 60_000;
     now = new Date(roundAt - 10_000);
     const building = (await call('POST', `/v1/villages/${village.id}/build`, ratimir.token, { plot: 'c0' })).body.village.queue[0];
     expect(new Date(building.completesAt).getTime()).toBeGreaterThan(roundAt);
@@ -423,7 +423,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(battle.defenderInitial).toEqual({ spearman: 20 });
     expect(battle.attackerNow).toEqual(battle.attackerInitial);
 
-    const roundMs = (15 * 60_000) / 10;
+    const roundMs = scheduler.data.battle.roundMinutes * 60_000;
     for (let round = 1; round <= 12 && battle.status === 'ongoing'; round++) {
       now = new Date(now.getTime() + roundMs);
       await tick(db, now, scheduler);
@@ -532,7 +532,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages[0].resources.ratesPerHour.grain).toBeLessThanOrEqual(rates.grain);
 
     while (world.battles[0]?.status === 'ongoing') {
-      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      now = new Date(now.getTime() + scheduler.data.battle.roundMinutes * 60_000);
       await tick(db, now, scheduler);
       world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
     }
@@ -822,17 +822,18 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(world.waves[0].arrivesAt);
     await tick(db, now, scheduler);
     for (let round = 0; round < 12; round++) {
-      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      now = new Date(now.getTime() + scheduler.data.battle.roundMinutes * 60_000);
       await tick(db, now, scheduler);
     }
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
     expect(world.battles[0].status).toBe('defended');
     // The horde's leader, named for its front, fled wounded with a grudge,
     // or fell with the last of the horde.
+    // (Battles last long enough that the next front's horde may have set out
+    // with its own leader meanwhile.)
     const front = world.battles[0].front;
-    expect(world.leaders).toHaveLength(1);
-    const chief = world.leaders[0];
-    expect(world.battles[0].leaderId).toBe(chief.id);
+    expect(world.leaders.filter((l: { front: string }) => l.front === front)).toHaveLength(1);
+    const chief = world.leaders.find((l: { id: number }) => l.id === world.battles[0].leaderId);
     expect(chief).toMatchObject({ front, battles: 1, wins: 0, losses: 1 });
     expect(scheduler.data.leaders.fronts[front]!.names).toContain(chief.name);
     expect(chief.title).toContain(chief.name);
@@ -881,8 +882,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
     expect(world.heroes[0]).toMatchObject({ status: 'home', villageId: second, path: null });
 
-    // Raided with the hero at hand: wounded, then healed.
-    await db.query(`UPDATE villages SET garrison = '{}' WHERE id = $1`, [second]);
+    // Raided with the hero at hand: wounded, then healed. (With rounds this
+    // long, the first village's troops would come to help: none are left.)
+    await db.query(`UPDATE villages SET garrison = '{}' WHERE id = ANY($1)`, [[second, village.id]]);
     const next = world.waves.find((w: { status: string }) => w.status === 'scheduled');
     now = new Date(next.spawnAt);
     await tick(db, now, scheduler);
@@ -893,7 +895,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     );
     now = new Date(marching[0]!.arrives_at);
     await tick(db, now, scheduler);
-    now = new Date(now.getTime() + (15 * 60_000) / 10);
+    now = new Date(now.getTime() + scheduler.data.battle.roundMinutes * 60_000);
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
     expect(world.battles[0]).toMatchObject({ villageId: second, status: 'raided' });
@@ -1095,7 +1097,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const b = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ola.accountId);
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
     const village = async (id: number) => (await world()).villages.find((v: { id: number }) => v.id === id);
-    const roundMs = (15 * 60_000) / 10;
+    const roundMs = scheduler.data.battle.roundMinutes * 60_000;
     await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', reserve = 1000 WHERE id = $1`, [a.id]);
     await db.query(`UPDATE villages SET garrison = '{"spearman": 10, "archer": 10}' WHERE id = $1`, [b.id]);
     expect(a.reinforce).toEqual({ share: 0.5, range: 4 });
@@ -1191,7 +1193,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await withoutStarterCamps(worldId);
     const home = started.body.villages[0];
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, mira.token)).body;
-    const roundMs = (15 * 60_000) / 10;
+    const roundMs = scheduler.data.battle.roundMinutes * 60_000;
     const terrain = new Map<string, TerrainId>(started.body.map.hexes.map(([q, r, t]: [number, number, TerrainId]) => [`${q},${r}`, t]));
     await db.query(`UPDATE villages SET garrison = '{"spearman": 400, "archer": 200}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
 
@@ -1322,7 +1324,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const home = started.body.villages[0];
     expect(started.body.sanctity).toBe(scheduler.data.horde.holyCity.sanctity);
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, lada.token)).body;
-    const roundMs = (15 * 60_000) / 10;
+    const roundMs = scheduler.data.battle.roundMinutes * 60_000;
     const fight = async (battleId: number) => {
       let battle = (await world()).battles.find((b: { id: number }) => b.id === battleId);
       for (let i = 0; i < 12 && battle.status === 'ongoing'; i++) {
@@ -1419,7 +1421,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const home = started.body.villages[0];
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, bogdan.token)).body;
     const village = async () => (await world()).villages.find((v: { id: number }) => v.id === home.id);
-    const roundMs = (15 * 60_000) / 10;
+    const roundMs = scheduler.data.battle.roundMinutes * 60_000;
     const hourMs = 3_600_000 / 10;
     await db.query(
       `UPDATE villages SET garrison = '{"spearman": 200, "archer": 120}', amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}',
@@ -1444,7 +1446,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(camp).toMatchObject({ front: first.front, kind: first.front === 'north' ? 'lair' : 'bandit' });
     const size = camp.size;
 
-    // A day later it has grown.
+    // A day later it has grown. (No horde sets out meanwhile to draw it off:
+    // battles of 10 real minutes a round take most of a game day here.)
+    await db.query(
+      `UPDATE scheduled_events SET due_at = due_at + interval '30 days' WHERE world_id = $1 AND status = 'pending' AND type IN ('wave_spawn', 'wave_warning')`,
+      [worldId],
+    );
     now = new Date(now.getTime() + 24 * hourMs);
     await tick(db, now, scheduler);
     expect((await world()).camps.find((c: { id: number }) => c.id === camp.id).size).toBeGreaterThan(size);
@@ -2027,7 +2034,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       now = new Date(battle.setup.siege.readyAt);
     }
     for (let round = 0; round < 12; round++) {
-      now = new Date(now.getTime() + (15 * 60_000) / 10);
+      now = new Date(now.getTime() + scheduler.data.battle.roundMinutes * 60_000);
       await tick(db, now, scheduler);
     }
     world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;

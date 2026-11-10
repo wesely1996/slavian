@@ -74,7 +74,7 @@ export async function startBattle(
   const setup: BattleSetup = { home: { initial: combatants(data, state.garrison) } };
   if (cameOverRiver(wave.path ?? [], { q: village.q, r: village.r }, await riverKeys(client, world.id))) setup.river = true;
   let composition = wave.composition;
-  let firstRound = at.getTime() + roundMs(data, world.speed);
+  let firstRound = at.getTime() + roundMs(data);
   const integrity = wallIntegrity(data, state.plots);
   if (integrity > 0) {
     const moat = towerLevel(state.plots, 'ditch');
@@ -284,7 +284,7 @@ export const battleHandlers: HandlerRegistry = {
     if (outcome === 'ongoing') {
       await recordRound(client, battle.id, log, null);
       const payload: BattlePayload = { battleId: battle.id };
-      await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', payload);
+      await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', payload);
     } else if (outcome === 'raided') {
       // The horde decides: carry off what it can and move on, or stay and
       // burn the village to the ground (horde.ts).

@@ -32,6 +32,20 @@ static func horde_against(world: Dictionary, village_id: int) -> bool:
 	return false
 
 
+## sim/armies.ts terrainRelief: how much of harsh terrain's slowness an
+## army's pathfinders take off (perUnit each, at most max).
+static func terrain_relief(data: Dictionary, units: Dictionary) -> float:
+	var relief := 0.0
+	var cap := 0.0
+	for unit in units:
+		var finding: Variant = data.units.units.get(unit, {}).get("pathfinding")
+		if finding == null or int(units[unit]) <= 0:
+			continue
+		relief += float(finding.perUnit) * int(units[unit])
+		cap = maxf(cap, float(finding.max))
+	return minf(cap, relief)
+
+
 ## Hexes per hour on plains: the slowest unit sets the pace.
 static func army_speed(data: Dictionary, units: Dictionary) -> float:
 	var slowest := INF
@@ -255,7 +269,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 	state = LocalReserve.take_for_army(state, grain)
 	var supplied := {"units": units, "supply": grain, "supplyAt": at, "hungrySince": null}
 	var speed := army_speed(data, units) * LocalSupply.speed_factor(data, supplied, at, world.speed)
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(home.q, home.r), to, speed, world.speed)
+	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(home.q, home.r), to, speed, world.speed, terrain_relief(data, units))
 	if path == null:
 		return LocalVillage.rule("No road leads there")
 	var hero_account: Variant = null
@@ -571,11 +585,11 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 		var road: Array = LocalLogistics.reversed_route(army.path) if army.status == "returning" else army.path
 		departs_at = int(army.leavesAt) if army.status == "returning" else int(army.departsAt)
 		path = LocalLogistics.splice_route(road, at - departs_at, func(from: Vector2i) -> Variant:
-			return LocalLogistics.road_route(data, land, from, dest, speed, world.speed))
+			return LocalLogistics.road_route(data, land, from, dest, speed, world.speed, terrain_relief(data, army.units)))
 	else:
 		_set_off(server, world, army, at)
 		var speed := army_speed(data, army.units) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
-		path = LocalLogistics.road_route(data, land, here, dest, speed, world.speed)
+		path = LocalLogistics.road_route(data, land, here, dest, speed, world.speed, terrain_relief(data, army.units))
 	if path == null:
 		return LocalVillage.rule("No road leads there")
 	army.orders = orders
@@ -708,7 +722,7 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 	var home := server.find_village(world, int(army.homeVillageId))
 	if not home.is_empty() and (int(army.path[0].q) != int(home.q) or int(army.path[0].r) != int(home.r)):
 		var speed := army_speed(server.data, army.units) * LocalSupply.speed_factor(server.data, army if supplied(army) else null, at, world.speed)
-		army.path = LocalLogistics.road_route(server.data, LocalHordes.land_of(world), Vector2i(home.q, home.r), Vector2i(army.targetQ, army.targetR), speed, world.speed)
+		army.path = LocalLogistics.road_route(server.data, LocalHordes.land_of(world), Vector2i(home.q, home.r), Vector2i(army.targetQ, army.targetR), speed, world.speed, terrain_relief(server.data, army.units))
 	army.status = "returning"
 	army.battleId = null
 	army.wagonFortAt = null

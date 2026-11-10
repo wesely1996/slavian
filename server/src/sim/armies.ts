@@ -24,6 +24,20 @@ export function fighters(data: GameData, units: Units): Record<string, number> {
   return out;
 }
 
+// How much of harsh terrain's slowness an army's pathfinders take off
+// (units.json pathfinding): perUnit each, at most max.
+export function terrainRelief(data: GameData, units: Units): number {
+  let relief = 0;
+  let cap = 0;
+  for (const [unit, n] of Object.entries(units)) {
+    const finding = data.units.units[unit]?.pathfinding;
+    if (!finding || n <= 0) continue;
+    relief += finding.perUnit * n;
+    cap = Math.max(cap, finding.max);
+  }
+  return Math.min(cap, relief);
+}
+
 // Hexes per hour on plains: the slowest unit sets the pace.
 export function armySpeed(data: GameData, units: Units): number {
   const speeds = Object.keys(units).filter((u) => (units[u] ?? 0) > 0).map((u) => data.units.units[u]?.speed ?? 1);

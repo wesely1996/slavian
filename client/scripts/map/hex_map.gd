@@ -56,6 +56,50 @@ func _ready() -> void:
 	add_child(_features)
 
 
+## While a battle goes on, the map is redrawn every frame: its swords clash.
+func _process(_delta: float) -> void:
+	if not _ongoing_battles().is_empty():
+		queue_redraw()
+
+
+func _ongoing_battles() -> Array:
+	return Game.battles.filter(func(b: Dictionary) -> bool: return b.get("status") == "ongoing" and b.get("q") != null and b.get("r") != null)
+
+
+## A battle under way: two swords over the hex swing in and clash, a spark
+## where they meet, and a red glow pulsing on the ground.
+func _draw_battle(battle: Dictionary) -> void:
+	var cell := Vector2i(int(battle.q), int(battle.r))
+	var center := HexMath.to_pixel(cell, hex_size)
+	# Each battle swings in its own time.
+	var t := Time.get_ticks_msec() / 1000.0 + float(int(battle.get("id", 0)) % 7) * 0.31
+	var swing := pow((sin(t * 5.0) + 1.0) / 2.0, 3.0)
+	var glow := HexMath.corners(center, hex_size * 0.9)
+	draw_colored_polygon(glow, Color(ENEMY_COLOR, 0.12 + 0.12 * swing))
+	var c := center + Vector2(0, -hex_size * 0.55)
+	var s := hex_size * 0.55
+	for side in [-1.0, 1.0]:
+		var a := 0.95 - 0.7 * swing
+		var dir := Vector2(-side * sin(a), -cos(a))
+		var pivot := c + Vector2(side * s * 0.75, s * 0.7)
+		var guard := pivot + dir * s * 0.32
+		var tip := pivot + dir * s * 1.45
+		var across := Vector2(dir.y, -dir.x)
+		draw_line(pivot, guard, Color("#5b3a21"), s * 0.16, true)
+		draw_circle(pivot, s * 0.09, Color("#c99a2e"))
+		draw_line(guard - across * s * 0.24, guard + across * s * 0.24, Color("#c99a2e"), s * 0.11, true)
+		draw_line(guard, tip, VILLAGE_OUTLINE_COLOR, s * 0.17, true)
+		draw_line(guard, tip, Color("#dfe3e8"), s * 0.11, true)
+	# A spark as the blades meet.
+	if swing > 0.8:
+		var spark := c + Vector2(0, -s * 0.15)
+		var flash := (swing - 0.8) / 0.2
+		for i in 8:
+			var ray := Vector2.UP.rotated(i * TAU / 8.0) * s * (0.15 + 0.35 * flash)
+			draw_line(spark, spark + ray, Color(1.0, 0.86, 0.4, flash), s * 0.06, true)
+		draw_circle(spark, s * 0.08 * (1.0 + flash), Color(1, 1, 0.85, flash))
+
+
 func refresh() -> void:
 	var map: Variant = Game.world.get("map")
 	radius = int(map.radius) if map is Dictionary else 0
@@ -173,6 +217,8 @@ func _draw() -> void:
 			_draw_forecast(wave)
 	for wave in WaveMath.visible_waves(Game.waves):
 		_draw_horde(wave, now)
+	for battle in _ongoing_battles():
+		_draw_battle(battle)
 
 	if has_hex(selected):
 		var outline := HexMath.corners(HexMath.to_pixel(selected, hex_size), hex_size * 0.92)

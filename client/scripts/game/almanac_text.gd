@@ -42,8 +42,8 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 	for id in units:
 		var u: Dictionary = units[id]
 		var where := UI.t("%s level %d") % [UI.t(data.buildings.buildings[u.building].name), int(u.requiresLevel)]
-		var text := UI.t("%s · attack %d · defense %d · speed %s hexes/h · carries %d · eats %s grain/h · food for %s on the march · trained at %s") % [
-			String(u.family).capitalize(), int(u.attack), int(u.defense), UI.number(TimeUtil.per_real_hour(float(u.speed) * speed)), int(u.carry), UI.number(TimeUtil.per_real_hour(float(u.upkeepPerHour) * speed)),
+		var text := UI.t("%s · attack %d · defense %d · health %d · speed %s hexes/h · carries %d · eats %s grain/h · food for %s on the march · trained at %s") % [
+			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.health), UI.number(TimeUtil.per_real_hour(float(u.speed) * speed)), int(u.carry), UI.number(TimeUtil.per_real_hour(float(u.upkeepPerHour) * speed)),
 			TimeUtil.format_duration(float(u.get("supplyHours", 0)) * 3600.0 / speed), where]
 		if u.get("counters") != null:
 			var strong := PackedStringArray()

@@ -241,6 +241,10 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - A battle is a series of **rounds**. Each round is a scheduled event. Total duration is **15 min–3 h** *(tunable)*, depending on army sizes and fortification.
 - Each round computes: effective attack/defense per family × counters × stance × terrain × setup × hero × research × clan, then applies casualties.
 - **Retreat thresholds** depend on stance.
+- **Rounds take 10 real minutes** (`roundMinutes` in `data/battle.json`), whatever the world's speed, so reinforcements have time to come.
+- **Health and armor** (as in RPGs and MOBAs): every unit has `health` (units.json, enemies.json). A unit's defense is its armor: only `armorConstant / (armorConstant + defense)` (100) of the damage aimed at it lands, so each point of armor counts for less the more of it there is (research, walls, hatred and leaders that raise defense get diminishing returns). What lands, over the target's health (hardened by its stance's defense and by fighting at home), is how many fall. Health was set to about 10 × defense × 100 / (100 + defense), so plain battles go as they did before; a bot run's outcomes stayed about the same.
+- **On the map**, a battle under way shows two swords clashing over its hex, a spark as they meet and a red glow pulsing on the ground.
+- **Pathfinders** marching with an army take 5% each of harsh terrain's slowness (move cost above 1) off its march, at most 50% (`pathfinding` in units.json). A unit's card and the Train tab show its speed and health.
 - **Battle reports:** readable after the fact, with a per-round summary, losses and the key modifiers ("Ambush +30%", "Pincer +18%").
 
 ### 6.6 Reinforcements
