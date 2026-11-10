@@ -4,6 +4,7 @@
 // for a shipyard, someone has sent resources), and the horde hates the more
 // for it (scheduler/eventOutcomes.ts). A paid-for shipyard builds
 // its boat (shipyard_done), struck by raiders (shipyard_raid) on the way.
+import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
@@ -137,7 +138,7 @@ export const mapEventHandlers: HandlerRegistry = {
       const home = await loadVillage(client, army.homeVillageId);
       const result = repelRaid(data, {
         army: combatants(data, army.units),
-        armyStats: withIntel(data, army.units, playerStats(data, home.state.bonuses, false)),
+        armyStats: withIntel(data, army.units, playerStats(data, villageBonuses(data, home.state), false)),
         armyStance: army.stance,
         raiders,
         raiderStance: rules.raiderStance,

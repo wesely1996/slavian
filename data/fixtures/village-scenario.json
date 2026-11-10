@@ -30763,6 +30763,229 @@
    }
   },
   {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "mountain_lodge"
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "A Mountain Lodge needs a village next to a mountain"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c1",
+    "building": "ranch"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Kitezh",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 1,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 1,
+       "building": "storehouse"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 1,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 1,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 1,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 1,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 1,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 1,
+       "building": "archer_tower"
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 1,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "o-1,2": {
+       "peak": 2,
+       "level": 2,
+       "terrain": "hills",
+       "building": "outpost"
+      }
+     },
+     "levels": {
+      "farm": 1,
+      "wall": 1,
+      "quarry": 1,
+      "barracks": 1,
+      "iron_mine": 1,
+      "elder_hall": 1,
+      "storehouse": 1,
+      "woodcutter": 1,
+      "archer_tower": 1
+     },
+     "queue": [
+      {
+       "plot": "c1",
+       "building": "ranch",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T16:22:17.000Z",
+       "completesAt": "2026-06-01T16:22:41.000Z"
+      }
+     ],
+     "garrison": {
+      "spearman": 5
+     },
+     "away": {},
+     "stance": "defensive",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "reserve": 200,
+     "reinforce": {
+      "share": 0.5,
+      "range": 4
+     },
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 1099.8666666666666,
+       "wood": 686,
+       "grain": 1273.5,
+       "stone": 949.3
+      },
+      "ratesPerHour": {
+       "iron": 164,
+       "wood": 390,
+       "grain": 353,
+       "stone": 261
+      },
+      "capacity": {
+       "iron": 1300,
+       "wood": 1300,
+       "grain": 1300,
+       "stone": 1300
+      },
+      "settledAt": "2026-06-01T16:22:17.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T16:22:17.000Z"
+   }
+  },
+  {
    "method": "GET",
    "path": "/v1/worlds/-1/notifications",
    "status": 200,

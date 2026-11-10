@@ -93,11 +93,14 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
     { method: 'POST', path: '/v1/villages/1/build/cancel', body: { plot: 'f0', targetLevel: 2 } },
     { advance: 30 * MINUTE },
     { method: 'GET', path: '/v1/worlds/-1' },
-    // Buildings only the land allows: water beside the village, hills under it.
+    // Buildings only the land allows: water beside the village, hills or plains
+    // under it, a mountain next to it.
     { method: 'POST', path: '/v1/villages/1/demolish', body: { plot: 'c1' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'fisherman_hut' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'water_wheel' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'windmill' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'mountain_lodge' } },
+    { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'ranch' } },
   ];
   for (const step of steps) await play(step);
 });

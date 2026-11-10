@@ -379,22 +379,31 @@ function isUnlockedSlot(data: GameData, plot: string, hallLevel: number): boolea
 // Pays for and queues a construction or upgrade. Builds run one after
 // another, so the new item starts when the last queued one completes.
 // What the land around a village allows (buildings.json `site`): water
-// beside it (a lake next to it, or a river along one of its edges), and
-// hills under it.
+// beside it (a lake next to it, or a river along one of its edges), hills
+// or plains under it, and a mountain next to it.
 export interface VillageSite {
   water: boolean;
   hills: boolean;
+  plains?: boolean;
+  mountain?: boolean;
 }
+export type SiteKind = 'water' | 'hills' | 'plains' | 'mountain';
 
 export function villageSite(terrain: ReadonlyMap<string, string>, rivers: readonly { a: Hex; b: Hex }[], cell: Hex): VillageSite {
   const key = hexKey(cell);
   const water = neighbors(cell).some((n) => terrain.get(hexKey(n)) === 'lake') || rivers.some((e) => hexKey(e.a) === key || hexKey(e.b) === key);
-  return { water, hills: terrain.get(key) === 'hills' };
+  const mountain = neighbors(cell).some((n) => terrain.get(hexKey(n)) === 'mountain');
+  return { water, hills: terrain.get(key) === 'hills', plains: terrain.get(key) === 'plains', mountain };
 }
 
 // The words for a site a building needs.
-export function siteText(site: 'water' | 'hills'): string {
-  return site === 'water' ? 'a village beside a lake or on a river' : 'a village on hills';
+export function siteText(site: SiteKind): string {
+  return {
+    water: 'a village beside a lake or on a river',
+    hills: 'a village on hills',
+    plains: 'a village on the plains',
+    mountain: 'a village next to a mountain',
+  }[site];
 }
 
 export function queueBuild(

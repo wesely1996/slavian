@@ -428,22 +428,32 @@ static func _resolve_plot(data: Dictionary, state: Dictionary, order: Dictionary
 
 ## Pays for and queues a build: {state, queued} or {"error"}.
 ## sim/village.ts villageSite: water beside the village (a lake next to
-## it, or a river along one of its edges) and hills under it. `terrain`:
-## {"q,r": id}; `rivers`: [{a, b}].
+## it, or a river along one of its edges), hills or plains under it and a
+## mountain next to it. `terrain`: {"q,r": id}; `rivers`: [{a, b}].
 static func village_site(terrain: Dictionary, rivers: Array, cell: Vector2i) -> Dictionary:
 	var water := false
+	var mountain := false
 	for n in HexMath.neighbors(cell):
-		if terrain.get("%d,%d" % [n.x, n.y]) == "lake":
+		var t: Variant = terrain.get("%d,%d" % [n.x, n.y])
+		if t == "lake":
 			water = true
+		elif t == "mountain":
+			mountain = true
 	for e in rivers:
 		if e.a == cell or e.b == cell:
 			water = true
-	return {"water": water, "hills": terrain.get("%d,%d" % [cell.x, cell.y]) == "hills"}
+	var here: Variant = terrain.get("%d,%d" % [cell.x, cell.y])
+	return {"water": water, "hills": here == "hills", "plains": here == "plains", "mountain": mountain}
 
 
 ## sim/village.ts siteText.
 static func site_text(site: String) -> String:
-	return "a village beside a lake or on a river" if site == "water" else "a village on hills"
+	return {
+		"water": "a village beside a lake or on a river",
+		"hills": "a village on hills",
+		"plains": "a village on the plains",
+		"mountain": "a village next to a mountain",
+	}.get(site, site)
 
 
 static func queue_build(data: Dictionary, state: Dictionary, order: Dictionary, at: int, world_speed: float, site: Dictionary = {}) -> Dictionary:

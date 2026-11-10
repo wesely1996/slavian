@@ -1326,7 +1326,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill"]
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
 MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
@@ -1519,6 +1519,34 @@ def building(kind, stage):
             s.line(hub[0], hub[1], tip[0], tip[1], stroke="#6e4b2c", sw=2.4)
             s.poly([(hub[0] + dx * 8, hub[1] + dy * 8), (tip[0], tip[1]), (tip[0] - dy * 6, tip[1] + dx * 6), (hub[0] + dx * 8 - dy * 5, hub[1] + dy * 8 + dx * 5)], "#c9ad78", stroke="#6e4b2c", sw=1.2, opacity=0.95)
         s.circle(hub[0], hub[1], 3, "#4a3422", stroke="none", sw=0)
+    elif kind == "ranch":
+        # A barn on the grassland, a fenced paddock and horses grazing.
+        s.path("M6,118 Q64,104 122,118 Z", s.lin([(0, "#b9c46a"), (1, "#7c8f3f")], 0, 0, 0, 1), stroke="none", sw=0)
+        house(s, 38, 106, 40 * big, 24 * big, roof="red" if stage == 3 else "thatch", wall="wood", windows=0)
+        for x in (66, 82, 98, 114):
+            s.line(x, 116, x, 100, stroke="#6e4b2c", sw=2.2)
+        s.line(66, 103, 114, 103, stroke="#8b5a2b", sw=1.8)
+        s.line(66, 110, 114, 110, stroke="#8b5a2b", sw=1.8)
+        for i in range(stage):
+            hx, hy = 78 + i * 14, 98 - (i % 2) * 6
+            coat = ["#7a4a2a", "#3b2a1e", "#c9b48a"][i]
+            s.ellipse(hx, hy, 7, 3.6, coat, stroke="none", sw=0)
+            s.line(hx + 5, hy - 1, hx + 9, hy - 6, stroke=coat, sw=3)
+            s.ellipse(hx + 10, hy - 6, 2.6, 1.6, coat, stroke="none", sw=0)
+            for lx in (hx - 4.5, hx - 2, hx + 2.5, hx + 5):
+                s.line(lx, hy + 2, lx, hy + 7, stroke=coat, sw=1.4)
+            s.line(hx - 7, hy - 1, hx - 10, hy + 4, stroke="#2b211a", sw=1.4)
+    elif kind == "mountain_lodge":
+        # A stone lodge under a peak, a mine mouth and a pile of logs and ore.
+        mountain_body(s, 86, 108, 70, 58 + stage * 6)
+        s.path("M72,108 L72,94 Q80,86 88,94 L88,108 Z", "#2b211a", stroke="none", sw=0)
+        s.line(70, 94, 90, 94, stroke="#6e4b2c", sw=2.5)
+        house(s, 40, 112, 42 * big, 24 * big, roof="slate" if stage >= 2 else "thatch", wall="plaster" if stage == 3 else "wood", windows=1)
+        for i in range(stage + 1):
+            s.line(96 + i * 2, 116 - i * 4, 118 + i * 2, 116 - i * 4, stroke="#8b5a2b", sw=4)
+            s.circle(118 + i * 2, 116 - i * 4, 2, "#c9a46a", stroke="none", sw=0)
+        for i in range(stage):
+            s.circle(64 + i * 5, 116, 2.6, "#6f6a61", stroke="none", sw=0)
     elif kind == "longhouse_hall":
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):

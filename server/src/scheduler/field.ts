@@ -8,7 +8,7 @@ import { WATER } from '../sim/mapgen.js';
 import { insertRoad, markRoadStanding, markRoadUpgrading, roadEdge, type RoadEdge } from '../db/roads.js';
 import { canCross } from '../sim/land.js';
 import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
-import { againstFront } from '../sim/clans.js';
+import { againstFront, villageBonuses } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
 import { z } from 'zod';
 import type { GameData, Stance } from '../data/index.js';
@@ -205,7 +205,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     const g = await generalWithArmy(client, army.id);
     if (g && (!general || g.level > general.level)) general = g;
   }
-  const research = againstFront(leader?.state.bonuses ?? {}, wave.front);
+  const research = againstFront(leader ? villageBonuses(data, leader.state) : {}, wave.front);
   const heroic = hero ? combine(research, heroBonuses(data, hero)) : research;
   const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
   const ground: Setup = {

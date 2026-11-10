@@ -2,6 +2,7 @@
 // fights the site's guardians on arrival, searches for a while
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
+import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
@@ -104,7 +105,9 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
     const home = await loadVillage(client, army.homeVillageId);
     const hero = await heroWithArmy(client, army.id);
     const general = await generalWithArmy(client, army.id);
-    const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+    // The home village's buildings count (a Ranch's riders).
+    const owned = villageBonuses(data, home.state);
+    const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
     const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     const result = assault(data, {
       army: combatants(data, army.units),
