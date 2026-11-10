@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { approachAngle, armySpeed, fighters, joinBonus, shareOf, splitLosses, validateArmy } from '../src/sim/armies.js';
+import { approachAngle, armySpeed, fighters, joinBonus, shareOf, splitLosses, terrainRelief, validateArmy } from '../src/sim/armies.js';
 import { hex } from '../src/sim/hex.js';
 
 const data = loadGameData();
@@ -39,5 +39,13 @@ describe('armies', () => {
     expect((split[0]!.archer ?? 0) + (split[2]!.archer ?? 0)).toBe(3);
     expect(splitLosses({ spearman: 99 }, forces).reduce((n, s) => n + (s.spearman ?? 0), 0)).toBe(40);
     expect(splitLosses({ horseman: 3 }, forces)).toEqual([{}, {}, {}]);
+  });
+});
+
+describe('pathfinders', () => {
+  it('take 5% of harsh terrain\'s slowness each, at most half', () => {
+    expect(terrainRelief(data, { spearman: 10 })).toBe(0);
+    expect(terrainRelief(data, { spearman: 10, pathfinder: 3 })).toBeCloseTo(0.15);
+    expect(terrainRelief(data, { pathfinder: 40 })).toBe(0.5);
   });
 });

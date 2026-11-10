@@ -87,3 +87,16 @@ describe('land', () => {
     expect(route('north').arrivesMs).toBe(Math.round((6 * 3_600_000) / unit('north').speed));
   });
 });
+
+describe('pathfinders on harsh terrain', () => {
+  it('take their share off move costs above 1, never plains', async () => {
+    const { moveCostOn, landOf } = await import('../src/sim/land.js');
+    const { loadGameData } = await import('../src/data/index.js');
+    const { hex } = await import('../src/sim/hex.js');
+    const data = loadGameData();
+    const land = landOf(new Map([['0,0', 'plains'], ['1,0', 'swamp'], ['0,1', 'plains']]), []);
+    const swamp = data.terrain.terrain.swamp.moveCost!;
+    expect(moveCostOn(data, land, true, 0.5)(hex(0, 0), hex(1, 0))).toBeCloseTo(1 + (swamp - 1) * 0.5);
+    expect(moveCostOn(data, land, true, 0.5)(hex(0, 0), hex(0, 1))).toBe(data.terrain.terrain.plains.moveCost);
+  });
+});

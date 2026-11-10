@@ -143,6 +143,8 @@ const unitSchema = z.object({
   speed: z.number().positive(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
+  // Damage it takes to fell one (battle.json).
+  health: z.number().positive(),
   carry: z.number().nonnegative(),
   // Its own counters, in place of its family's (battle.json).
   counters: familyMultipliers.optional(),
@@ -151,6 +153,9 @@ const unitSchema = z.object({
   // A healer (the Shaman): each one gives every soldier who falls beside it
   // `perUnit` chance to get up again, at most `max`.
   heals: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
+  // A pathfinder marching with an army takes `perUnit` of harsh terrain's
+  // slowness off its march (at most `max`).
+  pathfinding: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
 });
 
 const unitsFileSchema = z.object({
@@ -177,6 +182,7 @@ const enemyUnitSchema = z.object({
   minPlayers: z.number().int().positive().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
+  health: z.number().positive(),
   speed: z.number().positive(),
   // How hard it batters walls each round (walls.json).
   siege: z.number().nonnegative().optional(),
@@ -262,6 +268,8 @@ const battleFileSchema = z.object({
   roundMinutes: z.number().positive(),
   maxRounds: z.number().int().positive(),
   casualtyScale: z.number().positive(),
+  // Armor (defense) lets armorConstant / (armorConstant + armor) of damage through.
+  armorConstant: z.number().positive(),
   homeBonus: z.number().positive(),
   variance: z.number().min(0).max(1),
   raidShare: z.number().min(0).max(1),

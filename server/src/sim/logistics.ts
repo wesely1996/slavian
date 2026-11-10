@@ -36,8 +36,8 @@ export function caravansFor(data: GameData, load: Resources, bonuses: Bonuses = 
 }
 
 // The road between two hexes at `hexesPerHour` on plains (terrain move
-// cost slows it): each step is the hex and the ms after departure it is
-// entered.
+// cost slows it, less by `relief`: pathfinders along): each step is the hex
+// and the ms after departure it is entered.
 export function roadRoute(
   data: GameData,
   terrain: Land,
@@ -45,8 +45,9 @@ export function roadRoute(
   to: Hex,
   hexesPerHour: number,
   worldSpeed: number,
+  relief = 0,
 ): PathStep[] {
-  const moveCost = moveCostOn(data, terrain);
+  const moveCost = moveCostOn(data, terrain, true, relief);
   const path = findPath(from, to, moveCost, fastestStep(data, terrain));
   if (!path) throw new RuleError('No road leads there');
   const msPerCost = MS_PER_HOUR / hexesPerHour / worldSpeed;

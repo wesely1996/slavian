@@ -8744,7 +8744,7 @@
        }
       },
       "status": "cleared",
-      "round": 9,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -8779,14 +8779,6 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 3,
-        "attackerLeft": 3,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -8796,39 +8788,7 @@
        },
        {
         "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
+        "round": 4,
         "attackerLeft": 1,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -8861,15 +8821,15 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 12,
+      "status": "cleared",
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
        "crossbowman": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 1
       },
       "defenderInitial": {
        "spearman": 4
@@ -8888,91 +8848,11 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 2,
-        "attackerLeft": 2,
+        "attackerLeft": 1,
         "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 3,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 10,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 11,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 12,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -9178,7 +9058,7 @@
        "stone": 0
       },
       "units": {
-       "spearman": 3
+       "spearman": 4
       },
       "status": "returning",
       "battleId": null,
@@ -9238,8 +9118,8 @@
       "arrivesAt": "2026-06-01T09:53:36.000Z",
       "leavesAt": "2026-06-01T09:53:36.000Z",
       "returnsAt": "2026-06-01T09:57:12.000Z",
-      "supply": 72,
-      "supplyAt": "2026-06-01T09:53:36.000Z",
+      "supply": 96,
+      "supplyAt": "2026-06-01T09:50:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -9251,10 +9131,10 @@
        "waveId": 2,
        "battles": [
         {
-         "won": false,
-         "lost": 1,
+         "won": true,
+         "lost": 0,
          "name": "Horde Encampment",
-         "kills": 1,
+         "kills": 2,
          "stage": 1,
          "battleId": 1,
          "stronghold": true
@@ -11474,7 +11354,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 6
+       "spearman": 7
       },
       "away": {},
       "stance": "balanced",
@@ -11498,13 +11378,13 @@
        "amounts": {
         "iron": 292.5,
         "wood": 947.5,
-        "grain": 390,
+        "grain": 399,
         "stone": 805
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 238,
+        "grain": 211,
         "stone": 300
        },
        "capacity": {
@@ -11705,7 +11585,7 @@
        }
       },
       "status": "cleared",
-      "round": 9,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -11740,14 +11620,6 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 3,
-        "attackerLeft": 3,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -11757,39 +11629,7 @@
        },
        {
         "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
+        "round": 4,
         "attackerLeft": 1,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -11822,15 +11662,15 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 12,
+      "status": "cleared",
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
        "crossbowman": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 1
       },
       "defenderInitial": {
        "spearman": 4
@@ -11849,91 +11689,11 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 2,
-        "attackerLeft": 2,
+        "attackerLeft": 1,
         "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 3,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 10,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 11,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 12,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -12129,7 +11889,7 @@
       "stance": "offensive",
       "loot": null,
       "units": {
-       "spearman": 3
+       "spearman": 4
       },
       "status": "done",
       "battleId": null,
@@ -12202,10 +11962,10 @@
        "waveId": 2,
        "battles": [
         {
-         "won": false,
-         "lost": 1,
+         "won": true,
+         "lost": 0,
          "name": "Horde Encampment",
-         "kills": 1,
+         "kills": 2,
          "stage": 1,
          "battleId": 1,
          "stronghold": true
@@ -14425,7 +14185,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 6
+       "spearman": 7
       },
       "away": {},
       "stance": "balanced",
@@ -14449,13 +14209,13 @@
        "amounts": {
         "iron": 292.5,
         "wood": 947.5,
-        "grain": 390,
+        "grain": 399,
         "stone": 805
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 238,
+        "grain": 211,
         "stone": 300
        },
        "capacity": {
@@ -14656,7 +14416,7 @@
        }
       },
       "status": "cleared",
-      "round": 9,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -14691,14 +14451,6 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 3,
-        "attackerLeft": 3,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -14708,39 +14460,7 @@
        },
        {
         "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
+        "round": 4,
         "attackerLeft": 1,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -14773,15 +14493,15 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 12,
+      "status": "cleared",
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
        "crossbowman": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 1
       },
       "defenderInitial": {
        "spearman": 4
@@ -14800,91 +14520,11 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 2,
-        "attackerLeft": 2,
+        "attackerLeft": 1,
         "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 3,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 10,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 11,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 12,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -15080,7 +14720,7 @@
       "stance": "offensive",
       "loot": null,
       "units": {
-       "spearman": 3
+       "spearman": 4
       },
       "status": "done",
       "battleId": null,
@@ -15153,10 +14793,10 @@
        "waveId": 2,
        "battles": [
         {
-         "won": false,
-         "lost": 1,
+         "won": true,
+         "lost": 0,
          "name": "Horde Encampment",
-         "kills": 1,
+         "kills": 2,
          "stage": 1,
          "battleId": 1,
          "stronghold": true
@@ -17394,7 +17034,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 6
+       "spearman": 7
       },
       "away": {},
       "stance": "balanced",
@@ -17418,13 +17058,13 @@
        "amounts": {
         "iron": 292.5,
         "wood": 947.5,
-        "grain": 390,
+        "grain": 399,
         "stone": 805
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 238,
+        "grain": 211,
         "stone": 300
        },
        "capacity": {
@@ -17438,6 +17078,95 @@
      }
     ],
     "waves": [
+     {
+      "id": 1,
+      "index": 0,
+      "front": "north",
+      "status": "battling",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T10:49:12.000Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": 1,
+      "hatred": 0.8,
+      "bandOf": null,
+      "forecast": null
+     },
      {
       "id": 2,
       "index": 1,
@@ -17530,7 +17259,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -17568,37 +17297,27 @@
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -2,
+         0,
          -2,
          158400
         ],
         [
-         -2,
+         0,
          -1,
          172800
         ],
         [
-         -2,
+         0,
          0,
          187200
-        ],
-        [
-         -2,
-         1,
-         201600
-        ],
-        [
-         -2,
-         2,
-         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
@@ -17623,13 +17342,13 @@
         }
        },
        "guard": {
-        "archer": 9,
-        "spearman": 19
+        "archer": 10,
+        "spearman": 20
        },
        "holyCity": true
       },
-      "status": "defended",
-      "round": 1,
+      "status": "ongoing",
+      "round": 0,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
@@ -17637,34 +17356,19 @@
        "leshy_thrall": 1
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 1
+       "rusalka": 3,
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "archer": 10,
        "spearman": 20
       },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:27:54.000Z",
-        "round": 1,
-        "attackerLeft": 3,
-        "defenderLeft": 28,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
-       }
-      ],
+      "rounds": [],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T10:27:36.000Z",
-      "endedAt": "2026-06-01T10:27:54.000Z"
+      "endedAt": null
      },
      {
       "id": 2,
@@ -17686,7 +17390,7 @@
        }
       },
       "status": "cleared",
-      "round": 9,
+      "round": 4,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -17721,14 +17425,6 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 3,
-        "attackerLeft": 3,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
         "attackerLeft": 2,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -17738,39 +17434,7 @@
        },
        {
         "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
+        "round": 4,
         "attackerLeft": 1,
         "defenderLeft": 3,
         "attackerLosses": {
@@ -17803,15 +17467,15 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 12,
+      "status": "cleared",
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
        "crossbowman": 1
       },
       "attackerNow": {
-       "zealot": 2
+       "zealot": 1
       },
       "defenderInitial": {
        "spearman": 4
@@ -17830,91 +17494,11 @@
        {
         "at": "2026-06-01T09:53:36.000Z",
         "round": 2,
-        "attackerLeft": 2,
+        "attackerLeft": 1,
         "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 3,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 4,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 5,
-        "attackerLeft": 2,
-        "defenderLeft": 4,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 6,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 7,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 8,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 9,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 10,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 11,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T09:53:36.000Z",
-        "round": 12,
-        "attackerLeft": 2,
-        "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -17990,7 +17574,7 @@
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
       "level": 1,
-      "xp": 10,
+      "xp": 0,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -18000,12 +17584,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T11:03:54.000Z",
-      "battles": 1,
+      "woundedUntil": null,
+      "battles": 0,
       "wins": 0,
-      "losses": 1,
+      "losses": 0,
       "razed": 0,
-      "kills": 2,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -18136,7 +17720,7 @@
       "stance": "offensive",
       "loot": null,
       "units": {
-       "spearman": 3
+       "spearman": 4
       },
       "status": "done",
       "battleId": null,
@@ -18209,10 +17793,10 @@
        "waveId": 2,
        "battles": [
         {
-         "won": false,
-         "lost": 1,
+         "won": true,
+         "lost": 0,
          "name": "Horde Encampment",
-         "kills": 1,
+         "kills": 2,
          "stage": 1,
          "battleId": 1,
          "stronghold": true
@@ -18231,28 +17815,6 @@
       "r": 5,
       "size": 8,
       "waveId": null,
-      "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 6,
-      "waveId": 1,
-      "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 4,
-      "kind": "lair",
-      "front": "north",
-      "q": 0,
-      "r": -4,
-      "size": 6,
-      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -18402,13 +17964,7 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [
-     [
-      0,
-      0,
-      10.8
-     ]
-    ],
+    "fear": [],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -20302,15 +19858,6 @@
    "response": {
     "notifications": [
      {
-      "id": 15,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T10:27:54.000Z",
-      "read": false
-     },
-     {
       "id": 14,
       "kind": "under_attack",
       "tier": "push",
@@ -20368,8 +19915,8 @@
       "id": 8,
       "kind": "battle_result",
       "tier": "push",
-      "title": "Your army was thrown back from the horde's encampment",
-      "body": "1 of the horde fell before it set out, 1 of ours. The next horde hates us the more for it.",
+      "title": "Your army broke the horde in its encampment",
+      "body": "2 of the horde fell before it set out, 0 of ours. The next horde hates us the more for it.",
       "createdAt": "2026-06-01T09:53:36.000Z",
       "read": false
      },
@@ -20437,7 +19984,7 @@
       "read": false
      }
     ],
-    "unread": 15,
+    "unread": 14,
     "serverTime": "2026-06-01T10:36:48.000Z"
    }
   }

@@ -25,7 +25,7 @@ import { loadWave, type Wave } from '../db/waves.js';
 import { loadHexes, rallyPoint, type World } from '../db/worlds.js';
 import type { TrainingBatch } from '../sim/training.js';
 import { RuleError } from '../errors.js';
-import { approachAngle, armySpeed, fighters, joinBonus, shareOf, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
+import { approachAngle, armySpeed, fighters, joinBonus, shareOf, terrainRelief, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
@@ -124,7 +124,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   state = takeForArmy(state, grain);
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
   const speed = armySpeed(data, units) * supplySpeedFactor(data, supplied, input.at, world.speed);
-  const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed);
+  const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed, terrainRelief(data, units));
 
   let heroAccountId: number | null = null;
   if (input.withHero) {
@@ -249,12 +249,12 @@ export async function moveArmy(
     const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
     const road = army.status === 'returning' ? reversedRoute(army.path) : army.path;
     departsAt = army.status === 'returning' ? army.leavesAt! : army.departsAt;
-    path = spliceRoute(road, at.getTime() - departsAt.getTime(), (from) => roadRoute(data, land, from, dest, speed, world.speed));
+    path = spliceRoute(road, at.getTime() - departsAt.getTime(), (from) => roadRoute(data, land, from, dest, speed, world.speed, terrainRelief(data, army.units)));
   } else {
     army = await setOff(client, data, world, army, at);
     const fed = supplied(army);
     const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
-    path = roadRoute(data, land, here, dest, speed, world.speed);
+    path = roadRoute(data, land, here, dest, speed, world.speed, terrainRelief(data, army.units));
   }
   const moving: Army = {
     ...army,
@@ -521,7 +521,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
   if (home && data && (path[0]!.q !== home.q || path[0]!.r !== home.r)) {
     const fed = supplied(army);
     const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
-    path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), hex(army.targetQ, army.targetR), speed, world.speed);
+    path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), hex(army.targetQ, army.targetR), speed, world.speed, terrainRelief(data, army.units));
   }
   const back: Army = {
     ...army,

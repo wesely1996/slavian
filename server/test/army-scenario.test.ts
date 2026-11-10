@@ -64,4 +64,20 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'GET', path: world });
   // Explored, the site is gone from the land: a fort may stand there.
   await play({ method: 'POST', path: '/v1/villages/1/forts', body: { q: site.q, r: site.r } });
+
+  // Pathfinders take harsh terrain's slowness off an army's march: the same
+  // hex through the woods and hills, reached sooner with them along.
+  const slow = (q: number, r: number) => {
+    const t = terrain.get(`${q},${r}`);
+    return t !== undefined && passable(q, r) && (scheduler.data.terrain.terrain[t as keyof typeof scheduler.data.terrain.terrain].moveCost ?? 0) > 1;
+  };
+  const rough = [...terrain.keys()]
+    .map((k) => k.split(',').map(Number) as [number, number])
+    .filter(([q, r]) => slow(q, r) && hexDistance(hex(q, r), hex(home.q, home.r)) === 3)
+    .sort((a, b) => a[0] - b[0] || a[1] - b[1])[0];
+  if (rough) {
+    await play({ set: { garrison: { spearman: 4, pathfinder: 6 } } });
+    await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { spearman: 2 } } });
+    await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { spearman: 2, pathfinder: 6 } } });
+  }
 });

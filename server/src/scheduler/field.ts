@@ -146,7 +146,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
-  await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
+  await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', { battleId: battle.id });
   const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort', setup.wagonFort && 'a wagon fort', setup.river && 'a river crossing']
     .filter(Boolean)
     .join(', ');
@@ -299,7 +299,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       else await saveArmy(client, total(army.units) ? army : { ...army, status: 'done' });
     }
     await recordRound(client, battle.id, log, null);
-    await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data, world.speed)), 'battle_round', { battleId: battle.id });
+    await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', { battleId: battle.id });
   } else {
     const won = outcome === 'defended';
     const kills = total(battle.attackerInitial) - total(attackerNow);

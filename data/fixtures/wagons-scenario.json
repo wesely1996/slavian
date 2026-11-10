@@ -6536,7 +6536,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 4,
+       "spearman": 2,
        "supply_wagon": 0
       },
       "away": {},
@@ -6549,7 +6549,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 334.9000000000001,
+      "reserve": 149.70000000000007,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -6559,15 +6559,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 220.5,
-        "wood": 636.5,
+        "iron": 160.5,
+        "wood": 456.5,
         "grain": 0,
-        "stone": 725
+        "stone": 605
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -6576,11 +6576,100 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:29:34.800Z"
+       "settledAt": "2026-06-01T10:05:28.800Z"
       }
      }
     ],
     "waves": [
+     {
+      "id": 1,
+      "index": 0,
+      "front": "north",
+      "status": "battling",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": 1,
+      "hatred": 0.2,
+      "bandOf": null,
+      "forecast": null
+     },
      {
       "id": 2,
       "index": 1,
@@ -6673,7 +6762,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -6711,103 +6800,33 @@
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -2,
+         0,
          -2,
          158400
         ],
         [
-         -2,
+         0,
          -1,
          172800
         ],
         [
-         -2,
+         0,
          0,
          187200
-        ],
-        [
-         -2,
-         1,
-         201600
-        ],
-        [
-         -2,
-         2,
-         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
     "scouting": [],
     "ruinSearches": [],
     "battles": [
-     {
-      "id": 2,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": null,
-      "q": 0,
-      "r": 0,
-      "setup": {
-       "home": {
-        "initial": {
-         "archer": 10,
-         "spearman": 20
-        }
-       },
-       "guard": {
-        "archer": 9,
-        "spearman": 19
-       },
-       "holyCity": true
-      },
-      "status": "defended",
-      "round": 1,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "rusalka": 2,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
-      },
-      "attackerNow": {
-       "rusalka": 1
-      },
-      "defenderInitial": {
-       "archer": 10,
-       "spearman": 20
-      },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:29:24.000Z",
-        "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 28,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
-       }
-      ],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T10:29:06.000Z",
-      "endedAt": "2026-06-01T10:29:24.000Z"
-     },
      {
       "id": 1,
       "front": "north",
@@ -6825,8 +6844,8 @@
        "ambush": false,
        "wagonFort": 0.2
       },
-      "status": "raided",
-      "round": 5,
+      "status": "ongoing",
+      "round": 0,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
@@ -6834,68 +6853,19 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "spearman": 3,
        "supply_wagon": 2
       },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:27:39.600Z",
-        "round": 1,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "supply_wagon": 2
-        }
-       },
-       {
-        "at": "2026-06-01T10:27:57.600Z",
-        "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:15.600Z",
-        "round": 3,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:33.600Z",
-        "round": 4,
-        "attackerLeft": 7,
-        "defenderLeft": 3,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:51.600Z",
-        "round": 5,
-        "attackerLeft": 6,
-        "defenderLeft": 2,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "spearman": 1
-        }
-       }
-      ],
+      "rounds": [],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T10:27:21.600Z",
-      "endedAt": "2026-06-01T10:28:51.600Z"
+      "endedAt": null
      }
     ],
     "raids": [],
@@ -6963,25 +6933,23 @@
       "front": "north",
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
-      "level": 2,
-      "xp": 8,
-      "xpToNext": 28,
-      "skills": {
-       "savagery": 1
-      },
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
       "effects": {
-       "attack": 0.04,
+       "attack": 0,
        "defense": 0,
        "nerve": 0,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T11:05:24.000Z",
-      "battles": 2,
-      "wins": 1,
-      "losses": 1,
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
       "razed": 0,
-      "kills": 5,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -7003,10 +6971,11 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 3,
+       "supply_wagon": 2
       },
-      "status": "done",
-      "battleId": null,
+      "status": "engaged",
+      "battleId": 1,
       "path": [
        [
         -2,
@@ -7031,12 +7000,12 @@
       ],
       "departsAt": "2026-06-01T10:05:00.000Z",
       "arrivesAt": "2026-06-01T10:05:43.200Z",
-      "leavesAt": "2026-06-01T10:28:51.600Z",
-      "returnsAt": "2026-06-01T10:29:34.800Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T10:29:34.800Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 496,
+      "supplyAt": "2026-06-01T10:05:00.000Z",
       "hungrySince": null,
-      "wagonFortAt": null,
+      "wagonFortAt": "2026-06-01T10:10:36.000Z",
       "returnHome": false,
       "raid": null
      },
@@ -7093,17 +7062,6 @@
       "r": 5,
       "size": 8,
       "waveId": null,
-      "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 6,
-      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -7253,13 +7211,7 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [
-     [
-      0,
-      0,
-      11
-     ]
-    ],
+    "fear": [],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -9326,7 +9278,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 4,
+       "spearman": 2,
        "supply_wagon": 0
       },
       "away": {},
@@ -9339,7 +9291,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 334.9000000000001,
+      "reserve": 149.70000000000007,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -9349,15 +9301,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 220.5,
-        "wood": 636.5,
+        "iron": 160.5,
+        "wood": 456.5,
         "grain": 0,
-        "stone": 725
+        "stone": 605
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -9366,11 +9318,100 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:29:34.800Z"
+       "settledAt": "2026-06-01T10:05:28.800Z"
       }
      }
     ],
     "waves": [
+     {
+      "id": 1,
+      "index": 0,
+      "front": "north",
+      "status": "battling",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": 1,
+      "hatred": 0.2,
+      "bandOf": null,
+      "forecast": null
+     },
      {
       "id": 2,
       "index": 1,
@@ -9463,7 +9504,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -9501,103 +9542,33 @@
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -2,
+         0,
          -2,
          158400
         ],
         [
-         -2,
+         0,
          -1,
          172800
         ],
         [
-         -2,
+         0,
          0,
          187200
-        ],
-        [
-         -2,
-         1,
-         201600
-        ],
-        [
-         -2,
-         2,
-         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
     "scouting": [],
     "ruinSearches": [],
     "battles": [
-     {
-      "id": 2,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": null,
-      "q": 0,
-      "r": 0,
-      "setup": {
-       "home": {
-        "initial": {
-         "archer": 10,
-         "spearman": 20
-        }
-       },
-       "guard": {
-        "archer": 9,
-        "spearman": 19
-       },
-       "holyCity": true
-      },
-      "status": "defended",
-      "round": 1,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "rusalka": 2,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
-      },
-      "attackerNow": {
-       "rusalka": 1
-      },
-      "defenderInitial": {
-       "archer": 10,
-       "spearman": 20
-      },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:29:24.000Z",
-        "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 28,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
-       }
-      ],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T10:29:06.000Z",
-      "endedAt": "2026-06-01T10:29:24.000Z"
-     },
      {
       "id": 1,
       "front": "north",
@@ -9615,8 +9586,8 @@
        "ambush": false,
        "wagonFort": 0.2
       },
-      "status": "raided",
-      "round": 5,
+      "status": "ongoing",
+      "round": 0,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
@@ -9624,68 +9595,19 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "spearman": 3,
        "supply_wagon": 2
       },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:27:39.600Z",
-        "round": 1,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "supply_wagon": 2
-        }
-       },
-       {
-        "at": "2026-06-01T10:27:57.600Z",
-        "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:15.600Z",
-        "round": 3,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:33.600Z",
-        "round": 4,
-        "attackerLeft": 7,
-        "defenderLeft": 3,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:51.600Z",
-        "round": 5,
-        "attackerLeft": 6,
-        "defenderLeft": 2,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "spearman": 1
-        }
-       }
-      ],
+      "rounds": [],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T10:27:21.600Z",
-      "endedAt": "2026-06-01T10:28:51.600Z"
+      "endedAt": null
      }
     ],
     "raids": [],
@@ -9753,25 +9675,23 @@
       "front": "north",
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
-      "level": 2,
-      "xp": 8,
-      "xpToNext": 28,
-      "skills": {
-       "savagery": 1
-      },
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
       "effects": {
-       "attack": 0.04,
+       "attack": 0,
        "defense": 0,
        "nerve": 0,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T11:05:24.000Z",
-      "battles": 2,
-      "wins": 1,
-      "losses": 1,
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
       "razed": 0,
-      "kills": 5,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -9793,10 +9713,11 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 3,
+       "supply_wagon": 2
       },
-      "status": "done",
-      "battleId": null,
+      "status": "engaged",
+      "battleId": 1,
       "path": [
        [
         -2,
@@ -9821,12 +9742,12 @@
       ],
       "departsAt": "2026-06-01T10:05:00.000Z",
       "arrivesAt": "2026-06-01T10:05:43.200Z",
-      "leavesAt": "2026-06-01T10:28:51.600Z",
-      "returnsAt": "2026-06-01T10:29:34.800Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T10:29:34.800Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 496,
+      "supplyAt": "2026-06-01T10:05:00.000Z",
       "hungrySince": null,
-      "wagonFortAt": null,
+      "wagonFortAt": "2026-06-01T10:10:36.000Z",
       "returnHome": false,
       "raid": null
      },
@@ -9883,17 +9804,6 @@
       "r": 5,
       "size": 8,
       "waveId": null,
-      "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 6,
-      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -10043,13 +9953,7 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [
-     [
-      0,
-      0,
-      11
-     ]
-    ],
+    "fear": [],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -12119,7 +12023,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 4,
+       "spearman": 2,
        "supply_wagon": 0
       },
       "away": {},
@@ -12132,7 +12036,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 334.9000000000001,
+      "reserve": 149.70000000000007,
       "reinforce": {
        "share": 0.5,
        "range": 4
@@ -12142,15 +12046,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 220.5,
-        "wood": 636.5,
+        "iron": 160.5,
+        "wood": 456.5,
         "grain": 0,
-        "stone": 725
+        "stone": 605
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 346,
         "stone": 300
        },
        "capacity": {
@@ -12159,11 +12063,100 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:29:34.800Z"
+       "settledAt": "2026-06-01T10:05:28.800Z"
       }
      }
     ],
     "waves": [
+     {
+      "id": 1,
+      "index": 0,
+      "front": "north",
+      "status": "battling",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": 1,
+      "hatred": 0.2,
+      "bandOf": null,
+      "forecast": null
+     },
      {
       "id": 2,
       "index": 1,
@@ -12256,7 +12249,7 @@
         "q": 0,
         "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
          0,
@@ -12294,103 +12287,33 @@
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -2,
+         0,
          -2,
          158400
         ],
         [
-         -2,
+         0,
          -1,
          172800
         ],
         [
-         -2,
+         0,
          0,
          187200
-        ],
-        [
-         -2,
-         1,
-         201600
-        ],
-        [
-         -2,
-         2,
-         230400
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
     "scouting": [],
     "ruinSearches": [],
     "battles": [
-     {
-      "id": 2,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": null,
-      "q": 0,
-      "r": 0,
-      "setup": {
-       "home": {
-        "initial": {
-         "archer": 10,
-         "spearman": 20
-        }
-       },
-       "guard": {
-        "archer": 9,
-        "spearman": 19
-       },
-       "holyCity": true
-      },
-      "status": "defended",
-      "round": 1,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "rusalka": 2,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
-      },
-      "attackerNow": {
-       "rusalka": 1
-      },
-      "defenderInitial": {
-       "archer": 10,
-       "spearman": 20
-      },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:29:24.000Z",
-        "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 28,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
-        }
-       }
-      ],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T10:29:06.000Z",
-      "endedAt": "2026-06-01T10:29:24.000Z"
-     },
      {
       "id": 1,
       "front": "north",
@@ -12408,8 +12331,8 @@
        "ambush": false,
        "wagonFort": 0.2
       },
-      "status": "raided",
-      "round": 5,
+      "status": "ongoing",
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
@@ -12417,7 +12340,9 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1
+       "rusalka": 3,
+       "grey_wolf": 3,
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "spearman": 3,
@@ -12425,7 +12350,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T10:27:39.600Z",
+        "at": "2026-06-01T10:37:21.600Z",
         "round": 1,
         "attackerLeft": 8,
         "defenderLeft": 3,
@@ -12435,50 +12360,12 @@
         "defenderLosses": {
          "supply_wagon": 2
         }
-       },
-       {
-        "at": "2026-06-01T10:27:57.600Z",
-        "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:15.600Z",
-        "round": 3,
-        "attackerLeft": 8,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:33.600Z",
-        "round": 4,
-        "attackerLeft": 7,
-        "defenderLeft": 3,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:28:51.600Z",
-        "round": 5,
-        "attackerLeft": 6,
-        "defenderLeft": 2,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "spearman": 1
-        }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T10:27:21.600Z",
-      "endedAt": "2026-06-01T10:28:51.600Z"
+      "endedAt": null
      }
     ],
     "raids": [],
@@ -12546,25 +12433,23 @@
       "front": "north",
       "name": "Vyrgan",
       "title": "Vyrgan the Hungry",
-      "level": 2,
-      "xp": 8,
-      "xpToNext": 28,
-      "skills": {
-       "savagery": 1
-      },
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
       "effects": {
-       "attack": 0.04,
+       "attack": 0,
        "defense": 0,
        "nerve": 0,
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T11:05:24.000Z",
-      "battles": 2,
-      "wins": 1,
-      "losses": 1,
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
       "razed": 0,
-      "kills": 5,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -12586,10 +12471,10 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 3
       },
-      "status": "done",
-      "battleId": null,
+      "status": "engaged",
+      "battleId": 1,
       "path": [
        [
         -2,
@@ -12614,12 +12499,12 @@
       ],
       "departsAt": "2026-06-01T10:05:00.000Z",
       "arrivesAt": "2026-06-01T10:05:43.200Z",
-      "leavesAt": "2026-06-01T10:28:51.600Z",
-      "returnsAt": "2026-06-01T10:29:34.800Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T10:29:34.800Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 388.1333333333333,
+      "supplyAt": "2026-06-01T10:37:21.600Z",
       "hungrySince": null,
-      "wagonFortAt": null,
+      "wagonFortAt": "2026-06-01T10:10:36.000Z",
       "returnHome": false,
       "raid": null
      },
@@ -12676,17 +12561,6 @@
       "r": 5,
       "size": 8,
       "waveId": null,
-      "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 6,
-      "waveId": 1,
       "reward": null,
       "endsAt": null
      }
@@ -12836,13 +12710,7 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [
-     [
-      0,
-      0,
-      11
-     ]
-    ],
+    "fear": [],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -14736,42 +14604,6 @@
    "response": {
     "notifications": [
      {
-      "id": 18,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T10:29:24.000Z",
-      "read": false
-     },
-     {
-      "id": 17,
-      "kind": "leader",
-      "tier": "digest",
-      "title": "Vyrgan the Hungry grows stronger",
-      "body": "Vyrgan the Hungry is now level 2.",
-      "createdAt": "2026-06-01T10:29:24.000Z",
-      "read": false
-     },
-     {
-      "id": 16,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "A horde is at the Holy City",
-      "body": "6 of them against its guard of 30.",
-      "createdAt": "2026-06-01T10:29:06.000Z",
-      "read": false
-     },
-     {
-      "id": 15,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "Your army fell back from (0, -1)",
-      "body": "The horde marches on, 5 rounds late.",
-      "createdAt": "2026-06-01T10:28:51.600Z",
-      "read": false
-     },
-     {
       "id": 14,
       "kind": "under_attack",
       "tier": "push",
@@ -14898,7 +14730,7 @@
       "read": false
      }
     ],
-    "unread": 18,
+    "unread": 14,
     "serverTime": "2026-06-01T10:40:36.000Z"
    }
   }
