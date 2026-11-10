@@ -32,7 +32,7 @@ import { generalAfterBattle } from './generals.js';
 import { heroAfterBattle } from './heroes.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
-import { angerHorde, announceNext } from './waves.js';
+import { angerFront, announceNext } from './waves.js';
 import { endWave, loadWave, setWaveStrength } from '../db/waves.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -153,16 +153,6 @@ function pickFind(data: GameData, find: RaidFind, owned: Set<string>, found: Set
   return scrolls.length ? { kind: 'scroll', scroll: scrolls[Math.floor(rng() * scrolls.length)]! } : null;
 }
 
-// The next horde of a front hates the more for a raid.
-async function angerFront(client: DbClient, data: GameData, world: World, front: Front, amount: number, at: Date): Promise<void> {
-  if (amount <= 0) return;
-  const { rows } = await client.query<{ id: number }>(
-    `SELECT id FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled' AND band_of IS NULL ORDER BY spawn_at, id LIMIT 1`,
-    [world.id, front],
-  );
-  if (rows[0]) await angerHorde(client, data, world, rows[0].id, amount, at);
-}
-
 // The battle at a gathering horde's encampment: the share of it gathered
 // by now, behind its walls. Its dead are gone from the horde; win or lose,
 // the front's next horde hates the more. Then the army comes home.
@@ -242,13 +232,8 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
   } else {
     await setWaveStrength(client, wave.id, left);
   }
-  // The front's next horde (else this one) hates the more.
-  const { rows } = await client.query<{ id: number }>(
-    `SELECT id FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled' AND band_of IS NULL AND (spawn_at, id) > ($3, $4) ORDER BY spawn_at, id LIMIT 1`,
-    [world.id, wave.front, wave.spawnAt, wave.id],
-  );
-  const angered = rows[0]?.id ?? (total(left) > 0 ? wave.id : null);
-  if (angered !== null) await angerHorde(client, data, world, angered, data.raids.strike.hatred, at);
+  // Its front hates the more.
+  await angerFront(client, data, world, wave.front, data.raids.strike.hatred, at);
   const entry = { stage: 1, name: stage.name, stronghold: true, won: result.won, battleId: battle.id, kills, lost: total(lost) };
   after = { ...after, raid: { ...raid, stage: 1, battles: [entry] } };
   await sendHome(client, world, after, at, data);

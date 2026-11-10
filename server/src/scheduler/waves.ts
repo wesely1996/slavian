@@ -7,11 +7,12 @@ import { assignLeader } from './leaders.js';
 import { loadLand } from '../db/rivers.js';
 import { z } from 'zod';
 import type { GameData, TerrainId } from '../data/index.js';
+import type { Front } from '../sim/mapgen.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
-import { addHatred, endWave, insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, setWaveStrength, type Wave } from '../db/waves.js';
-import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
+import { endWave, insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, setWaveHatred, setWaveStrength, type Wave } from '../db/waves.js';
+import { addFrontHatred, drainFrontHatred, getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { hatredCrossings, planMarch, planWave, routeFrom, rngFor, splitBand, threatOf, waveHexAt, type March, type PathStep, type PlannedWave, type Target, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
 import { findBridge } from '../db/bridges.js';
@@ -149,15 +150,21 @@ export async function forecastMarches(client: DbClient, data: GameData, world: W
   return forecasts;
 }
 
-// A horde grows to hate (horde.json hatred): each time its hatred passes
-// another whole 100%, it sends out a band of its troops.
-export async function angerHorde(client: DbClient, data: GameData, world: World, waveId: number, amount: number, at: Date): Promise<void> {
-  const before = (await loadWave(client, waveId)).hatred;
-  await addHatred(client, waveId, amount);
-  for (let i = hatredCrossings(before, before + amount); i > 0; i--) {
-    const wave = await loadWave(client, waveId);
+// A front grows to hate (horde.json hatred): its next horde to set out takes
+// all of it. Each time the front's hatred passes another whole 100%, its next
+// horde yet to set out sends out a band of its troops.
+export async function angerFront(client: DbClient, data: GameData, world: World, front: Front, amount: number, at: Date): Promise<void> {
+  if (amount <= 0) return;
+  const before = await addFrontHatred(client, world.id, front, amount);
+  const { rows } = await client.query<{ id: number }>(
+    `SELECT id FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled' AND band_of IS NULL ORDER BY spawn_at, id LIMIT 1`,
+    [world.id, front],
+  );
+  const waveId = rows[0]?.id;
+  for (let i = waveId === undefined ? 0 : hatredCrossings(before, before + amount); i > 0; i--) {
+    const wave = await loadWave(client, waveId!);
     const { band, rest } = splitBand(wave.composition, data.horde.hatred.bandShare);
-    if (Object.keys(band).length === 0) return;
+    if (Object.keys(band).length === 0) break;
     await setWaveStrength(client, wave.id, rest);
     const planned: PlannedWave = { index: wave.index, front: wave.front, spawnAt: at, composition: band, threat: threatOf(data, band), stance: wave.stance };
     const created = await insertWave(client, world.id, planned, false, wave.id);
@@ -216,6 +223,8 @@ export const waveHandlers: HandlerRegistry = {
     let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'scheduled') return;
     if (wave.bandOf !== null) return sendBand(client, data, world, wave, event.dueAt);
+    // It takes all of its front's hatred.
+    await setWaveHatred(client, wave.id, await drainFrontHatred(client, world.id, wave.front));
     // The front's leader takes its head, if free to.
     await assignLeader(client, data, world, wave, event.dueAt);
     // Camps of its front send part of themselves along.

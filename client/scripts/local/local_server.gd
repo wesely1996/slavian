@@ -40,7 +40,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	var world := {
 		"id": id, "name": String(params.get("name", "Solo")), "status": "running", "speed": speed,
 		"difficulty": String(params.get("difficulty", "normal")), "seed": seed_value, "maxPlayers": 1,
-		"hostAccountId": account_id, "startedAt": now, "embers": 0, "ritualAt": null, "endedAt": null,
+		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
@@ -1116,7 +1116,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	return {
 		"id": world.id, "name": world.name, "status": world.status, "inviteCode": null, "speed": world.speed,
 		"maxPlayers": world.maxPlayers, "hostAccountId": world.hostAccountId, "startedAt": LocalTime.iso(world.startedAt),
-		"sanctity": world.sanctity, "embers": world.embers, "difficulty": world.difficulty, "quietHours": _quiet_window(world),
+		"sanctity": world.sanctity, "embers": world.embers, "hatred": world.get("hatred", {}).duplicate(), "difficulty": world.difficulty, "quietHours": _quiet_window(world),
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "ruinSearches": LocalScouting.ruin_searches_view(world), "battles": _battles_view(world), "raids": _raids_view(world),
@@ -1222,7 +1222,7 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 		if v.id == hero.villageId:
 			home = v
 	var fronts: Array = []
-	# Each front's next horde, and how much it hates already.
+	# Each front with a horde yet to set out, and how much the front hates already.
 	var next_of := {}
 	for w in world.waves:
 		if w.status != "scheduled" or w.get("bandOf") != null:
@@ -1235,7 +1235,7 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 	fronts.sort()
 	var hatred := {}
 	for front in next_of:
-		hatred[front] = float(next_of[front].get("hatred", 0.0))
+		hatred[front] = LocalHordes.front_hatred(world, String(front))
 	var sites: Array = []
 	for s in world.sites:
 		if s.status == "unexplored" and _total(s.guardians) == 0:

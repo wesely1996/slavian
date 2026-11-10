@@ -5,14 +5,14 @@
 import type { GameData } from '../data/index.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages } from '../db/villages.js';
-import { listMembers, type World } from '../db/worlds.js';
+import { getWorld, listMembers, type World } from '../db/worlds.js';
 import { eventBounty } from '../sim/events.js';
 import type { Front } from '../sim/mapgen.js';
 import { total } from '../sim/battle.js';
 import type { Resources } from '../sim/resources.js';
 import { tell } from './notices.js';
 import { reward } from './onboarding.js';
-import { angerHorde } from './waves.js';
+import { angerFront } from './waves.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -52,20 +52,16 @@ export async function rewardEvent(
 
 // Left undone: the next horde of the front hates the more, and everyone is told.
 export async function failEvent(client: DbClient, data: GameData, world: World, front: Front, title: string, vars: Record<string, string | number>, at: Date): Promise<void> {
-  const { rows } = await client.query<{ id: number; hatred: number }>(
-    `SELECT id, hatred FROM waves WHERE world_id = $1 AND front = $2 AND status = 'scheduled' AND band_of IS NULL ORDER BY spawn_at, id LIMIT 1`,
-    [world.id, front],
-  );
-  const wave = rows[0];
   const amount = data.events.failure.hatred;
-  if (wave && amount > 0) await angerHorde(client, data, world, wave.id, amount, at);
+  const hatred = Number((await getWorld(client, world.id)).hatred[front] ?? 0) + amount;
+  await angerFront(client, data, world, front, amount, at);
   for (const member of await listMembers(client, world.id)) {
     await tell(client, world, member.accountId, {
       kind: 'event',
       tier: 'push',
       title,
-      body: wave && amount > 0 ? 'The next horde from the {front} hates you the more for it: +{hatred}% attack and defense.' : 'Nothing more came of it.',
-      vars: { ...vars, front, hatred: wave ? Math.round((Number(wave.hatred) + amount) * 100) : 0 },
+      body: amount > 0 ? 'The next horde from the {front} hates you the more for it: +{hatred}% attack and defense.' : 'Nothing more came of it.',
+      vars: { ...vars, front, hatred: Math.round(hatred * 100) },
     }, at);
   }
 }

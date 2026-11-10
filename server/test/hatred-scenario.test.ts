@@ -1,7 +1,8 @@
-// A horde's hatred in a solo session: the hero ambushes the next horde
-// (each ambush holds it up and makes it hate the more, and the next ambush
-// on it is riskier and worth more XP); the hating horde comes on stronger,
-// and when it is over leaves camps behind for its hatred.
+// A front's hatred in a solo session: the hero ambushes the front's next
+// horde (each ambush holds it up and makes the front hate the more, and the
+// next ambush is riskier and worth more XP); the front's next horde to set
+// out takes all of its hatred, comes on stronger, and when it is over leaves
+// camps behind for its hatred. The front's hatred is then drained.
 import { MINUTE, scenario } from './scenario.js';
 
 const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Hatred', displayName: 'You', speed: 50, difficulty: 'normal' };
@@ -13,9 +14,10 @@ scenario('hatred-scenario.json', START, async ({ started, now, play }) => {
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
 
-  // Hating already, the first horde is near the edge: the first ambush
-  // tips it over 100%, and it sends a band out from its wilds.
-  await play({ set: { waveHatred: { index: 0, hatred: 0.95 } } });
+  // Hating already, the first horde's front is near the edge: the first
+  // ambush tips it over 100%, and its next horde sends a band out from its
+  // wilds.
+  await play({ set: { frontHatred: { front: firstFront, hatred: 0.95 } } });
   // The hero takes every ambush on the first horde's front it is offered
   // while that horde is yet to set out.
   let ambushes = 0;

@@ -279,10 +279,8 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.won, "at": at})
 	var finds: Array = []
 	if result.won:
-		var wave := LocalHeroCommands._next_wave(world, front)
 		var amount := float(data.raids.hatred.perBattle) + (float(data.raids.hatred.stronghold) if stage.stronghold else 0.0)
-		if not wave.is_empty() and amount > 0:
-			LocalHordes.anger_horde(server, world, wave, amount, at)
+		LocalHordes.anger_front(server, world, String(front), amount, at)
 		if front == "north":
 			var owner_hero: Dictionary = hero if not hero.is_empty() else (LocalArmies.hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 			var kinds := north_finds(data, stage.stronghold, int(world.seed), int(army.id), stage_no)
@@ -372,19 +370,8 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 		_announce_next(server, world)
 	else:
 		wave.composition = left
-	# The front's next horde (else this one) hates the more.
-	var angered: Dictionary = {}
-	for w in world.waves:
-		if w.front != front or w.status != "scheduled" or w.get("bandOf") != null:
-			continue
-		if int(w.spawnAt) < int(wave.spawnAt) or (int(w.spawnAt) == int(wave.spawnAt) and int(w.id) <= int(wave.id)):
-			continue
-		if angered.is_empty() or int(w.spawnAt) < int(angered.spawnAt) or (int(w.spawnAt) == int(angered.spawnAt) and int(w.id) < int(angered.id)):
-			angered = w
-	if angered.is_empty() and LocalBattle.total(left) > 0:
-		angered = wave
-	if not angered.is_empty():
-		LocalHordes.anger_horde(server, world, angered, float(data.raids.strike.hatred), at)
+	# Its front hates the more.
+	LocalHordes.anger_front(server, world, String(front), float(data.raids.strike.hatred), at)
 	var entry := {"stage": 1, "name": stage.name, "stronghold": true, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost)}
 	var next_raid: Dictionary = raid.duplicate()
 	next_raid.stage = 1

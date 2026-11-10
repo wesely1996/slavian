@@ -114,14 +114,10 @@ static func reward(server: LocalServer, world: Dictionary, account_id: Variant, 
 ## Left undone: the next horde of the front hates the more, and everyone is
 ## told (scheduler/eventOutcomes.ts failEvent).
 static func fail(server: LocalServer, world: Dictionary, front: String, title: String, vars: Dictionary, at: int) -> void:
-	var wave := LocalHeroCommands._next_wave(world, front)
 	var amount := float(server.data.events.failure.hatred)
-	var angered := not wave.is_empty() and amount > 0
-	var hatred := 0
-	if not wave.is_empty():
-		hatred = LocalWaves.js_round((float(wave.get("hatred", 0.0)) + amount) * 100)
-	if angered:
-		LocalHordes.anger_horde(server, world, wave, amount, at)
+	var angered := amount > 0
+	var hatred := LocalWaves.js_round((LocalHordes.front_hatred(world, front) + amount) * 100)
+	LocalHordes.anger_front(server, world, front, amount, at)
 	var told := vars.duplicate()
 	told.merge({"front": front, "hatred": hatred}, true)
 	LocalInbox.tell_everyone(server, world, {"kind": "event", "tier": "push", "title": title,

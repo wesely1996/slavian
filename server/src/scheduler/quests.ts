@@ -1,6 +1,6 @@
 // Hero quests on the scheduler (sim/quests.ts): a quest sends the hero away
 // (status 'questing') and hero_quest brings it home with what it went for.
-import { angerHorde } from './waves.js';
+import { angerFront } from './waves.js';
 import type { GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { loadHero, saveHero, type Hero } from '../db/heroes.js';
@@ -9,7 +9,7 @@ import type { DbClient } from '../db/pool.js';
 import { insertMission, markMissionDone, recordReport } from '../db/scouting.js';
 import { listSites, listScrolls, loadSite } from '../db/sites.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import type { World } from '../db/worlds.js';
+import { getWorld, type World } from '../db/worlds.js';
 import { total } from '../sim/battle.js';
 import { gainXp, woundMs } from '../sim/heroes.js';
 import { hallLevelAt } from './generals.js';
@@ -31,9 +31,9 @@ const DONE_KEPT = 30;
 
 // What the world holds for the hero's quests right now.
 async function questWorld(client: DbClient, data: GameData, world: World, hero: Hero): Promise<QuestWorld> {
-  // Each front's next horde, and how much it hates already.
-  const { rows } = await client.query<{ front: Front; hatred: number }>(
-    "SELECT DISTINCT ON (front) front, hatred FROM waves WHERE world_id = $1 AND status = 'scheduled' AND band_of IS NULL ORDER BY front, spawn_at, id",
+  // Each front with a horde yet to set out, and how much the front hates already.
+  const { rows } = await client.query<{ front: Front }>(
+    "SELECT DISTINCT front FROM waves WHERE world_id = $1 AND status = 'scheduled' AND band_of IS NULL ORDER BY front",
     [world.id],
   );
   const sites = (await listSites(client, world.id)).filter((s) => s.status === 'unexplored' && total(s.guardians) === 0);
@@ -43,7 +43,7 @@ async function questWorld(client: DbClient, data: GameData, world: World, hero: 
     speed: world.speed,
     startedAt: world.startedAt ?? new Date(0),
     fronts: rows.map((r) => r.front),
-    hatred: Object.fromEntries(rows.map((r) => [r.front, Number(r.hatred)])),
+    hatred: Object.fromEntries(rows.map((r) => [r.front, Number(world.hatred[r.front] ?? 0)])),
     sites: sites.map((s) => ({ id: s.id, q: s.q, r: s.r })),
     gearLeft: Object.keys(data.heroes.items).some((item) => !owned.has(item)),
   };
@@ -120,8 +120,9 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
       if (!wave) return { body: 'The road lay empty: that horde had already set out.' };
       const delay = Math.round(((data.quests.kinds.ambush.delayHours ?? 0) * MS_PER_HOUR) / world.speed);
       await client.query(`UPDATE waves SET spawn_at = spawn_at + make_interval(secs => $2::double precision / 1000) WHERE id = $1`, [wave.id, delay]);
-      // Held up, it hates the more.
-      await angerHorde(client, data, world, wave.id, data.horde.hatred.perAmbush, at);
+      // Held up, its front hates the more.
+      const hatred = Number((await getWorld(client, world.id)).hatred[wave.front] ?? 0) + data.horde.hatred.perAmbush;
+      await angerFront(client, data, world, wave.front, data.horde.hatred.perAmbush, at);
       await client.query(
         `UPDATE scheduled_events SET due_at = due_at + make_interval(secs => $3::double precision / 1000)
          WHERE world_id = $1 AND status = 'pending' AND type IN ('wave_spawn', 'wave_warning') AND (payload->>'waveId')::bigint = $2`,
@@ -129,7 +130,7 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
       );
       await notifyWorld(client, { worldId: world.id, type: 'waves' });
       // Told in real minutes, at any world speed.
-      return { body: 'The next horde from the {front} sets out {minutes} minutes later, hating you the more: +{hatred}% attack and defense.', vars: { front: quest.front ?? '', minutes: Math.round(delay / 60_000), hatred: Math.round((Number(wave.hatred) + data.horde.hatred.perAmbush) * 100) } };
+      return { body: 'The next horde from the {front} sets out {minutes} minutes later, hating you the more: +{hatred}% attack and defense.', vars: { front: quest.front ?? '', minutes: Math.round(delay / 60_000), hatred: Math.round(hatred * 100) } };
     }
     case 'scout': {
       const wave = await nextWave(client, world.id, quest.front);
