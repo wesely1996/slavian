@@ -230,29 +230,51 @@ export function isOver(world: World): boolean {
   return world.status === 'won' || world.status === 'lost' || world.status === 'abandoned';
 }
 
-export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {
-  const qs: number[] = [];
-  const rs: number[] = [];
-  const terrain: string[] = [];
-  for (const [key, type] of map.terrain) {
-    const [q, r] = key.split(',').map(Number);
-    qs.push(q!);
-    rs.push(r!);
-    terrain.push(type);
+// A world's terrain is stored as one row (migration 059): runs of hexes
+// along a row, "r:q0:t,t,t", joined by ";" in (r, q) order.
+export function encodeTerrain(cells: Iterable<readonly [number, number, string]>): string {
+  const sorted = [...cells].sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+  const runs: string[] = [];
+  let run: { r: number; q0: number; next: number; terrain: string[] } | null = null;
+  for (const [q, r, terrain] of sorted) {
+    if (run && run.r === r && run.next === q) {
+      run.terrain.push(terrain);
+      run.next++;
+      continue;
+    }
+    if (run) runs.push(`${run.r}:${run.q0}:${run.terrain.join(',')}`);
+    run = { r, q0: q, next: q + 1, terrain: [terrain] };
   }
-  await client.query(
-    `INSERT INTO hexes (world_id, q, r, terrain)
-     SELECT $1, * FROM unnest($2::int[], $3::int[], $4::text[])`,
-    [worldId, qs, rs, terrain],
-  );
+  if (run) runs.push(`${run.r}:${run.q0}:${run.terrain.join(',')}`);
+  return runs.join(';');
 }
 
+export function decodeTerrain(cells: string): [number, number, TerrainId][] {
+  const out: [number, number, TerrainId][] = [];
+  if (!cells) return out;
+  for (const run of cells.split(';')) {
+    const [r, q0, terrain] = run.split(':');
+    const row = Number(r);
+    let q = Number(q0);
+    for (const t of terrain!.split(',')) out.push([q++, row, t as TerrainId]);
+  }
+  return out;
+}
+
+export async function insertHexes(client: DbClient, worldId: number, map: WorldMap): Promise<void> {
+  const cells: [number, number, string][] = [];
+  for (const [key, type] of map.terrain) {
+    const [q, r] = key.split(',').map(Number);
+    cells.push([q!, r!, type]);
+  }
+  await client.query('INSERT INTO world_terrain (world_id, cells) VALUES ($1, $2)', [worldId, encodeTerrain(cells)]);
+}
+
+// [q, r, terrain] for every hex of the map, in (r, q) order (none before
+// the map is made).
 export async function loadHexes(client: DbClient, worldId: number): Promise<[number, number, TerrainId][]> {
-  const { rows } = await client.query<{ q: number; r: number; terrain: TerrainId }>(
-    'SELECT q, r, terrain FROM hexes WHERE world_id = $1 ORDER BY r, q',
-    [worldId],
-  );
-  return rows.map((row) => [row.q, row.r, row.terrain]);
+  const { rows } = await client.query<{ cells: string }>('SELECT cells FROM world_terrain WHERE world_id = $1', [worldId]);
+  return rows[0] ? decodeTerrain(rows[0].cells) : [];
 }
 
 export async function addEmbers(client: DbClient, worldId: number, n: number): Promise<void> {

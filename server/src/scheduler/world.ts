@@ -1,6 +1,6 @@
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { RuleError } from '../errors.js';
-import { getWorld, isOver } from '../db/worlds.js';
+import { getWorld, isOver, type World } from '../db/worlds.js';
 import type { ScheduledEvent, SchedulerDeps } from './events.js';
 import { alert } from '../alerts.js';
 
@@ -41,6 +41,16 @@ export async function drainWorld(
   until: Date,
   deps: SchedulerDeps,
 ): Promise<number> {
+  return (await drain(client, worldId, until, deps)).processed;
+}
+
+// drainWorld, also giving the world as it stands afterwards.
+async function drain(
+  client: DbClient,
+  worldId: number,
+  until: Date,
+  deps: SchedulerDeps,
+): Promise<{ processed: number; world: World }> {
   let world = await getWorld(client, worldId);
   let processed = 0;
   for (; processed < MAX_EVENTS_PER_DRAIN; processed++) {
@@ -54,7 +64,7 @@ export async function drainWorld(
       [worldId, until],
     );
     const row = rows[0];
-    if (!row) return processed;
+    if (!row) return { processed, world };
 
     const event: ScheduledEvent = {
       id: row.id,
@@ -75,7 +85,7 @@ export async function drainWorld(
       await client.query('RELEASE SAVEPOINT event');
       // Nothing more happens in a world whose run is over.
       world = await getWorld(client, worldId);
-      if (isOver(world)) return processed + 1;
+      if (isOver(world)) return { processed: processed + 1, world };
     } catch (error) {
       await client.query('ROLLBACK TO SAVEPOINT event');
       await client.query(
@@ -90,19 +100,20 @@ export async function drainWorld(
 }
 
 // Runs `fn` with exclusive access to the world, after catching the world up
-// to `now`. Commands go through here so they never act on stale state.
+// to `now`. Commands go through here so they never act on stale state. `fn`
+// is handed the world as caught up.
 export async function withWorld<T>(
   db: Db,
   worldId: number,
   now: Date,
   deps: SchedulerDeps,
-  fn: (client: DbClient) => Promise<T>,
+  fn: (client: DbClient, world: World) => Promise<T>,
 ): Promise<T> {
   return inTransaction(db, async (client) => {
     await lockWorld(client, worldId);
-    await drainWorld(client, worldId, now, deps);
+    const { world } = await drain(client, worldId, now, deps);
     // A finished run stays readable, but nothing more can be done in it.
-    if (isOver(await getWorld(client, worldId))) throw new RuleError('This run is over');
-    return fn(client);
+    if (isOver(world)) throw new RuleError('This run is over');
+    return fn(client, world);
   });
 }

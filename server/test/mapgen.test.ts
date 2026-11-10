@@ -3,6 +3,7 @@ import { loadGameData } from '../src/data/index.js';
 import { findPath, hex, hexDistance, hexKey, ring, spiral, type Hex } from '../src/sim/hex.js';
 import { commonNeighbors, edgeKey, moveCostOn } from '../src/sim/land.js';
 import { activeFrontsFor, frontOf, generateMap, landOfMap, radiusFor, START_RING, WATER } from '../src/sim/mapgen.js';
+import { decodeTerrain, encodeTerrain } from '../src/db/worlds.js';
 
 const data = loadGameData();
 
@@ -101,5 +102,26 @@ describe('rivers', () => {
       for (const start of map.startSites) expect(findPath(start, hex(0, 0), cost)).not.toBeNull();
     }
     expect(maps.some((m) => m.rivers.some((e) => e.bridge)) && maps.some((m) => m.rivers.some((e) => !e.bridge))).toBe(true);
+  });
+});
+
+describe('stored terrain', () => {
+  it('keeps every hex of a map, in (r, q) order, in one compact row', () => {
+    const map = generateMap(data, 4242, 3);
+    const cells = [...map.terrain].map(([key, t]): [number, number, string] => {
+      const [q, r] = key.split(',').map(Number);
+      return [q!, r!, t];
+    });
+    const stored = encodeTerrain(cells);
+    const expected = [...cells].sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    expect(decodeTerrain(stored)).toEqual(expected);
+    expect(stored.split(';').length).toBe(new Set(cells.map(([, r]) => r)).size);
+  });
+
+  it('keeps gaps in a row as separate runs', () => {
+    const cells: [number, number, string][] = [[3, 0, 'lake'], [0, 0, 'plains'], [1, 0, 'forest'], [-2, 1, 'hills']];
+    expect(encodeTerrain(cells)).toBe('0:0:plains,forest;0:3:lake;1:-2:hills');
+    expect(decodeTerrain(encodeTerrain(cells))).toEqual([[0, 0, 'plains'], [1, 0, 'forest'], [3, 0, 'lake'], [-2, 1, 'hills']]);
+    expect(decodeTerrain('')).toEqual([]);
   });
 });

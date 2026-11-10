@@ -14,6 +14,7 @@ import { hex, hexDistance } from '../src/sim/hex.js';
 import { gainXp, newHero, rosterBonuses } from '../src/sim/heroes.js';
 import { roadRoute } from '../src/sim/logistics.js';
 import { loadLand } from '../src/db/rivers.js';
+import { encodeTerrain, loadHexes } from '../src/db/worlds.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
@@ -42,6 +43,16 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
   let baseUrl: string;
   let now = new Date('2026-05-01T10:00:00Z');
   const clock = () => now;
+  // Changes one hex of a world's stored map.
+  const setTerrain = async (worldId: number, cell: { q: number; r: number }, terrain: string) => {
+    const client = await db.connect();
+    try {
+      const cells = (await loadHexes(client, worldId)).map(([q, r, t]): [number, number, string] => [q, r, q === cell.q && r === cell.r ? terrain : t]);
+      await client.query('UPDATE world_terrain SET cells = $2 WHERE world_id = $1', [worldId, encodeTerrain(cells)]);
+    } finally {
+      client.release();
+    }
+  };
 
   beforeAll(async () => {
     ({ db, cleanup } = await createTestDb());
@@ -1926,9 +1937,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const crossing = (body: object) => call('POST', `/v1/villages/${home.id}/crossings`, mira.token, body);
     expect((await crossing({ a: home, b: { q: home.q + 9, r: home.r } })).body.message).toMatch(/within|No river/);
     // An old map's river along a lake: no bridge leads onto the water.
-    await db.query("UPDATE hexes SET terrain = 'lake' WHERE world_id = $1 AND q = $2 AND r = $3", [worldId, across.q, across.r]);
+    await setTerrain(worldId, across, 'lake');
     expect((await crossing({ a: home, b: across })).body.message).toMatch(/both banks/);
-    await db.query('UPDATE hexes SET terrain = $4 WHERE world_id = $1 AND q = $2 AND r = $3', [worldId, across.q, across.r, terrain.get(`${across.q},${across.r}`)]);
+    await setTerrain(worldId, across, terrain.get(`${across.q},${across.r}`)!);
     let w = (await crossing({ a: home, b: across })).body;
     expect(w.map.rivers).toEqual([[a.q, a.r, b.q, b.r, 'building', 1]]);
     expect((await crossing({ a: across, b: home })).body.message).toMatch(/being built/);

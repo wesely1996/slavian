@@ -71,9 +71,8 @@ async function memberCommand<T>(
   input: { accountId: number; worldId: number; now: Date },
   apply: (client: DbClient, world: World, bridge: BridgeState) => Promise<T>,
 ): Promise<T> {
-  return withWorld(db, input.worldId, input.now, deps, async (client) => {
+  return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (!(await isMember(client, input.worldId, input.accountId))) throw new ForbiddenError('Not a member of this world');
-    const world = await getWorld(client, input.worldId);
     if (world.status !== 'running') throw new RuleError('This world is not running');
     return apply(client, world, await loadBridge(client, world.id, input.now, world.sanctity));
   });

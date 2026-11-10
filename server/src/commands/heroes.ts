@@ -4,7 +4,7 @@ import { loadHero, saveHero, type Hero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
-import { getWorld, loadHexes, type World } from '../db/worlds.js';
+import { loadHexes, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { HeroPayload } from '../scheduler/heroes.js';
@@ -27,8 +27,7 @@ async function heroCommand(
   input: HeroCommandInput,
   apply: (ctx: { client: DbClient; world: World; hero: Hero }) => Promise<Hero>,
 ): Promise<Hero> {
-  return withWorld(db, input.worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, input.worldId);
+  return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     const hero = await loadHero(client, world.id, input.accountId);
     const next = await apply({ client, world, hero });
     await saveHero(client, next);

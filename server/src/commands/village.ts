@@ -1,4 +1,4 @@
-import { listRiverEdges } from '../db/rivers.js';
+import { riverEdgesAt } from '../db/rivers.js';
 import { insertRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { Stance, TerrainId } from '../data/index.js';
@@ -18,7 +18,7 @@ import { loadWave } from '../db/waves.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { addBought, boughtCount, getWorld, loadHexes, type World } from '../db/worlds.js';
+import { addBought, boughtCount, loadHexes, type World } from '../db/worlds.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { ExpeditionPayload } from '../scheduler/expeditions.js';
@@ -88,8 +88,7 @@ export async function ownVillageCommand<T>(
   if (!rows[0]) throw new NotFoundError(`Village ${input.villageId} not found`);
   const worldId = rows[0].world_id;
 
-  return withWorld(db, worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, worldId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, {
       worldId,
@@ -137,7 +136,7 @@ export async function queueBuildCommand(
     };
     // What the land allows: water beside the village, hills under it.
     const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t as string] as const));
-    const site = villageSite(terrain, await listRiverEdges(client, world.id), hex(village.q, village.r));
+    const site = villageSite(terrain, await riverEdgesAt(client, world.id, hex(village.q, village.r)), hex(village.q, village.r));
     const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed, site);
     const payload: BuildCompletePayload = {
       villageId: village.id,
@@ -508,8 +507,7 @@ export async function abandonVillageCommand(db: Db, deps: SchedulerDeps, input: 
   const { rows } = await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [input.villageId]);
   if (!rows[0]) throw new NotFoundError(`Village ${input.villageId} not found`);
   const worldId = rows[0].world_id;
-  await withWorld(db, worldId, input.now, deps, async (client) => {
-    const world = await getWorld(client, worldId);
+  await withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     if (village.ownerAccountId !== input.accountId) throw new ForbiddenError('Only its owner can abandon a town');
     if (village.refuge) throw new RuleError('A refugee camp is not yours to abandon');
