@@ -301,33 +301,9 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     }
   });
 
-  app.get('/v1/data', async () => ({
-    buildings: scheduler.data.buildings,
-    terrain: scheduler.data.terrain,
-    units: scheduler.data.units,
-    enemies: scheduler.data.enemies,
-    waves: scheduler.data.waves,
-    scouting: scheduler.data.scouting,
-    battle: scheduler.data.battle,
-    logistics: scheduler.data.logistics,
-    expansion: scheduler.data.expansion,
-    research: scheduler.data.research,
-    heroes: scheduler.data.heroes,
-    quests: scheduler.data.quests,
-    leaders: scheduler.data.leaders,
-    walls: scheduler.data.walls,
-    orders: scheduler.data.orders,
-    armies: scheduler.data.armies,
-    field: scheduler.data.field,
-    horde: scheduler.data.horde,
-    camps: scheduler.data.camps,
-    difficulty: scheduler.data.difficulty,
-    sites: scheduler.data.sites,
-    lore: scheduler.data.lore,
-    bridge: scheduler.data.bridge,
-    clans: scheduler.data.clans,
-    onboarding: scheduler.data.onboarding,
-  }));
+  // All the game data, as the app bundles it for solo play (client/data/game.json):
+  // a screen may read any of it.
+  app.get('/v1/data', async () => scheduler.data);
 
   app.post('/v1/auth/guest', async (request) => {
     const body = guestBody.parse(request.body ?? {});

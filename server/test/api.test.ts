@@ -108,6 +108,10 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(status).toBe(200);
     expect(body.buildings.buildings.woodcutter.name).toBe('Woodcutter');
     expect(body.terrain.terrain.plains.settleable).toBe(true);
+    // All of it, as the app bundles it for solo play: screens read any part
+    // (the Raid tab its raids, the events panel its events).
+    expect(Object.keys(body).sort()).toEqual(Object.keys(scheduler.data).sort());
+    expect(body.raids.maxDepth).toBe(scheduler.data.raids.maxDepth);
   });
 
   it('lets a player join a run under way, with a village of their own', async () => {
