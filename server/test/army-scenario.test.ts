@@ -79,5 +79,11 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
     await play({ set: { garrison: { spearman: 4, pathfinder: 6 } } });
     await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { spearman: 2 } } });
     await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { spearman: 2, pathfinder: 6 } } });
+    // A large military caravan carries ten foot soldiers, or one siege
+    // engine, at its own pace (and 300 grain).
+    await play({ set: { garrison: { spearman: 10, large_caravan: 2, onager: 1 } } });
+    await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { spearman: 10, large_caravan: 1 } } });
+    // A siege engine goes first, a whole wagon to itself.
+    await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: rough[0], r: rough[1] }, units: { onager: 1, large_caravan: 1 } } });
   }
 });

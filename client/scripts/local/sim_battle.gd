@@ -50,32 +50,55 @@ static func battle_rng(seed_value: int, battle_id: int, round: int) -> LocalRng:
 ## A side's forces: its groups ({units, stance, stats?}) when it fights in
 ## groups, else the side itself as one.
 static func _groups(side: Dictionary) -> Array:
-	return side.groups if side.has("groups") else [{"units": side.units, "stance": side.stance}]
+	if side.has("groups"):
+		return side.groups
+	var one := {"units": side.units, "stance": side.stance}
+	if side.has("champions"):
+		one.champions = side.champions
+	return [one]
+
+
+## battle.ts championOf: a hero's or general's champion at `level`
+## (heroes.json champion, generals.champion), growthPerLevel more each level.
+static func champion_of(data: Dictionary, id: String, level: int) -> Dictionary:
+	var c: Dictionary = data.heroes.champion if id == "hero" else data.heroes.generals.champion
+	var f := 1.0 + float(c.growthPerLevel) * maxi(0, level - 1)
+	return {"id": id, "attack": float(c.attack) * f, "defense": float(c.defense) * f, "health": float(c.health) * f}
 
 
 ## Kills `from` inflicts on `to` this round, by unit type, for each of
-## `to`'s groups. A side: {units, stance, stats: Callable, home, groups?}.
-static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng) -> Array:
+## `to`'s groups, and the champions it strikes down there ({losses, fallen}).
+## A side: {units, stance, stats: Callable, home, groups?, champions?}.
+static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng) -> Dictionary:
 	var battle: Dictionary = data.battle
 	var strikers := _groups(from)
 	var groups := _groups(to)
 	var result: Array = []
+	var fallen: Array = []
 	for g in groups:
 		result.append({})
+		fallen.append([])
 	var targets: Array = []
 	var target_total := 0
 	for i in groups.size():
 		for unit in groups[i].units:
 			if int(groups[i].units[unit]) > 0:
-				targets.append([i, unit, int(groups[i].units[unit])])
+				targets.append([i, unit, int(groups[i].units[unit]), null])
 				target_total += int(groups[i].units[unit])
+	# Champions stand among their men: each is one more to strike at.
+	for i in groups.size():
+		for c in groups[i].get("champions", []):
+			targets.append([i, c.id, 1, c])
+			target_total += 1
 	if target_total == 0:
-		return result
+		return {"losses": result, "fallen": fallen}
 	for t in targets:
 		var group: Dictionary = groups[t[0]]
 		var target: String = t[1]
 		var target_count: int = t[2]
-		var stats: Dictionary = (group.stats if group.has("stats") else to.stats).call(target)
+		var champion: Variant = t[3]
+		var stats: Dictionary = {"attack": champion.attack, "defense": champion.defense, "health": champion.health, "family": "infantry"} if champion != null \
+			else (group.stats if group.has("stats") else to.stats).call(target)
 		var damage := 0.0
 		for striker in strikers:
 			var from_stance: Dictionary = battle.stances[striker.stance]
@@ -88,6 +111,9 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 				var attacker: Dictionary = striker_stats.call(unit)
 				var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
 				damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
+			# Its champions strike too, at no family's weakness.
+			for c in striker.get("champions", []):
+				damage += float(c.attack) * float(from_stance.attack) * matchup
 		var share := float(target_count) / target_total
 		var variance := 1.0 + float(battle.variance) * (rng.next() * 2.0 - 1.0)
 		# Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
@@ -99,9 +125,11 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 		# Round randomly so small fights still take losses on average.
 		var whole := floori(expected) + (1 if rng.next() < expected - floorf(expected) else 0)
 		var dead := mini(target_count, whole)
-		if dead > 0:
+		if dead > 0 and champion != null:
+			fallen[t[0]].append(champion.id)
+		elif dead > 0:
 			result[t[0]][target] = int(result[t[0]].get(target, 0)) + dead
-	return result
+	return {"losses": result, "fallen": fallen}
 
 
 static func _merged(losses: Array) -> Dictionary:
@@ -115,11 +143,12 @@ static func _merged(losses: Array) -> Dictionary:
 ## Simultaneous: both sides strike with the numbers they had at the start.
 ## With defender groups, also their losses by group (defenderGroupLosses).
 static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng) -> Dictionary:
-	var attacker_losses := _merged(_kills(data, defender, attacker, rng))
+	var struck := _kills(data, defender, attacker, rng)
 	var by_group := _kills(data, attacker, defender, rng)
-	var result := {"attackerLosses": attacker_losses, "defenderLosses": _merged(by_group)}
+	var result := {"attackerLosses": _merged(struck.losses), "defenderLosses": _merged(by_group.losses),
+		"attackerFallen": struck.fallen, "defenderFallen": by_group.fallen}
 	if defender.has("groups"):
-		result.defenderGroupLosses = by_group
+		result.defenderGroupLosses = by_group.losses
 	return result
 
 

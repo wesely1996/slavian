@@ -3,6 +3,7 @@ import { loadGameData, type Stance } from '../src/data/index.js';
 import {
   battleOutcome,
   battleRng,
+  championOf,
   enemyStats,
   playerStats,
   raidLoot,
@@ -187,5 +188,25 @@ describe('raids and stances', () => {
     expect(counts.offensive).toBeGreaterThan(counts.balanced!);
     expect(counts.balanced).toBeGreaterThan(counts.defensive!);
     expect(waveStance(data, 'north', 9, 3)).toBe(waveStance(data, 'north', 9, 3));
+  });
+});
+
+describe('champions', () => {
+  it('heroes and generals fight in the ranks: they strike, and fall when struck down', () => {
+    const hero = championOf(data, 'hero', 1);
+    const general = championOf(data, 'general', 1);
+    // A general is the lesser champion; both grow with their level.
+    expect(general.attack).toBeLessThan(hero.attack);
+    expect(general.health).toBeLessThan(hero.health);
+    expect(championOf(data, 'hero', 5).attack).toBeGreaterThan(hero.attack);
+    // The hero adds to the garrison's blows.
+    const plain = averageKills(horde({ leshy_thrall: 40 }), garrison({ spearman: 10 }));
+    const led = averageKills(horde({ leshy_thrall: 40 }), { ...garrison({ spearman: 10 }), champions: [hero] });
+    expect(led.attackerLosses).toBeGreaterThan(plain.attackerLosses);
+    // A weak champion before a great horde is struck down.
+    const frail = { id: 'general', attack: 1, defense: 0, health: 1 };
+    const r = resolveRound(data, horde({ cave_bear: 200 }), { ...garrison({ spearman: 1 }), champions: [frail] }, battleRng(1, 1, 1));
+    expect(r.defenderFallen[0]).toEqual(['general']);
+    expect(r.defenderLosses.general).toBeUndefined();
   });
 });

@@ -44129,7 +44129,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 8,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -44152,9 +44152,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -47154,7 +47155,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 7,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -47177,9 +47178,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -47187,9 +47189,11 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 9,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -50172,7 +50176,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 7,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -50195,9 +50199,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -50205,9 +50210,11 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 9,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -53190,7 +53197,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 7,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -53213,9 +53220,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -53223,9 +53231,11 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 9,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
@@ -55864,10 +55874,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 722,
-        "wood": 1272,
-        "grain": 1290.5,
-        "stone": 1483
+        "iron": 772,
+        "wood": 1360,
+        "grain": 1379.5,
+        "stone": 1586
        },
        "ratesPerHour": {
         "iron": 150,
@@ -56217,7 +56227,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 6,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -56240,9 +56250,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -56250,25 +56261,29 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 9,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:34:57.600Z",
         "round": 4,
-        "attackerLeft": 11,
+        "attackerLeft": 8,
         "defenderLeft": 0,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 183,
-       "wood": 323,
-       "grain": 328,
-       "stone": 377
+       "iron": 133,
+       "wood": 235,
+       "grain": 239,
+       "stone": 274
       },
       "decision": {
        "choice": "raid",
@@ -56352,7 +56367,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 2,
+      "xp": 5,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -56621,7 +56636,7 @@
       "front": "south",
       "q": -3,
       "r": 3,
-      "size": 11,
+      "size": 8,
       "waveId": 2,
       "reward": null,
       "endsAt": null
@@ -58974,10 +58989,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 594.5,
-        "wood": 1044,
-        "grain": 1058.5,
-        "stone": 1217
+        "iron": 635.5,
+        "wood": 1116,
+        "grain": 1131.5,
+        "stone": 1301
        },
        "ratesPerHour": {
         "iron": 150,
@@ -59304,10 +59319,10 @@
        }
       ],
       "loot": {
-       "iron": 130,
-       "wood": 228,
-       "grain": 232,
-       "stone": 266
+       "iron": 139,
+       "wood": 244,
+       "grain": 248,
+       "stone": 285
       },
       "decision": {
        "choice": "raid",
@@ -59344,7 +59359,7 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 9,
+       "zealot": 6,
        "crossbowman": 1,
        "sergeant_rider": 1
       },
@@ -59367,9 +59382,10 @@
        {
         "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
-        "attackerLeft": 11,
+        "attackerLeft": 10,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -59377,25 +59393,29 @@
        {
         "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
-        "attackerLeft": 11,
+        "attackerLeft": 9,
         "defenderLeft": 3,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:34:57.600Z",
         "round": 4,
-        "attackerLeft": 11,
+        "attackerLeft": 8,
         "defenderLeft": 0,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "zealot": 1
+        },
         "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 183,
-       "wood": 323,
-       "grain": 328,
-       "stone": 377
+       "iron": 133,
+       "wood": 235,
+       "grain": 239,
+       "stone": 274
       },
       "decision": {
        "choice": "raid",
@@ -59479,7 +59499,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 2,
+      "xp": 5,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -59745,7 +59765,7 @@
       "front": "south",
       "q": -3,
       "r": 3,
-      "size": 11,
+      "size": 8,
       "waveId": 2,
       "reward": null,
       "endsAt": null
@@ -61862,7 +61882,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 856 resources after 1 rounds.",
+      "body": "The horde carried off 916 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:35:26.400Z",
       "read": false
      },
@@ -61880,7 +61900,7 @@
       "kind": "camp",
       "tier": "digest",
       "title": "Raiders made camp at (-3, 3)",
-      "body": "11 survivors of wave 2 settled there.",
+      "body": "8 survivors of wave 2 settled there.",
       "createdAt": "2026-06-01T11:34:57.600Z",
       "read": false
      },
@@ -61889,7 +61909,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 1211 resources after 4 rounds.",
+      "body": "The horde carried off 881 resources after 4 rounds.",
       "createdAt": "2026-06-01T11:34:57.600Z",
       "read": false
      },

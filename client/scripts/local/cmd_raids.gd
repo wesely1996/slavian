@@ -49,7 +49,11 @@ static func raid_stage(data: Dictionary, front: String, depth: int, stage: int, 
 
 ## sim/raids.ts raidBattle: the army attacks until one side breaks or the
 ## last round passes. {won, rounds, armyNow, enemyNow}.
-static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, stage: Dictionary, front: String, seed_value: int, id: int) -> Dictionary:
+## `champions`: its hero and general fighting in its ranks;
+## `stats_without_hero`: its stats once the hero has fallen (the general in
+## command). Also returns the champions that fell (fallen).
+static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, stage: Dictionary, front: String, seed_value: int, id: int,
+		champions: Array = [], stats_without_hero: Callable = Callable()) -> Dictionary:
 	var rules: Dictionary = data.raids
 	var field: Variant = stage.field
 	var walls := 1.0 + float(rules.stronghold.walls) if stage.stronghold else 1.0
@@ -59,8 +63,10 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 		s.attack = float(s.attack) * (float(field.enemy.attack) if field != null else 1.0)
 		s.defense = float(s.defense) * (float(field.enemy.defense) if field != null else 1.0) * walls
 		return s
+	var fallen: Array = []
+	var fighting: Array = champions.duplicate()
 	var army_at := func(unit: String) -> Dictionary:
-		var s: Dictionary = army_stats.call(unit).duplicate()
+		var s: Dictionary = (stats_without_hero if "hero" in fallen and stats_without_hero.is_valid() else army_stats).call(unit).duplicate()
 		s.attack = float(s.attack) * (float(field.army.attack) if field != null else 1.0)
 		s.defense = float(s.defense) * (float(field.army.defense) if field != null else 1.0)
 		return s
@@ -69,8 +75,11 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 	var enemy_now: Dictionary = stage.enemy.duplicate()
 	var rounds: Array = []
 	for round in range(1, int(data.battle.maxRounds) + 1):
-		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": army_at, "home": false},
+		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": army_at, "home": false, "champions": fighting},
 			{"units": enemy_now, "stance": enemy_stance, "stats": enemy_at, "home": stage.stronghold}, LocalBattle.battle_rng(seed_value, id + 0x30000, round))
+		for c in result.attackerFallen[0]:
+			fallen.append(c)
+		fighting = fighting.filter(func(c: Dictionary) -> bool: return not c.id in fallen)
 		army_now = LocalCamps.subtract_units(army_now, result.attackerLosses)
 		enemy_now = LocalCamps.subtract_units(enemy_now, result.defenderLosses)
 		rounds.append({"round": round, "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
@@ -78,8 +87,8 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 		var outcome := LocalBattle.battle_outcome(data, {"round": round, "attackerStance": army_stance, "attackerInitial": army, "attackerNow": army_now,
 			"defenderStance": enemy_stance, "defenderInitial": stage.enemy, "defenderNow": enemy_now})
 		if outcome != "ongoing":
-			return {"won": outcome == "raided", "rounds": rounds, "armyNow": army_now, "enemyNow": enemy_now}
-	return {"won": false, "rounds": rounds, "armyNow": army_now, "enemyNow": enemy_now}
+			return {"won": outcome == "raided", "rounds": rounds, "armyNow": army_now, "enemyNow": enemy_now, "fallen": fallen}
+	return {"won": false, "rounds": rounds, "armyNow": army_now, "enemyNow": enemy_now, "fallen": fallen}
 
 
 ## sim/raids.ts strikeShare: the share of a scheduled horde gathered at its
@@ -258,8 +267,10 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var bonuses := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
 	var initial: Dictionary = army.units.duplicate()
 	var fighters := LocalScouting.combatants(data, army.units)
+	var succession := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
-		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + stage_no)
+		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + stage_no,
+		LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)
@@ -270,12 +281,14 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 		"attackerStance": data.raids.stronghold.stance if stage.stronghold else data.raids.fieldStance,
 		"attackerInitial": stage.enemy, "defenderInitial": initial, "startedAt": at},
 		{"rounds": result.rounds}, at, "cleared" if result.won else "repelled", taken if result.won else null)
-	if not hero.is_empty():
+	# Champions struck down fell; the others share the outcome.
+	LocalChampions.fall(server, world, result.fallen, hero, general, army.homeVillageId, {"kills": kills, "battleId": battle.id, "at": at})
+	if not hero.is_empty() and not "hero" in result.fallen:
 		if not result.won:
 			hero.villageId = army.homeVillageId
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.won, "battleId": battle.id, "at": at})
-	if not general.is_empty():
+	if not general.is_empty() and not "general" in result.fallen:
 		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.won, "at": at})
 	var finds: Array = []
 	if result.won:
@@ -342,8 +355,10 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 	var bonuses := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
 	var initial: Dictionary = army.units.duplicate()
 	var fighters := LocalScouting.combatants(data, army.units)
+	var succession := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
-		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + 1)
+		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + 1,
+		LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)
@@ -351,12 +366,14 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 		"setup": {"raid": {"front": front, "name": stage.name, "stronghold": true, "stage": 1, "strike": true}},
 		"attackerStance": data.raids.stronghold.stance, "attackerInitial": stage.enemy, "defenderInitial": initial, "startedAt": at},
 		{"rounds": result.rounds}, at, "cleared" if result.won else "repelled", null)
-	if not hero.is_empty():
+	# Champions struck down fell; the others share the outcome.
+	LocalChampions.fall(server, world, result.fallen, hero, general, army.homeVillageId, {"kills": kills, "battleId": battle.id, "at": at})
+	if not hero.is_empty() and not "hero" in result.fallen:
 		if not result.won:
 			hero.villageId = army.homeVillageId
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.won, "battleId": battle.id, "at": at})
-	if not general.is_empty():
+	if not general.is_empty() and not "general" in result.fallen:
 		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.won, "at": at})
 	# Its dead are gone from the horde.
 	var left := {}

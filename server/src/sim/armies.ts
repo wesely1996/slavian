@@ -39,8 +39,35 @@ export function terrainRelief(data: GameData, units: Units): number {
 }
 
 // Hexes per hour on plains: the slowest unit sets the pace.
+// Wagons that transport troops (units.json transports) load siege engines
+// first, each wagon taking `engines` of them, then foot soldiers into the
+// wagons left, `infantry` a wagon; the slowest ride first. Those riding
+// don't set the pace.
 export function armySpeed(data: GameData, units: Units): number {
-  const speeds = Object.keys(units).filter((u) => (units[u] ?? 0) > 0).map((u) => data.units.units[u]?.speed ?? 1);
+  const walking: Record<string, number> = Object.fromEntries(Object.entries(units).filter(([, n]) => n > 0));
+  const def = (u: string) => data.units.units[u];
+  const slowestFirst = (a: string, b: string) => (def(a)?.speed ?? 1) - (def(b)?.speed ?? 1) || (a < b ? -1 : a > b ? 1 : 0);
+  const board = (riders: string[], seats: number): number => {
+    for (const unit of riders.sort(slowestFirst)) {
+      const riding = Math.min(seats, walking[unit]!);
+      walking[unit] = walking[unit]! - riding;
+      seats -= riding;
+    }
+    return seats;
+  };
+  const engines = Object.keys(walking).filter((u) => def(u)?.engine === true);
+  const foot = Object.keys(walking).filter((u) => def(u)?.family === 'infantry' && def(u)?.engine !== true);
+  let infantrySeats = 0;
+  for (const wagon of Object.keys(walking).filter((u) => def(u)?.transports).sort()) {
+    const { infantry, engines: perWagon } = def(wagon)!.transports!;
+    const wagons = walking[wagon]!;
+    const enginesLeft = engines.reduce((sum, u) => sum + walking[u]!, 0);
+    const loaded = perWagon > 0 ? Math.min(enginesLeft, wagons * perWagon) : 0;
+    board(engines, loaded);
+    infantrySeats += (wagons - (perWagon > 0 ? Math.ceil(loaded / perWagon) : 0)) * infantry;
+  }
+  board(foot, infantrySeats);
+  const speeds = Object.keys(walking).filter((u) => walking[u]! > 0).map((u) => data.units.units[u]?.speed ?? 1);
   return speeds.length ? Math.min(...speeds) : 1;
 }
 

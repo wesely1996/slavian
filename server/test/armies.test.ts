@@ -49,3 +49,25 @@ describe('pathfinders', () => {
     expect(terrainRelief(data, { pathfinder: 40 })).toBe(0.5);
   });
 });
+
+describe('large military caravans', () => {
+  it('carry foot soldiers, the slowest first, who then set no pace', () => {
+    const wagon = data.units.units.large_caravan!;
+    expect(wagon.transports).toEqual({ infantry: 10, engines: 1 });
+    expect(wagon.supplyGrain).toBe(300);
+    // Ten spearmen ride: the wagon's pace.
+    expect(armySpeed(data, { spearman: 10, large_caravan: 1 })).toBe(wagon.speed);
+    // Eleven: one walks.
+    expect(armySpeed(data, { spearman: 11, large_caravan: 1 })).toBe(data.units.units.spearman!.speed);
+    // The slow shields ride first; the spearmen walking set the pace.
+    expect(armySpeed(data, { large_shield: 10, spearman: 5, large_caravan: 1 })).toBe(data.units.units.spearman!.speed);
+    // Riders never ride in it.
+    expect(armySpeed(data, { horseman: 5, large_caravan: 1 })).toBe(wagon.speed);
+    // A siege engine takes a whole wagon, before any foot soldier: with one
+    // wagon the onager rides and the spearmen walk; with two, all ride.
+    expect(armySpeed(data, { onager: 1, large_caravan: 1 })).toBe(wagon.speed);
+    expect(armySpeed(data, { onager: 1, spearman: 5, large_caravan: 1 })).toBe(data.units.units.spearman!.speed);
+    expect(armySpeed(data, { onager: 1, spearman: 10, large_caravan: 2 })).toBe(wagon.speed);
+    expect(armySpeed(data, { onager: 2, large_caravan: 1 })).toBe(data.units.units.onager!.speed);
+  });
+});

@@ -12568,8 +12568,7 @@
       },
       "attackerNow": {
        "zealot": 8,
-       "siege_ram": 1,
-       "crossbowman": 1
+       "siege_ram": 1
       },
       "defenderInitial": {
        "ambusher": 2,
@@ -12581,17 +12580,19 @@
         "round": 1,
         "breach": false,
         "wallLeft": 74,
-        "attackerLeft": 14,
+        "attackerLeft": 13,
         "defenderLeft": 10,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "crossbowman": 1
+        },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:17:50.400Z",
         "round": 2,
         "breach": false,
-        "wallLeft": 28,
-        "attackerLeft": 11,
+        "wallLeft": 29,
+        "attackerLeft": 10,
         "defenderLeft": 8,
         "attackerLosses": {
          "zealot": 1,
@@ -12608,7 +12609,7 @@
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 10,
+        "attackerLeft": 9,
         "defenderLeft": 7,
         "attackerLosses": {
          "crossbowman": 1
@@ -15477,8 +15478,7 @@
       },
       "attackerNow": {
        "zealot": 8,
-       "siege_ram": 1,
-       "crossbowman": 1
+       "siege_ram": 1
       },
       "defenderInitial": {
        "ambusher": 2,
@@ -15490,17 +15490,19 @@
         "round": 1,
         "breach": false,
         "wallLeft": 74,
-        "attackerLeft": 14,
+        "attackerLeft": 13,
         "defenderLeft": 10,
-        "attackerLosses": {},
+        "attackerLosses": {
+         "crossbowman": 1
+        },
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T11:17:50.400Z",
         "round": 2,
         "breach": false,
-        "wallLeft": 28,
-        "attackerLeft": 11,
+        "wallLeft": 29,
+        "attackerLeft": 10,
         "defenderLeft": 8,
         "attackerLosses": {
          "zealot": 1,
@@ -15517,7 +15519,7 @@
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 10,
+        "attackerLeft": 9,
         "defenderLeft": 7,
         "attackerLosses": {
          "crossbowman": 1

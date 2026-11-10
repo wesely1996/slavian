@@ -2,7 +2,7 @@
 // grow and feed the next wave, armies clearing them, and caravan ambushes.
 // Numbers in data/camps.json.
 import type { GameData, TerrainId } from '../data/index.js';
-import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type UnitStats } from './battle.js';
+import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import type { Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
@@ -133,20 +133,29 @@ export function assault(
     front: Front;
     seed: number;
     id: number;
+    // Its hero and general fighting in its ranks, and its stats once the
+    // hero has fallen (the general in command).
+    champions?: readonly Champion[];
+    statsWithoutHero?: (unit: string) => UnitStats;
   },
-): { cleared: boolean; rounds: AssaultRound[]; armyNow: Units; campNow: Units } {
+): { cleared: boolean; rounds: AssaultRound[]; armyNow: Units; campNow: Units; fallen: string[] } {
   const campStats = enemyStats(data, input.front);
   const stance = data.camps.assault.stance;
+  let champions = [...(input.champions ?? [])];
+  const fallen: string[] = [];
+  const armyStats = (unit: string): UnitStats => (fallen.includes('hero') && input.statsWithoutHero ? input.statsWithoutHero : input.armyStats)(unit);
   let armyNow = { ...input.army };
   let campNow = { ...input.camp };
   const rounds: AssaultRound[] = [];
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
-      { units: armyNow, stance: input.armyStance, stats: input.armyStats, home: false },
+      { units: armyNow, stance: input.armyStance, stats: armyStats, home: false, champions },
       { units: campNow, stance, stats: campStats, home: true },
       battleRng(input.seed, input.id + 0x10000, round),
     );
+    for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
+    champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);
     campNow = subtractUnits(campNow, result.defenderLosses);
     rounds.push({ round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(campNow) });
@@ -160,9 +169,9 @@ export function assault(
       defenderNow: campNow,
     });
     // 'raided': the defenders (the camp) broke; 'defended': the army did.
-    if (outcome !== 'ongoing') return { cleared: outcome === 'raided', rounds, armyNow, campNow };
+    if (outcome !== 'ongoing') return { cleared: outcome === 'raided', rounds, armyNow, campNow, fallen };
   }
-  return { cleared: false, rounds, armyNow, campNow };
+  return { cleared: false, rounds, armyNow, campNow, fallen };
 }
 
 export function campLoot(data: GameData, units: Units): Resources {

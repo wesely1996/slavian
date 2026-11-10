@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "A unit's cost is multiplied by costGrowthPerVillage for each village its owner has beyond the first (settlers), and with `costStep` by `growth` again for every `every` of them the player has bought; a `oneAtATime` unit trains one at a time, and not while another is in training in that village. Scouts (family scout) carry `scouting`: `stealth` scales the chance a horde catches them (scouting.json survival), `intel` is what each is worth to a report (its tiers) and to an army it marches with (scouting.json intel), and `assassinate` is each one's chance, on reaching a horde, of killing its leader. Scouts never fight: in battle they stand aside, and they ride home with their army. Combat stats (attack, defense) are used by battles from M1 step 5; `counters` (family: multiplier) replaces the unit's family's counters (battle.json) for its own attacks. Infantry trains in the Barracks, ranged troops in the Shooting Range and riders in the Stables, the Shaman in the Hospital; a unit with `heals` (the Shaman) gives every soldier of its side who falls in battle `perUnit` chance per healer to get up again (at most `max`), in an army (each round it fights, not when it starves) or in a garrison (with the Hospital's own, when the village holds); requiresLevel 1-3 is a first tier, 4-6 the second, 7-9 the third. speed is hexes per hour on plains; upkeepPerHour is grain; supplyHours is how many game hours of its own upkeep a unit carries when it marches out with an army (heavy troops and engines carry less, light infantry and skirmishers more, riders and scouts the most), so an army leaves with the sum of what its units carry; supplyGrain is grain a unit carries on top of that (a Military Caravan's wagon), and a `wagon` unit is no soldier: standing on open ground the wagons can be drawn into a wagon fort (field.json wagonFort). A village trains up to trainingQueueLimit batches at a time, one more for every buildingLevelsPerTrainingSlot levels of each of its trainingSlotBuildings (the military buildings). Training time shrinks by trainingSpeedup per level of the training building above its first. A unit with `clan` is that clan's own: only its members train it.",
+  "_comment": "A unit's cost is multiplied by costGrowthPerVillage for each village its owner has beyond the first (settlers), and with `costStep` by `growth` again for every `every` of them the player has bought; a `oneAtATime` unit trains one at a time, and not while another is in training in that village. Scouts (family scout) carry `scouting`: `stealth` scales the chance a horde catches them (scouting.json survival), `intel` is what each is worth to a report (its tiers) and to an army it marches with (scouting.json intel), and `assassinate` is each one's chance, on reaching a horde, of killing its leader. Scouts never fight: in battle they stand aside, and they ride home with their army. Combat stats (attack, defense) are used by battles from M1 step 5; `counters` (family: multiplier) replaces the unit's family's counters (battle.json) for its own attacks. Infantry trains in the Barracks, ranged troops in the Shooting Range and riders in the Stables, the Shaman in the Hospital; a unit with `heals` (the Shaman) gives every soldier of its side who falls in battle `perUnit` chance per healer to get up again (at most `max`), in an army (each round it fights, not when it starves) or in a garrison (with the Hospital's own, when the village holds); requiresLevel 1-3 is a first tier, 4-6 the second, 7-9 the third. speed is hexes per hour on plains; upkeepPerHour is grain; supplyHours is how many game hours of its own upkeep a unit carries when it marches out with an army (heavy troops and engines carry less, light infantry and skirmishers more, riders and scouts the most), so an army leaves with the sum of what its units carry; supplyGrain is grain a unit carries on top of that (a Military Caravan's wagon), and a `wagon` unit is no soldier: standing on open ground the wagons can be drawn into a wagon fort (field.json wagonFort). A unit with `transports` carries, each, `engines` siege engines (units marked `engine`) or else `infantry` foot soldiers (family infantry) of its army: engines first, slowest first; those riding don't set the army's pace, only those still walking do. A village trains up to trainingQueueLimit batches at a time, one more for every buildingLevelsPerTrainingSlot levels of each of its trainingSlotBuildings (the military buildings). Training time shrinks by trainingSpeedup per level of the training building above its first. A unit with `clan` is that clan's own: only its members train it.",
   "trainingQueueLimit": 3,
   "trainingSlotBuildings": ["barracks", "shooting_range", "stables"],
   "buildingLevelsPerTrainingSlot": 5,
@@ -385,6 +385,7 @@
       "counters": { "infantry": 1.9, "cavalry": 1.5 }
     },
     "onager": {
+      "engine": true,
       "name": "Onager",
       "description": "A throwing engine that hurls stones into packed ranks; slow to move.",
       "family": "archers",
@@ -419,6 +420,7 @@
       "counters": { "infantry": 1.5, "cavalry": 1.3 }
     },
     "thunder_thrower": {
+      "engine": true,
       "name": "Perun's Thunder Thrower",
       "description": "Hurls fire-pots that burst like Perun's lightning.",
       "family": "archers",
@@ -657,6 +659,25 @@
       "defense": 10,
       "health": 90,
       "carry": 100
+    },
+    "large_caravan": {
+      "name": "Large Military Caravan",
+      "description": "A long covered wagon behind a team of oxen: it carries 10 foot soldiers or 1 siege engine (engines first), who ride at its pace instead of marching, and 300 grain for the army. Standing in the open, it is drawn into the wagon fort.",
+      "family": "cavalry",
+      "building": "stables",
+      "requiresLevel": 4,
+      "cost": { "wood": 260, "stone": 40, "grain": 80, "iron": 70 },
+      "trainSeconds": 300,
+      "upkeepPerHour": 1,
+      "supplyHours": 24,
+      "supplyGrain": 300,
+      "wagon": true,
+      "transports": { "infantry": 10, "engines": 1 },
+      "speed": 7,
+      "attack": 2,
+      "defense": 12,
+      "health": 105,
+      "carry": 150
     }
   }
 }

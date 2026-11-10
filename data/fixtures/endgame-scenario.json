@@ -13871,7 +13871,7 @@
       "attackerNow": {
        "zealot": 16,
        "crossbowman": 7,
-       "sergeant_rider": 3
+       "sergeant_rider": 2
       },
       "defenderInitial": {
        "spearman": 4
@@ -13880,10 +13880,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 26,
+        "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -16463,9 +16464,9 @@
        "sergeant_rider": 3
       },
       "attackerNow": {
-       "zealot": 16,
+       "zealot": 15,
        "crossbowman": 6,
-       "sergeant_rider": 3
+       "sergeant_rider": 2
       },
       "defenderInitial": {
        "spearman": 4
@@ -16474,10 +16475,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 26,
+        "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -16486,9 +16488,10 @@
        {
         "at": "2026-06-01T09:34:43.200Z",
         "round": 2,
-        "attackerLeft": 25,
+        "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
@@ -18943,10 +18946,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 260,
-        "wood": 850,
-        "grain": 542.1333333333332,
-        "stone": 740
+        "iron": 290,
+        "wood": 885,
+        "grain": 572.1333333333332,
+        "stone": 760
        },
        "ratesPerHour": {
         "iron": 150,
@@ -18960,7 +18963,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:44:48.000Z"
+       "settledAt": "2026-06-01T09:44:43.200Z"
       }
      }
     ],
@@ -19069,9 +19072,9 @@
        "sergeant_rider": 3
       },
       "attackerNow": {
-       "zealot": 16,
-       "crossbowman": 6,
-       "sergeant_rider": 3
+       "zealot": 14,
+       "crossbowman": 5,
+       "sergeant_rider": 2
       },
       "defenderInitial": {
        "spearman": 4
@@ -19080,10 +19083,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 26,
+        "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -19092,9 +19096,10 @@
        {
         "at": "2026-06-01T09:34:43.200Z",
         "round": 2,
-        "attackerLeft": 25,
+        "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
@@ -19104,12 +19109,13 @@
        {
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
-        "attackerLeft": 25,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "attackerLeft": 21,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -21560,10 +21566,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 255,
-        "wood": 890,
-        "grain": 560.7999999999998,
-        "stone": 770
+        "iron": 285,
+        "wood": 925,
+        "grain": 590.7999999999998,
+        "stone": 790
        },
        "ratesPerHour": {
         "iron": 150,
@@ -21686,9 +21692,9 @@
        "sergeant_rider": 3
       },
       "attackerNow": {
-       "zealot": 15,
-       "crossbowman": 6,
-       "sergeant_rider": 3
+       "zealot": 13,
+       "crossbowman": 5,
+       "sergeant_rider": 2
       },
       "defenderInitial": {
        "spearman": 4
@@ -21697,10 +21703,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 26,
+        "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -21709,9 +21716,10 @@
        {
         "at": "2026-06-01T09:34:43.200Z",
         "round": 2,
-        "attackerLeft": 25,
+        "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
@@ -21721,17 +21729,18 @@
        {
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
-        "attackerLeft": 25,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "attackerLeft": 21,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {}
        },
        {
         "at": "2026-06-01T09:54:43.200Z",
         "round": 4,
-        "attackerLeft": 24,
+        "attackerLeft": 20,
         "defenderLeft": 3,
         "attackerLosses": {
          "zealot": 1
@@ -24189,10 +24198,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 220,
-        "wood": 895,
-        "grain": 549.4666666666665,
-        "stone": 780
+        "iron": 280,
+        "wood": 965,
+        "grain": 609.4666666666665,
+        "stone": 820
        },
        "ratesPerHour": {
         "iron": 150,
@@ -24315,9 +24324,9 @@
        "sergeant_rider": 3
       },
       "attackerNow": {
-       "zealot": 15,
-       "crossbowman": 5,
-       "sergeant_rider": 3
+       "zealot": 12,
+       "crossbowman": 4,
+       "sergeant_rider": 2
       },
       "defenderInitial": {
        "spearman": 4
@@ -24326,10 +24335,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 26,
+        "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -24338,9 +24348,10 @@
        {
         "at": "2026-06-01T09:34:43.200Z",
         "round": 2,
-        "attackerLeft": 25,
+        "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
@@ -24350,17 +24361,18 @@
        {
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
-        "attackerLeft": 25,
-        "defenderLeft": 3,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "attackerLeft": 21,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
+        "defenderLosses": {}
        },
        {
         "at": "2026-06-01T09:54:43.200Z",
         "round": 4,
-        "attackerLeft": 24,
+        "attackerLeft": 20,
         "defenderLeft": 3,
         "attackerLosses": {
          "zealot": 1
@@ -24372,13 +24384,14 @@
        {
         "at": "2026-06-01T10:04:43.200Z",
         "round": 5,
-        "attackerLeft": 23,
-        "defenderLeft": 2,
+        "attackerLeft": 18,
+        "defenderLeft": 3,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
-         "spearman": 2
+         "spearman": 1
         }
        }
       ],

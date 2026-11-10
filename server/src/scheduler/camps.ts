@@ -37,6 +37,7 @@ import { composeWave, rngFor } from '../sim/waves.js';
 import { armyLosses, holdHex, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
+import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { tell } from './notices.js';
 import { bridgeQuest } from './bridge.js';
 import { findBridge } from '../db/bridges.js';
@@ -214,11 +215,14 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   const general = await generalWithArmy(client, army.id);
   // The home village's buildings count (a Ranch's riders).
   const owned = villageBonuses(data, home.state);
-  const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
-  const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
+  // The hero commands, else the general, who takes over if the hero falls.
+  const bonuses = commandBonuses(data, owned, hero, general);
+  const succession = commandBonuses(data, owned, null, general);
   const result = assault(data, {
     army: combatants(data, army.units),
     armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
+    statsWithoutHero: withIntel(data, army.units, playerStats(data, succession, false)),
+    champions: championsOf(data, hero, general),
     armyStance: army.stance,
     camp: camp.units,
     front: camp.front as Front,
@@ -274,7 +278,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   } else {
     await saveCampUnits(client, camp.id, result.campNow);
   }
-  if (hero) {
+  // Champions struck down fell; the others share the outcome.
+  await championsFall(client, data, world, result.fallen, { hero, general, homeVillageId: army.homeVillageId }, { kills, battleId: battle.id, at });
+  if (hero && !result.fallen.includes('hero')) {
     await heroAfterBattle(
       client,
       data,
@@ -283,7 +289,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
       { kills, won: result.cleared, battleId: battle.id, at },
     );
   }
-  if (general) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
+  if (general && !result.fallen.includes('general')) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
   // Cleared, the army stands on the camp's hex until it is moved or called home.
   if (result.cleared && total(after.units) > 0) await holdHex(client, data, world, after, at);
   else await sendHome(client, world, after, at, data);

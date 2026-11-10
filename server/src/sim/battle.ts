@@ -29,6 +29,18 @@ export interface Side {
   // The side's forces when they fight apart, each in its own stance (a
   // village's garrison, each army): `units` and `stance` are then unused.
   readonly groups?: readonly Group[];
+  // Its champions, when it fights as one (see Group).
+  readonly champions?: readonly Champion[];
+}
+
+// A hero or general fighting in the ranks: one mighty warrior who strikes
+// with its attack and, struck down, falls (heroes.json champion).
+export interface Champion {
+  // 'hero' or 'general'.
+  readonly id: string;
+  readonly attack: number;
+  readonly defense: number;
+  readonly health: number;
 }
 
 export interface Group {
@@ -36,6 +48,7 @@ export interface Group {
   readonly stance: Stance;
   // Its own stats in place of the side's.
   readonly stats?: (unit: string) => UnitStats;
+  readonly champions?: readonly Champion[];
 }
 
 export interface RoundResult {
@@ -43,6 +56,10 @@ export interface RoundResult {
   readonly defenderLosses: Record<string, number>;
   // By group, when the defenders fight in groups.
   readonly defenderGroupLosses?: Record<string, number>[];
+  // Champions struck down this round (their ids), by group (one group for
+  // a side fighting as one).
+  readonly attackerFallen: string[][];
+  readonly defenderFallen: string[][];
 }
 
 export type Outcome = 'ongoing' | 'defended' | 'raided';
@@ -79,23 +96,33 @@ export function battleRng(seed: number, battleId: number, round: number): () => 
 }
 
 function groupsOf(side: Side): Group[] {
-  return side.groups ? [...side.groups] : [{ units: side.units, stance: side.stance }];
+  return side.groups ? [...side.groups] : [{ units: side.units, stance: side.stance, ...(side.champions ? { champions: side.champions } : {}) }];
+}
+
+// A champion as a target: one warrior of its own stats.
+function championStats(c: Champion): UnitStats {
+  return { attack: c.attack, defense: c.defense, health: c.health, family: 'infantry' };
 }
 
 // Kills `from` inflicts on `to` this round, by unit type, for each of
-// `to`'s groups.
-function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<string, number>[] {
+// `to`'s groups, and the champions it strikes down there.
+function kills(data: GameData, from: Side, to: Side, rng: () => number): { losses: Record<string, number>[]; fallen: string[][] } {
   const { battle } = data;
   const strikers = groupsOf(from);
   const groups = groupsOf(to);
   const result: Record<string, number>[] = groups.map(() => ({}));
-  const targets = groups.flatMap((g, i) => Object.entries(g.units).filter(([, n]) => n > 0).map(([unit, n]) => ({ i, unit, n })));
+  const fallen: string[][] = groups.map(() => []);
+  const targets: { i: number; unit: string; n: number; champion?: Champion }[] = [
+    ...groups.flatMap((g, i) => Object.entries(g.units).filter(([, n]) => n > 0).map(([unit, n]) => ({ i, unit, n }))),
+    // Champions stand among their men: each is one more to strike at.
+    ...groups.flatMap((g, i) => (g.champions ?? []).map((c) => ({ i, unit: c.id, n: 1, champion: c }))),
+  ];
   const targetTotal = targets.reduce((sum, t) => sum + t.n, 0);
-  if (targetTotal === 0) return result;
+  if (targetTotal === 0) return { losses: result, fallen };
 
-  for (const { i, unit: target, n: targetCount } of targets) {
+  for (const { i, unit: target, n: targetCount, champion } of targets) {
     const group = groups[i]!;
-    const stats = (group.stats ?? to.stats)(target);
+    const stats = champion ? championStats(champion) : (group.stats ?? to.stats)(target);
     let damage = 0;
     for (const striker of strikers) {
       const fromStance = battle.stances[striker.stance];
@@ -106,6 +133,8 @@ function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<
         const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
         damage += count * attacker.attack * fromStance.attack * matchup * counter;
       }
+      // Its champions strike too, at no family's weakness.
+      for (const c of striker.champions ?? []) damage += c.attack * fromStance.attack * matchup;
     }
     const share = targetCount / targetTotal;
     const variance = 1 + battle.variance * (rng() * 2 - 1);
@@ -118,9 +147,10 @@ function kills(data: GameData, from: Side, to: Side, rng: () => number): Record<
     // Round randomly so small fights still take losses on average.
     const whole = Math.floor(expected) + (rng() < expected - Math.floor(expected) ? 1 : 0);
     const dead = Math.min(targetCount, whole);
-    if (dead > 0) result[i]![target] = (result[i]![target] ?? 0) + dead;
+    if (dead > 0 && champion) fallen[i]!.push(champion.id);
+    else if (dead > 0) result[i]![target] = (result[i]![target] ?? 0) + dead;
   }
-  return result;
+  return { losses: result, fallen };
 }
 
 function merged(losses: readonly Record<string, number>[]): Record<string, number> {
@@ -131,9 +161,23 @@ function merged(losses: readonly Record<string, number>[]): Record<string, numbe
 
 export function resolveRound(data: GameData, attacker: Side, defender: Side, rng: () => number): RoundResult {
   // Simultaneous: both sides strike with the numbers they had at the start.
-  const attackerLosses = merged(kills(data, defender, attacker, rng));
+  const struck = kills(data, defender, attacker, rng);
   const byGroup = kills(data, attacker, defender, rng);
-  return { attackerLosses, defenderLosses: merged(byGroup), ...(defender.groups ? { defenderGroupLosses: byGroup } : {}) };
+  return {
+    attackerLosses: merged(struck.losses),
+    defenderLosses: merged(byGroup.losses),
+    ...(defender.groups ? { defenderGroupLosses: byGroup.losses } : {}),
+    attackerFallen: struck.fallen,
+    defenderFallen: byGroup.fallen,
+  };
+}
+
+// A hero's or general's champion at `level` (heroes.json champion,
+// generals.champion): its base stats, `growthPerLevel` more each level.
+export function championOf(data: GameData, id: 'hero' | 'general', level: number): Champion {
+  const c = id === 'hero' ? data.heroes.champion : data.heroes.generals.champion;
+  const f = 1 + c.growthPerLevel * Math.max(0, level - 1);
+  return { id, attack: c.attack * f, defense: c.defense * f, health: c.health * f };
 }
 
 export function subtractUnits(units: Units, losses: Units): Record<string, number> {
