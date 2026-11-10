@@ -439,7 +439,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return {"status": 200, "data": world_view(world, now)}
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
-		if village.ruin != null and not action in ["rebuild", "armies", "raids", "forts", "supply-points", "crossings", "roads"]:
+		if village.ruin != null and not action in ["rebuild", "armies", "raids", "strike", "forts", "supply-points", "crossings", "roads"]:
 			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
 		var result: Dictionary
 		var step := ""
@@ -548,7 +548,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalScouting.found_village(self, world, village, body, now)
 				if result.has("expedition"):
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
-			"armies", "raids", "forts", "supply-points", "crossings", "roads":
+			"armies", "raids", "strike", "forts", "supply-points", "crossings", "roads":
 				return _field_command(world, village, action, body, now, changed)
 			"caravans", "caravans/fetch":
 				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
@@ -603,6 +603,12 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 			if body.get("stance") != null and not String(body.stance) in data.battle.stances:
 				return _fail(400, "invalid_request", "Unknown stance")
 			result = LocalRaids.start(self, world, village, body, now)
+		"strike":
+			if not body is Dictionary or not body.get("waveId") is float and not body.get("waveId") is int or not body.get("units") is Dictionary:
+				return _fail(400, "invalid_request", "Say which horde to strike and who goes")
+			if body.get("stance") != null and not String(body.stance) in data.battle.stances:
+				return _fail(400, "invalid_request", "Unknown stance")
+			result = LocalRaids.start_strike(self, world, village, body, now)
 		"forts", "supply-points":
 			result = LocalArmies.build_fort(self, world, village, Vector2i(int(body.get("q", 0)), int(body.get("r", 0))), now, "supply" if action == "supply-points" else "fort")
 		"crossings", "roads":
@@ -616,7 +622,7 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 	changed.append(["village", village.id])
 	changed.append(["world"])
 	match action:
-		"armies", "raids":
+		"armies", "raids", "strike":
 			return {"status": 200, "data": {"army": LocalArmies.army_view(result), "serverTime": LocalTime.iso(now)}}
 		"forts", "supply-points":
 			return {"status": 200, "data": {"fort": LocalArmies.fort_view(result), "serverTime": LocalTime.iso(now)}}

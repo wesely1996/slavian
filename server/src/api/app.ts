@@ -22,6 +22,7 @@ import {
   circleWagonsCommand,
   sendArmyCommand,
   raidCommand,
+  strikeCommand,
   setReinforceCommand,
 } from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
@@ -211,6 +212,14 @@ const armyBody = z.object({
 const raidBody = z.object({
   front: z.enum(['north', 'east', 'south', 'west']),
   depth: z.number().int().min(1).max(10),
+  units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
+  withHero: z.boolean().optional(),
+  generalId: z.number().int().positive().optional(),
+  stance: z.enum(STANCES).optional(),
+});
+// A strike on a horde still gathering beyond the map's edge.
+const strikeBody = z.object({
+  waveId: z.number().int().positive(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
   withHero: z.boolean().optional(),
   generalId: z.number().int().positive().optional(),
@@ -746,6 +755,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = raidBody.parse(request.body);
     const army = await raidCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/villages/:id/strike', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = strikeBody.parse(request.body);
+    const army = await strikeCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 

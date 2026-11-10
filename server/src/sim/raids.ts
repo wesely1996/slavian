@@ -56,6 +56,28 @@ export function raidStage(data: GameData, input: { front: Front; depth: number; 
   return { stage: input.stage, name: stronghold ? front.stronghold : field!.name, stronghold, field, enemy };
 }
 
+// The share of a scheduled horde gathered at its encampment `hoursEarly`
+// game hours before it sets out (raids.json strike).
+export function strikeShare(data: GameData, hoursEarly: number): number {
+  const rules = data.raids.strike;
+  return 1 - (1 - rules.minShare) * Math.min(1, Math.max(0, hoursEarly) / rules.gatherHours);
+}
+
+// The encampment's battle: `share` of the horde's troops (at least one),
+// behind its walls like a stronghold.
+export function strikeStage(data: GameData, composition: Units, share: number): RaidStage {
+  const enemy: Record<string, number> = {};
+  for (const unit of Object.keys(composition).sort()) {
+    const n = Math.round((composition[unit] ?? 0) * share);
+    if (n > 0) enemy[unit] = n;
+  }
+  if (total(enemy) === 0) {
+    const first = Object.keys(composition).sort().find((u) => (composition[u] ?? 0) > 0);
+    if (first) enemy[first] = 1;
+  }
+  return { stage: 1, name: data.raids.strike.name, stronghold: true, field: null, enemy };
+}
+
 // A raid battle: the army attacks, round by round, until one side breaks or
 // the last round passes (the army falls back). On a field the terrain
 // scales both sides; the stronghold's defenders fight from behind its walls.

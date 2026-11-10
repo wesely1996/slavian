@@ -82,6 +82,31 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 	return {"won": false, "rounds": rounds, "armyNow": army_now, "enemyNow": enemy_now}
 
 
+## sim/raids.ts strikeShare: the share of a scheduled horde gathered at its
+## encampment `hours_early` game hours before it sets out.
+static func strike_share(data: Dictionary, hours_early: float) -> float:
+	var rules: Dictionary = data.raids.strike
+	return 1.0 - (1.0 - float(rules.minShare)) * minf(1.0, maxf(0.0, hours_early) / float(rules.gatherHours))
+
+
+## sim/raids.ts strikeStage: `share` of the horde's troops (at least one),
+## behind its walls like a stronghold.
+static func strike_stage(data: Dictionary, composition: Dictionary, share: float) -> Dictionary:
+	var enemy := {}
+	var units: Array = composition.keys()
+	units.sort()
+	for unit in units:
+		var n := LocalWaves.js_round(float(composition[unit]) * share)
+		if n > 0:
+			enemy[unit] = n
+	if LocalBattle.total(enemy) == 0:
+		for unit in units:
+			if int(composition[unit]) > 0:
+				enemy[unit] = 1
+				break
+	return {"stage": 1, "name": String(data.raids.strike.name), "stronghold": true, "field": null, "enemy": enemy}
+
+
 ## sim/raids.ts raidCapacity: what an army can carry home.
 static func capacity(data: Dictionary, units: Dictionary) -> float:
 	var carry := 0.0
@@ -151,14 +176,38 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, b
 	return army
 
 
+## scheduler/raids.ts startStrike: an army from `village` off to strike a
+## horde still gathering beyond the map's edge.
+static func start_strike(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	var wave := server.find_wave(world, int(body.get("waveId", 0)))
+	if wave.is_empty() or wave.get("bandOf") != null:
+		return LocalVillage.rule("No such horde")
+	if wave.status != "scheduled":
+		return LocalVillage.rule("That horde has already set out")
+	var front := String(wave.front)
+	var edge := raid_edge(data, world.hexes, int(world.radius), front, Vector2i(village.q, village.r))
+	if edge == Vector2i.MAX:
+		return LocalVillage.rule("There is no way out to that side of the map")
+	var army := LocalArmies.dispatch_army(server, world, {"homeVillageId": village.id, "targetVillageId": null, "targetHex": edge,
+		"units": body.get("units", {}), "orders": "raid", "withHero": body.get("withHero", false), "generalId": body.get("generalId"),
+		"stance": body.get("stance"), "at": now})
+	if army.has("error") or army.has("missing"):
+		return army
+	army.raid = {"front": front, "depth": 0, "stage": 0, "battles": [], "finds": [], "waveId": wave.id}
+	army.loot = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	return army
+
+
 ## scheduler/raids.ts reachEdge: it stands at the edge (beyond it) and the
-## first battle comes one stage later.
+## first battle comes one stage later (a strike's at once).
 static func reach_edge(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
 	if army.get("raid") == null:
 		LocalArmies.send_home(server, world, army, at)
 		return
 	army.status = "stationed"
-	server.schedule(world, at + _stage_ms(server.data, world.speed), "raid_stage", {"armyId": army.id, "stage": int(army.raid.stage) + 1})
+	var delay := 0 if army.raid.get("waveId") != null else _stage_ms(server.data, world.speed)
+	server.schedule(world, at + delay, "raid_stage", {"armyId": army.id, "stage": int(army.raid.stage) + 1})
 
 
 static func _stage_ms(data: Dictionary, world_speed: float) -> int:
@@ -196,6 +245,9 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 		return
 	var at := int(event.dueAt)
 	changed.append(["world"])
+	if army.raid.get("waveId") != null:
+		_strike_battle(server, world, army, at)
+		return
 	var raid: Dictionary = army.raid
 	var front := String(raid.front)
 	var stage_no := int(p.stage)
@@ -270,3 +322,90 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 		body = "It comes home with {loot} resources{found}." if stage.stronghold else "{kills} of the enemy fell; it carries {loot} resources{found} and marches on."
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "push" if done else "digest", "title": title, "body": body,
 		"vars": {"name": stage.name, "kills": kills, "loot": int(LocalLogistics.total(taken)), "found": found, "lost": LocalBattle.total(lost)}}, at)
+
+
+## scheduler/raids.ts strikeBattle: the share of a gathering horde there by
+## now, behind its walls. Its dead are gone from the horde; win or lose, the
+## front's next horde hates the more. Then the army comes home.
+static func _strike_battle(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	var data := server.data
+	var raid: Dictionary = army.raid
+	var wave := server.find_wave(world, int(raid.waveId))
+	if wave.status != "scheduled":
+		LocalArmies.send_home(server, world, army, at)
+		LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "push", "title": "The horde had already set out",
+			"body": "Your army found its encampment empty and turns for home.", "vars": {}}, at)
+		return
+	var front := String(wave.front)
+	var stage := strike_stage(data, wave.composition, strike_share(data, float(int(wave.spawnAt) - at) / LocalTime.MS_PER_HOUR * float(world.speed)))
+	var home := server.find_village(world, int(army.homeVillageId))
+	var hero := LocalArmies.hero_with_army(world, int(army.id))
+	var general := LocalGenerals.general_with_army(world, int(army.id))
+	var bonuses := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
+	var initial: Dictionary = army.units.duplicate()
+	var fighters := LocalScouting.combatants(data, army.units)
+	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
+		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + 1)
+	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
+	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
+	var after := LocalArmies.army_losses(server, world, army, lost, at)
+	var battle := LocalArmies._assault_battle(world, {"waveId": null, "villageId": null, "q": army.targetQ, "r": army.targetR,
+		"setup": {"raid": {"front": front, "name": stage.name, "stronghold": true, "stage": 1, "strike": true}},
+		"attackerStance": data.raids.stronghold.stance, "attackerInitial": stage.enemy, "defenderInitial": initial, "startedAt": at},
+		{"rounds": result.rounds}, at, "cleared" if result.won else "repelled", null)
+	if not hero.is_empty():
+		if not result.won:
+			hero.villageId = army.homeVillageId
+			hero.armyId = null
+		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.won, "battleId": battle.id, "at": at})
+	if not general.is_empty():
+		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.won, "at": at})
+	# Its dead are gone from the horde.
+	var left := {}
+	for unit in wave.composition:
+		var now := int(wave.composition[unit]) - maxi(0, int(stage.enemy.get(unit, 0)) - int(result.enemyNow.get(unit, 0)))
+		if now > 0:
+			left[unit] = now
+	if LocalBattle.total(left) == 0:
+		wave.status = "dispersed"
+		wave.endsAt = at
+		_announce_next(server, world)
+	else:
+		wave.composition = left
+	# The front's next horde (else this one) hates the more.
+	var angered: Dictionary = {}
+	for w in world.waves:
+		if w.front != front or w.status != "scheduled" or w.get("bandOf") != null:
+			continue
+		if int(w.spawnAt) < int(wave.spawnAt) or (int(w.spawnAt) == int(wave.spawnAt) and int(w.id) <= int(wave.id)):
+			continue
+		if angered.is_empty() or int(w.spawnAt) < int(angered.spawnAt) or (int(w.spawnAt) == int(angered.spawnAt) and int(w.id) < int(angered.id)):
+			angered = w
+	if angered.is_empty() and LocalBattle.total(left) > 0:
+		angered = wave
+	if not angered.is_empty():
+		LocalHordes.anger_horde(server, world, angered, float(data.raids.strike.hatred), at)
+	var entry := {"stage": 1, "name": stage.name, "stronghold": true, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost)}
+	var next_raid: Dictionary = raid.duplicate()
+	next_raid.stage = 1
+	next_raid.battles = [entry]
+	after.raid = next_raid
+	LocalArmies.send_home(server, world, after, at)
+	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "push",
+		"title": "Your army broke the horde in its encampment" if result.won else "Your army was thrown back from the horde's encampment",
+		"body": "{kills} of the horde fell before it set out, {lost} of ours. The next horde hates us the more for it.",
+		"vars": {"kills": kills, "lost": LocalBattle.total(lost)}}, at)
+
+
+## scheduler/waves.ts announceNext: a horde wiped out before it set out has
+## the next one announced in its place.
+static func _announce_next(server: LocalServer, world: Dictionary) -> void:
+	if world.ritualAt != null:
+		return
+	var last: Dictionary = {}
+	for w in world.waves:
+		if w.get("bandOf") == null and (last.is_empty() or int(w.index) > int(last.index)):
+			last = w
+	if last.is_empty() or last.ritual:
+		return
+	server.announce_wave(world, int(last.index) + 1, int(last.spawnAt))

@@ -660,6 +660,7 @@ const raidsFileSchema = z.object({
   loot: z.object({ perKill: resourceAmounts, stronghold: resourceAmounts }),
   carry: z.object({ perSoldier: z.number().nonnegative(), perWagon: z.number().nonnegative() }),
   hatred: z.object({ perBattle: z.number().nonnegative(), stronghold: z.number().nonnegative() }),
+  strike: z.object({ name: z.string(), gatherHours: z.number().positive(), minShare: z.number().min(0).max(1), hatred: z.number().nonnegative() }),
   north: z.object({
     resourceShare: z.number().min(0).max(1),
     finds: z.object({ gear: z.number().min(0).max(1), scroll: z.number().min(0).max(1), ember: z.number().min(0).max(1) }),

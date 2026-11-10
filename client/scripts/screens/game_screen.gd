@@ -91,6 +91,9 @@ var _army_return := false
 ## The raid being planned: the front it goes to and how many fields deep.
 var _raid_front := ""
 var _raid_depth := 1
+# The Raid tab: a strike on a gathering horde instead, and which (wave id).
+var _strike_mode := false
+var _strike_wave := 0
 ## The general picked to lead the next army sent (0: none).
 var _army_general := 0
 ## The stance picked for the next army sent ("": its village's).
@@ -2323,6 +2326,19 @@ func _raid_tab(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	_panel_body.add_child(UI.with_info(UI.label(tr("Raid"), UI.HEADING_SIZE),
 		tr("An army marches to the edge of the map on a front's side and goes into the enemy's lands: it fights a battle on each field it crosses, then besieges the front's stronghold, and comes home with what it carries. A battle lost turns it home with what it has. Every battle won makes that front's next horde hate you the more. It eats its own grain all the way: military caravans carry more, and more loot.")))
+	var mode_row := UI.hbox(8)
+	for strike in [false, true]:
+		var m := UI.button(tr("Strike a gathering horde") if strike else tr("Raid a front"), func() -> void:
+			_strike_mode = strike
+			_rebuild_panel())
+		m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		m.custom_minimum_size.x = 0
+		m.disabled = _strike_mode == strike
+		mode_row.add_child(m)
+	_panel_body.add_child(mode_row)
+	if _strike_mode:
+		_strike_tab(village)
+		return
 	var map: Variant = Game.world.get("map")
 	var fronts: Array = map.activeFronts if map is Dictionary else []
 	if fronts.is_empty():
@@ -2388,9 +2404,53 @@ func _raid_tab(village: Dictionary) -> void:
 	_picked_hint(go, home_units)
 
 
-func _send_raid(village_id: int, body: Dictionary) -> void:
+## The Raid tab's strike: a horde still gathering beyond the edge, hit
+## before it sets out (data/raids.json strike).
+func _strike_tab(village: Dictionary) -> void:
+	var data := Game.data
+	var village_id := int(village.id)
+	var info := UI.label(tr("Attack a horde still gathering beyond the map's edge, before it sets out. The earlier you strike, the fewer of it have gathered, but those there fight from behind their encampment's walls. Its dead are gone for good; win or lose, that front's next horde hates you far more."), UI.SMALL_SIZE, UI.MUTED)
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_panel_body.add_child(info)
+	var gathering: Array = Game.waves.filter(func(w: Dictionary) -> bool: return w.status == "scheduled" and w.get("bandOf") == null)
+	if gathering.is_empty():
+		_panel_body.add_child(UI.label(tr("No horde is gathering now."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	if not gathering.any(func(w: Dictionary) -> bool: return int(w.id) == _strike_wave):
+		_strike_wave = int(gathering[0].id)
+	var now := Game.server_now()
+	for wave in gathering:
+		var left := TimeUtil.parse_iso(wave.spawnAt) - now
+		var share := RaidText.strike_share(data, left / 3600.0 * float(Game.world.speed))
+		var b := UI.button(tr("Horde of %s (%s threat): sets out in %s, about %d%% gathered") % [RaidText.front_name(String(wave.front)), tr(String(wave.threat)).to_lower(),
+			TimeUtil.format_duration(left), roundi(share * 100.0)], func() -> void:
+			_strike_wave = int(wave.id)
+			_rebuild_panel(), WaveMath.front_icon(String(wave.front)))
+		b.disabled = int(wave.id) == _strike_wave
+		_panel_body.add_child(b)
+	var home_units := Rules.garrison_at(village, now)
+	_unit_pickers(home_units, true, "raid")
+	var hero := Game.my_hero()
+	var hero_ready: bool = not hero.is_empty() and hero.status == "home" and hero.villageId != null and int(hero.villageId) == village_id
+	if hero_ready:
+		_panel_body.add_child(UI.button(tr("%s leads it: %s") % [hero.name, tr("yes") if _army_hero else tr("no")], func() -> void:
+			_army_hero = not _army_hero
+			_rebuild_panel()))
+	_general_picker(village_id)
+	_army_stance_picker(village)
+	var wave_now := _strike_wave
+	var go := UI.button(tr("Strike the horde"), func() -> void:
+		var body := {"waveId": wave_now, "units": _picked_units(home_units), "withHero": _army_hero and hero_ready, "stance": _army_stance}
+		if _ready_general(village_id) > 0:
+			body.generalId = _ready_general(village_id)
+		_send_raid(village_id, body, "strike"), "map/camp_bandit")
+	_panel_body.add_child(go)
+	_picked_hint(go, home_units)
+
+
+func _send_raid(village_id: int, body: Dictionary, route := "raids") -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/raids" % village_id, body)
+	var response := await Api.post_json("/v1/villages/%d/%s" % [village_id, route], body)
 	if not response.ok:
 		_status.text = response.error
 		return
@@ -2862,8 +2922,11 @@ func _army_panel() -> void:
 	# A raid: where it stands, its battles, what it found and carries.
 	if army.get("raid") is Dictionary:
 		var raid: Dictionary = army.raid
-		_panel_body.add_child(UI.label(tr("Raid on %s") % RaidText.front_name(String(raid.front)), UI.HEADING_SIZE))
-		_panel_body.add_child(UI.label(RaidText.plan(Game.data, String(raid.front), int(raid.depth)), UI.SMALL_SIZE, UI.MUTED))
+		if raid.get("waveId") != null:
+			_panel_body.add_child(UI.label(tr("Strike on the horde of %s") % RaidText.front_name(String(raid.front)), UI.HEADING_SIZE))
+		else:
+			_panel_body.add_child(UI.label(tr("Raid on %s") % RaidText.front_name(String(raid.front)), UI.HEADING_SIZE))
+			_panel_body.add_child(UI.label(RaidText.plan(Game.data, String(raid.front), int(raid.depth)), UI.SMALL_SIZE, UI.MUTED))
 		for line in RaidText.battles(raid):
 			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
 		if not raid.get("finds", []).is_empty():

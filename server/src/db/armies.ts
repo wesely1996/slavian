@@ -70,6 +70,9 @@ export interface ArmyRaid {
   battles: RaidBattleEntry[];
   // Rare finds it took (the North): what they were, as told.
   finds: string[];
+  // A strike on a gathering horde (that wave's id): one battle at its
+  // encampment, then home.
+  waveId?: number;
 }
 
 interface ArmyRow {
