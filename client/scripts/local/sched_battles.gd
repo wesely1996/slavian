@@ -493,7 +493,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	for army in engaged:
 		if hero.is_empty():
 			hero = LocalArmies.hero_with_army(world, int(army.id))
-	var research: Dictionary = leader.state.bonuses if not leader.is_empty() else {}
+	var research: Dictionary = LocalVillage.village_bonuses(data, leader.state) if not leader.is_empty() else {}
 	if wave.front == "north" and float(research.get("coldDefense", 0.0)) != 0.0:
 		research = research.duplicate()
 		research["defense.all"] = float(research.get("defense.all", 0.0)) + float(research.coldDefense)

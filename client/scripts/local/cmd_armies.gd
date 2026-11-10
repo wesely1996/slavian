@@ -1441,7 +1441,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var home := server.find_village(world, int(army.homeVillageId))
 	var hero := hero_with_army(world, int(army.id))
 	var general := LocalGenerals.general_with_army(world, int(army.id))
-	var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
+	var bonuses := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
 	# Scouts never fight; they tell the army what it faces (intel).
 	var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id))
@@ -1549,7 +1549,7 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		var home := server.find_village(world, int(army.homeVillageId))
 		var hero := hero_with_army(world, int(army.id))
 		var general := LocalGenerals.general_with_army(world, int(army.id))
-		var bonuses := _led_bonuses(data, home.state.bonuses, hero, general)
+		var bonuses := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
 		var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000)
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,

@@ -4,6 +4,7 @@
 // siege of the front's stronghold. Battles won bring loot (as much as it
 // can carry), the North's rare finds, and the front's hatred; a raid beaten,
 // or done, comes home with what it carries.
+import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import type { GameData, Stance } from '../data/index.js';
 import { loadArmy, saveArmy, type Army, type ArmyRaid } from '../db/armies.js';
@@ -142,7 +143,9 @@ export const raidHandlers: HandlerRegistry = {
     const home = await loadVillage(client, army.homeVillageId);
     const hero = await heroWithArmy(client, army.id);
     const general = await generalWithArmy(client, army.id);
-    const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+    // The home village's buildings count (a Ranch's riders).
+    const owned = villageBonuses(data, home.state);
+    const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
     const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
     const fighters = combatants(data, army.units);
     const result = raidBattle(data, {

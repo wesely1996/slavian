@@ -572,7 +572,8 @@ func _test_group_research() -> void:
 
 func _test_village_site() -> void:
 	var terrain := {"0,0": "hills", "1,0": "lake", "5,5": "plains"}
-	_check(LocalVillage.village_site(terrain, [], Vector2i(0, 0)) == {"water": true, "hills": true}, "site beside a lake, on hills")
+	_check(LocalVillage.village_site(terrain, [], Vector2i(0, 0)) == {"water": true, "hills": true, "plains": false, "mountain": false}, "site beside a lake, on hills")
+	_check(LocalVillage.village_site({"5,5": "plains", "6,5": "mountain"}, [], Vector2i(5, 5)) == {"water": false, "hills": false, "plains": true, "mountain": true}, "site on the plains, by a mountain")
 	_check(LocalVillage.village_site(terrain, [{"a": Vector2i(5, 5), "b": Vector2i(6, 5)}], Vector2i(5, 5)).water, "site on a river")
 	var data := {"buildings": {"buildings": {"windmill": {"kind": "center", "site": "hills"}, "fisherman_hut": {"kind": "center", "site": "water"}, "mill": {"kind": "center"}}}}
 	var village := {"plots": {}, "queue": [], "bonuses": {}}

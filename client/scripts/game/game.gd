@@ -528,17 +528,20 @@ func commands(village: Dictionary) -> bool:
 ## what comes in per hour.
 ## What the land around a village allows (sim/village.ts villageSite):
 ## water beside it (a lake next to it, or a river along one of its edges),
-## hills under it.
+## hills or plains under it, a mountain next to it.
 func village_site(village: Dictionary) -> Dictionary:
 	var cell := Vector2i(int(village.q), int(village.r))
 	var water := false
+	var mountain := false
 	for n in HexMath.neighbors(cell):
 		if terrain.get(n, "") == "lake":
 			water = true
+		elif terrain.get(n, "") == "mountain":
+			mountain = true
 	for e in rivers:
 		if (int(e[0]) == cell.x and int(e[1]) == cell.y) or (int(e[2]) == cell.x and int(e[3]) == cell.y):
 			water = true
-	return {"water": water, "hills": terrain.get(cell, "") == "hills"}
+	return {"water": water, "hills": terrain.get(cell, "") == "hills", "plains": terrain.get(cell, "") == "plains", "mountain": mountain}
 
 
 ## The group's research pool: every member's Academies, all together.

@@ -28,6 +28,7 @@ import {
   trade,
   unlockedSlots,
   villageSite,
+  type VillageSite,
   type VillageState,
 } from '../src/sim/village.js';
 
@@ -296,15 +297,18 @@ describe('more buildings', () => {
   const at = (state: VillageState) => state.ledger.settledAt;
 
   it('builds by water and on hills only where the land allows', () => {
-    const terrain = new Map([['0,0', 'hills'], ['1,0', 'lake'], ['5,5', 'plains']]);
-    expect(villageSite(terrain, [], hex(0, 0))).toEqual({ water: true, hills: true });
-    expect(villageSite(terrain, [], hex(5, 5))).toEqual({ water: false, hills: false });
+    const terrain = new Map([['0,0', 'hills'], ['1,0', 'lake'], ['5,5', 'plains'], ['6,5', 'mountain']]);
+    expect(villageSite(terrain, [], hex(0, 0))).toEqual({ water: true, hills: true, plains: false, mountain: false });
+    expect(villageSite(terrain, [], hex(5, 5))).toEqual({ water: false, hills: false, plains: true, mountain: true });
     expect(villageSite(terrain, [{ a: hex(5, 5), b: hex(6, 5) }], hex(5, 5)).water).toBe(true);
     const v = rich(newVillage(data, T0, 1));
-    const queue = (building: string, site?: { water: boolean; hills: boolean }) => queueBuild(data, v, { plot: 'c1', building }, at(v), 1, site);
+    const queue = (building: string, site?: VillageSite) => queueBuild(data, v, { plot: 'c1', building }, at(v), 1, site);
     expect(() => queue('fisherman_hut')).toThrow("A Fisherman's Hut needs a village beside a lake or on a river");
     expect(() => queue('windmill', { water: true, hills: false })).toThrow('A Windmill needs a village on hills');
     expect(() => queue('water_wheel', { water: true, hills: false })).not.toThrow();
+    expect(() => queue('ranch', { water: true, hills: true })).toThrow('A Ranch needs a village on the plains');
+    expect(() => queue('mountain_lodge')).toThrow('A Mountain Lodge needs a village next to a mountain');
+    expect(() => queueBuild(data, v, { plot: 'c1', building: 'ranch' }, at(v), 1, { water: false, hills: false, plains: true })).not.toThrow();
     // A fisherman's hut brings in grain of its own.
     const { state, queued } = queueBuild(data, v, { plot: 'c1', building: 'fisherman_hut' }, at(v), 1, { water: true, hills: false });
     const fished = completeBuild(data, state, queued.plot, queued.targetLevel, queued.completesAt, 1);

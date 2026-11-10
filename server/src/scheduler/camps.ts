@@ -3,6 +3,7 @@
 // send part of themselves with the next wave of their front, ambush
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
+import { villageBonuses } from '../sim/clans.js';
 import { onboardingStep } from './onboarding.js';
 import { rewardEvent } from './eventOutcomes.js';
 import { z } from 'zod';
@@ -211,7 +212,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   const home = await loadVillage(client, army.homeVillageId);
   const hero = await heroWithArmy(client, army.id);
   const general = await generalWithArmy(client, army.id);
-  const heroic = hero ? combine(home.state.bonuses, heroBonuses(data, hero)) : home.state.bonuses;
+  // The home village's buildings count (a Ranch's riders).
+  const owned = villageBonuses(data, home.state);
+  const heroic = hero ? combine(owned, heroBonuses(data, hero)) : owned;
   const bonuses = general ? combine(heroic, generalBonuses(data, general)) : heroic;
   const result = assault(data, {
     army: combatants(data, army.units),

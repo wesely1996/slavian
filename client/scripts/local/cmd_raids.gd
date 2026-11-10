@@ -203,7 +203,7 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var home := server.find_village(world, int(army.homeVillageId))
 	var hero := LocalArmies.hero_with_army(world, int(army.id))
 	var general := LocalGenerals.general_with_army(world, int(army.id))
-	var bonuses := LocalArmies._led_bonuses(data, home.state.bonuses, hero, general)
+	var bonuses := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), hero, general)
 	var initial: Dictionary = army.units.duplicate()
 	var fighters := LocalScouting.combatants(data, army.units)
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
