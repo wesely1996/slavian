@@ -134,8 +134,9 @@ export async function markArrived(client: DbClient, id: number, endsAt: Date): P
 }
 
 // A horde grows to hate: `amount` more.
-export async function addHatred(client: DbClient, id: number, amount: number): Promise<void> {
-  await client.query('UPDATE waves SET hatred = hatred + $2::double precision WHERE id = $1', [id, amount]);
+// The hatred a horde carries, taken from its front as it set out.
+export async function setWaveHatred(client: DbClient, id: number, hatred: number): Promise<void> {
+  await client.query('UPDATE waves SET hatred = $2::double precision WHERE id = $1', [id, hatred]);
 }
 
 // Ritual Night replaces the waves still to come.

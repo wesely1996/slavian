@@ -926,10 +926,10 @@ func _replay_scenario(file: String, name: String) -> void:
 			if step.set.has("garrison"):
 				for unit in step.set.garrison:
 					world.villages[0].state.garrison[unit] = int(step.set.garrison[unit])
-			if step.set.has("waveHatred"):
-				for w in world.waves:
-					if int(w.index) == int(step.set.waveHatred.index) and w.get("bandOf") == null:
-						w.hatred = float(step.set.waveHatred.hatred)
+			if step.set.has("frontHatred"):
+				if not world.has("hatred"):
+					world.hatred = {}
+				world.hatred[String(step.set.frontHatred.front)] = float(step.set.frontHatred.hatred)
 			continue
 		var answer := local.handle(int(world.id), String(step.method), String(step.path), step.get("body"), now)
 		var label := "%s %d %s %s" % [name, i, step.method, step.path]

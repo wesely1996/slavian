@@ -2409,7 +2409,7 @@ func _raid_tab(village: Dictionary) -> void:
 func _strike_tab(village: Dictionary) -> void:
 	var data := Game.data
 	var village_id := int(village.id)
-	var info := UI.label(tr("Attack a horde still gathering beyond the map's edge, before it sets out. The earlier you strike, the fewer of it have gathered, but those there fight from behind their encampment's walls. Its dead are gone for good; win or lose, that front's next horde hates you far more."), UI.SMALL_SIZE, UI.MUTED)
+	var info := UI.label(tr("Attack a horde still gathering beyond the map's edge, before it sets out. The earlier you strike, the fewer of it have gathered, but those there fight from behind their encampment's walls. Its dead are gone for good; win or lose, that front's hatred rises sharply, and its next horde to set out takes it all."), UI.SMALL_SIZE, UI.MUTED)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_panel_body.add_child(info)
 	var gathering: Array = Game.waves.filter(func(w: Dictionary) -> bool: return w.status == "scheduled" and w.get("bandOf") == null)
@@ -5125,12 +5125,21 @@ func _wave_entry(wave: Dictionary) -> void:
 	threat_row.add_child(threat_ic)
 	threat_row.add_child(UI.label(tr("%s front · %s threat%s") % [String(wave.front).capitalize(), tr(wave.threat), known], UI.SMALL_SIZE, WaveMath.threat_color(String(wave.threat))))
 	_panel_body.add_child(threat_row)
-	# Ambushes and harassment make it hate: stronger, and camps in its wake.
-	var hatred := float(wave.get("hatred", 0.0))
-	if hatred > 0:
-		var camps := hatred * float(Game.data.horde.hatred.campChance)
-		_panel_body.add_child(UI.with_info(UI.label(tr("Hatred: +%d%% attack and defense") % roundi(hatred * 100.0), UI.SMALL_SIZE, UI.ERROR),
-			tr("Every ambush that delays this horde and every harassing strike against it make it hate the more. Each time its hatred passes another 100%%, it sends a band of %d%% of its troops against the nearest village. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance). Ambushing it again is riskier, and worth more.") % [roundi(float(Game.data.horde.hatred.bandShare) * 100.0), UI.number(camps)]))
+	# Hatred belongs to the front: ambushes, harassment, raids, strikes and
+	# events left undone add to it, and its next horde to set out takes it all.
+	var band_share := roundi(float(Game.data.horde.hatred.bandShare) * 100.0)
+	if wave.status == "scheduled" and wave.get("bandOf") == null:
+		var front_hatred := float(Game.world.get("hatred", {}).get(wave.front, 0.0))
+		if front_hatred > 0:
+			var camps := front_hatred * float(Game.data.horde.hatred.campChance)
+			_panel_body.add_child(UI.with_info(UI.label(tr("Hatred of the %s front: +%d%% attack and defense") % [String(wave.front).capitalize(), roundi(front_hatred * 100.0)], UI.SMALL_SIZE, UI.ERROR),
+				tr("The front's hatred grows with every ambush, harassing strike, raid and strike against its hordes, and every map event left undone. Its next horde to set out takes all of it, and the front's hatred starts again from nothing. Each time it passes another 100%%, the front's next horde sends a band of %d%% of its troops against the nearest village. A horde that took it leaves %s more camps behind when it is over (the whole part surely, the rest by chance). Ambushes on the front are riskier, and worth more.") % [band_share, UI.number(camps)]))
+	else:
+		var hatred := float(wave.get("hatred", 0.0))
+		if hatred > 0:
+			var camps := hatred * float(Game.data.horde.hatred.campChance)
+			_panel_body.add_child(UI.with_info(UI.label(tr("Hatred: +%d%% attack and defense") % roundi(hatred * 100.0), UI.SMALL_SIZE, UI.ERROR),
+				tr("It took all of its front's hatred as it set out. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance).") % UI.number(camps)))
 	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 	_panel_body.add_child(line)
 	_tick(line, func() -> String:

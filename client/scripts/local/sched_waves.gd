@@ -295,6 +295,8 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 		send_band(server, world, wave, at)
 		changed.append(["world"])
 		return
+	# It takes all of its front's hatred.
+	wave.hatred = drain_front_hatred(world, String(wave.front))
 	assign_leader(server, world, wave, at)
 	LocalCamps.camps_join(server, world, wave)
 	wave.composition = LocalStore.stored(wave.composition)
@@ -329,11 +331,33 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	changed.append(["world"])
 
 
-## A horde grows to hate (scheduler/waves.ts angerHorde): each time its
-## hatred passes another whole 100%, it sends out a band of its troops.
-static func anger_horde(server: LocalServer, world: Dictionary, wave: Dictionary, amount: float, at: int) -> void:
-	var before := float(wave.get("hatred", 0.0))
-	wave.hatred = before + amount
+## A front's hatred so far (0 if none).
+static func front_hatred(world: Dictionary, front: String) -> float:
+	return float(world.get("hatred", {}).get(front, 0.0))
+
+
+## A front's horde sets out: it takes all of the front's hatred, which is
+## drained (db/worlds.ts drainFrontHatred).
+static func drain_front_hatred(world: Dictionary, front: String) -> float:
+	var taken := front_hatred(world, front)
+	if world.has("hatred"):
+		world.hatred.erase(front)
+	return taken
+
+
+## A front grows to hate (scheduler/waves.ts angerFront): its next horde to
+## set out takes all of it. Each time the front's hatred passes another
+## whole 100%, its next horde yet to set out sends out a band of its troops.
+static func anger_front(server: LocalServer, world: Dictionary, front: String, amount: float, at: int) -> void:
+	if amount <= 0:
+		return
+	var before := front_hatred(world, front)
+	if not world.has("hatred"):
+		world.hatred = {}
+	world.hatred[front] = before + amount
+	var wave := LocalHeroCommands._next_wave(world, front)
+	if wave.is_empty():
+		return
 	for i in LocalWaves.hatred_crossings(before, before + amount):
 		var split := LocalWaves.split_band(wave.composition, float(server.data.horde.hatred.bandShare))
 		if split.band.is_empty():

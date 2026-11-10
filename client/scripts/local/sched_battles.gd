@@ -318,10 +318,10 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		if not leaving.call(a):
 			defenders_now = LocalCamps.add_units(defenders_now, LocalScouting.combatants(data, a.units))
 	wave.composition = attacker_now
-	# Every harassing strike makes the horde hate the more.
+	# Every harassing strike makes the horde's front hate the more.
 	var strikes := joining.filter(func(a: Dictionary) -> bool: return a.orders == "harass").size()
 	if strikes > 0:
-		LocalHordes.anger_horde(server, world, wave, strikes * float(data.horde.hatred.perHarass), at)
+		LocalHordes.anger_front(server, world, String(wave.front), strikes * float(data.horde.hatred.perHarass), at)
 
 	var outcome := LocalBattle.battle_outcome(data, {
 		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,

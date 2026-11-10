@@ -152,7 +152,7 @@ export function waveView(wave: Wave, forecast: March | null = null) {
     ritual: wave.ritual,
     // The enemy leader at its head (see leaders), if any.
     leaderId: wave.leaderId,
-    // Added to its attack and defense for ambushes and harassment.
+    // Added to its attack and defense: its front's hatred, taken as it set out.
     hatred: wave.hatred,
     // The horde it broke away from, for a band a hating horde sent out.
     bandOf: wave.bandOf,
@@ -572,6 +572,9 @@ export function worldSummary(world: World) {
     startedAt: world.startedAt?.toISOString() ?? null,
     sanctity: world.sanctity,
     embers: world.embers,
+    // Each front's hatred (horde.json hatred), by front: its next horde to
+    // set out takes it all.
+    hatred: world.hatred,
     difficulty: world.difficulty,
     // Hordes don't arrive in the group's quiet hours (minutes after local midnight).
     quietHours: quietWindow(world),

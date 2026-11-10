@@ -32,6 +32,8 @@ export interface World {
   ritualAt: Date | null;
   // When the run was won or lost.
   endedAt: Date | null;
+  // Each front's hatred (horde.json hatred), taken by its next horde to set out.
+  hatred: Partial<Record<Front, number>>;
 }
 
 export function quietWindow(world: World): QuietWindow | null {
@@ -52,7 +54,7 @@ export interface NewWorld {
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
   max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers,
   difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
-  ritual_at AS "ritualAt", ended_at AS "endedAt"`;
+  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
@@ -270,4 +272,28 @@ export async function setQuietHours(client: DbClient, worldId: number, window: Q
 export async function spendEmbers(client: DbClient, worldId: number, n: number): Promise<boolean> {
   const { rowCount } = await client.query('UPDATE worlds SET embers = embers - $2 WHERE id = $1 AND embers >= $2', [worldId, n]);
   return rowCount === 1;
+}
+
+// A front's hatred so far (0 if none), locking the world's row.
+async function frontHatred(client: DbClient, worldId: number, front: Front): Promise<number> {
+  const { rows } = await client.query<{ hatred: number | null }>(
+    'SELECT (hatred->>$2::text)::double precision AS hatred FROM worlds WHERE id = $1 FOR UPDATE',
+    [worldId, front],
+  );
+  return Number(rows[0]?.hatred ?? 0);
+}
+
+// A front's hatred rises; returns what it was before.
+export async function addFrontHatred(client: DbClient, worldId: number, front: Front, amount: number): Promise<number> {
+  const before = await frontHatred(client, worldId, front);
+  await client.query('UPDATE worlds SET hatred = hatred || jsonb_build_object($2::text, $3::double precision) WHERE id = $1', [worldId, front, before + amount]);
+  return before;
+}
+
+// A front's horde sets out: it takes all of the front's hatred, which is
+// drained. Returns what it took.
+export async function drainFrontHatred(client: DbClient, worldId: number, front: Front): Promise<number> {
+  const taken = await frontHatred(client, worldId, front);
+  await client.query('UPDATE worlds SET hatred = hatred - $2::text WHERE id = $1', [worldId, front]);
+  return taken;
 }
