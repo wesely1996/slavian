@@ -52,7 +52,7 @@ import {
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
-import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, startWorldCommand } from '../commands/worlds.js';
+import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, setRallyCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -178,6 +178,9 @@ const heroPickBody = z.object({ kind: z.string().min(1).max(32) });
 const claimBody = z.object({ step: z.string().min(1).max(32) });
 const delegateBody = z.object({ to: z.number().int().positive(), days: z.number().int() });
 const endDelegationBody = z.object({ owner: z.number().int().positive().optional() });
+// A player's rally point: one of their villages, or null for none.
+const rallyBody = z.object({ villageId: z.number().int().positive().nullable() });
+
 // The group's quiet hours (null start/end: none), set by the host.
 const quietBody = z.object({
   start: minuteOfDay.nullable(),
@@ -443,6 +446,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = quietBody.parse(request.body);
     await setQuietHoursCommand(db, { account, worldId: id, ...body });
+    return fullWorldView(id);
+  });
+
+  app.put('/v1/worlds/:id/rally', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { villageId } = rallyBody.parse(request.body);
+    await setRallyCommand(db, scheduler, { account, worldId: id, villageId, now: clock() });
     return fullWorldView(id);
   });
 

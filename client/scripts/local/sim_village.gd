@@ -747,9 +747,26 @@ static func batch_completes_at(batch: Dictionary) -> int:
 	return int(batch.startsAt) + int(batch.count) * int(batch.perUnitMs)
 
 
+## training.ts trainingFirstLevel: the first level at which a building
+## trains any unit (the Hospital's Shaman needs level 2).
+static func training_first_level(data: Dictionary, building: String) -> int:
+	var first := 0
+	for unit in data.units.units:
+		var def: Dictionary = data.units.units[unit]
+		if def.building == building and (first == 0 or int(def.get("requiresLevel", 1)) < first):
+			first = int(def.get("requiresLevel", 1))
+	return maxi(1, first)
+
+
+## training.ts trainingSpeedFactor: trainingSpeedup for each level above the
+## first the building trains anything at.
+static func training_speed_factor(data: Dictionary, building: String, building_level: int) -> float:
+	return pow(float(data.units.trainingSpeedup), maxi(0, building_level - training_first_level(data, building)))
+
+
 static func per_unit_ms(data: Dictionary, unit: String, building_level: int, world_speed: float, factor := 1.0) -> int:
 	var def: Dictionary = data.units.units[unit]
-	var speedup := pow(float(data.units.trainingSpeedup), maxi(0, building_level - 1)) * factor
+	var speedup := training_speed_factor(data, String(def.building), building_level) * factor
 	return maxi(1, LocalWaves.js_round((float(def.trainSeconds) * 1000.0 * speedup) / world_speed))
 
 
@@ -789,7 +806,7 @@ static func queue_training(data: Dictionary, state: Dictionary, unit: String, co
 	var starts_at := at
 	if not state.training.is_empty() and batch_completes_at(state.training[-1]) > at:
 		starts_at = batch_completes_at(state.training[-1])
-	var batch := {"unit": unit, "count": count, "startsAt": starts_at,
+	var batch := {"unit": unit, "count": count, "size": count, "startsAt": starts_at,
 		"perUnitMs": per_unit_ms(data, unit, level, world_speed, train_factor(village_bonuses(data, state), unit))}
 	var next := state.duplicate(true)
 	next.training.append(batch)

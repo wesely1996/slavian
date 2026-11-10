@@ -4,7 +4,8 @@ import { notifyWorld } from '../db/notify.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining, outpostHex } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
-import { armyHandlers } from './armies.js';
+import { armyHandlers, rallyTrained } from './armies.js';
+import { batchCompletesAt } from '../sim/training.js';
 import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
 import { expeditionHandlers } from './expeditions.js';
@@ -77,8 +78,11 @@ export const handlers: HandlerRegistry = {
   async training_complete({ client, data, world }, event) {
     const payload = trainingCompletePayload.parse(event.payload);
     const village = await loadVillage(client, payload.villageId);
+    const done = village.state.training.filter((batch) => batchCompletesAt(batch) <= event.dueAt);
     // New troops: the military reserve is topped up for them.
     await saveVillageState(client, village.id, topUpReserve(data, completeTraining(village.state, event.dueAt), event.dueAt));
+    // They march on to the owner's rally point, if one is set.
+    await rallyTrained(client, data, world, village.id, done, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   },
 

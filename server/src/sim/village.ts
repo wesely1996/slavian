@@ -745,6 +745,7 @@ export function queueTraining(
   const batch: TrainingBatch = {
     unit,
     count,
+    size: count,
     startsAt,
     perUnitMs: perUnitMs(data, unit, buildingLevel, worldSpeed, trainFactor(villageBonuses(data, state), unit)),
   };

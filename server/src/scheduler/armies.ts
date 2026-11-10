@@ -22,9 +22,10 @@ import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
 import { heroFactor } from '../sim/heroes.js';
 import { loadWave, type Wave } from '../db/waves.js';
-import { loadHexes, type World } from '../db/worlds.js';
+import { loadHexes, rallyPoint, type World } from '../db/worlds.js';
+import type { TrainingBatch } from '../sim/training.js';
 import { RuleError } from '../errors.js';
-import { approachAngle, armySpeed, joinBonus, shareOf, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
+import { approachAngle, armySpeed, fighters, joinBonus, shareOf, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
@@ -104,6 +105,16 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     const target = await loadVillage(client, input.targetVillageId).catch(() => null);
     if (!target || target.worldId !== world.id) throw new RuleError('No such village in this world');
     if (input.orders === 'garrison' && target.ownerAccountId !== home.ownerAccountId) throw new RuleError('Troops only join the garrisons of your own villages');
+    // Harassers strike a horde, never a friendly village: only where one
+    // fights or marches on it.
+    if (input.orders === 'harass') {
+      const { rows } = await client.query(
+        `SELECT 1 FROM battles WHERE village_id = $1 AND status = 'ongoing'
+         UNION ALL SELECT 1 FROM waves WHERE target_village_id = $1 AND status IN ('marching', 'battling') LIMIT 1`,
+        [target.id],
+      );
+      if (rows.length === 0) throw new RuleError(`No horde comes against ${target.name} to harass`);
+    }
     to = hex(target.q, target.r);
   }
   // The troops leave the garrison with what grain the military reserve
@@ -704,3 +715,35 @@ export const armyHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },
 };
+
+// Newly trained troops march to their owner's rally point (another of their
+// own settlements), if one is set: each batch done (`batches`, as they stood
+// before settling) sends as many of its unit as stand at home, up to its
+// size, as one army joining the garrison there. Troops that can't march
+// (settlers), or a village under siege, stay home.
+export async function rallyTrained(client: DbClient, data: GameData, world: World, villageId: number, batches: readonly TrainingBatch[], at: Date): Promise<void> {
+  const home = await loadVillage(client, villageId);
+  if (home.ownerAccountId === null || home.state.besieged || batches.length === 0) return;
+  const rally = await rallyPoint(client, world.id, home.ownerAccountId);
+  if (rally === null || rally === home.id) return;
+  const target = await loadVillage(client, rally).catch(() => null);
+  if (!target || target.worldId !== world.id || target.ownerAccountId !== home.ownerAccountId || target.ruin) return;
+  const units: Record<string, number> = {};
+  for (const batch of batches) {
+    const def = data.units.units[batch.unit];
+    const marches = def?.family === 'scout' || total(fighters(data, { [batch.unit]: 1 })) > 0;
+    if (!marches) continue;
+    const left = (home.state.garrison[batch.unit] ?? 0) - (units[batch.unit] ?? 0);
+    const n = Math.min(left, batch.size ?? batch.count);
+    if (n > 0) units[batch.unit] = (units[batch.unit] ?? 0) + n;
+  }
+  if (total(fighters(data, units)) === 0) return;
+  await client.query('SAVEPOINT rally');
+  try {
+    await dispatchArmy(client, data, world, { homeVillageId: home.id, targetVillageId: target.id, units, orders: 'garrison', at });
+    await client.query('RELEASE SAVEPOINT rally');
+  } catch (error) {
+    await client.query('ROLLBACK TO SAVEPOINT rally');
+    if (!(error instanceof RuleError)) throw error;
+  }
+}

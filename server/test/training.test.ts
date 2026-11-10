@@ -8,6 +8,8 @@ import {
   finishedBy,
   perUnitMs,
   settleTraining,
+  trainingFirstLevel,
+  trainingSpeedFactor,
   upkeepPerHour,
   type TrainingBatch,
 } from '../src/sim/training.js';
@@ -135,5 +137,17 @@ describe('queueTraining', () => {
     const built = completeBuild(data, building, queued.plot, 1, queued.completesAt, 1);
     const farm = data.buildings.buildings.farm!.production!.basePerHour;
     expect(built.ledger.ratesPerHour.grain).toBeCloseTo(trained.ledger.ratesPerHour.grain + farm);
+  });
+});
+
+describe('training speed by building level', () => {
+  const data = loadGameData();
+  it('counts from the first level a building trains anything at', () => {
+    expect(trainingFirstLevel(data, 'barracks')).toBe(1);
+    // The Hospital's Shaman needs level 2: no speed-up before then.
+    expect(trainingFirstLevel(data, 'hospital')).toBe(2);
+    expect(trainingSpeedFactor(data, 'hospital', 2)).toBe(1);
+    expect(trainingSpeedFactor(data, 'hospital', 3)).toBeCloseTo(data.units.trainingSpeedup);
+    expect(trainingSpeedFactor(data, 'barracks', 2)).toBeCloseTo(data.units.trainingSpeedup);
   });
 });

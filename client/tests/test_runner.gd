@@ -176,7 +176,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "market"],
+	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
 	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
