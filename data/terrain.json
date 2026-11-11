@@ -5,6 +5,7 @@
     "plains":      { "name": "Plains",         "moveCost": 1,    "settleable": true,  "edge": false },
     "forest":      { "name": "Forest",         "moveCost": 2,    "settleable": true,  "edge": false },
     "hills":       { "name": "Hills",          "moveCost": 2,    "settleable": true,  "edge": false },
+    "wooded_hills": { "name": "Wooded Hills",  "moveCost": 3,    "settleable": true,  "edge": false },
     "mountain":    { "name": "Mountain",       "moveCost": null, "settleable": false, "edge": false },
     "swamp":       { "name": "Swamp",          "moveCost": 3,    "settleable": false, "edge": false },
     "lake":        { "name": "Lake",           "moveCost": null, "settleable": false, "edge": false },

@@ -545,7 +545,7 @@ func village_site(village: Dictionary) -> Dictionary:
 	for e in rivers:
 		if (int(e[0]) == cell.x and int(e[1]) == cell.y) or (int(e[2]) == cell.x and int(e[3]) == cell.y):
 			water = true
-	return {"water": water, "hills": terrain.get(cell, "") == "hills", "plains": terrain.get(cell, "") == "plains", "mountain": mountain}
+	return {"water": water, "hills": terrain.get(cell, "") in ["hills", "wooded_hills"], "plains": terrain.get(cell, "") == "plains", "mountain": mountain}
 
 
 ## The group's research pool: every member's Academies, all together.

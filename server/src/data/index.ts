@@ -11,6 +11,7 @@ export const TERRAIN_IDS = [
   'plains',
   'forest',
   'hills',
+  'wooded_hills',
   'mountain',
   'swamp',
   'lake',

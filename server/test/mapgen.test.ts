@@ -81,7 +81,7 @@ describe('rivers', () => {
         if (meeting.length !== 1) continue;
         // A loose end: where the river rises in the hills, or its mouth.
         const [a, b, third] = meeting[0]!;
-        const rises = [a!, b!].some((h) => ['hills', 'mountain'].includes(type(h)!));
+        const rises = [a!, b!].some((h) => ['hills', 'wooded_hills', 'mountain'].includes(type(h)!));
         const mouth = type(third!) === undefined || WATER.includes(type(third!)!);
         expect(rises || mouth).toBe(true);
       }

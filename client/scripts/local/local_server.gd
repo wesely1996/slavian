@@ -953,6 +953,8 @@ func as_stored(world: Dictionary) -> void:
 		h.skills = LocalStore.stored(h.skills)
 		h.gear = LocalStore.stored(h.gear)
 	world.bridge = LocalStore.stored(world.bridge)
+	for y in world.get("shipyards", []):
+		y.raiders = LocalStore.stored(y.raiders)
 	for o in world.orders:
 		o.spec = LocalStore.stored(o.spec)
 

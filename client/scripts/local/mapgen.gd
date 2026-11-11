@@ -78,7 +78,7 @@ static func _candidate(seed_value: int, players: int) -> Dictionary:
 			type = _edge_terrain(front_of(cell), fronts, dist == radius, m)
 		else:
 			type = _interior_terrain(e, m)
-			if dist <= START_RING and not type in ["plains", "forest", "hills"]:
+			if dist <= START_RING and not type in ["plains", "forest", "hills", "wooded_hills"]:
 				type = "plains"
 		terrain[LocalLand.key(cell)] = type
 	var start_ring := HexMath.ring(Vector2i.ZERO, START_RING)
@@ -106,13 +106,13 @@ static func _fbm(noise: LocalNoise, frequency: float, x: float, y: float, octave
 static func _interior_terrain(e: float, m: float) -> String:
 	if e > 0.38:
 		return "mountain"
-	if e > 0.2:
-		return "hills"
+	if e > 0.175:
+		return "wooded_hills" if m > 0.25 else "hills"
 	if e < -0.4 and m > 0:
 		return "lake"
 	if e < -0.15 and m > 0.3:
 		return "swamp"
-	if m > 0.05:
+	if m > -0.015:
 		return "forest"
 	return "plains"
 
@@ -142,7 +142,7 @@ static func _lay_rivers(map: Dictionary, elevation: Dictionary, rng: LocalRng) -
 	var laid := {}
 	var sources: Array = []
 	for cell in HexMath.spiral(Vector2i.ZERO, radius - EDGE_BELT_WIDTH):
-		if not String(type_of.call(cell)) in ["hills", "mountain"]:
+		if not String(type_of.call(cell)) in ["hills", "wooded_hills", "mountain"]:
 			continue
 		for n in HexMath.neighbors(cell):
 			if LocalLand.key(cell) < LocalLand.key(n) and HexMath.distance(n, Vector2i.ZERO) <= radius - EDGE_BELT_WIDTH and bank.call(cell) and bank.call(n):

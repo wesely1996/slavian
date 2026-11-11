@@ -400,7 +400,8 @@ export function villageSite(terrain: ReadonlyMap<string, string>, rivers: readon
   const key = hexKey(cell);
   const water = neighbors(cell).some((n) => terrain.get(hexKey(n)) === 'lake') || rivers.some((e) => hexKey(e.a) === key || hexKey(e.b) === key);
   const mountain = neighbors(cell).some((n) => terrain.get(hexKey(n)) === 'mountain');
-  return { water, hills: terrain.get(key) === 'hills', plains: terrain.get(key) === 'plains', mountain };
+  // Wooded hills are hills too.
+  return { water, hills: terrain.get(key) === 'hills' || terrain.get(key) === 'wooded_hills', plains: terrain.get(key) === 'plains', mountain };
 }
 
 // The words for a site a building needs.
