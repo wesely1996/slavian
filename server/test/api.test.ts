@@ -1093,7 +1093,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await inbox()).unread).toBe(0);
   }));
 
-  it('sends armies: support that guards an ally, reinforcements that rally to battles', async () => {
+  it('sends armies: support that guards an ally, armies nearby that answer battles', async () => {
     const vid = await guest('Vid');
     const ola = await guest('Ola');
     const created = await call('POST', '/v1/worlds', vid.token, { name: 'Armies', maxPlayers: 2, speed: 10 });
@@ -1105,11 +1105,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
     const village = async (id: number) => (await world()).villages.find((v: { id: number }) => v.id === id);
     const roundMs = scheduler.data.battle.roundMinutes * 60_000;
-    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', reserve = 1000 WHERE id = $1`, [a.id]);
+    const full = `jsonb_set(amounts, '{grain}', '1000')`;
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', amounts = ${full} WHERE id = $1`, [a.id]);
     await db.query(`UPDATE villages SET garrison = '{"spearman": 10, "archer": 10}' WHERE id = $1`, [b.id]);
-    expect(a.reinforce).toEqual({ share: 0.5, range: 4 });
-    expect((await call('PUT', `/v1/villages/${a.id}/reinforce`, vid.token, { share: 0, range: 4 })).status).toBe(200);
-    expect((await call('PUT', `/v1/villages/${a.id}/reinforce`, ola.token, { share: 0, range: 4 })).status).toBe(403);
+    // How low a village's grain may fall for armies: half its storage unless set.
+    expect(a.armyFloor).toBeNull();
+    expect((await call('PUT', `/v1/villages/${a.id}/army-floor`, vid.token, { grain: 0 })).body.armyFloor).toBe(0);
+    expect((await call('PUT', `/v1/villages/${a.id}/army-floor`, ola.token, { grain: 0 })).status).toBe(403);
+    expect((await village(a.id)).armyFloor).toBe(0);
 
     // Vid sends 20 spearmen to stand guard at Ola's village.
     const send = (body: object) => call('POST', `/v1/villages/${a.id}/armies`, vid.token, body);
@@ -1124,7 +1127,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(sent.body.army.supply).toBeGreaterThan(0);
     now = new Date(sent.body.army.arrivesAt);
     await tick(db, now, scheduler);
-    expect((await world()).armies[0]).toMatchObject({ id: sent.body.army.id, status: 'stationed' });
+    // Standing in Ola's village, it is quartered: her granary feeds it.
+    const guarding = (await world()).armies[0];
+    expect(guarding).toMatchObject({ id: sent.body.army.id, status: 'stationed', quarteredAt: now.toISOString() });
 
     // A horde strikes Ola's village: the guard fights beside her garrison.
     now = new Date(started.body.waves[0].spawnAt);
@@ -1156,22 +1161,38 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       expect(home.garrison.spearman).toBe(10 + guard.units.spearman);
     }
 
-    // Next horde hits Vid: Ola's village sends half its troops (auto-reinforce).
-    await call('PUT', `/v1/villages/${b.id}/reinforce`, ola.token, { share: 0.5, range: 8 });
-    await db.query(`UPDATE villages SET garrison = '{"spearman": 20}' WHERE id = $1`, [b.id]);
-    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', reserve = 1000 WHERE id = $1`, [a.id]);
+    // Next horde hits Vid: Ola's garrison stays home, but an army of hers
+    // standing near Vid's village answers the battle.
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 20}', amounts = ${full} WHERE id = $1`, [b.id]);
+    await db.query(`UPDATE villages SET garrison = '{"spearman": 30}', amounts = ${full} WHERE id = $1`, [a.id]);
+    const landClient = await db.connect();
+    const land = await loadLand(landClient, worldId).finally(() => landClient.release());
+    const villageHexes = new Set((await world()).villages.map((v: { q: number; r: number }) => `${v.q},${v.r}`));
+    const post = [...land.entries()]
+      .map(([key, t]) => ({ q: Number(key.split(',')[0]), r: Number(key.split(',')[1]), t }))
+      .find((c) => scheduler.data.terrain.terrain[c.t].moveCost !== null && !villageHexes.has(`${c.q},${c.r}`) && hexDistance(hex(c.q, c.r), hex(a.q, a.r)) === 2)!;
+    const posted = await call('POST', `/v1/villages/${b.id}/armies`, ola.token, { target: { q: post.q, r: post.r }, units: { spearman: 10 }, orders: 'hold' });
+    expect(posted.body.army).toMatchObject({ orders: 'hold', respond: true });
+    // Hers answers battles nearby unless told otherwise.
+    expect((await call('POST', `/v1/armies/${posted.body.army.id}/respond`, ola.token, { respond: false })).body.army.respond).toBe(false);
+    expect((await call('POST', `/v1/armies/${posted.body.army.id}/respond`, vid.token, { respond: true })).status).toBe(403);
+    expect((await call('POST', `/v1/armies/${posted.body.army.id}/respond`, ola.token, { respond: true })).body.army.respond).toBe(true);
     const second = (await world()).waves.find((x: { status: string }) => x.status === 'scheduled');
-    now = new Date(second.spawnAt);
+    // It stands there before the horde comes.
+    now = new Date(Math.max(new Date(posted.body.army.arrivesAt).getTime(), new Date(second.spawnAt).getTime()));
     await tick(db, now, scheduler);
+    expect((await world()).armies.find((x: { id: number }) => x.id === posted.body.army.id).status).toBe('stationed');
     const { rows: next } = await db.query<{ arrives_at: Date }>(
-      `UPDATE waves SET target_village_id = $2, composition = '{"grey_wolf": 60}' WHERE id = $1 RETURNING arrives_at`,
-      [second.id, a.id],
+      `UPDATE waves SET target_village_id = $2, composition = '{"grey_wolf": 60}', arrives_at = GREATEST(arrives_at, $3) WHERE id = $1 RETURNING arrives_at`,
+      [second.id, a.id, now],
     );
     now = new Date(next[0]!.arrives_at);
     await tick(db, now, scheduler);
     w = await world();
-    const help = w.armies.find((x: { homeVillageId: number; status: string }) => x.homeVillageId === b.id && x.status === 'marching');
-    expect(help).toMatchObject({ orders: 'reinforce', targetVillageId: a.id, units: { spearman: 10 } });
+    // No village sends its garrison; the army nearby marches.
+    expect(w.armies.filter((x: { id: number; homeVillageId: number; orders: string }) => x.homeVillageId === b.id && x.orders === 'reinforce' && x.id !== posted.body.army.id)).toHaveLength(0);
+    const help = w.armies.find((x: { id: number }) => x.id === posted.body.army.id);
+    expect(help).toMatchObject({ status: 'marching', orders: 'reinforce', targetVillageId: a.id, units: { spearman: 10 }, post: { q: post.q, r: post.r, villageId: null } });
     // Let it arrive in time for the first round.
     await db.query(`UPDATE scheduled_events SET due_at = $2 WHERE type = 'army_arrive' AND payload @> $1::jsonb AND status = 'pending'`, [
       JSON.stringify({ armyId: help.id }),
@@ -1184,12 +1205,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const battle = w.battles.find((x: { villageId: number }) => x.villageId === a.id);
     expect(battle.rounds[0].joined).toEqual([expect.objectContaining({ armyId: help.id, villageId: b.id, orders: 'reinforce' })]);
     expect(battle.defenderInitial.spearman).toBe(40);
-    for (let i = 0; i < 12 && battle.status === 'ongoing' && (await world()).battles.find((x: { id: number }) => x.id === battle.id).status === 'ongoing'; i++) {
+    for (let i = 0; i < 12 && (await world()).battles.find((x: { id: number }) => x.id === battle.id).status === 'ongoing'; i++) {
       now = new Date(now.getTime() + roundMs);
       await tick(db, now, scheduler);
     }
+    // Once it is over, it goes back where it stood (or home, beaten).
     const after = (await world()).armies.find((x: { id: number }) => x.id === help.id);
-    expect(['returning', 'done']).toContain(after.status);
+    if (after.status === 'marching') expect(after).toMatchObject({ orders: 'hold', target: [post.q, post.r], post: null });
+    else expect(['returning', 'done']).toContain(after.status);
   });
 
   it('holds a hex: field battles with a fort and a hero, and a horde that breaks through', async () => {

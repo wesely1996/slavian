@@ -169,11 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -359,11 +355,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -379,13 +371,13 @@
       "amounts": {
        "iron": 50,
        "wood": 220,
-       "grain": 133.33333333333331,
+       "grain": 333.33333333333326,
        "stone": 320
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 184,
+       "grain": 292,
        "stone": 300
       },
       "capacity": {
@@ -594,11 +586,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -606,13 +594,13 @@
        "amounts": {
         "iron": 50,
         "wood": 220,
-        "grain": 133.33333333333331,
+        "grain": 333.33333333333326,
         "stone": 320
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 184,
+        "grain": 292,
         "stone": 300
        },
        "capacity": {
@@ -3200,11 +3188,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -3212,13 +3196,13 @@
        "amounts": {
         "iron": 50,
         "wood": 220,
-        "grain": 133.33333333333331,
+        "grain": 333.33333333333326,
         "stone": 320
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 184,
+        "grain": 292,
         "stone": 300
        },
        "capacity": {

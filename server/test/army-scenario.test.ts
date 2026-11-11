@@ -25,8 +25,6 @@ scenario('army-scenario.json', START, async ({ started, now, play }) => {
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 5 } });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'scout', count: 2 } });
-  await play({ method: 'PUT', path: '/v1/villages/1/reinforce', body: { share: 0.3, range: 3 } });
-  await play({ method: 'PUT', path: '/v1/villages/1/reinforce', body: { share: 0.3, range: 50 } });
   await play({ advance: spawnAt - now().getTime() - 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 10 } });
   await play({ method: 'POST', path: '/v1/villages/1/scout', body: { waveId: 1, count: 2 } });

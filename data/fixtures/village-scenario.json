@@ -168,11 +168,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -369,11 +365,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -576,11 +568,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -790,11 +778,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -1011,11 +995,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -1262,11 +1242,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -1274,7 +1250,7 @@
        "amounts": {
         "iron": 190,
         "wood": 110,
-        "grain": 120,
+        "grain": 320,
         "stone": 170
        },
        "ratesPerHour": {
@@ -3677,11 +3653,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -3697,13 +3669,13 @@
       "amounts": {
        "iron": 95,
        "wood": 55,
-       "grain": 85,
+       "grain": 285,
        "stone": 160
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 203,
+       "grain": 216.5,
        "stone": 180
       },
       "capacity": {
@@ -3875,11 +3847,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -3895,13 +3863,13 @@
       "amounts": {
        "iron": 95,
        "wood": 55,
-       "grain": 85,
+       "grain": 285,
        "stone": 160
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 203,
+       "grain": 216.5,
        "stone": 180
       },
       "capacity": {
@@ -4118,11 +4086,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -4130,13 +4094,13 @@
       "amounts": {
        "iron": 97.83333333333333,
        "wood": 33,
-       "grain": 88.68333333333334,
+       "grain": 290.2583333333333,
        "stone": 141
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 203,
+       "grain": 216.5,
        "stone": 180
       },
       "capacity": {
@@ -4318,11 +4282,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -4330,13 +4290,13 @@
       "amounts": {
        "iron": 97.83333333333333,
        "wood": 33,
-       "grain": 88.68333333333334,
+       "grain": 290.2583333333333,
        "stone": 141
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 203,
+       "grain": 216.5,
        "stone": 180
       },
       "capacity": {
@@ -4551,11 +4511,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -4563,13 +4519,13 @@
        "amounts": {
         "iron": 417.8333333333333,
         "wood": 813,
-        "grain": 994.6833333333334,
+        "grain": 1200,
         "stone": 801
        },
        "ratesPerHour": {
         "iron": 110,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 180
        },
        "capacity": {
@@ -6999,11 +6955,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -7011,13 +6963,13 @@
       "amounts": {
        "iron": 377.8333333333333,
        "wood": 663,
-       "grain": 914.6833333333334,
+       "grain": 1120,
        "stone": 701
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 180
       },
       "capacity": {
@@ -7253,11 +7205,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -7265,13 +7213,13 @@
        "amounts": {
         "iron": 727.1666666666666,
         "wood": 1303,
-        "grain": 1200,
+        "grain": 1320,
         "stone": 1340
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 240
        },
        "capacity": {
@@ -9718,11 +9666,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -9730,13 +9674,13 @@
        "amounts": {
         "iron": 727.1666666666666,
         "wood": 1303,
-        "grain": 1200,
+        "grain": 1320,
         "stone": 1340
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 240
        },
        "capacity": {
@@ -12137,11 +12081,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -12149,13 +12089,13 @@
       "amounts": {
        "wood": 1303,
        "stone": 1340,
-       "grain": 1200,
+       "grain": 1320,
        "iron": 727.1666666666666
       },
       "ratesPerHour": {
        "wood": 240,
        "stone": 180,
-       "grain": 353,
+       "grain": 366.5,
        "iron": 110
       },
       "capacity": {
@@ -12180,11 +12120,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":447,\"stone\":0,\"grain\":300,\"iron\":772.8333333333334}",
+    "message": "Insufficient resources: missing {\"wood\":447,\"stone\":0,\"grain\":180,\"iron\":772.8333333333334}",
     "missing": {
      "wood": 447,
      "stone": 0,
-     "grain": 300,
+     "grain": 180,
      "iron": 772.8333333333334
     }
    }
@@ -12388,11 +12328,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -12400,13 +12336,13 @@
        "amounts": {
         "iron": 727.1666666666666,
         "wood": 1303,
-        "grain": 1200,
+        "grain": 1320,
         "stone": 1340
        },
        "ratesPerHour": {
         "iron": 110,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 180
        },
        "capacity": {
@@ -14827,11 +14763,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -14839,13 +14771,13 @@
       "amounts": {
        "iron": 769.6666666666666,
        "wood": 1123,
-       "grain": 1160,
+       "grain": 1280,
        "stone": 1040
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 180
       },
       "capacity": {
@@ -15032,11 +14964,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -15044,13 +14972,13 @@
       "amounts": {
        "iron": 819.6666666666666,
        "wood": 963,
-       "grain": 1130,
+       "grain": 1250,
        "stone": 920
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 180
       },
       "capacity": {
@@ -15246,11 +15174,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -15258,13 +15182,13 @@
       "amounts": {
        "iron": 779.6666666666666,
        "wood": 813,
-       "grain": 1050,
+       "grain": 1170,
        "stone": 820
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 180
       },
       "capacity": {
@@ -15457,11 +15381,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -15469,13 +15389,13 @@
       "amounts": {
        "iron": 860.3333333333333,
        "wood": 745,
-       "grain": 914,
+       "grain": 1034,
        "stone": 830
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 240
       },
       "capacity": {
@@ -15711,11 +15631,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -15723,13 +15639,13 @@
        "amounts": {
         "iron": 860.3333333333333,
         "wood": 745,
-        "grain": 914,
+        "grain": 1034,
         "stone": 830
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 240
        },
        "capacity": {
@@ -18217,11 +18133,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -18229,13 +18141,13 @@
        "amounts": {
         "iron": 860.3333333333333,
         "wood": 745,
-        "grain": 914,
+        "grain": 1034,
         "stone": 830
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 240
        },
        "capacity": {
@@ -20704,11 +20616,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -20716,13 +20624,13 @@
       "amounts": {
        "iron": 820.3333333333333,
        "wood": 585,
-       "grain": 814,
+       "grain": 934,
        "stone": 710
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 240
       },
       "capacity": {
@@ -20910,11 +20818,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -20922,13 +20826,13 @@
       "amounts": {
        "wood": 605,
        "stone": 839.8,
-       "grain": 990.5,
+       "grain": 1000,
        "iron": 941.8666666666666
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -21187,11 +21091,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -21205,7 +21105,7 @@
       "ratesPerHour": {
        "wood": 240,
        "stone": 261,
-       "grain": 353,
+       "grain": 366.5,
        "iron": 164
       },
       "capacity": {
@@ -21415,11 +21315,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -21433,7 +21329,7 @@
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -21631,11 +21527,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -21649,7 +21541,7 @@
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -21891,11 +21783,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -21909,7 +21797,7 @@
        "ratesPerHour": {
         "iron": 164,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 261
        },
        "capacity": {
@@ -24358,11 +24246,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -24370,13 +24254,13 @@
       "amounts": {
        "iron": 1053.8666666666666,
        "wood": 621,
-       "grain": 1225,
+       "grain": 1238.5,
        "stone": 864.8
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -24574,11 +24458,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -24586,13 +24466,13 @@
       "amounts": {
        "iron": 1033.8666666666666,
        "wood": 581,
-       "grain": 1195,
+       "grain": 1208.5,
        "stone": 804.8
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -24797,11 +24677,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -24809,13 +24685,13 @@
       "amounts": {
        "iron": 1001.8666666666666,
        "wood": 517,
-       "grain": 1147,
+       "grain": 1160.5,
        "stone": 708.8
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -25027,11 +24903,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -25039,13 +24911,13 @@
       "amounts": {
        "iron": 981.8666666666666,
        "wood": 477,
-       "grain": 1117,
+       "grain": 1130.5,
        "stone": 648.8
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -25300,11 +25172,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -25312,13 +25180,13 @@
        "amounts": {
         "iron": 981.8666666666666,
         "wood": 477,
-        "grain": 1117,
+        "grain": 1130.5,
         "stone": 648.8
        },
        "ratesPerHour": {
         "iron": 164,
         "wood": 240,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 261
        },
        "capacity": {
@@ -27785,11 +27653,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -27797,13 +27661,13 @@
       "amounts": {
        "wood": 560,
        "stone": 772.8,
-       "grain": 1179,
+       "grain": 1192.5,
        "iron": 1022.8666666666666
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -28001,11 +27865,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -28013,13 +27873,13 @@
       "amounts": {
        "wood": 611,
        "stone": 848.8,
-       "grain": 1217,
+       "grain": 1230.5,
        "iron": 1047.8666666666666
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 240,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {
@@ -28254,11 +28114,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -28266,13 +28122,13 @@
        "amounts": {
         "iron": 1047.8666666666666,
         "wood": 611,
-        "grain": 1217,
+        "grain": 1230.5,
         "stone": 848.8
        },
        "ratesPerHour": {
         "iron": 164,
         "wood": 390,
-        "grain": 353,
+        "grain": 366.5,
         "stone": 261
        },
        "capacity": {
@@ -30710,11 +30566,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -30722,13 +30574,13 @@
       "amounts": {
        "wood": 866,
        "stone": 1029.3,
-       "grain": 1393.5,
+       "grain": 1413.75,
        "iron": 1139.8666666666666
       },
       "ratesPerHour": {
        "wood": 390,
        "stone": 261,
-       "grain": 353,
+       "grain": 366.5,
        "iron": 164
       },
       "capacity": {
@@ -30978,11 +30830,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -30990,13 +30838,13 @@
       "amounts": {
        "iron": 1099.8666666666666,
        "wood": 686,
-       "grain": 1273.5,
+       "grain": 1293.75,
        "stone": 949.3
       },
       "ratesPerHour": {
        "iron": 164,
        "wood": 390,
-       "grain": 353,
+       "grain": 366.5,
        "stone": 261
       },
       "capacity": {

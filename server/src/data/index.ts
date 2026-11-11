@@ -51,6 +51,8 @@ const buildingSchema = z.object({
     })
     .optional(),
   capacityGrowth: z.number().min(1).optional(),
+  // A grain silo: like a storehouse, for grain alone.
+  grainCapacityGrowth: z.number().min(1).optional(),
   // Outposts: resources per hour at level 1, by the terrain they stand on.
   yields: z.partialRecord(z.enum(TERRAIN_IDS), resourcesSchema.partial()).optional(),
   yieldGrowth: z.number().min(1).optional(),
@@ -538,8 +540,6 @@ const armiesFileSchema = z.object({
   version: z.number().int(),
   // Field armies carry their own grain (sim/supply.ts).
   supply: z.object({ garrisonUpkeep: z.number().min(0).max(1) }),
-  // Grain kept for armies in the military buildings, per level of each.
-  reserve: z.object({ buildings: z.array(z.string()), grainPerLevel: z.number().nonnegative() }),
   attrition: z.object({
     slowFactor: z.number().positive().max(1),
     lossAfterHours: z.number().min(0),
@@ -554,11 +554,12 @@ const armiesFileSchema = z.object({
     scale: z.number().nonnegative(),
     lossFactor: z.number().min(0).max(1),
   }),
-  reinforce: z.object({
-    defaultShare: z.number().min(0).max(1),
-    defaultRange: z.number().int().nonnegative(),
-    maxRange: z.number().int().positive(),
-  }),
+  // Quartered in a settlement, fort or supply point: the share of its
+  // upkeep the place feeds it, and how low a settlement's grain may fall for
+  // armies (a share of its grain storage) unless its owner sets a floor.
+  quarters: z.object({ upkeep: z.number().min(0).max(1), settlementFloor: z.number().min(0).max(1) }),
+  // A standing army answers battles this many hexes away.
+  respond: z.object({ range: z.number().int().nonnegative() }),
 });
 
 const fieldFileSchema = z.object({

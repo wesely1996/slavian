@@ -1,18 +1,33 @@
-import { loadArmy, saveArmy, saveReinforceRule, type Army } from '../db/armies.js';
+import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
 import type { GameData, Stance } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
-import { loadVillage } from '../db/villages.js';
+import { loadVillage, saveVillageState } from '../db/villages.js';
 import { getWorld, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
-import { circleWagons, disbandArmy, dispatchArmy, moveArmy, resupplyArmy, sendHome, setReturnHome, stockStore } from '../scheduler/armies.js';
+import {
+  armyGeneral,
+  armyHero,
+  circleWagons,
+  disbandArmy,
+  dispatchArmy,
+  mergeArmies,
+  moveArmy,
+  resupplyArmy,
+  sendHome,
+  setArmyHome,
+  setRespond,
+  setReturnHome,
+  splitArmy,
+  stockStore,
+} from '../scheduler/armies.js';
 import type { SchedulerDeps } from '../scheduler/events.js';
 import { withWorld } from '../scheduler/world.js';
 import type { ArmyOrders } from '../sim/armies.js';
 import type { Hex } from '../sim/hex.js';
-import type { Fort } from '../db/forts.js';
+import { loadFort, setFortFloor, type Fort } from '../db/forts.js';
 import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
 import type { RoadEdge } from '../db/roads.js';
 import type { Shipyard } from '../db/shipyards.js';
@@ -252,10 +267,10 @@ async function armyCommand<T>(
 export async function moveArmyCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { accountId: number; armyId: number; target?: Hex | undefined; villageId?: number | undefined; now: Date },
+  input: { accountId: number; armyId: number; target?: Hex | undefined; villageId?: number | undefined; join?: boolean | undefined; now: Date },
 ): Promise<Army> {
   return armyCommand(db, deps, input, 'moved an army', ({ client, world, army }) =>
-    moveArmy(client, deps.data, world, army, { hex: input.target, villageId: input.villageId }, input.now),
+    moveArmy(client, deps.data, world, army, { hex: input.target, villageId: input.villageId, join: input.join }, input.now),
   );
 }
 
@@ -294,21 +309,67 @@ export async function stockStoreCommand(db: Db, deps: SchedulerDeps, input: { ac
   return armyCommand(db, deps, input, 'left grain in a store', ({ client, world, army }) => stockStore(client, deps.data, world, army, input.grain, input.now));
 }
 
-// How a village answers battles nearby.
-export async function setReinforceCommand(
-  db: Db,
-  data: GameData,
-  input: { accountId: number; villageId: number; share: number; range: number },
-): Promise<void> {
+// How low a settlement's grain may fall for armies quartered in it or
+// filling up there (null: the default).
+export async function setVillageFloorCommand(db: Db, input: { accountId: number; villageId: number; grain: number | null; now: Date }): Promise<void> {
   const worldId = await worldOfVillage(db, input.villageId);
-  if (!(input.share >= 0 && input.share <= 1)) throw new RuleError('Send between 0% and 100%');
-  if (!Number.isInteger(input.range) || input.range < 0 || input.range > data.armies.reinforce.maxRange) {
-    throw new RuleError(`Range is 0 to ${data.armies.reinforce.maxRange} hexes`);
-  }
+  if (input.grain !== null && !(input.grain >= 0)) throw new RuleError('Say how much grain to keep');
   await inTransaction(db, async (client) => {
     const village = await loadVillage(client, input.villageId);
-    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: new Date(), action: 'changed how it reinforces', villageId: village.id });
-    await saveReinforceRule(client, input.villageId, { share: input.share, range: input.range });
-    await notifyWorld(client, { worldId, type: 'village', villageId: input.villageId });
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'set the grain kept from armies', villageId: village.id });
+    await saveVillageState(client, village.id, { ...village.state, armyFloor: input.grain === null ? null : Math.floor(input.grain) });
+    await notifyWorld(client, { worldId, type: 'village', villageId: village.id });
   });
+}
+
+// How low a fort's or supply point's grain may fall for armies (null: to the last).
+export async function setFortFloorCommand(db: Db, input: { accountId: number; fortId: number; grain: number | null; now: Date }): Promise<Fort> {
+  if (input.grain !== null && !(input.grain >= 0)) throw new RuleError('Say how much grain to keep');
+  return inTransaction(db, async (client) => {
+    const fort = await loadFort(client, input.fortId);
+    if (!fort) throw new NotFoundError('No such fort');
+    await authorize(client, { worldId: fort.worldId, ownerAccountId: fort.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'set the grain kept from armies', ...(fort.villageId !== null ? { villageId: fort.villageId } : {}), refusal: 'Not your fort' });
+    const floor = input.grain === null ? null : Math.floor(input.grain);
+    await setFortFloor(client, fort.id, floor);
+    await notifyWorld(client, { worldId: fort.worldId, type: 'armies' });
+    return { ...fort, armyFloor: floor };
+  });
+}
+
+// An army's home: another of its owner's settlements.
+export async function armyHomeCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; villageId: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'gave an army a new home', ({ client, world, army }) => setArmyHome(client, world, army, input.villageId));
+}
+
+// Whether an army answers battles nearby.
+export async function armyRespondCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; respond: boolean; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'told an army whether to answer battles', ({ client, army }) => setRespond(client, army, input.respond));
+}
+
+// The hero joins or leaves an army.
+export async function armyHeroCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; join: boolean; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, input.join ? 'put the hero at the head of an army' : 'took the hero from an army', ({ client, world, army }) =>
+    armyHero(client, deps.data, world, army, input.join, input.now),
+  );
+}
+
+// A general takes command of an army, or the one leading it leaves (null).
+export async function armyGeneralCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; generalId: number | null; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'changed the general of an army', ({ client, world, army }) => armyGeneral(client, deps.data, world, army, input.generalId, input.now));
+}
+
+// Another standing army joins this one.
+export async function mergeArmiesCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; otherId: number; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, 'merged two armies', ({ client, world, army }) => mergeArmies(client, deps.data, world, army, input.otherId, input.now));
+}
+
+// Some of a standing army's troops become an army of their own.
+export async function splitArmyCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; armyId: number; units: Record<string, number>; withHero?: boolean | undefined; withGeneral?: boolean | undefined; now: Date },
+): Promise<{ army: Army; split: Army }> {
+  return armyCommand(db, deps, input, 'split an army', ({ client, world, army }) =>
+    splitArmy(client, deps.data, world, army, { units: input.units, withHero: input.withHero, withGeneral: input.withGeneral }, input.now),
+  );
 }

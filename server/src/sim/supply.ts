@@ -14,6 +14,9 @@ export interface Supplied {
   readonly supplyAt: Date;
   // When the food ran out, once that is settled (null: fed, or not yet known).
   readonly hungrySince: Date | null;
+  // Quartered in a settlement, fort or supply point (sim/quarters.ts): the
+  // place feeds it, and its own grain keeps.
+  readonly quarteredAt?: Date | null;
 }
 
 // Grain an army eats per real hour.
@@ -33,15 +36,20 @@ export function fullSupply(data: GameData, units: Units): number {
   return total;
 }
 
+// What the army eats of its own grain per real hour: nothing while quartered.
+function ownRate(data: GameData, army: Supplied, worldSpeed: number): number {
+  return army.quarteredAt ? 0 : armyUpkeep(data, army.units, worldSpeed);
+}
+
 export function supplyLeft(data: GameData, army: Supplied, at: Date, worldSpeed: number): number {
-  const rate = armyUpkeep(data, army.units, worldSpeed);
+  const rate = ownRate(data, army, worldSpeed);
   return Math.max(0, army.supply - (rate * (at.getTime() - army.supplyAt.getTime())) / HOUR_MS);
 }
 
 // When the food runs (or ran) out at the present rate (null: it eats nothing).
 export function outOfFoodAt(data: GameData, army: Supplied, worldSpeed: number): Date | null {
   if (army.hungrySince) return army.hungrySince;
-  const rate = armyUpkeep(data, army.units, worldSpeed);
+  const rate = ownRate(data, army, worldSpeed);
   if (rate <= 0) return null;
   return new Date(army.supplyAt.getTime() + Math.ceil((army.supply * HOUR_MS) / rate));
 }

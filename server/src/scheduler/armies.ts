@@ -12,10 +12,10 @@ import { loadLand } from '../db/rivers.js';
 import type { Land } from '../sim/land.js';
 import { z } from 'zod';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
-import { armiesAt, insertArmy, loadArmy, loadReinforceRule, saveArmy, type Army } from '../db/armies.js';
+import { armiesAt, insertArmy, listArmies, loadArmy, saveArmy, setArmyLeaders, type Army, type ArmyPost } from '../db/armies.js';
 import { addDefenders, loadBattle, type Battle } from '../db/battles.js';
-import { heroWithArmy, loadHero, saveHero } from '../db/heroes.js';
-import { generalWithArmy, loadGeneral, saveGeneral } from '../db/generals.js';
+import { heroWithArmy, loadHero, saveHero, type Hero } from '../db/heroes.js';
+import { generalWithArmy, loadGeneral, saveGeneral, type General } from '../db/generals.js';
 import { hallLevelAt, killGeneral } from './generals.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -25,14 +25,14 @@ import { loadWave, type Wave } from '../db/waves.js';
 import { loadHexes, rallyPoint, type World } from '../db/worlds.js';
 import type { TrainingBatch } from '../sim/training.js';
 import { RuleError } from '../errors.js';
-import { approachAngle, armySpeed, fighters, joinBonus, shareOf, terrainRelief, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
+import { addUnits, approachAngle, armySpeed, fighters, joinBonus, terrainRelief, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
 import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
 import type { PathStep } from '../sim/waves.js';
 import { completeTraining, healFallen, healerChance, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
 import { createRng } from '../sim/rng.js';
-import { reserveOf, storeFromArmy, takeForArmy, topUpReserve } from '../sim/reserve.js';
+import { quarterOwed, quarterTickMs, settlementFloor, spareGrain, storeFloor } from '../sim/quarters.js';
 import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
 import { amountsAt, mapResources, spend, type Resources } from '../sim/resources.js';
 import { receive } from '../sim/logistics.js';
@@ -117,11 +117,11 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     }
     to = hex(target.q, target.r);
   }
-  // The troops leave the garrison with what grain the military reserve
-  // can spare; the granary is not touched.
+  // The troops leave the garrison with what grain the granary can spare
+  // above the village's floor for armies.
   let state = leaveGarrison(data, home.state, units, input.at, world.speed);
-  const grain = Math.min(fullSupply(data, units), reserveOf(state));
-  state = takeForArmy(state, grain);
+  const grain = Math.min(fullSupply(data, units), villageSpare(data, state, input.at));
+  if (grain > 0) state = { ...state, ledger: spend(state.ledger, input.at, grainOnly(grain)) };
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
   const speed = armySpeed(data, units) * supplySpeedFactor(data, supplied, input.at, world.speed);
   const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed, terrainRelief(data, units));
@@ -206,7 +206,10 @@ export async function moveArmy(
   data: GameData,
   world: World,
   army: Army,
-  to: { hex?: Hex | undefined; villageId?: number | undefined },
+  // A village of its owner's: it joins the garrison there unless `join` is
+  // false (then it stands there as an army). `orders` overrides what it
+  // does there (an army answering a battle reinforces).
+  to: { hex?: Hex | undefined; villageId?: number | undefined; join?: boolean | undefined; orders?: ArmyOrders | undefined },
   at: Date,
 ): Promise<Army> {
   // An army on the road can be turned too (not one in a battle).
@@ -220,7 +223,7 @@ export async function moveArmy(
     const village = await loadVillage(client, to.villageId).catch(() => null);
     if (!village || village.worldId !== world.id) throw new RuleError('No such village in this world');
     dest = hex(village.q, village.r);
-    orders = village.ownerAccountId === army.ownerAccountId ? 'garrison' : 'support';
+    orders = to.orders ?? (village.ownerAccountId === army.ownerAccountId && to.join !== false ? 'garrison' : 'support');
     targetVillageId = village.id;
   } else {
     if (!to.hex) throw new RuleError('Say where they should go');
@@ -229,7 +232,7 @@ export async function moveArmy(
     if (!terrain || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No army can stand there');
     if ((await listVillages(client, world.id)).some((v) => v.q === dest.q && v.r === dest.r)) throw new RuleError('That is a village; send them into it');
     // Sent onto a camp it storms it; onto a site not yet searched, it explores.
-    orders = await ordersAt(client, data, world, army, dest);
+    orders = to.orders ?? (await ordersAt(client, data, world, army, dest));
   }
   if (!onTheRoad && dest.q === here.q && dest.r === here.r) {
     // Already standing in its owner's village: it joins the garrison now.
@@ -310,6 +313,8 @@ function standing(army: Army): void {
 // whoever led it makes their own way home.
 export async function disbandArmy(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
   standing(army);
+  // Quartered, its place is paid for what it ate till now.
+  army = await unquarter(client, data, world, army, at);
   const home = await loadVillage(client, army.homeVillageId);
   const land = await terrainOf(client, world.id);
   const here = hex(army.targetQ, army.targetR);
@@ -335,13 +340,14 @@ export async function disbandArmy(client: DbClient, data: GameData, world: World
 }
 
 // A standing army in a village, or on a fort or supply point, takes on
-// what grain it can from its stores.
+// what grain it can carry from its stores, down to the place's floor.
 export async function resupplyArmy(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
   standing(army);
-  const store = army.targetVillageId === null ? await storeHere(client, army) : null;
-  if (army.targetVillageId === null && !store) throw new RuleError('They stand in no village, fort or supply point');
+  const place = await placeOf(client, army);
+  if (!place) throw new RuleError('They stand in no village, fort or supply point');
   if (!supplied(army)) throw new RuleError('Their village feeds them');
-  return store ? resupplyFromStore(client, data, world, army, store, at) : resupply(client, data, world, army, army.targetVillageId!, at);
+  const filled = await fillUp(client, data, world, army, place, at);
+  return planHunger(client, data, world, filled, at);
 }
 
 // A standing army holding open ground draws its wagons into a ring: a
@@ -382,14 +388,83 @@ async function storeHere(client: DbClient, army: Army): Promise<Fort | null> {
   return fort?.status === 'standing' ? fort : null;
 }
 
-// An army on a fort or supply point takes on what grain it can carry from it.
-async function resupplyFromStore(client: DbClient, data: GameData, world: World, army: Army, store: Fort, at: Date): Promise<Army> {
+// Where an army standing (or fighting) can be fed: the village it stands
+// in, or the fort or supply point under it.
+export type Place = { kind: 'village'; village: Village } | { kind: 'store'; fort: Fort };
+
+export async function placeOf(client: DbClient, army: Army): Promise<Place | null> {
+  if (army.status !== 'stationed' && army.status !== 'engaged') return null;
+  if (army.targetVillageId !== null) {
+    const village = await loadVillage(client, army.targetVillageId).catch(() => null);
+    return village && !village.ruin ? { kind: 'village', village } : null;
+  }
+  const fort = await storeHere(client, army);
+  return fort ? { kind: 'store', fort } : null;
+}
+
+// What grain a village can give armies at `at`: above its floor.
+export function villageSpare(data: GameData, state: Village['state'], at: Date): number {
+  return spareGrain(amountsAt(state.ledger, at).grain, settlementFloor(data, state.armyFloor, state.ledger.capacity.grain));
+}
+
+function placeSpare(data: GameData, place: Place, at: Date): number {
+  return place.kind === 'village' ? villageSpare(data, place.village.state, at) : spareGrain(place.fort.grain, storeFloor(place.fort.armyFloor));
+}
+
+// Takes grain from a place's stores (no more than it can spare).
+async function takeFromPlace(client: DbClient, world: World, place: Place, grain: number, at: Date): Promise<void> {
+  if (grain <= 0) return;
+  if (place.kind === 'store') {
+    await setFortGrain(client, place.fort.id, place.fort.grain - grain);
+    return;
+  }
+  const { village } = place;
+  await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, grainOnly(grain)) });
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
+}
+
+// An army at a place takes on what grain it can carry from its stores,
+// down to the place's floor (not saved).
+async function fillUp(client: DbClient, data: GameData, world: World, army: Army, place: Place, at: Date): Promise<Army> {
   const fed = supplied(army);
   if (!fed) return army;
-  const grain = Math.min(supplyRoom(data, fed, at, world.speed), store.grain);
-  const settled = addSupply(data, fed, grain, at, world.speed);
-  if (grain > 0) await setFortGrain(client, store.id, store.grain - grain);
-  return planHunger(client, data, world, settled, at);
+  const grain = Math.min(supplyRoom(data, fed, at, world.speed), placeSpare(data, place, at));
+  if (grain <= 0) return army;
+  await takeFromPlace(client, world, place, grain, at);
+  return addSupply(data, fed, grain, at, world.speed);
+}
+
+// A quartered army's place pays for what it ate since it was last charged
+// (quarters.upkeep of its upkeep), down to its floor. A place that could
+// not pay it all feeds it no more: from now it eats its own grain (not
+// saved). An army no longer at a place is unquartered the same way.
+export async function settleQuarters(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  const fed = supplied(army);
+  if (!fed || !army.quarteredAt) return army;
+  const place = await placeOf(client, army);
+  const owed = quarterOwed(data, army.units, army.quarteredAt, at, world.speed);
+  const paid = place ? Math.min(owed, placeSpare(data, place, at)) : 0;
+  if (place) await takeFromPlace(client, world, place, paid, at);
+  const settled = settleSupply(data, fed, at, world.speed);
+  return { ...settled, quarteredAt: place && paid >= owed - 1e-9 ? at : null };
+}
+
+// An army standing at a place with grain to spare is quartered there: the
+// place feeds it from now and its own grain keeps (not saved).
+export async function quarter(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  const fed = supplied(army);
+  if (!fed || army.quarteredAt) return army;
+  const place = await placeOf(client, army);
+  if (!place || placeSpare(data, place, at) <= 0) return army;
+  return { ...settleSupply(data, fed, at, world.speed), quarteredAt: at, hungrySince: null };
+}
+
+// An army leaving where it stood: what it owes is paid and it eats its
+// own grain from now (not saved).
+async function unquarter(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  if (!army.quarteredAt) return army;
+  const settled = await settleQuarters(client, data, world, army, at);
+  return { ...settled, quarteredAt: null };
 }
 
 function grainOnly(grain: number): Resources {
@@ -400,72 +475,56 @@ function supplied(army: Army): (Army & Supplied) | null {
   return army.supply === null || army.supplyAt === null ? null : (army as Army & Supplied);
 }
 
-// An army setting off leaves behind the grain it carries beyond its full
-// supply, or fills up from the military reserve of the village it leaves;
-// either way hunger comes at another time, so it is planned again.
+// An army setting off pays its quarters, then fills up to its full supply
+// from where it stood (down to the place's floor), or leaves behind the
+// grain it carries beyond its full supply; either way hunger comes at
+// another time, so it is planned again. One sent off from a battle fills
+// nothing (the battle keeps the stores).
 async function setOff(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
-  let fed = supplied(army);
-  if (!fed) return army;
-  // Ordered out of a village of its owner's it stood in, it fills up from
-  // the military reserve there (not one sent home from a battle: the battle
-  // keeps the village's stores).
-  const inVillage = army.status === 'stationed' && army.targetVillageId !== null;
-  const village = inVillage ? await loadVillage(client, army.targetVillageId!) : null;
-  if (village && village.ownerAccountId === army.ownerAccountId) {
-    const grain = Math.min(supplyRoom(data, fed, at, world.speed), reserveOf(village.state));
-    if (grain > 0) {
-      await saveVillageState(client, village.id, takeForArmy(village.state, grain));
-      await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
-      fed = addSupply(data, fed, grain, at, world.speed);
-      return planHunger(client, data, world, fed, at);
-    }
-  }
-  const trimmed = trimSupply(data, fed, at, world.speed);
-  return trimmed === fed ? army : planHunger(client, data, world, trimmed, at);
+  if (!supplied(army)) return army;
+  let next = await unquarter(client, data, world, army, at);
+  // Where it stood, as its stores are now that its quarters are paid.
+  const place = army.status === 'stationed' ? await placeOf(client, army) : null;
+  if (place) next = await fillUp(client, data, world, next, place, at);
+  next = trimSupply(data, supplied(next)!, at, world.speed);
+  return planHunger(client, data, world, next, at);
 }
 
-// Saves when hunger next comes for an army and schedules it (nothing while
-// it is fed for good, or carries no supply). An army standing in a village,
-// or on a fort or supply point, is fed from its stores the moment its own
-// grain runs out.
+// Saves when the army's food next needs looking at and schedules it: for a
+// quartered army, its place is charged every game hour; one standing at a
+// place that can't feed it now tries again every game hour (and goes
+// hungry as any other once its own grain is gone); nothing while it eats
+// nothing, or carries no supply.
 export async function planHunger(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
   const fed = supplied(army);
-  const out = fed ? outOfFoodAt(data, fed, world.speed) : null;
-  const inVillage = (army.status === 'stationed' || army.status === 'engaged') && army.targetVillageId !== null;
-  const stocked = inVillage || (out !== null && out > at && (await storeHere(client, army)) !== null);
-  const next = fed ? (stocked && out && out > at ? out : nextHungerCheck(data, fed, at, world.speed)) : null;
+  let next: Date | null = null;
+  if (fed) {
+    const tick = new Date(at.getTime() + quarterTickMs(world.speed));
+    if (army.quarteredAt) next = tick;
+    else {
+      next = nextHungerCheck(data, fed, at, world.speed);
+      if ((army.status === 'stationed' || army.status === 'engaged') && (await placeOf(client, army)) && (!next || next > tick)) next = tick;
+    }
+  }
   const planned: Army = { ...army, hungerAt: next };
   await saveArmy(client, planned);
   if (next) await scheduleEvent(client, world.id, next, 'army_hunger', { armyId: army.id } satisfies ArmyPayload);
   return planned;
 }
 
-// An army at a village takes on what grain it can carry from its stores.
-export async function resupply(client: DbClient, data: GameData, world: World, army: Army, villageId: number, at: Date): Promise<Army> {
-  const fed = supplied(army);
-  if (!fed) return army;
-  const village = await loadVillage(client, villageId);
-  const grain = Math.min(supplyRoom(data, fed, at, world.speed), amountsAt(village.state.ledger, at).grain);
-  const settled = addSupply(data, fed, grain, at, world.speed);
-  if (grain > 0) {
-    await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, grainOnly(grain)) });
-    await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
-  }
-  return planHunger(client, data, world, settled, at);
-}
-
 // An army ends in a village of its owner: the troops join the garrison,
 // what grain and loot it carries go into the stores, and whoever led it
 // stays there.
 async function joinVillage(client: DbClient, data: GameData, world: World, army: Army, villageId: number, at: Date): Promise<void> {
+  // Quartered where it stood (perhaps this very village): that is paid first.
+  army = await unquarter(client, data, world, army, at);
   const village = await loadVillage(client, villageId);
   const fed = supplied(army);
   let state = completeTraining(village.state, at);
   if (fed) {
     state = joinGarrison(data, state, army.units, at, world.speed);
-    // Its grain into the military reserve first; loot into the stores.
-    state = topUpReserve(data, storeFromArmy(data, state, supplyLeft(data, fed, at, world.speed), at), at);
-    const load = mapResources((kind) => army.loot?.[kind] ?? 0);
+    // Its grain and loot into the stores.
+    const load = mapResources((kind) => (army.loot?.[kind] ?? 0) + (kind === 'grain' ? supplyLeft(data, fed, at, world.speed) : 0));
     state = { ...state, ledger: receive(state.ledger, at, load).ledger };
     await saveVillageState(client, village.id, state);
     await saveArmy(client, { ...army, status: 'done', loot: null, supply: 0, supplyAt: at, hungerAt: null });
@@ -552,7 +611,7 @@ async function joinBattle(client: DbClient, data: GameData, world: World, army: 
 }
 
 // A battle starts at a village: armies standing there join at once, and
-// villages in range send their share of troops.
+// armies standing nearby answer it.
 export async function rallyToBattle(
   client: DbClient,
   data: GameData,
@@ -565,20 +624,73 @@ export async function rallyToBattle(
     await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
     await addDefenders(client, battle.id, combatants(data, army.units));
   }
-  for (const other of await listVillages(client, world.id)) {
-    if (other.id === village.id || other.state.besieged) continue;
-    const rule = await loadReinforceRule(client, other.id);
-    if (rule.share <= 0 || hexDistance(hex(other.q, other.r), hex(village.q, village.r)) > rule.range) continue;
-    const units = shareOf(data, completeTraining(other.state, at).garrison, rule.share);
-    if (total(units) === 0) continue;
+  await answerBattle(client, data, world, hex(village.q, village.r), village.id, at);
+  await notifyWorld(client, { worldId: world.id, type: 'armies' });
+}
+
+// Standing armies that answer a battle at `cell`: every army standing
+// within respond.range hexes of it (not there already) that fights and
+// was not told to stay out.
+export async function respondersTo(client: DbClient, data: GameData, worldId: number, cell: Hex): Promise<Army[]> {
+  return (await listArmies(client, worldId, 0)).filter(
+    (a) =>
+      a.status === 'stationed' &&
+      a.respond &&
+      a.orders !== 'explore' &&
+      (a.targetQ !== cell.q || a.targetR !== cell.r) &&
+      hexDistance(hex(a.targetQ, a.targetR), cell) <= data.armies.respond.range &&
+      total(combatants(data, a.units)) > 0,
+  );
+}
+
+// Armies standing nearby march to a battle that started at `cell` (a
+// village's, or on open ground), remembering where they stood: they go
+// back once it is over.
+export async function answerBattle(client: DbClient, data: GameData, world: World, cell: Hex, villageId: number | null, at: Date): Promise<void> {
+  for (const army of await respondersTo(client, data, world.id, cell)) {
+    const post: ArmyPost = { q: army.targetQ, r: army.targetR, villageId: army.targetVillageId };
+    await client.query('SAVEPOINT respond');
     try {
-      await dispatchArmy(client, data, world, { homeVillageId: other.id, targetVillageId: village.id, units, orders: 'reinforce', at });
+      const to = villageId !== null ? { villageId, orders: 'reinforce' as const } : { hex: cell, orders: 'hold' as const };
+      const moving = await moveArmy(client, data, world, army, to, at);
+      await saveArmy(client, { ...moving, post });
+      await client.query('RELEASE SAVEPOINT respond');
     } catch (error) {
-      // No road there: this village can't help.
+      // No road there: it can't help.
+      await client.query('ROLLBACK TO SAVEPOINT respond');
       if (!(error instanceof RuleError)) throw error;
     }
   }
-  await notifyWorld(client, { worldId: world.id, type: 'armies' });
+}
+
+// The ongoing battle with a horde on open ground at a hex, if any.
+export async function fieldBattleAt(client: DbClient, worldId: number, cell: Hex): Promise<Battle | null> {
+  const { rows } = await client.query<{ id: number }>(
+    `SELECT id FROM battles WHERE world_id = $1 AND q = $2 AND r = $3 AND village_id IS NULL AND wave_id IS NOT NULL AND status = 'ongoing' LIMIT 1`,
+    [worldId, cell.q, cell.r],
+  );
+  return rows[0] ? loadBattle(client, rows[0].id) : null;
+}
+
+// An army done with a battle it went to: one that answered it goes back to
+// where it stood; any other goes home.
+export async function afterBattle(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<Army> {
+  if (!army.post || total(army.units) === 0) return sendHome(client, world, army, at, data);
+  const post = army.post;
+  const done: Army = { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0, post: null };
+  if (done.targetQ === post.q && done.targetR === post.r) return planHunger(client, data, world, await quarter(client, data, world, done, at), at);
+  await client.query('SAVEPOINT back');
+  try {
+    const to = post.villageId !== null ? { villageId: post.villageId, join: false } : { hex: hex(post.q, post.r), orders: 'hold' as const };
+    const back = await moveArmy(client, data, world, done, to, at);
+    await client.query('RELEASE SAVEPOINT back');
+    return back;
+  } catch (error) {
+    // Where it stood is gone (or out of reach): it goes home.
+    await client.query('ROLLBACK TO SAVEPOINT back');
+    if (!(error instanceof RuleError)) throw error;
+    return sendHome(client, world, done, at, data);
+  }
 }
 
 // Losses an army took: its supply is settled first (the dead stop eating),
@@ -600,6 +712,8 @@ export async function armyLosses(
   const losses: Record<string, number> = {};
   for (const [unit, n] of Object.entries(fallen)) if (n - (healed[unit] ?? 0) > 0) losses[unit] = n - (healed[unit] ?? 0);
   if (total(losses) === 0) return army;
+  // Quartered, its place is paid for what the fallen ate till now.
+  army = await settleQuarters(client, data, world, army, at);
   const fed = supplied(army);
   let before: Army = army;
   if (fed) {
@@ -643,13 +757,14 @@ export const armyHandlers: HandlerRegistry = {
         await notifyWorld(client, { worldId: world.id, type: 'armies' });
         return;
       }
-      const stationed: Army = { ...army, status: 'stationed' };
-      await saveArmy(client, stationed);
       const fort = await fortAt(client, world.id, army.targetQ, army.targetR);
       if (fort) await markFortManned(client, fort.id, event.dueAt);
-      // A fort or supply point fills its supply, as a village would.
-      const store = await storeHere(client, stationed);
-      if (store) await resupplyFromStore(client, data, world, stationed, store, event.dueAt);
+      // On a fort or supply point it is quartered there.
+      const stationed = await quarter(client, data, world, { ...army, status: 'stationed' }, event.dueAt);
+      // A battle on the hex: it joins it from the next round.
+      const battle = await fieldBattleAt(client, world.id, hex(army.targetQ, army.targetR));
+      if (battle?.waveId) await joinBattle(client, data, world, stationed, battle, await loadWave(client, battle.waveId), event.dueAt);
+      else await planHunger(client, data, world, stationed, event.dueAt);
       await interceptAt(client, data, world, hex(army.targetQ, army.targetR), event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
@@ -663,15 +778,15 @@ export const armyHandlers: HandlerRegistry = {
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
     }
-    // Any village it reaches fills its supply.
-    const arrived = await resupply(client, data, world, army, army.targetVillageId!, event.dueAt);
+    // Any village it reaches quarters it.
+    const arrived = await quarter(client, data, world, { ...army, status: 'stationed' }, event.dueAt);
     const ongoing = rows[0] ? await loadBattle(client, rows[0].id) : null;
     if (ongoing?.waveId) {
       await joinBattle(client, data, world, arrived, ongoing, await loadWave(client, ongoing.waveId), event.dueAt);
     } else if (army.orders === 'support' && !army.returnHome) {
-      await planHunger(client, data, world, { ...arrived, status: 'stationed' }, event.dueAt);
+      await planHunger(client, data, world, arrived, event.dueAt);
     } else {
-      await sendHome(client, world, arrived, event.dueAt, data);
+      await afterBattle(client, data, world, arrived, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },
@@ -690,12 +805,12 @@ export const armyHandlers: HandlerRegistry = {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId).catch(() => null);
     const fed = army && supplied(army);
     if (!army || !fed || army.status === 'done' || !army.hungerAt || army.hungerAt.getTime() !== event.dueAt.getTime()) return;
-    // Standing in a village, or on a fort or supply point, it eats from the stores.
-    let current: Army = army;
-    const store = await storeHere(client, army);
-    if (((army.status === 'stationed' || army.status === 'engaged') && army.targetVillageId !== null) || store) {
-      current = store ? await resupplyFromStore(client, data, world, army, store, event.dueAt) : await resupply(client, data, world, army, army.targetVillageId!, event.dueAt);
-      if (supplyLeft(data, supplied(current)!, event.dueAt, world.speed) > 0) return;
+    // Quartered, its place pays for the hour (or can't, and it eats its
+    // own from now); standing at a place with grain again, it is quartered.
+    const current = army.quarteredAt ? await settleQuarters(client, data, world, army, event.dueAt) : await quarter(client, data, world, army, event.dueAt);
+    if (current.quarteredAt) {
+      await planHunger(client, data, world, current, event.dueAt);
+      return;
     }
     const strike = hungerStrikes(data, supplied(current)!, event.dueAt, world.speed);
     const name = (await loadVillage(client, army.homeVillageId).catch(() => null))?.name ?? '';
@@ -746,4 +861,249 @@ export async function rallyTrained(client: DbClient, data: GameData, world: Worl
     await client.query('ROLLBACK TO SAVEPOINT rally');
     if (!(error instanceof RuleError)) throw error;
   }
+}
+
+// A leader leaving an army out in the field makes their own way to a
+// village: a hero walks, a general rides.
+async function heroTo(client: DbClient, data: GameData, world: World, hero: Hero, from: Hex, village: Village, at: Date): Promise<void> {
+  const land = await terrainOf(client, world.id);
+  const path = roadRoute(data, land, from, hex(village.q, village.r), data.heroes.speed * heroFactor(data, hero.kind, 'heroSpeed'), world.speed);
+  const arrivesAt = new Date(at.getTime() + path.at(-1)!.atMs);
+  await saveHero(client, { ...hero, status: 'traveling', villageId: village.id, armyId: null, path, departsAt: at, arrivesAt });
+  await scheduleEvent(client, world.id, arrivesAt, 'hero_arrive', { accountId: hero.accountId });
+  await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+}
+
+async function generalTo(client: DbClient, data: GameData, world: World, general: General, from: Hex, village: Village, at: Date): Promise<void> {
+  const land = await terrainOf(client, world.id);
+  const path = roadRoute(data, land, from, hex(village.q, village.r), data.heroes.generals.speed, world.speed);
+  const until = new Date(at.getTime() + path.at(-1)!.atMs);
+  await saveGeneral(client, { ...general, status: 'traveling', villageId: village.id, armyId: null, path, departsAt: at, until });
+  await scheduleEvent(client, world.id, until, 'general_arrive', { generalId: general.id });
+  await notifyWorld(client, { worldId: world.id, type: 'generals' });
+}
+
+// The village of its owner's an army stands in (null: none).
+async function ownVillageHere(client: DbClient, army: Army): Promise<Village | null> {
+  if (army.targetVillageId === null || (army.status !== 'stationed' && army.status !== 'engaged')) return null;
+  const village = await loadVillage(client, army.targetVillageId).catch(() => null);
+  return village && village.ownerAccountId === army.ownerAccountId && !village.ruin ? village : null;
+}
+
+function notInBattle(army: Army): void {
+  if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
+  if (army.status === 'done') throw new RuleError('That army is no more');
+}
+
+// An army's home: another settlement of its owner's (where it goes when
+// called home).
+export async function setArmyHome(client: DbClient, world: World, army: Army, villageId: number): Promise<Army> {
+  if (army.status === 'done') throw new RuleError('That army is no more');
+  if (army.status === 'returning') throw new RuleError('They are on their way home; turn them first');
+  const village = await loadVillage(client, villageId).catch(() => null);
+  if (!village || village.worldId !== world.id || village.ownerAccountId !== army.ownerAccountId || village.ruin) {
+    throw new RuleError('Only one of your own settlements can be its home');
+  }
+  if (village.id === army.homeVillageId) throw new RuleError(`${village.name} is its home already`);
+  const next: Army = { ...army, homeVillageId: village.id };
+  await saveArmy(client, next);
+  return next;
+}
+
+// Whether a standing army answers battles nearby.
+export async function setRespond(client: DbClient, army: Army, respond: boolean): Promise<Army> {
+  if (army.status === 'done') throw new RuleError('That army is no more');
+  const next: Army = { ...army, respond };
+  await saveArmy(client, next);
+  return next;
+}
+
+// The owner's hero joins a standing army in the village where the hero is,
+// or leaves it (not in a battle): into the village it stands in if it is
+// the owner's, else on the road to the army's home.
+export async function armyHero(client: DbClient, data: GameData, world: World, army: Army, join: boolean, at: Date): Promise<Army> {
+  notInBattle(army);
+  const led = await heroWithArmy(client, army.id);
+  if (join) {
+    if (led) throw new RuleError(`${led.name} leads them already`);
+    if (army.status !== 'stationed') throw new RuleError('Only a standing army can take on a hero');
+    const hero = await loadHero(client, world.id, army.ownerAccountId!).catch(() => null);
+    if (!hero) throw new RuleError('You have no hero');
+    if (hero.status !== 'home' || army.targetVillageId === null || hero.villageId !== army.targetVillageId) throw new RuleError(`${hero.name} is not where they stand`);
+    await saveHero(client, { ...hero, status: 'with_army', villageId: null, armyId: army.id });
+    await setArmyLeaders(client, army.id, hero.accountId, (await generalWithArmy(client, army.id))?.id ?? null);
+    await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+    return { ...army, heroAccountId: hero.accountId };
+  }
+  if (!led) throw new RuleError('No hero leads them');
+  const village = await ownVillageHere(client, army);
+  if (village) {
+    await saveHero(client, { ...led, status: 'home', villageId: village.id, armyId: null });
+    await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  } else {
+    await heroTo(client, data, world, led, armyHex(army, at), await loadVillage(client, army.homeVillageId), at);
+  }
+  await setArmyLeaders(client, army.id, null, (await generalWithArmy(client, army.id))?.id ?? null);
+  return { ...army, heroAccountId: null };
+}
+
+// Where an army is now: the hex it stands on, or for one on the road the
+// last hex it reached.
+function armyHex(army: Army, at: Date): Hex {
+  if (army.status === 'stationed' || army.status === 'engaged') return hex(army.targetQ, army.targetR);
+  const road = army.status === 'returning' ? reversedRoute(army.path) : army.path;
+  const since = at.getTime() - (army.status === 'returning' ? army.leavesAt! : army.departsAt).getTime();
+  const step = [...road].reverse().find((s) => s.atMs <= since) ?? road[0]!;
+  return hex(step.q, step.r);
+}
+
+// A general takes command of a standing army in the village where the
+// general is (the one leading it stays there), or the general leading it
+// leaves (generalId null), as a hero would. Not in a battle.
+export async function armyGeneral(client: DbClient, data: GameData, world: World, army: Army, generalId: number | null, at: Date): Promise<Army> {
+  notInBattle(army);
+  const current = await generalWithArmy(client, army.id);
+  const heroId = (await heroWithArmy(client, army.id))?.accountId ?? null;
+  if (generalId === null) {
+    if (!current) throw new RuleError('No general leads them');
+    const village = await ownVillageHere(client, army);
+    if (village) {
+      await saveGeneral(client, { ...current, status: 'home', villageId: village.id, armyId: null });
+      await notifyWorld(client, { worldId: world.id, type: 'generals' });
+    } else {
+      await generalTo(client, data, world, current, armyHex(army, at), await loadVillage(client, army.homeVillageId), at);
+    }
+    await setArmyLeaders(client, army.id, heroId, null);
+    return { ...army, generalId: null };
+  }
+  if (army.status !== 'stationed') throw new RuleError('Only a standing army can take on a general');
+  const general = await loadGeneral(client, generalId).catch(() => null);
+  if (!general || general.accountId !== army.ownerAccountId) throw new RuleError('No such general');
+  if (general.id === current?.id) throw new RuleError(`${general.name} leads them already`);
+  if (general.status !== 'home' || army.targetVillageId === null || general.villageId !== army.targetVillageId) throw new RuleError(`${general.name} is not where they stand`);
+  if (current) await saveGeneral(client, { ...current, status: 'home', villageId: army.targetVillageId, armyId: null });
+  await saveGeneral(client, { ...general, status: 'with_army', villageId: null, armyId: army.id });
+  await setArmyLeaders(client, army.id, heroId, general.id);
+  await notifyWorld(client, { worldId: world.id, type: 'generals' });
+  return { ...army, generalId: general.id };
+}
+
+// Two standing armies of one owner on the same place become one: the
+// other's troops, grain, loot and leaders join this one (at most one
+// general between them).
+export async function mergeArmies(client: DbClient, data: GameData, world: World, army: Army, otherId: number, at: Date): Promise<Army> {
+  standing(army);
+  if (otherId === army.id) throw new RuleError('Pick another army');
+  const other = await loadArmy(client, otherId).catch(() => null);
+  if (!other || other.worldId !== world.id || other.ownerAccountId !== army.ownerAccountId) throw new RuleError('No such army of yours');
+  standing(other);
+  if (other.targetQ !== army.targetQ || other.targetR !== army.targetR) throw new RuleError('They must stand on the same hex');
+  const [heroA, heroB] = [await heroWithArmy(client, army.id), await heroWithArmy(client, other.id)];
+  const [genA, genB] = [await generalWithArmy(client, army.id), await generalWithArmy(client, other.id)];
+  if (genA && genB) throw new RuleError('Both have a general: send one away first');
+  // Both pay their quarters and eat their own for a moment.
+  const a = await unquarter(client, data, world, army, at);
+  const b = await unquarter(client, data, world, other, at);
+  const fedA = supplied(a);
+  const fedB = supplied(b);
+  const supply = fedA || fedB ? (fedA ? supplyLeft(data, fedA, at, world.speed) : 0) + (fedB ? supplyLeft(data, fedB, at, world.speed) : 0) : null;
+  const loot = a.loot || b.loot ? mapResources((kind) => (a.loot?.[kind] ?? 0) + (b.loot?.[kind] ?? 0)) : null;
+  await saveArmy(client, { ...b, units: {}, status: 'done', supply: 0, supplyAt: at, hungerAt: null, loot: null, leavesAt: at, returnsAt: at });
+  const hero = heroA ?? heroB;
+  const general = genA ?? genB;
+  if (heroB) await saveHero(client, { ...heroB, armyId: army.id });
+  if (genB) await saveGeneral(client, { ...genB, armyId: army.id });
+  await setArmyLeaders(client, army.id, hero?.accountId ?? null, general?.id ?? null);
+  await setArmyLeaders(client, other.id, null, null);
+  if (heroB) await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  if (genB) await notifyWorld(client, { worldId: world.id, type: 'generals' });
+  const merged: Army = {
+    ...a,
+    units: addUnits(a.units, b.units),
+    supply,
+    supplyAt: supply === null ? null : at,
+    hungrySince: null,
+    loot,
+    heroAccountId: hero?.accountId ?? null,
+    generalId: general?.id ?? null,
+    // A ring of wagons is drawn anew.
+    wagonFortAt: a.wagonFortAt && b.wagonFortAt ? new Date(Math.max(a.wagonFortAt.getTime(), b.wagonFortAt.getTime())) : a.wagonFortAt,
+  };
+  return planHunger(client, data, world, await quarter(client, data, world, merged, at), at);
+}
+
+// A standing army splits off some of its troops as an army of their own on
+// the same place, with their share of its grain, and its hero or general
+// if told so (its loot stays).
+export async function splitArmy(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  army: Army,
+  spec: { units: Record<string, number>; withHero?: boolean | undefined; withGeneral?: boolean | undefined },
+  at: Date,
+): Promise<{ army: Army; split: Army }> {
+  standing(army);
+  const units: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(spec.units)) {
+    if (!Number.isInteger(n) || n < 0) throw new RuleError('Pick whole troops');
+    if (n > (army.units[unit] ?? 0)) throw new RuleError('They have not so many');
+    if (n > 0) units[unit] = n;
+  }
+  const rest: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(army.units)) if (n - (units[unit] ?? 0) > 0) rest[unit] = n - (units[unit] ?? 0);
+  if (total(units) === 0) throw new RuleError('Pick who goes');
+  if (total(rest) === 0) throw new RuleError('Leave someone behind');
+  const hero = spec.withHero ? await heroWithArmy(client, army.id) : null;
+  if (spec.withHero && !hero) throw new RuleError('No hero leads them');
+  const general = spec.withGeneral ? await generalWithArmy(client, army.id) : null;
+  if (spec.withGeneral && !general) throw new RuleError('No general leads them');
+  const settled = await unquarter(client, data, world, army, at);
+  const fed = supplied(settled);
+  const carried = fed ? supplyLeft(data, fed, at, world.speed) : 0;
+  const whole = fullSupply(data, army.units);
+  const share = whole > 0 ? fullSupply(data, units) / whole : total(units) / total(army.units);
+  const taken = fed ? carried * share : null;
+  const created = await insertArmy(client, {
+    worldId: world.id,
+    ownerAccountId: army.ownerAccountId,
+    homeVillageId: army.homeVillageId,
+    targetVillageId: army.targetVillageId,
+    targetQ: army.targetQ,
+    targetR: army.targetR,
+    heroAccountId: hero?.accountId ?? null,
+    generalId: general?.id ?? null,
+    orders: army.orders === 'support' || army.orders === 'hold' ? army.orders : army.targetVillageId === null ? 'hold' : 'support',
+    stance: army.stance,
+    returnHome: army.returnHome,
+    respond: army.respond,
+    units,
+    supply: taken,
+    supplyAt: fed ? at : null,
+    path: [{ q: army.targetQ, r: army.targetR, atMs: 0 }],
+    departsAt: at,
+    arrivesAt: at,
+  });
+  if (hero) {
+    await saveHero(client, { ...hero, armyId: created.id });
+    await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  }
+  if (general) {
+    await saveGeneral(client, { ...general, armyId: created.id });
+    await notifyWorld(client, { worldId: world.id, type: 'generals' });
+  }
+  const leftHero = hero ? null : ((await heroWithArmy(client, army.id))?.accountId ?? null);
+  const leftGeneral = general ? null : ((await generalWithArmy(client, army.id))?.id ?? null);
+  await setArmyLeaders(client, army.id, leftHero, leftGeneral);
+  const kept: Army = {
+    ...settled,
+    units: rest,
+    supply: fed ? carried - taken! : settled.supply,
+    supplyAt: fed ? at : settled.supplyAt,
+    heroAccountId: leftHero,
+    generalId: leftGeneral,
+  };
+  const left = await planHunger(client, data, world, await quarter(client, data, world, kept, at), at);
+  const split = await planHunger(client, data, world, await quarter(client, data, world, { ...created, status: 'stationed', wagonFortAt: null }, at), at);
+  return { army: left, split };
 }

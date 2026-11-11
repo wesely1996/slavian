@@ -49,6 +49,20 @@ export interface Army {
   returnHome: boolean;
   // A raid beyond the map's edge (orders 'raid'; null otherwise).
   raid: ArmyRaid | null;
+  // Quartered in a settlement, fort or supply point: fed by it since then
+  // (null: it eats its own grain; sim/quarters.ts).
+  quarteredAt: Date | null;
+  // It answers battles nearby (data/armies.json respond.range).
+  respond: boolean;
+  // Where it stood when it went to answer a battle: it goes back after.
+  post: ArmyPost | null;
+}
+
+export interface ArmyPost {
+  q: number;
+  r: number;
+  // A settlement it stood in (null: a hex).
+  villageId: number | null;
 }
 
 export interface RaidBattleEntry {
@@ -106,6 +120,9 @@ interface ArmyRow {
   wagon_fort_at: Date | null;
   return_home: boolean;
   raid: ArmyRaid | null;
+  quartered_at: Date | null;
+  respond: boolean | null;
+  post: ArmyPost | null;
 }
 
 function fromRow(row: ArmyRow): Army {
@@ -140,6 +157,9 @@ function fromRow(row: ArmyRow): Army {
     wagonFortAt: row.wagon_fort_at,
     returnHome: row.return_home ?? false,
     raid: row.raid ?? null,
+    quarteredAt: row.quartered_at ?? null,
+    respond: row.respond ?? true,
+    post: row.post ?? null,
   };
 }
 
@@ -148,12 +168,21 @@ export async function insertArmy(
   a: Pick<
     Army,
     'worldId' | 'ownerAccountId' | 'homeVillageId' | 'targetVillageId' | 'targetQ' | 'targetR' | 'heroAccountId' | 'orders' | 'units' | 'path' | 'departsAt' | 'arrivesAt'
-  > & { generalId?: number | null; supply?: number | null; supplyAt?: Date | null; stance?: Stance; returnHome?: boolean; raid?: ArmyRaid | null },
+  > & {
+      generalId?: number | null;
+      supply?: number | null;
+      supplyAt?: Date | null;
+      stance?: Stance;
+      returnHome?: boolean;
+      raid?: ArmyRaid | null;
+      quarteredAt?: Date | null;
+      respond?: boolean;
+    },
 ): Promise<Army> {
   const { rows } = await client.query<ArmyRow>(
     `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at,
-       target_q, target_r, hero_account_id, general_id, supply, supply_at, stance, return_home, raid)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
+       target_q, target_r, hero_account_id, general_id, supply, supply_at, stance, return_home, raid, quartered_at, respond)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
     [
       a.worldId,
       a.ownerAccountId,
@@ -173,6 +202,8 @@ export async function insertArmy(
       a.stance ?? 'balanced',
       a.returnHome ?? false,
       a.raid ? JSON.stringify(a.raid) : null,
+      a.quarteredAt ?? null,
+      a.respond ?? true,
     ],
   );
   return fromRow(rows[0]!);
@@ -189,7 +220,7 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
     `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9,
        orders = $10, target_village_id = $11, target_q = $12, target_r = $13, path = $14, departs_at = $15, arrives_at = $16,
        supply = $17, supply_at = $18, hungry_since = $19, hunger_at = $20, wagon_fort_at = $21, stance = $22, engaged_units = $23,
-       return_home = $24, raid = $25
+       return_home = $24, raid = $25, home_village_id = $26, quartered_at = $27, respond = $28, post = $29
      WHERE id = $1`,
     [
       a.id,
@@ -217,6 +248,10 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
       a.engagedUnits ? JSON.stringify(a.engagedUnits) : null,
       a.returnHome,
       a.raid ? JSON.stringify(a.raid) : null,
+      a.homeVillageId,
+      a.quarteredAt,
+      a.respond,
+      a.post ? JSON.stringify(a.post) : null,
     ],
   );
 }
@@ -263,20 +298,7 @@ export async function listArmies(client: DbClient, worldId: number, recent = 5):
   return rows.map(fromRow);
 }
 
-export interface ReinforceRule {
-  share: number;
-  range: number;
-}
-
-export async function loadReinforceRule(client: DbClient, villageId: number): Promise<ReinforceRule> {
-  const { rows } = await client.query<{ reinforce_share: number; reinforce_range: number }>(
-    'SELECT reinforce_share, reinforce_range FROM villages WHERE id = $1',
-    [villageId],
-  );
-  if (!rows[0]) throw new NotFoundError(`Village ${villageId} not found`);
-  return { share: Number(rows[0].reinforce_share), range: rows[0].reinforce_range };
-}
-
-export async function saveReinforceRule(client: DbClient, villageId: number, rule: ReinforceRule): Promise<void> {
-  await client.query('UPDATE villages SET reinforce_share = $2, reinforce_range = $3 WHERE id = $1', [villageId, rule.share, rule.range]);
+// Who leads an army (the heroes' and generals' own rows say where they are).
+export async function setArmyLeaders(client: DbClient, armyId: number, heroAccountId: number | null, generalId: number | null): Promise<void> {
+  await client.query('UPDATE armies SET hero_account_id = $2, general_id = $3 WHERE id = $1', [armyId, heroAccountId, generalId]);
 }

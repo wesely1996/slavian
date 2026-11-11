@@ -169,11 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -379,11 +375,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -588,11 +580,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -614,7 +602,7 @@
       "ratesPerHour": {
        "iron": 30,
        "wood": 90,
-       "grain": 58.4,
+       "grain": 69.2,
        "stone": 60
       },
       "capacity": {
@@ -833,11 +821,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 0,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -851,7 +835,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 58.4,
+        "grain": 69.2,
         "stone": 60
        },
        "capacity": {
@@ -3163,7 +3147,10 @@
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T12:00:00.000Z"
    }
@@ -3359,11 +3346,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 0,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -3371,13 +3354,13 @@
        "amounts": {
         "iron": 240.5,
         "wood": 245.5,
-        "grain": 178.4,
+        "grain": 189.2,
         "stone": 253
        },
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 63.8,
+        "grain": 71.9,
         "stone": 60
        },
        "capacity": {
@@ -3741,7 +3724,10 @@
       "hungrySince": "2026-06-01T12:00:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],

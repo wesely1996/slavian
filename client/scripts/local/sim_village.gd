@@ -225,16 +225,23 @@ static func village_rates(data: Dictionary, state: Dictionary, world_speed: floa
 	return rates
 
 
-## Every storehouse adds what it holds above the base.
+## Every storehouse adds what it holds above the base, and every grain silo
+## the same for grain alone.
 static func capacity(data: Dictionary, plots: Dictionary, bonuses: Dictionary) -> Dictionary:
 	var growth := float(data.buildings.buildings.get("storehouse", {}).get("capacityGrowth", 1))
+	var silo_growth := float(data.buildings.buildings.get("grain_silo", {}).get("grainCapacityGrowth", 1))
 	var factor := 1.0
+	var silos := 0.0
 	for id in plots:
 		var plot: Dictionary = plots[id]
-		if plot.building == "storehouse" and int(plot.level) > 0 and outpost_hex(id) == Vector2i.MAX:
+		if int(plot.level) <= 0 or outpost_hex(id) != Vector2i.MAX:
+			continue
+		if plot.building == "storehouse":
 			factor += pow(growth, int(plot.level)) - 1.0
-	var cap := float(data.buildings.village.baseCapacity) * factor * (1.0 + bonus(bonuses, "storage"))
-	return resources(func(_kind: String) -> float: return cap)
+		elif plot.building == "grain_silo":
+			silos += pow(silo_growth, int(plot.level)) - 1.0
+	var base := float(data.buildings.village.baseCapacity) * (1.0 + bonus(bonuses, "storage"))
+	return resources(func(kind: String) -> float: return base * (factor + (silos if kind == "grain" else 0.0)))
 
 
 ## Research the village's Academy brings in per hour (world speed applied).

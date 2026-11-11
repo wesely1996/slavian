@@ -37,7 +37,7 @@ import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
-import { armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
+import { afterBattle, answerBattle, armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { combatants, withIntel } from '../sim/scouting.js';
@@ -147,6 +147,8 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
+  // Armies standing nearby answer it.
+  await answerBattle(client, data, world, cell, null, at);
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', { battleId: battle.id });
   const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort', setup.wagonFort && 'a wagon fort', setup.river && 'a river crossing']
     .filter(Boolean)
@@ -340,7 +342,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     }
     for (const army of armies) {
       // Won, it holds on (one told to come home once done, unless it guards a shipyard, turns back).
-      if (won && total(army.units) && (await staysOut(client, world, army))) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });
+      if (won && army.post) await afterBattle(client, data, world, army, at);
+      else if (won && total(army.units) && (await staysOut(client, world, army))) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });
       else await sendHome(client, world, army, at, data);
     }
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });

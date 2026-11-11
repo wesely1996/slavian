@@ -39,7 +39,7 @@ import { tell } from './notices.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
 import { hordeStats, leaderAfter } from './leaders.js';
-import { armyLosses, planHunger, rallyToBattle, sendHome } from './armies.js';
+import { afterBattle, armyLosses, planHunger, rallyToBattle, sendHome } from './armies.js';
 import { armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { addUnits } from '../sim/armies.js';
 import { fallBack, fieldRound } from './field.js';
@@ -283,12 +283,13 @@ export const battleHandlers: HandlerRegistry = {
       ...(engaged.length ? { garrisonLosses: shares[0]! } : {}),
     };
     // Armies after the round: harassers ride home; when the battle is over,
-    // support stays on guard (unless told to come home once done) and
+    // support stays on guard (unless told to come home once done),
+    // armies that answered it go back where they stood, and other
     // reinforcements go home.
     const kills = total(battle.attackerInitial) - total(attackerNow);
     for (const army of armies) {
       if (breaks(army)) await fallBack(client, data, world, army, { kills, battleId: battle.id, at });
-      else if (leaving(army) || spent(army) || (outcome !== 'ongoing' && (army.orders !== 'support' || army.returnHome))) await sendHome(client, world, army, at, data);
+      else if (leaving(army) || spent(army) || (outcome !== 'ongoing' && (army.orders !== 'support' || army.returnHome))) await afterBattle(client, data, world, army, at);
       else if (outcome !== 'ongoing') {
         if (total(army.units)) await planHunger(client, data, world, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 }, at);
         else await saveArmy(client, { ...army, status: 'done' });

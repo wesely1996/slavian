@@ -926,6 +926,9 @@ func _replay_scenario(file: String, name: String) -> void:
 			if step.set.has("garrison"):
 				for unit in step.set.garrison:
 					world.villages[0].state.garrison[unit] = int(step.set.garrison[unit])
+			if step.set.has("amounts"):
+				for kind in step.set.amounts:
+					world.villages[0].state.ledger.amounts[kind] = float(step.set.amounts[kind])
 			if step.set.has("frontHatred"):
 				if not world.has("hatred"):
 					world.hatred = {}

@@ -13,8 +13,6 @@ export interface Village {
   q: number;
   r: number;
   state: VillageState;
-  // Share of its troops sent to battles within `range` hexes (0: never).
-  reinforce?: { share: number; range: number };
   // Razed by a horde (see sim/horde.ts).
   ruin?: Ruin | null;
   // A refugee camp: raided, never razed.
@@ -49,10 +47,8 @@ interface VillageRow {
   away: Record<string, number>;
   stance: Stance;
   besieged: boolean;
-  reinforce_share: number;
-  reinforce_range: number;
   admin_upkeep: number;
-  reserve: number | null;
+  army_floor: number | null;
   bonuses: Record<string, number>;
   ruin: Ruin | null;
   refuge: boolean;
@@ -80,7 +76,6 @@ function fromRow(row: VillageRow): Village {
     name: row.name,
     q: row.q,
     r: row.r,
-    reinforce: { share: Number(row.reinforce_share), range: row.reinforce_range },
     ruin: row.ruin,
     refuge: row.refuge,
     state: {
@@ -94,7 +89,7 @@ function fromRow(row: VillageRow): Village {
       besieged: row.besieged,
       adminUpkeep: Number(row.admin_upkeep),
       bonuses: row.bonuses,
-      reserve: Number(row.reserve ?? 0),
+      armyFloor: row.army_floor === null ? null : Number(row.army_floor),
       ledger: {
         amounts: row.amounts,
         ratesPerHour: row.rates_per_hour,
@@ -112,7 +107,7 @@ export async function insertVillage(
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
     `INSERT INTO villages
-       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, reserve)
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, army_floor)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
      RETURNING *`,
     [
@@ -135,7 +130,7 @@ export async function insertVillage(
       state.besieged,
       state.adminUpkeep,
       JSON.stringify(state.bonuses),
-      state.reserve ?? 0,
+      state.armyFloor ?? null,
     ],
   );
   return fromRow(rows[0]!);
@@ -156,7 +151,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
   await client.query(
     `UPDATE villages
      SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7,
-         garrison = $8, training = $9, away = $10, stance = $11, plots = $12, besieged = $13, admin_upkeep = $14, bonuses = $15, reserve = $16
+         garrison = $8, training = $9, away = $10, stance = $11, plots = $12, besieged = $13, admin_upkeep = $14, bonuses = $15, army_floor = $16
      WHERE id = $1`,
     [
       id,
@@ -174,7 +169,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       state.besieged,
       state.adminUpkeep,
       JSON.stringify(state.bonuses),
-      state.reserve ?? 0,
+      state.armyFloor ?? null,
     ],
   );
 }
