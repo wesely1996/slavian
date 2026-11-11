@@ -377,13 +377,14 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	if not engaged.is_empty():
 		log.garrisonLosses = shares[0]
 	# Armies after the round: harassers ride home; when the battle is over,
-	# support stays on guard and reinforcements go home.
+	# support stays on guard, armies that answered it go back where they
+	# stood, and other reinforcements go home.
 	var kills := LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now)
 	for army in armies:
 		if breaks.call(army):
 			fall_back(server, world, army, kills, int(battle.id), at)
 		elif leaving.call(army) or spent.call(army) or (outcome != "ongoing" and (army.orders != "support" or army.get("returnHome", false))):
-			LocalArmies.send_home(server, world, army, at)
+			LocalArmies.after_battle(server, world, army, at)
 		elif outcome != "ongoing":
 			if LocalBattle.total(army.units) > 0:
 				army.status = "stationed"
@@ -647,7 +648,9 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 			if not commander.is_empty():
 				LocalGenerals.after_battle(server, world, commander, {"kills": kills, "won": won, "at": at})
 		for army in armies:
-			if won and LocalBattle.total(army.units) > 0 and LocalArmies.stays_out(world, army):
+			if won and army.get("post") != null:
+				LocalArmies.after_battle(server, world, army, at)
+			elif won and LocalBattle.total(army.units) > 0 and LocalArmies.stays_out(world, army):
 				army.status = "stationed"
 				army.battleId = null
 				army.joinsRound = null
@@ -705,22 +708,12 @@ static func horde_beaten(server: LocalServer, world: Dictionary, cell: Vector2i,
 	world.fear[key] = float(world.fear.get(key, 0.0)) + amount
 
 
-## Troops that could reach `village` in time: every other standing village
-## whose reinforce rule covers it.
+## Troops that could reach `village` in time: every army standing near
+## enough to answer a battle there.
 static func help_nearby(server: LocalServer, world: Dictionary, village: Dictionary) -> int:
 	var help := 0
-	for other in world.villages:
-		if int(other.id) == int(village.id) or other.ruin != null or other.state.besieged:
-			continue
-		var rule: Dictionary = other.reinforce
-		if float(rule.share) <= 0 or HexMath.distance(Vector2i(other.q, other.r), Vector2i(village.q, village.r)) > int(rule.range):
-			continue
-		var fighters := 0
-		for unit in other.state.garrison:
-			var def: Variant = server.data.units.units.get(unit)
-			if def != null and def.family in ["infantry", "archers", "cavalry"] and unit != "settler" and int(other.state.garrison[unit]) > 0:
-				fighters += int(other.state.garrison[unit])
-		help += floori(fighters * float(rule.share))
+	for army in LocalArmies.responders_to(server.data, world, Vector2i(village.q, village.r)):
+		help += LocalBattle.total(LocalArmies.fighters(server.data, army.units))
 	return help
 
 
@@ -916,6 +909,8 @@ static func start_holy_city_battle(server: LocalServer, world: Dictionary, wave:
 		army.joinBonus = 0
 		army.engagedUnits = army.units.duplicate()
 	server.schedule(world, at + LocalBattle.round_ms(server.data, world.speed), "battle_round", {"battleId": battle.id})
+	# Armies standing nearby answer it.
+	LocalArmies.answer_battle(server, world, Vector2i(0, 0), null, at)
 	LocalInbox.tell_everyone(server, world, {"kind": "under_attack", "tier": "push", "title": "A horde is at the Holy City",
 		"body": "{enemy} of them against its guard of {defenders}.",
 		"vars": {"enemy": LocalBattle.total(wave.composition), "defenders": LocalBattle.total(defenders)}}, at)

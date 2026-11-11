@@ -107,8 +107,7 @@ func _place_starter_camps(world: Dictionary, now: int) -> void:
 
 func insert_village(world: Dictionary, owner: int, name: String, at: Vector2i, state: Dictionary) -> Dictionary:
 	var village := {"id": world.next.village, "ownerAccountId": owner, "name": name, "q": at.x, "r": at.y, "state": state,
-		# Auto-reinforce defaults (migration 015): half the garrison, 4 hexes.
-		"reinforce": {"share": 0.5, "range": 4}, "ruin": null, "refuge": false}
+		"ruin": null, "refuge": false}
 	world.next.village += 1
 	world.villages.append(village)
 	return village
@@ -285,9 +284,9 @@ func handle(world_id: int, method: String, path: String, body: Variant, now: int
 	var processed := drain(world, now, changed)
 	as_stored(world)
 	# A finished run stays readable, but nothing more can be done in it
-	# (withWorld); the reinforce rule is set outside it.
+	# (withWorld); the grain kept from armies is set outside it.
 	var answer: Dictionary
-	if world.status in ["won", "lost"] and method != "GET" and not (method == "PUT" and path.ends_with("/reinforce")):
+	if world.status in ["won", "lost"] and method != "GET" and not (method == "PUT" and path.split("?")[0].ends_with("/army-floor")):
 		answer = _fail(400, "rule", "This run is over")
 	else:
 		answer = _route(world, method, parts, body if body is Dictionary else {}, now, changed)
@@ -385,7 +384,12 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		var moved: Dictionary
 		match parts[3]:
 			"move":
-				moved = LocalArmies.move(self, world, found, body, now)
+				# Only where it goes, and whether it joins a garrison there.
+				var asked := {}
+				for key in ["target", "villageId", "join"]:
+					if body is Dictionary and body.has(key):
+						asked[key] = body[key]
+				moved = LocalArmies.move(self, world, found, asked, now)
 			"disband":
 				moved = LocalArmies.disband(self, world, found, now)
 			"store":
@@ -429,15 +433,67 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(army)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
-	if method == "PUT" and parts.size() == 4 and parts[1] == "villages" and parts[3] == "reinforce":
-		var target := find_village(world, int(parts[2]))
-		if target.is_empty():
-			return _fail(404, "not_found", "Village %s not found" % parts[2])
-		var set := LocalArmies.set_reinforce(data, target, body)
-		if set.has("error"):
-			return _rule_answer(set)
-		changed.append(["village", target.id])
-		return {"status": 200, "data": {"reinforce": body}}
+	if method == "PUT" and parts.size() == 4 and parts[1] in ["villages", "forts"] and parts[3] == "army-floor":
+		# How low its grain may fall for armies (null: the default).
+		var grain: Variant = body.get("grain", 0) if body is Dictionary and body.has("grain") else -1
+		if not (grain == null or ((grain is int or grain is float) and float(grain) >= 0 and float(grain) <= 10000000)):
+			return _fail(400, "invalid_request", "Say how much grain to keep")
+		var floor_value: Variant = null if grain == null else floori(float(grain))
+		if parts[1] == "villages":
+			var target := find_village(world, int(parts[2]))
+			if target.is_empty():
+				return _fail(404, "not_found", "Village %s not found" % parts[2])
+			if target.ownerAccountId == null or int(target.ownerAccountId) != int(world.hostAccountId):
+				return _fail(403, "forbidden", "Not your village")
+			target.state.armyFloor = floor_value
+			changed.append(["village", target.id])
+			return {"status": 200, "data": {"armyFloor": floor_value, "serverTime": LocalTime.iso(now)}}
+		var fort := LocalArmies.find_fort(world, int(parts[2]))
+		if fort.is_empty():
+			return _fail(404, "not_found", "No such fort")
+		if fort.ownerAccountId == null or int(fort.ownerAccountId) != int(world.hostAccountId):
+			return _fail(403, "forbidden", "Not your fort")
+		fort.armyFloor = floor_value
+		changed.append(["world"])
+		return {"status": 200, "data": {"fort": LocalArmies.fort_view(fort), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["home", "respond", "hero", "general", "merge", "split"]:
+		var army := LocalArmies.find_army(world, int(parts[2]))
+		if army.is_empty():
+			return _fail(404, "not_found", "No such army")
+		var b: Dictionary = body if body is Dictionary else {}
+		var done: Dictionary
+		match parts[3]:
+			"home":
+				if not (b.get("villageId") is int or b.get("villageId") is float) or float(b.villageId) < 1:
+					return _fail(400, "invalid_request", "Say which settlement")
+				done = LocalArmies.set_home(self, world, army, int(b.villageId))
+			"respond":
+				if not b.get("respond") is bool:
+					return _fail(400, "invalid_request", "Say whether they answer battles")
+				done = LocalArmies.set_respond(army, bool(b.respond))
+			"hero":
+				if not b.get("join") is bool:
+					return _fail(400, "invalid_request", "Say whether the hero joins")
+				done = LocalArmies.army_hero(self, world, army, bool(b.join), now)
+			"general":
+				var gid: Variant = b.get("generalId", -1) if b.has("generalId") else -1
+				if not (gid == null or ((gid is int or gid is float) and float(gid) >= 1)):
+					return _fail(400, "invalid_request", "Say which general")
+				done = LocalArmies.army_general(self, world, army, null if gid == null else int(gid), now)
+			"merge":
+				if not (b.get("armyId") is int or b.get("armyId") is float) or float(b.armyId) < 1:
+					return _fail(400, "invalid_request", "Say which army")
+				done = LocalArmies.merge_armies(self, world, army, int(b.armyId), now)
+			_:
+				if not b.get("units") is Dictionary:
+					return _fail(400, "invalid_request", "Say who goes")
+				done = LocalArmies.split_army(self, world, army, b, now)
+		if done.has("error"):
+			return _rule_answer(done)
+		changed.append(["world"])
+		if parts[3] == "split":
+			return {"status": 200, "data": {"army": LocalArmies.army_view(done.army), "split": LocalArmies.army_view(done.split), "serverTime": LocalTime.iso(now)}}
+		return {"status": 200, "data": {"army": LocalArmies.army_view(done), "serverTime": LocalTime.iso(now)}}
 	if parts.size() >= 4 and parts[1] == "villages" and method == "POST":
 		var village := find_village(world, int(parts[2]))
 		if village.is_empty():
@@ -856,8 +912,7 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	var done := LocalVillage.complete_build(data, village.state, plot, int(p.targetLevel), int(event.dueAt), world.speed)
 	if done.has("error"):
 		return
-	# A finished level tops up the military reserve (it may hold more now).
-	village.state = LocalReserve.top_up(data, done, int(event.dueAt))
+	village.state = done
 	var def: Variant = data.buildings.buildings.get(p.building)
 	var big: bool = p.building == "elder_hall" or int(p.targetLevel) >= int(data.notifications.bigBuildLevel)
 	LocalInbox.tell(self, world, village.ownerAccountId, {"kind": "build_done", "tier": "push" if big else "digest",
@@ -1084,8 +1139,7 @@ func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array)
 	if village.is_empty():
 		return
 	var done: Array = village.state.training.filter(func(b: Dictionary) -> bool: return LocalVillage.batch_completes_at(b) <= int(event.dueAt))
-	# New troops: the military reserve is topped up for them.
-	village.state = LocalReserve.top_up(data, LocalVillage.complete_training(village.state, int(event.dueAt)), int(event.dueAt))
+	village.state = LocalVillage.complete_training(village.state, int(event.dueAt))
 	# They march on to the owner's rally point, if one is set.
 	LocalArmies.rally_trained(self, world, village, done, int(event.dueAt))
 	changed.append(["village", village.id])
@@ -1168,7 +1222,7 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 		"id": village.id, "worldId": world.id, "ownerAccountId": village.ownerAccountId, "name": village.name, "q": village.q, "r": village.r,
 		"plots": s.plots.duplicate(true), "levels": s.levels.duplicate(), "queue": queue, "garrison": s.garrison.duplicate(),
 		"away": s.away.duplicate(), "stance": s.stance, "besieged": s.besieged, "adminUpkeep": s.adminUpkeep,
-		"bonuses": s.bonuses.duplicate(), "reserve": LocalReserve.of(s), "reinforce": village.reinforce, "ruin": village.ruin, "refuge": village.refuge == true,
+		"bonuses": s.bonuses.duplicate(), "armyFloor": s.get("armyFloor"), "ruin": village.ruin, "refuge": village.refuge == true,
 		"training": training,
 		"resources": {"amounts": s.ledger.amounts, "ratesPerHour": s.ledger.ratesPerHour, "capacity": s.ledger.capacity,
 			"settledAt": LocalTime.iso(s.ledger.settledAt)},

@@ -1340,7 +1340,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge", "masons_guild", "workers_huts"]
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge", "masons_guild", "workers_huts", "grain_silo"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
 MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
@@ -1579,6 +1579,16 @@ def building(kind, stage):
             house(s, x, 112 - (i % 2) * 4, 22 * big, 14 * big, roof="thatch", wall="wood", windows=0)
             s.line(x + 12, 112 - (i % 2) * 4, x + 16, 96 - (i % 2) * 4, stroke="#8b5a2b", sw=1.8)
         s.path("M30,84 Q24,74 32,66 Q38,58 32,50", "none", stroke="#bfb7a8", sw=3, opacity=0.6)
+    elif kind == "grain_silo":
+        # Round silos of daub and stone, conical thatch hats, sacks at their feet.
+        for i in range(stage + 1):
+            x = 26 + i * 26
+            h = 34 + stage * 6
+            s.rect(x - 9, 112 - h, 18, h, s.lin([(0, "#d9c6a0"), (1, "#9b8763")], 0, 0, 1, 0), stroke="#5f4a32", sw=1.2, rx=3)
+            s.path(f"M{x - 12},{112 - h} L{x},{97 - h} L{x + 12},{112 - h} Z", "#b8913f", stroke="#6e4b2c", sw=1.2)
+            s.line(x - 9, 112 - h // 2, x + 9, 112 - h // 2, stroke="#7a6446", sw=1.2)
+        for i in range(stage + 1):
+            s.circle(14 + i * 7, 116, 3.2, "#c9a46a", stroke="#7a5a33", sw=0.8)
     elif kind == "longhouse_hall":
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):
