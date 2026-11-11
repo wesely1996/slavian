@@ -27,11 +27,12 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 		var faster := roundi((1.0 - Rules.hall_speedup(data, level)) * 100.0)
 		if faster > 0:
 			parts.append(UI.t("builds %d%% faster") % faster)
-	if building in data.armies.reserve.buildings:
-		parts.append(UI.t("keeps %d grain for armies") % roundi(float(data.armies.reserve.grainPerLevel) * level))
 	if def.has("capacityGrowth"):
 		var base := float(data.buildings.village.baseCapacity)
 		parts.append(UI.t("stores %d of each") % roundi(base * pow(float(def.capacityGrowth), level)))
+	if def.has("grainCapacityGrowth"):
+		var base_grain := float(data.buildings.village.baseCapacity)
+		parts.append(UI.t("+%d grain storage") % roundi(base_grain * (pow(float(def.grainCapacityGrowth), level) - 1.0)))
 	if def.has("effects"):
 		var scaled := {}
 		for key in def.effects:

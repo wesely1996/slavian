@@ -85,14 +85,17 @@ static func wagon_fort_bonus(data: Dictionary, units: Dictionary) -> float:
 	return minf(float(rules.maxBonus), float(rules.bonusPerWagon) * wagons / maxf(1.0, ceilf(soldiers / float(rules.menPerWagon))))
 
 
-## The grain a village's military reserve keeps at most (data/armies.json
-## reserve; server sim/reserve.ts reserveCapacity).
-static func reserve_capacity(data: Dictionary, plots: Dictionary) -> float:
-	var levels := 0
-	for plot in plots.values():
-		if plot.get("building") != null and String(plot.building) in data.armies.reserve.buildings:
-			levels += int(plot.level)
-	return float(levels) * float(data.armies.reserve.grainPerLevel)
+## How low a settlement's granary may fall for armies quartered in it or
+## filling up there: its own floor, else the default share of its grain
+## storage (data/armies.json quarters; server sim/quarters.ts).
+static func settlement_floor(data: Dictionary, floor_value: Variant, grain_capacity: float) -> float:
+	return float(floor_value) if floor_value != null else floorf(grain_capacity * float(data.armies.quarters.settlementFloor))
+
+
+## What a settlement can give armies now: its grain above its floor.
+static func village_spare(data: Dictionary, village: Dictionary, grain_now: float) -> float:
+	var capacity := float(village.get("resources", {}).get("capacity", {}).get("grain", 0))
+	return maxf(0.0, grain_now - settlement_floor(data, village.get("armyFloor"), capacity))
 
 
 ## The grain a fort or supply point keeps at most (data/field.json).
