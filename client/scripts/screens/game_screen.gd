@@ -2128,11 +2128,7 @@ func _armies_section(village: Dictionary) -> void:
 		var guarding: bool = army.targetVillageId != null and int(army.targetVillageId) == village_id and army.status in ["stationed", "engaged"] and int(army.homeVillageId) != village_id
 		return mine or guarding)
 	_panel_body.add_child(UI.label(tr("Armies"), UI.HEADING_SIZE))
-	# The military reserve: the grain armies leaving take (never the granary).
-	var reserve_cap := FieldRules.reserve_capacity(Game.data, village.get("plots", {}))
-	if reserve_cap > 0 or float(village.get("reserve", 0)) > 0:
-		_panel_body.add_child(UI.with_info(UI.label(tr("Military reserve: %d of %d grain") % [floori(float(village.get("reserve", 0))), floori(reserve_cap)], UI.SMALL_SIZE),
-			tr("Armies leaving take their grain from here, never from the granary; troops at home eat from the granary. The barracks, shooting range and stables keep %d grain each level; the reserve fills from the granary when a building or a training batch is done, and from what armies bring home.") % int(Game.data.armies.reserve.grainPerLevel)))
+	_floor_rows(village)
 	if here.is_empty():
 		_panel_body.add_child(UI.label(tr("No armies out from here, and none standing guard."), UI.SMALL_SIZE, UI.MUTED))
 	_paged("armies", here, 6 if _roomy() else 3, func(army: Dictionary) -> void:
@@ -2163,32 +2159,31 @@ func _armies_section(village: Dictionary) -> void:
 		if mine and army.status == "stationed":
 			_army_orders_row(army))
 
-	var rule: Dictionary = village.get("reinforce", {}) if village.get("reinforce") != null else {}
-	if rule.is_empty():
-		return
-	var share := roundi(float(rule.share) * 100.0)
-	var range_ := int(rule.range)
-	_panel_body.add_child(UI.label(tr("When a battle starts within %d hexes, send %d%% of the troops here to help.") % [range_, share] if share > 0 else tr("This village doesn't send help to battles nearby."), UI.SMALL_SIZE, UI.MUTED))
-	# How much goes, then how far: two rows, to fit beside the side tabs.
-	var rule_row := UI.hbox(8)
-	for option in [0, 25, 50, 75]:
-		var b := UI.button("%d%%" % option, func() -> void: _set_reinforce(village_id, option / 100.0, range_))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size.x = 0
-		b.disabled = option == share
-		rule_row.add_child(b)
-	_panel_body.add_child(rule_row)
-	var range_row := UI.hbox(8)
-	range_row.add_child(UI.label(tr("Within"), UI.SMALL_SIZE))
-	var reach := [range_]
-	range_row.add_child(_number_field("reinforce:%d" % village_id, range_, 0, int(Game.data.armies.reinforce.maxRange), func(n: int) -> void: reach[0] = n))
-	var hexes := UI.label(tr("hexes"), UI.SMALL_SIZE)
-	hexes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	range_row.add_child(hexes)
-	range_row.add_child(UI.button(tr("Set"), func() -> void:
-		_drafts.erase("reinforce:%d" % village_id)
-		_set_reinforce(village_id, share / 100.0, int(reach[0]))))
-	_panel_body.add_child(range_row)
+	_panel_body.add_child(UI.label(tr("The garrison stays home; armies standing within %d hexes of a battle march to it, unless told not to.") % int(Game.data.armies.respond.range), UI.SMALL_SIZE, UI.MUTED))
+
+
+## How low the granary may fall for armies quartered here or filling up:
+## a number to set, and the default (half the grain storage).
+func _floor_rows(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var capacity := float(village.get("resources", {}).get("capacity", {}).get("grain", 0))
+	var set_floor: Variant = village.get("armyFloor")
+	var floor_now := FieldRules.settlement_floor(Game.data, set_floor, capacity)
+	var text := tr("Armies may draw the granary down to %d grain") % floori(floor_now) if set_floor != null else tr("Armies may draw the granary down to %d grain (half of it)") % floori(floor_now)
+	_panel_body.add_child(UI.with_info(UI.label(text, UI.SMALL_SIZE),
+		tr("Armies standing here eat half their upkeep from the granary, and armies setting off fill up from it, never below this. The garrison eats a quarter of its upkeep from it either way.")))
+	var row := UI.hbox(8)
+	var picked := [floori(floor_now)]
+	row.add_child(_number_input("floor:%d" % village_id, floori(floor_now), 0, maxi(floori(capacity), floori(floor_now)), func(n: int) -> void: picked[0] = n))
+	row.add_child(UI.button(tr("Set"), func() -> void:
+		_drafts.erase("floor:%d" % village_id)
+		_set_floor("/v1/villages/%d/army-floor" % village_id, picked[0])))
+	var reset := UI.button(tr("Default"), func() -> void:
+		_drafts.erase("floor:%d" % village_id)
+		_set_floor("/v1/villages/%d/army-floor" % village_id, null))
+	reset.disabled = set_floor == null
+	row.add_child(reset)
+	_panel_body.add_child(row)
 
 
 ## Troops from this village to another, or to guard the Holy City: where,
@@ -2387,7 +2382,9 @@ func _raid_tab(village: Dictionary) -> void:
 		if picked.is_empty():
 			return ""
 		var eats := RaidText.upkeep(data, picked)
-		var grain := minf(LocalSupply.full_supply(data, picked), float(village.get("reserve", 0)))
+		var current: Dictionary = Game.villages.get(int(village.id), village)
+		var spare := FieldRules.village_spare(data, current, float(Ledger.amounts_at(current.resources, Game.server_now()).grain))
+		var grain := minf(LocalSupply.full_supply(data, picked), spare)
 		var lasts := grain / eats if eats > 0.0 else INF
 		return tr("Carries up to %d loot · grain for about %s · %s of battles beyond the edge, besides the march there and back") % [
 			RaidText.capacity(data, picked), TimeUtil.format_duration(lasts * 3600.0 / float(Game.world.speed)) if lasts < INF else tr("ever"),
@@ -3018,6 +3015,9 @@ func _army_panel() -> void:
 				return tr("Grain %d (+%d) of %d · eats %s an hour") % [floori(full), floori(left) - floori(full), floori(full), eats_text] \
 					+ "\n" + tr("The extra grain is left behind when they march off.")
 			return tr("Grain %d of %d · eats %s an hour") % [floori(left), floori(full), eats_text])
+		if army.get("quarteredAt") != null:
+			_panel_body.add_child(UI.with_info(UI.label(tr("Quartered: fed from the stores where it stands, %s grain an hour; its own grain keeps.") % UI.number(TimeUtil.per_real_hour(eats * speed * float(data.armies.quarters.upkeep))), UI.SMALL_SIZE, UI.ACCENT),
+				tr("An army standing in a settlement, fort or supply point eats half its upkeep from its stores, never below the floor set there. Once the floor is reached it eats its own grain again.")))
 		var lasts := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		_panel_body.add_child(lasts)
 		_tick(lasts, func() -> String: return ArmyText.supply_text(data, army, speed, Game.server_now()))
@@ -3038,6 +3038,7 @@ func _army_panel() -> void:
 	if not store.is_empty() and store.status == "standing":
 		var place := tr("Supply point") if store.get("kind", "fort") == "supply" else tr("Fort")
 		_panel_body.add_child(UI.label(tr("%s here: %d of %d grain") % [place, floori(float(store.get("grain", 0))), int(FieldRules.grain_capacity(data, store.get("kind", "fort")))], UI.SMALL_SIZE))
+		_store_floor_rows(store)
 	# Its wagons drawn into a ring.
 	if army.get("wagonFortAt") != null and army.status in ["stationed", "engaged"]:
 		var ring_at := TimeUtil.parse_iso(String(army.wagonFortAt))
@@ -3065,6 +3066,94 @@ func _army_panel() -> void:
 		_army_moving = army_id
 		_rebuild_panel(), "icon/map"))
 	_army_orders_row(army)
+	_army_manage(army)
+
+
+## A fort's or supply point's floor: how low its grain may fall for armies
+## (its owner sets it; by default to the last grain).
+func _store_floor_rows(store: Dictionary) -> void:
+	var floor_value: Variant = store.get("armyFloor")
+	_panel_body.add_child(UI.label(tr("Armies may draw it down to %d grain") % int(floor_value if floor_value != null else 0), UI.SMALL_SIZE, UI.MUTED))
+	if store.get("ownerAccountId") == null or int(store.ownerAccountId) != Game.my_account_id():
+		return
+	var fort_id := int(store.id)
+	var row := UI.hbox(8)
+	var picked := [int(floor_value if floor_value != null else 0)]
+	row.add_child(_number_input("fort-floor:%d" % fort_id, picked[0], 0, int(FieldRules.grain_capacity(Game.data, store.get("kind", "fort"))), func(n: int) -> void: picked[0] = n))
+	row.add_child(UI.button(tr("Set"), func() -> void:
+		_drafts.erase("fort-floor:%d" % fort_id)
+		_set_floor("/v1/forts/%d/army-floor" % fort_id, picked[0])))
+	_panel_body.add_child(row)
+
+
+## The rest of what your army can be told: whether it answers battles
+## nearby, its home, its hero and general, merging with another army
+## standing beside it and splitting off some of its troops.
+func _army_manage(army: Dictionary) -> void:
+	var army_id := int(army.id)
+	var standing: bool = army.status == "stationed"
+	var answers := CheckBox.new()
+	answers.text = tr("Answer battles within %d hexes") % int(Game.data.armies.respond.range)
+	answers.button_pressed = army.get("respond", true)
+	answers.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+	answers.toggled.connect(func(on: bool) -> void: _army_command(army_id, "respond", {"respond": on}))
+	_panel_body.add_child(UI.with_info(answers, tr("Standing still, it marches to any battle that starts within %d hexes, and comes back here once it is over.") % int(Game.data.armies.respond.range)))
+	# Its home: where it goes when called home.
+	if army.status != "returning":
+		var homes: Array = Game.villages.values().filter(func(v: Dictionary) -> bool: return Game.is_mine(v) and v.get("ruin") == null)
+		homes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+		if homes.size() > 1:
+			var labels := []
+			var selected := 0
+			for i in homes.size():
+				labels.append(tr("Home: %s") % homes[i].name)
+				if int(homes[i].id) == int(army.homeVillageId):
+					selected = i
+			var picker := UI.options(labels, selected)
+			picker.item_selected.connect(func(i: int) -> void:
+				if int(homes[i].id) != int(army.homeVillageId):
+					_army_command(army_id, "home", {"villageId": int(homes[i].id)}))
+			_panel_body.add_child(picker)
+	# Its leaders: the hero and a general join it where it stands (in one
+	# of your settlements) and leave it anywhere, not in a battle.
+	var leaders := UI.hbox(8)
+	var hero := Game.my_hero()
+	if army.get("heroAccountId") != null:
+		leaders.add_child(UI.button(tr("Hero leaves"), func() -> void: _army_command(army_id, "hero", {"join": false})))
+	elif standing and not hero.is_empty() and hero.status == "home" and army.targetVillageId != null and hero.villageId != null and int(hero.villageId) == int(army.targetVillageId):
+		leaders.add_child(UI.button(tr("%s takes command") % hero.name, func() -> void: _army_command(army_id, "hero", {"join": true})))
+	if army.get("generalId") != null:
+		leaders.add_child(UI.button(tr("General leaves"), func() -> void: _army_command(army_id, "general", {"generalId": null})))
+	if standing and army.targetVillageId != null:
+		var ready := Game.my_generals().filter(func(g: Dictionary) -> bool: return g.status == "home" and g.villageId != null and int(g.villageId) == int(army.targetVillageId))
+		if not ready.is_empty():
+			var labels := [tr("General…")]
+			for g in ready:
+				labels.append(tr("%s (Lv %d) takes command") % [g.name, int(g.level)])
+			var picker := UI.options(labels, 0)
+			picker.item_selected.connect(func(i: int) -> void:
+				if i > 0:
+					_army_command(army_id, "general", {"generalId": int(ready[i - 1].id)}))
+			leaders.add_child(picker)
+	if leaders.get_child_count() > 0:
+		_panel_body.add_child(leaders)
+	if not standing:
+		return
+	# Merging: another of your armies standing on the same hex joins this one.
+	var beside := Game.armies.filter(func(a: Dictionary) -> bool:
+		return int(a.id) != army_id and a.status == "stationed" and a.ownerAccountId != null and int(a.ownerAccountId) == Game.my_account_id() and ArmyText.held_hex(a) == ArmyText.held_hex(army))
+	for other in beside:
+		var other_id := int(other.id)
+		_panel_body.add_child(UI.button(tr("Merge in: %s") % ArmyText.units_text(other.units, Game.data.units.units), func() -> void: _army_command(army_id, "merge", {"armyId": other_id})))
+	# Splitting: the troops picked become an army of their own here.
+	if LocalBattle.total(army.units) > 1:
+		_panel_body.add_child(UI.label(tr("Split off"), UI.HEADING_SIZE))
+		_unit_pickers(army.units, true, "split")
+		var split := UI.button(tr("Split them off"), func() -> void:
+			_army_command(army_id, "split", {"units": _picked_units(army.units), "withHero": false, "withGeneral": false})
+			_army_units.clear())
+		_panel_body.add_child(split)
+		_picked_hint(split, army.units)
 
 
 ## The "come home when done" checkbox, with what it means for these orders.
@@ -3104,13 +3193,23 @@ func _army_orders_row(army: Dictionary) -> void:
 		return army.targetVillageId == null or int(v.id) != int(army.targetVillageId))
 	places.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
 	if not places.is_empty():
+		# Your own settlements: join the garrison there, or stand in it as an
+		# army (fed half its upkeep from the granary); another's: guard it.
 		var labels := [tr("March into…")]
+		var bodies := [{}]
 		for v in places:
-			labels.append(tr("Join %s") % v.name if Game.is_mine(v) else tr("Guard %s") % v.name)
+			if Game.is_mine(v):
+				labels.append(tr("Join the garrison of %s") % v.name)
+				bodies.append({"villageId": int(v.id), "join": true})
+				labels.append(tr("Stand in %s as an army") % v.name)
+				bodies.append({"villageId": int(v.id), "join": false})
+			else:
+				labels.append(tr("Guard %s") % v.name)
+				bodies.append({"villageId": int(v.id)})
 		var into := UI.options(labels, 0)
 		into.item_selected.connect(func(i: int) -> void:
 			if i > 0:
-				_army_command(army_id, "move", {"villageId": int(places[i - 1].id)}))
+				_army_command(army_id, "move", bodies[i]))
 		row.add_child(into)
 	if standing and army.targetVillageId != null and army.get("supply") != null:
 		row.add_child(UI.button(tr("Take on grain"), func() -> void: _army_command(army_id, "resupply", {})))
@@ -3190,11 +3289,17 @@ func _recall_army(army_id: int) -> void:
 		_status.text = response.error
 
 
-func _set_reinforce(village_id: int, share: float, range_: int) -> void:
+## How low a settlement's, fort's or supply point's grain may fall for
+## armies (null: the default).
+func _set_floor(path: String, grain: Variant) -> void:
 	_status.text = ""
-	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/villages/%d/reinforce" % village_id, {"share": share, "range": range_})
+	var response := await Api.request(HTTPClient.METHOD_PUT, path, {"grain": grain})
 	if not response.ok:
 		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	if path.begins_with("/v1/forts/"):
+		_refetch_world()
 
 
 # --- Standing orders ----------------------------------------------------------
@@ -4430,6 +4535,10 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 		var base := float(Game.data.buildings.village.baseCapacity)
 		var total := roundi(float(village.get("resources", {}).get("capacity", {}).get("wood", base)))
 		return tr("Holds %d of each resource above the base; the village keeps %d in all") % [roundi(base * (pow(float(def.capacityGrowth), level) - 1.0)), total]
+	if def.has("grainCapacityGrowth"):
+		var base_grain := float(Game.data.buildings.village.baseCapacity)
+		var grain_total := roundi(float(village.get("resources", {}).get("capacity", {}).get("grain", base_grain)))
+		return tr("Holds %d grain above the base; the village keeps %d grain in all") % [roundi(base_grain * (pow(float(def.grainCapacityGrowth), level) - 1.0)), grain_total]
 	if def.has("research"):
 		var research: Dictionary = def.research
 		var per_hour := func(l: int) -> int: return roundi(TimeUtil.per_real_hour(float(research.basePerHour) * pow(float(research.growth), l - 1) * speed)) if l > 0 else 0

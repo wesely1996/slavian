@@ -17,6 +17,8 @@ export interface Fort {
   mannedAt: Date | null;
   // Grain kept there for armies standing on it.
   grain: number;
+  // How low that grain may fall for armies (null: to the last).
+  armyFloor: number | null;
 }
 
 interface FortRow {
@@ -31,6 +33,7 @@ interface FortRow {
   completes_at: Date;
   manned_at: Date | null;
   grain: number;
+  army_floor: number | null;
 }
 
 function fromRow(row: FortRow): Fort {
@@ -46,6 +49,7 @@ function fromRow(row: FortRow): Fort {
     completesAt: row.completes_at,
     mannedAt: row.manned_at,
     grain: row.grain,
+    armyFloor: row.army_floor === null || row.army_floor === undefined ? null : Number(row.army_floor),
   };
 }
 
@@ -86,4 +90,8 @@ export async function deleteFort(client: DbClient, id: number): Promise<void> {
 
 export async function setFortGrain(client: DbClient, id: number, grain: number): Promise<void> {
   await client.query('UPDATE forts SET grain = $2 WHERE id = $1', [id, grain]);
+}
+
+export async function setFortFloor(client: DbClient, id: number, floor: number | null): Promise<void> {
+  await client.query('UPDATE forts SET army_floor = $2 WHERE id = $1', [id, floor]);
 }

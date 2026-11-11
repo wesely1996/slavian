@@ -298,13 +298,14 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 			if order.orders == "harass" and not horde_against(world, int(target.id)):
 				return LocalVillage.rule("No horde comes against %s to harass" % target.name)
 			to = Vector2i(target.q, target.r)
-	# The troops leave the garrison with what grain the military reserve
-	# can spare; the granary is not touched.
+	# The troops leave the garrison with what grain the granary can spare
+	# above the village's floor for armies.
 	var state := LocalVillage.leave_garrison(data, home.state, units, at, world.speed)
 	if state.has("error"):
 		return state
-	var grain := minf(LocalSupply.full_supply(data, units), LocalReserve.of(state))
-	state = LocalReserve.take_for_army(state, grain)
+	var grain := minf(LocalSupply.full_supply(data, units), village_spare(data, state, at))
+	if grain > 0:
+		state.ledger = LocalLedger.spend(state.ledger, at, _grain_only(grain))
 	var supplied := {"units": units, "supply": grain, "supplyAt": at, "hungrySince": null}
 	var speed := army_speed(data, units) * LocalSupply.speed_factor(data, supplied, at, world.speed)
 	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(home.q, home.r), to, speed, world.speed, terrain_relief(data, units))
@@ -334,7 +335,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		"stance": String(order.stance) if order.get("stance") != null else String(home.state.stance), "engagedUnits": null, "units": units, "status": "marching",
 		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": path, "departsAt": at, "arrivesAt": at + int(path[-1].atMs),
 		"leavesAt": null, "returnsAt": null, "supply": grain, "supplyAt": at, "hungrySince": null, "hungerAt": null, "wagonFortAt": null,
-		"returnHome": bool(order.get("returnHome", false))}
+		"returnHome": bool(order.get("returnHome", false)), "quarteredAt": null, "respond": true, "post": null}
 	world.next.army += 1
 	world.armies.append(army)
 	if hero_account != null:
@@ -363,53 +364,122 @@ static func supplied(army: Dictionary) -> bool:
 	return army.get("supply") != null and army.get("supplyAt") != null
 
 
-## Notes when hunger next comes for an army and schedules it. An army
-## standing in a village, or on a fort or supply point, is fed from its
-## stores the moment its grain runs out.
+## Notes when the army's food next needs looking at and schedules it: for
+## a quartered army, its place is charged every game hour; one standing at
+## a place that can't feed it now tries again every game hour (and goes
+## hungry as any other once its own grain is gone); nothing while it eats
+## nothing, or carries no supply.
 static func plan_hunger(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
 	var next: Variant = null
 	if supplied(army):
-		var out: Variant = LocalSupply.out_of_food_at(server.data, army, world.speed)
-		var in_village: bool = army.status in ["stationed", "engaged"] and army.targetVillageId != null
-		var stocked: bool = in_village or (out != null and int(out) > at and not store_here(world, army).is_empty())
-		next = out if stocked and out != null and int(out) > at else LocalSupply.next_check(server.data, army, at, world.speed)
+		var tick := at + LocalQuarters.tick_ms(world.speed)
+		if army.get("quarteredAt") != null:
+			next = tick
+		else:
+			next = LocalSupply.next_check(server.data, army, at, world.speed)
+			if army.status in ["stationed", "engaged"] and not place_of(server, world, army).is_empty() and (next == null or int(next) > tick):
+				next = tick
 	army.hungerAt = next
 	if next != null:
 		server.schedule(world, int(next), "army_hunger", {"armyId": army.id})
 
 
-## An army setting off leaves behind the grain it carries beyond its full
-## supply, or fills up from the military reserve of the village it leaves;
-## either way hunger comes at another time, so it is planned again.
+## An army setting off pays its quarters, then fills up to its full supply
+## from where it stood (down to the place's floor), or leaves behind the
+## grain it carries beyond its full supply; either way hunger comes at
+## another time, so it is planned again. One sent off from a battle fills
+## nothing (the battle keeps the stores).
 static func _set_off(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
 	if not supplied(army):
 		return
-	# Ordered out of a village of its owner's it stood in, it fills up from
-	# the military reserve there (not one sent home from a battle: the
-	# battle keeps the village's stores).
-	var in_village: bool = army.status == "stationed" and army.targetVillageId != null
-	var village := server.find_village(world, int(army.targetVillageId)) if in_village else {}
-	if not village.is_empty() and village.ownerAccountId != null and int(village.ownerAccountId) == int(army.ownerAccountId):
-		var grain := minf(LocalSupply.room(server.data, army, at, world.speed), LocalReserve.of(village.state))
-		if grain > 0:
-			village.state = LocalReserve.take_for_army(village.state, grain)
-			LocalSupply.add(server.data, army, grain, at, world.speed)
-			plan_hunger(server, world, army, at)
-			return
-	if LocalSupply.trim(server.data, army, at, world.speed):
-		plan_hunger(server, world, army, at)
+	unquarter(server, world, army, at)
+	var place := place_of(server, world, army) if army.status == "stationed" else {}
+	if not place.is_empty():
+		fill_up(server, world, army, place, at)
+	LocalSupply.trim(server.data, army, at, world.speed)
+	plan_hunger(server, world, army, at)
 
 
-## An army at a village takes on what grain it can carry from its stores.
-static func resupply(server: LocalServer, world: Dictionary, army: Dictionary, village_id: int, at: int) -> void:
+## Where an army standing (or fighting) can be fed: {"village": v} for the
+## village it stands in, {"store": fort} for the fort or supply point under
+## it, {} for none.
+static func place_of(server: LocalServer, world: Dictionary, army: Dictionary) -> Dictionary:
+	if not army.status in ["stationed", "engaged"]:
+		return {}
+	if army.targetVillageId != null:
+		var village := server.find_village(world, int(army.targetVillageId))
+		return {"village": village} if not village.is_empty() and village.get("ruin") == null else {}
+	var fort := store_here(world, army)
+	return {"store": fort} if not fort.is_empty() else {}
+
+
+## What grain a village can give armies at `at`: above its floor.
+static func village_spare(data: Dictionary, state: Dictionary, at: int) -> float:
+	var floor_value := LocalQuarters.settlement_floor(data, state.get("armyFloor"), float(state.ledger.capacity.grain))
+	return LocalQuarters.spare_grain(float(LocalLedger.amounts_at(state.ledger, at).grain), floor_value)
+
+
+static func _place_spare(data: Dictionary, place: Dictionary, at: int) -> float:
+	if place.has("village"):
+		return village_spare(data, place.village.state, at)
+	return LocalQuarters.spare_grain(float(place.store.grain), LocalQuarters.store_floor(place.store.get("armyFloor")))
+
+
+static func _take_from_place(place: Dictionary, grain: float, at: int) -> void:
+	if grain <= 0:
+		return
+	if place.has("store"):
+		place.store.grain = float(place.store.grain) - grain
+	else:
+		place.village.state.ledger = LocalLedger.spend(place.village.state.ledger, at, _grain_only(grain))
+
+
+## An army at a place takes on what grain it can carry from its stores,
+## down to the place's floor.
+static func fill_up(server: LocalServer, world: Dictionary, army: Dictionary, place: Dictionary, at: int) -> void:
 	if not supplied(army):
 		return
-	var village := server.find_village(world, village_id)
-	var grain := minf(LocalSupply.room(server.data, army, at, world.speed), float(LocalLedger.amounts_at(village.state.ledger, at).grain))
+	var grain := minf(LocalSupply.room(server.data, army, at, world.speed), _place_spare(server.data, place, at))
+	if grain <= 0:
+		return
+	_take_from_place(place, grain, at)
 	LocalSupply.add(server.data, army, grain, at, world.speed)
-	if grain > 0:
-		village.state.ledger = LocalLedger.spend(village.state.ledger, at, _grain_only(grain))
-	plan_hunger(server, world, army, at)
+
+
+## A quartered army's place pays for what it ate since it was last charged,
+## down to its floor; a place that could not pay it all feeds it no more
+## (from now it eats its own grain). An army no longer at a place is
+## unquartered the same way.
+static func settle_quarters(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if not supplied(army) or army.get("quarteredAt") == null:
+		return
+	var place := place_of(server, world, army)
+	var owed := LocalQuarters.owed(server.data, army.units, int(army.quarteredAt), at, world.speed)
+	var paid := minf(owed, _place_spare(server.data, place, at)) if not place.is_empty() else 0.0
+	if not place.is_empty():
+		_take_from_place(place, paid, at)
+	LocalSupply.settle(server.data, army, at, world.speed)
+	army.quarteredAt = at if not place.is_empty() and paid >= owed - 1e-9 else null
+
+
+## An army standing at a place with grain to spare is quartered there.
+static func quarter(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if not supplied(army) or army.get("quarteredAt") != null:
+		return
+	var place := place_of(server, world, army)
+	if place.is_empty() or _place_spare(server.data, place, at) <= 0:
+		return
+	LocalSupply.settle(server.data, army, at, world.speed)
+	army.quarteredAt = at
+	army.hungrySince = null
+
+
+## An army leaving where it stood pays what it owes and eats its own grain from now.
+static func unquarter(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if army.get("quarteredAt") == null:
+		return
+	settle_quarters(server, world, army, at)
+	army.quarteredAt = null
 
 
 ## The grain a fort or supply point keeps at most.
@@ -423,17 +493,6 @@ static func store_here(world: Dictionary, army: Dictionary) -> Dictionary:
 		return {}
 	var fort := fort_at(world, Vector2i(army.targetQ, army.targetR))
 	return fort if not fort.is_empty() and fort.status == "standing" else {}
-
-
-## An army on a fort or supply point takes on what grain it can carry from it.
-static func resupply_from_store(server: LocalServer, world: Dictionary, army: Dictionary, store: Dictionary, at: int) -> void:
-	if not supplied(army):
-		return
-	var grain := minf(LocalSupply.room(server.data, army, at, world.speed), float(store.grain))
-	LocalSupply.add(server.data, army, grain, at, world.speed)
-	if grain > 0:
-		store.grain = float(store.grain) - grain
-	plan_hunger(server, world, army, at)
 
 
 ## A standing army on a fort or supply point leaves up to `grain` of its own
@@ -469,15 +528,17 @@ static func store_command(server: LocalServer, world: Dictionary, army: Dictiona
 ## stays there.
 static func join_village(server: LocalServer, world: Dictionary, army: Dictionary, village_id: int, at: int) -> void:
 	var data := server.data
+	# Quartered where it stood (perhaps this very village): that is paid first.
+	unquarter(server, world, army, at)
 	var village := server.find_village(world, village_id)
 	var state := LocalVillage.complete_training(village.state, at)
 	if supplied(army):
 		state = LocalVillage.join_garrison(data, state, army.units, at, world.speed)
-		# Its grain into the military reserve first; loot into the stores.
-		state = LocalReserve.top_up(data, LocalReserve.store_from_army(data, state, LocalSupply.supply_left(data, army, at, world.speed), at), at)
+		# Its grain and loot into the stores.
 		var loot: Variant = army.loot
+		var carried := LocalSupply.supply_left(data, army, at, world.speed)
 		var load := LocalVillage.resources(func(kind: String) -> float:
-			return float(loot.get(kind, 0)) if loot != null else 0.0)
+			return (float(loot.get(kind, 0)) if loot != null else 0.0) + (carried if kind == "grain" else 0.0))
 		state.ledger = LocalLogistics.receive(state.ledger, at, load).ledger
 		village.state = state
 		army.status = "done"
@@ -587,7 +648,12 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 		if village.is_empty():
 			return LocalVillage.rule("No such village in this world")
 		dest = Vector2i(village.q, village.r)
-		orders = "garrison" if int(village.ownerAccountId) == int(army.ownerAccountId) else "support"
+		# Its owner's: it joins the garrison unless `join` is false (then it
+		# stands there as an army); `orders` overrides (answering a battle).
+		if body.get("orders") != null:
+			orders = String(body.orders)
+		else:
+			orders = "garrison" if village.ownerAccountId != null and int(village.ownerAccountId) == int(army.ownerAccountId) and body.get("join") != false else "support"
 		target_village = village.id
 	else:
 		var target: Variant = body.get("target")
@@ -600,7 +666,9 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 		if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == dest.x and int(v.r) == dest.y):
 			return LocalVillage.rule("That is a village; send them into it")
 		# Sent onto a camp it storms it; onto a site not yet searched, it explores.
-		if not camp_at(world, dest).is_empty():
+		if body.get("orders") != null:
+			orders = String(body.orders)
+		elif not camp_at(world, dest).is_empty():
 			if LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
 				return LocalVillage.rule("Scouts alone don't storm camps")
 			orders = "clear"
@@ -653,6 +721,8 @@ static func disband(server: LocalServer, world: Dictionary, army: Dictionary, at
 	var refused := _standing(army)
 	if not refused.is_empty():
 		return refused
+	# Quartered, its place is paid for what it ate till now.
+	unquarter(server, world, army, at)
 	var home := server.find_village(world, int(army.homeVillageId))
 	var land := LocalHordes.land_of(world)
 	var here := Vector2i(army.targetQ, army.targetR)
@@ -687,24 +757,24 @@ static func disband(server: LocalServer, world: Dictionary, army: Dictionary, at
 
 
 ## A standing army in a village, or on a fort or supply point, takes on
-## what grain it can from its stores.
+## what grain it can carry from its stores, down to the place's floor.
 static func resupply_command(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> Dictionary:
 	var refused := _standing(army)
 	if not refused.is_empty():
 		return refused
-	var store := store_here(world, army) if army.targetVillageId == null else {}
-	if army.targetVillageId == null and store.is_empty():
+	var place := place_of(server, world, army)
+	if place.is_empty():
 		return LocalVillage.rule("They stand in no village, fort or supply point")
 	if not supplied(army):
 		return LocalVillage.rule("Their village feeds them")
-	if not store.is_empty():
-		resupply_from_store(server, world, army, store, at)
-	else:
-		resupply(server, world, army, int(army.targetVillageId), at)
+	fill_up(server, world, army, place, at)
+	plan_hunger(server, world, army, at)
 	return army
 
 
-## Out of food: the army loses men, or is lost altogether.
+## Out of food: the army loses men, or is lost altogether. Quartered, its
+## place pays for the hour (or can't, and it eats its own from now);
+## standing at a place with grain again, it is quartered.
 static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var army := find_army(world, int(event.payload.armyId))
 	var at := int(event.dueAt)
@@ -712,15 +782,13 @@ static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	changed.append(["world"])
 	var data := server.data
-	# Standing in a village, or on a fort or supply point, it eats from the stores.
-	var store := store_here(world, army)
-	if (army.status in ["stationed", "engaged"] and army.targetVillageId != null) or not store.is_empty():
-		if not store.is_empty():
-			resupply_from_store(server, world, army, store, at)
-		else:
-			resupply(server, world, army, int(army.targetVillageId), at)
-		if LocalSupply.supply_left(data, army, at, world.speed) > 0:
-			return
+	if army.get("quarteredAt") != null:
+		settle_quarters(server, world, army, at)
+	else:
+		quarter(server, world, army, at)
+	if army.get("quarteredAt") != null:
+		plan_hunger(server, world, army, at)
+		return
 	var strike := LocalSupply.strikes(data, army, at, world.speed)
 	var home := server.find_village(world, int(army.homeVillageId))
 	var name: String = home.name if not home.is_empty() else ""
@@ -782,7 +850,8 @@ static func join_battle(server: LocalServer, world: Dictionary, army: Dictionary
 	var angle := 0.0
 	if horde_step != null and army_step != null:
 		angle = approach_angle(village_hex, Vector2i(horde_step.q, horde_step.r), Vector2i(army_step.q, army_step.r))
-	var bonus := join_bonus(server.data, army.orders, LocalBattle.total(army.units), LocalBattle.total(wave.composition), angle)
+	# Kept as the server keeps it (a Postgres real).
+	var bonus := pg_real(join_bonus(server.data, army.orders, LocalBattle.total(army.units), LocalBattle.total(wave.composition), angle))
 	army.status = "engaged"
 	army.battleId = battle.id
 	army.joinsRound = int(battle.round) + 1
@@ -790,6 +859,21 @@ static func join_battle(server: LocalServer, world: Dictionary, army: Dictionary
 	army.engagedUnits = army.units.duplicate()
 	plan_hunger(server, world, army, at)
 	_add_defenders(battle, LocalScouting.combatants(server.data, army.units))
+
+
+## A number as a Postgres `real` column gives it back: rounded to single
+## precision, printed in the fewest digits that read back the same.
+static func pg_real(value: float) -> float:
+	var single: float = PackedFloat32Array([value])[0]
+	if single == 0.0:
+		return 0.0
+	var exponent := floori(log(absf(single)) / log(10.0))
+	for digits in range(1, 10):
+		var scale := pow(10.0, digits - 1 - exponent)
+		var candidate := roundf(single * scale) / scale
+		if PackedFloat32Array([candidate])[0] == single:
+			return candidate
+	return single
 
 
 static func _add_defenders(battle: Dictionary, units: Dictionary) -> void:
@@ -800,7 +884,7 @@ static func _add_defenders(battle: Dictionary, units: Dictionary) -> void:
 
 
 ## A battle starts at a village: armies standing there join at once, and
-## villages in range send their share of troops.
+## armies standing nearby answer it.
 static func rally_to_battle(server: LocalServer, world: Dictionary, battle: Dictionary, village: Dictionary, at: int) -> void:
 	for army in armies_at(world, int(village.id), ["stationed"]):
 		army.status = "engaged"
@@ -809,17 +893,84 @@ static func rally_to_battle(server: LocalServer, world: Dictionary, battle: Dict
 		army.joinBonus = 0
 		army.engagedUnits = army.units.duplicate()
 		_add_defenders(battle, LocalScouting.combatants(server.data, army.units))
-	for other in world.villages:
-		if int(other.id) == int(village.id) or other.state.besieged:
+	answer_battle(server, world, Vector2i(village.q, village.r), village.id, at)
+
+
+## Standing armies that answer a battle at `cell`: every army standing
+## within respond.range hexes of it (not there already) that fights and was
+## not told to stay out (oldest first).
+static func responders_to(data: Dictionary, world: Dictionary, cell: Vector2i) -> Array:
+	var found := []
+	for a in _by_id(world.armies):
+		if a.status != "stationed" or not a.get("respond", true) or a.orders == "explore":
 			continue
-		var rule: Dictionary = other.reinforce
-		if float(rule.share) <= 0 or HexMath.distance(Vector2i(other.q, other.r), Vector2i(village.q, village.r)) > int(rule.range):
+		var at_hex := Vector2i(int(a.targetQ), int(a.targetR))
+		if at_hex == cell or HexMath.distance(at_hex, cell) > int(data.armies.respond.range):
 			continue
-		var units := share_of(server.data, LocalVillage.complete_training(other.state, at).garrison, float(rule.share))
-		if LocalBattle.total(units) == 0:
+		if LocalBattle.total(LocalScouting.combatants(data, a.units)) == 0:
 			continue
-		# No road there: this village can't help.
-		dispatch_army(server, world, {"homeVillageId": other.id, "targetVillageId": village.id, "units": units, "orders": "reinforce", "at": at})
+		found.append(a)
+	return found
+
+
+## Armies standing nearby march to a battle that started at `cell` (a
+## village's, or on open ground), remembering where they stood: they go
+## back once it is over.
+static func answer_battle(server: LocalServer, world: Dictionary, cell: Vector2i, village_id: Variant, at: int) -> void:
+	for army in responders_to(server.data, world, cell):
+		var post := {"q": int(army.targetQ), "r": int(army.targetR), "villageId": army.targetVillageId}
+		var body := {"villageId": village_id, "orders": "reinforce"} if village_id != null else {"target": {"q": cell.x, "r": cell.y}, "orders": "hold"}
+		# No road there: it can't help.
+		if not _try_move(server, world, army, body, at):
+			continue
+		army.post = post
+
+
+## Moves an army, or (refused) leaves it and the stores where it stands as
+## they were, as the server's savepoint does. Whether it moved.
+static func _try_move(server: LocalServer, world: Dictionary, army: Dictionary, body: Dictionary, at: int) -> bool:
+	var before := army.duplicate(true)
+	var place := place_of(server, world, army)
+	var ledger: Variant = place.village.state.ledger.duplicate(true) if place.has("village") else null
+	var grain: Variant = place.store.grain if place.has("store") else null
+	if not move(server, world, army, body, at).has("error"):
+		return true
+	army.merge(before, true)
+	if ledger != null:
+		place.village.state.ledger = ledger
+	if grain != null:
+		place.store.grain = grain
+	return false
+
+
+## The ongoing battle with a horde on open ground at a hex ({} if none).
+static func field_battle_at(world: Dictionary, cell: Vector2i) -> Dictionary:
+	for b in world.battles:
+		if b.get("villageId") == null and b.get("waveId") != null and b.status == "ongoing" and int(b.q) == cell.x and int(b.r) == cell.y:
+			return b
+	return {}
+
+
+## An army done with a battle it went to: one that answered it goes back to
+## where it stood; any other goes home.
+static func after_battle(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if army.get("post") == null or LocalBattle.total(army.units) == 0:
+		send_home(server, world, army, at)
+		return
+	var post: Dictionary = army.post
+	army.status = "stationed"
+	army.battleId = null
+	army.joinsRound = null
+	army.joinBonus = 0
+	army.post = null
+	if int(army.targetQ) == int(post.q) and int(army.targetR) == int(post.r):
+		quarter(server, world, army, at)
+		plan_hunger(server, world, army, at)
+		return
+	var body := {"villageId": post.villageId, "join": false} if post.villageId != null else {"target": {"q": int(post.q), "r": int(post.r)}, "orders": "hold"}
+	if not _try_move(server, world, army, body, at):
+		# Where it stood is gone (or out of reach): it goes home.
+		send_home(server, world, army, at)
 
 
 ## Losses an army took: its supply is settled first (the dead stop eating),
@@ -839,6 +990,8 @@ static func army_losses(server: LocalServer, world: Dictionary, army: Dictionary
 			losses[unit] = n
 	if LocalBattle.total(losses) == 0:
 		return army
+	# Quartered, its place is paid for what the fallen ate till now.
+	settle_quarters(server, world, army, at)
 	if supplied(army):
 		LocalSupply.settle(server.data, army, at, world.speed)
 	else:
@@ -878,21 +1031,26 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 			if not stays_out(world, army):
 				send_home(server, world, army, at)
 				return
-			army.status = "stationed"
 			var fort := fort_at(world, Vector2i(army.targetQ, army.targetR))
 			if not fort.is_empty():
 				fort.mannedAt = at
-			# A fort or supply point fills its supply, as a village would.
-			var store := store_here(world, army)
-			if not store.is_empty():
-				resupply_from_store(server, world, army, store, at)
+			# On a fort or supply point it is quartered there.
+			army.status = "stationed"
+			quarter(server, world, army, at)
+			# A battle on the hex: it joins it from the next round.
+			var battle := field_battle_at(world, Vector2i(army.targetQ, army.targetR))
+			if not battle.is_empty():
+				join_battle(server, world, army, battle, server.find_wave(world, int(battle.waveId)), at)
+			else:
+				plan_hunger(server, world, army, at)
 			intercept_at(server, world, Vector2i(army.targetQ, army.targetR), at)
 			return
 	if army.orders == "garrison":
 		join_village(server, world, army, int(army.targetVillageId), at)
 		return
-	# Any village it reaches fills its supply.
-	resupply(server, world, army, int(army.targetVillageId), at)
+	# Any village it reaches quarters it.
+	army.status = "stationed"
+	quarter(server, world, army, at)
 	var ongoing: Dictionary = {}
 	for b in world.battles:
 		if b.villageId != null and int(b.villageId) == int(army.targetVillageId) and b.status == "ongoing":
@@ -901,10 +1059,9 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 	if not ongoing.is_empty() and ongoing.waveId != null:
 		join_battle(server, world, army, ongoing, server.find_wave(world, int(ongoing.waveId)), at)
 	elif army.orders == "support" and not army.get("returnHome", false):
-		army.status = "stationed"
 		plan_hunger(server, world, army, at)
 	else:
-		send_home(server, world, army, at)
+		after_battle(server, world, army, at)
 
 
 static func on_army_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -961,18 +1118,6 @@ static func recall(server: LocalServer, world: Dictionary, army_id: int, now: in
 	if army.status != "stationed":
 		return LocalVillage.rule("Only armies out in the field can be called home")
 	return send_home(server, world, army, now)
-
-
-## How a village answers battles nearby.
-static func set_reinforce(data: Dictionary, village: Dictionary, body: Dictionary) -> Dictionary:
-	var share := float(body.get("share", -1))
-	var range_value := float(body.get("range", -1))
-	if not (share >= 0 and share <= 1):
-		return LocalVillage.rule("Send between 0% and 100%")
-	if range_value != floorf(range_value) or range_value < 0 or range_value > float(data.armies.reinforce.maxRange):
-		return LocalVillage.rule("Range is 0 to %d hexes" % int(data.armies.reinforce.maxRange))
-	village.reinforce = {"share": body.share, "range": body.range}
-	return {"reinforce": village.reinforce}
 
 
 # --- The field (sim/field.ts, scheduler/field.ts) -------------------------------------
@@ -1134,6 +1279,8 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		army.joinsRound = 1
 		army.joinBonus = 0
 		army.engagedUnits = army.units.duplicate()
+	# Armies standing nearby answer it.
+	answer_battle(server, world, cell, null, at)
 	server.schedule(world, at + LocalBattle.round_ms(data, world.speed), "battle_round", {"battleId": battle.id})
 	var ground: Array = []
 	for pair in [["ambush", "an ambush"], ["choke", "a choke point"], ["fort", "a fort"], ["wagonFort", "a wagon fort"], ["river", "a river crossing"]]:
@@ -1235,7 +1382,7 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 
 static func fort_view(f: Dictionary) -> Dictionary:
 	return {"id": f.id, "kind": f.get("kind", "fort"), "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
-		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0)}
+		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor")}
 
 
 static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1768,7 +1915,9 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"supply": a.get("supply"), "supplyAt": LocalTime.iso(a.supplyAt) if a.get("supplyAt") != null else null,
 		"hungrySince": LocalTime.iso(a.hungrySince) if a.get("hungrySince") != null else null,
 		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null,
-		"returnHome": a.get("returnHome", false), "raid": a.get("raid")}
+		"returnHome": a.get("returnHome", false), "raid": a.get("raid"),
+		"quarteredAt": LocalTime.iso(a.quarteredAt) if a.get("quarteredAt") != null else null,
+		"respond": a.get("respond", true), "post": a.get("post")}
 
 
 ## Newly trained troops march to their owner's rally point (scheduler/
@@ -1802,3 +1951,310 @@ static func rally_trained(server: LocalServer, world: Dictionary, home: Dictiona
 	if LocalBattle.total(fighters(data, units)) == 0:
 		return
 	dispatch_army(server, world, {"homeVillageId": home.id, "targetVillageId": target.id, "units": units, "orders": "garrison", "at": at})
+
+
+## A leader leaving an army out in the field makes their own way to a
+## village: a hero walks, a general rides.
+static func _hero_to(server: LocalServer, world: Dictionary, hero: Dictionary, from: Vector2i, village: Dictionary, at: int) -> void:
+	var data := server.data
+	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), from, Vector2i(village.q, village.r), float(data.heroes.speed) * LocalHeroes.hero_factor(data, hero.kind, "heroSpeed"), world.speed)
+	var arrives_at := at + int(path[-1].atMs)
+	hero.status = "traveling"
+	hero.villageId = village.id
+	hero.armyId = null
+	hero.path = path
+	hero.departsAt = LocalTime.iso(at)
+	hero.arrivesAt = LocalTime.iso(arrives_at)
+	server.schedule(world, arrives_at, "hero_arrive", {"accountId": hero.accountId})
+
+
+static func _general_to(server: LocalServer, world: Dictionary, general: Dictionary, from: Vector2i, village: Dictionary, at: int) -> void:
+	var data := server.data
+	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), from, Vector2i(village.q, village.r), float(data.heroes.generals.speed), world.speed)
+	general.status = "traveling"
+	general.villageId = village.id
+	general.armyId = null
+	general.path = path
+	general.departsAt = at
+	general.until = at + int(path[-1].atMs)
+	server.schedule(world, int(general.until), "general_arrive", {"generalId": general.id})
+
+
+## The village of its owner's an army stands in ({} if none).
+static func _own_village_here(server: LocalServer, world: Dictionary, army: Dictionary) -> Dictionary:
+	if army.targetVillageId == null or not army.status in ["stationed", "engaged"]:
+		return {}
+	var village := server.find_village(world, int(army.targetVillageId))
+	if village.is_empty() or village.ownerAccountId == null or int(village.ownerAccountId) != int(army.ownerAccountId) or village.get("ruin") != null:
+		return {}
+	return village
+
+
+static func _not_in_battle(army: Dictionary) -> Dictionary:
+	if army.status == "engaged":
+		return LocalVillage.rule("That army is in the middle of a battle")
+	if army.status == "done":
+		return LocalVillage.rule("That army is no more")
+	return {}
+
+
+## Where an army is now: the hex it stands on, or for one on the road the
+## last hex it reached.
+static func _army_hex(army: Dictionary, at: int) -> Vector2i:
+	if army.status in ["stationed", "engaged"]:
+		return Vector2i(int(army.targetQ), int(army.targetR))
+	var road: Array = LocalLogistics.reversed_route(army.path) if army.status == "returning" else army.path
+	var since := at - (int(army.leavesAt) if army.status == "returning" else int(army.departsAt))
+	var step: Dictionary = road[0]
+	for s in road:
+		if int(s.atMs) <= since:
+			step = s
+	return Vector2i(int(step.q), int(step.r))
+
+
+## An army's home: another settlement of its owner's.
+static func set_home(server: LocalServer, world: Dictionary, army: Dictionary, village_id: int) -> Dictionary:
+	if army.status == "done":
+		return LocalVillage.rule("That army is no more")
+	if army.status == "returning":
+		return LocalVillage.rule("They are on their way home; turn them first")
+	var village := server.find_village(world, village_id)
+	if village.is_empty() or village.ownerAccountId == null or int(village.ownerAccountId) != int(army.ownerAccountId) or village.get("ruin") != null:
+		return LocalVillage.rule("Only one of your own settlements can be its home")
+	if int(village.id) == int(army.homeVillageId):
+		return LocalVillage.rule("%s is its home already" % village.name)
+	army.homeVillageId = village.id
+	return army
+
+
+## Whether a standing army answers battles nearby.
+static func set_respond(army: Dictionary, respond: bool) -> Dictionary:
+	if army.status == "done":
+		return LocalVillage.rule("That army is no more")
+	army.respond = respond
+	return army
+
+
+## The hero joins a standing army in the village where the hero is, or
+## leaves it (not in a battle).
+static func army_hero(server: LocalServer, world: Dictionary, army: Dictionary, join: bool, at: int) -> Dictionary:
+	var refused := _not_in_battle(army)
+	if not refused.is_empty():
+		return refused
+	var led := hero_with_army(world, int(army.id))
+	var general := LocalGenerals.general_with_army(world, int(army.id))
+	if join:
+		if not led.is_empty():
+			return LocalVillage.rule("%s leads them already" % led.name)
+		if army.status != "stationed":
+			return LocalVillage.rule("Only a standing army can take on a hero")
+		var hero := hero_of(world, int(army.ownerAccountId))
+		if hero.is_empty():
+			return LocalVillage.rule("You have no hero")
+		if hero.status != "home" or army.targetVillageId == null or hero.villageId == null or int(hero.villageId) != int(army.targetVillageId):
+			return LocalVillage.rule("%s is not where they stand" % hero.name)
+		hero.status = "with_army"
+		hero.villageId = null
+		hero.armyId = army.id
+		army.heroAccountId = hero.accountId
+		army.generalId = general.id if not general.is_empty() else null
+		return army
+	if led.is_empty():
+		return LocalVillage.rule("No hero leads them")
+	var village := _own_village_here(server, world, army)
+	if not village.is_empty():
+		led.status = "home"
+		led.villageId = village.id
+		led.armyId = null
+	else:
+		_hero_to(server, world, led, _army_hex(army, at), server.find_village(world, int(army.homeVillageId)), at)
+	army.heroAccountId = null
+	army.generalId = general.id if not general.is_empty() else null
+	return army
+
+
+## A general takes command of a standing army in the village where the
+## general is (the one leading it stays there), or the general leading it
+## leaves (null). Not in a battle.
+static func army_general(server: LocalServer, world: Dictionary, army: Dictionary, general_id: Variant, at: int) -> Dictionary:
+	var refused := _not_in_battle(army)
+	if not refused.is_empty():
+		return refused
+	var current := LocalGenerals.general_with_army(world, int(army.id))
+	var led := hero_with_army(world, int(army.id))
+	var hero_id: Variant = led.accountId if not led.is_empty() else null
+	if general_id == null:
+		if current.is_empty():
+			return LocalVillage.rule("No general leads them")
+		var village := _own_village_here(server, world, army)
+		if not village.is_empty():
+			current.status = "home"
+			current.villageId = village.id
+			current.armyId = null
+		else:
+			_general_to(server, world, current, _army_hex(army, at), server.find_village(world, int(army.homeVillageId)), at)
+		army.heroAccountId = hero_id
+		army.generalId = null
+		return army
+	if army.status != "stationed":
+		return LocalVillage.rule("Only a standing army can take on a general")
+	var general := LocalGenerals.find(world, int(general_id))
+	if general.is_empty() or int(general.accountId) != int(army.ownerAccountId):
+		return LocalVillage.rule("No such general")
+	if not current.is_empty() and int(general.id) == int(current.id):
+		return LocalVillage.rule("%s leads them already" % general.name)
+	if general.status != "home" or army.targetVillageId == null or general.villageId == null or int(general.villageId) != int(army.targetVillageId):
+		return LocalVillage.rule("%s is not where they stand" % general.name)
+	if not current.is_empty():
+		current.status = "home"
+		current.villageId = army.targetVillageId
+		current.armyId = null
+	general.status = "with_army"
+	general.villageId = null
+	general.armyId = army.id
+	army.heroAccountId = hero_id
+	army.generalId = general.id
+	return army
+
+
+## Two standing armies of one owner on the same hex become one: the other's
+## troops, grain, loot and leaders join this one (at most one general).
+static func merge_armies(server: LocalServer, world: Dictionary, army: Dictionary, other_id: int, at: int) -> Dictionary:
+	var data := server.data
+	var refused := _standing(army)
+	if not refused.is_empty():
+		return refused
+	if other_id == int(army.id):
+		return LocalVillage.rule("Pick another army")
+	var other := find_army(world, other_id)
+	if other.is_empty() or other.ownerAccountId == null or int(other.ownerAccountId) != int(army.ownerAccountId):
+		return LocalVillage.rule("No such army of yours")
+	refused = _standing(other)
+	if not refused.is_empty():
+		return refused
+	if int(other.targetQ) != int(army.targetQ) or int(other.targetR) != int(army.targetR):
+		return LocalVillage.rule("They must stand on the same hex")
+	var hero_a := hero_with_army(world, int(army.id))
+	var hero_b := hero_with_army(world, int(other.id))
+	var gen_a := LocalGenerals.general_with_army(world, int(army.id))
+	var gen_b := LocalGenerals.general_with_army(world, int(other.id))
+	if not gen_a.is_empty() and not gen_b.is_empty():
+		return LocalVillage.rule("Both have a general: send one away first")
+	unquarter(server, world, army, at)
+	unquarter(server, world, other, at)
+	var fed_a := supplied(army)
+	var fed_b := supplied(other)
+	var supply: Variant = null
+	if fed_a or fed_b:
+		supply = (LocalSupply.supply_left(data, army, at, world.speed) if fed_a else 0.0) + (LocalSupply.supply_left(data, other, at, world.speed) if fed_b else 0.0)
+	var loot: Variant = null
+	if army.loot != null or other.loot != null:
+		var la: Variant = army.loot
+		var lb: Variant = other.loot
+		loot = LocalVillage.resources(func(kind: String) -> float:
+			return (float(la.get(kind, 0)) if la != null else 0.0) + (float(lb.get(kind, 0)) if lb != null else 0.0))
+	var units := LocalVillage.add_units(army.units, other.units)
+	other.units = {}
+	other.status = "done"
+	other.supply = 0
+	other.supplyAt = at
+	other.hungerAt = null
+	other.loot = null
+	other.leavesAt = at
+	other.returnsAt = at
+	other.heroAccountId = null
+	other.generalId = null
+	var hero := hero_a if not hero_a.is_empty() else hero_b
+	var general := gen_a if not gen_a.is_empty() else gen_b
+	if not hero_b.is_empty():
+		hero_b.armyId = army.id
+	if not gen_b.is_empty():
+		gen_b.armyId = army.id
+	army.units = units
+	army.supply = supply
+	army.supplyAt = at if supply != null else null
+	army.hungrySince = null
+	army.loot = loot
+	army.heroAccountId = hero.accountId if not hero.is_empty() else null
+	army.generalId = general.id if not general.is_empty() else null
+	var ring_a: Variant = army.get("wagonFortAt")
+	var ring_b: Variant = other.get("wagonFortAt")
+	army.wagonFortAt = maxi(int(ring_a), int(ring_b)) if ring_a != null and ring_b != null else ring_a
+	quarter(server, world, army, at)
+	plan_hunger(server, world, army, at)
+	return army
+
+
+## A standing army splits off some of its troops as an army of their own on
+## the same hex, with their share of its grain, and its hero or general if
+## told so (its loot stays): {army, split}, or {"error"}.
+static func split_army(server: LocalServer, world: Dictionary, army: Dictionary, body: Dictionary, at: int) -> Dictionary:
+	var data := server.data
+	var refused := _standing(army)
+	if not refused.is_empty():
+		return refused
+	var picked: Dictionary = body.units
+	var units := {}
+	for unit in picked:
+		var n := float(picked[unit])
+		if n != floorf(n) or n < 0:
+			return LocalVillage.rule("Pick whole troops")
+		if int(n) > int(army.units.get(unit, 0)):
+			return LocalVillage.rule("They have not so many")
+		if n > 0:
+			units[unit] = int(n)
+	var rest := {}
+	for unit in army.units:
+		var left := int(army.units[unit]) - int(units.get(unit, 0))
+		if left > 0:
+			rest[unit] = left
+	if LocalBattle.total(units) == 0:
+		return LocalVillage.rule("Pick who goes")
+	if LocalBattle.total(rest) == 0:
+		return LocalVillage.rule("Leave someone behind")
+	var hero := hero_with_army(world, int(army.id)) if body.get("withHero", false) else {}
+	if body.get("withHero", false) and hero.is_empty():
+		return LocalVillage.rule("No hero leads them")
+	var general := LocalGenerals.general_with_army(world, int(army.id)) if body.get("withGeneral", false) else {}
+	if body.get("withGeneral", false) and general.is_empty():
+		return LocalVillage.rule("No general leads them")
+	var whole := LocalSupply.full_supply(data, army.units)
+	unquarter(server, world, army, at)
+	var fed := supplied(army)
+	var carried := LocalSupply.supply_left(data, army, at, world.speed) if fed else 0.0
+	var share := LocalSupply.full_supply(data, units) / whole if whole > 0 else float(LocalBattle.total(units)) / LocalBattle.total(army.units)
+	var taken: Variant = carried * share if fed else null
+	var orders := String(army.orders) if army.orders in ["support", "hold"] else ("hold" if army.targetVillageId == null else "support")
+	var created := {"id": world.next.army, "ownerAccountId": army.ownerAccountId, "homeVillageId": army.homeVillageId,
+		"targetVillageId": army.targetVillageId, "targetQ": army.targetQ, "targetR": army.targetR,
+		"heroAccountId": hero.accountId if not hero.is_empty() else null, "generalId": general.id if not general.is_empty() else null,
+		"orders": orders, "stance": army.get("stance", "balanced"), "engagedUnits": null, "units": units, "status": "stationed",
+		"loot": null, "battleId": null, "joinsRound": null, "joinBonus": 0, "path": [{"q": int(army.targetQ), "r": int(army.targetR), "atMs": 0}],
+		"departsAt": at, "arrivesAt": at, "leavesAt": null, "returnsAt": null, "supply": taken, "supplyAt": at if fed else null,
+		"hungrySince": null, "hungerAt": null, "wagonFortAt": null, "returnHome": army.get("returnHome", false),
+		"quarteredAt": null, "respond": army.get("respond", true), "post": null}
+	world.next.army += 1
+	world.armies.append(created)
+	if not hero.is_empty():
+		hero.armyId = created.id
+	if not general.is_empty():
+		general.armyId = created.id
+	var left_hero: Variant = null
+	if hero.is_empty():
+		var h := hero_with_army(world, int(army.id))
+		left_hero = h.accountId if not h.is_empty() else null
+	var left_general: Variant = null
+	if general.is_empty():
+		var g := LocalGenerals.general_with_army(world, int(army.id))
+		left_general = g.id if not g.is_empty() else null
+	army.units = rest
+	if fed:
+		army.supply = carried - float(taken)
+		army.supplyAt = at
+	army.heroAccountId = left_hero
+	army.generalId = left_general
+	quarter(server, world, army, at)
+	plan_hunger(server, world, army, at)
+	quarter(server, world, created, at)
+	plan_hunger(server, world, created, at)
+	return {"army": army, "split": created}

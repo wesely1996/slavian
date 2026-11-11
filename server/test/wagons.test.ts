@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
 import { wagonFortBonus } from '../src/sim/field.js';
-import { reserveCapacity, storeFromArmy, takeForArmy, topUpReserve } from '../src/sim/reserve.js';
-import { amountsAt } from '../src/sim/resources.js';
+import { quarterOwed, settlementFloor, spareGrain, storeFloor } from '../src/sim/quarters.js';
+import { supplyLeft, outOfFoodAt } from '../src/sim/supply.js';
 import { fullSupply } from '../src/sim/supply.js';
-import { newVillage } from '../src/sim/village.js';
+import { capacity, newVillage } from '../src/sim/village.js';
 
 const data = loadGameData();
 const T0 = new Date('2026-03-01T00:00:00Z');
@@ -30,24 +30,32 @@ describe('military caravans', () => {
   });
 });
 
-describe('the military reserve', () => {
-  const village = newVillage(data, T0, 1);
-  const plots = { ...village.plots, c2: { building: 'barracks', level: 2 }, c3: { building: 'stables', level: 1 } };
-  const state = { ...village, plots };
-
-  it('keeps 200 grain per level of each military building', () => {
-    expect(reserveCapacity(data, plots)).toBe(600);
+describe('quarters and the grain silo', () => {
+  it('a grain silo adds grain storage alone, as a storehouse does for everything', () => {
+    const village = newVillage(data, T0, 1);
+    const base = capacity(data, village.plots);
+    const silo = capacity(data, { ...village.plots, c2: { building: 'grain_silo', level: 2 } });
+    expect(silo.wood).toBe(base.wood);
+    expect(silo.grain).toBeCloseTo(base.grain + data.buildings.village.baseCapacity * (1.3 ** 2 - 1));
   });
 
-  it('fills from the granary; an army takes from it alone; grain brought home goes into it first', () => {
-    const grain = amountsAt(state.ledger, T0).grain;
-    const full = topUpReserve(data, state, T0);
-    expect(full.reserve).toBe(Math.min(600, grain));
-    expect(amountsAt(full.ledger, T0).grain).toBe(grain - full.reserve!);
-    const left = takeForArmy(full, 100);
-    expect(left.reserve).toBe(full.reserve! - 100);
-    expect(amountsAt(left.ledger, T0).grain).toBe(amountsAt(full.ledger, T0).grain);
-    const back = storeFromArmy(data, left, 150, T0);
-    expect(back.reserve).toBe(Math.min(600, left.reserve! + 150));
+  it('settlements feed armies down to half their grain storage unless set; forts to the last grain', () => {
+    expect(settlementFloor(data, null, 1000)).toBe(500);
+    expect(settlementFloor(data, 200, 1000)).toBe(200);
+    expect(storeFloor(null)).toBe(0);
+    expect(storeFloor(300)).toBe(300);
+    expect(spareGrain(800, 500)).toBe(300);
+    expect(spareGrain(400, 500)).toBe(0);
+  });
+
+  it('a quartered army eats half its upkeep from the place, and none of its own grain', () => {
+    const units = { spearman: 10 };
+    const upkeep = data.units.units.spearman!.upkeepPerHour * 10;
+    const later = new Date(T0.getTime() + 2 * 3_600_000);
+    expect(quarterOwed(data, units, T0, later, 1)).toBeCloseTo(upkeep);
+    const army = { units, supply: 100, supplyAt: T0, hungrySince: null, quarteredAt: T0 };
+    expect(supplyLeft(data, army, later, 1)).toBe(100);
+    expect(outOfFoodAt(data, army, 1)).toBeNull();
+    expect(supplyLeft(data, { ...army, quarteredAt: null }, later, 1)).toBeCloseTo(100 - 2 * upkeep);
   });
 });

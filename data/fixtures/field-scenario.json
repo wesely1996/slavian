@@ -169,11 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -359,11 +355,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -379,13 +371,13 @@
       "amounts": {
        "iron": 50,
        "wood": 220,
-       "grain": 133.33333333333331,
+       "grain": 333.33333333333326,
        "stone": 320
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 184,
+       "grain": 292,
        "stone": 300
       },
       "capacity": {
@@ -560,11 +552,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -572,13 +560,13 @@
       "amounts": {
        "wood": 295,
        "stone": 370,
-       "grain": 163.99999999999997,
+       "grain": 381.99999999999994,
        "iron": 75
       },
       "ratesPerHour": {
        "wood": 450,
        "stone": 300,
-       "grain": 238,
+       "grain": 319,
        "iron": 150
       },
       "capacity": {
@@ -662,19 +650,22 @@
       [
        -1,
        2,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:30:00.000Z",
-     "arrivesAt": "2026-06-01T08:30:28.800Z",
+     "arrivesAt": "2026-06-01T08:30:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 48,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:30:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:30:00.000Z"
    }
@@ -718,19 +709,22 @@
       [
        -1,
        1,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:30:00.000Z",
-     "arrivesAt": "2026-06-01T08:30:28.800Z",
+     "arrivesAt": "2026-06-01T08:30:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 48,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:30:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:30:00.000Z"
    }
@@ -787,19 +781,22 @@
       [
        -1,
        2,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:35:00.000Z",
-     "arrivesAt": "2026-06-01T08:35:28.800Z",
+     "arrivesAt": "2026-06-01T08:35:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 48,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:30:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:35:00.000Z"
    }
@@ -845,12 +842,15 @@
      "arrivesAt": "2026-06-01T08:35:00.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 48,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:30:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:35:00.000Z"
    }
@@ -881,7 +881,7 @@
      "stance": "balanced",
      "loot": null,
      "units": {
-      "spearman": 2
+      "spearman": 1
      },
      "status": "marching",
      "battleId": null,
@@ -894,19 +894,22 @@
       [
        -2,
        2,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:40:00.000Z",
-     "arrivesAt": "2026-06-01T08:40:28.800Z",
+     "arrivesAt": "2026-06-01T08:40:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 48,
-     "supplyAt": "2026-06-01T08:30:00.000Z",
-     "hungrySince": null,
+     "supply": 0,
+     "supplyAt": "2026-06-01T08:39:36.000Z",
+     "hungrySince": "2026-06-01T08:30:00.000Z",
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:40:00.000Z"
    }
@@ -1090,7 +1093,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 6
+       "spearman": 5
       },
       "away": {},
       "stance": "balanced",
@@ -1102,11 +1105,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -1114,13 +1113,13 @@
        "amounts": {
         "iron": 100,
         "wood": 370,
-        "grain": 195.19999999999996,
+        "grain": 439.66666666666663,
         "stone": 420
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 238,
+        "grain": 332.5,
         "stone": 300
        },
        "capacity": {
@@ -1129,7 +1128,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:40:28.800Z"
+       "settledAt": "2026-06-01T08:40:38.400Z"
       }
      }
     ],
@@ -1378,7 +1377,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 1
       },
       "status": "done",
       "battleId": null,
@@ -1391,19 +1390,22 @@
        [
         -2,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "arrivesAt": "2026-06-01T08:40:28.800Z",
+      "arrivesAt": "2026-06-01T08:40:38.400Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null,
+      "supplyAt": "2026-06-01T08:40:38.400Z",
+      "hungrySince": "2026-06-01T08:30:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -3452,19 +3454,22 @@
       [
        -1,
        2,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:45:00.000Z",
-     "arrivesAt": "2026-06-01T08:45:28.800Z",
+     "arrivesAt": "2026-06-01T08:45:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 24,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:45:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:45:00.000Z"
    }
@@ -3512,19 +3517,22 @@
       [
        -1,
        1,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:45:00.000Z",
-     "arrivesAt": "2026-06-01T08:45:28.800Z",
+     "arrivesAt": "2026-06-01T08:45:38.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 72,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:45:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:45:00.000Z"
    }
@@ -3564,19 +3572,22 @@
       [
        -1,
        2,
-       28800
+       38400
       ]
      ],
      "departsAt": "2026-06-01T08:45:00.000Z",
-     "arrivesAt": "2026-06-01T08:45:28.800Z",
+     "arrivesAt": "2026-06-01T08:45:38.400Z",
      "leavesAt": "2026-06-01T08:50:00.000Z",
      "returnsAt": "2026-06-01T08:50:00.000Z",
-     "supply": 24,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:45:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:50:00.000Z"
    }
@@ -3770,7 +3781,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 2
+       "spearman": 1
       },
       "away": {},
       "stance": "balanced",
@@ -3782,11 +3793,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 104,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -3794,13 +3801,13 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 215.0333333333333,
+        "grain": 467.37499999999994,
         "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 346,
+        "grain": 386.5,
         "stone": 300
        },
        "capacity": {
@@ -4057,10 +4064,8 @@
       "orders": "hold",
       "stance": "balanced",
       "loot": null,
-      "units": {
-       "spearman": 3
-      },
-      "status": "stationed",
+      "units": {},
+      "status": "done",
       "battleId": null,
       "path": [
        [
@@ -4071,19 +4076,22 @@
        [
         -1,
         1,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
-      "leavesAt": null,
-      "returnsAt": null,
-      "supply": 72,
-      "supplyAt": "2026-06-01T08:45:00.000Z",
-      "hungrySince": null,
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "leavesAt": "2026-06-01T08:57:00.000Z",
+      "returnsAt": "2026-06-01T08:57:00.000Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T08:57:00.000Z",
+      "hungrySince": "2026-06-01T08:45:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 2,
@@ -4111,19 +4119,22 @@
        [
         -1,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
       "leavesAt": "2026-06-01T08:50:00.000Z",
       "returnsAt": "2026-06-01T08:50:00.000Z",
-      "supply": 24,
+      "supply": 0,
       "supplyAt": "2026-06-01T08:45:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 1,
@@ -4140,7 +4151,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 1
       },
       "status": "done",
       "battleId": null,
@@ -4153,19 +4164,22 @@
        [
         -2,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "arrivesAt": "2026-06-01T08:40:28.800Z",
+      "arrivesAt": "2026-06-01T08:40:38.400Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null,
+      "supplyAt": "2026-06-01T08:40:38.400Z",
+      "hungrySince": "2026-06-01T08:30:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -6383,7 +6397,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 2
+       "spearman": 1
       },
       "away": {},
       "stance": "balanced",
@@ -6395,11 +6409,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 104,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -6407,13 +6417,13 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 215.0333333333333,
+        "grain": 467.37499999999994,
         "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 346,
+        "grain": 386.5,
         "stone": 300
        },
        "capacity": {
@@ -6682,19 +6692,22 @@
        [
         -1,
         1,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
-      "leavesAt": "2026-06-01T09:25:48.000Z",
-      "returnsAt": "2026-06-01T09:25:48.000Z",
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "leavesAt": "2026-06-01T08:57:00.000Z",
+      "returnsAt": "2026-06-01T08:57:00.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:25:48.000Z",
-      "hungrySince": "2026-06-01T09:13:48.000Z",
+      "supplyAt": "2026-06-01T08:57:00.000Z",
+      "hungrySince": "2026-06-01T08:45:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 2,
@@ -6722,19 +6735,22 @@
        [
         -1,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
       "leavesAt": "2026-06-01T08:50:00.000Z",
       "returnsAt": "2026-06-01T08:50:00.000Z",
-      "supply": 24,
+      "supply": 0,
       "supplyAt": "2026-06-01T08:45:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 1,
@@ -6751,7 +6767,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 1
       },
       "status": "done",
       "battleId": null,
@@ -6764,19 +6780,22 @@
        [
         -2,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "arrivesAt": "2026-06-01T08:40:28.800Z",
+      "arrivesAt": "2026-06-01T08:40:38.400Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null,
+      "supplyAt": "2026-06-01T08:40:38.400Z",
+      "hungrySince": "2026-06-01T08:30:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -8989,7 +9008,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 2
+       "spearman": 1
       },
       "away": {},
       "stance": "balanced",
@@ -9001,11 +9020,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 104,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -9013,13 +9028,13 @@
        "amounts": {
         "iron": 112.5,
         "wood": 407.5,
-        "grain": 215.0333333333333,
+        "grain": 467.37499999999994,
         "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 346,
+        "grain": 386.5,
         "stone": 300
        },
        "capacity": {
@@ -9288,19 +9303,22 @@
        [
         -1,
         1,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
-      "leavesAt": "2026-06-01T09:25:48.000Z",
-      "returnsAt": "2026-06-01T09:25:48.000Z",
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "leavesAt": "2026-06-01T08:57:00.000Z",
+      "returnsAt": "2026-06-01T08:57:00.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:25:48.000Z",
-      "hungrySince": "2026-06-01T09:13:48.000Z",
+      "supplyAt": "2026-06-01T08:57:00.000Z",
+      "hungrySince": "2026-06-01T08:45:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 2,
@@ -9328,19 +9346,22 @@
        [
         -1,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:28.800Z",
+      "arrivesAt": "2026-06-01T08:45:38.400Z",
       "leavesAt": "2026-06-01T08:50:00.000Z",
       "returnsAt": "2026-06-01T08:50:00.000Z",
-      "supply": 24,
+      "supply": 0,
       "supplyAt": "2026-06-01T08:45:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      },
      {
       "id": 1,
@@ -9357,7 +9378,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 2
+       "spearman": 1
       },
       "status": "done",
       "battleId": null,
@@ -9370,19 +9391,22 @@
        [
         -2,
         2,
-        28800
+        38400
        ]
       ],
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "arrivesAt": "2026-06-01T08:40:28.800Z",
+      "arrivesAt": "2026-06-01T08:40:38.400Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:40:28.800Z",
-      "hungrySince": null,
+      "supplyAt": "2026-06-01T08:40:38.400Z",
+      "hungrySince": "2026-06-01T08:30:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -11452,20 +11476,20 @@
      },
      {
       "id": 6,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T09:25:48.000Z",
-      "read": false
-     },
-     {
-      "id": 5,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
       "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 5,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T08:57:00.000Z",
       "read": false
      },
      {

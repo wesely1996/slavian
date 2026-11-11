@@ -72,8 +72,10 @@ export interface VillageState {
   readonly adminUpkeep: number;
   // The owner's research effects (see research.ts).
   readonly bonuses: Bonuses;
-  // Grain kept for armies in the military buildings (reserve.ts).
-  readonly reserve?: number;
+  // How low its grain may fall for armies quartered in it or filling up
+  // (null or absent: data/armies.json quarters.settlementFloor of its grain
+  // storage; sim/quarters.ts).
+  readonly armyFloor?: number | null;
 }
 
 const MS_PER_SECOND = 1000;
@@ -270,15 +272,20 @@ export function villageRates(
 }
 
 // What the village can keep: every storehouse adds what it holds above the
-// base (one storehouse of level n holds base × growth^n).
+// base (one storehouse of level n holds base × growth^n), and every grain
+// silo the same for grain alone.
 export function capacity(data: GameData, plots: Plots, bonuses: Bonuses = {}): Resources {
   const growth = data.buildings.buildings.storehouse?.capacityGrowth ?? 1;
+  const siloGrowth = data.buildings.buildings.grain_silo?.grainCapacityGrowth ?? 1;
   let factor = 1;
+  let silos = 0;
   for (const [id, plot] of Object.entries(plots)) {
-    if (plot.building === 'storehouse' && plot.level > 0 && !outpostHex(id)) factor += growth ** plot.level - 1;
+    if (plot.level <= 0 || outpostHex(id)) continue;
+    if (plot.building === 'storehouse') factor += growth ** plot.level - 1;
+    if (plot.building === 'grain_silo') silos += siloGrowth ** plot.level - 1;
   }
-  const cap = data.buildings.village.baseCapacity * factor * (1 + bonus(bonuses, 'storage'));
-  return mapResources(() => cap);
+  const base = data.buildings.village.baseCapacity * (1 + bonus(bonuses, 'storage'));
+  return mapResources((kind) => base * (factor + (kind === 'grain' ? silos : 0)));
 }
 
 // Research the village's Academy brings in per hour (world speed applied).

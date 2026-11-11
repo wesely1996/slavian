@@ -487,6 +487,9 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	if int(army.id) == selected_army:
 		draw_arc(pos, hex_size * 0.34, 0.0, TAU, 32, SELECTION_COLOR, 3.0, true)
 	var side := MINE_COLOR if int(army.get("ownerAccountId", -1)) == Game.my_account_id() else ALLY_COLOR
+	# Its banner on the map: the army's symbol, and on the flag beside it
+	# how many troops march under it.
+	_draw_army_flag(pos + Vector2(hex_size * 0.22, -hex_size * 0.12), hex_size * 0.5, side, LocalBattle.total(army.get("units", {})))
 	if Art.has("unit/" + ArmyText.main_unit(army)):
 		draw_circle(pos, hex_size * 0.27, side)
 		_draw_art("unit/" + ArmyText.main_unit(army), pos, hex_size * 0.46)
@@ -496,6 +499,21 @@ func _draw_army(army: Dictionary, now: float) -> void:
 	draw_colored_polygon(shield, ARMY_COLOR)
 	shield.append(shield[0])
 	draw_polyline(shield, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## An army's flag: a pole and a cloth in its side's colour, with its number
+## of troops written on the cloth.
+func _draw_army_flag(base: Vector2, height: float, color: Color, count: int) -> void:
+	var top := base - Vector2(0, height)
+	draw_line(base, top, VILLAGE_OUTLINE_COLOR, maxf(1.5, height * 0.06), true)
+	var text := str(count)
+	var font := ThemeDB.fallback_font
+	var size := maxi(8, roundi(height * 0.36))
+	var width := maxf(height * 0.5, font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x + height * 0.16)
+	var cloth := Rect2(top, Vector2(width, height * 0.44))
+	draw_rect(cloth, color)
+	draw_rect(cloth, VILLAGE_OUTLINE_COLOR, false, maxf(1.0, height * 0.04))
+	draw_string(font, top + Vector2(height * 0.08, height * 0.44 - height * 0.1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE)
 
 
 ## An ambush set on a hex: a dashed ring in your colour and crossed spears

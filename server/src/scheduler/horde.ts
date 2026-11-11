@@ -6,7 +6,8 @@
 // horde reaching the Holy City fights its guard there (see field.ts).
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
-import { listArmies, loadReinforceRule, saveArmy } from '../db/armies.js';
+import { listArmies, saveArmy } from '../db/armies.js';
+import { answerBattle, respondersTo } from './armies.js';
 import { insertBattle, type Battle } from '../db/battles.js';
 import { listCamps } from '../db/camps.js';
 import { listSites } from '../db/sites.js';
@@ -73,16 +74,11 @@ export async function hordeBeaten(client: DbClient, data: GameData, world: World
   await addFear(client, world.id, cell.q, cell.r, fearLeft(data, killed));
 }
 
-// Troops that could reach `village` in time: every other standing village
-// whose reinforce rule covers it.
+// Troops that could reach `village` in time: every army standing near
+// enough to answer a battle there.
 async function helpNearby(client: DbClient, data: GameData, world: World, village: Village): Promise<number> {
   let help = 0;
-  for (const other of await listVillages(client, world.id)) {
-    if (other.id === village.id || other.ruin || other.state.besieged) continue;
-    const rule = other.reinforce ?? (await loadReinforceRule(client, other.id));
-    if (rule.share <= 0 || hexDistance(hex(other.q, other.r), hex(village.q, village.r)) > rule.range) continue;
-    help += Math.floor(total(fighters(data, other.state.garrison)) * rule.share);
-  }
+  for (const army of await respondersTo(client, data, world.id, hex(village.q, village.r))) help += total(fighters(data, army.units));
   return help;
 }
 
@@ -294,6 +290,8 @@ export async function startHolyCityBattle(client: DbClient, data: GameData, worl
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
   await scheduleEvent(client, world.id, new Date(at.getTime() + roundMs(data)), 'battle_round', { battleId: battle.id });
+  // Armies standing nearby answer it.
+  await answerBattle(client, data, world, hex(0, 0), null, at);
   for (const member of await listMembers(client, world.id)) {
     await tell(client, world, member.accountId, {
       kind: 'under_attack',

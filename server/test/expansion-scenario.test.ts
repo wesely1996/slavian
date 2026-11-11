@@ -60,7 +60,9 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
     // No horde comes against it: nothing there to harass.
     await play({ set: { garrison: { horseman: 3 } } });
     await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'harass', targetVillageId: second.id, units: { horseman: 3 } } });
-    await play({ method: 'PUT', path: `/v1/villages/${second.id}/reinforce`, body: { share: 1, range: 6 } });
+    // An army made its home in the new village.
+    const out = (await play({ method: 'GET', path: world })).body.armies.find((a: { status: string }) => a.status !== 'done');
+    if (out) await play({ method: 'POST', path: `/v1/armies/${out.id}/home`, body: { villageId: second.id } });
     await play({ advance: 30 * MINUTE });
     const settled = (await play({ method: 'GET', path: world })).body;
     // Given up: refused while an army guards it, then once it has gone home.

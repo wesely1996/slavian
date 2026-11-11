@@ -23,7 +23,14 @@ import {
   sendArmyCommand,
   raidCommand,
   strikeCommand,
-  setReinforceCommand,
+  setVillageFloorCommand,
+  setFortFloorCommand,
+  armyHomeCommand,
+  armyRespondCommand,
+  armyHeroCommand,
+  armyGeneralCommand,
+  mergeArmiesCommand,
+  splitArmyCommand,
 } from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
@@ -231,9 +238,16 @@ const strikeBody = z.object({
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
 // Grain a standing army leaves in a fort or supply point.
 const stockBody = z.object({ grain: z.number().int().positive().max(1_000_000) });
-const armyMoveBody = z.object({ target: hexBody.optional(), villageId: z.number().int().positive().optional() });
+// A village of the owner's: `join` false stands there as an army (else it joins the garrison).
+const armyMoveBody = z.object({ target: hexBody.optional(), villageId: z.number().int().positive().optional(), join: z.boolean().optional() });
+const floorBody = z.object({ grain: z.number().min(0).max(10_000_000).nullable() });
+const armyHomeBody = z.object({ villageId: z.number().int().positive() });
+const respondBody = z.object({ respond: z.boolean() });
+const armyHeroBody = z.object({ join: z.boolean() });
+const armyGeneralBody = z.object({ generalId: z.number().int().positive().nullable() });
+const mergeBody = z.object({ armyId: z.number().int().positive() });
+const splitBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)), withHero: z.boolean().optional(), withGeneral: z.boolean().optional() });
 const dismissBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)) });
-const reinforceBody = z.object({ share: z.number().min(0).max(1), range: z.number().int().min(0).max(99) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
 const foundBody = hexBody.extend({ name: z.string().trim().max(32).optional() });
 // Scouts by kind (units), or (count) that many plain scouts.
@@ -781,7 +795,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
     const body = armyMoveBody.parse(request.body);
-    const army = await moveArmyCommand(db, scheduler, { accountId: account.id, armyId: id, target: body.target, villageId: body.villageId, now: clock() });
+    const army = await moveArmyCommand(db, scheduler, { accountId: account.id, armyId: id, target: body.target, villageId: body.villageId, join: body.join, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 
@@ -888,12 +902,76 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     return fullWorldView(Number(worldId));
   });
 
-  app.put('/v1/villages/:id/reinforce', async (request) => {
+  // How low a settlement's grain may fall for armies (null: the default).
+  app.put('/v1/villages/:id/army-floor', async (request) => {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
-    const body = reinforceBody.parse(request.body);
-    await setReinforceCommand(db, scheduler.data, { accountId: account.id, villageId: id, ...body });
-    return { reinforce: body };
+    const { grain } = floorBody.parse(request.body);
+    await setVillageFloorCommand(db, { accountId: account.id, villageId: id, grain, now: clock() });
+    return { armyFloor: grain === null ? null : Math.floor(grain), serverTime: clock().toISOString() };
+  });
+
+  // How low a fort's or supply point's grain may fall for armies (null: 0).
+  app.put('/v1/forts/:id/army-floor', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { grain } = floorBody.parse(request.body);
+    const fort = await setFortFloorCommand(db, { accountId: account.id, fortId: id, grain, now: clock() });
+    return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  // An army's home: another of its owner's settlements.
+  app.post('/v1/armies/:id/home', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { villageId } = armyHomeBody.parse(request.body);
+    const army = await armyHomeCommand(db, scheduler, { accountId: account.id, armyId: id, villageId, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // Whether a standing army answers battles nearby.
+  app.post('/v1/armies/:id/respond', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { respond } = respondBody.parse(request.body);
+    const army = await armyRespondCommand(db, scheduler, { accountId: account.id, armyId: id, respond, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // The hero joins (in the village where they stand) or leaves an army.
+  app.post('/v1/armies/:id/hero', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { join } = armyHeroBody.parse(request.body);
+    const army = await armyHeroCommand(db, scheduler, { accountId: account.id, armyId: id, join, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // A general takes command of an army, or the one leading it leaves (null).
+  app.post('/v1/armies/:id/general', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { generalId } = armyGeneralBody.parse(request.body);
+    const army = await armyGeneralCommand(db, scheduler, { accountId: account.id, armyId: id, generalId, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // Another standing army of the caller's on the same hex joins this one.
+  app.post('/v1/armies/:id/merge', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { armyId } = mergeBody.parse(request.body);
+    const army = await mergeArmiesCommand(db, scheduler, { accountId: account.id, armyId: id, otherId: armyId, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // Some of a standing army's troops become an army of their own.
+  app.post('/v1/armies/:id/split', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = splitBody.parse(request.body);
+    const { army, split } = await splitArmyCommand(db, scheduler, { accountId: account.id, armyId: id, ...body, now: clock() });
+    return { army: armyView(army), split: armyView(split), serverTime: clock().toISOString() };
   });
 
   // Sends from the village what the group's research still needs.

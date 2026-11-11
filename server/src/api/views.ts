@@ -1,6 +1,5 @@
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
-import { reserveOf } from '../sim/reserve.js';
 import { researchPerHour } from '../sim/village.js';
 import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
@@ -67,11 +66,10 @@ export interface VillageView {
   adminUpkeep: number;
   // The owner's research effects.
   bonuses: Record<string, number>;
-  // Grain kept for armies leaving (the military reserve; its most follows
-  // from the plots, sim/reserve.ts reserveCapacity).
-  reserve: number;
-  // Troops sent to battles nearby: this share, within this many hexes.
-  reinforce: { share: number; range: number } | null;
+  // How low its grain may fall for armies quartered in it or filling up,
+  // as its owner set it (null: data/armies.json quarters.settlementFloor of
+  // its grain storage; sim/quarters.ts).
+  armyFloor: number | null;
   // Razed: what stood (plots), since when, and while rebuilding when it
   // stands again; with what rebuilding costs.
   // A refugee camp: hordes raid it but never raze it.
@@ -110,8 +108,7 @@ export function villageView(village: Village): VillageView {
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
-    reserve: reserveOf(village.state),
-    reinforce: village.reinforce ?? null,
+    armyFloor: village.state.armyFloor ?? null,
     ruin: village.ruin ?? null,
     refuge: village.refuge === true,
     training: training.map((batch) => ({
@@ -534,6 +531,12 @@ export function armyView(army: Army) {
     returnHome: army.returnHome,
     // A raid beyond the map's edge: front, depth, stage reached, battles, finds.
     raid: army.raid,
+    // Quartered in a settlement, fort or supply point since then: the place
+    // feeds it, and its own grain keeps (null: it eats its own).
+    quarteredAt: army.quarteredAt?.toISOString() ?? null,
+    // It answers battles nearby; where it stood before it went to one.
+    respond: army.respond,
+    post: army.post,
   };
 }
 
@@ -553,6 +556,8 @@ export function fortView(fort: Fort) {
     status: fort.status,
     completesAt: fort.completesAt.toISOString(),
     grain: fort.grain,
+    // How low its grain may fall for armies, as its owner set it (null: 0).
+    armyFloor: fort.armyFloor,
   };
 }
 

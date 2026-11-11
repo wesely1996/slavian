@@ -169,11 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -369,11 +365,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -560,11 +552,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -580,13 +568,13 @@
       "amounts": {
        "iron": 10,
        "wood": 40,
-       "grain": 93.33333333333331,
+       "grain": 293.33333333333326,
        "stone": 20
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 184,
+       "grain": 292,
        "stone": 300
       },
       "capacity": {
@@ -769,11 +757,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -781,13 +765,13 @@
       "amounts": {
        "iron": 255,
        "wood": 715,
-       "grain": 322.9333333333333,
+       "grain": 728.1333333333332,
        "stone": 430
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 184,
+       "grain": 292,
        "stone": 300
       },
       "capacity": {
@@ -967,11 +951,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -987,13 +967,13 @@
       "amounts": {
        "iron": 175,
        "wood": 635,
-       "grain": 252.93333333333328,
+       "grain": 658.1333333333332,
        "stone": 400
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 130,
+       "grain": 265,
        "stone": 300
       },
       "capacity": {
@@ -1180,11 +1160,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -1200,13 +1176,13 @@
       "amounts": {
        "iron": 125,
        "wood": 465,
-       "grain": 192.93333333333328,
+       "grain": 598.1333333333332,
        "stone": 310
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 130,
+       "grain": 265,
        "stone": 300
       },
       "capacity": {
@@ -1244,16 +1220,194 @@
     "unit": "archer",
     "count": 2
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":36.16666666666667,\"iron\":0}",
-    "missing": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 36.16666666666667,
-     "iron": 0
-    }
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 1,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 1,
+       "building": "shooting_range"
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 1,
+       "building": "hospital"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "wall": 1,
+      "barracks": 1,
+      "hospital": 1,
+      "elder_hall": 1,
+      "shooting_range": 1
+     },
+     "queue": [],
+     "garrison": {
+      "ambusher": 2,
+      "spearman": 8
+     },
+     "away": {},
+     "stance": "balanced",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [
+      {
+       "unit": "archer",
+       "count": 2,
+       "startsAt": "2026-06-01T10:25:00.000Z",
+       "perUnitMs": 1500,
+       "completesAt": "2026-06-01T10:25:03.000Z"
+      }
+     ],
+     "resources": {
+      "amounts": {
+       "iron": 72.5,
+       "wood": 447.5,
+       "grain": 586.7166666666666,
+       "stone": 335
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 238,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T10:25:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T10:25:00.000Z"
    }
   },
   {
@@ -1451,25 +1605,29 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
-      "training": [],
+      "training": [
+       {
+        "unit": "archer",
+        "count": 2,
+        "startsAt": "2026-06-01T10:25:00.000Z",
+        "perUnitMs": 1500,
+        "completesAt": "2026-06-01T10:25:03.000Z"
+       }
+      ],
       "resources": {
        "amounts": {
-        "iron": 125,
-        "wood": 465,
-        "grain": 0,
-        "stone": 310
+        "iron": 72.5,
+        "wood": 447.5,
+        "grain": 586.7166666666666,
+        "stone": 335
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -1478,7 +1636,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:14:07.200Z"
+       "settledAt": "2026-06-01T10:25:00.000Z"
       }
      }
     ],
@@ -4048,6 +4206,7 @@
       },
       "queue": [],
       "garrison": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -4061,25 +4220,21 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 125,
-        "wood": 465,
-        "grain": 0,
-        "stone": 310
+        "iron": 72.5,
+        "wood": 447.5,
+        "grain": 586.7166666666666,
+        "stone": 335
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -4088,7 +4243,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:14:07.200Z"
+       "settledAt": "2026-06-01T10:25:00.000Z"
       }
      }
     ],
@@ -6705,6 +6860,7 @@
       },
       "queue": [],
       "garrison": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -6718,25 +6874,21 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 125,
-        "wood": 465,
-        "grain": 0,
-        "stone": 310
+        "iron": 72.5,
+        "wood": 447.5,
+        "grain": 586.7166666666666,
+        "stone": 335
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -6745,7 +6897,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:14:07.200Z"
+       "settledAt": "2026-06-01T10:25:00.000Z"
       }
      }
     ],
@@ -9362,6 +9514,7 @@
       },
       "queue": [],
       "garrison": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -9375,25 +9528,21 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 765,
-        "grain": 86.66666666666666,
-        "stone": 510
+        "iron": 145,
+        "wood": 665,
+        "grain": 701.7499999999999,
+        "stone": 480
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 130,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -9661,6 +9810,7 @@
       "setup": {
        "home": {
         "initial": {
+         "archer": 2,
          "ambusher": 2,
          "spearman": 8
         }
@@ -9692,6 +9842,7 @@
        "sergeant_rider": 1
       },
       "defenderInitial": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -12108,8 +12259,9 @@
       },
       "queue": [],
       "garrison": {
-       "ambusher": 0,
-       "spearman": 7
+       "archer": 0,
+       "ambusher": 2,
+       "spearman": 5
       },
       "away": {},
       "stance": "balanced",
@@ -12121,25 +12273,21 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 307.5,
-        "wood": 1000,
-        "grain": 167.16666666666666,
-        "stone": 675
+        "iron": 227.5,
+        "wood": 912.5,
+        "grain": 841.6499999999999,
+        "stone": 645
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 211,
+        "grain": 305.5,
         "stone": 300
        },
        "capacity": {
@@ -12496,8 +12644,9 @@
       "setup": {
        "home": {
         "initial": {
-         "ambusher": 1,
-         "spearman": 7
+         "archer": 1,
+         "ambusher": 2,
+         "spearman": 6
         }
        },
        "wall": {
@@ -12520,8 +12669,9 @@
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "ambusher": 1,
-       "spearman": 7
+       "archer": 1,
+       "ambusher": 2,
+       "spearman": 6
       },
       "rounds": [],
       "loot": null,
@@ -12542,6 +12692,7 @@
       "setup": {
        "home": {
         "initial": {
+         "archer": 2,
          "ambusher": 2,
          "spearman": 8
         }
@@ -12567,10 +12718,11 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 8,
+       "zealot": 5,
        "siege_ram": 1
       },
       "defenderInitial": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -12580,27 +12732,30 @@
         "round": 1,
         "breach": false,
         "wallLeft": 74,
-        "attackerLeft": 13,
-        "defenderLeft": 10,
+        "attackerLeft": 12,
+        "defenderLeft": 11,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T11:17:50.400Z",
         "round": 2,
         "breach": false,
         "wallLeft": 29,
-        "attackerLeft": 10,
-        "defenderLeft": 8,
+        "attackerLeft": 8,
+        "defenderLeft": 9,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 2,
          "crossbowman": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
-         "ambusher": 1,
+         "archer": 1,
          "spearman": 1
         }
        },
@@ -12609,13 +12764,15 @@
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 9,
+        "attackerLeft": 6,
         "defenderLeft": 7,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
-         "ambusher": 1
+         "archer": 1,
+         "spearman": 1
         }
        }
       ],
@@ -15018,8 +15175,9 @@
       },
       "queue": [],
       "garrison": {
-       "ambusher": 0,
-       "spearman": 7
+       "archer": 0,
+       "ambusher": 2,
+       "spearman": 5
       },
       "away": {},
       "stance": "balanced",
@@ -15031,25 +15189,21 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 392.9333333333333,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 307.5,
-        "wood": 1000,
-        "grain": 167.16666666666666,
-        "stone": 675
+        "iron": 227.5,
+        "wood": 912.5,
+        "grain": 841.6499999999999,
+        "stone": 645
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 211,
+        "grain": 305.5,
         "stone": 300
        },
        "capacity": {
@@ -15406,8 +15560,9 @@
       "setup": {
        "home": {
         "initial": {
-         "ambusher": 1,
-         "spearman": 7
+         "archer": 1,
+         "ambusher": 2,
+         "spearman": 6
         }
        },
        "wall": {
@@ -15430,8 +15585,9 @@
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "ambusher": 1,
-       "spearman": 7
+       "archer": 1,
+       "ambusher": 2,
+       "spearman": 6
       },
       "rounds": [],
       "loot": null,
@@ -15452,6 +15608,7 @@
       "setup": {
        "home": {
         "initial": {
+         "archer": 2,
          "ambusher": 2,
          "spearman": 8
         }
@@ -15477,10 +15634,11 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 8,
+       "zealot": 5,
        "siege_ram": 1
       },
       "defenderInitial": {
+       "archer": 2,
        "ambusher": 2,
        "spearman": 8
       },
@@ -15490,27 +15648,30 @@
         "round": 1,
         "breach": false,
         "wallLeft": 74,
-        "attackerLeft": 13,
-        "defenderLeft": 10,
+        "attackerLeft": 12,
+        "defenderLeft": 11,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T11:17:50.400Z",
         "round": 2,
         "breach": false,
         "wallLeft": 29,
-        "attackerLeft": 10,
-        "defenderLeft": 8,
+        "attackerLeft": 8,
+        "defenderLeft": 9,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 2,
          "crossbowman": 1,
          "sergeant_rider": 1
         },
         "defenderLosses": {
-         "ambusher": 1,
+         "archer": 1,
          "spearman": 1
         }
        },
@@ -15519,13 +15680,15 @@
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 9,
+        "attackerLeft": 6,
         "defenderLeft": 7,
         "attackerLosses": {
+         "zealot": 1,
          "crossbowman": 1
         },
         "defenderLosses": {
-         "ambusher": 1
+         "archer": 1,
+         "spearman": 1
         }
        }
       ],
@@ -17754,7 +17917,7 @@
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
-      "body": "A horde of 13 is fighting your garrison of 8.",
+      "body": "A horde of 13 is fighting your garrison of 9.",
       "createdAt": "2026-06-01T11:25:26.400Z",
       "read": false
      },
@@ -17790,7 +17953,7 @@
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
-      "body": "A horde of 13 is fighting your garrison of 10.",
+      "body": "A horde of 13 is fighting your garrison of 12.",
       "createdAt": "2026-06-01T10:54:57.600Z",
       "read": false
      },

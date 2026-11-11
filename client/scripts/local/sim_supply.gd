@@ -23,8 +23,14 @@ static func full_supply(data: Dictionary, units: Dictionary) -> float:
 	return total
 
 
+## What the army eats of its own grain per real hour: nothing while
+## quartered in a settlement, fort or supply point (LocalQuarters).
+static func _own_rate(data: Dictionary, army: Dictionary, world_speed: float) -> float:
+	return 0.0 if army.get("quarteredAt") != null else army_upkeep(data, army.units, world_speed)
+
+
 static func supply_left(data: Dictionary, army: Dictionary, at: int, world_speed: float) -> float:
-	var rate := army_upkeep(data, army.units, world_speed)
+	var rate := _own_rate(data, army, world_speed)
 	return maxf(0.0, float(army.supply) - (rate * (at - int(army.supplyAt))) / HOUR_MS)
 
 
@@ -32,7 +38,7 @@ static func supply_left(data: Dictionary, army: Dictionary, at: int, world_speed
 static func out_of_food_at(data: Dictionary, army: Dictionary, world_speed: float) -> Variant:
 	if army.get("hungrySince") != null:
 		return int(army.hungrySince)
-	var rate := army_upkeep(data, army.units, world_speed)
+	var rate := _own_rate(data, army, world_speed)
 	if rate <= 0:
 		return null
 	return int(army.supplyAt) + ceili((float(army.supply) * HOUR_MS) / rate)

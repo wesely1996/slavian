@@ -169,11 +169,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 0,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [],
@@ -359,11 +355,7 @@
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
      },
-     "reserve": 200,
-     "reinforce": {
-      "share": 0.5,
-      "range": 4
-     },
+     "armyFloor": null,
      "ruin": null,
      "refuge": false,
      "training": [
@@ -379,13 +371,13 @@
       "amounts": {
        "iron": 110,
        "wood": 290,
-       "grain": 193.33333333333331,
+       "grain": 393.33333333333326,
        "stone": 360
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 238,
+       "grain": 319,
        "stone": 300
       },
       "capacity": {
@@ -591,11 +583,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 200,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -603,13 +591,13 @@
        "amounts": {
         "iron": 110,
         "wood": 290,
-        "grain": 193.33333333333331,
+        "grain": 393.33333333333326,
         "stone": 360
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 238,
+        "grain": 319,
         "stone": 300
        },
        "capacity": {
@@ -2898,34 +2886,37 @@
       [
        -1,
        1,
-       28800
+       38400
       ],
       [
        0,
        1,
-       43200
-      ],
-      [
-       1,
-       0,
        57600
+      ],
+      [
+       1,
+       0,
+       76800
       ],
       [
        2,
        -1,
-       86400
+       115200
       ]
      ],
      "departsAt": "2026-06-01T08:35:00.000Z",
-     "arrivesAt": "2026-06-01T08:36:26.400Z",
+     "arrivesAt": "2026-06-01T08:36:55.200Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 144,
+     "supply": 0,
      "supplyAt": "2026-06-01T08:35:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
      "returnHome": false,
-     "raid": null
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
     },
     "serverTime": "2026-06-01T08:35:00.000Z"
    }
@@ -2960,7 +2951,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -3122,11 +3113,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -3134,7 +3121,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 659.5,
+        "grain": 879.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -3149,7 +3136,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:26.400Z"
+       "settledAt": "2026-06-01T08:36:55.200Z"
       }
      }
     ],
@@ -3349,7 +3336,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -3359,7 +3346,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -3369,7 +3356,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -3379,7 +3366,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -3387,7 +3374,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -3405,8 +3392,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -3490,10 +3477,8 @@
        "grain": 240,
        "stone": 240
       },
-      "units": {
-       "spearman": 5
-      },
-      "status": "stationed",
+      "units": {},
+      "status": "done",
       "battleId": null,
       "path": [
        [
@@ -3504,34 +3489,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": null,
-      "returnsAt": null,
-      "supply": 136.8,
-      "supplyAt": "2026-06-01T08:36:26.400Z",
-      "hungrySince": null,
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "supply": 0,
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -5580,7 +5568,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -5742,11 +5730,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -5754,7 +5738,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 659.5,
+        "grain": 879.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -5769,7 +5753,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:26.400Z"
+       "settledAt": "2026-06-01T08:36:55.200Z"
       }
      }
     ],
@@ -5969,7 +5953,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -5979,7 +5963,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -5989,7 +5973,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -5999,7 +5983,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -6007,7 +5991,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -6025,8 +6009,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -6122,34 +6106,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -8213,7 +8200,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -8375,11 +8362,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -8387,7 +8370,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 659.5,
+        "grain": 879.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -8402,7 +8385,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:26.400Z"
+       "settledAt": "2026-06-01T08:36:55.200Z"
       }
      }
     ],
@@ -8602,7 +8585,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -8612,7 +8595,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -8622,7 +8605,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -8632,7 +8615,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -8640,7 +8623,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -8658,8 +8641,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -8755,34 +8738,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -10847,7 +10833,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -11009,11 +10995,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -11406,7 +11388,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -11416,7 +11398,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -11426,7 +11408,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -11436,7 +11418,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -11444,7 +11426,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -11462,8 +11444,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -11610,34 +11592,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -13726,7 +13711,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -13889,11 +13874,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -14286,7 +14267,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -14296,7 +14277,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -14306,7 +14287,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -14316,7 +14297,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -14324,7 +14305,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -14342,8 +14323,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -14490,34 +14471,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -16601,7 +16585,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -16764,11 +16748,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -16782,7 +16762,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -4406,
+        "grain": -2003,
         "stone": 300
        },
        "capacity": {
@@ -17239,7 +17219,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -17249,7 +17229,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -17259,7 +17239,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -17269,7 +17249,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -17277,7 +17257,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -17295,8 +17275,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -17445,34 +17425,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -19559,7 +19542,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -19722,11 +19705,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -19740,7 +19719,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -4406,
+        "grain": -2003,
         "stone": 300
        },
        "capacity": {
@@ -20243,7 +20222,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -20253,7 +20232,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -20263,7 +20242,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -20273,7 +20252,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -20281,7 +20260,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -20299,8 +20278,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -20476,34 +20455,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -22618,7 +22600,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:26.400Z",
+       "camp": "2026-06-01T08:36:55.200Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -22781,11 +22763,7 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
       },
-      "reserve": 56,
-      "reinforce": {
-       "share": 0.5,
-       "range": 4
-      },
+      "armyFloor": null,
       "ruin": null,
       "refuge": false,
       "training": [],
@@ -22799,7 +22777,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -4352,
+        "grain": -1976,
         "stone": 300
        },
        "capacity": {
@@ -23380,7 +23358,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -23390,7 +23368,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -23400,7 +23378,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -23410,7 +23388,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -23418,7 +23396,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:26.400Z",
+        "at": "2026-06-01T08:36:55.200Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -23436,8 +23414,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:26.400Z",
-      "endedAt": "2026-06-01T08:36:26.400Z"
+      "startedAt": "2026-06-01T08:36:55.200Z",
+      "endedAt": "2026-06-01T08:36:55.200Z"
      }
     ],
     "raids": [],
@@ -23613,34 +23591,37 @@
        [
         -1,
         1,
-        28800
+        38400
        ],
        [
         0,
         1,
-        43200
-       ],
-       [
-        1,
-        0,
         57600
+       ],
+       [
+        1,
+        0,
+        76800
        ],
        [
         2,
         -1,
-        86400
+        115200
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:26.400Z",
-      "leavesAt": "2026-06-01T09:23:40.321Z",
-      "returnsAt": "2026-06-01T09:23:40.321Z",
+      "arrivesAt": "2026-06-01T08:36:55.200Z",
+      "leavesAt": "2026-06-01T08:49:24.000Z",
+      "returnsAt": "2026-06-01T08:49:24.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T09:23:40.321Z",
-      "hungrySince": "2026-06-01T09:09:16.321Z",
+      "supplyAt": "2026-06-01T08:49:24.000Z",
+      "hungrySince": "2026-06-01T08:35:00.000Z",
       "wagonFortAt": null,
       "returnHome": false,
-      "raid": null
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
      }
     ],
     "forts": [],
@@ -25971,15 +25952,6 @@
      },
      {
       "id": 9,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T09:23:40.321Z",
-      "read": false
-     },
-     {
-      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
@@ -25988,12 +25960,21 @@
       "read": false
      },
      {
+      "id": 8,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T08:49:24.000Z",
+      "read": false
+     },
+     {
       "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, -1)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
@@ -26002,7 +25983,7 @@
       "tier": "digest",
       "title": "Your army cleared the captives' camp at (2, -1)",
       "body": "It carries home 868 resources.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
@@ -26011,7 +25992,7 @@
       "tier": "digest",
       "title": "Done: Clear your first camp",
       "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
@@ -26315,15 +26296,6 @@
      },
      {
       "id": 9,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T09:23:40.321Z",
-      "read": false
-     },
-     {
-      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
@@ -26332,12 +26304,21 @@
       "read": false
      },
      {
+      "id": 8,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T08:49:24.000Z",
+      "read": false
+     },
+     {
       "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, -1)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
@@ -26346,7 +26327,7 @@
       "tier": "digest",
       "title": "Your army cleared the captives' camp at (2, -1)",
       "body": "It carries home 868 resources.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
@@ -26355,7 +26336,7 @@
       "tier": "digest",
       "title": "Done: Clear your first camp",
       "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:36:26.400Z",
+      "createdAt": "2026-06-01T08:36:55.200Z",
       "read": false
      },
      {
