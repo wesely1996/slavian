@@ -145,6 +145,8 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 		box.add_child(UI.label(UI.t("Carries %d siege engine or %d foot soldiers of its army (engines first, the slowest first): they ride at its pace instead of marching") % [int(def.transports.engines), int(def.transports.infantry)], UI.SMALL_SIZE, UiTheme.GOLD))
 	if def.get("engine", false) == true:
 		box.add_child(UI.label(UI.t("A siege engine: it rides in a Large Military Caravan before any foot soldier"), UI.SMALL_SIZE, UI.MUTED))
+	if float(def.get("breach", 0)) > 0:
+		box.add_child(UI.label(UI.t("Each takes %d%% of a stronghold's walls off its defenders (raids and strikes on horde encampments)") % roundi(float(def.breach) * 100.0), UI.SMALL_SIZE, UiTheme.GOLD))
 	if def.get("wagon", false) == true:
 		box.add_child(UI.label(UI.t("No soldier: holding open ground, the wagons make a wagon fort (+%d%% defense for each wagon per %d soldiers, at most +%d%%)") % [
 			roundi(float(data.field.wagonFort.bonusPerWagon) * 100.0), int(data.field.wagonFort.menPerWagon), roundi(float(data.field.wagonFort.maxBonus) * 100.0)], UI.SMALL_SIZE))

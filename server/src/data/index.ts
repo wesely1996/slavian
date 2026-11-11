@@ -167,6 +167,8 @@ const unitSchema = z.object({
   pathfinding: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
   // A siege engine: it rides in a transport before any foot soldier.
   engine: z.boolean().optional(),
+  // A battering ram: the share of a stronghold's walls each one takes off its defenders.
+  breach: z.number().min(0).max(1).optional(),
   // Each one carries `engines` siege engines or else `infantry` foot
   // soldiers (family infantry) of its army.
   transports: z.object({ infantry: z.number().int().nonnegative(), engines: z.number().int().nonnegative() }).optional(),

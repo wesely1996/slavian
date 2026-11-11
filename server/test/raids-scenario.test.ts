@@ -26,6 +26,9 @@ scenario('raids-scenario.json', START, async ({ play }) => {
   await raid({ front: 'north', depth: 1, units: { spearman: Math.max(1, garrison - 6) }, stance: 'offensive' });
   await raid({ front: 'south', depth: 2, units: { spearman: 2 } });
   await raid({ front: 'south', depth: 1, units: { spearman: 1 } });
+  // Battering rams take the stronghold's walls off its defenders; a scorpion rides along.
+  await play({ set: { garrison: { spearman: 12, battering_ram: 2, scorpion: 1 } } });
+  await raid({ front: 'south', depth: 1, units: { spearman: 12, battering_ram: 2, scorpion: 1 } });
   await play({ method: 'GET', path: world });
   // On the march, at the edge, and through the stages.
   for (let i = 0; i < 6; i++) {

@@ -56,7 +56,11 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 		champions: Array = [], stats_without_hero: Callable = Callable()) -> Dictionary:
 	var rules: Dictionary = data.raids
 	var field: Variant = stage.field
-	var walls := 1.0 + float(rules.stronghold.walls) if stage.stronghold else 1.0
+	# Battering rams take the stronghold's walls off its defenders, a share each.
+	var breach := 0.0
+	for unit in army:
+		breach += float(data.units.units.get(unit, {}).get("breach", 0.0)) * int(army[unit])
+	var walls := 1.0 + float(rules.stronghold.walls) * maxf(0.0, 1.0 - breach) if stage.stronghold else 1.0
 	var base := LocalBattle.enemy_stats(data, front)
 	var enemy_at := func(unit: String) -> Dictionary:
 		var s: Dictionary = base.call(unit).duplicate()
