@@ -29,6 +29,9 @@ export interface Caravan {
   escort: Record<string, number>;
   // Set when a camp ambushed it.
   ambush: CaravanAmbush | null;
+  // What it brings back from one of its owner's settlements, forts or
+  // supply points (taken there on arrival, as far as there are).
+  retrieve: Resources | null;
 }
 
 export interface CaravanAmbush {
@@ -59,6 +62,7 @@ interface CaravanRow {
   returns_at: Date;
   escort: Record<string, number>;
   ambush: CaravanAmbush | null;
+  retrieve: Resources | null;
 }
 
 function fromRow(row: CaravanRow): Caravan {
@@ -80,17 +84,18 @@ function fromRow(row: CaravanRow): Caravan {
     returnsAt: row.returns_at,
     escort: row.escort,
     ambush: row.ambush,
+    retrieve: row.retrieve ?? null,
   };
 }
 
 export async function insertCaravan(
   client: DbClient,
-  caravan: Omit<Caravan, 'id' | 'carriedBack' | 'status' | 'ambush'>,
+  caravan: Omit<Caravan, 'id' | 'carriedBack' | 'status' | 'ambush' | 'retrieve'> & { retrieve?: Resources | null },
 ): Promise<Caravan> {
   const { rows } = await client.query<CaravanRow>(
     `INSERT INTO caravans
-       (world_id, village_id, destination_village_id, destination_fort_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort, destination_shipyard_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+       (world_id, village_id, destination_village_id, destination_fort_id, kind, caravans, cargo, path, departs_at, arrives_at, returns_at, escort, destination_shipyard_id, retrieve)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
     [
       caravan.worldId,
       caravan.villageId,
@@ -105,6 +110,7 @@ export async function insertCaravan(
       caravan.returnsAt,
       JSON.stringify(caravan.escort),
       caravan.destinationShipyardId,
+      caravan.retrieve ? JSON.stringify(caravan.retrieve) : null,
     ],
   );
   return fromRow(rows[0]!);
@@ -127,7 +133,7 @@ export async function markReturning(client: DbClient, id: number, carriedBack: R
 // (turned back home) its status and what it carries back.
 export async function saveCaravanRoute(client: DbClient, caravan: Caravan): Promise<void> {
   await client.query(
-    `UPDATE caravans SET path = $2, arrives_at = $3, returns_at = $4, destination_village_id = $5, status = $6, carried_back = $7 WHERE id = $1`,
+    `UPDATE caravans SET path = $2, arrives_at = $3, returns_at = $4, destination_village_id = $5, status = $6, carried_back = $7, retrieve = $8 WHERE id = $1`,
     [
       caravan.id,
       JSON.stringify(caravan.path),
@@ -136,6 +142,7 @@ export async function saveCaravanRoute(client: DbClient, caravan: Caravan): Prom
       caravan.destinationVillageId,
       caravan.status,
       caravan.carriedBack ? JSON.stringify(caravan.carriedBack) : null,
+      caravan.retrieve ? JSON.stringify(caravan.retrieve) : null,
     ],
   );
 }

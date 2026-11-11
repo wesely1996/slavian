@@ -571,6 +571,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -2484,24 +2485,24 @@
       [
        -2,
        3,
-       960000
+       720000
       ],
       [
        -2,
        4,
-       1920000
+       1440000
       ],
       [
        -2,
        5,
-       2880000
+       2160000
       ]
      ],
      "departsAt": "2026-06-01T08:00:00.000Z",
-     "arrivesAt": "2026-06-01T08:48:00.000Z",
+     "arrivesAt": "2026-06-01T08:36:00.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 288,
      "supplyAt": "2026-06-01T08:00:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -2544,7 +2545,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:48:00.000Z"
+       "camp": "2026-06-01T08:36:00.000Z"
       },
       "onboardingClaimed": {},
       "bought": {},
@@ -2711,7 +2712,7 @@
        "amounts": {
         "iron": 300,
         "wood": 500,
-        "grain": 500,
+        "grain": 212,
         "stone": 500
        },
        "ratesPerHour": {
@@ -2924,7 +2925,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:48:00.000Z",
+        "at": "2026-06-01T08:36:00.000Z",
         "round": 1,
         "attackerLeft": 1,
         "defenderLeft": 12,
@@ -2942,8 +2943,8 @@
        "stone": 45
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:48:00.000Z",
-      "endedAt": "2026-06-01T08:48:00.000Z"
+      "startedAt": "2026-06-01T08:36:00.000Z",
+      "endedAt": "2026-06-01T08:36:00.000Z"
      }
     ],
     "raids": [],
@@ -3041,24 +3042,24 @@
        [
         -2,
         3,
-        960000
+        720000
        ],
        [
         -2,
         4,
-        1920000
+        1440000
        ],
        [
         -2,
         5,
-        2880000
+        2160000
        ]
       ],
       "departsAt": "2026-06-01T08:00:00.000Z",
-      "arrivesAt": "2026-06-01T08:48:00.000Z",
+      "arrivesAt": "2026-06-01T08:36:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 0,
+      "supply": 288,
       "supplyAt": "2026-06-01T08:00:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -3172,6 +3173,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -5054,7 +5056,7 @@
       "tier": "digest",
       "title": "Your army cleared the bandit camp at (-2, 5)",
       "body": "It carries home 159 resources.",
-      "createdAt": "2026-06-01T08:48:00.000Z",
+      "createdAt": "2026-06-01T08:36:00.000Z",
       "read": false
      },
      {
@@ -5063,7 +5065,7 @@
       "tier": "digest",
       "title": "Done: Clear your first camp",
       "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:48:00.000Z",
+      "createdAt": "2026-06-01T08:36:00.000Z",
       "read": false
      }
     ],
@@ -5101,7 +5103,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:48:00.000Z"
+       "camp": "2026-06-01T08:36:00.000Z"
       },
       "onboardingClaimed": {},
       "bought": {},
@@ -5268,7 +5270,7 @@
        "amounts": {
         "iron": 300,
         "wood": 500,
-        "grain": 500,
+        "grain": 212,
         "stone": 500
        },
        "ratesPerHour": {
@@ -5481,7 +5483,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:48:00.000Z",
+        "at": "2026-06-01T08:36:00.000Z",
         "round": 1,
         "attackerLeft": 1,
         "defenderLeft": 12,
@@ -5499,8 +5501,8 @@
        "stone": 45
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:48:00.000Z",
-      "endedAt": "2026-06-01T08:48:00.000Z"
+      "startedAt": "2026-06-01T08:36:00.000Z",
+      "endedAt": "2026-06-01T08:36:00.000Z"
      }
     ],
     "raids": [],
@@ -5584,8 +5586,10 @@
        "grain": 45,
        "stone": 45
       },
-      "units": {},
-      "status": "done",
+      "units": {
+       "spearman": 12
+      },
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -5596,26 +5600,26 @@
        [
         -2,
         3,
-        960000
+        720000
        ],
        [
         -2,
         4,
-        1920000
+        1440000
        ],
        [
         -2,
         5,
-        2880000
+        2160000
        ]
       ],
       "departsAt": "2026-06-01T08:00:00.000Z",
-      "arrivesAt": "2026-06-01T08:48:00.000Z",
-      "leavesAt": "2026-06-02T03:00:00.000Z",
-      "returnsAt": "2026-06-02T03:00:00.000Z",
-      "supply": 0,
-      "supplyAt": "2026-06-02T03:00:00.000Z",
-      "hungrySince": "2026-06-01T08:00:00.000Z",
+      "arrivesAt": "2026-06-01T08:36:00.000Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 288,
+      "supplyAt": "2026-06-01T08:00:00.000Z",
+      "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -5746,6 +5750,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -7646,7 +7651,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:48:00.000Z"
+       "camp": "2026-06-01T08:36:00.000Z"
       },
       "onboardingClaimed": {},
       "bought": {},
@@ -7813,7 +7818,7 @@
        "amounts": {
         "iron": 300,
         "wood": 500,
-        "grain": 500,
+        "grain": 212,
         "stone": 500
        },
        "ratesPerHour": {
@@ -8061,7 +8066,66 @@
     "generals": [],
     "leaders": [],
     "orders": [],
-    "armies": [],
+    "armies": [
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": null,
+      "target": [
+       -2,
+       5
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "hold",
+      "stance": "balanced",
+      "loot": {
+       "iron": 24,
+       "wood": 45,
+       "grain": 45,
+       "stone": 45
+      },
+      "units": {},
+      "status": "done",
+      "battleId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -2,
+        3,
+        720000
+       ],
+       [
+        -2,
+        4,
+        1440000
+       ],
+       [
+        -2,
+        5,
+        2160000
+       ]
+      ],
+      "departsAt": "2026-06-01T08:00:00.000Z",
+      "arrivesAt": "2026-06-01T08:36:00.000Z",
+      "leavesAt": "2026-06-03T03:00:00.000Z",
+      "returnsAt": "2026-06-03T03:00:00.000Z",
+      "supply": 0,
+      "supplyAt": "2026-06-03T03:00:00.000Z",
+      "hungrySince": "2026-06-02T08:00:00.000Z",
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     }
+    ],
     "forts": [],
     "camps": [
      {
@@ -8215,6 +8279,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -10102,6 +10167,15 @@
      },
      {
       "id": 5,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-03T03:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",
@@ -10110,7 +10184,7 @@
       "read": false
      }
     ],
-    "unread": 2,
+    "unread": 3,
     "serverTime": "2026-06-03T09:00:00.000Z"
    }
   },
@@ -10131,6 +10205,15 @@
      },
      {
       "id": 5,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-03T03:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",
@@ -10139,7 +10222,7 @@
       "read": false
      }
     ],
-    "unread": 2,
+    "unread": 3,
     "serverTime": "2026-06-03T09:00:00.000Z"
    }
   }

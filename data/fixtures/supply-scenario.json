@@ -922,7 +922,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "A fort's store takes only grain"
+    "message": "A fort's store keeps only grain"
    }
   },
   {
@@ -1555,7 +1555,8 @@
       "arrivesAt": "2026-06-01T08:41:16.800Z",
       "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
-      "ambush": null
+      "ambush": null,
+      "retrieve": null
      }
     ],
     "vault": {
@@ -1570,6 +1571,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -3483,14 +3485,14 @@
       [
        -1,
        2,
-       38400
+       28800
       ]
      ],
      "departsAt": "2026-06-01T08:43:00.000Z",
-     "arrivesAt": "2026-06-01T08:43:38.400Z",
+     "arrivesAt": "2026-06-01T08:43:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 16.61666666666657,
      "supplyAt": "2026-06-01T08:43:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3587,10 +3589,54 @@
    "body": {
     "grain": 50
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "They have no grain to spare"
+    "army": {
+     "id": 1,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -1,
+      2
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "loot": null,
+     "units": {
+      "spearman": 3
+     },
+     "status": "stationed",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -1,
+       2,
+       28800
+      ]
+     ],
+     "departsAt": "2026-06-01T08:43:00.000Z",
+     "arrivesAt": "2026-06-01T08:43:28.800Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 0,
+     "supplyAt": "2026-06-01T08:45:00.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null,
+     "quarteredAt": "2026-06-01T08:44:40.800Z",
+     "respond": true,
+     "post": null
+    },
+    "serverTime": "2026-06-01T08:45:00.000Z"
    }
   },
   {
@@ -3651,11 +3697,11 @@
       [
        -1,
        2,
-       38400
+       28800
       ]
      ],
      "departsAt": "2026-06-01T08:43:00.000Z",
-     "arrivesAt": "2026-06-01T08:43:38.400Z",
+     "arrivesAt": "2026-06-01T08:43:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
      "supply": 72,
@@ -3664,7 +3710,7 @@
      "wagonFortAt": null,
      "returnHome": false,
      "raid": null,
-     "quarteredAt": "2026-06-01T08:44:50.400Z",
+     "quarteredAt": "2026-06-01T08:44:40.800Z",
      "respond": true,
      "post": null
     },
@@ -3962,7 +4008,7 @@
        "amounts": {
         "iron": 132.5,
         "wood": 57.5,
-        "grain": 29.499999999999904,
+        "grain": 12.883333333333333,
         "stone": 235
        },
        "ratesPerHour": {
@@ -4389,11 +4435,11 @@
        [
         -1,
         2,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T08:43:00.000Z",
-      "arrivesAt": "2026-06-01T08:43:38.400Z",
+      "arrivesAt": "2026-06-01T08:43:28.800Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 72,
@@ -4417,7 +4463,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 139.3,
+      "grain": 154.5166666666666,
       "armyFloor": null
      }
     ],
@@ -4621,7 +4667,8 @@
       "arrivesAt": "2026-06-01T08:41:16.800Z",
       "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
-      "ambush": null
+      "ambush": null,
+      "retrieve": null
      }
     ],
     "vault": {
@@ -4636,6 +4683,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -6733,7 +6781,7 @@
        "amounts": {
         "iron": 385,
         "wood": 515,
-        "grain": 534.6583333333332,
+        "grain": 518.0416666666666,
         "stone": 590
        },
        "ratesPerHour": {
@@ -7244,7 +7292,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 137.05,
+      "grain": 152.2666666666666,
       "armyFloor": null
      }
     ],
@@ -7448,7 +7496,8 @@
       "arrivesAt": "2026-06-01T08:41:16.800Z",
       "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
-      "ambush": null
+      "ambush": null,
+      "retrieve": null
      }
     ],
     "vault": {
@@ -7463,6 +7512,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -9646,7 +9696,7 @@
        "amounts": {
         "iron": 437.5,
         "wood": 672.5,
-        "grain": 636.4833333333331,
+        "grain": 619.8666666666666,
         "stone": 695
        },
        "ratesPerHour": {
@@ -10133,7 +10183,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 123.55000000000001,
+      "grain": 138.7666666666666,
       "armyFloor": null
      }
     ],
@@ -10354,7 +10404,8 @@
       "arrivesAt": "2026-06-01T08:41:16.800Z",
       "returnsAt": "2026-06-01T08:41:45.600Z",
       "escort": {},
-      "ambush": null
+      "ambush": null,
+      "retrieve": null
      }
     ],
     "vault": {
@@ -10369,6 +10420,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [

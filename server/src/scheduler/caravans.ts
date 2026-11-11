@@ -1,5 +1,6 @@
 // Caravans on the scheduler: caravan_arrive unloads (or loads, when
-// fetching from the vault) at the far end; caravan_return brings home
+// fetching from the vault, or bringing back from the owner's own
+// settlement, fort or supply point) at the far end; caravan_return brings home
 // whatever the caravan carries back. vault_upgrade finishes a vault level.
 // A caravan on a supply route fills a fort or supply point's grain store;
 // one sent to a shipyard pays toward its boat.
@@ -9,7 +10,7 @@ import { notifyWorld } from '../db/notify.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
-import { emptyResources, mapResources } from '../sim/resources.js';
+import { amountsAt, emptyResources, mapResources, spend } from '../sim/resources.js';
 import { loadShipyard } from '../db/shipyards.js';
 import { payIntoShipyard } from './mapEvents.js';
 import { loadFort, setFortGrain } from '../db/forts.js';
@@ -34,8 +35,11 @@ export const caravanHandlers: HandlerRegistry = {
       const fort = await loadFort(client, caravan.destinationFortId);
       const room = fort?.status === 'standing' ? Math.max(0, grainCapacity(data, fort.kind) - fort.grain) : 0;
       const grain = Math.min(room, caravan.cargo.grain);
-      if (fort && grain > 0) await setFortGrain(client, fort.id, fort.grain + grain);
-      carriedBack = { ...caravan.cargo, grain: caravan.cargo.grain - grain };
+      // And takes back what grain it was told to, as far as there is.
+      const there = (fort?.grain ?? 0) + grain;
+      const taken = fort?.status === 'standing' ? Math.min(there, caravan.retrieve?.grain ?? 0) : 0;
+      if (fort && grain - taken !== 0) await setFortGrain(client, fort.id, there - taken);
+      carriedBack = { ...caravan.cargo, grain: caravan.cargo.grain - grain + taken };
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
     } else if (caravan.destinationShipyardId !== null) {
       // A shipyard takes what its boat still needs; the rest (everything,
@@ -62,9 +66,14 @@ export const caravanHandlers: HandlerRegistry = {
     } else {
       const village = await loadVillage(client, caravan.destinationVillageId);
       const received = receive(village.state.ledger, event.dueAt, caravan.cargo);
-      await saveVillageState(client, village.id, { ...village.state, ledger: received.ledger });
+      // What it was told to bring back, as far as there is (from the
+      // owner's own settlement only).
+      const there = amountsAt(received.ledger, event.dueAt);
+      const taken = caravan.retrieve ? mapResources((k) => Math.max(0, Math.min(caravan.retrieve![k], Math.floor(there[k])))) : emptyResources();
+      const ledger = total(taken) > 0 ? spend(received.ledger, event.dueAt, taken) : received.ledger;
+      await saveVillageState(client, village.id, { ...village.state, ledger });
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
-      carriedBack = received.leftover;
+      carriedBack = mapResources((k) => received.leftover[k] + taken[k]);
       const sender = await loadVillage(client, caravan.villageId);
       if (sender.ownerAccountId !== village.ownerAccountId) {
         await tell(client, world, village.ownerAccountId, {

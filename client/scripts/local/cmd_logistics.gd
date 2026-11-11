@@ -13,6 +13,9 @@ static func caravans_at(data: Dictionary, yard_level: int) -> int:
 	return yard_level * int(data.logistics.caravan.caravansPerYardLevel)
 
 
+const BRING_BACK_OWN := "Caravans bring back only from your own settlements, forts and supply points"
+
+
 static func total(amounts: Dictionary) -> float:
 	var sum := 0.0
 	for kind in LocalLedger.KINDS:
@@ -156,7 +159,16 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	if yard < 1:
 		return LocalVillage.rule("Build a Caravan Yard first")
 	var bonuses := effective_bonuses(server, world, village)
-	var needed: Variant = caravans_for(data, order.load, bonuses)
+	var retrieve: Variant = order.get("retrieve") if order.get("retrieve") != null and total(order.retrieve) > 0 else null
+	# As many caravans as the bigger of the two loads takes (one may be empty).
+	var needed: Variant
+	if retrieve != null and total(order.load) == 0:
+		needed = caravans_for(data, retrieve, bonuses)
+	else:
+		needed = caravans_for(data, order.load, bonuses)
+		if not needed is Dictionary and retrieve != null:
+			var back: Variant = caravans_for(data, retrieve, bonuses)
+			needed = back if back is Dictionary else maxi(int(needed), int(back))
 	if needed is Dictionary:
 		return needed
 	var out := 0
@@ -173,12 +185,16 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 			return {"error": "No such fort or supply point", "kind": "not_found"}
 		to = Vector2i(fort.q, fort.r)
 		for k in ["wood", "stone", "iron"]:
-			if int(order.load.get(k, 0)) > 0:
-				return LocalVillage.rule("A fort's store takes only grain")
+			if int(order.load.get(k, 0)) > 0 or (retrieve != null and int(retrieve.get(k, 0)) > 0):
+				return LocalVillage.rule("A fort's store keeps only grain")
+		if retrieve != null and (fort.ownerAccountId == null or int(fort.ownerAccountId) != int(village.ownerAccountId)):
+			return LocalVillage.rule(BRING_BACK_OWN)
 	elif order.get("destinationShipyardId") != null:
 		var boatyard := LocalEvents.find_shipyard(world, int(order.destinationShipyardId))
 		if boatyard.is_empty():
 			return {"error": "No such shipyard in this world", "kind": "not_found"}
+		if retrieve != null:
+			return LocalVillage.rule(BRING_BACK_OWN)
 		if boatyard.status != "open":
 			return LocalVillage.rule("The boat is already paid for")
 		var need := LocalVillage.resources(func(k: String) -> int: return maxi(0, int(boatyard.cost[k]) - int(boatyard.paid[k])))
@@ -192,7 +208,11 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 		var destination := server.find_village(world, int(order.destinationVillageId))
 		if destination.is_empty():
 			return {"error": "No such village in this world", "kind": "not_found"}
+		if retrieve != null and (destination.ownerAccountId == null or int(destination.ownerAccountId) != int(village.ownerAccountId)):
+			return LocalVillage.rule(BRING_BACK_OWN)
 		to = Vector2i(destination.q, destination.r)
+	elif retrieve != null and kind == "deliver":
+		return LocalVillage.rule(BRING_BACK_OWN)
 	var path: Variant = caravan_route(data, LocalHordes.land_of(world), Vector2i(village.q, village.r), to, world.speed, bonuses)
 	if path == null:
 		return LocalVillage.rule("No road leads there")
@@ -204,7 +224,8 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	return {"villageId": village.id, "destinationVillageId": order.destinationVillageId, "destinationFortId": order.get("destinationFortId"),
 		"destinationShipyardId": order.get("destinationShipyardId"), "kind": kind,
 		"caravans": needed, "cargo": order.load.duplicate(), "carriedBack": null, "status": "outbound", "path": path, "departsAt": now,
-		"arrivesAt": now + travel, "returnsAt": now + 2 * travel, "escort": escort, "ambush": null}
+		"arrivesAt": now + travel, "returnsAt": now + 2 * travel, "escort": escort, "ambush": null,
+		"retrieve": retrieve.duplicate() if retrieve != null else null}
 
 
 static func set_out(server: LocalServer, world: Dictionary, caravan: Dictionary, now: int) -> Dictionary:
@@ -267,6 +288,13 @@ static func _order(body: Dictionary) -> Dictionary:
 		full[kind] = load.get(kind, 0)
 	var escort: Variant = body.get("escort", {})
 	var order := {"destinationVillageId": body.get("destinationVillageId"), "load": full, "escort": escort if escort is Dictionary else {}}
+	# What it brings back from there (its owner's own settlement, fort or supply point).
+	var retrieve: Variant = body.get("retrieve")
+	if retrieve is Dictionary:
+		var back := {}
+		for kind in LocalLedger.KINDS:
+			back[kind] = retrieve.get(kind, 0)
+		order.retrieve = back
 	# Or a fort or supply point, or a shipyard.
 	for key in ["destinationFortId", "destinationShipyardId"]:
 		if body.get(key) != null:
@@ -316,6 +344,7 @@ static func reroute(server: LocalServer, world: Dictionary, caravan: Dictionary,
 		caravan.path = back
 		caravan.status = "returning"
 		caravan.carriedBack = caravan.cargo.duplicate() if caravan.kind == "deliver" else {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+		caravan.retrieve = null
 		caravan.arrivesAt = int(caravan.departsAt) + there
 		caravan.returnsAt = int(caravan.departsAt) + 2 * there
 	else:
@@ -343,6 +372,8 @@ static func reroute(server: LocalServer, world: Dictionary, caravan: Dictionary,
 		var travel := int(path[-1].atMs)
 		caravan.path = path
 		caravan.destinationVillageId = int(to) if to != null else null
+		# What it was to bring back was to come from where it was going.
+		caravan.retrieve = null
 		caravan.arrivesAt = int(caravan.departsAt) + travel
 		caravan.returnsAt = int(caravan.departsAt) + 2 * travel
 	# Camps lying in wait on the old road wait in vain.
@@ -377,10 +408,14 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 		var fort := LocalArmies.find_fort(world, int(caravan.destinationFortId))
 		var room := maxf(0.0, LocalArmies.grain_capacity(data, fort.get("kind", "fort")) - float(fort.grain)) if not fort.is_empty() and fort.status == "standing" else 0.0
 		var grain := minf(room, float(caravan.cargo.grain))
-		if not fort.is_empty() and grain > 0:
-			fort.grain = float(fort.grain) + grain
+		# And takes back what grain it was told to, as far as there is.
+		var there := (float(fort.grain) if not fort.is_empty() else 0.0) + grain
+		var retrieve: Variant = caravan.get("retrieve")
+		var taken := minf(there, float(retrieve.grain) if retrieve != null else 0.0) if not fort.is_empty() and fort.status == "standing" else 0.0
+		if not fort.is_empty() and grain - taken != 0:
+			fort.grain = there - taken
 		carried_back = caravan.cargo.duplicate()
-		carried_back.grain = float(caravan.cargo.grain) - grain
+		carried_back.grain = float(caravan.cargo.grain) - grain + taken
 	elif caravan.get("destinationShipyardId") != null:
 		# A shipyard takes what its boat still needs; the rest (everything,
 		# if it is paid for or gone) comes back.
@@ -405,8 +440,13 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 	else:
 		var village := server.find_village(world, int(caravan.destinationVillageId))
 		var received := receive(village.state.ledger, int(event.dueAt), caravan.cargo)
-		village.state.ledger = received.ledger
-		carried_back = received.leftover
+		# What it was told to bring back, as far as there is.
+		var there := LocalLedger.amounts_at(received.ledger, int(event.dueAt))
+		var retrieve: Variant = caravan.get("retrieve")
+		var taken := LocalVillage.resources(func(k: String) -> float:
+			return maxf(0.0, minf(float(retrieve[k]), floorf(float(there[k])))) if retrieve != null else 0.0)
+		village.state.ledger = LocalLedger.spend(received.ledger, int(event.dueAt), taken) if total(taken) > 0 else received.ledger
+		carried_back = LocalVillage.resources(func(k: String) -> float: return float(received.leftover[k]) + float(taken[k]))
 		changed.append(["village", village.id])
 		var sender := server.find_village(world, int(caravan.villageId))
 		if int(sender.ownerAccountId) != int(village.ownerAccountId):
@@ -581,7 +621,7 @@ static func caravan_view(c: Dictionary) -> Dictionary:
 		"destinationShipyardId": c.get("destinationShipyardId"), "kind": c.kind, "caravans": c.caravans,
 		"cargo": c.cargo, "carriedBack": c.carriedBack, "status": c.status, "path": c.path.map(func(s: Dictionary) -> Array: return [s.q, s.r, s.atMs]),
 		"departsAt": LocalTime.iso(c.departsAt), "arrivesAt": LocalTime.iso(c.arrivesAt), "returnsAt": LocalTime.iso(c.returnsAt),
-		"escort": c.escort, "ambush": c.ambush}
+		"escort": c.escort, "ambush": c.ambush, "retrieve": c.get("retrieve")}
 
 
 static func vault_view(data: Dictionary, vault: Dictionary) -> Dictionary:

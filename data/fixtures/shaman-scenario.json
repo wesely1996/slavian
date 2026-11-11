@@ -1211,6 +1211,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -3125,24 +3126,24 @@
       [
        -2,
        3,
-       96000
+       72000
       ],
       [
        -2,
        4,
-       192000
+       144000
       ],
       [
        -2,
        5,
-       288000
+       216000
       ]
      ],
      "departsAt": "2026-06-01T12:00:00.000Z",
-     "arrivesAt": "2026-06-01T12:04:48.000Z",
+     "arrivesAt": "2026-06-01T12:03:36.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 96,
      "supplyAt": "2026-06-01T12:00:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3352,10 +3353,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 240.5,
-        "wood": 245.5,
-        "grain": 189.2,
-        "stone": 253
+        "iron": 239.5,
+        "wood": 242.5,
+        "grain": 160.73333333333332,
+        "stone": 251
        },
        "ratesPerHour": {
         "iron": 30,
@@ -3369,7 +3370,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T12:09:36.000Z"
+       "settledAt": "2026-06-01T12:07:12.000Z"
       }
      }
     ],
@@ -3568,7 +3569,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T12:04:48.000Z",
+        "at": "2026-06-01T12:03:36.000Z",
         "round": 1,
         "attackerLeft": 4,
         "defenderLeft": 3,
@@ -3578,7 +3579,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:04:48.000Z",
+        "at": "2026-06-01T12:03:36.000Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 3,
@@ -3586,7 +3587,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:04:48.000Z",
+        "at": "2026-06-01T12:03:36.000Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 2,
@@ -3596,7 +3597,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:04:48.000Z",
+        "at": "2026-06-01T12:03:36.000Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 1,
@@ -3608,8 +3609,8 @@
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T12:04:48.000Z",
-      "endedAt": "2026-06-01T12:04:48.000Z"
+      "startedAt": "2026-06-01T12:03:36.000Z",
+      "endedAt": "2026-06-01T12:03:36.000Z"
      }
     ],
     "raids": [],
@@ -3702,26 +3703,26 @@
        [
         -2,
         3,
-        96000
+        72000
        ],
        [
         -2,
         4,
-        192000
+        144000
        ],
        [
         -2,
         5,
-        288000
+        216000
        ]
       ],
       "departsAt": "2026-06-01T12:00:00.000Z",
-      "arrivesAt": "2026-06-01T12:04:48.000Z",
-      "leavesAt": "2026-06-01T12:04:48.000Z",
-      "returnsAt": "2026-06-01T12:09:36.000Z",
+      "arrivesAt": "2026-06-01T12:03:36.000Z",
+      "leavesAt": "2026-06-01T12:03:36.000Z",
+      "returnsAt": "2026-06-01T12:07:12.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T12:09:36.000Z",
-      "hungrySince": "2026-06-01T12:00:00.000Z",
+      "supplyAt": "2026-06-01T12:07:12.000Z",
+      "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -3894,6 +3895,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -5785,7 +5787,7 @@
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
       "body": "0 of them fell; 4 still hold it.",
-      "createdAt": "2026-06-01T12:04:48.000Z",
+      "createdAt": "2026-06-01T12:03:36.000Z",
       "read": false
      },
      {

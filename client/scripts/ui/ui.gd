@@ -293,10 +293,13 @@ static func signed(value: float) -> String:
 
 
 ## Amounts with each resource's icon, for a rich label: "[img]…[/img] 320 …".
-## Without the art it falls back to resource_text.
+## Without the art it falls back to resource_text. Kinds missing from
+## `amounts` are left out.
 static func costs(amounts: Dictionary, icon_size := 30) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
+		if not amounts.has(kind):
+			continue
 		var file := Art.path("resource/" + kind)
 		if file == "" or not ResourceLoader.exists(file):
 			return resource_text(amounts)
@@ -331,5 +334,6 @@ static func resource_name(kind: String) -> String:
 static func resource_text(amounts: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
-		parts.append("%s %d" % [resource_name(kind), amounts[kind]])
+		if amounts.has(kind):
+			parts.append("%s %d" % [resource_name(kind), amounts[kind]])
 	return "  ".join(parts)

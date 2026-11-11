@@ -48,8 +48,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "bounties": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1, "bounty": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -402,6 +402,31 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(moved)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(moved), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "bounties" and parts[3] in ["cancel", "take"]:
+		var bounty := LocalBounties.find(world, int(parts[2]))
+		var where: Dictionary
+		if parts[3] == "take":
+			if not body is Dictionary or not (body.get("villageId") is int or body.get("villageId") is float) or float(body.villageId) < 1:
+				return _fail(400, "invalid_request", "Say which village takes it")
+			where = find_village(world, int(body.villageId))
+			if where.is_empty():
+				return _fail(404, "not_found", "Village %s not found" % int(body.villageId))
+		else:
+			if bounty.is_empty():
+				return _fail(404, "not_found", "No such bounty")
+			where = find_village(world, int(bounty.villageId))
+		if where.ownerAccountId == null or int(where.ownerAccountId) != int(world.hostAccountId):
+			return _fail(403, "forbidden", "Not your village")
+		if parts[3] == "take" and where.get("ruin") != null:
+			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % where.name)
+		if bounty.is_empty():
+			return _fail(404, "not_found", "No such bounty")
+		var done := LocalBounties.take(self, world, bounty, where, now) if parts[3] == "take" else LocalBounties.cancel(world, bounty, where, now)
+		if done.has("error") or done.has("missing"):
+			return _rule_answer(done)
+		changed.append(["village", where.id])
+		changed.append(["world"])
+		return {"status": 200, "data": {"village": village_view(world, where), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "caravans" and parts[3] == "reroute":
 		var caravan := LocalLogistics.find_caravan(world, int(parts[2]))
 		if caravan.is_empty():
@@ -629,6 +654,10 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
 			"armies", "raids", "strike", "forts", "supply-points", "crossings", "roads":
 				return _field_command(world, village, action, body, now, changed)
+			"bounties":
+				result = LocalBounties.post(self, world, village, body, now)
+				if result.has("bounty"):
+					extra = ["bounty", LocalBounties.bounty_view(result.bounty)]
 			"caravans", "caravans/fetch":
 				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
 				if result.has("caravan"):
@@ -640,7 +669,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
-		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "scout", "scout/ruins", "found", "market/sell", "generals"]:
+		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "bounties", "scout", "scout/ruins", "found", "market/sell", "generals"]:
 			changed.append(["world"])
 		if step != "":
 			onboarding_step(world, int(village.ownerAccountId), step, now, changed)
@@ -1202,7 +1231,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
 		"shipyards": world.get("shipyards", []).map(LocalEvents.shipyard_view),
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
-		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
+		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault), "bounties": LocalBounties.bounties_view(world),
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads},
 		"serverTime": LocalTime.iso(now),
 	}
@@ -1454,6 +1483,9 @@ func _load_all() -> void:
 				m.merge({"rallyVillageId": null})
 			# Worlds saved before generals.
 			world.merge({"generals": []})
+			# Worlds saved before the bounty board.
+			world.merge({"bounties": []})
+			world.next.merge({"bounty": 1})
 			# Worlds saved before ruin searches.
 			world.merge({"ruinSearches": []})
 			world.next.merge({"ruinSearch": 1})

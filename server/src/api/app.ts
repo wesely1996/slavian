@@ -1,3 +1,4 @@
+import { cancelBountyCommand, postBountyCommand, takeBountyCommand } from '../commands/bounties.js';
 import websocket from '@fastify/websocket';
 import { insertChatMessage, lastReadId, listChatMessages, markChatRead, sentSince, unreadCount } from '../db/chat.js';
 import { delegateCommand, endDelegationCommand } from '../commands/delegation.js';
@@ -74,6 +75,7 @@ import { alert } from '../alerts.js';
 import {
   armyView,
   caravanView,
+  bountyView,
   expeditionView,
   heroView,
   generalView,
@@ -153,9 +155,14 @@ const caravanBody = z.object({
   destinationFortId: z.number().int().positive().optional(),
   destinationShipyardId: z.number().int().positive().optional(),
   load: loadSchema,
+  // What it brings back from there: only from your own settlement, fort or supply point.
+  retrieve: loadSchema.optional(),
   escort: escortSchema,
 });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
+// A bounty: what the poster offers and what they ask for.
+const bountyBody = z.object({ offer: loadSchema, want: loadSchema });
+const takeBountyBody = z.object({ villageId: z.number().int().positive() });
 // A caravan turned on its way out: home, or to a village (null: the vault).
 const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
@@ -1019,6 +1026,30 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const turn = rerouteBody.parse(request.body);
     const caravan = await rerouteCaravanCommand(db, scheduler, { accountId: account.id, caravanId: id, turn, now: clock() });
     return { caravan: caravanView(caravan), serverTime: clock().toISOString() };
+  });
+
+  // The Market's bounty board: post, call off, take.
+  app.post('/v1/villages/:id/bounties', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = bountyBody.parse(request.body);
+    const { village, bounty } = await postBountyCommand(db, scheduler, { accountId: account.id, villageId: id, ...body, now: clock() });
+    return { village: villageView(village), bounty: bountyView(bounty), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/bounties/:id/cancel', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { village } = await cancelBountyCommand(db, scheduler, { accountId: account.id, bountyId: id, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/bounties/:id/take', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { villageId } = takeBountyBody.parse(request.body);
+    const { village } = await takeBountyCommand(db, scheduler, { accountId: account.id, villageId, bountyId: id, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/caravans/fetch', async (request) => {

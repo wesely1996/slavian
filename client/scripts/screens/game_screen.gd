@@ -81,6 +81,8 @@ var _caravan_picking := 0
 ## opening another drops the picking.
 var _caravan_pick_mode := ""
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+# What the caravan brings back from your own settlement, fort or supply point.
+var _caravan_back: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 ## Army form: destination (village id; 0: the Holy City), troops and orders.
 var _army_to := 0
 var _army_units: Dictionary[String, int] = {}
@@ -1812,6 +1814,29 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 		_panel_body.add_child(row)
 	if limits.has("grain") and limits.size() == 1:
 		_panel_body.add_child(UI.label(tr("A store takes only grain."), UI.SMALL_SIZE, UI.MUTED))
+	# From your own settlement, fort or supply point it can bring back.
+	var own_place := _caravan_own_place(_caravan_target)
+	for kind in Ledger.KINDS:
+		if own_place.is_empty() or not limits.has(kind):
+			_caravan_back[kind] = 0
+	if not own_place.is_empty():
+		_panel_body.add_child(UI.with_info(UI.label(tr("Bring back"), UI.HEADING_SIZE),
+			tr("On the way home it takes these from %s, as much as there is when it gets there.") % CaravanText.target_name(_caravan_target)))
+		for kind in Ledger.KINDS:
+			if not limits.has(kind):
+				continue
+			var row := UI.hbox(8)
+			row.add_child(UI.icon("resource/%s" % kind, 40))
+			var label := UI.label(UI.resource_name(kind), UI.SMALL_SIZE)
+			label.custom_minimum_size.x = 90
+			row.add_child(label)
+			var there := floori(float(own_place.get(kind, 0)))
+			var top := maxi(there, _caravan_back[kind])
+			row.add_child(_number_field("back:%s" % kind, _caravan_back[kind], 0, maxi(top, 1000000), func(n: int) -> void: _caravan_back[kind] = n))
+			var have := UI.label(tr("%d there") % there, UI.SMALL_SIZE, UI.MUTED)
+			have.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(have)
+			_panel_body.add_child(row)
 
 	var garrison := Rules.garrison_at(village, Game.server_now())
 	var escort := func() -> Dictionary: return _picked_units(garrison) if not Game.camps.is_empty() else {}
@@ -1819,7 +1844,7 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 	_panel_body.add_child(summary)
 	var buttons := UI.hbox()
 	var target := _caravan_target.duplicate()
-	var send := UI.button(tr("Send"), func() -> void: _send_caravan(village_id, target, _caravan_load.duplicate(), escort.call()))
+	var send := UI.button(tr("Send"), func() -> void: _send_caravan(village_id, target, _caravan_load.duplicate(), escort.call(), _caravan_back.duplicate()))
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buttons.add_child(send)
 	var fetch: Button = null
@@ -1829,12 +1854,12 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 		buttons.add_child(fetch)
 	# What it takes, and whether it can go, as the numbers are typed.
 	_tick(summary, func() -> String:
-		var needed := CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {}))
+		var needed := maxi(CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})), CaravanMath.needed(Game.data, _caravan_back, village.get("bonuses", {})))
 		var current: Dictionary = Game.villages.get(village_id, village)
 		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), _caravan_load)
 		send.disabled = needed == 0 or needed > free or not affordable
 		if fetch != null:
-			fetch.disabled = needed == 0 or needed > free
+			fetch.disabled = CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})) == 0 or needed > free
 		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Type how much of each to carry")
 		if needed > free:
 			line += tr(" (only %d at home)") % free
@@ -1843,6 +1868,23 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 			line += " · " + tr("Escort: %s") % _units_text(guard)
 		return line)
 	_panel_body.add_child(buttons)
+
+
+## What a caravan's destination holds, when it is your own settlement, fort
+## or supply point (it can bring back from there): {} otherwise.
+func _caravan_own_place(target: Dictionary) -> Dictionary:
+	match String(target.get("kind", "")):
+		"village":
+			var v: Dictionary = Game.villages.get(int(target.id), {})
+			if v.is_empty() or not Game.is_mine(v):
+				return {}
+			return Ledger.amounts_at(v.resources, Game.server_now())
+		"fort":
+			var fort := Game.fort_at_id(int(target.id))
+			if fort.is_empty() or fort.get("status") != "standing" or fort.get("ownerAccountId") == null or int(fort.ownerAccountId) != Game.my_account_id():
+				return {}
+			return {"grain": float(fort.get("grain", 0))}
+	return {}
 
 
 ## Trips from this village, and deliveries on their way to it.
@@ -1952,9 +1994,14 @@ func _pick_caravan_target(village_id: int) -> void:
 	_rebuild_panel()
 
 
-func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escort: Dictionary) -> void:
+func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escort: Dictionary, back := {}) -> void:
 	_status.text = ""
 	var body := {"destinationVillageId": int(target.id) if target.kind == "village" else null, "load": cargo, "escort": escort}
+	var brings := 0
+	for kind in back:
+		brings += int(back[kind])
+	if brings > 0:
+		body.retrieve = back
 	if target.kind == "fort":
 		body.destinationFortId = int(target.id)
 	elif target.kind == "shipyard":
@@ -1966,8 +2013,9 @@ func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escor
 		return
 	Sound.effect("coins")
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	_caravan_back = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	_army_units.clear()
-	_forget_drafts(["load:", "escort:"])
+	_forget_drafts(["load:", "escort:", "back:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 	if response.data.get("caravan") is Dictionary:
@@ -2169,7 +2217,7 @@ func _floor_rows(village: Dictionary) -> void:
 	var capacity := float(village.get("resources", {}).get("capacity", {}).get("grain", 0))
 	var set_floor: Variant = village.get("armyFloor")
 	var floor_now := FieldRules.settlement_floor(Game.data, set_floor, capacity)
-	var text := tr("Armies may draw the granary down to %d grain") % floori(floor_now) if set_floor != null else tr("Armies may draw the granary down to %d grain (half of it)") % floori(floor_now)
+	var text := tr("Armies may draw the granary down to %d grain") % floori(floor_now)
 	_panel_body.add_child(UI.with_info(UI.label(text, UI.SMALL_SIZE),
 		tr("Armies standing here eat half their upkeep from the granary, and armies setting off fill up from it, never below this. The garrison eats a quarter of its upkeep from it either way.")))
 	var row := UI.hbox(8)
@@ -4326,6 +4374,8 @@ func _market_section(village: Dictionary, level: int) -> void:
 		button.disabled = _trade.give == _trade.get or got < 1 or have < int(_trade.amount)
 		return tr("You get %d %s (%d%% of what you give)") % [got, UI.resource_name(_trade.get), roundi(rate * 100.0)])
 
+	_bounty_board(village, level)
+
 	var hero := Game.my_hero()
 	var spare: Array = hero.get("inventory", [])
 	_panel_body.add_child(UI.label(tr("Sell spare gear"), UI.HEADING_SIZE))
@@ -4343,6 +4393,140 @@ func _market_section(village: Dictionary, level: int) -> void:
 	var worth := UI.rich()
 	worth.text = tr("Each piece fetches %s") % UI.costs(price)
 	_panel_body.add_child(worth)
+
+
+## A bounty being put together: step 1 what you give, step 2 what you want.
+var _bounty := {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
+
+
+## The Market's bounty board: every open bounty (yours to call off, others'
+## to take from this village), and a new one put together in two steps.
+func _bounty_board(village: Dictionary, level: int) -> void:
+	var data := Game.data
+	var village_id := int(village.id)
+	var share := roundi(float(data.buildings.village.market.bounties.feeShare) * 100.0)
+	var slots := Rules.bounty_slots(data, level)
+	var most := Rules.bounty_most(data, level)
+	var mine_here := Game.bounties.filter(func(b: Dictionary) -> bool: return int(b.villageId) == village_id)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Bounty board"), UI.HEADING_SIZE),
+		tr("Offer resources for others; another player takes your bounty at once. What you offer, and a %d%% fee on it, leave your stores when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not.") % [share, share]))
+	_panel_body.add_child(UI.label(tr("%d of %d open here · at most %d a side") % [mine_here.size(), slots, most], UI.SMALL_SIZE, UI.MUTED))
+	for bounty in Game.bounties:
+		var row := UI.hbox(8)
+		var mine: bool = bounty.ownerAccountId != null and int(bounty.ownerAccountId) == Game.my_account_id()
+		var words := UI.rich()
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var who := tr("Yours, from %s") % Game.village_name(int(bounty.villageId)) if mine else Game.village_name(int(bounty.villageId))
+		words.text = tr("%s: offers %s for %s") % [who, UI.costs(_nonzero(bounty.offer), 22), UI.costs(_nonzero(bounty.want), 22)]
+		row.add_child(words)
+		var bounty_id := int(bounty.id)
+		if mine:
+			row.add_child(UI.button(tr("Call off"), func() -> void: _bounty_command("/v1/bounties/%d/cancel" % bounty_id, {})))
+		else:
+			var take := UI.button(tr("Take"), func() -> void: _bounty_command("/v1/bounties/%d/take" % bounty_id, {"villageId": village_id}))
+			take.disabled = not Ledger.can_afford(Ledger.amounts_at(village.resources, Game.server_now()), bounty.want)
+			row.add_child(take)
+		_panel_body.add_child(row)
+	if Game.bounties.is_empty():
+		_panel_body.add_child(UI.label(tr("No bounties on the board."), UI.SMALL_SIZE, UI.MUTED))
+	if mine_here.size() >= slots:
+		return
+	# A new bounty: first what you give, then what you want for it.
+	var step := int(_bounty.step)
+	var side: String = "offer" if step == 1 else "want"
+	_panel_body.add_child(UI.label(tr("Post a bounty · 1 of 2: what you give") if step == 1 else tr("Post a bounty · 2 of 2: what you want"), UI.SMALL_SIZE + 2))
+	for kind in Ledger.KINDS:
+		# A resource you give can't also be one you want.
+		if step == 2 and int(_bounty.offer[kind]) > 0:
+			continue
+		var row := UI.hbox(8)
+		row.add_child(UI.icon("resource/%s" % kind, 36))
+		var name := UI.label(UI.resource_name(kind), UI.SMALL_SIZE)
+		name.custom_minimum_size.x = 90
+		row.add_child(name)
+		row.add_child(_number_field("bounty:%s:%s" % [side, kind], int(_bounty[side][kind]), 0, most, func(n: int) -> void: _bounty[side][kind] = n))
+		_panel_body.add_child(row)
+	var total_line := UI.rich()
+	_panel_body.add_child(total_line)
+	var buttons := UI.hbox(8)
+	if step == 2:
+		buttons.add_child(UI.button(tr("Back"), func() -> void:
+			_bounty.step = 1
+			_rebuild_panel()))
+	var go := UI.primary(tr("Next") if step == 1 else tr("Post bounty"), func() -> void:
+		if step == 1:
+			_bounty.step = 2
+			_rebuild_panel()
+		else:
+			_post_bounty(village_id))
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	buttons.add_child(go)
+	_panel_body.add_child(buttons)
+	# The total payment (what you give and the fee), and what you get, as typed.
+	_tick(total_line, func() -> String:
+		var offer: Dictionary = _bounty.offer
+		var want: Dictionary = _bounty.want
+		var fee := Rules.bounty_fee(data, offer)
+		var pay := {}
+		for kind in Ledger.KINDS:
+			pay[kind] = int(offer[kind]) + int(fee[kind])
+		var home: Dictionary = Game.villages.get(village_id, village)
+		var afford := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), pay)
+		var gives := _sum(offer)
+		var wants := _sum(want)
+		var text := tr("You pay %s (%s and a %d%% fee)") % [UI.costs(_nonzero(pay), 22), UI.costs(_nonzero(offer), 22), share] if gives > 0 else tr("Type what you give.")
+		if gives > 0 and not afford:
+			text += "\n" + tr("Not enough in the stores to cover it.")
+		if step == 2:
+			text += "\n" + (tr("You get %s when it is taken") % UI.costs(_nonzero(Rules.bounty_return(data, want)), 22) if wants > 0 else tr("Type what you want for it."))
+			go.disabled = gives == 0 or wants == 0 or not afford or gives > most or wants > most
+		else:
+			go.disabled = gives == 0 or not afford or gives > most
+		return text)
+
+
+func _sum(amounts: Dictionary) -> int:
+	var n := 0
+	for kind in amounts:
+		n += int(amounts[kind])
+	return n
+
+
+## Only the resources there are some of (for a short cost line).
+func _nonzero(amounts: Dictionary) -> Dictionary:
+	var out := {}
+	for kind in amounts:
+		if int(amounts[kind]) > 0:
+			out[kind] = int(amounts[kind])
+	return out
+
+
+func _post_bounty(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/bounties" % village_id, {"offer": _bounty.offer.duplicate(), "want": _bounty.want.duplicate()})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("coins")
+	_bounty = {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
+	_forget_drafts(["bounty:"])
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+	_refetch_world()
+
+
+func _bounty_command(path: String, body: Dictionary) -> void:
+	_status.text = ""
+	var response := await Api.post_json(path, body)
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("coins")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+	_refetch_world()
 
 
 func _market_trade(village_id: int) -> void:
