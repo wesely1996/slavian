@@ -4374,7 +4374,9 @@ func _market_section(village: Dictionary, level: int) -> void:
 		button.disabled = _trade.give == _trade.get or got < 1 or have < int(_trade.amount)
 		return tr("You get %d %s (%d%% of what you give)") % [got, UI.resource_name(_trade.get), roundi(rate * 100.0)])
 
-	_bounty_board(village, level)
+	# The bounty board trades between players: single player has none.
+	if not Local.is_active():
+		_bounty_board(village, level)
 
 	var hero := Game.my_hero()
 	var spare: Array = hero.get("inventory", [])

@@ -9,29 +9,6 @@
  },
  "steps": [
   {
-   "method": "POST",
-   "path": "/v1/villages/1/bounties",
-   "body": {
-    "offer": {
-     "wood": 100,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    },
-    "want": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 0,
-     "iron": 50
-    }
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "Build a Market to post bounties"
-   }
-  },
-  {
    "set": {
     "amounts": {
      "wood": 2000,
@@ -442,306 +419,6 @@
    }
   },
   {
-   "method": "POST",
-   "path": "/v1/villages/1/bounties",
-   "body": {
-    "offer": {
-     "wood": 600,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    },
-    "want": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 0,
-     "iron": 300
-    }
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "The Market takes bounties of at most 500 on each side"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/bounties",
-   "body": {
-    "offer": {
-     "wood": 100,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    },
-    "want": {
-     "wood": 100,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    }
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "Offer and ask for different resources"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/bounties",
-   "body": {
-    "offer": {
-     "wood": 400,
-     "stone": 100,
-     "grain": 0,
-     "iron": 0
-    },
-    "want": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 0,
-     "iron": 250
-    }
-   },
-   "status": 200,
-   "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Lipovets",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "market"
-      },
-      "c3": {
-       "level": 1,
-       "building": "caravan_yard"
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 0,
-       "building": null
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "market": 1,
-      "elder_hall": 1,
-      "caravan_yard": 1
-     },
-     "queue": [],
-     "garrison": {},
-     "away": {},
-     "stance": "balanced",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06
-     },
-     "armyFloor": null,
-     "ruin": null,
-     "refuge": false,
-     "training": [],
-     "resources": {
-      "amounts": {
-       "wood": 1560,
-       "stone": 1890,
-       "grain": 1000,
-       "iron": 1000
-      },
-      "ratesPerHour": {
-       "iron": 30,
-       "wood": 90,
-       "grain": 80,
-       "stone": 60
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T08:30:00.000Z"
-     }
-    },
-    "bounty": {
-     "id": 1,
-     "villageId": 1,
-     "ownerAccountId": 1,
-     "offer": {
-      "iron": 0,
-      "wood": 400,
-      "grain": 0,
-      "stone": 100
-     },
-     "want": {
-      "iron": 250,
-      "wood": 0,
-      "grain": 0,
-      "stone": 0
-     },
-     "fee": {
-      "iron": 0,
-      "wood": 40,
-      "grain": 0,
-      "stone": 10
-     },
-     "status": "open",
-     "createdAt": "2026-06-01T08:30:00.000Z"
-    },
-    "serverTime": "2026-06-01T08:30:00.000Z"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/bounties",
-   "body": {
-    "offer": {
-     "wood": 10,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    },
-    "want": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 10,
-     "iron": 0
-    }
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "The Market keeps 1 open bounty"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/bounties/1/take",
-   "body": {
-    "villageId": 1
-   },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "That bounty is your own"
-   }
-  },
-  {
    "method": "GET",
    "path": "/v1/worlds/-1",
    "status": 200,
@@ -934,9 +611,9 @@
       "resources": {
        "amounts": {
         "iron": 1000,
-        "wood": 1560,
+        "wood": 2000,
         "grain": 1000,
-        "stone": 1890
+        "stone": 2000
        },
        "ratesPerHour": {
         "iron": 30,
@@ -950,7 +627,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:30:00.000Z"
+       "settledAt": "2026-06-01T08:00:33.000Z"
       }
      }
     ],
@@ -1319,33 +996,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
-    "bounties": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "ownerAccountId": 1,
-      "offer": {
-       "iron": 0,
-       "wood": 400,
-       "grain": 0,
-       "stone": 100
-      },
-      "want": {
-       "iron": 250,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "fee": {
-       "iron": 0,
-       "wood": 40,
-       "grain": 0,
-       "stone": 10
-      },
-      "status": "open",
-      "createdAt": "2026-06-01T08:30:00.000Z"
-     }
-    ],
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -3226,207 +2877,6 @@
   },
   {
    "method": "POST",
-   "path": "/v1/bounties/1/cancel",
-   "body": {},
-   "status": 200,
-   "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Lipovets",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "market"
-      },
-      "c3": {
-       "level": 1,
-       "building": "caravan_yard"
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 0,
-       "building": null
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "market": 1,
-      "elder_hall": 1,
-      "caravan_yard": 1
-     },
-     "queue": [],
-     "garrison": {},
-     "away": {},
-     "stance": "balanced",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06
-     },
-     "armyFloor": null,
-     "ruin": null,
-     "refuge": false,
-     "training": [],
-     "resources": {
-      "amounts": {
-       "wood": 1560,
-       "stone": 1890,
-       "grain": 1000,
-       "iron": 1000
-      },
-      "ratesPerHour": {
-       "iron": 30,
-       "wood": 90,
-       "grain": 80,
-       "stone": 60
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T08:30:00.000Z"
-     }
-    },
-    "serverTime": "2026-06-01T08:30:00.000Z"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/bounties/1/cancel",
-   "body": {},
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "That bounty is closed"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/bounties/9/cancel",
-   "body": {},
-   "status": 404,
-   "response": {
-    "error": "not_found",
-    "message": "No such bounty"
-   }
-  },
-  {
-   "method": "POST",
    "path": "/v1/villages/1/supply-points",
    "body": {
     "q": -1,
@@ -3644,8 +3094,8 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 1260,
-       "stone": 1740,
+       "wood": 1700,
+       "stone": 1850,
        "grain": 640,
        "iron": 1000
       },
@@ -3902,8 +3352,8 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 1260,
-       "stone": 1740,
+       "wood": 1700,
+       "stone": 1850,
        "grain": 680,
        "iron": 1000
       },
@@ -4161,9 +3611,9 @@
       "resources": {
        "amounts": {
         "iron": 1000,
-        "wood": 1260,
+        "wood": 1700,
         "grain": 805.3333333333334,
-        "stone": 1740
+        "stone": 1850
        },
        "ratesPerHour": {
         "iron": 30,
@@ -6720,9 +6170,9 @@
       "resources": {
        "amounts": {
         "iron": 1000,
-        "wood": 1260,
+        "wood": 1700,
         "grain": 805.3333333333334,
-        "stone": 1740
+        "stone": 1850
        },
        "ratesPerHour": {
         "iron": 30,
