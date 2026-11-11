@@ -35,6 +35,9 @@ const SERVER_ONLY: Record<string, string> = {
   'GET /v1/worlds/:id/chat': 'the group chat (a solo world has none)',
   'POST /v1/worlds/:id/chat': 'the group chat (a solo world has none)',
   'POST /v1/worlds/:id/chat/read': 'the group chat (a solo world has none)',
+  'POST /v1/villages/:id/bounties': 'the bounty board trades between players (a solo world has none)',
+  'POST /v1/bounties/:id/cancel': 'the bounty board trades between players (a solo world has none)',
+  'POST /v1/bounties/:id/take': 'the bounty board trades between players (a solo world has none)',
 };
 
 // Every route the API declares, as "METHOD /path/:param".

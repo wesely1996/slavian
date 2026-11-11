@@ -1203,6 +1203,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"shipyards": world.get("shipyards", []).map(LocalEvents.shipyard_view),
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
+		"bounties": [],
 		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads},
 		"serverTime": LocalTime.iso(now),
 	}

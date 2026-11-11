@@ -28,6 +28,7 @@ import {
   withdraw,
 } from '../sim/logistics.js';
 import { mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
+import { total } from '../sim/logistics.js';
 import { sendAway, type VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
 
@@ -39,6 +40,9 @@ export interface CaravanOrder {
   // Or a shipyard, with what its boat still needs.
   destinationShipyardId?: number | undefined;
   load: Resources;
+  // What it brings back from there (its owner's settlement, fort or supply
+  // point only).
+  retrieve?: Resources | undefined;
   // Troops guarding it against camps on the road.
   escort?: Record<string, number> | undefined;
 }
@@ -66,7 +70,9 @@ export async function dispatchCaravan(
   const yard = village.state.levels[CARAVAN_YARD] ?? 0;
   if (yard < 1) throw new RuleError('Build a Caravan Yard first');
   const bonuses = await effectiveBonuses(client, data, village);
-  const needed = caravansFor(data, order.load, bonuses);
+  const retrieve = order.retrieve && total(order.retrieve) > 0 ? order.retrieve : null;
+  // As many caravans as the bigger of the two loads takes (one of them may be empty).
+  const needed = retrieve && total(order.load) === 0 ? caravansFor(data, retrieve, bonuses) : Math.max(caravansFor(data, order.load, bonuses), retrieve ? caravansFor(data, retrieve, bonuses) : 0);
   const free = caravansAt(data, yard) - (await caravansOut(client, village.id));
   if (needed > free) {
     throw new RuleError(`That takes ${needed} caravan${needed === 1 ? '' : 's'}; ${Math.max(0, free)} at home`);
@@ -77,10 +83,12 @@ export async function dispatchCaravan(
     const fort = await loadFort(client, order.destinationFortId);
     if (!fort || fort.worldId !== world.id) throw new NotFoundError('No such fort or supply point');
     to = hex(fort.q, fort.r);
-    if (RESOURCE_KINDS.some((k) => k !== 'grain' && order.load[k] > 0)) throw new RuleError("A fort's store takes only grain");
+    if (RESOURCE_KINDS.some((k) => k !== 'grain' && (order.load[k] > 0 || (retrieve?.[k] ?? 0) > 0))) throw new RuleError("A fort's store keeps only grain");
+    if (retrieve && fort.ownerAccountId !== village.ownerAccountId) throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
   } else if (order.destinationShipyardId !== undefined) {
     const shipyard = await loadShipyard(client, order.destinationShipyardId);
     if (!shipyard || shipyard.worldId !== world.id) throw new NotFoundError('No such shipyard in this world');
+    if (retrieve) throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
     if (shipyard.status !== 'open') throw new RuleError('The boat is already paid for');
     const need = mapResources((k) => Math.max(0, shipyard.cost[k] - shipyard.paid[k]));
     if (RESOURCE_KINDS.some((k) => order.load[k] > need[k])) {
@@ -91,7 +99,10 @@ export async function dispatchCaravan(
     if (order.destinationVillageId === village.id) throw new RuleError('Send it to another village');
     const destination = await loadVillage(client, order.destinationVillageId).catch(() => null);
     if (!destination || destination.worldId !== world.id) throw new NotFoundError('No such village in this world');
+    if (retrieve && destination.ownerAccountId !== village.ownerAccountId) throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
     to = hex(destination.q, destination.r);
+  } else if (retrieve && kind === 'deliver') {
+    throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
   }
   const terrain = await loadLand(client, world.id);
   const path = caravanRoute(data, terrain, hex(village.q, village.r), to, world.speed, bonuses);
@@ -111,6 +122,7 @@ export async function dispatchCaravan(
     arrivesAt,
     returnsAt: new Date(arrivesAt.getTime() + travelMs),
     escort: Object.fromEntries(Object.entries(order.escort ?? {}).filter(([, n]) => n > 0)),
+    retrieve,
   });
   const payload: CaravanPayload = { caravanId: caravan.id };
   await scheduleEvent(client, world.id, arrivesAt, 'caravan_arrive', payload);
@@ -153,6 +165,7 @@ export async function rerouteCaravanCommand(
           path,
           status: 'returning',
           carriedBack: caravan.kind === 'deliver' ? caravan.cargo : { wood: 0, stone: 0, grain: 0, iron: 0 },
+          retrieve: null,
           arrivesAt: new Date(caravan.departsAt.getTime() + there),
           returnsAt: new Date(caravan.departsAt.getTime() + 2 * there),
         };
@@ -175,6 +188,8 @@ export async function rerouteCaravanCommand(
           ...caravan,
           path,
           destinationVillageId: to,
+          // What it was to bring back was to come from where it was going.
+          retrieve: null,
           arrivesAt: new Date(caravan.departsAt.getTime() + travel),
           returnsAt: new Date(caravan.departsAt.getTime() + 2 * travel),
         };

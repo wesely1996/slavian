@@ -38,6 +38,8 @@ var raids: Array = []
 var caravans: Array = []
 ## The Holy City vault (see server vaultView).
 var vault: Dictionary = {}
+# The Market's bounty board: every open bounty in the world.
+var bounties: Array = []
 ## Settlers on the road to found villages, then the latest that ended.
 var expeditions: Array = []
 ## Everyone's research: {accountId, tech, status, completesAt, ...}.
@@ -171,6 +173,7 @@ func set_world(new_world: Dictionary) -> void:
 		fear[Vector2i(int(entry[0]), int(entry[1]))] = float(entry[2])
 	var new_vault: Variant = new_world.get("vault")
 	vault = new_vault if new_vault is Dictionary else {}
+	bounties = new_world.get("bounties", []) if new_world.get("bounties") is Array else []
 	terrain.clear()
 	var map: Variant = new_world.get("map")
 	if map is Dictionary:
@@ -449,11 +452,12 @@ func put_caravan(caravan: Dictionary) -> void:
 	caravans_changed.emit()
 
 
-func set_logistics(world_id_: int, new_caravans: Array, new_vault: Dictionary) -> void:
+func set_logistics(world_id_: int, new_caravans: Array, new_vault: Dictionary, new_bounties: Array = []) -> void:
 	if world_id_ != world_id():
 		return
 	caravans = new_caravans
 	vault = new_vault
+	bounties = new_bounties
 	caravans_changed.emit()
 
 

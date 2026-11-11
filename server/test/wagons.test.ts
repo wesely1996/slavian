@@ -39,8 +39,8 @@ describe('quarters and the grain silo', () => {
     expect(silo.grain).toBeCloseTo(base.grain + data.buildings.village.baseCapacity * (1.3 ** 2 - 1));
   });
 
-  it('settlements feed armies down to half their grain storage unless set; forts to the last grain', () => {
-    expect(settlementFloor(data, null, 1000)).toBe(500);
+  it('settlements and forts feed armies to the last grain unless a floor is set', () => {
+    expect(settlementFloor(data, null, 1000)).toBe(0);
     expect(settlementFloor(data, 200, 1000)).toBe(200);
     expect(storeFloor(null)).toBe(0);
     expect(storeFloor(300)).toBe(300);

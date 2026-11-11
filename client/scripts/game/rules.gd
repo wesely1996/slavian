@@ -296,6 +296,33 @@ static func recommended_garrison(data: Dictionary, villages_owned: int) -> int:
 # --- The Market, and tearing down (sim/village.ts).
 
 ## What one resource fetches of another at a Market of `level`.
+## The Market's bounty board (server sim/bounties.ts): the fee on what is
+## offered (paid when posting), what the poster gets back of what they ask,
+## how many open bounties a Market keeps and how much each may hold a side.
+static func bounty_fee(data: Dictionary, offer: Dictionary) -> Dictionary:
+	var share := float(data.buildings.village.market.bounties.feeShare)
+	var fee := {}
+	for kind in offer:
+		fee[kind] = ceili(float(offer[kind]) * share - 1e-9)
+	return fee
+
+
+static func bounty_return(data: Dictionary, want: Dictionary) -> Dictionary:
+	var share := float(data.buildings.village.market.bounties.feeShare)
+	var back := {}
+	for kind in want:
+		back[kind] = floori(float(want[kind]) * (1.0 - share) + 1e-9)
+	return back
+
+
+static func bounty_slots(data: Dictionary, level: int) -> int:
+	return 1 + floori(float(level - 1) / int(data.buildings.village.market.bounties.levelsPerBounty)) if level > 0 else 0
+
+
+static func bounty_most(data: Dictionary, level: int) -> int:
+	return int(data.buildings.village.market.bounties.amountPerLevel) * level
+
+
 static func market_rate(data: Dictionary, level: int) -> float:
 	var market: Dictionary = data.buildings.village.market
 	return float(market.baseRate) + float(market.ratePerLevel) * (level - 1) if level > 0 else 0.0

@@ -973,6 +973,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -2886,29 +2887,29 @@
       [
        -1,
        1,
-       38400
+       28800
       ],
       [
        0,
        1,
+       43200
+      ],
+      [
+       1,
+       0,
        57600
-      ],
-      [
-       1,
-       0,
-       76800
       ],
       [
        2,
        -1,
-       115200
+       86400
       ]
      ],
      "departsAt": "2026-06-01T08:35:00.000Z",
-     "arrivesAt": "2026-06-01T08:36:55.200Z",
+     "arrivesAt": "2026-06-01T08:36:26.400Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 144,
      "supplyAt": "2026-06-01T08:35:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -2951,7 +2952,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -3121,7 +3122,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 879.75,
+        "grain": 735.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -3136,7 +3137,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:55.200Z"
+       "settledAt": "2026-06-01T08:36:26.400Z"
       }
      }
     ],
@@ -3336,7 +3337,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -3346,7 +3347,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -3356,7 +3357,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -3366,7 +3367,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -3374,7 +3375,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -3392,8 +3393,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -3477,8 +3478,10 @@
        "grain": 240,
        "stone": 240
       },
-      "units": {},
-      "status": "done",
+      "units": {
+       "spearman": 5
+      },
+      "status": "stationed",
       "battleId": null,
       "path": [
        [
@@ -3489,31 +3492,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 136.8,
+      "supplyAt": "2026-06-01T08:36:26.400Z",
+      "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -3668,6 +3671,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -5568,7 +5572,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -5738,7 +5742,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 879.75,
+        "grain": 735.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -5753,7 +5757,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:55.200Z"
+       "settledAt": "2026-06-01T08:36:26.400Z"
       }
      }
     ],
@@ -5953,7 +5957,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -5963,7 +5967,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -5973,7 +5977,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -5983,7 +5987,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -5991,7 +5995,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -6009,8 +6013,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -6106,31 +6110,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -6298,6 +6302,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -8200,7 +8205,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -8370,7 +8375,7 @@
        "amounts": {
         "iron": 350,
         "wood": 810,
-        "grain": 879.75,
+        "grain": 735.75,
         "stone": 840
        },
        "ratesPerHour": {
@@ -8385,7 +8390,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:55.200Z"
+       "settledAt": "2026-06-01T08:36:26.400Z"
       }
      }
     ],
@@ -8585,7 +8590,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -8595,7 +8600,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -8605,7 +8610,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -8615,7 +8620,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -8623,7 +8628,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -8641,8 +8646,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -8738,31 +8743,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -8930,6 +8935,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -10833,7 +10839,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -11388,7 +11394,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -11398,7 +11404,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -11408,7 +11414,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -11418,7 +11424,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -11426,7 +11432,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -11444,8 +11450,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -11592,31 +11598,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -11803,6 +11809,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -13711,7 +13718,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -14267,7 +14274,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -14277,7 +14284,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -14287,7 +14294,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -14297,7 +14304,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -14305,7 +14312,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -14323,8 +14330,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -14471,31 +14478,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -14682,6 +14689,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -16585,7 +16593,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -17219,7 +17227,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -17229,7 +17237,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -17239,7 +17247,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -17249,7 +17257,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -17257,7 +17265,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -17275,8 +17283,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -17425,31 +17433,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -17639,6 +17647,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -19542,7 +19551,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -20222,7 +20231,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -20232,7 +20241,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -20242,7 +20251,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -20252,7 +20261,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -20260,7 +20269,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -20278,8 +20287,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -20455,31 +20464,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -20678,6 +20687,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -22600,7 +22610,7 @@
       "clan": null,
       "heroKind": "dobrynya",
       "onboarding": {
-       "camp": "2026-06-01T08:36:55.200Z",
+       "camp": "2026-06-01T08:36:26.400Z",
        "build": "2026-06-01T08:00:00.000Z",
        "train": "2026-06-01T08:20:00.000Z"
       },
@@ -23358,7 +23368,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 1,
         "attackerLeft": 5,
         "defenderLeft": 6,
@@ -23368,7 +23378,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 2,
         "attackerLeft": 4,
         "defenderLeft": 6,
@@ -23378,7 +23388,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 3,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -23388,7 +23398,7 @@
         }
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 4,
         "attackerLeft": 4,
         "defenderLeft": 5,
@@ -23396,7 +23406,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T08:36:55.200Z",
+        "at": "2026-06-01T08:36:26.400Z",
         "round": 5,
         "attackerLeft": 2,
         "defenderLeft": 5,
@@ -23414,8 +23424,8 @@
        "stone": 90
       },
       "decision": null,
-      "startedAt": "2026-06-01T08:36:55.200Z",
-      "endedAt": "2026-06-01T08:36:55.200Z"
+      "startedAt": "2026-06-01T08:36:26.400Z",
+      "endedAt": "2026-06-01T08:36:26.400Z"
      }
     ],
     "raids": [],
@@ -23591,31 +23601,31 @@
        [
         -1,
         1,
-        38400
+        28800
        ],
        [
         0,
         1,
+        43200
+       ],
+       [
+        1,
+        0,
         57600
-       ],
-       [
-        1,
-        0,
-        76800
        ],
        [
         2,
         -1,
-        115200
+        86400
        ]
       ],
       "departsAt": "2026-06-01T08:35:00.000Z",
-      "arrivesAt": "2026-06-01T08:36:55.200Z",
-      "leavesAt": "2026-06-01T08:49:24.000Z",
-      "returnsAt": "2026-06-01T08:49:24.000Z",
+      "arrivesAt": "2026-06-01T08:36:26.400Z",
+      "leavesAt": "2026-06-01T09:23:40.321Z",
+      "returnsAt": "2026-06-01T09:23:40.321Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T08:49:24.000Z",
-      "hungrySince": "2026-06-01T08:35:00.000Z",
+      "supplyAt": "2026-06-01T09:23:40.321Z",
+      "hungrySince": "2026-06-01T09:09:16.321Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -23822,6 +23832,7 @@
      "upgradingTo": null,
      "upgradeCompletesAt": null
     },
+    "bounties": [],
     "map": {
      "radius": 10,
      "activeFronts": [
@@ -25952,6 +25963,15 @@
      },
      {
       "id": 9,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T09:23:40.321Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
@@ -25960,21 +25980,12 @@
       "read": false
      },
      {
-      "id": 8,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T08:49:24.000Z",
-      "read": false
-     },
-     {
       "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, -1)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {
@@ -25983,7 +25994,7 @@
       "tier": "digest",
       "title": "Your army cleared the captives' camp at (2, -1)",
       "body": "It carries home 868 resources.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {
@@ -25992,7 +26003,7 @@
       "tier": "digest",
       "title": "Done: Clear your first camp",
       "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {
@@ -26296,6 +26307,15 @@
      },
      {
       "id": 9,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "An army from Vruchiy starved",
+      "body": "With no food left it scattered; none of them will come back.",
+      "createdAt": "2026-06-01T09:23:40.321Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-1, 4)",
@@ -26304,21 +26324,12 @@
       "read": false
      },
      {
-      "id": 8,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from Vruchiy starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T08:49:24.000Z",
-      "read": false
-     },
-     {
       "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, -1)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {
@@ -26327,7 +26338,7 @@
       "tier": "digest",
       "title": "Your army cleared the captives' camp at (2, -1)",
       "body": "It carries home 868 resources.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {
@@ -26336,7 +26347,7 @@
       "tier": "digest",
       "title": "Done: Clear your first camp",
       "body": "Claim its reward from the quest card.",
-      "createdAt": "2026-06-01T08:36:55.200Z",
+      "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
      {

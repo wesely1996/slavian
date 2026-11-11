@@ -10,7 +10,7 @@ signal waves_updated(world_id: int, waves: Array, leaders: Variant)
 signal scouting_updated(world_id: int, missions: Array)
 signal battles_updated(world_id: int, battles: Array)
 signal raids_updated(world_id: int, raids: Array)
-signal caravans_updated(world_id: int, caravans: Array, vault: Dictionary)
+signal caravans_updated(world_id: int, caravans: Array, vault: Dictionary, bounties: Array)
 signal expeditions_updated(world_id: int, expeditions: Array)
 signal research_updated(world_id: int, research: Array)
 signal heroes_updated(world_id: int, heroes: Array)
@@ -128,7 +128,7 @@ func _handle(text: String) -> void:
 		"expeditions":
 			expeditions_updated.emit(int(message.worldId), message.expeditions)
 		"caravans":
-			caravans_updated.emit(int(message.worldId), message.caravans, message.vault)
+			caravans_updated.emit(int(message.worldId), message.caravans, message.vault, message.get("bounties", []) if message.get("bounties") is Array else [])
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
 

@@ -568,6 +568,82 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
   });
 
+  it('posts, calls off and takes bounties on the Market board; caravans bring back from your own settlements', async () => {
+    const vid = await guest('Vid');
+    const ola = await guest('Ola');
+    const created = await call('POST', '/v1/worlds', vid.token, { name: 'Bounties', maxPlayers: 2, speed: 10 });
+    const worldId: number = created.body.id;
+    await call('POST', '/v1/worlds/join', ola.token, { inviteCode: created.body.inviteCode });
+    const started = await call('POST', `/v1/worlds/${worldId}/start`, vid.token);
+    await withoutStarterCamps(worldId);
+    const mine = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === vid.accountId);
+    const theirs = started.body.villages.find((v: { ownerAccountId: number }) => v.ownerAccountId === ola.accountId);
+    const load = (wood = 0, stone = 0, grain = 0, iron = 0) => ({ wood, stone, grain, iron });
+    const world = async () => (await call('GET', `/v1/worlds/${worldId}`, vid.token)).body;
+    const stores = async (id: number) => (await world()).villages.find((v: { id: number }) => v.id === id).resources.amounts;
+    const rich = `amounts = '{"wood": 3000, "stone": 3000, "grain": 3000, "iron": 3000}', capacity = '{"wood": 9000, "stone": 9000, "grain": 9000, "iron": 9000}'`;
+    await db.query(`UPDATE villages SET ${rich} WHERE id = ANY($1)`, [[mine.id, theirs.id]]);
+    const post = (body: object) => call('POST', `/v1/villages/${mine.id}/bounties`, vid.token, body);
+
+    expect((await post({ offer: load(1000), want: load(0, 0, 0, 500) })).body.message).toMatch(/Build a Market/);
+    await db.query(`UPDATE villages SET plots = plots || '{"c5": {"building": "market", "level": 2}}'::jsonb, levels = levels || '{"market": 2}'::jsonb WHERE id = $1`, [mine.id]);
+    // At level 2: one bounty, at most 1000 on each side.
+    expect((await post({ offer: load(1200), want: load(0, 0, 0, 500) })).body.message).toMatch(/at most 1000/);
+    expect((await post({ offer: load(100), want: load(100) })).body.message).toMatch(/different resources/);
+    expect((await post({ offer: load(), want: load(0, 0, 0, 500) })).body.message).toMatch(/Offer something/);
+    // 1000 wood for 500 iron: 1100 wood leave Vid's stores now.
+    const before = await stores(mine.id);
+    const posted = await post({ offer: load(1000), want: load(0, 0, 0, 500) });
+    expect(posted.body.bounty).toMatchObject({ offer: load(1000), want: load(0, 0, 0, 500), fee: load(100), status: 'open' });
+    expect(Math.round(before.wood - (await stores(mine.id)).wood)).toBeGreaterThanOrEqual(1100 - 5);
+    expect((await post({ offer: load(10), want: load(0, 10) })).body.message).toMatch(/keeps 1 open bounty/);
+    expect((await world()).bounties).toHaveLength(1);
+    // Not his to take, nor Ola's to call off.
+    const id = posted.body.bounty.id;
+    expect((await call('POST', `/v1/bounties/${id}/take`, vid.token, { villageId: mine.id })).body.message).toMatch(/your own/);
+    expect((await call('POST', `/v1/bounties/${id}/cancel`, ola.token)).status).toBe(403);
+    // Ola takes it: she pays 500 iron and gets 1000 wood; Vid gets 450 iron.
+    const olaBefore = await stores(theirs.id);
+    const vidBefore = await stores(mine.id);
+    expect((await call('POST', `/v1/bounties/${id}/take`, ola.token, { villageId: theirs.id })).status).toBe(200);
+    const olaAfter = await stores(theirs.id);
+    const vidAfter = await stores(mine.id);
+    expect(Math.round(olaAfter.wood - olaBefore.wood)).toBeGreaterThanOrEqual(1000);
+    expect(Math.round(olaBefore.iron - olaAfter.iron)).toBeGreaterThanOrEqual(499);
+    expect(Math.round(vidAfter.iron - vidBefore.iron)).toBeGreaterThanOrEqual(450);
+    expect(Math.round(vidAfter.iron - vidBefore.iron)).toBeLessThan(460);
+    expect((await call('POST', `/v1/bounties/${id}/take`, ola.token, { villageId: theirs.id })).body.message).toMatch(/closed/);
+    // Called off: the offer comes back, the fee doesn't.
+    const second = await post({ offer: load(0, 500), want: load(0, 0, 200) });
+    const kept = (await stores(mine.id)).stone;
+    expect((await call('POST', `/v1/bounties/${second.body.bounty.id}/cancel`, vid.token)).status).toBe(200);
+    expect(Math.round((await stores(mine.id)).stone - kept)).toBeGreaterThanOrEqual(500);
+    expect((await world()).bounties).toHaveLength(0);
+
+    // Caravans: bringing back only from your own settlements.
+    const yard = await call('POST', `/v1/villages/${mine.id}/build`, vid.token, { building: 'caravan_yard' });
+    now = new Date(yard.body.village.queue[0].completesAt);
+    await tick(db, now, scheduler);
+    const send = (body: object) => call('POST', `/v1/villages/${mine.id}/caravans`, vid.token, body);
+    expect((await send({ destinationVillageId: theirs.id, load: load(100), retrieve: load(0, 100) })).body.message).toMatch(/your own/);
+    // Vid's second village: 300 wood there, 200 stone back.
+    await db.query('UPDATE villages SET owner_account_id = $2 WHERE id = $1', [theirs.id, vid.accountId]);
+    const trip = await send({ destinationVillageId: theirs.id, load: load(300), retrieve: load(0, 200) });
+    expect(trip.body.caravan).toMatchObject({ caravans: 1, retrieve: load(0, 200) });
+    const there = await stores(theirs.id);
+    now = new Date(trip.body.caravan.arrivesAt);
+    await tick(db, now, scheduler);
+    const arrived = await stores(theirs.id);
+    expect(Math.round(arrived.wood - there.wood)).toBeGreaterThanOrEqual(300);
+    expect((await world()).caravans[0]).toMatchObject({ status: 'returning', carriedBack: load(0, 200) });
+    // (Room for it at home: storehouses hold 1000 there now.)
+    await db.query(`UPDATE villages SET amounts = jsonb_set(amounts, '{stone}', '0') WHERE id = $1`, [mine.id]);
+    const home = await stores(mine.id);
+    now = new Date(trip.body.caravan.returnsAt);
+    await tick(db, now, scheduler);
+    expect(Math.round((await stores(mine.id)).stone - home.stone)).toBeGreaterThanOrEqual(200);
+  });
+
   it('sends caravans to an ally and to the vault, fetches from it and enlarges it', async () => {
     const vid = await guest('Vid');
     const ola = await guest('Ola');

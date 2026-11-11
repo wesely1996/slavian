@@ -24,6 +24,8 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 			if caravan.kind == "fetch":
 				return UI.t("%s %s from the vault · there in %s") % [verb, cargo, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.arrivesAt) - now)]
 			var going := UI.t("%s %s · arrives in %s") % [verb, cargo, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.arrivesAt) - now)]
+			if caravan.get("retrieve") != null:
+				going += UI.t(" · brings back %s") % _load_text(caravan.retrieve)
 			if caravan.get("returnsAt") != null:
 				going += UI.t(" · home in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt) - now)
 			return going
@@ -33,6 +35,8 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 	var brought := _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")
 	if caravan.kind == "fetch":
 		return UI.t("Fetched %s from the vault") % brought
+	if caravan.get("retrieve") != null:
+		return UI.t("Delivered to %s; brought back %s") % [where, brought]
 	return UI.t("Delivered to %s%s") % [where, "" if brought == UI.t("nothing") else UI.t("; %s did not fit and came back") % brought]
 
 

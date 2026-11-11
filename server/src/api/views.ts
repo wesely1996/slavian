@@ -22,6 +22,7 @@ import { listVillages } from '../db/villages.js';
 import { listRecentBattles, type Battle } from '../db/battles.js';
 import { listRecentRaids, type Raid } from '../db/raids.js';
 import { listCaravans, type Caravan } from '../db/caravans.js';
+import { openBounties, type Bounty } from '../db/bounties.js';
 import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
@@ -334,6 +335,8 @@ export function caravanView(caravan: Caravan) {
     // Troops guarding it, and what happened if a camp ambushed it.
     escort: caravan.escort,
     ambush: caravan.ambush,
+    // What it brings back from where it goes (its owner's own), or null.
+    retrieve: caravan.retrieve,
   };
 }
 
@@ -347,10 +350,27 @@ export function vaultView(data: GameData, vault: Vault) {
   };
 }
 
+export function bountyView(bounty: Bounty) {
+  return {
+    id: bounty.id,
+    villageId: bounty.villageId,
+    ownerAccountId: bounty.ownerAccountId,
+    // What the poster gives, and asks for (they get it less the fee).
+    offer: bounty.offer,
+    want: bounty.want,
+    // The fee they paid when posting it.
+    fee: bounty.fee,
+    status: bounty.status,
+    createdAt: bounty.createdAt.toISOString(),
+  };
+}
+
 export async function logisticsView(client: DbClient, data: GameData, worldId: number) {
   return {
     caravans: (await listCaravans(client, worldId)).map(caravanView),
     vault: vaultView(data, await loadVault(client, worldId)),
+    // The Market's bounty board: every open bounty.
+    bounties: (await openBounties(client, worldId)).map(bountyView),
   };
 }
 
@@ -655,7 +675,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
   const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
   const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
-  const logistics = world.status === 'lobby' ? { caravans: [], vault: null } : await logisticsView(client, data, world.id);
+  const logistics = world.status === 'lobby' ? { caravans: [], vault: null, bounties: [] } : await logisticsView(client, data, world.id);
   const map =
     world.status === 'lobby'
       ? null
