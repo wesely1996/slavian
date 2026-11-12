@@ -2350,6 +2350,25 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     socket.close();
   });
 
+  it('keeps achievements on the account, solo ones sent from the device', async () => {
+    const ana = await guest('Ana');
+    expect((await call('GET', '/v1/me/achievements', ana.token)).body).toEqual({ achievements: [] });
+    const sent = await call('POST', '/v1/me/achievements', ana.token, {
+      achievements: [
+        { id: 'camp_cleared', earnedAt: '2026-05-01T10:00:00.000Z', runs: 2 },
+        { id: 'victory', earnedAt: '2026-05-03T10:00:00.000Z', runs: 1 },
+      ],
+    });
+    expect(sent.status).toBe(200);
+    // Sent again: the earliest time and the most runs win.
+    await call('POST', '/v1/me/achievements', ana.token, { achievements: [{ id: 'camp_cleared', earnedAt: '2026-05-02T10:00:00.000Z', runs: 1 }] });
+    expect((await call('GET', '/v1/me/achievements', ana.token)).body.achievements).toEqual([
+      { id: 'camp_cleared', earnedAt: '2026-05-01T10:00:00.000Z', times: 2 },
+      { id: 'victory', earnedAt: '2026-05-03T10:00:00.000Z', times: 1 },
+    ]);
+    expect((await call('POST', '/v1/me/achievements', ana.token, { achievements: [{ id: 'dragon', earnedAt: '2026-05-01T10:00:00.000Z', runs: 1 }] })).status).toBe(400);
+  });
+
   it('rejects live connections without a token', async () => {
     const socket = new WebSocket(`ws://${baseUrl}/v1/live`);
     const status = await new Promise<number>((resolve) => socket.once('unexpected-response', (_, res) => resolve(res.statusCode ?? 0)));
