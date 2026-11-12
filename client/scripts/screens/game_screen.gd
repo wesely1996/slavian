@@ -601,7 +601,8 @@ func _fit_sheet() -> void:
 		return
 	# Picking a hex on the map: the sheet shrinks to a line, so the map has room.
 	if _picking():
-		_scroll.custom_minimum_size.y = PICKING_HEIGHT
+		# (Room for the join checkbox under the prompt while an army moves.)
+		_scroll.custom_minimum_size.y = PICKING_HEIGHT + (60.0 if _army_moving != 0 else 0.0)
 		return
 	var tall := _panel_mode != "hex" or (_view == "village" and _tab != "village")
 	_scroll.custom_minimum_size.y = area.y * (0.58 if tall else 0.36)
@@ -631,9 +632,6 @@ func _picking_panel() -> void:
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	# Moving an army onto one of your settlements: does it join the garrison?
-	if _army_moving != 0:
-		row.add_child(_join_check())
 	var cancel := UI.button(tr("Cancel"), func() -> void:
 		var sending := _army_sending
 		_army_moving = 0
@@ -646,6 +644,10 @@ func _picking_panel() -> void:
 	cancel.custom_minimum_size.x = 140
 	row.add_child(cancel)
 	_panel_body.add_child(row)
+	# Moving an army onto one of your settlements: does it join the garrison?
+	# (On a line of its own, so the prompt keeps its width.)
+	if _army_moving != 0:
+		_panel_body.add_child(_join_check())
 
 
 ## How tall the sheet's scrolling part is.
@@ -2297,12 +2299,12 @@ func _send_troops(village: Dictionary) -> void:
 	else:
 		where = tr("the hex at (%d, %d)") % [cell.x, cell.y]
 		body = {"target": {"q": cell.x, "r": cell.y}, "orders": "hold"}
-	var dest := UI.hbox(8)
+	# Where they go on a line of its own (sharing a row with the button, the
+	# wrapping text was squeezed to a letter a line), the button under it.
 	var dest_text := UI.label(tr_n("To %s · %d hex", "To %s · %d hexes", away) % [where, away], UI.SMALL_SIZE)
-	dest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dest.add_child(UI.with_info(dest_text, ArmyText.order_text(String(body.orders))))
-	dest.add_child(pick)
-	_panel_body.add_child(dest)
+	_panel_body.add_child(UI.with_info(dest_text, ArmyText.order_text(String(body.orders))))
+	pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_panel_body.add_child(pick)
 	if not target.is_empty() and Game.is_mine(target):
 		_panel_body.add_child(_join_check())
 	elif not target.is_empty() and _horde_against(int(target.id)):
@@ -3075,8 +3077,13 @@ func _army_tab_orders(army: Dictionary) -> void:
 		return
 	var army_id := int(army.id)
 	_panel_body.add_child(UI.button(tr("Move: tap a hex"), func() -> void:
+		# To the map first (it resets the sheet), then wait for the tap with
+		# the army's sheet kept.
+		if _view != "map":
+			_set_view("map")
+		_army_id = army_id
+		_panel_mode = "army"
 		_army_moving = army_id
-		_set_view("map")
 		_rebuild_panel(), "icon/map"))
 	_army_orders_row(army, false)
 
