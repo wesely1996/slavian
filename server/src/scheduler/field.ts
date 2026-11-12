@@ -43,7 +43,7 @@ import { heroAfterBattle } from './heroes.js';
 import { combatants, withIntel } from '../sim/scouting.js';
 import { relinkOutposts } from './outposts.js';
 import { personality } from './battles.js';
-import { hordeBeaten } from './horde.js';
+import { hordeBeaten, joinHordeBattle } from './horde.js';
 import { hordeStats, leaderAfter } from './leaders.js';
 import { finishWave, planFortCheck } from './camps.js';
 import { holdForQuiet } from './waves.js';
@@ -539,6 +539,8 @@ export const fieldHandlers: HandlerRegistry = {
     const payload = interceptPayload.parse(event.payload);
     const wave = await loadWave(client, payload.waveId);
     if (wave.status !== 'marching' || !wave.path?.some((s) => s.q === payload.q && s.r === payload.r && s.atMs === payload.atMs)) return;
+    // Another horde already fighting there: it joins that battle.
+    if (await joinHordeBattle(client, data, world, wave, hex(payload.q, payload.r), event.dueAt)) return;
     await startFieldBattle(client, data, world, wave, hex(payload.q, payload.r), event.dueAt);
   },
 

@@ -83,6 +83,8 @@ const SERBIAN: Record<string, string> = {
 	// Field armies
 	'An army from {village} starved': 'Vojska iz sela {village} je umrla od gladi',
 	'With no food left it scattered; none of them will come back.': 'Bez hrane se razbežala; niko od njih se neće vratiti.',
+	'Another horde joins the battle at ({q}, {r})': 'Još jedna horda se pridružuje bici na ({q}, {r})',
+	'{enemy} more from the {front} fight alongside the horde already there.': 'Još {enemy} sa {front} bori se uz hordu koja je već tamo.',
 	// Generals
 	'{name} answers your call': '{name} se odaziva tvom pozivu',
 	'A new general stands ready.': 'Novi general je spreman.',

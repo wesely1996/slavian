@@ -23,7 +23,7 @@ import { unitsFed } from '../sim/village.js';
 import { fieldArmies } from '../db/armies.js';
 import { hex } from '../sim/hex.js';
 import { startBattle } from './battles.js';
-import { beginRampage, moveOn, startHolyCityBattle } from './horde.js';
+import { beginRampage, joinHordeBattle, moveOn, startHolyCityBattle } from './horde.js';
 import { campsJoin } from './camps.js';
 import { planWaveWarning } from './notices.js';
 import { planRaids } from './outposts.js';
@@ -295,6 +295,9 @@ export const waveHandlers: HandlerRegistry = {
     const wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     // A horde held up in a field battle arrives later than first planned.
     if (wave.status !== 'marching' || (wave.arrivesAt && event.dueAt < wave.arrivesAt)) return;
+    // Another horde already fighting there: it joins that battle.
+    const target = wave.targetVillageId !== null ? await loadVillage(client, wave.targetVillageId) : null;
+    if (await joinHordeBattle(client, data, world, wave, target ? hex(target.q, target.r) : hex(0, 0), event.dueAt)) return;
     await beginRampage(client, data, world, wave, event.dueAt);
     if (wave.targetVillageId !== null) {
       const village = await loadVillage(client, wave.targetVillageId);

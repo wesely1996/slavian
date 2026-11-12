@@ -204,6 +204,14 @@ export async function addDefenders(client: DbClient, id: number, units: Units): 
   await client.query('UPDATE battles SET defender_initial = $2 WHERE id = $1', [id, JSON.stringify(sum)]);
 }
 
+// A horde joined: its troops count towards the attackers' starting strength.
+export async function addAttackers(client: DbClient, id: number, units: Units): Promise<void> {
+  const battle = await loadBattle(client, id);
+  const sum: Record<string, number> = { ...battle.attackerInitial };
+  for (const [unit, n] of Object.entries(units)) sum[unit] = (sum[unit] ?? 0) + n;
+  await client.query('UPDATE battles SET attacker_initial = $2 WHERE id = $1', [id, JSON.stringify(sum)]);
+}
+
 export async function setDecision(client: DbClient, id: number, decision: BattleDecision): Promise<void> {
   await client.query('UPDATE battles SET decision = $2 WHERE id = $1', [id, JSON.stringify(decision)]);
 }

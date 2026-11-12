@@ -1248,6 +1248,10 @@ static func on_field_intercept(server: LocalServer, world: Dictionary, event: Di
 		return
 	if not wave.path.any(func(s: Dictionary) -> bool: return int(s.q) == int(p.q) and int(s.r) == int(p.r) and int(s.atMs) == int(p.atMs)):
 		return
+	# Another horde already fighting there: it joins that battle.
+	if LocalBattles.join_horde_battle(server, world, wave, Vector2i(int(p.q), int(p.r)), int(event.dueAt)):
+		changed.append(["world"])
+		return
 	start_field_battle(server, world, wave, Vector2i(int(p.q), int(p.r)), int(event.dueAt))
 	changed.append(["world"])
 
