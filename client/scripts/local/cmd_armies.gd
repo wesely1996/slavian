@@ -1676,7 +1676,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	# Scouts never fight; they tell the army what it faces (intel).
 	var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id),
-		LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
+		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
@@ -1796,7 +1796,7 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 		var succession := _led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 		var result := assault(data, LocalScouting.combatants(data, army.units), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000,
-			LocalChampions.champions_of(data, hero, general), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
+			LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},
 			result, at, "cleared" if result.cleared else "repelled", null)
@@ -1899,7 +1899,9 @@ static func on_site_explored(server: LocalServer, world: Dictionary, event: Dict
 	var owner_hero: Dictionary = leader if not leader.is_empty() else (hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 	var gear: Array = owner_hero.inventory + owner_hero.gear.values() if not owner_hero.is_empty() else []
 	var distance := LocalSites.distance_share(Vector2i(site.q, site.r), int(world.radius))
-	var loot_factor := float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0
+	# A clan that knows the old stones finds more in them (clans.json siteLoot).
+	var searcher := server.find_village(world, int(army.homeVillageId))
+	var loot_factor := (float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0) * (1.0 + float(searcher.state.get("bonuses", {}).get("siteLoot", 0.0)))
 	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), distance, LocalResearch.scrolls(world), gear, loot_factor)
 	# Scouts along find more besides: resources carried home with the find.
 	var extra := scout_loot(data, scouts_in(data, army.units), distance, loot_factor)

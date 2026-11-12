@@ -213,7 +213,12 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   // The hero commands, else the best general (who takes over when the hero falls).
   const bonuses = commandBonuses(data, research, hero, general);
   // Each army's hero and general fight in its ranks.
-  const armyLeaders = await Promise.all(engaged.map(async (a) => ({ hero: await heroWithArmy(client, a.id), general: await generalWithArmy(client, a.id) })));
+  const armyLeaders = await Promise.all(engaged.map(async (a) => ({
+      hero: await heroWithArmy(client, a.id),
+      general: await generalWithArmy(client, a.id),
+      // Its owner's bonuses, for its champions' strength.
+      owned: villageBonuses(data, (await loadVillage(client, a.homeVillageId)).state),
+    })));
   const ground: Setup = {
     ambush: !!battle.setup.ambush,
     choke: !!battle.setup.choke,
@@ -235,7 +240,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       units: combatants(data, a.units),
       stance: a.stance,
       stats: withIntel(data, a.units, statsFor(a.stance)),
-      champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general),
+      champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general, armyLeaders[i]!.owned),
     })),
   ];
   const chief = await hordeStats(client, data, wave, enemyStats(data, wave.front), null);

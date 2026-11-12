@@ -774,6 +774,7 @@ TROOPS = {
     "skirmisher": ("javelins", None, 1), "poison_archer": ("bow", "poison", 1),
     "hunter": ("bow", "boar", 2), "noble_skirmisher": ("javelins", "crown", 2), "poison_hunter": ("bow", "poison", 2),
     "onager": ("onager", None, 2), "scorpion": ("scorpion", None, 2), "battering_ram": ("ram", None, 2), "devana_hunter": ("bow", "moon", 3), "thunder_thrower": ("firepot", "perun", 3),
+    "aurochs_guard": ("tall_shield", "boar", 2), "raven_javelineer": ("javelins", "moon", 2), "fox_rider": ("horse", "sack", 2), "serpent_axeman": ("axe", "poison", 2),
     "raider": ("horse", "sack", 1), "mounted_archer": ("horse", "bow", 2), "bear_rider": ("bear", None, 2),
     "svarog_raider": ("horse", "fire", 3),
 }
@@ -1151,6 +1152,10 @@ CLAN_FIELDS = {
     "bobr": ARGENT,    # Bobrov (1781): a beaver in its own colour, on silver
     "sokol": OR,       # Sokołów Podlaski: a falcon on an oak branch, a ring in its beak, on gold
     "volk": AZURE,     # Vovchansk (1781): a silver wolf running on green ground, on blue
+    "tur": OR,         # an aurochs' head, black, on gold
+    "gavran": ARGENT,  # a black raven standing, on silver
+    "lisica": ("#4f9a4a", "#2c6a2a"),  # a red fox leaping, on green
+    "zmija": AZURE,    # a gold serpent coiled, on blue
 }
 
 
@@ -1176,6 +1181,7 @@ def charge(s, parts, fill, outline=SABLE, width=2.4):
 CHARGE_BOX = {
     "jelen": (26.2, 14.5, 93.8, 98.5), "rys": (26.5, 28.0, 99.0, 88.0), "medved": (31.8, 19.5, 96.5, 105.5),
     "bobr": (25.2, 47.2, 99.8, 87.0), "sokol": (28.5, 24.8, 99.5, 102.8), "volk": (22.5, 39.5, 98.5, 84.5),
+    "tur": (24.5, 20.5, 103.5, 98.5), "gavran": (25.5, 36.2, 104.5, 101.8), "lisica": (21.5, 27.5, 110.8, 84.2), "zmija": (26.2, 27.5, 91.2, 103.0),
 }
 CHARGES = {}
 
@@ -1349,7 +1355,66 @@ def wolf(s):
     s.circle(37, 54, 1.3, SABLE, stroke="none", sw=0)
 
 
-CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sokol": falcon, "volk": wolf})
+def aurochs(s):
+    """A black aurochs' head, facing out, with great pale horns."""
+    horn = s.lin([(0, "#fbf6ea"), (1, "#bdb29b")], 0, 0, 1, 1)
+    charge(s, [
+        ("limb", "M50,48 Q34,44 30,26", 6),
+        ("limb", "M78,48 Q94,44 98,26", 6),
+    ], horn)
+    charge(s, [
+        ("area", "M44,46 Q64,36 84,46 Q90,56 82,66 Q78,88 64,96 Q50,88 46,66 Q38,56 44,46 Z"),
+        ("area", "M40,50 L30,56 L42,60 Z"),
+        ("area", "M88,50 L98,56 L86,60 Z"),
+    ], "#2a2421", outline="#2a2421")
+    s.ellipse(64, 88, 10, 6, "#5a4a42", stroke="none", sw=0)
+    s.circle(55, 60, 2.5, "#c62f2c", stroke="none", sw=0)
+    s.circle(73, 60, 2.5, "#c62f2c", stroke="none", sw=0)
+
+
+def raven(s):
+    """A black raven standing to the left."""
+    charge(s, [
+        ("limb", "M60,82 L56,96 L50,98", 2.6),
+        ("limb", "M68,82 L68,96 L62,98", 2.6),
+        ("area", "M40,46 Q48,36 58,40 Q76,44 86,58 Q98,66 102,80 Q86,74 76,80 Q60,86 52,74 Q46,62 44,54 Z"),
+        ("area", "M40,46 L28,52 L42,54 Z"),
+    ], "#2a2421", outline="#2a2421")
+    s.path("M58,56 Q74,58 88,70", "none", stroke="#5a5a6a", sw=2)
+    s.circle(47, 46, 2, "#e2b33c", stroke="none", sw=0)
+
+
+def fox(s):
+    """A red fox leaping to the left, its brush high, its tip white."""
+    red = s.lin([(0, "#e8743a"), (1, "#b0441c")], 0, 0, 1, 1)
+    charge(s, [
+        ("limb", "M50,66 L38,76 L30,76", 3.6),
+        ("limb", "M56,68 L48,80", 3.6),
+        ("limb", "M78,66 L88,78", 3.6),
+        ("limb", "M82,64 L94,72", 3.6),
+        ("area", "M46,56 Q60,48 78,52 Q88,56 86,64 Q80,70 60,70 Q48,68 46,56 Z"),
+        ("area", "M48,58 Q42,48 34,46 L24,50 Q26,54 32,56 Q38,60 46,64 Z"),
+        ("area", "M34,47 L36,36 L42,48 Z"),
+        ("area", "M84,58 Q100,44 108,30 Q110,46 100,58 Q94,66 86,64 Z"),
+    ], red)
+    s.path("M104,36 Q108,30 108,30 Q110,40 104,46 Z", "#fbf6ea", stroke="none", sw=0)
+    s.circle(33, 50, 1.4, SABLE, stroke="none", sw=0)
+
+
+def serpent(s):
+    """A gold serpent coiled, its head raised to the left."""
+    gold = s.lin([(0, "#f6d572"), (1, "#b8862a")], 0, 0, 1, 1)
+    charge(s, [
+        ("limb", "M64,96 Q36,94 38,76 Q40,60 64,62 Q86,64 84,78 Q82,88 66,86 Q54,84 56,76 Q58,68 68,70", 9),
+        ("limb", "M68,70 Q80,60 74,46 Q68,34 52,36", 8),
+        ("area", "M54,30 Q40,30 38,38 Q42,44 54,42 Z"),
+    ], gold)
+    s.circle(46, 36, 1.6, SABLE, stroke="none", sw=0)
+    s.path("M38,38 L30,40 M30,40 L27,37 M30,40 L27,43", "none", stroke="#c62f2c", sw=1.4)
+
+
+CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sokol": falcon, "volk": wolf,
+                "tur": aurochs, "gavran": raven, "lisica": fox, "zmija": serpent})
 
 
 # --- Village interior: buildings and fields in three stages --------------------
@@ -1975,6 +2040,14 @@ HEROES = {
                      trim="#b5452f", head="nasal", sky=("#f0c8a8", "#8e4a3c"), braid=True, shield=True, mail=True),
     "ilya": dict(skin=("#e2b48e", "#9e6c4c"), hair=("#bdb5a8", "#6b645a"), beard="full", garb=("#6f6a62", "#2e2b27"),
                  trim="#a39d93", head="cone", sky=("#e6c08a", "#5a4a3a"), mail=True),
+    "alyosha": dict(skin=("#f4d0ae", "#bd8964"), hair=("#d79a4a", "#7a4a1a"), beard=None, garb=("#7a8c3a", "#3a4a18"),
+                    trim="#e2b33c", head="kolpak", sky=("#f2d08a", "#6a7a3a"), bow=True),
+    "mikula": dict(skin=("#e6b890", "#a8764e"), hair=("#e6cc7a", "#a08a3a"), beard="full", garb=("#ece4cc", "#a89c7c"),
+                   trim="#b5452f", head="bare", sky=("#e8d890", "#7a8a4a"), staff=True),
+    "marya": dict(skin=("#f6d6b8", "#c49270"), hair=("#2e2420", "#100c0a"), beard=None, garb=("#7a3a8a", "#3a1442"),
+                  trim="#e2b33c", head="crown", sky=("#e6b0c8", "#4a2a5e"), braid=True, shield=True, mail=True),
+    "svyatogor": dict(skin=("#d8a682", "#94603e"), hair=("#4a3a2e", "#1e1610"), beard="long", garb=("#4a5a52", "#1e2a24"),
+                      trim="#a39d93", head="helm", sky=("#a8b4c0", "#2e3440"), mail=True, fur=True),
 }
 
 
@@ -2038,7 +2111,7 @@ def portrait(kind):
         s.path("M70,107 Q80,104 90,107", "none", stroke=h["hair"][1], sw=3)
     # Hair on top, then headwear.
     head = h["head"]
-    if head in ("kolpak", "fur", "hood") or h.get("braid"):
+    if head in ("kolpak", "fur", "hood", "bare", "crown") or h.get("braid"):
         s.path("M54,92 Q52,58 80,56 Q108,58 106,92 Q100,72 80,70 Q60,72 54,92 Z", hair, stroke="none", sw=0)
     steel = s.lin([(0, "#f1f3f5"), (0.5, "#a3a9b0"), (1, "#4c535b")], 0, 0, 1, 1)
     if head == "helm":
@@ -2063,6 +2136,11 @@ def portrait(kind):
         s.path("M54,80 Q56,44 84,36 Q112,40 106,80 Z", garb, stroke="none", sw=0)
         s.path("M52,82 Q80,72 108,82 Q108,92 80,88 Q52,92 52,82 Z", s.lin([(0, "#e9dcc2"), (1, "#8c7a5e")]), stroke="none", sw=0)
         s.circle(84, 52, 4, h["trim"], stroke="none", sw=0)
+    elif head == "crown":
+        # A queen's crown of gold over her hair.
+        s.path("M56,74 L58,52 L66,64 L73,46 L80,62 L87,46 L94,64 L102,52 L104,74 Z", s.lin([(0, "#f6d572"), (1, "#a8772a")]), stroke=CONTOUR, sw=1.5)
+        for x in (66, 80, 94):
+            s.circle(x, 69, 2.5, "#b5452f", stroke="none", sw=0)
     if h.get("braid"):
         for i in range(5):
             s.ellipse(104 + i * 1.5, 104 + i * 12, 6, 7, hair, stroke="none", sw=0)

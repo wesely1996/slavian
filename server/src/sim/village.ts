@@ -600,7 +600,8 @@ export function trade(
   order: { give: ResourceKind; get: ResourceKind; amount: number },
   at: Date,
 ): { state: VillageState; got: number } {
-  const rate = marketRate(data, state.levels[MARKET] ?? 0);
+  // A clan of traders gets more for what it gives (clans.json marketRate).
+  const rate = marketRate(data, state.levels[MARKET] ?? 0) * (1 + bonus(state.bonuses, 'marketRate'));
   if (rate <= 0) throw new RuleError('Build a Market to trade');
   if (order.give === order.get) throw new RuleError('Trade one resource for another');
   if (!Number.isInteger(order.amount) || order.amount < 1) throw new RuleError('Trade at least 1');

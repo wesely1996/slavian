@@ -1150,70 +1150,86 @@ msgstr "prinos ispostava"
 msgid "storage"
 msgstr "skladište"
 
-#: client/scripts/game/hero_text.gd:35
+#: client/scripts/game/hero_text.gd:19
+msgid "hero's strength in battle"
+msgstr "snaga junaka u bici"
+
+#: client/scripts/game/hero_text.gd:19
+msgid "generals' strength in battle"
+msgstr "snaga vojvoda u bici"
+
+#: client/scripts/game/hero_text.gd:20
+msgid "market trades"
+msgstr "trgovina na pijaci"
+
+#: client/scripts/game/hero_text.gd:20
+msgid "finds in ancient sites"
+msgstr "nalazi na drevnim mestima"
+
+#: client/scripts/game/hero_text.gd:36
 msgid "Rides %s hexes an hour"
 msgstr "Jaše %s polja na sat"
 
-#: client/scripts/game/hero_text.gd:36
+#: client/scripts/game/hero_text.gd:37
 msgid "Wounded for %s after a lost fight"
 msgstr "Ranjen %s posle izgubljene bitke"
 
-#: client/scripts/game/hero_text.gd:37
+#: client/scripts/game/hero_text.gd:38
 msgid "Gear: %d of %d slots worn"
 msgstr "Oprema: nosi %d od %d mesta"
 
-#: client/scripts/game/hero_text.gd:38
+#: client/scripts/game/hero_text.gd:39
 msgid "skill point"
 msgid_plural "skill points"
 msgstr[0] "poen veštine"
 msgstr[1] "poena veštine"
 msgstr[2] "poena veštine"
 
-#: client/scripts/game/hero_text.gd:38
+#: client/scripts/game/hero_text.gd:39
 msgid "%d %s to spend"
 msgstr "%d %s za trošenje"
 
-#: client/scripts/game/hero_text.gd:99
+#: client/scripts/game/hero_text.gd:100
 msgid "No hero yet"
 msgstr "Još nema junaka"
 
-#: client/scripts/game/hero_text.gd:100
+#: client/scripts/game/hero_text.gd:101
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: client/scripts/game/hero_text.gd:107
+#: client/scripts/game/hero_text.gd:108
 msgid "%s: %s (%s)"
 msgstr "%s: %s (%s)"
 
-#: client/scripts/game/hero_text.gd:129
+#: client/scripts/game/hero_text.gd:130
 msgid "%s%d%% %s"
 msgstr "%s%d%% %s"
 
-#: client/scripts/game/hero_text.gd:141
+#: client/scripts/game/hero_text.gd:142
 msgid "%s lies wounded in %s · %s"
 msgstr "%s leži ranjen u %s · %s"
 
-#: client/scripts/game/hero_text.gd:146
+#: client/scripts/game/hero_text.gd:147
 msgid "%s is away on a quest · back in %s"
 msgstr "%s je na zadatku · vraća se za %s"
 
-#: client/scripts/game/hero_text.gd:148
+#: client/scripts/game/hero_text.gd:149
 msgid "Hero %s (Lv %d) leads this garrison"
 msgstr "Junak %s (nivo %d) vodi ovu posadu"
 
-#: client/scripts/game/hero_text.gd:149
+#: client/scripts/game/hero_text.gd:150
 msgid "Hero %s (Lv %d) stands in %s"
 msgstr "Junak %s (nivo %d) stoji u %s"
 
-#: client/scripts/game/hero_text.gd:157
+#: client/scripts/game/hero_text.gd:158
 msgid "ancient site"
 msgstr "drevno mesto"
 
-#: client/scripts/game/hero_text.gd:165
+#: client/scripts/game/hero_text.gd:166
 msgid "%d hold it · within %d hexes · gone in %s · +%d XP"
 msgstr "%d ga drži · do %d polja · nestaje za %s · +%d iskustva"
 
-#: client/scripts/game/hero_text.gd:166
+#: client/scripts/game/hero_text.gd:167
 msgid "%s · %d%% risk · +%d XP"
 msgstr "%s · %d%% rizik · +%d iskustva"
 
@@ -5751,6 +5767,102 @@ msgstr "Kamen i otpornost na hladnoću (protiv Severa)"
 msgid "Weaker grain"
 msgstr "Slabije žito"
 
+#: data/clans.json
+msgid "Rod Tura"
+msgstr "Rod Tura"
+
+#: data/clans.json
+msgid "Aurochs"
+msgstr "Tur"
+
+#: data/clans.json
+msgid "The aurochs-folk of the river meadows stand like their wild cattle: shoulder to shoulder, horns forward, never giving ground. Their heavy wagons crawl."
+msgstr "Turov narod sa rečnih livada stoji kao njihova divlja goveda: rame uz rame, rogovima napred, nikad ne uzmičući. Njihova teška kola puze."
+
+#: data/clans.json
+msgid "A black aurochs' head, on gold."
+msgstr "Crna glava tura, na zlatu."
+
+#: data/clans.json
+msgid "Home defense and infantry"
+msgstr "Odbrana doma i pešadija"
+
+#: data/clans.json
+msgid "Slower caravans"
+msgstr "Sporiji karavani"
+
+#: data/clans.json
+msgid "Rod Gavrana"
+msgstr "Rod Gavrana"
+
+#: data/clans.json
+msgid "Raven"
+msgstr "Gavran"
+
+#: data/clans.json
+msgid "The raven-folk keep the old knowledge and send their birds where men cannot go. Their fields are thin; their elders read the sky instead."
+msgstr "Gavranov narod čuva staro znanje i šalje svoje ptice kuda ljudi ne mogu. Njive su im mršave; njihovi starci umesto toga čitaju nebo."
+
+#: data/clans.json
+msgid "A black raven standing, on silver."
+msgstr "Crni gavran koji stoji, na srebru."
+
+#: data/clans.json
+msgid "Research and scouts (fewer scout losses)"
+msgstr "Istraživanje i izvidnici (manje izgubljenih izvidnika)"
+
+#: data/clans.json
+msgid "Less grain"
+msgstr "Manje žita"
+
+#: data/clans.json
+msgid "Rod Lisice"
+msgstr "Rod Lisice"
+
+#: data/clans.json
+msgid "Fox"
+msgstr "Lisica"
+
+#: data/clans.json
+msgid "The fox-folk trade where others fight and hide what others lose. Their palisades are an afterthought: they would rather not be found."
+msgstr "Lisičji narod trguje gde se drugi bore i krije ono što drugi gube. Palisade su im usputna misao: radije bi da ih niko ne nađe."
+
+#: data/clans.json
+msgid "A red fox leaping, on green."
+msgstr "Crvena lisica u skoku, na zelenom."
+
+#: data/clans.json
+msgid "Market trades, and less lost to plundering hordes"
+msgstr "Trgovina na pijaci, i manje izgubljeno od horde koja pljačka"
+
+#: data/clans.json
+msgid "Weaker home defense"
+msgstr "Slabija odbrana doma"
+
+#: data/clans.json
+msgid "Rod Zmije"
+msgstr "Rod Zmije"
+
+#: data/clans.json
+msgid "Serpent"
+msgstr "Zmija"
+
+#: data/clans.json
+msgid "The serpent-folk live among the old stones and know where the ancients hid their treasures. Their many mouths are hard to feed."
+msgstr "Zmijin narod živi među starim kamenjem i zna gde su drevni sakrili svoja blaga. Mnoga njihova usta teško je nahraniti."
+
+#: data/clans.json
+msgid "A gold serpent coiled, on blue."
+msgstr "Zlatna sklupčana zmija, na plavom."
+
+#: data/clans.json
+msgid "Stone, iron and richer finds in ancient sites"
+msgstr "Kamen, gvožđe i bogatiji nalazi na drevnim mestima"
+
+#: data/clans.json
+msgid "Costlier upkeep"
+msgstr "Skuplje izdržavanje"
+
 #: data/difficulty.json
 msgid "Story"
 msgstr "Priča"
@@ -6230,6 +6342,86 @@ msgstr "Snaga zemlje"
 #: data/heroes.json
 msgid "Mother Earth hides him: he is wounded for less time."
 msgstr "Majka Zemlja ga čuva: kraće ostaje ranjen."
+
+#: data/heroes.json
+msgid "Alyosha"
+msgstr "Aljoša"
+
+#: data/heroes.json
+msgid "The cunning youngest bogatyr"
+msgstr "Lukavi najmlađi bogatir"
+
+#: data/heroes.json
+msgid "A priest's son from Rostov who wins by wit as often as by the sword: he beat Tugarin by a trick no one else would stoop to."
+msgstr "Popov sin iz Rostova koji pobeđuje dosetkom jednako često kao mačem: Tugarina je savladao lukavstvom na koje se niko drugi ne bi spustio."
+
+#: data/heroes.json
+msgid "Sharp wit"
+msgstr "Oštar um"
+
+#: data/heroes.json
+msgid "His scouts ride faster, and raiders carry off less of what he guards."
+msgstr "Njegovi izvidnici jašu brže, a pljačkaši odnose manje od onoga što on čuva."
+
+#: data/heroes.json
+msgid "Mikula"
+msgstr "Mikula"
+
+#: data/heroes.json
+msgid "The giant ploughman"
+msgstr "Div orač"
+
+#: data/heroes.json
+msgid "The ploughman whose plough no prince's retinue could lift from the furrow. The earth loves him; war comes slowly to him."
+msgstr "Orač čiji plug nijedna kneževa družina nije mogla da izvuče iz brazde. Zemlja ga voli; rat mu dolazi sporo."
+
+#: data/heroes.json
+msgid "Mother earth's son"
+msgstr "Sin majke zemlje"
+
+#: data/heroes.json
+msgid "Full barns: every village stores a tenth more."
+msgstr "Pune ambare: svako selo čuva desetinu više."
+
+#: data/heroes.json
+msgid "Marya"
+msgstr "Marja"
+
+#: data/heroes.json
+msgid "The warrior queen"
+msgstr "Kraljica ratnica"
+
+#: data/heroes.json
+msgid "Marya Morevna, who chained Koschei and rode to war while her husband kept house. Her riders and her captains fear no one; books can wait."
+msgstr "Marja Morevna, koja je okovala Koščeja i jahala u rat dok joj je muž čuvao kuću. Njeni konjanici i vojvode ne boje se nikoga; knjige mogu da čekaju."
+
+#: data/heroes.json
+msgid "Queen of the steppe"
+msgstr "Kraljica stepe"
+
+#: data/heroes.json
+msgid "She rides ahead of her own armies."
+msgstr "Jaše ispred svojih vojski."
+
+#: data/heroes.json
+msgid "Svyatogor"
+msgstr "Svjatogor"
+
+#: data/heroes.json
+msgid "The mountain giant"
+msgstr "Div sa planine"
+
+#: data/heroes.json
+msgid "So huge that only the mountains can bear him. In battle he is a host on his own, on the road a slow one, at table a ruinous guest."
+msgstr "Toliko golem da ga samo planine mogu nositi. U bici je sam čitava vojska, na putu spora, a za stolom gost koji upropasti domaćina."
+
+#: data/heroes.json
+msgid "The earth groans"
+msgstr "Zemlja stenje"
+
+#: data/heroes.json
+msgid "Hordes falter before the gates he stands behind."
+msgstr "Horde posrću pred kapijama iza kojih on stoji."
 
 #: data/horde.json
 msgid "{owner}'s refuge"
@@ -7434,6 +7626,38 @@ msgstr "Veliki vojni karavan"
 #: data/units.json
 msgid "A long covered wagon behind a team of oxen: it carries 10 foot soldiers or 1 siege engine (engines first), who ride at its pace instead of marching, and 300 grain for the army. Standing in the open, it is drawn into the wagon fort."
 msgstr "Dugačka pokrivena kola za zapregom volova: nosi 10 pešaka ili 1 opsadnu spravu (prvo sprave), koji se voze njegovim korakom umesto da marširaju, i 300 žita za vojsku. Na otvorenom se uvlači u utvrđenje od kola."
+
+#: data/units.json
+msgid "Aurochs Guard"
+msgstr "Turova garda"
+
+#: data/units.json
+msgid "The aurochs-folk's own: shield-walls that do not break."
+msgstr "Turovog naroda: zidovi od štitova koji se ne lome."
+
+#: data/units.json
+msgid "Raven Javelineer"
+msgstr "Gavranov kopljobacač"
+
+#: data/units.json
+msgid "The raven-folk's own: skirmishers who strike first and see far."
+msgstr "Gavranovog naroda: čarkaši koji udaraju prvi i vide daleko."
+
+#: data/units.json
+msgid "Fox Rider"
+msgstr "Lisičji jahač"
+
+#: data/units.json
+msgid "The fox-folk's own: quick riders who carry off twice the spoils."
+msgstr "Lisičjeg naroda: brzi jahači koji odnose dvostruki plen."
+
+#: data/units.json
+msgid "Serpent Axeman"
+msgstr "Zmijin sekiraš"
+
+#: data/units.json
+msgid "The serpent-folk's own: heavy axes that bite through shields."
+msgstr "Zmijinog naroda: teške sekire koje seku kroz štitove."
 
 #: data/walls.json
 msgid "Timber Rampart"

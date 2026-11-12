@@ -16,7 +16,8 @@ static func effect_name(key: String) -> String:
 		"production.wood": UI.t("wood"), "production.stone": UI.t("stone"), "production.iron": UI.t("iron"),
 		"buildTime": UI.t("build time"), "trainTime": UI.t("training time"), "trainTime.settler": UI.t("settler training time"),
 		"coldDefense": UI.t("defense against the North"), "fortCost": UI.t("fort cost"), "outpostYield": UI.t("outpost yield"),
-		"storage": UI.t("storage"),
+		"storage": UI.t("storage"), "champion": UI.t("hero's strength in battle"), "generalChampion": UI.t("generals' strength in battle"),
+		"marketRate": UI.t("market trades"), "siteLoot": UI.t("finds in ancient sites"),
 	}.get(key, key)
 
 

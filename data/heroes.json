@@ -363,6 +363,58 @@
           }
         }
       ]
+    },
+    "alyosha": {
+      "name": "Alyosha",
+      "title": "The cunning youngest bogatyr",
+      "story": "A priest's son from Rostov who wins by wit as often as by the sword: he beat Tugarin by a trick no one else would stoop to.",
+      "effects": { "ambush": 0.12, "scoutSurvival": 0.2, "defense.all": -0.05 },
+      "traits": [
+        {
+          "name": "Sharp wit",
+          "description": "His scouts ride faster, and raiders carry off less of what he guards.",
+          "effects": { "scoutSpeed": 0.2, "lootTaken": -0.1 }
+        }
+      ]
+    },
+    "mikula": {
+      "name": "Mikula",
+      "title": "The giant ploughman",
+      "story": "The ploughman whose plough no prince's retinue could lift from the furrow. The earth loves him; war comes slowly to him.",
+      "effects": { "production.grain": 0.12, "buildTime": -0.1, "heroXp": -0.2 },
+      "traits": [
+        {
+          "name": "Mother earth's son",
+          "description": "Full barns: every village stores a tenth more.",
+          "effects": { "storage": 0.1 }
+        }
+      ]
+    },
+    "marya": {
+      "name": "Marya",
+      "title": "The warrior queen",
+      "story": "Marya Morevna, who chained Koschei and rode to war while her husband kept house. Her riders and her captains fear no one; books can wait.",
+      "effects": { "attack.cavalry": 0.12, "generalChampion": 0.3, "researchTime": 0.12 },
+      "traits": [
+        {
+          "name": "Queen of the steppe",
+          "description": "She rides ahead of her own armies.",
+          "effects": { "heroSpeed": 0.15 }
+        }
+      ]
+    },
+    "svyatogor": {
+      "name": "Svyatogor",
+      "title": "The mountain giant",
+      "story": "So huge that only the mountains can bear him. In battle he is a host on his own, on the road a slow one, at table a ruinous guest.",
+      "effects": { "champion": 0.6, "heroSpeed": -0.3, "upkeep": 0.1 },
+      "traits": [
+        {
+          "name": "The earth groans",
+          "description": "Hordes falter before the gates he stands behind.",
+          "effects": { "homeDefense": 0.05 }
+        }
+      ]
     }
   }
 }

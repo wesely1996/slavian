@@ -1145,69 +1145,85 @@ msgstr ""
 msgid "storage"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:35
-msgid "Rides %s hexes an hour"
+#: client/scripts/game/hero_text.gd:19
+msgid "hero's strength in battle"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:19
+msgid "generals' strength in battle"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:20
+msgid "market trades"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:20
+msgid "finds in ancient sites"
 msgstr ""
 
 #: client/scripts/game/hero_text.gd:36
-msgid "Wounded for %s after a lost fight"
+msgid "Rides %s hexes an hour"
 msgstr ""
 
 #: client/scripts/game/hero_text.gd:37
-msgid "Gear: %d of %d slots worn"
+msgid "Wounded for %s after a lost fight"
 msgstr ""
 
 #: client/scripts/game/hero_text.gd:38
+msgid "Gear: %d of %d slots worn"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:39
 msgid "skill point"
 msgid_plural "skill points"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/game/hero_text.gd:38
+#: client/scripts/game/hero_text.gd:39
 msgid "%d %s to spend"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:99
+#: client/scripts/game/hero_text.gd:100
 msgid "No hero yet"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:100
+#: client/scripts/game/hero_text.gd:101
 msgid "%s, %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:107
+#: client/scripts/game/hero_text.gd:108
 msgid "%s: %s (%s)"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:129
+#: client/scripts/game/hero_text.gd:130
 msgid "%s%d%% %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:141
+#: client/scripts/game/hero_text.gd:142
 msgid "%s lies wounded in %s · %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:146
+#: client/scripts/game/hero_text.gd:147
 msgid "%s is away on a quest · back in %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:148
+#: client/scripts/game/hero_text.gd:149
 msgid "Hero %s (Lv %d) leads this garrison"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:149
+#: client/scripts/game/hero_text.gd:150
 msgid "Hero %s (Lv %d) stands in %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:157
+#: client/scripts/game/hero_text.gd:158
 msgid "ancient site"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:165
+#: client/scripts/game/hero_text.gd:166
 msgid "%d hold it · within %d hexes · gone in %s · +%d XP"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:166
+#: client/scripts/game/hero_text.gd:167
 msgid "%s · %d%% risk · +%d XP"
 msgstr ""
 
@@ -5731,6 +5747,102 @@ msgstr ""
 msgid "Weaker grain"
 msgstr ""
 
+#: data/clans.json
+msgid "Rod Tura"
+msgstr ""
+
+#: data/clans.json
+msgid "Aurochs"
+msgstr ""
+
+#: data/clans.json
+msgid "The aurochs-folk of the river meadows stand like their wild cattle: shoulder to shoulder, horns forward, never giving ground. Their heavy wagons crawl."
+msgstr ""
+
+#: data/clans.json
+msgid "A black aurochs' head, on gold."
+msgstr ""
+
+#: data/clans.json
+msgid "Home defense and infantry"
+msgstr ""
+
+#: data/clans.json
+msgid "Slower caravans"
+msgstr ""
+
+#: data/clans.json
+msgid "Rod Gavrana"
+msgstr ""
+
+#: data/clans.json
+msgid "Raven"
+msgstr ""
+
+#: data/clans.json
+msgid "The raven-folk keep the old knowledge and send their birds where men cannot go. Their fields are thin; their elders read the sky instead."
+msgstr ""
+
+#: data/clans.json
+msgid "A black raven standing, on silver."
+msgstr ""
+
+#: data/clans.json
+msgid "Research and scouts (fewer scout losses)"
+msgstr ""
+
+#: data/clans.json
+msgid "Less grain"
+msgstr ""
+
+#: data/clans.json
+msgid "Rod Lisice"
+msgstr ""
+
+#: data/clans.json
+msgid "Fox"
+msgstr ""
+
+#: data/clans.json
+msgid "The fox-folk trade where others fight and hide what others lose. Their palisades are an afterthought: they would rather not be found."
+msgstr ""
+
+#: data/clans.json
+msgid "A red fox leaping, on green."
+msgstr ""
+
+#: data/clans.json
+msgid "Market trades, and less lost to plundering hordes"
+msgstr ""
+
+#: data/clans.json
+msgid "Weaker home defense"
+msgstr ""
+
+#: data/clans.json
+msgid "Rod Zmije"
+msgstr ""
+
+#: data/clans.json
+msgid "Serpent"
+msgstr ""
+
+#: data/clans.json
+msgid "The serpent-folk live among the old stones and know where the ancients hid their treasures. Their many mouths are hard to feed."
+msgstr ""
+
+#: data/clans.json
+msgid "A gold serpent coiled, on blue."
+msgstr ""
+
+#: data/clans.json
+msgid "Stone, iron and richer finds in ancient sites"
+msgstr ""
+
+#: data/clans.json
+msgid "Costlier upkeep"
+msgstr ""
+
 #: data/difficulty.json
 msgid "Story"
 msgstr ""
@@ -6209,6 +6321,86 @@ msgstr ""
 
 #: data/heroes.json
 msgid "Mother Earth hides him: he is wounded for less time."
+msgstr ""
+
+#: data/heroes.json
+msgid "Alyosha"
+msgstr ""
+
+#: data/heroes.json
+msgid "The cunning youngest bogatyr"
+msgstr ""
+
+#: data/heroes.json
+msgid "A priest's son from Rostov who wins by wit as often as by the sword: he beat Tugarin by a trick no one else would stoop to."
+msgstr ""
+
+#: data/heroes.json
+msgid "Sharp wit"
+msgstr ""
+
+#: data/heroes.json
+msgid "His scouts ride faster, and raiders carry off less of what he guards."
+msgstr ""
+
+#: data/heroes.json
+msgid "Mikula"
+msgstr ""
+
+#: data/heroes.json
+msgid "The giant ploughman"
+msgstr ""
+
+#: data/heroes.json
+msgid "The ploughman whose plough no prince's retinue could lift from the furrow. The earth loves him; war comes slowly to him."
+msgstr ""
+
+#: data/heroes.json
+msgid "Mother earth's son"
+msgstr ""
+
+#: data/heroes.json
+msgid "Full barns: every village stores a tenth more."
+msgstr ""
+
+#: data/heroes.json
+msgid "Marya"
+msgstr ""
+
+#: data/heroes.json
+msgid "The warrior queen"
+msgstr ""
+
+#: data/heroes.json
+msgid "Marya Morevna, who chained Koschei and rode to war while her husband kept house. Her riders and her captains fear no one; books can wait."
+msgstr ""
+
+#: data/heroes.json
+msgid "Queen of the steppe"
+msgstr ""
+
+#: data/heroes.json
+msgid "She rides ahead of her own armies."
+msgstr ""
+
+#: data/heroes.json
+msgid "Svyatogor"
+msgstr ""
+
+#: data/heroes.json
+msgid "The mountain giant"
+msgstr ""
+
+#: data/heroes.json
+msgid "So huge that only the mountains can bear him. In battle he is a host on his own, on the road a slow one, at table a ruinous guest."
+msgstr ""
+
+#: data/heroes.json
+msgid "The earth groans"
+msgstr ""
+
+#: data/heroes.json
+msgid "Hordes falter before the gates he stands behind."
 msgstr ""
 
 #: data/horde.json
@@ -7413,6 +7605,38 @@ msgstr ""
 
 #: data/units.json
 msgid "A long covered wagon behind a team of oxen: it carries 10 foot soldiers or 1 siege engine (engines first), who ride at its pace instead of marching, and 300 grain for the army. Standing in the open, it is drawn into the wagon fort."
+msgstr ""
+
+#: data/units.json
+msgid "Aurochs Guard"
+msgstr ""
+
+#: data/units.json
+msgid "The aurochs-folk's own: shield-walls that do not break."
+msgstr ""
+
+#: data/units.json
+msgid "Raven Javelineer"
+msgstr ""
+
+#: data/units.json
+msgid "The raven-folk's own: skirmishers who strike first and see far."
+msgstr ""
+
+#: data/units.json
+msgid "Fox Rider"
+msgstr ""
+
+#: data/units.json
+msgid "The fox-folk's own: quick riders who carry off twice the spoils."
+msgstr ""
+
+#: data/units.json
+msgid "Serpent Axeman"
+msgstr ""
+
+#: data/units.json
+msgid "The serpent-folk's own: heavy axes that bite through shields."
 msgstr ""
 
 #: data/walls.json

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The six clans (Rod), picked when joining a world (PLAN.md §9). `effects` join the player's research bonuses (same keys as research.json, plus researchTime, fortCost, coldDefense against the North front, ambush on field ambushes and trainTime.<unit>); a negative value is a weakness. `unique` names the clan's own unit (units.json) or building (buildings.json), which carries `clan`.",
+  "_comment": "The ten clans (Rod), picked when joining a world (PLAN.md §9). `effects` join the player's research bonuses (same keys as research.json, plus researchTime, fortCost, coldDefense against the North front, ambush on field ambushes and trainTime.<unit>); a negative value is a weakness. `unique` names the clan's own unit (units.json) or building (buildings.json), which carries `clan`.",
   "clans": {
     "jelen": {
       "name": "Rod Jelena",
@@ -61,6 +61,46 @@
       "weakness": "Weaker grain",
       "effects": { "production.stone": 0.15, "coldDefense": 0.2, "production.grain": -0.1 },
       "unique": { "building": "longhouse_hall" }
+    },
+    "tur": {
+      "name": "Rod Tura",
+      "animal": "Aurochs",
+      "story": "The aurochs-folk of the river meadows stand like their wild cattle: shoulder to shoulder, horns forward, never giving ground. Their heavy wagons crawl.",
+      "arms": "A black aurochs' head, on gold.",
+      "best": "Home defense and infantry",
+      "weakness": "Slower caravans",
+      "effects": { "homeDefense": 0.12, "defense.infantry": 0.08, "caravanSpeed": -0.15 },
+      "unique": { "unit": "aurochs_guard" }
+    },
+    "gavran": {
+      "name": "Rod Gavrana",
+      "animal": "Raven",
+      "story": "The raven-folk keep the old knowledge and send their birds where men cannot go. Their fields are thin; their elders read the sky instead.",
+      "arms": "A black raven standing, on silver.",
+      "best": "Research and scouts (fewer scout losses)",
+      "weakness": "Less grain",
+      "effects": { "researchTime": -0.12, "scoutSurvival": 0.25, "production.grain": -0.1 },
+      "unique": { "unit": "raven_javelineer" }
+    },
+    "lisica": {
+      "name": "Rod Lisice",
+      "animal": "Fox",
+      "story": "The fox-folk trade where others fight and hide what others lose. Their palisades are an afterthought: they would rather not be found.",
+      "arms": "A red fox leaping, on green.",
+      "best": "Market trades, and less lost to plundering hordes",
+      "weakness": "Weaker home defense",
+      "effects": { "marketRate": 0.15, "lootTaken": -0.2, "homeDefense": -0.1 },
+      "unique": { "unit": "fox_rider" }
+    },
+    "zmija": {
+      "name": "Rod Zmije",
+      "animal": "Serpent",
+      "story": "The serpent-folk live among the old stones and know where the ancients hid their treasures. Their many mouths are hard to feed.",
+      "arms": "A gold serpent coiled, on blue.",
+      "best": "Stone, iron and richer finds in ancient sites",
+      "weakness": "Costlier upkeep",
+      "effects": { "production.stone": 0.1, "production.iron": 0.1, "siteLoot": 0.25, "upkeep": 0.1 },
+      "unique": { "unit": "serpent_axeman" }
     }
   }
 }

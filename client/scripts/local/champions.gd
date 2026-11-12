@@ -17,12 +17,25 @@ static func command_bonuses(data: Dictionary, base: Dictionary, hero: Dictionary
 
 
 ## The champions fighting with a force: its hero, its general.
-static func champions_of(data: Dictionary, hero: Dictionary, general: Dictionary) -> Array:
+## The stronger for the owner's `champion` and `generalChampion` bonuses
+## (`owned`, a hero's own).
+static func champions_of(data: Dictionary, hero: Dictionary, general: Dictionary, owned := {}) -> Array:
 	var out: Array = []
 	if not hero.is_empty():
-		out.append(LocalBattle.champion_of(data, "hero", int(hero.level)))
+		out.append(_stronger(LocalBattle.champion_of(data, "hero", int(hero.level)), float(owned.get("champion", 0.0))))
 	if not general.is_empty():
-		out.append(LocalBattle.champion_of(data, "general", int(general.level)))
+		out.append(_stronger(LocalBattle.champion_of(data, "general", int(general.level)), float(owned.get("generalChampion", 0.0))))
+	return out
+
+
+static func _stronger(c: Dictionary, extra: float) -> Dictionary:
+	if extra == 0.0:
+		return c
+	var f := 1.0 + extra
+	var out := c.duplicate()
+	out.attack = float(c.attack) * f
+	out.defense = float(c.defense) * f
+	out.health = float(c.health) * f
 	return out
 
 
