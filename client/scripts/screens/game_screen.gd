@@ -3895,9 +3895,17 @@ func _hero_about(hero: Dictionary) -> void:
 	_panel_body.add_child(status)
 	_tick(status, func() -> String: return HeroText.whereabouts(hero, -1, Game.village_name(hero.villageId), Game.server_now()))
 	var xp_text := tr("XP %d / %d") % [int(hero.xp), int(hero.xpToNext)] if hero.xpToNext != null else tr("Highest level")
-	var skill_word := tr_n("skill point", "skill points", int(hero.skillPoints))
-	_panel_body.add_child(UI.with_info(UI.label(tr("%s · %d %s") % [xp_text, int(hero.skillPoints), skill_word], UI.SMALL_SIZE, UI.MUTED),
-		tr("XP comes from enemies slain while leading a garrison.")))
+	_panel_body.add_child(UI.with_info(UI.label(xp_text, UI.SMALL_SIZE, UI.MUTED), tr("XP comes from enemies slain while leading a garrison.")))
+	if hero.xpToNext != null:
+		var xp_bar := _gauge(UI.ACCENT)
+		xp_bar.value = clampf(float(hero.xp) / maxf(1.0, float(hero.xpToNext)), 0.0, 1.0)
+		_panel_body.add_child(xp_bar)
+	if int(hero.skillPoints) > 0:
+		var spend := UI.primary(tr_n("Spend %d skill point", "Spend %d skill points", int(hero.skillPoints)) % int(hero.skillPoints), func() -> void:
+			_side["hero"] = "skills"
+			_scroll.scroll_vertical = 0
+			_rebuild_panel(), "icon/research")
+		_panel_body.add_child(spend)
 	var effects := HeroText.effects(hero.bonuses)
 	if effects != "":
 		_panel_body.add_child(UI.label(tr("Adds where it stands: %s") % effects, UI.SMALL_SIZE, UI.MUTED))
@@ -3952,37 +3960,56 @@ func _hero_skills(hero: Dictionary) -> void:
 			if def.branch != branch:
 				continue
 			var rank := int(hero.skills.get(skill, 0))
+			var card := UI.card(10)
 			var row := UI.hbox()
+			card.add_child(row)
 			var info := UI.vbox(2)
 			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			info.add_child(UI.label(tr("%s  %d/%d") % [tr(def.name), rank, int(def.maxRank)]))
+			var head := UI.hbox(10)
+			var name := UI.label(tr(def.name))
+			name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			head.add_child(name)
+			# Its ranks as pips: filled for those learned.
+			var pips := UI.label("●".repeat(rank) + "○".repeat(maxi(0, int(def.maxRank) - rank)), UI.SMALL_SIZE, UI.ACCENT if rank > 0 else UI.MUTED)
+			pips.autowrap_mode = TextServer.AUTOWRAP_OFF
+			pips.tooltip_text = tr("%d of %d") % [rank, int(def.maxRank)]
+			head.add_child(pips)
+			info.add_child(head)
 			info.add_child(UI.label(tr(def.description), UI.SMALL_SIZE, UI.MUTED))
 			row.add_child(info)
 			if rank < int(def.maxRank) and int(hero.skillPoints) > 0:
-				var learn := UI.button("+", func() -> void: _hero_action("skills", {"skill": skill}))
-				learn.custom_minimum_size.x = 90
+				var learn := UI.primary("+", func() -> void: _hero_action("skills", {"skill": skill}))
+				learn.custom_minimum_size.x = 80
+				learn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				row.add_child(learn)
-			_panel_body.add_child(row))
+			_panel_body.add_child(card))
 
 
 ## What the hero wears, and what it carries to wear.
 func _hero_gear(hero: Dictionary) -> void:
 	var data: Dictionary = Game.data.heroes
 	_panel_body.add_child(UI.label(tr("Gear"), UI.HEADING_SIZE))
+	# What it wears: a card for each slot, two abreast.
+	var slots := GridContainer.new()
+	slots.columns = 2
+	slots.add_theme_constant_override("h_separation", 8)
+	slots.add_theme_constant_override("v_separation", 8)
 	for slot in data.slots:
 		var item: Variant = hero.gear.get(slot)
-		var row := UI.hbox()
-		var worn := UI.vbox(0)
-		worn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		worn.add_child(UI.label(tr("%s: %s") % [String(slot).capitalize(), tr(data.items[item].name) if item != null else "—"], UI.SMALL_SIZE))
+		var card := UI.card(8)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var worn := UI.vbox(2)
+		card.add_child(worn)
+		worn.add_child(UI.label(tr(String(slot).capitalize()), UI.SMALL_SIZE - 2, UI.MUTED))
+		worn.add_child(UI.label(tr(data.items[item].name) if item != null else tr("Empty"), UI.SMALL_SIZE, UiTheme.INK if item != null else UI.MUTED))
 		if item != null:
-			worn.add_child(UI.label(HeroText.effects(data.items[item].effects), UI.SMALL_SIZE, UI.GOOD))
-		row.add_child(worn)
-		if item != null:
+			worn.add_child(UI.label(HeroText.effects(data.items[item].effects), UI.SMALL_SIZE - 2, UI.GOOD))
 			var off := UI.button(tr("Take off"), func() -> void: _hero_action("unequip", {"slot": slot}))
-			off.custom_minimum_size.x = 150
-			row.add_child(off)
-		_panel_body.add_child(row)
+			off.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+			off.custom_minimum_size.y = 52
+			worn.add_child(off)
+		slots.add_child(card)
+	_panel_body.add_child(slots)
 	# Sets: what wearing all of one adds, and how much of it is worn.
 	var wearing: Array = hero.gear.values()
 	for set_id in data.get("sets", {}):
@@ -3995,16 +4022,19 @@ func _hero_gear(hero: Dictionary) -> void:
 		_panel_body.add_child(UI.with_info(UI.label(tr("No gear yet."), UI.SMALL_SIZE, UI.MUTED), tr("Beaten hordes sometimes leave gear behind for a hero who fought them.")))
 	_paged("hero gear", hero.inventory, 4 if _roomy() else 2, func(item: String) -> void:
 		var def: Dictionary = data.items[item]
+		var card := UI.card(8)
 		var row := UI.hbox()
+		card.add_child(row)
 		var info := UI.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.add_child(UI.label(tr("%s (%s)") % [tr(def.name), def.slot]))
 		info.add_child(UI.label(HeroText.effects(def.effects), UI.SMALL_SIZE, UI.MUTED))
 		row.add_child(info)
-		var wear := UI.button(tr("Wear"), func() -> void: _hero_action("equip", {"item": item}))
+		var wear := UI.primary(tr("Wear"), func() -> void: _hero_action("equip", {"item": item}))
 		wear.custom_minimum_size.x = 120
+		wear.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(wear)
-		_panel_body.add_child(row))
+		_panel_body.add_child(card))
 
 
 ## Send the hero to another of your villages, or rename it.

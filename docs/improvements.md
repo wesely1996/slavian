@@ -93,7 +93,7 @@ Contents:
   (steppers with "all"/"half" chips) → *Where* (tap the map, with the route,
   travel time and grain cost drawn live) → *Confirm* (one summary card).
   The confirm button is pinned to the bottom the whole time.
-- [ ] **Hero** (M): paper-doll with gear slots, skill tree as nodes rather
+- [ ] *(partly done: XP bar, skills as cards with rank pips, gear slots as cards)* **Hero** (M): paper-doll with gear slots, skill tree as nodes rather
   than a list, quests as cards with reward icons.
 - [ ] *(partly done: filter chips, notices as cards)* **Messages** (M): one inbox with filter chips (All · Battles · Economy ·
   Events · Chat). Battle reports open as a result card first (won/lost,
