@@ -22,6 +22,8 @@ const WORLDS_PER_PAGE := 4
 
 ## Page headings, each on a line of its own for the string extractor (# tr).
 const PAGE_TITLES := {
+	"achievements":
+		"Achievements",  # tr
 	"play":
 		"Play",  # tr
 	"solo":
@@ -301,6 +303,7 @@ func _render(page: String) -> void:
 		"notifications": _notifications_page()
 		"account": _account_page()
 		"help": _help_page()
+		"achievements": _achievements_page()
 		"credits": _credits_page()
 
 
@@ -329,8 +332,11 @@ func _home_page() -> void:
 	play.custom_minimum_size.y *= 1.35
 	play.add_theme_font_size_override("font_size", UI.scaled(UI.HEADING_SIZE))
 	_content.add_child(play)
+	# Signed in: solo achievements go to the account (the page opens on what
+	# came back, the menu being the way to it).
+	_sync_achievements()
 	# Help opens on how a run goes, Support us on the server costs.
-	for entry in [[tr("Settings"), "settings", "icon/settings", ""], [tr("Help"), "help", "icon/help", "run"], [tr("Support us"), "help", "icon/coin", "support"]]:
+	for entry in [[tr("Achievements"), "achievements", "achievement/victory", ""], [tr("Settings"), "settings", "icon/settings", ""], [tr("Help"), "help", "icon/help", "run"], [tr("Support us"), "help", "icon/coin", "support"]]:
 		var page: String = entry[1]
 		var side: String = entry[3]
 		var door := UI.button(entry[0], func() -> void:
@@ -345,6 +351,54 @@ func _home_page() -> void:
 	var quit := UI.button(tr("Quit"), func() -> void: get_tree().quit(), "icon/quit")
 	quit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(quit)
+
+
+# --- Achievements --------------------------------------------------------------
+
+## Every achievement: earned ones in full, with when first and how many
+## runs; the others faded; the hidden ones sealed until earned.
+func _achievements_page() -> void:
+	var defs: Dictionary = _pick_data().get("achievements", {}).get("achievements", {})
+	var earned: Dictionary = Session.achievements
+	_content.add_child(UI.label(tr("%d of %d earned") % [defs.keys().filter(func(id: String) -> bool: return earned.has(id)).size(), defs.size()], UI.HEADING_SIZE))
+	if not Session.is_logged_in():
+		_content.add_child(UI.label(tr("Kept on this device. Sign in to keep them on your account, from every device."), UI.SMALL_SIZE, UI.MUTED))
+	for id in defs:
+		var def: Dictionary = defs[id]
+		var got: bool = earned.has(id)
+		var secret: bool = def.get("hidden", false) and not got
+		var row := UI.hbox(12)
+		var medal := UI.icon("achievement/sealed" if secret else "achievement/%s" % id, 72.0)
+		if not got and not secret:
+			medal.modulate = Color(1, 1, 1, 0.35)
+		row.add_child(medal)
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label(tr("Hidden achievement") if secret else tr(String(def.name)), 0, UiTheme.GOLD if got else UI.MUTED))
+		info.add_child(UI.label(tr("Keep playing to find out.") if secret else tr(String(def.description)), UI.SMALL_SIZE, UI.MUTED))
+		if got:
+			var entry: Dictionary = Session.achievement_entry(id)
+			var runs: int = maxi(int(entry.get("times", 0)), entry.get("worlds", []).size())
+			var first := String(entry.get("at", "")).substr(0, 10)
+			info.add_child(UI.label((tr("First earned %s") % first if first != "" else tr("Earned")) + (" · " + tr("in %d runs") % runs if runs > 1 else ""), UI.SMALL_SIZE, UI.GOOD))
+		row.add_child(info)
+		_content.add_child(row)
+
+
+## Signed in: sends the achievements of solo runs to the account and takes
+## back what the account holds from every run (once at a time).
+var _syncing_achievements := false
+
+func _sync_achievements() -> void:
+	if not Session.is_logged_in() or _syncing_achievements:
+		return
+	_syncing_achievements = true
+	var response := await Api.request(HTTPClient.METHOD_POST, "/v1/me/achievements", {"achievements": Session.solo_achievements()}, true)
+	_syncing_achievements = false
+	if response.ok:
+		Session.remember_achievements(response.data.get("achievements", []))
+		if _page == "achievements":
+			_render("achievements")
 
 
 # --- Play --------------------------------------------------------------------

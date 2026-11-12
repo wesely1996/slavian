@@ -36,7 +36,8 @@ import {
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
 import { armyQuestOf, heroQuestOffers } from '../scheduler/quests.js';
-import { accountAchievements } from '../db/achievements.js';
+import { accountAchievements, recordSoloAchievements } from '../db/achievements.js';
+import { ACHIEVEMENTS } from '../data/index.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
 import {
@@ -161,6 +162,13 @@ const caravanBody = z.object({
   escort: escortSchema,
 });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
+// Achievements earned in solo runs, from the device.
+const soloAchievementsBody = z.object({
+  achievements: z
+    .array(z.object({ id: z.enum(ACHIEVEMENTS), earnedAt: z.string().datetime(), runs: z.number().int().min(1).max(10_000) }))
+    .max(ACHIEVEMENTS.length),
+});
+
 // A bounty: what the poster offers and what they ask for.
 const bountyBody = z.object({ offer: loadSchema, want: loadSchema });
 const takeBountyBody = z.object({ villageId: z.number().int().positive() });
@@ -353,12 +361,23 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   // When to be bothered: quiet hours (local minutes, may wrap midnight),
   // the device's UTC offset and the daily digest hour.
-  // Every achievement the player has earned, in any run: when first, where,
-  // and how many runs it came in.
+  // Every achievement the player has earned, in any run (solo ones sent from
+  // the device included): when first, and how many runs it came up in.
+  const achievementsView = (earned: Awaited<ReturnType<typeof accountAchievements>>) => ({
+    achievements: earned.map((e) => ({ id: e.achievement, earnedAt: e.earnedAt.toISOString(), times: e.times })),
+  });
   app.get('/v1/me/achievements', async (request) => {
     const account = await authenticate(db, request);
-    const earned = await inTransaction(db, (client) => accountAchievements(client, account.id));
-    return { achievements: earned.map((e) => ({ id: e.achievement, worldId: e.worldId, earnedAt: e.earnedAt.toISOString(), times: e.times })) };
+    return achievementsView(await inTransaction(db, (client) => accountAchievements(client, account.id)));
+  });
+  // Achievements earned in solo runs on the device, sent once signed in.
+  app.post('/v1/me/achievements', async (request) => {
+    const account = await authenticate(db, request);
+    const body = soloAchievementsBody.parse(request.body);
+    return achievementsView(await inTransaction(db, async (client) => {
+      await recordSoloAchievements(client, account.id, body.achievements.map((a) => ({ achievement: a.id, earnedAt: new Date(a.earnedAt), runs: a.runs })));
+      return accountAchievements(client, account.id);
+    }));
   });
 
   app.get('/v1/me/notifications', async (request) => {

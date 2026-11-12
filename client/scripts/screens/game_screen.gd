@@ -127,8 +127,6 @@ var _report_text := ""
 ## paged list is on.
 var _side: Dictionary[String, String] = {}
 var _pages: Dictionary[String, int] = {}
-## The account's achievements are asked of the server once per visit.
-var _achievements_fetched := false
 ## The end-of-run panel opens by itself once.
 var _run_seen := false
 var _threat_button: Button
@@ -5846,12 +5844,23 @@ func _on_inbox_changed() -> void:
 	_pop_events()
 
 
+## Achievements new to the player (Game.fresh_achievements): each in a popup.
+func _pop_achievements() -> void:
+	var defs: Dictionary = Game.data.get("achievements", {}).get("achievements", {})
+	for id in Game.fresh_achievements:
+		if defs.has(id):
+			Sound.effect("horn")
+			_show_note(tr("Achievement: %s") % tr(String(defs[id].name)), tr(String(defs[id].description)), tr("Onward"))
+	Game.fresh_achievements.clear()
+
+
 ## Daily map events, as they rise, are done or are left undone: each new
 ## event notice in a popup (the last few, oldest on top).
 func _pop_events() -> void:
 	var world_id := Game.world_id()
 	var seen := Session.world_mark(world_id, "event_seen")
-	var fresh: Array = Game.inbox.filter(func(n: Dictionary) -> bool: return n.get("kind") in ["event", "achievement"] and not n.get("read", false) and int(n.id) > seen)
+	var fresh: Array = Game.inbox.filter(func(n: Dictionary) -> bool: return n.get("kind") == "event" and not n.get("read", false) and int(n.id) > seen)
+	_pop_achievements()
 	if fresh.is_empty():
 		return
 	fresh.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) > int(b.id))
@@ -5882,7 +5891,6 @@ func _forces_panel() -> void:
 	if not hero.is_empty():
 		var face := "hero/%s" % hero.get("kind") if hero.get("kind") != null and Art.has("hero/%s" % hero.get("kind")) else "icon/profile"
 		tabs.append(["hero", face, tr("Your hero"), _forces_hero])
-	tabs.append(["achievements", "achievement/victory", tr("Achievements"), _forces_achievements])
 	_side_tabs("forces", tabs)
 
 
@@ -6000,48 +6008,6 @@ func _forces_armies() -> void:
 		view.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(view)
 		_panel_body.add_child(row))
-
-
-## Achievements: each medallion, earned (this run, or before) or not; the
-## hidden ones sealed until earned.
-func _forces_achievements() -> void:
-	var defs: Dictionary = Game.data.get("achievements", {}).get("achievements", {})
-	var here := {}
-	for a in Game.achievements:
-		if int(a.accountId) == Game.my_account_id():
-			here[String(a.achievement)] = true
-	var earned := Session.achievements
-	_panel_body.add_child(UI.label(tr("%d of %d earned") % [defs.keys().filter(func(id: String) -> bool: return earned.has(id) or here.has(id)).size(), defs.size()], UI.HEADING_SIZE))
-	# Signed in: what the account earned in other runs too.
-	if Game.world_id() > 0 and not _achievements_fetched:
-		_achievements_fetched = true
-		_fetch_achievements()
-	_paged("achievements", defs.keys(), 6 if _roomy() else 4, func(id: String) -> void:
-		var def: Dictionary = defs[id]
-		var got: bool = earned.has(id) or here.has(id)
-		var secret: bool = def.get("hidden", false) and not got
-		var row := UI.hbox(12)
-		var medal := UI.icon("achievement/sealed" if secret else "achievement/%s" % id, 72.0)
-		if not got and not secret:
-			medal.modulate = Color(1, 1, 1, 0.35)
-		row.add_child(medal)
-		var info := UI.vbox(2)
-		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label(tr("Hidden achievement") if secret else tr(String(def.name)), 0, UiTheme.GOLD if got else UI.MUTED))
-		info.add_child(UI.label(tr("Keep playing to find out.") if secret else tr(String(def.description)), UI.SMALL_SIZE, UI.MUTED))
-		if here.has(id):
-			info.add_child(UI.label(tr("Earned this run"), UI.SMALL_SIZE, UI.GOOD))
-		elif got:
-			info.add_child(UI.label(tr("Earned in an earlier run"), UI.SMALL_SIZE))
-		row.add_child(info)
-		_panel_body.add_child(row))
-
-
-## The account's achievements from every run (signed-in play only).
-func _fetch_achievements() -> void:
-	var response := await Api.get_json("/v1/me/achievements")
-	if response.ok and Session.remember_achievements(response.data.get("achievements", [])) and _panel_mode == "forces":
-		_rebuild_panel()
 
 
 ## Where your hero is.

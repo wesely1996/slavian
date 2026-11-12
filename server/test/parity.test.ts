@@ -21,6 +21,7 @@ const SERVER_ONLY: Record<string, string> = {
   'DELETE /v1/me': 'accounts',
   'GET /v1/me/export': 'accounts',
   'GET /v1/me/achievements': 'achievements across runs (the solo game keeps its own on the device)',
+  'POST /v1/me/achievements': 'solo achievements sent from the device to the account',
   'GET /v1/me/notifications': 'push settings (a solo world sends no pushes)',
   'PATCH /v1/me/notifications': 'push settings (a solo world sends no pushes)',
   'POST /v1/me/devices': 'push devices',

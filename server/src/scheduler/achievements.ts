@@ -1,15 +1,18 @@
 // Achievements (data/achievements.json): earned once per player per run,
 // where the game's moments happen, and told with a push notice.
 import type { Achievement, GameData } from '../data/index.js';
-import { insertAchievement } from '../db/achievements.js';
+import { hasAchievement, insertAchievement } from '../db/achievements.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listMembers, type World } from '../db/worlds.js';
 import { tell } from './notices.js';
 
+// Achievements belong to the account: each run it comes up in is recorded,
+// but the player is told only the first time ever.
 export async function achieve(client: DbClient, data: GameData, world: World, accountId: number | null, achievement: Achievement, at: Date): Promise<void> {
   if (accountId === null) return;
-  if (!(await insertAchievement(client, world.id, accountId, achievement, at))) return;
+  const before = await hasAchievement(client, accountId, achievement);
+  if (!(await insertAchievement(client, world.id, accountId, achievement, at)) || before) return;
   const def = data.achievements.achievements[achievement];
   await tell(client, world, accountId, { kind: 'achievement', tier: 'push', title: 'Achievement: {name}', body: '{description}', vars: { name: def.name, description: def.description } }, at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });

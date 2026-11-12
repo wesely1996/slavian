@@ -37,7 +37,8 @@ var intro_seen := false
 ## landscape included.
 var orientation_locked := true
 ## Achievements earned on this device or this account (data/achievements.json):
-## id -> when first earned (ISO time).
+## id -> {at: when first earned (ISO time), worlds: the runs it came up in
+## on this device (solo ones negative), times: runs the account counts}.
 var achievements: Dictionary = {}
 
 
@@ -58,6 +59,10 @@ func _ready() -> void:
 		intro_seen = config.get_value("session", "intro_seen", false)
 		orientation_locked = config.get_value("session", "orientation_locked", true)
 		achievements = config.get_value("session", "achievements", {})
+		# Older saves kept only when it was first earned.
+		for id in achievements.keys():
+			if achievements[id] is String:
+				achievements[id] = {"at": achievements[id], "worlds": [], "times": 0}
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -133,20 +138,53 @@ func set_tutorial_flag(world_id: int, key: String, value: bool) -> void:
 	save()
 
 
-## Remembers achievements earned ([{id, earnedAt}]); true when any was new.
-func remember_achievements(earned: Array) -> bool:
-	var fresh := false
+## Remembers achievements earned ([{id or achievement, earnedAt, times?}]),
+## in run `world_id` (0: from the account); returns the ids new to the record.
+func remember_achievements(earned: Array, world_id := 0) -> Array:
+	var fresh: Array = []
+	var changed := false
 	for e in earned:
 		var id := String(e.get("id", e.get("achievement", "")))
 		if id == "":
 			continue
 		var at := String(e.get("earnedAt", ""))
-		if not achievements.has(id) or (at != "" and at < String(achievements[id])):
-			achievements[id] = at
-			fresh = true
-	if fresh:
+		if not achievements.has(id):
+			achievements[id] = {"at": at, "worlds": [], "times": 0}
+			fresh.append(id)
+			changed = true
+		var entry := achievement_entry(id)
+		if at != "" and (String(entry.at) == "" or at < String(entry.at)):
+			entry.at = at
+			changed = true
+		if world_id != 0 and not world_id in entry.worlds:
+			entry.worlds.append(world_id)
+			changed = true
+		if e.has("times") and int(e.times) != int(entry.times):
+			entry.times = int(e.times)
+			changed = true
+	if changed:
 		save()
 	return fresh
+
+
+## An achievement's record: {at, worlds, times} ({} when not earned).
+func achievement_entry(id: String) -> Dictionary:
+	var entry: Variant = achievements.get(id)
+	if entry is String:
+		entry = {"at": entry, "worlds": [], "times": 0}
+		achievements[id] = entry
+	return entry if entry is Dictionary else {}
+
+
+## Achievements from solo runs, as the account takes them: [{id, earnedAt, runs}].
+func solo_achievements() -> Array:
+	var out: Array = []
+	for id in achievements.keys():
+		var entry := achievement_entry(id)
+		var solo: int = entry.get("worlds", []).filter(func(w: Variant) -> bool: return int(w) < 0).size()
+		if solo > 0 and String(entry.get("at", "")) != "":
+			out.append({"id": id, "earnedAt": entry.at, "runs": solo})
+	return out
 
 
 func set_text_size(size: String) -> void:
