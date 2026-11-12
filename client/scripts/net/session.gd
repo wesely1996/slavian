@@ -36,6 +36,10 @@ var intro_seen := false
 ## Whether the screen stays upright (the default) or turns with the phone,
 ## landscape included.
 var orientation_locked := true
+## Night mode: "auto" (as the phone is set), "on" or "off". A dim, warm
+## veil over the whole game, for playing in the dark.
+var night := "auto"
+var _night_veil: CanvasLayer
 ## Achievements earned on this device or this account (data/achievements.json):
 ## id -> {at: when first earned (ISO time), worlds: the runs it came up in
 ## on this device (solo ones negative), times: runs the account counts}.
@@ -58,6 +62,7 @@ func _ready() -> void:
 		push_sync = config.get_value("session", "push_sync", false)
 		intro_seen = config.get_value("session", "intro_seen", false)
 		orientation_locked = config.get_value("session", "orientation_locked", true)
+		night = config.get_value("session", "night", "auto")
 		achievements = config.get_value("session", "achievements", {})
 		# Older saves kept only when it was first earned.
 		for id in achievements.keys():
@@ -69,6 +74,7 @@ func _ready() -> void:
 	UiTheme.set_text_size(text_size)
 	UiTheme.apply()
 	apply_orientation()
+	apply_night()
 	var window := get_tree().root
 	UiTheme.fit(window)
 	window.size_changed.connect(func() -> void: UiTheme.fit(window))
@@ -96,6 +102,7 @@ func save() -> void:
 	config.set_value("session", "push_sync", push_sync)
 	config.set_value("session", "intro_seen", intro_seen)
 	config.set_value("session", "orientation_locked", orientation_locked)
+	config.set_value("session", "night", night)
 	config.set_value("session", "achievements", achievements)
 	config.save(PATH)
 
@@ -199,6 +206,36 @@ func set_orientation_locked(locked: bool) -> void:
 	orientation_locked = locked
 	apply_orientation()
 	save()
+
+
+func set_night(mode: String) -> void:
+	night = mode
+	apply_night()
+	save()
+
+
+func is_night() -> bool:
+	if night == "auto":
+		return DisplayServer.is_dark_mode_supported() and DisplayServer.is_dark_mode()
+	return night == "on"
+
+
+## The veil over everything (every scene, every layer): it multiplies what
+## is under it, so the parchment stops glaring and the colours stay.
+func apply_night() -> void:
+	if _night_veil == null:
+		_night_veil = CanvasLayer.new()
+		_night_veil.layer = 100
+		var veil := ColorRect.new()
+		veil.color = Color(0.62, 0.58, 0.6)
+		veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var blend := CanvasItemMaterial.new()
+		blend.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+		veil.material = blend
+		_night_veil.add_child(veil)
+		add_child(_night_veil)
+	_night_veil.visible = is_night()
 
 
 ## Upright, or turning with the phone (the sensor picks portrait or
