@@ -4171,6 +4171,11 @@ func _town_switcher(village: Dictionary) -> void:
 		_plot = Rules.HALL_PLOT
 		_renaming = false
 		_rebuild_panel()
+	# One village and no pen out: its name is on the top band already.
+	if mine.size() < 2 and not _renaming:
+		if not Game.is_mine(village):
+			_panel_body.add_child(UI.label(tr("Looking after it for %s") % Game.member_name(int(village.ownerAccountId)), UI.SMALL_SIZE, UI.MUTED))
+		return
 	var row := UI.hbox(8)
 	var back := UI.button("◀", step.bind(-1))
 	back.tooltip_text = tr("Previous town")
@@ -4323,7 +4328,7 @@ func _village_panel() -> void:
 	if village.get("ruin") is Dictionary:
 		_ruin_section(village)
 		return
-	var tabs := [["village", tr("Buildings"), "icon/build"], ["troops", tr("Troops"), "icon/troops"], ["caravans", tr("Caravans"), "icon/caravan"], ["research", tr("Research"), "icon/research"]]
+	var tabs := [["village", tr("Buildings")], ["troops", tr("Troops")], ["caravans", tr("Caravans")], ["research", tr("Research")]]
 	_panel_body.add_child(UI.tabs(tabs, _tab, func(key: String) -> void:
 		_tab = key
 		_scroll.scroll_vertical = 0
@@ -4475,17 +4480,17 @@ func _plot_section(village: Dictionary) -> void:
 		var options := Rules.constructible(Game.data, village, "tower" if on_walls else "center", Game.village_site(village))
 		if options.is_empty():
 			_panel_body.add_child(UI.label(tr("Every tower already stands on these walls.") if on_walls else tr("Every building already stands in this village."), UI.SMALL_SIZE, UI.MUTED))
-		_paged("plot options", options, 5 if _roomy() else 2, func(building: String) -> void:
-			# What a tower does, under its name.
-			var effect := WallText.tower_effect(Game.data, building, 0, float(Game.world.speed)) if on_walls else ""
-			var missing := Rules.missing_requirement(Game.data, village, building)
-			if not missing.is_empty():
-				_panel_body.add_child(UI.with_card(UI.label(tr(_building_def(building).name)), _building_card(village, building, 0)))
-				if effect != "":
-					_panel_body.add_child(UI.label(effect, UI.SMALL_SIZE, UI.MUTED))
-				_panel_body.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(missing[0]).name), missing[1]], UI.SMALL_SIZE, UI.ERROR))
-				return
-			_build_row(village, _plot, building, 1, tr("Build"), effect))
+		# What can stand here, a card each: picture, name, price, Build.
+		var grid := UI.vbox(8)
+		var page := UI.paged(options, int(_pages.get("plot options", 0)), 5 if _roomy() else 3, func(at: int) -> void:
+			_pages["plot options"] = at
+			_scroll.scroll_vertical = 0
+			_rebuild_panel())
+		for building in page[0]:
+			grid.add_child(_building_choice(village, building, on_walls))
+		_panel_body.add_child(grid)
+		if page[1].get_child_count() > 0:
+			_panel_body.add_child(page[1])
 		return
 
 	var building: String = planned.building
@@ -4501,10 +4506,14 @@ func _plot_section(village: Dictionary) -> void:
 	if effect != "":
 		_panel_body.add_child(UI.label(effect, UI.SMALL_SIZE, UI.MUTED))
 	var target := int(planned.level) + 1
-	if target > int(def.maxLevel):
-		_panel_body.add_child(UI.label(tr("Max level"), UI.SMALL_SIZE, UI.MUTED))
-	else:
-		_build_row(village, _plot, building, target, tr("Build") if level == 0 and int(planned.level) == 0 else tr("Upgrade"))
+	if target <= int(def.maxLevel):
+		_build_row(village, _plot, building, target, (tr("Build") if level == 0 and int(planned.level) == 0 else tr("Upgrade")) + tr(" → Lv %d") % target, "", false)
+	if building == Rules.HALL and Game.is_mine(village) and not _renaming and Game.my_villages().size() < 2:
+		var pen := UI.button(tr("Rename"), func() -> void:
+			_renaming = true
+			_rebuild_panel())
+		pen.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_panel_body.add_child(pen)
 	if building == "market" and level > 0:
 		_market_section(village, level)
 	if building == "heroes_hall" and level > 0:
@@ -4512,6 +4521,48 @@ func _plot_section(village: Dictionary) -> void:
 	_demolish_row(village, building, level)
 	if building == Rules.HALL:
 		_abandon_row(village)
+
+
+## One building that can go up on the picked plot, as a card: its picture
+## and name (tap the i for its sheet), what it costs and how long it takes,
+## and Build; or what it still needs.
+func _building_choice(village: Dictionary, building: String, on_walls: bool) -> Control:
+	var village_id := int(village.id)
+	var plot := _plot
+	var def := _building_def(building)
+	var card := UI.card(8)
+	var row := UI.hbox(10)
+	card.add_child(row)
+	var art := Art.building_id(building, 1)
+	if Art.has(art):
+		row.add_child(UI.icon(art, 64))
+	var box := UI.vbox(2)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(box)
+	box.add_child(UI.label(tr(def.name)))
+	if on_walls:
+		box.add_child(UI.label(WallText.tower_effect(Game.data, building, 0, float(Game.world.speed)), UI.SMALL_SIZE - 2, UI.MUTED))
+	row.add_child(UI.info_card(_building_card(village, building, 0)))
+	var missing := Rules.missing_requirement(Game.data, village, building)
+	if not missing.is_empty():
+		box.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(missing[0]).name), missing[1]], UI.SMALL_SIZE, UI.ERROR))
+		return card
+	var hall := Rules.hall_level(village)
+	var queue_full: bool = village.queue.size() >= Rules.queue_limit(Game.data, hall)
+	var cost := Rules.level_cost(def, 1)
+	var time := TimeUtil.format_duration(Rules.build_seconds(def, 1, float(Game.world.speed), Rules.hall_speedup(Game.data, hall) * ResearchRules.time_factor(village.get("bonuses", {}), "buildTime")))
+	var cost_line := UI.rich()
+	box.add_child(cost_line)
+	var button := UI.primary(tr("Build"), func() -> void: _queue_build(village_id, plot, building))
+	button.custom_minimum_size.x = 120
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(button)
+	_tick(cost_line, func() -> String:
+		var home: Dictionary = Game.villages.get(village_id, village)
+		var have := Ledger.amounts_at(home.resources, Game.server_now())
+		button.disabled = queue_full or not Ledger.can_afford(have, cost)
+		return tr("%s · %s") % [UI.costs(cost, 22, have), time] + (tr("  (queue full)") if queue_full else ""))
+	return card
 
 
 ## What the village's Market does: trade one resource for another, and buy
@@ -4858,7 +4909,7 @@ func _abandon(village_id: int) -> void:
 
 ## One "build `building` to `target` on `plot`" row with its cost, time
 ## and button.
-func _build_row(village: Dictionary, plot: String, building: String, target: int, verb: String, note := "") -> void:
+func _build_row(village: Dictionary, plot: String, building: String, target: int, verb: String, note := "", named := true) -> void:
 	var village_id := int(village.id)
 	var def := _building_def(building)
 	var hall := Rules.hall_level(village)
@@ -4866,10 +4917,13 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	var cost := Rules.level_cost(def, target)
 	var seconds := Rules.build_seconds(def, target, float(Game.world.speed), Rules.hall_speedup(Game.data, hall) * ResearchRules.time_factor(village.get("bonuses", {}), "buildTime"))
 
-	var row := UI.hbox()
+	# The building's own sheet has its name on top: there the price stands
+	# over one wide button. In a list, the name leads each row.
+	var row: BoxContainer = UI.hbox() if named else UI.vbox(8)
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.with_card(UI.label(tr("%s → Lv %d") % [tr(def.name), target]), _building_card(village, building, target - 1)))
+	if named:
+		info.add_child(UI.with_card(UI.label(tr("%s → Lv %d") % [tr(def.name), target]), _building_card(village, building, target - 1)))
 	if note != "":
 		info.add_child(UI.label(note, UI.SMALL_SIZE, UI.MUTED))
 	var cost_line := UI.rich()
@@ -4879,12 +4933,12 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := tr("%s · %s") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
+	var time := TimeUtil.format_duration(seconds)
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
-		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
-		button.disabled = queue_full or not affordable
-		return cost_text + (tr("  (queue full)") if queue_full else ""))
+		var have := Ledger.amounts_at(home.resources, Game.server_now())
+		button.disabled = queue_full or not Ledger.can_afford(have, cost)
+		return tr("%s · %s") % [UI.costs(cost, 30, have), time] + (tr("  (queue full)") if queue_full else ""))
 
 
 ## Whether a horde fights at a village or marches on it (cmd_armies.gd
@@ -4921,16 +4975,16 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	var speed := float(Game.world.speed)
 	if def.has("production"):
 		var resource: String = def.production.resource
-		return tr("%s +%d/h now, +%d/h at level %d") % [UI.resource_name(resource),
-			roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed))), roundi(TimeUtil.per_real_hour(Rules.field_production(def, level + 1, speed))), level + 1]
+		return tr("%s +%d/h → +%d/h") % [UI.resource_name(resource),
+			roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed))), roundi(TimeUtil.per_real_hour(Rules.field_production(def, level + 1, speed)))]
 	if building == "heroes_hall":
 		var text := GeneralText.hall_gives(Game.data, level)
 		return text.left(1).to_upper() + text.substr(1) + (tr("; level %d: %s") % [level + 1, GeneralText.hall_gives(Game.data, level + 1)] if level < int(def.maxLevel) else "")
 	if building == Rules.HALL:
 		var total := int(Game.data.buildings.village.centerSlots)
-		var text := tr("%d of %d building slots open, build queue %d.") % [Rules.unlocked_slots(Game.data, level), total, Rules.queue_limit(Game.data, level)]
+		var text := tr("Slots %d/%d · queue %d") % [Rules.unlocked_slots(Game.data, level), total, Rules.queue_limit(Game.data, level)]
 		if level < int(def.maxLevel):
-			text += tr(" Level %d: %d slots, queue %d, builds %d%% faster than level 1.") % [level + 1,
+			text += "\n" + tr("Lv %d: slots %d · queue %d · builds %d%% faster") % [level + 1,
 				Rules.unlocked_slots(Game.data, level + 1), Rules.queue_limit(Game.data, level + 1),
 				roundi((1.0 - Rules.hall_speedup(Game.data, level + 1)) * 100.0)]
 		return text
@@ -5135,18 +5189,20 @@ func _train_tab(village: Dictionary) -> void:
 		var def: Dictionary = units[unit]
 		var building_level := int(village.levels.get(def.building, 0))
 		var unlocked := building_level >= int(def.requiresLevel)
+		var frame := UI.card(10)
 		var card := UI.hbox(12)
+		frame.add_child(card)
 		if Art.has("unit/%s" % unit):
 			var picture := UI.icon("unit/%s" % unit, 64)
 			picture.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 			card.add_child(picture)
-		var info := UI.vbox(2)
+		var info := UI.vbox(4)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
 		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
-		info.add_child(UI.label(tr("%s · atk %d · def %d · hp %d · speed %s hexes/h · %s grain/h") % [def.family.capitalize(), def.attack, def.defense, int(def.health),
+		info.add_child(UI.label(tr("Atk %d · Def %d · HP %d · Speed %s · Grain %s/h") % [def.attack, def.defense, int(def.health),
 			UI.number(TimeUtil.per_real_hour(float(def.speed) * float(Game.world.speed))), UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))], UI.SMALL_SIZE, UI.MUTED))
-		_panel_body.add_child(card)
+		_panel_body.add_child(frame)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
 			return
@@ -5164,6 +5220,19 @@ func _train_tab(village: Dictionary) -> void:
 		else:
 			row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, max_batch, func(n: int) -> void:
 				_train_counts[unit] = n))
+			# As many as the stores pay for (up to a batch).
+			var most := UI.button(tr("Max"), func() -> void:
+				var home: Dictionary = Game.villages.get(village_id, village)
+				var have := Ledger.amounts_at(home.resources, Game.server_now())
+				var owned_now := Game.villages_owned(int(village.ownerAccountId))
+				var n := max_batch
+				while n > 1 and not Ledger.can_afford(have, Rules.unit_cost(def, n, owned_now, Game.bought(int(village.ownerAccountId), unit))):
+					n -= 1
+				_train_counts[unit] = n
+				_drafts.erase("train:%s" % unit)
+				_rebuild_panel())
+			most.focus_mode = Control.FOCUS_NONE
+			row.add_child(most)
 		if def.get("costStep") != null:
 			info.add_child(UI.with_info(UI.label(tr("One at a time; dearer for every %d you have recruited (%d).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED),
 				tr("Counted over all your villages. Each one that dies brings the price back down; founding a village with them does not.")))
@@ -5178,12 +5247,10 @@ func _train_tab(village: Dictionary) -> void:
 		_tick(cost_line, func() -> String:
 			var cost := Rules.unit_cost(def, int(_train_counts.get(unit, 1)), owned, Game.bought(int(village.ownerAccountId), unit))
 			var current: Dictionary = Game.villages.get(village_id, village)
-			var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-			train.disabled = queue_full or not affordable
-			var text := tr("%s · %s each") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
-			if queue_full:
-				return text + tr("  (queue full)")
-			return text if affordable else text + tr("  (not enough)")))
+			var have := Ledger.amounts_at(current.resources, Game.server_now())
+			train.disabled = queue_full or not Ledger.can_afford(have, cost)
+			var text := tr("%s · %s each") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)]
+			return text + tr("  (queue full)") if queue_full else text))
 
 
 func _stance_picker(village: Dictionary) -> void:
