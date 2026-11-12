@@ -13,6 +13,8 @@ export interface Bounty {
   offer: Resources;
   want: Resources;
   fee: Resources;
+  // Gear offered too (item ids), held off the poster's hero.
+  items: string[];
   status: BountyStatus;
   createdAt: Date;
   closedAt: Date | null;
@@ -27,6 +29,7 @@ interface BountyRow {
   offer: Resources;
   want: Resources;
   fee: Resources;
+  items: string[] | null;
   status: BountyStatus;
   created_at: Date;
   closed_at: Date | null;
@@ -42,6 +45,7 @@ function fromRow(row: BountyRow): Bounty {
     offer: row.offer,
     want: row.want,
     fee: row.fee,
+    items: row.items ?? [],
     status: row.status,
     createdAt: row.created_at,
     closedAt: row.closed_at,
@@ -49,10 +53,10 @@ function fromRow(row: BountyRow): Bounty {
   };
 }
 
-export async function insertBounty(client: DbClient, b: Pick<Bounty, 'worldId' | 'villageId' | 'ownerAccountId' | 'offer' | 'want' | 'fee' | 'createdAt'>): Promise<Bounty> {
+export async function insertBounty(client: DbClient, b: Pick<Bounty, 'worldId' | 'villageId' | 'ownerAccountId' | 'offer' | 'want' | 'fee' | 'items' | 'createdAt'>): Promise<Bounty> {
   const { rows } = await client.query<BountyRow>(
-    `INSERT INTO bounties (world_id, village_id, owner_account_id, offer, want, fee, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [b.worldId, b.villageId, b.ownerAccountId, JSON.stringify(b.offer), JSON.stringify(b.want), JSON.stringify(b.fee), b.createdAt],
+    `INSERT INTO bounties (world_id, village_id, owner_account_id, offer, want, fee, items, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+    [b.worldId, b.villageId, b.ownerAccountId, JSON.stringify(b.offer), JSON.stringify(b.want), JSON.stringify(b.fee), JSON.stringify(b.items), b.createdAt],
   );
   return fromRow(rows[0]!);
 }

@@ -1,6 +1,7 @@
 // The Market's bounty board (sim/bounties.ts): post a bounty from a village
 // with a Market, call it off, or take another player's at once.
 import { closeBounty, insertBounty, loadBounty, openBountiesOf, type Bounty } from '../db/bounties.js';
+import { loadHero, saveHero } from '../db/heroes.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db } from '../db/pool.js';
 import { loadVillage, saveVillageState, type Village } from '../db/villages.js';
@@ -17,12 +18,26 @@ import { ownVillageCommand, type VillageCommandInput } from './village.js';
 export async function postBountyCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: VillageCommandInput & { offer: Resources; want: Resources },
+  input: VillageCommandInput & { offer: Resources; want: Resources; items?: string[] | undefined },
 ): Promise<{ village: Village; bounty: Bounty }> {
+  const items = input.items ?? [];
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'posted a bounty' }, async ({ client, world, village }) => {
-    checkBounty(deps.data, village.state.levels[MARKET] ?? 0, await openBountiesOf(client, village.id), input.offer, input.want);
+    checkBounty(deps.data, village.state.levels[MARKET] ?? 0, await openBountiesOf(client, village.id), input.offer, input.want, items);
     const fee = bountyFee(deps.data, input.offer);
     const ledger = spend(village.state.ledger, input.now, mapResources((k) => input.offer[k] + fee[k]));
+    // Gear offered leaves the hero's pack while the bounty stands (worn gear
+    // can't be offered: take it off first).
+    if (items.length) {
+      const hero = await loadHero(client, world.id, village.ownerAccountId!);
+      const pack = [...hero.inventory];
+      for (const item of items) {
+        const at = pack.indexOf(item);
+        if (at < 0) throw new RuleError(`${hero.name} carries no ${deps.data.heroes.items[item]?.name ?? item} to offer (worn gear can't be offered)`);
+        pack.splice(at, 1);
+      }
+      await saveHero(client, { ...hero, inventory: pack });
+      await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+    }
     const bounty = await insertBounty(client, {
       worldId: world.id,
       villageId: village.id,
@@ -30,6 +45,7 @@ export async function postBountyCommand(
       offer: input.offer,
       want: input.want,
       fee,
+      items,
       createdAt: input.now,
     });
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
@@ -60,6 +76,12 @@ export async function cancelBountyCommand(db: Db, deps: SchedulerDeps, input: { 
       const bounty = (await loadBounty(client, found.id))!;
       if (bounty.status !== 'open') throw new RuleError('That bounty is closed');
       await closeBounty(client, bounty.id, 'cancelled', input.now, null);
+      // Its gear goes back into the hero's pack.
+      if (bounty.items.length && bounty.ownerAccountId !== null) {
+        const hero = await loadHero(client, world.id, bounty.ownerAccountId);
+        await saveHero(client, { ...hero, inventory: [...hero.inventory, ...bounty.items] });
+        await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+      }
       await notifyWorld(client, { worldId: world.id, type: 'caravans' });
       return { state: { ...village.state, ledger: receive(village.state.ledger, input.now, bounty.offer).ledger }, result: null };
     },
@@ -80,6 +102,15 @@ export async function takeBountyCommand(
     if (!bounty || bounty.worldId !== world.id) throw new NotFoundError('No such bounty');
     if (bounty.status !== 'open') throw new RuleError('That bounty is closed');
     if (bounty.ownerAccountId === village.ownerAccountId) throw new RuleError('That bounty is your own');
+    // Its gear goes to the taker's hero, who must not have it already.
+    if (bounty.items.length) {
+      const hero = await loadHero(client, world.id, village.ownerAccountId!);
+      const owned = new Set([...hero.inventory, ...Object.values(hero.gear)]);
+      const twice = bounty.items.find((item) => owned.has(item));
+      if (twice) throw new RuleError(`${hero.name} already has the ${deps.data.heroes.items[twice]?.name ?? twice}`);
+      await saveHero(client, { ...hero, inventory: [...hero.inventory, ...bounty.items] });
+      await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+    }
     const paid = spend(village.state.ledger, input.now, bounty.want);
     const ledger = receive(paid, input.now, bounty.offer).ledger;
     const poster = await loadVillage(client, bounty.villageId);

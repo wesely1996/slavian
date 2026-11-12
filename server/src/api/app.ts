@@ -170,7 +170,7 @@ const soloAchievementsBody = z.object({
 });
 
 // A bounty: what the poster offers and what they ask for.
-const bountyBody = z.object({ offer: loadSchema, want: loadSchema });
+const bountyBody = z.object({ offer: loadSchema, want: loadSchema, items: z.array(z.string().max(64)).max(6).optional() });
 const takeBountyBody = z.object({ villageId: z.number().int().positive() });
 // A caravan turned on its way out: home, or to a village (null: the vault).
 const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);
