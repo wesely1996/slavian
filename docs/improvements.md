@@ -89,7 +89,7 @@ Contents:
   Under it the troops as a row of unit portraits with counts. Actions as a
   fixed bar: **Move · Stance · Supply · More**. Settings and leaders go
   behind "More".
-- [ ] **Send troops / caravan / bounty as a 3-step wizard** (M): *What*
+- [ ] *(partly done: Send sits at the top of the troops form, always in sight)* **Send troops / caravan / bounty as a 3-step wizard** (M): *What*
   (steppers with "all"/"half" chips) → *Where* (tap the map, with the route,
   travel time and grain cost drawn live) → *Confirm* (one summary card).
   The confirm button is pinned to the bottom the whole time.
