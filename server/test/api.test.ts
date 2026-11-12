@@ -620,6 +620,23 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(Math.round((await stores(mine.id)).stone - kept)).toBeGreaterThanOrEqual(500);
     expect((await world()).bounties).toHaveLength(0);
 
+    // Gear too, from the hero's pack (not worn), alone or with resources;
+    // the taker's hero mustn't have it already.
+    const heroOf = async (accountId: number) => (await world()).heroes.find((h: { accountId: number }) => h.accountId === accountId);
+    await db.query(`UPDATE heroes SET inventory = '["perun_axe", "bear_tooth"]', gear = '{"armor": "bear_cloak"}' WHERE world_id = $1 AND account_id = $2`, [worldId, vid.accountId]);
+    expect((await post({ offer: load(), want: load(0, 0, 100), items: ['bear_cloak'] })).body.message).toMatch(/worn gear can't be offered/);
+    const gear = await post({ offer: load(), want: load(0, 0, 100), items: ['perun_axe'] });
+    expect(gear.body.bounty).toMatchObject({ items: ['perun_axe'], fee: load() });
+    expect((await heroOf(vid.accountId)).inventory).toEqual(['bear_tooth']);
+    expect((await call('POST', `/v1/bounties/${gear.body.bounty.id}/cancel`, vid.token)).status).toBe(200);
+    expect((await heroOf(vid.accountId)).inventory).toEqual(['bear_tooth', 'perun_axe']);
+    const again = await post({ offer: load(0, 100), want: load(0, 0, 100), items: ['perun_axe'] });
+    await db.query(`UPDATE heroes SET inventory = '["perun_axe"]' WHERE world_id = $1 AND account_id = $2`, [worldId, ola.accountId]);
+    expect((await call('POST', `/v1/bounties/${again.body.bounty.id}/take`, ola.token, { villageId: theirs.id })).body.message).toMatch(/already has/);
+    await db.query(`UPDATE heroes SET inventory = '[]' WHERE world_id = $1 AND account_id = $2`, [worldId, ola.accountId]);
+    expect((await call('POST', `/v1/bounties/${again.body.bounty.id}/take`, ola.token, { villageId: theirs.id })).status).toBe(200);
+    expect((await heroOf(ola.accountId)).inventory).toEqual(['perun_axe']);
+
     // Caravans: bringing back only from your own settlements.
     const yard = await call('POST', `/v1/villages/${mine.id}/build`, vid.token, { building: 'caravan_yard' });
     now = new Date(yard.body.village.queue[0].completesAt);

@@ -3568,7 +3568,7 @@ msgid "Bounty board"
 msgstr ""
 
 #: client/scripts/screens/game_screen.gd:4442
-msgid "Offer resources for others; another player takes your bounty at once. What you offer, and a %d%% fee on it, leave your stores when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not."
+msgid "Offer resources, or gear from your hero's pack, for others; another player takes your bounty at once. What you offer, and a %d%% fee on the resources, leave your stores (and the pack) when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not."
 msgstr ""
 
 #: client/scripts/screens/game_screen.gd:4443
@@ -3591,677 +3591,689 @@ msgstr ""
 msgid "Take"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4461
+#: client/scripts/screens/game_screen.gd:4463
+msgid "Your hero has that gear already"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:4467
 msgid "No bounties on the board."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4467
+#: client/scripts/screens/game_screen.gd:4473
 msgid "Post a bounty · 1 of 2: what you give"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4467
+#: client/scripts/screens/game_screen.gd:4473
 msgid "Post a bounty · 2 of 2: what you want"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4486
+#: client/scripts/screens/game_screen.gd:4488
+msgid "Gear from your hero's pack"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:4513
 msgid "Next"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4486
+#: client/scripts/screens/game_screen.gd:4513
 msgid "Post bounty"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4507
+#: client/scripts/screens/game_screen.gd:4535
 msgid "You pay %s (%s and a %d%% fee)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4507
+#: client/scripts/screens/game_screen.gd:4535
 msgid "Type what you give."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4509
+#: client/scripts/screens/game_screen.gd:4537
+msgid "Gear offered: %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen.gd:4539
 msgid "Not enough in the stores to cover it."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4511
+#: client/scripts/screens/game_screen.gd:4541
 msgid "You get %s when it is taken"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4511
+#: client/scripts/screens/game_screen.gd:4541
 msgid "Type what you want for it."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4598
+#: client/scripts/screens/game_screen.gd:4642
 msgid "Sure? Tear it down"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4598
+#: client/scripts/screens/game_screen.gd:4642
 msgid "Tear down"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4610
+#: client/scripts/screens/game_screen.gd:4654
 msgid "Tap again to tear down the %s. You get back %s, as far as the stores hold it."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4634
+#: client/scripts/screens/game_screen.gd:4678
 msgid "Sure? Abandon %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4634
+#: client/scripts/screens/game_screen.gd:4678
 msgid "Abandon this village"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4646
+#: client/scripts/screens/game_screen.gd:4690
 msgid "Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4731
+#: client/scripts/screens/game_screen.gd:4775
 msgid "%s +%d/h now, +%d/h at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4735
+#: client/scripts/screens/game_screen.gd:4779
 msgid "; level %d: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4738
+#: client/scripts/screens/game_screen.gd:4782
 msgid "%d of %d building slots open, build queue %d."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4740
+#: client/scripts/screens/game_screen.gd:4784
 msgid " Level %d: %d slots, queue %d, builds %d%% faster than level 1."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4751
+#: client/scripts/screens/game_screen.gd:4795
 msgid "Holds %d of each resource above the base; the village keeps %d in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4755
+#: client/scripts/screens/game_screen.gd:4799
 msgid "Holds %d grain above the base; the village keeps %d grain in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4759
+#: client/scripts/screens/game_screen.gd:4803
 msgid "Research +%d/h now, +%d/h at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4761
+#: client/scripts/screens/game_screen.gd:4805
 msgid "Trades at %d%% now, %d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4764
+#: client/scripts/screens/game_screen.gd:4808
 msgid "%d%% of the garrison's fallen get up again when it holds the village"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4768
+#: client/scripts/screens/game_screen.gd:4812
 msgid "%s +%d%% now, +%d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4774
+#: client/scripts/screens/game_screen.gd:4818
 msgid "Garrison"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4789
+#: client/scripts/screens/game_screen.gd:4833
 msgid "%s (Lv %d) commands this garrison: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4795
+#: client/scripts/screens/game_screen.gd:4839
 msgid "Recommended garrison: %d (%d at home)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4797
+#: client/scripts/screens/game_screen.gd:4841
 msgid "At home"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4808
+#: client/scripts/screens/game_screen.gd:4852
 msgid "Away: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4822
+#: client/scripts/screens/game_screen.gd:4866
 msgid "Search for ruins"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4823
+#: client/scripts/screens/game_screen.gd:4867
 msgid "Scouts search the land up to %d hexes around the village for %s. Each scout gives a %d%% chance of finding a forgotten ruin (at most %d%%), which then waits to be explored."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4830
+#: client/scripts/screens/game_screen.gd:4874
 msgid "%d scouts searching · back in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4837
+#: client/scripts/screens/game_screen.gd:4881
 msgid "%d scouts came back empty-handed"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4839
+#: client/scripts/screens/game_screen.gd:4883
 msgid "%d scouts found a %s at (%d, %d)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4849
+#: client/scripts/screens/game_screen.gd:4893
 msgid "Send to search (%d home)"
 msgid_plural "Send to search (%d home)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/screens/game_screen.gd:4872
+#: client/scripts/screens/game_screen.gd:4916
 msgid "Dismiss soldiers"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4894
+#: client/scripts/screens/game_screen.gd:4938
 msgid "Training (%d/%d)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4895
+#: client/scripts/screens/game_screen.gd:4939
 msgid "Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4897
+#: client/scripts/screens/game_screen.gd:4941
 msgid "Nobody in training."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4909
+#: client/scripts/screens/game_screen.gd:4953
 msgid "%s %d/%d   finishing…"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4911
+#: client/scripts/screens/game_screen.gd:4955
 msgid "%s %d/%d   next %s · all %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4926
+#: client/scripts/screens/game_screen.gd:4970
 msgid "Build a Barracks, Shooting Range or Stables in the village to train troops."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4931
+#: client/scripts/screens/game_screen.gd:4975
 msgid "%s (Lv %d)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4954
+#: client/scripts/screens/game_screen.gd:4998
 msgid "%s · atk %d · def %d · hp %d · speed %s hexes/h · %s grain/h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4973
+#: client/scripts/screens/game_screen.gd:5017
 msgid "One at a time; dearer for every %d bought (%d so far)."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4985
+#: client/scripts/screens/game_screen.gd:5029
 msgid "%s · %s each"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4988
+#: client/scripts/screens/game_screen.gd:5032
 msgid "  (not enough)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4993
+#: client/scripts/screens/game_screen.gd:5037
 msgid "Stance when attacked"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:4994
+#: client/scripts/screens/game_screen.gd:5038
 msgid "How the garrison fights, and the stance new armies take. Risk against reward: the earlier a stance breaks, the harder it hits or holds."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5018
+#: client/scripts/screens/game_screen.gd:5062
 msgid "%s: attack ×%.2f, defense ×%.2f, %s."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5034
+#: client/scripts/screens/game_screen.gd:5078
 msgid "Each army fights in its own stance and breaks on its own losses: one that breaks falls back home beaten (its hero wounded, its general killed) while the others fight on."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5059
+#: client/scripts/screens/game_screen.gd:5103
 msgid "No troops yet."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5084
+#: client/scripts/screens/game_screen.gd:5128
 msgid "%s · see how the run went"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5089
+#: client/scripts/screens/game_screen.gd:5133
 msgid "No threats known"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5093
+#: client/scripts/screens/game_screen.gd:5137
 msgid "%s is burning, %s left"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5096
+#: client/scripts/screens/game_screen.gd:5140
 msgid "A horde reaches %s in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5101
+#: client/scripts/screens/game_screen.gd:5145
 msgid "Battle at %s, round %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5104
+#: client/scripts/screens/game_screen.gd:5148
 msgid "Horde at %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5106
+#: client/scripts/screens/game_screen.gd:5150
 msgid "Next horde from the %s (%s threat) sets out in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5108
+#: client/scripts/screens/game_screen.gd:5152
 msgid ", expected at %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5119
+#: client/scripts/screens/game_screen.gd:5163
 msgid "Threats"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5127
+#: client/scripts/screens/game_screen.gd:5171
 msgid "Events"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5131
+#: client/scripts/screens/game_screen.gd:5175
 msgid "Enemy leaders"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5132
+#: client/scripts/screens/game_screen.gd:5176
 msgid "Battle reports"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5133
+#: client/scripts/screens/game_screen.gd:5177
 msgid "Camps and fronts"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5135
+#: client/scripts/screens/game_screen.gd:5179
 msgid "Your group"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5139
+#: client/scripts/screens/game_screen.gd:5183
 msgid "World settings"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5154
+#: client/scripts/screens/game_screen.gd:5198
 msgid "The Holy City: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5156
+#: client/scripts/screens/game_screen.gd:5200
 msgid "No waves announced."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5164
+#: client/scripts/screens/game_screen.gd:5208
 msgid "Every day something rises on the map near a village: captives to free, a forbidding ruin to search, a shipyard to pay for and defend. Each brings a bounty; one left undone makes the next horde hate you more."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5167
+#: client/scripts/screens/game_screen.gd:5211
 msgid "No events on the map now."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5191
+#: client/scripts/screens/game_screen.gd:5235
 msgid "Show on map"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5204
+#: client/scripts/screens/game_screen.gd:5248
 msgid "No battles fought yet."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5213
+#: client/scripts/screens/game_screen.gd:5257
 msgid "%s horde, %d rounds"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5223
+#: client/scripts/screens/game_screen.gd:5267
 msgid "Help came from %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5232
+#: client/scripts/screens/game_screen.gd:5276
 msgid "Fronts"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5242
+#: client/scripts/screens/game_screen.gd:5286
 msgid "Camps and lairs"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5244
+#: client/scripts/screens/game_screen.gd:5288
 msgid "%s at (%d, %d)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5246
+#: client/scripts/screens/game_screen.gd:5290
 msgid "Outposts burned"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5254
+#: client/scripts/screens/game_screen.gd:5298
 msgid "%s difficulty"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5261
+#: client/scripts/screens/game_screen.gd:5305
 msgid "Game speed"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5262
+#: client/scripts/screens/game_screen.gd:5306
 msgid "Everything in the world runs at this speed, the hordes too: an hour of the game passes in an hour divided by it. Speed up when you have time to play, slow down before you sleep."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5264
+#: client/scripts/screens/game_screen.gd:5308
 msgid "Now %s×"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5283
+#: client/scripts/screens/game_screen.gd:5327
 msgid "Peaceful hours"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5284
+#: client/scripts/screens/game_screen.gd:5328
 msgid "No horde arrives in these hours: one that would waits outside until they end. Set them to when you sleep."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5289
+#: client/scripts/screens/game_screen.gd:5333
 msgid "The host sets them."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5292
+#: client/scripts/screens/game_screen.gd:5336
 msgid "Off"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5316
+#: client/scripts/screens/game_screen.gd:5360
 msgid "Report a bug"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5326
+#: client/scripts/screens/game_screen.gd:5370
 msgid "Leave"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5328
+#: client/scripts/screens/game_screen.gd:5372
 msgid "Back to the menu"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5331
+#: client/scripts/screens/game_screen.gd:5375
 msgid "Sure? Quit this world"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5331
+#: client/scripts/screens/game_screen.gd:5375
 msgid "Quit this world"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5339
+#: client/scripts/screens/game_screen.gd:5383
 msgid "Tap again to delete this solo world."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5340
+#: client/scripts/screens/game_screen.gd:5384
 msgid "Tap again to quit. You're the last one here, so the world closes."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5341
+#: client/scripts/screens/game_screen.gd:5385
 msgid "Tap again to quit. Your villages go to your teammates, and you can't come back."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5381
+#: client/scripts/screens/game_screen.gd:5425
 msgid "What went wrong?"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5387
+#: client/scripts/screens/game_screen.gd:5431
 msgid "The current game state is attached to the report."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5392
+#: client/scripts/screens/game_screen.gd:5436
 msgid "Write what went wrong first."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5423
+#: client/scripts/screens/game_screen.gd:5467
 msgid "Sending the report…"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5427
+#: client/scripts/screens/game_screen.gd:5471
 msgid "Report sent. Saved to %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5429
+#: client/scripts/screens/game_screen.gd:5473
 msgid "Report saved to %s (the server did not take it: %s)"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5448
+#: client/scripts/screens/game_screen.gd:5492
 msgid "%s · %s front"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5458
+#: client/scripts/screens/game_screen.gd:5502
 msgid "Fallen: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5464
+#: client/scripts/screens/game_screen.gd:5508
 msgid "In battle: attack %d · defense %d · health %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5465
+#: client/scripts/screens/game_screen.gd:5509
 msgid "The hero fights in the ranks as a champion, striking like a band of soldiers. It commands the troops it stands with; struck down, it is carried home wounded and a general with it takes command."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5466
+#: client/scripts/screens/game_screen.gd:5510
 msgid "A general fights in the ranks too, a lesser champion than the hero. It commands the troops it stands with when no hero does, and takes command when the hero falls; struck down, it dies."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5478
+#: client/scripts/screens/game_screen.gd:5522
 msgid "No rally point: new troops stay where they are trained."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5480
+#: client/scripts/screens/game_screen.gd:5524
 msgid "Rally point: troops trained in your other settlements march here once done."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5482
+#: client/scripts/screens/game_screen.gd:5526
 msgid "Rally point: %s. Troops trained here march there once done."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5487
+#: client/scripts/screens/game_screen.gd:5531
 msgid "Stop rallying"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5489
+#: client/scripts/screens/game_screen.gd:5533
 msgid "Rally here"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5490
+#: client/scripts/screens/game_screen.gd:5534
 msgid "One of your settlements can be your rally point: every batch of troops trained in your other settlements marches there as soon as it is done, to join its garrison. Settlers stay home, and so do troops of a village under siege."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5526
+#: client/scripts/screens/game_screen.gd:5570
 msgid "%s's quest with the army."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5542
+#: client/scripts/screens/game_screen.gd:5586
 msgid "Raiders of the bridge · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5545
+#: client/scripts/screens/game_screen.gd:5589
 msgid "A band of horde %d · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5547
+#: client/scripts/screens/game_screen.gd:5591
 msgid "Wave %d · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5549
+#: client/scripts/screens/game_screen.gd:5593
 msgid " · composition unknown"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5554
+#: client/scripts/screens/game_screen.gd:5598
 msgid "%s front · %s threat%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5563
+#: client/scripts/screens/game_screen.gd:5607
 msgid "Hatred of the %s front: +%d%% attack and defense"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5564
+#: client/scripts/screens/game_screen.gd:5608
 msgid "The front's hatred grows with every ambush, harassing strike, raid and strike against its hordes, and every map event left undone. Its next horde to set out takes all of it, and the front's hatred starts again from nothing. Each time it passes another 100%%, the front's next horde sends a band of %d%% of its troops against the nearest village. A horde that took it leaves %s more camps behind when it is over (the whole part surely, the rest by chance). Ambushes on the front are riskier, and worth more."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5569
+#: client/scripts/screens/game_screen.gd:5613
 msgid "Hatred: +%d%% attack and defense"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5570
+#: client/scripts/screens/game_screen.gd:5614
 msgid "It took all of its front's hatred as it set out. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance)."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5577
+#: client/scripts/screens/game_screen.gd:5621
 msgid "Appears in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5580
+#: client/scripts/screens/game_screen.gd:5624
 msgid " · expected at %s in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5583
+#: client/scripts/screens/game_screen.gd:5627
 msgid "Marching on %s · arrives in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5585
+#: client/scripts/screens/game_screen.gd:5629
 msgid "At the gates of %s · leaves in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5587
+#: client/scripts/screens/game_screen.gd:5631
 msgid "Burning %s · done in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5590
+#: client/scripts/screens/game_screen.gd:5634
 msgid "Fighting at %s · round %d of %d · %d of them left"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5611
+#: client/scripts/screens/game_screen.gd:5655
 msgid "Scouts from %s: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5624
+#: client/scripts/screens/game_screen.gd:5668
 msgid "%d scouts en route · report in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5625
+#: client/scripts/screens/game_screen.gd:5669
 msgid "Scouts heading home · back in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5637
+#: client/scripts/screens/game_screen.gd:5681
 msgid "No scouts at home."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5650
+#: client/scripts/screens/game_screen.gd:5694
 msgid "%s · %d home"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5654
+#: client/scripts/screens/game_screen.gd:5698
 msgid "Send scouts"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5729
+#: client/scripts/screens/game_screen.gd:5773
 msgid "A caravan can go to a village or outpost, the Holy City, a shipyard, or a fort or supply point."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5783
+#: client/scripts/screens/game_screen.gd:5827
 msgid "● live"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5783
+#: client/scripts/screens/game_screen.gd:5827
 msgid "○ offline"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5830
+#: client/scripts/screens/game_screen.gd:5874
 msgid "Notifications"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5830
+#: client/scripts/screens/game_screen.gd:5874
 msgid "Chat"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5853
+#: client/scripts/screens/game_screen.gd:5897
 msgid "Achievement: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5888
+#: client/scripts/screens/game_screen.gd:5932
 msgid "All troops"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5889
+#: client/scripts/screens/game_screen.gd:5933
 msgid "By village"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5923
+#: client/scripts/screens/game_screen.gd:5967
 msgid "No troops yet. Train them in a village's Troops tab."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5935
+#: client/scripts/screens/game_screen.gd:5979
 msgid "%d at home · %d out · %d in training"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5940
+#: client/scripts/screens/game_screen.gd:5984
 msgid "%d in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5952
+#: client/scripts/screens/game_screen.gd:5996
 msgid "At home: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5963
+#: client/scripts/screens/game_screen.gd:6007
 msgid "Training: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5966
+#: client/scripts/screens/game_screen.gd:6010
 msgid "Open"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5980
+#: client/scripts/screens/game_screen.gd:6024
 msgid "No armies out. Send them from a village's Troops tab, or from a hex on the map."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:5989
+#: client/scripts/screens/game_screen.gd:6033
 msgid "From %s to %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6020
+#: client/scripts/screens/game_screen.gd:6064
 msgid "Open the hero"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6080
+#: client/scripts/screens/game_screen.gd:6124
 msgid "Earlier messages"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6082
+#: client/scripts/screens/game_screen.gd:6126
 msgid "No messages yet: say hello to your group."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6090
+#: client/scripts/screens/game_screen.gd:6134
 msgid "Write to your group"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6149
+#: client/scripts/screens/game_screen.gd:6193
 msgid "Danger is pushed to your phone; everything else waits for the daily digest."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6158
+#: client/scripts/screens/game_screen.gd:6202
 msgid "Messages"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6159
+#: client/scripts/screens/game_screen.gd:6203
 msgid "Settings"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6165
+#: client/scripts/screens/game_screen.gd:6209
 msgid "Nothing yet."
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6182
+#: client/scripts/screens/game_screen.gd:6226
 msgid "Quiet hours %s–%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6182
+#: client/scripts/screens/game_screen.gd:6226
 msgid "No quiet hours"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6185
+#: client/scripts/screens/game_screen.gd:6229
 msgid "On"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6190
+#: client/scripts/screens/game_screen.gd:6234
 msgid "From −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6190
+#: client/scripts/screens/game_screen.gd:6234
 msgid "From +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6190
+#: client/scripts/screens/game_screen.gd:6234
 msgid "Until −1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6190
+#: client/scripts/screens/game_screen.gd:6234
 msgid "Until +1h"
 msgstr ""
 
-#: client/scripts/screens/game_screen.gd:6199
+#: client/scripts/screens/game_screen.gd:6243
 msgid "Daily digest at %s"
 msgstr ""
 

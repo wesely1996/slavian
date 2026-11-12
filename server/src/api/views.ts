@@ -364,6 +364,8 @@ export function bountyView(bounty: Bounty) {
     want: bounty.want,
     // The fee they paid when posting it.
     fee: bounty.fee,
+    // Gear offered too (item ids).
+    items: bounty.items,
     status: bounty.status,
     createdAt: bounty.createdAt.toISOString(),
   };

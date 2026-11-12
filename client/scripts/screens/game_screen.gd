@@ -4426,7 +4426,7 @@ func _market_section(village: Dictionary, level: int) -> void:
 
 
 ## A bounty being put together: step 1 what you give, step 2 what you want.
-var _bounty := {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
+var _bounty := {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "items": []}
 
 
 ## The Market's bounty board: every open bounty (yours to call off, others'
@@ -4439,7 +4439,7 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 	var most := Rules.bounty_most(data, level)
 	var mine_here := Game.bounties.filter(func(b: Dictionary) -> bool: return int(b.villageId) == village_id)
 	_panel_body.add_child(UI.with_info(UI.label(tr("Bounty board"), UI.HEADING_SIZE),
-		tr("Offer resources for others; another player takes your bounty at once. What you offer, and a %d%% fee on it, leave your stores when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not.") % [share, share]))
+		tr("Offer resources, or gear from your hero's pack, for others; another player takes your bounty at once. What you offer, and a %d%% fee on the resources, leave your stores (and the pack) when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not.") % [share, share]))
 	_panel_body.add_child(UI.label(tr("%d of %d open here · at most %d a side") % [mine_here.size(), slots, most], UI.SMALL_SIZE, UI.MUTED))
 	for bounty in Game.bounties:
 		var row := UI.hbox(8)
@@ -4447,14 +4447,20 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 		var words := UI.rich()
 		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var who := tr("Yours, from %s") % Game.village_name(int(bounty.villageId)) if mine else Game.village_name(int(bounty.villageId))
-		words.text = tr("%s: offers %s for %s") % [who, UI.costs(_nonzero(bounty.offer), 22), UI.costs(_nonzero(bounty.want), 22)]
+		words.text = tr("%s: offers %s for %s") % [who, _bounty_offer_text(bounty.offer, bounty.get("items", [])), UI.costs(_nonzero(bounty.want), 22)]
 		row.add_child(words)
 		var bounty_id := int(bounty.id)
 		if mine:
 			row.add_child(UI.button(tr("Call off"), func() -> void: _bounty_command("/v1/bounties/%d/cancel" % bounty_id, {})))
 		else:
 			var take := UI.button(tr("Take"), func() -> void: _bounty_command("/v1/bounties/%d/take" % bounty_id, {"villageId": village_id}))
-			take.disabled = not Ledger.can_afford(Ledger.amounts_at(village.resources, Game.server_now()), bounty.want)
+			# Gear your hero already has can't be taken twice.
+			var hero := Game.my_hero()
+			var owned: Array = hero.get("inventory", []) + hero.get("gear", {}).values()
+			var twice: bool = bounty.get("items", []).any(func(item: String) -> bool: return item in owned)
+			take.disabled = twice or not Ledger.can_afford(Ledger.amounts_at(village.resources, Game.server_now()), bounty.want)
+			if twice:
+				take.tooltip_text = tr("Your hero has that gear already")
 			row.add_child(take)
 		_panel_body.add_child(row)
 	if Game.bounties.is_empty():
@@ -4476,6 +4482,27 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 		row.add_child(name)
 		row.add_child(_number_field("bounty:%s:%s" % [side, kind], int(_bounty[side][kind]), 0, most, func(n: int) -> void: _bounty[side][kind] = n))
 		_panel_body.add_child(row)
+	# Gear from the hero's pack can be offered too (not what it wears).
+	var pack: Array = Game.my_hero().get("inventory", [])
+	if step == 1 and not pack.is_empty():
+		_panel_body.add_child(UI.label(tr("Gear from your hero's pack"), UI.SMALL_SIZE, UI.MUTED))
+		var counts := {}
+		for item in pack:
+			counts[item] = int(counts.get(item, 0)) + 1
+		for item in counts:
+			var def: Dictionary = data.heroes.items.get(item, {})
+			var pick := CheckBox.new()
+			pick.text = tr(String(def.get("name", item)))
+			pick.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+			pick.button_pressed = item in _bounty.items
+			var chosen: String = item
+			pick.toggled.connect(func(on: bool) -> void:
+				if on and not chosen in _bounty.items:
+					_bounty.items.append(chosen)
+				elif not on:
+					_bounty.items.erase(chosen)
+				_rebuild_panel())
+			_panel_body.add_child(UI.with_info(pick, HeroText.effects(def.get("effects", {}))))
 	var total_line := UI.rich()
 	_panel_body.add_child(total_line)
 	var buttons := UI.hbox(8)
@@ -4504,15 +4531,32 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 		var afford := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), pay)
 		var gives := _sum(offer)
 		var wants := _sum(want)
-		var text := tr("You pay %s (%s and a %d%% fee)") % [UI.costs(_nonzero(pay), 22), UI.costs(_nonzero(offer), 22), share] if gives > 0 else tr("Type what you give.")
+		var items: Array = _bounty.items
+		var text := tr("You pay %s (%s and a %d%% fee)") % [UI.costs(_nonzero(pay), 22), UI.costs(_nonzero(offer), 22), share] if gives > 0 else (tr("Type what you give.") if items.is_empty() else "")
+		if not items.is_empty():
+			text += ("\n" if text != "" else "") + tr("Gear offered: %s") % _gear_names(items)
 		if gives > 0 and not afford:
 			text += "\n" + tr("Not enough in the stores to cover it.")
 		if step == 2:
 			text += "\n" + (tr("You get %s when it is taken") % UI.costs(_nonzero(Rules.bounty_return(data, want)), 22) if wants > 0 else tr("Type what you want for it."))
-			go.disabled = gives == 0 or wants == 0 or not afford or gives > most or wants > most
+			go.disabled = (gives == 0 and items.is_empty()) or wants == 0 or not afford or gives > most or wants > most
 		else:
-			go.disabled = gives == 0 or not afford or gives > most
+			go.disabled = (gives == 0 and items.is_empty()) or not afford or gives > most
 		return text)
+
+
+## What a bounty offers: its resources and its gear.
+func _bounty_offer_text(offer: Dictionary, items: Array) -> String:
+	var parts := PackedStringArray()
+	if _sum(offer) > 0:
+		parts.append(UI.costs(_nonzero(offer), 22))
+	if not items.is_empty():
+		parts.append(_gear_names(items))
+	return tr(" and ").join(parts)
+
+
+func _gear_names(items: Array) -> String:
+	return ", ".join(items.map(func(item: String) -> String: return tr(String(Game.data.heroes.items.get(item, {}).get("name", item)))))
 
 
 func _sum(amounts: Dictionary) -> int:
@@ -4533,13 +4577,13 @@ func _nonzero(amounts: Dictionary) -> Dictionary:
 
 func _post_bounty(village_id: int) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/bounties" % village_id, {"offer": _bounty.offer.duplicate(), "want": _bounty.want.duplicate()})
+	var response := await Api.post_json("/v1/villages/%d/bounties" % village_id, {"offer": _bounty.offer.duplicate(), "want": _bounty.want.duplicate(), "items": _bounty.items.duplicate()})
 	if not response.ok:
 		_status.text = response.error
 		Sound.effect("error")
 		return
 	Sound.effect("coins")
-	_bounty = {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
+	_bounty = {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "items": []}
 	_forget_drafts(["bounty:"])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)

@@ -31,12 +31,13 @@ export function bountyMost(data: GameData, marketLevel: number): number {
 }
 
 // Checks a bounty before it is posted.
-export function checkBounty(data: GameData, marketLevel: number, open: number, offer: Resources, want: Resources): void {
+export function checkBounty(data: GameData, marketLevel: number, open: number, offer: Resources, want: Resources, items: readonly string[] = []): void {
   if (marketLevel <= 0) throw new RuleError('Build a Market to post bounties');
   for (const side of [offer, want]) {
     if (RESOURCE_KINDS.some((k) => !Number.isInteger(side[k]) || side[k] < 0)) throw new RuleError('Amounts are whole, non-negative numbers');
   }
-  if (total(offer) <= 0) throw new RuleError('Offer something');
+  if (total(offer) <= 0 && items.length === 0) throw new RuleError('Offer something');
+  if (items.some((item) => !data.heroes.items[item])) throw new RuleError('No such gear');
   if (total(want) <= 0) throw new RuleError('Ask for something');
   if (RESOURCE_KINDS.some((k) => offer[k] > 0 && want[k] > 0)) throw new RuleError('Offer and ask for different resources');
   const most = bountyMost(data, marketLevel);
