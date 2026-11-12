@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import type { DbClient } from './pool.js';
+import type { Db, DbClient } from './pool.js';
 
 export interface Account {
   id: number;
@@ -25,12 +25,17 @@ export async function createGuestAccount(
   return { account, token };
 }
 
-export async function accountForToken(client: DbClient, token: string): Promise<Account | null> {
+// One statement, so it needs no transaction (pass the pool). The session's
+// last use is only noted once an hour: most requests then write nothing.
+export async function accountForToken(client: DbClient | Db, token: string): Promise<Account | null> {
   const { rows } = await client.query<Account>(
-    `UPDATE sessions s SET last_used_at = now()
-     FROM accounts a
-     WHERE s.token_hash = $1 AND a.id = s.account_id
-     RETURNING a.id, a.display_name AS "displayName", a.language`,
+    `WITH touched AS (
+       UPDATE sessions SET last_used_at = now()
+       WHERE token_hash = $1 AND last_used_at < now() - interval '1 hour'
+     )
+     SELECT a.id, a.display_name AS "displayName", a.language
+     FROM sessions s JOIN accounts a ON a.id = s.account_id
+     WHERE s.token_hash = $1`,
     [hashToken(token)],
   );
   return rows[0] ?? null;

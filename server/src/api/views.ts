@@ -16,7 +16,7 @@ import { listScrolls, listSites } from '../db/sites.js';
 import { findBridge } from '../db/bridges.js';
 import { newBridge } from '../sim/bridge.js';
 import { total } from '../sim/battle.js';
-import type { DbClient } from '../db/pool.js';
+import { memoReads, type DbClient } from '../db/pool.js';
 import type { Village } from '../db/villages.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { listVillages } from '../db/villages.js';
@@ -457,7 +457,8 @@ export function heroView(data: GameData, hero: Hero, offers: readonly (QuestOffe
   };
 }
 
-export async function heroesView(client: DbClient, data: GameData, worldId: number, at: Date = new Date()) {
+export async function heroesView(base: DbClient, data: GameData, worldId: number, at: Date = new Date()) {
+  const client = memoReads(base);
   const world = await getWorld(client, worldId);
   const out = [];
   for (const hero of await listHeroes(client, worldId)) out.push(heroView(data, hero, await heroQuestOffers(client, data, world, hero, at), await armyQuestOf(client, worldId, hero.accountId)));
@@ -619,7 +620,9 @@ export function worldSummary(world: World) {
 
 // Everything a member needs to render the world. Co-op: every member sees
 // every village in full.
-export async function worldView(client: DbClient, data: GameData, world: World, at: Date = new Date()) {
+export async function worldView(base: DbClient, data: GameData, world: World, at: Date = new Date()) {
+  // Its parts share their sources: each is read once.
+  const client = memoReads(base);
   const members = await listMembers(client, world.id);
   const villages = await listVillages(client, world.id);
   const waves = await wavesView(client, data, world);

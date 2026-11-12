@@ -2,7 +2,7 @@ import type { Difficulty, TerrainId } from '../data/index.js';
 import type { QuietWindow } from '../sim/difficulty.js';
 import type { Front, WorldMap } from '../sim/mapgen.js';
 import { NotFoundError } from '../errors.js';
-import type { DbClient } from './pool.js';
+import type { Db, DbClient } from './pool.js';
 
 // abandoned: everyone left (migration 037).
 export type WorldStatus = 'lobby' | 'running' | 'won' | 'lost' | 'abandoned';
@@ -207,7 +207,7 @@ export async function markClaimed(client: DbClient, worldId: number, accountId: 
   return rowCount === 1;
 }
 
-export async function isMember(client: DbClient, worldId: number, accountId: number): Promise<boolean> {
+export async function isMember(client: DbClient | Db, worldId: number, accountId: number): Promise<boolean> {
   const { rowCount } = await client.query(
     'SELECT 1 FROM world_members WHERE world_id = $1 AND account_id = $2 AND left_at IS NULL',
     [worldId, accountId],

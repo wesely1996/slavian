@@ -38,6 +38,8 @@ export class LiveHub {
   private listener: DbClient | null = null;
   private channel = '';
   private stopped = false;
+  // News being read for its subscribers: key -> whether it came again meanwhile.
+  private readonly reading = new Map<string, boolean>();
 
   constructor(
     private readonly db: Db,
@@ -82,7 +84,7 @@ export class LiveHub {
         const parsed = clientMessage.safeParse(safeJson(raw.toString()));
         if (!parsed.success) return send(socket, { type: 'error', message: 'Unknown message' });
         const { worldId } = parsed.data;
-        const member = await inTransaction(this.db, (client) => isMember(client, worldId, account.id));
+        const member = await isMember(this.db, worldId, account.id);
         if (!member) return send(socket, { type: 'error', message: `World ${worldId} not found` });
         worlds.add(worldId);
         this.socketsFor(worldId).add(socket);
@@ -115,6 +117,24 @@ export class LiveHub {
       for (const socket of sockets) send(socket, { type: 'chat', worldId: event.worldId, message: event.message, serverTime: this.clock().toISOString() });
       return;
     }
+    // A burst of the same news is read once: while one read is under way,
+    // any number of repeats ask for just one more after it.
+    const key = event.type === 'village' ? `${event.worldId}:village:${event.villageId}` : `${event.worldId}:${event.type}`;
+    if (this.reading.has(key)) {
+      this.reading.set(key, true);
+      return;
+    }
+    try {
+      do {
+        this.reading.set(key, false);
+        await this.deliver(event);
+      } while (this.reading.get(key));
+    } finally {
+      this.reading.delete(key);
+    }
+  }
+
+  private async deliver(event: Exclude<WorldEvent, { type: 'chat' } | { type: 'notifications' }>): Promise<void> {
     try {
       const message = await inTransaction(this.db, async (client) => {
         const serverTime = this.clock().toISOString();
@@ -162,7 +182,9 @@ export class LiveHub {
         }
         return { type: 'world', world: await worldView(client, this.data, await getWorld(client, event.worldId), new Date(serverTime)), serverTime };
       });
-      for (const socket of sockets) send(socket, message);
+      // Whoever is subscribed by now, and each message turned to text once.
+      const text = JSON.stringify(message);
+      for (const socket of this.subscribers.get(event.worldId) ?? []) if (socket.readyState === socket.OPEN) socket.send(text);
     } catch (error) {
       console.error('Live dispatch failed:', error);
     }

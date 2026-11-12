@@ -52,3 +52,32 @@ export async function inTransaction<T>(db: Db, fn: (client: DbClient) => Promise
     client.release();
   }
 }
+
+// A client for building one view: a read asked twice (same text, same
+// parameters) is answered from memory the second time, so views that share
+// their sources (the land, the villages, the world) cost one round trip
+// each. Rows are copied on a repeat, so no caller sees another's changes;
+// anything that is not a plain SELECT goes through and empties the memory.
+export function memoReads(client: DbClient): DbClient {
+  const seen = new Map<string, Promise<pg.QueryResult>>();
+  const query = (text: unknown, params?: unknown[]): Promise<pg.QueryResult> => {
+    if (typeof text !== 'string' || !/^\s*\(?\s*SELECT\b/i.test(text) || /\bpg_notify\b|\bpg_(try_)?advisory|\bFOR (UPDATE|SHARE)\b/i.test(text)) {
+      seen.clear();
+      return (client.query as (text: unknown, params?: unknown[]) => Promise<pg.QueryResult>)(text, params);
+    }
+    const key = `${text}\u0000${JSON.stringify(params ?? [])}`;
+    const known = seen.get(key);
+    if (known) return known.then((result) => ({ ...result, rows: structuredClone(result.rows) }));
+    const asked = client.query(text, params);
+    seen.set(key, asked);
+    asked.catch(() => seen.delete(key));
+    return asked;
+  };
+  return new Proxy(client, {
+    get(target, property) {
+      if (property === 'query') return query;
+      const value: unknown = Reflect.get(target, property);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
+}
