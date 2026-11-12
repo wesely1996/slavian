@@ -20,6 +20,14 @@ var _since_refresh := 0.0
 var _rate_negative := {}
 ## A rebuild of the sheet is waiting for the end of the frame.
 var _panel_stale := false
+## The status line as last shown in a toast.
+var _status_shown := ""
+var _toast_box: PanelContainer
+var _toast_tween: Tween
+## What the sheet showed when last built (a change of place fades it in).
+var _sheet_key := ""
+## Which notices the inbox lists: "all", "battles", "economy" or "other".
+var _inbox_filter := "all"
 
 var _live_label: Label
 ## The top band of wood, and the words its buttons show at full width (they
@@ -276,7 +284,15 @@ func _process(delta: float) -> void:
 				_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 		_fit_resources()
 	_threat_button.text = _threat_summary()
-	_status.visible = _status.text != ""
+	# Nothing threatening: no line at all.
+	_threat_button.visible = not Game.waves.is_empty() or RunText.is_over(Game.world) or Game.world.get("ritualAt") != null
+	# What the game has to say (a refusal, a hint) pops up over the bar at
+	# the bottom, where the thumb is, and fades.
+	_status.visible = false
+	if _status.text != _status_shown:
+		_status_shown = _status.text
+		if _status.text != "":
+			_toast(_status.text, true)
 	if hex_map.has_moving_hordes():
 		hex_map.queue_redraw()
 	for entry in _ticking:
@@ -544,9 +560,97 @@ func _light_nav() -> void:
 	_nav_buttons["hero"].visible = not Game.my_hero().is_empty()
 
 
+## A few words over the bottom bar for a few seconds: `warn` for a refusal
+## or a hint (with a buzz of the phone), else something done.
+func _toast(text: String, warn := false) -> void:
+	if _ui_layer == null:
+		return
+	if _toast_box == null:
+		_toast_box = PanelContainer.new()
+		_toast_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var words := UI.label("", UI.SMALL_SIZE)
+		words.name = "Words"
+		words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		words.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_toast_box.add_child(words)
+		_ui_layer.add_child(_toast_box)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(UiTheme.MADDER.darkened(0.35), 0.95) if warn else Color(UiTheme.INK, 0.92)
+	style.border_color = Color(UiTheme.ON_WOOD, 0.4)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(10)
+	style.set_content_margin_all(14)
+	_toast_box.add_theme_stylebox_override("panel", style)
+	var label := _toast_box.get_node("Words") as Label
+	label.text = text
+	label.add_theme_color_override("font_color", UiTheme.ON_WOOD)
+	var area := get_viewport().get_visible_rect().size
+	var width := minf(area.x - 32.0, 640.0)
+	_toast_box.custom_minimum_size = Vector2(width, 0)
+	_toast_box.size = Vector2(width, 0)
+	var nav_height := _nav.size.y if _nav != null else 0.0
+	_toast_box.position = Vector2((area.x - width) / 2.0, area.y - nav_height - 130.0)
+	_toast_box.visible = true
+	_toast_box.modulate.a = 0.0
+	if _toast_tween != null:
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(_toast_box, "modulate:a", 1.0, 0.15)
+	_toast_tween.tween_interval(2.2 + text.length() * 0.035)
+	_toast_tween.tween_property(_toast_box, "modulate:a", 0.0, 0.4)
+	_toast_tween.tween_callback(func() -> void: _toast_box.visible = false)
+	if OS.has_feature("mobile"):
+		Input.vibrate_handheld(35 if warn else 15)
+
+
+## The one thing most worth doing now, from how things stand: [what, where
+## it is done] ([] when nothing stands out).
+func _next_step() -> Array:
+	var now := Game.server_now()
+	for village in Game.my_villages():
+		if village.get("ruin") is Dictionary:
+			continue
+		var id := int(village.id)
+		var open := func(tab: String) -> void:
+			Game.current_village_id = id
+			_tab = tab
+			_set_view("village")
+			_tab = tab
+			_rebuild_panel()
+		if village.queue.is_empty():
+			return [tr("%s builds nothing") % village.name, open.bind("village")]
+		var amounts := Ledger.amounts_at(village.resources, now)
+		for kind in Ledger.KINDS:
+			var capacity := float(village.resources.capacity[kind])
+			if capacity > 0.0 and float(amounts[kind]) >= capacity * 0.97:
+				return [tr("%s: the %s store is full") % [village.name, UI.resource_name(kind).to_lower()], open.bind("village")]
+		if village.training.is_empty() and int(village.levels.get("barracks", 0)) > 0:
+			return [tr("%s trains nobody") % village.name, open.bind("troops")]
+	var hero := Game.my_hero()
+	if not hero.is_empty() and int(hero.get("skillPoints", 0)) > 0:
+		return [tr("Your hero has a skill point to spend"), func() -> void:
+			_panel_mode = "hero"
+			_rebuild_panel()]
+	return []
+
+
 ## Everything the bar has no room for.
 func _more_panel() -> void:
 	_panel_body.add_child(UI.label(String(Game.world.get("name", "")), UI.HEADING_SIZE))
+	var hint := _next_step()
+	if not hint.is_empty():
+		var card := UI.card(10)
+		var row := UI.hbox(10)
+		card.add_child(row)
+		var words := UI.vbox(0)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(tr("What next?"), UI.SMALL_SIZE, UI.MUTED))
+		words.add_child(UI.label(String(hint[0])))
+		row.add_child(words)
+		var go := UI.primary(tr("Go"), hint[1])
+		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(go)
+		_panel_body.add_child(card)
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
@@ -1404,6 +1508,11 @@ func _rebuild_panel() -> void:
 		_status.text = ""
 	_fit_sheet()
 	_light_nav()
+	var key := "%s/%s/%s/%s" % [_panel_mode, _view, _tab, _army_id if _panel_mode == "army" else 0]
+	if key != _sheet_key:
+		_sheet_key = key
+		_panel_body.modulate.a = 0.0
+		create_tween().tween_property(_panel_body, "modulate:a", 1.0, 0.16)
 	if _picking():
 		_picking_panel()
 		return
@@ -2666,6 +2775,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	if not response.ok:
 		_status.text = response.error
 		return
+	_toast(tr("The army is on its way"))
 	_army_units.clear()
 	_forget_drafts(["units:", "send:", "escort:"])
 	_send_target = Vector2i.MAX
@@ -5198,8 +5308,11 @@ func _train_tab(village: Dictionary) -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
 		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
-		info.add_child(UI.label(tr("Atk %d · Def %d · HP %d · Speed %s · Grain %s/h") % [def.attack, def.defense, int(def.health),
-			UI.number(TimeUtil.per_real_hour(float(def.speed) * float(Game.world.speed))), UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))], UI.SMALL_SIZE, UI.MUTED))
+		var stats := UI.stats([["icon/attack", str(int(def.attack))], ["icon/defense", str(int(def.defense))], ["icon/health", str(int(def.health))],
+			["icon/speed", UI.number(TimeUtil.per_real_hour(float(def.speed) * float(Game.world.speed)))],
+			["resource/grain", tr("%s/h") % UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))]])
+		stats.tooltip_text = tr("Attack · Defense · Health · Speed (hexes/h) · Grain eaten")
+		info.add_child(stats)
 		_panel_body.add_child(frame)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))
@@ -5429,6 +5542,7 @@ func _train(village_id: int, unit: String, count: int) -> void:
 		Sound.effect("error")
 		return
 	Sound.effect("train")
+	_toast(tr("Training %d × %s") % [count, tr(Game.data.units.units.get(unit, {"name": unit}).name)])
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -5819,10 +5933,11 @@ func _leaders_section() -> void:
 ## A hero's or general's own battle stats: it fights in the ranks.
 func _champion_line(id: String, level: int) -> Control:
 	var c := LocalBattle.champion_of(Game.data, id, level)
-	var text := tr("In battle: attack %d · defense %d · health %d") % [roundi(float(c.attack)), roundi(float(c.defense)), roundi(float(c.health))]
+	var line := UI.stats([["icon/attack", str(roundi(float(c.attack)))], ["icon/defense", str(roundi(float(c.defense)))], ["icon/health", str(roundi(float(c.health)))]], UI.SMALL_SIZE, UiTheme.GOLD)
+	line.tooltip_text = tr("In battle: attack · defense · health")
 	var why := tr("The hero fights in the ranks as a champion, striking like a band of soldiers. It commands the troops it stands with; struck down, it is carried home wounded and a general with it takes command.") if id == "hero" \
 		else tr("A general fights in the ranks too, a lesser champion than the hero. It commands the troops it stands with when no hero does, and takes command when the hero falls; struck down, it dies.")
-	return UI.with_info(UI.label(text, UI.SMALL_SIZE, UiTheme.GOLD), why)
+	return UI.with_info(line, why)
 
 
 ## The rally point, seen from one of the player's villages: where its new
@@ -6086,6 +6201,7 @@ func _queue_build(village_id: int, plot: String, building: String) -> void:
 		Sound.effect("error")
 		return
 	Sound.effect("build")
+	_toast(tr("%s queued") % tr(_building_def(building).name) if building != "" else tr("Queued"))
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
@@ -6545,15 +6661,53 @@ func _inbox_panel() -> void:
 	_messages_switch("inbox")
 
 
+## What a notice is about, for the inbox's filter.
+const NOTICE_GROUPS := {
+	"battles": ["battle_result", "under_attack", "razing", "wave_soon", "outpost_raided", "bandit", "camp", "lair", "leader"],
+	"economy": ["build_done", "train", "store", "surplus", "caravan_delivered", "supply", "settlers", "village", "rebuild", "gear"],
+}
+
+
+func _notice_group(kind: String) -> String:
+	for group in NOTICE_GROUPS:
+		if kind in NOTICE_GROUPS[group]:
+			return group
+	return "other"
+
+
 func _inbox_messages() -> void:
-	if Game.inbox.is_empty():
-		_panel_body.add_child(UI.label(tr("Nothing yet."), UI.SMALL_SIZE, UI.MUTED))
+	var chips := UI.hbox(6)
+	for chip in [["all", tr("All")], ["battles", tr("Battles")], ["economy", tr("Economy")], ["other", tr("Other")]]:
+		var key := String(chip[0])
+		var b := UI.button(String(chip[1]), func() -> void:
+			_inbox_filter = key
+			_pages["inbox"] = 0
+			_rebuild_panel())
+		b.theme_type_variation = "TabButton"
+		b.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.disabled = key == _inbox_filter
+		chips.add_child(b)
+	_panel_body.add_child(chips)
+	var shown: Array = Game.inbox.filter(func(n: Dictionary) -> bool: return _inbox_filter == "all" or _notice_group(String(n.get("kind", ""))) == _inbox_filter)
+	if shown.is_empty():
+		_panel_body.add_child(UI.label(tr("Nothing here."), UI.SMALL_SIZE, UI.MUTED))
 	var now := Game.server_now()
-	_paged("inbox", Game.inbox, 8 if _roomy() else 4, func(n: Dictionary) -> void:
-		var head := UI.label(("● " if not n.read else "") + String(n.title))
-		_panel_body.add_child(head)
-		var body := tr("%s · %s") % [InboxText.ago(TimeUtil.parse_iso(n.createdAt), now), n.body] if String(n.body) != "" else InboxText.ago(TimeUtil.parse_iso(n.createdAt), now)
-		_panel_body.add_child(UI.label(body, UI.SMALL_SIZE, UI.MUTED)))
+	_paged("inbox", shown, 6 if _roomy() else 3, func(n: Dictionary) -> void:
+		var card := UI.card(10)
+		var box := UI.vbox(2)
+		card.add_child(box)
+		var head := UI.hbox(8)
+		var title := UI.label(("● " if not n.read else "") + String(n.title))
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(title)
+		var when := UI.label(InboxText.ago(TimeUtil.parse_iso(n.createdAt), now), UI.SMALL_SIZE, UI.MUTED)
+		when.autowrap_mode = TextServer.AUTOWRAP_OFF
+		head.add_child(when)
+		box.add_child(head)
+		if String(n.body) != "":
+			box.add_child(UI.label(String(n.body), UI.SMALL_SIZE, UI.MUTED))
+		_panel_body.add_child(card))
 
 
 func _notification_settings() -> void:

@@ -225,6 +225,21 @@ def icon(kind):
         stroke("M50,10 Q30,14 20,36 L16,48 L28,44 Q46,32 50,10 Z", 4)
         stroke("M16,48 L28,30", 3)
         stroke("M10,56 L54,56", 3.5)
+    elif kind == "attack":
+        # A sword: how hard a unit strikes.
+        stroke("M46,8 L52,14 L26,40 L20,34 Z", 4)
+        stroke("M14,34 L28,48", 4.5)
+        stroke("M20,42 L10,52", 5)
+    elif kind == "defense":
+        # A plain shield: its armor.
+        stroke("M14,12 L50,12 L50,30 Q50,48 32,56 Q14,48 14,30 Z")
+    elif kind == "health":
+        # A heart: how much it takes to fell one.
+        stroke("M32,52 L12,32 Q4,22 12,14 Q22,6 32,18 Q42,6 52,14 Q60,22 52,32 Z")
+    elif kind == "speed":
+        # Two chevrons: how fast it marches.
+        stroke("M12,14 L30,32 L12,50", 5)
+        stroke("M32,14 L50,32 L32,50", 5)
     elif kind == "quit":
         # An open door and the way out.
         stroke("M30,10 L12,10 L12,54 L30,54", 4.5)
@@ -232,7 +247,7 @@ def icon(kind):
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "chat", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music"]
+UI_ICONS = ["back", "map", "village", "inbox", "chat", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music", "attack", "defense", "health", "speed"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------

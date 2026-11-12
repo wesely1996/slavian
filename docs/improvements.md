@@ -61,7 +61,7 @@ Contents:
 - [x] **Slim top bar** (M): village switcher on the left, the four resources
   in the middle, messages bell on the right. One row, no title, no live label
   (show a thin red line only while offline).
-- [ ] **Threat ribbon** (S): the next horde as a ribbon under the top bar with
+- [x] **Threat ribbon** (S): the next horde as a ribbon under the top bar with
   a countdown; tap centres the map on it. Hidden when nothing threatens.
 - [ ] **Real back stack** (M): every screen pushes onto a stack; the Android
   back button and a single "←" pop it. No more per-sheet Close buttons.
@@ -95,7 +95,7 @@ Contents:
   The confirm button is pinned to the bottom the whole time.
 - [ ] **Hero** (M): paper-doll with gear slots, skill tree as nodes rather
   than a list, quests as cards with reward icons.
-- [ ] **Messages** (M): one inbox with filter chips (All · Battles · Economy ·
+- [ ] *(partly done: filter chips, notices as cards)* **Messages** (M): one inbox with filter chips (All · Battles · Economy ·
   Events · Chat). Battle reports open as a result card first (won/lost,
   losses, loot) with "Watch the battle" for the round-by-round replay.
 - [ ] **Threats** (S): a timeline — hordes as beads on a line by arrival time,
@@ -113,11 +113,11 @@ Contents:
 - [ ] **Three button kinds only** (S): primary (filled, madder red), secondary
   (outlined), quiet (text). At least 48 dp tall. Destructive actions always
   ask via a hold-to-confirm rather than a second "Sure?" tap.
-- [ ] **Icon set pass** (M): one stroke weight, one size grid; every resource,
+- [ ] *(partly done: attack, defense, health, speed icons for unit stats)* **Icon set pass** (M): one stroke weight, one size grid; every resource,
   stat and action gets an icon so numbers can stand without words.
 - [ ] **Resource chips** (S): `icon 120` chips used everywhere a cost or loot
   is shown; red when short, with the shortfall on tap.
-- [ ] **Motion** (M): sheets slide, cards fade in, resource numbers count up
+- [ ] *(partly done: sheets fade in, toasts)* **Motion** (M): sheets slide, cards fade in, resource numbers count up
   or down, a built plot "pops", an army leaving draws its route. 150–250 ms,
   with a "reduce motion" setting.
 - [ ] **Typography** (S): a display face with Slavic character for headings,
@@ -126,7 +126,7 @@ Contents:
 
 ### 1.6 Feedback and safety
 
-- [ ] **Toasts** (S): every command answers with a short toast ("Barracks
+- [x] **Toasts** (S): every command answers with a short toast ("Barracks
   queued · 12 min"); errors shake the button and say what is missing.
 - [ ] **Undo for five seconds** (M) on cheap reversible actions (queue a build,
   send a caravan) in place of confirmation dialogs.
@@ -134,13 +134,13 @@ Contents:
   why ("needs Barracks 3", "40 stone short — ready in 6 min").
 - [ ] **Keep state across live updates** (M): update the numbers in place;
   never rebuild a sheet the player is typing or scrolling in.
-- [ ] **Haptics** (S) on confirm, error, battle start, horde horn.
+- [x] **Haptics** (S) on confirm, error, battle start, horde horn.
 
 ### 1.7 Onboarding and help
 
 - [ ] **Guided first ten minutes** (M): spotlight the control to press, one
   sentence each, skippable; replaces reading the quest card.
-- [ ] **"What next?" button** (M): one suggestion from the game's state (idle
+- [x] **"What next?" button** (M): one suggestion from the game's state (idle
   queue, full store, unspent skill point, unscouted horde).
 - [ ] **Almanac search and deep links** (S): every "i" opens the right
   almanac entry; the almanac gets a search box.
