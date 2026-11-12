@@ -110,6 +110,7 @@ The last bastion of Slavic faith and culture is the **Holy City**. A small group
 - **Hex grid** with axial coordinates (pointy-top). The Holy City sits at `(0,0)`.
 - **Starting ring:** distance 2 from the center (12 hexes). Players are spread evenly around it.
 - **Radius** *(tunable)*: ~10 for 1–2 players, scaling up to ~16 for 6.
+- **Terrain:** woods are about a fifth of the map and hills (with **wooded hills**, high ground thick with trees: move cost 3, an ambush ground, outposts yield wood, stone and iron) about an eighth.
 - **Fog of war:** hexes are revealed by village/outpost vision, armies and scouts. Revealed terrain stays known, but enemy positions are only live while in vision.
 
 ### 4.2 Terrain
@@ -246,6 +247,7 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - **On the map**, a battle under way shows two swords clashing over its hex, a spark as they meet and a red glow pulsing on the ground.
 - **Heroes and generals fight** (`champion` in `data/heroes.json`): besides leading, each fights in the ranks as a champion, one mighty warrior who strikes with its own attack and can be struck down (hero 150 attack, 80 defense, 1600 health, +10% a level; generals 90 / 55 / 1000, +8% a level). One commands a force: its hero, else its general; when the hero falls (carried home wounded) the general with it takes command for the rest of the battle. A general struck down dies. The hero's and generals' panels show these stats.
 - **Large Military Caravan** (Stables 4): carries 300 grain and, per wagon, either 1 siege engine (Onager, Thunder Thrower; loaded first) or 10 foot soldiers, the slowest first; those riding move at its pace (7) instead of marching.
+- **Battering rams** (Barracks level 5, siege engines): each takes a quarter of a stronghold's walls off its defenders, in raids and strikes on horde encampments (`breach`). **Scorpions** (Shooting Range level 4, siege engines) drive bolts through riders (×2 against cavalry).
 - **Pathfinders** marching with an army take 5% each of harsh terrain's slowness (move cost above 1) off its march, at most 50% (`pathfinding` in units.json). A unit's card and the Train tab show its speed and health.
 - **Battle reports:** readable after the fact, with a per-round summary, losses and the key modifiers ("Ambush +30%", "Pincer +18%").
 
@@ -294,6 +296,7 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 
 - **Supply points** (`data/field.json`, `supplyPoint`) are built like forts, within 5 hexes of a village and paid from it: grain stores with no walls, keeping up to 6000 grain. **Forts keep grain too** (up to 3000).
 - An army that arrives at or stands on a fort or supply point **fills up from its grain** as it would in a village: on arrival, when its own grain runs out, or when told to take on grain. A standing army there can also **leave grain** from its own supply.
+- **Shipyards** (a daily event) are struck by raiders every 2 game hours while their boat is built; burned 3 times, the boatwrights give up and the event fails (`maxBurns`).
 - **Hordes burn supply points:** one passing within its raid reach of a supply point (built or being built) burns it with all its grain, unless an army stands on it. Forts keep their grain behind their walls (until bandits take an abandoned one).
 - **Supply routes** are a standing order: "keep this fort or supply point stocked to N grain from this village". Every check, it sends the grain missing (counting what is already on the way, at least `orders.supplyMinLoad`) with the caravans at home; what doesn't fit when they arrive comes back.
 
@@ -400,14 +403,15 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
 
 - The Kalinov Bridge already crosses the Smorodina from Nav to Yav, and the hordes come over it. The group extends it from Yav to **Prav**: joined to the realm of the gods, the bridge is closed to Nav for good.
 - Built in the Holy City in **5 stages**.
-- Each stage needs a **large shared resource cost** (donations) plus **1–2 quests**, for example:
-  - Retrieve a relic from an ancient site.
-  - Clear a specific monster lair.
-  - Survive a wave with no Sanctity loss.
-  - Craft a ritual item (needs Svarog's Ember).
-  - Hold a strong point (a choke point or a fort) for a full battle.
+- Each stage needs a **large shared resource cost** (donations) plus its **story quest**, which raises its own place or host when the stage opens (`questPlaces` in `data/bridge.json`):
+  - **The Builders' Rune** (Foundation Stones): explore the Builders' Barrow, a quest ruin 5–8 hexes from the Holy City, deep in guardians.
+  - **The Den under the Sacred Oaks** (Oak Piers): clear a quest lair of the North, 5–8 hexes out, much bigger than a common lair.
+  - **Beat the Smith-Breakers** (Iron Span): a quest army of its own, apart from the hordes, sets out 3 game hours after the stage opens and marches on the Holy City; scattered or victorious instead of beaten, another comes 12 game hours later.
+  - **The Eye of Veles** (Guardian Rails): an army raids the North to its full depth and sacks its stronghold.
+  - **The ritual torc** (Ritual Arch): forged from a Svarog's Ember.
+- **Raids on the builders:** while a stage is raised, every active front sends a small horde (5 + 2 a stage), each at a different target: the group's villages first, then the Holy City (`constructionRaids`).
 - Bridge progress increases wave difficulty (it is part of group power).
-- **Every stage that stands rewards the group** (`reward` in `data/bridge.json`): each member gets resources in their first village (800/800/800/400 for the first stage, rising to 2000/2000/2000/1000 for the fourth) and a **blessing** on all their villages for the rest of the run: +5% production (Foundation Stones), −10% build time, +5% defense, +5% attack. The bridge sheet shows what the open stage brings, so building it early pays.
+- **Every stage that stands rewards the group** (`reward` in `data/bridge.json`): each member gets resources in their first village (400/400/400/200 for the first stage, rising to 1000/1000/1000/500 for the fourth) and a **blessing** on all their villages for the rest of the run: +10% production (Foundation Stones), −20% build time, +10% defense, +10% attack. The bridge sheet shows what the open stage brings, so building it early pays.
 - **Stage 5 → Ritual Night:** all active fronts attack at once (respecting quiet hours). Surviving it with Sanctity above 0 **wins the run**.
 - **Loss:** Sanctity reaches 0.
 
