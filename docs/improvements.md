@@ -85,7 +85,7 @@ Contents:
 - [ ] *(partly done: unit cards, Max, red costs)* **Recruit** (M): one grid of unit cards per building; each card has the
   portrait, attack/defence/speed/upkeep as four icons, and a stepper
   (−/+ and "max"). The training queue sits in the same strip as builds.
-- [ ] **Army** (M): header with banner, strength bar, supply bar, stance chip.
+- [ ] *(partly done: troops as pictures with counts, army cards)* **Army** (M): header with banner, strength bar, supply bar, stance chip.
   Under it the troops as a row of unit portraits with counts. Actions as a
   fixed bar: **Move · Stance · Supply · More**. Settings and leaders go
   behind "More".
