@@ -83,10 +83,15 @@ var _caravan_pick_mode := ""
 var _caravan_load: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 # What the caravan brings back from your own settlement, fort or supply point.
 var _caravan_back: Dictionary[String, int] = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
-## Army form: destination (village id; 0: the Holy City), troops and orders.
-var _army_to := 0
+## Army form: the hex it marches to (MAX: none picked yet), troops, and
+## whether it joins the garrison of your settlement there, or harasses the
+## horde at another's.
+var _send_target := Vector2i.MAX
 var _army_units: Dictionary[String, int] = {}
-var _army_orders := "support"
+var _army_join := false
+var _army_harass := false
+## The village whose new army waits for a hex to march to (0: none).
+var _army_sending := 0
 ## Hold form: whether your hero leads the army.
 var _army_hero := false
 ## Whether the army being sent comes home by itself once its errand is done.
@@ -614,20 +619,28 @@ const PICKING_HEIGHT := 96.0
 
 ## Whether the map waits for a tap: where an army marches or a caravan goes.
 func _picking() -> bool:
-	return _army_moving != 0 or _caravan_picking != 0
+	return _army_moving != 0 or _army_sending != 0 or _caravan_picking != 0
 
 
 ## The sheet while a hex is picked: what to tap, and Cancel.
 func _picking_panel() -> void:
 	var row := UI.hbox()
-	var text := UI.label(tr("Tap the hex (or village) for the army to march to.") if _army_moving != 0 else
+	var army := _army_moving != 0 or _army_sending != 0
+	var text := UI.label(tr("Tap the hex for the army to march to.") if army else
 		tr("Tap where the caravan goes: a village or outpost, the Holy City, a shipyard, or a fort or supply point."), UI.SMALL_SIZE)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
+	# Moving an army onto one of your settlements: does it join the garrison?
+	if _army_moving != 0:
+		row.add_child(_join_check())
 	var cancel := UI.button(tr("Cancel"), func() -> void:
+		var sending := _army_sending
 		_army_moving = 0
+		_army_sending = 0
 		_caravan_picking = 0
+		if sending != 0:
+			_back_to_send(sending)
 		_status.text = ""
 		_rebuild_panel())
 	cancel.custom_minimum_size.x = 140
@@ -2238,69 +2251,78 @@ func _floor_rows(village: Dictionary) -> void:
 	_panel_body.add_child(row)
 
 
-## Troops from this village to another, or to guard the Holy City: where,
-## on what orders, and who. Nearest first; `_army_to` 0 is the Holy City.
+## Troops from this village to a hex picked on the map: an open hex to hold,
+## a camp to storm, a site to search, the Holy City to guard, or a
+## settlement (yours: stand in it as an army, or join its garrison; another's:
+## guard it, or harass the horde against it).
 func _send_troops(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	var home_units := Rules.garrison_at(village, Game.server_now())
 	var here := Vector2i(int(village.q), int(village.r))
-	var targets: Array = [{"id": 0, "name": tr("The Holy City"), "at": HOLY_CITY}]
-	for v in Game.villages.values():
-		if int(v.id) != village_id:
-			targets.append({"id": int(v.id), "name": tr("%s (%s)") % [v.name, Game.member_name(int(v.ownerAccountId))], "at": Vector2i(int(v.q), int(v.r))})
-	targets.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return HexMath.distance(here, a.at) < HexMath.distance(here, b.at))
 	_panel_body.add_child(UI.label(tr("Send troops"), UI.HEADING_SIZE))
-	var labels := targets.map(func(t: Dictionary) -> String:
-		var away := HexMath.distance(here, t.at)
-		return tr_n("%s · %d hex", "%s · %d hexes", away) % [t.name, away])
-	var selected := 0
-	for i in targets.size():
-		if int(targets[i].id) == _army_to:
-			selected = i
-	_army_to = int(targets[selected].id)
-	var picker := UI.options(labels, selected)
-	picker.item_selected.connect(func(i: int) -> void:
-		_army_to = int(targets[i].id)
-		_rebuild_panel())
-	_panel_body.add_child(picker)
+	var pick := UI.button(tr("Choose where on the map") if _send_target == Vector2i.MAX else tr("Choose somewhere else"), func() -> void:
+		_army_sending = village_id
+		_set_view("map")
+		_rebuild_panel(), "icon/map")
+	if _send_target == Vector2i.MAX:
+		_panel_body.add_child(pick)
+		_panel_body.add_child(UI.label(tr("Tap a hex on the map for them to march to."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var cell := _send_target
+	var away := HexMath.distance(here, cell)
+	var target := Game.village_at(cell)
 	var body := {}
-	if _army_to == 0:
-		# The Holy City: they hold it beside its guard, against every horde
-		# that comes to its gates or passes through.
-		_panel_body.add_child(UI.label(tr("They stand with the Holy City's guard and fight every horde that reaches it, until called home."), UI.SMALL_SIZE, UI.MUTED))
-		body = {"target": {"q": HOLY_CITY.x, "r": HOLY_CITY.y}, "orders": "hold"}
+	var where := ""
+	if cell == here:
+		_panel_body.add_child(pick)
+		_panel_body.add_child(UI.label(tr("That is this village: choose somewhere else."), UI.SMALL_SIZE, UI.ERROR))
+		return
+	if cell == HOLY_CITY:
+		where = tr("The Holy City")
+		body = {"target": {"q": cell.x, "r": cell.y}, "orders": "hold"}
+	elif not target.is_empty():
+		where = tr("%s (%s)") % [target.name, Game.member_name(int(target.ownerAccountId))] if target.get("ownerAccountId") != null else String(target.name)
+		var orders := "support"
+		if Game.is_mine(target):
+			orders = "garrison" if _army_join else "support"
+		elif _army_harass and _horde_against(int(target.id)):
+			orders = "harass"
+		body = {"targetVillageId": int(target.id), "orders": orders}
+	elif not Game.camp_at(cell).is_empty():
+		where = tr("the camp at (%d, %d)") % [cell.x, cell.y]
+		body = {"target": {"q": cell.x, "r": cell.y}, "orders": "clear"}
+	elif not Game.site_at(cell).is_empty() and Game.site_at(cell).status != "explored":
+		where = tr("the ancient site at (%d, %d)") % [cell.x, cell.y]
+		body = {"target": {"q": cell.x, "r": cell.y}, "orders": "explore"}
 	else:
-		if _army_orders == "hold":
-			_army_orders = "support"
-		# Harassers strike a horde, never a friendly village: only where one
-		# fights or marches on it.
-		var kinds := ["support", "reinforce"]
-		if _horde_against(_army_to):
-			kinds.append("harass")
-		elif _army_orders == "harass":
-			_army_orders = "support"
-		if Game.is_mine(Game.villages.get(_army_to, {})):
-			kinds.append("garrison")
-		var kind_row := UI.hbox(8)
-		for kind in kinds:
-			var b := UI.button(String(kind).capitalize(), func() -> void:
-				_army_orders = kind
-				_rebuild_panel())
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			b.disabled = _army_orders == kind
-			kind_row.add_child(b)
-		kind_row.add_child(UI.info(ArmyText.order_text(_army_orders)))
-		_panel_body.add_child(kind_row)
-		body = {"targetVillageId": _army_to, "orders": _army_orders}
+		where = tr("the hex at (%d, %d)") % [cell.x, cell.y]
+		body = {"target": {"q": cell.x, "r": cell.y}, "orders": "hold"}
+	var dest := UI.hbox(8)
+	var dest_text := UI.label(tr_n("To %s · %d hex", "To %s · %d hexes", away) % [where, away], UI.SMALL_SIZE)
+	dest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dest.add_child(UI.with_info(dest_text, ArmyText.order_text(String(body.orders))))
+	dest.add_child(pick)
+	_panel_body.add_child(dest)
+	if not target.is_empty() and Game.is_mine(target):
+		_panel_body.add_child(_join_check())
+	elif not target.is_empty() and _horde_against(int(target.id)):
+		var harass := CheckBox.new()
+		harass.text = tr("Harass the horde against it (strike, then come home)")
+		harass.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		harass.button_pressed = _army_harass
+		harass.toggled.connect(func(on: bool) -> void:
+			_army_harass = on
+			_rebuild_panel())
+		_panel_body.add_child(harass)
 	_unit_pickers(home_units, true, "send")
 	_general_picker(village_id)
 	var fights: bool = body.orders != "garrison"
 	if fights:
 		_army_stance_picker(village)
 	# Support and holding stay until called home, unless told to come back once done.
-	var stays: bool = body.orders in ["support", "hold"]
+	var stays: bool = body.orders in ["support", "hold", "clear", "explore"]
 	if stays:
-		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), false), func(on: bool) -> void: _army_return = on))
+		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
 	var go := UI.button(tr("Send"), func() -> void:
 		var order := body.duplicate()
 		order.units = _picked_units(home_units)
@@ -2315,6 +2337,29 @@ func _send_troops(village: Dictionary) -> void:
 	_picked_hint(go, home_units)
 
 
+## Onto one of your settlements: whether the army joins its garrison there
+## (by default it stands in it as an army).
+func _join_check() -> CheckBox:
+	var join := CheckBox.new()
+	join.text = tr("Join the garrison (if it is one of your settlements)")
+	join.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+	join.button_pressed = _army_join
+	join.toggled.connect(func(on: bool) -> void:
+		_army_join = on
+		if _army_moving == 0:
+			_rebuild_panel())
+	return join
+
+
+## Back to a village's Send troops form (after picking where on the map).
+func _back_to_send(village_id: int) -> void:
+	Game.current_village_id = village_id
+	_tab = "troops"
+	_side["troops"] = "send"
+	_set_view("village")
+	_rebuild_panel()
+
+
 ## Steppers for each fighting unit at home, a few to a page (`list` keeps
 ## the page); returns the troops picked.
 func _unit_pickers(home_units: Dictionary, with_scouts := false, list := "units") -> Dictionary:
@@ -2322,7 +2367,8 @@ func _unit_pickers(home_units: Dictionary, with_scouts := false, list := "units"
 	var families := ["infantry", "archers", "cavalry", "scout"] if with_scouts else ["infantry", "archers", "cavalry"]
 	var fighting := home_units.keys().filter(func(unit: String) -> bool:
 		var def: Dictionary = defs.get(unit, {})
-		return not def.is_empty() and def.family in families and unit != "settler")
+		# None of them on hand: not offered at all.
+		return not def.is_empty() and def.family in families and unit != "settler" and int(home_units[unit]) > 0)
 	_paged(list, fighting, 6 if _roomy() else 3, func(unit: String) -> void:
 		var def: Dictionary = defs[unit]
 		var have := int(home_units[unit])
@@ -2536,6 +2582,9 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 		return
 	_army_units.clear()
 	_forget_drafts(["units:", "send:", "escort:"])
+	_send_target = Vector2i.MAX
+	_army_join = false
+	_army_harass = false
 	_army_hero = false
 	_army_general = 0
 	_army_stance = ""
@@ -2965,9 +3014,6 @@ func _army_panel() -> void:
 	if army.is_empty() or army.status == "done":
 		_panel_body.add_child(UI.label(tr("This army is no more: it came home, was disbanded or was lost."), UI.SMALL_SIZE, UI.MUTED))
 		return
-	var data := Game.data
-	var speed := float(Game.world.speed)
-	var defs: Dictionary = data.units.units
 	var target := ArmyText.target_name(army, Game.village_name)
 	var where := UI.label("", UI.SMALL_SIZE)
 	_panel_body.add_child(where)
@@ -2986,6 +3032,18 @@ func _army_panel() -> void:
 		if army.get("raid") is Dictionary and army.status == "stationed" and army.orders == "raid":
 			return RaidText.progress(army)
 		return ArmyText.status(army, target, Game.server_now(), search_done))
+	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	var tabs := [["orders", "icon/map", tr("Orders"), _army_tab_orders.bind(army)],
+		["troops", "unit/" + ArmyText.main_unit(army) if Art.has("unit/" + ArmyText.main_unit(army)) else "icon/troops", tr("Troops & leaders"), _army_tab_troops.bind(army)],
+		["supply", "resource/grain", tr("Supply"), _army_tab_supply.bind(army)]]
+	if mine:
+		tabs.append(["settings", "icon/settings", tr("Settings"), _army_tab_settings.bind(army)])
+	_side_tabs("army", tabs, 150.0)
+
+
+## The army's orders: its raid, its stance, where it goes (tap a hex), call
+## it home, disband.
+func _army_tab_orders(army: Dictionary) -> void:
 	# A raid: where it stands, its battles, what it found and carries.
 	if army.get("raid") is Dictionary:
 		var raid: Dictionary = army.raid
@@ -3000,6 +3058,35 @@ func _army_panel() -> void:
 			_panel_body.add_child(UI.label(tr("Found: %s") % ", ".join(raid.finds), UI.SMALL_SIZE, UI.GOOD))
 		var carried := int(LocalLogistics.total(army.loot)) if army.get("loot") is Dictionary else 0
 		_panel_body.add_child(UI.label(tr("Carries %d of %d loot") % [carried, RaidText.capacity(Game.data, army.units)], UI.SMALL_SIZE, UI.MUTED))
+	# Its stance: yours can be changed while it is out, not in a battle.
+	var own: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	var stance: String = army.get("stance", "balanced")
+	if own and army.status in ["stationed", "marching"]:
+		_panel_body.add_child(UI.label(tr("Stance"), UI.HEADING_SIZE))
+		var stance_army := int(army.id)
+		_stance_grid(stance, func(next: String) -> void: _set_army_stance(stance_army, next))
+	else:
+		_panel_body.add_child(UI.label(_stance_text(stance), UI.SMALL_SIZE, UI.MUTED))
+		if own and army.status == "engaged":
+			_panel_body.add_child(UI.label(tr("Its stance can't be changed in the middle of a battle."), UI.SMALL_SIZE, UI.MUTED))
+
+	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	if not mine or not army.status in ["stationed", "marching", "returning"]:
+		return
+	var army_id := int(army.id)
+	_panel_body.add_child(UI.button(tr("Move: tap a hex"), func() -> void:
+		_army_moving = army_id
+		_set_view("map")
+		_rebuild_panel(), "icon/map"))
+	_army_orders_row(army, false)
+
+
+## Its troops and who leads them: what each eats and carries, the hero and
+## a general, merging and splitting.
+func _army_tab_troops(army: Dictionary) -> void:
+	var data := Game.data
+	var speed := float(Game.world.speed)
+	var defs: Dictionary = data.units.units
 	var led := PackedStringArray()
 	for hero in Game.heroes:
 		if army.get("heroAccountId") != null and int(hero.accountId) == int(army.heroAccountId):
@@ -3015,18 +3102,6 @@ func _army_panel() -> void:
 		_panel_body.add_child(UI.with_info(UI.label(tr("Scouts: +%d%% attack and defense") % roundi(intel * 100.0), UI.SMALL_SIZE, UI.ACCENT),
 			tr("Scouts with an army never fight, but it fights the better for knowing the enemy: +%d%% for each scout (pathfinders count two, assassins three), at most +%d%%.") % [
 				roundi(float(Game.data.scouting.intel.perPoint) * 100.0), roundi(float(Game.data.scouting.intel.max) * 100.0)]))
-	# Its stance: yours can be changed while it is out, not in a battle.
-	var own: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
-	var stance: String = army.get("stance", "balanced")
-	if own and army.status in ["stationed", "marching"]:
-		_panel_body.add_child(UI.label(tr("Stance"), UI.HEADING_SIZE))
-		var stance_army := int(army.id)
-		_stance_grid(stance, func(next: String) -> void: _set_army_stance(stance_army, next))
-	else:
-		_panel_body.add_child(UI.label(_stance_text(stance), UI.SMALL_SIZE, UI.MUTED))
-		if own and army.status == "engaged":
-			_panel_body.add_child(UI.label(tr("Its stance can't be changed in the middle of a battle."), UI.SMALL_SIZE, UI.MUTED))
-
 	# The troops: what each eats, and how long each can carry its food.
 	_panel_body.add_child(UI.label(tr("Troops"), UI.HEADING_SIZE))
 	for unit in army.units:
@@ -3046,6 +3121,15 @@ func _army_panel() -> void:
 		row.add_child(words)
 		_panel_body.add_child(row)
 
+	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
+	if mine and army.status in ["stationed", "marching", "returning"]:
+		_army_leaders(army)
+
+
+## Its grain, fatigue, the store where it stands and its wagon ring.
+func _army_tab_supply(army: Dictionary) -> void:
+	var data := Game.data
+	var speed := float(Game.world.speed)
 	# Its grain, and how worn it is for want of it.
 	_panel_body.add_child(UI.label(tr("Supply"), UI.HEADING_SIZE))
 	var eats := ArmyText.upkeep(data, army.units)
@@ -3103,22 +3187,20 @@ func _army_panel() -> void:
 				return tr("Wagon fort: ready in %s (+%d%% defense)") % [TimeUtil.format_duration(left), bonus]
 			return tr("Wagon fort: +%d%% defense") % bonus)
 
-	# Orders, for your own army standing still or on the road (turned where
-	# it is: it finishes the hex it is crossing first).
 	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
-	if not mine or not army.status in ["stationed", "marching", "returning"]:
-		return
-	_panel_body.add_child(UI.label(tr("Orders"), UI.HEADING_SIZE))
+	if mine and army.status == "stationed":
+		_store_row(army)
+		_wagon_row(army)
+
+
+## Its standing settings: answering battles, its home, coming home once done.
+func _army_tab_settings(army: Dictionary) -> void:
 	var army_id := int(army.id)
 	if army.orders in ["support", "hold", "clear", "explore"]:
 		var on: bool = army.get("returnHome", false)
 		_panel_body.add_child(_return_check(on, ArmyText.return_text(String(army.orders), not Game.shipyard_at(ArmyText.held_hex(army)).is_empty()), func(next: bool) -> void:
 			_army_command(army_id, "return-home", {"returnHome": next})))
-	_panel_body.add_child(UI.button(tr("Move: tap a hex or a village"), func() -> void:
-		_army_moving = army_id
-		_rebuild_panel(), "icon/map"))
-	_army_orders_row(army)
-	_army_manage(army)
+	_army_settings(army)
 
 
 ## A fort's or supply point's floor: how low its grain may fall for armies
@@ -3141,9 +3223,8 @@ func _store_floor_rows(store: Dictionary) -> void:
 ## The rest of what your army can be told: whether it answers battles
 ## nearby, its home, its hero and general, merging with another army
 ## standing beside it and splitting off some of its troops.
-func _army_manage(army: Dictionary) -> void:
+func _army_settings(army: Dictionary) -> void:
 	var army_id := int(army.id)
-	var standing: bool = army.status == "stationed"
 	var answers := CheckBox.new()
 	answers.text = tr("Answer battles within %d hexes") % int(Game.data.armies.respond.range)
 	answers.button_pressed = army.get("respond", true)
@@ -3166,6 +3247,12 @@ func _army_manage(army: Dictionary) -> void:
 				if int(homes[i].id) != int(army.homeVillageId):
 					_army_command(army_id, "home", {"villageId": int(homes[i].id)}))
 			_panel_body.add_child(picker)
+
+
+## Its leaders (the hero and a general), and merging and splitting.
+func _army_leaders(army: Dictionary) -> void:
+	var army_id := int(army.id)
+	var standing: bool = army.status == "stationed"
 	# Its leaders: the hero and a general join it where it stands (in one
 	# of your settlements) and leave it anywhere, not in a battle.
 	var leaders := UI.hbox(8)
@@ -3241,40 +3328,18 @@ func _search_ends(army: Dictionary) -> float:
 
 ## What an army can be told: come home, march into a village, and, standing
 ## still, take on grain where it stands or disband.
-func _army_orders_row(army: Dictionary) -> void:
+func _army_orders_row(army: Dictionary, with_supply := true) -> void:
 	var army_id := int(army.id)
 	var standing: bool = army.status == "stationed"
 	var row := UI.hbox(8)
 	if army.status != "returning":
 		row.add_child(UI.button(tr("Call home"), func() -> void: _recall_army(army_id)))
-	var places: Array = Game.villages.values().filter(func(v: Dictionary) -> bool:
-		return army.targetVillageId == null or int(v.id) != int(army.targetVillageId))
-	places.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
-	if not places.is_empty():
-		# Your own settlements: join the garrison there, or stand in it as an
-		# army (fed half its upkeep from the granary); another's: guard it.
-		var labels := [tr("March into…")]
-		var bodies := [{}]
-		for v in places:
-			if Game.is_mine(v):
-				labels.append(tr("Join the garrison of %s") % v.name)
-				bodies.append({"villageId": int(v.id), "join": true})
-				labels.append(tr("Stand in %s as an army") % v.name)
-				bodies.append({"villageId": int(v.id), "join": false})
-			else:
-				labels.append(tr("Guard %s") % v.name)
-				bodies.append({"villageId": int(v.id)})
-		var into := UI.options(labels, 0)
-		into.item_selected.connect(func(i: int) -> void:
-			if i > 0:
-				_army_command(army_id, "move", bodies[i]))
-		row.add_child(into)
 	if standing and army.targetVillageId != null and army.get("supply") != null:
 		row.add_child(UI.button(tr("Take on grain"), func() -> void: _army_command(army_id, "resupply", {})))
 	if standing:
 		row.add_child(UI.button(tr("Disband"), func() -> void: _army_command(army_id, "disband", {})))
 	_panel_body.add_child(row)
-	if standing:
+	if standing and with_supply:
 		_store_row(army)
 		_wagon_row(army)
 
@@ -5777,15 +5842,30 @@ func _on_map_tapped(world_position: Vector2) -> void:
 		_status.text = ""
 		_open_caravans(target, from)
 		return
-	# Moving an army: the hex tapped (or the village on it) is where it goes.
+	# Moving an army: the hex tapped is where it goes (onto your own
+	# settlement it joins the garrison only if told to).
 	if _army_moving != 0:
 		var army_id := _army_moving
 		_army_moving = 0
 		_status.text = ""
 		if hex_map.has_hex(cell):
 			var village := Game.village_at(cell)
-			_army_command(army_id, "move", {"villageId": int(village.id)} if not village.is_empty() else {"target": {"q": cell.x, "r": cell.y}})
+			if village.is_empty():
+				_army_command(army_id, "move", {"target": {"q": cell.x, "r": cell.y}})
+			elif Game.is_mine(village):
+				_army_command(army_id, "move", {"villageId": int(village.id), "join": _army_join})
+			else:
+				_army_command(army_id, "move", {"villageId": int(village.id)})
 		_rebuild_panel()
+		return
+	# A new army's destination: back to the village's form with it.
+	if _army_sending != 0:
+		var from := _army_sending
+		_army_sending = 0
+		_status.text = ""
+		if hex_map.has_hex(cell):
+			_send_target = cell
+		_back_to_send(from)
 		return
 	# Laying a road: the hex tapped is where it goes (anything else cancels).
 	if _road_from != Vector2i.MAX:
