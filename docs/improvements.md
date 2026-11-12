@@ -76,13 +76,13 @@ Contents:
   facts, 1–3 action chips). Swipe the card up for the full sheet. Selecting
   your army shows its reachable actions as chips on the map itself
   ("Move", "Attack", "Join") rather than in a sheet.
-- [ ] **Village** (L): the picture of the village is the menu. Tap a plot →
+- [ ] *(partly done: building cards, red costs, one Upgrade button)* **Village** (L): the picture of the village is the menu. Tap a plot →
   a card with level, what the next level gives (as before → after numbers),
   cost chips coloured red when you can't pay, and one big **Upgrade** button.
   Empty plot → a grid of building cards (icon, name, one-line effect, cost),
   not a text list. The queue is a strip of chips along the bottom with
   countdowns; drag to reorder, tap to cancel.
-- [ ] **Recruit** (M): one grid of unit cards per building; each card has the
+- [ ] *(partly done: unit cards, Max, red costs)* **Recruit** (M): one grid of unit cards per building; each card has the
   portrait, attack/defence/speed/upkeep as four icons, and a stepper
   (−/+ and "max"). The training queue sits in the same strip as builds.
 - [ ] **Army** (M): header with banner, strength bar, supply bar, stance chip.
@@ -108,7 +108,7 @@ Contents:
 - [ ] **Design tokens** (M): one file with the spacing scale (4/8/12/16/24),
   three text sizes, the colour roles (surface, on-surface, accent, good,
   warning, danger) and corner radius. Every screen draws from it.
-- [ ] **Card component** (M): parchment card with a carved-wood header, one
+- [x] **Card component** (M): parchment card with a carved-wood header, one
   shadow, one radius. Replaces today's mix of panels, rules and plain labels.
 - [ ] **Three button kinds only** (S): primary (filled, madder red), secondary
   (outlined), quiet (text). At least 48 dp tall. Destructive actions always

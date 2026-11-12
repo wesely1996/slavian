@@ -174,6 +174,20 @@ static func panel(alpha := 1.0, padding := 20) -> PanelContainer:
 	return node
 
 
+## A card on the sheet: a faint darker field with a thin edge, to set one
+## thing (a building, a unit, an army) apart from the next.
+static func card(padding := 12) -> PanelContainer:
+	var node := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(UiTheme.INK, 0.05)
+	style.border_color = Color(UiTheme.INK, 0.22)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(padding)
+	node.add_theme_stylebox_override("panel", style)
+	return node
+
+
 ## A band of dark wood, for the top of the screen.
 static func wood(padding := 14) -> PanelContainer:
 	var node := PanelContainer.new()
@@ -295,7 +309,7 @@ static func signed(value: float) -> String:
 ## Amounts with each resource's icon, for a rich label: "[img]…[/img] 320 …".
 ## Without the art it falls back to resource_text. Kinds missing from
 ## `amounts` are left out.
-static func costs(amounts: Dictionary, icon_size := 30) -> String:
+static func costs(amounts: Dictionary, icon_size := 30, have := {}) -> String:
 	var parts := PackedStringArray()
 	for kind in Ledger.KINDS:
 		if not amounts.has(kind):
@@ -303,7 +317,11 @@ static func costs(amounts: Dictionary, icon_size := 30) -> String:
 		var file := Art.path("resource/" + kind)
 		if file == "" or not ResourceLoader.exists(file):
 			return resource_text(amounts)
-		parts.append("[img=%d]%s[/img] %d" % [icon_size, file, amounts[kind]])
+		var number := "%d" % amounts[kind]
+		# What the stores can't pay shows in red.
+		if have.has(kind) and float(have[kind]) < float(amounts[kind]):
+			number = "[color=#%s]%s[/color]" % [ERROR.to_html(false), number]
+		parts.append("[img=%d]%s[/img] %s" % [icon_size, file, number])
 	return "  ".join(parts)
 
 
