@@ -104,6 +104,9 @@ static func on_bridge_raised(server: LocalServer, world: Dictionary, event: Dict
 	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{name} stands", "body": body, "vars": vars}, at)
 	if next.status == "complete":
 		call_ritual_night(server, world, at)
+	else:
+		# The next stage's quests raise their places and host.
+		open_stage(server, world, int(next.stage), at)
 	# A lair is wanted (for the quest, or for the Embers the group lacks) and
 	# none stands: the North sends one.
 	var stage: Variant = LocalBridge.current_stage(data, next)
@@ -240,3 +243,116 @@ static func run_summary(world: Dictionary) -> Variant:
 		"villagesLost": lost,
 		"members": members,
 	}
+
+
+# --- Quests in the world (scheduler/bridgeQuests.ts) ---------------------------
+
+static func _stage_seed(world: Dictionary, stage: int, salt: int) -> int:
+	return (int(world.seed) ^ LocalRng.imul(stage + 1, 0x9e3779b1) ^ salt) & 0xffffffff
+
+
+## The latest regular horde (db/waves.ts lastWave), or {}.
+static func _last_horde(world: Dictionary) -> Dictionary:
+	var last := {}
+	for w in world.waves:
+		if w.get("bandOf") == null and (last.is_empty() or int(w.index) > int(last.index)):
+			last = w
+	return last
+
+
+static func _errand_wave(server: LocalServer, world: Dictionary, last: Dictionary, front: String, composition: Dictionary, spawn_at: int, errand: Dictionary) -> Dictionary:
+	var wave := {"id": world.next.wave, "index": last.index, "front": front, "status": "scheduled", "threat": LocalWaves.threat_of(server.data, composition),
+		"stance": "offensive", "composition": composition, "initial": composition.duplicate(), "spawnAt": spawn_at,
+		"spawn": null, "targetVillageId": null, "path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [],
+		"ritual": false, "leaderId": null, "hatred": 0.0, "bandOf": last.id, "errand": errand}
+	world.next.wave += 1
+	world.waves.append(wave)
+	server.schedule(world, spawn_at, "wave_spawn", {"waveId": wave.id})
+	return wave
+
+
+## A stage opens (0-based): its quests raise their ruin, lair or host.
+static func open_stage(server: LocalServer, world: Dictionary, stage: int, at: int) -> void:
+	var data := server.data
+	if stage >= data.bridge.stages.size():
+		return
+	var def: Dictionary = data.bridge.stages[stage]
+	var places: Dictionary = data.bridge.questPlaces
+	var players: int = world.members.size()
+	var last := _last_horde(world)
+	var index := maxi(1, int(last.index) if not last.is_empty() else 1)
+	for quest in def.quests:
+		if quest.kind in ["relic", "grove"]:
+			var place: Dictionary = places[quest.kind]
+			var taken := LocalBattles.taken_hexes(world)
+			for f in world.forts:
+				taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+			var cell := LocalBridge.quest_cell(data, world.hexes, taken, _stage_seed(world, stage, 0x5e1 if quest.kind == "relic" else 0x6a7), int(place.minDistance), int(place.maxDistance))
+			if cell == Vector2i.MAX:
+				continue
+			var units := LocalWaves.compose_wave(data, String(place.front), index, int(place.units), _stage_seed(world, stage, 0x7c3), players)
+			if quest.kind == "relic":
+				world.sites.append({"id": world.next.site, "kind": String(places.relic.siteKind), "q": cell.x, "r": cell.y, "guardians": units, "guardiansSeen": false,
+					"status": "unexplored", "exploredBy": null, "find": null, "exploredAt": null, "hard": true, "endsAt": null, "quest": "relic"})
+				world.next.site += 1
+			else:
+				LocalBattles.create_camp(server, world, {"kind": "lair", "front": String(place.front), "q": cell.x, "r": cell.y, "units": units,
+					"waveId": last.id if not last.is_empty() else null, "quest": "grove"}, at)
+			LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{place} rises", "body": "{story} It is marked on the map at ({q}, {r}).",
+				"vars": {"place": place.name, "story": quest.story, "q": cell.x, "r": cell.y}}, at)
+		if quest.kind == "defense":
+			send_quest_army(server, world, stage, LocalTime.ms(at + (float(places.defense.delayHours) * LocalTime.MS_PER_HOUR) / world.speed))
+			LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{place} gather", "body": "{story}",
+				"vars": {"place": places.defense.name, "story": quest.story}}, at)
+
+
+## The quest's host sets out at `spawn_at` and marches on the Holy City.
+static func send_quest_army(server: LocalServer, world: Dictionary, stage: int, spawn_at: int) -> void:
+	var data := server.data
+	var last := _last_horde(world)
+	if last.is_empty():
+		return
+	var fronts: Array = world.activeFronts
+	var front := String(fronts[(stage + int(last.id)) % fronts.size()])
+	var composition := LocalWaves.compose_wave(data, front, maxi(1, int(last.index)), int(data.bridge.questPlaces.defense.units), _stage_seed(world, stage, int(last.id)), world.members.size())
+	_errand_wave(server, world, last, front, composition, spawn_at, {"kind": "quest", "target": null})
+
+
+## A stage starts to be raised: every active front sends a small horde, each
+## at its own target.
+static func send_construction_raids(server: LocalServer, world: Dictionary, bridge: Dictionary, at: int) -> void:
+	var data := server.data
+	var last := _last_horde(world)
+	if last.is_empty():
+		return
+	var villages: Array = []
+	for v in world.villages:
+		if v.ruin == null and v.ownerAccountId != null:
+			villages.append(v.id)
+	var fronts: Array = world.activeFronts
+	var targets := LocalBridge.construction_targets(fronts, villages)
+	for i in fronts.size():
+		var front := String(fronts[i])
+		var composition := LocalWaves.compose_wave(data, front, maxi(1, int(last.index)), LocalBridge.construction_size(data, int(bridge.stage)), _stage_seed(world, int(bridge.stage), 0xb00 + i), world.members.size())
+		_errand_wave(server, world, last, front, composition, at, {"kind": "bridge", "target": targets[i]})
+	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "Nav strikes at the builders",
+		"body": "While {stage} is raised, every front sends a band at a different target.", "vars": {"stage": data.bridge.stages[int(bridge.stage)].name}}, at)
+
+
+## A horde on an errand is over: the quest's host, beaten, answers its
+## quest (true); not beaten, another comes later while the stage wants it.
+static func after_errand(server: LocalServer, world: Dictionary, wave: Dictionary, status: String, at: int) -> bool:
+	var errand: Variant = wave.get("errand")
+	if not errand is Dictionary or errand.kind != "quest":
+		return false
+	if status == "defeated":
+		return true
+	var data := server.data
+	var bridge: Dictionary = world.bridge
+	if bridge.status != "open" or world.status != "running":
+		return false
+	var stage: Variant = LocalBridge.current_stage(data, bridge)
+	if stage == null or not stage.quests.any(func(q: Dictionary) -> bool: return q.kind == "defense") or bridge.quests.has("defense"):
+		return false
+	send_quest_army(server, world, int(bridge.stage), LocalTime.ms(at + (float(data.bridge.questPlaces.defense.retryHours) * LocalTime.MS_PER_HOUR) / world.speed))
+	return false

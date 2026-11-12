@@ -298,6 +298,9 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	if result.won:
 		var amount := float(data.raids.hatred.perBattle) + (float(data.raids.hatred.stronghold) if stage.stronghold else 0.0)
 		LocalHordes.anger_front(server, world, String(front), amount, at)
+		# The North's stronghold sacked at the full depth: the Eye of Veles (a bridge quest).
+		if front == "north" and stage.stronghold and int(army.raid.depth) == int(data.raids.maxDepth):
+			LocalBattles.bridge_quest(server, world, "artifact", at)
 		if front == "north":
 			var owner_hero: Dictionary = hero if not hero.is_empty() else (LocalArmies.hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 			var kinds := north_finds(data, stage.stronghold, int(world.seed), int(army.id), stage_no)

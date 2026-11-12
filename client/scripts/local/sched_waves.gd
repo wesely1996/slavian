@@ -291,6 +291,10 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 	if wave.is_empty() or wave.status != "scheduled":
 		return
 	var at := int(event.dueAt)
+	if wave.get("errand") != null:
+		send_errand(server, world, wave, at)
+		changed.append(["world"])
+		return
 	if wave.get("bandOf") != null:
 		send_band(server, world, wave, at)
 		changed.append(["world"])
@@ -405,6 +409,32 @@ static func send_band(server: LocalServer, world: Dictionary, band: Dictionary, 
 	plan_raids(server, world, band, 0)
 	LocalArmies.plan_intercepts(server, world, band)
 	plan_warning(server, world, band, at)
+
+
+## A horde on an errand (scheduler/waves.ts sendErrand) sets out from its
+## front's wilds for its own target: a village, or the Holy City (a village
+## gone, the Holy City). With no way there, it scatters.
+static func send_errand(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
+	var data := server.data
+	var errand: Dictionary = wave.errand
+	var village: Dictionary = server.find_village(world, int(errand.target)) if errand.target != null else {}
+	var target := {"id": village.id, "cell": Vector2i(village.q, village.r)} if not village.is_empty() and village.get("ruin") == null else {"id": null, "cell": Vector2i.ZERO}
+	var march := plan_march(data, land_of(world), wave, [], int(world.seed), at, world.speed, {}, [target])
+	if march.is_empty():
+		wave.status = "dispersed"
+		wave.endsAt = at
+		LocalBridgeCommands.after_errand(server, world, wave, "dispersed", at)
+		return
+	march = hold_for_quiet(world, int(wave.spawnAt), march)
+	wave.status = "marching"
+	wave.spawn = {"q": march.spawn.x, "r": march.spawn.y}
+	wave.targetVillageId = march.targetVillageId
+	wave.path = march.path
+	wave.arrivesAt = march.arrivesAt
+	server.schedule(world, int(wave.arrivesAt), "wave_arrive", {"waveId": wave.id})
+	plan_raids(server, world, wave, 0)
+	LocalArmies.plan_intercepts(server, world, wave)
+	plan_warning(server, world, wave, at)
 
 
 ## A march arriving in the group's quiet hours waits outside until they end.
