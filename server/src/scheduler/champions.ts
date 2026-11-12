@@ -11,7 +11,7 @@ import type { World } from '../db/worlds.js';
 import { championOf, type Champion } from '../sim/battle.js';
 import { generalBonuses } from '../sim/generals.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
-import type { Bonuses } from '../sim/research.js';
+import { bonus, type Bonuses } from '../sim/research.js';
 import { generalAfterBattle } from './generals.js';
 import { heroAfterBattle } from './heroes.js';
 
@@ -22,9 +22,17 @@ export function commandBonuses(data: GameData, base: Bonuses, hero: Hero | null,
   return { ...base };
 }
 
-// The champions fighting with a force: its hero, its general.
-export function championsOf(data: GameData, hero: Hero | null, general: General | null): Champion[] {
-  return [...(hero ? [championOf(data, 'hero', hero.level)] : []), ...(general ? [championOf(data, 'general', general.level)] : [])];
+// The champions fighting with a force: its hero, its general, the stronger
+// for the owner's `champion` and `generalChampion` bonuses (a hero's own).
+export function championsOf(data: GameData, hero: Hero | null, general: General | null, owned: Bonuses = {}): Champion[] {
+  const stronger = (c: Champion, key: string): Champion => {
+    const f = 1 + bonus(owned, key);
+    return f === 1 ? c : { ...c, attack: c.attack * f, defense: c.defense * f, health: c.health * f };
+  };
+  return [
+    ...(hero ? [stronger(championOf(data, 'hero', hero.level), 'champion')] : []),
+    ...(general ? [stronger(championOf(data, 'general', general.level), 'generalChampion')] : []),
+  ];
 }
 
 // Champions struck down in a round: a hero is wounded (with an army, carried

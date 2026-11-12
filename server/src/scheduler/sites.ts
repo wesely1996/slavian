@@ -2,6 +2,7 @@
 // fights the site's guardians on arrival, searches for a while
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
+import { bonus } from '../sim/research.js';
 import { achieve } from './achievements.js';
 import { parseArmyQuestMark } from '../sim/quests.js';
 import { armyQuestDone } from './quests.js';
@@ -119,7 +120,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       army: combatants(data, army.units),
       armyStats: withIntel(data, army.units, playerStats(data, bonuses, false)),
       statsWithoutHero: withIntel(data, army.units, playerStats(data, succession, false)),
-      champions: championsOf(data, hero, general),
+      champions: championsOf(data, hero, general, owned),
       armyStance: army.stance,
       camp: site.guardians,
       front: 'north',
@@ -249,7 +250,9 @@ export const siteHandlers: HandlerRegistry = {
     const leader = await heroWithArmy(client, army.id);
     const ownerHero = leader ?? (army.ownerAccountId !== null ? await loadHero(client, world.id, army.ownerAccountId).catch(() => null) : null);
     const distance = distanceShare(hex(site.q, site.r), world.radius ?? 0);
-    const lootFactor = site.hard ? data.events.kinds.ruin.lootFactor : 1;
+    // A clan that knows the old stones finds more in them (clans.json siteLoot).
+    const searcher = await loadVillage(client, army.homeVillageId);
+    const lootFactor = (site.hard ? data.events.kinds.ruin.lootFactor : 1) * (1 + bonus(searcher.state.bonuses, 'siteLoot'));
     const find = rollFind(data, {
       kind: site.kind,
       seed: world.seed,

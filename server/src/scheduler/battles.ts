@@ -145,7 +145,12 @@ export const battleHandlers: HandlerRegistry = {
     const engaged = await armiesInBattle(client, battle.id);
     // Heroes and generals fight in the ranks: the village's with its
     // garrison, each army's with it.
-    const armyLeaders = await Promise.all(engaged.map(async (a) => ({ hero: await heroWithArmy(client, a.id), general: await generalWithArmy(client, a.id) })));
+    const armyLeaders = await Promise.all(engaged.map(async (a) => ({
+      hero: await heroWithArmy(client, a.id),
+      general: await generalWithArmy(client, a.id),
+      // Its owner's bonuses, for its champions' strength.
+      owned: villageBonuses(data, (await loadVillage(client, a.homeVillageId)).state),
+    })));
     const homeBroken = battle.setup.home?.broken === true;
     // Scouts never fight; an army's tell it what it faces (intel).
     const garrison = homeBroken ? {} : combatants(data, state.garrison);
@@ -191,12 +196,12 @@ export const battleHandlers: HandlerRegistry = {
         stats: defenderStats,
         home: true,
         groups: [
-          { units: garrison, stance: state.stance, champions: homeBroken ? [] : championsOf(data, hero, general) },
+          { units: garrison, stance: state.stance, champions: homeBroken ? [] : championsOf(data, hero, general, own) },
           ...engaged.map((a, i) => ({
             units: combatants(data, a.units),
             stance: a.stance,
             stats: withIntel(data, a.units, defenderStats),
-            champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general),
+            champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general, armyLeaders[i]!.owned),
           })),
         ],
       },

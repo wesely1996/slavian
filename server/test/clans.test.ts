@@ -3,7 +3,9 @@ import { loadGameData } from '../src/data/index.js';
 import { againstFront, clanBonuses, hasClan, villageBonuses } from '../src/sim/clans.js';
 import { setupFactors } from '../src/sim/field.js';
 import { researchMs, trainFactor } from '../src/sim/research.js';
-import { completeBuild, newVillage, queueBuild, queueTraining, villageRates, withBonuses } from '../src/sim/village.js';
+import { completeBuild, newVillage, queueBuild, queueTraining, trade, villageRates, withBonuses } from '../src/sim/village.js';
+import { championsOf } from '../src/scheduler/champions.js';
+import { rosterBonuses } from '../src/sim/heroes.js';
 import { fortCost } from '../src/scheduler/field.js';
 
 const data = loadGameData();
@@ -23,12 +25,30 @@ function rich(clan: string | null, level = 0, building = 'barracks') {
 }
 
 describe('clans', () => {
-  it('has six clans, each with a story, a weakness and its own unit or building', () => {
-    expect(Object.keys(data.clans.clans).sort()).toEqual(['bobr', 'jelen', 'medved', 'rys', 'sokol', 'volk']);
+  it('has ten clans, each with a story, a weakness and its own unit or building', () => {
+    expect(Object.keys(data.clans.clans).sort()).toEqual(['bobr', 'gavran', 'jelen', 'lisica', 'medved', 'rys', 'sokol', 'tur', 'volk', 'zmija']);
     for (const clan of Object.values(data.clans.clans)) {
       expect(clan.story.length).toBeGreaterThan(20);
-      expect(Object.values(clan.effects).some((v) => v < 0) || clan.effects.researchTime! > 0 || clan.effects.fortCost! > 0 || clan.effects['trainTime.settler']! > 0).toBe(true);
+      expect(Object.values(clan.effects).some((v) => v < 0) || clan.effects.researchTime! > 0 || clan.effects.fortCost! > 0 || clan.effects['trainTime.settler']! > 0 || clan.effects.upkeep! > 0).toBe(true);
     }
+  });
+
+  it('trades better at the Market for the fox-folk', () => {
+    const plain = rich(null, 1, 'market');
+    const fox = rich('lisica', 1, 'market');
+    const at = plain.ledger.settledAt;
+    const got = (state: typeof plain) => trade(data, state, { give: 'wood', get: 'stone', amount: 1000 }, at).got;
+    expect(got(fox)).toBe(Math.floor(got(plain) * 1.15));
+  });
+
+  it("makes Svyatogor's champion and Marya's generals stronger", () => {
+    const hero = { level: 1 } as never;
+    const general = { level: 1 } as never;
+    const [plainHero, plainGeneral] = championsOf(data, hero, general);
+    const [giant] = championsOf(data, hero, null, rosterBonuses(data, 'svyatogor'));
+    expect(giant!.attack).toBeCloseTo(plainHero!.attack * 1.6);
+    const [, queens] = championsOf(data, hero, general, rosterBonuses(data, 'marya'));
+    expect(queens!.health).toBeCloseTo(plainGeneral!.health * 1.3);
   });
 
   it('adds the clan to its bonuses, marked so its own units can be told apart', () => {
