@@ -793,7 +793,9 @@ func _fit_sheet() -> void:
 		_scroll.custom_minimum_size.y = PICKING_HEIGHT + (60.0 if _army_moving != 0 else 0.0)
 		return
 	var tall := _panel_mode != "hex" or (_view == "village" and _tab != "village")
-	_scroll.custom_minimum_size.y = area.y * (0.58 if tall else 0.36)
+	# Bare ground has little to say: a peek, and the map keeps the room.
+	var peek := not tall and _view == "map" and Game.village_at(_selected).is_empty() and _road_from == Vector2i.MAX
+	_scroll.custom_minimum_size.y = area.y * (0.58 if tall else (0.27 if peek else 0.36))
 	# The tutorial's card folds while a tall sheet leaves the map little room.
 	if tall != _sheet_tall:
 		_sheet_tall = tall
@@ -5631,6 +5633,8 @@ func _hordes_tab() -> void:
 	_panel_body.add_child(UI.label(tr("The Holy City: %s") % HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 	if Game.waves.is_empty():
 		_panel_body.add_child(UI.label(tr("No waves announced."), UI.SMALL_SIZE, UI.MUTED))
+	else:
+		_panel_body.add_child(ThreatLine.new())
 	_paged("waves", Game.waves, 2 if _roomy() else 1, _wave_entry)
 
 

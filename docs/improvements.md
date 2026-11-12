@@ -72,7 +72,7 @@ Contents:
 
 ### 1.4 Screens
 
-- [ ] **Map** (L): tap a hex → a small *peek card* (name, owner, 2–3 key
+- [ ] *(partly done: bare hexes open a short peek sheet)* **Map** (L): tap a hex → a small *peek card* (name, owner, 2–3 key
   facts, 1–3 action chips). Swipe the card up for the full sheet. Selecting
   your army shows its reachable actions as chips on the map itself
   ("Move", "Attack", "Join") rather than in a sheet.
@@ -98,7 +98,7 @@ Contents:
 - [ ] *(partly done: filter chips, notices as cards)* **Messages** (M): one inbox with filter chips (All · Battles · Economy ·
   Events · Chat). Battle reports open as a result card first (won/lost,
   losses, loot) with "Watch the battle" for the round-by-round replay.
-- [ ] **Threats** (S): a timeline — hordes as beads on a line by arrival time,
+- [x] **Threats** (S): a timeline — hordes as beads on a line by arrival time,
   coloured by front, with what you know from scouting.
 - [ ] **Main menu** (M): a painted backdrop, "Continue" as the one big button
   (last world), then Solo / Multiplayer / Achievements / Settings.
@@ -122,7 +122,7 @@ Contents:
   with a "reduce motion" setting.
 - [ ] **Typography** (S): a display face with Slavic character for headings,
   a clean humanist sans for numbers and body; tabular digits for timers.
-- [ ] **Dark "night" theme** (M): follows the device, or the in-game hour.
+- [x] **Dark "night" theme** (M): follows the device, or the in-game hour.
 
 ### 1.6 Feedback and safety
 

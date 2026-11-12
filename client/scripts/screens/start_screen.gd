@@ -788,6 +788,19 @@ func _orientation_page() -> void:
 		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_content.add_child(pick)
 	_content.add_child(UI.label(tr("Turned on its side, the game lays itself out in landscape: the map wide, the details beside it."), UI.SMALL_SIZE, UI.MUTED))
+	# Night mode: a dim, warm veil for playing in the dark.
+	_content.add_child(UI.label(tr("Night mode"), UI.HEADING_SIZE))
+	var modes := UI.hbox(8)
+	for entry in [["auto", tr("As the phone")], ["on", tr("On")], ["off", tr("Off")]]:
+		var mode := String(entry[0])
+		var pick := UI.button(String(entry[1]), func() -> void:
+			Session.set_night(mode)
+			_render("orientation"))
+		pick.theme_type_variation = "TabButton"
+		pick.disabled = Session.night == mode
+		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		modes.add_child(pick)
+	_content.add_child(modes)
 
 
 func _sound_page() -> void:
