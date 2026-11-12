@@ -25,8 +25,9 @@ var _live_label: Label
 ## The top band of wood, and the words its buttons show at full width (they
 ## fold to icons when the band would be wider than the screen: _fit_bar).
 var _top: PanelContainer
-var _view_label := ""
-var _live_text := ""
+## The bar along the bottom: place -> its button.
+var _nav: PanelContainer
+var _nav_buttons := {}
 var _resource_labels: Dictionary[String, Label] = {}
 ## Under each stock: how full the storehouse is, and its limit.
 var _resource_bars: Dictionary[String, ProgressBar] = {}
@@ -41,7 +42,6 @@ var _view_button: Button
 var _inbox_button: Button
 ## Which of the inbox and the chat the shared button opened last.
 var _messages_tab := "inbox"
-var _tutorial_button: Button
 ## Notification settings as the server last sent them.
 var _prefs: Dictionary = {}
 var _spacer: Control
@@ -195,6 +195,7 @@ func _ready() -> void:
 	Game.raids_changed.connect(_on_waves_changed)
 	Game.scouting_changed.connect(_on_waves_changed)
 	Game.battles_changed.connect(_on_waves_changed)
+	get_tree().set_quit_on_go_back(false)
 	Live.watch(Game.world_id())
 	_open_run_once()
 
@@ -310,57 +311,15 @@ func _build_ui() -> void:
 	var top_rows := UI.vbox(10)
 	top.add_child(top_rows)
 	_top_rows = top_rows
+	# One row: whose stores (tap: your next village), the four resources,
+	# and the messages. Everything else is on the bar at the bottom.
 	var bar := UI.hbox(6)
 	top_rows.add_child(bar)
-	var back := UI.button("", _leave, "icon/back")
-	back.theme_type_variation = "WoodIconButton"
-	back.tooltip_text = tr("Worlds")
-	bar.add_child(back)
-	var title := UI.label(Game.world.get("name", ""), UI.HEADING_SIZE)
-	title.theme_type_variation = "OnWoodHeading"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.autowrap_mode = TextServer.AUTOWRAP_OFF
-	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	bar.add_child(title)
-	_live_label = UI.label("", UI.SMALL_SIZE)
-	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	bar.add_child(_live_label)
-	_view_label = tr("Village")
-	_view_button = UI.button(_view_label, _toggle_view, "icon/village")
-	_view_button.tooltip_text = _view_label
-	_view_button.theme_type_variation = "WoodButton"
-	_view_button.visible = not _my_village().is_empty()
-	bar.add_child(_view_button)
-	# All your troops at a glance: where they stand, who is on the move.
-	var forces := UI.button("", func() -> void:
-		_panel_mode = "forces"
-		_rebuild_panel(), "icon/troops")
-	forces.theme_type_variation = "WoodIconButton"
-	forces.tooltip_text = tr("Your forces")
-	bar.add_child(forces)
-	# Every standing order of yours, in one place.
-	var orders := UI.button("", func() -> void:
-		_panel_mode = "orders"
-		_order_creating = false
-		_rebuild_panel(), "icon/clock")
-	orders.theme_type_variation = "WoodIconButton"
-	orders.tooltip_text = tr("Standing orders")
-	bar.add_child(orders)
-	# Notices and the group chat share one button: it opens whichever has
-	# something new (the chat first), and the sheet switches between them.
-	_inbox_button = UI.button("", _show_messages, "icon/inbox")
-	_inbox_button.theme_type_variation = "WoodIconButton"
-	_inbox_button.tooltip_text = tr("Inbox") if Local.is_active() else tr("Inbox and chat")
-	bar.add_child(_inbox_button)
-	# The tutorial, shown or hidden at any time.
-	_tutorial_button = UI.button("", _toggle_tutorial, "icon/help")
-	_tutorial_button.theme_type_variation = "WoodIconButton"
-	_tutorial_button.tooltip_text = tr("Tutorial")
-	bar.add_child(_tutorial_button)
 	# The resource strip: whose stores they are, then for each resource its
 	# icon, stock and limit, the hourly rate, and how full the store is.
 	_resources = UI.hbox(4)
-	top_rows.add_child(_resources)
+	_resources.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(_resources)
 	_stores_button = UI.button("", _next_village)
 	_stores_button.theme_type_variation = "WoodIconButton"
 	_stores_button.add_theme_font_size_override("font_size", 18)
@@ -411,6 +370,17 @@ func _build_ui() -> void:
 		_resource_bars[kind] = full
 		_rate_labels[kind] = rate
 		_rate_negative.erase(kind)
+	# Shown only while the server can't be reached.
+	_live_label = UI.label("", UI.SMALL_SIZE)
+	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_live_label.visible = false
+	bar.add_child(_live_label)
+	# Notices and the group chat share one button: it opens whichever has
+	# something new (the chat first), and the sheet switches between them.
+	_inbox_button = UI.button("", _show_messages, "icon/inbox")
+	_inbox_button.theme_type_variation = "WoodIconButton"
+	_inbox_button.tooltip_text = tr("Inbox") if Local.is_active() else tr("Inbox and chat")
+	bar.add_child(_inbox_button)
 	# The next threat: madder on the wood, opens the threats sheet.
 	_threat_button = UI.button("", _show_threats, "icon/threat")
 	_threat_button.custom_minimum_size.y = 56
@@ -472,13 +442,14 @@ func _build_ui() -> void:
 	_panel_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_panel_body)
 	_root = root
+	_build_nav()
 	# The quest card floats over the map and the village, at their top left.
 	_quest_card = QuestCard.new()
 	_quest_card.claim.connect(_claim_onboarding)
 	_quest_card.show_me.connect(_show_me)
 	_quest_card.hide_tutorial.connect(func() -> void:
 		Session.set_tutorial_flag(Game.world_id(), "hidden", true)
-		_status.text = tr("The tutorial is hidden. The ? button at the top brings it back.")
+		_status.text = tr("Tutorial hidden. More → Tutorial brings it back.")
 		_refresh_quest_card())
 	layer.add_child(_quest_card)
 	# The compass in the map's bottom right corner.
@@ -508,6 +479,134 @@ func _fit_resources() -> void:
 		_capacity_labels[kind].visible = show
 
 
+## The bar along the bottom: the five places of the game, each a picture
+## and a word. The one you are in is lit.
+func _build_nav() -> void:
+	_nav = UI.wood(6)
+	var style := UiTheme.wood_style(6)
+	style.content_margin_bottom = 14
+	_nav.add_theme_stylebox_override("panel", style)
+	var row := UI.hbox(0)
+	_nav.add_child(row)
+	for place in [["map", tr("Map"), "icon/map"], ["village", tr("Village"), "icon/village"], ["army", tr("Army"), "icon/troops"], ["hero", tr("Hero"), "icon/profile"], ["more", tr("More"), "icon/settings"]]:
+		var key := String(place[0])
+		var b := UI.button(String(place[1]), _go.bind(key), String(place[2]))
+		b.theme_type_variation = "NavButton"
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		b.expand_icon = true
+		b.custom_minimum_size.y = 92
+		b.clip_text = true
+		row.add_child(b)
+		_nav_buttons[key] = b
+	_root.add_child(_nav)
+	_view_button = _nav_buttons["village"]
+	_view_button.visible = not _my_village().is_empty()
+	_nav_buttons["hero"].visible = not Game.my_hero().is_empty()
+
+
+## To one of the bar's places.
+func _go(place: String) -> void:
+	match place:
+		"map":
+			_set_view("map")
+		"village":
+			_tab = "village"
+			_set_view("village")
+		"army":
+			if _view != "map":
+				_set_view("map")
+			_panel_mode = "forces"
+			_rebuild_panel()
+		_:
+			_panel_mode = place
+			_rebuild_panel()
+
+
+## Which of the bar's places is on screen.
+func _place() -> String:
+	if _panel_mode in ["forces", "army"]:
+		return "army"
+	if _panel_mode == "hero":
+		return "hero"
+	if _panel_mode in ["more", "orders", "almanac", "threats", "report", "run"]:
+		return "more"
+	if _panel_mode in ["inbox", "chat"]:
+		return ""
+	return "village" if _view == "village" else "map"
+
+
+func _light_nav() -> void:
+	var here := _place()
+	for key in _nav_buttons:
+		(_nav_buttons[key] as Button).theme_type_variation = "NavButtonOn" if key == here else "NavButton"
+	_nav_buttons["hero"].visible = not Game.my_hero().is_empty()
+
+
+## Everything the bar has no room for.
+func _more_panel() -> void:
+	_panel_body.add_child(UI.label(String(Game.world.get("name", "")), UI.HEADING_SIZE))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	var places := [
+		[tr("Research"), "icon/research", func() -> void:
+			_tab = "research"
+			_set_view("village")
+			_tab = "research"
+			_rebuild_panel()],
+		[tr("Caravans"), "icon/caravan", func() -> void:
+			_tab = "caravans"
+			_set_view("village")
+			_tab = "caravans"
+			_rebuild_panel()],
+		[tr("Standing orders"), "icon/clock", func() -> void:
+			_panel_mode = "orders"
+			_order_creating = false
+			_rebuild_panel()],
+		[tr("Threats"), "icon/threat", _show_threats],
+		[tr("Almanac"), "icon/help", func() -> void:
+			_panel_mode = "almanac"
+			_rebuild_panel()],
+		[tr("Tutorial"), "icon/info", _toggle_tutorial],
+		[tr("Report a bug"), "icon/chat", _report_bug],
+		[tr("Worlds"), "icon/back", _leave],
+	]
+	for place in places:
+		if _my_village().is_empty() and place[1] in ["icon/research", "icon/caravan"]:
+			continue
+		var b := UI.button(String(place[0]), place[2], String(place[1]))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		grid.add_child(b)
+	_panel_body.add_child(grid)
+
+
+## Back (the phone's button, or Escape): out of a sheet to what is under it,
+## out of the village to the map, and from the map to the worlds.
+func _back() -> void:
+	if _panel_mode != "hex":
+		_panel_mode = "hex"
+		_rebuild_panel()
+	elif _view != "map":
+		_set_view("map")
+	else:
+		_leave()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_back()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_back()
+		get_viewport().set_input_as_handled()
+
+
 ## The room across the top band: the screen's width less the band's margins
 ## (never the band's own width, which a too-wide row has already stretched).
 func _top_room() -> float:
@@ -517,24 +616,8 @@ func _top_room() -> float:
 	return room
 
 
-## The title row never pushes the screen wider than the phone: when its
-## buttons don't fit (a group's world has chat and the live mark too), the
-## Village/Map button shows only its icon, then the live mark only its dot.
 func _fit_bar() -> void:
-	if _top == null or _view_button == null:
-		return
-	var bar := _view_button.get_parent() as HBoxContainer
-	_view_button.text = _view_label
-	_live_label.text = _live_text
-	var room := _top_room()
-	if _row_need(bar) > room:
-		_view_button.text = ""
-	if _row_need(bar) > room:
-		_live_label.text = _live_text.left(1)
-	# Last, the tutorial's button goes (the almanac still opens it).
-	_tutorial_button.visible = true
-	if _row_need(bar) > room:
-		_tutorial_button.visible = false
+	_fit_resources()
 
 
 func _row_need(row: HBoxContainer) -> float:
@@ -572,22 +655,6 @@ func _arrange() -> void:
 func _move_panel(landscape: bool, area: Vector2) -> void:
 	if _panel.get_parent() != null:
 		_panel.get_parent().remove_child(_panel)
-	# In landscape the resources ride in the title row.
-	var bar := _view_button.get_parent()
-	_resources.get_parent().remove_child(_resources)
-	if landscape:
-		bar.add_child(_resources)
-		bar.move_child(_resources, 2)
-		_resources.size_flags_horizontal = Control.SIZE_SHRINK_END
-		_resources.add_theme_constant_override("separation", 28)
-	else:
-		_top_rows.add_child(_resources)
-		_top_rows.move_child(_resources, 1)
-		_resources.size_flags_horizontal = Control.SIZE_FILL
-		_resources.add_theme_constant_override("separation", 4)
-	for cell in _resources.get_children():
-		if cell != _stores_button:
-			(cell as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if landscape else Control.SIZE_EXPAND_FILL
 	if landscape:
 		_body.add_child(_panel)
 		_panel.custom_minimum_size = Vector2(clampf(area.x * 0.34, 620.0, 900.0), 0)
@@ -595,6 +662,8 @@ func _move_panel(landscape: bool, area: Vector2) -> void:
 		_scroll.custom_minimum_size.y = 0
 	else:
 		_root.add_child(_panel)
+		if _nav != null:
+			_root.move_child(_nav, -1)
 		_panel.custom_minimum_size = Vector2.ZERO
 		_panel.size_flags_vertical = Control.SIZE_FILL
 		_fit_sheet()
@@ -819,11 +888,6 @@ func _set_view(view: String) -> void:
 		_status.text = ""
 	_renaming = false
 	var on_map := view == "map"
-	_view_label = tr("Village") if on_map else tr("Map")
-	_view_button.text = _view_label
-	_view_button.tooltip_text = _view_label
-	_fit_bar()
-	_view_button.icon = Art.texture("icon/village" if on_map else "icon/map")
 	hex_map.visible = on_map
 	_spacer.visible = on_map
 	_grade.visible = on_map
@@ -1337,6 +1401,7 @@ func _rebuild_panel() -> void:
 		_caravan_picking = 0
 		_status.text = ""
 	_fit_sheet()
+	_light_nav()
 	if _picking():
 		_picking_panel()
 		return
@@ -1369,6 +1434,9 @@ func _rebuild_panel() -> void:
 		return
 	if _panel_mode == "forces":
 		_forces_panel()
+		return
+	if _panel_mode == "more":
+		_more_panel()
 		return
 	if _view == "village":
 		_village_panel()
@@ -5940,10 +6008,10 @@ func _on_village_changed(_village_id: int) -> void:
 
 
 func _on_live_connection(connected: bool) -> void:
-	_live_text = tr("● live") if connected else tr("○ offline")
-	_live_label.text = _live_text
+	_live_label.text = tr("○ offline")
+	_live_label.add_theme_color_override("font_color", Color("#e58a7d"))
+	_live_label.visible = not connected and not Local.is_active()
 	_fit_bar()
-	_live_label.add_theme_color_override("font_color", Color("#8fc4a6") if connected else UiTheme.ON_WOOD_MUTED)
 	if connected:
 		_refetch_world()
 

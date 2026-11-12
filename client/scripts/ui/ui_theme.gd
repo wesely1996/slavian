@@ -24,6 +24,8 @@ const WHEAT := Color("#9a7424")
 ## Lettering on the wood.
 const ON_WOOD := Color("#ece6d8")
 const ON_WOOD_MUTED := Color("#b5a994")
+## The lit place on the bottom bar: bright gold on the wood.
+const NAV_LIT := Color("#f0c869")
 ## Older names, kept for the screens that use them.
 const TEXT := INK
 const GOLD := WHEAT
@@ -237,6 +239,28 @@ static func build() -> Theme:
 			theme.set_color(state, type, ON_WOOD)
 		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
 			theme.set_color(state, type, ON_WOOD)
+
+	# The bar along the bottom of the game: a picture over a word, bare on
+	# the wood; the place you are in is lit in wheat under a bright edge.
+	for type in ["NavButton", "NavButtonOn"]:
+		var on: bool = type == "NavButtonOn"
+		theme.set_type_variation(type, "Button")
+		for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
+			var box := StyleBoxFlat.new()
+			box.bg_color = Color(NAV_LIT, 0.12) if on else Color(ON_WOOD, 0.1 if state in ["pressed", "hover_pressed"] else 0.0)
+			box.border_color = NAV_LIT
+			box.border_width_top = 4 if on else 0
+			box.set_corner_radius_all(4)
+			box.content_margin_top = 8
+			box.content_margin_bottom = 4
+			theme.set_stylebox(state, type, box)
+		var ink := NAV_LIT if on else ON_WOOD_MUTED
+		for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
+			theme.set_color(state, type, ink)
+		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+			theme.set_color(state, type, ink)
+		theme.set_font_size("font_size", type, 20)
+		theme.set_constant("icon_max_width", type, 40)
 
 	for type in ["LineEdit", "TextEdit"]:
 		var field := _box(PAGE, Color(INK, 0.3))
