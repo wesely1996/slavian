@@ -6,9 +6,9 @@
 // horde reaching the Holy City fights its guard there (see field.ts).
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
-import { listArmies, saveArmy } from '../db/armies.js';
+import { armiesInBattle, listArmies, saveArmy } from '../db/armies.js';
 import { answerBattle, respondersTo } from './armies.js';
-import { insertBattle, type Battle } from '../db/battles.js';
+import { addAttackers, insertBattle, loadBattle, type Battle } from '../db/battles.js';
 import { listCamps } from '../db/camps.js';
 import { listSites } from '../db/sites.js';
 import { afterSettling, createCamp, finishWave } from './camps.js';
@@ -27,6 +27,7 @@ import {
   markSettled,
   markStruck,
   marchOnward,
+  endWave,
   setWaveStrength,
   startRampage,
   type Wave,
@@ -268,6 +269,48 @@ export async function startRebuild(client: DbClient, data: GameData, world: Worl
 }
 
 // A horde at the Holy City fights its guard and anyone holding the city.
+// Hordes on one hex fight together, as armies do: one reaching a hex where
+// another horde is already fighting joins its battle, its troops added to
+// the attackers (a quest's host keeps to its own errand). Returns whether
+// it joined.
+export async function joinHordeBattle(client: DbClient, data: GameData, world: World, wave: Wave, cell: Hex, at: Date): Promise<boolean> {
+  if (wave.errand?.kind === 'quest' || total(wave.composition) === 0) return false;
+  const { rows } = await client.query<{ id: number }>(
+    `SELECT b.id FROM battles b JOIN waves w ON w.id = b.wave_id
+     WHERE b.world_id = $1 AND b.q = $2 AND b.r = $3 AND b.status = 'ongoing' AND b.wave_id <> $4 AND w.status = 'battling'
+     ORDER BY b.id LIMIT 1`,
+    [world.id, cell.q, cell.r, wave.id],
+  );
+  if (!rows[0]) return false;
+  const battle = await loadBattle(client, rows[0].id);
+  const host = await loadWave(client, battle.waveId!);
+  const joined: Record<string, number> = { ...host.composition };
+  for (const [unit, n] of Object.entries(wave.composition)) joined[unit] = (joined[unit] ?? 0) + n;
+  await setWaveStrength(client, host.id, joined);
+  await addAttackers(client, battle.id, wave.composition);
+  await cancelPlans(client, world.id, wave.id);
+  await endWave(client, wave.id, 'dispersed', at);
+  // Those fighting it hear of it.
+  const told = new Set<number>();
+  if (battle.villageId !== null) {
+    const owner = (await loadVillage(client, battle.villageId)).ownerAccountId;
+    if (owner !== null) told.add(owner);
+  }
+  for (const army of await armiesInBattle(client, battle.id)) if (army.ownerAccountId !== null) told.add(army.ownerAccountId);
+  for (const accountId of [...told].sort((a, b) => a - b)) {
+    await tell(client, world, accountId, {
+      kind: 'under_attack',
+      tier: 'push',
+      title: 'Another horde joins the battle at ({q}, {r})',
+      body: '{enemy} more from the {front} fight alongside the horde already there.',
+      vars: { q: cell.q, r: cell.r, enemy: total(wave.composition), front: wave.front },
+    }, at);
+  }
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+  await notifyWorld(client, { worldId: world.id, type: 'battles' });
+  return true;
+}
+
 export async function startHolyCityBattle(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<Battle> {
   const guard = holyCityGuard(data, wave.index);
   await markBattling(client, wave.id);

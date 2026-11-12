@@ -253,6 +253,7 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 
 ### 6.6 Reinforcements
 - **Garrisons stay home:** troops in a settlement leave it only by joining an army. Every standing army has an **answer toggle** (default on, `POST /v1/armies/:id/respond`): when a battle starts within 3 hexes of it (`respond.range` in `data/armies.json`; a village's, a field battle or the Holy City's), it marches there as a reinforcement, remembering where it stood, and goes back there once the battle is over (beaten, it goes home).
+- **Hordes fight together too** (`joinHordeBattle`): a horde reaching a hex where another horde is already fighting (a village, the Holy City or a field battle) joins that battle instead of starting its own; its troops are added to the attackers (and to their starting strength), and those fighting it are told. A bridge quest's host keeps to its own errand.
 - Once a battle ends, the surviving army follows its priority list to the next battle.
 - Reinforcements arrive after travel time and **join at the next round**.
 - **Arrival direction bonus:**

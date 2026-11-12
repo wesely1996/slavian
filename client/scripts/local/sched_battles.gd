@@ -12,11 +12,60 @@ const RAIDING := ["marching", "battling", "arrived"]
 
 # --- Arriving (scheduler/waves.ts) --------------------------------------------
 
+## Hordes on one hex fight together, as armies do (scheduler/horde.ts
+## joinHordeBattle): one reaching a hex where another horde is already
+## fighting joins its battle, its troops added to the attackers (a quest's
+## host keeps to its own errand). Returns whether it joined.
+static func join_horde_battle(server: LocalServer, world: Dictionary, wave: Dictionary, cell: Vector2i, at: int) -> bool:
+	var errand: Variant = wave.get("errand")
+	if (errand is Dictionary and errand.get("kind") == "quest") or LocalBattle.total(wave.composition) == 0:
+		return false
+	var battle: Dictionary = {}
+	var host: Dictionary = {}
+	for b in world.battles:
+		if b.status != "ongoing" or b.get("waveId") == null or int(b.waveId) == int(wave.id) or int(b.q) != cell.x or int(b.r) != cell.y:
+			continue
+		var w := server.find_wave(world, int(b.waveId))
+		if w.is_empty() or w.status != "battling":
+			continue
+		if battle.is_empty() or int(b.id) < int(battle.id):
+			battle = b
+			host = w
+	if battle.is_empty():
+		return false
+	host.composition = LocalCamps.add_units(host.composition, wave.composition)
+	battle.attackerInitial = LocalCamps.add_units(battle.attackerInitial, wave.composition)
+	world.events = world.events.filter(func(e: Dictionary) -> bool:
+		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+	wave.status = "dispersed"
+	wave.endsAt = at
+	# Those fighting it hear of it.
+	var told: Array = []
+	if battle.get("villageId") != null:
+		var owner: Variant = server.find_village(world, int(battle.villageId)).ownerAccountId
+		if owner != null:
+			told.append(int(owner))
+	for army in LocalArmies.armies_in_battle(world, int(battle.id)):
+		if army.ownerAccountId != null and not int(army.ownerAccountId) in told:
+			told.append(int(army.ownerAccountId))
+	told.sort()
+	for account_id in told:
+		LocalInbox.tell(server, world, account_id, {"kind": "under_attack", "tier": "push", "title": "Another horde joins the battle at ({q}, {r})",
+			"body": "{enemy} more from the {front} fight alongside the horde already there.",
+			"vars": {"q": cell.x, "r": cell.y, "enemy": LocalBattle.total(wave.composition), "front": wave.front}}, at)
+	return true
+
+
 static func on_wave_arrive(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var wave := server.find_wave(world, int(event.payload.waveId))
 	var at := int(event.dueAt)
 	# A horde held up in a field battle arrives later than first planned.
 	if wave.is_empty() or wave.status != "marching" or (wave.arrivesAt != null and at < int(wave.arrivesAt)):
+		return
+	# Another horde already fighting there: it joins that battle.
+	var target := server.find_village(world, int(wave.targetVillageId)) if wave.targetVillageId != null else {}
+	if join_horde_battle(server, world, wave, Vector2i(target.q, target.r) if not target.is_empty() else Vector2i.ZERO, at):
+		changed.append(["world"])
 		return
 	begin_rampage(server, world, wave, at)
 	if wave.targetVillageId != null:
