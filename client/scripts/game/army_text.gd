@@ -229,7 +229,7 @@ static func reinforcements(battle: Dictionary, village_name: Callable) -> String
 			var text: String = village_name.call(joined.villageId)
 			var bonus := roundi(float(joined.bonus) * 100.0)
 			if bonus > 0:
-				text += UI.t(" (+%d%% %s)") % [bonus, UI.t("harassment") if joined.orders == "harass" else UI.t("pincer")]
+				text += UI.t(" (+%d%% %s)") % [bonus, UI.t("harassment") if joined.orders == "harass" else (UI.t("hammer and anvil") if joined.get("hammer", false) else UI.t("pincer"))]
 			parts.append(text)
 	return ", ".join(parts)
 

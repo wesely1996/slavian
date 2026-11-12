@@ -74,18 +74,18 @@ export async function startBattle(
   await saveVillageState(client, village.id, state);
   await markBattling(client, wave.id);
   // Walls must be battered down; a horde without the siege to do it in time
-  // builds engines first, and the assault waits for them.
+  // builds engines first, and the assault waits for them. Meanwhile the
+  // archers of both sides shoot (volley rounds).
   const setup: BattleSetup = { home: { initial: combatants(data, state.garrison) } };
   if (cameOverRiver(wave.path ?? [], { q: village.q, r: village.r }, await riverKeys(client, world.id))) setup.river = true;
   let composition = wave.composition;
-  let firstRound = at.getTime() + roundMs(data);
+  const firstRound = at.getTime() + roundMs(data);
   const integrity = wallIntegrity(data, state.plots);
   if (integrity > 0) {
     const moat = towerLevel(state.plots, 'ditch');
     setup.wall = { level: wallLevel(state.plots), integrity, max: integrity, ...(moat > 0 ? { moat } : {}) };
     const works = siegeWorks(data, wave.front, composition, integrity, state.plots, world.speed);
     if (works) {
-      firstRound += works.setupMs;
       composition = addUnits(composition, { [works.engine]: works.count });
       setup.siege = { engine: works.engine, count: works.count, readyAt: new Date(at.getTime() + works.setupMs).toISOString() };
       await setWaveStrength(client, wave.id, composition);
@@ -166,14 +166,19 @@ export const battleHandlers: HandlerRegistry = {
     // climbers carry them over.
     const rng = battleRng(world.seed, battle.id, round);
     const wall = battle.setup.wall;
-    const standing = !!wall && wall.integrity > 0;
-    const smashed = standing ? ballistaKills(data, wave.front, wave.composition, state.plots, rng) : {};
+    // Once the defenders have charged out, the walls play no part.
+    const standing = !!wall && wall.integrity > 0 && !battle.setup.sally;
+    // While the horde still builds its engines before standing walls, only
+    // the archers of both sides shoot: a volley round. An army reaching the
+    // village then falls on the horde's back with all it has.
+    const volley = standing && !!battle.setup.siege && at.getTime() < Date.parse(battle.setup.siege.readyAt);
+    const smashed = standing && !volley ? ballistaKills(data, wave.front, wave.composition, state.plots, rng) : {};
     const assault = subtractUnits(wave.composition, smashed);
     const defenders = forces.reduce<Record<string, number>>((sum, f) => addUnits(sum, f), {});
     const archers = Object.entries(defenders).reduce((sum, [unit, n]) => sum + (data.units.units[unit]?.family === 'archers' ? n : 0), 0);
-    const over = standing ? overTheWalls(data, wave.front, assault, state.plots) : 0;
+    const over = standing && !volley ? overTheWalls(data, wave.front, assault, state.plots) : 0;
     const walls = standing ? wallFactors(data, state.plots, archers, over) : { defense: 1, attack: 1, archers: 1 };
-    const held = standing ? heldBack(data, over) : 1;
+    const held = volley ? 0 : standing ? heldBack(data, over) : 1;
     // A horde that came over a river into the fight strikes weaker.
     const river = battle.setup.river ? data.field.river.attackerFactor : 1;
     const defenderStats = (unit: string) => {
@@ -181,6 +186,12 @@ export const battleHandlers: HandlerRegistry = {
       const shooting = base.family === 'archers' ? walls.archers : 1;
       return { ...base, attack: base.attack * surge * walls.attack * shooting, defense: base.defense * walls.defense };
     };
+    // In a volley round those behind the walls only shoot.
+    const shotStats = (unit: string) => {
+      const stats = defenderStats(unit);
+      return stats.family === 'archers' ? stats : { ...stats, attack: 0 };
+    };
+    const homeStats = volley ? shotStats : defenderStats;
     const result = resolveRound(
       data,
       {
@@ -195,15 +206,15 @@ export const battleHandlers: HandlerRegistry = {
       {
         units: defenders,
         stance: state.stance,
-        stats: defenderStats,
+        stats: homeStats,
         home: true,
         groups: [
-          { units: garrison, stance: state.stance, champions: homeBroken ? [] : championsOf(data, hero, general, own) },
+          { units: garrison, stance: state.stance, champions: homeBroken || volley ? [] : championsOf(data, hero, general, own) },
           ...engaged.map((a, i) => ({
             units: combatants(data, a.units),
             stance: a.stance,
-            stats: withIntel(data, a.units, defenderStats),
-            champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general, armyLeaders[i]!.owned),
+            stats: withIntel(data, a.units, volley && a.joinsRound !== round ? shotStats : defenderStats),
+            champions: volley && a.joinsRound !== round ? [] : championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general, armyLeaders[i]!.owned),
           })),
         ],
       },
@@ -214,10 +225,13 @@ export const battleHandlers: HandlerRegistry = {
     // The horde batters the walls with what came at them this round.
     let wallLeft: number | undefined;
     let setup: BattleSetup = battle.setup;
-    if (standing) {
+    if (standing && !volley) {
       wallLeft = Math.max(0, Math.round(wall.integrity - siegeDamage(data, wave.front, assault, state.plots)));
       setup = { ...setup, wall: { ...wall, integrity: wallLeft } };
     }
+    // Volleys don't count against the battle's length.
+    const volleys = (battle.setup.volleys ?? 0) + (volley ? 1 : 0);
+    if (volley) setup = { ...setup, volleys };
     const shares = result.defenderGroupLosses!;
     // Champions struck down fall: a hero wounded (an army's carried home),
     // a general dead; the general takes command from a fallen hero.
@@ -250,8 +264,8 @@ export const battleHandlers: HandlerRegistry = {
     const strikes = joining.filter((a) => a.orders === 'harass').length;
     if (strikes > 0) await angerFront(client, data, world, wave.front, strikes * data.horde.hatred.perHarass, at);
 
-    const outcome = battleOutcome(data, {
-      round,
+    const judged = battleOutcome(data, {
+      round: round - volleys,
       attackerStance: battle.attackerStance,
       attackerInitial: battle.attackerInitial,
       attackerNow,
@@ -264,6 +278,9 @@ export const battleHandlers: HandlerRegistry = {
         ...armies.filter((a) => !leaving(a)).map((a) => ({ stance: a.stance, initial: combatants(data, a.engagedUnits ?? a.units), now: combatants(data, a.units) })),
       ],
     });
+    // Arrows alone don't take walls: while the horde still builds its
+    // engines it can be beaten, but the village doesn't fall.
+    const outcome = volley && judged === 'raided' ? 'ongoing' : judged;
     // While the fight goes on, an army that broke falls back home beaten,
     // and a garrison that broke fights no more.
     const breaks = (a: Army) =>
@@ -282,12 +299,14 @@ export const battleHandlers: HandlerRegistry = {
       defenderLeft: total(defendersNow),
       ...(joining.length
         ? {
-            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: combatants(data, a.units), bonus: a.joinBonus, stance: a.stance })),
+            joined: joining.map((a) => ({ armyId: a.id, villageId: a.homeVillageId, orders: a.orders, units: combatants(data, a.units), bonus: a.joinBonus, stance: a.stance, ...(standing && a.orders !== 'harass' && a.joinBonus > 0 ? { hammer: true } : {}) })),
           }
         : {}),
       ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units) })) } : {}),
       ...(homeBroke ? { homeBroke: true } : {}),
       ...(wallLeft !== undefined ? { wallLeft, breach: wallLeft === 0 } : {}),
+      ...(volley ? { volley: true } : {}),
+      ...(battle.setup.sally && !battle.rounds.some((r) => r.sally) ? { sally: true } : {}),
       ...(total(smashed) ? { smashed } : {}),
       ...(over > 0 ? { over: Math.round(over * 100) / 100 } : {}),
       ...(engaged.length ? { garrisonLosses: shares[0]! } : {}),

@@ -126,14 +126,17 @@ export function approachAngle(at: Hex, a: Hex, b: Hex): number {
 }
 
 // The first-round bonus of an army joining a battle: harassers always strike
-// hard; reinforcements get a pincer bonus when they come from another side.
+// hard; reinforcements reaching walls that still stand are the hammer to
+// their anvil, whatever side they come from; otherwise they get a pincer
+// bonus when they come from another side.
 export function joinBonus(
   data: GameData,
-  input: { orders: ArmyOrders; armySize: number; hordeSize: number; angle: number },
+  input: { orders: ArmyOrders; armySize: number; hordeSize: number; angle: number; walls?: boolean },
 ): number {
   if (input.hordeSize <= 0) return 0;
   const ratio = input.armySize / input.hordeSize;
   if (input.orders === 'harass') return Math.min(data.armies.harass.maxBonus, data.armies.harass.scale * ratio);
+  if (input.walls) return Math.min(data.armies.hammer.maxBonus, data.armies.hammer.scale * ratio);
   if (input.angle < data.armies.pincer.minAngle) return 0;
   return Math.min(data.armies.pincer.maxBonus, data.armies.pincer.scale * ratio);
 }

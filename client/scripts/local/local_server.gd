@@ -546,6 +546,22 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				var stanced: Dictionary = village.state.duplicate(true)
 				stanced.stance = String(body.stance)
 				result = {"state": stanced}
+			"sally":
+				# Out of the walls for the battle under way (commands/village.ts sallyCommand).
+				var fought: Variant = null
+				for b in world.battles:
+					if fought == null and b.status == "ongoing" and b.get("waveId") != null and b.get("villageId") != null and int(b.villageId) == int(village.id):
+						fought = b
+				if fought == null:
+					return _fail(400, "rule", "No horde is fighting at this village")
+				if fought.setup.get("wall") == null or int(fought.setup.wall.integrity) <= 0:
+					return _fail(400, "rule", "No walls stand between you and the horde")
+				if fought.setup.get("sally", false):
+					return _fail(400, "rule", "The garrison is already outside the walls")
+				var out: Dictionary = fought.setup.duplicate(true)
+				out.sally = true
+				fought.setup = out
+				result = {"state": village.state}
 			"rename":
 				var name := String(body.get("name", "")).strip_edges()
 				if name == "" or name.length() > 32:

@@ -237,6 +237,9 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - Better odds (walls, militia from population).
 - **Costs:** the population takes losses, buildings can be damaged, connected outposts stop producing until the battle ends.
 
+- **While the horde builds its engines** before standing walls (`setup.siege`), the archers of both sides shoot each round (a *volley round*: nobody else strikes, the walls are not battered, and these rounds don't count against the battle's length). Arrows alone don't take a village: it can't fall in a volley round, though the horde can be beaten in one.
+- **Charge out** (`POST /v1/villages/:id/sally`): while a horde fights at your standing walls you may order the garrison and the armies with it out. From the next round the fight is in the open: no wall defense, no shooting from the walls, the horde's fighters no longer held back, the walls neither battered nor breached, and a horde still building engines is fought at once. There is no going back in for that battle.
+
 ### 6.5 Battle resolution (Q11, Q18)
 - **Deterministic** given the inputs and a battle seed (so reports can be replayed and tested).
 - A battle is a series of **rounds**. Each round is a scheduled event. Total duration is **15 min–3 h** *(tunable)*, depending on army sizes and fortification.
@@ -258,6 +261,7 @@ Enemy hordes also have stances. They are hidden until scouted. A **visible match
 - Reinforcements arrive after travel time and **join at the next round**.
 - **Arrival direction bonus:**
   - **Pincer:** arriving from a different side than the defenders. Bonus scaled by reinforcement size relative to the enemy.
+  - **Hammer and anvil:** a reinforcement reaching a village whose walls still stand (and are still held) falls on the horde pinned against them, whatever side it comes from: on its first round +`hammer.scale` × its size / the horde's, at most `hammer.maxBonus` (0.8, 40%; `data/armies.json`), in place of the pincer. Arriving during a volley round, it alone strikes hand to hand.
   - **Hit-and-run harassment:** small, fast reinforcements (cavalry-heavy) that deal damage and withdraw. Bonus scaled the same way, with low losses.
 - Armies standing in a village or on a fort fight its battles from the start.
 
