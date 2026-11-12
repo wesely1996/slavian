@@ -1955,6 +1955,7 @@ func _upgrade_vault() -> void:
 ## _caravan_target); from `village_id` when given.
 func _open_caravans(target: Dictionary, village_id := 0) -> void:
 	_caravan_target = target
+	_caravan_step = 2
 	if village_id != 0:
 		Game.current_village_id = village_id
 	_tab = "caravans"
@@ -1989,6 +1990,31 @@ func _caravan_escort(village: Dictionary) -> void:
 	_unit_pickers(Rules.garrison_at(village, Game.server_now()), false, "escort")
 
 
+## The steps of a form as a row of chips ("1 Where", "2 What", "3 Confirm"):
+## the one you are on is lit, those behind it can be tapped to go back.
+func _steps_row(names: Array, at: int, on_pick: Callable) -> void:
+	var row := UI.hbox(6)
+	for i in names.size():
+		var step := i + 1
+		var chip := UI.button("%d  %s" % [step, names[i]], func() -> void: on_pick.call(step))
+		chip.theme_type_variation = "TabButton"
+		chip.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		chip.custom_minimum_size.y = 56
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.clip_text = true
+		# (A TabButton shown disabled is the open one.)
+		chip.disabled = step == at
+		if step > at:
+			chip.modulate = Color(1, 1, 1, 0.45)
+			chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(chip)
+	_panel_body.add_child(row)
+
+
+## Sending a caravan, a step at a time: where it goes, what it carries,
+## then one card to look over before it leaves.
+var _caravan_step := 1
+
 func _caravan_form(village: Dictionary, free: int) -> void:
 	var village_id := int(village.id)
 	# Where it goes, picked on the map; a place that is gone (or a boat
@@ -1997,27 +2023,54 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 		_caravan_target = {"kind": "vault"}
 	if _caravan_target.get("kind") == "village" and int(_caravan_target.id) == village_id:
 		_caravan_target = {"kind": "vault"}
-	var where := UI.hbox(8)
-	var to := UI.label(tr("To %s") % CaravanText.target_name(_caravan_target), UI.SMALL_SIZE + 2)
-	to.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	to.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	where.add_child(to)
-	where.add_child(UI.button(tr("Pick on the map"), func() -> void: _pick_caravan_target(village_id), "icon/map"))
-	_panel_body.add_child(where)
-
-	# How much of each: typed in, up to what the village holds and what the
-	# place takes (a store only grain, a boat what it still needs).
+	_caravan_step = clampi(_caravan_step, 1, 3)
+	var to_step := func(step: int) -> void:
+		_caravan_step = step
+		_scroll.scroll_vertical = 0
+		_rebuild_panel()
+	_steps_row([tr("Where"), tr("What"), tr("Confirm")], _caravan_step, to_step)
 	var limits := _caravan_limits(_caravan_target)
-	var amounts := Ledger.amounts_at(village.resources, Game.server_now())
+	var own_place := _caravan_own_place(_caravan_target)
 	for kind in Ledger.KINDS:
 		if not limits.has(kind):
 			_caravan_load[kind] = 0
+		if own_place.is_empty() or not limits.has(kind):
+			_caravan_back[kind] = 0
+	if _caravan_step == 1:
+		_caravan_where(village_id, to_step)
+	elif _caravan_step == 2:
+		_caravan_what(village, limits, own_place, free, to_step)
+	else:
+		_caravan_confirm(village, free, to_step)
+
+
+## Step 1: where it goes.
+func _caravan_where(village_id: int, to_step: Callable) -> void:
+	_panel_body.add_child(UI.label(tr("To %s") % CaravanText.target_name(_caravan_target)))
+	var row := UI.hbox(8)
+	var pick := UI.button(tr("Pick on the map"), func() -> void: _pick_caravan_target(village_id), "icon/map")
+	pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(pick)
+	if _caravan_target.get("kind") != "vault":
+		row.add_child(UI.button(tr("Holy City vault"), func() -> void:
+			_caravan_target = {"kind": "vault"}
+			_rebuild_panel()))
+	_panel_body.add_child(row)
+	var next := UI.primary(tr("Next"), func() -> void: to_step.call(2))
+	_panel_body.add_child(next)
+
+
+## Step 2: what it carries there, and what it brings back.
+func _caravan_what(village: Dictionary, limits: Dictionary, own_place: Dictionary, free: int, to_step: Callable) -> void:
+	var village_id := int(village.id)
+	# How much of each: typed in, up to what the village holds and what the
+	# place takes (a store only grain, a boat what it still needs).
+	var amounts := Ledger.amounts_at(village.resources, Game.server_now())
+	for kind in Ledger.KINDS:
+		if not limits.has(kind):
 			continue
 		var row := UI.hbox(8)
 		row.add_child(UI.icon("resource/%s" % kind, 40))
-		var name := UI.label(UI.resource_name(kind), UI.SMALL_SIZE)
-		name.custom_minimum_size.x = 90
-		row.add_child(name)
 		var most := int(floor(float(amounts.get(kind, 0))))
 		if limits[kind] != null:
 			most = mini(most, int(limits[kind]))
@@ -2026,14 +2079,16 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 		var of := UI.label(tr("of %d") % most, UI.SMALL_SIZE, UI.MUTED)
 		of.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(of)
+		var all := UI.button(tr("All"), func() -> void:
+			_caravan_load[kind] = most
+			_drafts.erase("load:%s" % kind)
+			_rebuild_panel())
+		all.focus_mode = Control.FOCUS_NONE
+		row.add_child(all)
 		_panel_body.add_child(row)
 	if limits.has("grain") and limits.size() == 1:
 		_panel_body.add_child(UI.label(tr("A store takes only grain."), UI.SMALL_SIZE, UI.MUTED))
 	# From your own settlement, fort or supply point it can bring back.
-	var own_place := _caravan_own_place(_caravan_target)
-	for kind in Ledger.KINDS:
-		if own_place.is_empty() or not limits.has(kind):
-			_caravan_back[kind] = 0
 	if not own_place.is_empty():
 		_panel_body.add_child(UI.with_info(UI.label(tr("Bring back"), UI.HEADING_SIZE),
 			tr("On the way home it takes these from %s, as much as there is when it gets there.") % CaravanText.target_name(_caravan_target)))
@@ -2042,9 +2097,6 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 				continue
 			var row := UI.hbox(8)
 			row.add_child(UI.icon("resource/%s" % kind, 40))
-			var label := UI.label(UI.resource_name(kind), UI.SMALL_SIZE)
-			label.custom_minimum_size.x = 90
-			row.add_child(label)
 			var there := floori(float(own_place.get(kind, 0)))
 			var top := maxi(there, _caravan_back[kind])
 			row.add_child(_number_field("back:%s" % kind, _caravan_back[kind], 0, maxi(top, 1000000), func(n: int) -> void: _caravan_back[kind] = n))
@@ -2052,37 +2104,76 @@ func _caravan_form(village: Dictionary, free: int) -> void:
 			have.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(have)
 			_panel_body.add_child(row)
-
-	var garrison := Rules.garrison_at(village, Game.server_now())
-	var escort := func() -> Dictionary: return _picked_units(garrison) if not Game.camps.is_empty() else {}
 	var summary := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(summary)
-	var buttons := UI.hbox()
+	var buttons := UI.hbox(8)
+	buttons.add_child(UI.button(tr("Back"), func() -> void: to_step.call(1)))
+	var next := UI.primary(tr("Next"), func() -> void: to_step.call(3))
+	next.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	buttons.add_child(next)
+	_panel_body.add_child(buttons)
+	_tick(summary, func() -> String:
+		var needed := _caravans_needed(village)
+		next.disabled = needed == 0
+		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Type how much of each to carry")
+		if needed > free:
+			line += tr(" (only %d at home)") % free
+		return line)
+
+
+## How many caravans the load (or what it brings back) takes.
+func _caravans_needed(village: Dictionary) -> int:
+	return maxi(CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})), CaravanMath.needed(Game.data, _caravan_back, village.get("bonuses", {})))
+
+
+## Step 3: the whole trip on one card, and Send.
+func _caravan_confirm(village: Dictionary, free: int, to_step: Callable) -> void:
+	var village_id := int(village.id)
+	var garrison := Rules.garrison_at(village, Game.server_now())
+	var escort := func() -> Dictionary: return _picked_units(garrison) if not Game.camps.is_empty() else {}
+	var card := UI.card(12)
+	var box := UI.vbox(6)
+	card.add_child(box)
+	box.add_child(UI.label(tr("To %s") % CaravanText.target_name(_caravan_target)))
+	var carries := UI.rich("", UI.SMALL_SIZE, UiTheme.INK)
+	carries.text = tr("Carries %s") % UI.costs(_nonzero(_caravan_load), 26) if _sum(_caravan_load) > 0 else tr("Carries nothing there")
+	box.add_child(carries)
+	if _sum(_caravan_back) > 0:
+		var back := UI.rich("", UI.SMALL_SIZE, UiTheme.INK)
+		back.text = tr("Brings back %s") % UI.costs(_nonzero(_caravan_back), 26)
+		box.add_child(back)
+	var guard: Dictionary = escort.call()
+	if not guard.is_empty():
+		box.add_child(UI.label(tr("Escort"), UI.SMALL_SIZE, UI.MUTED))
+		box.add_child(_unit_chips(guard, 34.0))
+	var summary := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	box.add_child(summary)
+	_panel_body.add_child(card)
+	var buttons := UI.hbox(8)
+	buttons.add_child(UI.button(tr("Back"), func() -> void: to_step.call(2)))
 	var target := _caravan_target.duplicate()
-	var send := UI.button(tr("Send"), func() -> void: _send_caravan(village_id, target, _caravan_load.duplicate(), escort.call(), _caravan_back.duplicate()))
+	var send := UI.primary(tr("Send"), func() -> void: _send_caravan(village_id, target, _caravan_load.duplicate(), escort.call(), _caravan_back.duplicate()), "icon/caravan")
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buttons.add_child(send)
+	_panel_body.add_child(buttons)
 	var fetch: Button = null
 	if _caravan_target.kind == "vault":
 		fetch = UI.button(tr("Fetch from vault"), func() -> void: _fetch_from_vault(village_id, _caravan_load.duplicate(), escort.call()))
-		fetch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		buttons.add_child(fetch)
-	# What it takes, and whether it can go, as the numbers are typed.
+		_panel_body.add_child(UI.with_info(fetch, tr("Brings this much from the Holy City vault home instead of taking it there.")))
+	# Whether it can go, as the stores and the yard stand.
 	_tick(summary, func() -> String:
-		var needed := maxi(CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})), CaravanMath.needed(Game.data, _caravan_back, village.get("bonuses", {})))
+		var needed := _caravans_needed(village)
 		var current: Dictionary = Game.villages.get(village_id, village)
 		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), _caravan_load)
 		send.disabled = needed == 0 or needed > free or not affordable
 		if fetch != null:
 			fetch.disabled = CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})) == 0 or needed > free
-		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Type how much of each to carry")
+		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Nothing to carry")
 		if needed > free:
 			line += tr(" (only %d at home)") % free
-		var guard: Dictionary = escort.call()
-		if not guard.is_empty():
-			line += " · " + tr("Escort: %s") % _units_text(guard)
+		if not affordable:
+			line += " · " + tr("Not enough in the stores to cover it.")
 		return line)
-	_panel_body.add_child(buttons)
 
 
 ## What a caravan's destination holds, when it is your own settlement, fort
@@ -2227,6 +2318,8 @@ func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escor
 		Sound.effect("error")
 		return
 	Sound.effect("coins")
+	_toast(tr("The caravan is on its way"))
+	_caravan_step = 1
 	_caravan_load = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	_caravan_back = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	_army_units.clear()
@@ -4811,10 +4904,16 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 	if mine_here.size() >= slots:
 		return
 	# A new bounty: first what you give, then what you want for it.
-	var step := int(_bounty.step)
+	var step := clampi(int(_bounty.step), 1, 3)
 	var side: String = "offer" if step == 1 else "want"
-	_panel_body.add_child(UI.label(tr("Post a bounty · 1 of 2: what you give") if step == 1 else tr("Post a bounty · 2 of 2: what you want"), UI.SMALL_SIZE + 2))
+	_panel_body.add_child(UI.label(tr("Post a bounty"), UI.HEADING_SIZE))
+	_steps_row([tr("You give"), tr("You want"), tr("Confirm")], step, func(to: int) -> void:
+		_bounty.step = to
+		_rebuild_panel())
 	for kind in Ledger.KINDS:
+		# The last step only sums it up.
+		if step == 3:
+			continue
 		# A resource you give can't also be one you want.
 		if step == 2 and int(_bounty.offer[kind]) > 0:
 			continue
@@ -4849,13 +4948,13 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 	var total_line := UI.rich()
 	_panel_body.add_child(total_line)
 	var buttons := UI.hbox(8)
-	if step == 2:
+	if step > 1:
 		buttons.add_child(UI.button(tr("Back"), func() -> void:
-			_bounty.step = 1
+			_bounty.step = step - 1
 			_rebuild_panel()))
-	var go := UI.primary(tr("Next") if step == 1 else tr("Post bounty"), func() -> void:
-		if step == 1:
-			_bounty.step = 2
+	var go := UI.primary(tr("Next") if step < 3 else tr("Post bounty"), func() -> void:
+		if step < 3:
+			_bounty.step = step + 1
 			_rebuild_panel()
 		else:
 			_post_bounty(village_id))
@@ -4880,7 +4979,7 @@ func _bounty_board(village: Dictionary, level: int) -> void:
 			text += ("\n" if text != "" else "") + tr("Gear offered: %s") % _gear_names(items)
 		if gives > 0 and not afford:
 			text += "\n" + tr("Not enough in the stores to cover it.")
-		if step == 2:
+		if step >= 2:
 			text += "\n" + (tr("You get %s when it is taken") % UI.costs(_nonzero(Rules.bounty_return(data, want)), 22) if wants > 0 else tr("Type what you want for it."))
 			go.disabled = (gives == 0 and items.is_empty()) or wants == 0 or not afford or gives > most or wants > most
 		else:
