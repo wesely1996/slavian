@@ -20,6 +20,7 @@ import { callRitualNight } from './ritual.js';
 import { revealSite } from './sites.js';
 import { revealLair } from './camps.js';
 import { withWorld } from './world.js';
+import { openStage, sendConstructionRaids } from './bridgeQuests.js';
 
 // Saves the bridge, and starts raising the stage once nothing is missing.
 async function settleBridge(client: DbClient, data: GameData, world: World, bridge: BridgeState, at: Date): Promise<BridgeState> {
@@ -27,6 +28,8 @@ async function settleBridge(client: DbClient, data: GameData, world: World, brid
   if (isReady(data, next)) {
     next = startRaising(data, next, at, world.speed);
     await scheduleEvent(client, world.id, new Date(next.raisedAt!), 'bridge_raised', { stage: next.stage });
+    // Nav strikes at the builders.
+    await sendConstructionRaids(client, data, world, next, at);
     for (const member of await listMembers(client, world.id)) {
       await tell(client, world, member.accountId, {
         kind: 'bridge',
@@ -142,6 +145,8 @@ export const bridgeHandlers: HandlerRegistry = {
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     if (next.status === 'complete') await callRitualNight(client, data, world, event.dueAt);
+    // The next stage's quests raise their places and host.
+    else await openStage(client, data, world, next.stage, event.dueAt);
     // A lair is wanted (for the quest, or for the Embers the group lacks) and
     // none stands: the North sends one.
     const stage = currentStage(data, next);

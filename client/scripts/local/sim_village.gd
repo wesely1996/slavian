@@ -450,7 +450,7 @@ static func village_site(terrain: Dictionary, rivers: Array, cell: Vector2i) -> 
 		if e.a == cell or e.b == cell:
 			water = true
 	var here: Variant = terrain.get("%d,%d" % [cell.x, cell.y])
-	return {"water": water, "hills": here == "hills", "plains": here == "plains", "mountain": mountain}
+	return {"water": water, "hills": here == "hills" or here == "wooded_hills", "plains": here == "plains", "mountain": mountain}
 
 
 ## sim/village.ts siteText.

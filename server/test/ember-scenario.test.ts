@@ -25,7 +25,7 @@ scenario('ember-scenario.json', START, async ({ started, now, play }) => {
         stage: 1,
         donated: { ...piers.cost, wood: piers.cost.wood - 10 },
         embers: piers.embers,
-        quests: { lair: now().toISOString() },
+        quests: { grove: now().toISOString() },
         stageStartedAt: now().toISOString(),
         sanctityAtStart: 100,
         status: 'open',

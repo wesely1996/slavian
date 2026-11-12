@@ -9,7 +9,7 @@ const SECTIONS := ["Units", "Buildings", "Stances", "Hordes", "Clans", "Terrain"
 const ART := {"Units": "unit/spearman", "Buildings": "icon/build", "Stances": "icon/troops", "Hordes": "icon/threat",
 	"Clans": "clan/volk", "Terrain": "icon/map", "The run": "settlement/holy_city"}
 ## Pictures for the kinds of ground that have one.
-const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hills": "feature/hill", "mountain": "feature/mountain",
+const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hills": "feature/hill", "wooded_hills": "feature/hill", "mountain": "feature/mountain",
 	"swamp": "feature/reeds", "holy_city": "settlement/holy_city", "dark_forest": "feature/dark_pine", "ice": "feature/ice",
 	"steppe": "feature/bush", "hallowed": "feature/blossom"}
 

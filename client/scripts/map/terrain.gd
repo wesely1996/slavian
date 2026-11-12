@@ -8,6 +8,7 @@ const COLORS := {
 	"plains": Color("#87924f"),
 	"forest": Color("#56683a"),
 	"hills": Color("#8e8657"),
+	"wooded_hills": Color("#6f7646"),
 	"mountain": Color("#7b766c"),
 	"swamp": Color("#5b6447"),
 	"lake": Color("#3d6f86"),
@@ -30,6 +31,7 @@ const HEIGHTS := {
 	"hallowed": 0.38,
 	"ice": 0.5,
 	"hills": 0.6,
+	"wooded_hills": 0.62,
 	"mountain": 1.0,
 }
 const UNKNOWN_COLOR := Color("#ff00ff")

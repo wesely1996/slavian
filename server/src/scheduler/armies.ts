@@ -666,7 +666,7 @@ export async function answerBattle(client: DbClient, data: GameData, world: Worl
 // The ongoing battle with a horde on open ground at a hex, if any.
 export async function fieldBattleAt(client: DbClient, worldId: number, cell: Hex): Promise<Battle | null> {
   const { rows } = await client.query<{ id: number }>(
-    `SELECT id FROM battles WHERE world_id = $1 AND q = $2 AND r = $3 AND village_id IS NULL AND wave_id IS NOT NULL AND status = 'ongoing' LIMIT 1`,
+    `SELECT id FROM battles WHERE world_id = $1 AND q = $2 AND r = $3 AND village_id IS NULL AND wave_id IS NOT NULL AND status = 'ongoing' ORDER BY id LIMIT 1`,
     [worldId, cell.q, cell.r],
   );
   return rows[0] ? loadBattle(client, rows[0].id) : null;

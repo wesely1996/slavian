@@ -40,6 +40,8 @@ import { heroAfterBattle } from './heroes.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { tell } from './notices.js';
 import { bridgeQuest } from './bridge.js';
+import { afterErrand } from './bridgeQuests.js';
+import type { BridgeQuest } from '../data/index.js';
 import { findBridge } from '../db/bridges.js';
 import { embersWanted } from '../sim/bridge.js';
 
@@ -77,7 +79,7 @@ export async function createCamp(
   client: DbClient,
   data: GameData,
   world: World,
-  camp: Pick<Camp, 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId'> & Partial<Pick<Camp, 'reward' | 'endsAt'>>,
+  camp: Pick<Camp, 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId'> & Partial<Pick<Camp, 'reward' | 'endsAt' | 'quest'>>,
   at: Date,
 ): Promise<Camp> {
   const created = await insertCamp(client, { reward: null, endsAt: null, ...camp, worldId: world.id, createdAt: at });
@@ -179,13 +181,18 @@ export async function finishWave(
   at: Date,
 ): Promise<void> {
   await endWave(client, waveId, status, at);
-  await spawnAfterWave(client, data, world, await loadWave(client, waveId), at);
+  const wave = await loadWave(client, waveId);
+  await spawnAfterWave(client, data, world, wave, at);
   await bridgeQuest(client, data, world, 'unscathed', at);
+  // A bridge quest's host beaten: the quest is done (not beaten: another comes).
+  if (await afterErrand(client, data, world, wave, status, at)) await bridgeQuest(client, data, world, 'defense', at);
 }
 
 export async function afterSettling(client: DbClient, data: GameData, world: World, waveId: number, at: Date): Promise<void> {
-  await spawnAfterWave(client, data, world, await loadWave(client, waveId), at);
+  const wave = await loadWave(client, waveId);
+  await spawnAfterWave(client, data, world, wave, at);
   await bridgeQuest(client, data, world, 'unscathed', at);
+  await afterErrand(client, data, world, wave, 'settled', at);
 }
 
 // A wave sets out: camps of its front send part of themselves along.
@@ -274,6 +281,8 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     ember = camp.kind === 'lair' && (lucky || (await embersShort(client, data, world.id)));
     if (ember) await addEmbers(client, world.id, 1);
     if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
+    // A bridge quest's lair.
+    if (camp.quest) await bridgeQuest(client, data, world, camp.quest as BridgeQuest, at);
     await onboardingStep(client, data, world, army.ownerAccountId, 'camp', at);
   } else {
     await saveCampUnits(client, camp.id, result.campNow);

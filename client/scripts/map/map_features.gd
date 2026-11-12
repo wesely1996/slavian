@@ -13,6 +13,7 @@ const FEATURES := {
 	"forest": [["feature/pine", 5, 0.42, 0.72], ["feature/oak", 3, 0.42, 0.72]],
 	"dark_forest": [["feature/dark_pine", 9, 0.46, 0.75]],
 	"hills": [["feature/hill", 2, 0.78, 0.5], ["feature/oak", 1, 0.36, 0.7]],
+	"wooded_hills": [["feature/hill", 2, 0.78, 0.5], ["feature/pine", 3, 0.38, 0.72], ["feature/oak", 2, 0.38, 0.72]],
 	"mountain": [["feature/mountain", 1, 1.15, 0.12], ["feature/peak", 2, 0.66, 0.6]],
 	"swamp": [["feature/reeds", 5, 0.3, 0.75]],
 	"steppe": [["feature/grass", 3, 0.26, 0.75]],

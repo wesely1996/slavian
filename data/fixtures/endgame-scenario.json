@@ -1113,6 +1113,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -1207,6 +1208,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -7,
@@ -1353,14 +1355,15 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
       "kind": "captives",
       "front": "north",
       "q": 2,
-      "r": -1,
+      "r": 0,
       "size": 6,
       "waveId": null,
       "reward": {
@@ -1371,7 +1374,8 @@
         "stone": 150
        }
       },
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -1386,7 +1390,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -1399,7 +1404,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -1412,7 +1418,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -1425,7 +1432,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -1438,7 +1446,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -1776,7 +1799,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -1856,7 +1879,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -1906,7 +1929,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -1941,12 +1964,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -2036,7 +2059,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -2051,7 +2074,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -2096,7 +2119,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -2121,12 +2144,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -2216,7 +2239,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -2241,7 +2264,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -2271,7 +2294,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -2386,7 +2409,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -2491,7 +2514,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -2521,7 +2544,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -2546,7 +2569,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -2591,12 +2614,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -2626,12 +2649,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -2766,7 +2789,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -2866,12 +2889,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -2901,7 +2924,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -3006,7 +3029,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -3146,23 +3169,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -3170,173 +3185,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -3646,6 +3685,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -3740,6 +3780,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -7,
@@ -3789,6 +3830,162 @@
         ]
        ],
        "arrivesAt": "2026-06-01T10:54:57.600Z"
+      }
+     },
+     {
+      "id": 3,
+      "index": 1,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": 1
+      },
+      "forecast": {
+       "spawn": {
+        "q": 2,
+        "r": -9
+       },
+       "targetVillageId": null,
+       "path": [
+        [
+         2,
+         -9,
+         0
+        ],
+        [
+         2,
+         -8,
+         28800
+        ],
+        [
+         1,
+         -7,
+         43200
+        ],
+        [
+         0,
+         -6,
+         57600
+        ],
+        [
+         0,
+         -5,
+         72000
+        ],
+        [
+         0,
+         -4,
+         86400
+        ],
+        [
+         0,
+         -3,
+         100800
+        ],
+        [
+         0,
+         -2,
+         115200
+        ],
+        [
+         0,
+         -1,
+         129600
+        ],
+        [
+         0,
+         0,
+         144000
+        ]
+       ],
+       "arrivesAt": "2026-06-01T08:52:24.000Z"
+      }
+     },
+     {
+      "id": 4,
+      "index": 1,
+      "front": "south",
+      "status": "scheduled",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": null
+      },
+      "forecast": {
+       "spawn": {
+        "q": -7,
+        "r": 9
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         -7,
+         9,
+         0
+        ],
+        [
+         -6,
+         8,
+         28800
+        ],
+        [
+         -5,
+         7,
+         43200
+        ],
+        [
+         -4,
+         6,
+         57600
+        ],
+        [
+         -3,
+         5,
+         72000
+        ],
+        [
+         -2,
+         4,
+         86400
+        ],
+        [
+         -2,
+         3,
+         100800
+        ],
+        [
+         -2,
+         2,
+         129600
+        ]
+       ],
+       "arrivesAt": "2026-06-01T08:52:09.600Z"
       }
      }
     ],
@@ -3886,14 +4083,15 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
       "kind": "captives",
       "front": "north",
       "q": 2,
-      "r": -1,
+      "r": 0,
       "size": 6,
       "waveId": null,
       "reward": {
@@ -3904,7 +4102,8 @@
         "stone": 150
        }
       },
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -3919,7 +4118,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -3932,7 +4132,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -3945,7 +4146,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -3958,7 +4160,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -3971,7 +4174,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -4311,7 +4529,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -4391,7 +4609,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -4441,7 +4659,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -4476,12 +4694,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -4571,7 +4789,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -4586,7 +4804,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -4631,7 +4849,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -4656,12 +4874,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -4751,7 +4969,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -4776,7 +4994,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -4806,7 +5024,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -4921,7 +5139,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -5026,7 +5244,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -5056,7 +5274,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -5081,7 +5299,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -5126,12 +5344,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -5161,12 +5379,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -5301,7 +5519,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -5401,12 +5619,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -5436,7 +5654,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -5541,7 +5759,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -5681,23 +5899,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -5705,173 +5915,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -6063,7 +6297,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": false,
+      "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -6077,10 +6311,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 170,
-        "wood": 360,
-        "grain": 453.33333333333326,
-        "stone": 400
+        "iron": 252.5,
+        "wood": 607.5,
+        "grain": 643.6333333333332,
+        "stone": 565
        },
        "ratesPerHour": {
         "iron": 150,
@@ -6094,7 +6328,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:20:00.000Z"
+       "settledAt": "2026-06-01T08:53:07.200Z"
       }
      }
     ],
@@ -6117,6 +6351,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -6211,6 +6446,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -7,
@@ -6261,11 +6497,263 @@
        ],
        "arrivesAt": "2026-06-01T10:54:57.600Z"
       }
+     },
+     {
+      "id": 3,
+      "index": 1,
+      "front": "north",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": {
+       "q": 2,
+       "r": -9
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        2,
+        -9,
+        0
+       ],
+       [
+        2,
+        -8,
+        28800
+       ],
+       [
+        1,
+        -7,
+        43200
+       ],
+       [
+        0,
+        -6,
+        57600
+       ],
+       [
+        -1,
+        -5,
+        72000
+       ],
+       [
+        -1,
+        -4,
+        86400
+       ],
+       [
+        -1,
+        -3,
+        100800
+       ],
+       [
+        -1,
+        -2,
+        115200
+       ],
+       [
+        -1,
+        -1,
+        129600
+       ],
+       [
+        -1,
+        0,
+        144000
+       ],
+       [
+        -2,
+        1,
+        158400
+       ],
+       [
+        -2,
+        2,
+        187200
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:53:07.200Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:14:43.200Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": 1
+      },
+      "forecast": null
+     },
+     {
+      "id": 4,
+      "index": 1,
+      "front": "south",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": {
+       "q": -7,
+       "r": 9
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        -7,
+        9,
+        0
+       ],
+       [
+        -6,
+        8,
+        28800
+       ],
+       [
+        -5,
+        7,
+        43200
+       ],
+       [
+        -4,
+        6,
+        57600
+       ],
+       [
+        -3,
+        5,
+        72000
+       ],
+       [
+        -2,
+        4,
+        86400
+       ],
+       [
+        -1,
+        3,
+        100800
+       ],
+       [
+        0,
+        2,
+        115200
+       ],
+       [
+        0,
+        1,
+        129600
+       ],
+       [
+        0,
+        0,
+        144000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:52:24.000Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:14:00.000Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": null
+      },
+      "forecast": null
      }
     ],
     "scouting": [],
     "ruinSearches": [],
-    "battles": [],
+    "battles": [
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "ongoing",
+      "round": 0,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": null
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 21
+       },
+       "holyCity": true
+      },
+      "status": "ongoing",
+      "round": 0,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": null
+     }
+    ],
     "raids": [],
     "expeditions": [],
     "research": [],
@@ -6357,14 +6845,15 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
       "kind": "captives",
       "front": "north",
       "q": 2,
-      "r": -1,
+      "r": 0,
       "size": 6,
       "waveId": null,
       "reward": {
@@ -6375,7 +6864,8 @@
         "stone": 150
        }
       },
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -6390,7 +6880,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -6403,7 +6894,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -6416,7 +6908,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -6429,7 +6922,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -6442,20 +6936,35 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -6470,9 +6979,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -6813,7 +7323,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -6893,7 +7403,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -6943,7 +7453,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -6978,12 +7488,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -7073,7 +7583,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -7088,7 +7598,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -7133,7 +7643,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -7158,12 +7668,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -7253,7 +7763,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -7278,7 +7788,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -7308,7 +7818,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -7423,7 +7933,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -7528,7 +8038,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -7558,7 +8068,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -7583,7 +8093,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -7628,12 +8138,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -7663,12 +8173,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -7803,7 +8313,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -7903,12 +8413,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -7938,7 +8448,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -8043,7 +8553,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -8183,23 +8693,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -8207,173 +8709,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -8565,7 +9091,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": false,
+      "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -8579,10 +9105,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 170,
-        "wood": 360,
-        "grain": 453.33333333333326,
-        "stone": 400
+        "iron": 247.5,
+        "wood": 647.5,
+        "grain": 671.2999999999998,
+        "stone": 595
        },
        "ratesPerHour": {
         "iron": 150,
@@ -8596,13 +9122,179 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:20:00.000Z"
+       "settledAt": "2026-06-01T09:03:12.000Z"
       }
      }
     ],
     "waves": [
      {
       "id": 3,
+      "index": 1,
+      "front": "north",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": {
+       "q": 2,
+       "r": -9
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        2,
+        -9,
+        0
+       ],
+       [
+        2,
+        -8,
+        28800
+       ],
+       [
+        1,
+        -7,
+        43200
+       ],
+       [
+        0,
+        -6,
+        57600
+       ],
+       [
+        -1,
+        -5,
+        72000
+       ],
+       [
+        -1,
+        -4,
+        86400
+       ],
+       [
+        -1,
+        -3,
+        100800
+       ],
+       [
+        -1,
+        -2,
+        115200
+       ],
+       [
+        -1,
+        -1,
+        129600
+       ],
+       [
+        -1,
+        0,
+        144000
+       ],
+       [
+        -2,
+        1,
+        158400
+       ],
+       [
+        -2,
+        2,
+        187200
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:53:07.200Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:14:43.200Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": 1
+      },
+      "forecast": null
+     },
+     {
+      "id": 4,
+      "index": 1,
+      "front": "south",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": {
+       "q": -7,
+       "r": 9
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        -7,
+        9,
+        0
+       ],
+       [
+        -6,
+        8,
+        28800
+       ],
+       [
+        -5,
+        7,
+        43200
+       ],
+       [
+        -4,
+        6,
+        57600
+       ],
+       [
+        -3,
+        5,
+        72000
+       ],
+       [
+        -2,
+        4,
+        86400
+       ],
+       [
+        -1,
+        3,
+        100800
+       ],
+       [
+        0,
+        2,
+        115200
+       ],
+       [
+        0,
+        1,
+        129600
+       ],
+       [
+        0,
+        0,
+        144000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:52:24.000Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:14:00.000Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": null
+      },
+      "forecast": null
+     },
+     {
+      "id": 5,
       "index": 2,
       "front": "north",
       "status": "scheduled",
@@ -8619,6 +9311,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 0,
@@ -8686,7 +9379,7 @@
       }
      },
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "scheduled",
@@ -8703,6 +9396,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -8717,42 +9411,32 @@
         ],
         [
          -8,
-         7,
+         6,
          28800
         ],
         [
          -7,
-         7,
+         6,
          57600
         ],
         [
          -6,
-         7,
+         5,
          86400
         ],
         [
          -5,
-         7,
-         100800
-        ],
-        [
-         -4,
-         6,
+         4,
          115200
         ],
         [
-         -3,
-         5,
-         129600
-        ],
-        [
-         -2,
-         4,
+         -4,
+         3,
          144000
         ],
         [
-         -2,
-         3,
+         -3,
+         2,
          158400
         ],
         [
@@ -8767,7 +9451,122 @@
     ],
     "scouting": [],
     "ruinSearches": [],
-    "battles": [],
+    "battles": [
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "ongoing",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 3,
+       "grey_wolf": 5,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": null
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 20
+       },
+       "holyCity": true
+      },
+      "status": "ongoing",
+      "round": 1,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 5,
+       "crossbowman": 3,
+       "sergeant_rider": 2
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": null
+     }
+    ],
     "raids": [],
     "expeditions": [],
     "research": [],
@@ -8859,14 +9658,15 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
       "kind": "captives",
       "front": "north",
       "q": 2,
-      "r": -1,
+      "r": 0,
       "size": 6,
       "waveId": null,
       "reward": {
@@ -8877,7 +9677,8 @@
         "stone": 150
        }
       },
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -8892,7 +9693,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -8905,7 +9707,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -8918,7 +9721,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -8931,7 +9735,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -8944,20 +9749,35 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -8972,9 +9792,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -9313,7 +10134,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -9393,7 +10214,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -9443,7 +10264,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -9478,12 +10299,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -9573,7 +10394,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -9588,7 +10409,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -9633,7 +10454,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -9658,12 +10479,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -9753,7 +10574,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -9778,7 +10599,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -9808,7 +10629,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -9923,7 +10744,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -10028,7 +10849,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -10058,7 +10879,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -10083,7 +10904,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -10128,12 +10949,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -10163,12 +10984,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -10303,7 +11124,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -10403,12 +11224,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -10438,7 +11259,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -10543,7 +11364,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -10683,23 +11504,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -10707,173 +11520,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -11079,10 +11916,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 305,
-        "wood": 765,
-        "grain": 764.7333333333333,
-        "stone": 670
+        "iron": 272.5,
+        "wood": 722.5,
+        "grain": 728.9666666666665,
+        "stone": 645
        },
        "ratesPerHour": {
         "iron": 150,
@@ -11096,13 +11933,101 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:14:43.200Z"
+       "settledAt": "2026-06-01T09:13:07.200Z"
       }
      }
     ],
     "waves": [
      {
       "id": 3,
+      "index": 1,
+      "front": "north",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T08:50:00.000Z",
+      "spawn": {
+       "q": 2,
+       "r": -9
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        2,
+        -9,
+        0
+       ],
+       [
+        2,
+        -8,
+        28800
+       ],
+       [
+        1,
+        -7,
+        43200
+       ],
+       [
+        0,
+        -6,
+        57600
+       ],
+       [
+        -1,
+        -5,
+        72000
+       ],
+       [
+        -1,
+        -4,
+        86400
+       ],
+       [
+        -1,
+        -3,
+        100800
+       ],
+       [
+        -1,
+        -2,
+        115200
+       ],
+       [
+        -1,
+        -1,
+        129600
+       ],
+       [
+        -1,
+        0,
+        144000
+       ],
+       [
+        -2,
+        1,
+        158400
+       ],
+       [
+        -2,
+        2,
+        187200
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:53:07.200Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:14:43.200Z",
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "kind": "bridge",
+       "target": 1
+      },
+      "forecast": null
+     },
+     {
+      "id": 5,
       "index": 2,
       "front": "north",
       "status": "battling",
@@ -11178,10 +12103,11 @@
       "leaderId": 1,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -11200,42 +12126,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -11252,6 +12168,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -11259,10 +12176,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -11298,10 +12215,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -11342,6 +12259,144 @@
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
       "endedAt": null
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "ongoing",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 3,
+       "grey_wolf": 3,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": null
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -11486,14 +12541,15 @@
       "size": 3,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
       "kind": "captives",
       "front": "north",
       "q": 2,
-      "r": -1,
+      "r": 0,
       "size": 6,
       "waveId": null,
       "reward": {
@@ -11504,7 +12560,8 @@
         "stone": 150
        }
       },
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -11519,7 +12576,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -11532,7 +12590,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -11545,7 +12604,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -11558,7 +12618,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -11571,20 +12632,35 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -11599,9 +12675,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -11622,7 +12699,13 @@
      "stageStartedAt": "2026-06-01T08:50:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [],
+    "fear": [
+     [
+      0,
+      0,
+      12
+     ]
+    ],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -11940,7 +13023,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -12020,7 +13103,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -12070,7 +13153,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -12105,12 +13188,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -12200,7 +13283,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -12215,7 +13298,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -12260,7 +13343,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -12285,12 +13368,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -12380,7 +13463,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -12405,7 +13488,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -12435,7 +13518,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -12550,7 +13633,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -12655,7 +13738,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -12685,7 +13768,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -12710,7 +13793,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -12755,12 +13838,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -12790,12 +13873,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -12930,7 +14013,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -13030,12 +14113,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -13065,7 +14148,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -13170,7 +14253,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -13310,23 +14393,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -13334,173 +14409,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -13694,7 +14793,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": true,
+      "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -13708,10 +14807,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 270,
-        "wood": 770,
-        "grain": 762.4,
-        "stone": 680
+        "iron": 240,
+        "wood": 735,
+        "grain": 732.3999999999997,
+        "stone": 660
        },
        "ratesPerHour": {
         "iron": 150,
@@ -13731,7 +14830,87 @@
     ],
     "waves": [
      {
-      "id": 4,
+      "id": 5,
+      "index": 2,
+      "front": "north",
+      "status": "battling",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T09:11:36.000Z",
+      "spawn": {
+       "q": 0,
+       "r": -10
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        0,
+        -10,
+        0
+       ],
+       [
+        0,
+        -9,
+        43200
+       ],
+       [
+        0,
+        -8,
+        72000
+       ],
+       [
+        0,
+        -7,
+        86400
+       ],
+       [
+        0,
+        -6,
+        100800
+       ],
+       [
+        0,
+        -5,
+        115200
+       ],
+       [
+        0,
+        -4,
+        129600
+       ],
+       [
+        0,
+        -3,
+        144000
+       ],
+       [
+        0,
+        -2,
+        158400
+       ],
+       [
+        0,
+        -1,
+        172800
+       ],
+       [
+        0,
+        0,
+        187200
+       ]
+      ],
+      "arrivesAt": "2026-06-01T09:14:43.200Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T09:36:19.200Z",
+      "struck": [],
+      "ritual": true,
+      "leaderId": 1,
+      "hatred": 0,
+      "bandOf": null,
+      "errand": null,
+      "forecast": null
+     },
+     {
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -13750,42 +14929,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -13802,6 +14971,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -13809,10 +14979,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -13834,9 +15004,9 @@
        "sergeant_rider": 3
       },
       "attackerNow": {
-       "zealot": 16,
+       "zealot": 15,
        "crossbowman": 7,
-       "sergeant_rider": 2
+       "sergeant_rider": 3
       },
       "defenderInitial": {
        "spearman": 4
@@ -13848,8 +15018,8 @@
         "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -13862,10 +15032,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -13884,7 +15054,7 @@
        },
        "holyCity": true
       },
-      "status": "defended",
+      "status": "ongoing",
       "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
@@ -13893,8 +15063,8 @@
        "leshy_thrall": 5
       },
       "attackerNow": {
-       "rusalka": 3,
-       "grey_wolf": 4,
+       "rusalka": 4,
+       "grey_wolf": 6,
        "leshy_thrall": 4
       },
       "defenderInitial": {
@@ -13905,11 +15075,11 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 11,
+        "attackerLeft": 14,
         "defenderLeft": 31,
         "attackerLosses": {
-         "rusalka": 2,
-         "grey_wolf": 8,
+         "rusalka": 1,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -13921,7 +15091,156 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
-      "endedAt": "2026-06-01T09:24:43.200Z"
+      "endedAt": null
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "defended",
+      "round": 3,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "grey_wolf": 2,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T09:23:07.200Z",
+        "round": 3,
+        "attackerLeft": 8,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -13936,7 +15255,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 7,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -13990,7 +15309,7 @@
       "name": "Navka",
       "title": "Navka the Hungry",
       "level": 1,
-      "xp": 10,
+      "xp": 0,
       "xpToNext": 20,
       "skills": {},
       "effects": {
@@ -14000,12 +15319,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T10:00:43.200Z",
-      "battles": 1,
+      "woundedUntil": null,
+      "battles": 0,
       "wins": 0,
-      "losses": 1,
+      "losses": 0,
       "razed": 0,
-      "kills": 2,
+      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      },
@@ -14066,18 +15385,8 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": -1,
-      "r": -7,
-      "size": 7,
-      "waveId": 3,
-      "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -14092,7 +15401,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -14105,7 +15415,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -14118,7 +15429,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -14131,7 +15443,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -14144,33 +15457,49 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 2,
-      "r": -2,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T10:24:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": 2,
+      "r": -1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -14185,9 +15514,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -14210,9 +15540,14 @@
     },
     "fear": [
      [
+      -2,
+      2,
+      11.4
+     ],
+     [
       0,
       0,
-      12.2
+      12
      ]
     ],
     "delegations": [],
@@ -14532,7 +15867,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -14612,7 +15947,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -14662,7 +15997,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -14697,12 +16032,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -14792,7 +16127,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -14807,7 +16142,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -14852,7 +16187,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -14877,12 +16212,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -14972,7 +16307,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -14997,7 +16332,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -15027,7 +16362,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -15142,7 +16477,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -15247,7 +16582,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -15277,7 +16612,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -15302,7 +16637,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -15347,12 +16682,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -15382,12 +16717,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -15522,7 +16857,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -15622,12 +16957,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -15657,7 +16992,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -15762,7 +17097,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -15902,23 +17237,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -15926,173 +17253,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -16286,7 +17637,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": true,
+      "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -16300,10 +17651,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 265,
-        "wood": 810,
-        "grain": 790.0666666666666,
-        "stone": 710
+        "iron": 235,
+        "wood": 775,
+        "grain": 760.0666666666664,
+        "stone": 690
        },
        "ratesPerHour": {
         "iron": 150,
@@ -16323,7 +17674,7 @@
     ],
     "waves": [
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -16342,42 +17693,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -16394,6 +17735,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -16401,10 +17743,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -16440,8 +17782,8 @@
         "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -16453,8 +17795,8 @@
         "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -16467,10 +17809,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -16485,12 +17827,12 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 21
+        "spearman": 20
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 5,
@@ -16499,8 +17841,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 4,
-       "leshy_thrall": 4
+       "grey_wolf": 1,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -16510,15 +17852,29 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 11,
+        "attackerLeft": 14,
         "defenderLeft": 31,
         "attackerLosses": {
-         "rusalka": 2,
-         "grey_wolf": 8,
+         "rusalka": 1,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
          "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:34:43.200Z",
+        "round": 2,
+        "attackerLeft": 7,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 5,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
          "spearman": 1
         }
        }
@@ -16526,7 +17882,156 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
-      "endedAt": "2026-06-01T09:24:43.200Z"
+      "endedAt": "2026-06-01T09:34:43.200Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "defended",
+      "round": 3,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "grey_wolf": 2,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T09:23:07.200Z",
+        "round": 3,
+        "attackerLeft": 8,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -16541,7 +18046,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 7,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -16605,12 +18110,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T10:00:43.200Z",
+      "woundedUntil": "2026-06-01T10:10:43.200Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 3,
       "grudgeVillageId": null,
       "diedAt": null
      },
@@ -16671,7 +18176,8 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -16680,9 +18186,10 @@
       "q": -1,
       "r": -7,
       "size": 7,
-      "waveId": 3,
+      "waveId": 5,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -16697,7 +18204,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -16710,7 +18218,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -16723,7 +18232,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -16736,7 +18246,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -16749,33 +18260,49 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 2,
-      "r": -2,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T10:24:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": 2,
+      "r": -1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -16790,9 +18317,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -16815,9 +18343,14 @@
     },
     "fear": [
      [
+      -2,
+      2,
+      11.4
+     ],
+     [
       0,
       0,
-      12.2
+      25
      ]
     ],
     "delegations": [],
@@ -17137,7 +18670,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -17217,7 +18750,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -17267,7 +18800,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -17302,12 +18835,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -17397,7 +18930,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -17412,7 +18945,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -17457,7 +18990,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -17482,12 +19015,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -17577,7 +19110,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -17602,7 +19135,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -17632,7 +19165,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -17747,7 +19280,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -17852,7 +19385,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -17882,7 +19415,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -17907,7 +19440,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -17952,12 +19485,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -17987,12 +19520,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -18127,7 +19660,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -18227,12 +19760,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -18262,7 +19795,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -18367,7 +19900,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -18507,23 +20040,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -18531,173 +20056,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -18891,7 +20440,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": true,
+      "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -18905,10 +20454,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 290,
-        "wood": 885,
-        "grain": 847.7333333333332,
-        "stone": 760
+        "iron": 230,
+        "wood": 815,
+        "grain": 787.733333333333,
+        "stone": 720
        },
        "ratesPerHour": {
         "iron": 150,
@@ -18922,13 +20471,13 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:44:43.200Z"
+       "settledAt": "2026-06-01T09:44:48.000Z"
       }
      }
     ],
     "waves": [
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -18947,42 +20496,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -18999,6 +20538,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -19006,10 +20546,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -19045,8 +20585,8 @@
         "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -19058,8 +20598,8 @@
         "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -19069,12 +20609,14 @@
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
         "attackerLeft": 21,
-        "defenderLeft": 4,
+        "defenderLeft": 3,
         "attackerLosses": {
          "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": null,
@@ -19083,10 +20625,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -19101,12 +20643,12 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 21
+        "spearman": 20
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 5,
@@ -19115,8 +20657,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 4,
-       "leshy_thrall": 4
+       "grey_wolf": 1,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -19126,15 +20668,29 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 11,
+        "attackerLeft": 14,
         "defenderLeft": 31,
         "attackerLosses": {
-         "rusalka": 2,
-         "grey_wolf": 8,
+         "rusalka": 1,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
          "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:34:43.200Z",
+        "round": 2,
+        "attackerLeft": 7,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 5,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
          "spearman": 1
         }
        }
@@ -19142,7 +20698,156 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
-      "endedAt": "2026-06-01T09:24:43.200Z"
+      "endedAt": "2026-06-01T09:34:43.200Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "defended",
+      "round": 3,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "grey_wolf": 2,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T09:23:07.200Z",
+        "round": 3,
+        "attackerLeft": 8,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -19157,7 +20862,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 7,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -19221,12 +20926,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T10:00:43.200Z",
+      "woundedUntil": "2026-06-01T10:10:43.200Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 3,
       "grudgeVillageId": null,
       "diedAt": null
      },
@@ -19287,7 +20992,8 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -19296,9 +21002,10 @@
       "q": -1,
       "r": -7,
       "size": 7,
-      "waveId": 3,
+      "waveId": 5,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -19313,7 +21020,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -19326,7 +21034,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -19339,7 +21048,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -19352,7 +21062,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -19365,33 +21076,49 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 2,
-      "r": -2,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T10:24:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": 2,
+      "r": -1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": -1,
+      "q": -6,
       "r": 4,
       "edge": [
-       -1,
+       -6,
        4,
-       0,
-       3
+       -7,
+       4
       ],
       "status": "open",
       "cost": {
@@ -19406,9 +21133,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -19431,9 +21159,14 @@
     },
     "fear": [
      [
+      -2,
+      2,
+      11.4
+     ],
+     [
       0,
       0,
-      12.2
+      25
      ]
     ],
     "delegations": [],
@@ -19753,7 +21486,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -19833,7 +21566,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -19883,7 +21616,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -19918,12 +21651,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -20013,7 +21746,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -20028,7 +21761,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -20073,7 +21806,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -20098,12 +21831,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -20193,7 +21926,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -20218,7 +21951,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -20248,7 +21981,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -20363,7 +22096,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -20468,7 +22201,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -20498,7 +22231,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -20523,7 +22256,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -20568,12 +22301,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -20603,12 +22336,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -20743,7 +22476,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -20843,12 +22576,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -20878,7 +22611,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -20983,7 +22716,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -21123,23 +22856,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -21147,173 +22872,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -21342,8 +23091,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {
-     "north": 0.2,
-     "south": 0.2
+     "north": 0.4
     },
     "difficulty": "normal",
     "quietHours": null,
@@ -21508,7 +23256,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": true,
+      "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -21522,10 +23270,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 285,
-        "wood": 925,
-        "grain": 875.3999999999999,
-        "stone": 790
+        "iron": 225,
+        "wood": 855,
+        "grain": 815.3999999999996,
+        "stone": 750
        },
        "ratesPerHour": {
         "iron": 150,
@@ -21545,7 +23293,7 @@
     ],
     "waves": [
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -21564,42 +23312,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -21616,6 +23354,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -21623,10 +23362,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -21649,7 +23388,7 @@
       },
       "attackerNow": {
        "zealot": 13,
-       "crossbowman": 5,
+       "crossbowman": 4,
        "sergeant_rider": 2
       },
       "defenderInitial": {
@@ -21662,8 +23401,8 @@
         "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -21675,8 +23414,8 @@
         "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -21686,20 +23425,23 @@
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
         "attackerLeft": 21,
-        "defenderLeft": 4,
+        "defenderLeft": 3,
         "attackerLosses": {
          "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T09:54:43.200Z",
         "round": 4,
-        "attackerLeft": 20,
+        "attackerLeft": 19,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -21712,10 +23454,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -21730,12 +23472,12 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 21
+        "spearman": 20
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 5,
@@ -21744,8 +23486,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 4,
-       "leshy_thrall": 4
+       "grey_wolf": 1,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -21755,15 +23497,29 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 11,
+        "attackerLeft": 14,
         "defenderLeft": 31,
         "attackerLosses": {
-         "rusalka": 2,
-         "grey_wolf": 8,
+         "rusalka": 1,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
          "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:34:43.200Z",
+        "round": 2,
+        "attackerLeft": 7,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 5,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
          "spearman": 1
         }
        }
@@ -21771,7 +23527,156 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
-      "endedAt": "2026-06-01T09:24:43.200Z"
+      "endedAt": "2026-06-01T09:34:43.200Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "defended",
+      "round": 3,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "grey_wolf": 2,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T09:23:07.200Z",
+        "round": 3,
+        "attackerLeft": 8,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -21786,7 +23691,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 7,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -21850,12 +23755,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T10:00:43.200Z",
+      "woundedUntil": "2026-06-01T10:10:43.200Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 3,
       "grudgeVillageId": null,
       "diedAt": null
      },
@@ -21916,7 +23821,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -21924,10 +23830,11 @@
       "front": "north",
       "q": -1,
       "r": -7,
-      "size": 8,
-      "waveId": 3,
+      "size": 7,
+      "waveId": 5,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -21942,7 +23849,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -21955,7 +23863,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -21968,7 +23877,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -21981,7 +23891,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -21994,20 +23905,36 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 2,
-      "r": -2,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T10:24:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": 2,
+      "r": -1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -22015,12 +23942,12 @@
      {
       "id": 2,
       "q": -7,
-      "r": 6,
+      "r": 5,
       "edge": [
        -6,
-       5,
+       4,
        -7,
-       6
+       5
       ],
       "status": "open",
       "cost": {
@@ -22035,9 +23962,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 9,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T10:52:48.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -22060,9 +23988,14 @@
     },
     "fear": [
      [
+      -2,
+      2,
+      11.4
+     ],
+     [
       0,
       0,
-      12.2
+      25
      ]
     ],
     "delegations": [],
@@ -22382,7 +24315,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -22462,7 +24395,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -22512,7 +24445,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -22547,12 +24480,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -22642,7 +24575,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -22657,7 +24590,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -22702,7 +24635,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -22727,12 +24660,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -22822,7 +24755,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -22847,7 +24780,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -22877,7 +24810,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -22992,7 +24925,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -23097,7 +25030,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -23127,7 +25060,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -23152,7 +25085,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -23197,12 +25130,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -23232,12 +25165,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -23372,7 +25305,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -23472,12 +25405,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -23507,7 +25440,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -23612,7 +25545,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -23752,23 +25685,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -23776,173 +25701,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -23971,8 +25920,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {
-     "north": 0.2,
-     "south": 0.2
+     "north": 0.4
     },
     "difficulty": "normal",
     "quietHours": null,
@@ -24137,7 +26085,7 @@
       },
       "away": {},
       "stance": "balanced",
-      "besieged": true,
+      "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
@@ -24151,10 +26099,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 280,
-        "wood": 965,
-        "grain": 903.0666666666665,
-        "stone": 820
+        "iron": 220,
+        "wood": 895,
+        "grain": 843.0666666666663,
+        "stone": 780
        },
        "ratesPerHour": {
         "iron": 150,
@@ -24174,7 +26122,7 @@
     ],
     "waves": [
      {
-      "id": 4,
+      "id": 6,
       "index": 3,
       "front": "south",
       "status": "battling",
@@ -24193,42 +26141,32 @@
        ],
        [
         -8,
-        7,
+        6,
         28800
        ],
        [
         -7,
-        7,
+        6,
         57600
        ],
        [
         -6,
-        7,
+        5,
         86400
        ],
        [
         -5,
-        7,
-        100800
-       ],
-       [
-        -4,
-        6,
+        4,
         115200
        ],
        [
-        -3,
-        5,
-        129600
-       ],
-       [
-        -2,
-        4,
+        -4,
+        3,
         144000
        ],
        [
-        -2,
-        3,
+        -3,
+        2,
         158400
        ],
        [
@@ -24245,6 +26183,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      }
     ],
@@ -24252,10 +26191,10 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 2,
+      "id": 4,
       "front": "south",
       "leaderId": 2,
-      "waveId": 4,
+      "waveId": 6,
       "campId": null,
       "siteId": null,
       "villageId": 1,
@@ -24291,8 +26230,8 @@
         "attackerLeft": 25,
         "defenderLeft": 2,
         "attackerLosses": {
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 2
@@ -24304,8 +26243,8 @@
         "attackerLeft": 23,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -24315,20 +26254,23 @@
         "at": "2026-06-01T09:44:43.200Z",
         "round": 3,
         "attackerLeft": 21,
-        "defenderLeft": 4,
+        "defenderLeft": 3,
         "attackerLosses": {
          "zealot": 1,
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T09:54:43.200Z",
         "round": 4,
-        "attackerLeft": 20,
+        "attackerLeft": 19,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1
+         "zealot": 1,
+         "crossbowman": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -24340,8 +26282,7 @@
         "attackerLeft": 18,
         "defenderLeft": 3,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "zealot": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -24354,10 +26295,10 @@
       "endedAt": null
      },
      {
-      "id": 1,
+      "id": 3,
       "front": "north",
       "leaderId": 1,
-      "waveId": 3,
+      "waveId": 5,
       "campId": null,
       "siteId": null,
       "villageId": null,
@@ -24372,12 +26313,12 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 21
+        "spearman": 20
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 5,
@@ -24386,8 +26327,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 4,
-       "leshy_thrall": 4
+       "grey_wolf": 1,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -24397,15 +26338,29 @@
        {
         "at": "2026-06-01T09:24:43.200Z",
         "round": 1,
-        "attackerLeft": 11,
+        "attackerLeft": 14,
         "defenderLeft": 31,
         "attackerLosses": {
-         "rusalka": 2,
-         "grey_wolf": 8,
+         "rusalka": 1,
+         "grey_wolf": 6,
          "leshy_thrall": 1
         },
         "defenderLosses": {
          "archer": 1,
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:34:43.200Z",
+        "round": 2,
+        "attackerLeft": 7,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 5,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
          "spearman": 1
         }
        }
@@ -24413,7 +26368,156 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:14:43.200Z",
-      "endedAt": "2026-06-01T09:24:43.200Z"
+      "endedAt": "2026-06-01T09:34:43.200Z"
+     },
+     {
+      "id": 2,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "spearman": 4
+        }
+       }
+      },
+      "status": "defended",
+      "round": 3,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 7,
+       "leshy_thrall": 5
+      },
+      "attackerNow": {
+       "rusalka": 2,
+       "grey_wolf": 2,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "spearman": 4
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:03:07.200Z",
+        "round": 1,
+        "attackerLeft": 12,
+        "defenderLeft": 3,
+        "attackerLosses": {
+         "grey_wolf": 2,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:13:07.200Z",
+        "round": 2,
+        "attackerLeft": 10,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "grey_wolf": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T09:23:07.200Z",
+        "round": 3,
+        "attackerLeft": 8,
+        "defenderLeft": 4,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:53:07.200Z",
+      "endedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "id": 1,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 21
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 19
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 7,
+       "crossbowman": 5,
+       "sergeant_rider": 3
+      },
+      "attackerNow": {
+       "zealot": 3,
+       "crossbowman": 1,
+       "sergeant_rider": 1
+      },
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 21
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T09:02:24.000Z",
+        "round": 1,
+        "attackerLeft": 10,
+        "defenderLeft": 31,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T09:12:24.000Z",
+        "round": 2,
+        "attackerLeft": 5,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "zealot": 2,
+         "crossbowman": 2,
+         "sergeant_rider": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T08:52:24.000Z",
+      "endedAt": "2026-06-01T09:12:24.000Z"
      }
     ],
     "raids": [],
@@ -24428,7 +26532,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 7,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -24492,12 +26596,12 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T10:00:43.200Z",
+      "woundedUntil": "2026-06-01T10:10:43.200Z",
       "battles": 1,
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 3,
       "grudgeVillageId": null,
       "diedAt": null
      },
@@ -24558,7 +26662,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -24567,9 +26672,10 @@
       "q": -1,
       "r": -7,
       "size": 8,
-      "waveId": 3,
+      "waveId": 5,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -24584,7 +26690,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -24597,7 +26704,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -24610,7 +26718,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -24623,7 +26732,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -24636,20 +26746,36 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
-      "kind": "sunken_shrine",
-      "q": 2,
-      "r": -2,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T10:24:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "kurgan",
+      "q": 2,
+      "r": -1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T10:24:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -24657,12 +26783,12 @@
      {
       "id": 2,
       "q": -7,
-      "r": 6,
+      "r": 5,
       "edge": [
        -6,
-       5,
+       4,
        -7,
-       6
+       5
       ],
       "status": "open",
       "cost": {
@@ -24677,9 +26803,10 @@
        "grain": 0,
        "stone": 0
       },
-      "front": "south",
+      "front": "north",
       "raiders": 9,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T10:52:48.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -24702,9 +26829,14 @@
     },
     "fear": [
      [
+      -2,
+      2,
+      11.4
+     ],
+     [
       0,
       0,
-      12.2
+      25
      ]
     ],
     "delegations": [],
@@ -25024,7 +27156,7 @@
       [
        4,
        -6,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -25104,7 +27236,7 @@
       [
        4,
        -5,
-       "plains"
+       "forest"
       ],
       [
        5,
@@ -25154,7 +27286,7 @@
       [
        -3,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        -2,
@@ -25189,12 +27321,12 @@
       [
        4,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
        -4,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -25284,7 +27416,7 @@
       [
        5,
        -3,
-       "hills"
+       "wooded_hills"
       ],
       [
        6,
@@ -25299,7 +27431,7 @@
       [
        8,
        -3,
-       "plains"
+       "forest"
       ],
       [
        9,
@@ -25344,7 +27476,7 @@
       [
        -2,
        -2,
-       "plains"
+       "hills"
       ],
       [
        -1,
@@ -25369,12 +27501,12 @@
       [
        3,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        4,
        -2,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -25464,7 +27596,7 @@
       [
        2,
        -1,
-       "hills"
+       "wooded_hills"
       ],
       [
        3,
@@ -25489,7 +27621,7 @@
       [
        7,
        -1,
-       "plains"
+       "forest"
       ],
       [
        8,
@@ -25519,7 +27651,7 @@
       [
        -8,
        0,
-       "plains"
+       "forest"
       ],
       [
        -7,
@@ -25634,7 +27766,7 @@
       [
        -6,
        1,
-       "plains"
+       "forest"
       ],
       [
        -5,
@@ -25739,7 +27871,7 @@
       [
        -5,
        2,
-       "plains"
+       "forest"
       ],
       [
        -4,
@@ -25769,7 +27901,7 @@
       [
        1,
        2,
-       "forest"
+       "hills"
       ],
       [
        2,
@@ -25794,7 +27926,7 @@
       [
        6,
        2,
-       "plains"
+       "forest"
       ],
       [
        7,
@@ -25839,12 +27971,12 @@
       [
        -4,
        3,
-       "plains"
+       "hills"
       ],
       [
        -3,
        3,
-       "plains"
+       "hills"
       ],
       [
        -2,
@@ -25874,12 +28006,12 @@
       [
        3,
        3,
-       "forest"
+       "wooded_hills"
       ],
       [
        4,
        3,
-       "hills"
+       "wooded_hills"
       ],
       [
        5,
@@ -26014,7 +28146,7 @@
       [
        -4,
        5,
-       "plains"
+       "hills"
       ],
       [
        -3,
@@ -26114,12 +28246,12 @@
       [
        0,
        6,
-       "plains"
+       "forest"
       ],
       [
        1,
        6,
-       "plains"
+       "forest"
       ],
       [
        2,
@@ -26149,7 +28281,7 @@
       [
        -8,
        7,
-       "hills"
+       "wooded_hills"
       ],
       [
        -7,
@@ -26254,7 +28386,7 @@
       [
        -1,
        8,
-       "plains"
+       "forest"
       ],
       [
        0,
@@ -26394,23 +28526,15 @@
        -8,
        2,
        "none",
-       1
-      ],
-      [
-       -8,
-       5,
-       -8,
-       6,
-       "none",
-       1
+       2
       ],
       [
        -7,
        0,
        -7,
        1,
-       "standing",
-       1
+       "none",
+       2
       ],
       [
        -7,
@@ -26418,173 +28542,197 @@
        -8,
        1,
        "none",
-       1
+       2
       ],
       [
        -7,
-       5,
-       -8,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -6,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -3,
-       -6,
-       -2,
-       "standing",
-       1
-      ],
-      [
-       -5,
-       -2,
-       -5,
-       -3,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       1,
-       "none",
-       1
-      ],
-      [
-       -4,
-       -3,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -5,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -4,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -4,
-       -4,
-       -3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       2,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
        3,
-       0,
-       2,
-       "none",
-       1
-      ],
-      [
-       -1,
-       3,
-       0,
-       3,
-       "standing",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
-       3,
-       "none",
-       1
-      ],
-      [
-       -1,
-       4,
-       0,
+       -7,
        4,
        "none",
-       1
+       2
       ],
       [
+       -7,
        5,
-       2,
+       -7,
        6,
-       2,
        "none",
        1
       ],
       [
-       5,
-       3,
+       -7,
        6,
-       2,
-       "none",
-       1
-      ],
-      [
+       -8,
        6,
-       1,
-       6,
-       2,
        "standing",
        1
       ],
       [
+       -7,
        6,
-       2,
+       -8,
        7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
        1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
        "none",
        1
       ]
@@ -26601,52 +28749,61 @@
    "response": {
     "notifications": [
      {
-      "id": 15,
+      "id": 22,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (-7, 6)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the south hates you the more.",
+      "title": "Boatwrights wait at (-7, 5)",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },
      {
-      "id": 14,
+      "id": 21,
       "kind": "event",
       "tier": "push",
-      "title": "The boatwrights at (-1, 4) gave up and left",
-      "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
+      "title": "The boatwrights at (-6, 4) gave up and left",
+      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },
      {
-      "id": 13,
+      "id": 20,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T09:34:43.200Z",
+      "read": false
+     },
+     {
+      "id": 19,
       "kind": "event",
       "tier": "push",
-      "title": "A forbidding ruin rises at (2, -2)",
+      "title": "A forbidding ruin rises at (2, -1)",
       "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2100 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T09:26:24.000Z",
       "read": false
      },
      {
-      "id": 12,
+      "id": 18,
       "kind": "event",
       "tier": "push",
-      "title": "The captives at (2, -1) were taken away",
+      "title": "The captives at (2, 0) were taken away",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T09:26:24.000Z",
       "read": false
      },
      {
-      "id": 11,
+      "id": 17,
       "kind": "battle_result",
       "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 1 rounds.",
-      "createdAt": "2026-06-01T09:24:43.200Z",
+      "title": "Vruchiy held",
+      "body": "The horde was beaten after 3 rounds.",
+      "createdAt": "2026-06-01T09:23:07.200Z",
       "read": false
      },
      {
-      "id": 10,
+      "id": 16,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -26655,7 +28812,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 15,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -26664,7 +28821,16 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 14,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T09:12:24.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -26673,7 +28839,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 12,
       "kind": "ritual",
       "tier": "push",
       "title": "Ritual Night",
@@ -26682,7 +28848,7 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 11,
       "kind": "bridge",
       "tier": "push",
       "title": "The Ritual Arch stands",
@@ -26691,16 +28857,43 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 10,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (-1, 4)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the south hates you the more.",
+      "title": "Boatwrights wait at (-6, 4)",
+      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
      {
-      "id": 4,
+      "id": 9,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Vruchiy is under attack",
+      "body": "A horde of 15 is fighting your garrison of 4.",
+      "createdAt": "2026-06-01T08:53:07.200Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "15 of them against its guard of 32.",
+      "createdAt": "2026-06-01T08:52:24.000Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The moderate north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T08:50:00.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
       "kind": "bridge",
       "tier": "digest",
       "title": "Raising The Ritual Arch",
@@ -26709,16 +28902,25 @@
       "read": false
      },
      {
-      "id": 3,
+      "id": 5,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "Nav strikes at the builders",
+      "body": "While The Ritual Arch is raised, every front sends a band at a different target.",
+      "createdAt": "2026-06-01T08:50:00.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
       "kind": "event",
       "tier": "push",
-      "title": "Captives are held at (2, -1)",
+      "title": "Captives are held at (2, 0)",
       "body": "Clear the camp to free them before they are taken away, for a bounty of at least 1400 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
@@ -26727,16 +28929,25 @@
       "read": false
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:00:00.000Z",
       "read": false
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (0, -5).",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
      }
     ],
-    "unread": 15,
+    "unread": 22,
     "serverTime": "2026-06-01T10:10:00.000Z"
    }
   }

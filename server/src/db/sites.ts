@@ -17,6 +17,8 @@ export interface Site {
   // it goes if nobody comes.
   hard?: boolean;
   endsAt?: Date | null;
+  // A bridge quest's ruin: the quest it answers (null: none).
+  quest?: string | null;
 }
 
 interface SiteRow {
@@ -33,6 +35,7 @@ interface SiteRow {
   explored_at: Date | null;
   hard: boolean;
   ends_at: Date | null;
+  quest: string | null;
 }
 
 function fromRow(row: SiteRow): Site {
@@ -50,6 +53,7 @@ function fromRow(row: SiteRow): Site {
     exploredAt: row.explored_at,
     hard: row.hard ?? false,
     endsAt: row.ends_at ?? null,
+    quest: row.quest ?? null,
   };
 }
 
@@ -70,6 +74,15 @@ export async function insertHardSite(client: DbClient, worldId: number, site: Pl
   const { rows } = await client.query<{ id: string }>(
     'INSERT INTO sites (world_id, kind, q, r, guardians, hard, ends_at) VALUES ($1, $2, $3, $4, $5, true, $6) RETURNING id',
     [worldId, site.kind, site.q, site.r, JSON.stringify(site.guardians), endsAt],
+  );
+  return Number(rows[0]!.id);
+}
+
+// A bridge quest's ruin, hard to take.
+export async function insertQuestSite(client: DbClient, worldId: number, site: PlacedSite, quest: string): Promise<number> {
+  const { rows } = await client.query<{ id: string }>(
+    'INSERT INTO sites (world_id, kind, q, r, guardians, hard, quest) VALUES ($1, $2, $3, $4, $5, true, $6) RETURNING id',
+    [worldId, site.kind, site.q, site.r, JSON.stringify(site.guardians), quest],
   );
   return Number(rows[0]!.id);
 }

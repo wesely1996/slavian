@@ -1697,6 +1697,9 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 			world.embers = int(world.embers) + 1
 		if camp.kind == "lair":
 			LocalBattles.bridge_quest(server, world, "lair", at)
+		# A bridge quest's lair.
+		if camp.get("quest") != null:
+			LocalBattles.bridge_quest(server, world, String(camp.quest), at)
 		server.onboarding_step(world, int(army.ownerAccountId), "camp", at, changed)
 	else:
 		camp.units = result.campNow
@@ -1831,6 +1834,9 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 	site.find = find
 	site.exploredAt = at
 	LocalBattles.bridge_quest(server, world, "site", at)
+	# A bridge quest's ruin.
+	if site.get("quest") != null:
+		LocalBattles.bridge_quest(server, world, String(site.quest), at)
 	var data := server.data
 	var name: String = data.sites.kinds.get(site.kind, {}).get("name", "site")
 	for member in world.members:

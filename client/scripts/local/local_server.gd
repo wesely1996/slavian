@@ -80,6 +80,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	world.bridge = {"stage": 0, "donated": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "embers": 0, "quests": {},
 		"stageStartedAt": LocalTime.iso(now), "sanctityAtStart": world.sanctity, "status": "open", "raisedAt": null}
 	_announce_first_waves(world)
+	# The bridge's first stage raises its quest's places.
+	LocalBridgeCommands.open_stage(self, world, 0, now)
 	LocalInbox.ensure_digests(self, world, now)
 	LocalEvents.ensure(self, world, now)
 	LocalPrune.ensure(self, world, now)
@@ -953,6 +955,8 @@ func as_stored(world: Dictionary) -> void:
 		h.skills = LocalStore.stored(h.skills)
 		h.gear = LocalStore.stored(h.gear)
 	world.bridge = LocalStore.stored(world.bridge)
+	for y in world.get("shipyards", []):
+		y.raiders = LocalStore.stored(y.raiders)
 	for o in world.orders:
 		o.spec = LocalStore.stored(o.spec)
 
@@ -1162,7 +1166,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		sites.append({"id": s.id, "kind": s.kind, "q": s.q, "r": s.r, "status": s.status,
 			"guardians": _total(s.guardians) if s.guardiansSeen else null, "exploredBy": s.exploredBy, "find": s.find,
 			"exploredAt": LocalTime.iso(s.exploredAt) if s.exploredAt != null else null,
-			"hard": s.get("hard", false), "endsAt": LocalTime.iso(s.endsAt) if s.get("endsAt") != null else null})
+			"hard": s.get("hard", false), "endsAt": LocalTime.iso(s.endsAt) if s.get("endsAt") != null else null, "quest": s.get("quest")})
 	var members: Array = []
 	for m in world.members:
 		var settled: Variant = m.get("researchSettledAt")
@@ -1272,7 +1276,7 @@ func _wave_view(w: Dictionary, forecast := {}) -> Dictionary:
 		"arrivesAt": LocalTime.iso(w.arrivesAt) if w.arrivesAt != null else null,
 		"endsAt": LocalTime.iso(w.endsAt) if w.endsAt != null else null,
 		"rampageEndsAt": LocalTime.iso(w.rampageEndsAt) if w.rampageEndsAt != null else null,
-		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId, "hatred": float(w.get("hatred", 0.0)), "bandOf": w.get("bandOf"),
+		"struck": w.struck, "ritual": w.ritual, "leaderId": w.leaderId, "hatred": float(w.get("hatred", 0.0)), "bandOf": w.get("bandOf"), "errand": w.get("errand"),
 		"forecast": null if forecast.is_empty() else {
 			"spawn": {"q": forecast.spawn.x, "r": forecast.spawn.y}, "targetVillageId": forecast.targetVillageId,
 			"path": forecast.path.map(func(step: Dictionary) -> Array: return [step.q, step.r, step.atMs]),
@@ -1388,7 +1392,7 @@ func _camps_view(world: Dictionary) -> Array:
 	for c in world.camps:
 		if c.status == "active":
 			out.append({"id": c.id, "kind": c.kind, "front": c.front, "q": c.q, "r": c.r, "size": _total(c.units), "waveId": c.waveId,
-				"reward": c.get("reward"), "endsAt": LocalTime.iso(c.endsAt) if c.get("endsAt") != null else null})
+				"reward": c.get("reward"), "endsAt": LocalTime.iso(c.endsAt) if c.get("endsAt") != null else null, "quest": c.get("quest")})
 	return out
 
 

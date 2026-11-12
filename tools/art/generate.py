@@ -773,7 +773,7 @@ TROOPS = {
     "chosen_shield": ("tall_shield", "crown", 3),
     "skirmisher": ("javelins", None, 1), "poison_archer": ("bow", "poison", 1),
     "hunter": ("bow", "boar", 2), "noble_skirmisher": ("javelins", "crown", 2), "poison_hunter": ("bow", "poison", 2),
-    "onager": ("onager", None, 2), "devana_hunter": ("bow", "moon", 3), "thunder_thrower": ("firepot", "perun", 3),
+    "onager": ("onager", None, 2), "scorpion": ("scorpion", None, 2), "battering_ram": ("ram", None, 2), "devana_hunter": ("bow", "moon", 3), "thunder_thrower": ("firepot", "perun", 3),
     "raider": ("horse", "sack", 1), "mounted_archer": ("horse", "bow", 2), "bear_rider": ("bear", None, 2),
     "svarog_raider": ("horse", "fire", 3),
 }
@@ -834,6 +834,21 @@ def troop(s, pale, weapon, mark, tier):
         s.line(48, 86, 84, 34, stroke=pale, sw=5)
         s.circle(86, 30, 9, s.rad([(0, "#cfc9bd"), (1, "#7d776d")]), stroke="none", sw=0)
         s.line(74, 86, 74, 62, stroke=wood, sw=4)
+    elif weapon == "scorpion":
+        # A great crossbow on a frame, its bolt laid.
+        s.line(40, 98, 60, 70, stroke=wood, sw=4)
+        s.line(84, 98, 64, 70, stroke=wood, sw=4)
+        s.line(34, 52, 94, 52, stroke=wood, sw=6)
+        s.path("M34,52 Q62,40 94,52", "none", stroke=pale, sw=2)
+        s.line(62, 86, 62, 28, stroke=pale, sw=4)
+        s.poly([(62, 20), (56, 32), (68, 32)], pale, stroke="none", sw=0)
+    elif weapon == "ram":
+        # An iron-capped log under a hide roof, on wheels.
+        s.path("M28,64 L62,38 L96,64 Z", s.lin([(0, "#a0805c"), (1, "#5b4129")], 0, 0, 0, 1), stroke="none", sw=0)
+        s.rect(22, 70, 84, 12, wood, stroke="none", sw=0, rx=5)
+        s.rect(96, 68, 12, 16, pale, stroke="none", sw=0, rx=3)
+        for x in (40, 84):
+            s.circle(x, 94, 8, s.rad([(0, "#c9a16e"), (1, "#5a3a1f")]), stroke="none", sw=0)
     elif weapon == "firepot":
         s.circle(60, 70, 22, s.rad([(0, "#5a4129"), (1, "#2b211a")]), stroke="none", sw=0)
         s.circle(60, 70, 22, "none", stroke=pale, sw=3)

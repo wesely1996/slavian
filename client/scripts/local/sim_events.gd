@@ -169,7 +169,7 @@ static func on_map_event(server: LocalServer, world: Dictionary, event: Dictiona
 		world.next.merge({"shipyard": 1})
 		var yard := {"id": world.next.shipyard, "q": planned.cell.x, "r": planned.cell.y, "edge": planned.edge, "status": "open",
 			"cost": data.events.kinds.shipyard.cost.duplicate(), "paid": {"wood": 0, "stone": 0, "grain": 0, "iron": 0},
-			"front": planned.front, "raiders": planned.raiders, "raids": 0, "endsAt": ends_at, "completesAt": null, "nextRaidAt": null}
+			"front": planned.front, "raiders": planned.raiders, "raids": 0, "burns": 0, "endsAt": ends_at, "completesAt": null, "nextRaidAt": null}
 		world.next.shipyard += 1
 		world.shipyards.append(yard)
 		server.schedule(world, ends_at, "map_event_end", {"shipyardId": yard.id})
@@ -271,17 +271,24 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 			"title": "Your army drove the raiders off the shipyard at ({q}, {r})" if result.held else "Raiders broke your army at the shipyard at ({q}, {r})",
 			"body": "{kills} of them fell, for {lost} of yours.", "vars": vars}, at)
 	var held := LocalBattle.total(raiders) == 0
+	# Burned too often, the boatwrights give up: the event is lost.
+	if not held and int(yard.get("burns", 0)) + 1 >= int(rules.maxBurns):
+		world.shipyards.erase(yard)
+		fail(server, world, String(yard.front), "Raiders burned the shipyard at ({q}, {r}) to the ground", where, at)
+		changed.append(["world"])
+		return
 	var completes_at := int(yard.completesAt) if held else int(yard.completesAt) + _hours_ms(float(rules.setbackHours), world.speed)
 	var next := at + _hours_ms(float(rules.raidEveryHours), world.speed)
 	yard.raids = int(yard.raids) + 1
+	yard.burns = int(yard.get("burns", 0)) + (0 if held else 1)
 	yard.completesAt = completes_at
 	yard.nextRaidAt = next if next < completes_at else null
 	if not held:
 		server.schedule(world, completes_at, "shipyard_done", {"shipyardId": yard.id})
 		var vars := where.duplicate()
-		vars.merge({"hours": rules.setbackHours})
+		vars.merge({"hours": rules.setbackHours, "burns": yard.burns, "most": int(rules.maxBurns)})
 		LocalInbox.tell_everyone(server, world, {"kind": "site", "tier": "push", "title": "Raiders burned work at the shipyard at ({q}, {r})",
-			"body": "The boat is set back {hours} hours. Armies standing there fight the next raiders.", "vars": vars}, at)
+			"body": "The boat is set back {hours} hours. Burned {burns} times of {most}: at {most} the boatwrights give up. Armies standing there fight the next raiders.", "vars": vars}, at)
 	if yard.nextRaidAt != null:
 		server.schedule(world, int(yard.nextRaidAt), "shipyard_raid", {"shipyardId": yard.id})
 	changed.append(["world"])
@@ -353,7 +360,7 @@ static func pay_into(server: LocalServer, world: Dictionary, yard: Dictionary, s
 
 static func shipyard_view(y: Dictionary) -> Dictionary:
 	return {"id": y.id, "q": y.q, "r": y.r, "edge": [y.edge.a.x, y.edge.a.y, y.edge.b.x, y.edge.b.y], "status": y.status,
-		"cost": y.cost, "paid": y.paid, "front": y.front, "raiders": LocalBattle.total(y.raiders), "raids": y.raids,
+		"cost": y.cost, "paid": y.paid, "front": y.front, "raiders": LocalBattle.total(y.raiders), "raids": y.raids, "burns": int(y.get("burns", 0)),
 		"endsAt": LocalTime.iso(y.endsAt) if y.endsAt != null else null,
 		"completesAt": LocalTime.iso(y.completesAt) if y.completesAt != null else null,
 		"nextRaidAt": LocalTime.iso(y.nextRaidAt) if y.nextRaidAt != null else null}

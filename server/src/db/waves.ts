@@ -34,8 +34,18 @@ export interface Wave {
   leaderId: number | null;
   // Share added to its attack and defense for ambushes and harassment.
   hatred: number;
-  // The horde it broke away from, for a band a hating horde sent out.
+  // The horde it broke away from, for a band a hating horde sent out (and,
+  // for a horde on an errand, the last horde before it).
   bandOf: number | null;
+  // A horde on an errand of its own (bridge.json): a small horde sent while
+  // a bridge stage is raised, or a bridge quest's army; where it goes (a
+  // village id, or null for the Holy City).
+  errand: WaveErrand | null;
+}
+
+export interface WaveErrand {
+  kind: 'bridge' | 'quest';
+  target: number | null;
 }
 
 interface WaveRow {
@@ -61,6 +71,7 @@ interface WaveRow {
   leader_id: number | null;
   hatred: number | null;
   band_of: number | string | null;
+  errand: WaveErrand | null;
 }
 
 function fromRow(row: WaveRow): Wave {
@@ -86,14 +97,22 @@ function fromRow(row: WaveRow): Wave {
     leaderId: row.leader_id,
     hatred: Number(row.hatred ?? 0),
     bandOf: row.band_of === null || row.band_of === undefined ? null : Number(row.band_of),
+    errand: row.errand ?? null,
   };
 }
 
-export async function insertWave(client: DbClient, worldId: number, wave: PlannedWave, ritual = false, bandOf: number | null = null): Promise<Wave> {
+export async function insertWave(
+  client: DbClient,
+  worldId: number,
+  wave: PlannedWave,
+  ritual = false,
+  bandOf: number | null = null,
+  errand: WaveErrand | null = null,
+): Promise<Wave> {
   const { rows } = await client.query<WaveRow>(
-    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial, ritual, band_of)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $6, $8, $9) RETURNING *`,
-    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt, ritual, bandOf],
+    `INSERT INTO waves (world_id, index, front, threat, stance, composition, spawn_at, initial, ritual, band_of, errand)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $6, $8, $9, $10) RETURNING *`,
+    [worldId, wave.index, wave.front, wave.threat, wave.stance, JSON.stringify(wave.composition), wave.spawnAt, ritual, bandOf, errand ? JSON.stringify(errand) : null],
   );
   return fromRow(rows[0]!);
 }

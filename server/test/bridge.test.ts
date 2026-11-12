@@ -32,9 +32,9 @@ describe('the Kalinov Bridge', () => {
   it('opens with its quests, rises, and moves on to the next stage', () => {
     let bridge = donate(data, newBridge(T0, 100), { resources: data.bridge.stages[0]!.cost, embers: 0 }).bridge;
     expect(isReady(data, bridge)).toBe(false);
-    expect(completeQuest(data, bridge, 'lair', T0)).toBeNull();
-    bridge = completeQuest(data, bridge, 'site', T0)!;
-    expect(completeQuest(data, bridge, 'site', T0)).toBeNull();
+    expect(completeQuest(data, bridge, 'grove', T0)).toBeNull();
+    bridge = completeQuest(data, bridge, 'relic', T0)!;
+    expect(completeQuest(data, bridge, 'relic', T0)).toBeNull();
     expect(isReady(data, bridge)).toBe(true);
     bridge = startRaising(data, bridge, T0, 10);
     expect(bridge.raisedAt).toBe(new Date(T0.getTime() + (data.bridge.buildHours * 3_600_000) / 10).toISOString());

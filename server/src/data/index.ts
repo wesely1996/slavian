@@ -11,6 +11,7 @@ export const TERRAIN_IDS = [
   'plains',
   'forest',
   'hills',
+  'wooded_hills',
   'mountain',
   'swamp',
   'lake',
@@ -166,6 +167,8 @@ const unitSchema = z.object({
   pathfinding: z.object({ perUnit: z.number().min(0).max(1), max: z.number().min(0).max(1) }).optional(),
   // A siege engine: it rides in a transport before any foot soldier.
   engine: z.boolean().optional(),
+  // A battering ram: the share of a stronghold's walls each one takes off its defenders.
+  breach: z.number().min(0).max(1).optional(),
   // Each one carries `engines` siege engines or else `infantry` foot
   // soldiers (family infantry) of its army.
   transports: z.object({ infantry: z.number().int().nonnegative(), engines: z.number().int().nonnegative() }).optional(),
@@ -815,7 +818,7 @@ const onboardingFileSchema = z.object({
 });
 export type OnboardingData = z.infer<typeof onboardingFileSchema>;
 
-export const BRIDGE_QUESTS = ['site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
+export const BRIDGE_QUESTS = ['relic', 'grove', 'defense', 'artifact', 'site', 'lair', 'unscathed', 'choke', 'ritual'] as const;
 export type BridgeQuest = (typeof BRIDGE_QUESTS)[number];
 const bridgeFileSchema = z.object({
   version: z.number().int(),
@@ -841,6 +844,15 @@ const bridgeFileSchema = z.object({
     )
     .min(1),
   quests: z.record(z.enum(BRIDGE_QUESTS), z.object({ name: z.string(), description: z.string() })),
+  // While a stage is raised, every active front sends a small horde of
+  // units + unitsPerStage x the stage's number, each at its own target.
+  constructionRaids: z.object({ units: z.number().int().positive(), unitsPerStage: z.number().int().nonnegative() }),
+  // The places and host the quests raise when their stage opens.
+  questPlaces: z.object({
+    relic: z.object({ name: z.string(), siteKind: z.string(), front: z.string(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive(), units: z.number().int().positive() }),
+    grove: z.object({ name: z.string(), front: z.string(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive(), units: z.number().int().positive() }),
+    defense: z.object({ name: z.string(), delayHours: z.number().nonnegative(), retryHours: z.number().positive(), units: z.number().int().positive() }),
+  }),
   // When the last stage stands: every active front attacks at once, after
   // delayHours (game hours), sizeFactor times its usual strength.
   ritualNight: z.object({
@@ -902,6 +914,8 @@ const eventsFileSchema = z.object({
       range: z.number().int().positive(),
       buildHours: z.number().positive(),
       raidEveryHours: z.number().positive(),
+      // Burned this many times, the shipyard is lost (the event fails).
+      maxBurns: z.number().int().positive(),
       setbackHours: z.number().nonnegative(),
       raiders: z.number().int().positive(),
       raiderStance: z.enum(STANCES),

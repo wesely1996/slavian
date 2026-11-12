@@ -1084,6 +1084,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(prefs.body.prefs).toEqual({ quietStart: 1320, quietEnd: 420, utcOffsetMinutes: 0, digestHour: 20, pushOff: [] });
     expect((await call('POST', '/v1/me/devices', mira.token, { token: 'phone-token-123', platform: 'android' })).status).toBe(200);
 
+    // (What the bridge's first quest told everyone at the start is not what this test is about.)
+    await call('POST', `/v1/worlds/${worldId}/notifications/read`, mira.token);
     // A small build goes to the digest (its getting-started notice is not what this test is about).
     await db.query(`UPDATE world_members SET onboarding = '{"build": "done"}' WHERE world_id = $1`, [worldId]);
     const build = await call('POST', `/v1/villages/${village.id}/build`, mira.token, { plot: 'f0' });
@@ -1118,7 +1120,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(await pushPending(db, scheduler.data, sender, new Date('2026-07-01T23:00:00Z'))).toBe(0);
     expect(await pushPending(db, scheduler.data, sender, noon)).toBeGreaterThanOrEqual(2);
     expect(sent.some((line) => line.startsWith('phone-token-123: A horde is coming'))).toBe(true);
-    expect(sent.some((line) => /build/i.test(line))).toBe(false);
+    // (The bridge's quest notices speak of builders; that is not a build.)
+    expect(sent.some((line) => /build/i.test(line) && !/builders/i.test(line))).toBe(false);
 
     // A topic switched off isn't pushed (unknown topics are dropped).
     const off = await call('PATCH', '/v1/me/notifications', mira.token, { pushOff: ['hordes', 'hordes', 'nonsense'] });
@@ -1367,7 +1370,6 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     expect(battle.status).toBe('defended');
     w = await world();
-    expect(w.bridge.quests.choke).toBeTruthy();
     expect(w.waves.some((x: { id: number }) => x.id === first.id)).toBe(false);
     expect(w.armies[0].status).toBe('stationed');
     expect(w.heroes[0].status).toBe('with_army');
@@ -1764,8 +1766,11 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(w.bridge.donated.stone).toBe(stage0.cost.stone);
     expect(w.bridge.status).toBe('open');
 
-    // Its quest: bring back a relic from an ancient site.
-    const site = started.body.sites[0];
+    // Its quest: the Builders' Barrow, a ruin of its own raised when the
+    // stage opened, deep in guardians (cleared here).
+    const site = started.body.sites.find((s: { quest: string | null }) => s.quest === 'relic');
+    expect(site).toBeTruthy();
+    expect(started.body.sites.filter((s: { quest: string | null }) => s.quest).length).toBe(1);
     await db.query(`UPDATE sites SET guardians = '{}' WHERE id = $1`, [site.id]);
     await db.query(`UPDATE villages SET garrison = '{"scout": 3}' WHERE id = $1`, [home.id]);
     const scouts = await call('POST', `/v1/villages/${home.id}/armies`, rusa.token, { target: { q: site.q, r: site.r }, units: { scout: 3 }, orders: 'explore' });
@@ -1775,14 +1780,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(now.getTime() + searchMs(scheduler.data, site.kind, { scout: 3 }, 10));
     await tick(db, now, scheduler);
     w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
-    expect(w.bridge.quests.site).toBe(now.toISOString());
+    expect(w.bridge.quests.relic).toBe(now.toISOString());
     expect(w.bridge.status).toBe('raising');
+    // While it is raised, every front sends a small horde, each at its own target.
+    const raiders = w.waves.filter((x: { errand: { kind: string } | null }) => x.errand?.kind === 'bridge');
+    expect(raiders).toHaveLength(w.map.activeFronts.length);
+    expect(new Set(raiders.map((x: { errand: { target: number | null } }) => x.errand.target)).size).toBe(raiders.length);
+    const { rows: sizes } = await db.query<{ composition: Record<string, number> }>("SELECT composition FROM waves WHERE world_id = $1 AND errand->>'kind' = 'bridge'", [worldId]);
+    for (const row of sizes) expect(Object.values(row.composition).reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(scheduler.data.bridge.constructionRaids.units + scheduler.data.bridge.constructionRaids.unitsPerStage);
 
     // Raised: the next stage opens.
     now = new Date(w.bridge.raisedAt);
     await tick(db, now, scheduler);
     w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
     expect(w.bridge).toMatchObject({ stage: 1, status: 'open', quests: {}, embers: 0 });
+    // The next stage's quest raises its own lair.
+    expect(w.camps.filter((c: { quest: string | null; kind: string }) => c.quest === 'grove' && c.kind === 'lair')).toHaveLength(1);
     // (The scouts' find may have been an Ember.)
     await db.query('UPDATE worlds SET embers = 0 WHERE id = $1', [worldId]);
     expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
@@ -1803,6 +1816,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
     let w = (await call('POST', `/v1/worlds/${worldId}/bridge/ritual`, rusa.token)).body;
     expect(w.bridge.status).toBe('raising');
+    // (The small hordes sent at the builders are another test's: they stay home.)
+    await db.query("UPDATE waves SET status = 'dispersed' WHERE world_id = $1 AND errand IS NOT NULL", [worldId]);
     const scheduled = started.body.waves.filter((x: { status: string }) => x.status === 'scheduled').length;
     expect(scheduled).toBeGreaterThan(0);
 
@@ -1952,15 +1967,15 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(Object.keys(last.body.members[0].onboardingClaimed)).toContain('finale');
   });
 
-  it('reveals a forgotten ruin when the bridge wants a relic and every site was searched', async () => {
+  it("raises each stage's quest host: beaten it answers the quest, not beaten another comes", async () => {
     const rusa = await guest('Rusa');
-    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Ruins', maxPlayers: 1, speed: 10 });
+    const created = await call('POST', '/v1/worlds', rusa.token, { name: 'Smiths', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
-    const started = (await call('POST', `/v1/worlds/${worldId}/start`, rusa.token)).body;
+    await call('POST', `/v1/worlds/${worldId}/start`, rusa.token);
     const stages = scheduler.data.bridge.stages;
-    const before = stages.findIndex((st, i) => i > 0 && stages[i + 1]?.quests.some((q) => q.kind === 'site'));
+    const before = stages.findIndex((st, i) => stages[i + 1]?.quests.some((q) => q.kind === 'defense'));
     const stage = stages[before]!;
-    // Everything but one wood in place for the stage before the one that wants a relic.
+    // Everything but one wood in place for the stage before the one that wants the host beaten.
     const donated = { ...stage.cost, wood: stage.cost.wood - 1 };
     const quests = Object.fromEntries(stage.quests.map((q) => [q.kind, now.toISOString()]));
     await db.query(
@@ -1968,15 +1983,34 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       [worldId, before, JSON.stringify(donated), stage.embers, JSON.stringify(quests)],
     );
     await db.query(`UPDATE vaults SET amounts = '{"wood": 1, "stone": 0, "grain": 0, "iron": 0}' WHERE world_id = $1`, [worldId]);
-    await db.query(`UPDATE sites SET status = 'explored' WHERE world_id = $1`, [worldId]);
     const raising = (await call('POST', `/v1/worlds/${worldId}/bridge/donate`, rusa.token, { resources: { wood: 1, stone: 0, grain: 0, iron: 0 }, embers: 0 })).body;
     expect(raising.bridge.status).toBe('raising');
+    await db.query("UPDATE waves SET status = 'dispersed' WHERE world_id = $1 AND errand IS NOT NULL", [worldId]);
     now = new Date(raising.bridge.raisedAt);
     await tick(db, now, scheduler);
-    const w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    let w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
     expect(w.bridge.stage).toBe(before + 1);
-    expect(w.sites).toHaveLength(started.sites.length + 1);
-    expect(w.sites.filter((x: { status: string }) => x.status === 'unexplored')).toHaveLength(1);
+    // The Smith-Breakers gather, apart from the hordes, for the Holy City.
+    const host = w.waves.find((x: { errand: { kind: string } | null; status: string }) => x.errand?.kind === 'quest' && x.status === 'scheduled');
+    expect(host).toMatchObject({ errand: { kind: 'quest', target: null } });
+    expect(new Date(host.spawnAt).getTime()).toBe(now.getTime() + (scheduler.data.bridge.questPlaces.defense.delayHours * 3_600_000) / 10);
+    // Scattered (not beaten): another is sent later.
+    const { finishWave } = await import('../src/scheduler/camps.js');
+    const client = await db.connect();
+    try {
+      const { getWorld } = await import('../src/db/worlds.js');
+      await finishWave(client, scheduler.data, await getWorld(client, worldId), host.id, 'dispersed', now);
+      w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+      const next = w.waves.find((x: { id: number; errand: { kind: string } | null; status: string }) => x.errand?.kind === 'quest' && x.status === 'scheduled' && x.id !== host.id);
+      expect(next).toBeTruthy();
+      expect(w.bridge.quests.defense).toBeUndefined();
+      // Beaten: the quest is done.
+      await finishWave(client, scheduler.data, await getWorld(client, worldId), next.id, 'defeated', now);
+    } finally {
+      client.release();
+    }
+    w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
+    expect(w.bridge.quests.defense).toBe(now.toISOString());
   });
 
   it('sends the hero on quests: an ambush holds a horde back, a ride out brings a report', async () => {

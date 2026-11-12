@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The Kalinov Bridge (PLAN.md §10), built in the Holy City in five stages. Each stage needs its cost in resources, drawn from the group's vault (caravans bring resources there), its embers (Svarog's Ember from lairs and ancient sites) and its quests, all done while the stage is open; it then takes buildHours game hours to raise. Each stage and each of its quests carries the story of why the bridge needs it. Quest kinds: site (explore an ancient site), lair (clear a monster lair), unscathed (a wave ends without the Holy City losing Sanctity since the stage began), choke (win a field battle at a choke point), ritual (craft a ritual item from ritualEmbers embers). Every finished stage makes waves powerPerStage bigger (group power), and brings every member its reward: resources to their first village, and a blessing (effects, like research) that lasts the rest of the run. When the fifth stage stands, Ritual Night comes.",
+  "_comment": "The Kalinov Bridge (PLAN.md §10), built in the Holy City in five stages. Each stage needs its cost in resources, drawn from the group's vault (caravans bring resources there), its embers (Svarog's Ember from lairs and ancient sites) and its quests, all done while the stage is open; it then takes buildHours game hours to raise. Each stage and each of its quests carries the story of why the bridge needs it. Quest kinds: relic (explore the stage's quest ruin, `questPlaces.relic`, raised when the stage opens, heavily guarded), grove (clear the stage's quest lair, `questPlaces.grove`), defense (beat the stage's quest army, `questPlaces.defense`: a host of its own, apart from the hordes, that sets out delayHours after the stage opens and marches on the Holy City; if it is not beaten, another comes retryHours after), artifact (an army raids the North to its full depth and sacks its stronghold), ritual (craft a ritual item from ritualEmbers embers); the older kinds site, lair, unscathed and choke are kept for old saves. While a stage is raised, every active front sends one small horde at a different target (`constructionRaids`: units + unitsPerStage x the stage's number): the group's villages first, then the Holy City. Every finished stage makes waves powerPerStage bigger (group power), and brings every member its reward: resources to their first village, and a blessing (effects, like research) that lasts the rest of the run. When the fifth stage stands, Ritual Night comes.",
   "story": "Beyond the Holy City the Kalinov Bridge crosses the Smorodina, the river of fire, from Nav to Yav, the living world, and every horde that comes walks over it. The volkhvs mean to raise it on from Yav to Prav, the realm of the gods: once the Ritual Arch joins it to Prav, the gods' light runs down the whole bridge and nothing from Nav can set foot on it again. The hordes know this, and will throw everything at the city on the night the arch is bound.",
   "buildHours": 12,
   "powerPerStage": 0.1,
@@ -15,14 +15,25 @@
         "iron": 1000
       },
       "embers": 0,
-      "reward": {"resources": {"wood": 800, "stone": 800, "grain": 800, "iron": 400}, "effects": {"production.all": 0.05}, "name": "Blessing of the Old Builders"},
+      "reward": {
+        "resources": {
+          "wood": 400,
+          "stone": 400,
+          "grain": 400,
+          "iron": 200
+        },
+        "effects": {
+          "production.all": 0.1
+        },
+        "name": "Blessing of the Old Builders"
+      },
       "quests": [
         {
-          "kind": "site",
-          "story": "Bring back a relic of the old builders from an ancient site: their mark, set in the first stone, binds the new span to the old bridge's end in Yav."
+          "kind": "relic",
+          "story": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span."
         }
       ],
-      "story": "A road to Prav can't rise from common stone. The old builders left their first stones among the ruins they abandoned, and only stones that remember the old rites will carry the bridge on from Yav."
+      "story": "A road to Prav can't rise from common stone. The old builders were buried with the rune that made their stones remember the rite; only stones marked with it will carry the bridge on from Yav."
     },
     {
       "name": "The Oak Piers",
@@ -33,14 +44,25 @@
         "iron": 2000
       },
       "embers": 1,
-      "reward": {"resources": {"wood": 1200, "stone": 1200, "grain": 1200, "iron": 600}, "effects": {"buildTime": -0.1}, "name": "Blessing of the Bridge Wrights"},
+      "reward": {
+        "resources": {
+          "wood": 600,
+          "stone": 600,
+          "grain": 600,
+          "iron": 300
+        },
+        "effects": {
+          "buildTime": -0.2
+        },
+        "name": "Blessing of the Bridge Wrights"
+      },
       "quests": [
         {
-          "kind": "lair",
-          "story": "Clear a monster lair: the volkhvs won't raise an axe in the grove while the beasts are there."
+          "kind": "grove",
+          "story": "The sacred oaks stand over a den of Nav's beasts, grown fat on the grove's offerings. Clear the Den under the Sacred Oaks, or no volkhv will lift an axe in the grove."
         }
       ],
-      "story": "The piers that lift the bridge towards Prav are cut from the sacred oaks of the grove, but beasts of the North have made their lairs among the roots and nobody can fell a tree while they howl."
+      "story": "The piers that lift the bridge towards Prav are cut from the sacred oaks, but Veles' beasts have made their den among the roots and nobody can fell a tree while they howl."
     },
     {
       "name": "The Iron Span",
@@ -51,18 +73,25 @@
         "iron": 5000
       },
       "embers": 1,
-      "reward": {"resources": {"wood": 1600, "stone": 1600, "grain": 1600, "iron": 800}, "effects": {"defense.all": 0.05}, "name": "Blessing of Svarog's Forge"},
+      "reward": {
+        "resources": {
+          "wood": 800,
+          "stone": 800,
+          "grain": 800,
+          "iron": 400
+        },
+        "effects": {
+          "defense.all": 0.1
+        },
+        "name": "Blessing of Svarog's Forge"
+      },
       "quests": [
         {
-          "kind": "unscathed",
-          "story": "The forge is lit from the Holy City's own flame: weather a wave without the city losing Sanctity, or the flame gutters and the iron cracks."
-        },
-        {
-          "kind": "choke",
-          "story": "The ore comes through the passes: hold a pass or a fort on a horde's road, so the smiths know the road can be kept."
+          "kind": "defense",
+          "story": "Nav knows the forge is lit. The Smith-Breakers, a host sworn to put out Svarog's flame, march on the Holy City apart from the hordes: beat them before the walls, and the iron can be forged."
         }
       ],
-      "story": "Iron forged under Svarog's eye carries the road up into the sky. The forge must burn without break, fed by ore brought in through the passes."
+      "story": "Iron forged under Svarog's eye carries the road up into the sky. The forge in the Holy City must burn without break, and Nav will send its own to put it out."
     },
     {
       "name": "The Guardian Rails",
@@ -73,18 +102,25 @@
         "iron": 6000
       },
       "embers": 1,
-      "reward": {"resources": {"wood": 2000, "stone": 2000, "grain": 2000, "iron": 1000}, "effects": {"attack.all": 0.05}, "name": "Blessing of Perun's Thunder"},
+      "reward": {
+        "resources": {
+          "wood": 1000,
+          "stone": 1000,
+          "grain": 1000,
+          "iron": 500
+        },
+        "effects": {
+          "attack.all": 0.1
+        },
+        "name": "Blessing of Perun's Thunder"
+      },
       "quests": [
         {
-          "kind": "site",
-          "story": "The guardians' faces are copied from the old idols: bring back their likeness from an ancient site."
-        },
-        {
-          "kind": "lair",
-          "story": "A rail is quenched in the blood of a beast of the North: clear a lair to give the carvers what they need."
+          "kind": "artifact",
+          "story": "The Eye of Veles, the stone that sees every road from Nav, is kept in the North's deepest stronghold. Raid the North to its full depth, sack the stronghold and bring the Eye back: set in the rails, it shows the guardians everything that comes."
         }
       ],
-      "story": "The rails are carved with the faces of guardians so that nothing from Nav can climb the new span to Prav, and every rail must be quenched before it will hold."
+      "story": "The rails are carved with the faces of guardians so that nothing from Nav can climb the new span to Prav; but guardians must see to guard, and only the Eye of Veles sees the roads of Nav."
     },
     {
       "name": "The Ritual Arch",
@@ -95,7 +131,15 @@
         "iron": 8000
       },
       "embers": 2,
-      "reward": {"resources": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "effects": {}},
+      "reward": {
+        "resources": {
+          "wood": 0,
+          "stone": 0,
+          "grain": 0,
+          "iron": 0
+        },
+        "effects": {}
+      },
       "quests": [
         {
           "kind": "ritual",
@@ -106,6 +150,26 @@
     }
   ],
   "quests": {
+    "relic": {
+      "name": "The Builders' Rune",
+      "description": "Explore the Builders' Barrow, deep in guardians, while this stage is open."
+    },
+    "grove": {
+      "name": "The Den under the Sacred Oaks",
+      "description": "Clear the quest lair while this stage is open."
+    },
+    "defense": {
+      "name": "Beat the Smith-Breakers",
+      "description": "Beat the quest army marching on the Holy City."
+    },
+    "artifact": {
+      "name": "The Eye of Veles",
+      "description": "Raid the North to its full depth and sack its stronghold while this stage is open."
+    },
+    "ritual": {
+      "name": "Craft the ritual torc",
+      "description": "Forge the ritual torc from a Svarog's Ember."
+    },
     "site": {
       "name": "Bring back a relic",
       "description": "Explore an ancient site while this stage is open."
@@ -121,10 +185,6 @@
     "choke": {
       "name": "Hold a strong point",
       "description": "Win a field battle at a choke point or from a fort while this stage is open."
-    },
-    "ritual": {
-      "name": "Craft the ritual torc",
-      "description": "Forge the ritual torc from a Svarog's Ember."
     }
   },
   "ritualNight": {
@@ -141,6 +201,33 @@
     "lost": {
       "title": "The Holy City has fallen",
       "story": "The walls are breached and the sanctuary fires are out. The hordes pour over the Kalinov Bridge unopposed. Some of the people escaped into the forests, carrying the songs with them; perhaps one day they will try again."
+    }
+  },
+  "constructionRaids": {
+    "units": 5,
+    "unitsPerStage": 2
+  },
+  "questPlaces": {
+    "relic": {
+      "name": "The Builders' Barrow",
+      "siteKind": "kurgan",
+      "front": "north",
+      "minDistance": 5,
+      "maxDistance": 8,
+      "units": 30
+    },
+    "grove": {
+      "name": "The Den under the Sacred Oaks",
+      "front": "north",
+      "minDistance": 5,
+      "maxDistance": 8,
+      "units": 36
+    },
+    "defense": {
+      "name": "The Smith-Breakers",
+      "delayHours": 3,
+      "retryHours": 12,
+      "units": 40
     }
   }
 }

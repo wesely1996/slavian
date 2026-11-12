@@ -1467,8 +1467,12 @@ func _terrain_panel() -> Array:
 		_panel_body.add_child(UI.label(tr_n("%d hex from the Holy City.", "%d hexes from the Holy City.", distance) % distance, UI.SMALL_SIZE, UI.MUTED))
 	var camp := Game.camp_at(_selected)
 	if not camp.is_empty():
+		_quest_place_line(camp.get("quest"))
 		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
 		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward")))
+	var quest_site := Game.site_at(_selected)
+	if not quest_site.is_empty() and quest_site.status == "unexplored":
+		_quest_place_line(quest_site.get("quest"))
 	if Game.fear.has(_selected):
 		_panel_body.add_child(UI.label(tr("Hordes fear this place: they were beaten here (%.0f).") % Game.fear[_selected], UI.SMALL_SIZE, UI.MUTED))
 	if id == "holy_city":
@@ -5483,8 +5487,24 @@ func _set_quiet(start: Variant, end: Variant) -> void:
 	Game.set_world(response.data)
 
 
+## A bridge quest's ruin or lair: its name and what the quest asks.
+func _quest_place_line(quest: Variant) -> void:
+	if quest == null or not Game.data.bridge.questPlaces.has(String(quest)):
+		return
+	var place: Dictionary = Game.data.bridge.questPlaces[String(quest)]
+	var asks: Dictionary = Game.data.bridge.quests.get(String(quest), {})
+	_panel_body.add_child(UI.with_info(UI.label(tr(String(place.name)), UI.HEADING_SIZE, UiTheme.GOLD), tr(String(asks.get("description", "")))))
+
+
 func _wave_entry(wave: Dictionary) -> void:
-	if wave.get("bandOf") != null:
+	var errand: Variant = wave.get("errand")
+	if errand is Dictionary and errand.kind == "quest":
+		# A bridge quest's host, apart from the hordes.
+		_panel_body.add_child(UI.label(tr("%s · %s") % [tr(String(Game.data.bridge.questPlaces.defense.name)), tr(Game.front_faction(wave.front))]))
+	elif errand is Dictionary:
+		# A band sent at the bridge's builders while a stage is raised.
+		_panel_body.add_child(UI.label(tr("Raiders of the bridge · %s") % tr(Game.front_faction(wave.front))))
+	elif wave.get("bandOf") != null:
 		# A band its hating horde sent out after a village.
 		_panel_body.add_child(UI.label(tr("A band of horde %d · %s") % [int(wave.index) + 1, tr(Game.front_faction(wave.front))]))
 	else:

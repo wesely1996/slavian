@@ -133,7 +133,7 @@ func _draw_parchment(area: Rect2, rng: RandomNumberGenerator) -> void:
 func _draw_ground(_area: Rect2, rng: RandomNumberGenerator) -> void:
 	var terrain := String(ctx.get("terrain", "plains"))
 	match terrain:
-		"hills", "mountain":
+		"hills", "wooded_hills", "mountain":
 			for i in 3:
 				var c := Vector2(rng.randf_range(0.1, 0.9) * size.x, rng.randf_range(0.15, 0.85) * size.y)
 				for ring in 3:

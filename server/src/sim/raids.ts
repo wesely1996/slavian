@@ -99,7 +99,10 @@ export function raidBattle(
 ): { won: boolean; rounds: { round: number; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units; fallen: string[] } {
   const rules = data.raids;
   const field = input.stage.field;
-  const walls = input.stage.stronghold ? 1 + rules.stronghold.walls : 1;
+  // Battering rams take the stronghold's walls off its defenders, a share each.
+  let breach = 0;
+  for (const [unit, n] of Object.entries(input.army)) breach += (data.units.units[unit]?.breach ?? 0) * n;
+  const walls = input.stage.stronghold ? 1 + rules.stronghold.walls * Math.max(0, 1 - breach) : 1;
   const base = enemyStats(data, input.front);
   const enemyStatsAt = (unit: string): UnitStats => {
     const s = base(unit);

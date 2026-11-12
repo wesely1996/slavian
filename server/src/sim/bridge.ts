@@ -4,6 +4,7 @@
 import type { BridgeQuest, GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { mapResources, RESOURCE_KINDS, type Resources } from './resources.js';
+import { hex, hexKey, ring, type Hex } from './hex.js';
 
 export interface BridgeState {
   // The stage being built (0-based); stages.length once the bridge stands.
@@ -112,4 +113,38 @@ export function bridgeBonuses(data: GameData, bridge: Pick<BridgeState, 'stage'>
     for (const [key, value] of Object.entries(stage.reward.effects)) out[key] = (out[key] ?? 0) + value;
   }
   return out;
+}
+
+// Where a quest's ruin or lair rises: the first open hex minDistance to
+// maxDistance hexes from the Holy City, nearest first, each ring walked
+// from a point the seed picks. Not on water, peaks or the edge belt, and
+// not where anything else stands (`taken`, "q,r" keys).
+export function questCell(data: GameData, terrain: ReadonlyMap<string, string>, taken: ReadonlySet<string>, seed: number, minDistance: number, maxDistance: number): Hex | null {
+  for (let d = minDistance; d <= maxDistance; d++) {
+    const cells = ring(hex(0, 0), d);
+    const start = (seed >>> 0) % cells.length;
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[(start + i) % cells.length]!;
+      const key = hexKey(cell);
+      const kind = terrain.get(key);
+      const def = kind ? data.terrain.terrain[kind as keyof typeof data.terrain.terrain] : undefined;
+      if (!def || kind === 'holy_city' || def.moveCost === null || def.edge || taken.has(key)) continue;
+      return cell;
+    }
+  }
+  return null;
+}
+
+// Who each front's small horde strikes while a stage is raised: the group's
+// villages in order, then the Holy City (null), each front its own while
+// there are enough.
+export function constructionTargets(fronts: readonly string[], villages: readonly number[]): (number | null)[] {
+  const targets: (number | null)[] = [...villages, null];
+  return fronts.map((_, i) => targets[i % targets.length]!);
+}
+
+// How big each of those hordes is, for the stage being raised (0-based).
+export function constructionSize(data: GameData, stage: number): number {
+  const rules = data.bridge.constructionRaids;
+  return rules.units + rules.unitsPerStage * (stage + 1);
 }

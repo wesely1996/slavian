@@ -284,6 +284,7 @@
       "health": 500,
       "carry": 60
     },
+    "battering_ram": {"engine": true, "name": "Battering Ram", "description": "An iron-capped log under a hide roof: little use in the open, but every ram takes a quarter of a stronghold's walls off its defenders (raids and strikes on horde encampments).", "family": "infantry", "building": "barracks", "requiresLevel": 5, "cost": {"wood": 300, "stone": 40, "grain": 80, "iron": 140}, "trainSeconds": 380, "upkeepPerHour": 3, "supplyHours": 18, "speed": 3, "attack": 25, "defense": 70, "health": 360, "carry": 0, "breach": 0.25, "counters": {}},
     "archer": {
       "name": "Archer",
       "description": "Shoots hard at infantry; riders cut them down.",
@@ -402,6 +403,7 @@
       "carry": 0,
       "counters": { "infantry": 1.8, "archers": 1.2 }
     },
+    "scorpion": {"engine": true, "name": "Scorpion", "description": "A great crossbow on a frame that drives a bolt through horse and rider alike; slow to move.", "family": "archers", "building": "shooting_range", "requiresLevel": 4, "cost": {"wood": 220, "stone": 60, "grain": 70, "iron": 160}, "trainSeconds": 360, "upkeepPerHour": 3, "supplyHours": 18, "speed": 3, "attack": 70, "defense": 25, "health": 150, "carry": 0, "counters": {"cavalry": 2.0, "infantry": 1.1}},
     "devana_hunter": {
       "name": "Devana's Hunter",
       "description": "Huntress of the goddess of the forest: swift and deadly.",

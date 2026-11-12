@@ -98,7 +98,7 @@ function generateCandidate(seed: number, playerCount: number): { map: WorldMap; 
       type = edgeTerrain(frontOf(cell), activeFronts, dist === radius, m);
     } else {
       type = interiorTerrain(e, m);
-      if (dist <= START_RING && !['plains', 'forest', 'hills'].includes(type)) type = 'plains';
+      if (dist <= START_RING && !['plains', 'forest', 'hills', 'wooded_hills'].includes(type)) type = 'plains';
     }
     terrain.set(hexKey(cell), type);
   }
@@ -131,7 +131,7 @@ function layRivers(map: WorldMap, elevation: ReadonlyMap<string, number>, rng: (
   const laid = new Map<string, { a: Hex; b: Hex; into: string; down: string | null; size: number }>();
   const sources: [Hex, Hex][] = [];
   for (const cell of spiral(hex(0, 0), map.radius - EDGE_BELT_WIDTH)) {
-    if (!['hills', 'mountain'].includes(type(cell) ?? '')) continue;
+    if (!['hills', 'wooded_hills', 'mountain'].includes(type(cell) ?? '')) continue;
     for (const n of neighbors(cell)) {
       if (hexKey(cell) < hexKey(n) && interior(n) && bank(cell) && bank(n)) sources.push([cell, n]);
     }
@@ -263,12 +263,14 @@ function fbm(noise: NoiseFunction2D, frequency: number, octaves = 4): (x: number
   };
 }
 
+// High ground is hills (wooded where it is wet), wet lowland forest: both
+// tuned to a little over a fifth (forest) and an eighth (hills) of the map.
 function interiorTerrain(e: number, m: number): TerrainId {
   if (e > 0.38) return 'mountain';
-  if (e > 0.2) return 'hills';
+  if (e > 0.175) return m > 0.25 ? 'wooded_hills' : 'hills';
   if (e < -0.4 && m > 0) return 'lake';
   if (e < -0.15 && m > 0.3) return 'swamp';
-  if (m > 0.05) return 'forest';
+  if (m > -0.015) return 'forest';
   return 'plains';
 }
 

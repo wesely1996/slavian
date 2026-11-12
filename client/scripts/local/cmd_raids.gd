@@ -56,7 +56,11 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 		champions: Array = [], stats_without_hero: Callable = Callable()) -> Dictionary:
 	var rules: Dictionary = data.raids
 	var field: Variant = stage.field
-	var walls := 1.0 + float(rules.stronghold.walls) if stage.stronghold else 1.0
+	# Battering rams take the stronghold's walls off its defenders, a share each.
+	var breach := 0.0
+	for unit in army:
+		breach += float(data.units.units.get(unit, {}).get("breach", 0.0)) * int(army[unit])
+	var walls := 1.0 + float(rules.stronghold.walls) * maxf(0.0, 1.0 - breach) if stage.stronghold else 1.0
 	var base := LocalBattle.enemy_stats(data, front)
 	var enemy_at := func(unit: String) -> Dictionary:
 		var s: Dictionary = base.call(unit).duplicate()
@@ -294,6 +298,9 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	if result.won:
 		var amount := float(data.raids.hatred.perBattle) + (float(data.raids.hatred.stronghold) if stage.stronghold else 0.0)
 		LocalHordes.anger_front(server, world, String(front), amount, at)
+		# The North's stronghold sacked at the full depth: the Eye of Veles (a bridge quest).
+		if front == "north" and stage.stronghold and int(army.raid.depth) == int(data.raids.maxDepth):
+			LocalBattles.bridge_quest(server, world, "artifact", at)
 		if front == "north":
 			var owner_hero: Dictionary = hero if not hero.is_empty() else (LocalArmies.hero_of(world, int(army.ownerAccountId)) if army.ownerAccountId != null else {})
 			var kinds := north_finds(data, stage.stronghold, int(world.seed), int(army.id), stage_no)

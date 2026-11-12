@@ -162,13 +162,21 @@ export const mapEventHandlers: HandlerRegistry = {
       }, at);
     }
     const held = total(raiders) === 0;
+    // Burned too often, the boatwrights give up: the event is lost.
+    if (!held && shipyard.burns + 1 >= rules.maxBurns) {
+      await deleteShipyard(client, shipyard.id);
+      await failEvent(client, data, world, shipyard.front as Front, 'Raiders burned the shipyard at ({q}, {r}) to the ground', where, at);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      await notifyWorld(client, { worldId: world.id, type: 'world' });
+      return;
+    }
     const completesAt = held ? shipyard.completesAt! : new Date(shipyard.completesAt!.getTime() + hoursMs(rules.setbackHours, world.speed));
     const next = new Date(at.getTime() + hoursMs(rules.raidEveryHours, world.speed));
-    const after: Shipyard = { ...shipyard, raids: shipyard.raids + 1, completesAt, nextRaidAt: next < completesAt ? next : null };
+    const after: Shipyard = { ...shipyard, raids: shipyard.raids + 1, burns: shipyard.burns + (held ? 0 : 1), completesAt, nextRaidAt: next < completesAt ? next : null };
     await saveShipyard(client, after);
     if (!held) {
       await scheduleEvent(client, world.id, completesAt, 'shipyard_done', { shipyardId: shipyard.id });
-      await tellAll(client, world, { kind: 'site', tier: 'push', title: 'Raiders burned work at the shipyard at ({q}, {r})', body: 'The boat is set back {hours} hours. Armies standing there fight the next raiders.', vars: { ...where, hours: rules.setbackHours } }, at);
+      await tellAll(client, world, { kind: 'site', tier: 'push', title: 'Raiders burned work at the shipyard at ({q}, {r})', body: 'The boat is set back {hours} hours. Burned {burns} times of {most}: at {most} the boatwrights give up. Armies standing there fight the next raiders.', vars: { ...where, hours: rules.setbackHours, burns: after.burns, most: rules.maxBurns } }, at);
     }
     if (after.nextRaidAt) await scheduleEvent(client, world.id, after.nextRaidAt, 'shipyard_raid', { shipyardId: shipyard.id });
     await notifyWorld(client, { worldId: world.id, type: 'armies' });

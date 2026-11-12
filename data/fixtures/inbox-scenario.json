@@ -403,7 +403,7 @@
    "response": {
     "notifications": [
      {
-      "id": 3,
+      "id": 4,
       "kind": "build_done",
       "tier": "digest",
       "title": "Woodcutter level 1 in Vruchiy",
@@ -412,7 +412,7 @@
       "read": false
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Farm level 1 in Vruchiy",
@@ -421,16 +421,25 @@
       "read": false
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T17:50:00.000Z",
       "read": false
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (0, -5).",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": false
      }
     ],
-    "unread": 3,
+    "unread": 4,
     "serverTime": "2026-06-01T17:59:00.000Z"
    }
   },
@@ -444,7 +453,7 @@
    "response": {
     "notifications": [
      {
-      "id": 4,
+      "id": 5,
       "kind": "digest",
       "tier": "push",
       "title": "Today in Letters",
@@ -453,7 +462,7 @@
       "read": false
      },
      {
-      "id": 3,
+      "id": 4,
       "kind": "build_done",
       "tier": "digest",
       "title": "Woodcutter level 1 in Vruchiy",
@@ -462,7 +471,7 @@
       "read": false
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Farm level 1 in Vruchiy",
@@ -471,16 +480,25 @@
       "read": false
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T17:50:00.000Z",
       "read": false
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (0, -5).",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": false
      }
     ],
-    "unread": 4,
+    "unread": 5,
     "serverTime": "2026-06-01T18:01:00.000Z"
    }
   },
@@ -500,7 +518,7 @@
    "response": {
     "notifications": [
      {
-      "id": 4,
+      "id": 5,
       "kind": "digest",
       "tier": "push",
       "title": "Today in Letters",
@@ -509,7 +527,7 @@
       "read": true
      },
      {
-      "id": 3,
+      "id": 4,
       "kind": "build_done",
       "tier": "digest",
       "title": "Woodcutter level 1 in Vruchiy",
@@ -518,7 +536,7 @@
       "read": true
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Farm level 1 in Vruchiy",
@@ -527,11 +545,20 @@
       "read": true
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
+      "createdAt": "2026-06-01T17:50:00.000Z",
+      "read": true
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (0, -5).",
       "createdAt": "2026-06-01T17:50:00.000Z",
       "read": true
      }

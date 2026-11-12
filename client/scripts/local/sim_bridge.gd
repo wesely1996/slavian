@@ -73,3 +73,39 @@ static func bridge_bonuses(data: Dictionary, bridge: Variant) -> Dictionary:
 		for key in effects:
 			out[key] = float(out.get(key, 0.0)) + float(effects[key])
 	return out
+
+
+## sim/bridge.ts questCell: where a quest's ruin or lair rises: the first
+## open hex minDistance to maxDistance from the Holy City, nearest first,
+## each ring walked from a point the seed picks (Vector2i.MAX: none).
+static func quest_cell(data: Dictionary, terrain: Dictionary, taken: Dictionary, seed_value: int, min_distance: int, max_distance: int) -> Vector2i:
+	for d in range(min_distance, max_distance + 1):
+		var cells := HexMath.ring(Vector2i.ZERO, d)
+		var start := (seed_value & 0xffffffff) % cells.size()
+		for i in cells.size():
+			var cell: Vector2i = cells[(start + i) % cells.size()]
+			var key := LocalLand.key(cell)
+			var kind: Variant = terrain.get(key)
+			if kind == null or kind == "holy_city" or taken.has(key):
+				continue
+			var def: Dictionary = data.terrain.terrain.get(kind, {})
+			if def.is_empty() or def.moveCost == null or def.get("edge", false):
+				continue
+			return cell
+	return Vector2i.MAX
+
+
+## Who each front's small horde strikes while a stage is raised: the
+## group's villages in order, then the Holy City (null).
+static func construction_targets(fronts: Array, villages: Array) -> Array:
+	var targets: Array = villages.duplicate()
+	targets.append(null)
+	var out: Array = []
+	for i in fronts.size():
+		out.append(targets[i % targets.size()])
+	return out
+
+
+static func construction_size(data: Dictionary, stage: int) -> int:
+	var rules: Dictionary = data.bridge.constructionRaids
+	return int(rules.units) + int(rules.unitsPerStage) * (stage + 1)

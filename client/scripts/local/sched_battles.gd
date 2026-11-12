@@ -1009,7 +1009,11 @@ static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dicti
 static func finish_wave(server: LocalServer, world: Dictionary, wave: Dictionary, status: String, at: int, changed: Array) -> void:
 	wave.status = status
 	wave.endsAt = at
-	_after_wave(server, world, wave, at)
+	spawn_after_wave(server, world, wave, at)
+	bridge_quest(server, world, "unscathed", at)
+	# A bridge quest's host beaten: the quest is done (not beaten: another comes).
+	if LocalBridgeCommands.after_errand(server, world, wave, status, at):
+		bridge_quest(server, world, "defense", at)
 	changed.append(["world"])
 
 
@@ -1017,6 +1021,7 @@ static func finish_wave(server: LocalServer, world: Dictionary, wave: Dictionary
 static func _after_wave(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	spawn_after_wave(server, world, wave, at)
 	bridge_quest(server, world, "unscathed", at)
+	LocalBridgeCommands.after_errand(server, world, wave, "settled", at)
 
 
 static func on_camp_grow(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1061,6 +1066,8 @@ static func settle_bridge(server: LocalServer, world: Dictionary, bridge: Dictio
 	if LocalBridge.is_ready(server.data, next):
 		next = LocalBridge.start_raising(server.data, next, at, world.speed)
 		server.schedule(world, LocalTime.parse(next.raisedAt), "bridge_raised", {"stage": next.stage})
+		# Nav strikes at the builders.
+		LocalBridgeCommands.send_construction_raids(server, world, next, at)
 		LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "digest", "title": "Raising {stage}",
 			"body": "Everything it needs is in place; the builders are at work.", "vars": {"stage": LocalBridge.current_stage(server.data, next).name}}, at)
 	world.bridge = next
