@@ -1250,24 +1250,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "4:ambush",
-        "kind": "ambush",
-        "front": "north",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "4:hoard",
-        "kind": "hoard",
+        "id": "4:tribute",
+        "kind": "tribute",
         "front": null,
         "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
        },
        {
         "id": "4:scout",
@@ -1278,8 +1268,19 @@
         "hours": 5,
         "xp": 25,
         "risk": 0.15
+       },
+       {
+        "id": "4:hunt",
+        "kind": "hunt",
+        "front": null,
+        "siteId": null,
+        "distance": 3,
+        "hours": 5,
+        "xp": 30,
+        "risk": 0.2
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [
@@ -3843,36 +3844,37 @@
       "quest": null,
       "offers": [
        {
-        "id": "15:hoard",
-        "kind": "hoard",
+        "id": "15:caravan",
+        "kind": "caravan",
         "front": null,
         "siteId": null,
         "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
+        "hours": 4.333333333333333,
+        "xp": 20,
+        "risk": 0.1
        },
        {
-        "id": "15:ambush",
-        "kind": "ambush",
-        "front": "north",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 64,
-        "risk": 0.37
+        "id": "15:ruins",
+        "kind": "ruins",
+        "front": null,
+        "siteId": 1,
+        "distance": 3,
+        "hours": 5,
+        "xp": 35,
+        "risk": 0.15
        },
        {
-        "id": "15:scout",
-        "kind": "scout",
-        "front": "north",
+        "id": "15:tribute",
+        "kind": "tribute",
+        "front": null,
         "siteId": null,
         "distance": 6,
-        "hours": 5,
+        "hours": 7,
         "xp": 25,
-        "risk": 0.15
+        "risk": 0.1
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [
@@ -6628,7 +6630,8 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": []
+      "offers": [],
+      "armyQuest": null
      }
     ],
     "generals": [
@@ -9402,7 +9405,8 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": []
+      "offers": [],
+      "armyQuest": null
      }
     ],
     "generals": [
@@ -12235,7 +12239,8 @@
       "arrivesAt": null,
       "woundedUntil": null,
       "quest": null,
-      "offers": []
+      "offers": [],
+      "armyQuest": null
      }
     ],
     "generals": [

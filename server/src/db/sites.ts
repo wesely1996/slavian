@@ -78,11 +78,11 @@ export async function insertHardSite(client: DbClient, worldId: number, site: Pl
   return Number(rows[0]!.id);
 }
 
-// A bridge quest's ruin, hard to take.
-export async function insertQuestSite(client: DbClient, worldId: number, site: PlacedSite, quest: string): Promise<number> {
+// A quest's ruin (the bridge's, or a hero's army quest), hard to take.
+export async function insertQuestSite(client: DbClient, worldId: number, site: PlacedSite, quest: string, endsAt: Date | null = null): Promise<number> {
   const { rows } = await client.query<{ id: string }>(
-    'INSERT INTO sites (world_id, kind, q, r, guardians, hard, quest) VALUES ($1, $2, $3, $4, $5, true, $6) RETURNING id',
-    [worldId, site.kind, site.q, site.r, JSON.stringify(site.guardians), quest],
+    'INSERT INTO sites (world_id, kind, q, r, guardians, hard, quest, ends_at) VALUES ($1, $2, $3, $4, $5, true, $6, $7) RETURNING id',
+    [worldId, site.kind, site.q, site.r, JSON.stringify(site.guardians), quest, endsAt],
   );
   return Number(rows[0]!.id);
 }

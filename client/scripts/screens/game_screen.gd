@@ -1469,7 +1469,7 @@ func _terrain_panel() -> Array:
 	if not camp.is_empty():
 		_quest_place_line(camp.get("quest"))
 		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
-		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward")))
+		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward"), camp.get("quest")))
 	var quest_site := Game.site_at(_selected)
 	if not quest_site.is_empty() and quest_site.status == "unexplored":
 		_quest_place_line(quest_site.get("quest"))
@@ -3171,6 +3171,12 @@ func _army_manage(army: Dictionary) -> void:
 	var leaders := UI.hbox(8)
 	var hero := Game.my_hero()
 	if army.get("heroAccountId") != null:
+		# The hero leading it: its sheet (its quests with the army among them).
+		if not hero.is_empty() and int(army.heroAccountId) == int(hero.accountId):
+			leaders.add_child(UI.button(tr("Hero"), func() -> void:
+				_panel_mode = "hero"
+				_side["hero"] = "quests"
+				_rebuild_panel(), "ui/hero"))
 		leaders.add_child(UI.button(tr("Hero leaves"), func() -> void: _army_command(army_id, "hero", {"join": false})))
 	elif standing and not hero.is_empty() and hero.status == "home" and army.targetVillageId != null and hero.villageId != null and int(hero.villageId) == int(army.targetVillageId):
 		leaders.add_child(UI.button(tr("%s takes command") % hero.name, func() -> void: _army_command(army_id, "hero", {"join": true})))
@@ -3778,20 +3784,38 @@ func _quest_section(hero: Dictionary) -> void:
 			_panel_body.add_child(UI.with_info(UI.button(tr("Call off the quest"), func() -> void: _hero_action("quest/cancel", {})),
 				tr("The hero turns for home where it is (as far back as it went, or from the place itself) and brings nothing back. Once on the way home, it can't be called off.")))
 		return
+	# The army quest it leads its army on: where, and how long it stands.
+	if hero.get("armyQuest") is Dictionary:
+		var on: Dictionary = hero.armyQuest
+		_panel_body.add_child(UI.label(tr(HeroText.quest_def(Game.data, on).get("name", "")), 0, UI.ACCENT))
+		_panel_body.add_child(UI.label(HeroText.quest_description(Game.data, on), UI.SMALL_SIZE, UI.MUTED))
+		var left := UI.label("", UI.SMALL_SIZE)
+		_panel_body.add_child(left)
+		if on.get("endsAt") != null:
+			_tick(left, func() -> String: return tr("At (%d, %d), gone in %s") % [int(on.q), int(on.r), TimeUtil.format_duration(TimeUtil.parse_iso(String(on.endsAt)) - Game.server_now())])
+		var cell := Vector2i(int(on.q), int(on.r))
+		_panel_body.add_child(UI.button(tr("Show on the map"), func() -> void: _go_to(cell), "icon/map"))
+		return
 	var offers: Array = hero.get("offers", [])
 	if offers.is_empty():
-		_panel_body.add_child(UI.label(tr("No quests while the hero is away, wounded or leading an army."), UI.SMALL_SIZE, UI.MUTED))
+		var why := tr("No quests while the hero is away or wounded.")
+		if hero.status == "with_army":
+			why = tr("Army quests come while the army the hero leads stands still.")
+		_panel_body.add_child(UI.label(why, UI.SMALL_SIZE, UI.MUTED))
 		return
+	if hero.status == "with_army":
+		_panel_body.add_child(UI.label(tr("Leading an army, the hero can take it on harder quests: their place rises near the army, which marches on it at once. Clear it in time for XP and the spoils."), UI.SMALL_SIZE, UI.MUTED))
 	_paged("quests", offers, 3 if _roomy() else 1, func(offer: Dictionary) -> void:
+		var army: bool = offer.get("army", false)
 		var row := UI.hbox()
 		var info := UI.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label(tr(kinds.get(String(offer.kind), {}).get("name", ""))))
+		info.add_child(UI.label(tr(HeroText.quest_def(Game.data, offer).get("name", ""))))
 		info.add_child(UI.label(HeroText.quest_description(Game.data, offer, _site_name(offer.get("siteId"))), UI.SMALL_SIZE, UI.MUTED))
 		info.add_child(UI.label(HeroText.quest_terms(offer, float(Game.world.get("speed", 1))), UI.SMALL_SIZE))
 		row.add_child(info)
-		var go := UI.primary(tr("Set out"), func() -> void: _hero_action("quest", {"offer": String(offer.id)}))
-		go.disabled = hero.status != "home"
+		var go := UI.primary(tr("Lead the army") if army else tr("Set out"), func() -> void: _hero_action("quest", {"offer": String(offer.id)}))
+		go.disabled = hero.status != ("with_army" if army else "home")
 		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(go)
 		_panel_body.add_child(row))
@@ -5489,6 +5513,18 @@ func _set_quiet(start: Variant, end: Variant) -> void:
 
 ## A bridge quest's ruin or lair: its name and what the quest asks.
 func _quest_place_line(quest: Variant) -> void:
+	# A hero's army quest ("hero:<account>:<kind>"): whose, and what.
+	if quest is String and String(quest).begins_with("hero:"):
+		var parts := String(quest).split(":")
+		var def: Dictionary = Game.data.get("quests", {}).get("army", {}).get("kinds", {}).get(parts[2] if parts.size() > 2 else "", {})
+		if not def.is_empty():
+			var whose := ""
+			for h in Game.heroes:
+				if str(h.accountId) == parts[1]:
+					whose = String(h.name)
+			_panel_body.add_child(UI.with_info(UI.label(tr(String(def.name)), UI.HEADING_SIZE, UiTheme.GOLD),
+				(tr("%s's quest with the army.") % whose + " " if whose != "" else "") + tr(String(def.description))))
+		return
 	if quest == null or not Game.data.bridge.questPlaces.has(String(quest)):
 		return
 	var place: Dictionary = Game.data.bridge.questPlaces[String(quest)]

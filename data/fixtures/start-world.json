@@ -399,24 +399,14 @@
    "quest": null,
    "offers": [
     {
-     "id": "0:ambush",
-     "kind": "ambush",
-     "front": "north",
+     "id": "0:shrine",
+     "kind": "shrine",
+     "front": null,
      "siteId": null,
      "distance": 5,
-     "hours": 5.666666666666667,
-     "xp": 40,
-     "risk": 0.25
-    },
-    {
-     "id": "0:ruins",
-     "kind": "ruins",
-     "front": null,
-     "siteId": 1,
-     "distance": 3,
-     "hours": 5,
-     "xp": 35,
-     "risk": 0.15
+     "hours": 9.666666666666666,
+     "xp": 80,
+     "risk": 0.05
     },
     {
      "id": "0:hoard",
@@ -427,8 +417,19 @@
      "hours": 6.333333333333333,
      "xp": 30,
      "risk": 0.2
+    },
+    {
+     "id": "0:ambush",
+     "kind": "ambush",
+     "front": "north",
+     "siteId": null,
+     "distance": 5,
+     "hours": 5.666666666666667,
+     "xp": 40,
+     "risk": 0.25
     }
-   ]
+   ],
+   "armyQuest": null
   }
  ],
  "generals": [],

@@ -965,8 +965,9 @@ static func create_camp(server: LocalServer, world: Dictionary, camp: Dictionary
 	created.merge(camp.duplicate(true), true)
 	world.next.camp += 1
 	world.camps.append(created)
-	# Captives' guards only hold them: they don't grow or waylay caravans.
-	if created.kind != "captives":
+	# Captives' guards only hold them, as a hero's quest camp waits for its
+	# hero: they don't grow or waylay caravans.
+	if created.kind != "captives" and LocalHeroes.parse_army_quest_mark(created.get("quest")).is_empty():
 		server.schedule(world, LocalTime.ms(at + (float(server.data.camps.growth.everyHours) * LocalTime.MS_PER_HOUR) / world.speed), "camp_grow",
 			{"campId": created.id})
 		LocalLogistics.plan_ambushes_for(server, world, at)

@@ -422,24 +422,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "0:ambush",
-        "kind": "ambush",
-        "front": "north",
+        "id": "0:shrine",
+        "kind": "shrine",
+        "front": null,
         "siteId": null,
         "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "0:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 1,
-        "distance": 3,
-        "hours": 5,
-        "xp": 35,
-        "risk": 0.15
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        },
        {
         "id": "0:hoard",
@@ -450,8 +440,19 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "0:ambush",
+        "kind": "ambush",
+        "front": "north",
+        "siteId": null,
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 40,
+        "risk": 0.25
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -3013,24 +3014,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "0:ambush",
-        "kind": "ambush",
-        "front": "north",
+        "id": "0:shrine",
+        "kind": "shrine",
+        "front": null,
         "siteId": null,
         "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "0:ruins",
-        "kind": "ruins",
-        "front": null,
-        "siteId": 1,
-        "distance": 3,
-        "hours": 5,
-        "xp": 35,
-        "risk": 0.15
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        },
        {
         "id": "0:hoard",
@@ -3041,8 +3032,19 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "0:ambush",
+        "kind": "ambush",
+        "front": "north",
+        "siteId": null,
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 40,
+        "risk": 0.25
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -5617,36 +5619,37 @@
       "quest": null,
       "offers": [
        {
-        "id": "3:hoard",
-        "kind": "hoard",
+        "id": "3:hunt",
+        "kind": "hunt",
         "front": null,
         "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
+        "distance": 3,
+        "hours": 5,
         "xp": 30,
         "risk": 0.2
        },
        {
-        "id": "3:ambush",
-        "kind": "ambush",
-        "front": "north",
+        "id": "3:caravan",
+        "kind": "caravan",
+        "front": null,
         "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
+        "distance": 4,
+        "hours": 4.333333333333333,
+        "xp": 20,
+        "risk": 0.1
        },
        {
-        "id": "3:scout",
-        "kind": "scout",
-        "front": "north",
+        "id": "3:shrine",
+        "kind": "shrine",
+        "front": null,
         "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
+        "distance": 5,
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -8155,24 +8158,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "6:ruins",
-        "kind": "ruins",
+        "id": "6:hunt",
+        "kind": "hunt",
         "front": null,
-        "siteId": 1,
+        "siteId": null,
         "distance": 3,
         "hours": 5,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "6:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
+        "xp": 30,
+        "risk": 0.2
        },
        {
         "id": "6:caravan",
@@ -8183,8 +8176,19 @@
         "hours": 4.333333333333333,
         "xp": 20,
         "risk": 0.1
+       },
+       {
+        "id": "6:shrine",
+        "kind": "shrine",
+        "front": null,
+        "siteId": null,
+        "distance": 5,
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],

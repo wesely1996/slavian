@@ -498,7 +498,9 @@ const heroesFileSchema = z.object({
   ),
 });
 
-export const QUEST_KINDS = ['ambush', 'scout', 'caravan', 'hoard', 'ruins'] as const;
+export const QUEST_KINDS = ['ambush', 'scout', 'caravan', 'hoard', 'ruins', 'hunt', 'tribute', 'shrine'] as const;
+export const ARMY_QUEST_KINDS = ['warband', 'warlord', 'barrow'] as const;
+export type ArmyQuestKind = (typeof ARMY_QUEST_KINDS)[number];
 export type QuestKind = (typeof QUEST_KINDS)[number];
 
 const questKindSchema = z.object({
@@ -516,6 +518,18 @@ const questKindSchema = z.object({
   resources: z.object({ wood: z.number(), stone: z.number(), grain: z.number(), iron: z.number() }).optional(),
 });
 
+const armyQuestKindSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  minDistance: z.number().int().positive(),
+  maxDistance: z.number().int().positive(),
+  units: z.number().int().positive(),
+  unitsPerLevel: z.number().nonnegative(),
+  lastsHours: z.number().positive(),
+  xp: z.number().int().nonnegative(),
+  resources: z.object({ wood: z.number(), stone: z.number(), grain: z.number(), iron: z.number() }).optional(),
+});
+
 // Hero quests (sim/quests.ts).
 const questsFileSchema = z.object({
   version: z.number().int(),
@@ -523,6 +537,11 @@ const questsFileSchema = z.object({
   refreshHours: z.number().positive(),
   perLevel: z.number().nonnegative(),
   kinds: z.object(Object.fromEntries(QUEST_KINDS.map((k) => [k, questKindSchema])) as Record<QuestKind, typeof questKindSchema>),
+  // Quests the hero takes its army on (sim/quests.ts armyQuestOffers).
+  army: z.object({
+    offers: z.number().int().positive(),
+    kinds: z.object(Object.fromEntries(ARMY_QUEST_KINDS.map((k) => [k, armyQuestKindSchema])) as Record<ArmyQuestKind, typeof armyQuestKindSchema>),
+  }),
 });
 
 const ordersFileSchema = z.object({

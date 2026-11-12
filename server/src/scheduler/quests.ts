@@ -16,9 +16,33 @@ import { hallLevelAt } from './generals.js';
 import { hex } from '../sim/hex.js';
 import { receive } from '../sim/logistics.js';
 import type { Front } from '../sim/mapgen.js';
-import { caravanFind, questMs, questOffers, questWounds, questXp, type QuestOffer, type QuestWorld } from '../sim/quests.js';
+import {
+  armyQuestMark,
+  armyQuestOffers,
+  armyQuestUnits,
+  caravanFind,
+  parseArmyQuestMark,
+  questFind,
+  questMs,
+  questOffers,
+  questSlot,
+  questWounds,
+  questXp,
+  type ArmyQuestOffer,
+  type QuestOffer,
+  type QuestWorld,
+} from '../sim/quests.js';
+import type { ArmyQuestKind } from '../data/index.js';
+import { loadArmy } from '../db/armies.js';
+import { insertQuestSite } from '../db/sites.js';
+import { lastWave } from '../db/waves.js';
+import { listMembers, loadHexes } from '../db/worlds.js';
+import { questCell } from '../sim/bridge.js';
+import { composeWave } from '../sim/waves.js';
+import { moveArmy } from './armies.js';
+import { createCamp, occupiedHexes } from './camps.js';
 import { createRng } from '../sim/rng.js';
-import { scoutReport } from '../sim/scouting.js';
+import { combatants, scoutReport } from '../sim/scouting.js';
 import { distanceShare, rollFind } from '../sim/sites.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroPayload, type HeroPayload } from './heroes.js';
@@ -49,19 +73,127 @@ async function questWorld(client: DbClient, data: GameData, world: World, hero: 
   };
 }
 
-// The quests the hero is offered now (none while it is away or has no home).
-export async function heroQuestOffers(client: DbClient, data: GameData, world: World, hero: Hero, at: Date): Promise<QuestOffer[]> {
-  if (hero.villageId === null || world.status !== 'running') return [];
+// The quests the hero is offered now (none while it has no home). Leading
+// an army standing in the field, with no army quest on, it is offered army
+// quests instead.
+export async function heroQuestOffers(client: DbClient, data: GameData, world: World, hero: Hero, at: Date): Promise<(QuestOffer | ArmyQuestOffer)[]> {
+  if (world.status !== 'running') return [];
+  if (hero.status === 'with_army') {
+    if (hero.armyId === null || (await loadArmy(client, hero.armyId)).status !== 'stationed') return [];
+    if (await armyQuestOf(client, world.id, hero.accountId)) return [];
+    return armyQuestOffers(data, { seed: world.seed, speed: world.speed, startedAt: world.startedAt ?? new Date(0) }, hero, at, hero.questsDone);
+  }
+  if (hero.villageId === null) return [];
   const home = await loadVillage(client, hero.villageId);
   return questOffers(data, await questWorld(client, data, world, hero), hero, hex(home.q, home.r), at, hero.questsDone);
 }
 
+// The army quest the hero is on: its place, and when it is gone.
+export interface ArmyQuest {
+  readonly kind: ArmyQuestKind;
+  readonly q: number;
+  readonly r: number;
+  readonly endsAt: string | null;
+}
+
+export async function armyQuestOf(client: DbClient, worldId: number, accountId: number): Promise<ArmyQuest | null> {
+  const { rows } = await client.query<{ quest: string; q: number; r: number; ends_at: Date | null }>(
+    `SELECT quest, q, r, ends_at FROM camps WHERE world_id = $1 AND status = 'active' AND quest LIKE $2
+     UNION ALL SELECT quest, q, r, ends_at FROM sites WHERE world_id = $1 AND status = 'unexplored' AND quest LIKE $2
+     ORDER BY q, r LIMIT 1`,
+    [worldId, `hero:${accountId}:%`],
+  );
+  const row = rows[0];
+  const mark = parseArmyQuestMark(row?.quest);
+  if (!row || !mark) return null;
+  return { kind: mark.kind, q: row.q, r: row.r, endsAt: row.ends_at?.toISOString() ?? null };
+}
+
+// The hero takes its army on an army quest: the quest's place is raised
+// near the army, and the army marches on it.
+async function startArmyQuest(client: DbClient, data: GameData, world: World, hero: Hero, offerId: string, at: Date): Promise<Hero> {
+  if (hero.status !== 'with_army' || hero.armyId === null) throw new RuleError(`${hero.name} must lead an army to take it on that quest`);
+  const army = await loadArmy(client, hero.armyId);
+  if (army.status !== 'stationed') throw new RuleError(`${hero.name}'s army must stand in the field to set out`);
+  if (total(combatants(data, army.units)) === 0) throw new RuleError(`${hero.name}'s army has nobody to fight`);
+  if (await armyQuestOf(client, world.id, hero.accountId)) throw new RuleError(`${hero.name} is already on a quest with the army`);
+  const offer = (await heroQuestOffers(client, data, world, hero, at)).find((o) => o.id === offerId);
+  if (!offer || !('army' in offer)) throw new RuleError('That quest is no longer on offer');
+  const def = data.quests.army.kinds[offer.kind];
+  const seed = (world.seed ^ Math.imul(hero.accountId + 1, 0x632be5ab) ^ questSlot(data, { startedAt: world.startedAt ?? new Date(0), speed: world.speed }, at)) >>> 0;
+  const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const));
+  const cell = questCell(data, terrain, await occupiedHexes(client, world.id), seed, def.minDistance, def.maxDistance, hex(army.targetQ, army.targetR));
+  if (!cell) throw new RuleError('There is no place for that quest anywhere near the army');
+  const fronts = world.activeFronts;
+  const front = fronts[seed % fronts.length]! as Front;
+  const last = await lastWave(client, world.id);
+  const players = (await listMembers(client, world.id)).length;
+  const units = composeWave(data, front, Math.max(1, last?.index ?? 1), armyQuestUnits(data, offer.kind, hero.level), seed, players);
+  const endsAt = new Date(at.getTime() + (def.lastsHours * MS_PER_HOUR) / world.speed);
+  const mark = armyQuestMark(hero.accountId, offer.kind);
+  if (offer.kind === 'barrow') {
+    const siteId = await insertQuestSite(client, world.id, { kind: 'kurgan', q: cell.q, r: cell.r, guardians: units }, mark, endsAt);
+    await scheduleEvent(client, world.id, endsAt, 'map_event_end', { siteId });
+  } else {
+    const reward = def.resources ? { resources: questFind(data, def.resources, hero.level) } : null;
+    const camp = await createCamp(
+      client,
+      data,
+      world,
+      { kind: offer.kind === 'warlord' ? 'lair' : 'bandit', front, q: cell.q, r: cell.r, units, waveId: null, reward, endsAt, quest: mark },
+      at,
+    );
+    await scheduleEvent(client, world.id, endsAt, 'map_event_end', { campId: camp.id });
+  }
+  const next: Hero = { ...hero, questsDone: [...hero.questsDone, offer.id].slice(-DONE_KEPT) };
+  await saveHero(client, next);
+  await moveArmy(client, data, world, army, { hex: cell }, at);
+  await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
+  return next;
+}
+
+// An army quest's place cleared (or searched): its hero gets the XP.
+export async function armyQuestDone(client: DbClient, data: GameData, world: World, mark: string | null | undefined, at: Date): Promise<void> {
+  const quest = parseArmyQuestMark(mark);
+  if (!quest) return;
+  const hero = await loadHero(client, world.id, quest.accountId);
+  const def = data.quests.army.kinds[quest.kind];
+  await saveHero(client, { ...hero, ...gainXp(data, hero, questXp(data, def, hero.kind)) });
+  await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  await tell(client, world, quest.accountId, {
+    kind: 'hero',
+    tier: 'digest',
+    title: '{name} has done: {quest}',
+    body: 'The army quest is done: {xp} XP for {name}.',
+    vars: { name: hero.name, quest: def.name, xp: questXp(data, def, hero.kind) },
+  }, at);
+}
+
+// An army quest's place gone, not done in time: its hero hears of it.
+// Returns whether it was one.
+export async function armyQuestGone(client: DbClient, data: GameData, world: World, mark: string | null | undefined, at: Date): Promise<boolean> {
+  const quest = parseArmyQuestMark(mark);
+  if (!quest) return false;
+  const hero = await loadHero(client, world.id, quest.accountId);
+  await notifyWorld(client, { worldId: world.id, type: 'heroes' });
+  await tell(client, world, quest.accountId, {
+    kind: 'hero',
+    tier: 'digest',
+    title: '{name} failed: {quest}',
+    body: 'The army did not get there in time, and the chance is gone.',
+    vars: { name: hero.name, quest: data.quests.army.kinds[quest.kind].name },
+  }, at);
+  return true;
+}
+
 // Sends the hero on one of its offers.
 export async function startQuest(client: DbClient, data: GameData, world: World, hero: Hero, offerId: string, at: Date): Promise<Hero> {
+  if (offerId.includes(':army:')) return startArmyQuest(client, data, world, hero, offerId, at);
   if (hero.status !== 'home') throw new RuleError(`${hero.name} must be at home, unhurt, to set out`);
   const home = await loadVillage(client, hero.villageId!);
   if (home.state.besieged) throw new RuleError(`${hero.name} won't leave ${home.name} in the middle of a battle`);
-  const offer = (await heroQuestOffers(client, data, world, hero, at)).find((o) => o.id === offerId);
+  const offer = (await heroQuestOffers(client, data, world, hero, at)).find((o): o is QuestOffer => o.id === offerId && !('army' in o));
   if (!offer) throw new RuleError('That quest is no longer on offer');
   const returnsAt = new Date(at.getTime() + questMs(offer, world.speed));
   const away: Hero = {
@@ -162,8 +294,12 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
       await notifyWorld(client, { worldId: world.id, type: 'scouting' });
       return { body: 'A full report on the next horde from the {front} is in the threats panel.', vars: { front: quest.front ?? '' } };
     }
-    case 'caravan': {
-      const found = caravanFind(data, hero.level);
+    case 'shrine':
+      return { body: 'Kept vigil under the oak, and came back wiser.' };
+    case 'caravan':
+    case 'hunt':
+    case 'tribute': {
+      const found = quest.kind === 'caravan' ? caravanFind(data, hero.level) : questFind(data, data.quests.kinds[quest.kind].resources, hero.level);
       const { ledger } = receive(home.state.ledger, at, found);
       await saveVillageState(client, home.id, { ...home.state, ledger });
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: home.id });

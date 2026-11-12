@@ -4,6 +4,8 @@ extends RefCounted
 ## server/src/sim/heroes.ts, quests.ts and names.ts.
 
 const MASK := 0xffffffff
+const QUEST_KINDS := ["ambush", "scout", "caravan", "hoard", "ruins", "hunt", "tribute", "shrine"]
+const ARMY_QUEST_KINDS := ["warband", "warlord", "barrow"]
 
 
 static func combine(a: Dictionary, b: Dictionary) -> Dictionary:
@@ -105,7 +107,7 @@ static func quest_offers(data: Dictionary, world: Dictionary, hero: Dictionary, 
 		if nearest == null or d < HexMath.distance(home, Vector2i(nearest.q, nearest.r)) or (d == HexMath.distance(home, Vector2i(nearest.q, nearest.r)) and s.id < nearest.id):
 			nearest = s
 	var open: Array = []
-	for kind in ["ambush", "scout", "caravan", "hoard", "ruins"]:
+	for kind in QUEST_KINDS:
 		if kind in ["ambush", "scout"] and world.fronts.is_empty():
 			continue
 		if kind == "hoard" and not world.gearLeft:
@@ -182,7 +184,12 @@ static func quest_ms(offer: Dictionary, world_speed: float) -> int:
 
 ## What the hero brings home from a caravan quest, more as it rises in level.
 static func caravan_find(data: Dictionary, level: int) -> Dictionary:
-	var base: Dictionary = data.quests.kinds.caravan.get("resources", {"wood": 0, "stone": 0, "grain": 0, "iron": 0})
+	return quest_find(data, data.quests.kinds.caravan.get("resources"), level)
+
+
+## A quest's `resources`, more as the hero rises in level.
+static func quest_find(data: Dictionary, resources: Variant, level: int) -> Dictionary:
+	var base: Dictionary = resources if resources != null else {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	var scale := 1.0 + float(data.quests.perLevel) * (level - 1)
 	return {"wood": LocalWaves.js_round(float(base.wood) * scale), "stone": LocalWaves.js_round(float(base.stone) * scale),
 		"grain": LocalWaves.js_round(float(base.grain) * scale), "iron": LocalWaves.js_round(float(base.iron) * scale)}
@@ -196,3 +203,49 @@ static func quest_wounds(offer: Dictionary, seed_value: int, account_id: int, de
 
 static func quest_xp(data: Dictionary, offer: Dictionary, kind: Variant) -> int:
 	return LocalWaves.js_round(float(offer.xp) * hero_factor(data, kind, "heroXp"))
+
+
+# --- Army quests (sim/quests.ts) ------------------------------------------------------
+
+## The army quests a hero leading an army is offered at `at`.
+static func army_quest_offers(data: Dictionary, world: Dictionary, hero: Dictionary, at: int, done: Array) -> Array:
+	var slot := quest_slot(data, world.startedAt, world.speed, at)
+	var rng := LocalRng.new((int(world.seed) ^ LocalRng.imul(int(hero.accountId) + 1, 0x9e3779b1) ^ LocalRng.imul(slot + 1, 0x27d4eb2f)) & MASK)
+	var open: Array = ARMY_QUEST_KINDS.duplicate()
+	for i in range(open.size() - 1, 0, -1):
+		var j := floori(rng.next() * (i + 1))
+		var swap: Variant = open[i]
+		open[i] = open[j]
+		open[j] = swap
+	var offers: Array = []
+	for kind in open:
+		if offers.size() >= int(data.quests.army.offers):
+			break
+		var id := "%d:army:%s" % [slot, kind]
+		if id in done:
+			continue
+		var def: Dictionary = data.quests.army.kinds[kind]
+		offers.append({"id": id, "kind": kind, "army": true, "distance": def.maxDistance, "hours": def.lastsHours, "xp": def.xp,
+			"units": army_quest_units(data, kind, int(hero.level))})
+	return offers
+
+
+## How many hold an army quest's place, for a hero of `level`.
+static func army_quest_units(data: Dictionary, kind: String, level: int) -> int:
+	var def: Dictionary = data.quests.army.kinds[kind]
+	return LocalWaves.js_round(float(def.units) + float(def.unitsPerLevel) * level)
+
+
+## The mark an army quest's camp or site carries: whose quest it is.
+static func army_quest_mark(account_id: int, kind: String) -> String:
+	return "hero:%d:%s" % [account_id, kind]
+
+
+## {accountId, kind} of a mark, or {} for none.
+static func parse_army_quest_mark(mark: Variant) -> Dictionary:
+	if not mark is String or not String(mark).begins_with("hero:"):
+		return {}
+	var parts := String(mark).split(":")
+	if parts.size() != 3 or not parts[1].is_valid_int() or not parts[2] in ARMY_QUEST_KINDS:
+		return {}
+	return {"accountId": int(parts[1]), "kind": parts[2]}

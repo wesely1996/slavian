@@ -2023,7 +2023,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(offers.length).toBe(scheduler.data.quests.offers);
     const slot = offers[0]!.id.split(':')[0];
     // Leave only the ambush and the ride out on offer.
-    await db.query(`UPDATE heroes SET quests_done = $2 WHERE world_id = $1`, [worldId, JSON.stringify(['caravan', 'hoard', 'ruins'].map((k) => `${slot}:${k}`))]);
+    await db.query(`UPDATE heroes SET quests_done = $2 WHERE world_id = $1`, [worldId, JSON.stringify(['caravan', 'hoard', 'ruins', 'hunt', 'tribute', 'shrine'].map((k) => `${slot}:${k}`))]);
     const quest = (path: string, body: object) => call('POST', `/v1/worlds/${worldId}/hero/${path}`, zora.token, body);
     let hero = (await quest('rename', { name: 'Dobrynya' })).body.hero;
     expect(hero.offers.map((o: { kind: string }) => o.kind).sort()).toEqual(['ambush', 'scout']);

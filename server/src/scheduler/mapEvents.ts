@@ -30,6 +30,7 @@ import { bountyTotal, failEvent, rewardEvent } from './eventOutcomes.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { takenHexes } from './horde.js';
 import { tell } from './notices.js';
+import { armyQuestGone } from './quests.js';
 
 const MS_PER_HOUR = 3_600_000;
 const mapEventPayload = z.object({ day: z.number().int().positive() });
@@ -101,6 +102,7 @@ export const mapEventHandlers: HandlerRegistry = {
       if (!camp || camp.status !== 'active') return;
       if ((await armiesHolding(client, world.id, camp.q, camp.r, ['marching', 'engaged'])).some((a) => a.orders === 'clear')) return;
       await deleteCamp(client, camp.id);
+      if (await armyQuestGone(client, data, world, camp.quest, event.dueAt)) return notifyWorld(client, { worldId: world.id, type: 'world' });
       await failEvent(client, data, world, camp.front as Front, 'The captives at ({q}, {r}) were taken away', { q: camp.q, r: camp.r }, event.dueAt);
     }
     if (siteId !== undefined) {
@@ -108,6 +110,7 @@ export const mapEventHandlers: HandlerRegistry = {
       if (!site || site.status !== 'unexplored') return;
       if ((await armiesHolding(client, world.id, site.q, site.r, ['marching', 'engaged', 'stationed'])).some((a) => a.orders === 'explore')) return;
       await deleteSite(client, site.id);
+      if (await armyQuestGone(client, data, world, site.quest, event.dueAt)) return notifyWorld(client, { worldId: world.id, type: 'world' });
       await failEvent(client, data, world, eventFront(hex(site.q, site.r), world.activeFronts), 'The forbidding ruin at ({q}, {r}) sank back into the earth', { q: site.q, r: site.r }, event.dueAt);
     }
     if (shipyardId !== undefined) {

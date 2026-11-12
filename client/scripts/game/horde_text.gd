@@ -42,9 +42,15 @@ static func camp(camp_: Dictionary, faction: String) -> String:
 
 ## What freeing a camp's captives brings: "Free them: 9 Axe Levies join
 ## the army" / "Free them: their goods, 600 resources, come home".
-static func captives(data: Dictionary, reward: Variant) -> String:
+static func captives(data: Dictionary, reward: Variant, quest: Variant = null) -> String:
 	if not reward is Dictionary:
 		return ""
+	# A hero's army quest camp: the spoils it holds.
+	if quest is String and String(quest).begins_with("hero:"):
+		var spoils := 0
+		for kind in reward.get("resources", {}):
+			spoils += int(reward.resources[kind])
+		return UI.t("Clear it: %d resources of spoils come home with the army") % spoils
 	if reward.has("units"):
 		var parts := PackedStringArray()
 		for unit in reward.units:

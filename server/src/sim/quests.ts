@@ -3,7 +3,7 @@
 // or wounded. A hero offers a few quests at a time, new ones every few game
 // hours, drawn from what the world holds: a horde to ambush or count, an
 // unguarded ancient site to search, a caravan or a hoard to find.
-import type { GameData, QuestKind } from '../data/index.js';
+import { ARMY_QUEST_KINDS, QUEST_KINDS, type ArmyQuestKind, type GameData, type QuestKind } from '../data/index.js';
 import { hexDistance, type Hex } from './hex.js';
 import { heroFactor } from './heroes.js';
 import { createRng } from './rng.js';
@@ -68,7 +68,7 @@ export function questOffers(
   const rng = createRng((world.seed ^ Math.imul(hero.accountId + 1, 0x85ebca6b) ^ Math.imul(slot + 1, 0xc2b2ae35)) >>> 0);
   const speed = data.heroes.speed * heroFactor(data, hero.kind, 'heroSpeed');
   const nearest = [...world.sites].sort((a, b) => hexDistance(home, a) - hexDistance(home, b) || a.id - b.id)[0];
-  const open: QuestKind[] = (['ambush', 'scout', 'caravan', 'hoard', 'ruins'] as const).filter((kind) => {
+  const open: QuestKind[] = QUEST_KINDS.filter((kind) => {
     if (kind === 'ambush' || kind === 'scout') return world.fronts.length > 0;
     if (kind === 'hoard') return world.gearLeft;
     if (kind === 'ruins') return nearest !== undefined;
@@ -111,7 +111,16 @@ export function questMs(offer: Pick<QuestOffer, 'hours'>, worldSpeed: number): n
 
 // What the hero brings home from a caravan quest, more as it rises in level.
 export function caravanFind(data: GameData, level: number): Record<'wood' | 'stone' | 'grain' | 'iron', number> {
-  const base = data.quests.kinds.caravan.resources ?? { wood: 0, stone: 0, grain: 0, iron: 0 };
+  return questFind(data, data.quests.kinds.caravan.resources, level);
+}
+
+// A quest's `resources`, more as the hero rises in level.
+export function questFind(
+  data: GameData,
+  resources: Record<'wood' | 'stone' | 'grain' | 'iron', number> | undefined,
+  level: number,
+): Record<'wood' | 'stone' | 'grain' | 'iron', number> {
+  const base = resources ?? { wood: 0, stone: 0, grain: 0, iron: 0 };
   const scale = 1 + data.quests.perLevel * (level - 1);
   return {
     wood: Math.round(base.wood * scale),
@@ -130,4 +139,63 @@ export function questWounds(offer: Pick<QuestOffer, 'risk' | 'id'>, seed: number
 // The XP a quest gives, times the hero's heroXp.
 export function questXp(data: GameData, offer: Pick<QuestOffer, 'xp'>, kind: string | null): number {
   return Math.round(offer.xp * heroFactor(data, kind, 'heroXp'));
+}
+
+// A quest the hero takes its army on (data/quests.json army): its place is
+// raised when it is taken, near where the army stands.
+export interface ArmyQuestOffer {
+  // `${slot}:army:${kind}`.
+  readonly id: string;
+  readonly kind: ArmyQuestKind;
+  readonly army: true;
+  // Hexes from the army, at most.
+  readonly distance: number;
+  // Game hours it stands, to be done in.
+  readonly hours: number;
+  readonly xp: number;
+  // How many hold the place.
+  readonly units: number;
+}
+
+// The army quests a hero leading an army is offered at `at`.
+export function armyQuestOffers(
+  data: GameData,
+  world: Pick<QuestWorld, 'seed' | 'speed' | 'startedAt'>,
+  hero: { accountId: number; level: number },
+  at: Date,
+  done: readonly string[] = [],
+): ArmyQuestOffer[] {
+  const slot = questSlot(data, world, at);
+  const rng = createRng((world.seed ^ Math.imul(hero.accountId + 1, 0x9e3779b1) ^ Math.imul(slot + 1, 0x27d4eb2f)) >>> 0);
+  const open: ArmyQuestKind[] = [...ARMY_QUEST_KINDS];
+  for (let i = open.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [open[i], open[j]] = [open[j]!, open[i]!];
+  }
+  const offers: ArmyQuestOffer[] = [];
+  for (const kind of open) {
+    if (offers.length >= data.quests.army.offers) break;
+    const id = `${slot}:army:${kind}`;
+    if (done.includes(id)) continue;
+    const def = data.quests.army.kinds[kind];
+    offers.push({ id, kind, army: true, distance: def.maxDistance, hours: def.lastsHours, xp: def.xp, units: armyQuestUnits(data, kind, hero.level) });
+  }
+  return offers;
+}
+
+// How many hold an army quest's place, for a hero of `level`.
+export function armyQuestUnits(data: GameData, kind: ArmyQuestKind, level: number): number {
+  const def = data.quests.army.kinds[kind];
+  return Math.round(def.units + def.unitsPerLevel * level);
+}
+
+// The mark an army quest's camp or site carries: whose quest it is.
+export function armyQuestMark(accountId: number, kind: ArmyQuestKind): string {
+  return `hero:${accountId}:${kind}`;
+}
+
+export function parseArmyQuestMark(mark: string | null | undefined): { accountId: number; kind: ArmyQuestKind } | null {
+  const m = /^hero:(\d+):(\w+)$/.exec(mark ?? '');
+  if (!m || !(ARMY_QUEST_KINDS as readonly string[]).includes(m[2]!)) return null;
+  return { accountId: Number(m[1]), kind: m[2] as ArmyQuestKind };
 }

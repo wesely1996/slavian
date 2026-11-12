@@ -35,7 +35,7 @@ import {
 } from '../commands/armies.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
-import { heroQuestOffers } from '../scheduler/quests.js';
+import { armyQuestOf, heroQuestOffers } from '../scheduler/quests.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
 import {
@@ -724,8 +724,11 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     await requireMember(account, id);
     const hero = await run({ accountId: account.id, worldId: id, now: clock(), ...schema.parse(request.body) });
-    const offers = await inTransaction(db, async (client) => heroQuestOffers(client, scheduler.data, await getWorld(client, id), hero, clock()));
-    return { hero: heroView(scheduler.data, hero, offers), serverTime: clock().toISOString() };
+    const [offers, armyQuest] = await inTransaction(db, async (client) => [
+      await heroQuestOffers(client, scheduler.data, await getWorld(client, id), hero, clock()),
+      await armyQuestOf(client, id, hero.accountId),
+    ] as const);
+    return { hero: heroView(scheduler.data, hero, offers, armyQuest), serverTime: clock().toISOString() };
   }
   app.post('/v1/worlds/:id/hero/quest', (request) => heroRoute(request, heroQuestBody, (input) => startQuestCommand(db, scheduler, input)));
   app.post('/v1/worlds/:id/hero/quest/cancel', (request) => heroRoute(request, emptyBody, (input) => cancelQuestCommand(db, scheduler, input)));

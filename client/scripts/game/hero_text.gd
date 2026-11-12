@@ -151,7 +151,7 @@ static func whereabouts(hero: Dictionary, village_id: int, place: String, now: f
 
 ## A quest's description, its front or site filled in (data/quests.json).
 static func quest_description(data: Dictionary, offer: Dictionary, site_name := "") -> String:
-	var def: Dictionary = data.get("quests", {}).get("kinds", {}).get(String(offer.kind), {})
+	var def: Dictionary = quest_def(data, offer)
 	var text := UI.t(def.get("description", ""))
 	text = text.replace("{front}", UI.t(String(offer.get("front", "")))) if offer.get("front") != null else text
 	return text.replace("{site}", site_name if site_name != "" else UI.t("ancient site"))
@@ -160,4 +160,15 @@ static func quest_description(data: Dictionary, offer: Dictionary, site_name := 
 ## "3h 20m · 25% risk · +40 XP"
 static func quest_terms(offer: Dictionary, world_speed: float) -> String:
 	var seconds := float(offer.hours) * 3600.0 / maxf(1.0, world_speed)
+	# An army quest: how many hold its place, and how long it stands.
+	if offer.get("army", false):
+		return UI.t("%d hold it · within %d hexes · gone in %s · +%d XP") % [int(offer.units), int(offer.distance), TimeUtil.format_duration(seconds), int(offer.xp)]
 	return UI.t("%s · %d%% risk · +%d XP") % [TimeUtil.format_duration(seconds), roundi(float(offer.risk) * 100.0), int(offer.xp)]
+
+
+## A quest's data: a quest the hero rides out on, or an army quest.
+static func quest_def(data: Dictionary, offer: Dictionary) -> Dictionary:
+	var quests: Dictionary = data.get("quests", {})
+	if offer.get("army", false) or quests.get("army", {}).get("kinds", {}).has(String(offer.kind)):
+		return quests.get("army", {}).get("kinds", {}).get(String(offer.kind), {})
+	return quests.get("kinds", {}).get(String(offer.kind), {})

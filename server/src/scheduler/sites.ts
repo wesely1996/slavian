@@ -2,6 +2,8 @@
 // fights the site's guardians on arrival, searches for a while
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
+import { parseArmyQuestMark } from '../sim/quests.js';
+import { armyQuestDone } from './quests.js';
 import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
@@ -213,7 +215,7 @@ export async function claimFind(
   await markExplored(client, site.id, accountId, find, at);
   await bridgeQuest(client, data, world, 'site', at);
   // A bridge quest's ruin.
-  if (site.quest) await bridgeQuest(client, data, world, site.quest as BridgeQuest, at);
+  if (site.quest && !parseArmyQuestMark(site.quest)) await bridgeQuest(client, data, world, site.quest as BridgeQuest, at);
   const name = data.sites.kinds[site.kind]?.name ?? 'site';
   for (const member of await listMembers(client, world.id)) {
     await tell(client, world, member.accountId, {
@@ -224,6 +226,8 @@ export async function claimFind(
       vars: { name, q: site.q, r: site.r, find: findText(data, find) },
     }, at);
   }
+  // A hero's army quest done.
+  await armyQuestDone(client, data, world, site.quest, at);
   // A forbidding ruin searched: the event's bounty.
   if (site.hard) await rewardEvent(client, data, world, accountId, { title: 'You searched the forbidding ruin at ({q}, {r})', vars: { q: site.q, r: site.r } }, at);
 }
