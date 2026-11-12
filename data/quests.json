@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Hero quests (PLAN.md M5 step 22). The hero offers `offers` quests at a time, new ones every `refreshHours` game hours. A quest takes the road there and back (`distance` hexes each way at the hero's speed; for ruins, the way to the site) plus `hours` on the spot; the hero then comes home with `xp` (times its heroXp) or, with chance `risk`, wounded. ambush: the next horde from the front sets out `delayHours` later, and hates the more for it (horde.json hatred); the more that horde already hates, the riskier the ambush (`hatredRisk` x its hatred added to `risk`, at most `maxRisk`) and the more XP it gives (x 1 + `hatredXp` x its hatred). scout: a full report on the next horde from the front. caravan: `resources` (times 1 + `perLevel` x (level - 1)) to the hero's village. hoard: a piece of gear the hero doesn't have. ruins: the hero searches an unguarded ancient site.",
+  "_comment": "Hero quests (PLAN.md M5 step 22). The hero offers `offers` quests at a time, new ones every `refreshHours` game hours. A quest takes the road there and back (`distance` hexes each way at the hero's speed; for ruins, the way to the site) plus `hours` on the spot; the hero then comes home with `xp` (times its heroXp) or, with chance `risk`, wounded. ambush: the next horde from the front sets out `delayHours` later, and hates the more for it (horde.json hatred); the more that horde already hates, the riskier the ambush (`hatredRisk` x its hatred added to `risk`, at most `maxRisk`) and the more XP it gives (x 1 + `hatredXp` x its hatred). scout: a full report on the next horde from the front. caravan: `resources` (times 1 + `perLevel` x (level - 1)) to the hero's village. hoard: a piece of gear the hero doesn't have. ruins: the hero searches an unguarded ancient site. hunt and tribute: like caravan, `resources` home. shrine: XP only. Army quests (`army`): offered instead while the hero leads an army standing in the field (`offers` of them at a time, one quest at a time): taking one raises its place `minDistance`-`maxDistance` hexes from the army (warband: a camp, warlord: a lair, barrow: a guarded ancient site, hard to take) held by `units` + `unitsPerLevel` x the hero's level of a front's troops, and the army marches on it. Cleared (or searched) within `lastsHours`, it gives the hero `xp` and its `resources` (times 1 + `perLevel` x (level - 1)) ride home with the army; the barrow gives a hard ruin's finds instead. Not done in time, the place is gone.",
   "offers": 3,
   "refreshHours": 8,
   "perLevel": 0.1,
@@ -8,28 +8,135 @@
     "ambush": {
       "name": "Ambush the horde's road",
       "description": "Fell trees across the road and burn the fords: the next horde from the {front} sets out later.",
-      "hours": 4, "distance": 5, "xp": 40, "risk": 0.25, "delayHours": 6, "hatredRisk": 0.6, "hatredXp": 3, "maxRisk": 0.7
+      "hours": 4,
+      "distance": 5,
+      "xp": 40,
+      "risk": 0.25,
+      "delayHours": 6,
+      "hatredRisk": 0.6,
+      "hatredXp": 3,
+      "maxRisk": 0.7
     },
     "scout": {
       "name": "Ride beyond the border",
       "description": "Count the next horde from the {front} with your own eyes: its size, its troops and its stance.",
-      "hours": 3, "distance": 6, "xp": 25, "risk": 0.15
+      "hours": 3,
+      "distance": 6,
+      "xp": 25,
+      "risk": 0.15
     },
     "caravan": {
       "name": "Find the lost caravan",
       "description": "A merchant's train went missing in the woods. Bring back what is left of it.",
-      "hours": 3, "distance": 4, "xp": 20, "risk": 0.1,
-      "resources": { "wood": 300, "stone": 300, "grain": 300, "iron": 150 }
+      "hours": 3,
+      "distance": 4,
+      "xp": 20,
+      "risk": 0.1,
+      "resources": {
+        "wood": 300,
+        "stone": 300,
+        "grain": 300,
+        "iron": 150
+      }
     },
     "hoard": {
       "name": "The smith's hoard",
       "description": "An old smith buried his best work under his hearth before the hordes came. Dig it up.",
-      "hours": 5, "distance": 4, "xp": 30, "risk": 0.2
+      "hours": 5,
+      "distance": 4,
+      "xp": 30,
+      "risk": 0.2
     },
     "ruins": {
       "name": "Search the ruins",
       "description": "Search the {site} in person: nothing guards it now.",
-      "hours": 4, "distance": 0, "xp": 35, "risk": 0.15
+      "hours": 4,
+      "distance": 0,
+      "xp": 35,
+      "risk": 0.15
+    },
+    "hunt": {
+      "name": "Hunt the great boar",
+      "description": "A boar the size of an ox tramples the fields. Bring it down and feast the village.",
+      "hours": 4,
+      "distance": 3,
+      "xp": 30,
+      "risk": 0.2,
+      "resources": {
+        "wood": 0,
+        "stone": 0,
+        "grain": 700,
+        "iron": 0
+      }
+    },
+    "tribute": {
+      "name": "Collect the hill clans' tribute",
+      "description": "The hill clans owe tribute since the last horde was turned back. Ride out and bring it home.",
+      "hours": 5,
+      "distance": 6,
+      "xp": 25,
+      "risk": 0.1,
+      "resources": {
+        "wood": 100,
+        "stone": 400,
+        "grain": 0,
+        "iron": 300
+      }
+    },
+    "shrine": {
+      "name": "Pilgrimage to Perun's oak",
+      "description": "Keep vigil a night and a day under the thunder god's oak, and come back wiser.",
+      "hours": 8,
+      "distance": 5,
+      "xp": 80,
+      "risk": 0.05
+    }
+  },
+  "army": {
+    "offers": 2,
+    "kinds": {
+      "warband": {
+        "name": "Break the raiders' warband",
+        "description": "Raiders gather in the wilds to fall on your roads. Take the army and scatter them before they strike.",
+        "minDistance": 3,
+        "maxDistance": 6,
+        "units": 25,
+        "unitsPerLevel": 4,
+        "lastsHours": 24,
+        "xp": 70,
+        "resources": {
+          "wood": 600,
+          "stone": 600,
+          "grain": 600,
+          "iron": 300
+        }
+      },
+      "warlord": {
+        "name": "Hunt down the Nav warlord",
+        "description": "A warlord of Nav has made a den in the borderland. Lead the army against him and his guard.",
+        "minDistance": 5,
+        "maxDistance": 9,
+        "units": 45,
+        "unitsPerLevel": 6,
+        "lastsHours": 36,
+        "xp": 140,
+        "resources": {
+          "wood": 1200,
+          "stone": 1200,
+          "grain": 1000,
+          "iron": 800
+        }
+      },
+      "barrow": {
+        "name": "Storm the haunted barrow",
+        "description": "The dead walk around a chieftain's barrow, and his grave goods lie within. Break their ring and search it.",
+        "minDistance": 4,
+        "maxDistance": 8,
+        "units": 35,
+        "unitsPerLevel": 5,
+        "lastsHours": 36,
+        "xp": 110
+      }
     }
   }
 }

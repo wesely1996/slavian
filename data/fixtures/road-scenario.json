@@ -1139,24 +1139,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "4:ambush",
-        "kind": "ambush",
-        "front": "north",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "4:hoard",
-        "kind": "hoard",
+        "id": "4:tribute",
+        "kind": "tribute",
         "front": null,
         "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
        },
        {
         "id": "4:scout",
@@ -1167,8 +1157,19 @@
         "hours": 5,
         "xp": 25,
         "risk": 0.15
+       },
+       {
+        "id": "4:hunt",
+        "kind": "hunt",
+        "front": null,
+        "siteId": null,
+        "distance": 3,
+        "hours": 5,
+        "xp": 30,
+        "risk": 0.2
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -3690,24 +3691,14 @@
       "quest": null,
       "offers": [
        {
-        "id": "4:ambush",
-        "kind": "ambush",
-        "front": "north",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 40,
-        "risk": 0.25
-       },
-       {
-        "id": "4:hoard",
-        "kind": "hoard",
+        "id": "4:tribute",
+        "kind": "tribute",
         "front": null,
         "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
        },
        {
         "id": "4:scout",
@@ -3718,8 +3709,19 @@
         "hours": 5,
         "xp": 25,
         "risk": 0.15
+       },
+       {
+        "id": "4:hunt",
+        "kind": "hunt",
+        "front": null,
+        "siteId": null,
+        "distance": 3,
+        "hours": 5,
+        "xp": 30,
+        "risk": 0.2
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -6403,36 +6405,37 @@
       "quest": null,
       "offers": [
        {
-        "id": "11:caravan",
-        "kind": "caravan",
-        "front": null,
+        "id": "11:ambush",
+        "kind": "ambush",
+        "front": "north",
         "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 64,
+        "risk": 0.37
        },
        {
-        "id": "11:ruins",
-        "kind": "ruins",
+        "id": "11:hunt",
+        "kind": "hunt",
         "front": null,
-        "siteId": 1,
+        "siteId": null,
         "distance": 3,
         "hours": 5,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "11:hoard",
-        "kind": "hoard",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "11:shrine",
+        "kind": "shrine",
+        "front": null,
+        "siteId": null,
+        "distance": 5,
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -9050,36 +9053,37 @@
       "quest": null,
       "offers": [
        {
-        "id": "11:caravan",
-        "kind": "caravan",
-        "front": null,
+        "id": "11:ambush",
+        "kind": "ambush",
+        "front": "north",
         "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 64,
+        "risk": 0.37
        },
        {
-        "id": "11:ruins",
-        "kind": "ruins",
+        "id": "11:hunt",
+        "kind": "hunt",
         "front": null,
-        "siteId": 1,
+        "siteId": null,
         "distance": 3,
         "hours": 5,
-        "xp": 35,
-        "risk": 0.15
-       },
-       {
-        "id": "11:hoard",
-        "kind": "hoard",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "11:shrine",
+        "kind": "shrine",
+        "front": null,
+        "siteId": null,
+        "distance": 5,
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -11988,26 +11992,6 @@
       "quest": null,
       "offers": [
        {
-        "id": "18:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "18:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       },
-       {
         "id": "18:hoard",
         "kind": "hoard",
         "front": null,
@@ -12016,8 +12000,29 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "18:tribute",
+        "kind": "tribute",
+        "front": null,
+        "siteId": null,
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
+       },
+       {
+        "id": "18:ruins",
+        "kind": "ruins",
+        "front": null,
+        "siteId": 1,
+        "distance": 3,
+        "hours": 5,
+        "xp": 35,
+        "risk": 0.15
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],
@@ -14926,26 +14931,6 @@
       "quest": null,
       "offers": [
        {
-        "id": "18:scout",
-        "kind": "scout",
-        "front": "north",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "18:caravan",
-        "kind": "caravan",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 4.333333333333333,
-        "xp": 20,
-        "risk": 0.1
-       },
-       {
         "id": "18:hoard",
         "kind": "hoard",
         "front": null,
@@ -14954,8 +14939,29 @@
         "hours": 6.333333333333333,
         "xp": 30,
         "risk": 0.2
+       },
+       {
+        "id": "18:tribute",
+        "kind": "tribute",
+        "front": null,
+        "siteId": null,
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
+       },
+       {
+        "id": "18:ruins",
+        "kind": "ruins",
+        "front": null,
+        "siteId": 1,
+        "distance": 3,
+        "hours": 5,
+        "xp": 35,
+        "risk": 0.15
        }
-      ]
+      ],
+      "armyQuest": null
      }
     ],
     "generals": [],

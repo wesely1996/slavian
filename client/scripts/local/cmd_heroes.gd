@@ -99,8 +99,108 @@ static func on_hero_arrive(_server: LocalServer, world: Dictionary, event: Dicti
 const DONE_KEPT := 30
 
 
+## The army quest the hero is on (scheduler/quests.ts armyQuestOf):
+## {kind, q, r, endsAt}, or null.
+static func army_quest_of(world: Dictionary, account_id: int) -> Variant:
+	var prefix := "hero:%d:" % account_id
+	var found: Array = []
+	for c in world.camps:
+		if c.status == "active" and String(c.get("quest", "") if c.get("quest") != null else "").begins_with(prefix):
+			found.append(c)
+	for s in world.sites:
+		if s.status == "unexplored" and String(s.get("quest", "") if s.get("quest") != null else "").begins_with(prefix):
+			found.append(s)
+	found.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.q) < int(b.q) or (int(a.q) == int(b.q) and int(a.r) < int(b.r)))
+	for place in found:
+		var mark := LocalHeroes.parse_army_quest_mark(place.quest)
+		if not mark.is_empty():
+			return {"kind": mark.kind, "q": place.q, "r": place.r, "endsAt": LocalTime.iso(place.endsAt) if place.get("endsAt") != null else null}
+	return null
+
+
+## The hero takes its army on an army quest: the quest's place is raised
+## near the army, and the army marches on it.
+static func _start_army_quest(server: LocalServer, world: Dictionary, hero: Dictionary, offer_id: String, now: int) -> Dictionary:
+	var data := server.data
+	if hero.status != "with_army" or hero.armyId == null:
+		return LocalVillage.rule("%s must lead an army to take it on that quest" % hero.name)
+	var army := LocalArmies.find_army(world, int(hero.armyId))
+	if army.status != "stationed":
+		return LocalVillage.rule("%s's army must stand in the field to set out" % hero.name)
+	if LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
+		return LocalVillage.rule("%s's army has nobody to fight" % hero.name)
+	if army_quest_of(world, int(hero.accountId)) != null:
+		return LocalVillage.rule("%s is already on a quest with the army" % hero.name)
+	var offer: Dictionary = {}
+	for o in server.quest_offers(world, hero, now):
+		if o.id == offer_id and o.get("army", false):
+			offer = o
+	if offer.is_empty():
+		return LocalVillage.rule("That quest is no longer on offer")
+	var def: Dictionary = data.quests.army.kinds[offer.kind]
+	var seed_value := (int(world.seed) ^ LocalRng.imul(int(hero.accountId) + 1, 0x632be5ab) ^ LocalHeroes.quest_slot(data, world.startedAt, world.speed, now)) & 0xffffffff
+	var taken := LocalBattles.taken_hexes(world)
+	for f in world.forts:
+		taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+	var cell := LocalBridge.quest_cell(data, world.hexes, taken, seed_value, int(def.minDistance), int(def.maxDistance), Vector2i(army.targetQ, army.targetR))
+	if cell == Vector2i.MAX:
+		return LocalVillage.rule("There is no place for that quest anywhere near the army")
+	var fronts: Array = world.activeFronts
+	var front: String = fronts[seed_value % fronts.size()]
+	var last := LocalBridgeCommands._last_horde(world)
+	var index := maxi(1, int(last.index) if not last.is_empty() else 1)
+	var units := LocalWaves.compose_wave(data, front, index, LocalHeroes.army_quest_units(data, offer.kind, int(hero.level)), seed_value, world.members.size())
+	var ends_at := LocalTime.ms(now + (float(def.lastsHours) * LocalTime.MS_PER_HOUR) / world.speed)
+	var mark := LocalHeroes.army_quest_mark(int(hero.accountId), offer.kind)
+	if offer.kind == "barrow":
+		var site := {"id": world.next.site, "kind": "kurgan", "q": cell.x, "r": cell.y, "guardians": units, "guardiansSeen": false,
+			"status": "unexplored", "exploredBy": null, "find": null, "exploredAt": null, "hard": true, "endsAt": ends_at, "quest": mark}
+		world.next.site += 1
+		world.sites.append(site)
+		server.schedule(world, ends_at, "map_event_end", {"siteId": site.id})
+	else:
+		var reward: Variant = {"resources": LocalHeroes.quest_find(data, def.resources, int(hero.level))} if def.get("resources") != null else null
+		var camp := LocalBattles.create_camp(server, world, {"kind": "lair" if offer.kind == "warlord" else "bandit", "front": front, "q": cell.x, "r": cell.y,
+			"units": units, "waveId": null, "reward": reward, "endsAt": ends_at, "quest": mark}, now)
+		server.schedule(world, ends_at, "map_event_end", {"campId": camp.id})
+	var done: Array = hero.questsDone + [offer.id]
+	hero.questsDone = done.slice(maxi(0, done.size() - DONE_KEPT))
+	var moved := LocalArmies.move(server, world, army, {"target": {"q": cell.x, "r": cell.y}}, now)
+	if moved.has("error"):
+		return moved
+	return hero
+
+
+## An army quest's place cleared (or searched): its hero gets the XP.
+static func army_quest_done(server: LocalServer, world: Dictionary, mark: Variant, at: int) -> void:
+	var quest := LocalHeroes.parse_army_quest_mark(mark)
+	if quest.is_empty():
+		return
+	var data := server.data
+	var hero := LocalArmies.hero_of(world, int(quest.accountId))
+	var def: Dictionary = data.quests.army.kinds[quest.kind]
+	var xp := LocalHeroes.quest_xp(data, def, hero.kind)
+	hero.merge(LocalHeroes.gain_xp(data, hero, xp), true)
+	LocalInbox.tell(server, world, quest.accountId, {"kind": "hero", "tier": "digest", "title": "{name} has done: {quest}",
+		"body": "The army quest is done: {xp} XP for {name}.", "vars": {"name": hero.name, "quest": def.name, "xp": xp}}, at)
+
+
+## An army quest's place gone, not done in time: its hero hears of it.
+## Returns whether it was one.
+static func army_quest_gone(server: LocalServer, world: Dictionary, mark: Variant, at: int) -> bool:
+	var quest := LocalHeroes.parse_army_quest_mark(mark)
+	if quest.is_empty():
+		return false
+	var hero := LocalArmies.hero_of(world, int(quest.accountId))
+	LocalInbox.tell(server, world, quest.accountId, {"kind": "hero", "tier": "digest", "title": "{name} failed: {quest}",
+		"body": "The army did not get there in time, and the chance is gone.", "vars": {"name": hero.name, "quest": server.data.quests.army.kinds[quest.kind].name}}, at)
+	return true
+
+
 ## Sends the hero on one of its offers.
 static func start_quest(server: LocalServer, world: Dictionary, hero: Dictionary, offer_id: String, now: int) -> Dictionary:
+	if ":army:" in offer_id:
+		return _start_army_quest(server, world, hero, offer_id, now)
 	if hero.status != "home":
 		return LocalVillage.rule("%s must be at home, unhurt, to set out" % hero.name)
 	var home := server.find_village(world, int(hero.villageId))
@@ -108,7 +208,7 @@ static func start_quest(server: LocalServer, world: Dictionary, hero: Dictionary
 		return LocalVillage.rule("%s won't leave %s in the middle of a battle" % [hero.name, home.name])
 	var offer: Dictionary = {}
 	for o in server.quest_offers(world, hero, now):
-		if o.id == offer_id:
+		if o.id == offer_id and not o.get("army", false):
 			offer = o
 	if offer.is_empty():
 		return LocalVillage.rule("That quest is no longer on offer")
@@ -196,8 +296,10 @@ static func _fulfil(server: LocalServer, world: Dictionary, hero: Dictionary, qu
 			mission.status = "done"
 			return {"body": "A full report on the next horde from the {front} is in the threats panel.",
 				"vars": {"front": quest.front if quest.front != null else ""}}
-		"caravan":
-			var found := LocalHeroes.caravan_find(data, int(hero.level))
+		"shrine":
+			return {"body": "Kept vigil under the oak, and came back wiser."}
+		"caravan", "hunt", "tribute":
+			var found := LocalHeroes.caravan_find(data, int(hero.level)) if quest.kind == "caravan" else LocalHeroes.quest_find(data, data.quests.kinds[quest.kind].get("resources"), int(hero.level))
 			home.state.ledger = LocalLogistics.receive(home.state.ledger, at, found).ledger
 			changed.append(["village", home.id])
 			return {"body": "Brought back {wood} wood, {stone} stone, {grain} grain and {iron} iron.", "vars": found}

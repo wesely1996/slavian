@@ -1681,8 +1681,9 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	if result.cleared:
 		camp.status = "cleared"
 		after.loot = camp_loot(data, camp.units)
-		# Captives freed: troops join the army, goods ride home with it.
-		if camp.kind == "captives" and camp.get("reward") != null:
+		# Captives freed (or a hero's quest camp cleared): troops join the army,
+		# goods ride home with it.
+		if camp.get("reward") != null:
 			if camp.reward.has("units"):
 				after.units = LocalCamps.add_units(after.units, camp.reward.units)
 			else:
@@ -1698,7 +1699,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		if camp.kind == "lair":
 			LocalBattles.bridge_quest(server, world, "lair", at)
 		# A bridge quest's lair.
-		if camp.get("quest") != null:
+		if camp.get("quest") != null and LocalHeroes.parse_army_quest_mark(camp.quest).is_empty():
 			LocalBattles.bridge_quest(server, world, String(camp.quest), at)
 		server.onboarding_step(world, int(army.ownerAccountId), "camp", at, changed)
 	else:
@@ -1724,6 +1725,9 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
 		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
 		"vars": {"where": where, "loot": int(LocalLogistics.total(after.loot if result.cleared and after.get("loot") != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
+	# A hero's army quest done.
+	if result.cleared:
+		LocalHeroCommands.army_quest_done(server, world, camp.get("quest"), at)
 	# Captives freed: the event's bounty.
 	if result.cleared and camp.kind == "captives":
 		LocalEvents.reward(server, world, army.ownerAccountId, {"title": "You freed the captives at ({q}, {r})", "vars": {"q": camp.q, "r": camp.r}}, at, changed)
@@ -1835,7 +1839,7 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 	site.exploredAt = at
 	LocalBattles.bridge_quest(server, world, "site", at)
 	# A bridge quest's ruin.
-	if site.get("quest") != null:
+	if site.get("quest") != null and LocalHeroes.parse_army_quest_mark(site.quest).is_empty():
 		LocalBattles.bridge_quest(server, world, String(site.quest), at)
 	var data := server.data
 	var name: String = data.sites.kinds.get(site.kind, {}).get("name", "site")
@@ -1846,6 +1850,8 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 			"title": "The {name} at ({q}, {r}) gave up {find}",
 			"body": data.lore.scrolls.get(find.scroll, {}).get("description", "") if scroll else "Explored and done.",
 			"vars": {"name": name, "q": site.q, "r": site.r, "find": find_text(data, find)}}, at)
+	# A hero's army quest done.
+	LocalHeroCommands.army_quest_done(server, world, site.get("quest"), at)
 	# A forbidding ruin searched: the event's bounty.
 	if site.get("hard", false):
 		LocalEvents.reward(server, world, account_id, {"title": "You searched the forbidding ruin at ({q}, {r})", "vars": {"q": site.q, "r": site.r}}, at, changed)

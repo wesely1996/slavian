@@ -3,6 +3,8 @@
 // send part of themselves with the next wave of their front, ambush
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
+import { parseArmyQuestMark } from '../sim/quests.js';
+import { armyQuestDone } from './quests.js';
 import { villageBonuses } from '../sim/clans.js';
 import { onboardingStep } from './onboarding.js';
 import { rewardEvent } from './eventOutcomes.js';
@@ -83,8 +85,9 @@ export async function createCamp(
   at: Date,
 ): Promise<Camp> {
   const created = await insertCamp(client, { reward: null, endsAt: null, ...camp, worldId: world.id, createdAt: at });
-  // Captives' guards only hold them: they don't grow or waylay caravans.
-  if (created.kind !== 'captives') {
+  // Captives' guards only hold them, as a hero's quest camp waits for its
+  // hero: they don't grow or waylay caravans.
+  if (created.kind !== 'captives' && !parseArmyQuestMark(created.quest)) {
     await scheduleEvent(client, world.id, new Date(at.getTime() + hoursMs(data.camps.growth.everyHours, world.speed)), 'camp_grow', {
       campId: created.id,
     });
@@ -199,7 +202,7 @@ export async function afterSettling(client: DbClient, data: GameData, world: Wor
 export async function campsJoin(client: DbClient, data: GameData, world: World, wave: Wave): Promise<void> {
   let composition = wave.composition;
   for (const camp of await listCamps(client, world.id)) {
-    if (camp.front !== wave.front || camp.kind === 'captives') continue;
+    if (camp.front !== wave.front || camp.kind === 'captives' || parseArmyQuestMark(camp.quest)) continue;
     const { sent, kept } = feed(data, camp.units);
     if (total(sent) === 0) continue;
     composition = addUnits(composition, sent);
@@ -271,8 +274,9 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
   if (result.cleared) {
     await markCleared(client, camp.id);
     after = { ...after, loot: campLoot(data, camp.units) };
-    // Captives freed: troops join the army, goods ride home with it.
-    if (camp.kind === 'captives' && camp.reward) {
+    // Captives freed (or a hero's quest camp cleared): troops join the army,
+    // goods ride home with it.
+    if (camp.reward) {
       if ('units' in camp.reward) after = { ...after, units: addUnits(after.units, camp.reward.units) };
       else after = { ...after, loot: mapResources((kind) => (after.loot?.[kind] ?? 0) + (camp.reward as { resources: Resources }).resources[kind]) };
     }
@@ -282,7 +286,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     if (ember) await addEmbers(client, world.id, 1);
     if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
     // A bridge quest's lair.
-    if (camp.quest) await bridgeQuest(client, data, world, camp.quest as BridgeQuest, at);
+    if (camp.quest && !parseArmyQuestMark(camp.quest)) await bridgeQuest(client, data, world, camp.quest as BridgeQuest, at);
     await onboardingStep(client, data, world, army.ownerAccountId, 'camp', at);
   } else {
     await saveCampUnits(client, camp.id, result.campNow);
@@ -313,6 +317,8 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
       : '{kills} of them fell; {defenders} still hold it.',
     vars: { where, loot: total(result.cleared && after.loot ? after.loot : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
+  // A hero's army quest done.
+  if (result.cleared) await armyQuestDone(client, data, world, camp.quest, at);
   // Captives freed: the event's bounty.
   if (result.cleared && camp.kind === 'captives') await rewardEvent(client, data, world, army.ownerAccountId, { title: 'You freed the captives at ({q}, {r})', vars: { q: camp.q, r: camp.r } }, at);
   await notifyWorld(client, { worldId: world.id, type: 'battles' });

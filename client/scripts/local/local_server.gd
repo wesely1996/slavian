@@ -941,6 +941,7 @@ func as_stored(world: Dictionary) -> void:
 			b[key] = LocalStore.stored(b[key])
 	for c in world.camps:
 		c.units = LocalStore.stored(c.units)
+		c.reward = LocalStore.stored(c.get("reward"))
 	for c in world.caravans:
 		for key in ["cargo", "carriedBack", "escort", "ambush"]:
 			c[key] = LocalStore.stored(c[key])
@@ -1291,12 +1292,22 @@ func _hero_view(world: Dictionary, h: Dictionary, now: int) -> Dictionary:
 		"path": h.path.map(func(st: Dictionary) -> Array: return [st.q, st.r, st.atMs]) if h.path != null else null,
 		"departsAt": h.departsAt, "arrivesAt": h.arrivesAt, "woundedUntil": h.woundedUntil, "quest": h.quest,
 		"offers": quest_offers(world, h, now),
+		"armyQuest": LocalHeroCommands.army_quest_of(world, int(h.accountId)),
 	}
 
 
 ## The quests a hero is offered now (scheduler/quests.ts heroQuestOffers).
 func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
-	if hero.villageId == null or world.status != "running":
+	if world.status != "running":
+		return []
+	# Leading an army standing in the field, with no army quest on: army quests.
+	if hero.status == "with_army":
+		if hero.armyId == null or LocalArmies.find_army(world, int(hero.armyId)).status != "stationed":
+			return []
+		if LocalHeroCommands.army_quest_of(world, int(hero.accountId)) != null:
+			return []
+		return LocalHeroes.army_quest_offers(data, world, hero, now, hero.questsDone)
+	if hero.villageId == null:
 		return []
 	var home: Dictionary = {}
 	for v in world.villages:

@@ -201,6 +201,9 @@ static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dict
 		if LocalArmies.armies_holding(world, Vector2i(camp.q, camp.r), ["marching", "engaged"]).any(func(a: Dictionary) -> bool: return a.orders == "clear"):
 			return
 		world.camps.erase(camp)
+		if LocalHeroCommands.army_quest_gone(server, world, camp.get("quest"), int(event.dueAt)):
+			changed.append(["world"])
+			return
 		fail(server, world, String(camp.front), "The captives at ({q}, {r}) were taken away", {"q": camp.q, "r": camp.r}, int(event.dueAt))
 	if p.get("siteId") != null:
 		var site: Dictionary = {}
@@ -212,6 +215,9 @@ static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dict
 		if LocalArmies.armies_holding(world, Vector2i(site.q, site.r), ["marching", "engaged", "stationed"]).any(func(a: Dictionary) -> bool: return a.orders == "explore"):
 			return
 		world.sites.erase(site)
+		if LocalHeroCommands.army_quest_gone(server, world, site.get("quest"), int(event.dueAt)):
+			changed.append(["world"])
+			return
 		fail(server, world, event_front(world, Vector2i(site.q, site.r)), "The forbidding ruin at ({q}, {r}) sank back into the earth", {"q": site.q, "r": site.r}, int(event.dueAt))
 	if p.get("shipyardId") != null:
 		var yard := find_shipyard(world, int(p.shipyardId))

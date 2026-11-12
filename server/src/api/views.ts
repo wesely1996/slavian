@@ -39,10 +39,10 @@ import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { listRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
-import { heroQuestOffers } from '../scheduler/quests.js';
+import { armyQuestOf, heroQuestOffers, type ArmyQuest } from '../scheduler/quests.js';
 import { forecastMarches } from '../scheduler/waves.js';
 import type { March } from '../sim/waves.js';
-import type { QuestOffer } from '../sim/quests.js';
+import type { ArmyQuestOffer, QuestOffer } from '../sim/quests.js';
 
 export interface VillageView {
   id: number;
@@ -422,7 +422,7 @@ export async function researchListView(client: DbClient, worldId: number) {
 }
 
 // Heroes are visible to the whole group, with the quests each is offered.
-export function heroView(data: GameData, hero: Hero, offers: readonly QuestOffer[] = []) {
+export function heroView(data: GameData, hero: Hero, offers: readonly (QuestOffer | ArmyQuestOffer)[] = [], armyQuest: ArmyQuest | null = null) {
   return {
     accountId: hero.accountId,
     // Who it is in the roster (data/heroes.json), for its portrait and traits.
@@ -449,13 +449,15 @@ export function heroView(data: GameData, hero: Hero, offers: readonly QuestOffer
     // The quest it is on (status 'questing'), and the ones it is offered.
     quest: hero.quest,
     offers,
+    // The army quest it leads its army on: its place, and when it is gone.
+    armyQuest,
   };
 }
 
 export async function heroesView(client: DbClient, data: GameData, worldId: number, at: Date = new Date()) {
   const world = await getWorld(client, worldId);
   const out = [];
-  for (const hero of await listHeroes(client, worldId)) out.push(heroView(data, hero, await heroQuestOffers(client, data, world, hero, at)));
+  for (const hero of await listHeroes(client, worldId)) out.push(heroView(data, hero, await heroQuestOffers(client, data, world, hero, at), await armyQuestOf(client, worldId, hero.accountId)));
   return out;
 }
 

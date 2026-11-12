@@ -119,9 +119,9 @@ export function bridgeBonuses(data: GameData, bridge: Pick<BridgeState, 'stage'>
 // maxDistance hexes from the Holy City, nearest first, each ring walked
 // from a point the seed picks. Not on water, peaks or the edge belt, and
 // not where anything else stands (`taken`, "q,r" keys).
-export function questCell(data: GameData, terrain: ReadonlyMap<string, string>, taken: ReadonlySet<string>, seed: number, minDistance: number, maxDistance: number): Hex | null {
+export function questCell(data: GameData, terrain: ReadonlyMap<string, string>, taken: ReadonlySet<string>, seed: number, minDistance: number, maxDistance: number, center: Hex = hex(0, 0)): Hex | null {
   for (let d = minDistance; d <= maxDistance; d++) {
-    const cells = ring(hex(0, 0), d);
+    const cells = ring(center, d);
     const start = (seed >>> 0) % cells.length;
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[(start + i) % cells.length]!;

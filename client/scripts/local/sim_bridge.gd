@@ -78,9 +78,9 @@ static func bridge_bonuses(data: Dictionary, bridge: Variant) -> Dictionary:
 ## sim/bridge.ts questCell: where a quest's ruin or lair rises: the first
 ## open hex minDistance to maxDistance from the Holy City, nearest first,
 ## each ring walked from a point the seed picks (Vector2i.MAX: none).
-static func quest_cell(data: Dictionary, terrain: Dictionary, taken: Dictionary, seed_value: int, min_distance: int, max_distance: int) -> Vector2i:
+static func quest_cell(data: Dictionary, terrain: Dictionary, taken: Dictionary, seed_value: int, min_distance: int, max_distance: int, center := Vector2i.ZERO) -> Vector2i:
 	for d in range(min_distance, max_distance + 1):
-		var cells := HexMath.ring(Vector2i.ZERO, d)
+		var cells := HexMath.ring(center, d)
 		var start := (seed_value & 0xffffffff) % cells.size()
 		for i in cells.size():
 			var cell: Vector2i = cells[(start + i) % cells.size()]
