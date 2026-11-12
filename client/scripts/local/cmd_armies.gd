@@ -158,12 +158,15 @@ static func approach_angle(at: Vector2i, a: Vector2i, b: Vector2i) -> float:
 
 
 ## The first-round bonus of an army joining a battle.
-static func join_bonus(data: Dictionary, orders: String, army_size: int, horde_size: int, angle: float) -> float:
+static func join_bonus(data: Dictionary, orders: String, army_size: int, horde_size: int, angle: float, walls := false) -> float:
 	if horde_size <= 0:
 		return 0.0
 	var ratio := float(army_size) / horde_size
 	if orders == "harass":
 		return minf(float(data.armies.harass.maxBonus), float(data.armies.harass.scale) * ratio)
+	# Walls that still stand are an anvil: the hammer falls from any side.
+	if walls:
+		return minf(float(data.armies.hammer.maxBonus), float(data.armies.hammer.scale) * ratio)
 	if angle < float(data.armies.pincer.minAngle):
 		return 0.0
 	return minf(float(data.armies.pincer.maxBonus), float(data.armies.pincer.scale) * ratio)
@@ -851,7 +854,8 @@ static func join_battle(server: LocalServer, world: Dictionary, army: Dictionary
 	if horde_step != null and army_step != null:
 		angle = approach_angle(village_hex, Vector2i(horde_step.q, horde_step.r), Vector2i(army_step.q, army_step.r))
 	# Kept as the server keeps it (a Postgres real).
-	var bonus := pg_real(join_bonus(server.data, army.orders, LocalBattle.total(army.units), LocalBattle.total(wave.composition), angle))
+	var anvil: bool = battle.setup.get("wall") != null and int(battle.setup.wall.integrity) > 0 and not battle.setup.get("sally", false)
+	var bonus := pg_real(join_bonus(server.data, army.orders, LocalBattle.total(army.units), LocalBattle.total(wave.composition), angle, anvil))
 	army.status = "engaged"
 	army.battleId = battle.id
 	army.joinsRound = int(battle.round) + 1

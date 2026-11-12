@@ -10,8 +10,10 @@ signal tapped(world_position: Vector2)
 @export var max_zoom := 2.5
 @export var wheel_zoom_step := 1.1
 ## A touch that moves further than this (screen pixels) is a drag, not a tap.
-@export var tap_max_distance := 14.0
-@export var tap_max_msec := 400
+@export var tap_max_distance := 22.0
+## A finger held still this long is still a tap (a careful one, as when
+## picking where an army goes); longer is a hold.
+@export var tap_max_msec := 900
 
 ## World-space rectangle the camera centre is kept inside.
 var bounds := Rect2(-1e9, -1e9, 2e9, 2e9)
@@ -47,6 +49,29 @@ func pan_by_screen(delta: Vector2) -> void:
 	_clamp_position()
 
 
+## Every finger lifted is forgotten, wherever it comes up. A touch that went
+## down on the map and came up over the interface (a sheet that grew under
+## it, a bar at the screen's edge) never reaches _unhandled_input: left in
+## _touches it would make every later tap look like the second finger of a
+## pinch, and no tap would register again.
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch and not event.pressed and _touches.has(event.index):
+		_forget.call_deferred(event.index)
+
+
+func _forget(index: int) -> void:
+	_touches.erase(index)
+	if index == _tap_index:
+		_tap_index = -1
+
+
+## Fingers down when the app goes to the background never come up here.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		_touches.clear()
+		_tap_index = -1
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		_on_touch(event)
@@ -65,6 +90,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_touch(event: InputEventScreenTouch) -> void:
 	if event.pressed:
+		# The first finger (index 0) going down means none other is down.
+		if event.index == 0:
+			_touches.clear()
 		_touches[event.index] = event.position
 		if _touches.size() == 1:
 			_tap_index = event.index

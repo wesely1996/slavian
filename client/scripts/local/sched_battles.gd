@@ -139,7 +139,6 @@ static func start_battle(server: LocalServer, world: Dictionary, wave: Dictionar
 			setup.wall.moat = moat
 		var works: Variant = LocalWalls.siege_works(data, wave.front, composition, integrity, state.plots, world.speed)
 		if works != null:
-			first_round += int(works.setupMs)
 			composition = LocalCamps.add_units(composition, {works.engine: works.count})
 			setup.siege = {"engine": works.engine, "count": works.count, "readyAt": LocalTime.iso(at + int(works.setupMs))}
 			wave.composition = composition
@@ -310,8 +309,15 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	var base_stats := LocalBattle.player_stats(data, bonuses, true)
 	var rng := LocalBattle.battle_rng(int(world.seed), int(battle.id), round)
 	var wall: Variant = battle.setup.get("wall")
-	var standing: bool = wall != null and int(wall.integrity) > 0
-	var smashed: Dictionary = LocalWalls.ballista_kills(data, wave.front, wave.composition, state.plots, rng) if standing else {}
+	# Once the defenders have charged out, the walls play no part.
+	var standing: bool = wall != null and int(wall.integrity) > 0 and not battle.setup.get("sally", false)
+	# While the horde still builds its engines, only archers shoot (a volley
+	# round), and an army reaching the village falls on the horde's back.
+	var volley: bool = standing and battle.setup.get("siege") != null and at < LocalTime.parse(String(battle.setup.siege.readyAt))
+	for entry in joined:
+		if standing and entry.orders != "harass" and float(entry.bonus) > 0:
+			entry.hammer = true
+	var smashed: Dictionary = LocalWalls.ballista_kills(data, wave.front, wave.composition, state.plots, rng) if standing and not volley else {}
 	var assault := LocalCamps.subtract_units(wave.composition, smashed)
 	var defenders := {}
 	for f in forces:
@@ -320,9 +326,9 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	for unit in defenders:
 		if data.units.units.get(unit, {}).get("family") == "archers":
 			archers += int(defenders[unit])
-	var over := LocalWalls.over_the_walls(data, wave.front, assault, state.plots) if standing else 0.0
+	var over := LocalWalls.over_the_walls(data, wave.front, assault, state.plots) if standing and not volley else 0.0
 	var walls: Dictionary = LocalWalls.wall_factors(data, state.plots, archers, over) if standing else {"defense": 1.0, "attack": 1.0, "archers": 1.0}
-	var held := LocalWalls.held_back(data, over) if standing else 1.0
+	var held := 0.0 if volley else (LocalWalls.held_back(data, over) if standing else 1.0)
 	# A horde that came over a river into the fight strikes weaker.
 	var river := float(data.field.river.attackerFactor) if battle.setup.get("river", false) else 1.0
 	var led_stats: Callable = led.stats
@@ -332,27 +338,42 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		s.attack = float(s.attack) * surge * float(walls.attack) * shooting
 		s.defense = float(s.defense) * float(walls.defense)
 		return s
-	var groups: Array = [{"units": garrison, "stance": state.stance, "champions": [] if home_broken else LocalChampions.champions_of(data, hero, general, own)}]
+	# In a volley round those behind the walls only shoot.
+	var shot_stats := func(unit: String) -> Dictionary:
+		var s: Dictionary = defender_stats.call(unit)
+		if s.family != "archers":
+			s.attack = 0.0
+		return s
+	var home_stats: Callable = shot_stats if volley else defender_stats
+	var groups: Array = [{"units": garrison, "stance": state.stance, "champions": [] if home_broken or volley else LocalChampions.champions_of(data, hero, general, own)}]
 	for i in engaged.size():
 		var a: Dictionary = engaged[i]
-		groups.append({"units": LocalScouting.combatants(data, a.units), "stance": a.get("stance", "balanced"), "stats": LocalScouting.with_intel(data, a.units, defender_stats),
-			"champions": LocalChampions.champions_of(data, army_leaders[i][0], army_leaders[i][1], army_leaders[i][2])})
+		var shoots: bool = volley and not (a.joinsRound != null and int(a.joinsRound) == round)
+		groups.append({"units": LocalScouting.combatants(data, a.units), "stance": a.get("stance", "balanced"), "stats": LocalScouting.with_intel(data, a.units, shot_stats if shoots else defender_stats),
+			"champions": [] if shoots else LocalChampions.champions_of(data, army_leaders[i][0], army_leaders[i][1], army_leaders[i][2])})
 	var result := LocalBattle.resolve_round(data,
 		{"units": assault, "stance": battle.attackerStance, "home": false, "stats": func(unit: String) -> Dictionary:
 			var s: Dictionary = led_stats.call(unit).duplicate()
 			s.attack = float(s.attack) * river * (1.0 if s.family == "archers" else held)
 			return s},
-		{"units": defenders, "stance": state.stance, "home": true, "stats": defender_stats, "groups": groups},
+		{"units": defenders, "stance": state.stance, "home": true, "stats": home_stats, "groups": groups},
 		rng)
 	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
 	var attacker_now := LocalCamps.subtract_units(wave.composition, attacker_losses)
 	# The horde batters the walls with what came at them this round.
 	var wall_left: Variant = null
-	if standing:
+	var first_out: bool = battle.setup.get("sally", false) and not battle.rounds.any(func(r: Dictionary) -> bool: return r.get("sally", false))
+	if standing and not volley:
 		wall_left = maxi(0, LocalWaves.js_round(float(wall.integrity) - LocalWalls.siege_damage(data, wave.front, assault, state.plots)))
 		var setup: Dictionary = battle.setup.duplicate(true)
 		setup.wall.integrity = wall_left
 		battle.setup = setup
+	# Volleys don't count against the battle's length.
+	var volleys := int(battle.setup.get("volleys", 0)) + (1 if volley else 0)
+	if volley:
+		var shot_setup: Dictionary = battle.setup.duplicate(true)
+		shot_setup.volleys = volleys
+		battle.setup = shot_setup
 	var shares: Array = result.defenderGroupLosses
 	# Champions struck down fall: a hero wounded (an army's carried home),
 	# a general dead; the general takes command from a fallen hero.
@@ -391,13 +412,16 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		LocalHordes.anger_front(server, world, String(wave.front), strikes * float(data.horde.hatred.perHarass), at)
 
 	var outcome := LocalBattle.battle_outcome(data, {
-		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
+		"round": round - volleys, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
 		"defenderStance": state.stance, "defenderInitial": battle.defenderInitial, "defenderNow": defenders_now,
 		"attackerNerve": float(data.enemies.fronts[wave.front].personality.nerve) * (1.0 + float(led.nerve)),
 		"defenderGroups": [{"stance": state.stance, "initial": home_initial, "now": garrison_now}] + armies.filter(func(a: Dictionary) -> bool: return not leaving.call(a)).map(
 			func(a: Dictionary) -> Dictionary: return {"stance": a.get("stance", "balanced"),
 				"initial": LocalScouting.combatants(data, a.engagedUnits if a.get("engagedUnits") != null else a.units), "now": LocalScouting.combatants(data, a.units)}),
 	})
+	# Arrows alone don't take walls.
+	if volley and outcome == "raided":
+		outcome = "ongoing"
 	# While the fight goes on, an army that broke falls back home beaten,
 	# and a garrison that broke fights no more.
 	var breaks := func(a: Dictionary) -> bool:
@@ -418,6 +442,10 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	if wall_left != null:
 		log.wallLeft = wall_left
 		log.breach = wall_left == 0
+	if volley:
+		log.volley = true
+	if first_out:
+		log.sally = true
 	if LocalBattle.total(smashed) > 0:
 		log.smashed = smashed
 	if over > 0:

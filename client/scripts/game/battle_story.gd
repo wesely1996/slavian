@@ -148,8 +148,15 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 	var entry: Dictionary = rounds[round - 1]
 	var lines := PackedStringArray()
 	var village_name: Callable = ctx.get("village_name", func(_id: Variant) -> String: return UI.t("a neighbour"))
+	if entry.get("volley", false):
+		lines.append(UI.t("They are still building their engines: only the archers of both sides shoot."))
+	if entry.get("sally", false):
+		lines.append(UI.t("The gates opened and our men charged out: the walls play no part any more."))
 	for army in entry.get("joined", []):
 		var how: String = {"harass": UI.t("harried the flank"), "pincer": UI.t("struck from behind"), "support": UI.t("joined the line")}.get(String(army.orders), UI.t("joined the fight"))
+		# The hammer to the walls' anvil.
+		if army.get("hammer", false):
+			how = UI.t("fell on them pinned against the walls (hammer and anvil)")
 		lines.append(UI.t("Help from %s %s with %s%s.") % [village_name.call(army.villageId), how, units_text(data, army.units), (UI.t(" (+%d%%)") % roundi(float(army.bonus) * 100.0)) if float(army.bonus) > 0.0 else ""])
 	var theirs := BattleText.total(entry.attackerLosses)
 	var ours := BattleText.total(entry.defenderLosses)

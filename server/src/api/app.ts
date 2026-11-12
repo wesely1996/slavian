@@ -54,6 +54,7 @@ import {
   sendScoutsCommand,
   searchRuinsCommand,
   setStanceCommand,
+  sallyCommand,
   startResearchCommand,
   fundResearchCommand,
   trainUnitsCommand,
@@ -683,6 +684,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = stanceBody.parse(request.body);
     const { village } = await setStanceCommand(db, scheduler, { accountId: account.id, villageId: id, stance: body.stance, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  // Leave the walls and charge the horde (for the battle under way).
+  app.post('/v1/villages/:id/sally', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { village } = await sallyCommand(db, scheduler, { accountId: account.id, villageId: id, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 

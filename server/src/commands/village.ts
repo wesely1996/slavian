@@ -15,6 +15,7 @@ import { countVillagesOwned, insertExpedition, outboundTo, type Expedition } fro
 import { insertProject, listResearch, saveProject, type ResearchEntry } from '../db/research.js';
 import { insertMission, type ScoutMission } from '../db/scouting.js';
 import { loadWave } from '../db/waves.js';
+import { ongoingBattleAt, saveSetup } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
@@ -246,6 +247,23 @@ export async function setStanceCommand(
     state: { ...village.state, stance: input.stance },
     result: null,
   }));
+  return { village };
+}
+
+// The garrison (and the armies with it) leave the walls and charge the
+// horde before them: from the next round the fight is in the open, the
+// walls giving nothing and taking nothing, and a horde still building its
+// engines is fought at once. There is no going back in for this battle.
+export async function sallyCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'ordered a sally' }, async ({ client, world, village }) => {
+    const battle = await ongoingBattleAt(client, village.id);
+    if (!battle) throw new RuleError('No horde is fighting at this village');
+    if (!battle.setup.wall || battle.setup.wall.integrity <= 0) throw new RuleError('No walls stand between you and the horde');
+    if (battle.setup.sally) throw new RuleError('The garrison is already outside the walls');
+    await saveSetup(client, battle.id, { ...battle.setup, sally: true });
+    await notifyWorld(client, { worldId: world.id, type: 'battles' });
+    return { state: village.state, result: null };
+  });
   return { village };
 }
 

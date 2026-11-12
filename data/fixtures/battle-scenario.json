@@ -12421,9 +12421,9 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "archer": 1,
        "ambusher": 2,
-       "spearman": 6
+       "spearman": 5
       },
       "away": {},
       "stance": "balanced",
@@ -12441,15 +12441,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 227.5,
-        "wood": 912.5,
-        "grain": 839.3999999999999,
-        "stone": 645
+        "iron": 220,
+        "wood": 890,
+        "grain": 827.4999999999998,
+        "stone": 630
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 265,
+        "grain": 292,
         "stone": 300
        },
        "capacity": {
@@ -12458,7 +12458,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:27:50.400Z"
+       "settledAt": "2026-06-01T11:24:57.600Z"
       }
      }
     ],
@@ -12739,9 +12739,11 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 6,
+       "zealot": 5,
+       "rusalka": 3,
+       "grey_wolf": 8,
        "siege_ram": 1,
-       "crossbowman": 1
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "archer": 2,
@@ -12750,7 +12752,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:07:50.400Z",
+        "at": "2026-06-01T11:04:57.600Z",
         "round": 1,
         "breach": false,
         "wallLeft": 74,
@@ -12765,7 +12767,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:17:50.400Z",
+        "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
         "breach": false,
         "wallLeft": 29,
@@ -12781,18 +12783,20 @@
         }
        },
        {
-        "at": "2026-06-01T11:27:50.400Z",
+        "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 8,
-        "defenderLeft": 10,
+        "attackerLeft": 6,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2
+         "zealot": 1,
+         "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        }
       ],
       "loot": null,
@@ -15241,9 +15245,9 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 2,
+       "archer": 1,
        "ambusher": 2,
-       "spearman": 6
+       "spearman": 5
       },
       "away": {},
       "stance": "balanced",
@@ -15261,15 +15265,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 227.5,
-        "wood": 912.5,
-        "grain": 839.3999999999999,
-        "stone": 645
+        "iron": 220,
+        "wood": 890,
+        "grain": 827.4999999999998,
+        "stone": 630
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 265,
+        "grain": 292,
         "stone": 300
        },
        "capacity": {
@@ -15278,7 +15282,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:27:50.400Z"
+       "settledAt": "2026-06-01T11:24:57.600Z"
       }
      }
     ],
@@ -15559,9 +15563,11 @@
        "sergeant_rider": 1
       },
       "attackerNow": {
-       "zealot": 6,
+       "zealot": 5,
+       "rusalka": 3,
+       "grey_wolf": 8,
        "siege_ram": 1,
-       "crossbowman": 1
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "archer": 2,
@@ -15570,7 +15576,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:07:50.400Z",
+        "at": "2026-06-01T11:04:57.600Z",
         "round": 1,
         "breach": false,
         "wallLeft": 74,
@@ -15585,7 +15591,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:17:50.400Z",
+        "at": "2026-06-01T11:14:57.600Z",
         "round": 2,
         "breach": false,
         "wallLeft": 29,
@@ -15601,18 +15607,20 @@
         }
        },
        {
-        "at": "2026-06-01T11:27:50.400Z",
+        "at": "2026-06-01T11:24:57.600Z",
         "round": 3,
         "breach": true,
         "wallLeft": 0,
-        "attackerLeft": 8,
-        "defenderLeft": 10,
+        "attackerLeft": 6,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2
+         "zealot": 1,
+         "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1,
+         "spearman": 1
+        }
        }
       ],
       "loot": null,

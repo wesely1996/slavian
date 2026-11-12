@@ -16,7 +16,8 @@ export interface RoundLog {
   defenderLeft: number;
   // Armies that fought for the first time this round, with their bonus
   // (and stance).
-  joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number; stance?: string }[];
+  // (`hammer`: the bonus is for pinning the horde against standing walls).
+  joined?: { armyId: number; villageId: number; orders: string; units: Record<string, number>; bonus: number; stance?: string; hammer?: boolean }[];
   // Armies that broke this round and fell back home, and whether the home
   // force (garrison, guard) broke.
   broke?: { armyId: number; villageId: number; stance: string; units: Record<string, number> }[];
@@ -28,6 +29,11 @@ export interface RoundLog {
   smashed?: Record<string, number>;
   // The share of the horde's fighters its climbers carried over the walls.
   over?: number;
+  // The horde was still building its engines before the walls: only the
+  // archers of both sides shot (and an army falling on the horde's back).
+  volley?: boolean;
+  // The garrison left its walls this round to fight in the open.
+  sally?: boolean;
   // The village's own garrison's part of defenderLosses, when armies fought
   // beside it.
   garrisonLosses?: Record<string, number>;
@@ -48,6 +54,11 @@ export interface BattleSetup {
   // The walls (and the level of the moat before them) and what is left of them.
   wall?: { level: number; integrity: number; max: number; moat?: number };
   siege?: { engine: string; count: number; readyAt: string };
+  // Rounds shot while the horde built its engines: they don't count
+  // against the battle's length.
+  volleys?: number;
+  // The defenders charged out: the walls play no part any more.
+  sally?: boolean;
   // A battle of a raid beyond the map's edge: the front, the field (or stronghold) and the stage.
   raid?: { front: string; name: string; stronghold: boolean; stage: number; strike?: boolean };
   // The horde crossed a river (over a bridge) into the fight.
@@ -214,6 +225,15 @@ export async function addAttackers(client: DbClient, id: number, units: Units): 
 
 export async function setDecision(client: DbClient, id: number, decision: BattleDecision): Promise<void> {
   await client.query('UPDATE battles SET decision = $2 WHERE id = $1', [id, JSON.stringify(decision)]);
+}
+
+// The battle a horde is fighting at a village right now (null: none).
+export async function ongoingBattleAt(client: DbClient, villageId: number): Promise<Battle | null> {
+  const { rows } = await client.query<{ id: number }>(
+    "SELECT id FROM battles WHERE village_id = $1 AND status = 'ongoing' AND wave_id IS NOT NULL ORDER BY id LIMIT 1",
+    [villageId],
+  );
+  return rows[0] ? loadBattle(client, rows[0].id) : null;
 }
 
 export async function saveSetup(client: DbClient, id: number, setup: BattleSetup): Promise<void> {

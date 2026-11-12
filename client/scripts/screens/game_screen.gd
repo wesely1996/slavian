@@ -824,6 +824,7 @@ func _battle_panel() -> void:
 	_panel_body.add_child(row)
 	var story := BattleStory.opening(Game.data, battle, ctx) if _battle_round == 0 else BattleStory.narrate(Game.data, battle, _battle_round, ctx)
 	_panel_body.add_child(UI.label(story))
+	_sally_row(battle)
 	if battle.status == "ongoing" and _battle_round >= count:
 		_panel_body.add_child(UI.label(tr("The fight goes on; the next round comes in %s.") % TimeUtil.format_duration(float(Game.data.battle.roundMinutes) * 60.0), UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(UI.button(tr("Back to the map"), func() -> void: _set_view("map"), "icon/map"))
@@ -5029,6 +5030,10 @@ func _troops_section(village: Dictionary) -> void:
 ## troops at home and away, settlers on the road.
 func _garrison_tab(village: Dictionary) -> void:
 	var village_id := int(village.id)
+	for battle in Game.battles:
+		if battle.get("status") == "ongoing" and battle.get("villageId") != null and int(battle.villageId) == village_id:
+			_panel_body.add_child(_battle_button(battle))
+			_sally_row(battle)
 	_stance_picker(village)
 	_hero_line(village_id)
 	var commander := Game.general_at(village_id)
@@ -5310,6 +5315,52 @@ func _set_army_stance(army_id: int, stance: String) -> void:
 	Game.note_server_time(response.data.serverTime)
 
 
+## While a horde is before your village's standing walls: the order to
+## leave them and charge it (tap twice; there is no going back in).
+func _sally_row(battle: Dictionary) -> void:
+	if battle.is_empty() or battle.get("status") != "ongoing" or battle.get("villageId") == null:
+		return
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	if not setup.has("wall") or int(setup.wall.integrity) <= 0:
+		return
+	var village_id := int(battle.villageId)
+	var village: Dictionary = Game.villages.get(village_id, {})
+	if village.is_empty() or not Game.commands(village):
+		return
+	if setup.get("sally", false):
+		_panel_body.add_child(UI.label(tr("Our men are outside the walls, fighting in the open."), UI.SMALL_SIZE, UI.ACCENT))
+		return
+	var armed := _sally_armed == int(battle.id)
+	var row := UI.hbox(8)
+	var button := UI.button(tr("Sure? Charge out") if armed else tr("Charge out of the walls"), func() -> void:
+		if _sally_armed != int(battle.id):
+			_sally_armed = int(battle.id)
+			_rebuild_panel()
+			return
+		_sally_armed = 0
+		_sally(village_id), "icon/troops")
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(button)
+	row.add_child(UI.info(tr("The garrison and the armies with it leave the walls and fight in the open from the next round: no wall defense, no shooting from the walls, and the horde's fighters are no longer held back. A horde still building its engines is fought at once. No going back in this battle.")))
+	_panel_body.add_child(row)
+
+
+var _sally_armed := 0
+
+
+func _sally(village_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/sally" % village_id, {})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("horn")
+	Game.update_village(response.data.village)
+	# The solo engine sends no live news: fetch the battle as it now stands.
+	_refetch_world()
+
+
 func _set_stance(village_id: int, stance: String) -> void:
 	_status.text = ""
 	var response := await Api.post_json("/v1/villages/%d/stance" % village_id, {"stance": stance})
@@ -5487,6 +5538,7 @@ func _battle_report(battle: Dictionary) -> void:
 	if helpers != "":
 		_panel_body.add_child(UI.label(tr("Help came from %s") % helpers, UI.SMALL_SIZE, UI.MUTED))
 	_panel_body.add_child(_battle_button(battle))
+	_sally_row(battle)
 
 
 ## Where the hordes come from: the fronts, their camps and lairs, and the
@@ -5860,6 +5912,7 @@ func _wave_entry(wave: Dictionary) -> void:
 	var fighting := Game.battle_for(int(wave.id))
 	if not fighting.is_empty() and fighting.status == "ongoing":
 		_panel_body.add_child(_battle_button(fighting))
+		_sally_row(fighting)
 	_scouting_section(wave)
 
 

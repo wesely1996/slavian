@@ -14,6 +14,7 @@ var _checks := 0
 func _initialize() -> void:
 	_test_hex_vectors()
 	_test_hex_round_trip()
+	_test_map_camera()
 	_test_resource_vectors()
 	_test_local_mapgen()
 	_test_local_start()
@@ -107,6 +108,43 @@ func _test_hex_vectors() -> void:
 func _test_hex_round_trip() -> void:
 	for cell in HexMath.spiral(Vector2i.ZERO, 6):
 		_check(HexMath.from_pixel(HexMath.to_pixel(cell, 37.0), 37.0) == cell, "pixel round trip %s" % cell)
+
+
+## A tap on the map still registers after a finger was lost: one that went
+## down on the map and came up over the interface (or never came up).
+func _test_map_camera() -> void:
+	var cam := MapCamera.new()
+	root.add_child(cam)
+	var taps := [0]
+	cam.tapped.connect(func(_at: Vector2) -> void: taps[0] += 1)
+	var touch := func(index: int, pressed: bool, at: Vector2) -> InputEventScreenTouch:
+		var event := InputEventScreenTouch.new()
+		event.index = index
+		event.pressed = pressed
+		event.position = at
+		return event
+	var at := Vector2(200, 300)
+	cam._unhandled_input(touch.call(0, true, at))
+	cam._unhandled_input(touch.call(0, false, at + Vector2(6, 6)))
+	_check(taps[0] == 1, "a tap on the map registers")
+	# A second finger went down and its lift never reached the map.
+	cam._unhandled_input(touch.call(1, true, Vector2(400, 500)))
+	cam._unhandled_input(touch.call(0, true, at))
+	cam._unhandled_input(touch.call(0, false, at))
+	_check(taps[0] == 2, "a tap registers after a finger was lost")
+	# Down on the map, up over the interface: seen by _input only.
+	cam._unhandled_input(touch.call(0, true, at))
+	cam._input(touch.call(0, false, at))
+	cam._forget(0)
+	_check(cam._touches.is_empty(), "a finger lifted over the interface is forgotten")
+	cam._unhandled_input(touch.call(0, true, at))
+	cam._unhandled_input(touch.call(0, false, at))
+	_check(taps[0] == 3, "and the next tap registers")
+	# A drag is not a tap.
+	cam._unhandled_input(touch.call(0, true, at))
+	cam._unhandled_input(touch.call(0, false, at + Vector2(80, 0)))
+	_check(taps[0] == 3, "a drag is not a tap")
+	cam.free()
 
 
 func _test_resource_vectors() -> void:
@@ -762,6 +800,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("field-scenario.json", "local field armies")
 	_replay_scenario("supply-scenario.json", "local supply")
 	_replay_scenario("wagons-scenario.json", "local wagons")
+	_replay_scenario("siege-scenario.json", "local sieges")
 	_replay_scenario("hatred-scenario.json", "local hatred")
 	_replay_scenario("reroute-scenario.json", "local rerouting")
 	_replay_scenario("raids-scenario.json", "local raids")

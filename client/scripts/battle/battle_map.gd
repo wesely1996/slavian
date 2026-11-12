@@ -567,8 +567,18 @@ func _wall_left() -> int:
 	return left
 
 
+## Whether the walls still part the lines in the round shown: standing, and
+## the defenders not yet charged out of them.
 func _wall_standing() -> bool:
-	return _has_wall() and _wall_left() > 0
+	return _has_wall() and _wall_left() > 0 and round < _sally_round()
+
+
+## The round the defenders charged out of the walls in (9999: they never did).
+func _sally_round() -> int:
+	for entry in battle.get("rounds", []):
+		if entry.get("sally", false):
+			return int(entry.round)
+	return 9999
 
 
 ## The round the walls fell in (the lines close from then on); 0 without
@@ -577,7 +587,7 @@ func _breach_round() -> int:
 	if not _has_wall():
 		return 0
 	for entry in battle.get("rounds", []):
-		if entry.get("breach", false):
+		if entry.get("breach", false) or entry.get("sally", false):
 			return int(entry.round)
 	return 9999
 

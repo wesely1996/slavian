@@ -603,7 +603,9 @@ async function joinBattle(client: DbClient, data: GameData, world: World, army: 
   const hordeStep = wave.path?.filter((s) => s.q !== battle.q || s.r !== battle.r).at(-1);
   const armyStep = army.path.at(-2);
   const angle = hordeStep && armyStep ? approachAngle(villageHex, hex(hordeStep.q, hordeStep.r), hex(armyStep.q, armyStep.r)) : 0;
-  const bonus = joinBonus(data, { orders: army.orders, armySize: total(army.units), hordeSize: total(wave.composition), angle });
+  // Walls that still stand (and are still held: no sally) are an anvil.
+  const walls = !!battle.setup.wall && battle.setup.wall.integrity > 0 && !battle.setup.sally;
+  const bonus = joinBonus(data, { orders: army.orders, armySize: total(army.units), hordeSize: total(wave.composition), angle, walls });
   const joined: Army = { ...army, status: 'engaged', battleId: battle.id, joinsRound: battle.round + 1, joinBonus: bonus, engagedUnits: army.units };
   await planHunger(client, data, world, joined, at);
   await addDefenders(client, battle.id, combatants(data, army.units));

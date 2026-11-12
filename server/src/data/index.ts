@@ -593,6 +593,7 @@ const armiesFileSchema = z.object({
     lostAfterHours: z.number().positive(),
   }),
   pincer: z.object({ minAngle: z.number().min(0).max(180), maxBonus: z.number().nonnegative(), scale: z.number().nonnegative() }),
+  hammer: z.object({ maxBonus: z.number().nonnegative(), scale: z.number().nonnegative() }),
   harass: z.object({
     minCavalryShare: z.number().min(0).max(1),
     maxBonus: z.number().nonnegative(),
