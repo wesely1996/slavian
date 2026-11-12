@@ -212,7 +212,8 @@ const SERBIAN: Record<string, string> = {
 	'The boat at ({q}, {r}) is begun': 'Čamac na ({q}, {r}) je započet',
 	'Raiders will come every {every} hours until it is done; armies standing there fight them.': 'Pljačkaši će dolaziti svakih {every} sati dok ne bude gotov; vojske koje stoje tamo bore se s njima.',
 	'Raiders burned work at the shipyard at ({q}, {r})': 'Pljačkaši su spalili deo posla u brodogradilištu na ({q}, {r})',
-	'The boat is set back {hours} hours. Armies standing there fight the next raiders.': 'Čamac kasni {hours} sati. Vojske koje stoje tamo bore se sa sledećim pljačkašima.',
+	'The boat is set back {hours} hours. Burned {burns} times of {most}: at {most} the boatwrights give up. Armies standing there fight the next raiders.': 'Čamac kasni {hours} sati. Spaljen {burns} puta od {most}: na {most} brodograditelji odustaju. Vojske koje stoje tamo bore se sa sledećim pljačkašima.',
+	'Raiders burned the shipyard at ({q}, {r}) to the ground': 'Pljačkaši su spalili brodogradilište na ({q}, {r}) do temelja',
 	'The boat at ({q}, {r}) is ready': 'Čamac na ({q}, {r}) je spreman',
 	"Armies, caravans and scouts move fast between hexes along its river. The boatwrights' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.":
 		'Vojske, karavani i izviđači brzo se kreću između polja duž njegove reke. Nagrada brodograditelja za {village}: {wood} drveta, {stone} kamena, {grain} žita i {iron} gvožđa.',

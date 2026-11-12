@@ -154,6 +154,9 @@ export function waveView(wave: Wave, forecast: March | null = null) {
     hatred: wave.hatred,
     // The horde it broke away from, for a band a hating horde sent out.
     bandOf: wave.bandOf,
+    // A horde on an errand of its own (a bridge quest's host, or a band sent
+    // while a stage is raised): {kind, target}.
+    errand: wave.errand,
     // A scheduled wave: where it is expected to set out from, its target,
     // its road (as path) and its arrival, were it to set out today.
     forecast: forecast
@@ -638,6 +641,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     waveId: c.waveId,
     reward: c.reward ?? null,
     endsAt: c.endsAt?.toISOString() ?? null,
+    // A bridge quest's lair: the quest it answers.
+    quest: c.quest ?? null,
   }));
   const sites = (await listSites(client, world.id)).map((s) => ({
     id: s.id,
@@ -653,6 +658,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     // A hard ruin (a daily event), and when it goes if nobody comes.
     hard: s.hard ?? false,
     endsAt: s.endsAt?.toISOString() ?? null,
+    // A bridge quest's ruin: the quest it answers.
+    quest: s.quest ?? null,
   }));
   // Shipyards (a daily event): what the boat costs and what is paid, while
   // it is built when raiders come next, and the river edge it sails from.
@@ -668,6 +675,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     front: s.front,
     raiders: total(s.raiders),
     raids: s.raids,
+    // Times raiders burned its work (data/events.json shipyard.maxBurns: it is lost).
+    burns: s.burns,
     endsAt: s.endsAt?.toISOString() ?? null,
     completesAt: s.completesAt?.toISOString() ?? null,
     nextRaidAt: s.nextRaidAt?.toISOString() ?? null,

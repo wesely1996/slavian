@@ -1,3 +1,4 @@
+import { openStage } from '../scheduler/bridgeQuests.js';
 import { randomInt } from 'node:crypto';
 import { insertRivers } from '../db/rivers.js';
 import type { Difficulty } from '../data/index.js';
@@ -203,6 +204,8 @@ export async function startWorldCommand(
     await placeStarterCamps(client, deps.data, started, input.now);
     await loadBridge(client, started.id, input.now, started.sanctity);
     await announceFirstWaves(client, deps.data, started);
+    // The bridge's first stage raises its quest's places.
+    await openStage(client, deps.data, started, 0, input.now);
     await ensureDigests(client, started, input.now);
     await ensureMapEvents(client, deps.data, started, input.now);
     await ensurePrune(client, started, input.now);

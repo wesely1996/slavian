@@ -1057,6 +1057,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -1136,6 +1137,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -4,
@@ -1288,7 +1290,8 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -1303,7 +1306,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -1316,7 +1320,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -1329,7 +1334,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -1342,7 +1348,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -1355,20 +1362,36 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
       "kind": "kurgan",
-      "q": -6,
-      "r": 1,
+      "q": -1,
+      "r": -4,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 7,
+      "kind": "sunken_shrine",
+      "q": -5,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -3579,6 +3602,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -3658,6 +3682,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -4,
@@ -3724,7 +3749,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:40:00.000Z",
       "returnsAt": "2026-06-01T08:43:36.000Z",
-      "siteId": 7
+      "siteId": 8
      },
      {
       "id": 1,
@@ -3810,7 +3835,8 @@
       "size": 4,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -3825,7 +3851,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -3838,7 +3865,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -3851,7 +3879,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -3864,7 +3893,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -3877,25 +3907,41 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
       "kind": "kurgan",
-      "q": -6,
-      "r": 1,
+      "q": -1,
+      "r": -4,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": null,
+      "quest": "relic"
      },
      {
       "id": 7,
+      "kind": "sunken_shrine",
+      "q": -5,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
+     },
+     {
+      "id": 8,
       "kind": "kurgan",
-      "q": -3,
+      "q": -4,
       "r": 7,
       "status": "unexplored",
       "guardians": null,
@@ -3903,7 +3949,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "lore": [],
@@ -6705,6 +6752,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -6784,6 +6832,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -4,
@@ -6850,7 +6899,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:55:00.000Z",
       "returnsAt": "2026-06-01T08:58:36.000Z",
-      "siteId": 9
+      "siteId": 10
      },
      {
       "id": 4,
@@ -6859,7 +6908,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:50:00.000Z",
       "returnsAt": "2026-06-01T08:53:36.000Z",
-      "siteId": 8
+      "siteId": 9
      },
      {
       "id": 3,
@@ -6877,7 +6926,7 @@
       "status": "done",
       "departsAt": "2026-06-01T08:40:00.000Z",
       "returnsAt": "2026-06-01T08:43:36.000Z",
-      "siteId": 7
+      "siteId": 8
      },
      {
       "id": 1,
@@ -6963,7 +7012,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -6978,7 +7028,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -6991,7 +7042,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -7004,7 +7056,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -7017,7 +7070,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -7030,25 +7084,41 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
       "kind": "kurgan",
-      "q": -6,
-      "r": 1,
+      "q": -1,
+      "r": -4,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T09:26:24.000Z"
+      "endsAt": null,
+      "quest": "relic"
      },
      {
       "id": 7,
+      "kind": "sunken_shrine",
+      "q": -5,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T09:26:24.000Z",
+      "quest": null
+     },
+     {
+      "id": 8,
       "kind": "kurgan",
-      "q": -3,
+      "q": -4,
       "r": 7,
       "status": "unexplored",
       "guardians": null,
@@ -7056,12 +7126,13 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "stone_idol",
-      "q": -2,
+      "q": 0,
       "r": -2,
       "status": "unexplored",
       "guardians": null,
@@ -7069,12 +7140,13 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "old_hillfort",
-      "q": -4,
+      "q": -5,
       "r": 5,
       "status": "unexplored",
       "guardians": null,
@@ -7082,20 +7154,21 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "lore": [],
     "shipyards": [
      {
       "id": 1,
-      "q": 5,
-      "r": 2,
+      "q": 3,
+      "r": -4,
       "edge": [
-       5,
-       2,
-       6,
-       2
+       3,
+       -3,
+       3,
+       -4
       ],
       "status": "open",
       "cost": {
@@ -7113,6 +7186,7 @@
       "front": "north",
       "raiders": 6,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T09:55:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -9092,34 +9166,34 @@
    "response": {
     "notifications": [
      {
-      "id": 10,
+      "id": 11,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Old Hillfort lies at (-4, 5). Send an army to explore it.",
+      "body": "A Old Hillfort lies at (-5, 5). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (5, 2)",
+      "title": "Boatwrights wait at (3, -4)",
       "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-2, -2). Send an army to explore it.",
+      "body": "A Stone Idol lies at (0, -2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9128,16 +9202,16 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Kurgan lies at (-3, 7). Send an army to explore it.",
+      "body": "A Kurgan lies at (-4, 7). Send an army to explore it.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9146,16 +9220,16 @@
       "read": false
      },
      {
-      "id": 4,
+      "id": 5,
       "kind": "event",
       "tier": "push",
-      "title": "A forbidding ruin rises at (-6, 1)",
+      "title": "A forbidding ruin rises at (-5, 0)",
       "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 1400 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
-      "id": 3,
+      "id": 4,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Train defenders",
@@ -9164,7 +9238,7 @@
       "read": false
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Scout Lodge level 1 in Mirogost",
@@ -9173,16 +9247,25 @@
       "read": false
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:00:00.000Z",
       "read": false
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (-1, -4).",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
      }
     ],
-    "unread": 10,
+    "unread": 11,
     "serverTime": "2026-06-01T09:00:00.000Z"
    }
   },
@@ -9193,34 +9276,34 @@
    "response": {
     "notifications": [
      {
-      "id": 10,
+      "id": 11,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Old Hillfort lies at (-4, 5). Send an army to explore it.",
+      "body": "A Old Hillfort lies at (-5, 5). Send an army to explore it.",
       "createdAt": "2026-06-01T08:58:36.000Z",
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (5, 2)",
+      "title": "Boatwrights wait at (3, -4)",
       "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Stone Idol lies at (-2, -2). Send an army to explore it.",
+      "body": "A Stone Idol lies at (0, -2). Send an army to explore it.",
       "createdAt": "2026-06-01T08:53:36.000Z",
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9229,16 +9312,16 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
-      "body": "A Kurgan lies at (-3, 7). Send an army to explore it.",
+      "body": "A Kurgan lies at (-4, 7). Send an army to explore it.",
       "createdAt": "2026-06-01T08:43:36.000Z",
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9247,16 +9330,16 @@
       "read": false
      },
      {
-      "id": 4,
+      "id": 5,
       "kind": "event",
       "tier": "push",
-      "title": "A forbidding ruin rises at (-6, 1)",
+      "title": "A forbidding ruin rises at (-5, 0)",
       "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 1400 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
-      "id": 3,
+      "id": 4,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Train defenders",
@@ -9265,7 +9348,7 @@
       "read": false
      },
      {
-      "id": 2,
+      "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Scout Lodge level 1 in Mirogost",
@@ -9274,16 +9357,25 @@
       "read": false
      },
      {
-      "id": 1,
+      "id": 2,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Raise a building",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:00:00.000Z",
       "read": false
+     },
+     {
+      "id": 1,
+      "kind": "bridge",
+      "tier": "push",
+      "title": "The Builders' Barrow rises",
+      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (-1, -4).",
+      "createdAt": "2026-06-01T08:00:00.000Z",
+      "read": false
      }
     ],
-    "unread": 10,
+    "unread": 11,
     "serverTime": "2026-06-01T09:00:00.000Z"
    }
   }

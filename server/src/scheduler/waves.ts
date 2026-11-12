@@ -29,6 +29,7 @@ import { planWaveWarning } from './notices.js';
 import { planRaids } from './outposts.js';
 import { planIntercepts } from './field.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
+import { afterErrand } from './bridgeQuests.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -218,10 +219,38 @@ async function sendBand(client: DbClient, data: GameData, world: World, band: Wa
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
 }
 
+// A horde on an errand (bridge.json) sets out from its front's wilds for
+// its own target: a village, or the Holy City (a village gone, the Holy
+// City). With no way there, it scatters.
+async function sendErrand(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
+  const errand = wave.errand!;
+  const village = errand.target === null ? null : await loadVillage(client, errand.target).catch(() => null);
+  const target: Target = village && !village.ruin ? { id: village.id, cell: hex(village.q, village.r) } : { id: null, cell: hex(0, 0) };
+  let march: March | null = null;
+  try {
+    march = planMarch(data, { terrain: await loadLand(client, world.id), radius: world.radius ?? 0, wave: asPlanned(wave), villages: [], seed: world.seed, departAt: at, worldSpeed: world.speed, targets: [target] });
+  } catch {
+    march = null;
+  }
+  if (!march) {
+    await endWave(client, wave.id, 'dispersed', at);
+    await afterErrand(client, data, world, wave, 'dispersed', at);
+    await notifyWorld(client, { worldId: world.id, type: 'waves' });
+    return;
+  }
+  await markMarching(client, wave.id, holdForQuiet(world, wave.spawnAt, march));
+  await scheduleEvent(client, world.id, (await loadWave(client, wave.id)).arrivesAt!, 'wave_arrive', { waveId: wave.id } satisfies WavePayload);
+  await planRaids(client, data, world, wave.id);
+  await planIntercepts(client, world, wave.id);
+  await planWaveWarning(client, data, world, wave.id, at);
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+}
+
 export const waveHandlers: HandlerRegistry = {
   async wave_spawn({ client, data, world }, event) {
     let wave = await loadWave(client, wavePayload.parse(event.payload).waveId);
     if (wave.status !== 'scheduled') return;
+    if (wave.errand !== null) return sendErrand(client, data, world, wave, event.dueAt);
     if (wave.bandOf !== null) return sendBand(client, data, world, wave, event.dueAt);
     // It takes all of its front's hatred.
     await setWaveHatred(client, wave.id, await drainFrontHatred(client, world.id, wave.front));

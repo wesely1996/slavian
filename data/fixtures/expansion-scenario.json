@@ -1822,6 +1822,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -1842,6 +1843,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 0,
@@ -1926,6 +1928,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -2280,7 +2283,8 @@
       "size": 6,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -2295,7 +2299,8 @@
         "axe_levy": 9
        }
       },
-      "endsAt": "2026-06-01T11:50:24.000Z"
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -2310,7 +2315,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -2323,7 +2329,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -2336,7 +2343,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -2349,7 +2357,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -2362,7 +2371,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -2393,6 +2417,7 @@
       "front": "north",
       "raiders": 10,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T11:21:36.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -4802,6 +4827,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -4822,6 +4848,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 0,
@@ -4906,6 +4933,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -5260,7 +5288,8 @@
       "size": 6,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -5275,7 +5304,8 @@
         "axe_levy": 9
        }
       },
-      "endsAt": "2026-06-01T11:50:24.000Z"
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -5290,7 +5320,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -5303,7 +5334,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -5316,7 +5348,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -5329,7 +5362,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -5342,7 +5376,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -5373,6 +5422,7 @@
       "front": "north",
       "raiders": 10,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T11:21:36.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -7986,6 +8036,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -8065,6 +8116,7 @@
       "leaderId": 3,
       "hatred": 0.4,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -8085,6 +8137,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -8134,6 +8187,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 7,
@@ -8617,7 +8671,8 @@
       "size": 7,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -8632,14 +8687,15 @@
         "axe_levy": 9
        }
       },
-      "endsAt": "2026-06-01T11:50:24.000Z"
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
      },
      {
       "id": 4,
       "kind": "captives",
       "front": "south",
-      "q": 1,
-      "r": 6,
+      "q": -1,
+      "r": 8,
       "size": 15,
       "waveId": null,
       "reward": {
@@ -8650,7 +8706,8 @@
         "stone": 375
        }
       },
-      "endsAt": "2026-06-01T12:19:12.000Z"
+      "endsAt": "2026-06-01T12:19:12.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -8665,7 +8722,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -8678,7 +8736,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -8691,7 +8750,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -8704,7 +8764,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -8717,7 +8778,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -11103,6 +11179,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -11182,6 +11259,7 @@
       "leaderId": 3,
       "hatred": 0.4,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -11202,6 +11280,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -11251,6 +11330,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 7,
@@ -11734,7 +11814,8 @@
       "size": 7,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -11749,14 +11830,15 @@
         "axe_levy": 9
        }
       },
-      "endsAt": "2026-06-01T11:50:24.000Z"
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
      },
      {
       "id": 4,
       "kind": "captives",
       "front": "south",
-      "q": 1,
-      "r": 6,
+      "q": -1,
+      "r": 8,
       "size": 15,
       "waveId": null,
       "reward": {
@@ -11767,7 +11849,8 @@
         "stone": 375
        }
       },
-      "endsAt": "2026-06-01T12:19:12.000Z"
+      "endsAt": "2026-06-01T12:19:12.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -11782,7 +11865,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -11795,7 +11879,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -11808,7 +11893,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -11821,7 +11907,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -11834,7 +11921,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -14326,6 +14428,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -14405,6 +14508,7 @@
       "leaderId": 3,
       "hatred": 0.4,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -14425,6 +14529,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -14474,6 +14579,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 7,
@@ -15028,7 +15134,8 @@
       "size": 7,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -15043,14 +15150,15 @@
         "axe_levy": 9
        }
       },
-      "endsAt": "2026-06-01T11:50:24.000Z"
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
      },
      {
       "id": 4,
       "kind": "captives",
       "front": "south",
-      "q": 1,
-      "r": 6,
+      "q": -1,
+      "r": 8,
       "size": 15,
       "waveId": null,
       "reward": {
@@ -15061,7 +15169,8 @@
         "stone": 375
        }
       },
-      "endsAt": "2026-06-01T12:19:12.000Z"
+      "endsAt": "2026-06-01T12:19:12.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -15076,7 +15185,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -15089,7 +15199,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -15102,7 +15213,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -15115,7 +15227,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -15128,7 +15241,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -17597,6 +17725,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -17641,6 +17770,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -17661,6 +17791,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 7,
@@ -17745,6 +17876,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -18347,14 +18479,15 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
       "kind": "captives",
       "front": "south",
-      "q": 1,
-      "r": 6,
+      "q": -1,
+      "r": 8,
       "size": 15,
       "waveId": null,
       "reward": {
@@ -18365,7 +18498,8 @@
         "stone": 375
        }
       },
-      "endsAt": "2026-06-01T12:19:12.000Z"
+      "endsAt": "2026-06-01T12:19:12.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -18380,7 +18514,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -18393,7 +18528,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -18406,7 +18542,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -18419,7 +18556,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -18432,10 +18570,25 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 7,
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 8,
       "kind": "stone_idol",
       "q": -5,
       "r": 2,
@@ -18445,7 +18598,8 @@
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T12:48:00.000Z"
+      "endsAt": "2026-06-01T12:48:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -20691,6 +20845,7 @@
       "leaderId": 4,
       "hatred": 0.2,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -20711,6 +20866,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -20790,6 +20946,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -21366,7 +21523,8 @@
       "size": 6,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -21377,7 +21535,8 @@
       "size": 12,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -21388,7 +21547,8 @@
       "size": 7,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -21399,7 +21559,8 @@
       "size": 6,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 8,
@@ -21414,7 +21575,8 @@
         "axe_levy": 12
        }
       },
-      "endsAt": "2026-06-01T13:16:48.000Z"
+      "endsAt": "2026-06-01T13:16:48.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -21429,7 +21591,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -21442,7 +21605,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -21455,7 +21619,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -21468,7 +21633,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -21481,10 +21647,25 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 7,
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 8,
       "kind": "stone_idol",
       "q": -5,
       "r": 2,
@@ -21494,7 +21675,8 @@
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T12:48:00.000Z"
+      "endsAt": "2026-06-01T12:48:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -23741,6 +23923,7 @@
       "leaderId": 4,
       "hatred": 0.2,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -23761,6 +23944,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -23840,6 +24024,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -24416,7 +24601,8 @@
       "size": 6,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -24427,7 +24613,8 @@
       "size": 12,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -24438,7 +24625,8 @@
       "size": 7,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -24449,7 +24637,8 @@
       "size": 6,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 8,
@@ -24464,7 +24653,8 @@
         "axe_levy": 12
        }
       },
-      "endsAt": "2026-06-01T13:16:48.000Z"
+      "endsAt": "2026-06-01T13:16:48.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -24479,7 +24669,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -24492,7 +24683,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -24505,7 +24697,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -24518,7 +24711,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -24531,10 +24725,25 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 7,
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 8,
       "kind": "stone_idol",
       "q": -5,
       "r": 2,
@@ -24544,7 +24753,8 @@
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T12:48:00.000Z"
+      "endsAt": "2026-06-01T12:48:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -26784,6 +26994,7 @@
       "leaderId": null,
       "hatred": 0.4,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -26804,6 +27015,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -26898,6 +27110,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -9,
@@ -27598,7 +27811,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -27609,7 +27823,8 @@
       "size": 9,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -27620,7 +27835,8 @@
       "size": 6,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -27631,7 +27847,8 @@
       "size": 5,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 8,
@@ -27646,14 +27863,15 @@
         "axe_levy": 12
        }
       },
-      "endsAt": "2026-06-01T13:16:48.000Z"
+      "endsAt": "2026-06-01T13:16:48.000Z",
+      "quest": null
      },
      {
       "id": 9,
       "kind": "captives",
       "front": "south",
-      "q": 1,
-      "r": 6,
+      "q": 0,
+      "r": 7,
       "size": 20,
       "waveId": null,
       "reward": {
@@ -27661,7 +27879,8 @@
         "spearman": 13
        }
       },
-      "endsAt": "2026-06-01T13:45:36.000Z"
+      "endsAt": "2026-06-01T13:45:36.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -27676,7 +27895,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -27689,7 +27909,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -27702,7 +27923,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -27715,7 +27937,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -27728,7 +27951,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -29940,6 +30178,7 @@
       "leaderId": 2,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -29960,6 +30199,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -30054,6 +30294,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 2,
@@ -30948,7 +31189,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -30959,7 +31201,8 @@
       "size": 6,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -30970,7 +31213,8 @@
       "size": 5,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -30981,14 +31225,15 @@
       "size": 3,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 10,
       "kind": "captives",
       "front": "north",
       "q": 4,
-      "r": 1,
+      "r": 2,
       "size": 21,
       "waveId": null,
       "reward": {
@@ -30999,7 +31244,8 @@
         "stone": 525
        }
       },
-      "endsAt": "2026-06-01T14:14:24.000Z"
+      "endsAt": "2026-06-01T14:14:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -31014,7 +31260,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -31027,7 +31274,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -31040,7 +31288,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -31053,7 +31302,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -31066,7 +31316,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -31097,6 +31362,7 @@
       "front": "north",
       "raiders": 19,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T14:43:12.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -33346,6 +33612,7 @@
       "leaderId": null,
       "hatred": 0.2,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -33366,6 +33633,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 9,
@@ -33460,6 +33728,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -8,
@@ -34468,7 +34737,8 @@
       "size": 5,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -34479,7 +34749,8 @@
       "size": 5,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -34490,7 +34761,8 @@
       "size": 5,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -34501,7 +34773,8 @@
       "size": 3,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 11,
@@ -34512,7 +34785,8 @@
       "size": 9,
       "waveId": 9,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 12,
@@ -34530,7 +34804,8 @@
         "stone": 638
        }
       },
-      "endsAt": "2026-06-01T15:40:48.000Z"
+      "endsAt": "2026-06-01T15:40:48.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -34545,7 +34820,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -34558,7 +34834,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -34571,7 +34848,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -34584,7 +34862,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -34597,20 +34876,36 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
-      "id": 8,
-      "kind": "sunken_shrine",
-      "q": 1,
-      "r": 4,
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
       "status": "unexplored",
       "guardians": null,
       "exploredBy": null,
       "find": null,
       "exploredAt": null,
       "hard": true,
-      "endsAt": "2026-06-01T15:12:00.000Z"
+      "endsAt": null,
+      "quest": "relic"
+     },
+     {
+      "id": 9,
+      "kind": "kurgan",
+      "q": 0,
+      "r": 5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": "2026-06-01T15:12:00.000Z",
+      "quest": null
      }
     ],
     "lore": [],
@@ -37156,6 +37451,7 @@
       "leaderId": 5,
       "hatred": 0.4,
       "bandOf": null,
+      "errand": null,
       "forecast": null
      },
      {
@@ -37176,6 +37472,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": -8,
@@ -37250,6 +37547,7 @@
       "leaderId": null,
       "hatred": 0,
       "bandOf": null,
+      "errand": null,
       "forecast": {
        "spawn": {
         "q": 4,
@@ -38258,7 +38556,8 @@
       "size": 6,
       "waveId": null,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -38269,7 +38568,8 @@
       "size": 6,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 6,
@@ -38280,7 +38580,8 @@
       "size": 6,
       "waveId": 4,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 7,
@@ -38291,7 +38592,8 @@
       "size": 4,
       "waveId": 2,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 11,
@@ -38302,7 +38604,8 @@
       "size": 7,
       "waveId": 9,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 12,
@@ -38320,7 +38623,8 @@
         "stone": 638
        }
       },
-      "endsAt": "2026-06-01T15:40:48.000Z"
+      "endsAt": "2026-06-01T15:40:48.000Z",
+      "quest": null
      },
      {
       "id": 13,
@@ -38331,7 +38635,8 @@
       "size": 20,
       "waveId": 10,
       "reward": null,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      }
     ],
     "sites": [
@@ -38346,7 +38651,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 2,
@@ -38359,7 +38665,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 3,
@@ -38372,7 +38679,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 4,
@@ -38385,7 +38693,8 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
      },
      {
       "id": 5,
@@ -38398,7 +38707,22 @@
       "find": null,
       "exploredAt": null,
       "hard": false,
-      "endsAt": null
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
      }
     ],
     "lore": [],
@@ -38429,6 +38753,7 @@
       "front": "north",
       "raiders": 23,
       "raids": 0,
+      "burns": 0,
       "endsAt": "2026-06-01T16:09:36.000Z",
       "completesAt": null,
       "nextRaidAt": null
@@ -40380,7 +40705,7 @@
    "response": {
     "notifications": [
      {
-      "id": 82,
+      "id": 83,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40389,7 +40714,7 @@
       "read": false
      },
      {
-      "id": 81,
+      "id": 82,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 0)",
@@ -40398,16 +40723,16 @@
       "read": false
      },
      {
-      "id": 80,
+      "id": 81,
       "kind": "event",
       "tier": "push",
-      "title": "The forbidding ruin at (1, 4) sank back into the earth",
+      "title": "The forbidding ruin at (0, 5) sank back into the earth",
       "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T15:12:00.000Z",
       "read": false
      },
      {
-      "id": 79,
+      "id": 80,
       "kind": "camp",
       "tier": "digest",
       "title": "Raiders made camp at (-2, 3)",
@@ -40416,7 +40741,7 @@
       "read": false
      },
      {
-      "id": 78,
+      "id": 79,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -40425,7 +40750,7 @@
       "read": false
      },
      {
-      "id": 77,
+      "id": 78,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -40434,7 +40759,7 @@
       "read": false
      },
      {
-      "id": 76,
+      "id": 77,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40443,7 +40768,7 @@
       "read": false
      },
      {
-      "id": 75,
+      "id": 76,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -40452,7 +40777,7 @@
       "read": false
      },
      {
-      "id": 74,
+      "id": 75,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -40461,7 +40786,7 @@
       "read": false
      },
      {
-      "id": 73,
+      "id": 74,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -40470,7 +40795,7 @@
       "read": false
      },
      {
-      "id": 72,
+      "id": 73,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -40479,7 +40804,7 @@
       "read": false
      },
      {
-      "id": 71,
+      "id": 72,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -40488,7 +40813,7 @@
       "read": false
      },
      {
-      "id": 70,
+      "id": 71,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -40497,7 +40822,7 @@
       "read": false
      },
      {
-      "id": 69,
+      "id": 70,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, -2)",
@@ -40506,7 +40831,7 @@
       "read": false
      },
      {
-      "id": 68,
+      "id": 69,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 1) gave up and left",
@@ -40515,7 +40840,7 @@
       "read": false
      },
      {
-      "id": 67,
+      "id": 68,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40524,7 +40849,7 @@
       "read": false
      },
      {
-      "id": 66,
+      "id": 67,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -40533,7 +40858,7 @@
       "read": false
      },
      {
-      "id": 65,
+      "id": 66,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40542,7 +40867,7 @@
       "read": false
      },
      {
-      "id": 64,
+      "id": 65,
       "kind": "leader",
       "tier": "digest",
       "title": "Karachun the Hungry has fallen",
@@ -40551,7 +40876,7 @@
       "read": false
      },
      {
-      "id": 63,
+      "id": 64,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40560,25 +40885,25 @@
       "read": false
      },
      {
-      "id": 62,
+      "id": 63,
       "kind": "event",
       "tier": "push",
-      "title": "A forbidding ruin rises at (1, 4)",
+      "title": "A forbidding ruin rises at (0, 5)",
       "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 5600 resources; left alone, it rouses the next horde from the south.",
       "createdAt": "2026-06-01T14:14:24.000Z",
       "read": false
      },
      {
-      "id": 61,
+      "id": 62,
       "kind": "event",
       "tier": "push",
-      "title": "The captives at (4, 1) were taken away",
+      "title": "The captives at (4, 2) were taken away",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T14:14:24.000Z",
       "read": false
      },
      {
-      "id": 60,
+      "id": 61,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40587,7 +40912,7 @@
       "read": false
      },
      {
-      "id": 59,
+      "id": 60,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -40596,7 +40921,7 @@
       "read": false
      },
      {
-      "id": 58,
+      "id": 59,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -40605,7 +40930,7 @@
       "read": false
      },
      {
-      "id": 57,
+      "id": 58,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -40614,7 +40939,7 @@
       "read": false
      },
      {
-      "id": 56,
+      "id": 57,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -40623,7 +40948,7 @@
       "read": false
      },
      {
-      "id": 55,
+      "id": 56,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-7, 1)",
@@ -40632,16 +40957,16 @@
       "read": false
      },
      {
-      "id": 54,
+      "id": 55,
       "kind": "event",
       "tier": "push",
-      "title": "The captives at (1, 6) were taken away",
+      "title": "The captives at (0, 7) were taken away",
       "body": "The next horde from the south hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T13:45:36.000Z",
       "read": false
      },
      {
-      "id": 53,
+      "id": 54,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40650,7 +40975,7 @@
       "read": false
      },
      {
-      "id": 52,
+      "id": 53,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40659,7 +40984,7 @@
       "read": false
      },
      {
-      "id": 51,
+      "id": 52,
       "kind": "leader",
       "tier": "digest",
       "title": "Karachun the Hungry grows stronger",
@@ -40668,7 +40993,7 @@
       "read": false
      },
      {
-      "id": 50,
+      "id": 51,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40677,16 +41002,16 @@
       "read": false
      },
      {
-      "id": 49,
+      "id": 50,
       "kind": "event",
       "tier": "push",
-      "title": "Captives are held at (4, 1)",
+      "title": "Captives are held at (4, 2)",
       "body": "Clear the camp to free them before they are taken away, for a bounty of at least 4900 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T13:16:48.000Z",
       "read": false
      },
      {
-      "id": 48,
+      "id": 49,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-7, 2) were taken away",
@@ -40695,7 +41020,7 @@
       "read": false
      },
      {
-      "id": 47,
+      "id": 48,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40704,7 +41029,7 @@
       "read": false
      },
      {
-      "id": 46,
+      "id": 47,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -40713,7 +41038,7 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 46,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -40722,7 +41047,7 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 45,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -40731,7 +41056,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 44,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -40740,7 +41065,7 @@
       "read": false
      }
     ],
-    "unread": 82,
+    "unread": 83,
     "serverTime": "2026-06-01T15:30:00.000Z"
    }
   }

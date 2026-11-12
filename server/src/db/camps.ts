@@ -18,6 +18,8 @@ export interface Camp {
   // goes if nobody comes.
   reward?: CampReward | null;
   endsAt?: Date | null;
+  // A bridge quest's lair: the quest it answers (null: none).
+  quest?: string | null;
 }
 
 interface CampRow {
@@ -33,6 +35,7 @@ interface CampRow {
   created_at: Date;
   reward: CampReward | null;
   ends_at: Date | null;
+  quest: string | null;
 }
 
 function fromRow(row: CampRow): Camp {
@@ -49,16 +52,17 @@ function fromRow(row: CampRow): Camp {
     createdAt: row.created_at,
     reward: row.reward ?? null,
     endsAt: row.ends_at ?? null,
+    quest: row.quest ?? null,
   };
 }
 
 export async function insertCamp(
   client: DbClient,
-  c: Pick<Camp, 'worldId' | 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId' | 'createdAt' | 'reward' | 'endsAt'>,
+  c: Pick<Camp, 'worldId' | 'kind' | 'front' | 'q' | 'r' | 'units' | 'waveId' | 'createdAt' | 'reward' | 'endsAt'> & { quest?: string | null },
 ): Promise<Camp> {
   const { rows } = await client.query<CampRow>(
-    `INSERT INTO camps (world_id, kind, front, q, r, units, wave_id, created_at, reward, ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-    [c.worldId, c.kind, c.front, c.q, c.r, JSON.stringify(c.units), c.waveId, c.createdAt, c.reward ? JSON.stringify(c.reward) : null, c.endsAt ?? null],
+    `INSERT INTO camps (world_id, kind, front, q, r, units, wave_id, created_at, reward, ends_at, quest) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+    [c.worldId, c.kind, c.front, c.q, c.r, JSON.stringify(c.units), c.waveId, c.createdAt, c.reward ? JSON.stringify(c.reward) : null, c.endsAt ?? null, c.quest ?? null],
   );
   return fromRow(rows[0]!);
 }

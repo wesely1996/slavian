@@ -18,6 +18,8 @@ export interface Shipyard {
   front: string;
   raiders: Record<string, number>;
   raids: number;
+  // Times raiders burned its work (shipyard.maxBurns: it is lost).
+  burns: number;
   endsAt: Date | null;
   completesAt: Date | null;
   nextRaidAt: Date | null;
@@ -38,6 +40,7 @@ interface Row {
   front: string;
   raiders: Record<string, number>;
   raids: number;
+  burns: number | null;
   ends_at: Date | null;
   completes_at: Date | null;
   next_raid_at: Date | null;
@@ -56,6 +59,7 @@ function fromRow(r: Row): Shipyard {
     front: r.front,
     raiders: r.raiders,
     raids: r.raids,
+    burns: r.burns ?? 0,
     endsAt: r.ends_at,
     completesAt: r.completes_at,
     nextRaidAt: r.next_raid_at,
@@ -89,8 +93,8 @@ export async function loadShipyard(client: DbClient, id: number): Promise<Shipya
 
 export async function saveShipyard(client: DbClient, s: Shipyard): Promise<void> {
   await client.query(
-    `UPDATE shipyards SET status = $2, paid = $3, raids = $4, completes_at = $5, next_raid_at = $6 WHERE id = $1`,
-    [s.id, s.status, JSON.stringify(s.paid), s.raids, s.completesAt, s.nextRaidAt],
+    `UPDATE shipyards SET status = $2, paid = $3, raids = $4, completes_at = $5, next_raid_at = $6, burns = $7 WHERE id = $1`,
+    [s.id, s.status, JSON.stringify(s.paid), s.raids, s.completesAt, s.nextRaidAt, s.burns],
   );
 }
 

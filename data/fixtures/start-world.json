@@ -222,6 +222,7 @@
    "leaderId": null,
    "hatred": 0,
    "bandOf": null,
+   "errand": null,
    "forecast": {
     "spawn": {
      "q": 9,
@@ -316,6 +317,7 @@
    "leaderId": null,
    "hatred": 0,
    "bandOf": null,
+   "errand": null,
    "forecast": {
     "spawn": {
      "q": -7,
@@ -444,7 +446,8 @@
    "size": 3,
    "waveId": null,
    "reward": null,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
   }
  ],
  "sites": [
@@ -459,7 +462,8 @@
    "find": null,
    "exploredAt": null,
    "hard": false,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
   },
   {
    "id": 2,
@@ -472,7 +476,8 @@
    "find": null,
    "exploredAt": null,
    "hard": false,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
   },
   {
    "id": 3,
@@ -485,7 +490,8 @@
    "find": null,
    "exploredAt": null,
    "hard": false,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
   },
   {
    "id": 4,
@@ -498,7 +504,8 @@
    "find": null,
    "exploredAt": null,
    "hard": false,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
   },
   {
    "id": 5,
@@ -511,7 +518,22 @@
    "find": null,
    "exploredAt": null,
    "hard": false,
-   "endsAt": null
+   "endsAt": null,
+   "quest": null
+  },
+  {
+   "id": 6,
+   "kind": "kurgan",
+   "q": 0,
+   "r": -5,
+   "status": "unexplored",
+   "guardians": null,
+   "exploredBy": null,
+   "find": null,
+   "exploredAt": null,
+   "hard": true,
+   "endsAt": null,
+   "quest": "relic"
   }
  ],
  "lore": [],

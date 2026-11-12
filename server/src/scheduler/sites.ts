@@ -30,6 +30,7 @@ import { heroAfterBattle } from './heroes.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
+import type { BridgeQuest } from '../data/index.js';
 import { bridgeQuest } from './bridge.js';
 import { rewardEvent } from './eventOutcomes.js';
 
@@ -211,6 +212,8 @@ export async function claimFind(
   }
   await markExplored(client, site.id, accountId, find, at);
   await bridgeQuest(client, data, world, 'site', at);
+  // A bridge quest's ruin.
+  if (site.quest) await bridgeQuest(client, data, world, site.quest as BridgeQuest, at);
   const name = data.sites.kinds[site.kind]?.name ?? 'site';
   for (const member of await listMembers(client, world.id)) {
     await tell(client, world, member.accountId, {

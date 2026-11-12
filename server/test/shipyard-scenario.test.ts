@@ -49,19 +49,21 @@ scenario('shipyard-scenario.json', START, async ({ play }) => {
   // A second payment is turned away: it is paid for.
   await play({ method: 'POST', path: `/v1/villages/1/shipyards/${shipyard.id}` });
 
+  // A strong guard (the raiders come every 2 hours, and burned 3 times the
+  // boat would be lost).
+  await play({ set: { garrison: { spearman: 40 } } });
   const spearmen = (await view()).villages[0].garrison.spearman ?? 0;
   await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: shipyard.q, r: shipyard.r }, units: { spearman: spearmen } } });
 
-  // Raids come every 8 hours until the boat is done: the spearmen drive
-  // off the first, then are called home, and the next burn work.
-  for (let i = 0; i < 6; i++) {
-    await play({ advance: 8 * HOUR });
-    if (i === 0) await play({ method: 'POST', path: '/v1/armies/1/recall' });
+  // Raids come every 2 hours until the boat is done: the spearmen stand
+  // guard and drive them off.
+  for (let i = 0; i < 16; i++) {
+    await play({ advance: 2 * HOUR });
     const now = (await view()).shipyards.find((s: View) => s.id === shipyard!.id);
-    if (now.status === 'done') break;
+    if (!now || now.status === 'done') break;
   }
   const done = (await view()).shipyards.find((s: View) => s.id === shipyard!.id);
-  if (done.status !== 'done') await play({ advance: 2 * DAY });
+  if (done && done.status !== 'done') await play({ advance: 2 * DAY });
 
   // Along the river now: the army still standing there (or what is left of
   // it, sent out again) marches down it, to the bank hex furthest from the
@@ -88,4 +90,15 @@ scenario('shipyard-scenario.json', START, async ({ play }) => {
   }
   await play({ advance: 4 * HOUR });
   await view();
+
+  // Another shipyard, paid for and left unguarded: burned 3 times, it is lost.
+  const other = (await view()).shipyards.find((s: View) => s.status === 'open');
+  if (other) {
+    await play({ set: { amounts: { wood: 3000, stone: 3000, grain: 3000, iron: 3000 } } });
+    await play({ method: 'POST', path: `/v1/villages/1/shipyards/${other.id}` });
+    for (let i = 0; i < 4; i++) {
+      await play({ advance: 2 * HOUR });
+      await view();
+    }
+  }
 });
