@@ -325,6 +325,22 @@ static func costs(amounts: Dictionary, icon_size := 30, have := {}) -> String:
 	return "  ".join(parts)
 
 
+## Numbers with a picture each instead of a word: `entries` is
+## [[art id, text], …] ("icon/attack", "25"). Line icons take the ink.
+static func stats(entries: Array, font_size := SMALL_SIZE, color := MUTED) -> RichTextLabel:
+	var parts := PackedStringArray()
+	var size := roundi(font_size * 1.15)
+	for entry in entries:
+		var file := Art.path(String(entry[0]))
+		if file == "" or not ResourceLoader.exists(file):
+			parts.append(String(entry[1]))
+		elif String(entry[0]).begins_with("icon/"):
+			parts.append("[img=%d color=#%s]%s[/img] %s" % [size, color.to_html(false), file, entry[1]])
+		else:
+			parts.append("[img=%d]%s[/img] %s" % [size, file, entry[1]])
+	return rich("   ".join(parts), font_size, color)
+
+
 ## A label that takes BBCode, for text with icons in it (UI.costs).
 static func rich(text := "", font_size := SMALL_SIZE, color := MUTED) -> RichTextLabel:
 	var node := RichTextLabel.new()

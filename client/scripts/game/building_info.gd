@@ -125,7 +125,10 @@ static func unit_card(data: Dictionary, unit: String, speed: float, building_lev
 	var box := UI.vbox(8)
 	box.add_child(_head("unit/%s" % unit, UI.t(def.name), UI.t(String(def.get("description", ""))),
 		UI.t("Only %s") % ClanText.title(data, def.clan) if def.get("clan") != null else ""))
-	box.add_child(UI.with_info(UI.label(UI.t("%s · attack %d · defense %d · health %d") % [family.capitalize(), int(def.attack), int(def.defense), int(def.health)], UI.SMALL_SIZE),
+	var numbers := UI.stats([["icon/attack", str(int(def.attack))], ["icon/defense", str(int(def.defense))], ["icon/health", str(int(def.health))]], UI.SMALL_SIZE, UiTheme.INK)
+	numbers.tooltip_text = UI.t("%s · attack · defense · health") % UI.t(family.capitalize())
+	box.add_child(UI.label(UI.t(family.capitalize()), UI.SMALL_SIZE, UI.MUTED))
+	box.add_child(UI.with_info(numbers,
 		UI.t("In battle, defense works like armor: of every blow only %d / (%d + defense) lands, so each point of it counts for less the more there is. Health is how much of what lands it takes to fell one.") % [int(data.battle.armorConstant), int(data.battle.armorConstant)]))
 	if def.get("pathfinding") is Dictionary:
 		box.add_child(UI.label(UI.t("With an army, each takes %d%% off how much harsh terrain slows it (at most %d%%)") % [roundi(float(def.pathfinding.perUnit) * 100.0), roundi(float(def.pathfinding.max) * 100.0)], UI.SMALL_SIZE, UiTheme.GOLD))
