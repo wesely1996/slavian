@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "_comment": "Achievements (scheduler/achievements.ts): earned once per player per run, at the moment named in `when`, and told with a push notice. `hidden` ones show as a sealed medallion, their name and how to earn them unknown, until earned. Each has its own picture (`art`, achievement/<id>, drawn by tools/art/generate.py).",
+  "achievements": {
+    "first_defense": { "name": "Shield of the Village", "description": "Beat a horde at one of your villages.", "hidden": false },
+    "field_victory": { "name": "Hold the Ford", "description": "Beat a horde in a field battle with an army holding its road.", "hidden": false },
+    "camp_cleared": { "name": "Clearing the Woods", "description": "Clear a bandit camp.", "hidden": false },
+    "lair_cleared": { "name": "Into the Den", "description": "Clear a lair of Nav.", "hidden": false },
+    "captives_freed": { "name": "Unchained", "description": "Free captives from the camp that holds them.", "hidden": false },
+    "site_explored": { "name": "Grave Goods", "description": "Search an ancient site.", "hidden": false },
+    "ember_found": { "name": "Keeper of the Flame", "description": "Find Svarog's Ember in an ancient site.", "hidden": false },
+    "scroll_found": { "name": "Lorekeeper", "description": "Find a lore scroll.", "hidden": false },
+    "hero_quest": { "name": "Errand Rider", "description": "Bring your hero home from a quest.", "hidden": false },
+    "army_quest": { "name": "Warleader", "description": "Finish a quest your hero leads the army on.", "hidden": false },
+    "second_village": { "name": "Two Hearths", "description": "Found a second village.", "hidden": false },
+    "fort_built": { "name": "Palisade", "description": "Raise a fort in the field.", "hidden": false },
+    "bridge_stage": { "name": "Stone upon Stone", "description": "Raise a stage of the Kalinov Bridge.", "hidden": false },
+    "hero_fallen": { "name": "Carried Home", "description": "Your hero was struck down in battle, and lived.", "hidden": true },
+    "hordes_united": { "name": "Many Banners", "description": "Stand against two hordes in one battle.", "hidden": true },
+    "stronghold_sacked": { "name": "To the Heart of Nav", "description": "Sack a stronghold beyond the border.", "hidden": true },
+    "village_ruined": { "name": "Ashes", "description": "Lose a village to a horde.", "hidden": true },
+    "boat_built": { "name": "The River Road", "description": "See a boat built at a shipyard.", "hidden": true },
+    "victory": { "name": "Dawn over Prav", "description": "Hold the Holy City through Ritual Night.", "hidden": true }
+  }
+}

@@ -3,6 +3,7 @@
 // send part of themselves with the next wave of their front, ambush
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
+import { achieve } from './achievements.js';
 import { parseArmyQuestMark } from '../sim/quests.js';
 import { armyQuestDone } from './quests.js';
 import { villageBonuses } from '../sim/clans.js';
@@ -317,6 +318,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
       : '{kills} of them fell; {defenders} still hold it.',
     vars: { where, loot: total(result.cleared && after.loot ? after.loot : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
+  if (result.cleared) await achieve(client, data, world, army.ownerAccountId, camp.kind === 'lair' ? 'lair_cleared' : camp.kind === 'captives' ? 'captives_freed' : 'camp_cleared', at);
   // A hero's army quest done.
   if (result.cleared) await armyQuestDone(client, data, world, camp.quest, at);
   // Captives freed: the event's bounty.

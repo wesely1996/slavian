@@ -477,6 +477,7 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 	expedition.foundedVillageId = founded.id
 	LocalInbox.tell(server, world, owner, {"kind": "settlers", "tier": "digest", "title": "{name} founded",
 		"body": "Your settlers built a new village.", "vars": {"name": expedition.name}}, at)
+	LocalAchievements.achieve(server, world, owner, "second_village", at)
 
 
 static func on_settlers_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:

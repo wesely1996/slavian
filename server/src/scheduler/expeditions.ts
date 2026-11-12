@@ -1,6 +1,7 @@
 // Settlers on the scheduler: settlers_arrive founds the village (or turns
 // the settlers back if the hex was taken meanwhile); settlers_return brings
 // them home.
+import { achieve } from './achievements.js';
 import { z } from 'zod';
 import type { TerrainId } from '../data/index.js';
 import { countVillagesOwned, loadExpedition, markExpeditionDone, markFounded, markTurnedBack } from '../db/expeditions.js';
@@ -73,6 +74,7 @@ export const expeditionHandlers: HandlerRegistry = {
       body: 'Your settlers built a new village.',
       vars: { name: expedition.name },
     }, event.dueAt);
+    await achieve(client, data, world, owner, 'second_village', event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 

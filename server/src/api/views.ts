@@ -5,6 +5,7 @@ import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
 import { listShipyards } from '../db/shipyards.js';
+import { listAchievements } from '../db/achievements.js';
 import { listRiverEdges } from '../db/rivers.js';
 import { activeDelegations, recentDelegationLog } from '../db/delegations.js';
 import { runSummary } from '../db/runs.js';
@@ -683,6 +684,8 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     completesAt: s.completesAt?.toISOString() ?? null,
     nextRaidAt: s.nextRaidAt?.toISOString() ?? null,
   }));
+  // Achievements earned this run, in the order earned.
+  const achievements = (await listAchievements(client, world.id)).map((a) => ({ accountId: a.accountId, achievement: a.achievement, earnedAt: a.earnedAt.toISOString() }));
   const lore = (await listScrolls(client, world.id)).map((l) => ({ scroll: l.scroll, accountId: l.accountId, siteId: l.siteId, foundAt: l.foundAt.toISOString() }));
   const bridge = (await findBridge(client, world.id)) ?? (world.startedAt ? newBridge(world.startedAt, world.sanctity) : null);
   const fear = [...(await loadFear(client, world.id)).entries()].map(([key, value]) => [...key.split(',').map(Number), Math.round(value * 10) / 10]);
@@ -739,6 +742,7 @@ export async function worldView(client: DbClient, data: GameData, world: World, 
     // Ancient sites, and the group's lore scrolls.
     sites,
     lore,
+    achievements,
     shipyards,
     // The Kalinov Bridge (see sim/bridge.ts).
     bridge,

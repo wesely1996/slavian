@@ -1830,6 +1830,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -4829,6 +4830,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -7963,6 +7965,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -11379,6 +11388,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -15350,6 +15366,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -18778,6 +18801,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -22363,6 +22393,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -25831,6 +25868,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -27980,7 +28024,7 @@
    "response": {
     "notifications": [
      {
-      "id": 45,
+      "id": 46,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -27989,7 +28033,7 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 45,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -27998,7 +28042,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 44,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-7, 2)",
@@ -28007,7 +28051,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 43,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-1, 8) were taken away",
@@ -28016,7 +28060,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 42,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -28025,7 +28069,7 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 41,
       "kind": "hero",
       "tier": "digest",
       "title": "Ilya is wounded",
@@ -28034,7 +28078,7 @@
       "read": false
      },
      {
-      "id": 39,
+      "id": 40,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -28043,7 +28087,7 @@
       "read": false
      },
      {
-      "id": 38,
+      "id": 39,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Gift a teammate",
@@ -28052,7 +28096,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 38,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -28061,7 +28105,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 37,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -28070,7 +28114,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 36,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (0, 5)",
@@ -28079,7 +28123,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 35,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -28088,7 +28132,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 34,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -28097,7 +28141,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 33,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -28106,7 +28150,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 32,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -28115,7 +28159,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 31,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -28124,7 +28168,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 30,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -28133,11 +28177,20 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 29,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
       "body": "The horde carried off 469 resources after 1 rounds.",
+      "createdAt": "2026-06-01T11:35:26.400Z",
+      "read": false
+     },
+     {
+      "id": 28,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Carried Home",
+      "body": "Your hero was struck down in battle, and lived.",
       "createdAt": "2026-06-01T11:35:26.400Z",
       "read": false
      },
@@ -28329,18 +28382,9 @@
       "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 1750 resources for everyone. If nobody does, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T08:57:36.000Z",
       "read": false
-     },
-     {
-      "id": 6,
-      "kind": "research_done",
-      "tier": "digest",
-      "title": "Felling Axes researched",
-      "body": "Woodcutters and forest outposts cut 10% more wood.",
-      "createdAt": "2026-06-01T08:45:24.000Z",
-      "read": false
      }
     ],
-    "unread": 45,
+    "unread": 46,
     "serverTime": "2026-06-01T12:31:30.000Z"
    }
   }

@@ -561,6 +561,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -3201,6 +3202,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "camp_cleared",
+      "earnedAt": "2026-06-01T08:36:00.000Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -5128,6 +5136,15 @@
    "response": {
     "notifications": [
      {
+      "id": 4,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Clearing the Woods",
+      "body": "Clear a bandit camp.",
+      "createdAt": "2026-06-01T08:36:00.000Z",
+      "read": false
+     },
+     {
       "id": 3,
       "kind": "battle_result",
       "tier": "digest",
@@ -5155,7 +5172,7 @@
       "read": false
      }
     ],
-    "unread": 3,
+    "unread": 4,
     "serverTime": "2026-06-01T12:00:00.000Z"
    }
   },
@@ -5826,6 +5843,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "camp_cleared",
+      "earnedAt": "2026-06-01T08:36:00.000Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -8363,6 +8387,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "camp_cleared",
+      "earnedAt": "2026-06-01T08:36:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -10322,7 +10353,7 @@
    "response": {
     "notifications": [
      {
-      "id": 7,
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -10331,7 +10362,7 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -10340,7 +10371,7 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",
@@ -10360,7 +10391,7 @@
    "response": {
     "notifications": [
      {
-      "id": 7,
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -10369,7 +10400,7 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -10378,7 +10409,7 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",

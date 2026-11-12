@@ -1,6 +1,7 @@
 // Battles on the scheduler: a horde reaching a village starts a battle; each
 // battle_round event fights one round, applies losses to the horde and the
 // garrison, and either schedules the next round or settles the outcome.
+import { achieve } from './achievements.js';
 import { createRng } from '../sim/rng.js';
 import { againstFront, villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
@@ -346,6 +347,7 @@ export const battleHandlers: HandlerRegistry = {
         villageState = joinGarrison(data, villageState, healed, at, world.speed);
       }
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
+      await achieve(client, data, world, village.ownerAccountId, 'first_defense', at);
       await hordeBeaten(client, data, world, hex(village.q, village.r), total(battle.attackerInitial) - total(attackerNow));
       await tell(client, world, village.ownerAccountId, {
         kind: 'battle_result',

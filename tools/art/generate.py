@@ -2073,6 +2073,66 @@ def portrait(kind):
     return s
 
 
+# --- Achievements: a medallion each, with its own picture inside --------------
+
+# What each achievement shows inside its medallion, and the rim: bronze for
+# the plain ones, gold for the hidden ones.
+ACHIEVEMENTS = {
+    "first_defense": (lambda: unit("spearman"), "bronze", ("#4a6a8a", "#1d2c3c")),
+    "field_victory": (lambda: unit("archer"), "bronze", ("#6a8a4a", "#26381a")),
+    "camp_cleared": (lambda: camp("bandit"), "bronze", ("#8a6a3a", "#3a2a14")),
+    "lair_cleared": (lambda: camp("lair"), "bronze", ("#4a5a4a", "#18221a")),
+    "captives_freed": (lambda: unit("settler"), "bronze", ("#8a7a5a", "#3a3020")),
+    "site_explored": (lambda: site("kurgan"), "bronze", ("#7a8a5a", "#2a3420")),
+    "ember_found": (lambda: resource("ember"), "bronze", ("#5a2a2a", "#1e0c0c")),
+    "scroll_found": (lambda: site("stone_idol"), "bronze", ("#5a5a7a", "#1c1c2c")),
+    "hero_quest": (lambda: unit("pathfinder"), "bronze", ("#7a5a3a", "#2c1c10")),
+    "army_quest": (lambda: unit("border_rider"), "bronze", ("#8a3a2a", "#2c100a")),
+    "second_village": (lambda: settlement(2), "bronze", ("#6a8a5a", "#22301a")),
+    "fort_built": (lambda: fort(), "bronze", ("#7a6a4a", "#2a2214")),
+    "bridge_stage": (lambda: holy_city(), "bronze", ("#4a6a8a", "#16222e")),
+    "hero_fallen": (lambda: unit("shaman"), "gold", ("#5a3a5a", "#1c101c")),
+    "hordes_united": (lambda: faction("north"), "gold", ("#3a3a3a", "#101010")),
+    "stronghold_sacked": (lambda: faction("east"), "gold", ("#6a2a1a", "#200a06")),
+    "village_ruined": (lambda: ruins(), "gold", ("#4a4440", "#141210")),
+    "boat_built": (lambda: unit("river_barge"), "gold", ("#2a5a7a", "#0c1e2a")),
+    "victory": (lambda: settlement(5), "gold", ("#c8a050", "#4a3010")),
+}
+RIMS = {"bronze": ("#e3b07a", "#a0643a", "#5e3618"), "gold": ("#f6e08f", "#c89a2e", "#7a5a17"), "iron": ("#c8ccd2", "#7c848e", "#3c424a")}
+
+
+def medallion(rim, field):
+    s = Svg()
+    soft_shadow(s, 66, 118, 46, 7, 0.35)
+    r = RIMS[rim]
+    s.circle(64, 62, 56, s.lin([(0, r[0]), (0.5, r[1]), (1, r[2])], 0, 0, 1, 1), stroke=INK, sw=3)
+    # Notches around the rim, like a struck coin.
+    for i in range(24):
+        a = i * math.pi / 12
+        x0, y0 = 64 + math.cos(a) * 50, 62 + math.sin(a) * 50
+        x1, y1 = 64 + math.cos(a) * 55, 62 + math.sin(a) * 55
+        s.line(x0, y0, x1, y1, stroke=r[2], sw=2, opacity=0.6)
+    s.circle(64, 62, 47, s.rad([(0, field[0]), (1, field[1])], 0.4, 0.3, 0.8), stroke=INK, sw=2.5)
+    return s
+
+
+def achievement(kind):
+    make, rim, field = ACHIEVEMENTS[kind]
+    s = medallion(rim, field)
+    s.embed(make(), 30, 26, 0.53)
+    # A highlight across the face.
+    s.path("M26,40 Q40,18 70,14", "none", stroke="#ffffff", sw=3, opacity=0.25)
+    return s
+
+
+def achievement_sealed():
+    """A hidden achievement not yet earned: a sealed iron medallion."""
+    s = medallion("iron", ("#3a3f46", "#14171b"))
+    s.path("M52,50 Q52,38 64,38 Q76,38 76,50 Q76,58 64,62 L64,70", "none", stroke="#c8ccd2", sw=6)
+    s.circle(64, 84, 3, "#c8ccd2", stroke="none", sw=0)
+    return s
+
+
 def assets():
     out = {}
     for kind, make in FEATURES.items():
@@ -2130,6 +2190,9 @@ def assets():
         for stage in (1, 2, 3):
             out[f"building/{kind}_{stage}"] = building(kind, stage)
     out["map/supply_point"] = supply_point()
+    for kind in ACHIEVEMENTS:
+        out[f"achievement/{kind}"] = achievement(kind)
+    out["achievement/sealed"] = achievement_sealed()
     return out
 
 

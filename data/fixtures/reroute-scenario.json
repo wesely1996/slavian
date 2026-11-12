@@ -1636,6 +1636,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -4475,6 +4476,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -7251,6 +7253,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -10208,6 +10211,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -13657,6 +13672,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -17561,6 +17588,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T12:51:07.200Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -21134,6 +21178,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T12:51:07.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T12:52:19.200Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -23072,7 +23138,7 @@
    "response": {
     "notifications": [
      {
-      "id": 51,
+      "id": 55,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya reached level 2",
@@ -23081,7 +23147,7 @@
       "read": false
      },
      {
-      "id": 50,
+      "id": 54,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
@@ -23090,7 +23156,25 @@
       "read": false
      },
      {
-      "id": 49,
+      "id": 53,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Shield of the Village",
+      "body": "Beat a horde at one of your villages.",
+      "createdAt": "2026-06-01T12:52:19.200Z",
+      "read": false
+     },
+     {
+      "id": 52,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Many Banners",
+      "body": "Stand against two hordes in one battle.",
+      "createdAt": "2026-06-01T12:51:07.200Z",
+      "read": false
+     },
+     {
+      "id": 51,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
@@ -23099,7 +23183,7 @@
       "read": false
      },
      {
-      "id": 48,
+      "id": 50,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -23108,7 +23192,7 @@
       "read": false
      },
      {
-      "id": 47,
+      "id": 49,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -23117,7 +23201,7 @@
       "read": false
      },
      {
-      "id": 46,
+      "id": 48,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (0, 5) sank back into the earth",
@@ -23126,7 +23210,7 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 47,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -23135,7 +23219,7 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 46,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -23144,7 +23228,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 45,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -23153,7 +23237,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 44,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-6, 1)",
@@ -23162,7 +23246,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 43,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-1, 8) were taken away",
@@ -23171,7 +23255,7 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 42,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -23180,7 +23264,7 @@
       "read": false
      },
      {
-      "id": 39,
+      "id": 41,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -23189,7 +23273,7 @@
       "read": false
      },
      {
-      "id": 38,
+      "id": 40,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -23198,7 +23282,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 39,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -23207,7 +23291,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 38,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -23216,7 +23300,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 37,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (0, 5)",
@@ -23225,7 +23309,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 36,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -23234,7 +23318,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 35,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -23243,7 +23327,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 34,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -23252,7 +23336,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 33,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -23261,7 +23345,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 32,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -23270,7 +23354,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 31,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -23279,7 +23363,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 30,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -23288,7 +23372,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 29,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -23297,7 +23381,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 28,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -23306,7 +23390,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 27,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -23315,7 +23399,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 26,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -23324,7 +23408,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 25,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -23333,7 +23417,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 24,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -23342,7 +23426,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 23,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -23351,7 +23435,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 22,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -23360,7 +23444,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -23369,7 +23453,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 20,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 5) gave up and left",
@@ -23378,7 +23462,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -23387,7 +23471,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 18,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -23396,7 +23480,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 17,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-8, 2)",
@@ -23405,34 +23489,16 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -1) sank back into the earth",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
-     },
-     {
-      "id": 13,
-      "kind": "event",
-      "tier": "push",
-      "title": "Boatwrights wait at (-7, 5)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the north hates you the more.",
-      "createdAt": "2026-06-01T09:55:12.000Z",
-      "read": false
-     },
-     {
-      "id": 12,
-      "kind": "event",
-      "tier": "push",
-      "title": "The boatwrights at (-6, 4) gave up and left",
-      "body": "The next horde from the north hates you the more for it: +40% attack and defense.",
-      "createdAt": "2026-06-01T09:55:12.000Z",
-      "read": false
      }
     ],
-    "unread": 51,
+    "unread": 55,
     "serverTime": "2026-06-01T13:01:30.000Z"
    }
   }

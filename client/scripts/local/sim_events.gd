@@ -316,6 +316,7 @@ static func on_shipyard_done(server: LocalServer, world: Dictionary, event: Dict
 		reward(server, world, member.accountId, {"title": "The boat at ({q}, {r}) is ready",
 			"body": "Armies, caravans and scouts move fast between hexes along its river. The boatwrights' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.",
 			"vars": {"q": yard.q, "r": yard.r}}, int(event.dueAt), changed)
+	LocalAchievements.achieve_all(server, world, "boat_built", int(event.dueAt))
 	changed.append(["world"])
 
 

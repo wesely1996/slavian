@@ -102,6 +102,7 @@ static func on_bridge_raised(server: LocalServer, world: Dictionary, event: Dict
 		vars = {"name": name, "stage": next_stage.name, "blessing": blessing}
 		vars.merge(gift)
 	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "{name} stands", "body": body, "vars": vars}, at)
+	LocalAchievements.achieve_all(server, world, "bridge_stage", at)
 	if next.status == "complete":
 		call_ritual_night(server, world, at)
 	else:
@@ -209,6 +210,7 @@ static func on_ritual_check(server: LocalServer, world: Dictionary, event: Dicti
 	world.endedAt = at
 	var won: Dictionary = server.data.bridge.endings.won
 	LocalInbox.tell_everyone(server, world, {"kind": "ritual", "tier": "push", "title": won.title, "body": won.story}, at)
+	LocalAchievements.achieve_all(server, world, "victory", at)
 	changed.append(["world"])
 
 

@@ -183,6 +183,7 @@ static func army_quest_done(server: LocalServer, world: Dictionary, mark: Varian
 	hero.merge(LocalHeroes.gain_xp(data, hero, xp), true)
 	LocalInbox.tell(server, world, quest.accountId, {"kind": "hero", "tier": "digest", "title": "{name} has done: {quest}",
 		"body": "The army quest is done: {xp} XP for {name}.", "vars": {"name": hero.name, "quest": def.name, "xp": xp}}, at)
+	LocalAchievements.achieve(server, world, quest.accountId, "army_quest", at)
 
 
 ## An army quest's place gone, not done in time: its hero hears of it.
@@ -358,6 +359,7 @@ static func on_hero_quest(server: LocalServer, world: Dictionary, event: Diction
 	vars.merge({"name": name, "quest": data.quests.kinds[quest.kind].name}, true)
 	LocalInbox.tell(server, world, hero.accountId, {"kind": "hero", "tier": "digest",
 		"title": "{name} came back wounded from: {quest}" if wounded else "{name} is back from: {quest}", "body": told.body, "vars": vars}, at)
+	LocalAchievements.achieve(server, world, hero.accountId, "hero_quest", at)
 	changed.append(["world"])
 
 

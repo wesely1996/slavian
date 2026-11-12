@@ -48,7 +48,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
 		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
 	}
 	# The map, its rivers and bridges.
@@ -1205,6 +1205,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "generals": world.generals.map(func(g: Dictionary) -> Dictionary: return LocalGenerals.view(data, g)), "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
 		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
 			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
+		"achievements": LocalAchievements.view(world),
 		"shipyards": world.get("shipyards", []).map(LocalEvents.shipyard_view),
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),

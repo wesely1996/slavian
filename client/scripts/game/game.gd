@@ -65,6 +65,8 @@ var lanes: Dictionary = {}
 ## Ancient sites (see server worldView) and the group's lore scrolls.
 var sites: Array = []
 var lore: Array = []
+## Achievements earned this run: [{accountId, achievement, earnedAt}].
+var achievements: Array = []
 ## The Kalinov Bridge (see server sim/bridge.ts).
 var bridge: Dictionary = {}
 ## Hand-overs still running, and what delegates did lately.
@@ -164,6 +166,9 @@ func set_world(new_world: Dictionary) -> void:
 	shipyards = new_world.get("shipyards", [])
 	sites = new_world.get("sites", [])
 	lore = new_world.get("lore", [])
+	achievements = new_world.get("achievements", [])
+	# Yours are remembered on the device too, across runs.
+	Session.remember_achievements(achievements.filter(func(a: Dictionary) -> bool: return int(a.accountId) == my_account_id()))
 	var new_bridge: Variant = new_world.get("bridge")
 	bridge = new_bridge if new_bridge is Dictionary else {}
 	delegations = new_world.get("delegations", [])

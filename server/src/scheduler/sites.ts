@@ -2,6 +2,7 @@
 // fights the site's guardians on arrival, searches for a while
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
+import { achieve } from './achievements.js';
 import { parseArmyQuestMark } from '../sim/quests.js';
 import { armyQuestDone } from './quests.js';
 import { villageBonuses } from '../sim/clans.js';
@@ -226,6 +227,9 @@ export async function claimFind(
       vars: { name, q: site.q, r: site.r, find: findText(data, find) },
     }, at);
   }
+  await achieve(client, data, world, accountId, 'site_explored', at);
+  if (find.type === 'ember') await achieve(client, data, world, accountId, 'ember_found', at);
+  if (find.type === 'scroll') await achieve(client, data, world, accountId, 'scroll_found', at);
   // A hero's army quest done.
   await armyQuestDone(client, data, world, site.quest, at);
   // A forbidding ruin searched: the event's bounty.

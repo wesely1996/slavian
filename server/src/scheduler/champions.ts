@@ -2,6 +2,7 @@
 // troops and fight in the ranks. One commands: the hero if there is one,
 // else the general, who takes the hero's place when the hero falls. A
 // champion struck down falls: a hero is carried home wounded, a general dies.
+import { achieve } from './achievements.js';
 import type { GameData } from '../data/index.js';
 import type { General } from '../db/generals.js';
 import type { Hero } from '../db/heroes.js';
@@ -39,6 +40,7 @@ export async function championsFall(
   if (fallen.includes('hero') && force.hero) {
     const hero = force.homeVillageId === null ? force.hero : { ...force.hero, villageId: force.homeVillageId, armyId: null };
     await heroAfterBattle(client, data, world, hero, { kills: input.kills, won: false, battleId: input.battleId, at: input.at });
+    await achieve(client, data, world, hero.accountId, 'hero_fallen', input.at);
   }
   if (fallen.includes('general') && force.general) {
     await generalAfterBattle(client, data, world, force.general, { kills: input.kills, won: false, at: input.at });

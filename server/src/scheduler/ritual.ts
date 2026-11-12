@@ -2,6 +2,7 @@
 // stage stands, every active front sends a horde at once; the run is won
 // when the last of them is done and the Holy City still stands, and lost
 // when its Sanctity reaches 0.
+import { achieveAll } from './achievements.js';
 import type { GameData } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
@@ -68,6 +69,7 @@ export const ritualHandlers: HandlerRegistry = {
     await recordRunEnd(client, world.id, event.dueAt);
     const { title, story } = data.bridge.endings.won;
     await tellEveryone(client, world, title, story, event.dueAt);
+    await achieveAll(client, data, world, 'victory', event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 };

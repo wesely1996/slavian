@@ -586,6 +586,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -3630,6 +3631,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -6355,6 +6357,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -9080,6 +9083,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -11836,6 +11840,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -14592,6 +14597,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -17387,6 +17393,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -20182,6 +20189,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -22977,6 +22985,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -25772,6 +25781,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -28467,6 +28477,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "field_victory",
+      "earnedAt": "2026-06-01T10:47:21.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -30463,6 +30480,15 @@
    "response": {
     "notifications": [
      {
+      "id": 14,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Hold the Ford",
+      "body": "Beat a horde in a field battle with an army holding its road.",
+      "createdAt": "2026-06-01T10:47:21.600Z",
+      "read": false
+     },
+     {
       "id": 13,
       "kind": "battle_result",
       "tier": "digest",
@@ -30580,7 +30606,7 @@
       "read": false
      }
     ],
-    "unread": 13,
+    "unread": 14,
     "serverTime": "2026-06-01T10:49:00.000Z"
    }
   },
@@ -30591,6 +30617,15 @@
    "response": {
     "notifications": [
      {
+      "id": 14,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Hold the Ford",
+      "body": "Beat a horde in a field battle with an army holding its road.",
+      "createdAt": "2026-06-01T10:47:21.600Z",
+      "read": false
+     },
+     {
       "id": 13,
       "kind": "battle_result",
       "tier": "digest",
@@ -30708,7 +30743,7 @@
       "read": false
      }
     ],
-    "unread": 13,
+    "unread": 14,
     "serverTime": "2026-06-01T10:49:00.000Z"
    }
   }

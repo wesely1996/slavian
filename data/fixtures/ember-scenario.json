@@ -1305,6 +1305,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 1,
@@ -4087,6 +4088,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 2,
@@ -7080,6 +7093,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 2,
@@ -10135,6 +10165,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -13181,6 +13228,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:06:09.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -16242,6 +16311,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:06:09.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -19273,6 +19364,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:06:09.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -22306,6 +22419,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:38:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T10:39:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "lair_cleared",
+      "earnedAt": "2026-06-01T10:41:36.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:06:09.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -24286,7 +24421,7 @@
    "response": {
     "notifications": [
      {
-      "id": 37,
+      "id": 41,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Zaslavl starved",
@@ -24295,7 +24430,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 40,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -24304,7 +24439,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 39,
       "kind": "bridge",
       "tier": "digest",
       "title": "The Iron Span: Beat the Smith-Breakers",
@@ -24313,7 +24448,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 38,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya reached level 2",
@@ -24322,7 +24457,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 37,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (0, 0)",
@@ -24331,7 +24466,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 36,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, 9)",
@@ -24340,7 +24475,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 35,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (-1, 4) sank back into the earth",
@@ -24349,7 +24484,16 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 34,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Many Banners",
+      "body": "Stand against two hordes in one battle.",
+      "createdAt": "2026-06-01T11:06:09.600Z",
+      "read": false
+     },
+     {
+      "id": 33,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (0, 0)",
@@ -24358,7 +24502,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 32,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Zaslavl was raided",
@@ -24367,7 +24511,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 31,
       "kind": "under_attack",
       "tier": "push",
       "title": "Zaslavl is under attack",
@@ -24376,7 +24520,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 30,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Zaslavl",
@@ -24385,7 +24529,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 29,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-7, 1)",
@@ -24394,7 +24538,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 28,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, 3) sank back into the earth",
@@ -24403,7 +24547,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 27,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -24412,7 +24556,16 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 26,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Into the Den",
+      "body": "Clear a lair of Nav.",
+      "createdAt": "2026-06-01T10:41:36.000Z",
+      "read": false
+     },
+     {
+      "id": 25,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army cleared the lair at (3, -2)",
@@ -24421,7 +24574,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 24,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Clear your first camp",
@@ -24430,7 +24583,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 23,
       "kind": "bridge",
       "tier": "push",
       "title": "The Smith-Breakers gather",
@@ -24439,7 +24592,16 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 22,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Stone upon Stone",
+      "body": "Raise a stage of the Kalinov Bridge.",
+      "createdAt": "2026-06-01T10:39:24.000Z",
+      "read": false
+     },
+     {
+      "id": 21,
       "kind": "bridge",
       "tier": "push",
       "title": "The Oak Piers stands",
@@ -24448,11 +24610,20 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Zaslavl held",
       "body": "The horde was beaten after 1 rounds.",
+      "createdAt": "2026-06-01T10:38:36.000Z",
+      "read": false
+     },
+     {
+      "id": 19,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Shield of the Village",
+      "body": "Beat a horde at one of your villages.",
       "createdAt": "2026-06-01T10:38:36.000Z",
       "read": false
      },
@@ -24608,18 +24779,9 @@
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:00:00.000Z",
       "read": false
-     },
-     {
-      "id": 1,
-      "kind": "bridge",
-      "tier": "push",
-      "title": "The Builders' Barrow rises",
-      "body": "The first builders sleep in the Builders' Barrow with their mark, the rune that bound the old span to Yav. Their dead still guard it: break through and bring the rune back, or no stone will hold the new span. It is marked on the map at (-2, -3).",
-      "createdAt": "2026-06-01T08:00:00.000Z",
-      "read": false
      }
     ],
-    "unread": 37,
+    "unread": 41,
     "serverTime": "2026-06-01T11:40:24.000Z"
    }
   }

@@ -36,6 +36,7 @@ import {
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
 import { armyQuestOf, heroQuestOffers } from '../scheduler/quests.js';
+import { accountAchievements } from '../db/achievements.js';
 import type { Hero } from '../db/heroes.js';
 import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
 import {
@@ -352,6 +353,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   // When to be bothered: quiet hours (local minutes, may wrap midnight),
   // the device's UTC offset and the daily digest hour.
+  // Every achievement the player has earned, in any run: when first, where,
+  // and how many runs it came in.
+  app.get('/v1/me/achievements', async (request) => {
+    const account = await authenticate(db, request);
+    const earned = await inTransaction(db, (client) => accountAchievements(client, account.id));
+    return { achievements: earned.map((e) => ({ id: e.achievement, worldId: e.worldId, earnedAt: e.earnedAt.toISOString(), times: e.times })) };
+  });
+
   app.get('/v1/me/notifications', async (request) => {
     const account = await authenticate(db, request);
     return { prefs: await inTransaction(db, (client) => loadPrefs(client, account.id)) };

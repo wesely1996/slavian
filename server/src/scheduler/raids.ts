@@ -4,6 +4,7 @@
 // siege of the front's stronghold. Battles won bring loot (as much as it
 // can carry), the North's rare finds, and the front's hatred; a raid beaten,
 // or done, comes home with what it carries.
+import { achieve } from './achievements.js';
 import { bridgeQuest } from './bridge.js';
 import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
@@ -336,6 +337,7 @@ export const raidHandlers: HandlerRegistry = {
       await angerFront(client, data, world, front, data.raids.hatred.perBattle + (stage.stronghold ? data.raids.hatred.stronghold : 0), at);
       // The North's stronghold sacked at the full depth: the Eye of Veles (a bridge quest).
       if (front === 'north' && stage.stronghold && raid.depth === data.raids.maxDepth) await bridgeQuest(client, data, world, 'artifact', at);
+      if (stage.stronghold) await achieve(client, data, world, army.ownerAccountId, 'stronghold_sacked', at);
       // The North: rare finds besides.
       if (front === 'north') {
         const ownerHero = hero ?? (army.ownerAccountId !== null ? await loadHero(client, world.id, army.ownerAccountId).catch(() => null) : null);
