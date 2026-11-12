@@ -2382,8 +2382,27 @@ func _send_troops(village: Dictionary) -> void:
 	# wrapping text was squeezed to a letter a line), the button under it.
 	var dest_text := UI.label(tr_n("To %s · %d hex", "To %s · %d hexes", away) % [where, away], UI.SMALL_SIZE)
 	_panel_body.add_child(UI.with_info(dest_text, ArmyText.order_text(String(body.orders))))
-	pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_panel_body.add_child(pick)
+	# Send sits at the top beside the destination, always in sight; the
+	# troops and the rest follow under it.
+	var fights: bool = body.orders != "garrison"
+	var stays: bool = body.orders in ["support", "hold", "clear", "explore"]
+	var go := UI.primary(tr("Send"), func() -> void:
+		var order := body.duplicate()
+		order.units = _picked_units(home_units)
+		if stays:
+			order.returnHome = _army_return
+		if _ready_general(village_id) > 0:
+			order.generalId = _ready_general(village_id)
+		if fights:
+			order.stance = _army_stance
+		_send_army(village_id, order), "icon/troops")
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pick.text = tr("Change")
+	var top_row := UI.hbox(8)
+	top_row.add_child(pick)
+	top_row.add_child(go)
+	_panel_body.add_child(top_row)
+	_picked_hint(go, home_units)
 	if not target.is_empty() and Game.is_mine(target):
 		_panel_body.add_child(_join_check())
 	elif not target.is_empty() and _horde_against(int(target.id)):
@@ -2397,25 +2416,11 @@ func _send_troops(village: Dictionary) -> void:
 		_panel_body.add_child(harass)
 	_unit_pickers(home_units, true, "send")
 	_general_picker(village_id)
-	var fights: bool = body.orders != "garrison"
 	if fights:
 		_army_stance_picker(village)
 	# Support and holding stay until called home, unless told to come back once done.
-	var stays: bool = body.orders in ["support", "hold", "clear", "explore"]
 	if stays:
 		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
-	var go := UI.button(tr("Send"), func() -> void:
-		var order := body.duplicate()
-		order.units = _picked_units(home_units)
-		if stays:
-			order.returnHome = _army_return
-		if _ready_general(village_id) > 0:
-			order.generalId = _ready_general(village_id)
-		if fights:
-			order.stance = _army_stance
-		_send_army(village_id, order))
-	_panel_body.add_child(go)
-	_picked_hint(go, home_units)
 
 
 ## Onto one of your settlements: whether the army joins its garrison there
@@ -2483,7 +2488,7 @@ func _picked_hint(button: Button, home_units: Dictionary) -> void:
 	_tick(hint, func() -> String:
 		var none := _picked_units(home_units).is_empty()
 		button.disabled = none
-		return tr("Type how many of each to send.") if none else "")
+		return tr("Pick the troops below.") if none else "")
 
 
 ## The troops picked in the fields, as many as are at home.
@@ -5930,7 +5935,7 @@ func _wave_entry(wave: Dictionary) -> void:
 				var appears := tr("Appears in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(wave.spawnAt) - now)
 				var forecast: Variant = wave.get("forecast")
 				if forecast is Dictionary:
-					appears += tr(" · expected at %s in %s") % [_target_name(forecast.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(forecast.arrivesAt) - now)]
+					appears += tr(" → %s in %s") % [_target_name(forecast.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(forecast.arrivesAt) - now)]
 				return appears
 			"marching":
 				return tr("Marching on %s · arrives in %s") % [Game.village_name(wave.targetVillageId), TimeUtil.format_duration(TimeUtil.parse_iso(wave.arrivesAt) - now)]
