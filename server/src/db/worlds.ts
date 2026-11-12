@@ -149,9 +149,10 @@ export async function boughtCount(client: DbClient, worldId: number, accountId: 
   return rows[0]?.n ?? 0;
 }
 
+// (A negative count: some died; it never falls below 0.)
 export async function addBought(client: DbClient, worldId: number, accountId: number, unit: string, count: number): Promise<void> {
   await client.query(
-    "UPDATE world_members SET bought = bought || jsonb_build_object($3::text, COALESCE((bought ->> $3)::int, 0) + $4) WHERE world_id = $1 AND account_id = $2",
+    "UPDATE world_members SET bought = bought || jsonb_build_object($3::text, GREATEST(0, COALESCE((bought ->> $3)::int, 0) + $4)) WHERE world_id = $1 AND account_id = $2",
     [worldId, accountId, unit, count],
   );
 }

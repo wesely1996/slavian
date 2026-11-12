@@ -5072,16 +5072,21 @@ func _train_tab(village: Dictionary) -> void:
 		# How many: typed in; the cost and the button follow as it is typed.
 		var row := UI.hbox()
 		info.add_child(row)
-		# Some (settlers) train one at a time, and dearer every few bought.
+		# Some (settlers) train one at a time, and dearer every few bought: a
+		# single Recruit button, like a general's.
 		var one: bool = def.get("oneAtATime", false)
 		if one:
 			_train_counts[unit] = 1
-		row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, 1 if one else max_batch, func(n: int) -> void:
-			_train_counts[unit] = n))
+		else:
+			row.add_child(_number_field("train:%s" % unit, int(_train_counts.get(unit, 1)), 1, max_batch, func(n: int) -> void:
+				_train_counts[unit] = n))
 		if def.get("costStep") != null:
-			info.add_child(UI.label(tr("One at a time; dearer for every %d bought (%d so far).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED))
-		var train := UI.primary(tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
+			info.add_child(UI.with_info(UI.label(tr("One at a time; dearer for every %d you have recruited (%d).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED),
+				tr("Counted over all your villages. Each one that dies brings the price back down; founding a village with them does not.")))
+		var train := UI.primary(tr("Recruit") if one else tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
 		train.custom_minimum_size.x = 120
+		if one:
+			train.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(train)
 		var seconds := float(def.trainSeconds) * LocalVillage.training_speed_factor(Game.data, String(def.building), building_level) \
 			* ResearchRules.time_factor(village.get("bonuses", {}), "trainTime") / float(Game.world.speed)

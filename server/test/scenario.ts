@@ -42,6 +42,8 @@ export type WorldSet = {
   garrison?: Record<string, number>;
   // The player's (first) village's stores, as of its last settling.
   amounts?: Record<string, number>;
+  // Units the player has bought that grow dearer (units.json costStep).
+  bought?: Record<string, number>;
 };
 export type Step = { advance?: number; method?: string; path?: string; body?: unknown; set?: WorldSet };
 
@@ -109,6 +111,9 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
                 'UPDATE villages SET garrison = garrison || $2::jsonb WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)',
                 [world.id, JSON.stringify(step.set.garrison)],
               );
+            }
+            if (step.set.bought) {
+              await db.query('UPDATE world_members SET bought = bought || $2::jsonb WHERE world_id = $1', [world.id, JSON.stringify(step.set.bought)]);
             }
             if (step.set.amounts) {
               await db.query(
