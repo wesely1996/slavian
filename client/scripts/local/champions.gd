@@ -34,5 +34,6 @@ static func fall(server: LocalServer, world: Dictionary, fallen: Array, hero: Di
 			hero.villageId = home_village_id
 			hero.armyId = null
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": int(input.kills), "won": false, "battleId": input.battleId, "at": input.at})
+		LocalAchievements.achieve(server, world, hero.accountId, "hero_fallen", int(input.at))
 	if "general" in fallen and not general.is_empty():
 		LocalGenerals.after_battle(server, world, general, {"kills": int(input.kills), "won": false, "at": input.at})

@@ -530,6 +530,23 @@ const armyQuestKindSchema = z.object({
   resources: z.object({ wood: z.number(), stone: z.number(), grain: z.number(), iron: z.number() }).optional(),
 });
 
+// Achievements (scheduler/achievements.ts).
+export const ACHIEVEMENTS = [
+  'first_defense', 'field_victory', 'camp_cleared', 'lair_cleared', 'captives_freed', 'site_explored', 'ember_found', 'scroll_found',
+  'hero_quest', 'army_quest', 'second_village', 'fort_built', 'bridge_stage',
+  'hero_fallen', 'hordes_united', 'stronghold_sacked', 'village_ruined', 'boat_built', 'victory',
+] as const;
+export type Achievement = (typeof ACHIEVEMENTS)[number];
+const achievementsFileSchema = z.object({
+  version: z.number().int(),
+  achievements: z.object(
+    Object.fromEntries(ACHIEVEMENTS.map((k) => [k, z.object({ name: z.string(), description: z.string(), hidden: z.boolean() })])) as Record<
+      Achievement,
+      z.ZodObject<{ name: z.ZodString; description: z.ZodString; hidden: z.ZodBoolean }>
+    >,
+  ),
+});
+
 // Hero quests (sim/quests.ts).
 const questsFileSchema = z.object({
   version: z.number().int(),
@@ -959,6 +976,7 @@ export interface GameData {
   research: ResearchData;
   heroes: HeroesData;
   quests: QuestsData;
+  achievements: z.infer<typeof achievementsFileSchema>;
   leaders: LeadersData;
   names: NamesData;
   walls: WallsData;
@@ -993,6 +1011,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     research: researchFileSchema.parse(read('research.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
     quests: questsFileSchema.parse(read('quests.json')),
+    achievements: achievementsFileSchema.parse(read('achievements.json')),
     leaders: leadersFileSchema.parse(read('leaders.json')),
     walls: wallsFileSchema.parse(read('walls.json')),
     names: namesFileSchema.parse(read('names.json')),

@@ -1918,6 +1918,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -4777,6 +4778,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -7689,6 +7691,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -10611,6 +10614,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "field_victory",
+      "earnedAt": "2026-06-01T10:47:21.600Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 3,
@@ -13920,6 +13940,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "ember_found",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "field_victory",
+      "earnedAt": "2026-06-01T10:47:21.600Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T11:44:57.600Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -16211,7 +16253,7 @@
    "response": {
     "notifications": [
      {
-      "id": 31,
+      "id": 35,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -16220,7 +16262,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 34,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16229,7 +16271,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 33,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (0, 5)",
@@ -16238,7 +16280,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 32,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -16247,7 +16289,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 31,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
@@ -16256,7 +16298,16 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 30,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Shield of the Village",
+      "body": "Beat a horde at one of your villages.",
+      "createdAt": "2026-06-01T11:44:57.600Z",
+      "read": false
+     },
+     {
+      "id": 29,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -16265,7 +16316,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 28,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -16274,7 +16325,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 27,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -16283,7 +16334,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 26,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -16292,7 +16343,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 25,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
@@ -16301,7 +16352,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 24,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -16310,7 +16361,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 23,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16319,7 +16370,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 22,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -16328,7 +16379,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 5) gave up and left",
@@ -16337,12 +16388,39 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 20,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Hold the Ford",
+      "body": "Beat a horde in a field battle with an army holding its road.",
+      "createdAt": "2026-06-01T10:47:21.600Z",
+      "read": false
+     },
+     {
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army held (0, -1)",
       "body": "The horde was beaten after 2 rounds.",
       "createdAt": "2026-06-01T10:47:21.600Z",
+      "read": false
+     },
+     {
+      "id": 18,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Keeper of the Flame",
+      "body": "Find Svarog's Ember in an ancient site.",
+      "createdAt": "2026-06-01T10:34:35.563Z",
+      "read": false
+     },
+     {
+      "id": 17,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Grave Goods",
+      "body": "Search an ancient site.",
+      "createdAt": "2026-06-01T10:34:35.563Z",
       "read": false
      },
      {
@@ -16490,7 +16568,7 @@
       "read": false
      }
     ],
-    "unread": 31,
+    "unread": 35,
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
   }

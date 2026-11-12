@@ -1,5 +1,6 @@
 // Hero quests on the scheduler (sim/quests.ts): a quest sends the hero away
 // (status 'questing') and hero_quest brings it home with what it went for.
+import { achieve } from './achievements.js';
 import { angerFront } from './waves.js';
 import type { GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
@@ -168,6 +169,7 @@ export async function armyQuestDone(client: DbClient, data: GameData, world: Wor
     body: 'The army quest is done: {xp} XP for {name}.',
     vars: { name: hero.name, quest: def.name, xp: questXp(data, def, hero.kind) },
   }, at);
+  await achieve(client, data, world, quest.accountId, 'army_quest', at);
 }
 
 // An army quest's place gone, not done in time: its hero hears of it.
@@ -368,5 +370,6 @@ export const questHandlers: HandlerRegistry = {
       body: told.body,
       vars: { ...told.vars, name: hero.name, quest: data.quests.kinds[quest.kind].name },
     }, event.dueAt);
+    await achieve(client, data, world, accountId, 'hero_quest', event.dueAt);
   },
 };

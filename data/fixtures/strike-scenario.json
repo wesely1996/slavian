@@ -1005,6 +1005,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -3523,6 +3524,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -6487,6 +6489,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -9367,6 +9370,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -12337,6 +12341,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -15342,6 +15347,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -18424,6 +18430,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T10:07:54.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -20420,7 +20433,7 @@
    "response": {
     "notifications": [
      {
-      "id": 18,
+      "id": 19,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -20429,7 +20442,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 18,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-8, 2)",
@@ -20438,7 +20451,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 17,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -1) sank back into the earth",
@@ -20447,11 +20460,20 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
       "body": "The horde was beaten after 1 rounds.",
+      "createdAt": "2026-06-01T10:07:54.000Z",
+      "read": false
+     },
+     {
+      "id": 15,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Shield of the Village",
+      "body": "Beat a horde at one of your villages.",
       "createdAt": "2026-06-01T10:07:54.000Z",
       "read": false
      },
@@ -20582,7 +20604,7 @@
       "read": false
      }
     ],
-    "unread": 18,
+    "unread": 19,
     "serverTime": "2026-06-01T10:36:48.000Z"
    }
   }

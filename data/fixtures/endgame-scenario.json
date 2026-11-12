@@ -1466,6 +1466,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -4195,6 +4196,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 4,
@@ -6958,6 +6960,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -9772,6 +9775,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -12558,6 +12568,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -15286,6 +15308,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T09:23:07.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -17933,6 +17972,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "victory",
+      "earnedAt": "2026-06-01T09:35:36.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -20599,6 +20660,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "victory",
+      "earnedAt": "2026-06-01T09:35:36.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -23265,6 +23348,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "victory",
+      "earnedAt": "2026-06-01T09:35:36.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -25931,6 +26036,28 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "bridge_stage",
+      "earnedAt": "2026-06-01T09:04:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T09:14:43.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "first_defense",
+      "earnedAt": "2026-06-01T09:23:07.200Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "victory",
+      "earnedAt": "2026-06-01T09:35:36.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -27920,7 +28047,16 @@
    "response": {
     "notifications": [
      {
-      "id": 22,
+      "id": 26,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Dawn over Prav",
+      "body": "Hold the Holy City through Ritual Night.",
+      "createdAt": "2026-06-01T09:35:36.000Z",
+      "read": false
+     },
+     {
+      "id": 25,
       "kind": "ritual",
       "tier": "push",
       "title": "The Kalinov Bridge holds",
@@ -27929,7 +28065,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 24,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -27938,7 +28074,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 23,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (2, -1)",
@@ -27947,7 +28083,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 22,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 0) were taken away",
@@ -27956,7 +28092,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 21,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya reached level 2",
@@ -27965,7 +28101,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 20,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
@@ -27974,7 +28110,25 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 19,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Shield of the Village",
+      "body": "Beat a horde at one of your villages.",
+      "createdAt": "2026-06-01T09:23:07.200Z",
+      "read": false
+     },
+     {
+      "id": 18,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Many Banners",
+      "body": "Stand against two hordes in one battle.",
+      "createdAt": "2026-06-01T09:14:43.200Z",
+      "read": false
+     },
+     {
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
@@ -27983,7 +28137,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -27992,7 +28146,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -28001,7 +28155,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 14,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -28010,11 +28164,20 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "ritual",
       "tier": "push",
       "title": "Ritual Night",
       "body": "With the arch raised, the volkhvs begin the rite that will join the bridge to Prav. Every horde in Nav feels it. Tonight they all come at once, from every front, to break the city before the last words are spoken.",
+      "createdAt": "2026-06-01T09:04:24.000Z",
+      "read": false
+     },
+     {
+      "id": 12,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Stone upon Stone",
+      "body": "Raise a stage of the Kalinov Bridge.",
       "createdAt": "2026-06-01T09:04:24.000Z",
       "read": false
      },
@@ -28118,7 +28281,7 @@
       "read": false
      }
     ],
-    "unread": 22,
+    "unread": 26,
     "serverTime": "2026-06-01T10:10:00.000Z"
    }
   }

@@ -2080,6 +2080,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -4776,6 +4777,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -7472,6 +7474,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -10275,6 +10278,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 3,
@@ -13120,6 +13124,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:25:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -15933,6 +15944,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T11:25:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -17866,6 +17884,15 @@
    "response": {
     "notifications": [
      {
+      "id": 26,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Many Banners",
+      "body": "Stand against two hordes in one battle.",
+      "createdAt": "2026-06-01T11:25:26.400Z",
+      "read": false
+     },
+     {
       "id": 25,
       "kind": "under_attack",
       "tier": "push",
@@ -18091,7 +18118,7 @@
       "read": false
      }
     ],
-    "unread": 25,
+    "unread": 26,
     "serverTime": "2026-06-01T11:14:57.600Z"
    }
   }

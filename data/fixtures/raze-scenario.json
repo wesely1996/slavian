@@ -766,6 +766,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -3255,6 +3256,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -5773,6 +5775,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 1,
@@ -8291,6 +8294,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -10948,6 +10952,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -13723,6 +13728,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [
      {
       "id": 3,
@@ -16685,6 +16691,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -19711,6 +19718,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -22939,6 +22953,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -26247,6 +26268,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -29909,6 +29937,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -33493,6 +33533,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 4,
@@ -37224,6 +37276,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 4,
@@ -40861,6 +40925,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -44508,6 +44584,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 5,
@@ -48227,6 +48315,18 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:35:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T13:04:43.200Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 5,
@@ -50192,7 +50292,7 @@
    "response": {
     "notifications": [
      {
-      "id": 95,
+      "id": 97,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50201,7 +50301,7 @@
       "read": false
      },
      {
-      "id": 94,
+      "id": 96,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50210,7 +50310,7 @@
       "read": false
      },
      {
-      "id": 93,
+      "id": 95,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50219,7 +50319,7 @@
       "read": false
      },
      {
-      "id": 92,
+      "id": 94,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, -4)",
@@ -50228,7 +50328,7 @@
       "read": false
      },
      {
-      "id": 91,
+      "id": 93,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-8, 3) were taken away",
@@ -50237,7 +50337,7 @@
       "read": false
      },
      {
-      "id": 90,
+      "id": 92,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50246,7 +50346,7 @@
       "read": false
      },
      {
-      "id": 89,
+      "id": 91,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50255,7 +50355,7 @@
       "read": false
      },
      {
-      "id": 88,
+      "id": 90,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50264,7 +50364,7 @@
       "read": false
      },
      {
-      "id": 87,
+      "id": 89,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 0)",
@@ -50273,7 +50373,7 @@
       "read": false
      },
      {
-      "id": 86,
+      "id": 88,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (4, 1) sank back into the earth",
@@ -50282,7 +50382,7 @@
       "read": false
      },
      {
-      "id": 85,
+      "id": 87,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -50291,7 +50391,7 @@
       "read": false
      },
      {
-      "id": 84,
+      "id": 86,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50300,7 +50400,7 @@
       "read": false
      },
      {
-      "id": 83,
+      "id": 85,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -50309,7 +50409,7 @@
       "read": false
      },
      {
-      "id": 82,
+      "id": 84,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50318,7 +50418,7 @@
       "read": false
      },
      {
-      "id": 81,
+      "id": 83,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50327,7 +50427,7 @@
       "read": false
      },
      {
-      "id": 80,
+      "id": 82,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-8, 3)",
@@ -50336,7 +50436,7 @@
       "read": false
      },
      {
-      "id": 79,
+      "id": 81,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-5, -1) gave up and left",
@@ -50345,7 +50445,7 @@
       "read": false
      },
      {
-      "id": 78,
+      "id": 80,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50354,7 +50454,7 @@
       "read": false
      },
      {
-      "id": 77,
+      "id": 79,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50363,7 +50463,7 @@
       "read": false
      },
      {
-      "id": 76,
+      "id": 78,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50372,7 +50472,7 @@
       "read": false
      },
      {
-      "id": 75,
+      "id": 77,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (4, 1)",
@@ -50381,7 +50481,7 @@
       "read": false
      },
      {
-      "id": 74,
+      "id": 76,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (5, 1) were taken away",
@@ -50390,7 +50490,7 @@
       "read": false
      },
      {
-      "id": 73,
+      "id": 75,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -50399,7 +50499,7 @@
       "read": false
      },
      {
-      "id": 72,
+      "id": 74,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -50408,7 +50508,7 @@
       "read": false
      },
      {
-      "id": 71,
+      "id": 73,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50417,7 +50517,7 @@
       "read": false
      },
      {
-      "id": 70,
+      "id": 72,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50426,7 +50526,7 @@
       "read": false
      },
      {
-      "id": 69,
+      "id": 71,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50435,7 +50535,7 @@
       "read": false
      },
      {
-      "id": 68,
+      "id": 70,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-5, -1)",
@@ -50444,7 +50544,7 @@
       "read": false
      },
      {
-      "id": 67,
+      "id": 69,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -50453,7 +50553,7 @@
       "read": false
      },
      {
-      "id": 66,
+      "id": 68,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -50462,7 +50562,7 @@
       "read": false
      },
      {
-      "id": 65,
+      "id": 67,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -50471,7 +50571,7 @@
       "read": false
      },
      {
-      "id": 64,
+      "id": 66,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -50480,7 +50580,7 @@
       "read": false
      },
      {
-      "id": 63,
+      "id": 65,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50489,7 +50589,7 @@
       "read": false
      },
      {
-      "id": 62,
+      "id": 64,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50498,7 +50598,7 @@
       "read": false
      },
      {
-      "id": 61,
+      "id": 63,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -50507,7 +50607,7 @@
       "read": false
      },
      {
-      "id": 60,
+      "id": 62,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (5, 1)",
@@ -50516,7 +50616,7 @@
       "read": false
      },
      {
-      "id": 59,
+      "id": 61,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-7, 2) were taken away",
@@ -50525,7 +50625,7 @@
       "read": false
      },
      {
-      "id": 58,
+      "id": 60,
       "kind": "camp",
       "tier": "digest",
       "title": "Raiders made camp at (-2, 3)",
@@ -50534,7 +50634,7 @@
       "read": false
      },
      {
-      "id": 57,
+      "id": 59,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -50543,7 +50643,7 @@
       "read": false
      },
      {
-      "id": 56,
+      "id": 58,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -50552,7 +50652,7 @@
       "read": false
      }
     ],
-    "unread": 95,
+    "unread": 97,
     "serverTime": "2026-06-01T16:00:00.000Z"
    }
   }

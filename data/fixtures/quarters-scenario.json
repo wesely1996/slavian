@@ -1375,6 +1375,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -4411,6 +4412,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -7135,6 +7137,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -9783,6 +9786,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -12737,6 +12741,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T19:51:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -15519,6 +15530,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T19:51:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -18365,6 +18383,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T19:51:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -21168,6 +21193,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T19:51:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -24023,6 +24055,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T19:51:00.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -26020,7 +26059,7 @@
    "response": {
     "notifications": [
      {
-      "id": 17,
+      "id": 18,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -26029,7 +26068,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -26038,7 +26077,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-4, 7)",
@@ -26047,12 +26086,21 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (1, -5) sank back into the earth",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T20:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 14,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Palisade",
+      "body": "Raise a fort in the field.",
+      "createdAt": "2026-06-01T19:51:00.000Z",
       "read": false
      },
      {
@@ -26173,7 +26221,7 @@
       "read": false
      }
     ],
-    "unread": 17,
+    "unread": 18,
     "serverTime": "2026-06-01T21:26:36.000Z"
    }
   }

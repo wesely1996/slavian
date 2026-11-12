@@ -4,6 +4,7 @@
 // into a bandit camp. Razed villages are ruins until rebuilt
 // (village_rebuilt); a player left with only ruins gets a refugee camp. A
 // horde reaching the Holy City fights its guard there (see field.ts).
+import { achieve } from './achievements.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesInBattle, listArmies, saveArmy } from '../db/armies.js';
@@ -227,6 +228,7 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
     body: 'Only ruins are left. Rebuild them, or start over from what remains.',
     vars: { village: village.name },
   }, at);
+  await achieve(client, data, world, village.ownerAccountId, 'village_ruined', at);
   // Nothing left standing: a refugee camp by the Holy City.
   const owner = village.ownerAccountId;
   if (owner !== null) {
@@ -305,6 +307,7 @@ export async function joinHordeBattle(client: DbClient, data: GameData, world: W
       body: '{enemy} more from the {front} fight alongside the horde already there.',
       vars: { q: cell.q, r: cell.r, enemy: total(wave.composition), front: wave.front },
     }, at);
+    await achieve(client, data, world, accountId, 'hordes_united', at);
   }
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
   await notifyWorld(client, { worldId: world.id, type: 'battles' });

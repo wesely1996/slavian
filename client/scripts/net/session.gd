@@ -36,6 +36,9 @@ var intro_seen := false
 ## Whether the screen stays upright (the default) or turns with the phone,
 ## landscape included.
 var orientation_locked := true
+## Achievements earned on this device or this account (data/achievements.json):
+## id -> when first earned (ISO time).
+var achievements: Dictionary = {}
 
 
 func _ready() -> void:
@@ -54,6 +57,7 @@ func _ready() -> void:
 		push_sync = config.get_value("session", "push_sync", false)
 		intro_seen = config.get_value("session", "intro_seen", false)
 		orientation_locked = config.get_value("session", "orientation_locked", true)
+		achievements = config.get_value("session", "achievements", {})
 	# First run: Serbian for a Serbian device, English otherwise.
 	if language == "":
 		language = "sr_Latn" if OS.get_locale_language() in ["sr", "bs", "hr", "me"] else "en"
@@ -87,6 +91,7 @@ func save() -> void:
 	config.set_value("session", "push_sync", push_sync)
 	config.set_value("session", "intro_seen", intro_seen)
 	config.set_value("session", "orientation_locked", orientation_locked)
+	config.set_value("session", "achievements", achievements)
 	config.save(PATH)
 
 
@@ -126,6 +131,22 @@ func set_tutorial_flag(world_id: int, key: String, value: bool) -> void:
 	state[key] = value
 	tutorial[str(world_id)] = state
 	save()
+
+
+## Remembers achievements earned ([{id, earnedAt}]); true when any was new.
+func remember_achievements(earned: Array) -> bool:
+	var fresh := false
+	for e in earned:
+		var id := String(e.get("id", e.get("achievement", "")))
+		if id == "":
+			continue
+		var at := String(e.get("earnedAt", ""))
+		if not achievements.has(id) or (at != "" and at < String(achievements[id])):
+			achievements[id] = at
+			fresh = true
+	if fresh:
+		save()
+	return fresh
 
 
 func set_text_size(size: String) -> void:

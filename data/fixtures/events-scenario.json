@@ -964,6 +964,7 @@
      }
     ],
     "lore": [],
+    "achievements": [],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -3680,6 +3681,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -6357,6 +6365,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 1,
@@ -9036,6 +9051,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -11941,6 +11963,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 3,
@@ -14858,6 +14887,13 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 3,
@@ -18217,6 +18253,23 @@
      }
     ],
     "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "captives_freed",
+      "earnedAt": "2026-06-01T08:36:26.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "site_explored",
+      "earnedAt": "2026-06-01T11:04:16.800Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hero_fallen",
+      "earnedAt": "2026-06-01T11:04:57.600Z"
+     }
+    ],
     "shipyards": [],
     "bridge": {
      "stage": 0,
@@ -20152,7 +20205,7 @@
    "response": {
     "notifications": [
      {
-      "id": 31,
+      "id": 34,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde ran into your army at (0, -5)",
@@ -20161,7 +20214,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 33,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -20170,7 +20223,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 32,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -20179,7 +20232,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 31,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -20188,7 +20241,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 30,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -20197,7 +20250,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 29,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -20206,7 +20259,16 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 28,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Carried Home",
+      "body": "Your hero was struck down in battle, and lived.",
+      "createdAt": "2026-06-01T11:04:57.600Z",
+      "read": false
+     },
+     {
+      "id": 27,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -20215,7 +20277,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 26,
       "kind": "event",
       "tier": "push",
       "title": "You searched the forbidding ruin at (0, -5)",
@@ -20224,7 +20286,16 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 25,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Grave Goods",
+      "body": "Search an ancient site.",
+      "createdAt": "2026-06-01T11:04:16.800Z",
+      "read": false
+     },
+     {
+      "id": 24,
       "kind": "site",
       "tier": "digest",
       "title": "The Kurgan at (0, -5) gave up 4050 resources",
@@ -20233,7 +20304,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 23,
       "kind": "bridge",
       "tier": "digest",
       "title": "Foundation Stones: The Builders' Rune",
@@ -20242,7 +20313,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 22,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -20251,7 +20322,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 21,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -20260,7 +20331,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -20269,7 +20340,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 19,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 5) gave up and left",
@@ -20278,7 +20349,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 18,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -20287,7 +20358,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -20296,7 +20367,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-8, 2)",
@@ -20305,7 +20376,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -1) sank back into the earth",
@@ -20314,7 +20385,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 14,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-7, 5)",
@@ -20323,7 +20394,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-6, 4) gave up and left",
@@ -20332,7 +20403,7 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (2, -1)",
@@ -20341,7 +20412,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -20350,7 +20421,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -20359,11 +20430,20 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, 0)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
+      "createdAt": "2026-06-01T08:36:26.400Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Unchained",
+      "body": "Free captives from the camp that holds them.",
       "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
@@ -20431,7 +20511,7 @@
       "read": false
      }
     ],
-    "unread": 31,
+    "unread": 34,
     "serverTime": "2026-06-01T11:27:48.000Z"
    }
   },
@@ -20442,7 +20522,7 @@
    "response": {
     "notifications": [
      {
-      "id": 31,
+      "id": 34,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde ran into your army at (0, -5)",
@@ -20451,7 +20531,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 33,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -20460,7 +20540,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 32,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -20469,7 +20549,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 31,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -20478,7 +20558,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 30,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -20487,7 +20567,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 29,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
@@ -20496,7 +20576,16 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 28,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Carried Home",
+      "body": "Your hero was struck down in battle, and lived.",
+      "createdAt": "2026-06-01T11:04:57.600Z",
+      "read": false
+     },
+     {
+      "id": 27,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -20505,7 +20594,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 26,
       "kind": "event",
       "tier": "push",
       "title": "You searched the forbidding ruin at (0, -5)",
@@ -20514,7 +20603,16 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 25,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Grave Goods",
+      "body": "Search an ancient site.",
+      "createdAt": "2026-06-01T11:04:16.800Z",
+      "read": false
+     },
+     {
+      "id": 24,
       "kind": "site",
       "tier": "digest",
       "title": "The Kurgan at (0, -5) gave up 4050 resources",
@@ -20523,7 +20621,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 23,
       "kind": "bridge",
       "tier": "digest",
       "title": "Foundation Stones: The Builders' Rune",
@@ -20532,7 +20630,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 22,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -20541,7 +20639,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 21,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -20550,7 +20648,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -20559,7 +20657,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 19,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 5) gave up and left",
@@ -20568,7 +20666,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 18,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -20577,7 +20675,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -20586,7 +20684,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-8, 2)",
@@ -20595,7 +20693,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, -1) sank back into the earth",
@@ -20604,7 +20702,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 14,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-7, 5)",
@@ -20613,7 +20711,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-6, 4) gave up and left",
@@ -20622,7 +20720,7 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (2, -1)",
@@ -20631,7 +20729,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -20640,7 +20738,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -20649,11 +20747,20 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "You freed the captives at (2, 0)",
       "body": "Bounty for Vruchiy: 400 wood, 400 stone, 400 grain and 200 iron.",
+      "createdAt": "2026-06-01T08:36:26.400Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Unchained",
+      "body": "Free captives from the camp that holds them.",
       "createdAt": "2026-06-01T08:36:26.400Z",
       "read": false
      },
@@ -20721,7 +20828,7 @@
       "read": false
      }
     ],
-    "unread": 31,
+    "unread": 34,
     "serverTime": "2026-06-01T11:27:48.000Z"
    }
   }

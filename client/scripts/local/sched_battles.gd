@@ -53,6 +53,7 @@ static func join_horde_battle(server: LocalServer, world: Dictionary, wave: Dict
 		LocalInbox.tell(server, world, account_id, {"kind": "under_attack", "tier": "push", "title": "Another horde joins the battle at ({q}, {r})",
 			"body": "{enemy} more from the {front} fight alongside the horde already there.",
 			"vars": {"q": cell.x, "r": cell.y, "enemy": LocalBattle.total(wave.composition), "front": wave.front}}, at)
+		LocalAchievements.achieve(server, world, account_id, "hordes_united", at)
 	return true
 
 
@@ -494,6 +495,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 			log.healed = healed
 			village_state = LocalVillage.join_garrison(data, village_state, healed, at, world.speed)
 		_record_round(battle, log, {"status": "defended", "at": at, "loot": null})
+		LocalAchievements.achieve(server, world, village.ownerAccountId, "first_defense", at)
 		horde_beaten(server, world, Vector2i(village.q, village.r), LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now))
 		LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "battle_result", "tier": "digest", "title": "{village} held",
 			"body": "The horde was beaten after {rounds} rounds; the hospital and shamans saved {healed} of the fallen." if saved > 0 else "The horde was beaten after {rounds} rounds.",
@@ -728,6 +730,8 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 					"title": "Your army held ({q}, {r})" if won else "Your army fell back from ({q}, {r})",
 					"body": "The horde was beaten after {rounds} rounds." if won else "The horde marches on, {rounds} rounds late.",
 					"vars": {"q": battle.q, "r": battle.r, "rounds": round}}, at)
+				if won:
+					LocalAchievements.achieve(server, world, owner, "field_victory", at)
 	changed.append(["world"])
 	return true
 
@@ -885,6 +889,7 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 	village.ruin = {"plots": plots, "since": LocalTime.iso(at), "rebuildingUntil": null}
 	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "razed", "tier": "push", "title": "{village} was razed",
 		"body": "Only ruins are left. Rebuild them, or start over from what remains.", "vars": {"village": village.name}}, at)
+	LocalAchievements.achieve(server, world, village.ownerAccountId, "village_ruined", at)
 	# Nothing left standing: a refugee camp by the Holy City.
 	var owner := int(village.ownerAccountId)
 	var standing: Array = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == owner and v.ruin == null and v.id != village.id)

@@ -4,6 +4,7 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { achieve } from './achievements.js';
 import { WATER } from '../sim/mapgen.js';
 import { insertRoad, markRoadStanding, markRoadUpgrading, roadEdge, type RoadEdge } from '../db/roads.js';
 import { canCross } from '../sim/land.js';
@@ -376,6 +377,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
         body: won ? 'The horde was beaten after {rounds} rounds.' : 'The horde marches on, {rounds} rounds late.',
         vars: { q: battle.q, r: battle.r, rounds: round },
       }, at);
+      if (won) await achieve(client, data, world, owner, 'field_victory', at);
     }
     await notifyWorld(client, { worldId: world.id, type: 'waves' });
   }
@@ -567,6 +569,7 @@ export const fieldHandlers: HandlerRegistry = {
       body: 'Armies holding it fight from behind its walls.',
       vars: { q: fort.q, r: fort.r },
     }, event.dueAt);
+    await achieve(client, data, world, fort.ownerAccountId, 'fort_built', event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },
 };

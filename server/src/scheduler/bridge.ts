@@ -1,3 +1,4 @@
+import { achieveAll } from './achievements.js';
 import { reward } from './onboarding.js';
 import { refreshBonuses } from './research.js';
 import { total } from '../sim/battle.js';
@@ -143,6 +144,7 @@ export const bridgeHandlers: HandlerRegistry = {
         vars: nextStage ? { name, stage: nextStage.name, blessing, ...gift } : { name },
       }, event.dueAt);
     }
+    await achieveAll(client, data, world, 'bridge_stage', event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     if (next.status === 'complete') await callRitualNight(client, data, world, event.dueAt);
     // The next stage's quests raise their places and host.

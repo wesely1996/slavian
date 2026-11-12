@@ -4,6 +4,7 @@
 // for a shipyard, someone has sent resources), and the horde hates the more
 // for it (scheduler/eventOutcomes.ts). A paid-for shipyard builds
 // its boat (shipyard_done), struck by raiders (shipyard_raid) on the way.
+import { achieveAll } from './achievements.js';
 import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
@@ -204,6 +205,7 @@ export const mapEventHandlers: HandlerRegistry = {
         vars: { q: shipyard.q, r: shipyard.r },
       }, event.dueAt);
     }
+    await achieveAll(client, data, world, 'boat_built', event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 };
