@@ -16,6 +16,10 @@ const HOLY_CITY := Vector2i.ZERO
 
 var _selected := Vector2i.MAX
 var _since_refresh := 0.0
+## Whether each resource's rate is shown as a loss (kind -> bool).
+var _rate_negative := {}
+## A rebuild of the sheet is waiting for the end of the frame.
+var _panel_stale := false
 
 var _live_label: Label
 ## The top band of wood, and the words its buttons show at full width (they
@@ -265,7 +269,10 @@ func _process(delta: float) -> void:
 			_resource_bars[kind].modulate = Color(1.6, 0.6, 0.55) if share >= 0.95 else Color.WHITE
 			label.tooltip_text = tr("%s: %s an hour, credited every minute (next in %s)") % [UI.resource_name(kind), UI.signed(TimeUtil.per_real_hour(rate)), TimeUtil.format_duration(Ledger.seconds_to_next(Game.server_now()))]
 			_rate_labels[kind].text = tr("%s/min") % _per_minute(TimeUtil.per_real_hour(rate))
-			_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
+			# (Only when it turns: an override set again lays the label out again.)
+			if _rate_negative.get(kind) != (rate < 0):
+				_rate_negative[kind] = rate < 0
+				_rate_labels[kind].add_theme_color_override("font_color", NEGATIVE if rate < 0 else UI.MUTED)
 		_fit_resources()
 	_threat_button.text = _threat_summary()
 	_status.visible = _status.text != ""
@@ -403,6 +410,7 @@ func _build_ui() -> void:
 		_capacity_labels[kind] = most
 		_resource_bars[kind] = full
 		_rate_labels[kind] = rate
+		_rate_negative.erase(kind)
 	# The next threat: madder on the wood, opens the threats sheet.
 	_threat_button = UI.button("", _show_threats, "icon/threat")
 	_threat_button.custom_minimum_size.y = 56
@@ -1305,6 +1313,7 @@ func _run_panel() -> void:
 
 
 func _rebuild_panel() -> void:
+	_panel_stale = false
 	var focus := get_viewport().gui_get_focus_owner()
 	# Only a field still being typed in gets its focus back (not one sent).
 	var typing := focus is LineEdit and (focus as LineEdit).is_editing() and _panel_body.is_ancestor_of(focus)
@@ -5795,7 +5804,22 @@ func _send_scouts(village_id: int, wave_id: int, units: Dictionary) -> void:
 func _on_waves_changed() -> void:
 	hex_map.queue_redraw()
 	_sound_hordes()
-	_rebuild_panel()
+	_rebuild_panel_soon()
+
+
+## News from the server often comes several at once (a battle's end changes
+## armies, villages, hordes and more): the sheet is rebuilt once for all of
+## it, at the end of the frame.
+func _rebuild_panel_soon() -> void:
+	if _panel_stale:
+		return
+	_panel_stale = true
+	_rebuild_stale_panel.call_deferred()
+
+
+func _rebuild_stale_panel() -> void:
+	if _panel_stale:
+		_rebuild_panel()
 
 
 # --- Sound -------------------------------------------------------------------
@@ -5912,7 +5936,7 @@ func _on_world_changed() -> void:
 
 func _on_village_changed(_village_id: int) -> void:
 	hex_map.queue_redraw()
-	_rebuild_panel()
+	_rebuild_panel_soon()
 
 
 func _on_live_connection(connected: bool) -> void:

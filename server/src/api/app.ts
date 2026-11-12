@@ -279,7 +279,7 @@ export async function authenticate(db: Db, request: FastifyRequest): Promise<Acc
   const header = request.headers.authorization ?? '';
   const match = /^Bearer (\S+)$/.exec(header);
   if (!match) throw new UnauthorizedError('Missing bearer token');
-  const account = await inTransaction(db, (client) => accountForToken(client, match[1]!));
+  const account = await accountForToken(db, match[1]!);
   if (!account) throw new UnauthorizedError('Invalid token');
   return account;
 }
@@ -309,7 +309,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   // Non-members get a 404 so world ids cannot be probed.
   async function requireMember(account: Account, worldId: number): Promise<void> {
-    const member = await inTransaction(db, (client) => isMember(client, worldId, account.id));
+    const member = await isMember(db, worldId, account.id);
     if (!member) throw new NotFoundError(`World ${worldId} not found`);
   }
 

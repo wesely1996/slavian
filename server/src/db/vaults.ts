@@ -19,8 +19,11 @@ interface VaultRow {
 
 // Every world has one; it is created the first time anyone looks.
 export async function loadVault(client: DbClient, worldId: number): Promise<Vault> {
-  await client.query('INSERT INTO vaults (world_id) VALUES ($1) ON CONFLICT DO NOTHING', [worldId]);
-  const { rows } = await client.query<VaultRow>('SELECT * FROM vaults WHERE world_id = $1', [worldId]);
+  let { rows } = await client.query<VaultRow>('SELECT * FROM vaults WHERE world_id = $1', [worldId]);
+  if (!rows[0]) {
+    await client.query('INSERT INTO vaults (world_id) VALUES ($1) ON CONFLICT DO NOTHING', [worldId]);
+    ({ rows } = await client.query<VaultRow>('SELECT * FROM vaults WHERE world_id = $1', [worldId]));
+  }
   const row = rows[0]!;
   return {
     worldId: row.world_id,
