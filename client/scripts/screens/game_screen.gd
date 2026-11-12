@@ -20,6 +20,12 @@ var _since_refresh := 0.0
 var _rate_negative := {}
 ## A rebuild of the sheet is waiting for the end of the frame.
 var _panel_stale := false
+## The chat is waiting to be laid out again; and you just sent a message.
+var _chat_stale := false
+var _chat_sent := false
+## The newest message already reported as read.
+var _chat_read_sent := 0
+var _chat_sending := false
 ## The status line as last shown in a toast.
 var _status_shown := ""
 var _toast_box: PanelContainer
@@ -6162,8 +6168,14 @@ func _rebuild_panel_soon() -> void:
 
 
 func _rebuild_stale_panel() -> void:
-	if _panel_stale:
-		_rebuild_panel()
+	if not _panel_stale:
+		return
+	# The chat shows nothing of the world: news of it must not rebuild the
+	# sheet under whoever is typing (the keyboard blinks, the list jumps).
+	if _panel_mode == "chat":
+		_panel_stale = false
+		return
+	_rebuild_panel()
 
 
 # --- Sound -------------------------------------------------------------------
@@ -6276,7 +6288,7 @@ func _on_world_changed() -> void:
 	if _view == "village" and _my_village().is_empty():
 		_set_view("map")
 		return
-	_rebuild_panel()
+	_rebuild_panel_soon()
 
 
 func _on_village_changed(_village_id: int) -> void:
@@ -6555,6 +6567,9 @@ func _read_chat() -> void:
 	if Game.chat.is_empty() or Game.chat_unread == 0:
 		return
 	var last := int(Game.chat[-1].id)
+	if last <= _chat_read_sent:
+		return
+	_chat_read_sent = last
 	Game.read_chat(last)
 	await Api.post_json("/v1/worlds/%d/chat/read" % Game.world_id(), {"id": last})
 
@@ -6566,12 +6581,30 @@ func _on_chat_changed() -> void:
 		_rebuild_panel()
 	if _panel_mode != "chat":
 		return
-	var at_bottom := _scroll.scroll_vertical >= int(_scroll.get_v_scroll_bar().max_value - _scroll.size.y) - 8
+	# Several changes in a frame (a message, then its read mark) lay the
+	# chat out once.
+	if _chat_stale:
+		return
+	_chat_stale = true
+	var bar := _scroll.get_v_scroll_bar()
+	var from_end := int(bar.max_value - _scroll.size.y) - _scroll.scroll_vertical
+	var at_bottom := from_end <= 8 or _chat_sent
+	_chat_sent = false
+	await get_tree().process_frame
+	_chat_stale = false
+	if _panel_mode != "chat":
+		return
 	_rebuild_panel()
 	_read_chat()
-	if at_bottom:
-		await get_tree().process_frame
-		_scroll.scroll_vertical = int(_scroll.get_v_scroll_bar().max_value)
+	# Laid out over the next frame: then back to where the reader was (from
+	# the end, so older messages loaded above don't push the page), or to
+	# the newest.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if _panel_mode != "chat":
+		return
+	var end := int(bar.max_value - _scroll.size.y)
+	_scroll.scroll_vertical = end if at_bottom else maxi(0, end - from_end)
 
 
 func _chat_panel() -> void:
@@ -6587,8 +6620,17 @@ func _chat_panel() -> void:
 	var now := Game.server_now()
 	for message in Game.chat:
 		var mine: bool = message.get("accountId") != null and int(message.accountId) == Game.my_account_id()
-		_panel_body.add_child(UI.label(ChatText.header(message, mine, now), UI.SMALL_SIZE, UI.GOOD if mine else UI.ACCENT))
-		_panel_body.add_child(UI.label(String(message.body)))
+		var bubble := UI.card(10)
+		var box := UI.vbox(2)
+		bubble.add_child(box)
+		box.add_child(UI.label(ChatText.header(message, mine, now), UI.SMALL_SIZE, UI.GOOD if mine else UI.ACCENT))
+		box.add_child(UI.label(String(message.body)))
+		# Yours lean right, the others' left.
+		var line := MarginContainer.new()
+		line.add_theme_constant_override("margin_left", 70 if mine else 0)
+		line.add_theme_constant_override("margin_right", 0 if mine else 70)
+		line.add_child(bubble)
+		_panel_body.add_child(line)
 	# What you write: Enter or Send.
 	var row := UI.hbox(8)
 	var field := _draft_field("chat", tr("Write to your group"), "")
@@ -6603,17 +6645,32 @@ func _chat_panel() -> void:
 
 func _send_chat(field: LineEdit) -> void:
 	var text := field.text.strip_edges()
-	if text == "":
+	# (Enter and Send together, or a second tap while the first is on its way.)
+	if text == "" or _chat_sending:
 		return
+	_chat_sending = true
 	_status.text = ""
-	var world_id := Game.world_id()
-	var response := await Api.post_json("/v1/worlds/%d/chat" % world_id, {"body": text})
-	if not response.ok:
-		_status.text = response.error
-		return
+	# Emptied at once, so what is typed next is not lost when the answer comes.
+	field.text = ""
 	_drafts.erase("chat")
 	_focused_draft = "chat"
+	var world_id := Game.world_id()
+	var response := await Api.post_json("/v1/worlds/%d/chat" % world_id, {"body": text})
+	_chat_sending = false
+	if not response.ok:
+		_status.text = response.error
+		# Back in the field, unless something else was typed meanwhile.
+		if not _drafts.has("chat"):
+			_drafts["chat"] = {"text": text, "caret": text.length()}
+			if is_instance_valid(field) and field.text == "":
+				field.text = text
+				field.caret_column = text.length()
+		return
+	_chat_sent = true
 	Game.add_chat(world_id, response.data.message)
+	# (The live copy of it may have come first: then nothing changed, and
+	# the list still goes to the newest.)
+	_on_chat_changed()
 
 
 func _older_chat() -> void:
