@@ -362,6 +362,9 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 	for i in engaged.size():
 		LocalChampions.fall(server, world, result.defenderFallen[i + 1], army_leaders[i][0], army_leaders[i][1], engaged[i].homeVillageId, fell)
 	var village_state := LocalVillage.lose_garrison(data, state, shares[0], at, world.speed)
+	# Settlers who fall make the next ones cheaper again (units.json costStep).
+	if int(shares[0].get("settler", 0)) > 0 and village.ownerAccountId != null:
+		server.add_bought(server.member_of(world, int(village.ownerAccountId)), "settler", -int(shares[0].settler))
 	var defender_losses: Dictionary = shares[0].duplicate()
 	var armies: Array = []
 	for i in engaged.size():
@@ -495,6 +498,9 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		if saved > 0:
 			log.healed = healed
 			village_state = LocalVillage.join_garrison(data, village_state, healed, at, world.speed)
+			# Settlers back on their feet count again.
+			if int(healed.get("settler", 0)) > 0 and village.ownerAccountId != null:
+				server.add_bought(server.member_of(world, int(village.ownerAccountId)), "settler", int(healed.settler))
 		_record_round(battle, log, {"status": "defended", "at": at, "loot": null})
 		LocalAchievements.achieve(server, world, village.ownerAccountId, "first_defense", at)
 		horde_beaten(server, world, Vector2i(village.q, village.r), LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now))
@@ -887,6 +893,10 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 		LocalResearch.settle_points(server, world, int(village.ownerAccountId), at)
 	var data := server.data
 	var plots: Dictionary = village.state.plots.duplicate(true)
+	# Settlers lost with the village make the next ones cheaper again.
+	var settlers := int(village.state.garrison.get("settler", 0))
+	if settlers > 0 and village.ownerAccountId != null:
+		server.add_bought(server.member_of(world, int(village.ownerAccountId)), "settler", -settlers)
 	village.state = ruined_state(data, village.state, at, world.speed)
 	village.ruin = {"plots": plots, "since": LocalTime.iso(at), "rebuildingUntil": null}
 	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "razed", "tier": "push", "title": "{village} was razed",

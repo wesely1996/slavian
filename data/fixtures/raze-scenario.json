@@ -198,6 +198,16 @@
    }
   },
   {
+   "set": {
+    "garrison": {
+     "settler": 2
+    },
+    "bought": {
+     "settler": 5
+    }
+   }
+  },
+  {
    "advance": 1800000
   },
   {
@@ -230,7 +240,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -374,7 +386,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -399,7 +413,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -2720,7 +2734,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -2864,7 +2880,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -2889,7 +2907,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -5244,7 +5262,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -5388,7 +5408,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -5413,7 +5435,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -7763,7 +7785,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -7907,7 +7931,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -7932,7 +7958,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -10282,7 +10308,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -10426,7 +10454,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -10451,7 +10481,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -12971,7 +13001,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 5
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -13115,7 +13147,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 2
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -13140,7 +13174,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 1150,
+        "grain": 1096,
         "stone": 300
        },
        "capacity": {
@@ -13400,7 +13434,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "ongoing",
@@ -13416,7 +13452,9 @@
        "crossbowman": 3,
        "sergeant_rider": 1
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [],
       "loot": null,
       "decision": null,
@@ -15722,7 +15760,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -15866,7 +15906,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 0
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -16324,7 +16366,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "raided",
@@ -16339,7 +16383,9 @@
        "zealot": 5,
        "crossbowman": 1
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [
        {
         "at": "2026-06-01T11:04:57.600Z",
@@ -16349,7 +16395,9 @@
         "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "settler": 2
+        }
        }
       ],
       "loot": {
@@ -16535,7 +16583,7 @@
       "wins": 1,
       "losses": 0,
       "razed": 0,
-      "kills": 0,
+      "kills": 2,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -18654,7 +18702,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -18798,7 +18848,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 0
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -19326,7 +19378,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "raided",
@@ -19340,7 +19394,9 @@
       "attackerNow": {
        "zealot": 2
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [
        {
         "at": "2026-06-01T11:04:57.600Z",
@@ -19350,7 +19406,9 @@
         "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "settler": 2
+        }
        }
       ],
       "loot": {
@@ -19540,7 +19598,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -21686,7 +21744,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -21830,7 +21890,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 0
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -22564,7 +22626,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "raided",
@@ -22578,7 +22642,9 @@
       "attackerNow": {
        "zealot": 2
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [
        {
         "at": "2026-06-01T11:04:57.600Z",
@@ -22588,7 +22654,9 @@
         "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "settler": 2
+        }
        }
       ],
       "loot": {
@@ -22778,7 +22846,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -24921,7 +24989,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -25065,7 +25135,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "settler": 0
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -25877,7 +25949,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "raided",
@@ -25891,7 +25965,9 @@
       "attackerNow": {
        "zealot": 2
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [
        {
         "at": "2026-06-01T11:04:57.600Z",
@@ -25901,7 +25977,9 @@
         "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "settler": 2
+        }
        }
       ],
       "loot": {
@@ -26091,7 +26169,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -28237,7 +28315,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -29578,7 +29658,9 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "settler": 2
+        }
        }
       },
       "status": "raided",
@@ -29592,7 +29674,9 @@
       "attackerNow": {
        "zealot": 2
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "settler": 2
+      },
       "rounds": [
        {
         "at": "2026-06-01T11:04:57.600Z",
@@ -29602,7 +29686,9 @@
         "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "settler": 2
+        }
        }
       ],
       "loot": {
@@ -29733,7 +29819,7 @@
       "wins": 3,
       "losses": 1,
       "razed": 1,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -31911,7 +31997,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -33345,7 +33433,7 @@
       "wins": 4,
       "losses": 1,
       "razed": 1,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -35539,7 +35627,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -37093,7 +37183,7 @@
       "wins": 4,
       "losses": 1,
       "razed": 1,
-      "kills": 2,
+      "kills": 4,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -39281,7 +39371,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -40723,7 +40815,7 @@
       "wins": 4,
       "losses": 2,
       "razed": 1,
-      "kills": 9,
+      "kills": 11,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -42898,7 +42990,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -44396,7 +44490,7 @@
       "wins": 4,
       "losses": 2,
       "razed": 1,
-      "kills": 9,
+      "kills": 11,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -46589,7 +46683,9 @@
        "build": "2026-06-01T08:00:00.000Z"
       },
       "onboardingClaimed": {},
-      "bought": {},
+      "bought": {
+       "settler": 3
+      },
       "rallyVillageId": null,
       "research": {
        "points": 0,
@@ -48127,7 +48223,7 @@
       "wins": 5,
       "losses": 2,
       "razed": 1,
-      "kills": 9,
+      "kills": 11,
       "grudgeVillageId": null,
       "diedAt": null
      }

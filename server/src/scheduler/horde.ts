@@ -4,6 +4,8 @@
 // into a bandit camp. Razed villages are ruins until rebuilt
 // (village_rebuilt); a player left with only ruins gets a refugee camp. A
 // horde reaching the Holy City fights its guard there (see field.ts).
+import { SETTLER } from '../sim/expansion.js';
+import { addBought } from '../db/worlds.js';
 import { achieve } from './achievements.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
@@ -219,6 +221,9 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
   if (researchPerHour(data, village.state.plots, world.speed) > 0 && village.ownerAccountId !== null) {
     await settleResearchPoints(client, data, world, village.ownerAccountId, at);
   }
+  // Settlers lost with the village make the next ones cheaper again.
+  const settlers = village.state.garrison[SETTLER] ?? 0;
+  if (settlers > 0 && village.ownerAccountId !== null) await addBought(client, world.id, village.ownerAccountId, SETTLER, -settlers);
   await saveVillageState(client, village.id, ruinedState(data, village.state, at, world.speed));
   await saveRuin(client, village.id, { plots: { ...village.state.plots }, since: at.toISOString(), rebuildingUntil: null });
   await tell(client, world, village.ownerAccountId, {

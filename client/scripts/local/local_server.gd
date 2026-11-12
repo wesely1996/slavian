@@ -773,7 +773,8 @@ func add_bought(member: Dictionary, unit: String, count: int) -> void:
 		return
 	if not member.has("bought"):
 		member.bought = {}
-	member.bought[unit] = int(member.bought.get(unit, 0)) + count
+	# (A negative count: some died; it never falls below 0.)
+	member.bought[unit] = maxi(0, int(member.bought.get(unit, 0)) + count)
 
 
 func find_village(world: Dictionary, id: int) -> Dictionary:

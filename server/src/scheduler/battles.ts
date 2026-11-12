@@ -1,6 +1,8 @@
 // Battles on the scheduler: a horde reaching a village starts a battle; each
 // battle_round event fights one round, applies losses to the horde and the
 // garrison, and either schedules the next round or settles the outcome.
+import { SETTLER } from '../sim/expansion.js';
+import { addBought } from '../db/worlds.js';
 import { achieve } from './achievements.js';
 import { createRng } from '../sim/rng.js';
 import { againstFront, villageBonuses } from '../sim/clans.js';
@@ -225,6 +227,8 @@ export const battleHandlers: HandlerRegistry = {
       await championsFall(client, data, world, result.defenderFallen[i + 1] ?? [], { ...armyLeaders[i]!, homeVillageId: army.homeVillageId }, fell);
     }
     let villageState = loseGarrison(data, state, shares[0]!, at, world.speed);
+    // Settlers who fall make the next ones cheaper again (units.json costStep).
+    if ((shares[0]![SETTLER] ?? 0) > 0 && village.ownerAccountId !== null) await addBought(client, world.id, village.ownerAccountId, SETTLER, -shares[0]![SETTLER]!);
     let defenderLosses: Record<string, number> = { ...shares[0]! };
     const armies: Army[] = [];
     for (const [i, army] of engaged.entries()) {
@@ -350,6 +354,8 @@ export const battleHandlers: HandlerRegistry = {
       if (total(healed) > 0) {
         log.healed = healed;
         villageState = joinGarrison(data, villageState, healed, at, world.speed);
+        // Settlers back on their feet count again.
+        if ((healed[SETTLER] ?? 0) > 0 && village.ownerAccountId !== null) await addBought(client, world.id, village.ownerAccountId, SETTLER, healed[SETTLER]!);
       }
       await recordRound(client, battle.id, log, { status: 'defended', at, loot: null });
       await achieve(client, data, world, village.ownerAccountId, 'first_defense', at);
