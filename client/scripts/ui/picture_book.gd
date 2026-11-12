@@ -9,7 +9,7 @@ signal closed
 ## [title, words] a page; the words name the mechanics.
 const PAGES := [
 	["The Holy City", "Hordes come from the edges of the world, wave after wave, for the Holy City at its heart. Raise villages around it, hold them, and build the Kalinov Bridge before the city falls."],  # tr
-	["First steps", "The card at the top of the map shows the next step and why it matters, with a reward for each. Stuck? The ? button explains; once the steps are done it opens the almanac."],  # tr
+	["First steps", "The card at the top of the map shows the next step and why it matters, with a reward for each. Stuck? More → Tutorial explains; the Almanac is there too."],  # tr
 	["Your hero", "A hero from the old tales leads your armies. It gains levels and skills, wears gear that beaten hordes leave behind, and goes on quests for more."],  # tr
 	["Your village", "Fields bring wood, stone, grain and iron, and each village keeps its own stores. The Elder's Hall opens more plots; barracks train troops; walls and towers keep the hordes out."],  # tr
 	["The map", "Around your villages lie rich hexes for outposts, roads that speed marches, camps to clear and old sites to explore. Hold a hex on a horde's road, and an ambush or a fort can stop it there."],  # tr

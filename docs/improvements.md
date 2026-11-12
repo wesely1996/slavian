@@ -25,6 +25,9 @@ Contents:
 - **Icon-only top bar.** Forces, orders, research, hero, messages, almanac,
   settings are unlabeled icons on the wood band. New players have to tap each
   to learn it; on a phone tooltips never show.
+- **Too much unneeded text.** A lot of the text can be shorter to increase
+  overview and lower the clutter. A lot of things don't need to be full
+  sentences.
 - **Text first, pictures second.** Most sheets are paragraphs of prose with
   buttons underneath. Costs, times and effects are inside sentences, so
   comparing two buildings or two units means reading both in full.
@@ -51,17 +54,19 @@ Contents:
 
 ### 1.3 Navigation
 
-- [ ] **Bottom navigation bar with five labeled tabs** (L): **Map · Village ·
+- [x] **Bottom navigation bar with five labeled tabs** (L): **Map · Village ·
   Army · Hero · More**. Replaces the view toggle and most top-bar icons.
   "More" holds research, orders, caravans/market, almanac, settings, report a
   bug. Badges on tabs (idle queue, unread, army in battle).
-- [ ] **Slim top bar** (M): village switcher on the left, the four resources
+- [x] **Slim top bar** (M): village switcher on the left, the four resources
   in the middle, messages bell on the right. One row, no title, no live label
   (show a thin red line only while offline).
 - [ ] **Threat ribbon** (S): the next horde as a ribbon under the top bar with
   a countdown; tap centres the map on it. Hidden when nothing threatens.
 - [ ] **Real back stack** (M): every screen pushes onto a stack; the Android
   back button and a single "←" pop it. No more per-sheet Close buttons.
+  *(Partly done: the phone's back button and Escape now step sheet → map →
+  worlds.)*
 - [ ] **Village switcher as a carousel** (S): swipe left/right on the village
   name to go to the next village; long-press for the list.
 
