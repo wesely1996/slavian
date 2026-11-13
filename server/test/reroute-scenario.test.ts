@@ -2,7 +2,8 @@
 // another hex halfway, one marching called home, one coming home sent out
 // again to hold a hex, and one in the middle of turning told to go where it
 // already heads. Then standing armies moved onto the starter camp (they
-// storm it) and onto an ancient site (they search it, slowly without scouts).
+// storm it) and onto an ancient site (they search it, slowly without scouts);
+// one sent to hold a hex with an unsearched site searches it too.
 // Last, armies told to come home once done: one holding a hex comes straight
 // back, one sent to support the village it came from is refused, and one
 // standing is told to come home and turns back at once.
@@ -77,8 +78,17 @@ scenario('reroute-scenario.json', START, async ({ started, play }) => {
   await play({ advance: 3 * 60 * MINUTE });
   const later = (await play({ method: 'GET', path: world })).body;
 
-  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
+  await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 8 } });
   await play({ advance: 15 * MINUTE });
+  // Sent to hold a hex where an unsearched site lies, it searches it.
+  const unsearched = (later.sites as { q: number; r: number; status: string }[])
+    .filter((s) => s.status === 'unexplored')
+    .sort((a, b) => hexDistance(hex(a.q, a.r), hex(home.q, home.r)) - hexDistance(hex(b.q, b.r), hex(home.q, home.r)))[0];
+  if (unsearched) {
+    await army({ orders: 'hold', target: { q: unsearched.q, r: unsearched.r }, units: { spearman: 2 } });
+    await play({ advance: 20 * MINUTE });
+    await play({ method: 'GET', path: world });
+  }
   await army({ orders: 'hold', target: { q: near[0], r: near[1] }, units: { spearman: 2 }, returnHome: true });
   const staying = (await army({ orders: 'hold', target: { q: other[0], r: other[1] }, units: { spearman: 2 } })).body.army;
   await play({ advance: 10 * MINUTE });

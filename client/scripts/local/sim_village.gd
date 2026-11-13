@@ -782,11 +782,51 @@ static func per_unit_ms(data: Dictionary, unit: String, building_level: int, wor
 ## few the player has bought.
 static func unit_cost(data: Dictionary, unit: String, count: int, villages_owned := 1, bought := 0) -> Dictionary:
 	var def: Dictionary = data.units.units[unit]
-	var step := 1.0
-	if def.get("costStep") != null:
-		step = pow(float(def.costStep.growth), floori(float(bought) / float(def.costStep.every)))
-	var factor := pow(float(def.get("costGrowthPerVillage", 1) if def.get("costGrowthPerVillage") != null else 1), maxi(0, villages_owned - 1)) * step
-	return resources(func(kind: String) -> int: return LocalWaves.js_round(float(def.cost[kind]) * factor) * count)
+	var per_village := pow(float(def.get("costGrowthPerVillage", 1) if def.get("costGrowthPerVillage") != null else 1), maxi(0, villages_owned - 1))
+	if def.get("costStep") == null:
+		return resources(func(kind: String) -> int: return LocalWaves.js_round(float(def.cost[kind]) * per_village) * count)
+	# Each one priced by how many were bought before it.
+	var factors: Array = []
+	for i in count:
+		factors.append(per_village * pow(float(def.costStep.growth), floori(float(bought + i) / float(def.costStep.every))))
+	return resources(func(kind: String) -> int:
+		var sum := 0
+		for factor in factors:
+			sum += LocalWaves.js_round(float(def.cost[kind]) * float(factor))
+		return sum)
+
+
+## village.ts cancelTraining: the batch at `index` called off (after those
+## finished by `at` joined the garrison); the units not yet trained paid back
+## in full (dearer ones at the dearest price: the owner has bought `bought`),
+## the batches after it moved up.
+static func cancel_training(data: Dictionary, state: Dictionary, index: int, at: int, world_speed: float, villages_owned := 1, bought := 0) -> Dictionary:
+	var settled := complete_training(state, at)
+	if index < 0 or index >= settled.training.size():
+		return rule("That training is not in the queue")
+	var batch: Dictionary = settled.training[index]
+	var def: Dictionary = data.units.units[batch.unit]
+	var refund := unit_cost(data, String(batch.unit), int(batch.count), villages_owned, maxi(0, bought - int(batch.count)) if def.get("costStep") != null else 0)
+	var training: Array = []
+	var moved: Array = []
+	for i in settled.training.size():
+		var item: Dictionary = settled.training[i]
+		if i == index:
+			continue
+		if i < index:
+			training.append(item)
+			continue
+		# Moves up: it starts when the one before it ends (or now).
+		var starts_at: int = batch_completes_at(training[-1]) if not training.is_empty() else mini(int(item.startsAt), at)
+		var next_item := item.duplicate()
+		next_item.startsAt = starts_at
+		if starts_at != int(item.startsAt):
+			moved.append(next_item)
+		training.append(next_item)
+	var next := settled.duplicate(true)
+	next.training = training
+	next.ledger = LocalLedger.with_rates(LocalLogistics.receive(settled.ledger, at, refund).ledger, at, village_rates(data, next, world_speed), settled.ledger.capacity)
+	return {"state": next, "refund": refund, "batch": batch, "moved": moved}
 
 
 static func queue_training(data: Dictionary, state: Dictionary, unit: String, count: int, at: int, world_speed: float, villages_owned := 1, bought := 0) -> Dictionary:

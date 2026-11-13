@@ -1,5 +1,5 @@
 // Founding a second village in a solo session (docs/local-engine.md,
-// part 5): settlers trained one by one and sent out; then the hero moves
+// part 5): settlers trained, some called off, and sent out; then the hero moves
 // there, a caravan and an army go between the villages, a road and a fort
 // rise, and the hordes keep coming. The new village is given up (refused
 // while an army guards it), and the first can't be.
@@ -29,10 +29,17 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
     await play({ advance: 20 * MINUTE });
     const answer = await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
     if (answer.status === 200) settlers++;
-    // One at a time: not two at once, nor while one is in training.
+    // More can be queued behind it, each priced as it is queued; one called
+    // off is paid back at the dearest price (and the count drops). A batch
+    // that isn't there can't be called off.
     if (answer.status === 200 && settlers === 1) {
+      await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
       await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 2 } });
+      await play({ method: 'POST', path: '/v1/villages/1/train/cancel', body: { index: 1 } });
+      await play({ method: 'POST', path: '/v1/villages/1/train/cancel', body: { index: 5 } });
       await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'settler', count: 1 } });
+      await play({ method: 'POST', path: '/v1/villages/1/train/cancel', body: { index: 0 } });
+      settlers++;
     }
   }
   await play({ advance: 20 * MINUTE });

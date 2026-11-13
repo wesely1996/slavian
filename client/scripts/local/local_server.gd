@@ -533,6 +533,13 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			"train":
 				result = _train(world, village, body, now)
 				step = "train"
+			"train/cancel":
+				var index: Variant = body.get("index")
+				if not (index is float or index is int) or float(index) != floorf(float(index)) or float(index) < 0 or float(index) > 99:
+					return _fail(400, "invalid_request", "Say which training to call off")
+				result = _cancel_training(world, village, int(index), now)
+				if result.has("refund"):
+					extra = ["refund", result.refund]
 			"outposts":
 				result = _claim_outpost(world, village, body, now)
 				step = "outpost"
@@ -750,6 +757,21 @@ func _train(world: Dictionary, village: Dictionary, body: Dictionary, now: int) 
 		add_bought(member, unit, int(result.batch.count))
 	if result.has("state"):
 		schedule(world, LocalVillage.batch_completes_at(result.batch), "training_complete", {"villageId": village.id})
+	return result
+
+
+## commands/village.ts cancelTrainingCommand.
+func _cancel_training(world: Dictionary, village: Dictionary, index: int, now: int) -> Dictionary:
+	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
+	var member := member_of(world, int(village.ownerAccountId))
+	var settled := LocalVillage.complete_training(village.state, now)
+	var unit := String(settled.training[index].unit) if index < settled.training.size() else ""
+	var result := LocalVillage.cancel_training(data, village.state, index, now, world.speed, owned, int(member.get("bought", {}).get(unit, 0)))
+	if result.has("state"):
+		if data.units.units.get(unit, {}).get("costStep") != null:
+			add_bought(member, unit, -int(result.batch.count))
+		for item in result.moved:
+			schedule(world, LocalVillage.batch_completes_at(item), "training_complete", {"villageId": village.id})
 	return result
 
 

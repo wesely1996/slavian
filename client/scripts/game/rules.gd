@@ -256,13 +256,17 @@ static func garrison_at(village: Dictionary, at_unix: float) -> Dictionary:
 ## bought `bought` of them: settlers get dearer with every village, and every
 ## few bought (server unitCost).
 static func unit_cost(def: Dictionary, count: int, villages_owned := 1, bought := 0) -> Dictionary:
-	var step := 1.0
-	if def.get("costStep") != null:
-		step = pow(float(def.costStep.growth), floori(float(bought) / float(def.costStep.every)))
-	var factor := pow(float(def.get("costGrowthPerVillage", 1.0)), maxi(0, villages_owned - 1)) * step
+	var per_village := pow(float(def.get("costGrowthPerVillage", 1.0) if def.get("costGrowthPerVillage") != null else 1.0), maxi(0, villages_owned - 1))
 	var cost := {}
 	for kind in Ledger.KINDS:
-		cost[kind] = roundi(float(def.cost[kind]) * factor) * count
+		if def.get("costStep") == null:
+			cost[kind] = roundi(float(def.cost[kind]) * per_village) * count
+			continue
+		# Each one priced by how many were bought before it.
+		var sum := 0
+		for i in count:
+			sum += roundi(float(def.cost[kind]) * per_village * pow(float(def.costStep.growth), floori(float(bought + i) / float(def.costStep.every))))
+		cost[kind] = sum
 	return cost
 
 

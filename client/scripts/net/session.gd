@@ -37,9 +37,15 @@ var intro_seen := false
 ## landscape included.
 var orientation_locked := true
 ## Night mode: "auto" (as the phone is set), "on" or "off". A dim, warm
-## veil over the whole game, for playing in the dark.
-var night := "auto"
+## veil over the whole game, for playing in the dark. Off unless chosen (as
+## the phone, a phone in dark mode dimmed the game with no word why).
+var night := "off"
 var _night_veil: CanvasLayer
+## Brightness of the whole game, 1 as drawn: above it the midtones lift,
+## below they sink (whites stay white, blacks black).
+var brightness := 1.0
+var _brightness_layer: CanvasLayer
+var _brightness_shader: ShaderMaterial
 ## Achievements earned on this device or this account (data/achievements.json):
 ## id -> {at: when first earned (ISO time), worlds: the runs it came up in
 ## on this device (solo ones negative), times: runs the account counts}.
@@ -62,7 +68,8 @@ func _ready() -> void:
 		push_sync = config.get_value("session", "push_sync", false)
 		intro_seen = config.get_value("session", "intro_seen", false)
 		orientation_locked = config.get_value("session", "orientation_locked", true)
-		night = config.get_value("session", "night", "auto")
+		night = config.get_value("session", "night", "off")
+		brightness = clampf(float(config.get_value("session", "brightness", 1.0)), 0.6, 1.6)
 		achievements = config.get_value("session", "achievements", {})
 		# Older saves kept only when it was first earned.
 		for id in achievements.keys():
@@ -75,6 +82,7 @@ func _ready() -> void:
 	UiTheme.apply()
 	apply_orientation()
 	apply_night()
+	apply_brightness()
 	var window := get_tree().root
 	UiTheme.fit(window)
 	window.size_changed.connect(func() -> void: UiTheme.fit(window))
@@ -103,6 +111,7 @@ func save() -> void:
 	config.set_value("session", "intro_seen", intro_seen)
 	config.set_value("session", "orientation_locked", orientation_locked)
 	config.set_value("session", "night", night)
+	config.set_value("session", "brightness", brightness)
 	config.set_value("session", "achievements", achievements)
 	config.save(PATH)
 
@@ -236,6 +245,38 @@ func apply_night() -> void:
 		_night_veil.add_child(veil)
 		add_child(_night_veil)
 	_night_veil.visible = is_night()
+
+
+func set_brightness(value: float) -> void:
+	brightness = clampf(value, 0.6, 1.6)
+	apply_brightness()
+
+
+## Over everything, the night veil included: each colour raised to the
+## power 1/brightness. Left out while it is 1 (it costs a full-screen pass).
+func apply_brightness() -> void:
+	if _brightness_layer == null:
+		_brightness_layer = CanvasLayer.new()
+		_brightness_layer.layer = 101
+		var cover := ColorRect.new()
+		cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var shader := Shader.new()
+		shader.code = """shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
+uniform float gain = 1.0;
+void fragment() {
+	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	COLOR = vec4(pow(max(c, vec3(0.0)), vec3(1.0 / gain)), 1.0);
+}
+"""
+		_brightness_shader = ShaderMaterial.new()
+		_brightness_shader.shader = shader
+		cover.material = _brightness_shader
+		_brightness_layer.add_child(cover)
+		add_child(_brightness_layer)
+	_brightness_shader.set_shader_parameter("gain", brightness)
+	_brightness_layer.visible = absf(brightness - 1.0) > 0.01
 
 
 ## Upright, or turning with the phone (the sensor picks portrait or

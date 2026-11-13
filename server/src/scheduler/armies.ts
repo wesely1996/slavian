@@ -240,6 +240,11 @@ export async function moveArmy(
       await joinVillage(client, data, world, army, targetVillageId!, at);
       return loadArmy(client, army.id);
     }
+    // Standing on a site nobody has searched yet: it starts searching now.
+    if (orders === 'explore') {
+      await arriveAtSite(client, data, world, { ...army, orders: 'explore' }, at);
+      return loadArmy(client, army.id);
+    }
     throw new RuleError('They are already there');
   }
   const land = await terrainOf(client, world.id);
@@ -737,6 +742,10 @@ export const armyHandlers: HandlerRegistry = {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
     // Turned on the road since: a later arrival is planned.
     if (army.status !== 'marching' || army.arrivesAt.getTime() !== event.dueAt.getTime()) return;
+    // Holding a hex with a site nobody has searched yet: it searches it.
+    if (army.orders === 'hold' && total(army.units) > 0 && (await siteAt(client, world.id, army.targetQ, army.targetR))?.status === 'unexplored') {
+      army.orders = 'explore';
+    }
     if (army.orders === 'explore') {
       await arriveAtSite(client, data, world, army, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
