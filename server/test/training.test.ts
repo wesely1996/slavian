@@ -73,7 +73,8 @@ describe('settlers', () => {
     const def = data.units.units.settler!;
     expect(unitCost(data, 'settler', 1, 1, 2).wood).toBe(def.cost.wood);
     expect(unitCost(data, 'settler', 1, 1, 3).wood).toBe(Math.round(def.cost.wood * 1.5));
-    expect(unitCost(data, 'settler', 1, 2, 6).wood).toBe(Math.round(def.cost.wood * 1.5 * 1.5 ** 2));
+    // However many villages they have founded.
+    expect(unitCost(data, 'settler', 1, 2, 6).wood).toBe(Math.round(def.cost.wood * 1.5 ** 2));
   });
 });
 

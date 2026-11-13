@@ -401,7 +401,8 @@ func _test_expansion() -> void:
 	_check(Rules.settle_problem(data, Vector2i(4, 0), "plains", home, villages, false).begins_with("Villages stand at least 3"), "too close")
 	_check(Rules.settle_problem(data, Vector2i(5, 0), "plains", home, villages, true) == "An outpost stands there.", "outpost")
 	var settler: Dictionary = units.units.settler
-	_check(Rules.unit_cost(settler, 1, 3).wood == roundi(float(settler.cost.wood) * 2.25), "settlers get dearer per village")
+	_check(Rules.unit_cost(settler, 1, 3).wood == int(settler.cost.wood), "settlers don't get dearer per village")
+	_check(Rules.unit_cost(settler, 1, 3, 3).wood == roundi(float(settler.cost.wood) * 1.5), "settlers get dearer for every three recruited")
 	_check(Rules.unit_cost(units.units.spearman, 2, 3) == Rules.unit_cost(units.units.spearman, 2), "other units don't")
 	_check(Rules.recommended_garrison(data, 1) == 10 and Rules.recommended_garrison(data, 3) == 20, "recommended garrison")
 
