@@ -708,10 +708,14 @@ func _toast(text: String, warn := false) -> void:
 	label.add_theme_color_override("font_color", UiTheme.ON_WOOD)
 	var area := get_viewport().get_visible_rect().size
 	var width := minf(area.x - 32.0, 640.0)
+	# The words are told how wide they may be: a wrapping label that doesn't
+	# know yet breaks after every letter, and the box grows tall and empty.
+	label.custom_minimum_size = Vector2(width - 28.0, 0)
+	label.size = Vector2(width - 28.0, 0)
 	_toast_box.custom_minimum_size = Vector2(width, 0)
-	_toast_box.size = Vector2(width, 0)
-	var nav_height := _nav.size.y if _nav != null else 0.0
-	_toast_box.position = Vector2((area.x - width) / 2.0, area.y - nav_height - 130.0)
+	_place_toast()
+	# Again once laid out (the first time, the words only then know their lines).
+	_place_toast.call_deferred()
 	_toast_box.visible = true
 	_toast_box.modulate.a = 0.0
 	if _toast_tween != null:
@@ -723,6 +727,21 @@ func _toast(text: String, warn := false) -> void:
 	_toast_tween.tween_callback(func() -> void: _toast_box.visible = false)
 	if OS.has_feature("mobile"):
 		Input.vibrate_handheld(35 if warn else 15)
+
+
+## The toast just above the bottom bar, as tall as its words (never more
+## than a few lines' worth).
+func _place_toast() -> void:
+	if _toast_box == null:
+		return
+	var area := get_viewport().get_visible_rect().size
+	var width := _toast_box.custom_minimum_size.x
+	var label := _toast_box.get_node("Words") as Label
+	var lines := maxi(1, label.get_line_count())
+	var height := minf(lines * label.get_line_height() + 30.0, 220.0)
+	_toast_box.size = Vector2(width, height)
+	var nav_height := _nav.size.y if _nav != null else 0.0
+	_toast_box.position = Vector2((area.x - width) / 2.0, area.y - nav_height - 24.0 - height)
 
 
 ## Back (the phone's button, or Escape): out of a sheet to what is under it,
