@@ -89,7 +89,7 @@ Contents:
   Under it the troops as a row of unit portraits with counts. Actions as a
   fixed bar: **Move · Stance · Supply · More**. Settings and leaders go
   behind "More".
-- [ ] *(partly done: Send sits at the top of the troops form, always in sight)* **Send troops / caravan / bounty as a 3-step wizard** (M): *What*
+- [x] *(caravans and bounties are three-step wizards; the troops form keeps Send at the top)* **Send troops / caravan / bounty as a 3-step wizard** (M): *What*
   (steppers with "all"/"half" chips) → *Where* (tap the map, with the route,
   travel time and grain cost drawn live) → *Confirm* (one summary card).
   The confirm button is pinned to the bottom the whole time.
@@ -313,7 +313,7 @@ Things worth doing even without the redesign.
 
 ### 4.2 Still open
 
-- [ ] **Split `game_screen.gd`** (L) — one script per screen. The largest
+- [x] **Split `game_screen.gd`** (L) — one script per screen. The largest
   single cost to every UI change.
 - [ ] **Update sheets in place** (L): bind labels to state so a live update
   changes numbers rather than rebuilding hundreds of controls.

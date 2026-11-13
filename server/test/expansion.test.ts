@@ -26,10 +26,10 @@ describe('founding villages', () => {
     expect(settleProblem(data, site(5, 0, 'plains', ['5,0']))).toMatch(/outpost/);
   });
 
-  it('settlers and administration get dearer with every village', () => {
+  it('administration gets dearer with every village; settlers do not', () => {
     const base = data.units.units.settler!.cost;
     expect(unitCost(data, 'settler', 3, 1)).toEqual({ wood: base.wood * 3, stone: base.stone * 3, grain: base.grain * 3, iron: base.iron * 3 });
-    expect(unitCost(data, 'settler', 1, 3).wood).toBe(Math.round(base.wood * 1.5 ** 2));
+    expect(unitCost(data, 'settler', 1, 3).wood).toBe(base.wood);
     expect(unitCost(data, 'spearman', 2, 5)).toEqual(unitCost(data, 'spearman', 2, 1));
     expect(adminUpkeepFor(data, 1)).toBe(data.expansion.adminUpkeepPerVillage);
     expect(adminUpkeepFor(data, 3)).toBe(3 * data.expansion.adminUpkeepPerVillage);

@@ -754,7 +754,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await world()).vault).toMatchObject({ level: 2, upgradingTo: null, capacity: 4500 });
   });
 
-  it('sends settlers to found a second village, which pays upkeep and makes settlers dearer', async () => {
+  it('sends settlers to found a second village, which pays upkeep; the settlers bought make the next dearer', async () => {
     const mila = await guest('Mila');
     const created = await call('POST', '/v1/worlds', mila.token, { name: 'Expansion', maxPlayers: 1, speed: 10 });
     const worldId: number = created.body.id;
@@ -815,13 +815,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages.find((v: { id: number }) => v.id === home.id).away.settler ?? 0).toBe(0);
     expect(world.expeditions[0]).toMatchObject({ status: 'founded', foundedVillageId: second.id });
 
-    // A second village makes the next settlers dearer, and so do the three
-    // bought.
+    // The three bought make the next settler dearer; the village founded
+    // with them does not.
     await rich();
     const before = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.villages.find((v: { id: number }) => v.id === home.id);
     const dearer = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
     const spentWood = before.resources.amounts.wood - dearer.body.village.resources.amounts.wood;
-    expect(spentWood).toBe(Math.round(scheduler.data.units.units.settler!.cost.wood * 1.5 * 1.5));
+    expect(spentWood).toBe(Math.round(scheduler.data.units.units.settler!.cost.wood * 1.5));
 
     // Settlers find their site taken: they come home.
     now = new Date(dearer.body.village.training.at(-1).completesAt);
