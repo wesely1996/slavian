@@ -313,7 +313,7 @@ Things worth doing even without the redesign.
 
 ### 4.2 Still open
 
-- [ ] **Split `game_screen.gd`** (L) — one script per screen. The largest
+- [x] **Split `game_screen.gd`** (L) — one script per screen. The largest
   single cost to every UI change.
 - [ ] **Update sheets in place** (L): bind labels to state so a live update
   changes numbers rather than rebuilding hundreds of controls.

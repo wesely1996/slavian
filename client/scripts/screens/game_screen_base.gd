@@ -29,6 +29,9 @@ var _rate_negative := {}
 
 ## A rebuild of the sheet is waiting for the end of the frame.
 var _panel_stale := false
+## The handle along the sheet's top, and whether the sheet is folded away.
+var _fold_handle: Button
+var _sheet_folded := false
 
 ## The chat is waiting to be laid out again; and you just sent a message.
 var _chat_stale := false
@@ -557,7 +560,22 @@ func _build_ui() -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_panel.add_child(_scroll)
+	# A handle along the sheet's top folds it away, so the map under it can
+	# be seen and tapped, and brings it back.
+	var sheet := UI.vbox(0)
+	_fold_handle = Button.new()
+	_fold_handle.flat = true
+	_fold_handle.focus_mode = Control.FOCUS_NONE
+	_fold_handle.custom_minimum_size = Vector2(0, 44)
+	_fold_handle.add_theme_font_size_override("font_size", 26)
+	_fold_handle.add_theme_color_override("font_color", UiTheme.MUTED)
+	_fold_handle.pressed.connect(func() -> void:
+		_sheet_folded = not _sheet_folded
+		_fit_sheet()
+		_arrange())
+	sheet.add_child(_fold_handle)
+	sheet.add_child(_scroll)
+	_panel.add_child(sheet)
 	_panel_body = UI.vbox(14)
 	_panel_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_panel_body)
@@ -798,6 +816,13 @@ func _move_panel(landscape: bool, area: Vector2) -> void:
 ## need it, so that they fit without scrolling.
 func _fit_sheet() -> void:
 	var area := get_viewport().get_visible_rect().size
+	if _fold_handle != null:
+		# Beside the map (landscape) the sheet is not in its way: no handle.
+		var beside := area.x > area.y * 1.05
+		_fold_handle.visible = not beside and not _picking()
+		_fold_handle.text = "▴  " + tr("Show") if _sheet_folded else "▾"
+		_fold_handle.tooltip_text = tr("Show the sheet") if _sheet_folded else tr("Fold the sheet away")
+		_scroll.visible = beside or _picking() or not _sheet_folded
 	if area.x > area.y * 1.05:
 		return
 	# Picking a hex on the map: the sheet shrinks to a line, so the map has room.
@@ -808,7 +833,7 @@ func _fit_sheet() -> void:
 	var tall := _panel_mode != "hex" or (_view == "village" and _tab != "village")
 	# Bare ground has little to say: a peek, and the map keeps the room.
 	var peek := not tall and _view == "map" and Game.village_at(_selected).is_empty() and _road_from == Vector2i.MAX
-	_scroll.custom_minimum_size.y = area.y * (0.58 if tall else (0.27 if peek else 0.36))
+	_scroll.custom_minimum_size.y = area.y * (0.5 if tall else (0.22 if peek else 0.31))
 	# The tutorial's card folds while a tall sheet leaves the map little room.
 	if tall != _sheet_tall:
 		_sheet_tall = tall
@@ -859,6 +884,7 @@ func _top_style() -> StyleBox:
 
 func _select(cell: Vector2i) -> void:
 	_selected = cell
+	_sheet_folded = false
 	_side.erase("hex")
 	_road_from = Vector2i.MAX
 	hex_map.show_road_targets([])
@@ -946,6 +972,10 @@ func _rebuild_panel() -> void:
 	var key := "%s/%s/%s/%s" % [_panel_mode, _view, _tab, _army_id if _panel_mode == "army" else 0]
 	if key != _sheet_key:
 		_sheet_key = key
+		# Somewhere new: the sheet comes back up.
+		if _sheet_folded:
+			_sheet_folded = false
+			_fit_sheet()
 		_panel_body.modulate.a = 0.0
 		create_tween().tween_property(_panel_body, "modulate:a", 1.0, 0.16)
 	if _picking():
