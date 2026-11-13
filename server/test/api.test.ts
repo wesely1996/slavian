@@ -1332,8 +1332,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const marching = (await world()).waves.find((x: { id: number }) => x.id === first.id);
     // A hex on the road a few steps short of the village: in fort range,
     // not the Holy City (no forts there).
-    // (and no ancient site)
-    const ancient = new Set(started.body.sites.map((s: { q: number; r: number }) => `${s.q},${s.r}`));
+    // (and no ancient site or camp: daily events and waves may have raised
+    // some since the start, wherever the random seed put them)
+    const standing = await world();
+    const ancient = new Set(
+      [...standing.sites, ...started.body.sites, ...standing.camps].map((s: { q: number; r: number }) => `${s.q},${s.r}`),
+    );
     const holdable = (path: [number, number, number][]) =>
       path.slice(0, -1).reverse().find(([pq, pr]) => {
         const d = hexDistance(hex(pq, pr), hex(home.q, home.r));
