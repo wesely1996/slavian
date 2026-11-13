@@ -57,6 +57,7 @@ import {
   queueBuild,
   villageSite,
   queueTraining,
+  cancelTraining,
   sendAway,
   leaveGarrison,
   type BuildOrder,
@@ -166,6 +167,27 @@ export async function trainUnitsCommand(
     return { state, result: batch, onboarding: 'train' };
   });
   return { village, batch: result };
+}
+
+// Calls off a training batch: the units not yet trained are paid back
+// (settlers at the dearest price, and the count of them bought drops);
+// the batches after it finish sooner.
+export async function cancelTrainingCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { index: number },
+): Promise<{ village: Village; refund: Resources }> {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'cancelled training' }, async ({ client, world, village }) => {
+    const settled = completeTraining(village.state, input.now);
+    const unit = settled.training[input.index]?.unit ?? '';
+    const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
+    const bought = unit ? await boughtCount(client, world.id, village.ownerAccountId!, unit) : 0;
+    const { state, refund, batch, moved } = cancelTraining(deps.data, village.state, input.index, input.now, world.speed, owned, bought);
+    if (deps.data.units.units[batch.unit]?.costStep) await addBought(client, world.id, village.ownerAccountId!, batch.unit, -batch.count);
+    for (const item of moved) await scheduleEvent(client, world.id, batchCompletesAt(item), 'training_complete', { villageId: village.id } satisfies TrainingCompletePayload);
+    return { state, result: refund };
+  });
+  return { village, refund: result };
 }
 
 // Sends scouts from the caller's village to a wave. They report on arrival

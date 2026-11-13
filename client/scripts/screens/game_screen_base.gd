@@ -1362,7 +1362,11 @@ func _unit_chips(units: Dictionary, size := 40.0) -> Control:
 			chip.add_child(words)
 		flow.add_child(chip)
 	if flow.get_child_count() == 0:
-		flow.add_child(UI.label(tr("No troops"), UI.SMALL_SIZE, UI.MUTED))
+		# Unwrapped: a wrapping label in a flow container is given no width
+		# and stood its letters one under another.
+		var none := UI.label(tr("No troops"), UI.SMALL_SIZE, UI.MUTED)
+		none.autowrap_mode = TextServer.AUTOWRAP_OFF
+		flow.add_child(none)
 	return flow
 
 

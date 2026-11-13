@@ -801,6 +801,28 @@ func _orientation_page() -> void:
 		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		modes.add_child(pick)
 	_content.add_child(modes)
+	# Brightness: the whole game lighter or darker.
+	_content.add_child(UI.label(tr("Brightness"), UI.HEADING_SIZE))
+	var title := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_content.add_child(title)
+	var slider := HSlider.new()
+	slider.min_value = 0.6
+	slider.max_value = 1.6
+	slider.step = 0.05
+	slider.value = Session.brightness
+	slider.custom_minimum_size.y = 48
+	var show := func(value: float) -> void: title.text = tr("%d%%") % roundi(value * 100.0)
+	show.call(Session.brightness)
+	slider.value_changed.connect(func(value: float) -> void:
+		show.call(value)
+		Session.set_brightness(value))
+	slider.drag_ended.connect(func(_changed: bool) -> void: Session.save())
+	_content.add_child(slider)
+	var reset := UI.button(tr("As drawn (100%)"), func() -> void:
+		Session.set_brightness(1.0)
+		Session.save()
+		_render("orientation"))
+	_content.add_child(reset)
 
 
 func _sound_page() -> void:

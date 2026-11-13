@@ -409,6 +409,11 @@ func _hold_panel(terrain_id: String) -> void:
 		row.add_child(UI.button(tr("View"), func() -> void: _open_army(view_id)))
 		if army.ownerAccountId != null and int(army.ownerAccountId) == Game.my_account_id() and army.status in ["stationed", "marching"]:
 			var army_id := int(army.id)
+			# Standing on a site nobody has searched: search it now.
+			if exploring and army.status == "stationed" and army.orders != "explore":
+				var search := UI.button(tr("Explore"), func() -> void: _army_command(army_id, "move", {"target": {"q": cell.x, "r": cell.y}}))
+				search.custom_minimum_size.x = 150
+				row.add_child(search)
 			var recall := UI.button(tr("Call home"), func() -> void: _recall_army(army_id))
 			recall.custom_minimum_size.x = 150
 			row.add_child(recall)
@@ -436,7 +441,7 @@ func _hold_panel(terrain_id: String) -> void:
 		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, at_home)
-	if orders == "hold":
+	if orders in ["hold", "explore"]:
 		_move_here_rows(cell)
 
 

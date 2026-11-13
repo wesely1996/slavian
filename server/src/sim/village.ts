@@ -769,9 +769,50 @@ export function queueTraining(
 export function unitCost(data: GameData, unit: string, count: number, villagesOwned = 1, bought = 0): Resources {
   const def = data.units.units[unit];
   if (!def) throw new RuleError(`Unknown unit "${unit}"`);
-  const step = def.costStep ? def.costStep.growth ** Math.floor(bought / def.costStep.every) : 1;
-  const factor = (def.costGrowthPerVillage ?? 1) ** Math.max(0, villagesOwned - 1) * step;
-  return mapResources((kind) => Math.round(def.cost[kind] * factor) * count);
+  const perVillage = (def.costGrowthPerVillage ?? 1) ** Math.max(0, villagesOwned - 1);
+  if (!def.costStep) return mapResources((kind) => Math.round(def.cost[kind] * perVillage) * count);
+  // Each one priced by how many were bought before it.
+  const step = def.costStep;
+  const factors = Array.from({ length: count }, (_, i) => perVillage * step.growth ** Math.floor((bought + i) / step.every));
+  return mapResources((kind) => factors.reduce((sum, factor) => sum + Math.round(def.cost[kind] * factor), 0));
+}
+
+// Calls off the training batch at `index` (after those finished by `at`
+// joined the garrison): the units not yet trained are paid back in full
+// (for units that grow dearer, at the price of the dearest bought: the
+// owner has bought `bought`), and the batches after it move up.
+export function cancelTraining(
+  data: GameData,
+  state: VillageState,
+  index: number,
+  at: Date,
+  worldSpeed: number,
+  villagesOwned = 1,
+  bought = 0,
+): { state: VillageState; refund: Resources; batch: TrainingBatch; moved: TrainingBatch[] } {
+  const settled = completeTraining(state, at);
+  const batch = settled.training[index];
+  if (!batch) throw new RuleError('That training is not in the queue');
+  const def = data.units.units[batch.unit]!;
+  const refund = unitCost(data, batch.unit, batch.count, villagesOwned, def.costStep ? Math.max(0, bought - batch.count) : 0);
+  const training: TrainingBatch[] = [];
+  const moved: TrainingBatch[] = [];
+  for (const [i, item] of settled.training.entries()) {
+    if (i === index) continue;
+    if (i < index) {
+      training.push(item);
+      continue;
+    }
+    // Moves up: it starts when the one before it ends (or now).
+    const before = training.at(-1);
+    const startsAt = before ? batchCompletesAt(before) : item.startsAt < at ? item.startsAt : at;
+    const next = { ...item, startsAt };
+    if (startsAt.getTime() !== item.startsAt.getTime()) moved.push(next);
+    training.push(next);
+  }
+  const next = { ...settled, training };
+  const ledger = withRates(receive(settled.ledger, at, refund).ledger, at, villageRates(data, next, worldSpeed), settled.ledger.capacity);
+  return { state: { ...next, ledger }, refund, batch, moved };
 }
 
 // Moves units trained by `at` into the garrison. Idempotent.

@@ -683,6 +683,11 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 		if orders == "garrison":
 			join_village(server, world, army, int(target_village), at)
 			return army
+		# Standing on a site nobody has searched yet: it starts searching now.
+		if orders == "explore":
+			army.orders = "explore"
+			arrive_at_site(server, world, army, at, [])
+			return army
 		return LocalVillage.rule("They are already there")
 	var land := LocalHordes.land_of(world)
 	var path: Variant
@@ -1020,6 +1025,9 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	var at := int(event.dueAt)
 	changed.append(["world"])
+	# Holding a hex with a site nobody has searched yet: it searches it.
+	if army.orders == "hold" and LocalBattle.total(army.units) > 0 and site_at(world, Vector2i(army.targetQ, army.targetR)).get("status") == "unexplored":
+		army.orders = "explore"
 	match String(army.orders):
 		"raid":
 			LocalRaids.reach_edge(server, world, army, at)

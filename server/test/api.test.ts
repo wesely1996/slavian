@@ -782,22 +782,24 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(lodge.body.village.queue[0].completesAt);
     await tick(db, now, scheduler);
     await rich();
-    // Settlers train one at a time, and not while another is in training.
-    expect((await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 3 })).body.message).toMatch(/one at a time/);
-    const trainOne = async () => {
-      const trained = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
-      expect(trained.status).toBe(200);
-      return trained;
-    };
-    const first = await trainOne();
-    expect((await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 })).body.message).toMatch(/already in training/);
-    now = new Date(first.body.village.training.at(-1).completesAt);
+    // Several can be queued at once, each priced as it is queued (three
+    // bought: none dearer yet); the fourth, queued behind them, costs half
+    // as much again, and called off it is paid back at that price.
+    const wood = (v: { resources: { amounts: { wood: number } } }) => v.resources.amounts.wood;
+    const before3 = (await call('GET', `/v1/worlds/${worldId}`, mila.token)).body.villages.find((v: { id: number }) => v.id === home.id);
+    const three = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 3 });
+    expect(three.status).toBe(200);
+    const base = scheduler.data.units.units.settler!.cost.wood;
+    expect(Math.round(wood(before3) - wood(three.body.village))).toBe(3 * base);
+    const fourth = await call('POST', `/v1/villages/${home.id}/train`, mila.token, { unit: 'settler', count: 1 });
+    expect(Math.round(wood(three.body.village) - wood(fourth.body.village))).toBe(Math.round(base * 1.5));
+    const off = await call('POST', `/v1/villages/${home.id}/train/cancel`, mila.token, { index: 1 });
+    expect(off.status).toBe(200);
+    expect(off.body.refund.wood).toBe(Math.round(base * 1.5));
+    expect(off.body.village.training).toHaveLength(1);
+    expect((await call('POST', `/v1/villages/${home.id}/train/cancel`, mila.token, { index: 3 })).body.message).toMatch(/not in the queue/);
+    now = new Date(three.body.village.training.at(-1).completesAt);
     await tick(db, now, scheduler);
-    for (let i = 0; i < 2; i++) {
-      const next = await trainOne();
-      now = new Date(next.body.village.training.at(-1).completesAt);
-      await tick(db, now, scheduler);
-    }
 
     const sent = await found(site[0], site[1], 'Vesna');
     expect(sent.status).toBe(200);

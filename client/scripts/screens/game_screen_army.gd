@@ -1065,9 +1065,21 @@ func _train_tab(village: Dictionary) -> void:
 		tr("Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place.") % int(Game.data.units.buildingLevelsPerTrainingSlot)))
 	if training.is_empty():
 		_panel_body.add_child(UI.label(tr("Nobody in training."), UI.SMALL_SIZE, UI.MUTED))
+	var waiting := 0
 	for batch in training:
+		var row := UI.hbox()
 		var line := UI.label("", UI.SMALL_SIZE)
-		_panel_body.add_child(line)
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(line)
+		_panel_body.add_child(row)
+		# Called off by its place among those not finished yet (as the server
+		# counts them): those not yet trained are paid back.
+		if Rules.finished_by(batch, Game.server_now()) < int(batch.count) and Game.is_mine(village):
+			var index := waiting
+			waiting += 1
+			var cancel := UI.button(tr("Cancel"), func() -> void: _cancel_training(village_id, index))
+			cancel.tooltip_text = tr("Call it off: those not yet trained are paid back in full.")
+			row.add_child(cancel)
 		var unit_name: String = tr(units.get(batch.unit, {"name": batch.unit}).name)
 		var done_at := TimeUtil.parse_iso(batch.completesAt)
 		var start := TimeUtil.parse_iso(batch.startsAt)
@@ -1160,8 +1172,8 @@ func _train_tab(village: Dictionary) -> void:
 			most.focus_mode = Control.FOCUS_NONE
 			row.add_child(most)
 		if def.get("costStep") != null:
-			info.add_child(UI.with_info(UI.label(tr("One at a time; dearer for every %d you have recruited (%d).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED),
-				tr("Counted over all your villages. Each one that dies brings the price back down; founding a village with them does not.")))
+			info.add_child(UI.with_info(UI.label(tr("Dearer for every %d recruited (%d so far).") % [int(def.costStep.every), Game.bought(int(village.ownerAccountId), unit)], UI.SMALL_SIZE, UI.MUTED),
+				tr("Counted over all your villages, from the moment one is queued. Each one that dies or is called off brings the price back down (the dearest is paid back); founding a village with them does not.")))
 		var train := UI.primary(tr("Recruit") if one else tr("Train"), func() -> void: _train(village_id, unit, int(_train_counts.get(unit, 1))))
 		train.custom_minimum_size.x = 120
 		if one:
@@ -1297,6 +1309,17 @@ func _train(village_id: int, unit: String, count: int) -> void:
 		return
 	Sound.effect("train")
 	_toast(tr("Training %d × %s") % [count, tr(Game.data.units.units.get(unit, {"name": unit}).name)])
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+
+
+func _cancel_training(village_id: int, index: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/train/cancel" % village_id, {"index": index})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
 
