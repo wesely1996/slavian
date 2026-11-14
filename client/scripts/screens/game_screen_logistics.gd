@@ -350,6 +350,7 @@ func _send_caravan(village_id: int, target: Dictionary, cargo: Dictionary, escor
 	_army_units.clear()
 	_forget_drafts(["load:", "escort:", "back:"])
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 	Game.update_village(response.data.village)
 	if response.data.get("caravan") is Dictionary:
 		Game.put_caravan(response.data.caravan)
@@ -553,3 +554,5 @@ func _cancel_order(village_id: int, order_id: int) -> void:
 	var response := await Api.post_json("/v1/villages/%d/orders/%d/cancel" % [village_id, order_id], {})
 	if not response.ok:
 		_status.text = response.error
+		return
+	_sync_after_command()
