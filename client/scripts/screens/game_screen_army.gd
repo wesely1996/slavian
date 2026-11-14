@@ -942,6 +942,7 @@ func _troops_section(village: Dictionary) -> void:
 		["train", "unit/spearman", tr("Train"), _train_tab.bind(village)],
 		["armies", "icon/troops", tr("Armies"), _armies_section.bind(village)],
 		["send", "unit/border_rider", tr("Send troops"), _send_troops.bind(village)],
+		["ruins", "site/stone_idol", tr("Search for ruins"), _ruins_tab.bind(village)],
 		["raid", "map/camp_bandit", tr("Raid"), _raid_tab.bind(village)]], VILLAGE_TOP)
 
 
@@ -976,8 +977,15 @@ func _garrison_tab(village: Dictionary) -> void:
 	if not away.is_empty():
 		_panel_body.add_child(UI.label(tr("Away"), UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(_unit_chips(away))
-	_ruin_search_section(village)
 	_dismiss_section(village)
+
+
+## Its own tab (it was at the foot of the garrison, where nobody found it):
+## the search, or what it takes to start one.
+func _ruins_tab(village: Dictionary) -> void:
+	_ruin_search_section(village)
+	if int(village.levels.get("scout_lodge", 0)) < 1:
+		_panel_body.add_child(UI.label(tr("Build a Scout Lodge to send scouts searching for ruins."), UI.SMALL_SIZE, UI.ERROR))
 
 
 ## Scouts sent to search the land around the village for a forgotten ruin,
@@ -985,8 +993,6 @@ func _garrison_tab(village: Dictionary) -> void:
 func _ruin_search_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	var searches: Array = Game.world.get("ruinSearches", []).filter(func(s: Dictionary) -> bool: return int(s.villageId) == village_id)
-	if int(village.levels.get("scout_lodge", 0)) < 1 and searches.is_empty():
-		return
 	var rules: Dictionary = Game.data.scouting.ruinSearch
 	var duration := TimeUtil.format_duration(float(rules.hours) * 3600.0 / float(Game.world.speed))
 	_panel_body.add_child(UI.with_info(UI.label(tr("Search for ruins"), UI.SMALL_SIZE, UI.MUTED),
