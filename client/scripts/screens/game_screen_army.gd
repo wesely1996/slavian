@@ -389,6 +389,8 @@ func _send_raid(village_id: int, body: Dictionary, route := "raids") -> void:
 	var response := await Api.post_json("/v1/villages/%d/%s" % [village_id, route], body)
 	if not response.ok:
 		_status.text = response.error
+		# Refused for troops the screen thought were at home: show what is.
+		_sync_after_command()
 		return
 	_army_units.clear()
 	_forget_drafts(["units:", "send:", "escort:", "raid:"])
@@ -396,6 +398,7 @@ func _send_raid(village_id: int, body: Dictionary, route := "raids") -> void:
 	_army_general = 0
 	_army_stance = ""
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 
 
 func _send_army(village_id: int, body: Dictionary) -> void:
@@ -403,6 +406,8 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	var response := await Api.post_json("/v1/villages/%d/armies" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
+		# Refused for troops the screen thought were at home: show what is.
+		_sync_after_command()
 		return
 	_toast(tr("The army is on its way"))
 	_army_units.clear()
@@ -414,6 +419,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	_army_general = 0
 	_army_stance = ""
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 
 
 ## Your generals ready in a village, and a choice of which leads the next
@@ -914,6 +920,8 @@ func _army_command(army_id: int, action: String, body: Dictionary) -> void:
 	var response := await Api.post_json("/v1/armies/%d/%s" % [army_id, action], body)
 	if not response.ok:
 		_status.text = response.error
+		return
+	_sync_after_command()
 
 
 func _recall_army(army_id: int) -> void:
@@ -921,6 +929,8 @@ func _recall_army(army_id: int) -> void:
 	var response := await Api.post_json("/v1/armies/%d/recall" % army_id, {})
 	if not response.ok:
 		_status.text = response.error
+		return
+	_sync_after_command()
 
 
 ## How low a settlement's, fort's or supply point's grain may fall for
@@ -1252,6 +1262,7 @@ func _set_army_stance(army_id: int, stance: String) -> void:
 		_status.text = response.error
 		return
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 
 
 ## While a horde is before your village's standing walls: the order to

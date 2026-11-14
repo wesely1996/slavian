@@ -35,6 +35,8 @@ var _subscribe_sent := false
 var _world_id := 0
 var _retry_in := 0.0
 var _backoff := RETRY_MIN_SEC
+## When the app last went to the background (ticks; 0: never).
+var _away_since := 0
 
 
 func watch(world_id: int) -> void:
@@ -131,6 +133,21 @@ func _handle(text: String) -> void:
 			caravans_updated.emit(int(message.worldId), message.caravans, message.vault, message.get("bounties", []) if message.get("bounties") is Array else [])
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
+
+
+## Back from the background: a phone that slept may have dropped the
+## connection without either end noticing (it still reads as open, and
+## nothing more arrives). Connect afresh; once subscribed, the screens read
+## the world again for what they missed.
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_APPLICATION_FOCUS_IN]:
+		# Away a moment (a system dialog): nothing to fear.
+		var away := Time.get_ticks_msec() - _away_since if _away_since > 0 else 0
+		_away_since = 0
+		if _world_id > 0 and away >= 3000:
+			watch(_world_id)
+	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT] and _away_since == 0:
+		_away_since = Time.get_ticks_msec()
 
 
 func _schedule_retry() -> void:

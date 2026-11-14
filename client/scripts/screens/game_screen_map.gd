@@ -367,6 +367,7 @@ func _upgrade_vault() -> void:
 		_status.text = response.error
 		return
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 
 
 ## Holding the selected hex: what the ground gives, armies already there,
@@ -494,6 +495,7 @@ func _build_fort(village_id: int, cell: Vector2i, kind := "fort") -> void:
 		_status.text = response.error
 		return
 	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
 
 
 ## Rivers along the selected hex: where bridges stand, and building more.

@@ -1690,6 +1690,15 @@ func _on_village_changed(_village_id: int) -> void:
 func _on_live_connection(connected: bool) -> void:
 	pass
 
+## After a command whose answer doesn't carry what it changed (an army sent:
+## the village it left), online the world is read again rather than waiting
+## for the live message: a connection that died quietly (the phone asleep)
+## left the troops on screen as if they had never gone. The solo engine
+## sends its news itself.
+func _sync_after_command() -> void:
+	if not Local.is_active():
+		_refetch_world()
+
 func _refetch_world() -> void:
 	pass
 
