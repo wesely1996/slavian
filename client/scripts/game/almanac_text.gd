@@ -2,11 +2,14 @@ class_name AlmanacText
 extends RefCounted
 ## The in-game almanac, written from the game data (data/*.json).
 
-const SECTIONS := ["Units", "Buildings", "Stances", "Hordes", "Clans", "Terrain", "The run"]  # tr
+const SECTIONS := ["Units", "Enemies", "Buildings", "Stances", "Hordes", "Clans", "Terrain", "The run"]  # tr
 
+
+## What kind of troop a unit is (units.json, enemies.json `family`).
+const FAMILIES := ["Infantry", "Archers", "Cavalry", "Scout"]  # tr
 
 ## The picture on each section's tab.
-const ART := {"Units": "unit/spearman", "Buildings": "icon/build", "Stances": "icon/troops", "Hordes": "icon/threat",
+const ART := {"Units": "unit/spearman", "Enemies": "unit/grey_wolf", "Buildings": "icon/build", "Stances": "icon/troops", "Hordes": "icon/threat",
 	"Clans": "clan/volk", "Terrain": "icon/map", "The run": "settlement/holy_city"}
 ## Pictures for the kinds of ground that have one.
 const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hills": "feature/hill", "wooded_hills": "feature/hill", "mountain": "feature/mountain",
@@ -21,6 +24,8 @@ static func entries(data: Dictionary, section: String, speed := 1.0) -> Array:
 	match section:
 		"Units":
 			return _units(data, speed)
+		"Enemies":
+			return _enemies(data, speed)
 		"Buildings":
 			return _buildings(data)
 		"Stances":
@@ -42,8 +47,8 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 	for id in units:
 		var u: Dictionary = units[id]
 		var where := UI.t("%s level %d") % [UI.t(data.buildings.buildings[u.building].name), int(u.requiresLevel)]
-		var text := UI.t("%s · attack %d · defense %d · health %d · speed %s hexes/h · carries %d · eats %s grain/h · food for %s on the march · trained at %s") % [
-			String(u.family).capitalize(), int(u.attack), int(u.defense), int(u.health), UI.number(TimeUtil.per_real_hour(float(u.speed) * speed)), int(u.carry), UI.number(TimeUtil.per_real_hour(float(u.upkeepPerHour) * speed)),
+		var text := UI.t("%s · attack %s · defense %s · health %d · speed %s hexes/h · carries %d · eats %s grain/h · food for %s on the march · trained at %s") % [
+			UI.t(String(u.family).capitalize()), BattleText.stat_range(data, float(u.attack)), BattleText.stat_range(data, float(u.defense)), int(u.health), UI.number(TimeUtil.per_real_hour(float(u.speed) * speed)), int(u.carry), UI.number(TimeUtil.per_real_hour(float(u.upkeepPerHour) * speed)),
 			TimeUtil.format_duration(float(u.get("supplyHours", 0)) * 3600.0 / speed), where]
 		if u.get("counters") != null:
 			var strong := PackedStringArray()
@@ -53,6 +58,33 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
 		out.append([UI.t(u.name), text, "unit/%s" % id, id])
+	return out
+
+
+## Every enemy unit, front by front and tier by tier, with its numbers.
+static func _enemies(data: Dictionary, speed := 1.0) -> Array:
+	var out := []
+	var fronts: Dictionary = data.enemies.fronts
+	for front in fronts:
+		var f: Dictionary = fronts[front]
+		var ids: Array = f.units.keys()
+		# By tier (engines, which have none, last), as the data lists them.
+		ids.sort_custom(func(a: String, b: String) -> bool:
+			var ta := int(f.units[a].tier) if f.units[a].get("tier") != null else 99
+			var tb := int(f.units[b].tier) if f.units[b].get("tier") != null else 99
+			return ta < tb or (ta == tb and f.units.keys().find(a) < f.units.keys().find(b)))
+		for id in ids:
+			var u: Dictionary = f.units[id]
+			var rank := UI.t("tier %d (from wave %d)") % [int(u.tier), int(data.enemies.tiers.minWave[int(u.tier) - 1]) + 1] if u.get("tier") != null else UI.t("siege engine")
+			var text := UI.t("%s · %s · %s · attack %s · defense %s · health %d · speed %s hexes/h") % [
+				UI.t(f.faction), rank, UI.t(String(u.family).capitalize()), BattleText.stat_range(data, float(u.attack)), BattleText.stat_range(data, float(u.defense)),
+				int(u.health), UI.number(TimeUtil.per_real_hour(float(u.get("speed", 0)) * speed))]
+			if u.get("counters") != null:
+				var strong := PackedStringArray()
+				for target in u.counters:
+					strong.append("%s ×%.1f" % [UI.t(String(target).capitalize()), float(u.counters[target])])
+				text += UI.t(" · strong against %s") % ", ".join(strong)
+			out.append([UI.t(u.name), text, "unit/%s" % id])
 	return out
 
 

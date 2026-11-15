@@ -9342,7 +9342,7 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "rusalka": 2,
        "grey_wolf": 1,
        "leshy_thrall": 1
       },
@@ -9353,11 +9353,11 @@
        {
         "at": "2026-06-01T10:37:21.600Z",
         "round": 1,
-        "attackerLeft": 6,
+        "attackerLeft": 7,
         "defenderLeft": 3,
         "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -9366,12 +9366,11 @@
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 3,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 2
         },
         "defenderLosses": {}
        }
@@ -9394,7 +9393,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 1,
-      "xp": 6,
+      "xp": 5,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -9421,7 +9420,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 1,
-      "xp": 6,
+      "xp": 5,
       "xpToNext": 40,
       "bonuses": {
        "attack.all": 0.02,
@@ -9735,7 +9734,7 @@
      [
       0,
       -1,
-      9.1
+      9
      ]
     ],
     "delegations": [],
@@ -12183,7 +12182,7 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "rusalka": 2,
        "grey_wolf": 1,
        "leshy_thrall": 1
       },
@@ -12194,11 +12193,11 @@
        {
         "at": "2026-06-01T10:37:21.600Z",
         "round": 1,
-        "attackerLeft": 6,
+        "attackerLeft": 7,
         "defenderLeft": 3,
         "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -12207,12 +12206,11 @@
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 3,
+        "attackerLeft": 4,
         "defenderLeft": 3,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 1,
-         "leshy_thrall": 1
+         "grey_wolf": 2
         },
         "defenderLosses": {}
        }
@@ -12235,7 +12233,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 1,
-      "xp": 6,
+      "xp": 5,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -12262,7 +12260,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 1,
-      "xp": 6,
+      "xp": 5,
       "xpToNext": 40,
       "bonuses": {
        "attack.all": 0.02,
@@ -12576,7 +12574,7 @@
      [
       0,
       -1,
-      9.1
+      9
      ]
     ],
     "delegations": [],

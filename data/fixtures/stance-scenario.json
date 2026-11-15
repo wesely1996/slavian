@@ -31384,7 +31384,7 @@
       },
       "attackerNow": {
        "rusalka": 2,
-       "grey_wolf": 2,
+       "grey_wolf": 3,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -31404,14 +31404,14 @@
          }
         ],
         "round": 1,
-        "attackerLeft": 6,
-        "defenderLeft": 7,
+        "attackerLeft": 7,
+        "defenderLeft": 6,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2
+         "grey_wolf": 1
         },
         "defenderLosses": {
-         "spearman": 1
+         "spearman": 2
         }
        }
       ],
@@ -31580,7 +31580,7 @@
       "stance": "hold_the_line",
       "loot": null,
       "units": {
-       "spearman": 6
+       "spearman": 5
       },
       "status": "engaged",
       "battleId": 1,
@@ -31610,8 +31610,8 @@
       "arrivesAt": "2026-06-01T10:09:43.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 144,
-      "supplyAt": "2026-06-01T10:09:00.000Z",
+      "supply": 2.1999999999999886,
+      "supplyAt": "2026-06-01T10:37:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,

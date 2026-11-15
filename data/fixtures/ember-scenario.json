@@ -3418,7 +3418,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 7
+       "spearman": 8
       },
       "away": {},
       "stance": "balanced",
@@ -3446,7 +3446,7 @@
        "ratesPerHour": {
         "iron": 165,
         "wood": 495.00000000000006,
-        "grain": 345.50000000000006,
+        "grain": 332.00000000000006,
         "stone": 330
        },
        "capacity": {
@@ -3754,8 +3754,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -3765,14 +3765,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -3815,8 +3814,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -3831,7 +3830,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -6049,7 +6049,7 @@
      "r": -2
     },
     "units": {
-     "spearman": 7
+     "spearman": 8
     },
     "withHero": true
    },
@@ -6070,7 +6070,7 @@
      "stance": "balanced",
      "loot": null,
      "units": {
-      "spearman": 7
+      "spearman": 8
      },
      "status": "marching",
      "battleId": null,
@@ -6110,7 +6110,7 @@
      "arrivesAt": "2026-06-01T10:41:36.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 168,
+     "supply": 192,
      "supplyAt": "2026-06-01T10:40:24.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -6328,7 +6328,7 @@
        "amounts": {
         "iron": 700.25,
         "wood": 1600,
-        "grain": 1432,
+        "grain": 1408,
         "stone": 1600
        },
        "ratesPerHour": {
@@ -6643,7 +6643,7 @@
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [],
       "loot": null,
@@ -6663,7 +6663,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -6671,31 +6671,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -6737,8 +6728,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -6748,14 +6739,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -6798,8 +6788,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -6814,7 +6804,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -6906,7 +6897,7 @@
        "stone": 90
       },
       "units": {
-       "spearman": 7
+       "spearman": 8
       },
       "status": "engaged",
       "battleId": 4,
@@ -6936,7 +6927,7 @@
       "arrivesAt": "2026-06-01T10:47:04.800Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 168,
+      "supply": 192,
       "supplyAt": "2026-06-01T10:40:24.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -9253,7 +9244,7 @@
        "amounts": {
         "iron": 741.5,
         "wood": 1600,
-        "grain": 1432,
+        "grain": 1408,
         "stone": 1600
        },
        "ratesPerHour": {
@@ -9669,7 +9660,7 @@
        },
        "guard": {
         "archer": 10,
-        "spearman": 20
+        "spearman": 21
        },
        "holyCity": true
       },
@@ -9683,27 +9674,27 @@
       },
       "attackerNow": {
        "zealot": 18,
-       "crossbowman": 9,
-       "sergeant_rider": 6
+       "crossbowman": 10,
+       "sergeant_rider": 5
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [
        {
         "at": "2026-06-01T10:56:21.600Z",
         "round": 1,
         "attackerLeft": 33,
-        "defenderLeft": 36,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 3,
-         "crossbowman": 3,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "sergeant_rider": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 3
+         "spearman": 2
         }
        }
       ],
@@ -9724,7 +9715,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -9732,31 +9723,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -9798,8 +9780,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -9809,14 +9791,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -9859,8 +9840,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -9875,7 +9856,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -9992,7 +9974,7 @@
        "stone": 90
       },
       "units": {
-       "spearman": 6
+       "spearman": 7
       },
       "status": "engaged",
       "battleId": 4,
@@ -10022,7 +10004,7 @@
       "arrivesAt": "2026-06-01T10:47:04.800Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 74.9,
+      "supply": 85.6,
       "supplyAt": "2026-06-01T10:56:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -12357,7 +12339,7 @@
        "amounts": {
         "iron": 585,
         "wood": 1216,
-        "grain": 1089,
+        "grain": 1071,
         "stone": 1216
        },
        "ratesPerHour": {
@@ -12663,7 +12645,7 @@
        },
        "guard": {
         "archer": 8,
-        "spearman": 18
+        "spearman": 20
        },
        "holyCity": true
       },
@@ -12677,34 +12659,34 @@
       },
       "attackerNow": {
        "zealot": 24,
-       "crossbowman": 10,
-       "sergeant_rider": 6
+       "crossbowman": 11,
+       "sergeant_rider": 5
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [
        {
         "at": "2026-06-01T10:56:21.600Z",
         "round": 1,
         "attackerLeft": 33,
-        "defenderLeft": 36,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 3,
-         "crossbowman": 3,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "sergeant_rider": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:06:21.600Z",
         "round": 2,
         "attackerLeft": 40,
-        "defenderLeft": 31,
+        "defenderLeft": 34,
         "attackerLosses": {
          "zealot": 3,
          "crossbowman": 2,
@@ -12712,7 +12694,7 @@
         },
         "defenderLosses": {
          "archer": 2,
-         "spearman": 3
+         "spearman": 2
         }
        }
       ],
@@ -12763,7 +12745,7 @@
       "loot": {
        "iron": 184,
        "wood": 384,
-       "grain": 343,
+       "grain": 337,
        "stone": 384
       },
       "decision": {
@@ -12787,7 +12769,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -12795,31 +12777,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -12861,8 +12834,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -12872,14 +12845,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -12922,8 +12894,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -12938,7 +12910,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -13055,7 +13028,7 @@
        "stone": 90
       },
       "units": {
-       "spearman": 5
+       "spearman": 6
       },
       "status": "engaged",
       "battleId": 4,
@@ -13085,7 +13058,7 @@
       "arrivesAt": "2026-06-01T10:47:04.800Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 24.900000000000006,
+      "supply": 27.26666666666666,
       "supplyAt": "2026-06-01T11:06:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -15425,7 +15398,7 @@
        "amounts": {
         "iron": 585,
         "wood": 1216,
-        "grain": 1089,
+        "grain": 1071,
         "stone": 1216
        },
        "ratesPerHour": {
@@ -15731,7 +15704,7 @@
        },
        "guard": {
         "archer": 7,
-        "spearman": 17
+        "spearman": 19
        },
        "holyCity": true
       },
@@ -15744,35 +15717,35 @@
        "sergeant_rider": 8
       },
       "attackerNow": {
-       "zealot": 22,
-       "crossbowman": 8,
+       "zealot": 21,
+       "crossbowman": 9,
        "sergeant_rider": 4
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [
        {
         "at": "2026-06-01T10:56:21.600Z",
         "round": 1,
         "attackerLeft": 33,
-        "defenderLeft": 36,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 3,
-         "crossbowman": 3,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "sergeant_rider": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:06:21.600Z",
         "round": 2,
         "attackerLeft": 40,
-        "defenderLeft": 31,
+        "defenderLeft": 34,
         "attackerLosses": {
          "zealot": 3,
          "crossbowman": 2,
@@ -15780,18 +15753,18 @@
         },
         "defenderLosses": {
          "archer": 2,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:16:21.600Z",
         "round": 3,
         "attackerLeft": 34,
-        "defenderLeft": 29,
+        "defenderLeft": 32,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 3,
          "crossbowman": 2,
-         "sergeant_rider": 2
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "archer": 1,
@@ -15846,7 +15819,7 @@
       "loot": {
        "iron": 184,
        "wood": 384,
-       "grain": 343,
+       "grain": 337,
        "stone": 384
       },
       "decision": {
@@ -15870,7 +15843,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -15878,31 +15851,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -15944,8 +15908,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -15955,14 +15919,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -16005,8 +15968,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -16021,7 +15984,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -16138,7 +16102,7 @@
        "stone": 90
       },
       "units": {
-       "spearman": 5
+       "spearman": 6
       },
       "status": "engaged",
       "battleId": 4,
@@ -16168,7 +16132,7 @@
       "arrivesAt": "2026-06-01T10:47:04.800Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 24.900000000000006,
+      "supply": 27.26666666666666,
       "supplyAt": "2026-06-01T11:06:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -18508,7 +18472,7 @@
        "amounts": {
         "iron": 585,
         "wood": 1216,
-        "grain": 1089,
+        "grain": 1071,
         "stone": 1216
        },
        "ratesPerHour": {
@@ -18759,7 +18723,7 @@
       "loot": {
        "iron": 184,
        "wood": 384,
-       "grain": 343,
+       "grain": 337,
        "stone": 384
       },
       "decision": {
@@ -18790,7 +18754,7 @@
        },
        "guard": {
         "archer": 6,
-        "spearman": 16
+        "spearman": 17
        },
        "holyCity": true
       },
@@ -18806,35 +18770,35 @@
        "sergeant_rider": 8
       },
       "attackerNow": {
-       "zealot": 21,
+       "zealot": 19,
        "crossbowman": 7,
-       "sergeant_rider": 3
+       "sergeant_rider": 4
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [
        {
         "at": "2026-06-01T10:56:21.600Z",
         "round": 1,
         "attackerLeft": 33,
-        "defenderLeft": 36,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 3,
-         "crossbowman": 3,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "sergeant_rider": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:06:21.600Z",
         "round": 2,
         "attackerLeft": 40,
-        "defenderLeft": 31,
+        "defenderLeft": 34,
         "attackerLosses": {
          "zealot": 3,
          "crossbowman": 2,
@@ -18842,18 +18806,18 @@
         },
         "defenderLosses": {
          "archer": 2,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:16:21.600Z",
         "round": 3,
         "attackerLeft": 34,
-        "defenderLeft": 29,
+        "defenderLeft": 32,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 3,
          "crossbowman": 2,
-         "sergeant_rider": 2
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "archer": 1,
@@ -18863,19 +18827,18 @@
        {
         "at": "2026-06-01T11:26:21.600Z",
         "round": 4,
-        "attackerLeft": 31,
-        "defenderLeft": 23,
+        "attackerLeft": 30,
+        "defenderLeft": 24,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 2,
          "rusalka": 2,
          "grey_wolf": 8,
-         "crossbowman": 1,
-         "leshy_thrall": 2,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 1
+         "spearman": 2
         }
        }
       ],
@@ -18896,7 +18859,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -18904,31 +18867,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -18970,8 +18924,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -18981,14 +18935,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -19031,8 +18984,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -19047,7 +19000,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -19073,7 +19027,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 2,
-      "xp": 12,
+      "xp": 13,
       "xpToNext": 41,
       "skillPoints": 1,
       "skills": {},
@@ -19083,7 +19037,7 @@
       "path": null,
       "departsAt": null,
       "arrivesAt": null,
-      "woundedUntil": "2026-06-01T11:36:20.161Z",
+      "woundedUntil": "2026-06-01T11:37:00.800Z",
       "quest": null,
       "offers": [
        {
@@ -19221,11 +19175,11 @@
       ],
       "departsAt": "2026-06-01T11:26:21.600Z",
       "arrivesAt": "2026-06-01T11:27:19.200Z",
-      "leavesAt": "2026-06-01T11:26:44.161Z",
-      "returnsAt": "2026-06-01T11:26:44.161Z",
+      "leavesAt": "2026-06-01T11:27:24.800Z",
+      "returnsAt": "2026-06-01T11:27:24.800Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T11:26:44.161Z",
-      "hungrySince": "2026-06-01T11:12:20.161Z",
+      "supplyAt": "2026-06-01T11:27:24.800Z",
+      "hungrySince": "2026-06-01T11:11:48.800Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -19445,7 +19399,7 @@
      [
       0,
       0,
-      25.2
+      25.4
      ]
     ],
     "delegations": [],
@@ -21563,7 +21517,7 @@
        "amounts": {
         "iron": 585,
         "wood": 1216,
-        "grain": 1089,
+        "grain": 1071,
         "stone": 1216
        },
        "ratesPerHour": {
@@ -21814,7 +21768,7 @@
       "loot": {
        "iron": 184,
        "wood": 384,
-       "grain": 343,
+       "grain": 337,
        "stone": 384
       },
       "decision": {
@@ -21845,7 +21799,7 @@
        },
        "guard": {
         "archer": 6,
-        "spearman": 16
+        "spearman": 17
        },
        "holyCity": true
       },
@@ -21861,35 +21815,35 @@
        "sergeant_rider": 8
       },
       "attackerNow": {
-       "zealot": 21,
+       "zealot": 19,
        "crossbowman": 7,
-       "sergeant_rider": 3
+       "sergeant_rider": 4
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 29
+       "spearman": 30
       },
       "rounds": [
        {
         "at": "2026-06-01T10:56:21.600Z",
         "round": 1,
         "attackerLeft": 33,
-        "defenderLeft": 36,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 3,
-         "crossbowman": 3,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "sergeant_rider": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:06:21.600Z",
         "round": 2,
         "attackerLeft": 40,
-        "defenderLeft": 31,
+        "defenderLeft": 34,
         "attackerLosses": {
          "zealot": 3,
          "crossbowman": 2,
@@ -21897,18 +21851,18 @@
         },
         "defenderLosses": {
          "archer": 2,
-         "spearman": 3
+         "spearman": 2
         }
        },
        {
         "at": "2026-06-01T11:16:21.600Z",
         "round": 3,
         "attackerLeft": 34,
-        "defenderLeft": 29,
+        "defenderLeft": 32,
         "attackerLosses": {
-         "zealot": 2,
+         "zealot": 3,
          "crossbowman": 2,
-         "sergeant_rider": 2
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "archer": 1,
@@ -21918,19 +21872,18 @@
        {
         "at": "2026-06-01T11:26:21.600Z",
         "round": 4,
-        "attackerLeft": 31,
-        "defenderLeft": 23,
+        "attackerLeft": 30,
+        "defenderLeft": 24,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 2,
          "rusalka": 2,
          "grey_wolf": 8,
-         "crossbowman": 1,
-         "leshy_thrall": 2,
-         "sergeant_rider": 1
+         "crossbowman": 2,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
-         "spearman": 1
+         "spearman": 2
         }
        }
       ],
@@ -21951,7 +21904,7 @@
       "r": -2,
       "setup": {},
       "status": "cleared",
-      "round": 2,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 1,
@@ -21959,31 +21912,22 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 1,
+       "grey_wolf": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 8
       },
       "rounds": [
        {
         "at": "2026-06-01T10:41:36.000Z",
         "round": 1,
-        "attackerLeft": 4,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:41:36.000Z",
-        "round": 2,
         "attackerLeft": 2,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 2
+         "rusalka": 1,
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
         "defenderLosses": {}
        }
@@ -22025,8 +21969,8 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "grey_wolf": 2,
-       "leshy_thrall": 2
+       "grey_wolf": 3,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -22036,14 +21980,13 @@
         "at": "2026-06-01T10:38:36.000Z",
         "round": 1,
         "attackerLeft": 5,
-        "defenderLeft": 7,
+        "defenderLeft": 8,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -22086,8 +22029,8 @@
        "sergeant_rider": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 2,
+       "rusalka": 1,
+       "grey_wolf": 3,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -22102,7 +22045,8 @@
         "defenderLeft": 30,
         "attackerLosses": {
          "zealot": 4,
-         "grey_wolf": 3,
+         "rusalka": 1,
+         "grey_wolf": 2,
          "crossbowman": 3,
          "leshy_thrall": 1,
          "sergeant_rider": 2
@@ -22128,7 +22072,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 2,
-      "xp": 12,
+      "xp": 13,
       "xpToNext": 41,
       "skillPoints": 1,
       "skills": {},
@@ -22276,11 +22220,11 @@
       ],
       "departsAt": "2026-06-01T11:26:21.600Z",
       "arrivesAt": "2026-06-01T11:27:19.200Z",
-      "leavesAt": "2026-06-01T11:26:44.161Z",
-      "returnsAt": "2026-06-01T11:26:44.161Z",
+      "leavesAt": "2026-06-01T11:27:24.800Z",
+      "returnsAt": "2026-06-01T11:27:24.800Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T11:26:44.161Z",
-      "hungrySince": "2026-06-01T11:12:20.161Z",
+      "supplyAt": "2026-06-01T11:27:24.800Z",
+      "hungrySince": "2026-06-01T11:11:48.800Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -22500,7 +22444,7 @@
      [
       0,
       0,
-      25.2
+      25.4
      ]
     ],
     "delegations": [],
@@ -24426,7 +24370,7 @@
       "tier": "push",
       "title": "An army from Zaslavl starved",
       "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T11:26:44.161Z",
+      "createdAt": "2026-06-01T11:27:24.800Z",
       "read": false
      },
      {
@@ -24506,7 +24450,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Zaslavl was raided",
-      "body": "The horde carried off 1295 resources after 1 rounds.",
+      "body": "The horde carried off 1289 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:05:40.800Z",
       "read": false
      },

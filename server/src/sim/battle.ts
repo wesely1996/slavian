@@ -120,30 +120,35 @@ function kills(data: GameData, from: Side, to: Side, rng: () => number): { losse
   const targetTotal = targets.reduce((sum, t) => sum + t.n, 0);
   if (targetTotal === 0) return { losses: result, fallen };
 
+  // Attack is a range: each unit type strikes this round with its own roll.
+  const rolled = strikers.map((striker) =>
+    Object.fromEntries(Object.entries(striker.units).filter(([, count]) => count > 0).map(([unit]) => [unit, 1 + battle.statSpread * (rng() * 2 - 1)])),
+  );
   for (const { i, unit: target, n: targetCount, champion } of targets) {
     const group = groups[i]!;
     const stats = champion ? championStats(champion) : (group.stats ?? to.stats)(target);
     let damage = 0;
-    for (const striker of strikers) {
+    for (const [s, striker] of strikers.entries()) {
       const fromStance = battle.stances[striker.stance];
       const matchup = battle.matchups[striker.stance]?.[group.stance] ?? 1;
       for (const [unit, count] of Object.entries(striker.units)) {
         if (count <= 0) continue;
         const attacker = (striker.stats ?? from.stats)(unit);
         const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
-        damage += count * attacker.attack * fromStance.attack * matchup * counter;
+        damage += count * attacker.attack * rolled[s]![unit]! * fromStance.attack * matchup * counter;
       }
       // Its champions strike too, at no family's weakness.
       for (const c of striker.champions ?? []) damage += c.attack * fromStance.attack * matchup;
     }
     const share = targetCount / targetTotal;
-    const variance = 1 + battle.variance * (rng() * 2 - 1);
+    // Defense is a range too: this target's roll for the round.
+    const guard = 1 + battle.statSpread * (rng() * 2 - 1);
     // Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
     // Each of the target's health that lands (hardened by its stance and by
     // fighting at home) fells one.
-    const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense));
+    const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense) * guard);
     const toughness = Math.max(1, stats.health) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
-    const expected = (damage * share * variance * battle.casualtyScale * lands) / toughness;
+    const expected = (damage * share * battle.casualtyScale * lands) / toughness;
     // Round randomly so small fights still take losses on average.
     const whole = Math.floor(expected) + (rng() < expected - Math.floor(expected) ? 1 : 0);
     const dead = Math.min(targetCount, whole);

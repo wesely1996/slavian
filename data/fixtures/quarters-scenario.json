@@ -20797,7 +20797,7 @@
         }
        },
        "guard": {
-        "archer": 10,
+        "archer": 9,
         "spearman": 20
        },
        "holyCity": true
@@ -20811,7 +20811,6 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
-       "rusalka": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -20822,14 +20821,15 @@
        {
         "at": "2026-06-01T20:25:36.000Z",
         "round": 1,
-        "attackerLeft": 2,
-        "defenderLeft": 37,
+        "attackerLeft": 1,
+        "defenderLeft": 36,
         "attackerLosses": {
-         "rusalka": 1,
+         "rusalka": 2,
          "grey_wolf": 4,
          "leshy_thrall": 2
         },
         "defenderLosses": {
+         "archer": 1,
          "spearman": 1
         }
        }
@@ -20941,7 +20941,7 @@
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 1,
+      "kills": 2,
       "grudgeVillageId": 1,
       "diedAt": null
      }
@@ -21252,7 +21252,7 @@
      [
       0,
       0,
-      11.4
+      11.6
      ]
     ],
     "delegations": [],
@@ -23669,7 +23669,7 @@
         }
        },
        "guard": {
-        "archer": 10,
+        "archer": 9,
         "spearman": 20
        },
        "holyCity": true
@@ -23683,7 +23683,6 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
-       "rusalka": 1,
        "leshy_thrall": 1
       },
       "defenderInitial": {
@@ -23694,14 +23693,15 @@
        {
         "at": "2026-06-01T20:25:36.000Z",
         "round": 1,
-        "attackerLeft": 2,
-        "defenderLeft": 37,
+        "attackerLeft": 1,
+        "defenderLeft": 36,
         "attackerLosses": {
-         "rusalka": 1,
+         "rusalka": 2,
          "grey_wolf": 4,
          "leshy_thrall": 2
         },
         "defenderLosses": {
+         "archer": 1,
          "spearman": 1
         }
        }
@@ -23813,7 +23813,7 @@
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 1,
+      "kills": 2,
       "grudgeVillageId": 1,
       "diedAt": null
      }
@@ -24114,7 +24114,7 @@
      [
       0,
       0,
-      11.4
+      11.6
      ]
     ],
     "delegations": [],

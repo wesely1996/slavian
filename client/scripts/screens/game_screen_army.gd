@@ -156,6 +156,8 @@ func _send_troops(village: Dictionary) -> void:
 	_general_picker(village_id)
 	if fights:
 		_army_stance_picker(village)
+	if String(body.orders) in ["clear", "explore"]:
+		_danger_line(cell, func() -> Dictionary: return _picked_units(home_units), village, func() -> String: return _army_stance if _army_stance != "" else String(village.get("stance", "balanced")))
 	# Support and holding stay until called home, unless told to come back once done.
 	if stays:
 		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
@@ -1151,7 +1153,7 @@ func _train_tab(village: Dictionary) -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(info)
 		info.add_child(UI.with_card(UI.label(tr(def.name)), _unit_card(village, unit)))
-		var stats := UI.stats([["icon/attack", str(int(def.attack))], ["icon/defense", str(int(def.defense))], ["icon/health", str(int(def.health))],
+		var stats := UI.stats([["icon/attack", BattleText.stat_range(Game.data, float(def.attack))], ["icon/defense", BattleText.stat_range(Game.data, float(def.defense))], ["icon/health", str(int(def.health))],
 			["icon/speed", UI.number(TimeUtil.per_real_hour(float(def.speed) * float(Game.world.speed)))],
 			["resource/grain", tr("%s/h") % UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))]])
 		stats.tooltip_text = tr("Attack · Defense · Health · Speed (hexes/h) · Grain eaten")

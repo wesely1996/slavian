@@ -294,7 +294,8 @@ const battleFileSchema = z.object({
   // Armor (defense) lets armorConstant / (armorConstant + armor) of damage through.
   armorConstant: z.number().positive(),
   homeBonus: z.number().positive(),
-  variance: z.number().min(0).max(1),
+  // Attack and defense are ranges: each round's roll is within 1 ± this.
+  statSpread: z.number().min(0).max(0.9),
   raidShare: z.number().min(0).max(1),
   counters: z.partialRecord(z.enum(UNIT_FAMILIES), familyMultipliers),
   stances: z.record(

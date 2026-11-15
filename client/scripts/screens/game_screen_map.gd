@@ -434,6 +434,7 @@ func _hold_panel(terrain_id: String) -> void:
 		_panel_body.add_child(lead)
 	_general_picker(village_id)
 	_army_stance_picker(home)
+	_danger_line(cell, func() -> Dictionary: return _picked_units(at_home), home, func() -> String: return _army_stance if _army_stance != "" else String(home.get("stance", "balanced")))
 	_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(orders, not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
 		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance, "returnHome": _army_return}
@@ -442,8 +443,7 @@ func _hold_panel(terrain_id: String) -> void:
 		_send_army(village_id, order))
 	_panel_body.add_child(go)
 	_picked_hint(go, at_home)
-	if orders in ["hold", "explore"]:
-		_move_here_rows(cell)
+	_move_here_rows(cell)
 
 
 ## A fort (or, with kind "supply", a supply point) on the selected open
@@ -625,6 +625,53 @@ func _build_crossing(village_id: int, a: Vector2i, b: Vector2i) -> void:
 	Game.set_world(response.data)
 
 
+## What is known of who an army sent to `cell` would fight: {size, front,
+## wave} for a camp or a site whose guardians were seen; {size: -1} for a
+## site nobody has looked at; {} where there is no fight.
+func _foe_at(cell: Vector2i) -> Dictionary:
+	var camp := Game.camp_at(cell)
+	if not camp.is_empty():
+		# Made up as its front's hordes are by now.
+		var wave := 0
+		for w in Game.waves:
+			if String(w.get("front", "")) == String(camp.front) and w.get("status") != "scheduled":
+				wave = maxi(wave, int(w.get("index", 0)))
+		return {"size": int(camp.size), "front": String(camp.front), "wave": wave}
+	var site := Game.site_at(cell)
+	if site.is_empty() or site.status != "unexplored":
+		return {}
+	if site.get("guardians") == null:
+		return {"size": -1}
+	return {"size": int(site.guardians), "front": "north", "wave": int(Game.data.sites.guardians.waveIndex)}
+
+
+## How a fight at `cell` would likely go for the troops `units_now` gives
+## (asked again as they are picked), from `village`'s bonuses, in `stance`:
+## a line in the verdict's colour, or nothing where there is no fight.
+func _danger_line(cell: Vector2i, units_now: Callable, village: Dictionary, stance_now: Callable) -> void:
+	var foe := _foe_at(cell)
+	if foe.is_empty():
+		return
+	if int(foe.size) == 0:
+		_panel_body.add_child(UI.label(tr("Nothing guards it: no fight."), UI.SMALL_SIZE, UI.GOOD))
+		return
+	if int(foe.size) < 0:
+		_panel_body.add_child(UI.with_info(UI.label(tr("Danger unknown: nobody has seen what guards it."), UI.SMALL_SIZE, UI.MUTED),
+			tr("Scouts sent alone count the guardians and turn back; then the odds show here.")))
+		return
+	var line := UI.label("", UI.SMALL_SIZE)
+	_panel_body.add_child(UI.with_info(line,
+		tr("A guess from %d fights played out with what you know: the enemy's numbers (who exactly is among them is guessed from their front), your troops, their stance and your bonuses. Heroes and generals are not counted.") % Danger.TRIALS))
+	_tick(line, func() -> String:
+		var units: Dictionary = units_now.call()
+		if LocalBattle.total(LocalScouting.combatants(Game.data, units)) == 0:
+			line.add_theme_color_override("font_color", UI.MUTED)
+			return tr("%d enemies there.") % int(foe.size)
+		var guess := Danger.estimate(Game.data, units, village.get("bonuses", {}), String(stance_now.call()), int(foe.size), String(foe.front), int(foe.wave))
+		line.add_theme_color_override("font_color", Danger.verdict(guess)[1])
+		return Danger.line(guess))
+
+
 ## Your armies standing elsewhere, each with a button to march here and
 ## hold this hex.
 func _move_here_rows(cell: Vector2i) -> void:
@@ -644,6 +691,10 @@ func _move_here_rows(cell: Vector2i) -> void:
 		go.custom_minimum_size.x = 150
 		row.add_child(go)
 		_panel_body.add_child(row)
+		# What it would meet here.
+		var units: Dictionary = army.units
+		var stance := String(army.get("stance", "balanced"))
+		_danger_line(cell, func() -> Dictionary: return units, Game.villages.get(int(army.homeVillageId), {}), func() -> String: return stance)
 
 
 ## The name of an ancient site by its id ("" if unknown).
