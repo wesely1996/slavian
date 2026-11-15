@@ -9592,6 +9592,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -9602,10 +9603,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 147.5,
-        "wood": 512.5,
-        "grain": 408.0583333333332,
-        "stone": 515
+        "iron": 190,
+        "wood": 640,
+        "grain": 509.9166666666666,
+        "stone": 600
        },
        "ratesPerHour": {
         "iron": 150,
@@ -9614,12 +9615,12 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
-       "settledAt": "2026-06-01T08:59:22.800Z"
+       "settledAt": "2026-06-01T09:16:47.890Z"
       }
      }
     ],
@@ -10118,7 +10119,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T09:16:47.890Z",
       "hard": false,
@@ -10210,7 +10213,14 @@
       "quest": null
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -10220,6 +10230,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T09:16:47.890Z"
      }
     ],
@@ -12364,6 +12379,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -12375,9 +12391,9 @@
       "resources": {
        "amounts": {
         "iron": 382,
-        "wood": 916,
-        "grain": 866.6083333333332,
-        "stone": 778
+        "wood": 965,
+        "grain": 916.6083333333332,
+        "stone": 828
        },
        "ratesPerHour": {
         "iron": 150,
@@ -12386,10 +12402,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T12:22:19.200Z"
       }
@@ -12868,9 +12884,9 @@
       ],
       "loot": {
        "iron": 87,
-       "wood": 202,
-       "grain": 194,
-       "stone": 179
+       "wood": 216,
+       "grain": 207,
+       "stone": 192
       },
       "decision": {
        "choice": "raid",
@@ -12930,9 +12946,9 @@
       ],
       "loot": {
        "iron": 70,
-       "wood": 152,
-       "grain": 148,
-       "stone": 143
+       "wood": 165,
+       "grain": 161,
+       "stone": 156
       },
       "decision": {
        "choice": "raid",
@@ -13087,9 +13103,9 @@
       ],
       "loot": {
        "iron": 116,
-       "wood": 240,
-       "grain": 240,
-       "stone": 240
+       "wood": 264,
+       "grain": 264,
+       "stone": 264
       },
       "decision": {
        "choice": "raid",
@@ -13579,7 +13595,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T09:16:47.890Z",
       "hard": false,
@@ -13671,7 +13689,14 @@
       "quest": null
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -13681,6 +13706,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T09:16:47.890Z"
      }
     ],
@@ -15762,6 +15792,7 @@
      "adminUpkeep": 0,
      "bonuses": {
       "upkeep": 0.08,
+      "storage": 0.1,
       "attack.all": 0.1,
       "homeDefense": 0.06,
       "attack.cavalry": 0.06
@@ -15781,9 +15812,9 @@
      "resources": {
       "amounts": {
        "iron": 152,
-       "wood": 666,
-       "grain": 653.2749999999999,
-       "stone": 638
+       "wood": 715,
+       "grain": 703.2749999999999,
+       "stone": 688
       },
       "ratesPerHour": {
        "iron": 150,
@@ -15792,10 +15823,10 @@
        "stone": 300
       },
       "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
+       "iron": 1100,
+       "wood": 1100,
+       "grain": 1100,
+       "stone": 1100
       },
       "settledAt": "2026-06-01T12:26:30.000Z"
      }
@@ -16083,6 +16114,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -16094,9 +16126,9 @@
       "resources": {
        "amounts": {
         "iron": 217,
-        "wood": 861,
-        "grain": 741.2583333333332,
-        "stone": 768
+        "wood": 910,
+        "grain": 791.2583333333332,
+        "stone": 818
        },
        "ratesPerHour": {
         "iron": 150,
@@ -16105,10 +16137,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T12:52:19.200Z"
       }
@@ -16511,9 +16543,9 @@
       ],
       "loot": {
        "iron": 87,
-       "wood": 202,
-       "grain": 194,
-       "stone": 179
+       "wood": 216,
+       "grain": 207,
+       "stone": 192
       },
       "decision": {
        "choice": "raid",
@@ -16573,9 +16605,9 @@
       ],
       "loot": {
        "iron": 70,
-       "wood": 152,
-       "grain": 148,
-       "stone": 143
+       "wood": 165,
+       "grain": 161,
+       "stone": 156
       },
       "decision": {
        "choice": "raid",
@@ -16730,9 +16762,9 @@
       ],
       "loot": {
        "iron": 116,
-       "wood": 240,
-       "grain": 240,
-       "stone": 240
+       "wood": 264,
+       "grain": 264,
+       "stone": 264
       },
       "decision": {
        "choice": "raid",
@@ -17332,7 +17364,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T09:16:47.890Z",
       "hard": false,
@@ -17410,7 +17444,14 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -17420,6 +17461,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T09:16:47.890Z"
      },
      {
@@ -19705,6 +19751,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -19716,9 +19763,9 @@
       "resources": {
        "amounts": {
         "iron": 244.5,
-        "wood": 943.5,
-        "grain": 752.8166666666665,
-        "stone": 823
+        "wood": 992.5,
+        "grain": 802.8166666666665,
+        "stone": 873
        },
        "ratesPerHour": {
         "iron": 150,
@@ -19727,10 +19774,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T13:03:25.200Z"
       }
@@ -20133,9 +20180,9 @@
       ],
       "loot": {
        "iron": 87,
-       "wood": 202,
-       "grain": 194,
-       "stone": 179
+       "wood": 216,
+       "grain": 207,
+       "stone": 192
       },
       "decision": {
        "choice": "raid",
@@ -20195,9 +20242,9 @@
       ],
       "loot": {
        "iron": 70,
-       "wood": 152,
-       "grain": 148,
-       "stone": 143
+       "wood": 165,
+       "grain": 161,
+       "stone": 156
       },
       "decision": {
        "choice": "raid",
@@ -20352,9 +20399,9 @@
       ],
       "loot": {
        "iron": 116,
-       "wood": 240,
-       "grain": 240,
-       "stone": 240
+       "wood": 264,
+       "grain": 264,
+       "stone": 264
       },
       "decision": {
        "choice": "raid",
@@ -21074,7 +21121,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T09:16:47.890Z",
       "hard": false,
@@ -21160,7 +21209,14 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -21170,6 +21226,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T09:16:47.890Z"
      },
      {
@@ -23387,6 +23448,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -23398,9 +23460,9 @@
       "resources": {
        "amounts": {
         "iron": 289.5,
-        "wood": 1000,
-        "grain": 885.5999999999998,
-        "stone": 913
+        "wood": 1100,
+        "grain": 935.5999999999998,
+        "stone": 963
        },
        "ratesPerHour": {
         "iron": 150,
@@ -23409,10 +23471,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T13:21:07.200Z"
       }
@@ -23954,9 +24016,9 @@
       ],
       "loot": {
        "iron": 87,
-       "wood": 202,
-       "grain": 194,
-       "stone": 179
+       "wood": 216,
+       "grain": 207,
+       "stone": 192
       },
       "decision": {
        "choice": "raid",
@@ -24016,9 +24078,9 @@
       ],
       "loot": {
        "iron": 70,
-       "wood": 152,
-       "grain": 148,
-       "stone": 143
+       "wood": 165,
+       "grain": 161,
+       "stone": 156
       },
       "decision": {
        "choice": "raid",
@@ -24173,9 +24235,9 @@
       ],
       "loot": {
        "iron": 116,
-       "wood": 240,
-       "grain": 240,
-       "stone": 240
+       "wood": 264,
+       "grain": 264,
+       "stone": 264
       },
       "decision": {
        "choice": "raid",
@@ -24836,7 +24898,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T09:16:47.890Z",
       "hard": false,
@@ -24922,7 +24986,14 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T09:16:47.890Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -24932,6 +25003,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T09:16:47.890Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T09:16:47.890Z"
      },
      {
@@ -26883,7 +26959,7 @@
    "response": {
     "notifications": [
      {
-      "id": 61,
+      "id": 62,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -26892,7 +26968,7 @@
       "read": false
      },
      {
-      "id": 60,
+      "id": 61,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
@@ -26901,7 +26977,7 @@
       "read": false
      },
      {
-      "id": 59,
+      "id": 60,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -26910,7 +26986,7 @@
       "read": false
      },
      {
-      "id": 58,
+      "id": 59,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (4, 1)",
@@ -26919,7 +26995,7 @@
       "read": false
      },
      {
-      "id": 57,
+      "id": 58,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-6, 1) were taken away",
@@ -26928,7 +27004,7 @@
       "read": false
      },
      {
-      "id": 56,
+      "id": 57,
       "kind": "site",
       "tier": "digest",
       "title": "The Sunken Shrine at (3, 0) gave up 1755 resources",
@@ -26937,7 +27013,7 @@
       "read": false
      },
      {
-      "id": 55,
+      "id": 56,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya reached level 2",
@@ -26946,7 +27022,7 @@
       "read": false
      },
      {
-      "id": 54,
+      "id": 55,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
@@ -26955,7 +27031,7 @@
       "read": false
      },
      {
-      "id": 53,
+      "id": 54,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Shield of the Village",
@@ -26964,7 +27040,7 @@
       "read": false
      },
      {
-      "id": 52,
+      "id": 53,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Many Banners",
@@ -26973,7 +27049,7 @@
       "read": false
      },
      {
-      "id": 51,
+      "id": 52,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
@@ -26982,7 +27058,7 @@
       "read": false
      },
      {
-      "id": 50,
+      "id": 51,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -26991,7 +27067,7 @@
       "read": false
      },
      {
-      "id": 49,
+      "id": 50,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -27000,7 +27076,7 @@
       "read": false
      },
      {
-      "id": 48,
+      "id": 49,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (0, 5) sank back into the earth",
@@ -27009,7 +27085,7 @@
       "read": false
      },
      {
-      "id": 47,
+      "id": 48,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -27018,7 +27094,7 @@
       "read": false
      },
      {
-      "id": 46,
+      "id": 47,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -27027,7 +27103,7 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 46,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -27036,7 +27112,7 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 45,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-6, 1)",
@@ -27045,7 +27121,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 44,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-1, 8) were taken away",
@@ -27054,7 +27130,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 43,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -27063,7 +27139,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 42,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -27072,16 +27148,16 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 41,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 662 resources after 1 rounds.",
+      "body": "The horde carried off 702 resources after 1 rounds.",
       "createdAt": "2026-06-01T12:03:31.200Z",
       "read": false
      },
      {
-      "id": 39,
+      "id": 40,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -27090,7 +27166,7 @@
       "read": false
      },
      {
-      "id": 38,
+      "id": 39,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -27099,7 +27175,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 38,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (0, 5)",
@@ -27108,7 +27184,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 37,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -27117,7 +27193,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 36,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -27126,7 +27202,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 35,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
@@ -27135,7 +27211,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 34,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -27144,7 +27220,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 33,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -27153,16 +27229,16 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 32,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 513 resources after 1 rounds.",
+      "body": "The horde carried off 552 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:35:26.400Z",
       "read": false
      },
      {
-      "id": 30,
+      "id": 31,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -27171,7 +27247,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 30,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -27180,7 +27256,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 29,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -27189,7 +27265,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 28,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -27198,7 +27274,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 27,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -27207,7 +27283,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 26,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -27216,16 +27292,16 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 25,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy was raided",
-      "body": "The horde carried off 836 resources after 2 rounds.",
+      "body": "The horde carried off 908 resources after 2 rounds.",
       "createdAt": "2026-06-01T11:14:57.600Z",
       "read": false
      },
      {
-      "id": 23,
+      "id": 24,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -27234,7 +27310,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 23,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -27243,7 +27319,7 @@
       "read": false
      }
     ],
-    "unread": 61,
+    "unread": 62,
     "serverTime": "2026-06-01T13:21:30.000Z"
    }
   }

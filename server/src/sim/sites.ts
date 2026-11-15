@@ -14,11 +14,19 @@ export interface PlacedSite {
   readonly guardians: Record<string, number>;
 }
 
-export type Find =
+// What a search found; `ember`: a Svarog's Ember besides. (Searches before
+// the Ember became an extra could find one instead: type 'ember'.)
+export type Find = (
   | { readonly type: 'resources'; readonly resources: Resources }
   | { readonly type: 'gear'; readonly item: string }
   | { readonly type: 'ember' }
-  | { readonly type: 'scroll'; readonly scroll: string };
+  | { readonly type: 'scroll'; readonly scroll: string }
+) & { readonly ember?: true };
+
+// Whether a find brought a Svarog's Ember.
+export function withEmber(find: Find): boolean {
+  return find.type === 'ember' || find.ember === true;
+}
 
 function shuffled<T>(items: T[], rng: () => number): T[] {
   const out = [...items];
@@ -86,7 +94,8 @@ export function placeSites(
 }
 
 // What exploring a site turns up, seeded by the site: resources (more the
-// further out), a piece of gear, an Ember, or a scroll the group lacks.
+// further out), a piece of gear, or a scroll the group lacks; and besides,
+// perhaps a Svarog's Ember (the kind's emberChance, shared by the players).
 export function rollFind(
   data: GameData,
   input: {
@@ -98,22 +107,26 @@ export function rollFind(
     ownedGear: ReadonlySet<string>;
     // A hard ruin's resources are worth this many times as much.
     lootFactor?: number;
+    // Players in the world: the Ember's chance is split among them.
+    players?: number;
   },
 ): Find {
   const rng = createRng((input.seed ^ Math.imul(input.siteId + 1, 0x2c1b3c6d) ^ 0xf1d) >>> 0);
   const weights = data.sites.kinds[input.kind]!.finds;
   const scrolls = Object.keys(data.lore.scrolls).filter((s) => !input.foundScrolls.has(s)).sort();
   const gear = Object.keys(data.heroes.items).filter((i) => !input.ownedGear.has(i)).sort();
-  const options = (['resources', 'gear', 'scroll', 'ember'] as const).filter(
+  const options = (['resources', 'gear', 'scroll'] as const).filter(
     (type) => weights[type] > 0 && (type !== 'scroll' || scrolls.length) && (type !== 'gear' || gear.length),
   );
   const total = options.reduce((sum, type) => sum + weights[type], 0);
   let roll = rng() * total;
   const type = options.find((t) => (roll -= weights[t]) < 0) ?? 'resources';
-  if (type === 'gear') return { type, item: gear[Math.floor(rng() * gear.length)]! };
-  if (type === 'scroll') return { type, scroll: scrolls[Math.floor(rng() * scrolls.length)]! };
-  if (type === 'ember') return { type };
-  return { type: 'resources', resources: mapResources((kind) => Math.round(data.sites.loot[kind] * (1 + input.distance) * (input.lootFactor ?? 1))) };
+  let find: Find;
+  if (type === 'gear') find = { type, item: gear[Math.floor(rng() * gear.length)]! };
+  else if (type === 'scroll') find = { type, scroll: scrolls[Math.floor(rng() * scrolls.length)]! };
+  else find = { type: 'resources', resources: mapResources((kind) => Math.round(data.sites.loot[kind] * (1 + input.distance) * (input.lootFactor ?? 1))) };
+  const ember = rng() < data.sites.kinds[input.kind]!.emberChance / Math.max(1, input.players ?? 1);
+  return ember ? { ...find, ember: true } : find;
 }
 
 // What the group's scrolls add to every player's bonuses.

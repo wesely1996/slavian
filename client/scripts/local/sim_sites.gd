@@ -83,15 +83,17 @@ static func place_sites(data: Dictionary, terrain: Dictionary, radius: int, star
 
 
 ## What exploring a site turns up, seeded by the site: {type: "resources",
-## resources} | {type: "gear", item} | {type: "scroll", scroll} | {type: "ember"}.
-static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: int, distance: float, found_scrolls: Array, owned_gear: Array, loot_factor := 1.0) -> Dictionary:
+## resources} | {type: "gear", item} | {type: "scroll", scroll}, with
+## "ember": true when a Svarog's Ember came besides (the kind's emberChance,
+## split among the `players`). Old saves may hold {type: "ember"}.
+static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: int, distance: float, found_scrolls: Array, owned_gear: Array, loot_factor := 1.0, players := 1) -> Dictionary:
 	var rng := LocalRng.new((seed_value ^ LocalRng.imul(site_id + 1, 0x2c1b3c6d) ^ 0xf1d) & 0xffffffff)
 	var weights: Dictionary = data.sites.kinds[kind].finds
 	var scrolls: Array = data.lore.scrolls.keys().filter(func(s: String) -> bool: return not s in found_scrolls)
 	scrolls.sort()
 	var gear: Array = data.heroes.items.keys().filter(func(i: String) -> bool: return not i in owned_gear)
 	gear.sort()
-	var options: Array = ["resources", "gear", "scroll", "ember"].filter(func(type: String) -> bool:
+	var options: Array = ["resources", "gear", "scroll"].filter(func(type: String) -> bool:
 		return float(weights[type]) > 0 and (type != "scroll" or not scrolls.is_empty()) and (type != "gear" or not gear.is_empty()))
 	var total := 0.0
 	for type in options:
@@ -103,15 +105,23 @@ static func roll_find(data: Dictionary, kind: String, seed_value: int, site_id: 
 		if roll < 0:
 			picked = type
 			break
+	var find: Dictionary
 	match picked:
 		"gear":
-			return {"type": "gear", "item": gear[floori(rng.next() * gear.size())]}
+			find = {"type": "gear", "item": gear[floori(rng.next() * gear.size())]}
 		"scroll":
-			return {"type": "scroll", "scroll": scrolls[floori(rng.next() * scrolls.size())]}
-		"ember":
-			return {"type": "ember"}
-	return {"type": "resources", "resources": LocalVillage.resources(func(k: String) -> int:
-		return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance) * loot_factor))}
+			find = {"type": "scroll", "scroll": scrolls[floori(rng.next() * scrolls.size())]}
+		_:
+			find = {"type": "resources", "resources": LocalVillage.resources(func(k: String) -> int:
+				return LocalWaves.js_round(float(data.sites.loot[k]) * (1.0 + distance) * loot_factor))}
+	if rng.next() < float(data.sites.kinds[kind].emberChance) / maxi(1, players):
+		find.ember = true
+	return find
+
+
+## Whether a find brought a Svarog's Ember (sim/sites.ts withEmber).
+static func with_ember(find: Dictionary) -> bool:
+	return find.get("type") == "ember" or find.get("ember", false) == true
 
 
 ## What scouts searching around `center` turn up, seeded by the search

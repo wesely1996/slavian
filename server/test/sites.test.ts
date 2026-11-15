@@ -54,11 +54,17 @@ describe('ancient sites', () => {
     const allGear = new Set(Object.keys(data.heroes.items));
     for (let id = 0; id < 40; id++) {
       const find = rollFind(data, { ...base, siteId: id, foundScrolls: allScrolls, ownedGear: allGear });
-      expect(['resources', 'ember']).toContain(find.type);
+      expect(find.type).toBe('resources');
       if (find.type === 'resources') expect(find.resources.wood).toBe(data.sites.loot.wood * 2);
     }
-    const kinds = new Set(Array.from({ length: 60 }, (_, id) => rollFind(data, { ...base, siteId: id }).type));
-    expect(kinds).toEqual(new Set(['resources', 'gear', 'scroll', 'ember']));
+    const finds = Array.from({ length: 200 }, (_, id) => rollFind(data, { ...base, siteId: id }));
+    expect(new Set(finds.map((f) => f.type))).toEqual(new Set(['resources', 'gear', 'scroll']));
+    // A Svarog's Ember comes on top of a find, the rarer the more players.
+    const embers = (players: number) => Array.from({ length: 400 }, (_, id) => rollFind(data, { ...base, siteId: id, players })).filter((f) => f.ember).length;
+    const chance = data.sites.kinds.stone_idol!.emberChance;
+    expect(embers(1)).toBeGreaterThan(400 * chance * 0.6);
+    expect(embers(1)).toBeLessThan(400 * chance * 1.4);
+    expect(embers(4)).toBeLessThan(embers(1) / 2);
     expect(distanceShare(hex(0, 0), 10)).toBe(0);
   });
 

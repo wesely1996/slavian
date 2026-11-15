@@ -26,7 +26,7 @@ import { assault } from '../sim/camps.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import { listCamps } from '../db/camps.js';
-import { distanceShare, placeSites, rollFind, scoutLoot, scoutsIn, searchMs, type Find } from '../sim/sites.js';
+import { distanceShare, placeSites, rollFind, scoutLoot, scoutsIn, searchMs, withEmber, type Find } from '../sim/sites.js';
 import { mapResources } from '../sim/resources.js';
 import { armyLosses, holdHex, sendHome } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -73,6 +73,11 @@ export async function revealSite(client: DbClient, data: GameData, world: World)
 }
 
 export function findText(data: GameData, find: Find): string {
+  const main = mainFindText(data, find);
+  return find.ember ? `${main} and a Svarog's Ember` : main;
+}
+
+function mainFindText(data: GameData, find: Find): string {
   switch (find.type) {
     case 'resources':
       return `${Object.values(find.resources).reduce((a, b) => a + b, 0)} resources`;
@@ -203,7 +208,7 @@ export async function claimFind(
   find: Find,
   at: Date,
 ): Promise<void> {
-  if (find.type === 'ember') await addEmbers(client, world.id, 1);
+  if (withEmber(find)) await addEmbers(client, world.id, 1);
   if (find.type === 'gear' && hero) {
     await saveHero(client, { ...hero, inventory: [...hero.inventory, find.item] });
     await notifyWorld(client, { worldId: world.id, type: 'heroes' });
@@ -229,7 +234,7 @@ export async function claimFind(
     }, at);
   }
   await achieve(client, data, world, accountId, 'site_explored', at);
-  if (find.type === 'ember') await achieve(client, data, world, accountId, 'ember_found', at);
+  if (withEmber(find)) await achieve(client, data, world, accountId, 'ember_found', at);
   if (find.type === 'scroll') await achieve(client, data, world, accountId, 'scroll_found', at);
   // A hero's army quest done.
   await armyQuestDone(client, data, world, site.quest, at);
@@ -261,6 +266,7 @@ export const siteHandlers: HandlerRegistry = {
       lootFactor,
       foundScrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
       ownedGear: new Set(ownerHero ? [...ownerHero.inventory, ...Object.values(ownerHero.gear)] : []),
+      players: (await listMembers(client, world.id)).length,
     });
     // Scouts along find more besides: resources carried home with the find.
     const extra = scoutLoot(data, scoutsIn(data, army.units), distance, lootFactor);
