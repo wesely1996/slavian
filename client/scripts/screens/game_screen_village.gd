@@ -422,25 +422,30 @@ func _plot_section(village: Dictionary) -> void:
 		_abandon_row(village)
 
 
-## The Shrine's god: picked once (a card each, what it gives at this
-## level), then its blessing on all the player's villages.
+## The Shrine's god: picked (a card each, what it gives at this level);
+## once chosen, its blessing on all the player's villages, and the other
+## gods to turn to, for Embers.
 func _shrine_section(village: Dictionary, holds: Dictionary, def: Dictionary, level: int) -> void:
 	var village_id := int(village.id)
 	var gods: Dictionary = def.deities
 	var chosen: Variant = holds.get("deity")
-	if chosen != null and gods.has(chosen):
+	var blessed: bool = chosen != null and gods.has(chosen)
+	if blessed:
 		var god: Dictionary = gods[chosen]
 		_panel_body.add_child(UI.label(tr("Blessed by %s") % tr(god.name), UI.HEADING_SIZE))
 		_panel_body.add_child(UI.label(tr(god.description), UI.SMALL_SIZE, UI.MUTED))
 		var now_text := _god_effects(god.effects, level)
 		var next_text := _god_effects(god.effects, level + 1) if level < int(def.maxLevel) else ""
 		_panel_body.add_child(UI.label(tr("All your villages: %s") % now_text + (tr(" · at level %d: %s") % [level + 1, next_text] if next_text != "" else ""), UI.SMALL_SIZE, UI.ACCENT))
-		return
 	if not Game.is_mine(village):
 		return
-	_panel_body.add_child(UI.with_info(UI.label(tr("Choose its god"), UI.HEADING_SIZE),
-		tr("Once chosen, the god stays: its blessing reaches all your villages and grows with every level of the Shrine.")))
+	var cost := int(def.get("switchEmbers", 0)) if blessed else 0
+	var heading := tr("Turn to another god") if blessed else tr("Choose its god")
+	var why := tr("Its blessing reaches all your villages and grows with every level of the Shrine. Turning to another god later takes %d Svarog's Ember.") % int(def.get("switchEmbers", 0))
+	_panel_body.add_child(UI.with_info(UI.label(heading, UI.SMALL_SIZE, UI.MUTED) if blessed else UI.label(heading, UI.HEADING_SIZE), why))
 	for id in gods:
+		if blessed and String(id) == String(chosen):
+			continue
 		var god: Dictionary = gods[id]
 		var card := UI.card(6)
 		var row := UI.hbox(10)
@@ -452,7 +457,18 @@ func _shrine_section(village: Dictionary, holds: Dictionary, def: Dictionary, le
 		box.add_child(UI.label(tr(god.description), UI.SMALL_SIZE, UI.MUTED))
 		box.add_child(UI.label(tr("Now: %s · per level: %s") % [_god_effects(god.effects, level), _god_effects(god.effects, 1)], UI.SMALL_SIZE, UI.ACCENT))
 		var deity := String(id)
-		var pick := UI.primary(tr("Choose"), func() -> void: _pick_deity(village_id, deity))
+		var pick: Button
+		if cost > 0:
+			var group := int(Game.world.get("embers", 0))
+			var price := UI.rich()
+			price.text = UI.embers(cost, 22, group)
+			price.fit_content = true
+			price.autowrap_mode = TextServer.AUTOWRAP_OFF
+			box.add_child(price)
+			pick = UI.button(tr("Turn to"), func() -> void: _pick_deity(village_id, deity))
+			pick.disabled = group < cost
+		else:
+			pick = UI.primary(tr("Choose"), func() -> void: _pick_deity(village_id, deity))
 		pick.custom_minimum_size.x = 120
 		pick.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(pick)

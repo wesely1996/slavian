@@ -628,7 +628,14 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				var picked := LocalVillage.pick_deity(data, village.state, String(body.get("deity", "")))
 				if picked.has("error"):
 					return _rule_answer(picked)
-				village.state = picked
+				# Turning to another god takes the group's Embers.
+				var cost := int(picked.embers)
+				if cost > 0:
+					if int(world.embers) < cost:
+						return _rule_answer(LocalVillage.rule("Turning to another god takes %d Svarog's Ember; the group has %d" % [cost, int(world.embers)]))
+					world.embers = int(world.embers) - cost
+					changed.append(["world"])
+				village.state = picked.state
 				if village.ownerAccountId != null:
 					refresh_bonuses(world, int(village.ownerAccountId), now, changed)
 				result = {"state": village.state}

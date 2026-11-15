@@ -560,6 +560,9 @@ func _build_ui() -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# The whole sheet drags with a finger (over its buttons too), no need
+	# to find the thin scroll bar.
+	_scroll.add_child(DragScroll.new())
 	# A handle along the sheet's top folds it away, so the map under it can
 	# be seen and tapped, and brings it back.
 	var sheet := UI.vbox(0)

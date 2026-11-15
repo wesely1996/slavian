@@ -76,6 +76,8 @@ const buildingSchema = z.object({
   // The Shrine: the gods its village may pick (once); the god's effects,
   // times the level, add to the owner's bonuses in all their villages.
   deities: z.record(z.string(), z.object({ name: z.string(), description: z.string(), effects: z.record(z.string(), z.number()) })).optional(),
+  // The Shrine: Embers it takes to turn to another god.
+  switchEmbers: z.number().int().nonnegative().optional(),
 });
 
 const buildingsFileSchema = z.object({

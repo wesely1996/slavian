@@ -1089,18 +1089,20 @@ static func shrine_bonuses(data: Dictionary, states: Array) -> Dictionary:
 	return out
 
 
-## The village's Shrine raised to `deity`: once, and only once it stands.
+## The village's Shrine raised to `deity` once it stands: {state, embers}
+## (what turning to it from another god takes; 0 for the first).
 static func pick_deity(data: Dictionary, state: Dictionary, deity: String) -> Dictionary:
 	var id := shrine_plot(data, state.plots)
 	if id == "" or int(state.plots[id].level) <= 0:
 		return rule("Build a Shrine first")
 	var plot: Dictionary = state.plots[id]
 	var def: Dictionary = data.buildings.buildings[plot.building]
-	if plot.get("deity") != null:
-		return rule("This %s already belongs to %s" % [def.name, def.deities.get(plot.deity, {}).get("name", plot.deity)])
 	if not def.deities.has(deity):
 		return rule("No such god")
+	if plot.get("deity") == deity:
+		return rule("This %s already belongs to %s" % [def.name, def.deities[deity].name])
+	var embers := int(def.get("switchEmbers", 0)) if plot.get("deity") != null else 0
 	var next := state.duplicate(true)
 	next.plots[id].deity = deity
-	return next
+	return {"state": next, "embers": embers}
 
