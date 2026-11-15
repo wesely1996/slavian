@@ -10,6 +10,7 @@ import { listScrolls } from '../db/sites.js';
 import { listMembers, type World } from '../db/worlds.js';
 import { combine, rosterBonuses } from '../sim/heroes.js';
 import { loreBonuses } from '../sim/sites.js';
+import { shrineBonuses } from '../sim/shrines.js';
 import { notifyWorld } from '../db/notify.js';
 import { finishResearch, listResearch, loadResearchPoints, saveResearchPoints } from '../db/research.js';
 import { listVillages, saveVillageState } from '../db/villages.js';
@@ -35,7 +36,9 @@ export async function playerBonuses(client: DbClient, data: GameData, worldId: n
   const own = combine(clanBonuses(data, member?.clan ?? null), rosterBonuses(data, member?.heroKind ?? null));
   // The blessings of the bridge's finished stages, for everyone.
   const blessed = bridgeBonuses(data, await findBridge(client, worldId));
-  return combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own);
+  // The gods of the player's Shrines, from every village of theirs that stands.
+  const gods = shrineBonuses(data, (await listVillages(client, worldId)).filter((v) => v.ownerAccountId === accountId && !v.ruin).map((v) => v.state));
+  return combine(combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own), gods);
 }
 
 // Gives every village of `accountIds` its owner's current bonuses.

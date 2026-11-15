@@ -11,6 +11,7 @@ import { loadGameData } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
 import { tick } from '../src/scheduler/worker.js';
+import { levelsOf } from '../src/sim/village.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 import { idMapsFrom, toLocalIds, type LocalIdMaps } from './local-ids.js';
 
@@ -44,6 +45,13 @@ export type WorldSet = {
   amounts?: Record<string, number>;
   // Units the player has bought that grow dearer (units.json costStep).
   bought?: Record<string, number>;
+  // Buildings standing in the player's (first) village, by plot (its levels
+  // follow; its rates and stores only from its next change).
+  plots?: Record<string, { building: string; level: number }>;
+  // Techs the group knows already (in this order), and the research the
+  // player's Academies have brought in (as of now).
+  known?: string[];
+  researchPoints?: number;
 };
 export type Step = { advance?: number; method?: string; path?: string; body?: unknown; set?: WorldSet };
 
@@ -114,6 +122,24 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
             }
             if (step.set.bought) {
               await db.query('UPDATE world_members SET bought = bought || $2::jsonb WHERE world_id = $1', [world.id, JSON.stringify(step.set.bought)]);
+            }
+            if (step.set.plots) {
+              const { rows } = await db.query<{ id: number; plots: Record<string, { building: string | null; level: number }> }>(
+                'SELECT id, plots FROM villages WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)',
+                [world.id],
+              );
+              const plots = { ...rows[0]!.plots, ...step.set.plots };
+              await db.query('UPDATE villages SET plots = $2, levels = $3 WHERE id = $1', [rows[0]!.id, JSON.stringify(plots), JSON.stringify(levelsOf(plots))]);
+            }
+            for (const tech of step.set.known ?? []) {
+              await db.query(
+                `INSERT INTO research (world_id, account_id, tech, status, village_id, started_at, completes_at, cost, paid)
+                 SELECT $1, owner_account_id, $2, 'done', id, $3, $3, NULL, NULL FROM villages WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)`,
+                [world.id, tech, now],
+              );
+            }
+            if (step.set.researchPoints !== undefined) {
+              await db.query('UPDATE world_members SET research_points = $2, research_settled_at = $3 WHERE world_id = $1', [world.id, step.set.researchPoints, now]);
             }
             if (step.set.amounts) {
               await db.query(

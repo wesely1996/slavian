@@ -41,6 +41,8 @@ export interface Plot {
   // Outposts joined to the village by roads: the share added to their
   // yield (land.ts roadLink; absent: no road link).
   readonly road?: number;
+  // A Shrine: the god its village picked (data/buildings.json deities).
+  readonly deity?: string;
 }
 export type Plots = Readonly<Record<string, Plot>>;
 

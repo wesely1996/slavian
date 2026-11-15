@@ -54,7 +54,7 @@ export interface VillageView {
   r: number;
   // Fields "f0"…, center slots "c0"… and outposts "o<q>,<r>" (with the
   // terrain of their hex).
-  plots: Record<string, { building: string | null; level: number; terrain?: string; road?: number }>;
+  plots: Record<string, { building: string | null; level: number; terrain?: string; road?: number; deity?: string }>;
   levels: Record<string, number>;
   queue: { plot: string; building: string; targetLevel: number; startsAt: string; completesAt: string }[];
   // Units at home as of the last settle; units finished since are counted

@@ -22,7 +22,7 @@ import { generalHandlers } from './generals.js';
 import { questHandlers } from './quests.js';
 import { noticeHandlers } from './notices.js';
 import { orderHandlers } from './orders.js';
-import { researchHandlers, settleResearchPoints } from './research.js';
+import { refreshBonuses, researchHandlers, settleResearchPoints } from './research.js';
 import { outpostHandlers, outpostStanding } from './outposts.js';
 import { tell } from './notices.js';
 import { scoutingHandlers } from './scouting.js';
@@ -56,6 +56,10 @@ export const handlers: HandlerRegistry = {
     }
     const state = completeBuild(data, village.state, plot, payload.targetLevel, event.dueAt, world.speed);
     await saveVillageState(client, village.id, state);
+    // A Shrine's new level: its god's blessing grows in all the owner's villages.
+    if (data.buildings.buildings[payload.building]?.deities && village.ownerAccountId !== null) {
+      await refreshBonuses(client, data, world, [village.ownerAccountId], event.dueAt);
+    }
     const def = data.buildings.buildings[payload.building];
     const big = payload.building === 'elder_hall' || payload.targetLevel >= data.notifications.bigBuildLevel;
     await tell(client, world, village.ownerAccountId, {

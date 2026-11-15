@@ -178,7 +178,11 @@ func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 	var lore := LocalResearch.lore_bonuses(data, LocalResearch.scrolls(world))
 	# The blessings of the bridge's finished stages, for everyone.
 	var blessed := LocalBridge.bridge_bonuses(data, world.get("bridge"))
-	return LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(research, lore), blessed), own)
+	# The gods of the player's Shrines, from every village of theirs that stands.
+	var states: Array = world.villages.filter(func(v: Dictionary) -> bool:
+		return v.ownerAccountId != null and int(v.ownerAccountId) == account_id and v.get("ruin") == null).map(func(v: Dictionary) -> Dictionary: return v.state)
+	var gods := LocalVillage.shrine_bonuses(data, states)
+	return LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(research, lore), blessed), own), gods)
 
 
 func _ensure_sites(world: Dictionary) -> void:
@@ -592,6 +596,16 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalVillage.cancel_build(data, village.state, String(body.plot), int(target), now)
 				if result.has("refund"):
 					extra = ["refund", result.refund]
+					# The Embers its levels took come back in full.
+					var kept := {}
+					for item in result.state.queue:
+						kept["%s:%d" % [item.plot, int(item.targetLevel)]] = true
+					for item in village.state.queue:
+						if not kept.has("%s:%d" % [item.plot, int(item.targetLevel)]):
+							var back := int(data.buildings.buildings.get(item.building, {}).get("embers", 0))
+							world.embers = int(world.embers) + back
+							if back > 0:
+								result.embersChanged = true
 					for item in result.moved:
 						schedule(world, int(item.completesAt), "build_complete", {"villageId": village.id, "plot": item.plot, "building": item.building, "targetLevel": item.targetLevel})
 			"demolish":
@@ -605,6 +619,19 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					# Settled before the village changes (an Academy torn down).
 					if data.buildings.buildings.get(standing, {}).get("research") != null:
 						LocalResearch.settle_points(self, world, int(village.ownerAccountId), now)
+					# A Shrine torn down: its god's blessing goes.
+					if data.buildings.buildings.get(standing, {}).get("deities") != null and village.ownerAccountId != null:
+						village.state = result.state
+						refresh_bonuses(world, int(village.ownerAccountId), now, changed)
+						result = {"state": village.state, "refund": result.refund}
+			"deity":
+				var picked := LocalVillage.pick_deity(data, village.state, String(body.get("deity", "")))
+				if picked.has("error"):
+					return _rule_answer(picked)
+				village.state = picked
+				if village.ownerAccountId != null:
+					refresh_bonuses(world, int(village.ownerAccountId), now, changed)
+				result = {"state": village.state}
 			"market/trade":
 				var give := String(body.get("give", ""))
 				var get_ := String(body.get("get", ""))
@@ -665,6 +692,9 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(result)
 		village.state = result.state
 		changed.append(["village", village.id])
+		# The group's Embers changed (a Shrine's level queued or called off).
+		if result.get("embersChanged", false):
+			changed.append(["world"])
 		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "scout", "scout/ruins", "found", "market/sell", "generals"]:
 			changed.append(["world"])
 		if step != "":
@@ -742,6 +772,15 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 	# What the land allows: water beside the village, hills under it.
 	var site := LocalVillage.village_site(world.hexes, world.rivers, Vector2i(int(village.q), int(village.r)))
 	var result := LocalVillage.queue_build(data, village.state, order, now, world.speed, site)
+	# Some levels take the group's Svarog's Embers too (the Shrine).
+	if result.has("state"):
+		var def: Dictionary = data.buildings.buildings.get(result.queued.building, {})
+		var embers := int(def.get("embers", 0))
+		if embers > 0:
+			if int(world.embers) < embers:
+				return LocalVillage.rule("Every level of the %s takes %d Svarog's Ember; the group has %d" % [def.name, embers, int(world.embers)])
+			world.embers = int(world.embers) - embers
+			result.embersChanged = true
 	if result.has("state"):
 		var q: Dictionary = result.queued
 		schedule(world, int(q.completesAt), "build_complete", {"villageId": village.id, "plot": q.plot, "building": q.building, "targetLevel": q.targetLevel})
@@ -944,6 +983,7 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	if village.is_empty() or village.ruin != null:
 		return
 	var plot: String = p.get("plot", "")
+	var shrine: bool = data.buildings.buildings.get(p.building, {}).get("deities") != null
 	# Cancelled, or moved up (a later event of its own finishes it).
 	if not village.state.queue.any(func(item: Dictionary) -> bool: return item.plot == plot and int(item.targetLevel) == int(p.targetLevel) and int(item.completesAt) == int(event.dueAt)):
 		return
@@ -954,6 +994,9 @@ func _on_build_complete(world: Dictionary, event: Dictionary, changed: Array) ->
 	if done.has("error"):
 		return
 	village.state = done
+	# A Shrine's new level: its god's blessing grows in all the owner's villages.
+	if shrine and village.ownerAccountId != null:
+		refresh_bonuses(world, int(village.ownerAccountId), int(event.dueAt), changed)
 	var def: Variant = data.buildings.buildings.get(p.building)
 	var big: bool = p.building == "elder_hall" or int(p.targetLevel) >= int(data.notifications.bigBuildLevel)
 	LocalInbox.tell(self, world, village.ownerAccountId, {"kind": "build_done", "tier": "push" if big else "digest",

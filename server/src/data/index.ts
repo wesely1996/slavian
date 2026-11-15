@@ -71,6 +71,11 @@ const buildingSchema = z.object({
   site: z.enum(['water', 'hills', 'plains', 'mountain']).optional(),
   // The Academy: research per hour at level 1, times growth per level above.
   research: z.object({ basePerHour: z.number().positive(), growth: z.number().min(1) }).optional(),
+  // Svarog's Embers (the group's) every level takes, besides its cost.
+  embers: z.number().int().positive().optional(),
+  // The Shrine: the gods its village may pick (once); the god's effects,
+  // times the level, add to the owner's bonuses in all their villages.
+  deities: z.record(z.string(), z.object({ name: z.string(), description: z.string(), effects: z.record(z.string(), z.number()) })).optional(),
 });
 
 const buildingsFileSchema = z.object({
@@ -350,6 +355,8 @@ const researchFileSchema = z.object({
       description: z.string(),
       // A rare tech: only once the group has found this lore scroll.
       requiresScroll: z.string().optional(),
+      // The mightiest: the group's Svarog's Embers it takes, spent when it is started.
+      embers: z.number().int().positive().optional(),
     }),
   ),
 });

@@ -1,7 +1,7 @@
 import { riverEdgesAt } from '../db/rivers.js';
 import { insertRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
-import type { Stance, TerrainId } from '../data/index.js';
+import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
 import { standingRoads } from '../db/roads.js';
 import { roadLink } from '../sim/land.js';
@@ -19,11 +19,12 @@ import { ongoingBattleAt, saveSetup } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { addBought, boughtCount, loadHexes, type World } from '../db/worlds.js';
+import { addBought, addEmbers, boughtCount, loadHexes, spendEmbers, type World } from '../db/worlds.js';
+import { pickDeity } from '../sim/shrines.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
 import type { ExpeditionPayload } from '../scheduler/expeditions.js';
-import { groupKnown, groupPoints, settleResearchPoints, spendGroupPoints, type ResearchPayload } from '../scheduler/research.js';
+import { groupKnown, groupPoints, refreshBonuses, settleResearchPoints, spendGroupPoints, type ResearchPayload } from '../scheduler/research.js';
 import type { MissionPayload } from '../scheduler/scouting.js';
 import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
 import { SETTLER, settleProblem } from '../sim/expansion.js';
@@ -140,6 +141,8 @@ export async function queueBuildCommand(
     const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t as string] as const));
     const site = villageSite(terrain, await riverEdgesAt(client, world.id, hex(village.q, village.r)), hex(village.q, village.r));
     const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed, site);
+    // Some levels take the group's Svarog's Embers too (the Shrine).
+    await spendBuildEmbers(client, deps.data, world, queued.building);
     const payload: BuildCompletePayload = {
       villageId: village.id,
       plot: queued.plot,
@@ -188,6 +191,29 @@ export async function cancelTrainingCommand(
     return { state, result: refund };
   });
   return { village, refund: result };
+}
+
+// The Embers a level of `building` takes from the group, if any.
+async function spendBuildEmbers(client: DbClient, data: GameData, world: World, building: string): Promise<void> {
+  const def = data.buildings.buildings[building];
+  const embers = def?.embers ?? 0;
+  if (embers > 0 && !(await spendEmbers(client, world.id, embers))) {
+    throw new RuleError(`Every level of the ${def!.name} takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+  }
+  if (embers > 0) await notifyWorld(client, { worldId: world.id, type: 'world' });
+}
+
+// Gives the village's Shrine its god, once: the god's blessing reaches all
+// the owner's villages, more with every level.
+export async function pickDeityCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput & { deity: string }): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'chose a god for the shrine' }, async ({ client, world, village }) => {
+    const state = pickDeity(deps.data, village.state, input.deity);
+    if (village.ownerAccountId === null) return { state, result: null };
+    await saveVillageState(client, village.id, state);
+    await refreshBonuses(client, deps.data, world, [village.ownerAccountId], input.now);
+    return { state: (await loadVillage(client, village.id)).state, result: null };
+  });
+  return { village };
 }
 
 // Sends scouts from the caller's village to a wave. They report on arrival
@@ -331,6 +357,15 @@ export async function cancelBuildCommand(
 ): Promise<{ village: Village; refund: Resources }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'cancelled a build' }, async ({ client, world, village }) => {
     const { state, refund, moved } = cancelBuild(deps.data, village.state, input.plot, input.targetLevel, input.now);
+    // The Embers its levels took come back in full.
+    const kept = new Set(state.queue.map((item) => `${item.plot}:${item.targetLevel}`));
+    const embers = village.state.queue
+      .filter((item) => !kept.has(`${item.plot}:${item.targetLevel}`))
+      .reduce((sum, item) => sum + (deps.data.buildings.buildings[item.building]?.embers ?? 0), 0);
+    if (embers > 0) {
+      await addEmbers(client, world.id, embers);
+      await notifyWorld(client, { worldId: world.id, type: 'world' });
+    }
     for (const item of moved) {
       const payload: BuildCompletePayload = { villageId: village.id, plot: item.plot, building: item.building, targetLevel: item.targetLevel };
       await scheduleEvent(client, world.id, item.completesAt, 'build_complete', payload);
@@ -436,6 +471,12 @@ export async function startResearchCommand(
     if (points < needed) {
       throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${needed} research; the group's Academies have brought in ${Math.floor(points)}`);
     }
+    // The mightiest techs take the group's Svarog's Embers as well.
+    const embers = deps.data.research.techs[input.tech]!.embers ?? 0;
+    if (embers > 0 && !(await spendEmbers(client, world.id, embers))) {
+      throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+    }
+    if (embers > 0) await notifyWorld(client, { worldId: world.id, type: 'world' });
     await spendGroupPoints(client, deps.data, world, needed, input.now);
     const research = await insertProject(client, {
       worldId: world.id,
@@ -507,6 +548,12 @@ export async function demolishCommand(
       await settleResearchPoints(client, deps.data, world, village.ownerAccountId, input.now);
     }
     const { state, refund } = demolish(deps.data, village.state, input.plot, input.now, world.speed);
+    // A Shrine torn down: its god's blessing goes.
+    if (building && deps.data.buildings.buildings[building]?.deities && village.ownerAccountId !== null) {
+      await saveVillageState(client, village.id, state);
+      await refreshBonuses(client, deps.data, world, [village.ownerAccountId], input.now);
+      return { state: (await loadVillage(client, village.id)).state, result: refund };
+    }
     return { state, result: refund };
   });
   return { village, refund: result };

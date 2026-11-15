@@ -4179,339 +4179,375 @@ msgstr "Istražuje se"
 msgid "%d research, then %s from the members · %s"
 msgstr "%d istraživanja, pa %s od članova · %s"
 
-#: client/scripts/screens/game_screen_village.gd:99
+#: client/scripts/screens/game_screen_village.gd:101
+msgid "%s · %s, spent at the start"
+msgstr "%s · %s, troši se na početku"
+
+#: client/scripts/screens/game_screen_village.gd:103
 msgid "%s  (%s)"
 msgstr "%s  (%s)"
 
-#: client/scripts/screens/game_screen_village.gd:101
+#: client/scripts/screens/game_screen_village.gd:105
 msgid "Begin"
 msgstr "Počni"
 
-#: client/scripts/screens/game_screen_village.gd:108
+#: client/scripts/screens/game_screen_village.gd:114
+msgid "%s  (not enough Svarog's Ember)"
+msgstr "%s  (nedovoljno Svarogovog žara)"
+
+#: client/scripts/screens/game_screen_village.gd:115
 msgid "%s  (not enough research)"
 msgstr "%s  (nema dovoljno istraživanja)"
 
-#: client/scripts/screens/game_screen_village.gd:151
+#: client/scripts/screens/game_screen_village.gd:158
 msgid "Looking after it for %s"
 msgstr "Čuvaš ga za igrača %s"
 
-#: client/scripts/screens/game_screen_village.gd:155
+#: client/scripts/screens/game_screen_village.gd:162
 msgid "Previous town"
 msgstr "Prethodni grad"
 
-#: client/scripts/screens/game_screen_village.gd:162
+#: client/scripts/screens/game_screen_village.gd:169
 msgid "Town name"
 msgstr "Ime grada"
 
-#: client/scripts/screens/game_screen_village.gd:167
+#: client/scripts/screens/game_screen_village.gd:174
 msgid "Save"
 msgstr "Sačuvaj"
 
-#: client/scripts/screens/game_screen_village.gd:181
+#: client/scripts/screens/game_screen_village.gd:188
 msgid "Town %d of %d"
 msgstr "Grad %d od %d"
 
-#: client/scripts/screens/game_screen_village.gd:187
+#: client/scripts/screens/game_screen_village.gd:194
 msgid "Rename the town"
 msgstr "Preimenuj grad"
 
-#: client/scripts/screens/game_screen_village.gd:191
+#: client/scripts/screens/game_screen_village.gd:198
 msgid "Next town"
 msgstr "Sledeći grad"
 
-#: client/scripts/screens/game_screen_village.gd:238
+#: client/scripts/screens/game_screen_village.gd:245
 msgid "The picked plot"
 msgstr "Izabrano mesto"
 
-#: client/scripts/screens/game_screen_village.gd:239
+#: client/scripts/screens/game_screen_village.gd:246
 msgid "Build queue"
 msgstr "Red gradnje"
 
-#: client/scripts/screens/game_screen_village.gd:240
+#: client/scripts/screens/game_screen_village.gd:247
 msgid "Outposts"
 msgstr "Ispostave"
 
-#: client/scripts/screens/game_screen_village.gd:247
+#: client/scripts/screens/game_screen_village.gd:254
 msgid "%s lies in ruins"
 msgstr "%s leži u ruševinama"
 
-#: client/scripts/screens/game_screen_village.gd:252
+#: client/scripts/screens/game_screen_village.gd:259
 msgid "Rebuilding · stands again in %s"
 msgstr "Obnova · ponovo stoji za %s"
 
-#: client/scripts/screens/game_screen_village.gd:254
+#: client/scripts/screens/game_screen_village.gd:261
 msgid "Burned down by a horde"
 msgstr "Spalila ga je horda"
 
-#: client/scripts/screens/game_screen_village.gd:254
+#: client/scripts/screens/game_screen_village.gd:261
 msgid "A horde burned it down. Rebuild everything as it stood, at %d%% of what it cost."
 msgstr "Horda ga je spalila. Obnovi sve kako je bilo, uz %d%% cene koštanja."
 
-#: client/scripts/screens/game_screen_village.gd:285
+#: client/scripts/screens/game_screen_village.gd:292
 msgid "Build queue (%d/%d)"
 msgstr "Red gradnje (%d/%d)"
 
-#: client/scripts/screens/game_screen_village.gd:287
+#: client/scripts/screens/game_screen_village.gd:294
 msgid "Nothing under construction."
 msgstr "Ništa se ne gradi."
 
-#: client/scripts/screens/game_screen_village.gd:295
+#: client/scripts/screens/game_screen_village.gd:302
 msgid "%s → Lv %d"
 msgstr "%s → nivo %d"
 
-#: client/scripts/screens/game_screen_village.gd:302
+#: client/scripts/screens/game_screen_village.gd:309
 msgid "%s   %s"
 msgstr "%s   %s"
 
-#: client/scripts/screens/game_screen_village.gd:302
+#: client/scripts/screens/game_screen_village.gd:309
 msgid "finishing…"
 msgstr "završava se…"
 
-#: client/scripts/screens/game_screen_village.gd:307
+#: client/scripts/screens/game_screen_village.gd:314
 msgid "Call it off: %d%% of what it cost comes back."
 msgstr "Otkaži: vraća se %d%% onoga što je koštalo."
 
-#: client/scripts/screens/game_screen_village.gd:326
+#: client/scripts/screens/game_screen_village.gd:333
 msgid "Outposts (%d/%d)"
 msgstr "Ispostave (%d/%d)"
 
-#: client/scripts/screens/game_screen_village.gd:330
+#: client/scripts/screens/game_screen_village.gd:337
 msgid "None yet: tap a hex near the village"
 msgstr "Još nema: dodirni polje blizu sela"
 
-#: client/scripts/screens/game_screen_village.gd:330
+#: client/scripts/screens/game_screen_village.gd:337
 msgid "None yet. Tap a forest, plains, hills, mountain or lake hex within %d of the village on the map to claim one."
 msgstr "Još nijedna. Dodirni polje šume, ravnice, brda, planine ili jezera na udaljenosti do %d od sela na mapi da je prisvojiš."
 
-#: client/scripts/screens/game_screen_village.gd:338
+#: client/scripts/screens/game_screen_village.gd:345
 msgid "%s (%d, %d)  %s"
 msgstr "%s (%d, %d)  %s"
 
-#: client/scripts/screens/game_screen_village.gd:339
+#: client/scripts/screens/game_screen_village.gd:346
 msgid "Lv %d · %s"
 msgstr "nivo %d · %s"
 
-#: client/scripts/screens/game_screen_village.gd:339
+#: client/scripts/screens/game_screen_village.gd:346
 msgid "Lv 0"
 msgstr "nivo 0"
 
-#: client/scripts/screens/game_screen_village.gd:361
+#: client/scripts/screens/game_screen_village.gd:368
 msgid "Wall slot"
 msgstr "Mesto na bedemu"
 
-#: client/scripts/screens/game_screen_village.gd:362
+#: client/scripts/screens/game_screen_village.gd:369
 msgid "Raise the walls to level %d to build a tower here."
 msgstr "Podigni bedeme na nivo %d da bi ovde gradio kulu."
 
-#: client/scripts/screens/game_screen_village.gd:364
+#: client/scripts/screens/game_screen_village.gd:371
 msgid "Locked slot"
 msgstr "Zaključano mesto"
 
-#: client/scripts/screens/game_screen_village.gd:366
+#: client/scripts/screens/game_screen_village.gd:373
 msgid "Upgrade the Elder's Hall to level %d to build here."
 msgstr "Unapredi Dom starešina na nivo %d da bi ovde gradio."
 
-#: client/scripts/screens/game_screen_village.gd:369
+#: client/scripts/screens/game_screen_village.gd:376
 msgid "Empty wall slot"
 msgstr "Prazno mesto na bedemu"
 
-#: client/scripts/screens/game_screen_village.gd:369
+#: client/scripts/screens/game_screen_village.gd:376
 msgid "Empty slot"
 msgstr "Prazno mesto"
 
-#: client/scripts/screens/game_screen_village.gd:372
+#: client/scripts/screens/game_screen_village.gd:379
 msgid "Every tower already stands on these walls."
 msgstr "Sve kule već stoje na ovim bedemima."
 
-#: client/scripts/screens/game_screen_village.gd:372
+#: client/scripts/screens/game_screen_village.gd:379
 msgid "Every building already stands in this village."
 msgstr "Sve zgrade već stoje u ovom selu."
 
-#: client/scripts/screens/game_screen_village.gd:391
+#: client/scripts/screens/game_screen_village.gd:398
 msgid "  (max)"
 msgstr "  (maks.)"
 
-#: client/scripts/screens/game_screen_village.gd:393
+#: client/scripts/screens/game_screen_village.gd:400
 msgid "  (→ %d queued)"
 msgstr "  (→ %d u redu)"
 
-#: client/scripts/screens/game_screen_village.gd:400
+#: client/scripts/screens/game_screen_village.gd:407
 msgid " → Lv %d"
 msgstr " → nivo %d"
 
-#: client/scripts/screens/game_screen_village.gd:461
+#: client/scripts/screens/game_screen_village.gd:433
+msgid "Blessed by %s"
+msgstr "Blagoslov: %s"
+
+#: client/scripts/screens/game_screen_village.gd:437
+msgid "All your villages: %s"
+msgstr "Sva tvoja sela: %s"
+
+#: client/scripts/screens/game_screen_village.gd:437
+msgid " · at level %d: %s"
+msgstr " · na nivou %d: %s"
+
+#: client/scripts/screens/game_screen_village.gd:441
+msgid "Choose its god"
+msgstr "Izaberi boga"
+
+#: client/scripts/screens/game_screen_village.gd:442
+msgid "Once chosen, the god stays: its blessing reaches all your villages and grows with every level of the Shrine."
+msgstr "Izabrani bog ostaje: njegov blagoslov stiže do svih tvojih sela i raste sa svakim nivoom svetilišta."
+
+#: client/scripts/screens/game_screen_village.gd:453
+msgid "Now: %s · per level: %s"
+msgstr "Sada: %s · po nivou: %s"
+
+#: client/scripts/screens/game_screen_village.gd:455
+msgid "Choose"
+msgstr "Izaberi"
+
+#: client/scripts/screens/game_screen_village.gd:531
 msgid "Trade"
 msgstr "Trguj"
 
-#: client/scripts/screens/game_screen_village.gd:470
+#: client/scripts/screens/game_screen_village.gd:540
 msgid "for"
 msgstr "za"
 
-#: client/scripts/screens/game_screen_village.gd:489
+#: client/scripts/screens/game_screen_village.gd:559
 msgid "You get %d %s (%d%% of what you give)"
 msgstr "Dobijaš %d %s (%d%% od onoga što daješ)"
 
-#: client/scripts/screens/game_screen_village.gd:497
+#: client/scripts/screens/game_screen_village.gd:567
 msgid "Sell spare gear"
 msgstr "Prodaj suvišnu opremu"
 
-#: client/scripts/screens/game_screen_village.gd:499
+#: client/scripts/screens/game_screen_village.gd:569
 msgid "Your hero carries no spare gear. Gear they wear must be taken off first."
 msgstr "Tvoj junak ne nosi suvišnu opremu. Opremu koju nosi na sebi prvo mora da skine."
 
-#: client/scripts/screens/game_screen_village.gd:507
+#: client/scripts/screens/game_screen_village.gd:577
 msgid "Sell"
 msgstr "Prodaj"
 
-#: client/scripts/screens/game_screen_village.gd:510
+#: client/scripts/screens/game_screen_village.gd:580
 msgid "Each piece fetches %s"
 msgstr "Svaki komad donosi %s"
 
-#: client/scripts/screens/game_screen_village.gd:523
+#: client/scripts/screens/game_screen_village.gd:593
 msgid "Bounty board"
 msgstr "Tabla ponuda"
 
-#: client/scripts/screens/game_screen_village.gd:524
+#: client/scripts/screens/game_screen_village.gd:594
 msgid "Offer resources, or gear from your hero's pack, for others; another player takes your bounty at once. What you offer, and a %d%% fee on the resources, leave your stores (and the pack) when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not."
 msgstr "Ponudi resurse, ili opremu iz junakovog tovara, drugima; drugi igrač odmah preuzima tvoju ponudu. Ono što nudiš, i naknada od %d%% na resurse, napuštaju tvoja skladišta (i tovar) kada je postaviš; kada je preuzmu dobijaš ono što si tražio, umanjeno za %d%%. Ako je povučeš, ponuđeno se vraća; naknada ne."
 
-#: client/scripts/screens/game_screen_village.gd:525
+#: client/scripts/screens/game_screen_village.gd:595
 msgid "%d of %d open here · at most %d a side"
 msgstr "%d od %d otvorenih ovde · najviše %d po strani"
 
-#: client/scripts/screens/game_screen_village.gd:531
+#: client/scripts/screens/game_screen_village.gd:601
 msgid "Yours, from %s"
 msgstr "Tvoja, iz %s"
 
-#: client/scripts/screens/game_screen_village.gd:532
+#: client/scripts/screens/game_screen_village.gd:602
 msgid "%s: offers %s for %s"
 msgstr "%s: nudi %s za %s"
 
-#: client/scripts/screens/game_screen_village.gd:536
+#: client/scripts/screens/game_screen_village.gd:606
 msgid "Call off"
 msgstr "Povuci"
 
-#: client/scripts/screens/game_screen_village.gd:538
+#: client/scripts/screens/game_screen_village.gd:608
 msgid "Take"
 msgstr "Prihvati"
 
-#: client/scripts/screens/game_screen_village.gd:545
+#: client/scripts/screens/game_screen_village.gd:615
 msgid "Your hero has that gear already"
 msgstr "Tvoj junak već ima tu opremu"
 
-#: client/scripts/screens/game_screen_village.gd:549
+#: client/scripts/screens/game_screen_village.gd:619
 msgid "No bounties on the board."
 msgstr "Nema ponuda na tabli."
 
-#: client/scripts/screens/game_screen_village.gd:555
+#: client/scripts/screens/game_screen_village.gd:625
 msgid "Post a bounty"
 msgstr "Objavi nagradu"
 
-#: client/scripts/screens/game_screen_village.gd:556
+#: client/scripts/screens/game_screen_village.gd:626
 msgid "You give"
 msgstr "Daješ"
 
-#: client/scripts/screens/game_screen_village.gd:556
+#: client/scripts/screens/game_screen_village.gd:626
 msgid "You want"
 msgstr "Tražiš"
 
-#: client/scripts/screens/game_screen_village.gd:576
+#: client/scripts/screens/game_screen_village.gd:646
 msgid "Gear from your hero's pack"
 msgstr "Oprema iz junakovog tovara"
 
-#: client/scripts/screens/game_screen_village.gd:601
+#: client/scripts/screens/game_screen_village.gd:671
 msgid "Post bounty"
 msgstr "Postavi ponudu"
 
-#: client/scripts/screens/game_screen_village.gd:623
+#: client/scripts/screens/game_screen_village.gd:693
 msgid "You pay %s (%s and a %d%% fee)"
 msgstr "Plaćaš %s (%s i naknada od %d%%)"
 
-#: client/scripts/screens/game_screen_village.gd:623
+#: client/scripts/screens/game_screen_village.gd:693
 msgid "Type what you give."
 msgstr "Upiši šta daješ."
 
-#: client/scripts/screens/game_screen_village.gd:625
+#: client/scripts/screens/game_screen_village.gd:695
 msgid "Gear offered: %s"
 msgstr "Ponuđena oprema: %s"
 
-#: client/scripts/screens/game_screen_village.gd:629
+#: client/scripts/screens/game_screen_village.gd:699
 msgid "You get %s when it is taken"
 msgstr "Dobijaš %s kad je prihvaćena"
 
-#: client/scripts/screens/game_screen_village.gd:629
+#: client/scripts/screens/game_screen_village.gd:699
 msgid "Type what you want for it."
 msgstr "Upiši šta tražiš za nju."
 
-#: client/scripts/screens/game_screen_village.gd:707
+#: client/scripts/screens/game_screen_village.gd:777
 msgid "Sure? Tear it down"
 msgstr "Sigurno? Sruši je"
 
-#: client/scripts/screens/game_screen_village.gd:707
+#: client/scripts/screens/game_screen_village.gd:777
 msgid "Tear down"
 msgstr "Sruši"
 
-#: client/scripts/screens/game_screen_village.gd:719
+#: client/scripts/screens/game_screen_village.gd:789
 msgid "Tap again to tear down the %s. You get back %s, as far as the stores hold it."
 msgstr "Dodirni ponovo da srušiš: %s. Dobijaš nazad %s, koliko skladišta mogu da prime."
 
-#: client/scripts/screens/game_screen_village.gd:740
+#: client/scripts/screens/game_screen_village.gd:810
 msgid "Sure? Abandon %s"
 msgstr "Sigurno? Napusti %s"
 
-#: client/scripts/screens/game_screen_village.gd:740
+#: client/scripts/screens/game_screen_village.gd:810
 msgid "Abandon this village"
 msgstr "Napusti ovo selo"
 
-#: client/scripts/screens/game_screen_village.gd:752
+#: client/scripts/screens/game_screen_village.gd:822
 msgid "Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way."
 msgstr "Dodirni ponovo da ga napustiš zauvek. %s od izgrađenog ide u riznicu Svetog grada; njegove trupe i tvoj junak u njemu sele se u tvoje najbliže selo; ono što je uskladišteno propada. Mora biti mirno: bez gradnje, obuke, karavana ili vojski u pokretu."
 
-#: client/scripts/screens/game_screen_village.gd:812
+#: client/scripts/screens/game_screen_village.gd:885
 msgid "%s +%d/h → +%d/h"
 msgstr "%s +%d/h → +%d/h"
 
-#: client/scripts/screens/game_screen_village.gd:816
+#: client/scripts/screens/game_screen_village.gd:889
 msgid "; level %d: %s"
 msgstr "; nivo %d: %s"
 
-#: client/scripts/screens/game_screen_village.gd:819
+#: client/scripts/screens/game_screen_village.gd:892
 msgid "Slots %d/%d · queue %d"
 msgstr "Mesta %d/%d · red %d"
 
-#: client/scripts/screens/game_screen_village.gd:821
+#: client/scripts/screens/game_screen_village.gd:894
 msgid "Lv %d: slots %d · queue %d · builds %d%% faster"
 msgstr "Nivo %d: mesta %d · red %d · gradi %d%% brže"
 
-#: client/scripts/screens/game_screen_village.gd:832
+#: client/scripts/screens/game_screen_village.gd:905
 msgid "Holds %d of each resource above the base; the village keeps %d in all"
 msgstr "Čuva %d svakog resursa preko osnove; selo ukupno čuva %d"
 
-#: client/scripts/screens/game_screen_village.gd:836
+#: client/scripts/screens/game_screen_village.gd:909
 msgid "Holds %d grain above the base; the village keeps %d grain in all"
 msgstr "Čuva %d žita iznad osnove; selo ukupno čuva %d žita"
 
-#: client/scripts/screens/game_screen_village.gd:840
+#: client/scripts/screens/game_screen_village.gd:913
 msgid "Research +%d/h now, +%d/h at level %d"
 msgstr "Istraživanje +%d/h sada, +%d/h na nivou %d"
 
-#: client/scripts/screens/game_screen_village.gd:842
+#: client/scripts/screens/game_screen_village.gd:915
 msgid "Trades at %d%% now, %d%% at level %d"
 msgstr "Trguje po %d%% sada, %d%% na nivou %d"
 
-#: client/scripts/screens/game_screen_village.gd:845
+#: client/scripts/screens/game_screen_village.gd:918
 msgid "%d%% of the garrison's fallen get up again when it holds the village"
 msgstr "%d%% palih iz posade ponovo ustaje kad odbrani selo"
 
-#: client/scripts/screens/game_screen_village.gd:849
+#: client/scripts/screens/game_screen_village.gd:922
 msgid "%s +%d%% now, +%d%% at level %d"
 msgstr "%s +%d%% sada, +%d%% na nivou %d"
 
-#: client/scripts/screens/game_screen_village.gd:861
+#: client/scripts/screens/game_screen_village.gd:934
 msgid "%s queued"
 msgstr "%s u redu"
 
-#: client/scripts/screens/game_screen_village.gd:861
+#: client/scripts/screens/game_screen_village.gd:934
 msgid "Queued"
 msgstr "U redu"
 
@@ -5214,19 +5250,19 @@ msgstr "Sakrij"
 msgid "now"
 msgstr "sada"
 
-#: client/scripts/ui/ui.gd:361
+#: client/scripts/ui/ui.gd:373
 msgid "Wood"
 msgstr "Drvo"
 
-#: client/scripts/ui/ui.gd:362
+#: client/scripts/ui/ui.gd:374
 msgid "Stone"
 msgstr "Kamen"
 
-#: client/scripts/ui/ui.gd:363
+#: client/scripts/ui/ui.gd:375
 msgid "Grain"
 msgstr "Žito"
 
-#: client/scripts/ui/ui.gd:364
+#: client/scripts/ui/ui.gd:376
 msgid "Iron"
 msgstr "Gvožđe"
 
@@ -5689,6 +5725,70 @@ msgstr "Dom doseljenika"
 #: data/buildings.json
 msgid "Trains settlers, who walk out to found new villages."
 msgstr "Obučava naseljenike, koji idu da osnuju nova sela."
+
+#: data/buildings.json
+msgid "Shrine"
+msgstr "Svetilište"
+
+#: data/buildings.json
+msgid "A shrine to one of the old gods, raised with a Svarog's Ember. Choose its god once: the blessing reaches all your villages and grows with every level. Each level takes another Ember and mostly grain, the offering."
+msgstr "Svetilište jednom od starih bogova, podignuto Svarogovim žarom. Boga biraš jednom: blagoslov stiže do svih tvojih sela i raste sa svakim nivoom. Svaki nivo traži još jedan žar i uglavnom žito, kao žrtvu."
+
+#: data/buildings.json
+msgid "Perun"
+msgstr "Perun"
+
+#: data/buildings.json
+msgid "The thunderer, god of war: your troops strike harder."
+msgstr "Gromovnik, bog rata: tvoje trupe udaraju jače."
+
+#: data/buildings.json
+msgid "Svetovid"
+msgstr "Svetovid"
+
+#: data/buildings.json
+msgid "The four-faced watcher: your villages hold better."
+msgstr "Četvorolični stražar: tvoja sela se bolje drže."
+
+#: data/buildings.json
+msgid "Veles"
+msgstr "Veles"
+
+#: data/buildings.json
+msgid "Lord of herds: more grain, and troops eat less."
+msgstr "Gospodar stada: više žita, a trupe jedu manje."
+
+#: data/buildings.json
+msgid "Mokosh"
+msgstr "Mokoš"
+
+#: data/buildings.json
+msgid "The mother who spins fate: fuller stores, and raiders carry off less."
+msgstr "Majka koja prede sudbinu: punija skladišta, a pljačkaši odnose manje."
+
+#: data/buildings.json
+msgid "Svarog"
+msgstr "Svarog"
+
+#: data/buildings.json
+msgid "The heavenly smith: you build and train faster."
+msgstr "Nebeski kovač: brže gradiš i obučavaš."
+
+#: data/buildings.json
+msgid "Dazhbog"
+msgstr "Dažbog"
+
+#: data/buildings.json
+msgid "The giving sun: every resource flows a little richer."
+msgstr "Darežljivo sunce: svakog resursa ima malo više."
+
+#: data/buildings.json
+msgid "Stribog"
+msgstr "Stribog"
+
+#: data/buildings.json
+msgid "Grandfather of the winds: caravans and scouts travel faster, and more scouts come home."
+msgstr "Deda vetrova: karavani i izviđači putuju brže, a više izviđača se vraća."
 
 #: data/buildings.json
 msgid "Studies the techs of the research tree and brings in the research every tech costs; what you learn helps all your villages."
@@ -7453,6 +7553,46 @@ msgstr "Dažbogova žetva"
 #: data/research.json
 msgid "Offerings to the sun bring good years: +5% of every resource."
 msgstr "Žrtve suncu donose dobre godine: +5% svakog resursa."
+
+#: data/research.json
+msgid "Sun-Forged Steel"
+msgstr "Čelik kovan suncem"
+
+#: data/research.json
+msgid "Blades quenched in Svarog's fire: every unit strikes 10% harder."
+msgstr "Sečiva kaljena u Svarogovoj vatri: svaka jedinica udara 10% jače."
+
+#: data/research.json
+msgid "Kolovrat Wards"
+msgstr "Kolovratske zaštite"
+
+#: data/research.json
+msgid "Sun-wheels burned into every gate: +8% defense everywhere and +10% at home."
+msgstr "Sunčani točkovi urezani u svaku kapiju: +8% odbrane svuda i +10% kod kuće."
+
+#: data/research.json
+msgid "Rod's Abundance"
+msgstr "Rodovo obilje"
+
+#: data/research.json
+msgid "The forefather blesses every hearth: +10% of every resource."
+msgstr "Praotac blagosilja svako ognjište: +10% svakog resursa."
+
+#: data/research.json
+msgid "Firebird Couriers"
+msgstr "Glasnici žar-ptice"
+
+#: data/research.json
+msgid "Riders who carry an ember's glow never lose the road: caravans and scouts 25% faster, scouts 15% likelier to return."
+msgstr "Jahači koji nose sjaj žara nikad ne gube put: karavani i izviđači 25% brži, izviđači se 15% češće vraćaju."
+
+#: data/research.json
+msgid "Svarog's Living Flame"
+msgstr "Svarogov živi plamen"
+
+#: data/research.json
+msgid "The god's own fire burns in every forge and hearth: build and train 15% faster, and troops eat 10% less."
+msgstr "Božja vatra gori u svakoj kovačnici i ognjištu: gradnja i obuka 15% brže, a trupe jedu 10% manje."
 
 #: data/scouting.json
 msgid "rough"
