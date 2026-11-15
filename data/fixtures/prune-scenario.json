@@ -2953,7 +2953,7 @@
       "r": 5,
       "setup": {},
       "status": "cleared",
-      "round": 1,
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
@@ -2969,13 +2969,26 @@
        {
         "at": "2026-06-01T08:36:00.000Z",
         "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 12,
+        "attackerLeft": 2,
+        "defenderLeft": 11,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T08:36:00.000Z",
+        "round": 2,
+        "attackerLeft": 1,
+        "defenderLeft": 10,
+        "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": {
@@ -3072,7 +3085,7 @@
        "stone": 45
       },
       "units": {
-       "spearman": 12
+       "spearman": 10
       },
       "status": "stationed",
       "battleId": null,
@@ -3102,8 +3115,8 @@
       "arrivesAt": "2026-06-01T08:36:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 288,
-      "supplyAt": "2026-06-01T08:00:00.000Z",
+      "supply": 280.8,
+      "supplyAt": "2026-06-01T08:36:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -5574,7 +5587,7 @@
       "r": 5,
       "setup": {},
       "status": "cleared",
-      "round": 1,
+      "round": 2,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 2,
@@ -5590,13 +5603,26 @@
        {
         "at": "2026-06-01T08:36:00.000Z",
         "round": 1,
-        "attackerLeft": 1,
-        "defenderLeft": 12,
+        "attackerLeft": 2,
+        "defenderLeft": 11,
         "attackerLosses": {
-         "zealot": 1,
+         "zealot": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T08:36:00.000Z",
+        "round": 2,
+        "attackerLeft": 1,
+        "defenderLeft": 10,
+        "attackerLosses": {
          "crossbowman": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": {
@@ -5693,7 +5719,7 @@
        "stone": 45
       },
       "units": {
-       "spearman": 12
+       "spearman": 10
       },
       "status": "stationed",
       "battleId": null,
@@ -5723,8 +5749,8 @@
       "arrivesAt": "2026-06-01T08:36:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 288,
-      "supplyAt": "2026-06-01T08:00:00.000Z",
+      "supply": 280.8,
+      "supplyAt": "2026-06-01T08:36:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -8265,11 +8291,11 @@
       ],
       "departsAt": "2026-06-01T08:00:00.000Z",
       "arrivesAt": "2026-06-01T08:36:00.000Z",
-      "leavesAt": "2026-06-03T03:00:00.000Z",
-      "returnsAt": "2026-06-03T03:00:00.000Z",
+      "leavesAt": "2026-06-03T05:40:48.000Z",
+      "returnsAt": "2026-06-03T05:40:48.000Z",
       "supply": 0,
-      "supplyAt": "2026-06-03T03:00:00.000Z",
-      "hungrySince": "2026-06-02T08:00:00.000Z",
+      "supplyAt": "2026-06-03T05:40:48.000Z",
+      "hungrySince": "2026-06-02T12:40:48.000Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -10367,7 +10393,7 @@
       "tier": "push",
       "title": "An army from Vruchiy starved",
       "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-03T03:00:00.000Z",
+      "createdAt": "2026-06-03T05:40:48.000Z",
       "read": false
      },
      {
@@ -10405,7 +10431,7 @@
       "tier": "push",
       "title": "An army from Vruchiy starved",
       "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-03T03:00:00.000Z",
+      "createdAt": "2026-06-03T05:40:48.000Z",
       "read": false
      },
      {

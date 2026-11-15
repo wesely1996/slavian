@@ -27991,6 +27991,96 @@
     ],
     "waves": [
      {
+      "id": 1,
+      "index": 0,
+      "front": "north",
+      "status": "battling",
+      "threat": "Low",
+      "spawnAt": "2026-06-01T10:24:00.000Z",
+      "spawn": {
+       "q": 9,
+       "r": -8
+      },
+      "targetVillageId": null,
+      "path": [
+       [
+        9,
+        -8,
+        0
+       ],
+       [
+        8,
+        -8,
+        43200
+       ],
+       [
+        7,
+        -8,
+        72000
+       ],
+       [
+        6,
+        -8,
+        86400
+       ],
+       [
+        5,
+        -8,
+        100800
+       ],
+       [
+        4,
+        -7,
+        115200
+       ],
+       [
+        3,
+        -6,
+        129600
+       ],
+       [
+        2,
+        -5,
+        144000
+       ],
+       [
+        1,
+        -4,
+        158400
+       ],
+       [
+        0,
+        -3,
+        172800
+       ],
+       [
+        0,
+        -2,
+        187200
+       ],
+       [
+        0,
+        -1,
+        201600
+       ],
+       [
+        0,
+        0,
+        216000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:27:36.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0.4,
+      "bandOf": null,
+      "errand": null,
+      "forecast": null
+     },
+     {
       "id": 2,
       "index": 1,
       "front": "south",
@@ -28132,26 +28222,72 @@
          158400
         ],
         [
-         -1,
+         0,
          -1,
          172800
         ],
         [
-         -1,
+         0,
          0,
          187200
-        ],
-        [
-         0,
-         0,
-         201600
         ]
        ],
-       "arrivesAt": "2026-06-01T11:24:57.600Z"
+       "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
      }
     ],
-    "scouting": [],
+    "scouting": [
+     {
+      "id": 1,
+      "villageId": 1,
+      "waveId": 1,
+      "sent": 20,
+      "units": {
+       "assassin": 16,
+       "pathfinder": 4
+      },
+      "status": "done",
+      "target": {
+       "q": 8,
+       "r": -8
+      },
+      "departsAt": "2026-06-01T10:25:00.000Z",
+      "arrivesAt": "2026-06-01T10:26:22.286Z",
+      "returnsAt": "2026-06-01T10:27:44.572Z",
+      "report": {
+       "sent": 20,
+       "size": {
+        "max": 9,
+        "min": 9
+       },
+       "tier": "exact",
+       "units": [
+        {
+         "max": 4,
+         "min": 4,
+         "name": "Grey Wolf",
+         "unit": "grey_wolf"
+        },
+        {
+         "max": 3,
+         "min": 3,
+         "name": "Rusalka",
+         "unit": "rusalka"
+        },
+        {
+         "max": 2,
+         "min": 2,
+         "name": "Leshy's Thrall",
+         "unit": "leshy_thrall"
+        }
+       ],
+       "stance": "offensive",
+       "dispersed": false,
+       "survivors": 19,
+       "leaderSlain": "Vyrgan the Hungry"
+      }
+     }
+    ],
     "ruinSearches": [],
     "battles": [
      {
@@ -28170,7 +28306,7 @@
        "river": false,
        "ambush": false
       },
-      "status": "defended",
+      "status": "ongoing",
       "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
@@ -28179,9 +28315,9 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 1,
-       "leshy_thrall": 2
+       "rusalka": 3,
+       "grey_wolf": 2,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "spearman": 8
@@ -28190,11 +28326,11 @@
        {
         "at": "2026-06-01T10:37:21.600Z",
         "round": 1,
-        "attackerLeft": 6,
+        "attackerLeft": 7,
         "defenderLeft": 7,
         "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 2
+         "grey_wolf": 1,
+         "leshy_thrall": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -28203,18 +28339,20 @@
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 6,
+        "defenderLeft": 6,
         "attackerLosses": {
          "grey_wolf": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T10:27:21.600Z",
-      "endedAt": "2026-06-01T10:47:21.600Z"
+      "endedAt": null
      }
     ],
     "raids": [],
@@ -28322,10 +28460,10 @@
       "loot": null,
       "units": {
        "scout": 4,
-       "spearman": 7
+       "spearman": 6
       },
-      "status": "stationed",
-      "battleId": null,
+      "status": "engaged",
+      "battleId": 1,
       "path": [
        [
         -2,
@@ -28352,8 +28490,8 @@
       "arrivesAt": "2026-06-01T10:19:43.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 200.4,
-      "supplyAt": "2026-06-01T10:37:21.600Z",
+      "supply": 108.73333333333333,
+      "supplyAt": "2026-06-01T10:47:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -28373,18 +28511,6 @@
       "r": 5,
       "size": 8,
       "waveId": null,
-      "reward": null,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 3,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 6,
-      "waveId": 1,
       "reward": null,
       "endsAt": null,
       "quest": null
@@ -28477,13 +28603,7 @@
      }
     ],
     "lore": [],
-    "achievements": [
-     {
-      "accountId": 1,
-      "achievement": "field_victory",
-      "earnedAt": "2026-06-01T10:47:21.600Z"
-     }
-    ],
+    "achievements": [],
     "shipyards": [
      {
       "id": 2,
@@ -28563,13 +28683,7 @@
      "stageStartedAt": "2026-06-01T08:00:00.000Z",
      "sanctityAtStart": 100
     },
-    "fear": [
-     [
-      0,
-      -1,
-      10.8
-     ]
-    ],
+    "fear": [],
     "delegations": [],
     "delegationLog": [],
     "run": null,
@@ -30480,24 +30594,6 @@
    "response": {
     "notifications": [
      {
-      "id": 14,
-      "kind": "achievement",
-      "tier": "push",
-      "title": "Achievement: Hold the Ford",
-      "body": "Beat a horde in a field battle with an army holding its road.",
-      "createdAt": "2026-06-01T10:47:21.600Z",
-      "read": false
-     },
-     {
-      "id": 13,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "Your army held (0, -1)",
-      "body": "The horde was beaten after 2 rounds.",
-      "createdAt": "2026-06-01T10:47:21.600Z",
-      "read": false
-     },
-     {
       "id": 12,
       "kind": "under_attack",
       "tier": "push",
@@ -30606,7 +30702,7 @@
       "read": false
      }
     ],
-    "unread": 14,
+    "unread": 12,
     "serverTime": "2026-06-01T10:49:00.000Z"
    }
   },
@@ -30617,24 +30713,6 @@
    "response": {
     "notifications": [
      {
-      "id": 14,
-      "kind": "achievement",
-      "tier": "push",
-      "title": "Achievement: Hold the Ford",
-      "body": "Beat a horde in a field battle with an army holding its road.",
-      "createdAt": "2026-06-01T10:47:21.600Z",
-      "read": false
-     },
-     {
-      "id": 13,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "Your army held (0, -1)",
-      "body": "The horde was beaten after 2 rounds.",
-      "createdAt": "2026-06-01T10:47:21.600Z",
-      "read": false
-     },
-     {
       "id": 12,
       "kind": "under_attack",
       "tier": "push",
@@ -30743,7 +30821,7 @@
       "read": false
      }
     ],
-    "unread": 14,
+    "unread": 12,
     "serverTime": "2026-06-01T10:49:00.000Z"
    }
   }

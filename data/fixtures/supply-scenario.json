@@ -10027,8 +10027,8 @@
         }
        },
        "guard": {
-        "archer": 10,
-        "spearman": 19
+        "archer": 9,
+        "spearman": 20
        },
        "holyCity": true
       },
@@ -10042,7 +10042,7 @@
       },
       "attackerNow": {
        "rusalka": 1,
-       "leshy_thrall": 1
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "archer": 10,
@@ -10052,15 +10052,14 @@
        {
         "at": "2026-06-01T10:37:36.000Z",
         "round": 1,
-        "attackerLeft": 2,
+        "attackerLeft": 3,
         "defenderLeft": 32,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 4,
-         "leshy_thrall": 1
+         "grey_wolf": 4
         },
         "defenderLosses": {
-         "spearman": 1
+         "archer": 1
         }
        }
       ],
@@ -10511,7 +10510,7 @@
      [
       0,
       0,
-      11.4
+      11.2
      ]
     ],
     "delegations": [],

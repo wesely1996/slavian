@@ -92,6 +92,14 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			target_total += 1
 	if target_total == 0:
 		return {"losses": result, "fallen": fallen}
+	# Attack is a range: each unit type strikes this round with its own roll.
+	var rolled: Array = []
+	for striker in strikers:
+		var rolls := {}
+		for unit in striker.units:
+			if int(striker.units[unit]) > 0:
+				rolls[unit] = 1.0 + float(battle.statSpread) * (rng.next() * 2.0 - 1.0)
+		rolled.append(rolls)
 	for t in targets:
 		var group: Dictionary = groups[t[0]]
 		var target: String = t[1]
@@ -100,7 +108,8 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 		var stats: Dictionary = {"attack": champion.attack, "defense": champion.defense, "health": champion.health, "family": "infantry"} if champion != null \
 			else (group.stats if group.has("stats") else to.stats).call(target)
 		var damage := 0.0
-		for striker in strikers:
+		for s in strikers.size():
+			var striker: Dictionary = strikers[s]
 			var from_stance: Dictionary = battle.stances[striker.stance]
 			var matchup := float(battle.matchups.get(striker.stance, {}).get(group.stance, 1.0))
 			var striker_stats: Callable = striker.stats if striker.has("stats") else from.stats
@@ -110,18 +119,19 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 					continue
 				var attacker: Dictionary = striker_stats.call(unit)
 				var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
-				damage += count * float(attacker.attack) * float(from_stance.attack) * matchup * counter
+				damage += count * float(attacker.attack) * float(rolled[s][unit]) * float(from_stance.attack) * matchup * counter
 			# Its champions strike too, at no family's weakness.
 			for c in striker.get("champions", []):
 				damage += float(c.attack) * float(from_stance.attack) * matchup
 		var share := float(target_count) / target_total
-		var variance := 1.0 + float(battle.variance) * (rng.next() * 2.0 - 1.0)
+		# Defense is a range too: this target's roll for the round.
+		var guard := 1.0 + float(battle.statSpread) * (rng.next() * 2.0 - 1.0)
 		# Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
 		# Each of the target's health that lands (hardened by its stance and
 		# by fighting at home) fells one.
-		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense)))
+		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense)) * guard)
 		var toughness := maxf(1.0, float(stats.health)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
-		var expected := (damage * share * variance * float(battle.casualtyScale) * lands) / toughness
+		var expected := (damage * share * float(battle.casualtyScale) * lands) / toughness
 		# Round randomly so small fights still take losses on average.
 		var whole := floori(expected) + (1 if rng.next() < expected - floorf(expected) else 0)
 		var dead := mini(target_count, whole)

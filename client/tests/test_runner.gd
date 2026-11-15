@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_hex_vectors()
 	_test_hex_round_trip()
 	_test_map_camera()
+	_test_danger()
 	_test_resource_vectors()
 	_test_local_mapgen()
 	_test_local_start()
@@ -112,6 +113,20 @@ func _test_hex_round_trip() -> void:
 
 ## A tap on the map still registers after a finger was lost: one that went
 ## down on the map and came up over the interface (or never came up).
+## Stat ranges on the cards, and the odds shown before an assault.
+func _test_danger() -> void:
+	var data := LocalData.load_data()
+	_check(BattleText.stat_range(data, 13.0) == "10–16", "attack 13 reads 10–16: %s" % BattleText.stat_range(data, 13.0))
+	_check(BattleText.stat_range(data, 0.0) == "0", "no attack reads 0")
+	var few := Danger.estimate(data, {"spearman": 3}, {}, "balanced", 60, "north", 0)
+	var many := Danger.estimate(data, {"spearman": 400, "archer": 200}, {}, "balanced", 10, "north", 0)
+	_check(float(few.win) < 0.05 and float(few.own) > 0.3, "three spearmen against sixty: no hope (%s)" % [few])
+	_check(float(many.win) > 0.95 and float(many.own) < 0.15, "six hundred against ten: no danger (%s)" % [many])
+	_check(Danger.verdict(few)[0] == "Crushing defeat" and Danger.verdict(many)[0] == "Crushing victory", "the verdicts say so")
+	_check(Danger.estimate(data, {"scout": 5}, {}, "balanced", 10, "north", 0).win == 0.0, "scouts alone win no fight")
+	_check(Danger.estimate(data, {"spearman": 3}, {}, "balanced", 60, "north", 0) == few, "the same question, the same answer")
+
+
 func _test_map_camera() -> void:
 	var cam := MapCamera.new()
 	root.add_child(cam)

@@ -3,6 +3,15 @@ extends RefCounted
 ## Words for battles from the server (see server/src/sim/battle.ts).
 
 
+## A stat as the range it is rolled in each round of a battle ("10–16" for
+## 13: data/battle.json statSpread); a single number where both ends meet.
+static func stat_range(data: Dictionary, value: float) -> String:
+	var spread := float(data.battle.get("statSpread", 0.0))
+	var low := roundi(value * (1.0 - spread))
+	var high := roundi(value * (1.0 + spread))
+	return str(low) if low == high else "%d–%d" % [low, high]
+
+
 static func total(units: Dictionary) -> int:
 	var sum := 0
 	for unit in units:
