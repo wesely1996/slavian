@@ -31,6 +31,7 @@ func _init(content: Control, height := 320.0, focus: Control = null) -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.custom_minimum_size.y = 0.0
+	_scroll.add_child(DragScroll.new())
 	_paper.add_child(_scroll)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(content)

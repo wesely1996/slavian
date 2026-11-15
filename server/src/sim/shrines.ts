@@ -27,13 +27,15 @@ export function shrineBonuses(data: GameData, villages: readonly { readonly plot
   return out;
 }
 
-// The village's Shrine raised to `deity`: once, and only once it stands.
-export function pickDeity(data: GameData, state: VillageState, deity: string): VillageState {
+// The village's Shrine raised to `deity` once it stands; `embers`: what
+// turning to it from another god takes (0 for the first).
+export function pickDeity(data: GameData, state: VillageState, deity: string): { state: VillageState; embers: number } {
   const id = shrinePlot(data, state.plots);
   const plot = id ? state.plots[id]! : null;
   if (!id || !plot || plot.level <= 0) throw new RuleError('Build a Shrine first');
   const def = data.buildings.buildings[plot.building!]!;
-  if (plot.deity) throw new RuleError(`This ${def.name} already belongs to ${def.deities![plot.deity]?.name ?? plot.deity}`);
   if (!def.deities![deity]) throw new RuleError('No such god');
-  return { ...state, plots: { ...state.plots, [id]: { ...plot, deity } } };
+  if (plot.deity === deity) throw new RuleError(`This ${def.name} already belongs to ${def.deities![deity]!.name}`);
+  const embers = plot.deity ? (def.switchEmbers ?? 0) : 0;
+  return { state: { ...state, plots: { ...state.plots, [id]: { ...plot, deity } } }, embers };
 }

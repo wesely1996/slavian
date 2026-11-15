@@ -119,6 +119,7 @@ func _ready() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.add_child(DragScroll.new())
 	sheet_column.add_child(scroll)
 	# The app's version, at the foot of the main menu.
 	_version = UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE)

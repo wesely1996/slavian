@@ -203,11 +203,16 @@ async function spendBuildEmbers(client: DbClient, data: GameData, world: World, 
   if (embers > 0) await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
-// Gives the village's Shrine its god, once: the god's blessing reaches all
-// the owner's villages, more with every level.
+// Gives the village's Shrine its god (another later, for Embers): the god's
+// blessing reaches all the owner's villages, more with every level.
 export async function pickDeityCommand(db: Db, deps: SchedulerDeps, input: VillageCommandInput & { deity: string }): Promise<{ village: Village }> {
   const { village } = await ownVillageCommand(db, deps, { ...input, action: 'chose a god for the shrine' }, async ({ client, world, village }) => {
-    const state = pickDeity(deps.data, village.state, input.deity);
+    const { state, embers } = pickDeity(deps.data, village.state, input.deity);
+    // Turning to another god takes the group's Embers.
+    if (embers > 0) {
+      if (!(await spendEmbers(client, world.id, embers))) throw new RuleError(`Turning to another god takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+      await notifyWorld(client, { worldId: world.id, type: 'world' });
+    }
     if (village.ownerAccountId === null) return { state, result: null };
     await saveVillageState(client, village.id, state);
     await refreshBonuses(client, deps.data, world, [village.ownerAccountId], input.now);
