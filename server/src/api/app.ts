@@ -61,6 +61,7 @@ import {
   tradeCommand,
   cancelBuildCommand,
   cancelTrainingCommand,
+  pickDeityCommand,
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
@@ -137,6 +138,7 @@ const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.
 // or an outpost ("o3,-2"); `building`
 // names what to construct in an empty slot. Older clients send only
 // `building`.
+const deityBody = z.object({ deity: z.string().min(1).max(32) });
 const cancelTrainBody = z.object({ index: z.number().int().min(0).max(99) });
 const cancelBuildBody = z.object({ plot: z.string().min(1).max(32), targetLevel: z.number().int().positive() });
 const buildBody = z
@@ -686,6 +688,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = renameBody.parse(request.body);
     const { village } = await renameVillageCommand(db, scheduler, { accountId: account.id, villageId: id, name: body.name, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  // The village's Shrine given its god (once).
+  app.post('/v1/villages/:id/deity', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = deityBody.parse(request.body);
+    const { village } = await pickDeityCommand(db, scheduler, { accountId: account.id, villageId: id, deity: body.deity, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 

@@ -1674,6 +1674,35 @@ def building(kind, stage):
             house(s, x, 112 - (i % 2) * 4, 22 * big, 14 * big, roof="thatch", wall="wood", windows=0)
             s.line(x + 12, 112 - (i % 2) * 4, x + 16, 96 - (i % 2) * 4, stroke="#8b5a2b", sw=1.8)
         s.path("M30,84 Q24,74 32,66 Q38,58 32,50", "none", stroke="#bfb7a8", sw=3, opacity=0.6)
+    elif kind == "shrine":
+        # A carved idol of the old gods on a round of beaten earth, an ember
+        # glowing in the offering bowl before it; a ring of carved stakes
+        # (stage 2) and a timber canopy over the idol (stage 3).
+        soft_shadow(s, 64, 112, 40, 8, 0.32)
+        s.ellipse(64, 110, 42, 9, s.lin([(0, "#9c8a66"), (1, "#6f5f43")], 0, 0, 0, 1), stroke="none", sw=0)
+        if stage >= 2:
+            for i in range(7):
+                x = 26 + i * 12.5
+                foot = 110 + (3 if i in (0, 6) else 6 if i in (1, 5) else 8)
+                s.line(x, foot, x, foot - 22, stroke="#7a5332", sw=4)
+                s.circle(x, foot - 23, 2.4, "#c9a46a", stroke="#6e4b2c", sw=0.8)
+        if stage == 3:
+            for x in (46, 82):
+                s.line(x, 108, x, 46, stroke="#5b3f25", sw=4)
+            s.path("M38,50 L64,30 L90,50 Z", s.lin([(0, "#b8913f"), (1, "#7a5a2a")], 0, 0, 0, 1), stroke="#4f3a22", sw=1.5)
+        # The idol: a four-sided pillar with a cap, faces cut into it.
+        h = [0, 44, 52, 56][stage]
+        s.rect(57, 106 - h, 14, h, s.lin([(0, "#c49a66"), (0.5, "#9a6f42"), (1, "#5f4128")], 0, 0, 1, 0), stroke="#4f3a22", sw=1.2, rx=2)
+        s.path(f"M54,{106 - h} Q64,{94 - h} 74,{106 - h} Z", "#7a4f2c", stroke="#4f3a22", sw=1.2)
+        for row in range(2 if stage == 1 else 3):
+            y = 106 - h + 10 + row * 13
+            s.circle(61, y, 1.4, "#3a2a1a", stroke="none", sw=0)
+            s.circle(67, y, 1.4, "#3a2a1a", stroke="none", sw=0)
+            s.line(61, y + 5, 67, y + 5, stroke="#3a2a1a", sw=1.2)
+        # The offering bowl with its ember.
+        s.ellipse(64, 112, 11, 4, "#6f6a62", stroke="#3f3a34", sw=1)
+        s.ellipse(64, 109, 7, 4, s.rad([(0, "#fff1b8"), (0.4, GLOW), (1, "#c9502c")]), stroke="none", sw=0)
+        s.path("M60,108 Q62,98 64,104 Q66,95 68,108 Z", s.lin([(0, "#ffd36b"), (1, "#e2602f")], 0, 1, 0, 0), stroke="none", sw=0)
     elif kind == "grain_silo":
         # Round silos of daub and stone, conical thatch hats, sacks at their feet.
         for i in range(stage + 1):
@@ -2286,6 +2315,9 @@ def assets():
     for kind in ACHIEVEMENTS:
         out[f"achievement/{kind}"] = achievement(kind)
     out["achievement/sealed"] = achievement_sealed()
+    # The Shrine, after everything else (gradient ids above stay as they were).
+    for stage in (1, 2, 3):
+        out[f"building/shrine_{stage}"] = building("shrine", stage)
     return out
 
 

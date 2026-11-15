@@ -325,6 +325,18 @@ static func costs(amounts: Dictionary, icon_size := 30, have := {}) -> String:
 	return "  ".join(parts)
 
 
+## Svarog's Embers a thing takes, with the Ember's picture (red when the
+## group has fewer: `have` < 0 for not known).
+static func embers(count: int, icon_size := 30, have := -1) -> String:
+	var number := "%d" % count
+	if have >= 0 and have < count:
+		number = "[color=#%s]%s[/color]" % [ERROR.to_html(false), number]
+	var file := Art.path("resource/ember")
+	if file == "" or not ResourceLoader.exists(file):
+		return t("%s Svarog's Ember") % number
+	return "[img=%d]%s[/img] %s" % [icon_size, file, number]
+
+
 ## Numbers with a picture each instead of a word: `entries` is
 ## [[art id, text], …] ("icon/attack", "25"). Line icons take the ink.
 static func stats(entries: Array, font_size := SMALL_SIZE, color := MUTED) -> RichTextLabel:

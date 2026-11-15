@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Shared research in the Academy: the group researches together, one tech at a time, and every finished tech's effects reach every member's villages. A member starts a tech from a village with an Academy of `academyLevel` once the group knows every tech in `requires` (and has found its lore scroll, `requiresScroll`): it costs `researchPerSecond` research for every second it lasts, taken from what the members' Academies have brought in (the group's pool, from the members in turn). Its `cost` in resources is then gathered from the members: any of them sends from any village what they can of what it still needs; once it is all paid the research begins and lasts `seconds` game seconds (divided by world speed). Effects add up across the group's techs: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance).",
+  "_comment": "Shared research in the Academy: the group researches together, one tech at a time, and every finished tech's effects reach every member's villages. A member starts a tech from a village with an Academy of `academyLevel` once the group knows every tech in `requires` (and has found its lore scroll, `requiresScroll`): it costs `researchPerSecond` research for every second it lasts, taken from what the members' Academies have brought in (the group's pool, from the members in turn). Its `cost` in resources is then gathered from the members: any of them sends from any village what they can of what it still needs; once it is all paid the research begins and lasts `seconds` game seconds (divided by world speed). Effects add up across the group's techs: production.<resource>/production.all, outpostYield, storage (+share of capacity), buildTime/trainTime (negative = faster), upkeep (negative = less grain), attack.<family>/attack.all, defense.<family>/defense.all, homeDefense (defenders in their own village), lootTaken (negative = raiders take less), caravanSpeed, caravanCapacity, scoutSpeed, scoutSurvival (added to the survival chance). The mightiest techs also take `embers`: that many of the group's Svarog's Embers, spent when the tech is started.",
   "researchPerSecond": 0.1,
   "branches": {
     "economy": "Economy",
@@ -747,6 +747,114 @@
         "production.all": 0.05
       },
       "description": "Offerings to the sun bring good years: +5% of every resource."
+    },
+    "sun_forged_steel": {
+      "name": "Sun-Forged Steel",
+      "branch": "military",
+      "academyLevel": 5,
+      "requires": [
+        "war_drums",
+        "iron_scale_armour"
+      ],
+      "cost": {
+        "wood": 1800,
+        "stone": 1200,
+        "grain": 1500,
+        "iron": 2400
+      },
+      "embers": 2,
+      "seconds": 12000,
+      "effects": {
+        "attack.all": 0.1
+      },
+      "description": "Blades quenched in Svarog's fire: every unit strikes 10% harder."
+    },
+    "kolovrat_wards": {
+      "name": "Kolovrat Wards",
+      "branch": "fortification",
+      "academyLevel": 5,
+      "requires": [
+        "stone_keeps"
+      ],
+      "cost": {
+        "wood": 2100,
+        "stone": 2700,
+        "grain": 1200,
+        "iron": 1200
+      },
+      "embers": 2,
+      "seconds": 12000,
+      "effects": {
+        "defense.all": 0.08,
+        "homeDefense": 0.1
+      },
+      "description": "Sun-wheels burned into every gate: +8% defense everywhere and +10% at home."
+    },
+    "rod_abundance": {
+      "name": "Rod's Abundance",
+      "branch": "economy",
+      "academyLevel": 5,
+      "requires": [
+        "frontier_tithes"
+      ],
+      "cost": {
+        "wood": 2100,
+        "stone": 2100,
+        "grain": 2100,
+        "iron": 1200
+      },
+      "embers": 2,
+      "seconds": 12000,
+      "effects": {
+        "production.all": 0.1
+      },
+      "description": "The forefather blesses every hearth: +10% of every resource."
+    },
+    "firebird_couriers": {
+      "name": "Firebird Couriers",
+      "branch": "scouting",
+      "academyLevel": 5,
+      "requires": [
+        "caravan_guilds",
+        "night_runners"
+      ],
+      "cost": {
+        "wood": 1500,
+        "stone": 900,
+        "grain": 1500,
+        "iron": 900
+      },
+      "embers": 1,
+      "seconds": 9600,
+      "effects": {
+        "caravanSpeed": 0.25,
+        "scoutSpeed": 0.25,
+        "scoutSurvival": 0.15
+      },
+      "description": "Riders who carry an ember's glow never lose the road: caravans and scouts 25% faster, scouts 15% likelier to return."
+    },
+    "svarog_flame": {
+      "name": "Svarog's Living Flame",
+      "branch": "faith",
+      "academyLevel": 5,
+      "requires": [
+        "svarog_forge",
+        "dazhbog_harvest"
+      ],
+      "cost": {
+        "wood": 1800,
+        "stone": 1800,
+        "grain": 2400,
+        "iron": 1800
+      },
+      "embers": 3,
+      "seconds": 14400,
+      "effects": {
+        "buildTime": -0.15,
+        "trainTime": -0.15,
+        "upkeep": -0.1
+      },
+      "description": "The god's own fire burns in every forge and hearth: build and train 15% faster, and troops eat 10% less."
     }
   }
 }

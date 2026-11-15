@@ -95,6 +95,10 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		info.add_child(cost_line)
 		var duration := TimeUtil.format_duration(float(def.seconds) / speed)
 		var cost_text := tr("%d research, then %s from the members · %s") % [needed, UI.costs(cost), duration]
+		# The mightiest take the group's Svarog's Embers too, spent at the start.
+		var embers := int(def.get("embers", 0)) if def.get("embers") != null else 0
+		if embers > 0:
+			cost_text = tr("%s · %s, spent at the start") % [cost_text, UI.embers(embers, 30, int(Game.world.get("embers", 0)))]
 		if problem != "":
 			cost_line.text = tr("%s  (%s)") % [cost_text, problem.trim_suffix(".").to_lower()]
 			return
@@ -104,7 +108,10 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		row.add_child(button)
 		_tick(cost_line, func() -> String:
 			var scholarly: bool = Game.group_research().points >= needed
-			button.disabled = not scholarly
+			var lit: bool = int(Game.world.get("embers", 0)) >= embers
+			button.disabled = not scholarly or not lit
+			if not lit:
+				return tr("%s  (not enough Svarog's Ember)") % cost_text
 			return cost_text if scholarly else tr("%s  (not enough research)") % cost_text))
 
 
@@ -408,9 +415,69 @@ func _plot_section(village: Dictionary) -> void:
 		_market_section(village, level)
 	if building == "heroes_hall" and level > 0:
 		_generals_section(village)
+	if def.get("deities") != null and level > 0:
+		_shrine_section(village, holds, def, level)
 	_demolish_row(village, building, level)
 	if building == Rules.HALL:
 		_abandon_row(village)
+
+
+## The Shrine's god: picked once (a card each, what it gives at this
+## level), then its blessing on all the player's villages.
+func _shrine_section(village: Dictionary, holds: Dictionary, def: Dictionary, level: int) -> void:
+	var village_id := int(village.id)
+	var gods: Dictionary = def.deities
+	var chosen: Variant = holds.get("deity")
+	if chosen != null and gods.has(chosen):
+		var god: Dictionary = gods[chosen]
+		_panel_body.add_child(UI.label(tr("Blessed by %s") % tr(god.name), UI.HEADING_SIZE))
+		_panel_body.add_child(UI.label(tr(god.description), UI.SMALL_SIZE, UI.MUTED))
+		var now_text := _god_effects(god.effects, level)
+		var next_text := _god_effects(god.effects, level + 1) if level < int(def.maxLevel) else ""
+		_panel_body.add_child(UI.label(tr("All your villages: %s") % now_text + (tr(" · at level %d: %s") % [level + 1, next_text] if next_text != "" else ""), UI.SMALL_SIZE, UI.ACCENT))
+		return
+	if not Game.is_mine(village):
+		return
+	_panel_body.add_child(UI.with_info(UI.label(tr("Choose its god"), UI.HEADING_SIZE),
+		tr("Once chosen, the god stays: its blessing reaches all your villages and grows with every level of the Shrine.")))
+	for id in gods:
+		var god: Dictionary = gods[id]
+		var card := UI.card(6)
+		var row := UI.hbox(10)
+		card.add_child(row)
+		var box := UI.vbox(2)
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(box)
+		box.add_child(UI.label(tr(god.name)))
+		box.add_child(UI.label(tr(god.description), UI.SMALL_SIZE, UI.MUTED))
+		box.add_child(UI.label(tr("Now: %s · per level: %s") % [_god_effects(god.effects, level), _god_effects(god.effects, 1)], UI.SMALL_SIZE, UI.ACCENT))
+		var deity := String(id)
+		var pick := UI.primary(tr("Choose"), func() -> void: _pick_deity(village_id, deity))
+		pick.custom_minimum_size.x = 120
+		pick.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(pick)
+		_panel_body.add_child(card)
+
+
+## "+4% production": a god's effects at a Shrine's `level`.
+func _god_effects(effects: Dictionary, level: int) -> String:
+	var scaled := {}
+	for key in effects:
+		scaled[key] = float(effects[key]) * level
+	return HeroText.effects(scaled)
+
+
+func _pick_deity(village_id: int, deity: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/deity" % village_id, {"deity": deity})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("done")
+	Game.note_server_time(response.data.serverTime)
+	Game.update_village(response.data.village)
+	_sync_after_command()
 
 
 ## One building that can go up on the picked plot, as a card: its picture
@@ -447,11 +514,14 @@ func _building_choice(village: Dictionary, building: String, on_walls: bool) -> 
 	button.custom_minimum_size.x = 120
 	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(button)
+	var embers := int(def.get("embers", 0)) if def.get("embers") != null else 0
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
 		var have := Ledger.amounts_at(home.resources, Game.server_now())
-		button.disabled = queue_full or not Ledger.can_afford(have, cost)
-		return tr("%s · %s") % [UI.costs(cost, 22, have), time] + (tr("  (queue full)") if queue_full else ""))
+		var group := int(Game.world.get("embers", 0))
+		button.disabled = queue_full or not Ledger.can_afford(have, cost) or group < embers
+		var price := UI.costs(cost, 22, have) + ("  " + UI.embers(embers, 22, group) if embers > 0 else "")
+		return tr("%s · %s") % [price, time] + (tr("  (queue full)") if queue_full else ""))
 	return card
 
 
@@ -796,11 +866,14 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	row.add_child(button)
 	_panel_body.add_child(row)
 	var time := TimeUtil.format_duration(seconds)
+	var embers := int(def.get("embers", 0)) if def.get("embers") != null else 0
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
 		var have := Ledger.amounts_at(home.resources, Game.server_now())
-		button.disabled = queue_full or not Ledger.can_afford(have, cost)
-		return tr("%s · %s") % [UI.costs(cost, 30, have), time] + (tr("  (queue full)") if queue_full else ""))
+		var group := int(Game.world.get("embers", 0))
+		button.disabled = queue_full or not Ledger.can_afford(have, cost) or group < embers
+		var price := UI.costs(cost, 30, have) + ("  " + UI.embers(embers, 30, group) if embers > 0 else "")
+		return tr("%s · %s") % [price, time] + (tr("  (queue full)") if queue_full else ""))
 
 
 ## What a building does at its level, and at the next one.

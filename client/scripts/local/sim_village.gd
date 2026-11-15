@@ -1058,3 +1058,49 @@ static func settle_problem(data: Dictionary, cell: Vector2i, terrain: Variant, h
 
 static func admin_upkeep_for(data: Dictionary, villages_owned: int) -> float:
 	return float(data.expansion.adminUpkeepPerVillage) * villages_owned
+
+
+# --- Shrines (sim/shrines.ts) ---------------------------------------------------
+
+## The plot holding the village's Shrine (a building with gods), "" if none.
+static func shrine_plot(data: Dictionary, plots: Dictionary) -> String:
+	for id in plots:
+		var building: Variant = plots[id].get("building")
+		if building != null and data.buildings.buildings.get(building, {}).get("deities") != null:
+			return String(id)
+	return ""
+
+
+## What the gods of a player's Shrines give, all villages together.
+static func shrine_bonuses(data: Dictionary, states: Array) -> Dictionary:
+	var out := {}
+	for state in states:
+		var id := shrine_plot(data, state.plots)
+		if id == "":
+			continue
+		var plot: Dictionary = state.plots[id]
+		if int(plot.level) <= 0 or plot.get("deity") == null:
+			continue
+		var god: Variant = data.buildings.buildings[plot.building].deities.get(plot.deity)
+		if god == null:
+			continue
+		for key in god.effects:
+			out[key] = float(out.get(key, 0.0)) + float(god.effects[key]) * int(plot.level)
+	return out
+
+
+## The village's Shrine raised to `deity`: once, and only once it stands.
+static func pick_deity(data: Dictionary, state: Dictionary, deity: String) -> Dictionary:
+	var id := shrine_plot(data, state.plots)
+	if id == "" or int(state.plots[id].level) <= 0:
+		return rule("Build a Shrine first")
+	var plot: Dictionary = state.plots[id]
+	var def: Dictionary = data.buildings.buildings[plot.building]
+	if plot.get("deity") != null:
+		return rule("This %s already belongs to %s" % [def.name, def.deities.get(plot.deity, {}).get("name", plot.deity)])
+	if not def.deities.has(deity):
+		return rule("No such god")
+	var next := state.duplicate(true)
+	next.plots[id].deity = deity
+	return next
+

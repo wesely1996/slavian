@@ -164,6 +164,12 @@ static func start_research(server: LocalServer, world: Dictionary, village: Dict
 		pool += points_at(server, world, int(m.accountId), now)
 	if pool < needed:
 		return LocalVillage.rule("%s takes %d research; the group's Academies have brought in %d" % [data.research.techs[tech].name, needed, floori(pool)])
+	# The mightiest techs take the group's Svarog's Embers as well.
+	var embers := int(data.research.techs[tech].get("embers", 0))
+	if embers > 0:
+		if int(world.embers) < embers:
+			return LocalVillage.rule("%s takes %d Svarog's Ember; the group has %d" % [data.research.techs[tech].name, embers, int(world.embers)])
+		world.embers = int(world.embers) - embers
 	group_points(server, world, now)
 	spend_group_points(server, world, needed, now)
 	var entry := {"accountId": int(village.ownerAccountId), "tech": tech, "status": "funding", "villageId": village.id, "startedAt": now,

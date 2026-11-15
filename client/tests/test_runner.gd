@@ -214,7 +214,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "grain_silo", "market"],
+	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "shrine", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "grain_silo", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
 	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
@@ -802,6 +802,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("supply-scenario.json", "local supply")
 	_replay_scenario("wagons-scenario.json", "local wagons")
 	_replay_scenario("siege-scenario.json", "local sieges")
+	_replay_scenario("shrine-scenario.json", "local shrines")
 	_replay_scenario("hatred-scenario.json", "local hatred")
 	_replay_scenario("reroute-scenario.json", "local rerouting")
 	_replay_scenario("raids-scenario.json", "local raids")
@@ -972,6 +973,18 @@ func _replay_scenario(file: String, name: String) -> void:
 			if step.set.has("bought"):
 				for unit in step.set.bought:
 					local.add_bought(world.members[0], unit, int(step.set.bought[unit]) - int(world.members[0].get("bought", {}).get(unit, 0)))
+			if step.set.has("plots"):
+				var village: Dictionary = world.villages[0]
+				for plot in step.set.plots:
+					village.state.plots[plot] = LocalServer._decode(step.set.plots[plot])
+				village.state.levels = LocalVillage.levels_of(village.state.plots)
+			if step.set.has("known"):
+				for tech in step.set.known:
+					world.research.append({"accountId": int(world.members[0].accountId), "tech": tech, "status": "done", "villageId": world.villages[0].id,
+						"startedAt": now, "completesAt": now, "cost": null, "paid": null})
+			if step.set.has("researchPoints"):
+				world.members[0].researchPoints = float(step.set.researchPoints)
+				world.members[0].researchSettledAt = now
 			if step.set.has("amounts"):
 				for kind in step.set.amounts:
 					world.villages[0].state.ledger.amounts[kind] = float(step.set.amounts[kind])
