@@ -7,6 +7,12 @@ extends RefCounted
 static func find(data: Dictionary, found: Variant) -> String:
 	if not found is Dictionary:
 		return ""
+	var main := _main_find(data, found)
+	# A Svarog's Ember besides the find.
+	return UI.t("%s and a Svarog's Ember") % main if found.get("ember", false) == true else main
+
+
+static func _main_find(data: Dictionary, found: Dictionary) -> String:
 	match found.type:
 		"gear":
 			return UI.t(data.heroes.items.get(found.item, {}).get("name", found.item))

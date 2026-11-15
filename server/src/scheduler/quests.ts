@@ -326,6 +326,7 @@ async function fulfil(client: DbClient, data: GameData, world: World, hero: Hero
       lootFactor: site.hard ? data.events.kinds.ruin.lootFactor : 1,
         foundScrolls: new Set((await listScrolls(client, world.id)).map((s) => s.scroll)),
         ownedGear: new Set([...hero.inventory, ...Object.values(hero.gear)]),
+        players: (await listMembers(client, world.id)).length,
       });
       if (find.type === 'resources') {
         const { ledger } = receive(home.state.ledger, at, find.resources);

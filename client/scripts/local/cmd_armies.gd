@@ -1842,9 +1842,9 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 ## What a search turned up besides resources: Ember for the world, gear for
 ## the hero, a scroll for the whole group. The site is marked explored.
 static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary, account_id: Variant, hero: Dictionary, find: Dictionary, at: int, changed: Array) -> void:
+	if LocalSites.with_ember(find):
+		world.embers = int(world.embers) + 1
 	match String(find.type):
-		"ember":
-			world.embers = int(world.embers) + 1
 		"gear":
 			if not hero.is_empty():
 				hero.inventory = hero.inventory + [find.item]
@@ -1870,7 +1870,7 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 			"body": data.lore.scrolls.get(find.scroll, {}).get("description", "") if scroll else "Explored and done.",
 			"vars": {"name": name, "q": site.q, "r": site.r, "find": find_text(data, find)}}, at)
 	LocalAchievements.achieve(server, world, account_id, "site_explored", at)
-	if find.type == "ember":
+	if LocalSites.with_ember(find):
 		LocalAchievements.achieve(server, world, account_id, "ember_found", at)
 	if find.type == "scroll":
 		LocalAchievements.achieve(server, world, account_id, "scroll_found", at)
@@ -1882,6 +1882,11 @@ static func claim_find(server: LocalServer, world: Dictionary, site: Dictionary,
 
 
 static func find_text(data: Dictionary, find: Dictionary) -> String:
+	var main := _main_find_text(data, find)
+	return "%s and a Svarog's Ember" % main if find.get("ember", false) == true else main
+
+
+static func _main_find_text(data: Dictionary, find: Dictionary) -> String:
 	match String(find.type):
 		"resources":
 			return "%d resources" % int(LocalLogistics.total(find.resources))
@@ -1914,7 +1919,7 @@ static func on_site_explored(server: LocalServer, world: Dictionary, event: Dict
 	# A clan that knows the old stones finds more in them (clans.json siteLoot).
 	var searcher := server.find_village(world, int(army.homeVillageId))
 	var loot_factor := (float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0) * (1.0 + float(searcher.state.get("bonuses", {}).get("siteLoot", 0.0)))
-	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), distance, LocalResearch.scrolls(world), gear, loot_factor)
+	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), distance, LocalResearch.scrolls(world), gear, loot_factor, world.members.size())
 	# Scouts along find more besides: resources carried home with the find.
 	var extra := scout_loot(data, scouts_in(data, army.units), distance, loot_factor)
 	if find.type == "resources" or LocalLogistics.total(extra) > 0:

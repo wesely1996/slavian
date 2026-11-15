@@ -795,7 +795,9 @@ const sitesFileSchema = z.object({
       terrain: z.array(z.enum(TERRAIN_IDS)).min(1),
       exploreHours: z.number().positive(),
       guardianChance: z.number().min(0).max(1),
-      finds: z.object({ resources: z.number().nonnegative(), gear: z.number().nonnegative(), scroll: z.number().nonnegative(), ember: z.number().nonnegative() }),
+      finds: z.object({ resources: z.number().nonnegative(), gear: z.number().nonnegative(), scroll: z.number().nonnegative() }),
+      // The chance of a Svarog's Ember on top of the find, divided by the players.
+      emberChance: z.number().min(0).max(1),
       description: z.string(),
     }),
   ),

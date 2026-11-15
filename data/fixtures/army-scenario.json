@@ -9916,6 +9916,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -9938,10 +9939,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T10:59:31.200Z"
       }
@@ -10535,7 +10536,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T10:34:35.563Z",
       "hard": false,
@@ -10613,7 +10616,14 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T10:34:35.563Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -10623,6 +10633,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T10:34:35.563Z"
      },
      {
@@ -12892,6 +12907,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06
@@ -12903,7 +12919,7 @@
       "resources": {
        "amounts": {
         "iron": 383,
-        "wood": 1000,
+        "wood": 1100,
         "grain": 765.3515416666684,
         "stone": 962
        },
@@ -12914,10 +12930,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T12:00:28.800Z"
       }
@@ -13847,7 +13863,9 @@
       "guardians": null,
       "exploredBy": 1,
       "find": {
-       "type": "ember"
+       "type": "scroll",
+       "ember": true,
+       "scroll": "mokosh_weave"
       },
       "exploredAt": "2026-06-01T10:34:35.563Z",
       "hard": false,
@@ -13939,7 +13957,14 @@
       "quest": null
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": 1,
+      "foundAt": "2026-06-01T10:34:35.563Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -13949,6 +13974,11 @@
      {
       "accountId": 1,
       "achievement": "ember_found",
+      "earnedAt": "2026-06-01T10:34:35.563Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "scroll_found",
       "earnedAt": "2026-06-01T10:34:35.563Z"
      },
      {
@@ -16253,7 +16283,7 @@
    "response": {
     "notifications": [
      {
-      "id": 35,
+      "id": 36,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -16262,7 +16292,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 35,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16271,7 +16301,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 34,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (0, 5)",
@@ -16280,7 +16310,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 33,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -16289,7 +16319,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 32,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
@@ -16298,7 +16328,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 31,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Shield of the Village",
@@ -16307,7 +16337,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 30,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -16316,7 +16346,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 29,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -16325,7 +16355,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 28,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -16334,7 +16364,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 27,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
@@ -16343,7 +16373,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 26,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
@@ -16352,7 +16382,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 25,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -16361,7 +16391,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 24,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16370,7 +16400,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 23,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -16379,7 +16409,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 22,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-7, 5) gave up and left",
@@ -16388,7 +16418,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 21,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Hold the Ford",
@@ -16397,12 +16427,21 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army held (0, -1)",
       "body": "The horde was beaten after 2 rounds.",
       "createdAt": "2026-06-01T10:47:21.600Z",
+      "read": false
+     },
+     {
+      "id": 19,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Lorekeeper",
+      "body": "Find a lore scroll.",
+      "createdAt": "2026-06-01T10:34:35.563Z",
       "read": false
      },
      {
@@ -16427,8 +16466,8 @@
       "id": 16,
       "kind": "site",
       "tier": "digest",
-      "title": "The Stone Idol at (-3, 0) gave up a Svarog's Ember",
-      "body": "Explored and done.",
+      "title": "The Stone Idol at (-3, 0) gave up the scroll \"Weave of Mokosh\" and a Svarog's Ember",
+      "body": "Storehouses hold 10% more.",
       "createdAt": "2026-06-01T10:34:35.563Z",
       "read": false
      },
@@ -16568,7 +16607,7 @@
       "read": false
      }
     ],
-    "unread": 35,
+    "unread": 36,
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
   }
