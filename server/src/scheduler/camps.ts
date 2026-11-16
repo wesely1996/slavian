@@ -284,7 +284,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     // A lair holds an Ember by chance, and always while the bridge lacks one.
     const lucky = rngFor(world.seed, camp.id, 0xe3)() < data.camps.loot.emberChance;
     ember = camp.kind === 'lair' && (lucky || (await embersShort(client, data, world.id)));
-    if (ember) await addEmbers(client, world.id, 1);
+    if (ember) await addEmbers(client, world.id, army.ownerAccountId, 1);
     if (camp.kind === 'lair') await bridgeQuest(client, data, world, 'lair', at);
     // A bridge quest's lair.
     if (camp.quest && !parseArmyQuestMark(camp.quest)) await bridgeQuest(client, data, world, camp.quest as BridgeQuest, at);

@@ -348,7 +348,7 @@ export const raidHandlers: HandlerRegistry = {
           const picked = pickFind(data, find, owned, found, world.seed ^ Math.imul(army.id + 1, 0x9e3779b1) ^ (payload.stage * 16 + i));
           if (!picked) continue;
           if (picked.kind === 'ember') {
-            await addEmbers(client, world.id, 1);
+            await addEmbers(client, world.id, army.ownerAccountId, 1);
             finds.push("a Svarog's Ember");
           } else if (picked.kind === 'gear' && current) {
             await saveHero(client, { ...current, inventory: [...current.inventory, picked.item] });

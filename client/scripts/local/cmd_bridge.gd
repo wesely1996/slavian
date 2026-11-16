@@ -33,7 +33,7 @@ static func donate_command(server: LocalServer, world: Dictionary, body: Diction
 	var embers := int(body.get("embers", 0))
 	var from_vault := LocalLogistics.withdraw(world.vault.amounts, resources)
 	if embers > int(world.embers):
-		return LocalVillage.rule("The group has %d Svarog's Ember" % int(world.embers))
+		return LocalVillage.rule("You have %d Svarog's Ember" % int(world.embers))
 	var result := donate(data, world.bridge, from_vault.taken, embers)
 	if result.has("error"):
 		return result

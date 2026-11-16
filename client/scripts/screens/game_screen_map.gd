@@ -285,7 +285,7 @@ func _bridge_panel() -> void:
 	var give := UI.button(tr("Give from the vault"), func() -> void: _donate_bridge(Game.vault.get("amounts", {}), 0))
 	give.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(give)
-	if BridgeText.embers_missing(Game.data, bridge) > 0 and int(Game.world.get("embers", 0)) > 0:
+	if BridgeText.embers_missing(Game.data, bridge) > 0 and Game.my_embers() > 0:
 		var ember := UI.button(tr("Give an Ember"), func() -> void: _donate_bridge({}, 1))
 		ember.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(ember)
@@ -295,7 +295,7 @@ func _bridge_panel() -> void:
 	if ritual_open:
 		var forge := UI.button(tr("Forge the torc"), func() -> void: _forge_torc())
 		forge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		forge.disabled = int(Game.world.get("embers", 0)) < int(Game.data.bridge.ritualEmbers)
+		forge.disabled = Game.my_embers() < int(Game.data.bridge.ritualEmbers)
 		row.add_child(forge)
 	_panel_body.add_child(row)
 
@@ -335,7 +335,7 @@ func _vault_panel() -> void:
 	for kind in Ledger.KINDS:
 		parts.append(tr("%s %d") % [UI.resource_name(kind), int(vault.amounts[kind])])
 	_panel_body.add_child(UI.label("  ".join(parts) + tr("   (of %d each)") % capacity, UI.SMALL_SIZE))
-	_panel_body.add_child(UI.label(tr("Svarog's Ember: %d (from lairs)") % int(Game.world.get("embers", 0)), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(tr("Your Svarog's Embers: %d · the group's: %d") % [Game.my_embers(), int(Game.world.get("embers", 0))], UI.SMALL_SIZE, UI.MUTED))
 	if vault.upgradingTo != null:
 		var done_at := TimeUtil.parse_iso(vault.upgradeCompletesAt)
 		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)

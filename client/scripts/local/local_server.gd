@@ -641,7 +641,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				var cost := int(picked.embers)
 				if cost > 0:
 					if int(world.embers) < cost:
-						return _rule_answer(LocalVillage.rule("Turning to another god takes %d Svarog's Ember; the group has %d" % [cost, int(world.embers)]))
+						return _rule_answer(LocalVillage.rule("Turning to another god takes %d Svarog's Ember; you have %d" % [cost, int(world.embers)]))
 					world.embers = int(world.embers) - cost
 					changed.append(["world"])
 				village.state = picked.state
@@ -794,7 +794,7 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 		var embers := int(def.get("embers", 0))
 		if embers > 0:
 			if int(world.embers) < embers:
-				return LocalVillage.rule("Every level of the %s takes %d Svarog's Ember; the group has %d" % [def.name, embers, int(world.embers)])
+				return LocalVillage.rule("Every level of the %s takes %d Svarog's Ember; you have %d" % [def.name, embers, int(world.embers)])
 			world.embers = int(world.embers) - embers
 			result.embersChanged = true
 	if result.has("state"):
@@ -1313,7 +1313,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"rallyVillageId": m.get("rallyVillageId"), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "embers": int(world.embers), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:

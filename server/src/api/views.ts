@@ -723,6 +723,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       bought: m.bought,
       // Their rally point: where newly trained troops march (null: none).
       rallyVillageId: m.rallyVillageId,
+      // Their own Svarog's Embers (the world's `embers` is everyone's together).
+      embers: m.embers,
       // When their scouts may next search for ruins (null: never searched).
       ruinSearchReadyAt: lastSearches.has(m.accountId) ? ruinSearchReadyAt(data, lastSearches.get(m.accountId)!, world.speed).toISOString() : null,
       // Research their Academies brought in by settledAt (null: none yet),

@@ -106,7 +106,7 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
                 [world.id, JSON.stringify(step.set.bridge)],
               );
             }
-            if (step.set.embers !== undefined) await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [world.id, step.set.embers]);
+            if (step.set.embers !== undefined) await db.query('UPDATE world_members SET embers = $2 WHERE world_id = $1', [world.id, step.set.embers]);
             if (step.set.vault) {
               await db.query('INSERT INTO vaults (world_id) VALUES ($1) ON CONFLICT DO NOTHING', [world.id]);
               await db.query('UPDATE vaults SET amounts = $2 WHERE world_id = $1', [world.id, JSON.stringify(step.set.vault)]);

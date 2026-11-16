@@ -52,7 +52,8 @@ export interface NewWorld {
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
-  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity, embers,
+  max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity,
+  (SELECT COALESCE(sum(m.embers), 0) FROM world_members m WHERE m.world_id = worlds.id AND m.left_at IS NULL)::int AS embers,
   difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
   ritual_at AS "ritualAt", ended_at AS "endedAt", hatred`;
 
@@ -105,6 +106,8 @@ export interface Member {
   bought: Record<string, number>;
   // Their rally point: the village their newly trained troops march to.
   rallyVillageId: number | null;
+  // Their Svarog's Embers: each player's own.
+  embers: number;
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -118,7 +121,7 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
             m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought,
-            m.rally_village_id AS "rallyVillageId"
+            m.rally_village_id AS "rallyVillageId", m.embers
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,
@@ -294,8 +297,21 @@ export async function loadHexes(client: DbClient, worldId: number): Promise<[num
   return rows[0] ? decodeTerrain(rows[0].cells) : [];
 }
 
-export async function addEmbers(client: DbClient, worldId: number, n: number): Promise<void> {
-  await client.query('UPDATE worlds SET embers = embers + $2 WHERE id = $1', [worldId, n]);
+// Gives a player Svarog's Embers (theirs alone). With no player to give
+// them to (an army without an owner), the first member gets them.
+export async function addEmbers(client: DbClient, worldId: number, accountId: number | null, n: number): Promise<void> {
+  await client.query(
+    `UPDATE world_members SET embers = embers + $3 WHERE world_id = $1 AND account_id = COALESCE(
+       (SELECT account_id FROM world_members WHERE world_id = $1 AND account_id = $2 AND left_at IS NULL),
+       (SELECT account_id FROM world_members WHERE world_id = $1 AND left_at IS NULL ORDER BY joined_at, account_id LIMIT 1))`,
+    [worldId, accountId, n],
+  );
+}
+
+// A player's own Svarog's Embers.
+export async function memberEmbers(client: DbClient, worldId: number, accountId: number | null): Promise<number> {
+  const { rows } = await client.query<{ embers: number }>('SELECT embers FROM world_members WHERE world_id = $1 AND account_id = $2', [worldId, accountId]);
+  return rows[0]?.embers ?? 0;
 }
 
 export async function setQuietHours(client: DbClient, worldId: number, window: QuietWindow | null): Promise<void> {
@@ -307,9 +323,9 @@ export async function setQuietHours(client: DbClient, worldId: number, window: Q
   ]);
 }
 
-// Spends the group's Svarog's Ember; false if there isn't enough.
-export async function spendEmbers(client: DbClient, worldId: number, n: number): Promise<boolean> {
-  const { rowCount } = await client.query('UPDATE worlds SET embers = embers - $2 WHERE id = $1 AND embers >= $2', [worldId, n]);
+// Spends a player's Svarog's Embers; false if they haven't enough.
+export async function spendEmbers(client: DbClient, worldId: number, accountId: number | null, n: number): Promise<boolean> {
+  const { rowCount } = await client.query('UPDATE world_members SET embers = embers - $3 WHERE world_id = $1 AND account_id = $2 AND embers >= $3', [worldId, accountId, n]);
   return rowCount === 1;
 }
 

@@ -86,6 +86,8 @@ var _view := "map"
 var _view_button: Button
 
 var _inbox_button: Button
+var _ember_chip: HBoxContainer
+var _ember_label: Label
 
 ## Which of the inbox and the chat the shared button opened last.
 var _messages_tab := "inbox"
@@ -283,6 +285,7 @@ func _ready() -> void:
 	_build_ui()
 	camera.tapped.connect(_on_map_tapped)
 	Game.world_changed.connect(_on_world_changed)
+	Game.world_changed.connect(_update_embers)
 	Game.village_changed.connect(_on_village_changed)
 	Live.village_updated.connect(Game.update_village)
 	Live.world_updated.connect(Game.set_world)
@@ -505,6 +508,16 @@ func _build_ui() -> void:
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_live_label.visible = false
 	bar.add_child(_live_label)
+	# The player's own Svarog's Embers, beside the stores.
+	_ember_chip = UI.hbox(4)
+	_ember_chip.tooltip_text = tr("Your Svarog's Embers: found in ancient sites and lairs, spent on the bridge, the Shrine and the mightiest research.")
+	if Art.has("resource/ember"):
+		_ember_chip.add_child(UI.icon("resource/ember", 34))
+	_ember_label = UI.label("0", UI.SMALL_SIZE, UiTheme.ON_WOOD)
+	_ember_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_ember_chip.add_child(_ember_label)
+	bar.add_child(_ember_chip)
+	_update_embers()
 	# Notices and the group chat share one button: it opens whichever has
 	# something new (the chat first), and the sheet switches between them.
 	_inbox_button = UI.button("", _show_messages, "icon/inbox")
@@ -1705,6 +1718,11 @@ func _on_live_connection(connected: bool) -> void:
 ## for the live message: a connection that died quietly (the phone asleep)
 ## left the troops on screen as if they had never gone. The solo engine
 ## sends its news itself.
+func _update_embers() -> void:
+	if _ember_label != null:
+		_ember_label.text = str(Game.my_embers())
+
+
 func _sync_after_command() -> void:
 	if Local.is_active():
 		return

@@ -19,7 +19,7 @@ import { ongoingBattleAt, saveSetup } from '../db/battles.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { addBought, addEmbers, boughtCount, loadHexes, spendEmbers, type World } from '../db/worlds.js';
+import { addBought, addEmbers, boughtCount, loadHexes, memberEmbers, spendEmbers, type World } from '../db/worlds.js';
 import { pickDeity } from '../sim/shrines.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { BuildCompletePayload, TrainingCompletePayload } from '../scheduler/handlers.js';
@@ -142,7 +142,7 @@ export async function queueBuildCommand(
     const site = villageSite(terrain, await riverEdgesAt(client, world.id, hex(village.q, village.r)), hex(village.q, village.r));
     const { state, queued } = queueBuild(deps.data, village.state, order, input.now, world.speed, site);
     // Some levels take the group's Svarog's Embers too (the Shrine).
-    await spendBuildEmbers(client, deps.data, world, queued.building);
+    await spendBuildEmbers(client, deps.data, world, village.ownerAccountId, queued.building);
     const payload: BuildCompletePayload = {
       villageId: village.id,
       plot: queued.plot,
@@ -194,11 +194,11 @@ export async function cancelTrainingCommand(
 }
 
 // The Embers a level of `building` takes from the group, if any.
-async function spendBuildEmbers(client: DbClient, data: GameData, world: World, building: string): Promise<void> {
+async function spendBuildEmbers(client: DbClient, data: GameData, world: World, owner: number | null, building: string): Promise<void> {
   const def = data.buildings.buildings[building];
   const embers = def?.embers ?? 0;
-  if (embers > 0 && !(await spendEmbers(client, world.id, embers))) {
-    throw new RuleError(`Every level of the ${def!.name} takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+  if (embers > 0 && !(await spendEmbers(client, world.id, owner, embers))) {
+    throw new RuleError(`Every level of the ${def!.name} takes ${embers} Svarog's Ember; you have ${await memberEmbers(client, world.id, owner)}`);
   }
   if (embers > 0) await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
@@ -210,7 +210,9 @@ export async function pickDeityCommand(db: Db, deps: SchedulerDeps, input: Villa
     const { state, embers } = pickDeity(deps.data, village.state, input.deity);
     // Turning to another god takes the group's Embers.
     if (embers > 0) {
-      if (!(await spendEmbers(client, world.id, embers))) throw new RuleError(`Turning to another god takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+      if (!(await spendEmbers(client, world.id, village.ownerAccountId, embers))) {
+        throw new RuleError(`Turning to another god takes ${embers} Svarog's Ember; you have ${await memberEmbers(client, world.id, village.ownerAccountId)}`);
+      }
       await notifyWorld(client, { worldId: world.id, type: 'world' });
     }
     if (village.ownerAccountId === null) return { state, result: null };
@@ -378,7 +380,7 @@ export async function cancelBuildCommand(
       .filter((item) => !kept.has(`${item.plot}:${item.targetLevel}`))
       .reduce((sum, item) => sum + (deps.data.buildings.buildings[item.building]?.embers ?? 0), 0);
     if (embers > 0) {
-      await addEmbers(client, world.id, embers);
+      await addEmbers(client, world.id, village.ownerAccountId, embers);
       await notifyWorld(client, { worldId: world.id, type: 'world' });
     }
     for (const item of moved) {
@@ -488,8 +490,8 @@ export async function startResearchCommand(
     }
     // The mightiest techs take the group's Svarog's Embers as well.
     const embers = deps.data.research.techs[input.tech]!.embers ?? 0;
-    if (embers > 0 && !(await spendEmbers(client, world.id, embers))) {
-      throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${embers} Svarog's Ember; the group has ${world.embers}`);
+    if (embers > 0 && !(await spendEmbers(client, world.id, village.ownerAccountId, embers))) {
+      throw new RuleError(`${deps.data.research.techs[input.tech]!.name} takes ${embers} Svarog's Ember; you have ${await memberEmbers(client, world.id, village.ownerAccountId)}`);
     }
     if (embers > 0) await notifyWorld(client, { worldId: world.id, type: 'world' });
     await spendGroupPoints(client, deps.data, world, needed, input.now);

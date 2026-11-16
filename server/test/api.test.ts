@@ -1823,8 +1823,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // The next stage's quest raises its own lair.
     expect(w.camps.filter((c: { quest: string | null; kind: string }) => c.quest === 'grove' && c.kind === 'lair')).toHaveLength(1);
     // (The scouts' find may have been an Ember.)
-    await db.query('UPDATE worlds SET embers = 0 WHERE id = $1', [worldId]);
-    expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
+    await db.query('UPDATE world_members SET embers = 0 WHERE world_id = $1', [worldId]);
+    expect((await donate({}, 1)).body.message).toMatch(/have 0 Svarog/);
   });
 
   it('calls Ritual Night when the bridge is whole, and the run is won when the city outlasts it', async () => {
@@ -1839,7 +1839,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       `UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int, 'donated', $3::jsonb, 'embers', $4::int) WHERE world_id = $1`,
       [worldId, stages.length - 1, JSON.stringify(last.cost), last.embers],
     );
-    await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
+    await db.query('UPDATE world_members SET embers = $2 WHERE world_id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
     let w = (await call('POST', `/v1/worlds/${worldId}/bridge/ritual`, rusa.token)).body;
     expect(w.bridge.status).toBe('raising');
     // (The small hordes sent at the builders are another test's: they stay home.)

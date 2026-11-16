@@ -168,7 +168,7 @@ static func start_research(server: LocalServer, world: Dictionary, village: Dict
 	var embers := int(data.research.techs[tech].get("embers", 0))
 	if embers > 0:
 		if int(world.embers) < embers:
-			return LocalVillage.rule("%s takes %d Svarog's Ember; the group has %d" % [data.research.techs[tech].name, embers, int(world.embers)])
+			return LocalVillage.rule("%s takes %d Svarog's Ember; you have %d" % [data.research.techs[tech].name, embers, int(world.embers)])
 		world.embers = int(world.embers) - embers
 	group_points(server, world, now)
 	spend_group_points(server, world, needed, now)
