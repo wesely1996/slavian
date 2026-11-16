@@ -81,7 +81,10 @@ export class LiveHub {
     this.owners.set(socket, account.id);
     socket.on('message', (raw) => {
       void (async () => {
-        const parsed = clientMessage.safeParse(safeJson(raw.toString()));
+        const message = safeJson(raw.toString());
+        // The client's heartbeat: it reconnects when no answer comes.
+        if (message !== null && typeof message === 'object' && (message as { type?: unknown }).type === 'ping') return send(socket, { type: 'pong' });
+        const parsed = clientMessage.safeParse(message);
         if (!parsed.success) return send(socket, { type: 'error', message: 'Unknown message' });
         const { worldId } = parsed.data;
         const member = await isMember(this.db, worldId, account.id);

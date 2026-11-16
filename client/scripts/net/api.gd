@@ -15,6 +15,11 @@ func get_json(path: String) -> Response:
 	return await request(HTTPClient.METHOD_GET, path)
 
 
+## A command (anything but a read) the server accepted, online: the game
+## screen reads the world again after it, whatever the live connection does.
+signal command_done
+
+
 func post_json(path: String, body: Dictionary = {}, remote := false) -> Response:
 	return await request(HTTPClient.METHOD_POST, path, body, remote)
 
@@ -62,6 +67,8 @@ func request(method: HTTPClient.Method, path: String, body: Variant = null, remo
 	response.ok = response.status >= 200 and response.status < 300
 	if not response.ok:
 		response.error = error_text(response.data, response.status)
+	elif method != HTTPClient.METHOD_GET and not path.begins_with("/v1/auth") and not path.contains("/chat") and not path.contains("/notifications"):
+		command_done.emit()
 	return response
 
 

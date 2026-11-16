@@ -100,6 +100,7 @@ var _root: VBoxContainer
 var _body: HBoxContainer
 
 var _scroll: ScrollContainer
+var _sync_timer: Timer
 
 var _resources: HBoxContainer
 
@@ -284,6 +285,9 @@ func _ready() -> void:
 	Live.village_updated.connect(Game.update_village)
 	Live.world_updated.connect(Game.set_world)
 	Live.connection_changed.connect(_on_live_connection)
+	# Every command the server accepts is followed by a fresh read of the
+	# world: nothing on screen waits for a live message that may not come.
+	Api.command_done.connect(_sync_after_command)
 	Live.waves_updated.connect(Game.set_waves)
 	Live.scouting_updated.connect(Game.set_scouting)
 	Live.battles_updated.connect(Game.set_battles)
@@ -337,6 +341,7 @@ func _exit_tree() -> void:
 	Live.village_updated.disconnect(Game.update_village)
 	Live.world_updated.disconnect(Game.set_world)
 	Live.connection_changed.disconnect(_on_live_connection)
+	Api.command_done.disconnect(_sync_after_command)
 	Live.waves_updated.disconnect(Game.set_waves)
 	Live.scouting_updated.disconnect(Game.set_scouting)
 	Live.battles_updated.disconnect(Game.set_battles)
@@ -1699,8 +1704,22 @@ func _on_live_connection(connected: bool) -> void:
 ## left the troops on screen as if they had never gone. The solo engine
 ## sends its news itself.
 func _sync_after_command() -> void:
-	if not Local.is_active():
-		_refetch_world()
+	if Local.is_active():
+		return
+	# Several commands in a row are answered by one read.
+	if _sync_timer == null:
+		_sync_timer = Timer.new()
+		_sync_timer.one_shot = true
+		_sync_timer.timeout.connect(_sync_now)
+		add_child(_sync_timer)
+	_sync_timer.start(0.4)
+
+
+## The world read again, without the inbox and chat a reconnect also reads.
+func _sync_now() -> void:
+	var response := await Api.get_json("/v1/worlds/%d" % Game.world_id())
+	if response.ok and int(response.data.get("id", 0)) == Game.world_id():
+		Game.set_world(response.data)
 
 func _refetch_world() -> void:
 	pass
