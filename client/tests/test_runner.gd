@@ -442,6 +442,18 @@ func _test_research() -> void:
 
 
 func _test_heroes() -> void:
+	# The hero's skills count in the screens' numbers only while it is at home
+	# in that village (effectiveBonuses): Quartermaster's caravan load.
+	var game: Node = root.get_node("Game")
+	var kept: Array = game.heroes
+	game.heroes = [{"accountId": 1, "villageId": 5, "status": "home", "bonuses": {"caravanCapacity": 0.2}}]
+	var harnessed := {"id": 5, "bonuses": {"caravanCapacity": 0.1}}
+	_check(is_equal_approx(float(game.village_bonuses(harnessed).caravanCapacity), 0.3), "hero at home adds its bonuses")
+	_check(is_equal_approx(float(harnessed.bonuses.caravanCapacity), 0.1), "the village's own bonuses untouched")
+	_check(is_equal_approx(float(game.village_bonuses({"id": 6, "bonuses": {}}).get("caravanCapacity", 0.0)), 0.0), "not in another village")
+	game.heroes[0].status = "with_army"
+	_check(game.village_bonuses(harnessed).caravanCapacity == 0.1, "not while away with an army")
+	game.heroes = kept
 	_check(HeroText.effects({"attack.all": 0.08, "lootTaken": -0.15}) == "+8% attack, −15% loot taken", "hero effects: %s" % HeroText.effects({"attack.all": 0.08, "lootTaken": -0.15}))
 	_check(HeroText.effects({}) == "", "no effects")
 	var hero := {"name": "Vasilisa", "level": 3, "status": "home", "villageId": 4}

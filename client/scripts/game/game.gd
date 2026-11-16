@@ -418,6 +418,20 @@ func hero_at(village_id: int) -> Dictionary:
 	return {}
 
 
+## A village's bonuses with its hero's skills and gear added while the hero
+## is at home there (effectiveBonuses on the server): caravan load and speed,
+## scout speed and the like.
+func village_bonuses(village: Dictionary) -> Dictionary:
+	var out: Dictionary = village.get("bonuses", {}).duplicate()
+	for hero in heroes:
+		if hero.villageId == null or int(hero.villageId) != int(village.get("id", -1)) or hero.status != "home":
+			continue
+		var extra: Dictionary = hero.get("bonuses", {})
+		for key in extra:
+			out[key] = float(out.get(key, 0.0)) + float(extra[key])
+	return out
+
+
 func set_research(world_id_: int, new_research: Array) -> void:
 	if world_id_ != world_id():
 		return

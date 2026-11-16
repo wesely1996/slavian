@@ -460,7 +460,23 @@ func _build_ui() -> void:
 	_stores_button.clip_text = true
 	_stores_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_stores_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_resources.add_child(_stores_button)
+	_stores_button.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Whose stores, and under it the player's own Svarog's Embers: one
+	# column, so the embers never make the strip wider than a phone.
+	var whose := UI.vbox(0)
+	whose.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	whose.add_child(_stores_button)
+	_ember_chip = UI.hbox(4)
+	_ember_chip.alignment = BoxContainer.ALIGNMENT_CENTER
+	_ember_chip.mouse_filter = Control.MOUSE_FILTER_PASS
+	_ember_chip.tooltip_text = tr("Your Svarog's Embers: found in ancient sites and lairs, spent on the bridge, the Shrine and the mightiest research.")
+	if Art.has("resource/ember"):
+		_ember_chip.add_child(UI.icon("resource/ember", 24))
+	_ember_label = UI.label("0", 18, UiTheme.ON_WOOD)
+	_ember_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_ember_chip.add_child(_ember_label)
+	whose.add_child(_ember_chip)
+	_resources.add_child(whose)
 	for kind in Ledger.KINDS:
 		var cell := UI.hbox(8)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -508,15 +524,6 @@ func _build_ui() -> void:
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_live_label.visible = false
 	bar.add_child(_live_label)
-	# The player's own Svarog's Embers, beside the stores.
-	_ember_chip = UI.hbox(4)
-	_ember_chip.tooltip_text = tr("Your Svarog's Embers: found in ancient sites and lairs, spent on the bridge, the Shrine and the mightiest research.")
-	if Art.has("resource/ember"):
-		_ember_chip.add_child(UI.icon("resource/ember", 34))
-	_ember_label = UI.label("0", UI.SMALL_SIZE, UiTheme.ON_WOOD)
-	_ember_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_ember_chip.add_child(_ember_label)
-	bar.add_child(_ember_chip)
 	_update_embers()
 	# Notices and the group chat share one button: it opens whichever has
 	# something new (the chat first), and the sheet switches between them.

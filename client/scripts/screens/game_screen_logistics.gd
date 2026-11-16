@@ -24,7 +24,7 @@ func _caravans_section(village: Dictionary) -> void:
 
 func _caravan_load_tab(village: Dictionary) -> void:
 	var yard := int(village.levels.get("caravan_yard", 0))
-	var capacity := CaravanMath.capacity(Game.data, village.get("bonuses", {}))
+	var capacity := CaravanMath.capacity(Game.data, Game.village_bonuses(village))
 	if yard < 1:
 		_panel_body.add_child(UI.with_info(UI.label(tr("Needs a Caravan Yard"), UI.SMALL_SIZE, UI.MUTED), tr("Build a Caravan Yard in the village to send caravans to allies and the Holy City vault.")))
 		return
@@ -148,7 +148,7 @@ func _caravan_what(village: Dictionary, limits: Dictionary, own_place: Dictionar
 
 ## How many caravans the load (or what it brings back) takes.
 func _caravans_needed(village: Dictionary) -> int:
-	return maxi(CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})), CaravanMath.needed(Game.data, _caravan_back, village.get("bonuses", {})))
+	return maxi(CaravanMath.needed(Game.data, _caravan_load, Game.village_bonuses(village)), CaravanMath.needed(Game.data, _caravan_back, Game.village_bonuses(village)))
 
 
 ## Step 3: the whole trip on one card, and Send.
@@ -192,7 +192,7 @@ func _caravan_confirm(village: Dictionary, free: int, to_step: Callable) -> void
 		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), _caravan_load)
 		send.disabled = needed == 0 or needed > free or not affordable
 		if fetch != null:
-			fetch.disabled = CaravanMath.needed(Game.data, _caravan_load, village.get("bonuses", {})) == 0 or needed > free
+			fetch.disabled = CaravanMath.needed(Game.data, _caravan_load, Game.village_bonuses(village)) == 0 or needed > free
 		var line := tr_n("Needs %d caravan", "Needs %d caravans", needed) % needed if needed > 0 else tr("Nothing to carry")
 		if needed > free:
 			line += tr(" (only %d at home)") % free
