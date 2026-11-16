@@ -66,7 +66,7 @@ export const mapEventHandlers: HandlerRegistry = {
       taken: await takenHexes(client, world.id),
       sites: (await listSites(client, world.id)).map((s) => hex(s.q, s.r)),
       rivers: await listRiverEdges(client, world.id),
-      shipyards: (await listShipyards(client, world.id)).map((s) => hex(s.q, s.r)),
+      shipyards: (await listShipyards(client, world.id)).map((s) => ({ cell: hex(s.q, s.r), edge: s.edge })),
       activeFronts: world.activeFronts,
       seed: world.seed,
       day,

@@ -57,12 +57,23 @@ export function fastestStep(data: GameData, land: Land): number {
 // shared bank hex) and, with `terrain`, across every lake it reaches: the
 // lake's hexes, its shores, and the rivers that flow into it join, and so on.
 export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex; b: Hex }, terrain?: ReadonlyMap<string, TerrainId>): string[] {
+  const water = riverWater(rivers, edge, terrain);
+  const lanes = new Set<string>();
+  for (const cell of water.values()) {
+    for (const n of neighbors(cell)) if (water.has(hexKey(n))) lanes.add(edgeKey(cell, n));
+  }
+  return [...lanes].sort();
+}
+
+// The hexes on the water of `edge`'s river (riverLanes): its banks, and the
+// lakes it reaches with their shores and rivers. One shipyard to a river.
+export function riverWater(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex; b: Hex }, terrain?: ReadonlyMap<string, TerrainId>): Map<string, Hex> {
   const byHex = new Map<string, number[]>();
   rivers.forEach((e, i) => {
     for (const end of [e.a, e.b]) byHex.set(hexKey(end), [...(byHex.get(hexKey(end)) ?? []), i]);
   });
   const start = rivers.findIndex((e) => edgeKey(e.a, e.b) === edgeKey(edge.a, edge.b));
-  if (start < 0) return [];
+  if (start < 0) return new Map();
   const seen = new Set([start]);
   const queue = [start];
   // Bank and shore hexes, and lake hexes: all on the water.
@@ -90,11 +101,7 @@ export function riverLanes(rivers: readonly { a: Hex; b: Hex }[], edge: { a: Hex
     const e = rivers[queue.shift()!]!;
     for (const end of [e.a, e.b]) reach(end);
   }
-  const lanes = new Set<string>();
-  for (const cell of water.values()) {
-    for (const n of neighbors(cell)) if (water.has(hexKey(n))) lanes.add(edgeKey(cell, n));
-  }
-  return [...lanes].sort();
+  return water;
 }
 
 // The terrain's move cost of entering `to`, or null when it is impassable

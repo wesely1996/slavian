@@ -4,7 +4,7 @@
 import type { GameData, TerrainId } from '../data/index.js';
 import type { CampReward } from '../db/camps.js';
 import { hexDistance, hexKey, ring, type Hex } from './hex.js';
-import { edgeKey } from './land.js';
+import { edgeKey, riverWater } from './land.js';
 import { frontOf, type Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
@@ -40,9 +40,10 @@ export function planMapEvent(
     villages: readonly Hex[];
     taken: ReadonlySet<string>;
     sites: readonly Hex[];
-    // River edges, and the shipyards there already are.
+    // River edges, and the shipyards there already are (with the river
+    // edge each stands on).
     rivers: readonly { a: Hex; b: Hex }[];
-    shipyards: readonly Hex[];
+    shipyards: readonly { cell: Hex; edge: { a: Hex; b: Hex } }[];
     activeFronts: readonly Front[];
     seed: number;
     day: number;
@@ -60,6 +61,11 @@ export function planMapEvent(
   for (const e of [...input.rivers].sort((x, y) => (edgeKey(x.a, x.b) < edgeKey(y.a, y.b) ? -1 : 1))) {
     for (const end of [e.a, e.b]) banks.set(hexKey(end), [...(banks.get(hexKey(end)) ?? []), e]);
   }
+  // A river (and the lakes it reaches) holds one shipyard, building or done.
+  const sailed = new Set<string>();
+  if (kind === 'shipyard') {
+    for (const s of input.shipyards) for (const k of riverWater(input.rivers, s.edge, input.terrain).keys()) sailed.add(k);
+  }
   const center = input.villages[Math.floor(rng() * input.villages.length)]!;
   const usable: { cell: Hex; type: TerrainId }[] = [];
   for (let d = rules.range.min; d <= rules.range.max; d++) {
@@ -68,7 +74,7 @@ export function planMapEvent(
       if (!type || type === 'holy_city' || data.terrain.terrain[type].moveCost === null || input.taken.has(hexKey(cell))) continue;
       if (kind === 'ruin' && !Object.values(data.sites.kinds).some((k) => k.terrain.includes(type))) continue;
       if (kind === 'ruin' && input.sites.some((s) => hexDistance(s, cell) < 2)) continue;
-      if (kind === 'shipyard' && (!banks.has(hexKey(cell)) || input.shipyards.some((s) => hexDistance(s, cell) < 2))) continue;
+      if (kind === 'shipyard' && (!banks.has(hexKey(cell)) || sailed.has(hexKey(cell)) || input.shipyards.some((s) => hexDistance(s.cell, cell) < 2))) continue;
       usable.push({ cell, type });
     }
   }

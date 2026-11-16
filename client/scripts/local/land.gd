@@ -187,6 +187,20 @@ static func fastest_step(data: Dictionary, land: Dictionary) -> float:
 ## ({"q,r": id}), across every lake it reaches (its hexes and shores, and
 ## the rivers flowing into it). `rivers`: [{a, b}].
 static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i, terrain := {}) -> Array:
+	var water := river_water(rivers, a, b, terrain)
+	var lanes := {}
+	for k in water:
+		for n in HexMath.neighbors(water[k]):
+			if water.has(key(n)):
+				lanes[edge_key(water[k], n)] = true
+	var out: Array = lanes.keys()
+	out.sort()
+	return out
+
+
+## The hexes on the water of a-b's river (riverWater): its banks, and the
+## lakes it reaches with their shores and rivers. {"q,r": Vector2i}.
+static func river_water(rivers: Array, a: Vector2i, b: Vector2i, terrain := {}) -> Dictionary:
 	var by_hex := {}
 	for i in rivers.size():
 		for end in [rivers[i].a, rivers[i].b]:
@@ -199,21 +213,13 @@ static func river_lanes(rivers: Array, a: Vector2i, b: Vector2i, terrain := {}) 
 			start = i
 			break
 	if start < 0:
-		return []
+		return {}
 	var state := {"seen": {start: true}, "queue": [start], "water": {}}
 	while not state.queue.is_empty():
 		var e: Dictionary = rivers[state.queue.pop_front()]
 		for end in [e.a, e.b]:
 			_reach(end, by_hex, terrain, state)
-	var water: Dictionary = state.water
-	var lanes := {}
-	for k in water:
-		for n in HexMath.neighbors(water[k]):
-			if water.has(key(n)):
-				lanes[edge_key(water[k], n)] = true
-	var out: Array = lanes.keys()
-	out.sort()
-	return out
+	return state.water
 
 
 ## A hex on the water (riverLanes): the rivers along it join, and a lake

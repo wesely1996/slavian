@@ -31,6 +31,11 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 				banks[LocalLand.key(end)] = []
 			banks[LocalLand.key(end)].append(e)
 	var yards: Array = world.get("shipyards", []).map(func(y: Dictionary) -> Vector2i: return Vector2i(y.q, y.r))
+	# A river (and the lakes it reaches) holds one shipyard, building or done.
+	var sailed := {}
+	if kind == "shipyard":
+		for y in world.get("shipyards", []):
+			sailed.merge(LocalLand.river_water(world.rivers, y.edge.a, y.edge.b, world.hexes))
 	var center: Vector2i = villages[floori(rng.next() * villages.size())]
 	var taken := LocalBattles.taken_hexes(world)
 	var sites: Array = world.sites.map(func(s: Dictionary) -> Vector2i: return Vector2i(s.q, s.r))
@@ -44,7 +49,7 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 				continue
 			if kind == "ruin" and sites.any(func(s: Vector2i) -> bool: return HexMath.distance(s, cell) < 2):
 				continue
-			if kind == "shipyard" and (not banks.has(LocalLand.key(cell)) or yards.any(func(y: Vector2i) -> bool: return HexMath.distance(y, cell) < 2)):
+			if kind == "shipyard" and (not banks.has(LocalLand.key(cell)) or sailed.has(LocalLand.key(cell)) or yards.any(func(y: Vector2i) -> bool: return HexMath.distance(y, cell) < 2)):
 				continue
 			usable.append([cell, type])
 	if usable.is_empty():
