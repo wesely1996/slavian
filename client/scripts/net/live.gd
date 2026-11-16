@@ -35,6 +35,13 @@ var _subscribe_sent := false
 var _world_id := 0
 var _retry_in := 0.0
 var _backoff := RETRY_MIN_SEC
+## A heartbeat: a ping every PING_SEC while connected; with nothing heard
+## for SILENCE_SEC the connection is dead whatever it says (a phone's radio
+## slept, a proxy dropped it), and it is opened afresh.
+const PING_SEC := 20.0
+const SILENCE_SEC := 50.0
+var _since_ping := 0.0
+var _since_heard := 0.0
 ## When the app last went to the background (ticks; 0: never).
 var _away_since := 0
 
@@ -61,6 +68,8 @@ func _open() -> void:
 	_socket = WebSocketPeer.new()
 	_socket.inbound_buffer_size = INBOUND_BUFFER_BYTES
 	_subscribe_sent = false
+	_since_ping = 0.0
+	_since_heard = 0.0
 	_socket.handshake_headers = PackedStringArray(["Authorization: Bearer " + Session.token])
 	if _socket.connect_to_url(Session.live_url()) != OK:
 		_socket = null
@@ -84,7 +93,15 @@ func _process(delta: float) -> void:
 				_backoff = RETRY_MIN_SEC
 				_socket.send_text(JSON.stringify({"type": "subscribe", "worldId": _world_id}))
 			while _socket.get_available_packet_count() > 0:
+				_since_heard = 0.0
 				_handle(_socket.get_packet().get_string_from_utf8())
+			_since_ping += delta
+			_since_heard += delta
+			if _since_ping >= PING_SEC:
+				_since_ping = 0.0
+				_socket.send_text(JSON.stringify({"type": "ping"}))
+			if _since_heard >= SILENCE_SEC:
+				watch(_world_id)
 		WebSocketPeer.STATE_CLOSED:
 			_socket = null
 			_set_connected(false)
@@ -131,6 +148,8 @@ func _handle(text: String) -> void:
 			expeditions_updated.emit(int(message.worldId), message.expeditions)
 		"caravans":
 			caravans_updated.emit(int(message.worldId), message.caravans, message.vault, message.get("bounties", []) if message.get("bounties") is Array else [])
+		"pong":
+			pass
 		"error":
 			push_warning("Live: %s" % message.get("message", ""))
 

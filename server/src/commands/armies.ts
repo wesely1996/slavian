@@ -56,6 +56,7 @@ export async function sendArmyCommand(
     generalId?: number | undefined;
     stance?: Stance | undefined;
     returnHome?: boolean | undefined;
+    grain?: number | undefined;
     now: Date;
   },
 ): Promise<Army> {
@@ -73,6 +74,7 @@ export async function sendArmyCommand(
       generalId: input.generalId,
       stance: input.stance,
       returnHome: input.returnHome,
+      grain: input.grain,
       at: input.now,
     });
   });

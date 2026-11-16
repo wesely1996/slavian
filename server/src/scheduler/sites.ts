@@ -208,7 +208,7 @@ export async function claimFind(
   find: Find,
   at: Date,
 ): Promise<void> {
-  if (withEmber(find)) await addEmbers(client, world.id, 1);
+  if (withEmber(find)) await addEmbers(client, world.id, accountId, 1);
   if (find.type === 'gear' && hero) {
     await saveHero(client, { ...hero, inventory: [...hero.inventory, find.item] });
     await notifyWorld(client, { worldId: world.id, type: 'heroes' });

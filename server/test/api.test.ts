@@ -1529,9 +1529,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const third = w.waves.find((x: { status: string }) => x.status === 'scheduled');
     now = new Date(third.spawnAt);
     await tick(db, now, scheduler);
+    // A host of its own front's troops (another front's would fight with no
+    // stats at all), big enough to win whatever the rounds roll.
+    const own = Object.keys(scheduler.data.enemies.fronts[third.front as 'north']!.units).slice(0, 2);
     const { rows } = await db.query<{ arrives_at: Date }>(
-      `UPDATE waves SET target_village_id = NULL, composition = '{"cave_bear": 400, "zealot": 400}' WHERE id = $1 RETURNING arrives_at`,
-      [third.id],
+      `UPDATE waves SET target_village_id = NULL, composition = $2 WHERE id = $1 RETURNING arrives_at`,
+      [third.id, JSON.stringify(Object.fromEntries(own.map((unit) => [unit, 1200])))],
     );
     now = new Date(rows[0]!.arrives_at);
     await tick(db, now, scheduler);
@@ -1820,8 +1823,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // The next stage's quest raises its own lair.
     expect(w.camps.filter((c: { quest: string | null; kind: string }) => c.quest === 'grove' && c.kind === 'lair')).toHaveLength(1);
     // (The scouts' find may have been an Ember.)
-    await db.query('UPDATE worlds SET embers = 0 WHERE id = $1', [worldId]);
-    expect((await donate({}, 1)).body.message).toMatch(/has 0 Svarog/);
+    await db.query('UPDATE world_members SET embers = 0 WHERE world_id = $1', [worldId]);
+    expect((await donate({}, 1)).body.message).toMatch(/have 0 Svarog/);
   });
 
   it('calls Ritual Night when the bridge is whole, and the run is won when the city outlasts it', async () => {
@@ -1836,7 +1839,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
       `UPDATE bridges SET state = state || jsonb_build_object('stage', $2::int, 'donated', $3::jsonb, 'embers', $4::int) WHERE world_id = $1`,
       [worldId, stages.length - 1, JSON.stringify(last.cost), last.embers],
     );
-    await db.query('UPDATE worlds SET embers = $2 WHERE id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
+    await db.query('UPDATE world_members SET embers = $2 WHERE world_id = $1', [worldId, scheduler.data.bridge.ritualEmbers]);
     let w = (await call('POST', `/v1/worlds/${worldId}/bridge/ritual`, rusa.token)).body;
     expect(w.bridge.status).toBe('raising');
     // (The small hordes sent at the builders are another test's: they stay home.)

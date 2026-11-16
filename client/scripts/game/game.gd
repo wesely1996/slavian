@@ -594,6 +594,11 @@ func my_member() -> Dictionary:
 	return {}
 
 
+## The player's own Svarog's Embers.
+func my_embers() -> int:
+	return int(my_member().get("embers", world.get("embers", 0)))
+
+
 ## How many of `unit` a player has bought (units that grow dearer: costStep).
 func bought(account_id: int, unit: String) -> int:
 	for member in world.get("members", []):

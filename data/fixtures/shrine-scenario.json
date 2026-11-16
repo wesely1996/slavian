@@ -35,7 +35,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Every level of the Shrine takes 1 Svarog's Ember; the group has 0"
+    "message": "Every level of the Shrine takes 1 Svarog's Ember; you have 0"
    }
   },
   {
@@ -872,7 +872,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Turning to another god takes 1 Svarog's Ember; the group has 0"
+    "message": "Turning to another god takes 1 Svarog's Ember; you have 0"
    }
   },
   {
@@ -912,6 +912,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "embers": 2,
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -3588,6 +3589,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "embers": 1,
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -6261,6 +6263,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "embers": 0,
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -8742,7 +8745,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Rod's Abundance takes 2 Svarog's Ember; the group has 1"
+    "message": "Rod's Abundance takes 2 Svarog's Ember; you have 1"
    }
   },
   {
@@ -8986,6 +8989,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "embers": 0,
       "ruinSearchReadyAt": null,
       "research": {
        "points": 3800,

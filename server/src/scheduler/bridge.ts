@@ -10,7 +10,7 @@ import { findBridge, loadBridge, saveBridge } from '../db/bridges.js';
 import { notifyWorld } from '../db/notify.js';
 import type { Db, DbClient } from '../db/pool.js';
 import { loadVault, saveVault } from '../db/vaults.js';
-import { getWorld, isMember, listMembers, spendEmbers, type World } from '../db/worlds.js';
+import { getWorld, isMember, listMembers, memberEmbers, spendEmbers, type World } from '../db/worlds.js';
 import { ForbiddenError, RuleError } from '../errors.js';
 import { completeQuest, currentStage, donate, embersWanted, isReady, raised, startRaising, type BridgeState } from '../sim/bridge.js';
 import { withdraw } from '../sim/logistics.js';
@@ -92,10 +92,11 @@ export async function donateCommand(
   return memberCommand(db, deps, input, async (client, world, bridge) => {
     const vault = await loadVault(client, world.id);
     const fromVault = withdraw(vault.amounts, input.resources);
-    if (input.embers > world.embers) throw new RuleError(`The group has ${world.embers} Svarog's Ember`);
+    const own = await memberEmbers(client, world.id, input.accountId);
+    if (input.embers > own) throw new RuleError(`You have ${own} Svarog's Ember`);
     const result = donate(deps.data, bridge, { resources: fromVault.taken, embers: input.embers });
     await saveVault(client, { ...vault, amounts: withdraw(vault.amounts, result.taken).amounts });
-    if (result.embers > 0 && !(await spendEmbers(client, world.id, result.embers))) throw new RuleError("Not enough Svarog's Ember");
+    if (result.embers > 0 && !(await spendEmbers(client, world.id, input.accountId, result.embers))) throw new RuleError("Not enough Svarog's Ember");
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
     return settleBridge(client, deps.data, world, result.bridge, input.now);
   });
@@ -106,7 +107,7 @@ export async function craftRitualCommand(db: Db, deps: SchedulerDeps, input: { a
   return memberCommand(db, deps, input, async (client, world, bridge) => {
     const done = completeQuest(deps.data, bridge, 'ritual', input.now);
     if (!done) throw new RuleError('No stage needs the ritual torc now');
-    if (!(await spendEmbers(client, world.id, deps.data.bridge.ritualEmbers))) {
+    if (!(await spendEmbers(client, world.id, input.accountId, deps.data.bridge.ritualEmbers))) {
       throw new RuleError(`The torc takes ${deps.data.bridge.ritualEmbers} Svarog's Ember`);
     }
     return settleBridge(client, deps.data, world, done, input.now);

@@ -98,7 +98,7 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		# The mightiest take the group's Svarog's Embers too, spent at the start.
 		var embers := int(def.get("embers", 0)) if def.get("embers") != null else 0
 		if embers > 0:
-			cost_text = tr("%s · %s, spent at the start") % [cost_text, UI.embers(embers, 30, int(Game.world.get("embers", 0)))]
+			cost_text = tr("%s · %s, spent at the start") % [cost_text, UI.embers(embers, 30, Game.my_embers())]
 		if problem != "":
 			cost_line.text = tr("%s  (%s)") % [cost_text, problem.trim_suffix(".").to_lower()]
 			return
@@ -108,7 +108,7 @@ func _research_branch(village: Dictionary, branch: String) -> void:
 		row.add_child(button)
 		_tick(cost_line, func() -> String:
 			var scholarly: bool = Game.group_research().points >= needed
-			var lit: bool = int(Game.world.get("embers", 0)) >= embers
+			var lit: bool = Game.my_embers() >= embers
 			button.disabled = not scholarly or not lit
 			if not lit:
 				return tr("%s  (not enough Svarog's Ember)") % cost_text
@@ -459,7 +459,7 @@ func _shrine_section(village: Dictionary, holds: Dictionary, def: Dictionary, le
 		var deity := String(id)
 		var pick: Button
 		if cost > 0:
-			var group := int(Game.world.get("embers", 0))
+			var group := Game.my_embers()
 			var price := UI.rich()
 			price.text = UI.embers(cost, 22, group)
 			price.fit_content = true
@@ -534,7 +534,7 @@ func _building_choice(village: Dictionary, building: String, on_walls: bool) -> 
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
 		var have := Ledger.amounts_at(home.resources, Game.server_now())
-		var group := int(Game.world.get("embers", 0))
+		var group := Game.my_embers()
 		button.disabled = queue_full or not Ledger.can_afford(have, cost) or group < embers
 		var price := UI.costs(cost, 22, have) + ("  " + UI.embers(embers, 22, group) if embers > 0 else "")
 		return tr("%s · %s") % [price, time] + (tr("  (queue full)") if queue_full else ""))
@@ -886,7 +886,7 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
 		var have := Ledger.amounts_at(home.resources, Game.server_now())
-		var group := int(Game.world.get("embers", 0))
+		var group := Game.my_embers()
 		button.disabled = queue_full or not Ledger.can_afford(have, cost) or group < embers
 		var price := UI.costs(cost, 30, have) + ("  " + UI.embers(embers, 30, group) if embers > 0 else "")
 		return tr("%s · %s") % [price, time] + (tr("  (queue full)") if queue_full else ""))

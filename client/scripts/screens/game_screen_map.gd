@@ -285,7 +285,7 @@ func _bridge_panel() -> void:
 	var give := UI.button(tr("Give from the vault"), func() -> void: _donate_bridge(Game.vault.get("amounts", {}), 0))
 	give.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(give)
-	if BridgeText.embers_missing(Game.data, bridge) > 0 and int(Game.world.get("embers", 0)) > 0:
+	if BridgeText.embers_missing(Game.data, bridge) > 0 and Game.my_embers() > 0:
 		var ember := UI.button(tr("Give an Ember"), func() -> void: _donate_bridge({}, 1))
 		ember.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(ember)
@@ -295,7 +295,7 @@ func _bridge_panel() -> void:
 	if ritual_open:
 		var forge := UI.button(tr("Forge the torc"), func() -> void: _forge_torc())
 		forge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		forge.disabled = int(Game.world.get("embers", 0)) < int(Game.data.bridge.ritualEmbers)
+		forge.disabled = Game.my_embers() < int(Game.data.bridge.ritualEmbers)
 		row.add_child(forge)
 	_panel_body.add_child(row)
 
@@ -335,7 +335,7 @@ func _vault_panel() -> void:
 	for kind in Ledger.KINDS:
 		parts.append(tr("%s %d") % [UI.resource_name(kind), int(vault.amounts[kind])])
 	_panel_body.add_child(UI.label("  ".join(parts) + tr("   (of %d each)") % capacity, UI.SMALL_SIZE))
-	_panel_body.add_child(UI.label(tr("Svarog's Ember: %d (from lairs)") % int(Game.world.get("embers", 0)), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(tr("Your Svarog's Embers: %d · the group's: %d") % [Game.my_embers(), int(Game.world.get("embers", 0))], UI.SMALL_SIZE, UI.MUTED))
 	if vault.upgradingTo != null:
 		var done_at := TimeUtil.parse_iso(vault.upgradeCompletesAt)
 		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
@@ -435,9 +435,11 @@ func _hold_panel(terrain_id: String) -> void:
 	_general_picker(village_id)
 	_army_stance_picker(home)
 	_danger_line(cell, func() -> Dictionary: return _picked_units(at_home), home, func() -> String: return _army_stance if _army_stance != "" else String(home.get("stance", "balanced")))
+	_grain_row(func() -> Dictionary: return _picked_units(at_home), home)
 	_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(orders, not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
-		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance, "returnHome": _army_return}
+		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance, "returnHome": _army_return,
+			"grain": _grain_to_take(_picked_units(at_home), home)}
 		if _ready_general(village_id) > 0:
 			order.generalId = _ready_general(village_id)
 		_send_army(village_id, order))
@@ -623,6 +625,55 @@ func _build_crossing(village_id: int, a: Vector2i, b: Vector2i) -> void:
 		_status.text = response.error
 		return
 	Game.set_world(response.data)
+
+
+## The most grain the troops `units` can take from `village` now: what they
+## carry, as far as the granary holds it.
+func _grain_most(units: Dictionary, village: Dictionary) -> int:
+	var home: Dictionary = Game.villages.get(int(village.id), village)
+	var held := floori(float(Ledger.amounts_at(home.resources, Game.server_now()).get("grain", 0.0)))
+	return maxi(0, mini(floori(LocalSupply.full_supply(Game.data, units)), held))
+
+
+## The grain an army of `units` leaving `village` takes: the amount typed,
+## as far as it can (all it can carry while none was typed).
+func _grain_to_take(units: Dictionary, village: Dictionary) -> int:
+	var most := _grain_most(units, village)
+	return most if _army_grain < 0 else mini(_army_grain, most)
+
+
+## How much grain the army takes along: typed in, with how long it lasts
+## and the most the troops picked can carry.
+func _grain_row(units_now: Callable, village: Dictionary) -> void:
+	var row := UI.hbox(8)
+	if Art.has("resource/grain"):
+		row.add_child(UI.icon("resource/grain", 40))
+	var start: int = _grain_to_take(units_now.call(), village)
+	var stepper := _number_field("army grain", start, 0, 999999, func(n: int) -> void: _army_grain = n)
+	row.add_child(stepper)
+	var fields := stepper.find_children("*", "LineEdit", true, false)
+	var field: LineEdit = fields[0] if not fields.is_empty() else null
+	var all := UI.button(tr("Max"), func() -> void:
+		_army_grain = -1
+		_drafts.erase("army grain")
+		_rebuild_panel())
+	all.custom_minimum_size.x = 100
+	row.add_child(all)
+	_panel_body.add_child(row)
+	var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(UI.with_info(line,
+		tr("Grain the army takes from the granary to eat on the way. When it runs out the army goes hungry: it marches slower and then loses soldiers. It can fill up again in your villages, forts and supply points.")))
+	_tick(line, func() -> String:
+		var units: Dictionary = units_now.call()
+		var most := _grain_most(units, village)
+		var taken := _grain_to_take(units, village)
+		# Until an amount is typed the field follows the troops picked.
+		if field != null and _army_grain < 0 and not field.has_focus() and not _drafts.has("army grain"):
+			field.text = str(most)
+		var eats := LocalSupply.army_upkeep(Game.data, units, float(Game.world.speed))
+		if units.is_empty() or eats <= 0.0:
+			return tr("Grain for the march: pick the troops first.")
+		return tr("Takes %d grain · lasts %s · they can carry %d") % [taken, TimeUtil.format_duration(float(taken) / eats * 3600.0), most])
 
 
 ## What is known of who an army sent to `cell` would fight: {size, front,

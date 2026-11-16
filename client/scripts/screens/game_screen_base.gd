@@ -86,6 +86,8 @@ var _view := "map"
 var _view_button: Button
 
 var _inbox_button: Button
+var _ember_chip: HBoxContainer
+var _ember_label: Label
 
 ## Which of the inbox and the chat the shared button opened last.
 var _messages_tab := "inbox"
@@ -100,6 +102,7 @@ var _root: VBoxContainer
 var _body: HBoxContainer
 
 var _scroll: ScrollContainer
+var _sync_timer: Timer
 
 var _resources: HBoxContainer
 
@@ -181,6 +184,8 @@ var _army_hero := false
 
 ## Whether the army being sent comes home by itself once its errand is done.
 var _army_return := false
+## Grain the next army takes from the granary (-1: all it can carry).
+var _army_grain := -1
 
 ## The raid being planned: the front it goes to and how many fields deep.
 var _raid_front := ""
@@ -280,10 +285,14 @@ func _ready() -> void:
 	_build_ui()
 	camera.tapped.connect(_on_map_tapped)
 	Game.world_changed.connect(_on_world_changed)
+	Game.world_changed.connect(_update_embers)
 	Game.village_changed.connect(_on_village_changed)
 	Live.village_updated.connect(Game.update_village)
 	Live.world_updated.connect(Game.set_world)
 	Live.connection_changed.connect(_on_live_connection)
+	# Every command the server accepts is followed by a fresh read of the
+	# world: nothing on screen waits for a live message that may not come.
+	Api.command_done.connect(_sync_after_command)
 	Live.waves_updated.connect(Game.set_waves)
 	Live.scouting_updated.connect(Game.set_scouting)
 	Live.battles_updated.connect(Game.set_battles)
@@ -337,6 +346,7 @@ func _exit_tree() -> void:
 	Live.village_updated.disconnect(Game.update_village)
 	Live.world_updated.disconnect(Game.set_world)
 	Live.connection_changed.disconnect(_on_live_connection)
+	Api.command_done.disconnect(_sync_after_command)
 	Live.waves_updated.disconnect(Game.set_waves)
 	Live.scouting_updated.disconnect(Game.set_scouting)
 	Live.battles_updated.disconnect(Game.set_battles)
@@ -498,6 +508,16 @@ func _build_ui() -> void:
 	_live_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_live_label.visible = false
 	bar.add_child(_live_label)
+	# The player's own Svarog's Embers, beside the stores.
+	_ember_chip = UI.hbox(4)
+	_ember_chip.tooltip_text = tr("Your Svarog's Embers: found in ancient sites and lairs, spent on the bridge, the Shrine and the mightiest research.")
+	if Art.has("resource/ember"):
+		_ember_chip.add_child(UI.icon("resource/ember", 34))
+	_ember_label = UI.label("0", UI.SMALL_SIZE, UiTheme.ON_WOOD)
+	_ember_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_ember_chip.add_child(_ember_label)
+	bar.add_child(_ember_chip)
+	_update_embers()
 	# Notices and the group chat share one button: it opens whichever has
 	# something new (the chat first), and the sheet switches between them.
 	_inbox_button = UI.button("", _show_messages, "icon/inbox")
@@ -1698,9 +1718,28 @@ func _on_live_connection(connected: bool) -> void:
 ## for the live message: a connection that died quietly (the phone asleep)
 ## left the troops on screen as if they had never gone. The solo engine
 ## sends its news itself.
+func _update_embers() -> void:
+	if _ember_label != null:
+		_ember_label.text = str(Game.my_embers())
+
+
 func _sync_after_command() -> void:
-	if not Local.is_active():
-		_refetch_world()
+	if Local.is_active():
+		return
+	# Several commands in a row are answered by one read.
+	if _sync_timer == null:
+		_sync_timer = Timer.new()
+		_sync_timer.one_shot = true
+		_sync_timer.timeout.connect(_sync_now)
+		add_child(_sync_timer)
+	_sync_timer.start(0.4)
+
+
+## The world read again, without the inbox and chat a reconnect also reads.
+func _sync_now() -> void:
+	var response := await Api.get_json("/v1/worlds/%d" % Game.world_id())
+	if response.ok and int(response.data.get("id", 0)) == Game.world_id():
+		Game.set_world(response.data)
 
 func _refetch_world() -> void:
 	pass
