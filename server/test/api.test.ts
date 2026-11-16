@@ -1529,9 +1529,12 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const third = w.waves.find((x: { status: string }) => x.status === 'scheduled');
     now = new Date(third.spawnAt);
     await tick(db, now, scheduler);
+    // A host of its own front's troops (another front's would fight with no
+    // stats at all), big enough to win whatever the rounds roll.
+    const own = Object.keys(scheduler.data.enemies.fronts[third.front as 'north']!.units).slice(0, 2);
     const { rows } = await db.query<{ arrives_at: Date }>(
-      `UPDATE waves SET target_village_id = NULL, composition = '{"cave_bear": 400, "zealot": 400}' WHERE id = $1 RETURNING arrives_at`,
-      [third.id],
+      `UPDATE waves SET target_village_id = NULL, composition = $2 WHERE id = $1 RETURNING arrives_at`,
+      [third.id, JSON.stringify(Object.fromEntries(own.map((unit) => [unit, 1200])))],
     );
     now = new Date(rows[0]!.arrives_at);
     await tick(db, now, scheduler);
