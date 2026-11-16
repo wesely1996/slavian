@@ -86,6 +86,28 @@ func _event_lines(event: Dictionary, brings: String, unless := false) -> void:
 		return (tr("Gone in %s, unless someone sends resources") if unless else tr("Gone in %s, unless an army is on its way")) % TimeUtil.format_duration(left))
 
 
+## How fast the march goes into the selected hex: its terrain, and the best
+## road or boat's river from it.
+func _movement_line(id: String) -> void:
+	if id == "":
+		return
+	var roads := RiverText.roads_at(Game.roads, _selected)
+	var levels := RiverText.road_levels_at(Game.roads, _selected)
+	var standing: Array = []
+	var lane := false
+	for i in 6:
+		var other: Vector2i = _selected + HexMath.DIRECTIONS[i]
+		if roads.get(other, "") != "" and roads[other] != "building":
+			standing.append(int(levels.get(other, 1)))
+		if Game.lanes.has(LocalLand.edge_key(_selected, other)):
+			lane = true
+	var text := RiverText.movement_line(Game.data, id, standing, lane)
+	var cost: Variant = Game.data.terrain.terrain.get(id, {}).get("moveCost")
+	var color := UI.ERROR if cost == null and not lane else (UI.GOOD if cost != null and float(cost) <= 1.0 else UI.MUTED)
+	_panel_body.add_child(UI.with_info(UI.label(text, UI.SMALL_SIZE, color),
+		tr("Armies, caravans and scouts move at this share of their plains speed when stepping into this hex. Roads and a finished boat's river make it faster; pathfinders in the army take off part of harsh terrain's slowness.")))
+
+
 ## What the selected empty hex is (laid out at the top of its sheet), and
 ## the parts of its sheet: [[key, art id, name, fill], …] for _hex_panel.
 func _terrain_panel() -> Array:
@@ -94,6 +116,7 @@ func _terrain_panel() -> Array:
 	var distance := HexMath.distance(_selected, Vector2i.ZERO)
 	if distance > 0:
 		_panel_body.add_child(UI.label(tr_n("%d hex from the Holy City.", "%d hexes from the Holy City.", distance) % distance, UI.SMALL_SIZE, UI.MUTED))
+	_movement_line(id)
 	var camp := Game.camp_at(_selected)
 	if not camp.is_empty():
 		_quest_place_line(camp.get("quest"))
