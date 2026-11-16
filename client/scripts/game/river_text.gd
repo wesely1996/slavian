@@ -75,6 +75,31 @@ static func road_levels_at(roads: Array, cell: Vector2i) -> Dictionary:
 	return out
 
 
+## How fast armies, caravans and scouts move into a hex of `terrain_id`
+## (sim/land.ts moveCostOn), as a share of plains speed: "" when it can't be
+## entered at all. `road_levels`: standing roads from the hex; `lane`: a
+## finished boat sails one of its edges.
+static func movement_line(data: Dictionary, terrain_id: String, road_levels: Array, lane: bool) -> String:
+	var def: Dictionary = data.terrain.terrain.get(terrain_id, {})
+	var shipyard: Dictionary = data.events.kinds.shipyard
+	var lane_factor := 1.0 / float(shipyard.laneSpeed)
+	if def.get("moveCost") == null:
+		if terrain_id == "lake" and lane:
+			return UI.t("Movement speed: %d%%, by boat only") % roundi(100.0 / (float(shipyard.lakeMoveCost) * lane_factor))
+		return UI.t("Movement: impassable")
+	var cost := float(def.moveCost)
+	var parts := PackedStringArray([UI.t("Movement speed: %d%%") % roundi(100.0 / cost)])
+	var levels: Array = data.field.road.levels
+	var best := 0
+	for level in road_levels:
+		best = maxi(best, int(level))
+	if best > 0:
+		parts.append(UI.t("%d%% on its road") % roundi(100.0 / (cost * float(levels[mini(best, levels.size()) - 1].factor))))
+	if lane:
+		parts.append(UI.t("%d%% along the boat's river") % roundi(100.0 / (cost * lane_factor)))
+	return " · ".join(parts)
+
+
 ## The share of the march a road of each level takes, as "50% · 35% · 25%".
 static func road_speeds(data: Dictionary) -> String:
 	var parts := PackedStringArray()

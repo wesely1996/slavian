@@ -38,6 +38,7 @@ func _initialize() -> void:
 	_test_expansion()
 	_test_research()
 	_test_heroes()
+	_test_movement_line()
 	_test_orders()
 	_test_inbox()
 	_test_armies()
@@ -439,6 +440,16 @@ func _test_research() -> void:
 	_check(ResearchRules.problem(data, "spear_drill", 2, mine.done, false) == "Known.", "known")
 	_check(is_equal_approx(ResearchRules.time_factor({"buildTime": -0.1}, "buildTime"), 0.9) and ResearchRules.time_factor({"buildTime": -3.0}, "buildTime") == 0.1, "time factor")
 	_check(CaravanMath.needed({"logistics": {"caravan": {"capacity": 500}}}, {"wood": 600}, {"caravanCapacity": 0.25}) == 1, "pack harnesses")
+
+
+## The movement line on a hex's sheet (moveCostOn): terrain, roads, boats.
+func _test_movement_line() -> void:
+	var data := LocalData.load_data()
+	_check(RiverText.movement_line(data, "plains", [], false) == "Movement speed: 100%", "plains: %s" % RiverText.movement_line(data, "plains", [], false))
+	_check(RiverText.movement_line(data, "forest", [1, 2], false) == "Movement speed: 50% · 143% on its road", "forest with roads: %s" % RiverText.movement_line(data, "forest", [1, 2], false))
+	_check(RiverText.movement_line(data, "swamp", [], true) == "Movement speed: 33% · 100% along the boat's river", "swamp on a lane")
+	_check(RiverText.movement_line(data, "mountain", [], false) == "Movement: impassable", "mountains")
+	_check(RiverText.movement_line(data, "lake", [], true) == "Movement speed: 300%, by boat only", "a sailed lake")
 
 
 func _test_heroes() -> void:
