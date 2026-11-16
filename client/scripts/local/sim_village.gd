@@ -545,6 +545,36 @@ static func complete_build(data: Dictionary, state: Dictionary, plot: String, ta
 	return next
 
 
+## village.ts grantBuilding: a building given outright, raised at `level`
+## on the first free, unlocked center slot nothing is queued for; with none
+## free, one of its kind standing lower is raised to it ({} when neither).
+static func grant_building(data: Dictionary, state: Dictionary, building: String, level: int, at: int, world_speed: float) -> Dictionary:
+	var open := unlocked_slots(data, int(state.levels.get(HALL, 0)))
+	var slots: Array = []
+	for i in open:
+		var id := center_plot(i)
+		if state.plots.has(id) and not state.queue.any(func(item: Dictionary) -> bool: return item.plot == id):
+			slots.append(id)
+	var plot := ""
+	for id in slots:
+		if state.plots[id].get("building") == null and int(state.plots[id].level) <= 0:
+			plot = id
+			break
+	if plot == "":
+		for id in slots:
+			if state.plots[id].get("building") == building and int(state.plots[id].level) > 0 and int(state.plots[id].level) < level:
+				plot = id
+				break
+	if plot == "":
+		return {}
+	var next := state.duplicate(true)
+	next.plots[plot].building = building
+	next.plots[plot].level = level
+	next.levels = levels_of(next.plots)
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, next.plots, state.bonuses))
+	return next
+
+
 ## Everything a building of `level` cost to raise, level by level.
 static func built_cost(def: Dictionary, level: int) -> Dictionary:
 	var sum := resources(func(_kind: String) -> int: return 0)

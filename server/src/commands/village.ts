@@ -1,5 +1,5 @@
 import { riverEdgesAt } from '../db/rivers.js';
-import { insertRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
+import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
@@ -266,6 +266,11 @@ export async function sendScoutsCommand(
   return { village, mission: result };
 }
 
+// When a player whose scouts last set out at `last` may search again.
+export function ruinSearchReadyAt(data: GameData, last: Date, worldSpeed: number): Date {
+  return new Date(last.getTime() + Math.round((data.scouting.ruinSearch.cooldownHours * 3_600_000) / worldSpeed));
+}
+
 // Sends scouts from the caller's village to search the land around it for a
 // forgotten ruin; they are back after `ruinSearch.hours` game hours.
 export async function searchRuinsCommand(
@@ -275,9 +280,14 @@ export async function searchRuinsCommand(
 ): Promise<{ village: Village; search: RuinSearch }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent scouts to search for ruins' }, async ({ client, world, village }) => {
     const rules = deps.data.scouting.ruinSearch;
-    const max = deps.data.scouting.maxScouts;
+    const max = rules.maxScouts;
     if (!Number.isInteger(input.count) || input.count < rules.minScouts || input.count > max) {
       throw new RuleError(`Send between ${rules.minScouts} and ${max} scouts`);
+    }
+    // One search at a time per player, and a rest after it.
+    const last = village.ownerAccountId === null ? undefined : (await lastRuinSearches(client, world.id)).get(village.ownerAccountId);
+    if (last && input.now.getTime() < ruinSearchReadyAt(deps.data, last, world.speed).getTime()) {
+      throw new RuleError('Your scouts searched for ruins not long ago; let them rest before the next search');
     }
     const state = sendAway(deps.data, village.state, SCOUT_UNIT, input.count, input.now, world.speed);
     const returnsAt = new Date(input.now.getTime() + Math.round((rules.hours * 3_600_000) / world.speed));

@@ -322,15 +322,37 @@ static func mission_view(m: Dictionary) -> Dictionary:
 
 # --- Ruin searches ---------------------------------------------------------------------------
 
+## When a player's scouts may next search for ruins (null: never searched):
+## cooldownHours game hours after they last set out, over all their villages
+## (commands/village.ts ruinSearchReadyAt, db lastRuinSearches).
+static func ruin_search_ready_at(server: LocalServer, world: Dictionary, account_id: Variant) -> Variant:
+	if account_id == null:
+		return null
+	var last: Variant = null
+	for s in world.ruinSearches:
+		var v := server.find_village(world, int(s.villageId))
+		if v.is_empty() or v.ownerAccountId == null or int(v.ownerAccountId) != int(account_id):
+			continue
+		if last == null or int(s.departsAt) > int(last):
+			last = int(s.departsAt)
+	if last == null:
+		return null
+	return int(last) + LocalWaves.js_round(float(server.data.scouting.ruinSearch.cooldownHours) * 3600000.0 / float(world.speed))
+
+
 ## Scouts sent to search the land around the village for a forgotten ruin
 ## (commands/village.ts searchRuinsCommand).
 static func search_ruins(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
 	var data := server.data
 	var rules: Dictionary = data.scouting.ruinSearch
-	var max_scouts := int(data.scouting.maxScouts)
+	var max_scouts := int(rules.maxScouts)
 	var count := float(body.get("count", 0))
 	if count != floorf(count) or count < int(rules.minScouts) or count > max_scouts:
 		return LocalVillage.rule("Send between %d and %d scouts" % [int(rules.minScouts), max_scouts])
+	# One search at a time per player, and a rest after it.
+	var ready: Variant = ruin_search_ready_at(server, world, village.ownerAccountId)
+	if ready != null and now < int(ready):
+		return LocalVillage.rule("Your scouts searched for ruins not long ago; let them rest before the next search")
 	var state := LocalVillage.send_away(data, village.state, SCOUT, int(count), now, world.speed)
 	if state.has("error"):
 		return state

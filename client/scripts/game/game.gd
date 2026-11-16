@@ -586,6 +586,14 @@ func rally_village(account_id: int = -1) -> int:
 	return 0
 
 
+## The player's own entry among the world's members ({} if none).
+func my_member() -> Dictionary:
+	for member in world.get("members", []):
+		if int(member.accountId) == my_account_id():
+			return member
+	return {}
+
+
 ## How many of `unit` a player has bought (units that grow dearer: costStep).
 func bought(account_id: int, unit: String) -> int:
 	for member in world.get("members", []):

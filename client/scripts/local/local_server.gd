@@ -341,6 +341,15 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			LocalInbox.mark_all_read(world, int(world.hostAccountId), now)
 			changed.append(["inbox"])
 			return {"status": 200, "data": {"ok": true}}
+	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "onboarding" and parts[4] == "skip":
+		if world.status != "running":
+			return _fail(400, "rule", "The run is not under way")
+		var skipped := _skip_onboarding(world, now, changed)
+		if skipped.has("error"):
+			return _rule_answer(skipped)
+		var skipped_view := world_view(world, now)
+		skipped_view.skipped = skipped
+		return {"status": 200, "data": skipped_view}
 	if method == "POST" and parts.size() == 5 and parts[1] == "worlds" and parts[3] == "onboarding" and parts[4] == "claim":
 		var claimed := _claim_onboarding(world, String(body.get("step", "")), now, changed)
 		if claimed.has("error"):
@@ -906,6 +915,48 @@ func _claim_onboarding(world: Dictionary, step: String, now: int, changed: Array
 	return {"villageId": village_id, "finale": finale}
 
 
+## scheduler/onboarding.ts skipOnboarding: every step and the finale done
+## and claimed; a share of what was unclaimed now, and a building to hold it.
+func _skip_onboarding(world: Dictionary, now: int, changed: Array) -> Dictionary:
+	var member: Dictionary = world.members[0]
+	var sum := {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	var any := false
+	var defs: Array = data.onboarding.steps.map(func(s: Dictionary) -> Dictionary: return {"id": s.id, "reward": s.reward})
+	defs.append({"id": "finale", "reward": data.onboarding.finale.reward})
+	for def in defs:
+		if def.id != "finale" and not member.onboarding.has(def.id):
+			member.onboarding[def.id] = LocalTime.iso(now)
+		if member.onboardingClaimed.has(def.id):
+			continue
+		member.onboardingClaimed[def.id] = LocalTime.iso(now)
+		any = true
+		for kind in sum:
+			sum[kind] += int(def.reward[kind])
+	if not any:
+		return LocalVillage.rule("There is nothing left of the tutorial to skip")
+	var amounts := {}
+	for kind in sum:
+		amounts[kind] = floori(float(sum[kind]) * float(data.onboarding.skip.share))
+	# The building first, so the stores are bigger when the reward lands.
+	var building: Variant = null
+	var home: Dictionary = {}
+	for v in world.villages:
+		if int(v.ownerAccountId) == int(member.accountId) and v.ruin == null and (home.is_empty() or v.id < home.id):
+			home = v
+	if not home.is_empty():
+		var raised := LocalVillage.grant_building(data, home.state, String(data.onboarding.skip.building), int(data.onboarding.skip.level), now, world.speed)
+		if not raised.is_empty():
+			home.state = raised
+			building = data.onboarding.skip.building
+	var village_id: Variant = reward(world, int(member.accountId), amounts, now, changed)
+	changed.append(["world"])
+	return {"villageId": village_id, "reward": amounts, "building": building}
+
+
+func _iso_or_null(at: Variant) -> Variant:
+	return LocalTime.iso(int(at)) if at != null else null
+
+
 ## A reward, all of it, to the player's first standing village.
 func reward(world: Dictionary, account_id: int, amounts: Dictionary, now: int, changed: Array) -> Variant:
 	var home: Dictionary = {}
@@ -1262,7 +1313,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"rallyVillageId": m.get("rallyVillageId"), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:

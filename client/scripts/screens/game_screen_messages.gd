@@ -286,9 +286,35 @@ func _welcome_once() -> void:
 func _show_welcome() -> void:
 	var text := tr("Hordes will come from the edges of the map, wave after wave. Hold your villages, help your group, and build the Kalinov Bridge in the Holy City before it falls.") \
 		+ "\n\n" + tr("The quest card at the top of the map shows what to do next, with Show me to point the way and a reward for each step.")
+	# Skipping pays out at once, less than the steps would: say how much.
+	var skip: Dictionary = Game.data.onboarding.get("skip", {})
+	if not skip.is_empty() and not _tutorial_claimed():
+		text += "\n\n" + tr("Or skip the tutorial: %d%% of its rewards come at once, with a %s (level %d) to hold them.") % [
+			roundi(float(skip.share) * 100.0), tr(Game.data.buildings.buildings[skip.building].name), int(skip.get("level", 1))]
 	_show_note(tr("Welcome to %s") % Game.world.get("name", ""), text, tr("Let's begin"), tr("Skip the tutorial"), func() -> void:
 		Session.set_tutorial_flag(Game.world_id(), "hidden", true)
-		_refresh_quest_card())
+		_refresh_quest_card()
+		_skip_tutorial())
+
+
+## Whether every reward of the getting-started chain is claimed already.
+func _tutorial_claimed() -> bool:
+	return Game.my_member().get("onboardingClaimed", {}).has("finale")
+
+
+## The tutorial skipped: what is left of its rewards comes now, a share of it.
+func _skip_tutorial() -> void:
+	if _tutorial_claimed():
+		return
+	var response := await Api.post_json("/v1/worlds/%d/onboarding/skip" % Game.world_id(), {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Sound.effect("done")
+	Game.set_world(response.data)
+	var got: Dictionary = response.data.get("skipped", {})
+	if got.get("reward") is Dictionary:
+		_toast(tr("Tutorial skipped: %s") % OnboardingText.reward({"reward": got.reward}).trim_prefix(tr("Reward: ")))
 
 
 ## A card in the middle of the screen over a dimmed game.
