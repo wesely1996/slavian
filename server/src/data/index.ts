@@ -265,6 +265,9 @@ const scoutingFileSchema = z.object({
   // Scouts sent to search the land around their village for a forgotten ruin.
   ruinSearch: z.object({
     minScouts: z.number().int().positive(),
+    maxScouts: z.number().int().positive(),
+    // Game hours between a player's searches (from when the last set out).
+    cooldownHours: z.number().nonnegative(),
     hours: z.number().positive(),
     range: z.number().int().positive(),
     spacing: z.number().int().nonnegative(),
@@ -864,6 +867,9 @@ const onboardingFileSchema = z.object({
   ),
   // The reward for claiming every step.
   finale: z.object({ title: z.string(), story: z.string(), reward: resourcesSchema }),
+  // Skipping the chain: this share of every unclaimed reward at once, and
+  // this building raised on a free slot of the player's first village.
+  skip: z.object({ share: z.number().min(0).max(1), building: z.string(), level: z.number().int().positive() }),
 });
 export type OnboardingData = z.infer<typeof onboardingFileSchema>;
 

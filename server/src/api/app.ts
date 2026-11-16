@@ -65,7 +65,7 @@ import {
 } from '../commands/village.js';
 import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
-import { claimOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, setRallyCommand, startWorldCommand } from '../commands/worlds.js';
+import { claimOnboardingCommand, skipOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, setRallyCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
 import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
@@ -509,6 +509,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { step } = claimBody.parse(request.body);
     const claimed = await claimOnboardingCommand(db, scheduler, { account, worldId: id, step, now: clock() });
     return { ...(await fullWorldView(id)), claimed };
+  });
+
+  // Skip the tutorial: a share of its unclaimed rewards now, and a storehouse.
+  app.post('/v1/worlds/:id/onboarding/skip', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const skipped = await skipOnboardingCommand(db, scheduler, { account, worldId: id, now: clock() });
+    return { ...(await fullWorldView(id)), skipped };
   });
 
   app.put('/v1/worlds/:id/delegation', async (request) => {

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6, M5 step 23). Each step is done by doing it once, in any order; its reward then waits to be claimed from the quest card and goes to the player's first village. `how` says what to tap, step by step; `show` is what the quest card's Show me points at. The `story` is the elder's reason for asking. `finale` is the reward for claiming every step. A step's `solo` replaces its words in a solo world, where there are no teammates.",
+  "_comment": "The getting-started chain for each player's first days (PLAN.md M4 step 6, M5 step 23). Each step is done by doing it once, in any order; its reward then waits to be claimed from the quest card and goes to the player's first village. `how` says what to tap, step by step; `show` is what the quest card's Show me points at. The `story` is the elder's reason for asking. `finale` is the reward for claiming every step. A step's `solo` replaces its words in a solo world, where there are no teammates. `skip`: a player may skip the chain at once: every reward not yet claimed (the finale's too) comes now, `share` of it, and a `building` is raised at `level` on a free slot of their first village to hold it (with no slot free, one that already stands there is raised to that level).",
   "steps": [
     {
       "id": "build",
@@ -129,5 +129,10 @@
       "grain": 800,
       "iron": 500
     }
+  },
+  "skip": {
+    "share": 0.55,
+    "building": "storehouse",
+    "level": 3
   }
 }

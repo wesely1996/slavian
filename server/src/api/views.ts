@@ -37,7 +37,8 @@ import { loadVault, type Vault } from '../db/vaults.js';
 import type { GameData } from '../data/index.js';
 import { vaultCapacity } from '../sim/logistics.js';
 import { listMissions, type ScoutMission } from '../db/scouting.js';
-import { listRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
+import { lastRuinSearches, listRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
+import { ruinSearchReadyAt } from '../commands/village.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { armyQuestOf, heroQuestOffers, type ArmyQuest } from '../scheduler/quests.js';
@@ -628,6 +629,7 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
   const waves = await wavesView(client, data, world);
   const scouting = await scoutingView(client, world.id);
   const ruinSearches = (await listRuinSearches(client, world.id)).map(ruinSearchView);
+  const lastSearches = await lastRuinSearches(client, world.id);
   const battles = await battlesView(client, world.id);
   const raids = await raidsView(client, world.id);
   const expeditions = await expeditionsView(client, world.id);
@@ -721,6 +723,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       bought: m.bought,
       // Their rally point: where newly trained troops march (null: none).
       rallyVillageId: m.rallyVillageId,
+      // When their scouts may next search for ruins (null: never searched).
+      ruinSearchReadyAt: lastSearches.has(m.accountId) ? ruinSearchReadyAt(data, lastSearches.get(m.accountId)!, world.speed).toISOString() : null,
       // Research their Academies brought in by settledAt (null: none yet),
       // and what comes in per hour since.
       research: {

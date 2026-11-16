@@ -1009,7 +1009,9 @@ func _ruin_search_section(village: Dictionary) -> void:
 	var duration := TimeUtil.format_duration(float(rules.hours) * 3600.0 / float(Game.world.speed))
 	_panel_body.add_child(UI.with_info(UI.label(tr("Search for ruins"), UI.SMALL_SIZE, UI.MUTED),
 		tr("Scouts search the land up to %d hexes around the village for %s. Each scout gives a %d%% chance of finding a forgotten ruin (at most %d%%), which then waits to be explored.") % [
-			int(rules.range), duration, roundi(float(rules.chancePerScout) * 100.0), roundi(float(rules.maxChance) * 100.0)]))
+			int(rules.range), duration, roundi(float(rules.chancePerScout) * 100.0), roundi(float(rules.maxChance) * 100.0)]
+		+ " " + tr("Up to %d scouts go at a time, and you can send a search once every %s (over all your villages).") % [
+			int(rules.get("maxScouts", Game.data.scouting.maxScouts)), TimeUtil.format_duration(float(rules.get("cooldownHours", 0)) * 3600.0 / float(Game.world.speed))]))
 	for search in searches:
 		var line := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		_panel_body.add_child(line)
@@ -1029,7 +1031,7 @@ func _ruin_search_section(village: Dictionary) -> void:
 		return
 	var at_home := int(Rules.garrison_at(village, Game.server_now()).get("scout", 0))
 	var least := int(rules.minScouts)
-	var most := maxi(least, mini(int(Game.data.scouting.maxScouts), at_home))
+	var most := maxi(least, mini(int(rules.get("maxScouts", Game.data.scouting.maxScouts)), at_home))
 	var count := clampi(_ruin_scouts.get(village_id, mini(maxi(at_home, least), 5)), least, most)
 	var row := UI.hbox()
 	_panel_body.add_child(row)
@@ -1039,6 +1041,14 @@ func _ruin_search_section(village: Dictionary) -> void:
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	send.disabled = at_home < least
 	row.add_child(send)
+	# Their rest between searches (all your villages share it).
+	var ready: Variant = Game.my_member().get("ruinSearchReadyAt")
+	var rest := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(rest)
+	_tick(rest, func() -> String:
+		var left := TimeUtil.parse_iso(ready) - Game.server_now() if ready != null else 0.0
+		send.disabled = at_home < least or left > 0.0
+		return tr("Your scouts rest after a search: they can go again in %s") % TimeUtil.format_duration(left) if left > 0.0 else "")
 
 
 func _search_ruins(village_id: int, count: int) -> void:
@@ -1049,6 +1059,7 @@ func _search_ruins(village_id: int, count: int) -> void:
 		return
 	Game.note_server_time(response.data.serverTime)
 	Game.update_village(response.data.village)
+	_sync_after_command()
 
 
 ## Soldiers sent home to their farms: they stop eating, and are gone.

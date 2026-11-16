@@ -101,6 +101,11 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'windmill' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'mountain_lodge' } },
     { method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'ranch' } },
+    // The rest of the tutorial skipped: a share of what was not yet claimed
+    // comes at once, with a Storehouse on a free slot; there is no skipping twice.
+    { method: 'POST', path: '/v1/worlds/-1/onboarding/skip', body: {} },
+    { method: 'POST', path: '/v1/worlds/-1/onboarding/skip', body: {} },
+    { method: 'POST', path: '/v1/worlds/-1/onboarding/claim', body: { step: 'camp' } },
   ];
   for (const step of steps) await play(step);
 });

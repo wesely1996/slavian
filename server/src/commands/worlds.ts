@@ -38,7 +38,8 @@ import { ensureSites } from '../scheduler/sites.js';
 import { loadBridge } from '../db/bridges.js';
 import { drainWorld, lockWorld, withWorld } from '../scheduler/world.js';
 import { refreshBonuses, settleResearchPoints } from '../scheduler/research.js';
-import { claimOnboarding } from '../scheduler/onboarding.js';
+import { claimOnboarding, skipOnboarding } from '../scheduler/onboarding.js';
+import type { Resources } from '../sim/resources.js';
 import { generateMap } from '../sim/mapgen.js';
 import { newVillage } from '../sim/village.js';
 import { record } from '../db/telemetry.js';
@@ -265,6 +266,14 @@ export async function claimOnboardingCommand(
   return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (world.status !== 'running') throw new RuleError('The run is not under way');
     return claimOnboarding(client, deps.data, world, input.account.id, input.step, input.now);
+  });
+}
+
+// Skips the getting-started chain for a share of its rewards at once.
+export async function skipOnboardingCommand(db: Db, deps: SchedulerDeps, input: { account: Account; worldId: number; now: Date }): Promise<{ villageId: number | null; reward: Resources; building: string | null }> {
+  return withWorld(db, input.worldId, input.now, deps, async (client, world) => {
+    if (world.status !== 'running') throw new RuleError('The run is not under way');
+    return skipOnboarding(client, deps.data, world, input.account.id, input.now);
   });
 }
 

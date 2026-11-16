@@ -494,6 +494,23 @@ export function completeBuild(
   return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
 }
 
+// A building given outright (a gift, not built): raised at `level` on the
+// first free, unlocked center slot nothing is queued for; with none free,
+// one of its kind already standing lower (and not being built on) is raised
+// to that level; null when neither can be.
+export function grantBuilding(data: GameData, state: VillageState, building: string, level: number, at: Date, worldSpeed: number): VillageState | null {
+  const open = unlockedSlots(data, state.levels[HALL] ?? 0);
+  const idle = (plot: string) => !state.queue.some((item) => item.plot === plot);
+  const slots = Array.from({ length: open }, (_, i) => centerPlot(i)).filter((plot) => state.plots[plot] && idle(plot));
+  const plot =
+    slots.find((p) => state.plots[p]!.building === null && state.plots[p]!.level <= 0) ??
+    slots.find((p) => state.plots[p]!.building === building && state.plots[p]!.level > 0 && state.plots[p]!.level < level);
+  if (!plot) return null;
+  const plots = { ...state.plots, [plot]: { ...state.plots[plot]!, building, level } };
+  const next = { ...state, plots, levels: levelsOf(plots) };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
+}
+
 // Everything a building of `level` cost to raise, level by level.
 export function builtCost(def: BuildingDef, level: number): Resources {
   const sum = mapResources(() => 0);

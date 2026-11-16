@@ -56,6 +56,17 @@ export async function finishRuinSearch(client: DbClient, id: number, foundSiteId
   await client.query(`UPDATE ruin_searches SET status = 'done', found_site_id = $2 WHERE id = $1`, [id, foundSiteId]);
 }
 
+// When each player's scouts last set out to search (by account id), over
+// all their villages.
+export async function lastRuinSearches(client: DbClient, worldId: number): Promise<Map<number, Date>> {
+  const { rows } = await client.query<{ account_id: number; at: Date }>(
+    `SELECT v.owner_account_id AS account_id, max(s.departs_at) AS at FROM ruin_searches s JOIN villages v ON v.id = s.village_id
+     WHERE s.world_id = $1 AND v.owner_account_id IS NOT NULL GROUP BY v.owner_account_id`,
+    [worldId],
+  );
+  return new Map(rows.map((r) => [Number(r.account_id), r.at]));
+}
+
 // Searches still out, plus the five latest back, newest first.
 export async function listRuinSearches(client: DbClient, worldId: number): Promise<RuinSearch[]> {
   const { rows } = await client.query<Row>(
