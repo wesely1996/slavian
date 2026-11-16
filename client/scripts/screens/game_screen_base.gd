@@ -182,6 +182,8 @@ var _army_hero := false
 
 ## Whether the army being sent comes home by itself once its errand is done.
 var _army_return := false
+## Grain the next army takes from the granary (-1: all it can carry).
+var _army_grain := -1
 
 ## The raid being planned: the front it goes to and how many fields deep.
 var _raid_front := ""

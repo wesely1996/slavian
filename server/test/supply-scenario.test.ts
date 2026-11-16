@@ -88,4 +88,16 @@ scenario('supply-scenario.json', START, async ({ started, now, play }) => {
     await play({ method: 'POST', path: `/v1/armies/${keeper.id}/resupply`, body: {} });
   }
   await play({ method: 'GET', path: world });
+
+  // The sender says how much grain goes along: no more than they carry or
+  // the granary holds; a little, or none at all.
+  await play({ advance: 30 * MINUTE });
+  await play({ set: { garrison: { spearman: 6 }, amounts: { grain: 300 } } });
+  await army({ orders: 'hold', target: { q: third.q, r: third.r }, units: { spearman: 2 }, grain: 100000 });
+  await play({ set: { amounts: { grain: 5 } } });
+  await army({ orders: 'hold', target: { q: third.q, r: third.r }, units: { spearman: 2 }, grain: 40 });
+  await play({ set: { amounts: { grain: 300 } } });
+  await army({ orders: 'hold', target: { q: third.q, r: third.r }, units: { spearman: 2 }, grain: 30 });
+  await army({ orders: 'hold', target: { q: third.q, r: third.r }, units: { spearman: 2 }, grain: 0 });
+  await play({ method: 'GET', path: world });
 });

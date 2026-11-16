@@ -72,6 +72,10 @@ export interface ArmyOrder {
   stance?: Stance | undefined;
   // It comes home by itself once its errand is done.
   returnHome?: boolean | undefined;
+  // Grain to take along, the sender's choice: at most what the troops can
+  // carry and what the granary holds (absent: all they can carry, down to
+  // the village's floor for armies).
+  grain?: number | undefined;
   at: Date;
 }
 
@@ -120,7 +124,14 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   // The troops leave the garrison with what grain the granary can spare
   // above the village's floor for armies.
   let state = leaveGarrison(data, home.state, units, input.at, world.speed);
-  const grain = Math.min(fullSupply(data, units), villageSpare(data, state, input.at));
+  let grain = Math.min(fullSupply(data, units), villageSpare(data, state, input.at));
+  if (input.grain !== undefined) {
+    const carried = Math.floor(fullSupply(data, units));
+    const held = Math.floor(amountsAt(state.ledger, input.at).grain);
+    if (input.grain > carried) throw new RuleError(`They carry at most ${carried} grain`);
+    if (input.grain > held) throw new RuleError(`The granary holds only ${held} grain`);
+    grain = input.grain;
+  }
   if (grain > 0) state = { ...state, ledger: spend(state.ledger, input.at, grainOnly(grain)) };
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
   const speed = armySpeed(data, units) * supplySpeedFactor(data, supplied, input.at, world.speed);

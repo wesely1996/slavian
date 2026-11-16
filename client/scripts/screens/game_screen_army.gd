@@ -12,7 +12,6 @@ func _armies_section(village: Dictionary) -> void:
 		var guarding: bool = army.targetVillageId != null and int(army.targetVillageId) == village_id and army.status in ["stationed", "engaged"] and int(army.homeVillageId) != village_id
 		return mine or guarding)
 	_panel_body.add_child(UI.label(tr("Armies"), UI.HEADING_SIZE))
-	_floor_rows(village)
 	if here.is_empty():
 		_panel_body.add_child(UI.label(tr("No armies out from here, and none standing guard."), UI.SMALL_SIZE, UI.MUTED))
 	_paged("armies", here, 6 if _roomy() else 3, func(army: Dictionary) -> void:
@@ -127,6 +126,7 @@ func _send_troops(village: Dictionary) -> void:
 	var go := UI.primary(tr("Send"), func() -> void:
 		var order := body.duplicate()
 		order.units = _picked_units(home_units)
+		order.grain = _grain_to_take(order.units, village)
 		if stays:
 			order.returnHome = _army_return
 		if _ready_general(village_id) > 0:
@@ -156,6 +156,7 @@ func _send_troops(village: Dictionary) -> void:
 	_general_picker(village_id)
 	if fights:
 		_army_stance_picker(village)
+	_grain_row(func() -> Dictionary: return _picked_units(home_units), village)
 	if String(body.orders) in ["clear", "explore"]:
 		_danger_line(cell, func() -> Dictionary: return _picked_units(home_units), village, func() -> String: return _army_stance if _army_stance != "" else String(village.get("stance", "balanced")))
 	# Support and holding stay until called home, unless told to come back once done.
@@ -420,6 +421,8 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	_army_hero = false
 	_army_general = 0
 	_army_stance = ""
+	_army_grain = -1
+	_forget_drafts(["army grain"])
 	Game.note_server_time(response.data.serverTime)
 	_sync_after_command()
 

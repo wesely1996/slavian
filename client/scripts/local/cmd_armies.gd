@@ -307,6 +307,15 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 	if state.has("error"):
 		return state
 	var grain := minf(LocalSupply.full_supply(data, units), village_spare(data, state, at))
+	# The sender's choice: at most what they carry and what the granary holds.
+	if order.get("grain") != null:
+		var carried := floori(LocalSupply.full_supply(data, units))
+		var held := floori(float(LocalLedger.amounts_at(state.ledger, at).grain))
+		if int(order.grain) > carried:
+			return LocalVillage.rule("They carry at most %d grain" % carried)
+		if int(order.grain) > held:
+			return LocalVillage.rule("The granary holds only %d grain" % held)
+		grain = float(int(order.grain))
 	if grain > 0:
 		state.ledger = LocalLedger.spend(state.ledger, at, _grain_only(grain))
 	var supplied := {"units": units, "supply": grain, "supplyAt": at, "hungrySince": null}
@@ -1098,7 +1107,13 @@ static func send_army(server: LocalServer, world: Dictionary, village: Dictionar
 	return dispatch_army(server, world, {"homeVillageId": village.id, "targetVillageId": body.get("targetVillageId"),
 		"targetHex": Vector2i(int(target.q), int(target.r)) if target is Dictionary else null, "units": units, "orders": body.orders,
 		"withHero": body.get("withHero", false), "generalId": body.get("generalId"), "stance": body.get("stance"),
-		"returnHome": body.get("returnHome", false) == true, "at": now})
+		"returnHome": body.get("returnHome", false) == true, "grain": _whole_or_null(body.get("grain")), "at": now})
+
+
+static func _whole_or_null(value: Variant) -> Variant:
+	if (value is int or value is float) and float(value) >= 0.0 and float(value) == floorf(float(value)):
+		return int(value)
+	return null
 
 
 ## commands/armies.ts armyStanceCommand: an army's battle stance; not in the

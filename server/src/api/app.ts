@@ -238,6 +238,9 @@ const armyBody = z.object({
   stance: z.enum(STANCES).optional(),
   // It comes home by itself once its errand is done.
   returnHome: z.boolean().optional(),
+  // Grain it takes from the granary (absent: all it can carry, down to the
+  // village's floor for armies).
+  grain: z.number().int().min(0).max(100_000_000).optional(),
 });
 // A raid beyond the map's edge on a front's side, `depth` fields deep.
 const raidBody = z.object({
