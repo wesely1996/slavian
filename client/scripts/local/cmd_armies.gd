@@ -841,7 +841,9 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 		return army
 	_set_off(server, world, army, at)
 	# An army that moved on from where it first went takes the road home from
-	# where it stands (drawn backwards, as every road home is).
+	# where it stands (drawn backwards, as every road home is), without the
+	# halts where it waited for a fire on the way out.
+	army.path = LocalLogistics.without_halts(army.path)
 	var home := server.find_village(world, int(army.homeVillageId))
 	if not home.is_empty() and (int(army.path[0].q) != int(home.q) or int(army.path[0].r) != int(home.r)):
 		var speed := army_speed(server.data, army.units) * LocalSupply.speed_factor(server.data, army if supplied(army) else null, at, world.speed)

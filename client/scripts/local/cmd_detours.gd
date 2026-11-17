@@ -18,9 +18,9 @@ static func enters_before(path: Array, origin: int, at: int, cell: Vector2i, unt
 
 
 ## detour: the road from `elapsed_ms` along `path` round the fire, or null
-## (no way round). Headed straight into the fire, it walks back to the hex
-## before, as long as it had gone on, and goes round from there.
-static func _detour(path: Array, elapsed_ms: int, cell: Vector2i, next: Callable) -> Variant:
+## (no way round). Headed straight into the fire, it goes round from the hex
+## before: walking back to it (`turn_back`), or, a horde, swerving on at once.
+static func _detour(path: Array, elapsed_ms: int, cell: Vector2i, next: Callable, turn_back := true) -> Variant:
 	var i := path.size() - 1
 	for k in path.size():
 		if int(path[k].atMs) >= elapsed_ms:
@@ -33,51 +33,52 @@ static func _detour(path: Array, elapsed_ms: int, cell: Vector2i, next: Callable
 	if i == 0:
 		return null
 	var back: Dictionary = path[i - 1]
-	var turn_at := elapsed_ms + (elapsed_ms - int(back.atMs))
 	var turned: Variant = next.call(Vector2i(int(back.q), int(back.r)))
 	if turned == null:
 		return null
-	var out: Array = path.slice(0, i)
+	var turn_at := elapsed_ms + (elapsed_ms - int(back.atMs)) if turn_back else elapsed_ms
+	var out: Array = path.slice(0, i) if turn_back else path.slice(0, i - 1)
 	out.append({"q": back.q, "r": back.r, "atMs": turn_at})
 	for k in range(1, turned.size()):
 		out.append({"q": turned[k].q, "r": turned[k].r, "atMs": turn_at + int(turned[k].atMs)})
 	return out
 
 
-## hordeDetour: a horde's road round the fire (never back the way it came),
-## or, with no way round, its road held at the fire's edge until it is out
-## (`until_ms`, from its spawn).
-static func horde_detour(path: Array, elapsed_ms: int, cell: Vector2i, until_ms: int, next: Callable) -> Array:
+## waitOut: its road kept, waiting in the hex before the fire until it is
+## out (`until_ms`, timed like the road); headed into it already, it walks
+## back to that hex to wait.
+static func wait_out(path: Array, elapsed_ms: int, cell: Vector2i, until_ms: int) -> Array:
 	var i := path.size() - 1
 	for k in path.size():
 		if int(path[k].atMs) >= elapsed_ms:
 			i = k
 			break
-	var ahead: Dictionary = path[i]
-	var into_fire := int(ahead.q) == cell.x and int(ahead.r) == cell.y and i > 0
-	var from: Dictionary = path[i - 1] if into_fire else ahead
-	var turn_at := elapsed_ms if into_fire else int(ahead.atMs)
-	var onward: Variant = next.call(Vector2i(int(from.q), int(from.r)))
-	if onward != null:
-		var out: Array = path.slice(0, i - 1 if into_fire else i)
-		out.append({"q": from.q, "r": from.r, "atMs": turn_at})
-		for k in range(1, onward.size()):
-			out.append({"q": onward[k].q, "r": onward[k].r, "atMs": turn_at + int(onward[k].atMs)})
-		return out
-	# No way round: it waits outside until the fire is out.
 	var j := -1
 	for k in range(i, path.size()):
 		if int(path[k].q) == cell.x and int(path[k].r) == cell.y:
 			j = k
 			break
-	var wait := maxi(0, until_ms - int(path[j].atMs)) if j >= 0 else 0
-	var held: Array = []
-	for k in path.size():
-		var step: Dictionary = path[k].duplicate()
-		if j >= 0 and k >= j:
-			step.atMs = int(step.atMs) + wait
-		held.append(step)
-	return held
+	if j <= 0:
+		return path.duplicate()
+	var before: Dictionary = path[j - 1]
+	var step_ms := int(path[j].atMs) - int(before.atMs)
+	var back := elapsed_ms + (elapsed_ms - int(before.atMs)) if int(before.atMs) < elapsed_ms else int(before.atMs)
+	var leaves := maxi(back, until_ms - step_ms)
+	var shift := leaves + step_ms - int(path[j].atMs)
+	var out: Array = path.slice(0, j)
+	out.append({"q": before.q, "r": before.r, "atMs": leaves})
+	for k in range(j, path.size()):
+		var moved: Dictionary = path[k].duplicate()
+		moved.atMs = int(moved.atMs) + shift
+		out.append(moved)
+	return out
+
+
+## bestWay: round the fire or waiting it out, whichever arrives sooner.
+static func best_way(path: Array, elapsed_ms: int, cell: Vector2i, until_ms: int, next: Callable, turn_back := true) -> Array:
+	var waited := wait_out(path, elapsed_ms, cell, until_ms)
+	var around: Variant = _detour(path, elapsed_ms, cell, next, turn_back)
+	return around if around != null and int(around[-1].atMs) < int(waited[-1].atMs) else waited
 
 
 static func _by_departure(items: Array, key: String) -> Array:
@@ -99,9 +100,9 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 		var target := server.find_village(world, int(wave.targetVillageId)) if wave.targetVillageId != null else {}
 		var goal := {"id": target.id, "cell": Vector2i(target.q, target.r)} if not target.is_empty() else {"id": null, "cell": Vector2i.ZERO}
 		var since_spawn := at - int(wave.spawnAt)
-		var path: Array = horde_detour(wave.path, since_spawn, cell, until - int(wave.spawnAt), func(from: Vector2i) -> Variant:
+		var path: Array = best_way(wave.path, since_spawn, cell, until - int(wave.spawnAt), func(from: Vector2i) -> Variant:
 			var route: Variant = LocalHordes.route_from(data, land, from, [goal], wave.front, wave.composition, {}, LocalWaves.rng_for(int(world.seed), int(wave.index), 0xf1), 0.0, world.speed)
-			return route.path if route != null else null)
+			return route.path if route != null else null, false)
 		var march := LocalHordes.hold_for_quiet(world, int(wave.spawnAt), {"path": path, "arrivesAt": int(wave.spawnAt) + int(path[-1].atMs)})
 		wave.status = "marching"
 		wave.path = march.path
@@ -116,9 +117,7 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 	for army in _by_departure(world.armies.filter(func(a: Dictionary) -> bool: return a.status != "done"), "departsAt"):
 		if army.status == "marching" and enters_before(army.path, int(army.departsAt), at, cell, until):
 			var dest := Vector2i(int(army.targetQ), int(army.targetR))
-			var path: Variant = _detour(army.path, at - int(army.departsAt), cell, func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, dest, at, world))
-			if path == null:
-				continue
+			var path: Array = best_way(army.path, at - int(army.departsAt), cell, until - int(army.departsAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, dest, at, world))
 			army.path = path
 			army.arrivesAt = int(army.departsAt) + int(path[-1].atMs)
 			server.schedule(world, int(army.arrivesAt), "army_arrive", {"armyId": army.id})
@@ -129,9 +128,7 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 			var home := server.find_village(world, int(army.homeVillageId))
 			if home.is_empty():
 				continue
-			var back: Variant = _detour(road, at - int(army.leavesAt), cell, func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, Vector2i(home.q, home.r), at, world))
-			if back == null:
-				continue
+			var back: Array = best_way(road, at - int(army.leavesAt), cell, until - int(army.leavesAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, Vector2i(home.q, home.r), at, world))
 			army.path = LocalLogistics.reversed_route(back)
 			army.returnsAt = int(army.leavesAt) + int(back[-1].atMs)
 			server.schedule(world, int(army.returnsAt), "army_return", {"armyId": army.id})
@@ -143,21 +140,16 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 		var bonuses := LocalLogistics.effective_bonuses(server, world, village)
 		if caravan.status == "outbound" and enters_before(caravan.path, int(caravan.departsAt), at, cell, until):
 			var dest := _caravan_goal(server, world, caravan)
-			var path: Variant = _detour(caravan.path, at - int(caravan.departsAt), cell, func(from: Vector2i) -> Variant: return LocalLogistics.caravan_route(data, land, from, dest, world.speed, bonuses))
-			if path == null:
-				continue
-			var travel := int(path[-1].atMs)
+			var path: Array = best_way(caravan.path, at - int(caravan.departsAt), cell, until - int(caravan.departsAt), func(from: Vector2i) -> Variant: return LocalLogistics.caravan_route(data, land, from, dest, world.speed, bonuses))
 			caravan.path = path
-			caravan.arrivesAt = int(caravan.departsAt) + travel
-			caravan.returnsAt = int(caravan.departsAt) + 2 * travel
+			caravan.arrivesAt = int(caravan.departsAt) + int(path[-1].atMs)
+			caravan.returnsAt = int(caravan.arrivesAt) + int(LocalLogistics.without_halts(path)[-1].atMs)
 			_reroute_caravan(server, world, caravan, "out", "caravan_arrive", int(caravan.arrivesAt), at)
 		elif caravan.status == "returning":
 			var road := LocalLogistics.reversed_route(caravan.path)
 			if not enters_before(road, int(caravan.arrivesAt), at, cell, until):
 				continue
-			var back: Variant = _detour(road, at - int(caravan.arrivesAt), cell, func(from: Vector2i) -> Variant: return LocalLogistics.caravan_route(data, land, from, Vector2i(village.q, village.r), world.speed, bonuses))
-			if back == null:
-				continue
+			var back: Array = best_way(road, at - int(caravan.arrivesAt), cell, until - int(caravan.arrivesAt), func(from: Vector2i) -> Variant: return LocalLogistics.caravan_route(data, land, from, Vector2i(village.q, village.r), world.speed, bonuses))
 			caravan.path = LocalLogistics.reversed_route(back)
 			caravan.returnsAt = int(caravan.arrivesAt) + int(back[-1].atMs)
 			_reroute_caravan(server, world, caravan, "back", "caravan_return", int(caravan.returnsAt), at)
@@ -169,21 +161,16 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 			continue
 		if expedition.status == "outbound" and enters_before(expedition.path, int(expedition.departsAt), at, cell, until):
 			var goal := Vector2i(int(expedition.q), int(expedition.r))
-			var path: Variant = _detour(expedition.path, at - int(expedition.departsAt), cell, func(from: Vector2i) -> Variant: return LocalLogistics.road_route(data, land, from, goal, settler_speed, world.speed))
-			if path == null:
-				continue
-			var travel := int(path[-1].atMs)
+			var path: Array = best_way(expedition.path, at - int(expedition.departsAt), cell, until - int(expedition.departsAt), func(from: Vector2i) -> Variant: return LocalLogistics.road_route(data, land, from, goal, settler_speed, world.speed))
 			expedition.path = path
-			expedition.arrivesAt = int(expedition.departsAt) + travel
-			expedition.returnsAt = int(expedition.departsAt) + 2 * travel
+			expedition.arrivesAt = int(expedition.departsAt) + int(path[-1].atMs)
+			expedition.returnsAt = int(expedition.arrivesAt) + int(LocalLogistics.without_halts(path)[-1].atMs)
 			server.schedule(world, int(expedition.arrivesAt), "settlers_arrive", {"expeditionId": expedition.id})
 		elif expedition.status == "returning":
 			var road := LocalLogistics.reversed_route(expedition.path)
 			if not enters_before(road, int(expedition.arrivesAt), at, cell, until):
 				continue
-			var back: Variant = _detour(road, at - int(expedition.arrivesAt), cell, func(from: Vector2i) -> Variant: return LocalLogistics.road_route(data, land, from, Vector2i(home.q, home.r), settler_speed, world.speed))
-			if back == null:
-				continue
+			var back: Array = best_way(road, at - int(expedition.arrivesAt), cell, until - int(expedition.arrivesAt), func(from: Vector2i) -> Variant: return LocalLogistics.road_route(data, land, from, Vector2i(home.q, home.r), settler_speed, world.speed))
 			expedition.path = LocalLogistics.reversed_route(back)
 			expedition.returnsAt = int(expedition.arrivesAt) + int(back[-1].atMs)
 			server.schedule(world, int(expedition.returnsAt), "settlers_return", {"expeditionId": expedition.id})

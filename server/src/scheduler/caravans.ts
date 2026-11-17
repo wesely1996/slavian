@@ -5,11 +5,11 @@
 // A caravan on a supply route fills a fort or supply point's grain store;
 // one sent to a shipyard pays toward its boat.
 import { z } from 'zod';
-import { loadCaravan, markCaravanDone, markReturning } from '../db/caravans.js';
+import { loadCaravan, markCaravanDone, markReturning, saveCaravanRoute, type Caravan } from '../db/caravans.js';
 import { notifyWorld } from '../db/notify.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import { receive, store, total, vaultCapacity, withdraw } from '../sim/logistics.js';
+import { receive, store, total, vaultCapacity, withdraw, withoutHalts } from '../sim/logistics.js';
 import { amountsAt, emptyResources, mapResources, spend } from '../sim/resources.js';
 import { loadShipyard } from '../db/shipyards.js';
 import { payIntoShipyard } from './mapEvents.js';
@@ -86,9 +86,13 @@ export const caravanHandlers: HandlerRegistry = {
       }
     }
     await markReturning(client, caravan.id, carriedBack);
-    await planAmbushes(client, data, world, { ...caravan, status: 'returning', carriedBack }, 'back', event.dueAt);
+    // The way home goes straight: no halts where it waited for a fire.
+    const path = withoutHalts(caravan.path);
+    const home: Caravan = { ...caravan, path, status: 'returning', carriedBack, returnsAt: new Date(caravan.arrivesAt.getTime() + path.at(-1)!.atMs) };
+    if (path.length !== caravan.path.length) await saveCaravanRoute(client, home);
+    await planAmbushes(client, data, world, home, 'back', event.dueAt);
     const payload: CaravanPayload = { caravanId: caravan.id };
-    await scheduleEvent(client, world.id, caravan.returnsAt, 'caravan_return', payload);
+    await scheduleEvent(client, world.id, home.returnsAt, 'caravan_return', payload);
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
   },
 

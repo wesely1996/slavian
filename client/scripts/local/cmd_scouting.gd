@@ -485,6 +485,11 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 	if problem != "":
 		expedition.status = "returning"
 		expedition.failure = problem
+		# The way home goes straight: no halts where they waited for a fire.
+		var straight := LocalLogistics.without_halts(expedition.path)
+		if straight.size() != expedition.path.size():
+			expedition.path = straight
+			expedition.returnsAt = int(expedition.arrivesAt) + int(straight[-1].atMs)
 		LocalInbox.tell(server, world, home.ownerAccountId, {"kind": "settlers", "tier": "digest", "title": "Settlers turned back from ({q}, {r})",
 			"body": "{problem}. They are walking home to {home}.", "vars": {"q": expedition.q, "r": expedition.r, "problem": problem, "home": home.name}}, at)
 		server.schedule(world, int(expedition.returnsAt), "settlers_return", {"expeditionId": expedition.id})

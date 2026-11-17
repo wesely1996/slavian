@@ -28,7 +28,7 @@ import { RuleError } from '../errors.js';
 import { addUnits, approachAngle, armySpeed, fighters, joinBonus, terrainRelief, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { woundMs } from '../sim/heroes.js';
-import { reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
+import { reversedRoute, roadRoute, spliceRoute, withoutHalts } from '../sim/logistics.js';
 import type { PathStep } from '../sim/waves.js';
 import { completeTraining, healFallen, healerChance, joinGarrison, leaveGarrison, loseAway, returnHome } from '../sim/village.js';
 import { createRng } from '../sim/rng.js';
@@ -591,7 +591,8 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
   if (data) army = await setOff(client, data, world, army, at);
   // An army that moved on from where it first went takes the road home
   // from where it stands (drawn backwards, as every road home is).
-  let path = army.path;
+  // (Without its halts: a wait for a fire on the way out isn't waited again.)
+  let path = withoutHalts(army.path);
   const home = await loadVillage(client, army.homeVillageId).catch(() => null);
   if (home && data && (path[0]!.q !== home.q || path[0]!.r !== home.r)) {
     const fed = supplied(army);
