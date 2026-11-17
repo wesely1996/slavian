@@ -136,10 +136,11 @@ func _terrain_panel() -> Array:
 		parts.append(["shipyard", "icon/coin", tr("Shipyard"), _shipyard_panel.bind(yard)])
 	var holder := Game.outpost_owner(_selected)
 	var site := Game.site_at(_selected)
+	var kind := Rules.outpost_kind(Game.data, id)
 	if not holder.is_empty():
-		parts.append(["outpost", "map/outpost", tr("Outpost"), _outpost_panel.bind(holder, Rules.outpost_plot(_selected))])
+		parts.append(["outpost", kind.art, tr(kind.name), _outpost_panel.bind(holder, Rules.outpost_plot(_selected))])
 	elif camp.is_empty() and site.is_empty():
-		parts.append(["claim", "map/outpost", tr("Build an outpost"), _claim_panel.bind(id)])
+		parts.append(["claim", kind.art, tr("Build a %s") % tr(kind.name).to_lower() if kind.art != "map/outpost" else tr("Build an outpost"), _claim_panel.bind(id)])
 		parts.append(["found", "unit/settler", tr("Found a village"), _found_panel.bind(id)])
 	var hold_art := "icon/troops"
 	if not camp.is_empty():
@@ -246,11 +247,12 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 	var state := tr("Lv %d") % level
 	if level == 0:
 		state = tr("being built") if int(planned.level) > 0 else tr("in ruins")
-	_panel_body.add_child(UI.with_card(UI.label(tr("Outpost  %s") % state, UI.HEADING_SIZE), _building_card(holder, Rules.OUTPOST, level)))
+	_panel_body.add_child(UI.with_card(UI.label(tr("%s  %s") % [tr(Rules.outpost_kind(Game.data, String(holds.get("terrain", ""))).name), state], UI.HEADING_SIZE), _building_card(holder, Rules.OUTPOST, level)))
 	_panel_body.add_child(UI.label(tr("%s · supplies %s") % [who, holder.name], UI.SMALL_SIZE, UI.MUTED))
 	var speed := float(Game.world.speed)
 	var terrain: String = holds.get("terrain", "")
 	var gathering := _yield_text(Rules.outpost_yield(Game.data, terrain, level, speed))
+	_panel_body.add_child(UI.label(tr(Rules.outpost_kind(Game.data, terrain).description), UI.SMALL_SIZE, UI.MUTED))
 	var line := tr("Gathers %s") % gathering if level > 0 else tr("Gathers nothing until built")
 	if holder.get("besieged", false) and level > 0:
 		line += tr(" (not while %s is under siege)") % holder.name
@@ -845,7 +847,7 @@ func _claim_panel(terrain: String) -> void:
 	var taken := not Game.village_at(_selected).is_empty()
 	var problem := Rules.claim_problem(Game.data, home, _selected, terrain, taken)
 	var speed := float(Game.world.speed)
-	_panel_body.add_child(UI.label(tr("An outpost here would gather %s.") % _yield_text(Rules.outpost_yield(Game.data, terrain, 1, speed)), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(tr("A %s here would gather %s.") % [tr(Rules.outpost_kind(Game.data, terrain).name).to_lower(), _yield_text(Rules.outpost_yield(Game.data, terrain, 1, speed))], UI.SMALL_SIZE, UI.MUTED))
 	if problem != "":
 		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
 		return
@@ -859,7 +861,7 @@ func _claim_panel(terrain: String) -> void:
 	var row := UI.hbox()
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.with_card(UI.label(tr("Build an outpost")), _building_card(home, Rules.OUTPOST, 0)))
+	info.add_child(UI.with_card(UI.label(tr("Build a %s") % tr(Rules.outpost_kind(Game.data, terrain).name).to_lower()), _building_card(home, Rules.OUTPOST, 0)))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
@@ -990,10 +992,17 @@ func _on_map_tapped(world_position: Vector2) -> void:
 		if picked:
 			_build_road(_road_village, from, cell)
 			return
-	# An army's marker: its own sheet.
-	var tapped_army := hex_map.army_at(local, Game.server_now()) if _road_from == Vector2i.MAX else 0
-	if tapped_army != 0:
-		_open_army(tapped_army)
+	# An army's marker: its own sheet. Armies on one spot open one after
+	# another, tap by tap, until something else is tapped.
+	var stack: Array = hex_map.armies_at(local, Game.server_now()) if _road_from == Vector2i.MAX else []
+	if not stack.is_empty():
+		var at := 0
+		if stack == _army_stack:
+			at = (_army_stack_at + 1) % stack.size()
+		_army_stack = stack
+		_army_stack_at = at
+		_open_army(int(stack[at]))
 		return
+	_army_stack = []
 	if hex_map.has_hex(cell):
 		_select(cell)

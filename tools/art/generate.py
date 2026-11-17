@@ -608,6 +608,76 @@ def outpost():
     return s
 
 
+def outpost_kind(kind):
+    """An outpost as its land makes it: a farmstead, a sawmill, a quarry, a
+    woodland camp, a mine or a fishing boat (buildings.json outpost kinds)."""
+    s = Svg()
+    log = s.lin([(0, "#c08a55"), (1, "#5a3a1f")], 0, 0, 0, 1)
+    block = s.lin([(0, "#e4ded3"), (1, "#9a948a")], 0, 0, 1, 1)
+    if kind == "farm":
+        for i in range(3):
+            s.rect(64, 84 + i * 9, 50, 6, s.lin([(0, "#f2d77e"), (1, "#b48d3e")], 0, 0, 0, 1), stroke="none", sw=0, rx=3)
+        house(s, 42, 108, 36, 20, roof="thatch", wall="wood")
+        for x in (92, 106):
+            s.path(f"M{x - 6},86 L{x},62 L{x + 6},86 Z", s.lin([(0, "#f2d77e"), (1, "#a8833a")], 0, 0, 1, 0), stroke="none", sw=0)
+            s.line(x - 5, 76, x + 5, 76, stroke="#8a6a2c", sw=2)
+    elif kind == "sawmill":
+        conifer(s, 98, 92, 26, 46, ("#7f9a52", "#4f6b37", "#2b3f24"))
+        # An open saw shed on posts, a log on the trestle under it.
+        post = s.lin([(0, "#b07a45"), (1, "#6b4a2c")], 0, 0, 1, 0)
+        soft_shadow(s, 54, 110, 40, 8, 0.3)
+        for x in (24, 80):
+            s.rect(x - 3, 70, 6, 40, post, stroke="none", sw=0)
+        s.poly([(16, 74), (52, 52), (88, 74)], s.lin([(0, P["wood"][1]), (1, P["wood"][0])]), stroke="none", sw=0)
+        s.rect(30, 90, 46, 9, log, stroke="none", sw=0, rx=4)
+        s.circle(52, 84, 9, "#c9c3b7", stroke="#5d6672", sw=2)
+        for a in range(8):
+            import math
+            t = a * math.pi / 4
+            s.line(52 + 9 * math.cos(t), 84 + 9 * math.sin(t), 52 + 12 * math.cos(t), 84 + 12 * math.sin(t), stroke="#5d6672", sw=2)
+        for i, (x, y) in enumerate([(84, 112), (100, 112), (92, 103)]):
+            s.circle(x, y, 6, s.rad([(0, "#e8c48e"), (0.6, "#b07a45"), (1, "#5a3a1f")]), stroke="none", sw=0)
+    elif kind == "quarry":
+        s.poly([(14, 110), (24, 70), (52, 56), (70, 74), (64, 110)], s.lin([(0, "#d8d2c6"), (1, "#7d776d")], 0, 0, 1, 1), stroke="none", sw=0)
+        s.path("M30,98 L40,78 L54,84", "none", stroke="#6a655d", sw=2.5)
+        for x, y in [(74, 112), (94, 112), (84, 100)]:
+            s.rect(x - 9, y - 11, 18, 11, block, stroke="none", sw=0)
+        s.line(108, 112, 104, 80, stroke="#6e4b2c", sw=3.5)
+        s.path("M94,82 Q104,74 116,80", "none", stroke="#5d6672", sw=4)
+    elif kind == "camp":
+        conifer(s, 30, 88, 24, 42, ("#7f9a52", "#4f6b37", "#2b3f24"))
+        s.poly([(70, 112), (80, 86), (100, 80), (112, 112)], s.lin([(0, "#d8d2c6"), (1, "#7d776d")], 0, 0, 1, 1), stroke="none", sw=0)
+        tent(s, 54, 112, 34)
+        for i in range(2):
+            s.rect(16 + i * 6, 110 - i * 8, 30, 8, log, stroke="none", sw=0, rx=4)
+        s.rect(88, 108, 16, 9, block, stroke="none", sw=0)
+    elif kind == "mine":
+        s.path("M20,112 Q30,40 70,34 Q108,42 116,112 Z", s.rad([(0, "#a49e94"), (1, "#57534c")], 0.38, 0.3, 0.8), stroke="none", sw=0)
+        s.path("M46,112 L46,78 L80,78 L80,112 Z", "#141110", stroke="none", sw=0)
+        timber = s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 0, 1)
+        s.rect(42, 72, 42, 7, timber, stroke="none", sw=0)
+        for x in (42, 77):
+            s.rect(x, 76, 7, 36, timber, stroke="none", sw=0)
+        s.circle(64, 92, 4, GLOW, stroke="none", sw=0)
+        cart(s, 102, 116, 24)
+        for x in (96, 104):
+            s.circle(x, 102, 4, s.rad([(0, "#8d98a6"), (1, "#3d444d")]), stroke="none", sw=0)
+    else:  # fishing
+        s.ellipse(64, 104, 58, 16, s.rad([(0, P["water"][1]), (1, P["water"][0])], 0.5, 0.4, 0.7), stroke="none", sw=0)
+        for x in (24, 98):
+            s.path(f"M{x},104 Q{x + 6},100 {x + 12},104", "none", stroke="#d8eef7", sw=2, opacity=0.7)
+        hull = s.lin([(0, "#b78d5e"), (0.6, "#8c6640"), (1, "#594027")], 0, 0, 0, 1)
+        s.path("M26,92 Q30,106 52,106 L86,106 Q102,104 106,90 Z", hull, stroke="none", sw=0)
+        s.line(28, 94, 104, 92, stroke="#432c19", sw=2, opacity=0.6)
+        s.line(62, 92, 62, 40, stroke="#5b3f25", sw=3)
+        s.poly([(62, 44), (88, 80), (62, 82)], s.lin([(0, "#f4eddc"), (1, "#b9ae96")], 0, 0, 1, 0), stroke="none", sw=0)
+        # The net hanging over the side.
+        s.path("M90,92 Q100,104 92,116", "none", stroke="#e6dcc2", sw=2)
+        for y in (98, 104, 110):
+            s.line(88, y, 100, y, stroke="#e6dcc2", sw=1.2, opacity=0.8)
+    return s
+
+
 def site(kind):
     s = Svg()
     soft_shadow(s, 64, 112, 52, 11, 0.3)
@@ -2269,6 +2339,8 @@ def assets():
     out["map/camp_lair"] = camp("lair")
     out["map/fort"] = fort()
     out["map/outpost"] = outpost()
+    for kind in ["farm", "sawmill", "quarry", "camp", "mine", "fishing"]:
+        out[f"map/outpost_{kind}"] = outpost_kind(kind)
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
         out[f"site/{kind}"] = site(kind)
     for kind in ["spearman", "archer", "horseman", "scout", "pathfinder", "assassin", "settler", "forest_archer", "river_barge", "border_rider", "supply_wagon", "large_caravan", "shaman"]:

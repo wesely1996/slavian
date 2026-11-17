@@ -199,6 +199,15 @@ static func outpost_limit(data: Dictionary, level: int) -> int:
 	return int(v.baseOutposts) + level / int(v.hallLevelsPerOutpost)
 
 
+## What an outpost on `terrain` is called and drawn as (buildings.json
+## outpost kinds): {name, art, description}, untranslated; a plain Outpost
+## where the land has no kind of its own.
+static func outpost_kind(data: Dictionary, terrain: String) -> Dictionary:
+	var def: Dictionary = data.buildings.buildings[OUTPOST]
+	var kind: Dictionary = def.get("kinds", {}).get(terrain, {})
+	return {"name": kind.get("name", def.name), "art": kind.get("art", "map/outpost"), "description": kind.get("description", def.description)}
+
+
 ## Resources per hour an outpost gathers on `terrain` (world speed applied).
 static func outpost_yield(data: Dictionary, terrain: String, level: int, world_speed: float) -> Dictionary:
 	var def: Dictionary = data.buildings.buildings[OUTPOST]

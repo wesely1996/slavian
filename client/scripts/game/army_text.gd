@@ -243,3 +243,28 @@ static func main_unit(army: Dictionary) -> String:
 			most = int(army.units[unit])
 			best = unit
 	return best
+
+
+## Armies sharing a spot on the map in the order a tap goes through them:
+## your own first, then the biggest (most men), then the oldest.
+static func stack_order(armies: Array, me: int) -> Array:
+	var sorted := armies.duplicate()
+	sorted.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var mine_a := int(a.get("ownerAccountId", -1)) == me
+		var mine_b := int(b.get("ownerAccountId", -1)) == me
+		if mine_a != mine_b:
+			return mine_a
+		var size_a := men(a)
+		var size_b := men(b)
+		if size_a != size_b:
+			return size_a > size_b
+		return int(a.id) < int(b.id))
+	return sorted.map(func(a: Dictionary) -> int: return int(a.id))
+
+
+## How many men an army has.
+static func men(army: Dictionary) -> int:
+	var n := 0
+	for unit in army.get("units", {}):
+		n += int(army.units[unit])
+	return n
