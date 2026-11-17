@@ -57,6 +57,9 @@ const buildingSchema = z.object({
   // Outposts: resources per hour at level 1, by the terrain they stand on.
   yields: z.partialRecord(z.enum(TERRAIN_IDS), resourcesSchema.partial()).optional(),
   yieldGrowth: z.number().min(1).optional(),
+  // Outposts: what one is called and drawn as on each terrain (a sawmill in
+  // the woods, a fishing boat on a lake); the rules are the same.
+  kinds: z.partialRecord(z.enum(TERRAIN_IDS), z.object({ name: z.string(), art: z.string(), description: z.string() })).optional(),
   // A clan's own building: only that clan builds it; its effects add to the
   // village's bonuses per level.
   clan: z.string().optional(),

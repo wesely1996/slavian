@@ -39,6 +39,7 @@ func _initialize() -> void:
 	_test_research()
 	_test_heroes()
 	_test_movement_line()
+	_test_army_stack()
 	_test_orders()
 	_test_inbox()
 	_test_armies()
@@ -440,6 +441,17 @@ func _test_research() -> void:
 	_check(ResearchRules.problem(data, "spear_drill", 2, mine.done, false) == "Known.", "known")
 	_check(is_equal_approx(ResearchRules.time_factor({"buildTime": -0.1}, "buildTime"), 0.9) and ResearchRules.time_factor({"buildTime": -3.0}, "buildTime") == 0.1, "time factor")
 	_check(CaravanMath.needed({"logistics": {"caravan": {"capacity": 500}}}, {"wood": 600}, {"caravanCapacity": 0.25}) == 1, "pack harnesses")
+
+
+## Armies on one spot open tap by tap: yours first, then the biggest.
+func _test_army_stack() -> void:
+	var armies := [
+		{"id": 1, "ownerAccountId": 2, "units": {"spearman": 50}},
+		{"id": 2, "ownerAccountId": 1, "units": {"spearman": 5}},
+		{"id": 3, "ownerAccountId": 1, "units": {"spearman": 10, "archer": 10}},
+		{"id": 4, "ownerAccountId": 1, "units": {"archer": 5}},
+	]
+	_check(ArmyText.stack_order(armies, 1) == [3, 2, 4, 1], "army stack order: %s" % [ArmyText.stack_order(armies, 1)])
 
 
 ## The movement line on a hex's sheet (moveCostOn): terrain, roads, boats.

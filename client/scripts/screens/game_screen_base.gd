@@ -145,6 +145,10 @@ var _clearing := false
 
 ## A road being laid: from this hex, by this village, to a hex tapped next.
 var _road_from := Vector2i.MAX
+## The armies on the spot last tapped (map order) and which one is open:
+## the next tap there opens the next one.
+var _army_stack: Array = []
+var _army_stack_at := 0
 
 var _road_village := 0
 

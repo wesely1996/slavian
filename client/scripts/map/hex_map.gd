@@ -194,7 +194,7 @@ func _draw() -> void:
 			draw_circle(Vector2.ZERO, hex_size * 0.45, HOLY_CITY_COLOR)
 	for village in Game.villages.values():
 		for plot in Rules.outpost_plots(village):
-			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village))
+			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village), String(village.plots[plot].get("terrain", "")))
 	for village in Game.villages.values():
 		_draw_village(village)
 
@@ -439,12 +439,16 @@ func _standing_outposts() -> Array:
 	return cells
 
 
-func _draw_outpost(cell: Vector2i, level: int, mine: bool) -> void:
+func _draw_outpost(cell: Vector2i, level: int, mine: bool, terrain: String) -> void:
 	var c := HexMath.to_pixel(cell, hex_size)
 	var side := MINE_COLOR if mine else ALLY_COLOR
-	if Art.has("map/outpost"):
+	# Each land its own: a sawmill in the woods, a fishing boat on a lake.
+	var look := String(Rules.outpost_kind(Game.data, terrain if terrain != "" else String(Game.terrain.get(cell, ""))).art)
+	if not Art.has(look):
+		look = "map/outpost"
+	if Art.has(look):
 		_draw_ring(c + Vector2(0, hex_size * 0.32), hex_size * 0.9, side)
-		_draw_art("map/outpost", c, hex_size * 0.85, Color(1, 1, 1, 0.55) if level <= 0 else Color.WHITE)
+		_draw_art(look, c, hex_size * 0.85, Color(1, 1, 1, 0.55) if level <= 0 else Color.WHITE)
 		return
 	var r := hex_size * 0.26
 	var diamond := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, 0), c + Vector2(0, r), c + Vector2(-r, 0)])
@@ -470,23 +474,24 @@ func army_position(army: Dictionary, now: float) -> Vector2:
 	return Vector2.INF
 
 
-## The id of the army whose marker is under `local` (0: none): the
-## nearest, your own before others'.
-func army_at(local: Vector2, now: float) -> int:
-	var best := 0
-	var best_d := INF
-	var best_mine := false
+## The ids of the armies whose markers are under `local` (none: []): those
+## drawn on the same spot as the nearest, your own first, then the biggest
+## (ArmyText.stack_order); a tap goes through them one after another.
+func armies_at(local: Vector2, now: float) -> Array:
+	var nearest := Vector2.INF
+	var hits: Array = []
 	for army in Game.armies:
 		var pos := army_position(army, now)
 		if pos == Vector2.INF or pos.distance_to(local) > hex_size * 0.3:
 			continue
-		var d := pos.distance_to(local)
-		var mine := int(army.get("ownerAccountId", -1)) == Game.my_account_id()
-		if (mine and not best_mine) or (mine == best_mine and d < best_d):
-			best = int(army.id)
-			best_d = d
-			best_mine = mine
-	return best
+		hits.append([army, pos])
+		if nearest == Vector2.INF or pos.distance_to(local) < nearest.distance_to(local):
+			nearest = pos
+	var stack: Array = []
+	for hit in hits:
+		if hit[1].distance_to(nearest) < hex_size * 0.15:
+			stack.append(hit[0])
+	return ArmyText.stack_order(stack, Game.my_account_id())
 
 
 ## An army: a blue shield on the road, or beside the village it guards.

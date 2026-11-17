@@ -342,7 +342,7 @@ func _outposts_section(village: Dictionary) -> void:
 		var level := int(holds.level)
 		var terrain: String = holds.get("terrain", "")
 		var row := UI.hbox()
-		var text := UI.label(tr("%s (%d, %d)  %s") % [Terrain.display_name(terrain, Game.data), cell.x, cell.y,
+		var text := UI.label(tr("%s (%d, %d)  %s") % [tr(Rules.outpost_kind(Game.data, terrain).name), cell.x, cell.y,
 			tr("Lv %d · %s") % [level, _yield_text(Rules.outpost_yield(Game.data, terrain, level, speed))] if level > 0 else tr("Lv 0")], UI.SMALL_SIZE)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)
