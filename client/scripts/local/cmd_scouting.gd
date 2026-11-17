@@ -473,7 +473,8 @@ static func find_expedition(world: Dictionary, id: int) -> Dictionary:
 static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var data := server.data
 	var expedition := find_expedition(world, int(event.payload.expeditionId))
-	if expedition.is_empty() or expedition.status != "outbound":
+	# Gone round a fire since: a later arrival is planned.
+	if expedition.is_empty() or expedition.status != "outbound" or int(expedition.arrivesAt) != int(event.dueAt):
 		return
 	var at := int(event.dueAt)
 	var home := server.find_village(world, int(expedition.villageId))
@@ -504,7 +505,7 @@ static func on_settlers_arrive(server: LocalServer, world: Dictionary, event: Di
 
 static func on_settlers_return(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var expedition := find_expedition(world, int(event.payload.expeditionId))
-	if expedition.is_empty() or expedition.status != "returning":
+	if expedition.is_empty() or expedition.status != "returning" or int(expedition.returnsAt) != int(event.dueAt):
 		return
 	var home := server.find_village(world, int(expedition.villageId))
 	home.state = LocalVillage.return_home(server.data, home.state, SETTLER, int(expedition.settlers), int(event.dueAt), world.speed)

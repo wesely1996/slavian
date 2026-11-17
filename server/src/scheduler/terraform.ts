@@ -19,6 +19,8 @@ import { spend } from '../sim/resources.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { takenHexes } from './horde.js';
 import { tell, tellOwner } from './notices.js';
+import { avoidFire } from './detours.js';
+import { armiesHolding } from '../db/armies.js';
 
 const workPayload = z.object({ q: z.number().int(), r: z.number().int() });
 const firePayload = z.object({ q: z.number().int(), r: z.number().int(), action: z.string(), generation: z.number().int(), villageId: z.number().int().nullable() });
@@ -41,6 +43,8 @@ async function spreadFire(client: DbClient, data: GameData, world: World, work: 
   for (const next of neighbors(work.cell)) {
     const type = terrain.get(hexKey(next));
     if (!type || !def.from[type] || settled.has(hexKey(next))) continue;
+    // An army standing there keeps the fire off.
+    if ((await armiesHolding(client, world.id, next.q, next.r, ['stationed', 'engaged'])).length) continue;
     if ((await terraformAt(client, world.id, next))?.action === work.action) continue;
     if (!fireCatches(world.seed, next, at, fire.spreadChance)) continue;
     await scheduleEvent(client, world.id, new Date(at.getTime() + (fire.spreadHours * 3_600_000) / world.speed), 'fire_spread', {
@@ -61,6 +65,7 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
   const type = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t])).get(hexKey(cell));
   const villages = await listVillages(client, world.id);
   if (!type || !def.from[type] || villages.some((v) => v.q === cell.q && v.r === cell.r)) return;
+  if ((await armiesHolding(client, world.id, cell.q, cell.r, ['stationed', 'engaged'])).length) return;
   const there = await terraformAt(client, world.id, cell);
   if (there?.action === action) return;
   if (there) await deleteTerraform(client, world.id, cell);
@@ -96,6 +101,7 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
   const work: Terraform = { cell, action, villageId, completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed), generation };
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
+  await avoidFire(client, data, world, cell, work.completesAt, at);
   await spreadFire(client, data, world, work, at);
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
@@ -103,11 +109,12 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
 
 // Why `action` can't be done on a hex of `terrain` `distance` from the
 // village ('' when it can): the rules that need no database.
-export function terraformProblem(data: GameData, action: string, terrain: TerrainId | undefined, distance: number, taken: boolean, busy: boolean): string {
+export function terraformProblem(data: GameData, action: string, terrain: TerrainId | undefined, distance: number, taken: boolean, busy: boolean, held = false): string {
   const rules = data.field.terraform;
   const def = rules.actions[action];
   if (!def) return 'No such work';
   if (taken) return 'Something stands there';
+  if (def.fire && held) return 'An army stands there';
   if (distance < 1 || distance > rules.range) return `Land is reshaped within ${rules.range} hexes of the village`;
   if (busy) return 'Work is already under way there';
   if (!terrain || !def.from[terrain]) return 'That work cannot be done on this land';
@@ -124,6 +131,7 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
     hexDistance(cell, hex(village.q, village.r)),
     (await takenHexes(client, world.id)).has(hexKey(cell)),
     (await terraformAt(client, world.id, cell)) !== null,
+    (await armiesHolding(client, world.id, cell.q, cell.r, ['stationed', 'engaged'])).length > 0,
   );
   if (problem) throw new RuleError(problem);
   const def = data.field.terraform.actions[action]!;
@@ -131,7 +139,10 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
   const work: Terraform = { cell, action, villageId: village.id, completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed), generation: 0 };
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
-  if (def.fire) await spreadFire(client, data, world, work, at);
+  if (def.fire) {
+    await avoidFire(client, data, world, cell, work.completesAt, at);
+    await spreadFire(client, data, world, work, at);
+  }
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
   return work;

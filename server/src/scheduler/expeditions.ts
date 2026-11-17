@@ -20,7 +20,8 @@ export type ExpeditionPayload = z.infer<typeof expeditionPayload>;
 export const expeditionHandlers: HandlerRegistry = {
   async settlers_arrive({ client, data, world }, event) {
     const expedition = await loadExpedition(client, expeditionPayload.parse(event.payload).expeditionId);
-    if (expedition.status !== 'outbound') return;
+    // Gone round a fire since: a later arrival is planned.
+    if (expedition.status !== 'outbound' || expedition.arrivesAt.getTime() !== event.dueAt.getTime()) return;
     const home = await loadVillage(client, expedition.villageId);
     const villages = await listVillages(client, world.id);
     const outposts = new Set(villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => hexKey(outpostHex(plot)!))));
@@ -80,7 +81,7 @@ export const expeditionHandlers: HandlerRegistry = {
 
   async settlers_return({ client, data, world }, event) {
     const expedition = await loadExpedition(client, expeditionPayload.parse(event.payload).expeditionId);
-    if (expedition.status !== 'returning') return;
+    if (expedition.status !== 'returning' || expedition.returnsAt.getTime() !== event.dueAt.getTime()) return;
     const home = await loadVillage(client, expedition.villageId);
     await saveVillageState(client, home.id, returnHome(data, home.state, SETTLER, expedition.settlers, event.dueAt, world.speed));
     await markExpeditionDone(client, expedition.id);

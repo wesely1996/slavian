@@ -865,11 +865,13 @@ func _terraform_panel(terrain: String) -> void:
 		return
 	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty() or not Game.camp_at(cell).is_empty() \
 		or not Game.site_at(cell).is_empty() or Game.forts.any(func(f: Dictionary) -> bool: return int(f.q) == cell.x and int(f.r) == cell.y)
+	# An army standing there: no fire can be set on it.
+	var held := Game.armies.any(func(a: Dictionary) -> bool: return a.status in ["stationed", "engaged"] and ArmyText.held_hex(a) == cell)
 	var village_id := int(home.id)
 	var speed := float(Game.world.speed)
 	for action in options:
 		var def: Dictionary = rules.actions[action]
-		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken, false)
+		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken, false, held)
 		var into := Terrain.display_name(String(def.from[terrain]), Game.data)
 		var row := UI.hbox()
 		var info := UI.vbox(2)
@@ -894,6 +896,8 @@ func _terraform_panel(terrain: String) -> void:
 			return text)
 	if taken:
 		_panel_body.add_child(UI.label(tr("Something stands there"), UI.SMALL_SIZE, UI.MUTED))
+	elif held:
+		_panel_body.add_child(UI.label(tr("An army stands there: no fire can be set"), UI.SMALL_SIZE, UI.MUTED))
 
 
 func _terraform(village_id: int, cell: Vector2i, action: String) -> void:

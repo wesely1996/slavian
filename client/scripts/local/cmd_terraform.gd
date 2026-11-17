@@ -7,13 +7,15 @@ extends RefCounted
 
 
 ## terraformProblem: why `action` can't be done ("" when it can).
-static func problem(data: Dictionary, action: String, terrain: Variant, distance: int, taken: bool, busy: bool) -> String:
+static func problem(data: Dictionary, action: String, terrain: Variant, distance: int, taken: bool, busy: bool, held := false) -> String:
 	var rules: Dictionary = data.field.terraform
 	var def: Dictionary = rules.actions.get(action, {})
 	if def.is_empty():
 		return "No such work"
 	if taken:
 		return "Something stands there"
+	if def.has("fire") and held:
+		return "An army stands there"
 	if distance < 1 or distance > int(rules.range):
 		return "Land is reshaped within %d hexes of the village" % int(rules.range)
 	if busy:
@@ -37,7 +39,7 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	for f in world.forts:
 		taken[LocalLand.key(Vector2i(f.q, f.r))] = true
 	var reason := problem(data, action, world.hexes.get(LocalLand.key(cell)), HexMath.distance(cell, Vector2i(village.q, village.r)),
-		taken.has(LocalLand.key(cell)), not work_at(world, cell).is_empty())
+		taken.has(LocalLand.key(cell)), not work_at(world, cell).is_empty(), not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty())
 	if reason != "":
 		return LocalVillage.rule(reason)
 	var def: Dictionary = data.field.terraform.actions[action]
@@ -50,6 +52,7 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	world.terraforms.append(work)
 	server.schedule(world, work.completesAt, "terraform_done", {"q": cell.x, "r": cell.y})
 	if def.has("fire"):
+		LocalDetours.avoid_fire(server, world, cell, int(work.completesAt), at)
 		_spread(server, world, work, at)
 	return work
 
@@ -74,6 +77,9 @@ static func _spread(server: LocalServer, world: Dictionary, work: Dictionary, at
 		var type: Variant = world.hexes.get(LocalLand.key(next))
 		if type == null or not def.from.has(type) or settled.has(LocalLand.key(next)):
 			continue
+		# An army standing there keeps the fire off.
+		if not LocalArmies.armies_holding(world, next, ["stationed", "engaged"]).is_empty():
+			continue
 		if work_at(world, next).get("action") == work.action:
 			continue
 		if not fire_catches(int(world.seed), next, at, float(fire.spreadChance)):
@@ -93,6 +99,8 @@ static func on_fire_spread(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	var type: Variant = world.hexes.get(LocalLand.key(cell))
 	if type == null or not def.from.has(type) or world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == cell.x and int(v.r) == cell.y):
+		return
+	if not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty():
 		return
 	var there := work_at(world, cell)
 	if there.get("action") == p.action:
@@ -126,6 +134,7 @@ static func on_fire_spread(server: LocalServer, world: Dictionary, event: Dictio
 	var work := {"cell": cell, "action": String(p.action), "villageId": p.villageId, "completesAt": LocalTime.ms(at + float(def.hours) * 3600000.0 / world.speed), "generation": int(p.generation)}
 	world.terraforms.append(work)
 	server.schedule(world, work.completesAt, "terraform_done", {"q": cell.x, "r": cell.y})
+	LocalDetours.avoid_fire(server, world, cell, int(work.completesAt), at)
 	_spread(server, world, work, at)
 	changed.append(["world"])
 
