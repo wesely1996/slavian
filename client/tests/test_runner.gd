@@ -40,6 +40,7 @@ func _initialize() -> void:
 	_test_heroes()
 	_test_movement_line()
 	_test_army_stack()
+	_test_detours()
 	_test_orders()
 	_test_inbox()
 	_test_armies()
@@ -441,6 +442,22 @@ func _test_research() -> void:
 	_check(ResearchRules.problem(data, "spear_drill", 2, mine.done, false) == "Known.", "known")
 	_check(is_equal_approx(ResearchRules.time_factor({"buildTime": -0.1}, "buildTime"), 0.9) and ResearchRules.time_factor({"buildTime": -3.0}, "buildTime") == 0.1, "time factor")
 	_check(CaravanMath.needed({"logistics": {"caravan": {"capacity": 500}}}, {"wood": 600}, {"caravanCapacity": 0.25}) == 1, "pack harnesses")
+
+
+## Going round a fire (server/test/detours.test.ts, the same cases).
+func _test_detours() -> void:
+	var road: Array = []
+	for q in 5:
+		road.append({"q": q, "r": 0, "atMs": q * 10000})
+	var around := func(from: Vector2i) -> Variant:
+		return [{"q": from.x, "r": from.y, "atMs": 0}, {"q": from.x + 1, "r": -1, "atMs": 12000}, {"q": 4, "r": 0, "atMs": 30000}]
+	var flat := func(path: Variant) -> Array:
+		return [] if path == null else path.map(func(s: Dictionary) -> Array: return [int(s.q), int(s.r), int(s.atMs)])
+	_check(flat.call(LocalDetours._detour(road, 14000, Vector2i(2, 0), around)) == [[0, 0, 0], [1, 0, 10000], [1, 0, 18000], [2, -1, 30000], [4, 0, 48000]], "an army walks back from a fire ahead")
+	_check(LocalDetours._detour(road, 14000, Vector2i(2, 0), func(_f: Vector2i) -> Variant: return null) == null, "no way round: keeps its road")
+	_check(flat.call(LocalDetours.horde_detour(road, 14000, Vector2i(2, 0), 60000, around)) == [[0, 0, 0], [1, 0, 14000], [2, -1, 26000], [4, 0, 44000]], "a horde swerves on")
+	_check(flat.call(LocalDetours.horde_detour(road, 14000, Vector2i(2, 0), 60000, func(_f: Vector2i) -> Variant: return null)) == [[0, 0, 0], [1, 0, 10000], [2, 0, 60000], [3, 0, 70000], [4, 0, 80000]], "a horde waits for the fire to go out")
+	_check(flat.call(LocalDetours.horde_detour(road, 4000, Vector2i(3, 0), 60000, around))[1] == [1, 0, 10000], "a horde goes round a fire further on")
 
 
 ## Armies on one spot open tap by tap: yours first, then the biggest.

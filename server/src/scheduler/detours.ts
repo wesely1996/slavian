@@ -3,7 +3,9 @@
 // settlers, finishes the hex it is crossing and goes round it to where it
 // was going, by the best road there is now. Headed straight into the fire,
 // it turns back to the hex it came from and goes round from there. With no
-// way round at all, it keeps its road.
+// way round at all, it keeps its road. Hordes never turn back: headed
+// straight into it they swerve on from the hex they came from, and with no
+// way round they wait at its edge until it is out, then march on.
 import type { GameData } from '../data/index.js';
 import { listArmies, saveArmy, type Army } from '../db/armies.js';
 import { listCaravans, saveCaravanRoute, type Caravan } from '../db/caravans.js';
@@ -54,6 +56,26 @@ export function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, 
   return [...path.slice(0, i), { q: back.q, r: back.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
 }
 
+// A horde's road round the fire (never back the way it came), or, with no
+// way round, its road held at the fire's edge until it is out (`untilMs`,
+// from its spawn).
+export function hordeDetour(path: readonly PathStep[], elapsedMs: number, cell: Hex, untilMs: number, next: (from: Hex) => PathStep[] | null): PathStep[] {
+  let i = path.findIndex((step) => step.atMs >= elapsedMs);
+  if (i < 0) i = path.length - 1;
+  const ahead = path[i]!;
+  const intoFire = ahead.q === cell.q && ahead.r === cell.r && i > 0;
+  const from = intoFire ? path[i - 1]! : ahead;
+  const turnAt = intoFire ? elapsedMs : ahead.atMs;
+  const onward = next({ q: from.q, r: from.r });
+  if (onward) {
+    return [...path.slice(0, intoFire ? i - 1 : i), { q: from.q, r: from.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
+  }
+  // No way round: it waits outside until the fire is out.
+  const j = path.findIndex((step, k) => k >= i && step.q === cell.q && step.r === cell.r);
+  const wait = j < 0 ? 0 : Math.max(0, untilMs - path[j]!.atMs);
+  return path.map((step, k) => (j >= 0 && k >= j ? { ...step, atMs: step.atMs + wait } : step));
+}
+
 function safely(route: () => PathStep[]): PathStep[] | null {
   try {
     return route();
@@ -70,10 +92,9 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
     const target = wave.targetVillageId !== null ? await loadVillage(client, wave.targetVillageId).catch(() => null) : null;
     const goal = target ? { id: target.id, cell: hex(target.q, target.r) } : { id: null, cell: hex(0, 0) };
     const sinceSpawn = at.getTime() - wave.spawnAt.getTime();
-    const path = detour(wave.path, sinceSpawn, cell, (from) =>
+    const path = hordeDetour(wave.path, sinceSpawn, cell, until.getTime() - wave.spawnAt.getTime(), (from) =>
       routeFrom(data, { terrain: land, from, targets: [goal], front: wave.front, composition: wave.composition, rng: rngFor(world.seed, wave.index, 0xf1), startMs: 0, worldSpeed: world.speed })?.path ?? null,
     );
-    if (!path) continue;
     const march = holdForQuiet(world, wave.spawnAt, { path, arrivesAt: new Date(wave.spawnAt.getTime() + path.at(-1)!.atMs) });
     await marchOnward(client, wave.id, wave.targetVillageId, [...march.path], march.arrivesAt);
     await cancelPlans(client, world.id, wave.id);

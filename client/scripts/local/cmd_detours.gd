@@ -44,6 +44,42 @@ static func _detour(path: Array, elapsed_ms: int, cell: Vector2i, next: Callable
 	return out
 
 
+## hordeDetour: a horde's road round the fire (never back the way it came),
+## or, with no way round, its road held at the fire's edge until it is out
+## (`until_ms`, from its spawn).
+static func horde_detour(path: Array, elapsed_ms: int, cell: Vector2i, until_ms: int, next: Callable) -> Array:
+	var i := path.size() - 1
+	for k in path.size():
+		if int(path[k].atMs) >= elapsed_ms:
+			i = k
+			break
+	var ahead: Dictionary = path[i]
+	var into_fire := int(ahead.q) == cell.x and int(ahead.r) == cell.y and i > 0
+	var from: Dictionary = path[i - 1] if into_fire else ahead
+	var turn_at := elapsed_ms if into_fire else int(ahead.atMs)
+	var onward: Variant = next.call(Vector2i(int(from.q), int(from.r)))
+	if onward != null:
+		var out: Array = path.slice(0, i - 1 if into_fire else i)
+		out.append({"q": from.q, "r": from.r, "atMs": turn_at})
+		for k in range(1, onward.size()):
+			out.append({"q": onward[k].q, "r": onward[k].r, "atMs": turn_at + int(onward[k].atMs)})
+		return out
+	# No way round: it waits outside until the fire is out.
+	var j := -1
+	for k in range(i, path.size()):
+		if int(path[k].q) == cell.x and int(path[k].r) == cell.y:
+			j = k
+			break
+	var wait := maxi(0, until_ms - int(path[j].atMs)) if j >= 0 else 0
+	var held: Array = []
+	for k in path.size():
+		var step: Dictionary = path[k].duplicate()
+		if j >= 0 and k >= j:
+			step.atMs = int(step.atMs) + wait
+		held.append(step)
+	return held
+
+
 static func _by_departure(items: Array, key: String) -> Array:
 	var out := items.duplicate()
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -63,11 +99,9 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 		var target := server.find_village(world, int(wave.targetVillageId)) if wave.targetVillageId != null else {}
 		var goal := {"id": target.id, "cell": Vector2i(target.q, target.r)} if not target.is_empty() else {"id": null, "cell": Vector2i.ZERO}
 		var since_spawn := at - int(wave.spawnAt)
-		var path: Variant = _detour(wave.path, since_spawn, cell, func(from: Vector2i) -> Variant:
+		var path: Array = horde_detour(wave.path, since_spawn, cell, until - int(wave.spawnAt), func(from: Vector2i) -> Variant:
 			var route: Variant = LocalHordes.route_from(data, land, from, [goal], wave.front, wave.composition, {}, LocalWaves.rng_for(int(world.seed), int(wave.index), 0xf1), 0.0, world.speed)
 			return route.path if route != null else null)
-		if path == null:
-			continue
 		var march := LocalHordes.hold_for_quiet(world, int(wave.spawnAt), {"path": path, "arrivesAt": int(wave.spawnAt) + int(path[-1].atMs)})
 		wave.status = "marching"
 		wave.path = march.path
