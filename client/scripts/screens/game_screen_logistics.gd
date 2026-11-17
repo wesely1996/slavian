@@ -212,6 +212,13 @@ func _caravan_what(village: Dictionary, limits: Dictionary, own_place: Dictionar
 			var have := UI.label(tr("%d there") % there, UI.SMALL_SIZE, UI.MUTED)
 			have.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(have)
+			# Everything there now (more may come in before it arrives).
+			var all := UI.button(tr("All"), func() -> void:
+				_caravan_back[kind] = there
+				_drafts.erase("back:%s" % kind)
+				_rebuild_panel())
+			all.focus_mode = Control.FOCUS_NONE
+			row.add_child(all)
 			_panel_body.add_child(row)
 	var summary := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 	_panel_body.add_child(summary)

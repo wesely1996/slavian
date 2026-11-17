@@ -3045,190 +3045,190 @@ msgstr "Na povratku uzima ovo iz %s, koliko ima kad stigne."
 msgid "%d there"
 msgstr "%d tamo"
 
-#: client/scripts/screens/game_screen_logistics.gd:219
+#: client/scripts/screens/game_screen_logistics.gd:226
 msgid "Back"
 msgstr "Nazad"
 
-#: client/scripts/screens/game_screen_logistics.gd:227
+#: client/scripts/screens/game_screen_logistics.gd:234
 msgid "Needs %d caravan"
 msgid_plural "Needs %d caravans"
 msgstr[0] "Potreban je %d karavan"
 msgstr[1] "Potrebna su %d karavana"
 msgstr[2] "Potrebno je %d karavana"
 
-#: client/scripts/screens/game_screen_logistics.gd:227
+#: client/scripts/screens/game_screen_logistics.gd:234
 msgid "Type how much of each to carry"
 msgstr "Upiši koliko čega da se nosi"
 
-#: client/scripts/screens/game_screen_logistics.gd:229
+#: client/scripts/screens/game_screen_logistics.gd:236
 msgid " (only %d at home)"
 msgstr " (kod kuće samo %d)"
 
-#: client/scripts/screens/game_screen_logistics.gd:248
+#: client/scripts/screens/game_screen_logistics.gd:255
 msgid "Carries %s"
 msgstr "Nosi %s"
 
-#: client/scripts/screens/game_screen_logistics.gd:248
+#: client/scripts/screens/game_screen_logistics.gd:255
 msgid "Carries nothing there"
 msgstr "Tamo ne nosi ništa"
 
-#: client/scripts/screens/game_screen_logistics.gd:252
+#: client/scripts/screens/game_screen_logistics.gd:259
 msgid "Brings back %s"
 msgstr "Vraća %s"
 
-#: client/scripts/screens/game_screen_logistics.gd:270
+#: client/scripts/screens/game_screen_logistics.gd:277
 msgid "Fetch from vault"
 msgstr "Preuzmi iz riznice"
 
-#: client/scripts/screens/game_screen_logistics.gd:271
+#: client/scripts/screens/game_screen_logistics.gd:278
 msgid "Brings this much from the Holy City vault home instead of taking it there."
 msgstr "Donosi ovoliko iz riznice Svetog grada kući, umesto da nosi tamo."
 
-#: client/scripts/screens/game_screen_logistics.gd:280
+#: client/scripts/screens/game_screen_logistics.gd:287
 msgid "Nothing to carry"
 msgstr "Nema šta da nosi"
 
-#: client/scripts/screens/game_screen_logistics.gd:284
+#: client/scripts/screens/game_screen_logistics.gd:291
 msgid "Not enough in the stores to cover it."
 msgstr "Nema dovoljno u skladištima da se to pokrije."
 
-#: client/scripts/screens/game_screen_logistics.gd:311
+#: client/scripts/screens/game_screen_logistics.gd:318
 msgid "No caravans on the road."
 msgstr "Nijedan karavan nije na putu."
 
-#: client/scripts/screens/game_screen_logistics.gd:330
+#: client/scripts/screens/game_screen_logistics.gd:337
 msgid "Turn back"
 msgstr "Vrati nazad"
 
-#: client/scripts/screens/game_screen_logistics.gd:333
+#: client/scripts/screens/game_screen_logistics.gd:340
 msgid "Send to…"
 msgstr "Pošalji u…"
 
-#: client/scripts/screens/game_screen_logistics.gd:431
+#: client/scripts/screens/game_screen_logistics.gd:438
 msgid "The caravan is on its way"
 msgstr "Karavan je krenuo"
 
-#: client/scripts/screens/game_screen_logistics.gd:465
+#: client/scripts/screens/game_screen_logistics.gd:472
 msgid "Last: %s"
 msgstr "Poslednje: %s"
 
-#: client/scripts/screens/game_screen_logistics.gd:469
+#: client/scripts/screens/game_screen_logistics.gd:476
 msgid "Stop"
 msgstr "Zaustavi"
 
-#: client/scripts/screens/game_screen_logistics.gd:479
+#: client/scripts/screens/game_screen_logistics.gd:486
 msgid "Standing orders"
 msgstr "Stalni nalozi"
 
-#: client/scripts/screens/game_screen_logistics.gd:483
+#: client/scripts/screens/game_screen_logistics.gd:490
 msgid "Create order"
 msgstr "Novi nalog"
 
-#: client/scripts/screens/game_screen_logistics.gd:487
+#: client/scripts/screens/game_screen_logistics.gd:494
 msgid "Orders run on their own"
 msgstr "Naredbe se izvršavaju same"
 
-#: client/scripts/screens/game_screen_logistics.gd:487
+#: client/scripts/screens/game_screen_logistics.gd:494
 msgid "They run on their own, checked every %s: repeat training, rebuilding raided outposts, surplus to the vault and supply routes."
 msgstr "Izvršavaju se sami, provera na svakih %s: ponovljena obuka, obnova opljačkanih ispostava, višak u riznicu i putevi snabdevanja."
 
-#: client/scripts/screens/game_screen_logistics.gd:490
+#: client/scripts/screens/game_screen_logistics.gd:497
 msgid "You have no village to give orders from."
 msgstr "Nemaš selo iz kojeg bi izdao naloge."
 
-#: client/scripts/screens/game_screen_logistics.gd:500
+#: client/scripts/screens/game_screen_logistics.gd:507
 msgid "No standing orders."
 msgstr "Nema stalnih naloga."
 
-#: client/scripts/screens/game_screen_logistics.gd:511
+#: client/scripts/screens/game_screen_logistics.gd:518
 msgid "From %s"
 msgstr "Iz %s"
 
-#: client/scripts/screens/game_screen_logistics.gd:518
+#: client/scripts/screens/game_screen_logistics.gd:525
 msgid "Repeat training"
 msgstr "Ponovljena obuka"
 
-#: client/scripts/screens/game_screen_logistics.gd:518
+#: client/scripts/screens/game_screen_logistics.gd:525
 msgid "Surplus to the vault"
 msgstr "Višak u riznicu"
 
-#: client/scripts/screens/game_screen_logistics.gd:518
+#: client/scripts/screens/game_screen_logistics.gd:525
 msgid "Supply route"
 msgstr "Put snabdevanja"
 
-#: client/scripts/screens/game_screen_logistics.gd:542
+#: client/scripts/screens/game_screen_logistics.gd:549
 msgid "Keeps a unit topped up: when fewer are ready, it trains more."
 msgstr "Održava broj jedinica: kad ih je spremno manje, obučava nove."
 
-#: client/scripts/screens/game_screen_logistics.gd:551
+#: client/scripts/screens/game_screen_logistics.gd:558
 msgid "Keep"
 msgstr "Drži"
 
-#: client/scripts/screens/game_screen_logistics.gd:551
+#: client/scripts/screens/game_screen_logistics.gd:558
 msgid "ready"
 msgstr "spremno"
 
-#: client/scripts/screens/game_screen_logistics.gd:552
+#: client/scripts/screens/game_screen_logistics.gd:559
 msgid "at a time"
 msgstr "odjednom"
 
-#: client/scripts/screens/game_screen_logistics.gd:554
+#: client/scripts/screens/game_screen_logistics.gd:561
 msgid "Keep %s topped up"
 msgstr "Dopunjavaj %s"
 
-#: client/scripts/screens/game_screen_logistics.gd:564
+#: client/scripts/screens/game_screen_logistics.gd:571
 msgid "Orders %d/%d · +1 every %d Hall levels"
 msgstr "Naredbe %d/%d · +1 na svaka %d nivoa Doma"
 
-#: client/scripts/screens/game_screen_logistics.gd:568
+#: client/scripts/screens/game_screen_logistics.gd:575
 msgid "Rebuilds the village's raided outposts to the best level they had."
 msgstr "Obnavlja opljačkane ispostave sela do najvišeg nivoa koji su imale."
 
-#: client/scripts/screens/game_screen_logistics.gd:570
+#: client/scripts/screens/game_screen_logistics.gd:577
 msgid "This village already does."
 msgstr "Ovo selo to već radi."
 
-#: client/scripts/screens/game_screen_logistics.gd:572
+#: client/scripts/screens/game_screen_logistics.gd:579
 msgid "Rebuild raided outposts automatically"
 msgstr "Automatski obnovi opustošene ispostave"
 
-#: client/scripts/screens/game_screen_logistics.gd:576
+#: client/scripts/screens/game_screen_logistics.gd:583
 msgid "Caravans take what is above this share of storage to the Holy City vault."
 msgstr "Karavani nose u riznicu Svetog grada sve što pređe ovaj deo skladišta."
 
-#: client/scripts/screens/game_screen_logistics.gd:582
+#: client/scripts/screens/game_screen_logistics.gd:589
 msgid "Above"
 msgstr "Iznad"
 
-#: client/scripts/screens/game_screen_logistics.gd:585
+#: client/scripts/screens/game_screen_logistics.gd:592
 msgid "% of storage"
 msgstr "% skladišta"
 
-#: client/scripts/screens/game_screen_logistics.gd:589
+#: client/scripts/screens/game_screen_logistics.gd:596
 msgid "Start"
 msgstr "Počni"
 
-#: client/scripts/screens/game_screen_logistics.gd:595
+#: client/scripts/screens/game_screen_logistics.gd:602
 msgid "Keeps a fort or supply point fed"
 msgstr "Hrani utvrdu ili tačku snabdevanja"
 
-#: client/scripts/screens/game_screen_logistics.gd:595
+#: client/scripts/screens/game_screen_logistics.gd:602
 msgid "Caravans from this village keep a fort or supply point of yours filled with grain up to the amount you set, whenever at least %d is missing."
 msgstr "Karavani iz ovog sela pune tvoju utvrdu ili žitnicu žitom do zadate količine kad god nedostaje bar %d."
 
-#: client/scripts/screens/game_screen_logistics.gd:599
+#: client/scripts/screens/game_screen_logistics.gd:606
 msgid "Build a fort or a supply point on the map first."
 msgstr "Prvo izgradi utvrdu ili žitnicu na mapi."
 
-#: client/scripts/screens/game_screen_logistics.gd:605
+#: client/scripts/screens/game_screen_logistics.gd:612
 msgid "Supply point at (%d, %d)"
 msgstr "Žitnica na (%d, %d)"
 
-#: client/scripts/screens/game_screen_logistics.gd:605
+#: client/scripts/screens/game_screen_logistics.gd:612
 msgid "Fort at (%d, %d)"
 msgstr "Utvrda na (%d, %d)"
 
-#: client/scripts/screens/game_screen_logistics.gd:615
+#: client/scripts/screens/game_screen_logistics.gd:622
 msgid "grain there"
 msgstr "žita tamo"
 
