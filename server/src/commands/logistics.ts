@@ -8,7 +8,7 @@ import { loadFort } from '../db/forts.js';
 import { loadShipyard } from '../db/shipyards.js';
 import { loadVault, saveVault, type Vault } from '../db/vaults.js';
 import { loadVillage, type Village } from '../db/villages.js';
-import { loadHexes, type World } from '../db/worlds.js';
+import { listMembers, loadHexes, setMerchantReadyAt, type World } from '../db/worlds.js';
 import { NotFoundError, RuleError } from '../errors.js';
 import { scheduleEvent, type SchedulerDeps } from '../scheduler/events.js';
 import type { CaravanPayload } from '../scheduler/caravans.js';
@@ -22,12 +22,13 @@ import {
   caravansAt,
   caravansFor,
   HOLY_CITY,
+  merchantCooldownHours,
   spliceRoute,
   vaultUpgradeCost,
   vaultUpgradeMs,
   withdraw,
 } from '../sim/logistics.js';
-import { mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
+import { emptyResources, mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { total } from '../sim/logistics.js';
 import { sendAway, type VillageState } from '../sim/village.js';
 import { ownVillageCommand, type VillageCommandInput } from './village.js';
@@ -72,7 +73,13 @@ export async function dispatchCaravan(
   const bonuses = await effectiveBonuses(client, data, village);
   const retrieve = order.retrieve && total(order.retrieve) > 0 ? order.retrieve : null;
   // As many caravans as the bigger of the two loads takes (one of them may be empty).
-  const needed = retrieve && total(order.load) === 0 ? caravansFor(data, retrieve, bonuses) : Math.max(caravansFor(data, order.load, bonuses), retrieve ? caravansFor(data, retrieve, bonuses) : 0);
+  // (A merchant goes empty, in one caravan.)
+  const needed =
+    kind === 'merchant'
+      ? 1
+      : retrieve && total(order.load) === 0
+        ? caravansFor(data, retrieve, bonuses)
+        : Math.max(caravansFor(data, order.load, bonuses), retrieve ? caravansFor(data, retrieve, bonuses) : 0);
   const free = caravansAt(data, yard) - (await caravansOut(client, village.id));
   if (needed > free) {
     throw new RuleError(`That takes ${needed} caravan${needed === 1 ? '' : 's'}; ${Math.max(0, free)} at home`);
@@ -256,6 +263,31 @@ export async function fetchFromVaultCommand(
       input.now,
     );
     return { state, result: caravan };
+  });
+  return { village, caravan: result };
+}
+
+// Sends a merchant caravan (logistics.json merchant) to another settlement
+// (or the Holy City, null): it trades along the road and brings home
+// perHex of each resource for every hex out and back. One a player, every
+// so often.
+export async function merchantCaravanCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { destinationVillageId: number | null },
+): Promise<{ village: Village; caravan: Caravan }> {
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'sent a merchant caravan' }, async ({ client, world, village }) => {
+    const member = (await listMembers(client, world.id)).find((m) => m.accountId === village.ownerAccountId);
+    if (member?.merchantReadyAt && input.now < member.merchantReadyAt) throw new RuleError('Your merchants are still on the road or resting');
+    if (input.destinationVillageId !== null) {
+      const destination = await loadVillage(client, input.destinationVillageId).catch(() => null);
+      if (destination?.ruin) throw new RuleError('Pick a settlement that stands');
+    }
+    const caravan = await dispatchCaravan(client, deps.data, world, village, 'merchant', { destinationVillageId: input.destinationVillageId, load: emptyResources() }, input.now);
+    const hours = merchantCooldownHours(deps.data, village.state.levels[CARAVAN_YARD] ?? 0);
+    await setMerchantReadyAt(client, world.id, village.ownerAccountId!, new Date(input.now.getTime() + (hours * 3_600_000) / world.speed));
+    await notifyWorld(client, { worldId: world.id, type: 'world' });
+    return { state: village.state, result: caravan };
   });
   return { village, caravan: result };
 }

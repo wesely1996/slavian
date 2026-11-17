@@ -9,7 +9,7 @@ import { loadCaravan, markCaravanDone, markReturning, saveCaravanRoute, type Car
 import { notifyWorld } from '../db/notify.js';
 import { loadVault, saveVault } from '../db/vaults.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
-import { receive, store, total, vaultCapacity, withdraw, withoutHalts } from '../sim/logistics.js';
+import { merchantEarnings, receive, store, total, vaultCapacity, withdraw, withoutHalts } from '../sim/logistics.js';
 import { amountsAt, emptyResources, mapResources, spend } from '../sim/resources.js';
 import { loadShipyard } from '../db/shipyards.js';
 import { payIntoShipyard } from './mapEvents.js';
@@ -29,7 +29,10 @@ export const caravanHandlers: HandlerRegistry = {
     // Turned on the road since: a later arrival is planned, or none.
     if (caravan.status !== 'outbound' || caravan.arrivesAt.getTime() !== event.dueAt.getTime()) return;
     let carriedBack = emptyResources();
-    if (caravan.destinationFortId !== null) {
+    if (caravan.kind === 'merchant') {
+      // Merchants deliver nothing: they traded along the road, and bring it home.
+      carriedBack = merchantEarnings(data, caravan.path);
+    } else if (caravan.destinationFortId !== null) {
       // A supply route: grain goes into the store as far as it fits; the
       // rest (everything, if the store is gone) comes back.
       const fort = await loadFort(client, caravan.destinationFortId);

@@ -18,8 +18,92 @@ func _caravans_section(village: Dictionary) -> void:
 	var tabs := [["load", "icon/caravan", tr("Send a caravan"), _caravan_load_tab.bind(village)]]
 	if int(village.levels.get("caravan_yard", 0)) >= 1 and not Game.camps.is_empty():
 		tabs.append(["escort", "unit/spearman", tr("Escort"), _caravan_escort.bind(village)])
+	tabs.append(["merchant", "map/merchant_caravan", tr("Merchants"), _merchant_tab.bind(village)])
 	tabs.append(["road", "icon/map", tr("On the road"), _caravan_trips.bind(village_id)])
 	_side_tabs("caravans", tabs, VILLAGE_TOP)
+
+
+## A merchant caravan: to any other settlement (or the Holy City), trading
+## along the fastest road; it brings home some of each resource for every
+## hex out and back. Once a player's merchants set out, they rest a while.
+func _merchant_tab(village: Dictionary) -> void:
+	var village_id := int(village.id)
+	var merchant: Dictionary = Game.data.logistics.merchant
+	var per_hex := int(merchant.perHex.wood)
+	var yard := int(village.levels.get("caravan_yard", 0))
+	var hours := CaravanMath.merchant_cooldown_hours(Game.data, yard)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Merchant caravan"), UI.HEADING_SIZE),
+		tr("Merchants carry nothing there: they trade along the fastest road and bring home %d of each resource for every hex out and back. Then your merchants rest %s game hours, %s fewer for every Caravan Yard level above the first, never under %s.") % [
+			per_hex, _hours_text(float(merchant.cooldownHours)), _hours_text(float(merchant.cooldownPerYardLevel)), _hours_text(float(merchant.minCooldownHours))]))
+	if yard < 1:
+		_panel_body.add_child(UI.label(tr("Needs a Caravan Yard"), UI.SMALL_SIZE, UI.MUTED))
+		return
+	# Where they go: anywhere standing but here.
+	var target_gone: bool = _merchant_target.get("kind") == "village" and (int(_merchant_target.id) == village_id or _caravan_limits(_merchant_target).is_empty())
+	if target_gone:
+		_merchant_target = {"kind": "vault"}
+	_panel_body.add_child(UI.label(tr("To %s") % CaravanText.target_name(_merchant_target)))
+	var row := UI.hbox(8)
+	var pick := UI.button(tr("Pick on the map"), func() -> void:
+		_pick_caravan_target(village_id, true), "icon/map")
+	pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(pick)
+	if _merchant_target.get("kind") != "vault":
+		row.add_child(UI.button(tr("Holy City"), func() -> void:
+			_merchant_target = {"kind": "vault"}
+			_rebuild_panel()))
+	_panel_body.add_child(row)
+	# What it should bring: the road is at least as long as the straight line.
+	var to := Vector2i.ZERO
+	if _merchant_target.get("kind") == "village":
+		var there: Dictionary = Game.villages.get(int(_merchant_target.id), {})
+		to = Vector2i(int(there.get("q", 0)), int(there.get("r", 0)))
+	var hexes := HexMath.distance(Vector2i(int(village.q), int(village.r)), to)
+	var card := UI.card(12)
+	var box := UI.vbox(6)
+	card.add_child(box)
+	box.add_child(UI.label(tr_n("At least %d hex each way", "At least %d hexes each way", hexes) % hexes, UI.SMALL_SIZE, UI.MUTED))
+	var earns := UI.rich("", UI.SMALL_SIZE, UiTheme.INK)
+	earns.text = tr("Brings home at least %s") % UI.costs(CaravanMath.merchant_earnings(Game.data, hexes), 26)
+	box.add_child(earns)
+	box.add_child(UI.label(tr("Then your merchants rest %s") % TimeUtil.format_duration(hours * 3600.0 / float(Game.world.speed)), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(card)
+	var send := UI.primary(tr("Send the merchants"), func() -> void: _send_merchants(village_id, _merchant_target.duplicate()), "map/merchant_caravan")
+	_panel_body.add_child(send)
+	var wait := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+	_panel_body.add_child(wait)
+	_tick(wait, func() -> String:
+		var free := CaravanMath.available(Game.data, Game.villages.get(village_id, village), Game.caravans)
+		var ready_at: Variant = Game.my_member().get("merchantReadyAt")
+		var left := TimeUtil.parse_iso(ready_at) - Game.server_now() if ready_at != null else 0.0
+		send.disabled = left > 0.0 or free < 1
+		if left > 0.0:
+			return tr("Your merchants are on the road or resting: ready in %s") % TimeUtil.format_duration(left)
+		if free < 1:
+			return tr("Every caravan is out on the road")
+		return tr("Your merchants are ready"))
+
+
+## "12", "0.18", "8.5": hours as short as they write.
+func _hours_text(hours: float) -> String:
+	return String.num(hours, 2)
+
+
+func _send_merchants(village_id: int, target: Dictionary) -> void:
+	_status.text = ""
+	var body := {"destinationVillageId": int(target.id) if target.get("kind") == "village" else null}
+	var response := await Api.post_json("/v1/villages/%d/caravans/merchant" % village_id, body)
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("coins")
+	_toast(tr("The merchants are on their way"))
+	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
+	Game.update_village(response.data.village)
+	if response.data.get("caravan") is Dictionary:
+		Game.put_caravan(response.data.caravan)
 
 
 func _caravan_load_tab(village: Dictionary) -> void:
@@ -318,7 +402,8 @@ func _caravan_limits(target: Dictionary) -> Dictionary:
 
 
 ## The map waits for where the caravan from `village_id` goes.
-func _pick_caravan_target(village_id: int) -> void:
+func _pick_caravan_target(village_id: int, merchants := false) -> void:
+	_merchant_picking = merchants
 	_set_view("map")
 	_caravan_picking = village_id
 	_caravan_pick_mode = _panel_mode

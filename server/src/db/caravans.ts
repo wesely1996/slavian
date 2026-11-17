@@ -3,7 +3,7 @@ import type { Resources } from '../sim/resources.js';
 import type { PathStep } from '../sim/waves.js';
 import type { DbClient } from './pool.js';
 
-export type CaravanKind = 'deliver' | 'fetch';
+export type CaravanKind = 'deliver' | 'fetch' | 'merchant';
 export type CaravanStatus = 'outbound' | 'returning' | 'done';
 
 export interface Caravan {

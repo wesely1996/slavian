@@ -160,6 +160,12 @@ var _caravan_target := {"kind": "vault"}
 
 var _caravan_picking := 0
 
+## The map tap picks where the merchants go, not a caravan's target.
+var _merchant_picking := false
+
+## Where the merchants go: {kind: "vault"} or {kind: "village", id}.
+var _merchant_target := {"kind": "vault"}
+
 ## The sheet that was open when the caravan's target began to be picked:
 ## opening another drops the picking.
 var _caravan_pick_mode := ""

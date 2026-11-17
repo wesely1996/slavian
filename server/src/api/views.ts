@@ -726,6 +726,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       bought: m.bought,
       // Their rally point: where newly trained troops march (null: none).
       rallyVillageId: m.rallyVillageId,
+      // When they may send their next merchant caravan (null: now).
+      merchantReadyAt: m.merchantReadyAt?.toISOString() ?? null,
       // Their own Svarog's Embers (the world's `embers` is everyone's together).
       embers: m.embers,
       // When their scouts may next search for ruins (null: never searched).

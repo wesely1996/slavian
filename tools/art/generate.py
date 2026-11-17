@@ -753,6 +753,71 @@ def caravan_token():
     return s
 
 
+def merchant_caravan_token():
+    """A merchant caravan, side on and facing right: a dappled horse pulling
+    a painted trader's wagon under a red-and-gold striped awning with a
+    scalloped fringe, bolts of cloth and jars on show, and a gold coin sign
+    hung from a pole at the front, nothing like the ox and its plain cart."""
+    import math
+    s = Svg()
+    soft_shadow(s, 64, 106, 56, 8, 0.4)
+    # The wagon bed, painted blue with gold trim.
+    s.rect(10, 70, 66, 18, s.lin([(0, "#4f7fb8"), (0.6, "#2f5a8c"), (1, "#1d3a5e")], 0, 0, 0, 1), stroke=EDGE, sw=2.5, rx=3)
+    s.line(12, 75, 74, 75, stroke="#e8c25a", sw=2)
+    for x in (24, 43, 62):
+        s.circle(x, 81, 2.4, "#e8c25a", stroke="none", sw=0)
+    # The wares: bolts of cloth and two jars.
+    for x, colour in [(18, "#c8443a"), (28, "#3f8f5a"), (38, "#e0a83a"), (48, "#7a4aa0")]:
+        s.rect(x - 4.5, 52, 9, 18, s.lin([(0, colour), (1, "#2a2018")], 0, 0, 1.6, 0), stroke=EDGE, sw=1.5, rx=4)
+    for x in (60, 70):
+        s.path(f"M{x - 5},70 Q{x - 7},60 {x - 3},56 L{x + 3},56 Q{x + 7},60 {x + 5},70 Z", s.lin([(0, "#d98a52"), (1, "#8a4a24")], 0, 0, 1, 0), stroke=EDGE, sw=1.5)
+        s.rect(x - 3, 52, 6, 4, "#8a4a24", stroke=EDGE, sw=1)
+    # Two posts and a striped awning over the wares, its fringe scalloped.
+    for x in (12, 74):
+        s.line(x, 72, x, 34, stroke="#5a3a1f", sw=3)
+    stripes = ["#d6403a", "#f2d27a"] * 4
+    w = 66 / len(stripes)
+    for i, colour in enumerate(stripes):
+        x0 = 9 + i * w
+        s.poly([(x0, 30 + i * 0.4), (x0 + w, 30 + (i + 1) * 0.4), (x0 + w + 1, 40), (x0 + 1, 40)], colour, stroke="none", sw=0)
+    s.path("M8,30 L78,33 L79,40 L9,40 Z", "none", stroke=EDGE, sw=2.5)
+    for i in range(8):
+        cx = 13.5 + i * 8.5
+        s.path(f"M{cx - 4.25},40 Q{cx},48 {cx + 4.25},40 Z", stripes[i], stroke=EDGE, sw=1.5)
+    # Two large wheels, red spokes.
+    for x in (24, 62):
+        s.circle(x, 92, 12, "none", stroke="#2a1f16", sw=4)
+        s.circle(x, 92, 3.5, "#e8c25a", stroke="#2a1f16", sw=1.5)
+        for a in range(0, 180, 30):
+            t = math.radians(a)
+            s.line(x - 10 * math.cos(t), 92 - 10 * math.sin(t), x + 10 * math.cos(t), 92 + 10 * math.sin(t), stroke="#a8342c", sw=1.8)
+    # The shafts and a dappled grey horse, head up.
+    s.line(74, 80, 98, 76, stroke="#5a3a1f", sw=3)
+    horse = s.lin([(0, "#e9e6df"), (0.6, "#b9b4aa"), (1, "#7e786e")], 0, 0, 0.3, 1)
+    for x, lean in [(90, -3), (95, 2), (108, -2), (113, 3)]:
+        s.line(x, 80, x + lean, 100, stroke="#7e786e", sw=4.5)
+        s.rect(x + lean - 3, 99, 6, 3, "#2a1f16", stroke="none", sw=0, rx=1)
+    s.ellipse(102, 74, 15, 9, horse, stroke=EDGE, sw=2)
+    for dx, dy in [(-6, -2), (2, 2), (8, -3), (-1, 4)]:
+        s.circle(102 + dx, 74 + dy, 1.8, "#8f897f", stroke="none", sw=0, opacity=0.7)
+    # Neck and head reaching forward and up.
+    s.path("M110,70 Q114,56 120,50 L127,52 Q129,57 125,60 L118,64 Q116,70 114,76 Z", horse, stroke=EDGE, sw=2)
+    s.path("M110,68 Q112,56 119,49", "none", stroke="#4a3a2a", sw=3.5)
+    s.circle(122, 53, 1.4, "#1d1813", stroke="none", sw=0)
+    s.path("M88,72 Q82,78 85,88", "none", stroke="#4a3a2a", sw=3)
+    # A red harness collar with a gold bell.
+    s.path("M108,66 Q114,72 112,80", "none", stroke="#c8443a", sw=3)
+    s.circle(112, 82, 2.2, "#e8c25a", stroke=EDGE, sw=1)
+    # The trader's sign: a gold coin on a pole at the front.
+    s.line(76, 72, 82, 16, stroke="#5b3f25", sw=2.5)
+    s.line(82, 18, 96, 18, stroke="#5b3f25", sw=2)
+    s.line(92, 18, 92, 22, stroke="#5b3f25", sw=1.2)
+    s.circle(92, 31, 9.5, s.rad([(0, "#fff0b0"), (0.6, "#e8c25a"), (1, "#a8781e")]), stroke=EDGE, sw=2)
+    s.circle(92, 31, 5.5, "none", stroke="#a8781e", sw=1.5)
+    s.rect(90.5, 29.5, 3, 3, "#a8781e", stroke="none", sw=0)
+    return s
+
+
 def site(kind):
     s = Svg()
     soft_shadow(s, 64, 112, 52, 11, 0.3)
@@ -2432,6 +2497,7 @@ def assets():
     out["map/outpost"] = outpost()
     out["map/fire"] = fire()
     out["map/caravan"] = caravan_token()
+    out["map/merchant_caravan"] = merchant_caravan_token()
     for kind in ["farm", "sawmill", "quarry", "camp", "mine", "fishing"]:
         out[f"map/outpost_{kind}"] = outpost_kind(kind)
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:
