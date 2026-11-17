@@ -9,6 +9,7 @@ import { createPool, pooledEndpointWarning } from './db/pool.js';
 import { upgradeDigests, upgradeHeroes, upgradeMapEvents, upgradeLegacyVillages, upgradeSites, upgradeTownNames, upgradeWallPlots } from './db/upgrades.js';
 import { pushSenderFromEnv } from './push/sender.js';
 import { runPushLoop } from './push/worker.js';
+import { announceRelease, releaseFromEnv } from './push/announce.js';
 import { handlers } from './scheduler/handlers.js';
 import { runWorkerLoop } from './scheduler/loop.js';
 import { alert } from './alerts.js';
@@ -53,7 +54,19 @@ const worker =
     : runWorkerLoop(db, scheduler, { pollMs: Number(process.env.WORKER_POLL_MS ?? 500), signal: abort.signal });
 const pusher = runPushLoop(db, scheduler.data, pushSender, { pollMs: Number(process.env.PUSH_POLL_MS ?? 5000), signal: abort.signal });
 
+// A new release: every phone hears of it once, a few minutes after the
+// server starts on it (by then the release page has its APK).
+const release = releaseFromEnv();
+if (release) console.log(`Release ${release.version}`);
+const announcing = setTimeout(() => {
+  announceRelease(db, pushSender, release, new Date()).then(
+    (sent) => sent && console.log(`Announced release ${release!.version} to ${sent} device(s)`),
+    (error) => console.error('Release announcement failed:', error),
+  );
+}, Number(process.env.RELEASE_ANNOUNCE_DELAY_MS ?? 5 * 60_000));
+
 async function shutdown(): Promise<void> {
+  clearTimeout(announcing);
   abort.abort();
   await app.close();
   await live.stop();

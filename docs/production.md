@@ -50,6 +50,16 @@ and restarts, and waits up to two minutes for the server to be healthy and
 answer `https://<DOMAIN>/health`. If it doesn't, the previous image runs
 again and the job fails. Database migrations run on start and are not undone.
 
+**Players hear of it.** The release's server image knows its version
+(`SLAVIAN_VERSION`, and `SLAVIAN_RELEASES_URL` for the download page).
+Five minutes after the server starts on a version it hasn't announced
+(`RELEASE_ANNOUNCE_DELAY_MS`), it pushes "Slavian <version> is out" with
+the download address to every registered phone, once (the
+`release_announcements` table). That needs push set up (`fcm.json` above):
+without it the server logs "Push notifications: off" and nothing goes out.
+From 0.17.0 the app's main menu also offers the download when the server
+runs a newer version (`GET /v1/release`).
+
 What it needs, once:
 - **A deploy key** that may run only the script. On the VPS, in
   `/root/.ssh/authorized_keys`:

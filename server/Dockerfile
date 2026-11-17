@@ -12,6 +12,11 @@ COPY server/tsconfig.json server/
 COPY server/migrations server/migrations
 COPY server/src server/src
 WORKDIR /app/server
+# The release this image is (release.yml): announced to players' phones once,
+# and offered for download in the app's main menu. Empty on dev builds.
+ARG SLAVIAN_VERSION=""
+ARG SLAVIAN_RELEASES_URL=""
+ENV SLAVIAN_VERSION=$SLAVIAN_VERSION SLAVIAN_RELEASES_URL=$SLAVIAN_RELEASES_URL
 USER node
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s \

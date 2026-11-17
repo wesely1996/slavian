@@ -144,6 +144,10 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.name }}:${{ needs.tag.outputs.tag }}
+          # Players' phones hear of the release once this server starts.
+          build-args: |
+            SLAVIAN_VERSION=${{ needs.tag.outputs.version }}
+            SLAVIAN_RELEASES_URL=${{ github.server_url }}/${{ github.repository }}/releases/latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
