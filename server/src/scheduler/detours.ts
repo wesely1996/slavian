@@ -1,8 +1,9 @@
 // A forest has caught fire (field.json terraform burn): whatever is on the
 // road and would enter it while it burns, a horde, an army, a caravan or
 // settlers, finishes the hex it is crossing and goes round it to where it
-// was going, by the best road there is now. With no way round (or the fire
-// in the very next hex), it keeps its road.
+// was going, by the best road there is now. Headed straight into the fire,
+// it turns back to the hex it came from and goes round from there. With no
+// way round at all, it keeps its road.
 import type { GameData } from '../data/index.js';
 import { listArmies, saveArmy, type Army } from '../db/armies.js';
 import { listCaravans, saveCaravanRoute, type Caravan } from '../db/caravans.js';
@@ -34,15 +35,23 @@ export function entersBefore(path: readonly PathStep[], origin: Date, at: Date, 
   return path.some((s) => s.q === cell.q && s.r === cell.r && origin.getTime() + s.atMs > at.getTime() && origin.getTime() + s.atMs < until.getTime());
 }
 
-// The road from `elapsedMs` along `path` round the fire, or null (none, or
-// it would still go through).
-function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, next: (from: Hex) => PathStep[] | null): PathStep[] | null {
-  let onward: PathStep[] | null = null;
-  const spliced = spliceRoute(path, elapsedMs, (from) => {
-    onward = from.q === cell.q && from.r === cell.r ? null : next(from);
-    return onward ?? [{ ...from, atMs: 0 }];
-  });
-  return onward ? spliced : null;
+// The road from `elapsedMs` along `path` round the fire, or null (no way
+// round). It finishes the hex it is crossing (spliceRoute); if that hex is
+// on fire, it walks back to the one before, as long as it had gone on.
+export function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, next: (from: Hex) => PathStep[] | null): PathStep[] | null {
+  let i = path.findIndex((step) => step.atMs >= elapsedMs);
+  if (i < 0) i = path.length - 1;
+  const ahead = path[i]!;
+  if (ahead.q !== cell.q || ahead.r !== cell.r) {
+    const onward = next({ q: ahead.q, r: ahead.r });
+    return onward ? spliceRoute(path, elapsedMs, () => onward) : null;
+  }
+  if (i === 0) return null;
+  const back = path[i - 1]!;
+  const turnAt = elapsedMs + (elapsedMs - back.atMs);
+  const onward = next({ q: back.q, r: back.r });
+  if (!onward) return null;
+  return [...path.slice(0, i), { q: back.q, r: back.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
 }
 
 function safely(route: () => PathStep[]): PathStep[] | null {

@@ -712,6 +712,47 @@ def fire():
     return s
 
 
+def caravan_token():
+    """A caravan on the road, side on and facing right: an ox in harness
+    pulling a covered wagon laden with goods, a pennant on its pole."""
+    s = Svg()
+    soft_shadow(s, 64, 104, 54, 8, 0.4)
+    wood = s.lin([(0, "#c8955c"), (0.6, "#8c6640"), (1, "#4a321c")], 0, 0, 0, 1)
+    # The wagon bed and its goods: sacks and a crate behind the cover.
+    s.rect(14, 74, 62, 14, wood, stroke=EDGE, sw=2.5, rx=3)
+    for x in (20, 34, 48, 62):
+        s.line(x, 75, x, 87, stroke="#4a321c", sw=1.5, opacity=0.6)
+    s.path("M18,76 Q20,40 46,36 Q72,40 74,76 Z", s.lin([(0, "#fbf6ea"), (0.6, "#e6dcc2"), (1, "#b9ae96")], 0, 0, 1, 0.4), stroke=EDGE, sw=2.5)
+    for x in (32, 46, 60):
+        s.path(f"M{x},{39 if x == 46 else 42} Q{x - 2},58 {x},76", "none", stroke="#b9ae96", sw=2)
+    s.rect(64, 60, 14, 14, s.lin([(0, "#d9a868"), (1, "#7a5228")], 0, 0, 1, 1), stroke=EDGE, sw=2, rx=1)
+    s.line(64, 67, 78, 67, stroke="#5a3a1f", sw=1.5)
+    # Two spoked wheels.
+    for x in (28, 64):
+        s.circle(x, 92, 11, "none", stroke="#3a2a1c", sw=4)
+        s.circle(x, 92, 3, "#3a2a1c", stroke="none", sw=0)
+        for a in range(0, 180, 45):
+            import math
+            t = math.radians(a)
+            s.line(x - 9 * math.cos(t), 92 - 9 * math.sin(t), x + 9 * math.cos(t), 92 + 9 * math.sin(t), stroke="#5a3a1f", sw=2)
+    # The pole, the yoke and the ox.
+    s.line(76, 82, 96, 80, stroke="#5a3a1f", sw=3)
+    ox = s.lin([(0, "#b4825a"), (1, "#5a3a1f")], 0, 0, 0.3, 1)
+    for x in (88, 94, 106, 112):
+        s.rect(x - 2.5, 80, 5, 20, "#5a3a1f", stroke="none", sw=0, rx=2)
+    s.ellipse(100, 74, 16, 11, ox, stroke=EDGE, sw=2)
+    # The head, low and forward under the yoke, horns curving up.
+    s.path("M112,68 Q120,64 124,70 L126,80 Q124,84 120,83 L114,78 Z", ox, stroke=EDGE, sw=2)
+    s.path("M118,67 Q114,58 120,56 M121,67 Q128,60 126,55", "none", stroke="#efe6d2", sw=2.5)
+    s.circle(121, 72, 1.6, "#1d1813", stroke="none", sw=0)
+    s.path("M84,72 Q80,78 82,86", "none", stroke="#5a3a1f", sw=2)
+    s.rect(104, 58, 6, 12, "#6b4a2c", stroke=EDGE, sw=1.5, rx=1)
+    # A pennant on a staff at the back.
+    s.line(16, 76, 14, 28, stroke="#5b3f25", sw=2.5)
+    s.poly([(14, 28), (32, 33), (14, 39)], s.lin([(0, "#cf5a44"), (1, "#a83a2c")], 0, 0, 1, 0), stroke=EDGE, sw=1.5)
+    return s
+
+
 def site(kind):
     s = Svg()
     soft_shadow(s, 64, 112, 52, 11, 0.3)
@@ -2390,6 +2431,7 @@ def assets():
     out["map/fort"] = fort()
     out["map/outpost"] = outpost()
     out["map/fire"] = fire()
+    out["map/caravan"] = caravan_token()
     for kind in ["farm", "sawmill", "quarry", "camp", "mine", "fishing"]:
         out[f"map/outpost_{kind}"] = outpost_kind(kind)
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:

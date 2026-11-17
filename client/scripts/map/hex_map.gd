@@ -211,9 +211,21 @@ func _draw() -> void:
 		if Game.is_mine(Game.villages.get(int(caravan.villageId), {})):
 			_draw_trail(caravan.get("path", []), p, caravan.status == "returning", CARAVAN_COLOR)
 		if not p.is_empty():
-			var pos := HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
-			draw_circle(pos, hex_size * 0.2, CARAVAN_COLOR)
-			draw_arc(pos, hex_size * 0.2, 0.0, TAU, 16, VILLAGE_OUTLINE_COLOR, 2.0)
+			var a := HexMath.to_pixel(p.from, hex_size)
+			var b := HexMath.to_pixel(p.to, hex_size)
+			var pos := a.lerp(b, p.t)
+			# An ox cart, facing the way it goes, on its side's ring.
+			var tex := Art.texture("map/caravan")
+			if tex == null:
+				draw_circle(pos, hex_size * 0.2, CARAVAN_COLOR)
+				draw_arc(pos, hex_size * 0.2, 0.0, TAU, 16, VILLAGE_OUTLINE_COLOR, 2.0)
+				continue
+			_draw_ring(pos + Vector2(0, hex_size * 0.24), hex_size * 0.8, MINE_COLOR if Game.is_mine(Game.villages.get(int(caravan.villageId), {})) else ALLY_COLOR)
+			var w := hex_size * 0.95
+			var h := w * tex.get_size().y / tex.get_size().x
+			draw_set_transform(pos, 0.0, Vector2(-1.0 if b.x < a.x - 0.5 else 1.0, 1.0))
+			draw_texture_rect(tex, Rect2(Vector2(-w, -h) / 2.0, Vector2(w, h)), false)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for expedition in Game.expeditions:
 		var p := CaravanMath.progress(expedition, now)
 		if not p.is_empty():
