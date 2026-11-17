@@ -1661,15 +1661,27 @@ msgstr ""
 msgid "%d%% along the boat's river"
 msgstr ""
 
-#: client/scripts/game/river_text.gd:121
-msgid "Roads go within %d hexes of your village"
+#: client/scripts/game/river_text.gd:112
+msgid "Dirt track"
+msgstr ""
+
+#: client/scripts/game/river_text.gd:112
+msgid "Stone road"
+msgstr ""
+
+#: client/scripts/game/river_text.gd:112
+msgid "Paved road"
 msgstr ""
 
 #: client/scripts/game/river_text.gd:126
+msgid "Roads go within %d hexes of your village"
+msgstr ""
+
+#: client/scripts/game/river_text.gd:131
 msgid "No road can run there"
 msgstr ""
 
-#: client/scripts/game/river_text.gd:129
+#: client/scripts/game/river_text.gd:134
 msgid "A river lies between; build a bridge first"
 msgstr ""
 
@@ -3585,12 +3597,8 @@ msgstr ""
 msgid " (being improved)"
 msgstr ""
 
-#: client/scripts/screens/game_screen_map.gd:611
-msgid " (level %d)"
-msgstr ""
-
 #: client/scripts/screens/game_screen_map.gd:619
-msgid "Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. Each level is faster; the march takes %s of the time."
+msgid "Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. A dirt track, a stone road and a paved road are each faster; the march takes %s of the time."
 msgstr ""
 
 #: client/scripts/screens/game_screen_map.gd:621
@@ -3602,7 +3610,7 @@ msgid "Improve"
 msgstr ""
 
 #: client/scripts/screens/game_screen_map.gd:635
-msgid "%s to level %d: %s · %s"
+msgid "%s to a %s: %s · %s"
 msgstr ""
 
 #: client/scripts/screens/game_screen_map.gd:651

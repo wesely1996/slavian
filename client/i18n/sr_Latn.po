@@ -1670,15 +1670,27 @@ msgstr "%d%% po njegovom putu"
 msgid "%d%% along the boat's river"
 msgstr "%d%% niz reku čamca"
 
-#: client/scripts/game/river_text.gd:121
+#: client/scripts/game/river_text.gd:112
+msgid "Dirt track"
+msgstr "Zemljani put"
+
+#: client/scripts/game/river_text.gd:112
+msgid "Stone road"
+msgstr "Kameni put"
+
+#: client/scripts/game/river_text.gd:112
+msgid "Paved road"
+msgstr "Popločan put"
+
+#: client/scripts/game/river_text.gd:126
 msgid "Roads go within %d hexes of your village"
 msgstr "Putevi se postavljaju unutar %d polja od tvog sela"
 
-#: client/scripts/game/river_text.gd:126
+#: client/scripts/game/river_text.gd:131
 msgid "No road can run there"
 msgstr "Tu ne može proći put"
 
-#: client/scripts/game/river_text.gd:129
+#: client/scripts/game/river_text.gd:134
 msgid "A river lies between; build a bridge first"
 msgstr "Između je reka; prvo izgradi most"
 
@@ -3606,13 +3618,9 @@ msgstr " (u gradnji)"
 msgid " (being improved)"
 msgstr " (poboljšava se)"
 
-#: client/scripts/screens/game_screen_map.gd:611
-msgid " (level %d)"
-msgstr " (nivo %d)"
-
 #: client/scripts/screens/game_screen_map.gd:619
-msgid "Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. Each level is faster; the march takes %s of the time."
-msgstr "Putevi ubrzavaju pokret svima na njima, i ljudskim hordama, ali ih zveri sa Severa izbegavaju. Svaki nivo je brži; pokret traje %s vremena."
+msgid "Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. A dirt track, a stone road and a paved road are each faster; the march takes %s of the time."
+msgstr "Putevi ubrzavaju marš svima na njima, i ljudskim hordama, ali zveri Severa ih izbegavaju. Zemljani, kameni i popločan put su svaki brži; marš traje %s vremena."
 
 #: client/scripts/screens/game_screen_map.gd:621
 msgid "Roads run %s."
@@ -3623,8 +3631,8 @@ msgid "Improve"
 msgstr "Poboljšaj"
 
 #: client/scripts/screens/game_screen_map.gd:635
-msgid "%s to level %d: %s · %s"
-msgstr "%s na nivo %d: %s · %s"
+msgid "%s to a %s: %s · %s"
+msgstr "%s u %s: %s · %s"
 
 #: client/scripts/screens/game_screen_map.gd:651
 msgid "A mountain pass: %s · %s"

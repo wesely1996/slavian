@@ -107,6 +107,11 @@ static func movement_line(data: Dictionary, terrain_id: String, road_levels: Arr
 
 
 ## The share of the march a road of each level takes, as "50% · 35% · 25%".
+## A road level's name: 1 a dirt track, 2 a stone road, 3 a paved road.
+static func road_tier_name(level: int) -> String:
+	return [UI.t("Dirt track"), UI.t("Stone road"), UI.t("Paved road")][clampi(level, 1, 3) - 1]
+
+
 static func road_speeds(data: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for level in data.field.road.levels:
