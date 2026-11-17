@@ -57,8 +57,9 @@ Five minutes after the server starts on a version it hasn't announced
 the download address to every registered phone, once (the
 `release_announcements` table). That needs push set up (`fcm.json` above):
 without it the server logs "Push notifications: off" and nothing goes out.
-From 0.17.0 the app's main menu also offers the download when the server
-runs a newer version (`GET /v1/release`).
+From 0.17.0, when the server runs a newer version than the app
+(`GET /v1/release`), opening the app shows a notice with a Download
+button (once a launch), and the main menu offers the download too.
 
 What it needs, once:
 - **A deploy key** that may run only the script. On the VPS, in
