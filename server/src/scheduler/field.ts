@@ -7,7 +7,7 @@
 import { achieve } from './achievements.js';
 import { WATER } from '../sim/mapgen.js';
 import { insertRoad, markRoadStanding, markRoadUpgrading, roadEdge, type RoadEdge } from '../db/roads.js';
-import { canCross } from '../sim/land.js';
+import { edgeKey, roadLevelCost } from '../sim/land.js';
 import { riverEdge, riverKeys, setCrossing, type StoredRiverEdge } from '../db/rivers.js';
 import { againstFront, villageBonuses } from '../sim/clans.js';
 import { bonus } from '../sim/research.js';
@@ -493,16 +493,19 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
   if (hexDistance(a, b) !== 1) throw new RuleError('A road joins two neighbouring hexes');
   if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) throw new RuleError(`Roads go within ${rules.range} hexes of the village`);
   const land = await terrainOf(client, world.id);
+  let pass = false;
   for (const end of [a, b]) {
     const type = land.get(`${end.q},${end.r}`);
-    if (!type || data.terrain.terrain[type].moveCost === null) throw new RuleError('No road can run there');
+    const def = type ? data.terrain.terrain[type] : undefined;
+    if (!def || (def.moveCost === null && def.roadMoveCost === undefined)) throw new RuleError('No road can run there');
+    if (def.moveCost === null) pass = true;
   }
-  if (!canCross(land, a, b)) throw new RuleError('A river lies between; build a bridge first');
+  if (land.blocked?.has(edgeKey(a, b))) throw new RuleError('A river lies between; build a bridge first');
   const existing = await roadEdge(client, world.id, a, b);
   if (existing?.status === 'building') throw new RuleError('A road is being built there');
   if (existing?.status === 'upgrading') throw new RuleError('That road is being improved');
   if (existing && existing.level >= rules.levels.length) throw new RuleError('That road is as good as it gets');
-  const level = rules.levels[existing ? existing.level : 0]!;
+  const level = roadLevelCost(data, existing ? existing.level + 1 : 1, pass);
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, level.cost) });
   const completesAt = new Date(at.getTime() + (level.buildSeconds * 1000) / world.speed);
   if (existing) await markRoadUpgrading(client, world.id, a, b, village.id, completesAt);

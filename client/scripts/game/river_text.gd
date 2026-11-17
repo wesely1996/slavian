@@ -86,6 +86,12 @@ static func movement_line(data: Dictionary, terrain_id: String, road_levels: Arr
 	if def.get("moveCost") == null:
 		if terrain_id == "lake" and lane:
 			return UI.t("Movement speed: %d%%, by boat only") % roundi(100.0 / (float(shipyard.lakeMoveCost) * lane_factor))
+		var best_pass := 0
+		for level in road_levels:
+			best_pass = maxi(best_pass, int(level))
+		if def.get("roadMoveCost") != null and best_pass > 0:
+			var pass_levels: Array = data.field.road.levels
+			return UI.t("Movement speed: %d%%, along its mountain road only") % roundi(100.0 / (float(def.roadMoveCost) * float(pass_levels[mini(best_pass, pass_levels.size()) - 1].factor)))
 		return UI.t("Movement: impassable")
 	var cost := float(def.moveCost)
 	var parts := PackedStringArray([UI.t("Movement speed: %d%%") % roundi(100.0 / cost)])
@@ -115,9 +121,19 @@ static func road_problem(data: Dictionary, terrain: Dictionary, rivers: Array, h
 		return UI.t("Roads go within %d hexes of your village") % range_
 	for end in [a, b]:
 		var type: String = terrain.get(end, "")
-		if type == "" or data.terrain.terrain.get(type, {}).get("moveCost") == null:
+		var def: Dictionary = data.terrain.terrain.get(type, {})
+		if type == "" or (def.get("moveCost") == null and def.get("roadMoveCost") == null):
 			return UI.t("No road can run there")
 	for e in edges_at(rivers, a):
 		if e.other == b and e.crossing != "standing":
 			return UI.t("A river lies between; build a bridge first")
 	return ""
+
+
+## Whether a road between a and b is a mountain pass (one end impassable
+## land a road can be cut through): mountainFactor times as dear and slow.
+static func is_pass(data: Dictionary, terrain: Dictionary, a: Vector2i, b: Vector2i) -> bool:
+	for end in [a, b]:
+		if data.terrain.terrain.get(terrain.get(end, ""), {}).get("moveCost", 1) == null:
+			return true
+	return false

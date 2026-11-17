@@ -140,6 +140,8 @@ export async function takenHexes(client: DbClient, worldId: number): Promise<Set
 // The rampage is over: survivors make camp near where they stand.
 async function settle(client: DbClient, data: GameData, world: World, wave: Wave, from: Hex, at: Date): Promise<void> {
   const units = wave.composition;
+  // The Avatar never makes camp: its rampage over, it sinks into the earth.
+  if (wave.errand?.kind === 'avatar') return finishWave(client, data, world, wave.id, 'dispersed', at);
   const site = total(units) > 0 ? campSite(data, await terrainOf(client, world.id), from, await takenHexes(client, world.id)) : null;
   if (!site) {
     await finishWave(client, data, world, wave.id, 'dispersed', at);

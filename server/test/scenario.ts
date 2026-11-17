@@ -7,6 +7,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/api/app.js';
+import { startRitual } from '../src/scheduler/cultists.js';
+import { getWorld } from '../src/db/worlds.js';
+import type { Front } from '../src/sim/mapgen.js';
 import { loadGameData } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
@@ -38,6 +41,9 @@ export type WorldSet = {
   vault?: Record<string, number>;
   // A front's hatred.
   frontHatred?: { front: string; hatred: number };
+  // Cultists of Černobog begin their ritual at a hex (events.json ritual),
+  // as the rare daily event would.
+  ritual?: { q: number; r: number; front: string; guards: Record<string, number> };
   // Units standing in the player's (first) village, by unit (their upkeep
   // counts from the village's next change).
   garrison?: Record<string, number>;
@@ -110,6 +116,15 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
             if (step.set.vault) {
               await db.query('INSERT INTO vaults (world_id) VALUES ($1) ON CONFLICT DO NOTHING', [world.id]);
               await db.query('UPDATE vaults SET amounts = $2 WHERE world_id = $1', [world.id, JSON.stringify(step.set.vault)]);
+            }
+            if (step.set.ritual) {
+              const r = step.set.ritual;
+              const client = await db.connect();
+              try {
+                await startRitual(client, scheduler.data, await getWorld(client, world.id), { cell: { q: r.q, r: r.r }, front: r.front as Front, guards: r.guards }, now);
+              } finally {
+                client.release();
+              }
             }
             if (step.set.frontHatred) {
               await db.query('UPDATE worlds SET hatred = hatred || jsonb_build_object($2::text, $3::double precision) WHERE id = $1', [world.id, step.set.frontHatred.front, step.set.frontHatred.hatred]);

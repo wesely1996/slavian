@@ -297,6 +297,12 @@ export async function loadHexes(client: DbClient, worldId: number): Promise<[num
   return rows[0] ? decodeTerrain(rows[0].cells) : [];
 }
 
+// Changes one hex's terrain (terraforming).
+export async function setHexTerrain(client: DbClient, worldId: number, q: number, r: number, terrain: TerrainId): Promise<void> {
+  const cells = (await loadHexes(client, worldId)).map(([cq, cr, t]) => [cq, cr, cq === q && cr === r ? terrain : t] as const);
+  await client.query('UPDATE world_terrain SET cells = $2 WHERE world_id = $1', [worldId, encodeTerrain(cells)]);
+}
+
 // Gives a player Svarog's Embers (theirs alone). With no player to give
 // them to (an army without an owner), the first member gets them.
 export async function addEmbers(client: DbClient, worldId: number, accountId: number | null, n: number): Promise<void> {

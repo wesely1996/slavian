@@ -118,6 +118,9 @@ const buildingsFileSchema = z.object({
 const terrainSchema = z.object({
   name: z.string(),
   moveCost: z.number().positive().nullable(),
+  // Impassable land a road can be cut through (mountain passes): the cost of
+  // entering it along a standing road, before the road's factor.
+  roadMoveCost: z.number().positive().optional(),
   settleable: z.boolean(),
   edge: z.boolean(),
 });
@@ -206,6 +209,8 @@ const enemyUnitSchema = z.object({
   minWave: z.number().int().nonnegative().default(0),
   // Only groups of at least this many players see it.
   minPlayers: z.number().int().positive().optional(),
+  // Kept out of the almanac (the Avatar of Černobog).
+  hidden: z.boolean().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   health: z.number().positive(),
@@ -551,6 +556,7 @@ export const ACHIEVEMENTS = [
   'first_defense', 'field_victory', 'camp_cleared', 'lair_cleared', 'captives_freed', 'site_explored', 'ember_found', 'scroll_found',
   'hero_quest', 'army_quest', 'second_village', 'fort_built', 'bridge_stage',
   'hero_fallen', 'hordes_united', 'stronghold_sacked', 'village_ruined', 'boat_built', 'victory',
+  'ritual_broken', 'avatar_risen', 'avatar_slain',
 ] as const;
 export type Achievement = (typeof ACHIEVEMENTS)[number];
 const achievementsFileSchema = z.object({
@@ -664,8 +670,27 @@ const fieldFileSchema = z.object({
   }),
   // Roads between neighbouring hexes (M5 step 4), built and then improved
   // level by level: each level's `factor` of the move cost.
+  terraform: z.object({
+    range: z.number().int().positive(),
+    actions: z.record(
+      z.string(),
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        from: z.partialRecord(z.enum(TERRAIN_IDS), z.enum(TERRAIN_IDS)),
+        cost: resourcesSchema,
+        hours: z.number().positive(),
+        gain: resourcesSchema.optional(),
+        // A fire: nothing enters the hex while it burns, and it may spread.
+        fire: z.object({ spreadChance: z.number().min(0).max(1), spreadHours: z.number().positive(), generations: z.number().int().min(0) }).optional(),
+      }),
+    ),
+  }),
   road: z.object({
     range: z.number().int().positive(),
+    // A road into impassable land with a roadMoveCost (a mountain pass) costs
+    // and takes this many times as much.
+    mountainFactor: z.number().min(1),
     levels: z
       .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive(), outpostBonus: z.number().min(0) }))
       .min(1),
@@ -966,6 +991,15 @@ const eventsFileSchema = z.object({
       resources: resourcesSchema,
     }),
     ruin: z.object({ weight: z.number().nonnegative(), guardianFactor: z.number().positive(), lootFactor: z.number().positive() }),
+    // Cultists of Černobog working a ritual: the Avatar rises if it ends.
+    ritual: z.object({
+      weight: z.number().nonnegative(),
+      guards: z.number().int().positive(),
+      hours: z.number().positive(),
+      minutesPerFallen: z.number().nonnegative(),
+      avatar: z.string(),
+      avatarBountyFactor: z.number().nonnegative(),
+    }),
     shipyard: z.object({
       weight: z.number().nonnegative(),
       cost: resourcesSchema,

@@ -19,8 +19,9 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 	var captives: Dictionary = rules.kinds.captives
 	var ruin: Dictionary = rules.kinds.ruin
 	var shipyard: Dictionary = rules.kinds.shipyard
-	var pick := rng.next() * (float(captives.weight) + float(ruin.weight) + float(shipyard.weight))
-	var kind := "captives" if pick < float(captives.weight) else ("ruin" if pick < float(captives.weight) + float(ruin.weight) else "shipyard")
+	var ritual: Dictionary = rules.kinds.ritual
+	var pick := rng.next() * (float(captives.weight) + float(ruin.weight) + float(shipyard.weight) + float(ritual.weight))
+	var kind := "captives" if pick < float(captives.weight) else ("ruin" if pick < float(captives.weight) + float(ruin.weight) else ("shipyard" if pick < float(captives.weight) + float(ruin.weight) + float(shipyard.weight) else "ritual"))
 	# Each bank hex's river edges, in edge-key order.
 	var rivers: Array = world.rivers.duplicate()
 	rivers.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return LocalLand.edge_key(x.a, x.b) < LocalLand.edge_key(y.a, y.b))
@@ -64,6 +65,8 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 		# Stored as the server does (db/rivers.ts): the end with the smaller key first.
 		var ends: Array = [edge.a, edge.b] if LocalLand.key(edge.a) < LocalLand.key(edge.b) else [edge.b, edge.a]
 		return {"kind": kind, "cell": cell, "edge": {"a": ends[0], "b": ends[1]}, "front": front, "raiders": raiders}
+	if kind == "ritual":
+		return {"kind": kind, "cell": cell, "front": front, "guards": LocalWaves.compose_wave(data, front, day, LocalWaves.js_round(float(ritual.guards) * grown), (int(world.seed) ^ day ^ 0xc017) & 0xffffffff, world.members.size())}
 	if kind == "captives":
 		var guards := LocalWaves.compose_wave(data, front, day, LocalWaves.js_round(float(captives.guards) * grown), (int(world.seed) ^ day) & 0xffffffff, world.members.size())
 		var reward: Dictionary
@@ -162,6 +165,8 @@ static func on_map_event(server: LocalServer, world: Dictionary, event: Dictiona
 		var camp := LocalBattles.create_camp(server, world, {"kind": "captives", "front": planned.front, "q": planned.cell.x, "r": planned.cell.y,
 			"units": planned.guards, "waveId": null, "reward": planned.reward, "endsAt": ends_at}, at)
 		server.schedule(world, ends_at, "map_event_end", {"campId": camp.id})
+	elif planned.get("kind") == "ritual":
+		LocalCultists.start(server, world, planned.cell, String(planned.front), planned.guards, at)
 	elif planned.get("kind") == "ruin":
 		var site: Dictionary = planned.site
 		var created := {"id": world.next.site, "kind": site.kind, "q": site.q, "r": site.r, "guardians": site.guardians, "guardiansSeen": false,
@@ -182,7 +187,10 @@ static func on_map_event(server: LocalServer, world: Dictionary, event: Dictiona
 		var vars := {"q": planned.cell.x, "r": planned.cell.y, "front": event_front(world, planned.cell), "bounty": LocalBattle.total(bounty_at(data, world, at))}
 		var notice := {"kind": "event", "tier": "push", "title": "Captives are held at ({q}, {r})",
 			"body": "Clear the camp to free them before they are taken away, for a bounty of at least {bounty} resources. If they are taken, the next horde from the {front} hates you the more.", "vars": vars}
-		if planned.kind == "ruin":
+		if planned.kind == "ritual":
+			notice = {"kind": "event", "tier": "push", "title": "Cultists of Černobog gather at ({q}, {r})",
+				"body": "They work a dark ritual. Scatter them before it ends, for a bounty of at least {bounty} resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.", "vars": vars}
+		elif planned.kind == "ruin":
 			notice = {"kind": "event", "tier": "push", "title": "A forbidding ruin rises at ({q}, {r})",
 				"body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least {bounty} resources; left alone, it rouses the next horde from the {front}.", "vars": vars}
 		elif planned.kind == "shipyard":
@@ -202,6 +210,10 @@ static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dict
 			if int(c.id) == int(p.campId):
 				camp = c
 		if camp.is_empty() or camp.status != "active":
+			return
+		# A ritual waits for nobody.
+		if camp.kind == "cultists":
+			LocalCultists.ritual_ends(server, world, camp, int(event.dueAt), changed)
 			return
 		if LocalArmies.armies_holding(world, Vector2i(camp.q, camp.r), ["marching", "engaged"]).any(func(a: Dictionary) -> bool: return a.orders == "clear"):
 			return

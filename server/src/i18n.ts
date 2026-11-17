@@ -160,6 +160,11 @@ const SERBIAN: Record<string, string> = {
 	'Its escort drove off the {enemy} at ({q}, {r}).': 'Njegova pratnja je oterala {enemy} na ({q}, {r}).',
 	'It lost {lost} of its load near ({q}, {r}).': 'Izgubio je {lost} svog tereta blizu ({q}, {r}).',
 	'A bridge stands near {village}': 'Most stoji blizu {village}',
+	'The land near {village} is reshaped': 'Zemlja kod {village} je preoblikovana',
+	'The work at ({q}, {r}) is done.': 'Posao na ({q}, {r}) je završen.',
+	'Fire burned an outpost of {village}': 'Vatra je spalila ispostavu sela {village}',
+	'Fire burned your stronghold at ({q}, {r})': 'Vatra je spalila tvoje uporište na ({q}, {r})',
+	'Nothing is left of it, nor of its grain.': 'Ništa od njega nije ostalo, ni od njegovog žita.',
 	'Roads now cross the river between ({aq}, {ar}) and ({bq}, {br}), for friend and foe alike.':
 		'Putevi sada prelaze reku između ({aq}, {ar}) i ({bq}, {br}), za prijatelja i neprijatelja.',
 	'Fort at ({q}, {r}) finished': 'Utvrda na ({q}, {r}) je završena',
@@ -234,6 +239,15 @@ const SERBIAN: Record<string, string> = {
 	'Bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.': 'Nagrada za {village}: {wood} drveta, {stone} kamena, {grain} žita i {iron} gvožđa.',
 	'Done, with no village left to take the bounty.': 'Urađeno, ali nema sela koje bi primilo nagradu.',
 	'You freed the captives at ({q}, {r})': 'Oslobodio si zarobljenike na ({q}, {r})',
+	'Cultists of Černobog gather at ({q}, {r})': 'Kultisti Černoboga se okupljaju na ({q}, {r})',
+	'They work a dark ritual. Scatter them before it ends, for a bounty of at least {bounty} resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.':
+		'Izvode mračni obred. Rasteraj ih pre nego što se završi, za nagradu od najmanje {bounty} resursa; svaki vojnik koji padne u borbi sa njima približava njegov kraj. Ako se završi, nešto strašno hoda.',
+	'You broke the ritual at ({q}, {r})': 'Prekinuo si obred na ({q}, {r})',
+	'The Avatar of Černobog walks at ({q}, {r})': 'Avatar Černoboga hoda na ({q}, {r})',
+	'The ritual is done. The Black God takes flesh and marches on the villages. Slay it for a great bounty.':
+		'Obred je završen. Crni bog se otelotvorio i kreće na sela. Ubij ga za veliku nagradu.',
+	'The Avatar of Černobog is slain': 'Avatar Černoboga je ubijen',
+	'Its flesh falls to ash. Every village of the group gets {bounty} resources.': 'Njegovo telo se pretvara u pepeo. Svako selo grupe dobija {bounty} resursa.',
 	'You searched the forbidding ruin at ({q}, {r})': 'Pretražio si zlokobnu ruševinu na ({q}, {r})',
 	'The captives at ({q}, {r}) were taken away': 'Zarobljenici sa ({q}, {r}) su odvedeni',
 	'The forbidding ruin at ({q}, {r}) sank back into the earth': 'Zlokobna ruševina na ({q}, {r}) potonula je nazad u zemlju',

@@ -35,7 +35,12 @@ static func land_of(world: Dictionary) -> Dictionary:
 		if s.status == "done":
 			for k in LocalLand.river_lanes(world.rivers, s.edge.a, s.edge.b, world.hexes):
 				lanes[k] = true
-	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes}
+	# Burning forests: nothing enters them until the fire is out.
+	var burning := {}
+	for w in world.get("terraforms", []):
+		if w.action == "burn":
+			burning[LocalLand.key(w.cell)] = true
+	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning}
 
 
 ## The cheapest target from `from`: road cost plus fear, plus extra for the
@@ -47,7 +52,7 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 	var roads := front != "north"
 	var step_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var type: Variant = land.terrain.get(LocalLand.key(b))
-		if type == null or land.blocked.has(LocalLand.edge_key(a, b)):
+		if type == null or land.blocked.has(LocalLand.edge_key(a, b)) or land.get("burning", {}).has(LocalLand.key(b)):
 			return -1.0
 		var cost: Variant = data.terrain.terrain[type].moveCost
 		if cost == null:
@@ -417,6 +422,9 @@ static func send_band(server: LocalServer, world: Dictionary, band: Dictionary, 
 static func send_errand(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	var data := server.data
 	var errand: Dictionary = wave.errand
+	if errand.kind == "avatar":
+		LocalCultists.send(server, world, wave, at)
+		return
 	var village: Dictionary = server.find_village(world, int(errand.target)) if errand.target != null else {}
 	var target := {"id": village.id, "cell": Vector2i(village.q, village.r)} if not village.is_empty() and village.get("ruin") == null else {"id": null, "cell": Vector2i.ZERO}
 	var march := plan_march(data, land_of(world), wave, [], int(world.seed), at, world.speed, {}, [target])

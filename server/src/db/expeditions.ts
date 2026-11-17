@@ -115,3 +115,13 @@ export async function countVillagesOwned(client: DbClient, worldId: number, acco
   );
   return Number(rows[0]!.n);
 }
+
+// Settlers going round a fire: their new road and times.
+export async function saveExpeditionRoute(client: DbClient, expedition: Expedition): Promise<void> {
+  await client.query('UPDATE expeditions SET path = $2, arrives_at = $3, returns_at = $4 WHERE id = $1', [
+    expedition.id,
+    JSON.stringify(expedition.path),
+    expedition.arrivesAt,
+    expedition.returnsAt,
+  ]);
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, type TerrainId } from '../src/data/index.js';
 import { hex } from '../src/sim/hex.js';
-import { edgeKey, landOf, moveCostOn, riverLanes, roadLink } from '../src/sim/land.js';
+import { edgeKey, landOf, moveCostOn, riverLanes, roadLevelCost, roadLink } from '../src/sim/land.js';
 import { routeFrom } from '../src/sim/waves.js';
 
 const data = loadGameData();
@@ -33,6 +33,23 @@ describe('land', () => {
     expect(cost(hex(2, 0), hex(3, 0))).toBeCloseTo(shipyard.lakeMoveCost / shipyard.laneSpeed);
     expect(moveCostOn(data, landOf(terrain, []))(hex(2, 0), hex(3, 0))).toBeNull();
     expect(moveCostOn(data, landOf(terrain, [], [], lanes), false)(hex(2, 0), hex(3, 0))).toBeNull();
+  });
+
+  it('cuts a pass through a mountain: only along a standing road, slowly, at three times the price', () => {
+    const terrain = strip();
+    terrain.set('3,0', 'mountain');
+    const pass = edgeKey(hex(2, 0), hex(3, 0));
+    const roadless = moveCostOn(data, landOf(terrain, []));
+    expect(roadless(hex(2, 0), hex(3, 0))).toBeNull();
+    const land = landOf(terrain, [], [[pass, 1]]);
+    const levels = data.field.road.levels;
+    expect(moveCostOn(data, land)(hex(2, 0), hex(3, 0))).toBeCloseTo(data.terrain.terrain.mountain.roadMoveCost! * levels[0]!.factor);
+    // Beasts keep off roads, so off the pass; a road elsewhere opens nothing.
+    expect(moveCostOn(data, land, false)(hex(2, 0), hex(3, 0))).toBeNull();
+    expect(moveCostOn(data, land)(hex(4, 0), hex(3, 0))).toBeNull();
+    const k = data.field.road.mountainFactor;
+    expect(roadLevelCost(data, 2, true)).toEqual({ cost: { wood: levels[1]!.cost.wood * k, stone: levels[1]!.cost.stone * k, grain: levels[1]!.cost.grain * k, iron: levels[1]!.cost.iron * k }, buildSeconds: levels[1]!.buildSeconds * k });
+    expect(roadLevelCost(data, 1, false)).toEqual({ cost: levels[0]!.cost, buildSeconds: levels[0]!.buildSeconds });
   });
 
   it('links an outpost to its village by the fewest road steps, averaging their bonus', () => {

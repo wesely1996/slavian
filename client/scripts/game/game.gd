@@ -76,6 +76,9 @@ var bridge: Dictionary = {}
 var rivers: Array = []
 ## Roads: [aq, ar, bq, br, status] (see RiverText.roads_at).
 var roads: Array = []
+## Land being reshaped (field.json terraform): {Vector2i: {action, villageId,
+## completesAt}}; a burning forest is the work "burn".
+var terraforms: Dictionary = {}
 var delegations: Array = []
 var delegation_log: Array = []
 ## How much hordes fear each hex where they were beaten.
@@ -148,6 +151,10 @@ func set_world(new_world: Dictionary) -> void:
 	var world_map: Variant = new_world.get("map")
 	rivers = world_map.get("rivers", []) if world_map is Dictionary else []
 	roads = world_map.get("roads", []) if world_map is Dictionary else []
+	terraforms.clear()
+	if world_map is Dictionary:
+		for t in world_map.get("terraforms", []):
+			terraforms[Vector2i(int(t[0]), int(t[1]))] = {"action": String(t[2]), "villageId": t[3], "completesAt": String(t[4])}
 	villages.clear()
 	for village in new_world.get("villages", []):
 		villages[int(village.id)] = village

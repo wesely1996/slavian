@@ -10,8 +10,8 @@ extends RefCounted
 static func active(camps: Array, sites: Array, shipyards: Array) -> Array:
 	var out: Array = []
 	for camp in camps:
-		if camp.get("kind") == "captives":
-			out.append({"kind": "captives", "cell": Vector2i(int(camp.q), int(camp.r)), "item": camp})
+		if camp.get("kind") in ["captives", "cultists"]:
+			out.append({"kind": String(camp.kind), "cell": Vector2i(int(camp.q), int(camp.r)), "item": camp})
 	for site in sites:
 		if site.get("hard", false) and site.get("status") == "unexplored":
 			out.append({"kind": "ruin", "cell": Vector2i(int(site.q), int(site.r)), "item": site})
@@ -71,6 +71,8 @@ static func title(event: Dictionary) -> String:
 	match String(event.kind):
 		"captives":
 			return UI.t("Captives at (%d, %d)") % [cell.x, cell.y]
+		"cultists":
+			return UI.t("Cultists' ritual at (%d, %d)") % [cell.x, cell.y]
 		"ruin":
 			return UI.t("Forbidding ruin at (%d, %d)") % [cell.x, cell.y]
 	return UI.t("Shipyard at (%d, %d)") % [cell.x, cell.y]
@@ -90,6 +92,8 @@ static func state(data: Dictionary, event: Dictionary, now: float, world_speed: 
 		if item.get("endsAt") != null and paid_share(item) <= 0.0:
 			paid += " · " + UI.t("gone in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(String(item.endsAt)) - now)
 		return paid
+	if event.kind == "cultists" and item.get("endsAt") != null:
+		return UI.t("The ritual ends in %s") % TimeUtil.format_duration(TimeUtil.parse_iso(String(item.endsAt)) - now)
 	if item.get("endsAt") == null:
 		return UI.t("An army is on its way")
 	return UI.t("Gone in %s, unless an army is on its way") % TimeUtil.format_duration(TimeUtil.parse_iso(String(item.endsAt)) - now)

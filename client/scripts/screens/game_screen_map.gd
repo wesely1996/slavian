@@ -69,6 +69,21 @@ func _hex_panel() -> void:
 		_side_tabs("hex", parts, 120.0 if village.is_empty() else 0.0)
 
 
+## Cultists at their ritual: what scattering them brings, and how long
+## until the ritual ends (sooner with every soldier of yours who falls).
+func _ritual_lines(camp: Dictionary) -> void:
+	var rules: Dictionary = Game.data.events.kinds.ritual
+	_panel_body.add_child(UI.with_info(UI.label(tr("Scatter them before the ritual ends"), UI.SMALL_SIZE, UI.GOOD),
+		tr("Clearing the camp breaks the ritual, for the event's bounty. Every soldier of yours who falls fighting them brings its end %d game minutes nearer. If it ends, something terrible walks.") % int(rules.minutesPerFallen)))
+	if camp.get("endsAt") == null:
+		return
+	var ends_at := TimeUtil.parse_iso(String(camp.endsAt))
+	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
+	_panel_body.add_child(line)
+	_tick(line, func() -> String:
+		return tr("The ritual ends in %s") % TimeUtil.format_duration(maxf(0.0, ends_at - Game.server_now())))
+
+
 ## A daily event's lines: what it brings, and how long it waits (it goes
 ## then, unless an army is already on its way).
 func _event_lines(event: Dictionary, brings: String, unless := false) -> void:
@@ -102,6 +117,9 @@ func _movement_line(id: String) -> void:
 		if Game.lanes.has(LocalLand.edge_key(_selected, other)):
 			lane = true
 	var text := RiverText.movement_line(Game.data, id, standing, lane)
+	var work: Dictionary = Game.terraforms.get(_selected, {})
+	if not work.is_empty() and Game.data.field.terraform.actions.get(work.action, {}).has("fire"):
+		text = tr("Movement: blocked by fire")
 	var cost: Variant = Game.data.terrain.terrain.get(id, {}).get("moveCost")
 	var color := UI.ERROR if cost == null and not lane else (UI.GOOD if cost != null and float(cost) <= 1.0 else UI.MUTED)
 	_panel_body.add_child(UI.with_info(UI.label(text, UI.SMALL_SIZE, color),
@@ -121,7 +139,10 @@ func _terrain_panel() -> Array:
 	if not camp.is_empty():
 		_quest_place_line(camp.get("quest"))
 		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
-		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward"), camp.get("quest")))
+		if camp.kind == "cultists":
+			_ritual_lines(camp)
+		else:
+			_event_lines(camp, HordeText.captives(Game.data, camp.get("reward"), camp.get("quest")))
 	var quest_site := Game.site_at(_selected)
 	if not quest_site.is_empty() and quest_site.status == "unexplored":
 		_quest_place_line(quest_site.get("quest"))
@@ -142,6 +163,7 @@ func _terrain_panel() -> Array:
 	elif camp.is_empty() and site.is_empty():
 		parts.append(["claim", kind.art, tr("Build a %s") % tr(kind.name).to_lower() if kind.art != "map/outpost" else tr("Build an outpost"), _claim_panel.bind(id)])
 		parts.append(["found", "unit/settler", tr("Found a village"), _found_panel.bind(id)])
+	parts.append(["terraform", "icon/terraform", tr("Reshape the land"), _terraform_panel.bind(id)])
 	var hold_art := "icon/troops"
 	if not camp.is_empty():
 		hold_art = "map/camp_lair"
@@ -600,7 +622,7 @@ func _road_section(cell: Vector2i) -> void:
 	for i in better:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
 		var next := int(levels[other]) + 1
-		var step: Dictionary = road_levels[next - 1]
+		var step := LocalLand.road_level_cost(Game.data, next, RiverText.is_pass(Game.data, Game.terrain, cell, other))
 		var row := UI.hbox()
 		var line := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -617,17 +639,23 @@ func _road_section(cell: Vector2i) -> void:
 	if open.is_empty():
 		return
 	# One button; then the hex the road goes to is tapped on the map.
-	var cost: Dictionary = road_levels[0].cost
+	var targets: Array = open.map(func(i: int) -> Vector2i: return cell + HexMath.DIRECTIONS[i])
+	var plain := targets.filter(func(t: Vector2i) -> bool: return not RiverText.is_pass(Game.data, Game.terrain, cell, t))
+	var first := LocalLand.road_level_cost(Game.data, 1, plain.is_empty())
+	var cost: Dictionary = first.cost
 	var info := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 	_panel_body.add_child(info)
-	var targets: Array = open.map(func(i: int) -> Vector2i: return cell + HexMath.DIRECTIONS[i])
+	if plain.size() < targets.size():
+		var pass_cost := LocalLand.road_level_cost(Game.data, 1, true)
+		_panel_body.add_child(UI.with_info(UI.label(tr("A mountain pass: %s · %s") % [UI.costs(pass_cost.cost), TimeUtil.format_duration(float(pass_cost.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED),
+			tr("A road into the mountains costs and takes %d times as much. Armies, caravans and scouts then cross the mountain along it, slowly; none can stop there, and the hordes keep off the passes.") % int(Game.data.field.road.mountainFactor)))
 	var build := UI.button(tr("Build a road"), func() -> void:
 		_road_from = cell
 		_road_village = village_id
 		hex_map.show_road_targets(targets)
 		_status.text = tr("Tap the hex next to this one to build the road to."), "icon/map")
 	_panel_body.add_child(build)
-	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(road_levels[0].buildSeconds) / float(Game.world.speed))]
+	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(first.buildSeconds) / float(Game.world.speed))]
 	_tick(info, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
 		build.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
@@ -799,6 +827,86 @@ func _expeditions_list(village_id: int) -> void:
 				"founded":
 					return tr("Founded %s") % expedition.name
 			return tr("Settlers came home from (%d, %d)") % [int(expedition.q), int(expedition.r)])
+
+
+## Reshaping the selected hex (field.json terraform): the work under way,
+## or what one of your villages near it could do there.
+func _terraform_panel(terrain: String) -> void:
+	var rules: Dictionary = Game.data.field.get("terraform", {})
+	if rules.is_empty():
+		return
+	var cell := _selected
+	var work: Dictionary = Game.terraforms.get(cell, {})
+	if not work.is_empty():
+		var def: Dictionary = rules.actions.get(work.action, {})
+		var ends := TimeUtil.parse_iso(work.completesAt)
+		_panel_body.add_child(UI.with_info(UI.label(tr(def.get("name", work.action)), UI.HEADING_SIZE), tr(def.get("description", ""))))
+		var line := UI.label("", UI.SMALL_SIZE, UI.ERROR if def.has("fire") else UI.MUTED)
+		_panel_body.add_child(line)
+		_tick(line, func() -> String:
+			var left := ends - Game.server_now()
+			if def.has("fire"):
+				return tr("On fire: nothing gets through · out in %s") % TimeUtil.format_duration(maxf(0.0, left))
+			return tr("Under way · done in %s") % TimeUtil.format_duration(maxf(0.0, left)))
+		return
+	var options: Array = rules.actions.keys().filter(func(a: String) -> bool: return rules.actions[a].from.has(terrain))
+	if options.is_empty():
+		return
+	# The nearest of your villages within reach does the work.
+	var home := {}
+	for v in Game.my_villages():
+		var d := HexMath.distance(cell, Vector2i(int(v.q), int(v.r)))
+		if d <= int(rules.range) and (home.is_empty() or d < HexMath.distance(cell, Vector2i(int(home.q), int(home.r)))):
+			home = v
+	_panel_body.add_child(UI.with_info(UI.label(tr("Reshape the land"), UI.HEADING_SIZE),
+		tr("A village reshapes the land within %d hexes of it, where nothing stands: paid at once, mostly in grain to feed the workers, and done after a while.") % int(rules.range)))
+	if home.is_empty():
+		_panel_body.add_child(UI.label(tr("None of your villages is within %d hexes.") % int(rules.range), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty() or not Game.camp_at(cell).is_empty() \
+		or not Game.site_at(cell).is_empty() or Game.forts.any(func(f: Dictionary) -> bool: return int(f.q) == cell.x and int(f.r) == cell.y)
+	# An army standing there: no fire can be set on it.
+	var held := Game.armies.any(func(a: Dictionary) -> bool: return a.status in ["stationed", "engaged"] and ArmyText.held_hex(a) == cell)
+	var village_id := int(home.id)
+	var speed := float(Game.world.speed)
+	for action in options:
+		var def: Dictionary = rules.actions[action]
+		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken, false, held)
+		var into := Terrain.display_name(String(def.from[terrain]), Game.data)
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.with_info(UI.label(tr(def.name)), tr(def.description)))
+		var gain: Dictionary = def.get("gain", {})
+		var brings := " · " + tr("brings %s") % UI.costs(gain) if gain.values().any(func(n: Variant) -> bool: return float(n) > 0.0) else ""
+		var text := tr("%s → %s · %s · %s") % [Terrain.display_name(terrain, Game.data), into, UI.costs(def.cost), TimeUtil.format_duration(float(def.hours) * 3600.0 / speed)] + brings
+		var cost_line := UI.rich(text, UI.SMALL_SIZE, UiTheme.TEXT)
+		info.add_child(cost_line)
+		row.add_child(info)
+		var start := UI.button(tr("Start"), func() -> void: _terraform(village_id, cell, action))
+		start.custom_minimum_size.x = 130
+		row.add_child(start)
+		_panel_body.add_child(row)
+		if problem != "":
+			start.disabled = true
+			continue
+		_tick(cost_line, func() -> String:
+			var current: Dictionary = Game.villages.get(village_id, home)
+			start.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), def.cost)
+			return text)
+	if taken:
+		_panel_body.add_child(UI.label(tr("Something stands there"), UI.SMALL_SIZE, UI.MUTED))
+	elif held:
+		_panel_body.add_child(UI.label(tr("An army stands there: no fire can be set"), UI.SMALL_SIZE, UI.MUTED))
+
+
+func _terraform(village_id: int, cell: Vector2i, action: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/terraform" % village_id, {"q": cell.x, "r": cell.y, "action": action})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 ## An empty settleable hex: can your village send settlers here?

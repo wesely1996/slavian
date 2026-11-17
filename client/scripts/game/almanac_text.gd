@@ -67,7 +67,8 @@ static func _enemies(data: Dictionary, speed := 1.0) -> Array:
 	var fronts: Dictionary = data.enemies.fronts
 	for front in fronts:
 		var f: Dictionary = fronts[front]
-		var ids: Array = f.units.keys()
+		# The Avatar of Černobog stays a surprise (enemies.json hidden).
+		var ids: Array = f.units.keys().filter(func(id: String) -> bool: return not f.units[id].get("hidden", false))
 		# By tier (engines, which have none, last), as the data lists them.
 		ids.sort_custom(func(a: String, b: String) -> bool:
 			var ta := int(f.units[a].tier) if f.units[a].get("tier") != null else 99
@@ -139,7 +140,7 @@ static func _hordes(data: Dictionary) -> Array:
 				lines.append(UI.t("Tier %d (from wave %d): %s") % [tier, int(data.enemies.tiers.minWave[tier - 1]) + 1, ", ".join(names)])
 		var engines := PackedStringArray()
 		for unit in f.units:
-			if f.units[unit].get("tier") == null:
+			if f.units[unit].get("tier") == null and not f.units[unit].get("hidden", false):
 				engines.append(UI.t(f.units[unit].name))
 		if not engines.is_empty():
 			lines.append(UI.t("Engines: %s") % ", ".join(engines))

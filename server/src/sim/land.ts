@@ -3,6 +3,7 @@
 // bridge (PLAN.md M5 step 3). A plain terrain map is land without rivers.
 import type { GameData, TerrainId } from '../data/index.js';
 import { hexKey, neighbors, type Hex, type StepCost } from './hex.js';
+import { mapResources, type Resources } from './resources.js';
 
 export interface Land extends ReadonlyMap<string, TerrainId> {
   // Edge keys (edgeKey) of rivers without a standing bridge.
@@ -11,6 +12,8 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   readonly roads?: ReadonlyMap<string, number>;
   // Steps (edge keys) along a river a finished boat sails (riverLanes).
   readonly lanes?: ReadonlySet<string>;
+  // Hexes (hexKey) on fire: nothing enters them until the fire is out.
+  readonly burning?: ReadonlySet<string>;
 }
 
 // One key for the edge between two neighbouring hexes, whichever way round.
@@ -21,7 +24,7 @@ export function edgeKey(a: Hex, b: Hex): string {
 }
 
 export function canCross(land: Land, from: Hex, to: Hex): boolean {
-  return !land.blocked?.has(edgeKey(from, to));
+  return !land.blocked?.has(edgeKey(from, to)) && !land.burning?.has(hexKey(to));
 }
 
 // The level of the road between two hexes (0: none).
@@ -33,6 +36,15 @@ export function roadLevel(land: Land, from: Hex, to: Hex): number {
 export function roadFactor(data: GameData, level: number): number {
   const levels = data.field.road.levels;
   return level <= 0 ? 1 : levels[Math.min(level, levels.length) - 1]!.factor;
+}
+
+// What building a road to `level` costs and how long it takes (game
+// seconds): a mountain pass (`pass`) mountainFactor times both.
+export function roadLevelCost(data: GameData, level: number, pass: boolean): { cost: Resources; buildSeconds: number } {
+  const rules = data.field.road;
+  const def = rules.levels[level - 1]!;
+  const k = pass ? rules.mountainFactor : 1;
+  return { cost: mapResources((kind) => def.cost[kind] * k), buildSeconds: def.buildSeconds * k };
 }
 
 // The cheapest a step can be: along the best road there is (the path
@@ -115,11 +127,14 @@ export function moveCostOn(data: GameData, land: Land, roads = true, relief = 0)
     if (type === undefined || !canCross(land, from, to)) return null;
     // A lake is crossed only by boat.
     const sailed = roads && type === 'lake' && !!land.lanes?.has(edgeKey(from, to));
-    const base = sailed ? data.events.kinds.shipyard.lakeMoveCost : data.terrain.terrain[type].moveCost;
+    const level = roadLevel(land, from, to);
+    // A mountain pass: impassable land entered only along a standing road.
+    const pass = roads && level > 0 ? (data.terrain.terrain[type].roadMoveCost ?? null) : null;
+    const base = sailed ? data.events.kinds.shipyard.lakeMoveCost : (data.terrain.terrain[type].moveCost ?? pass);
     if (base === null) return null;
     const cost = !sailed && relief > 0 && base > 1 ? 1 + (base - 1) * (1 - relief) : base;
     if (!roads) return cost;
-    const road = roadFactor(data, roadLevel(land, from, to));
+    const road = roadFactor(data, level);
     return cost * (land.lanes?.has(edgeKey(from, to)) ? Math.min(road, laneFactor(data)) : road);
   };
 }
@@ -130,11 +145,18 @@ export function landOf(
   blocked: Iterable<string>,
   roads: Iterable<readonly [string, number]> = [],
   lanes: Iterable<string> = [],
+  burning: Iterable<string> = [],
 ): Land {
-  const land = new Map(terrain) as Map<string, TerrainId> & { blocked?: ReadonlySet<string>; roads?: ReadonlyMap<string, number>; lanes?: ReadonlySet<string> };
+  const land = new Map(terrain) as Map<string, TerrainId> & {
+    blocked?: ReadonlySet<string>;
+    roads?: ReadonlyMap<string, number>;
+    lanes?: ReadonlySet<string>;
+    burning?: ReadonlySet<string>;
+  };
   land.blocked = new Set(blocked);
   land.roads = new Map(roads);
   land.lanes = new Set(lanes);
+  land.burning = new Set(burning);
   return land;
 }
 

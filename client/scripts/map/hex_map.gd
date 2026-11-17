@@ -195,6 +195,13 @@ func _draw() -> void:
 	for village in Game.villages.values():
 		for plot in Rules.outpost_plots(village):
 			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village), String(village.plots[plot].get("terrain", "")))
+	# Land being reshaped: a forest on fire, or a spade where work goes on.
+	for cell in Game.terraforms:
+		var c := HexMath.to_pixel(cell, hex_size)
+		if Game.data.field.terraform.actions.get(Game.terraforms[cell].action, {}).has("fire"):
+			_draw_art("map/fire", c, hex_size * 1.1)
+		else:
+			_draw_art("icon/terraform", c + Vector2(-hex_size * 0.4, -hex_size * 0.3), hex_size * 0.42, Color(UiTheme.ON_WOOD, 0.9))
 	for village in Game.villages.values():
 		_draw_village(village)
 
@@ -573,6 +580,8 @@ func _draw_camp(camp: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(camp.q), int(camp.r)), hex_size)
 	# Captives are held in a bandit camp.
 	var art := "map/camp_" + ("bandit" if camp.kind == "captives" else String(camp.kind))
+	if not Art.has(art):
+		art = "map/camp_bandit"
 	if Art.has(art):
 		_draw_ring(c + Vector2(0, hex_size * 0.4), hex_size * 1.2, ENEMY_COLOR if camp.kind != "captives" else UI.GOOD)
 		_draw_art(art, c, hex_size * 1.15)
