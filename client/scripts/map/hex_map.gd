@@ -35,8 +35,6 @@ const RIVER_BANK := Color(0.1, 0.16, 0.12, 0.45)
 const RIVER_GLINT := Color(0.75, 0.88, 0.92, 0.45)
 const PLANK_COLOR := Color("#b07a45")
 const LANE_COLOR := Color(0.95, 0.8, 0.35, 0.85)
-const ROAD_COLOR := Color("#a8906a")
-const ROAD_EDGE := Color(0.18, 0.14, 0.09, 0.35)
 ## Each front's emblem (art id "faction/<emblem>").
 const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "order"}
 
@@ -46,6 +44,7 @@ var radius := 0
 var selected := Vector2i.MAX
 var _ground: MapGround
 var _features: MapFeatures
+var _highlights: MapHighlights
 var _clashes: Clashes
 
 
@@ -56,6 +55,9 @@ func _ready() -> void:
 	_features = MapFeatures.new()
 	_features.show_behind_parent = true
 	add_child(_features)
+	_highlights = MapHighlights.new()
+	_highlights.show_behind_parent = true
+	add_child(_highlights)
 	_clashes = Clashes.new()
 	_clashes.map = self
 	_clashes.set_process(false)
@@ -183,6 +185,7 @@ func get_bounds() -> Rect2:
 
 
 func _draw() -> void:
+	_highlights.show_marks(MapHighlights.marks_from(Game.camps, Game.sites, Game.shipyards), hex_size)
 	for road in Game.roads:
 		_draw_road(road)
 	for edge in Game.rivers:
@@ -273,21 +276,175 @@ func _draw() -> void:
 		draw_dashed_line(from, to, SELECTION_COLOR, hex_size * 0.08, hex_size * 0.18, true)
 
 
-## A road between two hex centres: a dirt track, faded while being built.
-## A road, wider at each level; faded while first being built.
+## A road between two hex centres, drawn by its level (field.json
+## road.levels): a dirt track with wheel ruts, a stone road of gravel, a
+## paved road of flagstones between kerbs, each wider than the last. Into a
+## mountain it climbs in switchbacks, low walls on the outer bends. Being
+## built: faded and dashed; being built or improved: a pick and shovel.
 func _draw_road(road: Array) -> void:
-	var a := HexMath.to_pixel(Vector2i(int(road[0]), int(road[1])), hex_size)
-	var b := HexMath.to_pixel(Vector2i(int(road[2]), int(road[3])), hex_size)
-	var tint := Color(1, 1, 1, 0.45) if String(road[4]) == "building" else Color.WHITE
-	var wide := 1.0 + 0.3 * float((int(road[5]) if road.size() > 5 else 1) - 1)
-	draw_line(a, b, ROAD_EDGE * Color(1, 1, 1, tint.a), hex_size * 0.15 * wide, true)
-	draw_line(a, b, ROAD_COLOR * tint, hex_size * 0.09 * wide, true)
-	draw_circle(a, hex_size * 0.045 * wide, ROAD_COLOR * tint)
-	draw_circle(b, hex_size * 0.045 * wide, ROAD_COLOR * tint)
+	var from := Vector2i(int(road[0]), int(road[1]))
+	var to := Vector2i(int(road[2]), int(road[3]))
+	var status := String(road[4])
+	var tier := clampi(int(road[5]) if road.size() > 5 else 1, 1, ROAD_TIERS.size())
+	var look: Dictionary = ROAD_TIERS[tier - 1]
+	var w := hex_size * float(look.width)
+	var bends: Array = []
+	var points := _road_points(from, to, w, bends)
+	if status == "building":
+		_draw_road_dashed(points, look, w)
+	else:
+		_draw_road_body(points, look, w, tier)
+		for bend in bends:
+			_draw_road_wall(bend[0], bend[1], w)
+	if status != "standing":
+		_draw_road_works(_along(points, 0.5), w)
 
 
-## A shipyard: a boat on the bank, ringed while it waits to be paid for
-## (good) or is being built (warning); a finished one is drawn plainly.
+## Each road level's look: [edge, surface, detail] colours and width in hexes.
+const ROAD_TIERS := [
+	{"edge": Color("#4a3622"), "surface": Color("#a5845a"), "detail": Color("#6e5236"), "width": 0.1},
+	{"edge": Color("#3b3935"), "surface": Color("#a29d93"), "detail": Color("#5f5b55"), "width": 0.13},
+	{"edge": Color("#2e2a25"), "surface": Color("#ddd3bd"), "detail": Color("#8f8574"), "width": 0.16},
+]
+
+
+## The road's line from centre to centre: straight, or where it enters a
+## mountain, zigzagging up to the centre in three tight bends. `bends` gets
+## [point, outward direction] for each bend.
+func _road_points(from: Vector2i, to: Vector2i, w: float, bends: Array) -> PackedVector2Array:
+	var a := HexMath.to_pixel(from, hex_size)
+	var b := HexMath.to_pixel(to, hex_size)
+	var mid := (a + b) / 2.0
+	var points := PackedVector2Array([a])
+	if _mountain(from):
+		points.append_array(_switchbacks(a, mid, w, bends, from))
+	points.append(mid)
+	if _mountain(to):
+		var climb := _switchbacks(b, mid, w, bends, to)
+		climb.reverse()
+		points.append_array(climb)
+	points.append(b)
+	return points
+
+
+## Land a road climbs into (terrain.json roadMoveCost: a mountain pass).
+func _mountain(cell: Vector2i) -> bool:
+	return Game.data.get("terrain", {}).get("terrain", {}).get(Game.terrain.get(cell, ""), {}).get("roadMoveCost") != null
+
+
+## Bends between the top (a mountain's centre) and the foot (where its road
+## leaves it), from the top down, swinging side to side; seeded by the hex
+## so the same mountain winds the same way.
+func _switchbacks(top: Vector2, foot: Vector2, w: float, bends: Array, cell: Vector2i) -> PackedVector2Array:
+	var along := foot - top
+	var across := Vector2(-along.y, along.x).normalized()
+	var swing := hex_size * 0.3
+	var side := 1.0 if (hash(cell) & 1) == 0 else -1.0
+	var points := PackedVector2Array()
+	for t in [0.22, 0.5, 0.78]:
+		var p: Vector2 = top + along * t + across * swing * side
+		points.append(p)
+		bends.append([p, across * side])
+		side = -side
+	return points
+
+
+## A point `t` of the way along a line of points (by length).
+func _along(points: PackedVector2Array, t: float) -> Vector2:
+	var total := 0.0
+	for i in range(1, points.size()):
+		total += points[i - 1].distance_to(points[i])
+	var left := total * t
+	for i in range(1, points.size()):
+		var step := points[i - 1].distance_to(points[i])
+		if left <= step and step > 0.0:
+			return points[i - 1].lerp(points[i], left / step)
+		left -= step
+	return points[points.size() - 1]
+
+
+## A standing road: its edge, its surface (rounded at every bend), then the
+## level's detail along each stretch.
+func _draw_road_body(points: PackedVector2Array, look: Dictionary, w: float, tier: int) -> void:
+	var edge := w * (1.45 if tier == 3 else 1.3)
+	draw_polyline(points, look.edge, edge, true)
+	for p in points:
+		draw_circle(p, edge / 2.0, look.edge)
+	draw_polyline(points, look.surface, w, true)
+	for p in points:
+		draw_circle(p, w / 2.0, look.surface)
+	for i in range(1, points.size()):
+		var a: Vector2 = points[i - 1]
+		var b: Vector2 = points[i]
+		var length := a.distance_to(b)
+		if length < 1.0:
+			continue
+		var dir := (b - a) / length
+		var across := Vector2(-dir.y, dir.x)
+		match tier:
+			1:
+				# Two wheel ruts.
+				for side in [-0.24, 0.24]:
+					draw_line(a + across * w * side, b + across * w * side, Color(look.detail, 0.75), maxf(1.0, w * 0.12), true)
+			2:
+				# Gravel: small stones scattered along it, the same each time.
+				var n := int(length / (w * 0.45))
+				for k in n:
+					var at := a + dir * (k + 0.5) * length / maxf(1, n)
+					var jitter := float((hash(Vector2i(int(at.x), int(at.y))) % 7) - 3) / 3.0
+					draw_circle(at + across * w * 0.27 * jitter, w * 0.1, look.detail)
+			_:
+				# Flagstones: joints across, and a line of kerb stones each side.
+				var n := int(length / (w * 0.75))
+				for k in range(1, n):
+					var at := a + dir * k * length / n
+					draw_line(at - across * w * 0.42, at + across * w * 0.42, Color(look.detail, 0.45), maxf(1.0, w * 0.06), true)
+				for side in [-0.42, 0.42]:
+					draw_line(a + across * w * side, b + across * w * side, Color(look.detail, 0.55), maxf(1.0, w * 0.08), true)
+
+
+## A road being built: its line dashed and faded.
+func _draw_road_dashed(points: PackedVector2Array, look: Dictionary, w: float) -> void:
+	for i in range(1, points.size()):
+		draw_dashed_line(points[i - 1], points[i], Color(look.edge, 0.45), w * 1.3, w * 1.4, true)
+		draw_dashed_line(points[i - 1], points[i], Color(look.surface, 0.55), w, w * 1.4, true)
+
+
+## A low dry-stone wall on the outer side of a mountain bend.
+func _draw_road_wall(at: Vector2, out: Vector2, w: float) -> void:
+	var along := Vector2(-out.y, out.x)
+	var c := at + out * w * 1.1
+	# Three rough stones in a row.
+	for k in [-0.62, 0.0, 0.62]:
+		var p: Vector2 = c + along * w * k
+		var stone := PackedVector2Array([p + along * w * 0.28 + out * w * 0.2, p - along * w * 0.26 + out * w * 0.22, p - along * w * 0.3 - out * w * 0.18, p + along * w * 0.3 - out * w * 0.2])
+		draw_colored_polygon(stone, Color("#a39c8f"))
+		stone.append(stone[0])
+		draw_polyline(stone, Color("#4b4740"), maxf(1.0, w * 0.08), true)
+
+
+## Work under way on a road: a crossed pick and shovel on a dark disc.
+func _draw_road_works(at: Vector2, w: float) -> void:
+	var r := maxf(w * 1.6, hex_size * 0.16)
+	draw_circle(at, r, Color(0.16, 0.12, 0.08, 0.85))
+	draw_arc(at, r, 0.0, TAU, 20, Color("#e2b33c"), 1.5, true)
+	var handle := Color("#c9965a")
+	var iron := Color("#d8dde2")
+	# The shovel: handle from bottom left to top right, a blade at the top.
+	var s0 := at + Vector2(-r * 0.55, r * 0.55)
+	var s1 := at + Vector2(r * 0.3, -r * 0.3)
+	draw_line(s0, s1, handle, r * 0.16, true)
+	var blade := PackedVector2Array([s1 + Vector2(-r * 0.05, -r * 0.3), s1 + Vector2(r * 0.3, r * 0.05), s1 + Vector2(r * 0.42, -r * 0.3), s1 + Vector2(r * 0.12, -r * 0.45)])
+	draw_colored_polygon(blade, iron)
+	# The pick: handle from bottom right to top left, a curved head across it.
+	var p0 := at + Vector2(r * 0.55, r * 0.55)
+	var p1 := at + Vector2(-r * 0.4, -r * 0.4)
+	draw_line(p0, p1, handle, r * 0.16, true)
+	draw_arc(p1 + Vector2(r * 0.25, r * 0.25), r * 0.55, PI * 1.05, PI * 1.45, 8, iron, r * 0.14, true)
+
+
+## A shipyard: a boat on the bank (highlighted by MapHighlights while it
+## waits to be paid for or is being built); faded while being built.
 func _draw_shipyard(yard: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(yard.q), int(yard.r)), hex_size)
 	var r := hex_size * 0.32
@@ -596,7 +753,7 @@ func _draw_camp(camp: Dictionary) -> void:
 	if not Art.has(art):
 		art = "map/camp_bandit"
 	if Art.has(art):
-		_draw_ring(c + Vector2(0, hex_size * 0.4), hex_size * 1.2, ENEMY_COLOR if camp.kind != "captives" else UI.GOOD)
+		# (Highlighted under it by MapHighlights.)
 		_draw_art(art, c, hex_size * 1.15)
 		return
 	var r := hex_size * 0.32
