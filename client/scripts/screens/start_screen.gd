@@ -125,6 +125,7 @@ func _ready() -> void:
 	_version = UI.label(tr("Version %s") % ProjectSettings.get_setting("application/config/version", ""), UI.SMALL_SIZE)
 	_version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sheet_column.add_child(_version)
+	_offer_update(sheet_column)
 	var body := UI.vbox(18)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
@@ -1374,3 +1375,30 @@ func _enter_game(world: Dictionary) -> void:
 	Session.last_world = {"id": int(world.id), "name": String(world.get("name", ""))}
 	Session.save()
 	get_tree().change_scene_to_file(GAME_SCENE)
+
+
+## A newer release than this app, from the server: a button to download it
+## under the version (nothing when offline, or already up to date).
+func _offer_update(column: Container) -> void:
+	var response := await Api.get_json("/v1/release")
+	if not response.ok or not response.data is Dictionary or response.data.get("version") == null or response.data.get("url") == null:
+		return
+	var latest := String(response.data.version)
+	if not is_newer_version(latest, String(ProjectSettings.get_setting("application/config/version", ""))):
+		return
+	var url := String(response.data.url)
+	var download := UI.primary(tr("Version %s is out: download it") % latest, func() -> void: OS.shell_open(url))
+	if is_instance_valid(column):
+		column.add_child(download)
+
+
+## Whether version `a` ("0.17.0") comes after `b`, part by part.
+static func is_newer_version(a: String, b: String) -> bool:
+	var x := a.split(".")
+	var y := b.split(".")
+	for i in maxi(x.size(), y.size()):
+		var p := int(x[i]) if i < x.size() else 0
+		var q := int(y[i]) if i < y.size() else 0
+		if p != q:
+			return p > q
+	return false

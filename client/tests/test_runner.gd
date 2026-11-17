@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_danger()
 	_test_resource_vectors()
 	_test_local_mapgen()
+	_test_newer_version()
 	_test_local_start()
 	_test_local_villages()
 	_test_local_waves()
@@ -81,6 +82,16 @@ func _check(condition: bool, message: String) -> void:
 
 func _v(pair: Array) -> Vector2i:
 	return Vector2i(int(pair[0]), int(pair[1]))
+
+
+## The main menu offers a download only for a newer release.
+func _test_newer_version() -> void:
+	var start: GDScript = load("res://scripts/screens/start_screen.gd")
+	_check(start.is_newer_version("0.17.0", "0.16.0"), "0.17.0 is newer than 0.16.0")
+	_check(start.is_newer_version("0.10.0", "0.9.5"), "0.10.0 is newer than 0.9.5")
+	_check(start.is_newer_version("1.0", "0.99.9"), "1.0 is newer than 0.99.9")
+	_check(not start.is_newer_version("0.17.0", "0.17.0"), "the same version is not newer")
+	_check(not start.is_newer_version("0.16.2", "0.17.0"), "an older version is not newer")
 
 
 func _test_hex_vectors() -> void:

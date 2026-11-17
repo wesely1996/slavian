@@ -14,6 +14,7 @@ const API = fileURLToPath(new URL('../src/api/', import.meta.url));
 const SERVER_ONLY: Record<string, string> = {
   'GET /health': 'the health check',
   'GET /v1/costs': 'server costs and donations (the start screen)',
+  'GET /v1/release': 'the released version, for the start screen to offer its download',
   'GET /v1/data': 'the solo engine bundles the game data',
   'POST /v1/auth/guest': 'accounts',
   'GET /v1/me': 'accounts',

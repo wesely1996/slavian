@@ -1,3 +1,4 @@
+import { releaseFromEnv } from '../push/announce.js';
 import { cancelBountyCommand, postBountyCommand, takeBountyCommand } from '../commands/bounties.js';
 import websocket from '@fastify/websocket';
 import { insertChatMessage, lastReadId, listChatMessages, markChatRead, sentSince, unreadCount } from '../db/chat.js';
@@ -333,6 +334,11 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   // For uptime monitors and the container's health check: up only while the
   // database answers.
+  // The version this server was released as, and where to download its
+  // app (null on a dev build): the main menu offers the download when it is
+  // newer than the app.
+  app.get('/v1/release', async () => releaseFromEnv() ?? { version: null, url: null });
+
   app.get('/health', async (_request, reply) => {
     try {
       await db.query('SELECT 1');
