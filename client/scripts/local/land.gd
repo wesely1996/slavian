@@ -247,15 +247,32 @@ static func _reach(cell: Vector2i, by_hex: Dictionary, terrain: Dictionary, stat
 static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, relief := 0.0) -> Callable:
 	return func(from: Vector2i, to: Vector2i) -> float:
 		var type: Variant = land.terrain.get(key(to))
-		if type == null or land.blocked.has(edge_key(from, to)):
+		if type == null or land.blocked.has(edge_key(from, to)) or land.get("burning", {}).has(key(to)):
 			return -1.0
 		# A lake is crossed only by boat.
 		var sailed: bool = roads and type == "lake" and land.get("lanes", {}).has(edge_key(from, to))
+		var level := int(land.roads.get(edge_key(from, to), 0))
+		# A mountain pass: impassable land entered only along a standing road.
+		var pass_cost: Variant = data.terrain.terrain[type].get("roadMoveCost") if roads and level > 0 else null
 		var base: Variant = data.events.kinds.shipyard.lakeMoveCost if sailed else data.terrain.terrain[type].moveCost
+		if base == null:
+			base = pass_cost
 		if base == null:
 			return -1.0
 		var cost: float = 1.0 + (float(base) - 1.0) * (1.0 - relief) if not sailed and relief > 0.0 and float(base) > 1.0 else float(base)
 		if not roads:
 			return float(cost)
-		var road := road_factor(data, int(land.roads.get(edge_key(from, to), 0)))
+		var road := road_factor(data, level)
 		return float(cost) * (minf(road, lane_factor(data)) if land.get("lanes", {}).has(edge_key(from, to)) else road)
+
+
+## sim/land.ts roadLevelCost: what building a road to `level` costs and how
+## long it takes (game seconds), a mountain pass mountainFactor times both.
+static func road_level_cost(data: Dictionary, level: int, mountain_pass: bool) -> Dictionary:
+	var rules: Dictionary = data.field.road
+	var def: Dictionary = rules.levels[level - 1]
+	var k := float(rules.mountainFactor) if mountain_pass else 1.0
+	var cost := {}
+	for kind in def.cost:
+		cost[kind] = float(def.cost[kind]) * k
+	return {"cost": cost, "buildSeconds": float(def.buildSeconds) * k}

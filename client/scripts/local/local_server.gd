@@ -46,7 +46,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null}],
-		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "events": [],
+		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
 		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
@@ -533,7 +533,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return {"status": 200, "data": world_view(world, now)}
 		# Only the village commands refuse ruins (ownVillageCommand); armies,
 		# forts, roads and bridges go out from them all the same.
-		if village.ruin != null and not action in ["rebuild", "armies", "raids", "strike", "forts", "supply-points", "crossings", "roads"]:
+		if village.ruin != null and not action in ["rebuild", "armies", "raids", "strike", "forts", "supply-points", "crossings", "roads", "terraform"]:
 			return _fail(400, "rule", "%s lies in ruins; rebuild it first" % village.name)
 		var result: Dictionary
 		var step := ""
@@ -695,7 +695,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalScouting.found_village(self, world, village, body, now)
 				if result.has("expedition"):
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
-			"armies", "raids", "strike", "forts", "supply-points", "crossings", "roads":
+			"armies", "raids", "strike", "forts", "supply-points", "crossings", "roads", "terraform":
 				return _field_command(world, village, action, body, now, changed)
 			"caravans", "caravans/fetch":
 				result = LocalLogistics.send_caravan(self, world, village, body, now) if action == "caravans" else LocalLogistics.fetch_from_vault(self, world, village, body, now)
@@ -767,6 +767,10 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 			var from := Vector2i(int(a.get("q", 0)), int(a.get("r", 0)))
 			var to := Vector2i(int(b.get("q", 0)), int(b.get("r", 0)))
 			result = LocalArmies.build_crossing(self, world, village, from, to, now) if action == "crossings" else LocalArmies.build_road(self, world, village, from, to, now)
+		"terraform":
+			if not body is Dictionary or not (body.get("q") is float or body.get("q") is int) or not (body.get("r") is float or body.get("r") is int) or not body.get("action") is String:
+				return _fail(400, "invalid_request", "Say where and what")
+			result = LocalTerraform.start(self, world, village, Vector2i(int(body.q), int(body.r)), String(body.action), now)
 	if result.has("error") or result.has("missing"):
 		return _rule_answer(result)
 	changed.append(["village", village.id])
@@ -1195,6 +1199,14 @@ func _on_road_built(world: Dictionary, event: Dictionary, changed: Array) -> voi
 	LocalArmies.on_road_built(self, world, event, changed)
 
 
+func _on_terraform_done(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalTerraform.on_done(self, world, event, changed)
+
+
+func _on_fire_spread(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalTerraform.on_fire_spread(self, world, event, changed)
+
+
 func _on_crossing_built(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalArmies.on_crossing_built(self, world, event, changed)
 
@@ -1350,7 +1362,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"bounties": [],
-		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads},
+		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads, "terraforms": LocalTerraform.view(world)},
 		"serverTime": LocalTime.iso(now),
 	}
 
@@ -1480,7 +1492,11 @@ func quest_offers(world: Dictionary, hero: Dictionary, now: int) -> Array:
 
 
 ## [q, r, terrain] for every map hex, in the order the server reads them
-## (db/worlds.ts loadHexes), built once per world.
+## (db/worlds.ts loadHexes), built once per world (again after terraforming).
+func forget_hexes_view(world: Dictionary) -> void:
+	_hex_views.erase(int(world.id))
+
+
 func _hexes_view(world: Dictionary) -> Array:
 	var id := int(world.id)
 	if _hex_views.has(id) and _hex_views[id].size() == world.hexes.size():
@@ -1616,6 +1632,8 @@ func _load_all() -> void:
 			world.next.merge({"ruinSearch": 1})
 			# Worlds saved before shipyards.
 			world.merge({"shipyards": []})
+			# Worlds saved before terraforming.
+			world.merge({"terraforms": []})
 			world.next.merge({"shipyard": 1})
 			for a in world.armies:
 				# Armies from before their own stances: their village's.

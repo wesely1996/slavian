@@ -168,6 +168,15 @@ def icon(kind):
     elif kind == "threat":
         stroke("M14,50 L46,18 M40,14 L50,24 M18,40 L24,46")
         stroke("M50,50 L18,18 M24,14 L14,24 M46,40 L40,46")
+    elif kind == "terraform":
+        # A spade in the earth, a sapling beside it.
+        stroke("M20,10 L20,36", 4.5)
+        stroke("M12,36 L28,36 L26,50 Q20,56 14,50 Z", 4)
+        stroke("M14,10 L26,10", 4)
+        stroke("M8,56 L56,56", 3.5)
+        stroke("M44,56 L44,30", 4)
+        stroke("M44,40 Q34,36 36,26 Q44,28 44,36", 3.5)
+        stroke("M44,34 Q54,30 54,20 Q46,22 44,30", 3.5)
     elif kind == "build":
         stroke("M12,52 L36,28", 6)
         stroke("M28,12 L46,8 L56,26 L40,34 Z", 4)
@@ -247,7 +256,7 @@ def icon(kind):
     return s
 
 
-UI_ICONS = ["back", "map", "village", "inbox", "chat", "threat", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music", "attack", "defense", "health", "speed"]
+UI_ICONS = ["back", "map", "village", "inbox", "chat", "threat", "terraform", "build", "troops", "caravan", "research", "clock", "play", "profile", "settings", "help", "credits", "quit", "info", "coin", "lock", "music", "attack", "defense", "health", "speed"]
 
 
 # --- Map features: shaded, outline-free, lit from the upper left ------------------
@@ -675,6 +684,21 @@ def outpost_kind(kind):
         s.path("M90,92 Q100,104 92,116", "none", stroke="#e6dcc2", sw=2)
         for y in (98, 104, 110):
             s.line(88, y, 100, y, stroke="#e6dcc2", sw=1.2, opacity=0.8)
+    return s
+
+
+def fire():
+    """A forest fire: tongues of flame over charred stumps, smoke above."""
+    s = Svg()
+    for x, y, r in [(44, 34, 16), (70, 26, 20), (90, 38, 14)]:
+        s.circle(x, y, r, s.rad([(0, "#5b5450", 0.55), (1, "#5b5450", 0)]), stroke="none", sw=0)
+    for x in (34, 62, 92):
+        s.rect(x - 5, 96, 10, 18, s.lin([(0, "#3a2a1c"), (1, "#141110")], 0, 0, 1, 0), stroke="none", sw=0, rx=2)
+    flame = s.lin([(0, "#fff3a0"), (0.35, "#ffb347"), (0.75, "#e8642c"), (1, "#a83a2c")], 0, 1, 0, 0)
+    for x, h, w in [(34, 50, 26), (62, 66, 34), (92, 46, 24)]:
+        s.path(f"M{x - w / 2},108 Q{x - w / 2},{108 - h * 0.6} {x - w * 0.1},{108 - h} Q{x + w * 0.05},{108 - h * 0.55} {x + w * 0.2},{108 - h * 0.75} Q{x + w / 2},{108 - h * 0.4} {x + w / 2},108 Z",
+               flame, stroke="none", sw=0, opacity=0.95)
+    s.ellipse(64, 110, 50, 7, s.rad([(0, "#ffb347", 0.5), (1, "#e8642c", 0)]), stroke="none", sw=0)
     return s
 
 
@@ -2339,6 +2363,7 @@ def assets():
     out["map/camp_lair"] = camp("lair")
     out["map/fort"] = fort()
     out["map/outpost"] = outpost()
+    out["map/fire"] = fire()
     for kind in ["farm", "sawmill", "quarry", "camp", "mine", "fishing"]:
         out[f"map/outpost_{kind}"] = outpost_kind(kind)
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:

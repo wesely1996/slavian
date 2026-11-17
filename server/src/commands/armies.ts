@@ -1,3 +1,5 @@
+import { startTerraform } from '../scheduler/terraform.js';
+import type { Terraform } from '../db/terraforms.js';
 import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
@@ -190,6 +192,20 @@ export async function buildRoadCommand(
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a road', villageId: village.id });
     return buildRoad(client, deps.data, world, village.id, input.a, input.b, input.now);
+  });
+}
+
+// Starts reshaping a hex near the caller's village (field.json terraform).
+export async function terraformCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; cell: Hex; action: string; now: Date },
+): Promise<Terraform> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'reshaped the land', villageId: village.id });
+    return startTerraform(client, deps.data, world, village.id, input.cell, input.action, input.now);
   });
 }
 

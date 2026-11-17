@@ -118,6 +118,9 @@ const buildingsFileSchema = z.object({
 const terrainSchema = z.object({
   name: z.string(),
   moveCost: z.number().positive().nullable(),
+  // Impassable land a road can be cut through (mountain passes): the cost of
+  // entering it along a standing road, before the road's factor.
+  roadMoveCost: z.number().positive().optional(),
   settleable: z.boolean(),
   edge: z.boolean(),
 });
@@ -664,8 +667,27 @@ const fieldFileSchema = z.object({
   }),
   // Roads between neighbouring hexes (M5 step 4), built and then improved
   // level by level: each level's `factor` of the move cost.
+  terraform: z.object({
+    range: z.number().int().positive(),
+    actions: z.record(
+      z.string(),
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        from: z.partialRecord(z.enum(TERRAIN_IDS), z.enum(TERRAIN_IDS)),
+        cost: resourcesSchema,
+        hours: z.number().positive(),
+        gain: resourcesSchema.optional(),
+        // A fire: nothing enters the hex while it burns, and it may spread.
+        fire: z.object({ spreadChance: z.number().min(0).max(1), spreadHours: z.number().positive(), generations: z.number().int().min(0) }).optional(),
+      }),
+    ),
+  }),
   road: z.object({
     range: z.number().int().positive(),
+    // A road into impassable land with a roadMoveCost (a mountain pass) costs
+    // and takes this many times as much.
+    mountainFactor: z.number().min(1),
     levels: z
       .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive(), outpostBonus: z.number().min(0) }))
       .min(1),

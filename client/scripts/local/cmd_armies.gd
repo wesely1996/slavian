@@ -1530,10 +1530,13 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 		return LocalVillage.rule("A road joins two neighbouring hexes")
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > int(rules.range):
 		return LocalVillage.rule("Roads go within %d hexes of the village" % int(rules.range))
+	var mountain_pass := false
 	for end in [a, b]:
 		var type: Variant = world.hexes.get(LocalLand.key(end))
-		if type == null or data.terrain.terrain[type].moveCost == null:
+		if type == null or (data.terrain.terrain[type].moveCost == null and data.terrain.terrain[type].get("roadMoveCost") == null):
 			return LocalVillage.rule("No road can run there")
+		if data.terrain.terrain[type].moveCost == null:
+			mountain_pass = true
 	if LocalHordes.land_of(world).blocked.has(LocalLand.edge_key(a, b)):
 		return LocalVillage.rule("A river lies between; build a bridge first")
 	var existing := _road_edge(world, a, b)
@@ -1543,7 +1546,7 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 		return LocalVillage.rule("That road is being improved")
 	if not existing.is_empty() and int(existing.level) >= rules.levels.size():
 		return LocalVillage.rule("That road is as good as it gets")
-	var level: Dictionary = rules.levels[int(existing.level) if not existing.is_empty() else 0]
+	var level := LocalLand.road_level_cost(data, int(existing.level) + 1 if not existing.is_empty() else 1, mountain_pass)
 	var ledger := LocalLedger.spend(village.state.ledger, at, level.cost)
 	if ledger.has("missing"):
 		return ledger

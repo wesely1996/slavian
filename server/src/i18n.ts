@@ -160,6 +160,11 @@ const SERBIAN: Record<string, string> = {
 	'Its escort drove off the {enemy} at ({q}, {r}).': 'Njegova pratnja je oterala {enemy} na ({q}, {r}).',
 	'It lost {lost} of its load near ({q}, {r}).': 'Izgubio je {lost} svog tereta blizu ({q}, {r}).',
 	'A bridge stands near {village}': 'Most stoji blizu {village}',
+	'The land near {village} is reshaped': 'Zemlja kod {village} je preoblikovana',
+	'The work at ({q}, {r}) is done.': 'Posao na ({q}, {r}) je završen.',
+	'Fire burned an outpost of {village}': 'Vatra je spalila ispostavu sela {village}',
+	'Fire burned your stronghold at ({q}, {r})': 'Vatra je spalila tvoje uporište na ({q}, {r})',
+	'Nothing is left of it, nor of its grain.': 'Ništa od njega nije ostalo, ni od njegovog žita.',
 	'Roads now cross the river between ({aq}, {ar}) and ({bq}, {br}), for friend and foe alike.':
 		'Putevi sada prelaze reku između ({aq}, {ar}) i ({bq}, {br}), za prijatelja i neprijatelja.',
 	'Fort at ({q}, {r}) finished': 'Utvrda na ({q}, {r}) je završena',

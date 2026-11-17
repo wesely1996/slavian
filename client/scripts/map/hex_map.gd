@@ -195,6 +195,13 @@ func _draw() -> void:
 	for village in Game.villages.values():
 		for plot in Rules.outpost_plots(village):
 			_draw_outpost(Rules.outpost_hex(plot), int(village.plots[plot].level), Game.is_mine(village), String(village.plots[plot].get("terrain", "")))
+	# Land being reshaped: a forest on fire, or a spade where work goes on.
+	for cell in Game.terraforms:
+		var c := HexMath.to_pixel(cell, hex_size)
+		if Game.data.field.terraform.actions.get(Game.terraforms[cell].action, {}).has("fire"):
+			_draw_art("map/fire", c, hex_size * 1.1)
+		else:
+			_draw_art("icon/terraform", c + Vector2(-hex_size * 0.4, -hex_size * 0.3), hex_size * 0.42, Color(UiTheme.ON_WOOD, 0.9))
 	for village in Game.villages.values():
 		_draw_village(village)
 

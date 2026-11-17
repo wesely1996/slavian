@@ -13,6 +13,7 @@ import {
   buildSupplyPointCommand,
   stockStoreCommand,
   buildRoadCommand,
+  terraformCommand,
   payShipyardCommand,
   disbandArmyCommand,
   moveArmyCommand,
@@ -181,6 +182,7 @@ const takeBountyBody = z.object({ villageId: z.number().int().positive() });
 const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const crossingBody = z.object({ a: hexBody, b: hexBody });
+const terraformBody = z.object({ q: z.number().int(), r: z.number().int(), action: z.string() });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
 const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
 const heroEquipBody = z.object({ item: z.string().min(1).max(64) });
@@ -968,6 +970,16 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const account = await authenticate(db, request);
     const { id, shipyardId } = shipyardParams.parse(request.params);
     await payShipyardCommand(db, scheduler, { accountId: account.id, villageId: id, shipyardId, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  // Reshapes a hex near the village: clear, plant or drain (field.json terraform).
+  app.post('/v1/villages/:id/terraform', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = terraformBody.parse(request.body);
+    await terraformCommand(db, scheduler, { accountId: account.id, villageId: id, cell: { q: body.q, r: body.r }, action: body.action, now: clock() });
     const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
     return fullWorldView(Number(worldId));
   });

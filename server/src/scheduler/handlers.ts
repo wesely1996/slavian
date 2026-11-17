@@ -9,6 +9,7 @@ import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
 import { expeditionHandlers } from './expeditions.js';
 import { fieldHandlers } from './field.js';
+import { terraformHandlers } from './terraform.js';
 import { hordeHandlers } from './horde.js';
 import { campHandlers } from './camps.js';
 import { mapEventHandlers } from './mapEvents.js';
@@ -101,6 +102,7 @@ export const handlers: HandlerRegistry = {
   ...noticeHandlers,
   ...armyHandlers,
   ...fieldHandlers,
+  ...terraformHandlers,
   ...hordeHandlers,
   ...campHandlers,
   ...mapEventHandlers,
