@@ -589,6 +589,8 @@ export function fortView(fort: Fort) {
     grain: fort.grain,
     // How low its grain may fall for armies, as its owner set it (null: 0).
     armyFloor: fort.armyFloor,
+    // Nobody's: a built mountain city's supply point.
+    neutral: fort.neutral,
   };
 }
 

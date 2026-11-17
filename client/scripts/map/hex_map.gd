@@ -242,7 +242,9 @@ func _draw() -> void:
 			tri.append(tri[0])
 			draw_polyline(tri, VILLAGE_OUTLINE_COLOR, 2.0)
 	for fort in Game.forts:
-		_draw_fort(fort)
+		# (A mountain city's store is drawn as the city.)
+		if not fort.get("neutral", false):
+			_draw_fort(fort)
 	for camp in Game.camps:
 		_draw_camp(camp)
 	for yard in Game.shipyards:

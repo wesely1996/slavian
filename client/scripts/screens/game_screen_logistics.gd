@@ -195,7 +195,13 @@ func _caravan_what(village: Dictionary, limits: Dictionary, own_place: Dictionar
 		all.focus_mode = Control.FOCUS_NONE
 		row.add_child(all)
 		_panel_body.add_child(row)
-	if limits.has("grain") and limits.size() == 1:
+	if _caravan_target.get("kind") == "shipyard" and limits.has("grain") and limits.size() == 1:
+		# A built mountain city: its stone for the grain.
+		var rate := float(Game.data.events.kinds.mountain_city.stonePerGrain)
+		var trade := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(trade)
+		_tick(trade, func() -> String: return tr("The mountain city trades %s stone for each grain: this load brings back %d stone.") % [String.num(rate, 2), floori(float(_caravan_load.get("grain", 0)) * rate)])
+	elif limits.has("grain") and limits.size() == 1:
 		_panel_body.add_child(UI.label(tr("A store takes only grain."), UI.SMALL_SIZE, UI.MUTED))
 	# From your own settlement, fort or supply point it can bring back.
 	if not own_place.is_empty():
@@ -371,7 +377,8 @@ func _caravan_target_at(cell: Vector2i, from_village_id: int) -> Dictionary:
 	if Game.terrain.get(cell) == "holy_city":
 		return {"kind": "vault"}
 	var yard := Game.shipyard_at(cell)
-	if not yard.is_empty() and yard.status == "open":
+	# An open shipyard (or mountain city), or a built city to trade with.
+	if not yard.is_empty() and (yard.status == "open" or (EventText.is_city(yard) and yard.status == "done")):
 		return {"kind": "shipyard", "id": int(yard.id)}
 	for fort in Game.forts:
 		if Vector2i(int(fort.q), int(fort.r)) == cell and fort.get("status") == "standing":
@@ -398,6 +405,9 @@ func _caravan_limits(target: Dictionary) -> Dictionary:
 			return {} if fort.is_empty() or fort.get("status") != "standing" else {"grain": null}
 		"shipyard":
 			for yard in Game.shipyards:
+				# A built mountain city takes grain, for its stone.
+				if int(yard.id) == int(target.id) and EventText.is_city(yard) and yard.status == "done":
+					return {"grain": null}
 				if int(yard.id) == int(target.id) and yard.status == "open":
 					var need := {}
 					for kind in Ledger.KINDS:

@@ -35,6 +35,8 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 			var back := _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")
 			return UI.t("Heading home with %s · back in %s") % [back, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt) - now)]
 	var brought := _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")
+	if caravan.get("destinationShipyardId") != null and caravan.carriedBack != null and int(caravan.carriedBack.get("stone", 0)) > int(caravan.cargo.get("stone", 0)):
+		return UI.t("Traded %s at %s for %s") % [cargo, where, brought]
 	if caravan.kind == "fetch":
 		return UI.t("Fetched %s from the vault") % brought
 	if caravan.get("retrieve") != null:
@@ -76,6 +78,8 @@ static func target_name(target: Dictionary) -> String:
 			var fort := Game.fort_at_id(int(target.id))
 			if fort.is_empty():
 				return UI.t("a store that is gone")
+			if fort.get("neutral", false):
+				return UI.t("the mountain city's store at (%d, %d)") % [int(fort.q), int(fort.r)]
 			return (UI.t("the supply point at (%d, %d)") if fort.get("kind") == "supply" else UI.t("the fort at (%d, %d)")) % [int(fort.q), int(fort.r)]
 		"shipyard":
 			for yard in Game.shipyards:

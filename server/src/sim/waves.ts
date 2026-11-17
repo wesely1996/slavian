@@ -213,7 +213,8 @@ export function routeFrom(
   const rules = data.horde;
   const moveCost = (to: Hex): number | null => {
     const type = terrain.get(hexKey(to));
-    return type === undefined ? null : data.terrain.terrain[type].moveCost;
+    // (Never into a mountain city: hordes keep out of the mountains.)
+    return type === undefined || data.terrain.terrain[type].hordesPass === false ? null : data.terrain.terrain[type].moveCost;
   };
   // Human hordes take the roads; the Monsters of the North keep off them.
   const roads = input.front !== 'north';

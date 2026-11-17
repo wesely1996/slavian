@@ -4,6 +4,7 @@
 // into a bandit camp. Razed villages are ruins until rebuilt
 // (village_rebuilt); a player left with only ruins gets a refugee camp. A
 // horde reaching the Holy City fights its guard there (see field.ts).
+import { listShipyards } from '../db/shipyards.js';
 import { SETTLER } from '../sim/expansion.js';
 import { addBought } from '../db/worlds.js';
 import { achieve } from './achievements.js';
@@ -134,6 +135,8 @@ export async function takenHexes(client: DbClient, worldId: number): Promise<Set
   for (const f of await listForts(client, worldId)) taken.add(hexKey(hex(f.q, f.r)));
   for (const c of await listCamps(client, worldId)) taken.add(hexKey(hex(c.q, c.r)));
   for (const s of await listSites(client, worldId)) taken.add(hexKey(hex(s.q, s.r)));
+  // Shipyards and mountain cities.
+  for (const y of await listShipyards(client, worldId)) taken.add(hexKey(hex(y.q, y.r)));
   return taken;
 }
 

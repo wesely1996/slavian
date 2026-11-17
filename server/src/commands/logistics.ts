@@ -97,10 +97,15 @@ export async function dispatchCaravan(
     if (!shipyard || shipyard.worldId !== world.id) throw new NotFoundError('No such shipyard in this world');
     if (retrieve) throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
     const project = shipyard.kind === 'mountain_city' ? 'The city' : 'The boat';
-    if (shipyard.status !== 'open') throw new RuleError(`${project} is already paid for`);
-    const need = mapResources((k) => Math.max(0, shipyard.cost[k] - shipyard.paid[k]));
-    if (RESOURCE_KINDS.some((k) => order.load[k] > need[k])) {
-      throw new RuleError(`${project} still needs ${need.wood} wood, ${need.stone} stone, ${need.grain} grain and ${need.iron} iron`);
+    if (shipyard.kind === 'mountain_city' && shipyard.status === 'done') {
+      // A built city trades its stone for grain.
+      if (order.load.wood > 0 || order.load.stone > 0 || order.load.iron > 0) throw new RuleError('The mountain city trades its stone only for grain');
+    } else {
+      if (shipyard.status !== 'open') throw new RuleError(`${project} is already paid for`);
+      const need = mapResources((k) => Math.max(0, shipyard.cost[k] - shipyard.paid[k]));
+      if (RESOURCE_KINDS.some((k) => order.load[k] > need[k])) {
+        throw new RuleError(`${project} still needs ${need.wood} wood, ${need.stone} stone, ${need.grain} grain and ${need.iron} iron`);
+      }
     }
     to = hex(shipyard.q, shipyard.r);
   } else if (order.destinationVillageId !== null) {

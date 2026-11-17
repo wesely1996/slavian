@@ -19,6 +19,9 @@ export interface Fort {
   grain: number;
   // How low that grain may fall for armies (null: to the last).
   armyFloor: number | null;
+  // Nobody's (a mountain city's supply point): any army draws on it, any
+  // caravan fills it; no horde burns it, no bandit takes it.
+  neutral: boolean;
 }
 
 interface FortRow {
@@ -34,6 +37,7 @@ interface FortRow {
   manned_at: Date | null;
   grain: number;
   army_floor: number | null;
+  neutral: boolean | null;
 }
 
 function fromRow(row: FortRow): Fort {
@@ -50,6 +54,7 @@ function fromRow(row: FortRow): Fort {
     mannedAt: row.manned_at,
     grain: row.grain,
     armyFloor: row.army_floor === null || row.army_floor === undefined ? null : Number(row.army_floor),
+    neutral: row.neutral ?? false,
   };
 }
 
@@ -57,6 +62,16 @@ export async function insertFort(client: DbClient, f: Pick<Fort, 'kind' | 'world
   const { rows } = await client.query<FortRow>(
     `INSERT INTO forts (kind, world_id, owner_account_id, village_id, q, r, completes_at, manned_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $7) RETURNING *`,
     [f.kind, f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt],
+  );
+  return fromRow(rows[0]!);
+}
+
+// A neutral supply point, standing at once (a built mountain city's).
+export async function insertNeutralSupply(client: DbClient, worldId: number, q: number, r: number, at: Date): Promise<Fort> {
+  const { rows } = await client.query<FortRow>(
+    `INSERT INTO forts (kind, world_id, owner_account_id, village_id, q, r, completes_at, manned_at, status, neutral)
+     VALUES ('supply', $1, NULL, NULL, $2, $3, $4, $4, 'standing', true) RETURNING *`,
+    [worldId, q, r, at],
   );
   return fromRow(rows[0]!);
 }

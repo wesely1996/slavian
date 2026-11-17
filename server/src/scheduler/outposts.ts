@@ -75,7 +75,7 @@ async function scheduleRaids(
 
 async function scheduleSupplyRaids(client: DbClient, data: GameData, world: World, wave: Wave, points: readonly Fort[], fromMs: number): Promise<void> {
   if (!wave.path) return;
-  const targets = points.filter((f) => f.kind === 'supply').map((f) => ({ fortId: f.id, cell: hex(f.q, f.r) }));
+  const targets = points.filter((f) => f.kind === 'supply' && !f.neutral).map((f) => ({ fortId: f.id, cell: hex(f.q, f.r) }));
   for (const raid of raidsAlong(wave.path, targets, data.enemies.fronts[wave.front]!.personality.raidReach, fromMs)) {
     const payload: SupplyRaidPayload = { waveId: wave.id, fortId: raid.fortId };
     const { rows } = await client.query(
@@ -126,7 +126,7 @@ export const outpostHandlers: HandlerRegistry = {
     const wave = await loadWave(client, payload.waveId);
     if (!RAIDING.has(wave.status)) return;
     const point = await loadFort(client, payload.fortId);
-    if (!point || point.kind !== 'supply') return;
+    if (!point || point.kind !== 'supply' || point.neutral) return;
     if ((await armiesHolding(client, world.id, point.q, point.r, ['stationed', 'engaged'])).length) return;
     await deleteFort(client, point.id);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });

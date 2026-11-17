@@ -55,7 +55,8 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		if type == null or land.blocked.has(LocalLand.edge_key(a, b)) or land.get("burning", {}).has(LocalLand.key(b)):
 			return -1.0
 		var cost: Variant = data.terrain.terrain[type].moveCost
-		if cost == null:
+		# (Never into a mountain city: hordes keep out of the mountains.)
+		if cost == null or data.terrain.terrain[type].get("hordesPass", true) == false:
 			return -1.0
 		return float(cost) * LocalLand.road_factor(data, int(land.roads.get(LocalLand.edge_key(a, b), 0))) if roads else float(cost)
 	var search_cost := func(a: Vector2i, b: Vector2i) -> float:
@@ -510,7 +511,7 @@ static func schedule_supply_raids(server: LocalServer, world: Dictionary, wave: 
 		return
 	var targets: Array = []
 	for f in points:
-		if f.get("kind", "fort") == "supply":
+		if f.get("kind", "fort") == "supply" and not f.get("neutral", false):
 			targets.append({"fortId": f.id, "cell": Vector2i(f.q, f.r)})
 	var reach := int(server.data.enemies.fronts[wave.front].personality.raidReach)
 	for raid in raids_along(wave.path, targets, reach, from_ms):

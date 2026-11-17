@@ -5,7 +5,9 @@
 // strike every few hours, until the city stands and every village produces
 // 10% more. A second city, paid for and left unguarded, is overrun and its
 // hex is mountain again; a third, never paid for, is given up when the
-// event ends.
+// event ends. The city that stands trades stone for grain (and nothing
+// else) by caravan, and keeps a neutral store of grain a caravan fills and
+// the army standing there draws on.
 import { loadGameData } from '../src/data/index.js';
 import { mountainCitySpot } from '../src/sim/events.js';
 import { hex, hexDistance, type Hex } from '../src/sim/hex.js';
@@ -56,6 +58,20 @@ scenario('mountain-city-scenario.json', START, async ({ started, play }) => {
     const now = await city(first);
     if (!now || now.status === 'done') break;
   }
+  await view();
+
+  // Built: it trades grain for stone (only grain), and keeps a store of
+  // grain for armies, filled by caravan; the guard draws on it.
+  await play({ set: { plots: { c3: { building: 'caravan_yard', level: 5 } }, amounts: { wood: 1000, stone: 100, grain: 2000, iron: 500 } } });
+  const caravan = (load: object, to: object) => play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: null, load, ...to } });
+  await caravan({ wood: 100, stone: 0, grain: 0, iron: 0 }, { destinationShipyardId: one.id });
+  await caravan({ wood: 0, stone: 0, grain: 300, iron: 0 }, { destinationShipyardId: one.id });
+  const store = (await view()).forts.find((f: View) => f.neutral);
+  if (store) await caravan({ wood: 0, stone: 0, grain: 300, iron: 0 }, { destinationFortId: store.id });
+  await play({ advance: 4 * HOUR });
+  const guard = (await view()).armies.find((a: View) => a.status === 'stationed');
+  if (guard) await play({ method: 'POST', path: `/v1/armies/${guard.id}/resupply` });
+  await play({ advance: 4 * HOUR });
   await view();
 
   // A second city, paid for and left unguarded: overrun, mountain again.
