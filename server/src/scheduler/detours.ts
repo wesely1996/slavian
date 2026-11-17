@@ -1,11 +1,10 @@
 // A forest has caught fire (field.json terraform burn): whatever is on the
 // road and would enter it while it burns, a horde, an army, a caravan or
 // settlers, finishes the hex it is crossing and goes round it to where it
-// was going, by the best road there is now. Headed straight into the fire,
-// it turns back to the hex it came from and goes round from there. With no
-// way round at all, it keeps its road. Hordes never turn back: headed
-// straight into it they swerve on from the hex they came from, and with no
-// way round they wait at its edge until it is out, then march on.
+// was going, or waits at its edge until it is out and keeps its road,
+// whichever brings it there sooner. Headed straight into the fire, it goes
+// round from the hex it came from: walking back to it first, except a
+// horde, which never turns back but swerves on from there.
 import type { GameData } from '../data/index.js';
 import { listArmies, saveArmy, type Army } from '../db/armies.js';
 import { listCaravans, saveCaravanRoute, type Caravan } from '../db/caravans.js';
@@ -22,7 +21,7 @@ import type { World } from '../db/worlds.js';
 import { armySpeed, terrainRelief } from '../sim/armies.js';
 import { hex, type Hex } from '../sim/hex.js';
 import type { Land } from '../sim/land.js';
-import { caravanRoute, reversedRoute, roadRoute, spliceRoute } from '../sim/logistics.js';
+import { caravanRoute, reversedRoute, roadRoute, spliceRoute, withoutHalts } from '../sim/logistics.js';
 import { supplySpeedFactor } from '../sim/supply.js';
 import { rngFor, routeFrom, type PathStep } from '../sim/waves.js';
 import { planAmbushes } from './camps.js';
@@ -39,8 +38,9 @@ export function entersBefore(path: readonly PathStep[], origin: Date, at: Date, 
 
 // The road from `elapsedMs` along `path` round the fire, or null (no way
 // round). It finishes the hex it is crossing (spliceRoute); if that hex is
-// on fire, it walks back to the one before, as long as it had gone on.
-export function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, next: (from: Hex) => PathStep[] | null): PathStep[] | null {
+// on fire, it goes round from the one before: walking back to it, as long
+// as it had gone on (`turnBack`), or, a horde, swerving on from it at once.
+export function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, next: (from: Hex) => PathStep[] | null, turnBack = true): PathStep[] | null {
   let i = path.findIndex((step) => step.atMs >= elapsedMs);
   if (i < 0) i = path.length - 1;
   const ahead = path[i]!;
@@ -50,30 +50,34 @@ export function detour(path: readonly PathStep[], elapsedMs: number, cell: Hex, 
   }
   if (i === 0) return null;
   const back = path[i - 1]!;
-  const turnAt = elapsedMs + (elapsedMs - back.atMs);
   const onward = next({ q: back.q, r: back.r });
   if (!onward) return null;
-  return [...path.slice(0, i), { q: back.q, r: back.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
+  const turnAt = turnBack ? elapsedMs + (elapsedMs - back.atMs) : elapsedMs;
+  const before = turnBack ? path.slice(0, i) : path.slice(0, i - 1);
+  return [...before, { q: back.q, r: back.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
 }
 
-// A horde's road round the fire (never back the way it came), or, with no
-// way round, its road held at the fire's edge until it is out (`untilMs`,
-// from its spawn).
-export function hordeDetour(path: readonly PathStep[], elapsedMs: number, cell: Hex, untilMs: number, next: (from: Hex) => PathStep[] | null): PathStep[] {
+// Its road kept, waiting in the hex before the fire until it is out
+// (`untilMs`, timed like the road): it steps into the fire's hex as the
+// fire dies. Headed into it already, it walks back to that hex to wait.
+export function waitOut(path: readonly PathStep[], elapsedMs: number, cell: Hex, untilMs: number): PathStep[] {
   let i = path.findIndex((step) => step.atMs >= elapsedMs);
   if (i < 0) i = path.length - 1;
-  const ahead = path[i]!;
-  const intoFire = ahead.q === cell.q && ahead.r === cell.r && i > 0;
-  const from = intoFire ? path[i - 1]! : ahead;
-  const turnAt = intoFire ? elapsedMs : ahead.atMs;
-  const onward = next({ q: from.q, r: from.r });
-  if (onward) {
-    return [...path.slice(0, intoFire ? i - 1 : i), { q: from.q, r: from.r, atMs: turnAt }, ...onward.slice(1).map((step) => ({ q: step.q, r: step.r, atMs: turnAt + step.atMs }))];
-  }
-  // No way round: it waits outside until the fire is out.
   const j = path.findIndex((step, k) => k >= i && step.q === cell.q && step.r === cell.r);
-  const wait = j < 0 ? 0 : Math.max(0, untilMs - path[j]!.atMs);
-  return path.map((step, k) => (j >= 0 && k >= j ? { ...step, atMs: step.atMs + wait } : step));
+  if (j <= 0) return [...path];
+  const before = path[j - 1]!;
+  const stepMs = path[j]!.atMs - before.atMs;
+  const back = before.atMs < elapsedMs ? elapsedMs + (elapsedMs - before.atMs) : before.atMs;
+  const leaves = Math.max(back, untilMs - stepMs);
+  const shift = leaves + stepMs - path[j]!.atMs;
+  return [...path.slice(0, j), { q: before.q, r: before.r, atMs: leaves }, ...path.slice(j).map((step) => ({ ...step, atMs: step.atMs + shift }))];
+}
+
+// Round the fire or waiting it out, whichever arrives sooner.
+export function bestWay(path: readonly PathStep[], elapsedMs: number, cell: Hex, untilMs: number, next: (from: Hex) => PathStep[] | null, turnBack = true): PathStep[] {
+  const waited = waitOut(path, elapsedMs, cell, untilMs);
+  const around = detour(path, elapsedMs, cell, next, turnBack);
+  return around && around.at(-1)!.atMs < waited.at(-1)!.atMs ? around : waited;
 }
 
 function safely(route: () => PathStep[]): PathStep[] | null {
@@ -92,8 +96,13 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
     const target = wave.targetVillageId !== null ? await loadVillage(client, wave.targetVillageId).catch(() => null) : null;
     const goal = target ? { id: target.id, cell: hex(target.q, target.r) } : { id: null, cell: hex(0, 0) };
     const sinceSpawn = at.getTime() - wave.spawnAt.getTime();
-    const path = hordeDetour(wave.path, sinceSpawn, cell, until.getTime() - wave.spawnAt.getTime(), (from) =>
-      routeFrom(data, { terrain: land, from, targets: [goal], front: wave.front, composition: wave.composition, rng: rngFor(world.seed, wave.index, 0xf1), startMs: 0, worldSpeed: world.speed })?.path ?? null,
+    const path = bestWay(
+      wave.path,
+      sinceSpawn,
+      cell,
+      until.getTime() - wave.spawnAt.getTime(),
+      (from) => routeFrom(data, { terrain: land, from, targets: [goal], front: wave.front, composition: wave.composition, rng: rngFor(world.seed, wave.index, 0xf1), startMs: 0, worldSpeed: world.speed })?.path ?? null,
+      false,
     );
     const march = holdForQuiet(world, wave.spawnAt, { path, arrivesAt: new Date(wave.spawnAt.getTime() + path.at(-1)!.atMs) });
     await marchOnward(client, wave.id, wave.targetVillageId, [...march.path], march.arrivesAt);
@@ -106,8 +115,7 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
   for (const army of await listArmies(client, world.id, 0)) {
     if (army.status === 'marching' && entersBefore(army.path, army.departsAt, at, cell, until)) {
       const dest = hex(army.targetQ, army.targetR);
-      const path = detour(army.path, at.getTime() - army.departsAt.getTime(), cell, (from) => safely(() => armyRoad(data, land, army, from, dest, at, world)));
-      if (!path) continue;
+      const path = bestWay(army.path, at.getTime() - army.departsAt.getTime(), cell, until.getTime() - army.departsAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, dest, at, world)));
       const moved: Army = { ...army, path, arrivesAt: new Date(army.departsAt.getTime() + path.at(-1)!.atMs) };
       await saveArmy(client, moved);
       await scheduleEvent(client, world.id, moved.arrivesAt, 'army_arrive', { armyId: army.id });
@@ -116,8 +124,7 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
       if (!entersBefore(road, army.leavesAt, at, cell, until)) continue;
       const home = await loadVillage(client, army.homeVillageId).catch(() => null);
       if (!home) continue;
-      const back = detour(road, at.getTime() - army.leavesAt.getTime(), cell, (from) => safely(() => armyRoad(data, land, army, from, hex(home.q, home.r), at, world)));
-      if (!back) continue;
+      const back = bestWay(road, at.getTime() - army.leavesAt.getTime(), cell, until.getTime() - army.leavesAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, hex(home.q, home.r), at, world)));
       const moved: Army = { ...army, path: reversedRoute(back), returnsAt: new Date(army.leavesAt.getTime() + back.at(-1)!.atMs) };
       await saveArmy(client, moved);
       await scheduleEvent(client, world.id, moved.returnsAt!, 'army_return', { armyId: army.id });
@@ -130,16 +137,14 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
     const bonuses = await effectiveBonuses(client, data, village);
     if (caravan.status === 'outbound' && entersBefore(caravan.path, caravan.departsAt, at, cell, until)) {
       const dest = await caravanGoal(client, caravan);
-      const path = detour(caravan.path, at.getTime() - caravan.departsAt.getTime(), cell, (from) => safely(() => caravanRoute(data, land, from, dest, world.speed, bonuses)));
-      if (!path) continue;
-      const travel = path.at(-1)!.atMs;
-      const moved: Caravan = { ...caravan, path, arrivesAt: new Date(caravan.departsAt.getTime() + travel), returnsAt: new Date(caravan.departsAt.getTime() + 2 * travel) };
+      const path = bestWay(caravan.path, at.getTime() - caravan.departsAt.getTime(), cell, until.getTime() - caravan.departsAt.getTime(), (from) => safely(() => caravanRoute(data, land, from, dest, world.speed, bonuses)));
+      const arrivesAt = new Date(caravan.departsAt.getTime() + path.at(-1)!.atMs);
+      const moved: Caravan = { ...caravan, path, arrivesAt, returnsAt: new Date(arrivesAt.getTime() + withoutHalts(path).at(-1)!.atMs) };
       await rerouteCaravan(client, data, world, moved, 'out', 'caravan_arrive', moved.arrivesAt, at);
     } else if (caravan.status === 'returning') {
       const road = reversedRoute(caravan.path);
       if (!entersBefore(road, caravan.arrivesAt, at, cell, until)) continue;
-      const back = detour(road, at.getTime() - caravan.arrivesAt.getTime(), cell, (from) => safely(() => caravanRoute(data, land, from, hex(village.q, village.r), world.speed, bonuses)));
-      if (!back) continue;
+      const back = bestWay(road, at.getTime() - caravan.arrivesAt.getTime(), cell, until.getTime() - caravan.arrivesAt.getTime(), (from) => safely(() => caravanRoute(data, land, from, hex(village.q, village.r), world.speed, bonuses)));
       const moved: Caravan = { ...caravan, path: reversedRoute(back), returnsAt: new Date(caravan.arrivesAt.getTime() + back.at(-1)!.atMs) };
       await rerouteCaravan(client, data, world, moved, 'back', 'caravan_return', moved.returnsAt, at);
     }
@@ -150,19 +155,17 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
     const home = await loadVillage(client, expedition.villageId).catch(() => null);
     if (!home) continue;
     if (expedition.status === 'outbound' && entersBefore(expedition.path, expedition.departsAt, at, cell, until)) {
-      const path = detour(expedition.path, at.getTime() - expedition.departsAt.getTime(), cell, (from) =>
+      const path = bestWay(expedition.path, at.getTime() - expedition.departsAt.getTime(), cell, until.getTime() - expedition.departsAt.getTime(), (from) =>
         safely(() => roadRoute(data, land, from, hex(expedition.q, expedition.r), settlerSpeed, world.speed)),
       );
-      if (!path) continue;
-      const travel = path.at(-1)!.atMs;
-      const moved = { ...expedition, path, arrivesAt: new Date(expedition.departsAt.getTime() + travel), returnsAt: new Date(expedition.departsAt.getTime() + 2 * travel) };
+      const arrivesAt = new Date(expedition.departsAt.getTime() + path.at(-1)!.atMs);
+      const moved = { ...expedition, path, arrivesAt, returnsAt: new Date(arrivesAt.getTime() + withoutHalts(path).at(-1)!.atMs) };
       await saveExpeditionRoute(client, moved);
       await scheduleEvent(client, world.id, moved.arrivesAt, 'settlers_arrive', { expeditionId: expedition.id });
     } else if (expedition.status === 'returning') {
       const road = reversedRoute(expedition.path);
       if (!entersBefore(road, expedition.arrivesAt, at, cell, until)) continue;
-      const back = detour(road, at.getTime() - expedition.arrivesAt.getTime(), cell, (from) => safely(() => roadRoute(data, land, from, hex(home.q, home.r), settlerSpeed, world.speed)));
-      if (!back) continue;
+      const back = bestWay(road, at.getTime() - expedition.arrivesAt.getTime(), cell, until.getTime() - expedition.arrivesAt.getTime(), (from) => safely(() => roadRoute(data, land, from, hex(home.q, home.r), settlerSpeed, world.speed)));
       const moved = { ...expedition, path: reversedRoute(back), returnsAt: new Date(expedition.arrivesAt.getTime() + back.at(-1)!.atMs) };
       await saveExpeditionRoute(client, moved);
       await scheduleEvent(client, world.id, moved.returnsAt, 'settlers_return', { expeditionId: expedition.id });

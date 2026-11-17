@@ -4,7 +4,8 @@
 import { achieve } from './achievements.js';
 import { z } from 'zod';
 import type { TerrainId } from '../data/index.js';
-import { countVillagesOwned, loadExpedition, markExpeditionDone, markFounded, markTurnedBack } from '../db/expeditions.js';
+import { countVillagesOwned, loadExpedition, markExpeditionDone, markFounded, markTurnedBack, saveExpeditionRoute } from '../db/expeditions.js';
+import { withoutHalts } from '../sim/logistics.js';
 import { notifyWorld } from '../db/notify.js';
 import { insertVillage, listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { loadHexes } from '../db/worlds.js';
@@ -37,6 +38,13 @@ export const expeditionHandlers: HandlerRegistry = {
     });
     if (problem) {
       await markTurnedBack(client, expedition.id, problem);
+      // The way home goes straight: no halts where they waited for a fire.
+      const path = withoutHalts(expedition.path);
+      if (path.length !== expedition.path.length) {
+        expedition.path = path;
+        expedition.returnsAt = new Date(expedition.arrivesAt.getTime() + path.at(-1)!.atMs);
+        await saveExpeditionRoute(client, expedition);
+      }
       await tell(client, world, home.ownerAccountId, {
         kind: 'settlers',
         tier: 'digest',

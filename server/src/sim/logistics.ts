@@ -118,6 +118,22 @@ export function reversedRoute(path: readonly PathStep[]): PathStep[] {
   return [...path].reverse().map((step) => ({ q: step.q, r: step.r, atMs: total - step.atMs }));
 }
 
+// A road without its halts (two steps on one hex: a wait for a fire to go
+// out, or a walk back from one): the way home goes straight.
+export function withoutHalts(path: readonly PathStep[]): PathStep[] {
+  const out: PathStep[] = [];
+  let shift = 0;
+  path.forEach((step, i) => {
+    const before = path[i - 1];
+    if (before && before.q === step.q && before.r === step.r) {
+      shift += step.atMs - before.atMs;
+      return;
+    }
+    out.push({ q: step.q, r: step.r, atMs: step.atMs - shift });
+  });
+  return out;
+}
+
 // Turning something on the road `elapsedMs` after it set out: it finishes
 // the hex it is crossing (or turns at once where it has just come in), then
 // takes `next`, a road from that hex timed from 0. The steps already taken

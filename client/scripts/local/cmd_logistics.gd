@@ -51,6 +51,20 @@ static func reversed_route(path: Array) -> Array:
 	return out
 
 
+## sim/logistics.ts withoutHalts: a road without its halts (two steps on one
+## hex: a wait for a fire to go out, or a walk back from one).
+static func without_halts(path: Array) -> Array:
+	var out: Array = []
+	var shift := 0
+	for i in path.size():
+		var step: Dictionary = path[i]
+		if i > 0 and int(path[i - 1].q) == int(step.q) and int(path[i - 1].r) == int(step.r):
+			shift += int(step.atMs) - int(path[i - 1].atMs)
+			continue
+		out.append({"q": step.q, "r": step.r, "atMs": int(step.atMs) - shift})
+	return out
+
+
 ## Turning something on the road `elapsed_ms` after it set out: it finishes
 ## the hex it is crossing, then takes the road `next` gives from that hex
 ## (or null: none); the steps already taken stay (sim/logistics.ts spliceRoute).
@@ -455,6 +469,10 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 				"vars": {"sender": sender.name, "village": village.name, "amount": total(caravan.cargo) - total(received.leftover)}}, int(event.dueAt))
 	caravan.status = "returning"
 	caravan.carriedBack = carried_back
+	# The way home goes straight: no halts where it waited for a fire.
+	var straight := without_halts(caravan.path)
+	caravan.path = straight
+	caravan.returnsAt = int(caravan.arrivesAt) + int(straight[-1].atMs)
 	plan_ambushes(server, world, caravan, "back", int(event.dueAt))
 	server.schedule(world, int(caravan.returnsAt), "caravan_return", {"caravanId": caravan.id})
 	changed.append(["world"])
