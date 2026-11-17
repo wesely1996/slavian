@@ -1390,6 +1390,45 @@ func _offer_update(column: Container) -> void:
 	var download := UI.primary(tr("Version %s is out: download it") % latest, func() -> void: OS.shell_open(url))
 	if is_instance_valid(column):
 		column.add_child(download)
+	# Once a launch, a notice over the menu too.
+	if not _update_noticed.has(latest) and is_inside_tree():
+		_update_noticed[latest] = true
+		_update_notice(latest, url)
+
+
+## Versions the update notice was shown for since the app started.
+static var _update_noticed := {}
+
+
+## "A new version is out" over the whole menu: download it, or later.
+func _update_notice(latest: String, url: String) -> void:
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.6)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(shade)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.add_child(center)
+	var sheet := UI.panel(1.0, 0)
+	sheet.add_theme_stylebox_override("panel", UiTheme.sheet_style(24))
+	sheet.custom_minimum_size.x = minf(620.0, get_viewport_rect().size.x - 32.0)
+	center.add_child(sheet)
+	var box := UI.vbox(16)
+	sheet.add_child(box)
+	box.add_child(UI.label(tr("A new version is out"), UI.HEADING_SIZE, UiTheme.INK))
+	var text := UI.label(tr("Slavian %s is ready; you have %s. Download the new version to keep playing with everyone.") % [
+		latest, ProjectSettings.get_setting("application/config/version", "")], UI.SMALL_SIZE, UiTheme.INK)
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(text)
+	var row := UI.hbox(12)
+	row.add_child(UI.button(tr("Later"), shade.queue_free))
+	var go := UI.primary(tr("Download"), func() -> void:
+		OS.shell_open(url)
+		shade.queue_free())
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(go)
+	box.add_child(row)
 
 
 ## Whether version `a` ("0.17.0") comes after `b`, part by part.
