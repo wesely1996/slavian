@@ -15,6 +15,8 @@ const FEATURES := {
 	"hills": [["feature/hill", 2, 0.78, 0.5], ["feature/oak", 1, 0.36, 0.7]],
 	"wooded_hills": [["feature/hill", 2, 0.78, 0.5], ["feature/pine", 3, 0.38, 0.72], ["feature/oak", 2, 0.38, 0.72]],
 	"mountain": [["feature/mountain", 1, 1.15, 0.12], ["feature/peak", 2, 0.66, 0.6]],
+	# A mountain city's peaks stand round it (the city itself is drawn on the map).
+	"mountain_city": [["feature/peak", 2, 0.6, 0.85]],
 	"swamp": [["feature/reeds", 5, 0.3, 0.75]],
 	"steppe": [["feature/grass", 3, 0.26, 0.75]],
 	"plains": [["feature/bush", 1, 0.26, 0.7], ["feature/grass", 2, 0.24, 0.75]],

@@ -177,7 +177,7 @@ func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 	var research := LocalResearch.bonuses_of(data, LocalResearch.known(world, account_id))
 	var lore := LocalResearch.lore_bonuses(data, LocalResearch.scrolls(world))
 	# The blessings of the bridge's finished stages, for everyone.
-	var blessed := LocalBridge.bridge_bonuses(data, world.get("bridge"))
+	var blessed := LocalHeroes.combine(LocalBridge.bridge_bonuses(data, world.get("bridge")), LocalEvents.mountain_city_bonuses(data, world))
 	# The gods of the player's Shrines, from every village of theirs that stands.
 	var states: Array = world.villages.filter(func(v: Dictionary) -> bool:
 		return v.ownerAccountId != null and int(v.ownerAccountId) == account_id and v.get("ruin") == null).map(func(v: Dictionary) -> Dictionary: return v.state)

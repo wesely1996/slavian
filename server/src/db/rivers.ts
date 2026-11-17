@@ -98,7 +98,7 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   const rivers = await listRiverEdges(client, worldId);
   const blocked = rivers.filter((e) => e.crossing !== 'standing').map((e) => edgeKey(e.a, e.b));
   const roads = await standingRoads(client, worldId);
-  const lanes = (await listShipyards(client, worldId)).filter((s) => s.status === 'done').flatMap((s) => riverLanes(rivers, s.edge, terrain));
+  const lanes = (await listShipyards(client, worldId)).filter((s) => s.kind === 'boat' && s.status === 'done').flatMap((s) => riverLanes(rivers, s.edge, terrain));
   const burning = (await listTerraforms(client, worldId)).filter((t) => t.action === 'burn').map((t) => hexKey(t.cell));
   return landOf(terrain, blocked, roads, lanes, burning);
 }

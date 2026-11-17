@@ -96,10 +96,11 @@ export async function dispatchCaravan(
     const shipyard = await loadShipyard(client, order.destinationShipyardId);
     if (!shipyard || shipyard.worldId !== world.id) throw new NotFoundError('No such shipyard in this world');
     if (retrieve) throw new RuleError('Caravans bring back only from your own settlements, forts and supply points');
-    if (shipyard.status !== 'open') throw new RuleError('The boat is already paid for');
+    const project = shipyard.kind === 'mountain_city' ? 'The city' : 'The boat';
+    if (shipyard.status !== 'open') throw new RuleError(`${project} is already paid for`);
     const need = mapResources((k) => Math.max(0, shipyard.cost[k] - shipyard.paid[k]));
     if (RESOURCE_KINDS.some((k) => order.load[k] > need[k])) {
-      throw new RuleError(`The boat still needs ${need.wood} wood, ${need.stone} stone, ${need.grain} grain and ${need.iron} iron`);
+      throw new RuleError(`${project} still needs ${need.wood} wood, ${need.stone} stone, ${need.grain} grain and ${need.iron} iron`);
     }
     to = hex(shipyard.q, shipyard.r);
   } else if (order.destinationVillageId !== null) {

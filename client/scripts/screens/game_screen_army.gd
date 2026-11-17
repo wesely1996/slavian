@@ -161,7 +161,7 @@ func _send_troops(village: Dictionary) -> void:
 		_danger_line(cell, func() -> Dictionary: return _picked_units(home_units), village, func() -> String: return _army_stance if _army_stance != "" else String(village.get("stance", "balanced")))
 	# Support and holding stay until called home, unless told to come back once done.
 	if stays:
-		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
+		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), Game.shipyard_at(cell)), func(on: bool) -> void: _army_return = on))
 
 
 ## Onto one of your settlements: whether the army joins its garrison there
@@ -761,7 +761,7 @@ func _army_tab_settings(army: Dictionary) -> void:
 	var army_id := int(army.id)
 	if army.orders in ["support", "hold", "clear", "explore"]:
 		var on: bool = army.get("returnHome", false)
-		_panel_body.add_child(_return_check(on, ArmyText.return_text(String(army.orders), not Game.shipyard_at(ArmyText.held_hex(army)).is_empty()), func(next: bool) -> void:
+		_panel_body.add_child(_return_check(on, ArmyText.return_text(String(army.orders), Game.shipyard_at(ArmyText.held_hex(army))), func(next: bool) -> void:
 			_army_command(army_id, "return-home", {"returnHome": next})))
 	_army_settings(army)
 

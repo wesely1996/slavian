@@ -155,7 +155,10 @@ func _terrain_panel() -> Array:
 	var parts := []
 	var yard := Game.shipyard_at(_selected)
 	if not yard.is_empty():
-		parts.append(["shipyard", "icon/coin", tr("Shipyard"), _shipyard_panel.bind(yard)])
+		if EventText.is_city(yard):
+			parts.append(["shipyard", "map/mountain_city", tr("Mountain city"), _shipyard_panel.bind(yard)])
+		else:
+			parts.append(["shipyard", "icon/coin", tr("Shipyard"), _shipyard_panel.bind(yard)])
 	var holder := Game.outpost_owner(_selected)
 	var site := Game.site_at(_selected)
 	var kind := Rules.outpost_kind(Game.data, id)
@@ -180,13 +183,22 @@ func _terrain_panel() -> Array:
 ## it; while it is built, when it is done and when raiders come; once done,
 ## the river it sails.
 func _shipyard_panel(yard: Dictionary) -> void:
-	var rules: Dictionary = Game.data.events.kinds.shipyard
-	var speed := int(rules.laneSpeed)
-	_panel_body.add_child(UI.with_info(UI.label(tr("Shipyard"), UI.HEADING_SIZE),
-		tr("A group project: once the boat is built, armies, caravans and scouts move %d× as fast between hexes along this river.") % speed))
-	if yard.status == "done":
-		_panel_body.add_child(UI.label(tr("The boat sails this river: marches along it go %d× as fast.") % speed, UI.SMALL_SIZE, UI.GOOD))
-		return
+	var rules := EventText.project_rules(Game.data, yard)
+	var city := EventText.is_city(yard)
+	if city:
+		var bonus := roundi(float(rules.productionBonus) * 100.0)
+		_panel_body.add_child(UI.with_info(UI.label(tr("Mountain city"), UI.HEADING_SIZE),
+			tr("A group project: masons raise a city in the mountain. Once it stands, every village of every player produces %d%% more of every resource, for good. Monsters from under the mountain strike while it is built.") % bonus))
+		if yard.status == "done":
+			_panel_body.add_child(UI.label(tr("The city stands: every village produces %d%% more of every resource.") % bonus, UI.SMALL_SIZE, UI.GOOD))
+			return
+	else:
+		var speed := int(rules.laneSpeed)
+		_panel_body.add_child(UI.with_info(UI.label(tr("Shipyard"), UI.HEADING_SIZE),
+			tr("A group project: once the boat is built, armies, caravans and scouts move %d× as fast between hexes along this river.") % speed))
+		if yard.status == "done":
+			_panel_body.add_child(UI.label(tr("The boat sails this river: marches along it go %d× as fast.") % speed, UI.SMALL_SIZE, UI.GOOD))
+			return
 	var speed_f := float(Game.world.speed)
 	if yard.status == "building":
 		var done_at := TimeUtil.parse_iso(String(yard.completesAt))
@@ -198,7 +210,7 @@ func _shipyard_panel(yard: Dictionary) -> void:
 			var now := Game.server_now()
 			if is_instance_valid(built):
 				built.value = EventText.build_share(Game.data, yard, now, speed_f)
-			return tr("The boat is %d%% built · ready in %s") % [roundi(EventText.build_share(Game.data, yard, now, speed_f) * 100.0), TimeUtil.format_duration(done_at - now)])
+			return (tr("The city is %d%% built · ready in %s") if city else tr("The boat is %d%% built · ready in %s")) % [roundi(EventText.build_share(Game.data, yard, now, speed_f) * 100.0), TimeUtil.format_duration(done_at - now)])
 		if yard.get("nextRaidAt") != null:
 			# The raiders coming: drawn in black on the map, closing in on the yard.
 			var raid_at := TimeUtil.parse_iso(String(yard.nextRaidAt))
@@ -211,8 +223,11 @@ func _shipyard_panel(yard: Dictionary) -> void:
 				var now := Game.server_now()
 				if is_instance_valid(closing):
 					closing.value = maxf(0.0, EventText.raid_share(Game.data, yard, now, speed_f))
-				return tr("%d raiders strike here in %s") % [raiders, TimeUtil.format_duration(raid_at - now)])
-		_panel_body.add_child(UI.with_info(UI.label(tr("Raiders burn work unless an army stands here"), UI.SMALL_SIZE, UI.MUTED), tr("Armies standing here fight the raiders; if none drives them off, %d hours of work are lost.") % int(rules.setbackHours)))
+				return (tr("%d monsters strike here in %s") if city else tr("%d raiders strike here in %s")) % [raiders, TimeUtil.format_duration(raid_at - now)])
+		if city:
+			_panel_body.add_child(UI.with_info(UI.label(tr("Monsters wreck work unless an army stands here"), UI.SMALL_SIZE, UI.MUTED), tr("Armies standing here fight the monsters from under the mountain; if none drives them off, %d hours of work are lost, and struck down %d times the city is lost.") % [int(rules.setbackHours), int(rules.maxBurns)]))
+		else:
+			_panel_body.add_child(UI.with_info(UI.label(tr("Raiders burn work unless an army stands here"), UI.SMALL_SIZE, UI.MUTED), tr("Armies standing here fight the raiders; if none drives them off, %d hours of work are lost.") % int(rules.setbackHours)))
 		return
 	var parts := PackedStringArray()
 	var any_paid := false
@@ -224,7 +239,10 @@ func _shipyard_panel(yard: Dictionary) -> void:
 	var paid_bar := _gauge(UI.GOOD)
 	paid_bar.value = EventText.paid_share(yard)
 	_panel_body.add_child(paid_bar)
-	_panel_body.add_child(UI.with_info(UI.label(tr("Build time and raids"), UI.SMALL_SIZE, UI.MUTED), tr("When it is paid for, the boat takes %d hours to build, and raiders come every %d hours.") % [int(rules.buildHours), int(rules.raidEveryHours)]))
+	if city:
+		_panel_body.add_child(UI.with_info(UI.label(tr("Build time and monsters"), UI.SMALL_SIZE, UI.MUTED), tr("When it is paid for, the city takes %d hours to build, and monsters come every %d hours.") % [int(rules.buildHours), int(rules.raidEveryHours)]))
+	else:
+		_panel_body.add_child(UI.with_info(UI.label(tr("Build time and raids"), UI.SMALL_SIZE, UI.MUTED), tr("When it is paid for, the boat takes %d hours to build, and raiders come every %d hours.") % [int(rules.buildHours), int(rules.raidEveryHours)]))
 	if not any_paid:
 		_event_lines(yard, "", true)
 	# A caravan from any village with a Caravan Yard; a village close by can
@@ -484,7 +502,7 @@ func _hold_panel(terrain_id: String) -> void:
 	_army_stance_picker(home)
 	_danger_line(cell, func() -> Dictionary: return _picked_units(at_home), home, func() -> String: return _army_stance if _army_stance != "" else String(home.get("stance", "balanced")))
 	_grain_row(func() -> Dictionary: return _picked_units(at_home), home)
-	_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(orders, not Game.shipyard_at(cell).is_empty()), func(on: bool) -> void: _army_return = on))
+	_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(orders, Game.shipyard_at(cell)), func(on: bool) -> void: _army_return = on))
 	var go := UI.button({"explore": tr("Explore"), "hold": tr("Hold this hex"), "clear": tr("Storm it")}[orders], func() -> void:
 		var order := {"target": {"q": cell.x, "r": cell.y}, "units": _picked_units(at_home), "orders": orders, "withHero": _army_hero and hero_ready, "stance": _army_stance, "returnHome": _army_return,
 			"grain": _grain_to_take(_picked_units(at_home), home)}

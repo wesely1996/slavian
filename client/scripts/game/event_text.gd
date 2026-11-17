@@ -33,6 +33,16 @@ static func _ends(event: Dictionary) -> float:
 	return INF
 
 
+## Whether a project is a mountain city (else a boat at a shipyard).
+static func is_city(yard: Dictionary) -> bool:
+	return yard.get("kind", "boat") == "mountain_city"
+
+
+## The rules a project is built by (events.json shipyard or mountain_city).
+static func project_rules(data: Dictionary, yard: Dictionary) -> Dictionary:
+	return data.events.kinds.mountain_city if is_city(yard) else data.events.kinds.shipyard
+
+
 ## How much of a shipyard's cost has been paid (0..1).
 static func paid_share(yard: Dictionary) -> float:
 	var cost := 0.0
@@ -50,7 +60,7 @@ static func build_share(data: Dictionary, yard: Dictionary, now: float, world_sp
 		return 1.0
 	if yard.get("status") != "building" or yard.get("completesAt") == null:
 		return 0.0
-	var span := float(data.events.kinds.shipyard.buildHours) * 3600.0 / world_speed
+	var span := float(project_rules(data, yard).buildHours) * 3600.0 / world_speed
 	var left := TimeUtil.parse_iso(String(yard.completesAt)) - now
 	return clampf(1.0 - left / span, 0.0, 1.0) if span > 0.0 else 1.0
 
@@ -60,7 +70,7 @@ static func build_share(data: Dictionary, yard: Dictionary, now: float, world_sp
 static func raid_share(data: Dictionary, yard: Dictionary, now: float, world_speed: float) -> float:
 	if yard.get("status") != "building" or yard.get("nextRaidAt") == null:
 		return -1.0
-	var span := float(data.events.kinds.shipyard.raidEveryHours) * 3600.0 / world_speed
+	var span := float(project_rules(data, yard).raidEveryHours) * 3600.0 / world_speed
 	var left := TimeUtil.parse_iso(String(yard.nextRaidAt)) - now
 	return clampf(1.0 - left / span, 0.0, 1.0) if span > 0.0 else 1.0
 
@@ -75,6 +85,8 @@ static func title(event: Dictionary) -> String:
 			return UI.t("Cultists' ritual at (%d, %d)") % [cell.x, cell.y]
 		"ruin":
 			return UI.t("Forbidding ruin at (%d, %d)") % [cell.x, cell.y]
+	if is_city(event.get("item", {})):
+		return UI.t("Mountain city at (%d, %d)") % [cell.x, cell.y]
 	return UI.t("Shipyard at (%d, %d)") % [cell.x, cell.y]
 
 
@@ -83,10 +95,12 @@ static func state(data: Dictionary, event: Dictionary, now: float, world_speed: 
 	var item: Dictionary = event.item
 	if event.kind == "shipyard":
 		if item.status == "building":
-			var line := UI.t("Boat %d%% built · ready in %s") % [roundi(build_share(data, item, now, world_speed) * 100.0),
-				TimeUtil.format_duration(TimeUtil.parse_iso(String(item.completesAt)) - now)]
+			var built := roundi(build_share(data, item, now, world_speed) * 100.0)
+			var ready := TimeUtil.format_duration(TimeUtil.parse_iso(String(item.completesAt)) - now)
+			var line := (UI.t("City %d%% built · ready in %s") if is_city(item) else UI.t("Boat %d%% built · ready in %s")) % [built, ready]
 			if item.get("nextRaidAt") != null:
-				line += " · " + UI.t("%d raiders strike in %s") % [int(item.raiders), TimeUtil.format_duration(TimeUtil.parse_iso(String(item.nextRaidAt)) - now)]
+				var strike := TimeUtil.format_duration(TimeUtil.parse_iso(String(item.nextRaidAt)) - now)
+				line += " · " + (UI.t("%d monsters strike in %s") if is_city(item) else UI.t("%d raiders strike in %s")) % [int(item.raiders), strike]
 			return line
 		var paid := UI.t("%d%% paid") % roundi(paid_share(item) * 100.0)
 		if item.get("endsAt") != null and paid_share(item) <= 0.0:

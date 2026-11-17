@@ -1,4 +1,6 @@
 import { findBridge } from '../db/bridges.js';
+import { listShipyards } from '../db/shipyards.js';
+import { mountainCityBonuses } from '../sim/events.js';
 import { bridgeBonuses } from '../sim/bridge.js';
 // Research on the scheduler: research_complete marks the tech known and
 // gives every village of the group its effects (research is shared).
@@ -35,7 +37,7 @@ export async function playerBonuses(client: DbClient, data: GameData, worldId: n
   const member = (await listMembers(client, worldId)).find((m) => m.accountId === accountId);
   const own = combine(clanBonuses(data, member?.clan ?? null), rosterBonuses(data, member?.heroKind ?? null));
   // The blessings of the bridge's finished stages, for everyone.
-  const blessed = bridgeBonuses(data, await findBridge(client, worldId));
+  const blessed = combine(bridgeBonuses(data, await findBridge(client, worldId)), mountainCityBonuses(data, await listShipyards(client, worldId)));
   // The gods of the player's Shrines, from every village of theirs that stands.
   const gods = shrineBonuses(data, (await listVillages(client, worldId)).filter((v) => v.ownerAccountId === accountId && !v.ruin).map((v) => v.state));
   return combine(combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own), gods);

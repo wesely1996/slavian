@@ -312,7 +312,8 @@ async function settleSite(ctx: TurnContext, home: Village): Promise<Hex | null> 
     const [q, r] = key.split(',').map(Number);
     const cell = hex(q!, r!);
     const d = hexDistance(cell, from);
-    if (d > rules.maxDistance || hexDistance(cell, hex(0, 0)) < Math.max(rules.minHolyCityDistance, 3)) continue;
+    // Close to home, though settlers may go anywhere.
+    if (d > 6 || hexDistance(cell, hex(0, 0)) < Math.max(rules.minHolyCityDistance, 3)) continue;
     if (villages.some((v) => hexDistance(cell, hex(v.q, v.r)) < rules.minVillageDistance)) continue;
     // Close to home, but not on the border.
     if (!best || d < hexDistance(best, from) || (d === hexDistance(best, from) && hexDistance(cell, hex(0, 0)) < hexDistance(best, hex(0, 0)))) best = cell;

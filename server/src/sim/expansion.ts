@@ -22,9 +22,6 @@ export function settleProblem(data: GameData, site: SettleSite): string | null {
   if (!data.terrain.terrain[site.terrain].settleable) {
     return `Villages can't be founded on ${data.terrain.terrain[site.terrain].name}`;
   }
-  if (hexDistance(site.cell, site.home) > rules.maxDistance) {
-    return `Settlers walk at most ${rules.maxDistance} hexes from their village`;
-  }
   if (hexDistance(site.cell, hex(0, 0)) < rules.minHolyCityDistance) return 'Too close to the Holy City';
   if (site.villages.some((v) => hexDistance(v, site.cell) < rules.minVillageDistance)) {
     return `Villages stand at least ${rules.minVillageDistance} hexes apart`;

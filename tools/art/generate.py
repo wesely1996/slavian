@@ -753,6 +753,39 @@ def caravan_token():
     return s
 
 
+def mountain_city():
+    """A city cut into a mountain: a grey peak with snow, and in its face
+    terraces of stone walls with towers, an arched gate glowing warm, lit
+    windows and a gold banner at the top."""
+    s = Svg()
+    soft_shadow(s, 64, 114, 58, 10, 0.4)
+    rock = s.lin([(0, "#b9b2a6"), (0.55, "#857e72"), (1, "#4e4840")], 0, 0, 1, 1)
+    s.path("M4,116 L40,40 L56,52 L72,14 L92,46 L104,36 L124,116 Z", rock, stroke=EDGE, sw=2.5)
+    # Snow on the peaks.
+    s.path("M64,30 L72,14 L82,32 L76,28 L70,34 Z", "#f4f6f8", stroke="none", sw=0)
+    s.path("M35,50 L40,40 L46,48 L42,46 Z", "#f4f6f8", stroke="none", sw=0)
+    # Terraced walls, lower and wider, upper and narrower.
+    wall = s.lin([(0, "#e3d9c4"), (1, "#a99c83")], 0, 0, 0, 1)
+    for x0, x1, y, h in [(22, 106, 92, 20), (34, 94, 72, 18), (46, 82, 54, 16)]:
+        s.rect(x0, y, x1 - x0, h, wall, stroke=EDGE, sw=2, rx=1)
+        # Crenellations.
+        for x in range(x0 + 2, x1 - 4, 8):
+            s.rect(x, y - 4, 5, 4, wall, stroke=EDGE, sw=1.2)
+        # Lit windows.
+        for x in range(x0 + 7, x1 - 6, 12):
+            s.rect(x, y + h * 0.35, 3.5, 5, "#ffcf6a", stroke="#5a4a32", sw=0.8, rx=1.5)
+    # Two towers flanking the gate.
+    for x in (44, 84):
+        s.rect(x - 6, 82, 12, 32, wall, stroke=EDGE, sw=2)
+        s.poly([(x - 8, 82), (x, 70), (x + 8, 82)], "#8c3a2e", stroke=EDGE, sw=1.8)
+    # The gate: an arch glowing from inside the mountain.
+    s.path("M56,114 L56,100 Q64,90 72,100 L72,114 Z", s.lin([(0, "#ffe39a"), (1, "#c9722e")], 0, 0, 0, 1), stroke=EDGE, sw=2)
+    # A banner at the top.
+    s.line(64, 54, 64, 36, stroke="#5b3f25", sw=2)
+    s.poly([(64, 36), (78, 40), (64, 45)], s.lin([(0, "#f2d27a"), (1, "#c99a2e")], 0, 0, 1, 0), stroke=EDGE, sw=1.4)
+    return s
+
+
 def merchant_caravan_token():
     """A merchant caravan, side on and facing right: a dappled horse pulling
     a painted trader's wagon under a red-and-gold striped awning with a
@@ -2498,6 +2531,7 @@ def assets():
     out["map/fire"] = fire()
     out["map/caravan"] = caravan_token()
     out["map/merchant_caravan"] = merchant_caravan_token()
+    out["map/mountain_city"] = mountain_city()
     for kind in ["farm", "sawmill", "quarry", "camp", "mine", "fishing"]:
         out[f"map/outpost_{kind}"] = outpost_kind(kind)
     for kind in ["kurgan", "sunken_shrine", "old_hillfort", "stone_idol", "frozen_ruin"]:

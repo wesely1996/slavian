@@ -426,7 +426,7 @@ func _test_expansion() -> void:
 	var villages := [home, Vector2i(-2, 0)]
 	_check(Rules.settle_problem(data, Vector2i(5, 0), "plains", home, villages, false) == "", "a free plains hex can be settled")
 	_check(Rules.settle_problem(data, Vector2i(5, 0), "swamp", home, villages, false).begins_with("Villages can't be founded on Swamp"), "swamp")
-	_check(Rules.settle_problem(data, Vector2i(9, 0), "plains", home, villages, false).begins_with("Settlers walk at most 6"), "too far")
+	_check(Rules.settle_problem(data, Vector2i(14, 0), "plains", home, villages, false) == "", "settlers may go however far")
 	_check(Rules.settle_problem(data, Vector2i(4, 0), "plains", home, villages, false).begins_with("Villages stand at least 3"), "too close")
 	_check(Rules.settle_problem(data, Vector2i(5, 0), "plains", home, villages, true) == "An outpost stands there.", "outpost")
 	var settler: Dictionary = units.units.settler
@@ -879,6 +879,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("raze-scenario.json", "local razes")
 	_replay_scenario("logistics-scenario.json", "local logistics")
 	_replay_scenario("merchant-scenario.json", "local merchant caravans")
+	_replay_scenario("mountain-city-scenario.json", "local mountain city")
 	_replay_scenario("army-scenario.json", "local armies")
 	_replay_scenario("expansion-scenario.json", "local expansion")
 	_replay_scenario("endgame-scenario.json", "local endgame")
@@ -1082,6 +1083,9 @@ func _replay_scenario(file: String, name: String) -> void:
 			if step.set.has("ritual"):
 				var r: Dictionary = step.set.ritual
 				LocalCultists.start(local, world, Vector2i(int(r.q), int(r.r)), String(r.front), r.guards, now)
+			if step.set.has("mountainCity"):
+				var m: Dictionary = step.set.mountainCity
+				LocalEvents.raise_mountain_city(local, world, Vector2i(int(m.q), int(m.r)), String(m.front), m.raiders, now)
 			if step.set.has("frontHatred"):
 				if not world.has("hatred"):
 					world.hatred = {}

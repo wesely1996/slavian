@@ -21,6 +21,8 @@ export const TERRAIN_IDS = [
   'ice',
   'steppe',
   'hallowed',
+  // A mountain city's hex (events.json mountain_city): open land in the mountain.
+  'mountain_city',
 ] as const;
 export type TerrainId = (typeof TERRAIN_IDS)[number];
 
@@ -349,7 +351,6 @@ const logisticsFileSchema = z.object({
 const expansionFileSchema = z.object({
   version: z.number().int(),
   settlersNeeded: z.number().int().positive(),
-  maxDistance: z.number().int().positive(),
   minVillageDistance: z.number().int().positive(),
   minHolyCityDistance: z.number().int().nonnegative(),
   startingResources: resourcesSchema,
@@ -1021,6 +1022,21 @@ const eventsFileSchema = z.object({
       laneSpeed: z.number().min(1),
       // A lake on its river is sailed at this move cost (before the lane's speed).
       lakeMoveCost: z.number().positive(),
+    }),
+    // A neutral city in a mountain, paid for and defended like a shipyard;
+    // built, it raises every member's production for good.
+    mountain_city: z.object({
+      weight: z.number().nonnegative(),
+      cost: resourcesSchema,
+      range: z.number().int().positive(),
+      buildHours: z.number().positive(),
+      raidEveryHours: z.number().positive(),
+      maxBurns: z.number().int().positive(),
+      setbackHours: z.number().nonnegative(),
+      raiders: z.number().int().positive(),
+      raiderStance: z.enum(STANCES),
+      raiderFront: z.string(),
+      productionBonus: z.number().nonnegative(),
     }),
   }),
 });

@@ -1453,6 +1453,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -1557,39 +1569,7 @@
     ],
     "lore": [],
     "achievements": [],
-    "shipyards": [
-     {
-      "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     }
-    ],
+    "shipyards": [],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -4378,6 +4358,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -4482,39 +4474,7 @@
     ],
     "lore": [],
     "achievements": [],
-    "shipyards": [
-     {
-      "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     }
-    ],
+    "shipyards": [],
     "bridge": {
      "stage": 0,
      "embers": 0,
@@ -7155,6 +7115,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -7248,37 +7220,7 @@
     "shipyards": [
      {
       "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     },
-     {
-      "id": 3,
+      "kind": "boat",
       "q": -8,
       "r": 2,
       "edge": [
@@ -9946,6 +9888,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -10039,37 +9993,7 @@
     "shipyards": [
      {
       "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     },
-     {
-      "id": 3,
+      "kind": "boat",
       "q": -8,
       "r": 2,
       "edge": [
@@ -12490,6 +12414,68 @@
        ],
        "arrivesAt": "2026-06-01T11:24:43.200Z"
       }
+     },
+     {
+      "id": 4,
+      "index": 2,
+      "front": "north",
+      "status": "marching",
+      "threat": "Severe",
+      "spawnAt": "2026-06-01T10:38:24.000Z",
+      "spawn": {
+       "q": 1,
+       "r": -3
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        1,
+        -3,
+        0
+       ],
+       [
+        0,
+        -2,
+        24000
+       ],
+       [
+        -1,
+        -1,
+        48000
+       ],
+       [
+        -2,
+        0,
+        72000
+       ],
+       [
+        -2,
+        1,
+        96000
+       ],
+       [
+        -2,
+        2,
+        144000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T10:40:48.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 3,
+      "errand": {
+       "from": {
+        "q": 1,
+        "r": -3
+       },
+       "kind": "avatar",
+       "target": null
+      },
+      "forecast": null
      }
     ],
     "scouting": [],
@@ -12888,41 +12874,17 @@
      }
     ],
     "lore": [],
-    "achievements": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "avatar_risen",
+      "earnedAt": "2026-06-01T10:38:24.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     },
-     {
-      "id": 3,
+      "kind": "boat",
       "q": -8,
       "r": 2,
       "edge": [
@@ -14880,6 +14842,33 @@
    "response": {
     "notifications": [
      {
+      "id": 20,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The severe north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T10:38:24.000Z",
+      "read": false
+     },
+     {
+      "id": 19,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: The Black God Walks",
+      "body": "See the Avatar of Černobog rise.",
+      "createdAt": "2026-06-01T10:38:24.000Z",
+      "read": false
+     },
+     {
+      "id": 18,
+      "kind": "event",
+      "tier": "push",
+      "title": "The Avatar of Černobog walks at (1, -3)",
+      "body": "The ritual is done. The Black God takes flesh and marches on the villages. Slay it for a great bounty.",
+      "createdAt": "2026-06-01T10:38:24.000Z",
+      "read": false
+     },
+     {
       "id": 17,
       "kind": "under_attack",
       "tier": "push",
@@ -14928,8 +14917,8 @@
       "id": 12,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (-7, 5)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the north hates you the more.",
+      "title": "Cultists of Černobog gather at (1, -3)",
+      "body": "They work a dark ritual. Scatter them before it ends, for a bounty of at least 2450 resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },
@@ -15033,7 +15022,7 @@
       "read": false
      }
     ],
-    "unread": 17,
+    "unread": 20,
     "serverTime": "2026-06-01T10:40:36.000Z"
    }
   }
