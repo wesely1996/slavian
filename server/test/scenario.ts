@@ -70,7 +70,8 @@ export interface Session {
   play(step: Step): Promise<{ status: number; body: any }>;
 }
 
-export function scenario(fixture: string, start: ScenarioStart, script: (session: Session) => Promise<void>): void {
+// `timeoutMs`: for a long script (the default is vitest's 5 s).
+export function scenario(fixture: string, start: ScenarioStart, script: (session: Session) => Promise<void>, timeoutMs?: number): void {
   const path = fileURLToPath(new URL(`../../data/fixtures/${fixture}`, import.meta.url));
   describe.skipIf(!TEST_DATABASE_URL)(`${fixture} for the local engine (postgres)`, () => {
     let db: Db;
@@ -184,6 +185,6 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
       const fixture = { start, steps: recorded };
       if (process.env.UPDATE_FIXTURES) writeFileSync(path, JSON.stringify(fixture, null, 1) + '\n');
       expect(fixture).toEqual(JSON.parse(readFileSync(path, 'utf8')));
-    });
+    }, timeoutMs);
   });
 }

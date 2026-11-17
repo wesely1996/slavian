@@ -107,4 +107,4 @@ scenario('fire-scenario.json', START, async ({ started, play }) => {
   }
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
-});
+}, 30_000);
