@@ -13,6 +13,8 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 	if caravan.get("destinationShipyardId") != null:
 		where = target_name({"kind": "shipyard", "id": int(caravan.destinationShipyardId)})
 	var cargo := _load_text(caravan.cargo)
+	if caravan.get("kind") == "merchant":
+		return _describe_merchant(caravan, where, outgoing, now)
 	if not outgoing:
 		var from := Game.village_name(caravan.villageId)
 		if caravan.status == "outbound":
@@ -38,6 +40,20 @@ static func describe(caravan: Dictionary, village_id: int, now: float) -> String
 	if caravan.get("retrieve") != null:
 		return UI.t("Delivered to %s; brought back %s") % [where, brought]
 	return UI.t("Delivered to %s%s") % [where, "" if brought == UI.t("nothing") else UI.t("; %s did not fit and came back") % brought]
+
+
+## A merchant caravan: it carries nothing there, and trades along the road.
+static func _describe_merchant(caravan: Dictionary, where: String, outgoing: bool, now: float) -> String:
+	if not outgoing:
+		return UI.t("Merchants from %s passing through") % Game.village_name(caravan.villageId)
+	match caravan.status:
+		"outbound":
+			var earned := CaravanMath.merchant_earnings(Game.data, CaravanMath.hexes_crossed(caravan.get("path", [])))
+			return UI.t("Merchants to %s · home in %s with %s") % [where, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt if caravan.get("returnsAt") != null else caravan.arrivesAt) - now), _load_text(earned)]
+		"returning":
+			var back := _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")
+			return UI.t("Merchants heading home with %s · back in %s") % [back, TimeUtil.format_duration(TimeUtil.parse_iso(caravan.returnsAt) - now)]
+	return UI.t("Merchants traded on the road to %s and brought home %s") % [where, _load_text(caravan.carriedBack) if caravan.carriedBack != null else UI.t("nothing")]
 
 
 static func _load_text(amounts: Dictionary) -> String:

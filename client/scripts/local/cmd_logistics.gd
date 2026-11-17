@@ -176,7 +176,10 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 	var retrieve: Variant = order.get("retrieve") if order.get("retrieve") != null and total(order.retrieve) > 0 else null
 	# As many caravans as the bigger of the two loads takes (one may be empty).
 	var needed: Variant
-	if retrieve != null and total(order.load) == 0:
+	# (A merchant goes empty, in one caravan.)
+	if kind == "merchant":
+		needed = 1
+	elif retrieve != null and total(order.load) == 0:
 		needed = caravans_for(data, retrieve, bonuses)
 	else:
 		needed = caravans_for(data, order.load, bonuses)
@@ -290,6 +293,43 @@ static func fetch_from_vault(server: LocalServer, world: Dictionary, village: Di
 	if caravan.has("error"):
 		return caravan
 	return {"state": state, "caravan": set_out(server, world, caravan, now)}
+
+
+## sim/logistics.ts merchantCooldownHours: game hours until the next
+## merchant caravan, for a village whose Caravan Yard is at `yard_level`.
+static func merchant_cooldown_hours(data: Dictionary, yard_level: int) -> float:
+	var m: Dictionary = data.logistics.merchant
+	return maxf(float(m.minCooldownHours), float(m.cooldownHours) - float(m.cooldownPerYardLevel) * maxi(0, yard_level - 1))
+
+
+## merchantEarnings: perHex of each resource for every hex out and back.
+static func merchant_earnings(data: Dictionary, path: Array) -> Dictionary:
+	var hexes := 2 * maxi(0, without_halts(path).size() - 1)
+	return LocalVillage.resources(func(k: String) -> float: return float(data.logistics.merchant.perHex[k]) * hexes)
+
+
+## merchantCaravanCommand: a merchant caravan to another settlement (or the
+## Holy City, null), one a player every so often.
+static func merchant_caravan(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	if not body.has("destinationVillageId") or not (body.destinationVillageId == null or body.destinationVillageId is float or body.destinationVillageId is int):
+		return {"error": "✖ Invalid input: expected number, received undefined\n  → at destinationVillageId", "kind": "invalid"}
+	var member: Dictionary = {}
+	for m in world.members:
+		if int(m.accountId) == int(village.ownerAccountId):
+			member = m
+	if member.get("merchantReadyAt") != null and now < int(member.merchantReadyAt):
+		return LocalVillage.rule("Your merchants are still on the road or resting")
+	if body.destinationVillageId != null:
+		var destination := server.find_village(world, int(body.destinationVillageId))
+		if not destination.is_empty() and destination.get("ruin") != null:
+			return LocalVillage.rule("Pick a settlement that stands")
+	var order := {"destinationVillageId": int(body.destinationVillageId) if body.destinationVillageId != null else null, "load": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "escort": {}}
+	var caravan := dispatch(server, world, village, "merchant", order, now)
+	if caravan.has("error"):
+		return caravan
+	var hours := merchant_cooldown_hours(server.data, int(village.state.levels.get(CARAVAN_YARD, 0)))
+	member.merchantReadyAt = LocalTime.ms(now + hours * 3600000.0 / world.speed)
+	return {"state": village.state, "caravan": set_out(server, world, caravan, now)}
 
 
 ## The request body as an order: {destinationVillageId, load, escort}.
@@ -416,7 +456,10 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 	if caravan.is_empty() or caravan.status != "outbound" or int(caravan.arrivesAt) != int(event.dueAt):
 		return
 	var carried_back := {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
-	if caravan.get("destinationFortId") != null:
+	if caravan.kind == "merchant":
+		# Merchants deliver nothing: they traded along the road, and bring it home.
+		carried_back = merchant_earnings(data, caravan.path)
+	elif caravan.get("destinationFortId") != null:
 		# A supply route: grain goes into the store as far as it fits; the
 		# rest (everything, if the store is gone) comes back.
 		var fort := LocalArmies.find_fort(world, int(caravan.destinationFortId))

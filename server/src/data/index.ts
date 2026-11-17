@@ -323,6 +323,13 @@ const battleFileSchema = z.object({
 
 const logisticsFileSchema = z.object({
   version: z.number().int(),
+  // Merchant caravans: trading along the road, per hex out and back.
+  merchant: z.object({
+    perHex: resourcesSchema,
+    cooldownHours: z.number().positive(),
+    cooldownPerYardLevel: z.number().nonnegative(),
+    minCooldownHours: z.number().positive(),
+  }),
   caravan: z.object({
     capacity: z.number().int().positive(),
     speed: z.number().positive(),

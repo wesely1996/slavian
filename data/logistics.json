@@ -1,6 +1,12 @@
 {
   "version": 1,
-  "_comment": "Caravans: each Caravan Yard level adds `caravansPerYardLevel` caravans; each carries `capacity` of resources in total and travels `speed` hexes per hour on plains (terrain move cost slows it; world speed divides time). The Holy City vault is shared by the group: level 1 holds `baseCapacity` of each resource, each level multiplies that by `capacityGrowth`; upgrades are paid from the vault itself.",
+  "_comment": "Caravans: each Caravan Yard level adds `caravansPerYardLevel` caravans; each carries `capacity` of resources in total and travels `speed` hexes per hour on plains (terrain move cost slows it; world speed divides time). The Holy City vault is shared by the group: level 1 holds `baseCapacity` of each resource, each level multiplies that by `capacityGrowth`; upgrades are paid from the vault itself. A merchant caravan (`merchant`) goes empty from a village with a Caravan Yard to any other settlement (or the Holy City) by the fastest road and back, trading along the way: it brings home `perHex` of each resource for every hex it travels, out and back, paid as it turns for home (so camps may ambush it on the way back). It takes one of the yard's caravans; each player may send one every `cooldownHours` game hours, less `cooldownPerYardLevel` for each Caravan Yard level above 1 of the village sending it, never under `minCooldownHours`.",
+  "merchant": {
+    "perHex": { "wood": 20, "stone": 20, "grain": 20, "iron": 20 },
+    "cooldownHours": 12,
+    "cooldownPerYardLevel": 0.18,
+    "minCooldownHours": 8.5
+  },
   "caravan": {
     "capacity": 500,
     "speed": 5,

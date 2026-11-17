@@ -118,6 +118,20 @@ export function reversedRoute(path: readonly PathStep[]): PathStep[] {
   return [...path].reverse().map((step) => ({ q: step.q, r: step.r, atMs: total - step.atMs }));
 }
 
+// A merchant caravan's cooldown (game hours, logistics.json merchant) for
+// a village whose Caravan Yard is at `yardLevel`.
+export function merchantCooldownHours(data: GameData, yardLevel: number): number {
+  const m = data.logistics.merchant;
+  return Math.max(m.minCooldownHours, m.cooldownHours - m.cooldownPerYardLevel * Math.max(0, yardLevel - 1));
+}
+
+// What a merchant caravan on `path` brings home: perHex of each resource
+// for every hex out and back (its road without halts).
+export function merchantEarnings(data: GameData, path: readonly PathStep[]): Resources {
+  const hexes = 2 * Math.max(0, withoutHalts(path).length - 1);
+  return mapResources((k) => data.logistics.merchant.perHex[k] * hexes);
+}
+
 // A road without its halts (two steps on one hex: a wait for a fire to go
 // out, or a walk back from one): the way home goes straight.
 export function withoutHalts(path: readonly PathStep[]): PathStep[] {

@@ -8,6 +8,7 @@ func _picking_panel() -> void:
 	var row := UI.hbox()
 	var army := _army_moving != 0 or _army_sending != 0
 	var text := UI.label(tr("Tap the hex for the army to march to.") if army else
+		tr("Tap the settlement the merchants trade with: another village or outpost, or the Holy City.") if _merchant_picking else
 		tr("Tap where the caravan goes: a village or outpost, the Holy City, a shipyard, or a fort or supply point."), UI.SMALL_SIZE)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1055,6 +1056,21 @@ func _on_map_tapped(world_position: Vector2) -> void:
 	var cell := hex_map.local_to_hex(local)
 	# Picking where a caravan goes: a village, an outpost (its village), the
 	# Holy City's vault, a shipyard or a fort or supply point.
+	if _caravan_picking != 0 and _merchant_picking:
+		var trade := _caravan_target_at(cell, _caravan_picking)
+		if not trade.get("kind") in ["vault", "village"]:
+			_status.text = tr("Merchants trade with another village or outpost, or the Holy City.")
+			return
+		var home := _caravan_picking
+		_caravan_picking = 0
+		_merchant_picking = false
+		_status.text = ""
+		_merchant_target = trade
+		Game.current_village_id = home
+		_tab = "caravans"
+		_side["caravans"] = "merchant"
+		_set_view("village")
+		return
 	if _caravan_picking != 0:
 		var target := _caravan_target_at(cell, _caravan_picking)
 		if target.is_empty():

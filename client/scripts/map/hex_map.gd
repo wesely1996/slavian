@@ -214,8 +214,9 @@ func _draw() -> void:
 			var a := HexMath.to_pixel(p.from, hex_size)
 			var b := HexMath.to_pixel(p.to, hex_size)
 			var pos := a.lerp(b, p.t)
-			# An ox cart, facing the way it goes, on its side's ring.
-			var tex := Art.texture("map/caravan")
+			# An ox cart (merchants: a horse and a painted trader's wagon),
+			# facing the way it goes, on its side's ring.
+			var tex := Art.texture("map/merchant_caravan" if caravan.get("kind") == "merchant" else "map/caravan")
 			if tex == null:
 				draw_circle(pos, hex_size * 0.2, CARAVAN_COLOR)
 				draw_arc(pos, hex_size * 0.2, 0.0, TAU, 16, VILLAGE_OUTLINE_COLOR, 2.0)

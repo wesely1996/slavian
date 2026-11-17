@@ -58,3 +58,28 @@ static func vault_upgrade_seconds(data: Dictionary, target_level: int, world_spe
 	var v: Dictionary = data.logistics.vault
 	return float(v.upgradeSeconds) * pow(float(v.timeGrowth), target_level - 2) / world_speed
 
+
+
+## Game hours the player's merchants rest after a trip from a village whose
+## Caravan Yard is at `yard_level` (server merchantCooldownHours).
+static func merchant_cooldown_hours(data: Dictionary, yard_level: int) -> float:
+	var m: Dictionary = data.logistics.merchant
+	return maxf(float(m.minCooldownHours), float(m.cooldownHours) - float(m.cooldownPerYardLevel) * maxi(0, yard_level - 1))
+
+
+## Hexes a road of [q, r, atMs] steps crosses (a halt on one hex counts once).
+static func hexes_crossed(path: Array) -> int:
+	var n := 0
+	for i in range(1, path.size()):
+		if int(path[i][0]) != int(path[i - 1][0]) or int(path[i][1]) != int(path[i - 1][1]):
+			n += 1
+	return n
+
+
+## What merchants bring home for `hexes` each way: perHex of each resource
+## for every hex out and back (server merchantEarnings).
+static func merchant_earnings(data: Dictionary, hexes: int) -> Dictionary:
+	var earned := {}
+	for kind in Ledger.KINDS:
+		earned[kind] = int(data.logistics.merchant.perHex[kind]) * 2 * hexes
+	return earned

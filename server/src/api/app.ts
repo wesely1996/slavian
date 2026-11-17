@@ -40,7 +40,7 @@ import { armyQuestOf, heroQuestOffers } from '../scheduler/quests.js';
 import { accountAchievements, recordSoloAchievements } from '../db/achievements.js';
 import { ACHIEVEMENTS } from '../data/index.js';
 import type { Hero } from '../db/heroes.js';
-import { fetchFromVaultCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
+import { fetchFromVaultCommand, merchantCaravanCommand, sendCaravanCommand, upgradeVaultCommand, rerouteCaravanCommand } from '../commands/logistics.js';
 import {
   abandonOutpostCommand,
   abandonVillageCommand,
@@ -168,6 +168,7 @@ const caravanBody = z.object({
   escort: escortSchema,
 });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
+const merchantBody = z.object({ destinationVillageId: z.number().int().nullable() });
 // Achievements earned in solo runs, from the device.
 const soloAchievementsBody = z.object({
   achievements: z
@@ -1134,6 +1135,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { villageId } = takeBountyBody.parse(request.body);
     const { village } = await takeBountyCommand(db, scheduler, { accountId: account.id, villageId, bountyId: id, now: clock() });
     return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
+  // A merchant caravan to another settlement (null: the Holy City).
+  app.post('/v1/villages/:id/caravans/merchant', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { destinationVillageId } = merchantBody.parse(request.body);
+    const { village, caravan } = await merchantCaravanCommand(db, scheduler, { accountId: account.id, villageId: id, destinationVillageId, now: clock() });
+    return { village: villageView(village), caravan: caravanView(caravan), serverTime: clock().toISOString() };
   });
 
   app.post('/v1/villages/:id/caravans/fetch', async (request) => {
