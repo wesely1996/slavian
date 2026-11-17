@@ -1415,7 +1415,7 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 
 static func fort_view(f: Dictionary) -> Dictionary:
 	return {"id": f.id, "kind": f.get("kind", "fort"), "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
-		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor")}
+		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor"), "neutral": f.get("neutral", false)}
 
 
 static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:

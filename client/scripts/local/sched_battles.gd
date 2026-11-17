@@ -842,6 +842,9 @@ static func taken_hexes(world: Dictionary) -> Dictionary:
 			taken[LocalLand.key(Vector2i(c.q, c.r))] = true
 	for s in world.sites:
 		taken[LocalLand.key(Vector2i(s.q, s.r))] = true
+	# Shipyards and mountain cities.
+	for y in world.get("shipyards", []):
+		taken[LocalLand.key(Vector2i(y.q, y.r))] = true
 	return taken
 
 
@@ -1049,7 +1052,7 @@ static func on_supply_raid(server: LocalServer, world: Dictionary, event: Dictio
 	if wave.is_empty() or not wave.status in RAIDING:
 		return
 	var point := LocalArmies.find_fort(world, int(p.fortId))
-	if point.is_empty() or point.get("kind", "fort") != "supply":
+	if point.is_empty() or point.get("kind", "fort") != "supply" or point.get("neutral", false):
 		return
 	if not LocalArmies.armies_holding(world, Vector2i(point.q, point.r), ["stationed", "engaged"]).is_empty():
 		return

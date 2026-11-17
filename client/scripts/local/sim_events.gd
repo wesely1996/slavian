@@ -420,6 +420,10 @@ static func on_shipyard_done(server: LocalServer, world: Dictionary, event: Dict
 		if army.get("returnHome", false):
 			LocalArmies.send_home(server, world, army, int(event.dueAt))
 	if _city(yard):
+		# A neutral supply point for every army, in the city.
+		world.forts.append({"id": world.next.fort, "kind": "supply", "ownerAccountId": null, "villageId": null, "q": yard.q, "r": yard.r,
+			"status": "standing", "completesAt": int(event.dueAt), "mannedAt": int(event.dueAt), "grain": 0.0, "neutral": true})
+		world.next.fort += 1
 		# Every member's villages produce the more, from now on.
 		for member in world.members:
 			server.refresh_bonuses(world, int(member.accountId), int(event.dueAt), changed)

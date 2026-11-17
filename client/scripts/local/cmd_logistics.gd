@@ -213,12 +213,17 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 		if retrieve != null:
 			return LocalVillage.rule(BRING_BACK_OWN)
 		var project := "The city" if boatyard.get("kind", "boat") == "mountain_city" else "The boat"
-		if boatyard.status != "open":
-			return LocalVillage.rule("%s is already paid for" % project)
-		var need := LocalVillage.resources(func(k: String) -> int: return maxi(0, int(boatyard.cost[k]) - int(boatyard.paid[k])))
-		for k in LocalLedger.KINDS:
-			if int(order.load.get(k, 0)) > int(need[k]):
-				return LocalVillage.rule("%s still needs %d wood, %d stone, %d grain and %d iron" % [project, need.wood, need.stone, need.grain, need.iron])
+		if boatyard.get("kind", "boat") == "mountain_city" and boatyard.status == "done":
+			# A built city trades its stone for grain.
+			if int(order.load.get("wood", 0)) > 0 or int(order.load.get("stone", 0)) > 0 or int(order.load.get("iron", 0)) > 0:
+				return LocalVillage.rule("The mountain city trades its stone only for grain")
+		else:
+			if boatyard.status != "open":
+				return LocalVillage.rule("%s is already paid for" % project)
+			var need := LocalVillage.resources(func(k: String) -> int: return maxi(0, int(boatyard.cost[k]) - int(boatyard.paid[k])))
+			for k in LocalLedger.KINDS:
+				if int(order.load.get(k, 0)) > int(need[k]):
+					return LocalVillage.rule("%s still needs %d wood, %d stone, %d grain and %d iron" % [project, need.wood, need.stone, need.grain, need.iron])
 		to = Vector2i(boatyard.q, boatyard.r)
 	elif order.destinationVillageId != null:
 		if int(order.destinationVillageId) == int(village.id):
@@ -478,7 +483,13 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 		# A shipyard takes what its boat still needs; the rest (everything,
 		# if it is paid for or gone) comes back.
 		var yard := LocalEvents.find_shipyard(world, int(caravan.destinationShipyardId))
-		if not yard.is_empty() and yard.status == "open":
+		if yard.get("kind", "boat") == "mountain_city" and yard.get("status") == "done":
+			# A built mountain city trades: stone for the grain brought (the
+			# rest, sent while it was being paid for, comes back).
+			carried_back = caravan.cargo.duplicate()
+			carried_back.grain = 0
+			carried_back.stone = int(caravan.cargo.stone) + floori(float(caravan.cargo.grain) * float(data.events.kinds.mountain_city.stonePerGrain))
+		elif not yard.is_empty() and yard.status == "open":
 			var sent := LocalVillage.resources(func(k: String) -> int: return maxi(0, mini(int(caravan.cargo[k]), int(yard.cost[k]) - int(yard.paid[k]))))
 			if total(sent) > 0:
 				LocalEvents.pay_into(server, world, yard, sent, int(event.dueAt))

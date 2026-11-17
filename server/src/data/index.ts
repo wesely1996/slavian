@@ -123,6 +123,8 @@ const terrainSchema = z.object({
   // Impassable land a road can be cut through (mountain passes): the cost of
   // entering it along a standing road, before the road's factor.
   roadMoveCost: z.number().positive().optional(),
+  // false: hordes never enter it (a mountain city's hex).
+  hordesPass: z.boolean().optional(),
   settleable: z.boolean(),
   edge: z.boolean(),
 });
@@ -1037,6 +1039,8 @@ const eventsFileSchema = z.object({
       raiderStance: z.enum(STANCES),
       raiderFront: z.string(),
       productionBonus: z.number().nonnegative(),
+      // A built city's trade: stone a caravan brings back for each grain.
+      stonePerGrain: z.number().nonnegative(),
     }),
   }),
 });

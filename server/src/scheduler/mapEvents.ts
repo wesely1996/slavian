@@ -11,6 +11,7 @@ import { combatants, withIntel } from '../sim/scouting.js';
 import type { GameData } from '../data/index.js';
 import { armiesHolding, saveArmy } from '../db/armies.js';
 import { deleteCamp, loadCamp } from '../db/camps.js';
+import { insertNeutralSupply } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listRiverEdges } from '../db/rivers.js';
@@ -217,6 +218,8 @@ export const mapEventHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
     const members = await listMembers(client, world.id);
     if (shipyard.kind === 'mountain_city') {
+      // A neutral supply point for every army, in the city.
+      await insertNeutralSupply(client, world.id, shipyard.q, shipyard.r, event.dueAt);
       // Every member's villages produce the more, from now on.
       await refreshBonuses(client, data, world, members.map((m) => m.accountId), event.dueAt);
       for (const member of members) {

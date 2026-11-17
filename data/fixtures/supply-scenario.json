@@ -638,7 +638,8 @@
      "status": "building",
      "completesAt": "2026-06-01T08:40:36.000Z",
      "grain": 0,
-     "armyFloor": null
+     "armyFloor": null,
+     "neutral": false
     },
     "serverTime": "2026-06-01T08:40:00.000Z"
    }
@@ -1401,7 +1402,8 @@
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
       "grain": 339,
-      "armyFloor": null
+      "armyFloor": null,
+      "neutral": false
      }
     ],
     "camps": [
@@ -4515,7 +4517,8 @@
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
       "grain": 154.5166666666666,
-      "armyFloor": null
+      "armyFloor": null,
+      "neutral": false
      }
     ],
     "camps": [
@@ -6646,7 +6649,8 @@
      "status": "building",
      "completesAt": "2026-06-01T10:26:36.000Z",
      "grain": 0,
-     "armyFloor": null
+     "armyFloor": null,
+     "neutral": false
     },
     "serverTime": "2026-06-01T10:26:00.000Z"
    }
@@ -7372,7 +7376,8 @@
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
       "grain": 152.2666666666666,
-      "armyFloor": null
+      "armyFloor": null,
+      "neutral": false
      }
     ],
     "camps": [
@@ -16143,7 +16148,7 @@
       "id": 13,
       "kind": "event",
       "tier": "push",
-      "title": "The forbidding ruin at (2, -1) sank back into the earth",
+      "title": "The forbidding ruin at (2, 2) sank back into the earth",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
@@ -16170,7 +16175,7 @@
       "id": 10,
       "kind": "event",
       "tier": "push",
-      "title": "A forbidding ruin rises at (2, -1)",
+      "title": "A forbidding ruin rises at (2, 2)",
       "body": "Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least 2100 resources; left alone, it rouses the next horde from the north.",
       "createdAt": "2026-06-01T09:26:24.000Z",
       "read": false

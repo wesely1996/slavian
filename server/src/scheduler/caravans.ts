@@ -48,7 +48,11 @@ export const caravanHandlers: HandlerRegistry = {
       // A shipyard takes what its boat still needs; the rest (everything,
       // if it is paid for or gone) comes back.
       const shipyard = await loadShipyard(client, caravan.destinationShipyardId);
-      if (shipyard && shipyard.status === 'open') {
+      if (shipyard?.kind === 'mountain_city' && shipyard.status === 'done') {
+        // A built mountain city trades: stone for the grain brought (the
+        // rest, sent while it was being paid for, comes back).
+        carriedBack = { ...caravan.cargo, grain: 0, stone: caravan.cargo.stone + Math.floor(caravan.cargo.grain * data.events.kinds.mountain_city.stonePerGrain) };
+      } else if (shipyard && shipyard.status === 'open') {
         const sent = mapResources((k) => Math.max(0, Math.min(caravan.cargo[k], shipyard.cost[k] - shipyard.paid[k])));
         if (total(sent) > 0) await payIntoShipyard(client, data, world, shipyard, sent, event.dueAt);
         carriedBack = mapResources((k) => caravan.cargo[k] - sent[k]);

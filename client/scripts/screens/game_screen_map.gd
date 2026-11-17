@@ -159,6 +159,10 @@ func _terrain_panel() -> Array:
 			parts.append(["shipyard", "map/mountain_city", tr("Mountain city"), _shipyard_panel.bind(yard)])
 		else:
 			parts.append(["shipyard", "icon/coin", tr("Shipyard"), _shipyard_panel.bind(yard)])
+	# A mountain city's hex: armies stand there; nothing else is built.
+	if EventText.is_city(yard):
+		parts.append(["hold", "icon/troops", tr("Send an army"), _hold_panel.bind(id)])
+		return parts
 	var holder := Game.outpost_owner(_selected)
 	var site := Game.site_at(_selected)
 	var kind := Rules.outpost_kind(Game.data, id)
@@ -191,6 +195,7 @@ func _shipyard_panel(yard: Dictionary) -> void:
 			tr("A group project: masons raise a city in the mountain. Once it stands, every village of every player produces %d%% more of every resource, for good. Monsters from under the mountain strike while it is built.") % bonus))
 		if yard.status == "done":
 			_panel_body.add_child(UI.label(tr("The city stands: every village produces %d%% more of every resource.") % bonus, UI.SMALL_SIZE, UI.GOOD))
+			_city_trade(yard)
 			return
 	else:
 		var speed := int(rules.laneSpeed)
@@ -266,6 +271,34 @@ func _shipyard_panel(yard: Dictionary) -> void:
 			any = true
 	if not any:
 		_panel_body.add_child(UI.with_info(UI.label(tr("Needs a Caravan Yard"), UI.SMALL_SIZE, UI.MUTED), tr("Build a Caravan Yard to send it resources by caravan (villages within %d hexes can send at once).") % int(rules.range)))
+
+
+## A built mountain city: its trade (stone for grain, by caravan) and its
+## store of grain for any army standing there (a neutral supply point).
+func _city_trade(yard: Dictionary) -> void:
+	var rate := float(Game.data.events.kinds.mountain_city.stonePerGrain)
+	var cell := Vector2i(int(yard.q), int(yard.r))
+	var store := {}
+	for fort in Game.forts:
+		if fort.get("neutral", false) and Vector2i(int(fort.q), int(fort.r)) == cell:
+			store = fort
+	_panel_body.add_child(UI.with_info(UI.label(tr("Trade and supply"), UI.HEADING_SIZE),
+		tr("A caravan that brings the city grain brings back %s stone for each. Its store keeps grain for any army standing here, filled by anyone's caravans; hordes never come into the mountains, so nothing burns it.") % String.num(rate, 2)))
+	if not store.is_empty():
+		_panel_body.add_child(UI.label(tr("Its store: %d grain for armies standing here") % int(store.get("grain", 0)), UI.SMALL_SIZE))
+	var any := false
+	for village in Game.my_villages():
+		if village.get("ruin") != null or int(village.get("levels", {}).get("caravan_yard", 0)) < 1:
+			continue
+		var village_id := int(village.id)
+		var yard_id := int(yard.id)
+		_panel_body.add_child(UI.button(tr("Trade grain for stone from %s") % village.name, func() -> void: _open_caravans({"kind": "shipyard", "id": yard_id}, village_id), "icon/caravan"))
+		if not store.is_empty():
+			var store_id := int(store.id)
+			_panel_body.add_child(UI.button(tr("Send grain to its store from %s") % village.name, func() -> void: _open_caravans({"kind": "fort", "id": store_id}, village_id), "resource/grain"))
+		any = true
+	if not any:
+		_panel_body.add_child(UI.label(tr("Needs a Caravan Yard"), UI.SMALL_SIZE, UI.MUTED))
 
 
 func _pay_shipyard(village_id: int, yard_id: int) -> void:
