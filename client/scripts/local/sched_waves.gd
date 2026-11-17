@@ -32,7 +32,7 @@ static func land_of(world: Dictionary) -> Dictionary:
 			roads[LocalLand.edge_key(e.a, e.b)] = int(e.get("level", 1))
 	var lanes := {}
 	for s in world.get("shipyards", []):
-		if s.status == "done":
+		if s.get("kind", "boat") == "boat" and s.status == "done":
 			for k in LocalLand.river_lanes(world.rivers, s.edge.a, s.edge.b, world.hexes):
 				lanes[k] = true
 	# Burning forests: nothing enters them until the fire is out.

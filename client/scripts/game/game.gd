@@ -279,7 +279,7 @@ func _lanes(world_rivers: Array) -> Dictionary:
 	for cell in terrain:
 		land[LocalLand.key(cell)] = terrain[cell]
 	for yard in shipyards:
-		if yard.status == "done":
+		if yard.get("kind", "boat") == "boat" and yard.status == "done":
 			var e: Array = yard.edge
 			for k in LocalLand.river_lanes(edges, Vector2i(int(e[0]), int(e[1])), Vector2i(int(e[2]), int(e[3])), land):
 				out[k] = true

@@ -14,7 +14,7 @@ const ART := {"Units": "unit/spearman", "Enemies": "unit/grey_wolf", "Buildings"
 ## Pictures for the kinds of ground that have one.
 const TERRAIN_ART := {"plains": "feature/grass", "forest": "feature/pine", "hills": "feature/hill", "wooded_hills": "feature/hill", "mountain": "feature/mountain",
 	"swamp": "feature/reeds", "holy_city": "settlement/holy_city", "dark_forest": "feature/dark_pine", "ice": "feature/ice",
-	"steppe": "feature/bush", "hallowed": "feature/blossom"}
+	"steppe": "feature/bush", "hallowed": "feature/blossom", "mountain_city": "map/mountain_city"}
 
 
 ## [[title, text, art id or "", unit, building or clan id], …] for a

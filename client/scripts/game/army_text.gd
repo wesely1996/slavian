@@ -15,9 +15,12 @@ static func order_text(order: String) -> String:
 	}.get(order, order)
 
 
-## What "come home when done" means for `order` (at a shipyard: `shipyard`).
-static func return_text(order: String, shipyard: bool) -> String:
-	if shipyard:
+## What "come home when done" means for `order` (at a shipyard or mountain
+## city: `project`, else {}).
+static func return_text(order: String, project: Dictionary) -> String:
+	if EventText.is_city(project):
+		return UI.t("Come home when done: they guard the mountain city against the monsters until it stands, then march home with what they carry.")
+	if not project.is_empty():
 		return UI.t("Come home when done: they guard the shipyard against its raiders until the boat is finished, then march home with what they carry.")
 	return {
 		"support": UI.t("Come home when done: they march to the village, fight its battle if one is on, then come home instead of standing guard."),

@@ -1,16 +1,20 @@
-// Shipyards: the group's river-boat projects (data/events.json `shipyard`).
+// Shipyards: the group's river-boat projects (data/events.json `shipyard`),
+// and mountain cities (`mountain_city`), built and defended the same way.
 import { hex, type Hex } from '../sim/hex.js';
 import type { Resources } from '../sim/resources.js';
 import type { DbClient } from './pool.js';
 
 export type ShipyardStatus = 'open' | 'building' | 'done';
+// A boat on a river, or a city in a mountain.
+export type ShipyardKind = 'boat' | 'mountain_city';
 
 export interface Shipyard {
   id: number;
   worldId: number;
+  kind: ShipyardKind;
   q: number;
   r: number;
-  // The river edge it is built on.
+  // The river edge it is built on (a mountain city: its own hex twice).
   edge: { a: Hex; b: Hex };
   status: ShipyardStatus;
   cost: Resources;
@@ -28,6 +32,7 @@ export interface Shipyard {
 interface Row {
   id: string;
   world_id: string;
+  kind: ShipyardKind;
   q: number;
   r: number;
   aq: number;
@@ -50,6 +55,7 @@ function fromRow(r: Row): Shipyard {
   return {
     id: Number(r.id),
     worldId: Number(r.world_id),
+    kind: r.kind,
     q: r.q,
     r: r.r,
     edge: { a: hex(r.aq, r.ar), b: hex(r.bq, r.br) },
@@ -69,14 +75,14 @@ function fromRow(r: Row): Shipyard {
 export async function insertShipyard(
   client: DbClient,
   worldId: number,
-  input: { cell: Hex; edge: { a: Hex; b: Hex }; cost: Resources; front: string; raiders: Record<string, number>; endsAt: Date },
+  input: { kind?: ShipyardKind; cell: Hex; edge: { a: Hex; b: Hex }; cost: Resources; front: string; raiders: Record<string, number>; endsAt: Date },
 ): Promise<number> {
   const none: Resources = { wood: 0, stone: 0, grain: 0, iron: 0 };
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO shipyards (world_id, q, r, aq, ar, bq, br, status, cost, paid, front, raiders, ends_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, 'open', $8, $9, $10, $11, $12) RETURNING id`,
+    `INSERT INTO shipyards (world_id, q, r, aq, ar, bq, br, status, cost, paid, front, raiders, ends_at, kind)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, 'open', $8, $9, $10, $11, $12, $13) RETURNING id`,
     [worldId, input.cell.q, input.cell.r, input.edge.a.q, input.edge.a.r, input.edge.b.q, input.edge.b.r,
-      JSON.stringify(input.cost), JSON.stringify(none), input.front, JSON.stringify(input.raiders), input.endsAt],
+      JSON.stringify(input.cost), JSON.stringify(none), input.front, JSON.stringify(input.raiders), input.endsAt, input.kind ?? 'boat'],
   );
   return Number(rows[0]!.id);
 }

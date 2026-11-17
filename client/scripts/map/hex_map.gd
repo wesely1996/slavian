@@ -447,17 +447,23 @@ func _draw_road_works(at: Vector2, w: float) -> void:
 ## waits to be paid for or is being built); faded while being built.
 func _draw_shipyard(yard: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(yard.q), int(yard.r)), hex_size)
-	var r := hex_size * 0.32
-	var hull := PackedVector2Array([c + Vector2(-r, 0), c + Vector2(r, 0), c + Vector2(r * 0.6, r * 0.45), c + Vector2(-r * 0.6, r * 0.45)])
 	var tint := Color(1, 1, 1, 0.6) if yard.status == "building" else Color.WHITE
-	draw_colored_polygon(hull, PLANK_COLOR * tint)
-	hull.append(hull[0])
-	draw_polyline(hull, VILLAGE_OUTLINE_COLOR, 2.0)
-	draw_line(c, c + Vector2(0, -r * 1.1), VILLAGE_OUTLINE_COLOR, 2.0)
-	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r * 1.05), c + Vector2(r * 0.6, -r * 0.2), c + Vector2(0, -r * 0.2)]), Color(0.95, 0.92, 0.85) * tint)
+	# A mountain city: its walls and gate cut into the mountain (half
+	# see-through until it is paid for and built).
+	if EventText.is_city(yard):
+		if not _draw_art("map/mountain_city", c, hex_size * 1.25, Color(1, 1, 1, 0.55) if yard.status == "open" else tint):
+			draw_circle(c, hex_size * 0.35, Color("#8a8070") * tint)
+	else:
+		var r := hex_size * 0.32
+		var hull := PackedVector2Array([c + Vector2(-r, 0), c + Vector2(r, 0), c + Vector2(r * 0.6, r * 0.45), c + Vector2(-r * 0.6, r * 0.45)])
+		draw_colored_polygon(hull, PLANK_COLOR * tint)
+		hull.append(hull[0])
+		draw_polyline(hull, VILLAGE_OUTLINE_COLOR, 2.0)
+		draw_line(c, c + Vector2(0, -r * 1.1), VILLAGE_OUTLINE_COLOR, 2.0)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r * 1.05), c + Vector2(r * 0.6, -r * 0.2), c + Vector2(0, -r * 0.2)]), Color(0.95, 0.92, 0.85) * tint)
 	if yard.status == "done":
 		return
-	_draw_ring(c, hex_size * 0.9, UI.GOOD if yard.status == "open" else UI.ACCENT)
+	# (Highlighted under it by MapHighlights.)
 	# How far along it is: paid for (green), then built (gold).
 	var now := Game.server_now()
 	var speed := float(Game.world.get("speed", 1))

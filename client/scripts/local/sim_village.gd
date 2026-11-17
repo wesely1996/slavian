@@ -1075,8 +1075,6 @@ static func settle_problem(data: Dictionary, cell: Vector2i, terrain: Variant, h
 		return "That hex is not on the map"
 	if not data.terrain.terrain[terrain].settleable:
 		return "Villages can't be founded on %s" % data.terrain.terrain[terrain].name
-	if HexMath.distance(cell, home) > int(rules.maxDistance):
-		return "Settlers walk at most %d hexes from their village" % int(rules.maxDistance)
 	if HexMath.distance(cell, Vector2i.ZERO) < int(rules.minHolyCityDistance):
 		return "Too close to the Holy City"
 	if villages.any(func(v: Vector2i) -> bool: return HexMath.distance(v, cell) < int(rules.minVillageDistance)):

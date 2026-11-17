@@ -1,9 +1,10 @@
 // Daily map events (data/events.json): each game day after the first, one
 // rises near one of the players' villages: captives held in a camp, a hard
-// ruin, or a shipyard on a river bank for the group to build a boat at.
+// ruin, a shipyard on a river bank for the group to build a boat at, a
+// cultists' ritual, or (rarely) a mountain city to raise in a mountain.
 import type { GameData, TerrainId } from '../data/index.js';
 import type { CampReward } from '../db/camps.js';
-import { hexDistance, hexKey, ring, type Hex } from './hex.js';
+import { hexDistance, hexKey, neighbors, ring, type Hex } from './hex.js';
 import { edgeKey, riverWater } from './land.js';
 import { frontOf, type Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
@@ -15,7 +16,8 @@ export type MapEventPlan =
   | { kind: 'captives'; cell: Hex; front: Front; guards: Composition; reward: CampReward }
   | { kind: 'ruin'; cell: Hex; site: PlacedSite }
   | { kind: 'shipyard'; cell: Hex; edge: { a: Hex; b: Hex }; front: Front; raiders: Composition }
-  | { kind: 'ritual'; cell: Hex; front: Front; guards: Composition };
+  | { kind: 'ritual'; cell: Hex; front: Front; guards: Composition }
+  | { kind: 'mountain_city'; cell: Hex; front: Front; raiders: Composition };
 
 // The front an event at `cell` belongs to: the land it rose in, or the first
 // active one.
@@ -28,6 +30,24 @@ export function eventFront(cell: Hex, activeFronts: readonly Front[]): Front {
 export function eventBounty(data: GameData, day: number): Resources {
   const grown = 1 + data.events.reward.growthPerDay * (Math.max(1, day) - 1);
   return mapResources((k) => Math.round(data.events.reward.resources[k] * grown));
+}
+
+// What the mountain cities standing (built) give every member: each its
+// productionBonus more of every resource.
+export function mountainCityBonuses(data: GameData, projects: readonly { kind: string; status: string }[]): Record<string, number> {
+  const built = projects.filter((p) => p.kind === 'mountain_city' && p.status === 'done').length;
+  return built ? { 'production.all': built * data.events.kinds.mountain_city.productionBonus } : {};
+}
+
+// A mountain city can rise on `cell`: a mountain a road could be cut into
+// (terrain.json roadMoveCost), with open land beside it to come from.
+export function mountainCitySpot(data: GameData, terrain: ReadonlyMap<string, TerrainId>, cell: Hex): boolean {
+  const type = terrain.get(hexKey(cell));
+  if (!type || data.terrain.terrain[type].roadMoveCost === undefined || data.terrain.terrain[type].moveCost !== null) return false;
+  return neighbors(cell).some((n) => {
+    const next = terrain.get(hexKey(n));
+    return !!next && data.terrain.terrain[next].moveCost !== null && !data.terrain.terrain[next].edge;
+  });
 }
 
 // The event of `day` (1: the first, a game day into the run), or null when
@@ -54,10 +74,14 @@ export function planMapEvent(
   const rules = data.events;
   const rng = createRng((input.seed ^ Math.imul(input.day + 1, 0x632be5ab)) >>> 0);
   if (input.villages.length === 0) return null;
-  const { captives, ruin, shipyard, ritual } = rules.kinds;
-  const pick = rng() * (captives.weight + ruin.weight + shipyard.weight + ritual.weight);
+  const { captives, ruin, shipyard, ritual, mountain_city: city } = rules.kinds;
+  const pick = rng() * (captives.weight + ruin.weight + shipyard.weight + ritual.weight + city.weight);
   const kind: MapEventPlan['kind'] =
-    pick < captives.weight ? 'captives' : pick < captives.weight + ruin.weight ? 'ruin' : pick < captives.weight + ruin.weight + shipyard.weight ? 'shipyard' : 'ritual';
+    pick < captives.weight ? 'captives'
+    : pick < captives.weight + ruin.weight ? 'ruin'
+    : pick < captives.weight + ruin.weight + shipyard.weight ? 'shipyard'
+    : pick < captives.weight + ruin.weight + shipyard.weight + ritual.weight ? 'ritual'
+    : 'mountain_city';
   // Each bank hex's river edges, in edge-key order.
   const banks = new Map<string, { a: Hex; b: Hex }[]>();
   for (const e of [...input.rivers].sort((x, y) => (edgeKey(x.a, x.b) < edgeKey(y.a, y.b) ? -1 : 1))) {
@@ -73,7 +97,14 @@ export function planMapEvent(
   for (let d = rules.range.min; d <= rules.range.max; d++) {
     for (const cell of ring(center, d)) {
       const type = input.terrain.get(hexKey(cell));
-      if (!type || type === 'holy_city' || data.terrain.terrain[type].moveCost === null || input.taken.has(hexKey(cell))) continue;
+      if (!type || input.taken.has(hexKey(cell))) continue;
+      // A mountain city rises in a mountain beside open land, apart from other projects.
+      if (kind === 'mountain_city') {
+        if (!mountainCitySpot(data, input.terrain, cell) || input.shipyards.some((s) => hexDistance(s.cell, cell) < 2)) continue;
+        usable.push({ cell, type });
+        continue;
+      }
+      if (type === 'holy_city' || data.terrain.terrain[type].moveCost === null) continue;
       if (kind === 'ruin' && !Object.values(data.sites.kinds).some((k) => k.terrain.includes(type))) continue;
       if (kind === 'ruin' && input.sites.some((s) => hexDistance(s, cell) < 2)) continue;
       if (kind === 'shipyard' && (!banks.has(hexKey(cell)) || sailed.has(hexKey(cell)) || input.shipyards.some((s) => hexDistance(s.cell, cell) < 2))) continue;
@@ -87,6 +118,11 @@ export function planMapEvent(
   if (kind === 'shipyard') {
     const raiders = composeWave(data, front, input.day, Math.round(shipyard.raiders * grown), (input.seed ^ input.day ^ 0x5a17) >>> 0, input.players);
     return { kind, cell, edge: banks.get(hexKey(cell))![0]!, front, raiders };
+  }
+  if (kind === 'mountain_city') {
+    const raiderFront = (input.activeFronts as readonly string[]).includes(city.raiderFront) ? (city.raiderFront as Front) : front;
+    const raiders = composeWave(data, raiderFront, input.day, Math.round(city.raiders * grown), (input.seed ^ input.day ^ 0x3c17) >>> 0, input.players);
+    return { kind, cell, front: raiderFront, raiders };
   }
   if (kind === 'ritual') {
     const guards = composeWave(data, front, input.day, Math.round(ritual.guards * grown), (input.seed ^ input.day ^ 0xc017) >>> 0, input.players);

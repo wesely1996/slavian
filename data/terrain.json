@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "moveCost is the cost of entering the hex; null means impassable. roadMoveCost: impassable land a road can be cut through (a mountain pass, field.json road.mountainFactor times as dear and slow to build): entering it along a standing road costs roadMoveCost times the road's factor; elsewhere it stays impassable, no army can stop on it, and hordes keep off the passes. Edge types form the unsettleable belt around the map.",
+  "_comment": "moveCost is the cost of entering the hex; null means impassable. roadMoveCost: impassable land a road can be cut through (a mountain pass, field.json road.mountainFactor times as dear and slow to build): entering it along a standing road costs roadMoveCost times the road's factor; elsewhere it stays impassable, no army can stop on it, and hordes keep off the passes. Edge types form the unsettleable belt around the map. mountain_city is a mountain hex where a mountain city rises (events.json mountain_city): open to armies while it stands.",
   "terrain": {
     "plains":      { "name": "Plains",         "moveCost": 1,    "settleable": true,  "edge": false },
     "forest":      { "name": "Forest",         "moveCost": 2,    "settleable": true,  "edge": false },
@@ -14,6 +14,7 @@
     "dark_forest": { "name": "Dark Forest",    "moveCost": 3,    "settleable": false, "edge": true },
     "ice":         { "name": "Ice",            "moveCost": 3,    "settleable": false, "edge": true },
     "steppe":      { "name": "Steppe",         "moveCost": 1,    "settleable": false, "edge": true },
-    "hallowed":    { "name": "Hallowed Lands", "moveCost": 2,    "settleable": false, "edge": true }
+    "hallowed":    { "name": "Hallowed Lands", "moveCost": 2,    "settleable": false, "edge": true },
+    "mountain_city": { "name": "Mountain City", "moveCost": 2,  "settleable": false, "edge": false }
   }
 }

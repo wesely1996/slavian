@@ -212,12 +212,13 @@ static func dispatch(server: LocalServer, world: Dictionary, village: Dictionary
 			return {"error": "No such shipyard in this world", "kind": "not_found"}
 		if retrieve != null:
 			return LocalVillage.rule(BRING_BACK_OWN)
+		var project := "The city" if boatyard.get("kind", "boat") == "mountain_city" else "The boat"
 		if boatyard.status != "open":
-			return LocalVillage.rule("The boat is already paid for")
+			return LocalVillage.rule("%s is already paid for" % project)
 		var need := LocalVillage.resources(func(k: String) -> int: return maxi(0, int(boatyard.cost[k]) - int(boatyard.paid[k])))
 		for k in LocalLedger.KINDS:
 			if int(order.load.get(k, 0)) > int(need[k]):
-				return LocalVillage.rule("The boat still needs %d wood, %d stone, %d grain and %d iron" % [need.wood, need.stone, need.grain, need.iron])
+				return LocalVillage.rule("%s still needs %d wood, %d stone, %d grain and %d iron" % [project, need.wood, need.stone, need.grain, need.iron])
 		to = Vector2i(boatyard.q, boatyard.r)
 	elif order.destinationVillageId != null:
 		if int(order.destinationVillageId) == int(village.id):

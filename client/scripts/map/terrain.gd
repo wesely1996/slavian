@@ -18,6 +18,8 @@ const COLORS := {
 	"ice": Color("#c4ced2"),
 	"steppe": Color("#ad9d67"),
 	"hallowed": Color("#8d8174"),
+	# A mountain city's hex: dressed stone in the mountain.
+	"mountain_city": Color("#8f8778"),
 }
 const HEIGHTS := {
 	"ocean": 0.0,
@@ -33,6 +35,7 @@ const HEIGHTS := {
 	"hills": 0.6,
 	"wooded_hills": 0.62,
 	"mountain": 1.0,
+	"mountain_city": 0.85,
 }
 const UNKNOWN_COLOR := Color("#ff00ff")
 

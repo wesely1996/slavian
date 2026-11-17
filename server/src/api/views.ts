@@ -674,8 +674,10 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
   }));
   // Shipyards (a daily event): what the boat costs and what is paid, while
   // it is built when raiders come next, and the river edge it sails from.
+  // A mountain city (kind 'mountain_city') is built the same way.
   const shipyards = (await listShipyards(client, world.id)).map((s) => ({
     id: s.id,
+    kind: s.kind,
     q: s.q,
     r: s.r,
     edge: [s.edge.a.q, s.edge.a.r, s.edge.b.q, s.edge.b.r],

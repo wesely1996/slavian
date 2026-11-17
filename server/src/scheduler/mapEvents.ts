@@ -20,7 +20,7 @@ import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { RuleError } from '../errors.js';
 import { playerStats, total } from '../sim/battle.js';
 import { repelRaid } from '../sim/camps.js';
-import { listMembers, loadHexes, type World } from '../db/worlds.js';
+import { listMembers, loadHexes, setHexTerrain, type World } from '../db/worlds.js';
 import { eventFront, planMapEvent } from '../sim/events.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
@@ -32,6 +32,7 @@ import { bountyTotal, failEvent, rewardEvent } from './eventOutcomes.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { takenHexes } from './horde.js';
 import { tell } from './notices.js';
+import { refreshBonuses } from './research.js';
 import { armyQuestGone } from './quests.js';
 
 const MS_PER_HOUR = 3_600_000;
@@ -85,6 +86,8 @@ export const mapEventHandlers: HandlerRegistry = {
     } else if (plan?.kind === 'shipyard') {
       const shipyardId = await insertShipyard(client, world.id, { cell: plan.cell, edge: plan.edge, cost: data.events.kinds.shipyard.cost, front: plan.front, raiders: plan.raiders, endsAt });
       await scheduleEvent(client, world.id, endsAt, 'map_event_end', { shipyardId });
+    } else if (plan?.kind === 'mountain_city') {
+      await raiseMountainCity(client, data, world, plan, at);
     }
     if (plan) {
       const vars = { q: plan.cell.q, r: plan.cell.r, front: eventFront(plan.cell, world.activeFronts), bounty: bountyTotal(data, world, at) };
@@ -94,6 +97,8 @@ export const mapEventHandlers: HandlerRegistry = {
           ? { kind: 'event', tier: 'push', title: 'Cultists of Černobog gather at ({q}, {r})', body: 'They work a dark ritual. Scatter them before it ends, for a bounty of at least {bounty} resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.', vars }
         : plan.kind === 'ruin'
           ? { kind: 'event', tier: 'push', title: 'A forbidding ruin rises at ({q}, {r})', body: 'Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least {bounty} resources; left alone, it rouses the next horde from the {front}.', vars }
+        : plan.kind === 'mountain_city'
+          ? { kind: 'event', tier: 'push', title: 'Masons would raise a city in the mountain at ({q}, {r})', body: 'Send them resources from your villages, and they build a city that makes every village of yours produce {bonus}% more, for good, with a bounty of at least {bounty} resources for everyone. Monsters from under the mountain will strike while it is built; armies standing there fight them. If nobody pays, the next horde from the {front} hates you the more.', vars: { ...vars, bonus: Math.round(data.events.kinds.mountain_city.productionBonus * 100) } }
           : { kind: 'event', tier: 'push', title: 'Boatwrights wait at ({q}, {r})', body: 'Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least {bounty} resources for everyone. If nobody does, the next horde from the {front} hates you the more.', vars }, at);
       await notifyWorld(client, { worldId: world.id, type: 'world' });
     }
@@ -127,8 +132,8 @@ export const mapEventHandlers: HandlerRegistry = {
       if (!shipyard || shipyard.status !== 'open' || total(shipyard.paid) > 0) return;
       const { rows: coming } = await client.query("SELECT 1 FROM caravans WHERE destination_shipyard_id = $1 AND status = 'outbound'", [shipyard.id]);
       if (coming.length) return;
-      await deleteShipyard(client, shipyard.id);
-      await failEvent(client, data, world, shipyard.front as Front, 'The boatwrights at ({q}, {r}) gave up and left', { q: shipyard.q, r: shipyard.r }, event.dueAt);
+      await loseProject(client, data, world, shipyard, event.dueAt);
+      await failEvent(client, data, world, shipyard.front as Front, shipyard.kind === 'mountain_city' ? 'The masons at ({q}, {r}) gave up and left' : 'The boatwrights at ({q}, {r}) gave up and left', { q: shipyard.q, r: shipyard.r }, event.dueAt);
     }
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
@@ -138,7 +143,8 @@ export const mapEventHandlers: HandlerRegistry = {
   async shipyard_raid({ client, data, world }, event) {
     const shipyard = await loadShipyard(client, shipyardPayload.parse(event.payload).shipyardId);
     if (!shipyard || shipyard.status !== 'building' || shipyard.nextRaidAt?.getTime() !== event.dueAt.getTime()) return;
-    const rules = data.events.kinds.shipyard;
+    const rules = projectRules(data, shipyard);
+    const city = shipyard.kind === 'mountain_city';
     const at = event.dueAt;
     let raiders: Record<string, number> = { ...shipyard.raiders };
     const where = { q: shipyard.q, r: shipyard.r };
@@ -167,7 +173,9 @@ export const mapEventHandlers: HandlerRegistry = {
       await tell(client, world, army.ownerAccountId, {
         kind: 'battle_result',
         tier: 'digest',
-        title: result.held ? 'Your army drove the raiders off the shipyard at ({q}, {r})' : 'Raiders broke your army at the shipyard at ({q}, {r})',
+        title: city
+          ? (result.held ? 'Your army drove the monsters back under the mountain at ({q}, {r})' : 'Monsters from under the mountain broke your army at ({q}, {r})')
+          : (result.held ? 'Your army drove the raiders off the shipyard at ({q}, {r})' : 'Raiders broke your army at the shipyard at ({q}, {r})'),
         body: '{kills} of them fell, for {lost} of yours.',
         vars: { ...where, kills, lost: total(lost) },
       }, at);
@@ -175,8 +183,8 @@ export const mapEventHandlers: HandlerRegistry = {
     const held = total(raiders) === 0;
     // Burned too often, the boatwrights give up: the event is lost.
     if (!held && shipyard.burns + 1 >= rules.maxBurns) {
-      await deleteShipyard(client, shipyard.id);
-      await failEvent(client, data, world, shipyard.front as Front, 'Raiders burned the shipyard at ({q}, {r}) to the ground', where, at);
+      await loseProject(client, data, world, shipyard, at);
+      await failEvent(client, data, world, shipyard.front as Front, city ? 'Monsters from under the mountain overran the city at ({q}, {r})' : 'Raiders burned the shipyard at ({q}, {r}) to the ground', where, at);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       await notifyWorld(client, { worldId: world.id, type: 'world' });
       return;
@@ -187,7 +195,9 @@ export const mapEventHandlers: HandlerRegistry = {
     await saveShipyard(client, after);
     if (!held) {
       await scheduleEvent(client, world.id, completesAt, 'shipyard_done', { shipyardId: shipyard.id });
-      await tellAll(client, world, { kind: 'site', tier: 'push', title: 'Raiders burned work at the shipyard at ({q}, {r})', body: 'The boat is set back {hours} hours. Burned {burns} times of {most}: at {most} the boatwrights give up. Armies standing there fight the next raiders.', vars: { ...where, hours: rules.setbackHours, burns: after.burns, most: rules.maxBurns } }, at);
+      await tellAll(client, world, city
+        ? { kind: 'site', tier: 'push', title: 'Monsters wrecked work on the mountain city at ({q}, {r})', body: 'The city is set back {hours} hours. Struck down {burns} times of {most}: at {most} the masons give up. Armies standing there fight the next monsters.', vars: { ...where, hours: rules.setbackHours, burns: after.burns, most: rules.maxBurns } }
+        : { kind: 'site', tier: 'push', title: 'Raiders burned work at the shipyard at ({q}, {r})', body: 'The boat is set back {hours} hours. Burned {burns} times of {most}: at {most} the boatwrights give up. Armies standing there fight the next raiders.', vars: { ...where, hours: rules.setbackHours, burns: after.burns, most: rules.maxBurns } }, at);
     }
     if (after.nextRaidAt) await scheduleEvent(client, world.id, after.nextRaidAt, 'shipyard_raid', { shipyardId: shipyard.id });
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
@@ -205,7 +215,21 @@ export const mapEventHandlers: HandlerRegistry = {
       if (army.returnHome) await sendHome(client, world, army, event.dueAt, data);
     }
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
-    for (const member of await listMembers(client, world.id)) {
+    const members = await listMembers(client, world.id);
+    if (shipyard.kind === 'mountain_city') {
+      // Every member's villages produce the more, from now on.
+      await refreshBonuses(client, data, world, members.map((m) => m.accountId), event.dueAt);
+      for (const member of members) {
+        await rewardEvent(client, data, world, member.accountId, {
+          title: 'The mountain city at ({q}, {r}) stands',
+          body: "Its trade makes every village of yours produce {bonus}% more of every resource, for good. The masons' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.",
+          vars: { q: shipyard.q, r: shipyard.r, bonus: Math.round(data.events.kinds.mountain_city.productionBonus * 100) },
+        }, event.dueAt);
+      }
+      await notifyWorld(client, { worldId: world.id, type: 'world' });
+      return;
+    }
+    for (const member of members) {
       await rewardEvent(client, data, world, member.accountId, {
         title: 'The boat at ({q}, {r}) is ready',
         body: "Armies, caravans and scouts move fast between hexes along its river. The boatwrights' bounty for {village}: {wood} wood, {stone} stone, {grain} grain and {iron} iron.",
@@ -224,15 +248,16 @@ async function tellAll(client: DbClient, world: World, notice: Parameters<typeof
 // A village sends what the shipyard still needs (as much as it has); once
 // it is all paid, the boat is begun, and raiders come.
 export async function payShipyard(client: DbClient, data: GameData, world: World, villageId: number, shipyardId: number, at: Date): Promise<Shipyard> {
-  const rules = data.events.kinds.shipyard;
   const shipyard = await loadShipyard(client, shipyardId);
   if (!shipyard || shipyard.worldId !== world.id) throw new RuleError('No such shipyard in this world');
-  if (shipyard.status !== 'open') throw new RuleError('The boat is already paid for');
+  const rules = projectRules(data, shipyard);
+  const city = shipyard.kind === 'mountain_city';
+  if (shipyard.status !== 'open') throw new RuleError(city ? 'The city is already paid for' : 'The boat is already paid for');
   const village = await loadVillage(client, villageId);
-  if (hexDistance(hex(village.q, village.r), hex(shipyard.q, shipyard.r)) > rules.range) throw new RuleError(`Villages within ${rules.range} hexes send to a shipyard`);
+  if (hexDistance(hex(village.q, village.r), hex(shipyard.q, shipyard.r)) > rules.range) throw new RuleError(city ? `Villages within ${rules.range} hexes send to a mountain city` : `Villages within ${rules.range} hexes send to a shipyard`);
   const have = amountsAt(village.state.ledger, at);
   const sent: Resources = mapResources((k) => Math.max(0, Math.min(shipyard.cost[k] - shipyard.paid[k], Math.floor(have[k]))));
-  if (total(sent) === 0) throw new RuleError('The village has nothing the shipyard needs');
+  if (total(sent) === 0) throw new RuleError(city ? 'The village has nothing the masons need' : 'The village has nothing the shipyard needs');
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, sent) });
   const after = await payIntoShipyard(client, data, world, shipyard, sent, at);
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
@@ -242,7 +267,7 @@ export async function payShipyard(client: DbClient, data: GameData, world: World
 // Resources reach an open shipyard (from a village nearby, or by caravan):
 // once it is all paid, the boat is begun, and raiders come.
 export async function payIntoShipyard(client: DbClient, data: GameData, world: World, shipyard: Shipyard, sent: Resources, at: Date): Promise<Shipyard> {
-  const rules = data.events.kinds.shipyard;
+  const rules = projectRules(data, shipyard);
   const paid = mapResources((k) => shipyard.paid[k] + sent[k]);
   let after: Shipyard = { ...shipyard, paid };
   if (RESOURCE_KINDS.every((k) => paid[k] >= shipyard.cost[k])) {
@@ -251,9 +276,50 @@ export async function payIntoShipyard(client: DbClient, data: GameData, world: W
     after = { ...after, status: 'building', completesAt, nextRaidAt: raid < completesAt ? raid : null };
     await scheduleEvent(client, world.id, completesAt, 'shipyard_done', { shipyardId: shipyard.id });
     if (after.nextRaidAt) await scheduleEvent(client, world.id, after.nextRaidAt, 'shipyard_raid', { shipyardId: shipyard.id });
-    await tellAll(client, world, { kind: 'site', tier: 'push', title: 'The boat at ({q}, {r}) is begun', body: 'Raiders will come every {every} hours until it is done; armies standing there fight them.', vars: { q: shipyard.q, r: shipyard.r, every: rules.raidEveryHours } }, at);
+    await tellAll(client, world, shipyard.kind === 'mountain_city'
+      ? { kind: 'site', tier: 'push', title: 'The mountain city at ({q}, {r}) is begun', body: 'Monsters from under the mountain will strike every {every} hours until it stands; armies standing there fight them.', vars: { q: shipyard.q, r: shipyard.r, every: rules.raidEveryHours } }
+      : { kind: 'site', tier: 'push', title: 'The boat at ({q}, {r}) is begun', body: 'Raiders will come every {every} hours until it is done; armies standing there fight them.', vars: { q: shipyard.q, r: shipyard.r, every: rules.raidEveryHours } }, at);
   }
   await saveShipyard(client, after);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
   return after;
+}
+
+// The rules a project is built by: a boat's, or a mountain city's.
+export function projectRules(data: GameData, project: Pick<Shipyard, 'kind'>) {
+  const { shipyard, mountain_city: city } = data.events.kinds;
+  return project.kind === 'mountain_city' ? city : shipyard;
+}
+
+// A mountain city rises (events.json mountain_city): its hex opens up as
+// Mountain City land, and masons wait for resources until the event ends.
+export async function raiseMountainCity(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  plan: { cell: { q: number; r: number }; front: Front; raiders: Record<string, number> },
+  at: Date,
+): Promise<number> {
+  const endsAt = new Date(at.getTime() + hoursMs(data.events.lastsHours, world.speed));
+  const cell = hex(plan.cell.q, plan.cell.r);
+  const id = await insertShipyard(client, world.id, {
+    kind: 'mountain_city', cell, edge: { a: cell, b: cell }, cost: data.events.kinds.mountain_city.cost, front: plan.front, raiders: plan.raiders, endsAt,
+  });
+  await setHexTerrain(client, world.id, cell.q, cell.r, 'mountain_city');
+  await scheduleEvent(client, world.id, endsAt, 'map_event_end', { shipyardId: id });
+  await notifyWorld(client, { worldId: world.id, type: 'world' });
+  return id;
+}
+
+// A project lost (left unpaid, or struck down too often). A mountain
+// city's hex turns back into mountain, and armies standing there or on
+// their way go home.
+async function loseProject(client: DbClient, data: GameData, world: World, project: Shipyard, at: Date): Promise<void> {
+  await deleteShipyard(client, project.id);
+  if (project.kind !== 'mountain_city') return;
+  await setHexTerrain(client, world.id, project.q, project.r, 'mountain');
+  for (const army of await armiesHolding(client, world.id, project.q, project.r, ['stationed', 'marching'])) {
+    await sendHome(client, world, army, at, data);
+  }
+  await notifyWorld(client, { worldId: world.id, type: 'armies' });
 }

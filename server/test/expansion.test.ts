@@ -16,11 +16,11 @@ describe('founding villages', () => {
     outposts: new Set(outposts),
   });
 
-  it('needs a free, settleable hex near enough and far enough', () => {
+  it('needs a free, settleable hex far enough from the others, however far from home', () => {
     expect(settleProblem(data, site(5, 0))).toBeNull();
     expect(settleProblem(data, { ...site(5, 0), terrain: undefined })).toMatch(/not on the map/);
     expect(settleProblem(data, site(5, 0, 'swamp'))).toMatch(/can't be founded on Swamp/);
-    expect(settleProblem(data, site(9, 0))).toMatch(/at most 6 hexes/);
+    expect(settleProblem(data, site(14, 0))).toBeNull();
     expect(settleProblem(data, site(4, 0))).toMatch(/at least 3 hexes apart/);
     expect(settleProblem(data, site(1, -1))).toMatch(/Holy City|apart/);
     expect(settleProblem(data, site(5, 0, 'plains', ['5,0']))).toMatch(/outpost/);

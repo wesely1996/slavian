@@ -967,6 +967,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -1060,37 +1072,7 @@
     "shipyards": [
      {
       "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     },
-     {
-      "id": 3,
+      "kind": "boat",
       "q": -8,
       "r": 2,
       "edge": [
@@ -3616,6 +3598,18 @@
       "reward": null,
       "endsAt": null,
       "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "cultists",
+      "front": "north",
+      "q": 1,
+      "r": -3,
+      "size": 28,
+      "waveId": null,
+      "reward": null,
+      "endsAt": "2026-06-01T10:38:24.000Z",
+      "quest": null
      }
     ],
     "sites": [
@@ -3709,37 +3703,7 @@
     "shipyards": [
      {
       "id": 2,
-      "q": -7,
-      "r": 5,
-      "edge": [
-       -6,
-       4,
-       -7,
-       5
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 9,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T10:52:48.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     },
-     {
-      "id": 3,
+      "kind": "boat",
       "q": -8,
       "r": 2,
       "edge": [
@@ -5718,8 +5682,8 @@
       "id": 10,
       "kind": "event",
       "tier": "push",
-      "title": "Boatwrights wait at (-7, 5)",
-      "body": "Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least 2450 resources for everyone. If nobody does, the next horde from the north hates you the more.",
+      "title": "Cultists of Černobog gather at (1, -3)",
+      "body": "They work a dark ritual. Scatter them before it ends, for a bounty of at least 2450 resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.",
       "createdAt": "2026-06-01T09:55:12.000Z",
       "read": false
      },

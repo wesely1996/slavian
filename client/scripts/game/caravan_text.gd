@@ -80,6 +80,8 @@ static func target_name(target: Dictionary) -> String:
 		"shipyard":
 			for yard in Game.shipyards:
 				if int(yard.id) == int(target.id):
+					if EventText.is_city(yard):
+						return UI.t("the mountain city at (%d, %d)") % [int(yard.q), int(yard.r)]
 					return UI.t("the shipyard at (%d, %d)") % [int(yard.q), int(yard.r)]
 			return UI.t("a shipyard that is gone")
 	return UI.t("the Holy City vault")
