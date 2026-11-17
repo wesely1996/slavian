@@ -36,7 +36,7 @@ static func decision(battle: Dictionary) -> String:
 
 ## "Bandit camp of the Nomad Horde · 24 strong"
 static func camp(camp_: Dictionary, faction: String) -> String:
-	var kind := UI.t("Monster lair") if camp_.kind == "lair" else (UI.t("Captives' camp") if camp_.kind == "captives" else UI.t("Bandit camp"))
+	var kind := UI.t("Monster lair") if camp_.kind == "lair" else (UI.t("Captives' camp") if camp_.kind == "captives" else (UI.t("Cultists of Černobog") if camp_.kind == "cultists" else UI.t("Bandit camp")))
 	return UI.t("%s of the %s · %d strong") % [kind, UI.t(faction), int(camp_.size)]
 
 

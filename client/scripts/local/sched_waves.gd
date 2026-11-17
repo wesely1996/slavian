@@ -422,6 +422,9 @@ static func send_band(server: LocalServer, world: Dictionary, band: Dictionary, 
 static func send_errand(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	var data := server.data
 	var errand: Dictionary = wave.errand
+	if errand.kind == "avatar":
+		LocalCultists.send(server, world, wave, at)
+		return
 	var village: Dictionary = server.find_village(world, int(errand.target)) if errand.target != null else {}
 	var target := {"id": village.id, "cell": Vector2i(village.q, village.r)} if not village.is_empty() and village.get("ruin") == null else {"id": null, "cell": Vector2i.ZERO}
 	var march := plan_march(data, land_of(world), wave, [], int(world.seed), at, world.speed, {}, [target])

@@ -14,7 +14,8 @@ import { composeWave, type Composition } from './waves.js';
 export type MapEventPlan =
   | { kind: 'captives'; cell: Hex; front: Front; guards: Composition; reward: CampReward }
   | { kind: 'ruin'; cell: Hex; site: PlacedSite }
-  | { kind: 'shipyard'; cell: Hex; edge: { a: Hex; b: Hex }; front: Front; raiders: Composition };
+  | { kind: 'shipyard'; cell: Hex; edge: { a: Hex; b: Hex }; front: Front; raiders: Composition }
+  | { kind: 'ritual'; cell: Hex; front: Front; guards: Composition };
 
 // The front an event at `cell` belongs to: the land it rose in, or the first
 // active one.
@@ -53,9 +54,10 @@ export function planMapEvent(
   const rules = data.events;
   const rng = createRng((input.seed ^ Math.imul(input.day + 1, 0x632be5ab)) >>> 0);
   if (input.villages.length === 0) return null;
-  const { captives, ruin, shipyard } = rules.kinds;
-  const pick = rng() * (captives.weight + ruin.weight + shipyard.weight);
-  const kind: MapEventPlan['kind'] = pick < captives.weight ? 'captives' : pick < captives.weight + ruin.weight ? 'ruin' : 'shipyard';
+  const { captives, ruin, shipyard, ritual } = rules.kinds;
+  const pick = rng() * (captives.weight + ruin.weight + shipyard.weight + ritual.weight);
+  const kind: MapEventPlan['kind'] =
+    pick < captives.weight ? 'captives' : pick < captives.weight + ruin.weight ? 'ruin' : pick < captives.weight + ruin.weight + shipyard.weight ? 'shipyard' : 'ritual';
   // Each bank hex's river edges, in edge-key order.
   const banks = new Map<string, { a: Hex; b: Hex }[]>();
   for (const e of [...input.rivers].sort((x, y) => (edgeKey(x.a, x.b) < edgeKey(y.a, y.b) ? -1 : 1))) {
@@ -85,6 +87,10 @@ export function planMapEvent(
   if (kind === 'shipyard') {
     const raiders = composeWave(data, front, input.day, Math.round(shipyard.raiders * grown), (input.seed ^ input.day ^ 0x5a17) >>> 0, input.players);
     return { kind, cell, edge: banks.get(hexKey(cell))![0]!, front, raiders };
+  }
+  if (kind === 'ritual') {
+    const guards = composeWave(data, front, input.day, Math.round(ritual.guards * grown), (input.seed ^ input.day ^ 0xc017) >>> 0, input.players);
+    return { kind, cell, front, guards };
   }
   if (kind === 'captives') {
     const guards = composeWave(data, front, input.day, Math.round(captives.guards * grown), (input.seed ^ input.day) >>> 0, input.players);

@@ -27,6 +27,7 @@ import type { Front } from '../sim/mapgen.js';
 import { amountsAt, mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { armyLosses, sendHome } from './armies.js';
 import { createCamp } from './camps.js';
+import { ritualEnds, startRitual } from './cultists.js';
 import { bountyTotal, failEvent, rewardEvent } from './eventOutcomes.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { takenHexes } from './horde.js';
@@ -79,6 +80,8 @@ export const mapEventHandlers: HandlerRegistry = {
     } else if (plan?.kind === 'ruin') {
       const siteId = await insertHardSite(client, world.id, plan.site, endsAt);
       await scheduleEvent(client, world.id, endsAt, 'map_event_end', { siteId });
+    } else if (plan?.kind === 'ritual') {
+      await startRitual(client, data, world, plan, at);
     } else if (plan?.kind === 'shipyard') {
       const shipyardId = await insertShipyard(client, world.id, { cell: plan.cell, edge: plan.edge, cost: data.events.kinds.shipyard.cost, front: plan.front, raiders: plan.raiders, endsAt });
       await scheduleEvent(client, world.id, endsAt, 'map_event_end', { shipyardId });
@@ -87,6 +90,8 @@ export const mapEventHandlers: HandlerRegistry = {
       const vars = { q: plan.cell.q, r: plan.cell.r, front: eventFront(plan.cell, world.activeFronts), bounty: bountyTotal(data, world, at) };
       await tellAll(client, world, plan.kind === 'captives'
         ? { kind: 'event', tier: 'push', title: 'Captives are held at ({q}, {r})', body: 'Clear the camp to free them before they are taken away, for a bounty of at least {bounty} resources. If they are taken, the next horde from the {front} hates you the more.', vars }
+        : plan.kind === 'ritual'
+          ? { kind: 'event', tier: 'push', title: 'Cultists of Černobog gather at ({q}, {r})', body: 'They work a dark ritual. Scatter them before it ends, for a bounty of at least {bounty} resources; every soldier who falls fighting them brings its end nearer. If it ends, something terrible walks.', vars }
         : plan.kind === 'ruin'
           ? { kind: 'event', tier: 'push', title: 'A forbidding ruin rises at ({q}, {r})', body: 'Strong guardians watch it, and rich finds lie within, for a while. Searching it brings a bounty of at least {bounty} resources; left alone, it rouses the next horde from the {front}.', vars }
           : { kind: 'event', tier: 'push', title: 'Boatwrights wait at ({q}, {r})', body: 'Send them resources from your villages, and they build a boat that carries armies and caravans fast along the river, with a bounty of at least {bounty} resources for everyone. If nobody does, the next horde from the {front} hates you the more.', vars }, at);
@@ -101,6 +106,8 @@ export const mapEventHandlers: HandlerRegistry = {
     if (campId !== undefined) {
       const camp = await loadCamp(client, campId);
       if (!camp || camp.status !== 'active') return;
+      // A ritual waits for nobody.
+      if (camp.kind === 'cultists') return ritualEnds(client, data, world, camp.id, event.dueAt);
       if ((await armiesHolding(client, world.id, camp.q, camp.r, ['marching', 'engaged'])).some((a) => a.orders === 'clear')) return;
       await deleteCamp(client, camp.id);
       if (await armyQuestGone(client, data, world, camp.quest, event.dueAt)) return notifyWorld(client, { worldId: world.id, type: 'world' });

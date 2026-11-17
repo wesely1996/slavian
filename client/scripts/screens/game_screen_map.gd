@@ -69,6 +69,21 @@ func _hex_panel() -> void:
 		_side_tabs("hex", parts, 120.0 if village.is_empty() else 0.0)
 
 
+## Cultists at their ritual: what scattering them brings, and how long
+## until the ritual ends (sooner with every soldier of yours who falls).
+func _ritual_lines(camp: Dictionary) -> void:
+	var rules: Dictionary = Game.data.events.kinds.ritual
+	_panel_body.add_child(UI.with_info(UI.label(tr("Scatter them before the ritual ends"), UI.SMALL_SIZE, UI.GOOD),
+		tr("Clearing the camp breaks the ritual, for the event's bounty. Every soldier of yours who falls fighting them brings its end %d game minutes nearer. If it ends, something terrible walks.") % int(rules.minutesPerFallen)))
+	if camp.get("endsAt") == null:
+		return
+	var ends_at := TimeUtil.parse_iso(String(camp.endsAt))
+	var line := UI.label("", UI.SMALL_SIZE, UI.ERROR)
+	_panel_body.add_child(line)
+	_tick(line, func() -> String:
+		return tr("The ritual ends in %s") % TimeUtil.format_duration(maxf(0.0, ends_at - Game.server_now())))
+
+
 ## A daily event's lines: what it brings, and how long it waits (it goes
 ## then, unless an army is already on its way).
 func _event_lines(event: Dictionary, brings: String, unless := false) -> void:
@@ -124,7 +139,10 @@ func _terrain_panel() -> Array:
 	if not camp.is_empty():
 		_quest_place_line(camp.get("quest"))
 		_panel_body.add_child(UI.label(HordeText.camp(camp, Game.front_faction(camp.front)), UI.SMALL_SIZE, UI.ERROR))
-		_event_lines(camp, HordeText.captives(Game.data, camp.get("reward"), camp.get("quest")))
+		if camp.kind == "cultists":
+			_ritual_lines(camp)
+		else:
+			_event_lines(camp, HordeText.captives(Game.data, camp.get("reward"), camp.get("quest")))
 	var quest_site := Game.site_at(_selected)
 	if not quest_site.is_empty() and quest_site.status == "unexplored":
 		_quest_place_line(quest_site.get("quest"))

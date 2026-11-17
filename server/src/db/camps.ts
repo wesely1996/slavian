@@ -6,7 +6,7 @@ export type CampReward = { units: Record<string, number> } | { resources: Record
 export interface Camp {
   id: number;
   worldId: number;
-  kind: 'bandit' | 'lair' | 'captives';
+  kind: 'bandit' | 'lair' | 'captives' | 'cultists';
   front: string;
   q: number;
   r: number;
@@ -25,7 +25,7 @@ export interface Camp {
 interface CampRow {
   id: number;
   world_id: number;
-  kind: 'bandit' | 'lair' | 'captives';
+  kind: 'bandit' | 'lair' | 'captives' | 'cultists';
   front: string;
   q: number;
   r: number;
@@ -89,6 +89,18 @@ export async function saveCampUnits(client: DbClient, id: number, units: Record<
 // Gone unvisited: a daily event's time is up.
 export async function deleteCamp(client: DbClient, id: number): Promise<void> {
   await client.query('DELETE FROM camps WHERE id = $1', [id]);
+}
+
+// Event camps (captives' guards, cultists at their ritual) hold their place:
+// they don't grow, waylay caravans, join hordes or count against the camps
+// a front may keep.
+export function isEventCamp(kind: Camp['kind']): boolean {
+  return kind === 'captives' || kind === 'cultists';
+}
+
+// When a ritual ends (cultists' camps): sooner with each soldier who falls.
+export async function setCampEndsAt(client: DbClient, id: number, endsAt: Date): Promise<void> {
+  await client.query('UPDATE camps SET ends_at = $2 WHERE id = $1', [id, endsAt]);
 }
 
 export async function markCleared(client: DbClient, id: number): Promise<void> {

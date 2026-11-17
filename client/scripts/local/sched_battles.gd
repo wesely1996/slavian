@@ -8,6 +8,9 @@ extends RefCounted
 ## cmd_armies.gd.
 
 const RAIDING := ["marching", "battling", "arrived"]
+## Event camps (captives' guards, cultists at their ritual) hold their place
+## (db/camps.ts isEventCamp): they don't grow, waylay caravans or join hordes.
+const EVENT_CAMPS := ["captives", "cultists"]
 
 
 # --- Arriving (scheduler/waves.ts) --------------------------------------------
@@ -845,6 +848,10 @@ static func taken_hexes(world: Dictionary) -> Dictionary:
 ## The rampage is over: survivors make camp near where they stand.
 static func settle(server: LocalServer, world: Dictionary, wave: Dictionary, from: Vector2i, at: int, changed: Array) -> void:
 	var units: Dictionary = wave.composition
+	# The Avatar never makes camp: its rampage over, it sinks into the earth.
+	if wave.get("errand") is Dictionary and wave.errand.kind == "avatar":
+		finish_wave(server, world, wave, "dispersed", at, changed)
+		return
 	var site: Variant = LocalHorde.camp_site(server.data, world.hexes, from, taken_hexes(world)) if LocalBattle.total(units) > 0 else null
 	if site == null:
 		finish_wave(server, world, wave, "dispersed", at, changed)
@@ -1061,7 +1068,7 @@ static func create_camp(server: LocalServer, world: Dictionary, camp: Dictionary
 	world.camps.append(created)
 	# Captives' guards only hold them, as a hero's quest camp waits for its
 	# hero: they don't grow or waylay caravans.
-	if created.kind != "captives" and LocalHeroes.parse_army_quest_mark(created.get("quest")).is_empty():
+	if not created.kind in EVENT_CAMPS and LocalHeroes.parse_army_quest_mark(created.get("quest")).is_empty():
 		server.schedule(world, LocalTime.ms(at + (float(server.data.camps.growth.everyHours) * LocalTime.MS_PER_HOUR) / world.speed), "camp_grow",
 			{"campId": created.id})
 		LocalLogistics.plan_ambushes_for(server, world, at)
@@ -1075,12 +1082,12 @@ static func occupied_hexes(world: Dictionary) -> Dictionary:
 
 ## A wave is over: new camps of its front rise near its road.
 static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
-	# A band leaves no camps behind.
-	if wave.get("bandOf") != null:
+	# A band leaves no camps behind, nor does the Avatar.
+	if wave.get("bandOf") != null or (wave.get("errand") is Dictionary and wave.errand.kind == "avatar"):
 		return
 	var data := server.data
 	var rules: Dictionary = data.camps.spawn
-	var active: int = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.front == wave.front and c.kind != "captives").size()
+	var active: int = world.camps.filter(func(c: Dictionary) -> bool: return c.status == "active" and c.front == wave.front and not c.kind in EVENT_CAMPS).size()
 	var exact := float(rules.perWave) * float(data.difficulty.presets[world.difficulty].campRate)
 	var roll := LocalWaves.rng_for(int(world.seed), int(wave.index), 0xcb).next()
 	var per_wave := floori(exact) + (1 if roll < exact - floorf(exact) else 0)
@@ -1105,6 +1112,7 @@ static func finish_wave(server: LocalServer, world: Dictionary, wave: Dictionary
 	wave.status = status
 	wave.endsAt = at
 	spawn_after_wave(server, world, wave, at)
+	LocalCultists.avatar_ends(server, world, wave, status, at, changed)
 	bridge_quest(server, world, "unscathed", at)
 	# A bridge quest's host beaten: the quest is done (not beaten: another comes).
 	if LocalBridgeCommands.after_errand(server, world, wave, status, at):

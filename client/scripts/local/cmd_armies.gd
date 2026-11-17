@@ -1710,7 +1710,8 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
-	var after := army_losses(server, world, army, _losses({"units": LocalScouting.combatants(data, army.units)}, result.armyNow), at)
+	var fallen_men := _losses({"units": LocalScouting.combatants(data, army.units)}, result.armyNow)
+	var after := army_losses(server, world, army, fallen_men, at)
 	var kills := LocalBattle.total(camp.units) - LocalBattle.total(result.campNow)
 	var ember := false
 	if result.cleared:
@@ -1753,14 +1754,14 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		hold_hex(server, world, after, at)
 	else:
 		send_home(server, world, after, at)
-	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else ("captives' camp" if camp.kind == "captives" else "bandit camp"), int(camp.q), int(camp.r)]
+	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else ("captives' camp" if camp.kind == "captives" else ("cultists' circle" if camp.kind == "cultists" else "bandit camp")), int(camp.q), int(camp.r)]
 	var body := "{kills} of them fell; {defenders} still hold it."
 	if result.cleared:
 		body = "It carries home {loot} resources and a Svarog's Ember for the group." if ember else "It carries home {loot} resources."
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
 		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
 		"vars": {"where": where, "loot": int(LocalLogistics.total(after.loot if result.cleared and after.get("loot") != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
-	if result.cleared:
+	if result.cleared and camp.kind != "cultists":
 		LocalAchievements.achieve(server, world, army.ownerAccountId, "lair_cleared" if camp.kind == "lair" else ("captives_freed" if camp.kind == "captives" else "camp_cleared"), at)
 	# A hero's army quest done.
 	if result.cleared:
@@ -1768,6 +1769,13 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	# Captives freed: the event's bounty.
 	if result.cleared and camp.kind == "captives":
 		LocalEvents.reward(server, world, army.ownerAccountId, {"title": "You freed the captives at ({q}, {r})", "vars": {"q": camp.q, "r": camp.r}}, at, changed)
+	# Cultists scattered: the ritual is broken, for the event's bounty.
+	if result.cleared and camp.kind == "cultists":
+		LocalEvents.reward(server, world, army.ownerAccountId, {"title": "You broke the ritual at ({q}, {r})", "vars": {"q": camp.q, "r": camp.r}}, at, changed)
+		LocalAchievements.achieve(server, world, army.ownerAccountId, "ritual_broken", at)
+	# Every soldier who fell feeds the ritual: it ends the sooner.
+	if not result.cleared and camp.kind == "cultists":
+		LocalCultists.quicken(server, world, camp, LocalBattle.total(fallen_men), at)
 
 
 # --- Ancient sites (scheduler/sites.ts) -----------------------------------------------

@@ -224,6 +224,7 @@ async function sendBand(client: DbClient, data: GameData, world: World, band: Wa
 // City). With no way there, it scatters.
 async function sendErrand(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const errand = wave.errand!;
+  if (errand.kind === 'avatar') return sendAvatar(client, data, world, wave, at);
   const village = errand.target === null ? null : await loadVillage(client, errand.target).catch(() => null);
   const target: Target = village && !village.ruin ? { id: village.id, cell: hex(village.q, village.r) } : { id: null, cell: hex(0, 0) };
   let march: March | null = null;
@@ -239,6 +240,39 @@ async function sendErrand(client: DbClient, data: GameData, world: World, wave: 
     return;
   }
   await markMarching(client, wave.id, holdForQuiet(world, wave.spawnAt, march));
+  await scheduleEvent(client, world.id, (await loadWave(client, wave.id)).arrivesAt!, 'wave_arrive', { waveId: wave.id } satisfies WavePayload);
+  await planRaids(client, data, world, wave.id);
+  await planIntercepts(client, world, wave.id);
+  await planWaveWarning(client, data, world, wave.id, at);
+  await notifyWorld(client, { worldId: world.id, type: 'waves' });
+}
+
+// The Avatar of Černobog rises where its cultists stood and marches on the
+// villages, choosing as a horde does; with none to reach, it sinks away.
+async function sendAvatar(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
+  const from = hex(wave.errand!.from!.q, wave.errand!.from!.r);
+  const targets: Target[] = (await listVillages(client, world.id))
+    .filter((v) => !v.ruin && v.ownerAccountId !== null)
+    .map((v) => ({ id: v.id, cell: hex(v.q, v.r) }));
+  const route = targets.length
+    ? routeFrom(data, {
+        terrain: await loadLand(client, world.id),
+        from,
+        targets,
+        front: wave.front,
+        composition: wave.composition,
+        rng: rngFor(world.seed, wave.index, 0xa7),
+        startMs: 0,
+        worldSpeed: world.speed,
+      })
+    : null;
+  if (!route) {
+    await endWave(client, wave.id, 'dispersed', at);
+    await notifyWorld(client, { worldId: world.id, type: 'waves' });
+    return;
+  }
+  const march: March = { spawn: from, targetVillageId: route.targetVillageId, path: route.path, arrivesAt: new Date(at.getTime() + route.arrivesMs) };
+  await markMarching(client, wave.id, march);
   await scheduleEvent(client, world.id, (await loadWave(client, wave.id)).arrivesAt!, 'wave_arrive', { waveId: wave.id } satisfies WavePayload);
   await planRaids(client, data, world, wave.id);
   await planIntercepts(client, world, wave.id);

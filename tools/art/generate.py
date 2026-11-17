@@ -561,6 +561,16 @@ def tent(s, x, foot, w, color=("#c9a77a", "#8c6a45", "#5a4129")):
 
 def camp(kind):
     s = Svg()
+    if kind == "cultists":
+        # A ring of black stones round a fire, smoke rising: the ritual.
+        soft_shadow(s, 64, 112, 52, 11, 0.35)
+        s.ellipse(64, 104, 44, 12, s.rad([(0, "#5a1a1a", 0.7), (1, "#1a0a0a", 0)]), stroke="none", sw=0)
+        for i, (x, y) in enumerate([(26, 102), (40, 92), (64, 88), (88, 92), (102, 102), (82, 112), (46, 112)]):
+            s.poly([(x - 6, y + 6), (x - 4, y - 16 - (i % 2) * 6), (x + 4, y - 18 - (i % 2) * 6), (x + 6, y + 6)], s.lin([(0, "#4a4450"), (1, "#141218")], 0, 0, 1, 0), stroke="none", sw=0)
+        s.path("M56,104 Q58,84 64,76 Q70,84 72,104 Z", s.lin([(0, "#fff3a0"), (0.4, "#ff6a2a"), (1, "#5a1a1a")], 0, 1, 0, 0), stroke="none", sw=0)
+        for x, y, r in [(60, 60, 8), (68, 46, 10), (62, 30, 12)]:
+            s.circle(x, y, r, s.rad([(0, "#2a2430", 0.6), (1, "#2a2430", 0)]), stroke="none", sw=0)
+        return s
     if kind == "bandit":
         soft_shadow(s, 64, 112, 50, 11, 0.3)
         tent(s, 42, 104, 40, ("#b98a5e", "#8a5e3c", "#563821"))
@@ -1026,6 +1036,18 @@ def enemy(kind):
     s = Svg()
     pale = enamel(s, ENEMY_RIM)
     red = s.lin([(0, "#e07a62"), (1, "#8e2f26")], 0, 0, 1, 1)
+    if kind == "chernobog_avatar":
+        # The Black God in flesh: a horned shadow with burning eyes.
+        dark = s.lin([(0, "#3a3240"), (1, "#0c0a10")], 0, 0, 0, 1)
+        s.path("M24,108 Q30,60 64,48 Q98,60 104,108 Z", dark, stroke="none", sw=0)
+        s.circle(64, 46, 20, dark, stroke="none", sw=0)
+        for side in (-1, 1):
+            s.path(f"M{64 + side * 14},34 Q{64 + side * 34},26 {64 + side * 36},6 Q{64 + side * 26},22 {64 + side * 8},28 Z", pale, stroke="none", sw=0)
+        glow = s.rad([(0, "#fff3a0"), (0.5, "#ff6a2a"), (1, "#a83a2c", 0)])
+        for x in (56, 72):
+            s.ellipse(x, 46, 6, 4, glow, stroke="none", sw=0)
+        s.path("M48,108 L56,74 L64,96 L72,74 L80,108", "none", stroke="#a83a2c", sw=3, opacity=0.8)
+        return s
     if kind in ("grey_wolf", "volkolak"):
         wolf_head(s, pale)
         if kind == "volkolak":
@@ -2313,6 +2335,9 @@ ACHIEVEMENTS = {
     "village_ruined": (lambda: ruins(), "gold", ("#4a4440", "#141210")),
     "boat_built": (lambda: unit("river_barge"), "gold", ("#2a5a7a", "#0c1e2a")),
     "victory": (lambda: settlement(5), "gold", ("#c8a050", "#4a3010")),
+    "ritual_broken": (lambda: camp("cultists"), "gold", ("#5a1a1a", "#1a0606")),
+    "avatar_risen": (lambda: enemy("chernobog_avatar"), "iron", ("#3a3240", "#0c0a10")),
+    "avatar_slain": (lambda: enemy("chernobog_avatar"), "gold", ("#8a6a2a", "#2a1a06")),
 }
 RIMS = {"bronze": ("#e3b07a", "#a0643a", "#5e3618"), "gold": ("#f6e08f", "#c89a2e", "#7a5a17"), "iron": ("#c8ccd2", "#7c848e", "#3c424a")}
 
@@ -2361,6 +2386,7 @@ def assets():
     out["banner/cloth"] = banner("cloth")
     out["map/camp_bandit"] = camp("bandit")
     out["map/camp_lair"] = camp("lair")
+    out["map/camp_cultists"] = camp("cultists")
     out["map/fort"] = fort()
     out["map/outpost"] = outpost()
     out["map/fire"] = fire()
@@ -2372,6 +2398,7 @@ def assets():
         out[f"unit/{kind}"] = unit(kind)
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)
+    out["unit/chernobog_avatar"] = enemy("chernobog_avatar")
     for units in ENEMY_UNITS.values():
         for kind in units:
             out[f"unit/{kind}"] = enemy(kind)

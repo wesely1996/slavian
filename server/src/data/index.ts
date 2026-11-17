@@ -209,6 +209,8 @@ const enemyUnitSchema = z.object({
   minWave: z.number().int().nonnegative().default(0),
   // Only groups of at least this many players see it.
   minPlayers: z.number().int().positive().optional(),
+  // Kept out of the almanac (the Avatar of Černobog).
+  hidden: z.boolean().optional(),
   attack: z.number().nonnegative(),
   defense: z.number().nonnegative(),
   health: z.number().positive(),
@@ -554,6 +556,7 @@ export const ACHIEVEMENTS = [
   'first_defense', 'field_victory', 'camp_cleared', 'lair_cleared', 'captives_freed', 'site_explored', 'ember_found', 'scroll_found',
   'hero_quest', 'army_quest', 'second_village', 'fort_built', 'bridge_stage',
   'hero_fallen', 'hordes_united', 'stronghold_sacked', 'village_ruined', 'boat_built', 'victory',
+  'ritual_broken', 'avatar_risen', 'avatar_slain',
 ] as const;
 export type Achievement = (typeof ACHIEVEMENTS)[number];
 const achievementsFileSchema = z.object({
@@ -988,6 +991,15 @@ const eventsFileSchema = z.object({
       resources: resourcesSchema,
     }),
     ruin: z.object({ weight: z.number().nonnegative(), guardianFactor: z.number().positive(), lootFactor: z.number().positive() }),
+    // Cultists of Černobog working a ritual: the Avatar rises if it ends.
+    ritual: z.object({
+      weight: z.number().nonnegative(),
+      guards: z.number().int().positive(),
+      hours: z.number().positive(),
+      minutesPerFallen: z.number().nonnegative(),
+      avatar: z.string(),
+      avatarBountyFactor: z.number().nonnegative(),
+    }),
     shipyard: z.object({
       weight: z.number().nonnegative(),
       cost: resourcesSchema,

@@ -18,6 +18,10 @@ import { encodeTerrain, loadHexes } from '../src/db/worlds.js';
 import { createTestDb, TEST_DATABASE_URL } from './db.js';
 
 const scheduler = { data: loadGameData(), handlers };
+// These worlds run on random seeds for days: the rare cultists' ritual
+// (events.json ritual) would now and then loose the Avatar of Černobog on
+// them. cultists-scenario plays it out.
+scheduler.data.events.kinds.ritual.weight = 0;
 
 // The Holy City counts as the nearest settlement, so in these small worlds a
 // horde may go for it first; tests of fights at a village put it further off.

@@ -44,8 +44,10 @@ export interface Wave {
 }
 
 export interface WaveErrand {
-  kind: 'bridge' | 'quest';
+  kind: 'bridge' | 'quest' | 'avatar';
   target: number | null;
+  // The Avatar of Černobog rises where its cultists stood.
+  from?: { q: number; r: number };
 }
 
 interface WaveRow {

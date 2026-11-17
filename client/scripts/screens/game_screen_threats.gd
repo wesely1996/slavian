@@ -559,7 +559,9 @@ func _set_quiet(start: Variant, end: Variant) -> void:
 
 func _wave_entry(wave: Dictionary) -> void:
 	var errand: Variant = wave.get("errand")
-	if errand is Dictionary and errand.kind == "quest":
+	if errand is Dictionary and errand.kind == "avatar":
+		_panel_body.add_child(UI.label(tr("The Avatar of Černobog"), UI.HEADING_SIZE, UI.ERROR))
+	elif errand is Dictionary and errand.kind == "quest":
 		# A bridge quest's host, apart from the hordes.
 		_panel_body.add_child(UI.label(tr("%s · %s") % [tr(String(Game.data.bridge.questPlaces.defense.name)), tr(Game.front_faction(wave.front))]))
 	elif errand is Dictionary:
