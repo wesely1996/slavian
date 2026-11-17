@@ -80,17 +80,30 @@ scenario('fire-scenario.json', START, async ({ started, play }) => {
   if (settlers) await burnOnRoad(settlers.path);
   await play({ method: 'GET', path: world });
 
-  // A caravan to the Holy City, and a fire on its road home.
-  const caravan = (await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: null, load: { wood: 100, stone: 0, grain: 0, iron: 0 } } })).body?.caravan;
-  for (let i = 0; i < 20 && caravan; i++) {
-    await play({ advance: MINUTE });
+  // A caravan to the settlers' new village: the fire is set in the very
+  // hex it is heading into, so it turns back and goes round.
+  for (let i = 0; i < 30; i++) {
+    const seen = (await play({ method: 'GET', path: world })).body;
+    if ((seen?.villages ?? []).length > 1) break;
+    await play({ advance: 2 * MINUTE });
+  }
+  await play({ set: { amounts: { wood: 5000, stone: 5000, grain: 5000, iron: 5000 } } });
+  const caravan = (await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: 2, load: { wood: 100, stone: 0, grain: 0, iron: 0 } } })).body?.caravan;
+  for (let i = 0; i < 200 && caravan; i++) {
+    await play({ advance: 3000 });
     const seen = (await play({ method: 'GET', path: world })).body;
     const now = seen?.caravans?.find((c: { id: number }) => c.id === caravan.id);
-    if (now?.status === 'returning') {
-      await burnOnRoad([{ q: 0, r: 0 }, ...[...steps(now.path)].reverse()]);
-      await play({ method: 'GET', path: world });
-      break;
-    }
+    if (!now || now.status !== 'outbound') break;
+    const elapsed = Date.parse(seen.serverTime) - Date.parse(now.departsAt);
+    const road = now.path as [number, number, number][];
+    const k = road.findIndex((step) => step[2] >= elapsed);
+    if (k <= 0) continue;
+    const ahead = road[k]!;
+    if (!wooded.has(`${ahead[0]},${ahead[1]}`) || burnt.has(`${ahead[0]},${ahead[1]}`) || elapsed <= road[k - 1]![2]) continue;
+    burnt.add(`${ahead[0]},${ahead[1]}`);
+    await work(hex(ahead[0], ahead[1]), 'burn');
+    await play({ method: 'GET', path: world });
+    break;
   }
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });

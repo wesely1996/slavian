@@ -17,13 +17,31 @@ static func enters_before(path: Array, origin: int, at: int, cell: Vector2i, unt
 	return false
 
 
-## detour: the road from `elapsed_ms` along `path` round the fire, or null.
+## detour: the road from `elapsed_ms` along `path` round the fire, or null
+## (no way round). Headed straight into the fire, it walks back to the hex
+## before, as long as it had gone on, and goes round from there.
 static func _detour(path: Array, elapsed_ms: int, cell: Vector2i, next: Callable) -> Variant:
-	var state := {"onward": null}
-	var spliced: Variant = LocalLogistics.splice_route(path, elapsed_ms, func(from: Vector2i) -> Variant:
-		state.onward = null if from == cell else next.call(from)
-		return state.onward if state.onward != null else [{"q": from.x, "r": from.y, "atMs": 0}])
-	return spliced if state.onward != null else null
+	var i := path.size() - 1
+	for k in path.size():
+		if int(path[k].atMs) >= elapsed_ms:
+			i = k
+			break
+	var ahead := Vector2i(int(path[i].q), int(path[i].r))
+	if ahead != cell:
+		var onward: Variant = next.call(ahead)
+		return LocalLogistics.splice_route(path, elapsed_ms, func(_from: Vector2i) -> Variant: return onward) if onward != null else null
+	if i == 0:
+		return null
+	var back: Dictionary = path[i - 1]
+	var turn_at := elapsed_ms + (elapsed_ms - int(back.atMs))
+	var turned: Variant = next.call(Vector2i(int(back.q), int(back.r)))
+	if turned == null:
+		return null
+	var out: Array = path.slice(0, i)
+	out.append({"q": back.q, "r": back.r, "atMs": turn_at})
+	for k in range(1, turned.size()):
+		out.append({"q": turned[k].q, "r": turned[k].r, "atMs": turn_at + int(turned[k].atMs)})
+	return out
 
 
 static func _by_departure(items: Array, key: String) -> Array:
