@@ -6,7 +6,7 @@ import { hex, hexDistance } from '../src/sim/hex.js';
 import { riverLanes } from '../src/sim/land.js';
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Shipyard', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Shipyard', displayName: 'You', speed: 50, difficulty: 'baron' };
 // A game day at speed 50.
 const DAY = (24 * 60 * MINUTE) / 50;
 const HOUR = DAY / 24;

@@ -4,7 +4,7 @@
 // in its garrison die with it, and the next ones are the cheaper for it.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Ruins', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Ruins', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('raze-scenario.json', START, async ({ play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f6' } });

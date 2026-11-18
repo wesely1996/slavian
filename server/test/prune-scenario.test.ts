@@ -4,7 +4,7 @@
 // what it took away still counts.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Pruning', displayName: 'You', speed: 1, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Pruning', displayName: 'You', speed: 1, difficulty: 'baron' };
 const HOUR = 60 * MINUTE;
 
 scenario('prune-scenario.json', START, async ({ play }) => {

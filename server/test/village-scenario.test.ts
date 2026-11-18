@@ -9,7 +9,7 @@
 import { hexDistance, neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler, type Step } from './scenario.js';
 
-const START = { seed: 777, at: '2026-06-01T08:00:00.000Z', name: 'Villages', displayName: 'You', speed: 10, difficulty: 'normal' };
+const START = { seed: 777, at: '2026-06-01T08:00:00.000Z', name: 'Villages', displayName: 'You', speed: 10, difficulty: 'baron' };
 
 scenario('village-scenario.json', START, async ({ started, play }) => {
   // An outpost hex: the first neighbour of the village (in hex order)

@@ -4,7 +4,7 @@
 // then more, coming back with a new site or with nothing.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 5151, at: '2026-06-01T08:00:00.000Z', name: 'Ruins', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 5151, at: '2026-06-01T08:00:00.000Z', name: 'Ruins', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('ruins-scenario.json', START, async ({ play }) => {
   const search = (count: number) => play({ method: 'POST', path: '/v1/villages/1/scout/ruins', body: { count } });

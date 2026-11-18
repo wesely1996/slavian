@@ -5,7 +5,7 @@
 // on this map its own chance would have missed).
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4244, at: '2026-06-01T08:00:00.000Z', name: 'Embers', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4244, at: '2026-06-01T08:00:00.000Z', name: 'Embers', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('ember-scenario.json', START, async ({ started, now, play }) => {
   const world = '/v1/worlds/-1';

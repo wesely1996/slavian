@@ -5,7 +5,7 @@
 // camps behind for its hatred. The front's hatred is then drained.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Hatred', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Hatred', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('hatred-scenario.json', START, async ({ started, now, play }) => {
   const world = '/v1/worlds/-1';

@@ -1663,15 +1663,15 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
   it('difficulty sets wave sizes; quiet hours set by the host hold hordes back', villagesFirst(async () => {
     const yara = await guest('Yara');
     const stranger = await guest('Stranger');
-    const created = await call('POST', '/v1/worlds', yara.token, { name: 'Gentle', maxPlayers: 1, speed: 10, difficulty: 'story' });
-    expect(created.body.difficulty).toBe('story');
+    const created = await call('POST', '/v1/worlds', yara.token, { name: 'Ducal', maxPlayers: 1, speed: 10, difficulty: 'duke' });
+    expect(created.body.difficulty).toBe('duke');
     expect((await call('POST', '/v1/worlds', yara.token, { name: 'Bad', difficulty: 'impossible' })).status).toBe(400);
     const worldId: number = created.body.id;
     const started = await call('POST', `/v1/worlds/${worldId}/start`, yara.token);
     const home = started.body.villages[0];
-    // Story waves come at 70% of their base size.
+    // A Duke's waves come at twice their base size.
     const { rows: sizes } = await db.query<{ composition: Record<string, number> }>('SELECT composition FROM waves WHERE world_id = $1 AND index = 0', [worldId]);
-    expect(Object.values(sizes[0]!.composition).reduce((a, b) => a + b, 0)).toBe(Math.round(scheduler.data.waves.baseUnits * 0.7));
+    expect(Object.values(sizes[0]!.composition).reduce((a, b) => a + b, 0)).toBe(Math.round(scheduler.data.waves.baseUnits * 2));
 
     // Quiet hours: nearly the whole day from the moment the first horde sets out.
     const first = started.body.waves[0];

@@ -211,6 +211,8 @@ static func on_ritual_check(server: LocalServer, world: Dictionary, event: Dicti
 	var won: Dictionary = server.data.bridge.endings.won
 	LocalInbox.tell_everyone(server, world, {"kind": "ritual", "tier": "push", "title": won.title, "body": won.story}, at)
 	LocalAchievements.achieve_all(server, world, "victory", at)
+	# And the run's title: won as a Baron, a Viscount…
+	LocalAchievements.achieve_all(server, world, "title_%s" % world.difficulty, at)
 	changed.append(["world"])
 
 

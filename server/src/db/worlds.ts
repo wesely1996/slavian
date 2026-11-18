@@ -61,7 +61,7 @@ export async function createWorld(client: DbClient, world: NewWorld): Promise<Wo
   const { rows } = await client.query<World>(
     `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code, difficulty)
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${COLUMNS}`,
-    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'normal'],
+    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'baron'],
   );
   return rows[0]!;
 }

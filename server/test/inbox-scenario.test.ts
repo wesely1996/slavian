@@ -3,7 +3,7 @@
 // then everything is marked read.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T17:50:00.000Z', name: 'Letters', displayName: 'You', speed: 1, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T17:50:00.000Z', name: 'Letters', displayName: 'You', speed: 1, difficulty: 'baron' };
 
 scenario('inbox-scenario.json', START, async ({ play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'f6' } });

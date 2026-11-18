@@ -3,7 +3,7 @@
 // simulated clock, and reports how each run went.
 //   DATABASE_URL=postgres://... npm run sim -- --players 2 --bots balanced --difficulty normal --runs 3
 // Options: --players N (1–6), --bots kind[,kind…] (turtle, expander,
-// balanced; cycled over the players), --difficulty story|normal|hard|nightmare,
+// balanced; cycled over the players), --difficulty baron|viscount|count|marquess|duke,
 // --runs N, --speed N (world speed), --days N (game days before giving up),
 // --json (one JSON line per run), --seed N (the map seed of the first run,
 // counting up; random maps without it).
@@ -174,7 +174,7 @@ async function main(): Promise<void> {
     options: {
       players: { type: 'string', default: '2' },
       bots: { type: 'string', default: 'balanced' },
-      difficulty: { type: 'string', default: 'normal' },
+      difficulty: { type: 'string', default: 'baron' },
       runs: { type: 'string', default: '1' },
       speed: { type: 'string', default: '20' },
       days: { type: 'string', default: '45' },

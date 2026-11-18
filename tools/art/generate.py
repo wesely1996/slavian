@@ -2477,8 +2477,35 @@ ACHIEVEMENTS = {
     "ritual_broken": (lambda: camp("cultists"), "gold", ("#5a1a1a", "#1a0606")),
     "avatar_risen": (lambda: enemy("chernobog_avatar"), "iron", ("#3a3240", "#0c0a10")),
     "avatar_slain": (lambda: enemy("chernobog_avatar"), "gold", ("#8a6a2a", "#2a1a06")),
+    # A run won on each difficulty title: a coronet with more points the
+    # higher the title, on a richer field.
+    "title_baron": (lambda: coronet(3), "bronze", ("#5a6a7a", "#1c242c")),
+    "title_viscount": (lambda: coronet(4), "iron", ("#4a5a8a", "#161c30")),
+    "title_count": (lambda: coronet(5), "gold", ("#7a3a3a", "#260e0e")),
+    "title_marquess": (lambda: coronet(6), "gold", ("#5a3a7a", "#1c0e28")),
+    "title_duke": (lambda: coronet(7), "gold", ("#8a1a2a", "#2a060c")),
 }
 RIMS = {"bronze": ("#e3b07a", "#a0643a", "#5e3618"), "gold": ("#f6e08f", "#c89a2e", "#7a5a17"), "iron": ("#c8ccd2", "#7c848e", "#3c424a")}
+
+
+def coronet(points):
+    """A noble's coronet: a gold band set with gems, `points` tines each
+    topped with a pearl, a velvet cap inside (taller for higher titles)."""
+    s = Svg()
+    gold = s.lin([(0, "#fff0a8"), (0.5, "#e2b53c"), (1, "#8a6214")], 0, 0, 0, 1)
+    cap_top = 46 - points * 3
+    s.path(f"M30,92 Q30,{cap_top} 64,{cap_top - 6} Q98,{cap_top} 98,92 Z", s.lin([(0, "#c8323c"), (1, "#5a0c14")], 0, 0, 0, 1), stroke=EDGE, sw=2)
+    # The tines, evenly across the band, each with a pearl.
+    xs = [22 + i * (84 / (points - 1)) for i in range(points)]
+    for i, x in enumerate(xs):
+        h = 40 if i % 2 == 0 or points < 5 else 30
+        s.poly([(x - 7, 92), (x, 92 - h), (x + 7, 92)], gold, stroke=EDGE, sw=2)
+        s.circle(x, 92 - h - 4, 5, s.rad([(0, "#ffffff"), (0.7, "#e8e2d4"), (1, "#a8a090")]), stroke=EDGE, sw=1.5)
+    # The band, with gems set in it.
+    s.rect(18, 90, 92, 18, gold, stroke=EDGE, sw=2.5, rx=4)
+    for i, colour in enumerate(["#3a7ad0", "#d0303a", "#2a9a5a", "#d0303a", "#3a7ad0"]):
+        s.ellipse(30 + i * 17, 99, 4.5, 5.5, colour, stroke=EDGE, sw=1.2)
+    return s
 
 
 def medallion(rim, field):

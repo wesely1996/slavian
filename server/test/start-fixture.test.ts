@@ -16,7 +16,7 @@ import { idMapsFrom, toLocalIds } from './local-ids.js';
 
 const FIXTURE = fileURLToPath(new URL('../../data/fixtures/start-world.json', import.meta.url));
 const scheduler = { data: loadGameData(), handlers };
-export const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Solo', displayName: 'You', speed: 1, difficulty: 'normal' };
+export const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Solo', displayName: 'You', speed: 1, difficulty: 'baron' };
 
 describe.skipIf(!TEST_DATABASE_URL)('start-world fixture for the local engine (postgres)', () => {
   let db: Db;
