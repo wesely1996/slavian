@@ -479,16 +479,16 @@ func _generals_section(village: Dictionary) -> void:
 		var actions := UI.hbox(8)
 		if general.status == "home" and places.size() > 1:
 			var others := places.filter(func(v: Dictionary) -> bool: return general.villageId == null or int(v.id) != int(general.villageId))
-			var to := UI.options(others.map(func(v: Dictionary) -> String: return tr("Send to %s") % v.name), 0)
-			to.item_selected.connect(func(i: int) -> void: _move_general(general_id, int(others[i].id)))
+			# A prompt first: picking the item already shown sends nothing, so
+			# no village may be the one shown.
+			var to := UI.options([tr("Send to…")] + others.map(func(v: Dictionary) -> String: return tr("Send to %s") % v.name), 0)
+			to.item_selected.connect(func(i: int) -> void:
+				if i > 0:
+					_move_general(general_id, int(others[i - 1].id)))
 			to.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			to.custom_minimum_size.x = 0
 			to.clip_text = true
 			actions.add_child(to)
-		if general.status != "with_army":
-			var dismiss := UI.button(tr("Dismiss"), func() -> void: _dismiss_general(general_id))
-			dismiss.custom_minimum_size.x = 130
-			actions.add_child(dismiss)
 		if actions.get_child_count() > 0:
 			_panel_body.add_child(actions)
 	var cost := GeneralText.recruit_cost(Game.data, mine.size())
@@ -510,12 +510,13 @@ func _generals_section(village: Dictionary) -> void:
 	_panel_body.add_child(row)
 	var full := mine.size() >= keeps
 	var wait := TimeUtil.format_duration(float(Game.data.heroes.generals.recruitHours) * 3600.0 / float(Game.world.speed))
-	var text := tr("A general: %s · %s") % [UI.costs(cost), wait]
 	_tick(cost_line, func() -> String:
 		var home: Dictionary = Game.villages.get(village_id, village)
-		var affordable := Ledger.can_afford(Ledger.amounts_at(home.resources, Game.server_now()), cost)
+		var have := Ledger.amounts_at(home.resources, Game.server_now())
+		var affordable := Ledger.can_afford(have, cost)
 		recruit.disabled = full or not affordable
-		return text + (tr("  (raise a Hero's Hall for more)") if full else ""))
+		# What the village lacks shows red, as for buildings.
+		return tr("A general: %s · %s") % [UI.costs(cost, 30, have), wait] + (tr("  (raise a Hero's Hall for more)") if full else ""))
 
 
 func _recruit_general(village_id: int, given := "") -> void:
@@ -537,15 +538,6 @@ func _move_general(general_id: int, village_id: int) -> void:
 		_status.text = response.error
 		return
 	Game.set_generals(Game.world_id(), Game.generals.map(func(g: Dictionary) -> Dictionary: return response.data.general if int(g.id) == general_id else g))
-
-
-func _dismiss_general(general_id: int) -> void:
-	_status.text = ""
-	var response := await Api.post_json("/v1/generals/%d/dismiss" % general_id, {})
-	if not response.ok:
-		_status.text = response.error
-		return
-	Game.set_generals(Game.world_id(), Game.generals.filter(func(g: Dictionary) -> bool: return int(g.id) != general_id))
 
 
 func _open_army(army_id: int) -> void:

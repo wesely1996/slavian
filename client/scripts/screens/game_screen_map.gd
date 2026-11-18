@@ -448,7 +448,7 @@ func _vault_panel() -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.add_child(UI.label(tr("Vault → Lv %d (paid from the vault)") % (level + 1)))
 		var seconds := CaravanMath.vault_upgrade_seconds(Game.data, level + 1, float(Game.world.speed))
-		info.add_child(UI.rich(tr("%s · %s") % [UI.costs(cost), TimeUtil.format_duration(seconds)]))
+		info.add_child(UI.rich(tr("%s · %s") % [UI.costs(cost, 30, vault.amounts), TimeUtil.format_duration(seconds)]))
 		row.add_child(info)
 		var button := UI.button(tr("Enlarge"), _upgrade_vault)
 		button.custom_minimum_size.x = 160
@@ -582,11 +582,11 @@ func _fort_panel(terrain_id: String, kind := "fort") -> void:
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := tr("%s · %s") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
-		button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-		return cost_text)
+		var have := Ledger.amounts_at(current.resources, Game.server_now())
+		button.disabled = not Ledger.can_afford(have, cost)
+		return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
 
 
 func _build_fort(village_id: int, cell: Vector2i, kind := "fort") -> void:
@@ -634,11 +634,12 @@ func _river_section(cell: Vector2i) -> void:
 		button.custom_minimum_size.x = 160
 		row.add_child(button)
 		_panel_body.add_child(row)
-		var price := tr("Build a bridge: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))]
+		var bridge_time := TimeUtil.format_duration(float(Game.data.field.bridge.buildSeconds) / float(Game.world.speed))
 		_tick(info, func() -> String:
 			var current: Dictionary = Game.villages.get(village_id, home)
-			button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-			return price)
+			var have := Ledger.amounts_at(current.resources, Game.server_now())
+			button.disabled = not Ledger.can_afford(have, cost)
+			return tr("Build a bridge: %s · %s") % [UI.costs(cost, 30, have), bridge_time])
 
 
 ## Roads from the selected hex: where they run, and building more.
@@ -683,11 +684,14 @@ func _road_section(cell: Vector2i) -> void:
 		improve.custom_minimum_size.x = 130
 		row.add_child(improve)
 		_panel_body.add_child(row)
-		var step_text := tr("%s to a %s: %s · %s") % [tr(names[i]), RiverText.road_tier_name(next).to_lower(), UI.costs(step.cost), TimeUtil.format_duration(float(step.buildSeconds) / float(Game.world.speed))]
+		var direction := tr(names[i])
+		var tier := RiverText.road_tier_name(next).to_lower()
+		var step_time := TimeUtil.format_duration(float(step.buildSeconds) / float(Game.world.speed))
 		_tick(line, func() -> String:
 			var current: Dictionary = Game.villages.get(village_id, home)
-			improve.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), step.cost)
-			return step_text)
+			var have := Ledger.amounts_at(current.resources, Game.server_now())
+			improve.disabled = not Ledger.can_afford(have, step.cost)
+			return tr("%s to a %s: %s · %s") % [direction, tier, UI.costs(step.cost, 30, have), step_time])
 	if open.is_empty():
 		return
 	# One button; then the hex the road goes to is tapped on the map.
@@ -700,7 +704,7 @@ func _road_section(cell: Vector2i) -> void:
 	if plain.size() < targets.size():
 		var pass_cost := LocalLand.road_level_cost(Game.data, 1, true)
 		# (Rich text: the costs are icons.)
-		var pass_line := UI.rich(tr("A mountain pass: %s · %s") % [UI.costs(pass_cost.cost), TimeUtil.format_duration(float(pass_cost.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED)
+		var pass_line := UI.rich(tr("A mountain pass: %s · %s") % [UI.costs(pass_cost.cost, 30, Ledger.amounts_at(home.resources, Game.server_now())), TimeUtil.format_duration(float(pass_cost.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED)
 		_panel_body.add_child(UI.with_info(pass_line,
 			tr("A road into the mountains costs and takes %d times as much. Armies, caravans and scouts then cross the mountain along it, slowly; none can stop there, and the hordes keep off the passes.") % int(Game.data.field.road.mountainFactor)))
 	var build := UI.button(tr("Build a road"), func() -> void:
@@ -709,11 +713,12 @@ func _road_section(cell: Vector2i) -> void:
 		hex_map.show_road_targets(targets)
 		_status.text = tr("Tap the hex next to this one to build the road to."), "icon/map")
 	_panel_body.add_child(build)
-	var text := tr("A road: %s · %s") % [UI.costs(cost), TimeUtil.format_duration(float(first.buildSeconds) / float(Game.world.speed))]
+	var road_time := TimeUtil.format_duration(float(first.buildSeconds) / float(Game.world.speed))
 	_tick(info, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
-		build.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-		return text)
+		var have := Ledger.amounts_at(current.resources, Game.server_now())
+		build.disabled = not Ledger.can_afford(have, cost)
+		return tr("A road: %s · %s") % [UI.costs(cost, 30, have), road_time])
 
 
 func _build_road(village_id: int, a: Vector2i, b: Vector2i) -> void:
@@ -933,7 +938,7 @@ func _terraform_panel(terrain: String) -> void:
 		info.add_child(UI.with_info(UI.label(tr(def.name)), tr(def.description)))
 		var gain: Dictionary = def.get("gain", {})
 		var brings := " · " + tr("brings %s") % UI.costs(gain) if gain.values().any(func(n: Variant) -> bool: return float(n) > 0.0) else ""
-		var text := tr("%s → %s · %s · %s") % [Terrain.display_name(terrain, Game.data), into, UI.costs(def.cost), TimeUtil.format_duration(float(def.hours) * 3600.0 / speed)] + brings
+		var text := tr("%s → %s · %s · %s") % [Terrain.display_name(terrain, Game.data), into, UI.costs(def.cost, 30, Ledger.amounts_at(home.resources, Game.server_now())), TimeUtil.format_duration(float(def.hours) * 3600.0 / speed)] + brings
 		var cost_line := UI.rich(text, UI.SMALL_SIZE, UiTheme.TEXT)
 		info.add_child(cost_line)
 		row.add_child(info)
@@ -1031,12 +1036,11 @@ func _claim_panel(terrain: String) -> void:
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := tr("%s · %s") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, home)
-		var affordable := Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-		button.disabled = queue_full or not affordable
-		return cost_text + (tr("  (queue full)") if queue_full else ""))
+		var have := Ledger.amounts_at(current.resources, Game.server_now())
+		button.disabled = queue_full or not Ledger.can_afford(have, cost)
+		return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)] + (tr("  (queue full)") if queue_full else ""))
 
 
 func _yield_text(amounts: Dictionary) -> String:
