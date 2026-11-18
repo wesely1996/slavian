@@ -635,6 +635,11 @@ func _test_group() -> void:
 	_check(GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}) == "Hordes hold off 22:00–06:00 (UTC+02:00)", "quiet hours: %s" % GroupText.quiet({"start": 1320, "end": 360, "utcOffsetMinutes": 120}))
 	_check(GroupText.offset_text(-300) == "UTC−05:00", "negative offset")
 	_check(GroupText.difficulty({"difficulty": {"presets": {"hard": {"name": "Hard"}}}}, "hard") == "Hard", "difficulty name")
+	var titles: Dictionary = {"difficulty": JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../data/difficulty.json")))}
+	var about := GroupText.difficulty_info(titles)
+	_check(GroupText.DIFFICULTIES.size() == 5 and GroupText.DIFFICULTIES[0] == "baron" and GroupText.DIFFICULTIES[4] == "duke", "five titles, Baron first")
+	_check(about.find("Baron:") < about.find("Duke:") and about.find("Baron:") >= 0, "the info lists every title, easiest first: %s" % about.left(200))
+	_check(about.contains("Grace: 5 hordes only plunder before any may burn a village.") and about.contains("Even the first horde may burn a village."), "the info spells out the grace")
 
 
 func _test_lake_lanes() -> void:

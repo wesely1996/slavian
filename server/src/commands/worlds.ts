@@ -78,7 +78,7 @@ export async function createWorldCommand(
           hostAccountId: input.account.id,
           maxPlayers: input.maxPlayers,
           inviteCode: newInviteCode(),
-          difficulty: input.difficulty ?? 'normal',
+          difficulty: input.difficulty ?? 'baron',
         });
         await addMember(client, world.id, input.account.id);
         return world;

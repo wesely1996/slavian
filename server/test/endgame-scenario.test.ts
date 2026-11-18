@@ -5,7 +5,7 @@
 // stage raised, Ritual Night's hordes, and the run's end.
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Arch', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Arch', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('endgame-scenario.json', START, async ({ now, play }) => {
   const world = '/v1/worlds/-1';

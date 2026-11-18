@@ -5,7 +5,7 @@
 // what it carries; one is called home in the middle of its raid.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Raids', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Raids', displayName: 'You', speed: 50, difficulty: 'baron' };
 // A game hour at speed 50.
 const HOUR = (60 * MINUTE) / 50;
 

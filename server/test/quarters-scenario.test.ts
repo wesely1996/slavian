@@ -9,7 +9,7 @@
 import { neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4343, at: '2026-06-01T08:00:00.000Z', name: 'Quarters', displayName: 'You', speed: 10, difficulty: 'normal' };
+const START = { seed: 4343, at: '2026-06-01T08:00:00.000Z', name: 'Quarters', displayName: 'You', speed: 10, difficulty: 'baron' };
 
 scenario('quarters-scenario.json', START, async ({ started, now, play }) => {
   const at = (iso: string) => new Date(iso).getTime();

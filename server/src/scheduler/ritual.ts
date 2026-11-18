@@ -70,6 +70,8 @@ export const ritualHandlers: HandlerRegistry = {
     const { title, story } = data.bridge.endings.won;
     await tellEveryone(client, world, title, story, event.dueAt);
     await achieveAll(client, data, world, 'victory', event.dueAt);
+    // And the run's title: won as a Baron, a Viscount…
+    await achieveAll(client, data, world, `title_${world.difficulty}`, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   },
 };

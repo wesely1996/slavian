@@ -44,7 +44,7 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       players: { type: 'string', default: '1,2,3,4' },
-      difficulty: { type: 'string', default: 'normal' },
+      difficulty: { type: 'string', default: 'baron' },
       bots: { type: 'string', default: 'balanced' },
       runs: { type: 'string', default: '6' },
       jobs: { type: 'string', default: '4' },

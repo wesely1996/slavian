@@ -475,14 +475,15 @@ func _solo_form() -> void:
 	_content.add_child(UI.label(tr("Speed and difficulty"), UI.SMALL_SIZE, UI.MUTED))
 	var row := UI.hbox()
 	row.add_child(_form_options("speed", SPEED_LABELS.map(tr), 0))
-	row.add_child(_form_options("difficulty", GroupText.DIFFICULTY_LABELS.map(tr), 1))
+	row.add_child(_form_options("difficulty", GroupText.DIFFICULTY_LABELS.map(tr), 0))
+	row.add_child(UI.info(GroupText.difficulty_info(LocalData.load_data())))
 	_content.add_child(row)
 	_choice_buttons(LocalData.load_data())
 	var start := UI.primary(tr("Start a solo world"), func() -> void:
 		var who := String(Session.account.get("displayName", "")) if Session.is_logged_in() else ""
 		_start_solo({"name": world_name.text.strip_edges() if world_name.text.strip_edges() != "" else tr("A solo world"),
 			"displayName": who if who != "" else tr("You"), "speed": SPEEDS[int(_form.get("speed", 0))],
-			"difficulty": GroupText.DIFFICULTIES[int(_form.get("difficulty", 1))], "heroKind": _choice.hero, "clan": _choice.clan}), "icon/play")
+			"difficulty": GroupText.DIFFICULTIES[int(_form.get("difficulty", 0))], "heroKind": _choice.hero, "clan": _choice.clan}), "icon/play")
 	_needs_choices(start)
 	_content.add_child(start)
 
@@ -597,13 +598,14 @@ func _friends_form() -> void:
 	var row := UI.hbox()
 	row.add_child(_form_options("players", range(1, 7).map(func(n: int) -> String: return tr_n("%d player", "%d players", n) % n), 1))
 	row.add_child(_form_options("speed", SPEED_LABELS.map(tr), 0))
-	row.add_child(_form_options("difficulty", GroupText.DIFFICULTY_LABELS.map(tr), 1))
+	row.add_child(_form_options("difficulty", GroupText.DIFFICULTY_LABELS.map(tr), 0))
+	row.add_child(UI.info(GroupText.difficulty_info(LocalData.load_data())))
 	_content.add_child(row)
 	if not await _choices_with_data():
 		return
 	var create := UI.primary(tr("Create world"), func() -> void:
 		var typed := world_name.text.strip_edges()
-		_create_world(typed if typed != "" else world_name.placeholder_text, int(_form.get("players", 1)) + 1, SPEEDS[int(_form.get("speed", 0))], GroupText.DIFFICULTIES[int(_form.get("difficulty", 1))]))
+		_create_world(typed if typed != "" else world_name.placeholder_text, int(_form.get("players", 1)) + 1, SPEEDS[int(_form.get("speed", 0))], GroupText.DIFFICULTIES[int(_form.get("difficulty", 0))]))
 	_needs_choices(create)
 	_content.add_child(create)
 
@@ -649,7 +651,7 @@ func _login(display_name: String) -> void:
 	_render(_page)
 
 
-func _create_world(world_name: String, max_players: int, speed: int, difficulty := "normal") -> void:
+func _create_world(world_name: String, max_players: int, speed: int, difficulty := "baron") -> void:
 	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
 	_handle_world_response(await _with_choices(response))
 

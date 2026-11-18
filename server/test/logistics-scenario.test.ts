@@ -6,7 +6,7 @@
 // turned on their way out; a hero's quest called off.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Roads', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Roads', displayName: 'You', speed: 50, difficulty: 'baron' };
 const load = (wood: number, stone = 0, grain = 0, iron = 0) => ({ wood, stone, grain, iron });
 
 scenario('logistics-scenario.json', START, async ({ play }) => {

@@ -10,29 +10,40 @@ const quiet = { start: 22 * 60, end: 7 * 60, utcOffsetMinutes: 120 };
 
 describe('difficulty', () => {
   const base = { players: 2, villages: 2, armyAttack: 0, waveIndex: 3 };
-  const normal = data.difficulty.presets.normal.waveScale;
+  const normal = data.difficulty.presets.baron.waveScale;
 
   it('scales waves by preset, between floor and cap', () => {
-    expect(waveFactor(data, 'normal', base)).toBeCloseTo(normal);
-    expect(waveFactor(data, 'story', base)).toBe(0.7);
-    expect(waveFactor(data, 'nightmare', base)).toBe(1.5);
+    expect(waveFactor(data, 'baron', base)).toBeCloseTo(normal);
+    expect(waveFactor(data, 'count', base)).toBe(1.5);
+    expect(waveFactor(data, 'duke', base)).toBe(2);
     // A huge group hits the cap; nothing goes below the floor.
-    expect(waveFactor(data, 'normal', { ...base, villages: 40 })).toBe(data.difficulty.presets.normal.maxFactor);
-    expect(waveFactor(data, 'story', { ...base, players: 0 })).toBeGreaterThanOrEqual(data.difficulty.presets.story.floor);
+    expect(waveFactor(data, 'baron', { ...base, villages: 40 })).toBe(data.difficulty.presets.baron.maxFactor);
+    expect(waveFactor(data, 'baron', { ...base, players: 0 })).toBeGreaterThanOrEqual(data.difficulty.presets.baron.floor);
+  });
+
+  it('gets harder title by title, Baron to Duke', () => {
+    const titles = ['baron', 'viscount', 'count', 'marquess', 'duke'] as const;
+    for (let i = 1; i < titles.length; i++) {
+      const easier = data.difficulty.presets[titles[i - 1]!];
+      const harder = data.difficulty.presets[titles[i]!];
+      expect(harder.waveScale).toBeGreaterThan(easier.waveScale);
+      expect(harder.campRate).toBeGreaterThan(easier.campRate);
+      expect(harder.graceWaves).toBeLessThanOrEqual(easier.graceWaves);
+    }
   });
 
   it('grows waves with extra villages and an army above the curve', () => {
-    expect(waveFactor(data, 'normal', { ...base, villages: 4 })).toBeCloseTo(1.5 * normal);
+    expect(waveFactor(data, 'baron', { ...base, villages: 4 })).toBeCloseTo(1.5 * normal);
     const expected = 2 * data.difficulty.power.attackPerPlayer * (1 + data.difficulty.power.growthPerWave * 3);
-    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected })).toBeCloseTo(normal);
-    expect(waveFactor(data, 'normal', { ...base, armyAttack: expected * 2 })).toBeCloseTo(1.5 * normal);
+    expect(waveFactor(data, 'baron', { ...base, armyAttack: expected })).toBeCloseTo(normal);
+    expect(waveFactor(data, 'baron', { ...base, armyAttack: expected * 2 })).toBeCloseTo(1.5 * normal);
   });
 
   it('sets how many camps rise and how hordes decide', () => {
-    expect(campsPerWave(data, 'normal', 0.99)).toBe(1);
-    expect(campsPerWave(data, 'story', 0.2)).toBe(1);
-    expect(campsPerWave(data, 'story', 0.8)).toBe(0);
-    expect(campsPerWave(data, 'nightmare', 0.5)).toBe(2);
+    expect(campsPerWave(data, 'baron', 0.99)).toBe(1);
+    expect(campsPerWave(data, 'viscount', 0.2)).toBe(2);
+    expect(campsPerWave(data, 'viscount', 0.8)).toBe(1);
+    expect(campsPerWave(data, 'count', 0.5)).toBe(2);
     const raze = { front: 'south' as const, waveIndex: 1, hordeNow: 60, hordeInitial: 80, helpNearby: 10, rampageLeftMs: 1e9, worldSpeed: 1 };
     expect(decideRaze(data, raze).choice).toBe('raid');
     expect(decideRaze(data, { ...raze, graceWaves: 0 }).choice).toBe('raze');

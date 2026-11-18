@@ -5,7 +5,7 @@
   "name": "Arch",
   "displayName": "You",
   "speed": 50,
-  "difficulty": "normal"
+  "difficulty": "baron"
  },
  "steps": [
   {
@@ -896,7 +896,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": null,
     "endedAt": null,
@@ -3474,7 +3474,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": null,
     "endedAt": null,
@@ -6146,7 +6146,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": null,
     "endedAt": null,
@@ -8947,7 +8947,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": null,
@@ -11771,7 +11771,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": null,
@@ -14583,7 +14583,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": "2026-06-01T09:24:48.000Z",
@@ -15262,6 +15262,11 @@
      {
       "accountId": 1,
       "achievement": "victory",
+      "earnedAt": "2026-06-01T09:24:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "title_baron",
       "earnedAt": "2026-06-01T09:24:48.000Z"
      }
     ],
@@ -17268,7 +17273,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": "2026-06-01T09:24:48.000Z",
@@ -17947,6 +17952,11 @@
      {
       "accountId": 1,
       "achievement": "victory",
+      "earnedAt": "2026-06-01T09:24:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "title_baron",
       "earnedAt": "2026-06-01T09:24:48.000Z"
      }
     ],
@@ -19953,7 +19963,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": "2026-06-01T09:24:48.000Z",
@@ -20632,6 +20642,11 @@
      {
       "accountId": 1,
       "achievement": "victory",
+      "earnedAt": "2026-06-01T09:24:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "title_baron",
       "earnedAt": "2026-06-01T09:24:48.000Z"
      }
     ],
@@ -22638,7 +22653,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": "2026-06-01T09:24:48.000Z",
@@ -23317,6 +23332,11 @@
      {
       "accountId": 1,
       "achievement": "victory",
+      "earnedAt": "2026-06-01T09:24:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "title_baron",
       "earnedAt": "2026-06-01T09:24:48.000Z"
      }
     ],
@@ -25323,7 +25343,7 @@
     "sanctity": 100,
     "embers": 0,
     "hatred": {},
-    "difficulty": "normal",
+    "difficulty": "baron",
     "quietHours": null,
     "ritualAt": "2026-06-01T09:11:36.000Z",
     "endedAt": "2026-06-01T09:24:48.000Z",
@@ -26002,6 +26022,11 @@
      {
       "accountId": 1,
       "achievement": "victory",
+      "earnedAt": "2026-06-01T09:24:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "title_baron",
       "earnedAt": "2026-06-01T09:24:48.000Z"
      }
     ],
@@ -27996,6 +28021,15 @@
    "response": {
     "notifications": [
      {
+      "id": 25,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Baron of the Bridge",
+      "body": "Win a run as a Baron.",
+      "createdAt": "2026-06-01T09:24:48.000Z",
+      "read": false
+     },
+     {
       "id": 24,
       "kind": "achievement",
       "tier": "push",
@@ -28212,7 +28246,7 @@
       "read": false
      }
     ],
-    "unread": 24,
+    "unread": 25,
     "serverTime": "2026-06-01T10:10:00.000Z"
    }
   }

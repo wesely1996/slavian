@@ -567,6 +567,8 @@ export const ACHIEVEMENTS = [
   'hero_quest', 'army_quest', 'second_village', 'fort_built', 'bridge_stage',
   'hero_fallen', 'hordes_united', 'stronghold_sacked', 'village_ruined', 'boat_built', 'victory',
   'ritual_broken', 'avatar_risen', 'avatar_slain',
+  // A run won on each difficulty title.
+  'title_baron', 'title_viscount', 'title_count', 'title_marquess', 'title_duke',
 ] as const;
 export type Achievement = (typeof ACHIEVEMENTS)[number];
 const achievementsFileSchema = z.object({
@@ -798,10 +800,13 @@ const raidsFileSchema = z.object({
 export type RaidsData = z.infer<typeof raidsFileSchema>;
 
 
-export const DIFFICULTIES = ['story', 'normal', 'hard', 'nightmare'] as const;
+// Hereditary titles, easiest first (data/difficulty.json).
+export const DIFFICULTIES = ['baron', 'viscount', 'count', 'marquess', 'duke'] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 const presetSchema = z.object({
   name: z.string(),
+  // What the title means, in a line (the numbers are spelled out by the client).
+  description: z.string(),
   waveScale: z.number().positive(),
   floor: z.number().positive(),
   maxFactor: z.number().positive(),

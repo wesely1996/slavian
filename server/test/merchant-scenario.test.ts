@@ -6,7 +6,7 @@
 // and one without a Caravan Yard.
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 5151, at: '2026-06-01T08:00:00.000Z', name: 'Merchants', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 5151, at: '2026-06-01T08:00:00.000Z', name: 'Merchants', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('merchant-scenario.json', START, async ({ play }) => {
   const merchant = (destinationVillageId: number | null) =>

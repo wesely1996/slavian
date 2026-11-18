@@ -5,7 +5,7 @@
 import { neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4545, at: '2026-06-01T08:00:00.000Z', name: 'Market', displayName: 'You', speed: 10, difficulty: 'normal' };
+const START = { seed: 4545, at: '2026-06-01T08:00:00.000Z', name: 'Market', displayName: 'You', speed: 10, difficulty: 'baron' };
 
 scenario('market-scenario.json', START, async ({ started, play }) => {
   const world = '/v1/worlds/-1';

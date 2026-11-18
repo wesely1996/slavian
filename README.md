@@ -55,7 +55,7 @@ npm run worker   # standalone scheduler worker (with INLINE_WORKER=0 on the API)
 DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim -- --players 2 --bots balanced,turtle --difficulty normal --runs 3
 ```
 
-Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled over the players), `--difficulty` (`story`, `normal`, `hard`, `nightmare`), `--runs`, `--speed` (world speed, default 20), `--days` (game days before giving up, default 45), `--json` (one JSON line per run), `--seed N` (the map seed of the first run, counting up; random maps without it), `--verbose` (a line per game day and the most common refused orders). Bots build (walls and towers too), keep a garrison and go defensive while a horde is coming, explore sites, clear camps, found villages, tithe to the bridge and chase its quests; refused orders are normal and only counted.
+Options: `--players 1-6`, `--bots` (`turtle`, `expander`, `balanced`, cycled over the players), `--difficulty` (`baron`, `viscount`, `count`, `marquess`, `duke`), `--runs`, `--speed` (world speed, default 20), `--days` (game days before giving up, default 45), `--json` (one JSON line per run), `--seed N` (the map seed of the first run, counting up; random maps without it), `--verbose` (a line per game day and the most common refused orders). Bots build (walls and towers too), keep a garrison and go defensive while a horde is coming, explore sites, clear camps, found villages, tithe to the bridge and chase its quests; refused orders are normal and only counted.
 
 `npm run sim:matrix` plays many runs at once for win rates: every player count and preset asked for, `--runs` each on map seeds 1, 2, … (so two tunings play the same maps), over `--jobs` processes, then a table of wins, losses (and the front that struck last), unfinished runs, the days to win and villages lost. A run takes a few minutes, so a large matrix takes an hour or more.
 
@@ -74,7 +74,7 @@ DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:m
 | `GET` | `/v1/costs` | This month's server costs, donations and the donation link (`site/costs.json`). |
 | `POST` | `/v1/reports` | Send a bug report `{ message, worldId, state }`; the app also saves it as a file. |
 | `GET` | `/v1/data` | Game data (buildings, terrain, units, enemies, wave, scouting, battle, logistics, expansion, research, hero and standing-order settings). |
-| `POST` | `/v1/worlds` | Create a world (lobby) with an invite code: `{ name, maxPlayers, speed, difficulty }` (`story`, `normal`, `hard` or `nightmare`). |
+| `POST` | `/v1/worlds` | Create a world (lobby) with an invite code: `{ name, maxPlayers, speed, difficulty }` (`baron`, `viscount`, `count`, `marquess` or `duke`, easiest first). |
 | `PUT` | `/v1/worlds/:id/quiet` | Host only: the group's quiet hours `{ start, end, utcOffsetMinutes }` (minutes after local midnight; `null` start/end: none). Hordes arriving inside them wait until they end. |
 | `POST` | `/v1/worlds/join` | Join by `{ inviteCode, clan?, hero? }`, in the lobby or while the run is under way (a village is founded for the newcomer). |
 | `GET` | `/v1/worlds/:id` | Full world: members, villages, announced waves, scout missions and reports, ruin searches, recent battles, map, the Kalinov Bridge, `ritualAt` (when Ritual Night's hordes set out) and, once a run is won or lost, `endedAt` and a `run` summary. A finished run stays readable; every command in it answers "This run is over". |

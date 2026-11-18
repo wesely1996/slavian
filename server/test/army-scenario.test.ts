@@ -7,7 +7,7 @@
 import { hexDistance, neighbors, hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Armies', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Armies', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('army-scenario.json', START, async ({ started, now, play }) => {
   const at = (iso: string) => new Date(iso).getTime();

@@ -42,7 +42,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	var seed_value := int(params.get("seed", randi() & 0x7fffffff))
 	var world := {
 		"id": id, "name": String(params.get("name", "Solo")), "status": "running", "speed": speed,
-		"difficulty": String(params.get("difficulty", "normal")), "seed": seed_value, "maxPlayers": 1,
+		"difficulty": String(params.get("difficulty", "baron")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "merchantReadyAt": null}],
@@ -1630,6 +1630,8 @@ func _load_all() -> void:
 				m.merge({"rallyVillageId": null})
 				# Worlds saved before merchant caravans.
 				m.merge({"merchantReadyAt": null})
+			# Worlds saved before the difficulty titles (migration 075).
+			world.difficulty = {"story": "baron", "normal": "baron", "hard": "viscount", "nightmare": "count"}.get(String(world.get("difficulty", "baron")), String(world.get("difficulty", "baron")))
 			# Worlds saved before generals.
 			world.merge({"generals": []})
 			# Worlds saved before ruin searches.

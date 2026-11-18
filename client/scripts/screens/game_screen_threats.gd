@@ -413,7 +413,7 @@ func _fronts_tab() -> void:
 
 ## The group: difficulty and quiet hours, everyone's clan, and hand-overs.
 func _group_tab() -> void:
-	var difficulty := tr(GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "normal"))))
+	var difficulty := tr(GroupText.difficulty(Game.data, String(Game.world.get("difficulty", "baron"))))
 	_panel_body.add_child(UI.label(tr("%s difficulty") % difficulty, UI.SMALL_SIZE, UI.MUTED))
 	_clan_section()
 

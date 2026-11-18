@@ -132,7 +132,7 @@ const createWorldBody = z.object({
   name: z.string().trim().min(1).max(48),
   maxPlayers: z.number().int().min(1).max(6).default(6),
   speed: z.number().min(1).max(100).default(1),
-  difficulty: z.enum(DIFFICULTIES).default('normal'),
+  difficulty: z.enum(DIFFICULTIES).default('baron'),
 });
 // A run under way can be joined too: the clan and hero chosen go with it.
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.string().max(32).optional(), hero: z.string().max(32).optional() });

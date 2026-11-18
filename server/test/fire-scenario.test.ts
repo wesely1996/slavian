@@ -6,7 +6,7 @@
 import { hex, hexDistance, type Hex } from '../src/sim/hex.js';
 import { MINUTE, scenario } from './scenario.js';
 
-const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Fires', displayName: 'You', speed: 50, difficulty: 'normal' };
+const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Fires', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 type Step = { q: number; r: number };
 const steps = (path: unknown): Step[] => ((path ?? []) as unknown[]).map((s) => (Array.isArray(s) ? { q: s[0] as number, r: s[1] as number } : (s as Step)));
