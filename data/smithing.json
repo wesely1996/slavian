@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The Blacksmith (buildings.json blacksmith): each player forges improvements for their own units, one at a time, from a village with a Blacksmith; what is forged serves all that player's villages and armies. Every trainable unit has a `line` for each stat it has (attack, defense and health only where the unit's own is above 0; speed for every unit that moves): each line has `levels` levels of `perLevel` more of that stat (added to the group's research bonuses). Level n needs a Blacksmith of level `smithyLevels`[n-1] in the village forging it. It costs the unit's own training cost x `costFactor` x n, and takes (`hours.base` + `hours.perTier` x the unit's requiresLevel) x n game hours (divided by world speed), shortened by the village's smithTime (the Blacksmith's level).",
+  "_comment": "The Blacksmith (buildings.json blacksmith): each player forges improvements for their own units, one at a time, from a village with a Blacksmith; what is forged serves all that player's villages and armies. Every trainable unit has a `line` for each stat it has (attack, defense and health only where the unit's own is above 0; speed for every unit that moves): each line has `levels` levels of `perLevel` more of that stat (added to the group's research bonuses). Level n needs a Blacksmith of level `smithyLevels`[n-1] in the village forging it. It costs the unit's own training cost x `costFactor` x n, and takes (`hours.base` + `hours.perTier` x the unit's requiresLevel) x n game hours (divided by world speed), shortened by the village's smithTime (the Blacksmith's level). The afflictions (burn, poison; battle.json afflictions) are lines of one level each, priced and timed as level `costLevel`, needing a Blacksmith of `smithyLevels`: fire arrows for archers and siege engines, poisoned blades for infantry and cavalry; a unit whose blows already carry it (inflicts) has no such line.",
   "levels": 3,
   "perLevel": 0.1,
   "smithyLevels": [
@@ -29,6 +29,32 @@
     "speed": {
       "name": "Better harness",
       "description": "The unit marches faster; an army keeps the pace of its slowest unit."
+    },
+    "burn": {
+      "name": "Fire arrows",
+      "description": "Its blows set the foe burning: a tenth of each hit hurts again in each of the next three rounds.",
+      "levels": 1,
+      "smithyLevels": [
+        10
+      ],
+      "costLevel": 3,
+      "families": [
+        "archers"
+      ],
+      "engines": true
+    },
+    "poison": {
+      "name": "Poisoned blades",
+      "description": "Its blows poison: the side it strikes fights 15% weaker in attack and defense for the next two rounds.",
+      "levels": 1,
+      "smithyLevels": [
+        10
+      ],
+      "costLevel": 3,
+      "families": [
+        "infantry",
+        "cavalry"
+      ]
     }
   }
 }

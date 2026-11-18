@@ -445,7 +445,7 @@ func _smithy_section(village: Dictionary, level: int) -> void:
 	var clan: Variant = member.get("clan")
 	var units: Array = Game.data.units.units.keys().filter(func(u: String) -> bool:
 		var def: Dictionary = Game.data.units.units[u]
-		return (def.get("clan") == null or def.get("clan") == clan) and not _smith_lines(u).is_empty())
+		return (def.get("clan") == null or def.get("clan") == clan) and not LocalSmithing.smith_lines(Game.data, u).is_empty())
 	if not _smith_unit in units:
 		_smith_unit = units[0]
 	var picker := UI.options(units.map(func(u: String) -> String: return tr(Game.data.units.units[u].name)), units.find(_smith_unit))
@@ -457,27 +457,35 @@ func _smithy_section(village: Dictionary, level: int) -> void:
 	var def: Dictionary = Game.data.units.units[unit]
 	var effects: Dictionary = _building_def("blacksmith").get("effects", {})
 	var factor := maxf(0.1, 1.0 + float(village.get("bonuses", {}).get("smithTime", 0.0)) + float(effects.get("smithTime", 0.0)) * level)
-	for line in _smith_lines(unit):
+	# What its blows carry already (battle.json afflictions).
+	for own in def.get("inflicts", []):
+		_panel_body.add_child(UI.label(tr("Its blows set the foe burning already") if own == "burn" else tr("Its blows poison already"), UI.SMALL_SIZE, UI.MUTED))
+	for line in LocalSmithing.smith_lines(Game.data, unit):
 		var have_level := int(smithing.get(unit, {}).get(line, 0))
+		var levels := LocalSmithing.line_levels(Game.data, line)
 		var info := UI.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var share := roundi(have_level * float(rules.perLevel) * 100.0)
-		info.add_child(UI.label(tr("%s  %d/%d") % [tr(rules.lines[line].name), have_level, int(rules.levels)] + (tr(" (+%d%%)") % share if share > 0 else "")))
+		var heading := tr(rules.lines[line].name)
+		if LocalSmithing.is_affliction(line):
+			heading = ("✓ " if have_level > 0 else "") + heading
+		else:
+			heading = tr("%s  %d/%d") % [heading, have_level, levels] + (tr(" (+%d%%)") % share if share > 0 else "")
+		info.add_child(UI.label(heading))
 		var row := UI.hbox(8)
 		row.add_child(info)
 		_panel_body.add_child(row)
 		var next := have_level + 1
-		if next > int(rules.levels):
+		if LocalSmithing.is_affliction(line) or next > levels:
 			info.add_child(UI.label(tr(rules.lines[line].description), UI.SMALL_SIZE, UI.MUTED))
+		if next > levels:
 			continue
-		var needs := int(rules.smithyLevels[next - 1])
+		var needs := LocalSmithing.smithy_level_for(Game.data, line, next)
 		if level < needs:
-			info.add_child(UI.label(tr("Level %d needs a Blacksmith of level %d") % [next, needs], UI.SMALL_SIZE, UI.MUTED))
+			info.add_child(UI.label(tr("Level %d needs a Blacksmith of level %d") % [next, needs] if levels > 1 else tr("Needs a Blacksmith of level %d") % needs, UI.SMALL_SIZE, UI.MUTED))
 			continue
-		var cost := {}
-		for kind in Ledger.KINDS:
-			cost[kind] = roundi(float(def.cost[kind]) * float(rules.costFactor) * next)
-		var hours := (float(rules.hours.base) + float(rules.hours.perTier) * float(def.requiresLevel)) * next
+		var cost := LocalSmithing.smith_cost(Game.data, unit, line, next)
+		var hours := (float(rules.hours.base) + float(rules.hours.perTier) * float(def.requiresLevel)) * LocalSmithing.priced_level(Game.data, line, next)
 		var seconds := hours * 3600.0 * factor / float(Game.world.speed)
 		var cost_line := UI.rich("")
 		info.add_child(cost_line)
@@ -489,12 +497,6 @@ func _smithy_section(village: Dictionary, level: int) -> void:
 			var have := Ledger.amounts_at(home.resources, Game.server_now())
 			forge.disabled = work != null or not Ledger.can_afford(have, cost)
 			return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
-
-
-## The lines a unit can be improved along: the stats it has.
-func _smith_lines(unit: String) -> Array:
-	var def: Dictionary = Game.data.units.units.get(unit, {})
-	return ["attack", "defense", "health", "speed"].filter(func(line: String) -> bool: return float(def.get(line, 0)) > 0)
 
 
 func _start_smithing(village_id: int, unit: String, line: String) -> void:

@@ -2,7 +2,7 @@
 // edge on a front's side, fights `depth` field battles in the enemy's lands
 // and then besieges the front's stronghold, carrying home what it takes.
 import type { GameData, Stance, TerrainId } from '../data/index.js';
-import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
+import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
@@ -118,13 +118,17 @@ export function raidBattle(
   let armyNow = { ...input.army };
   let enemyNow = { ...input.stage.enemy };
   const rounds = [];
+  // Burning and poison carry from round to round.
+  let afflictions = NO_AFFLICTIONS;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
       { units: armyNow, stance: input.armyStance, stats: armyStatsAt, home: false, champions },
       { units: enemyNow, stance: enemyStance, stats: enemyStatsAt, home: input.stage.stronghold },
       battleRng(input.seed, input.id + 0x30000, round),
+      afflictions,
     );
+    afflictions = result.afflictions;
     for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
     champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);

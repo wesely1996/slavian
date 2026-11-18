@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "A round takes roundMinutes of real time, whatever the world speed, so reinforcements can come. A unit's attack and defense are ranges: each round every unit type strikes with its attack × a roll within 1 ± statSpread, and every target type takes it on its defense × such a roll (a card shows 10–16 for 13 ± 25%). Damage = count × rolled attack × stance attack × matchup × counter × target share × casualtyScale; the target's rolled defense is armor, letting armorConstant / (armorConstant + defense) of it through (as armor does in an RPG); what lands, over the target's health (units.json, enemies.json) × stance defense × home bonus, is how many fall. A side breaks once it has lost retreatAt of its starting units (null: never): risk against reward, the earlier a stance breaks the more it gives. On the players' side every army fights in its own stance and breaks on its own losses (since it joined the battle), falling back home beaten (its hero wounded, its general killed) while the others fight on; a village's garrison fights in the village's stance, and a garrison that breaks stops fighting. The defenders lose once every army and the garrison has broken or fallen.",
+  "_comment": "A round takes roundMinutes of real time, whatever the world speed, so reinforcements can come. A unit's attack and defense are ranges: each round every unit type strikes with its attack × a roll within 1 ± statSpread, and every target type takes it on its defense × such a roll (a card shows 10–16 for 13 ± 25%). Damage = count × rolled attack × stance attack × matchup × counter × target share × casualtyScale; the target's rolled defense is armor, letting armorConstant / (armorConstant + defense) of it through (as armor does in an RPG); what lands, over the target's health (units.json, enemies.json) × stance defense × home bonus, is how many fall. A side breaks once it has lost retreatAt of its starting units (null: never): risk against reward, the earlier a stance breaks the more it gives. On the players' side every army fights in its own stance and breaks on its own losses (since it joined the battle), falling back home beaten (its hero wounded, its general killed) while the others fight on; a village's garrison fights in the village's stance, and a garrison that breaks stops fighting. The defenders lose once every army and the garrison has broken or fallen. Afflictions: a unit that burns (its own inflicts, or forged fire arrows) hurts its targets again with `burn.share` of its blow in each of the next `burn.rounds` rounds, through armor as any blow; a side struck by a unit that poisons fights at `poison.factor` of its attack and defense for the next `poison.rounds` rounds.",
   "roundMinutes": 10,
   "maxRounds": 12,
   "casualtyScale": 1,
@@ -24,5 +24,9 @@
     "offensive": { "balanced": 1.1, "hold_the_line": 0.9 },
     "balanced": { "defensive": 1.1 },
     "hold_the_line": { "offensive": 1.1, "defensive": 0.9 }
+  },
+  "afflictions": {
+    "burn": { "share": 0.1, "rounds": 3 },
+    "poison": { "factor": 0.85, "rounds": 2 }
   }
 }

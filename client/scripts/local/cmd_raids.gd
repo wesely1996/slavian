@@ -78,9 +78,12 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 	var army_now := army.duplicate()
 	var enemy_now: Dictionary = stage.enemy.duplicate()
 	var rounds: Array = []
+	# Burning and poison carry from round to round.
+	var afflictions := LocalBattle.no_afflictions()
 	for round in range(1, int(data.battle.maxRounds) + 1):
 		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": army_at, "home": false, "champions": fighting},
-			{"units": enemy_now, "stance": enemy_stance, "stats": enemy_at, "home": stage.stronghold}, LocalBattle.battle_rng(seed_value, id + 0x30000, round))
+			{"units": enemy_now, "stance": enemy_stance, "stats": enemy_at, "home": stage.stronghold}, LocalBattle.battle_rng(seed_value, id + 0x30000, round), afflictions)
+		afflictions = result.afflictions
 		for c in result.attackerFallen[0]:
 			fallen.append(c)
 		fighting = fighting.filter(func(c: Dictionary) -> bool: return not c.id in fallen)

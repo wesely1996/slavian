@@ -6,32 +6,59 @@ extends RefCounted
 ## adds perLevel to that unit's stat, for all the player's villages and armies.
 
 const BLACKSMITH := "blacksmith"
-const LINES := ["attack", "defense", "health", "speed"]
+const LINES := ["attack", "defense", "health", "speed", "burn", "poison"]
 
 
-## The lines a unit can be improved along: a stat it has.
+## A line that forges an affliction (burn, poison) rather than a stat.
+static func is_affliction(line: String) -> bool:
+	return line in LocalBattle.AFFLICTIONS
+
+
+## The lines a unit can be improved along: a stat it has, and an affliction
+## for the families (or engines) it serves, for a unit that strikes and
+## doesn't already carry it.
 static func smith_lines(data: Dictionary, unit: String) -> Array:
 	var def: Dictionary = data.units.units.get(unit, {})
 	if def.is_empty():
 		return []
-	return LINES.filter(func(line: String) -> bool: return float(def.get(line, 0)) > 0)
+	return LINES.filter(func(line: String) -> bool:
+		if not is_affliction(line):
+			return float(def.get(line, 0)) > 0
+		var rules: Dictionary = data.smithing.lines[line]
+		var serves: bool = def.family in rules.get("families", []) or (rules.get("engines", false) == true and def.get("engine", false) == true)
+		return serves and float(def.attack) > 0 and not line in def.get("inflicts", []))
+
+
+static func line_levels(data: Dictionary, line: String) -> int:
+	return int(data.smithing.lines[line].get("levels", data.smithing.levels))
+
+
+static func smithy_level_for(data: Dictionary, line: String, level: int) -> int:
+	var levels: Array = data.smithing.lines[line].get("smithyLevels", data.smithing.smithyLevels)
+	return int(levels[level - 1]) if level - 1 < levels.size() else 1
+
+
+## The level a line's `level` is priced and timed as.
+static func priced_level(data: Dictionary, line: String, level: int) -> int:
+	return int(data.smithing.lines[line].get("costLevel", 1)) + level - 1
 
 
 static func smith_level(smithing: Dictionary, unit: String, line: String) -> int:
 	return int(smithing.get(unit, {}).get(line, 0))
 
 
-static func smith_cost(data: Dictionary, unit: String, level: int) -> Dictionary:
+static func smith_cost(data: Dictionary, unit: String, line: String, level: int) -> Dictionary:
 	var def: Dictionary = data.units.units[unit]
+	var priced := priced_level(data, line, level)
 	var out := {}
 	for kind in LocalLedger.KINDS:
-		out[kind] = LocalWaves.js_round(float(def.cost[kind]) * float(data.smithing.costFactor) * level)
+		out[kind] = LocalWaves.js_round(float(def.cost[kind]) * float(data.smithing.costFactor) * priced)
 	return out
 
 
-static func smith_ms(data: Dictionary, unit: String, level: int, world_speed: float, bonuses: Dictionary = {}) -> int:
+static func smith_ms(data: Dictionary, unit: String, line: String, level: int, world_speed: float, bonuses: Dictionary = {}) -> int:
 	var def: Dictionary = data.units.units[unit]
-	var hours := (float(data.smithing.hours.base) + float(data.smithing.hours.perTier) * float(def.requiresLevel)) * level
+	var hours := (float(data.smithing.hours.base) + float(data.smithing.hours.perTier) * float(def.requiresLevel)) * priced_level(data, line, level)
 	return LocalWaves.js_round((hours * 3600000.0 * maxf(0.1, 1.0 + LocalVillage.bonus(bonuses, "smithTime"))) / world_speed)
 
 
@@ -45,10 +72,9 @@ static func next_smith_level(data: Dictionary, smithing: Dictionary, unit: Strin
 	if busy:
 		return LocalVillage.rule("Your Blacksmith is busy; one improvement at a time")
 	var level := smith_level(smithing, unit, line) + 1
-	if level > int(data.smithing.levels):
+	if level > line_levels(data, line):
 		return LocalVillage.rule("The %s's %s is as good as it gets" % [def.name, String(data.smithing.lines[line].name).to_lower()])
-	var levels: Array = data.smithing.smithyLevels
-	var needs := int(levels[level - 1]) if level - 1 < levels.size() else 1
+	var needs := smithy_level_for(data, line, level)
 	if smithy_level < needs:
 		return LocalVillage.rule("That needs a Blacksmith of level %d" % needs)
 	return {"level": level}
@@ -63,7 +89,7 @@ static func smithing_bonuses(data: Dictionary, smithing: Dictionary) -> Dictiona
 		for line in LINES:
 			var level := int(smithing[unit].get(line, 0))
 			if level > 0:
-				out["%s.unit.%s" % [line, unit]] = level * float(data.smithing.perLevel)
+				out["%s.unit.%s" % [line, unit]] = 1.0 if is_affliction(line) else level * float(data.smithing.perLevel)
 	return out
 
 
@@ -87,10 +113,10 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, b
 	if next.has("error"):
 		return next
 	var level := int(next.level)
-	var ledger := LocalLedger.spend(village.state.ledger, now, smith_cost(data, unit, level))
+	var ledger := LocalLedger.spend(village.state.ledger, now, smith_cost(data, unit, line, level))
 	if ledger.has("missing"):
 		return ledger
-	var completes_at := now + smith_ms(data, unit, level, world.speed, LocalVillage.village_bonuses(data, village.state))
+	var completes_at := now + smith_ms(data, unit, line, level, world.speed, LocalVillage.village_bonuses(data, village.state))
 	var work := {"unit": unit, "line": line, "level": level, "villageId": village.id, "completesAt": LocalTime.iso(completes_at)}
 	member.smithWork = work
 	server.schedule(world, completes_at, "smith_done", {"accountId": int(member.accountId)})
@@ -116,7 +142,7 @@ static func on_smith_done(server: LocalServer, world: Dictionary, event: Diction
 	server.refresh_bonuses(world, account_id, int(event.dueAt), changed)
 	LocalInbox.tell(server, world, account_id, {"kind": "build_done", "tier": "digest",
 		"title": "The Blacksmith finished: {unit}, {line} {level}",
-		"body": "{line} for every {unit} of yours: +{share}% from now on.",
+		"body": "{line} for every {unit} of yours from now on." if is_affliction(String(work.line)) else "{line} for every {unit} of yours: +{share}% from now on.",
 		"vars": {"unit": data.units.units.get(work.unit, {}).get("name", work.unit), "line": data.smithing.lines[work.line].name, "level": int(work.level),
 			"share": LocalWaves.js_round(int(work.level) * float(data.smithing.perLevel) * 100)}}, int(event.dueAt))
 	changed.append(["world"])
