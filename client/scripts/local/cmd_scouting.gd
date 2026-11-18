@@ -94,9 +94,9 @@ static func scout_travel_ms(data: Dictionary, land: Dictionary, from: Vector2i, 
 	var slowest := INF
 	for unit in units:
 		if int(units[unit]) > 0:
-			slowest = minf(slowest, float(data.units.units[unit].speed))
+			slowest = minf(slowest, LocalSmithing.unit_speed(data, unit, bonuses))
 	if slowest == INF:
-		slowest = float(data.units.units[SCOUT].speed)
+		slowest = LocalSmithing.unit_speed(data, SCOUT, bonuses)
 	var speed := slowest * (1.0 + float(bonuses.get("scoutSpeed", 0.0)))
 	return maxi(1, LocalWaves.js_round(((cost / speed) * LocalTime.MS_PER_HOUR) / world_speed))
 
@@ -443,7 +443,7 @@ static func found_village(server: LocalServer, world: Dictionary, village: Dicti
 	var state := LocalVillage.send_away(data, village.state, SETTLER, settlers, now, world.speed)
 	if state.has("error"):
 		return LocalVillage.rule("Founding a village takes %d settlers at home" % settlers)
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), home, cell, float(data.units.units[SETTLER].speed), world.speed)
+	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), home, cell, LocalSmithing.unit_speed(data, SETTLER, village.state.bonuses), world.speed)
 	if path == null:
 		return LocalVillage.rule("No road leads there")
 	var travel := int(path[-1].atMs)

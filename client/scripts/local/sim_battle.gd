@@ -29,8 +29,10 @@ static func defense_factor(bonuses: Dictionary, family: String, home: bool) -> f
 static func player_stats(data: Dictionary, bonuses: Dictionary = {}, home := false) -> Callable:
 	return func(unit: String) -> Dictionary:
 		var def: Dictionary = data.units.units.get(unit, {"attack": 0, "defense": 1, "health": 1, "family": "infantry"})
-		var stats := {"family": def.family, "attack": float(def.attack) * attack_factor(bonuses, def.family),
-			"defense": float(def.defense) * defense_factor(bonuses, def.family, home), "health": float(def.health)}
+		# The family's research and the unit's own forging (smithing.json) add up.
+		var stats := {"family": def.family, "attack": float(def.attack) * (attack_factor(bonuses, def.family) + LocalVillage.bonus(bonuses, "attack.unit." + String(unit))),
+			"defense": float(def.defense) * (defense_factor(bonuses, def.family, home) + LocalVillage.bonus(bonuses, "defense.unit." + String(unit))),
+			"health": float(def.health) * (1.0 + LocalVillage.bonus(bonuses, "health.unit." + String(unit)))}
 		if def.get("counters") != null:
 			stats.counters = def.counters
 		return stats

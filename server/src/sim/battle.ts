@@ -78,9 +78,10 @@ export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false)
     const def = data.units.units[unit] ?? { attack: 0, defense: 1, health: 1, family: 'infantry' as const };
     return {
       family: def.family,
-      attack: def.attack * attackFactor(bonuses, def.family),
-      defense: def.defense * defenseFactor(bonuses, def.family, home),
-      health: def.health,
+      // The family's research and the unit's own forging (smithing.json) add up.
+      attack: def.attack * (attackFactor(bonuses, def.family) + bonus(bonuses, `attack.unit.${unit}`)),
+      defense: def.defense * (defenseFactor(bonuses, def.family, home) + bonus(bonuses, `defense.unit.${unit}`)),
+      health: def.health * (1 + bonus(bonuses, `health.unit.${unit}`)),
       ...('counters' in def && def.counters ? { counters: def.counters } : {}),
     };
   };

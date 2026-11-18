@@ -1690,7 +1690,7 @@ CHARGES.update({"jelen": stag, "rys": lynx, "medved": bear, "bobr": beaver, "sok
 # --- Village interior: buildings and fields in three stages --------------------
 # Stage 1: levels 1-3, stage 2: 4-7, stage 3: 8 and up (client Art.building_id).
 
-VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge", "masons_guild", "workers_huts", "grain_silo"]
+VILLAGE_BUILDINGS = ["elder_hall", "storehouse", "barracks", "scout_lodge", "caravan_yard", "settlers_lodge", "academy", "granary_temple", "stone_redoubt", "longhouse_hall", "fisherman_hut", "water_wheel", "windmill", "ranch", "mountain_lodge", "masons_guild", "workers_huts", "grain_silo", "blacksmith"]
 # The Stables and the Shooting Range, drawn after the rest (their gradient
 # ids come last).
 MILITARY_BUILDINGS = ["stables", "shooting_range", "heroes_hall"]
@@ -1716,6 +1716,9 @@ def sign(s, x, y, emblem):
             s.line(x, y + 7, x + dx, y - 6, stroke="#f2cf72", sw=2.5)
     elif emblem == "horseshoe":
         s.path(f"M{x - 6},{y + 7} L{x - 6},{y - 1} Q{x - 6},{y - 7} {x},{y - 7} Q{x + 6},{y - 7} {x + 6},{y - 1} L{x + 6},{y + 7}", "none", stroke=pale, sw=3)
+    elif emblem == "hammer":
+        s.line(x - 5, y + 7, x + 3, y - 3, stroke=pale, sw=2.2)
+        s.path(f"M{x - 1},{y - 8} L{x + 8},{y - 1} L{x + 5},{y + 2} L{x - 4},{y - 5} Z", pale, stroke="none", sw=0)
     elif emblem == "bow":
         s.path(f"M{x - 4},{y - 8} Q{x + 8},{y} {x - 4},{y + 8}", "none", stroke=pale, sw=2.5)
         s.line(x - 7, y, x + 8, y, stroke=pale, sw=2)
@@ -1968,6 +1971,30 @@ def building(kind, stage):
             s.line(x - 9, 112 - h // 2, x + 9, 112 - h // 2, stroke="#7a6446", sw=1.2)
         for i in range(stage + 1):
             s.circle(14 + i * 7, 116, 3.2, "#c9a46a", stroke="#7a5a33", sw=0.8)
+    elif kind == "blacksmith":
+        # An open-fronted forge: a smithy with a glowing hearth under its
+        # chimney, an anvil on a stump before it, a hammer sign; finished
+        # blades on a rack (stage 2) and a second hearth's smoke (stage 3).
+        house(s, 48, 110, 52 * big, 28 * big, roof="slate" if stage >= 2 else "thatch", wall="plaster" if stage == 3 else "wood", windows=0)
+        s.rect(66, 66 - stage * 3, 9, 26 + stage * 3, s.lin([(0, "#9a948a"), (1, "#5c574f")], 0, 0, 1, 0), stroke="#3f3a34", sw=1)
+        s.path(f"M70,{64 - stage * 3} Q64,{52 - stage * 3} 72,{44 - stage * 3} Q80,{36 - stage * 3} 72,{28 - stage * 3}", "none", stroke="#bfb7a8", sw=3, opacity=0.6)
+        s.path("M38,110 L38,96 Q48,88 58,96 L58,110 Z", "#2b211a", stroke="none", sw=0)
+        s.ellipse(48, 106, 8, 4, s.rad([(0, "#fff1b8"), (0.4, GLOW), (1, "#c9502c")]), stroke="none", sw=0)
+        # The anvil on its stump.
+        s.rect(86, 104, 12, 10, s.lin([(0, "#a8794a"), (1, "#5b3f25")], 0, 0, 1, 0), stroke="none", sw=0, rx=2)
+        s.path("M80,98 L104,98 L100,104 L84,104 Z", s.lin([(0, "#8a8f96"), (1, "#3c4046")], 0, 0, 0, 1), stroke="#2b2e33", sw=0.8)
+        s.path("M80,98 Q74,99 76,102 L84,102 Z", "#5d6268", stroke="none", sw=0)
+        s.line(98, 96, 108, 84, stroke="#8b5a2b", sw=2)
+        s.rect(104, 80, 9, 5, "#4c5157", stroke="none", sw=0, rx=1)
+        if stage >= 2:
+            s.line(112, 112, 112, 88, stroke="#6e4b2c", sw=2)
+            s.line(122, 112, 122, 88, stroke="#6e4b2c", sw=2)
+            s.line(110, 92, 124, 92, stroke="#8b5a2b", sw=1.8)
+            for i in range(stage + 1):
+                s.line(113 + i * 2.6, 92, 113 + i * 2.6, 110, stroke="#c9ced4", sw=1.2)
+        if stage == 3:
+            s.path("M30,80 Q24,70 32,62 Q38,54 32,46", "none", stroke="#bfb7a8", sw=3, opacity=0.5)
+        sign(s, 22, 90, "hammer")
     elif kind == "longhouse_hall":
         house(s, 52, 110, 76 * big, 22 * big, roof="thatch", wall="wood", windows=2)
         for i in range(stage):

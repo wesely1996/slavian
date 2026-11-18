@@ -1316,6 +1316,8 @@ const VILLAGE_TOP := 170.0
 ## What the village's Market does: trade one resource for another, and buy
 ## the hero's spare gear.
 var _trade := {"give": "wood", "get": "iron", "amount": 100}
+## The unit picked at the Blacksmith.
+var _smith_unit := "spearman"
 
 ## A bounty being put together: step 1 what you give, step 2 what you want.
 var _bounty := {"step": 1, "offer": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "want": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "items": []}

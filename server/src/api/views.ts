@@ -732,6 +732,10 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       rallyVillageId: m.rallyVillageId,
       // When they may send their next merchant caravan (null: now).
       merchantReadyAt: m.merchantReadyAt?.toISOString() ?? null,
+      // Their Blacksmith's forged levels (unit -> line -> level) and the
+      // improvement being forged ({unit, line, level, villageId, completesAt} or null).
+      smithing: m.smithing,
+      smithWork: m.smithWork,
       // Their own Svarog's Embers (the world's `embers` is everyone's together).
       embers: m.embers,
       // When their scouts may next search for ruins (null: never searched).

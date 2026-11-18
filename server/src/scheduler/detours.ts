@@ -1,3 +1,6 @@
+import type { Bonuses } from '../sim/research.js';
+import { ownerBonuses } from './armies.js';
+import { unitSpeed } from '../sim/smithing.js';
 // A forest has caught fire (field.json terraform burn): whatever is on the
 // road and would enter it while it burns, a horde, an army, a caravan or
 // settlers, finishes the hex it is crossing and goes round it to where it
@@ -115,7 +118,8 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
   for (const army of await listArmies(client, world.id, 0)) {
     if (army.status === 'marching' && entersBefore(army.path, army.departsAt, at, cell, until)) {
       const dest = hex(army.targetQ, army.targetR);
-      const path = bestWay(army.path, at.getTime() - army.departsAt.getTime(), cell, until.getTime() - army.departsAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, dest, at, world)));
+      const bonuses = await ownerBonuses(client, army);
+      const path = bestWay(army.path, at.getTime() - army.departsAt.getTime(), cell, until.getTime() - army.departsAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, dest, at, world, bonuses)));
       const moved: Army = { ...army, path, arrivesAt: new Date(army.departsAt.getTime() + path.at(-1)!.atMs) };
       await saveArmy(client, moved);
       await scheduleEvent(client, world.id, moved.arrivesAt, 'army_arrive', { armyId: army.id });
@@ -124,7 +128,7 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
       if (!entersBefore(road, army.leavesAt, at, cell, until)) continue;
       const home = await loadVillage(client, army.homeVillageId).catch(() => null);
       if (!home) continue;
-      const back = bestWay(road, at.getTime() - army.leavesAt.getTime(), cell, until.getTime() - army.leavesAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, hex(home.q, home.r), at, world)));
+      const back = bestWay(road, at.getTime() - army.leavesAt.getTime(), cell, until.getTime() - army.leavesAt.getTime(), (from) => safely(() => armyRoad(data, land, army, from, hex(home.q, home.r), at, world, home.state.bonuses)));
       const moved: Army = { ...army, path: reversedRoute(back), returnsAt: new Date(army.leavesAt.getTime() + back.at(-1)!.atMs) };
       await saveArmy(client, moved);
       await scheduleEvent(client, world.id, moved.returnsAt!, 'army_return', { armyId: army.id });
@@ -150,10 +154,11 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
     }
   }
   // Settlers, on their way or walking home.
-  const settlerSpeed = data.units.units.settler!.speed;
   for (const expedition of await listExpeditions(client, world.id, 0)) {
     const home = await loadVillage(client, expedition.villageId).catch(() => null);
     if (!home) continue;
+    // At the settlers' pace, with their owner's forged harness.
+    const settlerSpeed = unitSpeed(data, 'settler', home.state.bonuses);
     if (expedition.status === 'outbound' && entersBefore(expedition.path, expedition.departsAt, at, cell, until)) {
       const path = bestWay(expedition.path, at.getTime() - expedition.departsAt.getTime(), cell, until.getTime() - expedition.departsAt.getTime(), (from) =>
         safely(() => roadRoute(data, land, from, hex(expedition.q, expedition.r), settlerSpeed, world.speed)),
@@ -175,9 +180,9 @@ export async function avoidFire(client: DbClient, data: GameData, world: World, 
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
 }
 
-function armyRoad(data: GameData, land: Land, army: Army, from: Hex, to: Hex, at: Date, world: World): PathStep[] {
+function armyRoad(data: GameData, land: Land, army: Army, from: Hex, to: Hex, at: Date, world: World, bonuses: Bonuses): PathStep[] {
   const fed = army.supply === null || army.supplyAt === null ? null : (army as Army & { supply: number; supplyAt: Date });
-  const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+  const speed = armySpeed(data, army.units, bonuses) * supplySpeedFactor(data, fed, at, world.speed);
   return roadRoute(data, land, from, to, speed, world.speed, terrainRelief(data, army.units));
 }
 

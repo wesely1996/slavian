@@ -77,6 +77,9 @@ const SERBIAN: Record<string, string> = {
 	'{name} founded': '{name} je osnovano',
 	'Your settlers built a new village.': 'Tvoji doseljenici su sagradili novo selo.',
 	'{tech} researched': '{tech} je istraženo',
+	// The Blacksmith
+	'The Blacksmith finished: {unit}, {line} {level}': 'Kovačnica je završila: {unit}, {line} {level}',
+	'{line} for every {unit} of yours: +{share}% from now on.': '{line} za svakog tvog: {unit}, +{share}% od sada.',
 	'{name} is wounded': '{name} je ranjen',
 	'Back on their feet in a few hours.': 'Na nogama za nekoliko sati.',
 	'{name} reached level {level}': '{name} je stigao do nivoa {level}',

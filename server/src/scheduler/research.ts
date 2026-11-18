@@ -1,3 +1,4 @@
+import { smithingBonuses } from '../sim/smithing.js';
 import { findBridge } from '../db/bridges.js';
 import { listShipyards } from '../db/shipyards.js';
 import { mountainCityBonuses } from '../sim/events.js';
@@ -40,7 +41,9 @@ export async function playerBonuses(client: DbClient, data: GameData, worldId: n
   const blessed = combine(bridgeBonuses(data, await findBridge(client, worldId)), mountainCityBonuses(data, await listShipyards(client, worldId)));
   // The gods of the player's Shrines, from every village of theirs that stands.
   const gods = shrineBonuses(data, (await listVillages(client, worldId)).filter((v) => v.ownerAccountId === accountId && !v.ruin).map((v) => v.state));
-  return combine(combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own), gods);
+  // What their Blacksmith has forged, for their units.
+  const forged = smithingBonuses(data, member?.smithing ?? {});
+  return combine(combine(combine(combine(combine(bonusesOf(data, known), loreBonuses(data, scrolls)), blessed), own), gods), forged);
 }
 
 // Gives every village of `accountIds` its owner's current bonuses.

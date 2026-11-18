@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "_comment": "The Blacksmith (buildings.json blacksmith): each player forges improvements for their own units, one at a time, from a village with a Blacksmith; what is forged serves all that player's villages and armies. Every trainable unit has a `line` for each stat it has (attack, defense and health only where the unit's own is above 0; speed for every unit that moves): each line has `levels` levels of `perLevel` more of that stat (added to the group's research bonuses). Level n needs a Blacksmith of level `smithyLevels`[n-1] in the village forging it. It costs the unit's own training cost x `costFactor` x n, and takes (`hours.base` + `hours.perTier` x the unit's requiresLevel) x n game hours (divided by world speed), shortened by the village's smithTime (the Blacksmith's level).",
+  "levels": 3,
+  "perLevel": 0.1,
+  "smithyLevels": [
+    1,
+    5,
+    10
+  ],
+  "costFactor": 8,
+  "hours": {
+    "base": 1,
+    "perTier": 0.5
+  },
+  "lines": {
+    "attack": {
+      "name": "Sharper arms",
+      "description": "The unit hits harder."
+    },
+    "defense": {
+      "name": "Stouter armor",
+      "description": "The unit takes less of every blow."
+    },
+    "health": {
+      "name": "Hardier troops",
+      "description": "It takes more to bring one of them down."
+    },
+    "speed": {
+      "name": "Better harness",
+      "description": "The unit marches faster; an army keeps the pace of its slowest unit."
+    }
+  }
+}
