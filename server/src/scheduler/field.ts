@@ -30,7 +30,7 @@ import { runLost } from './ritual.js';
 import { damageSanctity, getWorld, listMembers, type World } from '../db/worlds.js';
 import { RuleError } from '../errors.js';
 import { addUnits } from '../sim/armies.js';
-import { battleOutcome, battleRng, broken, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total } from '../sim/battle.js';
+import { battleOutcome, battleRng, broken, enemyStats, playerStats, resolveRound, roundMs, subtractUnits, total, withAfflictions } from '../sim/battle.js';
 import { cameOverRiver, setupAt, setupFactors, stepInto, wagonFortBonus, type Setup } from '../sim/field.js';
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
@@ -262,6 +262,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       groups,
     },
     battleRng(world.seed, battle.id, round),
+    battle.setup.afflictions,
   );
   const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
   await setWaveStrength(client, wave.id, attackerNow);
@@ -299,7 +300,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units)) === 0;
   const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
   const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
-  if (guardNow) await saveSetup(client, battle.id, { ...battle.setup, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
+  // Burning and poison carry into the next round.
+  const carried = withAfflictions(battle.setup, result.afflictions);
+  if (guardNow) await saveSetup(client, battle.id, { ...carried, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
+  else if (carried !== battle.setup) await saveSetup(client, battle.id, carried);
   const log: RoundLog = {
     round,
     at: at.toISOString(),

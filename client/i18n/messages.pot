@@ -99,135 +99,159 @@ msgstr ""
 msgid " · strong against %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:59
+#: client/scripts/game/almanac_text.gd:60
 msgid " · only %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:79
+#: client/scripts/game/almanac_text.gd:69
+msgid " · its blows set the foe burning"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:69
+msgid " · its blows poison"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:88
 msgid "tier %d (from wave %d)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:79
+#: client/scripts/game/almanac_text.gd:88
 msgid "siege engine"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:80
+#: client/scripts/game/almanac_text.gd:89
 msgid "%s · %s · %s · attack %s · defense %s · health %d · speed %s hexes/h"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:97
+#: client/scripts/game/almanac_text.gd:107
 msgid "Field around the village"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:97
+#: client/scripts/game/almanac_text.gd:107
 msgid "Building in the village"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:97
+#: client/scripts/game/almanac_text.gd:107
 msgid "Outpost on a nearby hex"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:98
+#: client/scripts/game/almanac_text.gd:108
 msgid "%s · up to level %d"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:100
+#: client/scripts/game/almanac_text.gd:110
 msgid " · makes %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:104
+#: client/scripts/game/almanac_text.gd:114
 msgid "%s %+d%%"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:105
+#: client/scripts/game/almanac_text.gd:115
 msgid " · per level: "
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:117
+#: client/scripts/game/almanac_text.gd:127
 msgid "never breaks"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:117
+#: client/scripts/game/almanac_text.gd:127
 msgid "breaks at %d%% losses"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:118
+#: client/scripts/game/almanac_text.gd:128
 msgid "attack ×%.2f · defense ×%.2f · %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:122
+#: client/scripts/game/almanac_text.gd:132
 msgid "%s beat %s (×%.1f)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:123
+#: client/scripts/game/almanac_text.gd:133
 msgid "Counters"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:140
+#: client/scripts/game/almanac_text.gd:137
+msgid "Burning"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:137
+msgid "A burning unit's blow hurts its targets again: %d%% of it in each of the next %d rounds."
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:138
+msgid "Poison"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:138
+msgid "A side struck by a poisoner fights at %d%% of its attack and defense for the next %d rounds."
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:155
 msgid "Tier %d (from wave %d): %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:146
+#: client/scripts/game/almanac_text.gd:161
 msgid "Engines: %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:147
+#: client/scripts/game/almanac_text.gd:162
 msgid "%s (%s front)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:147
+#: client/scripts/game/almanac_text.gd:162
 msgid "%s Units: %s."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:155
+#: client/scripts/game/almanac_text.gd:170
 msgid "%s (%s)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:155
+#: client/scripts/game/almanac_text.gd:170
 msgid "%s %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:179
 msgid "impassable"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:179
 msgid "move cost %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:165
+#: client/scripts/game/almanac_text.gd:180
 msgid "%s · %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:165
+#: client/scripts/game/almanac_text.gd:180
 msgid "villages can be founded here"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:165
+#: client/scripts/game/almanac_text.gd:180
 msgid "no villages"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:171
+#: client/scripts/game/almanac_text.gd:186
 msgid "The Kalinov Bridge"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:172
+#: client/scripts/game/almanac_text.gd:187
 msgid "Ritual Night"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:173
+#: client/scripts/game/almanac_text.gd:188
 msgid "Winning"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:173
+#: client/scripts/game/almanac_text.gd:188
 msgid "%s: the Holy City still stands when Ritual Night's last horde is done."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:174
+#: client/scripts/game/almanac_text.gd:189
 msgid "Losing"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:174
+#: client/scripts/game/almanac_text.gd:189
 msgid "%s: its Sanctity reaches 0."
 msgstr ""
 
@@ -4753,227 +4777,239 @@ msgstr ""
 msgid "Forging %s · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:465
+#: client/scripts/screens/game_screen_village.gd:462
+msgid "Its blows set the foe burning already"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:462
+msgid "Its blows poison already"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:473
 msgid "%s  %d/%d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:475
+#: client/scripts/screens/game_screen_village.gd:485
 msgid "Level %d needs a Blacksmith of level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:484
+#: client/scripts/screens/game_screen_village.gd:485
+msgid "Needs a Blacksmith of level %d"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:492
 msgid "Forge"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:526
+#: client/scripts/screens/game_screen_village.gd:528
 msgid "Blessed by %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:530
+#: client/scripts/screens/game_screen_village.gd:532
 msgid "All your villages: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:530
+#: client/scripts/screens/game_screen_village.gd:532
 msgid " · at level %d: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:534
+#: client/scripts/screens/game_screen_village.gd:536
 msgid "Turn to another god"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:534
+#: client/scripts/screens/game_screen_village.gd:536
 msgid "Choose its god"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:535
+#: client/scripts/screens/game_screen_village.gd:537
 msgid "Its blessing reaches all your villages and grows with every level of the Shrine. Turning to another god later takes %d Svarog's Ember."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:549
+#: client/scripts/screens/game_screen_village.gd:551
 msgid "Now: %s · per level: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:559
+#: client/scripts/screens/game_screen_village.gd:561
 msgid "Turn to"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:562
+#: client/scripts/screens/game_screen_village.gd:564
 msgid "Choose"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:638
+#: client/scripts/screens/game_screen_village.gd:640
 msgid "Trade"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:647
+#: client/scripts/screens/game_screen_village.gd:649
 msgid "for"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:666
+#: client/scripts/screens/game_screen_village.gd:668
 msgid "You get %d %s (%d%% of what you give)"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:674
+#: client/scripts/screens/game_screen_village.gd:676
 msgid "Sell spare gear"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:676
+#: client/scripts/screens/game_screen_village.gd:678
 msgid "Your hero carries no spare gear. Gear they wear must be taken off first."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:684
+#: client/scripts/screens/game_screen_village.gd:686
 msgid "Sell"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:687
+#: client/scripts/screens/game_screen_village.gd:689
 msgid "Each piece fetches %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:700
+#: client/scripts/screens/game_screen_village.gd:702
 msgid "Bounty board"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:701
+#: client/scripts/screens/game_screen_village.gd:703
 msgid "Offer resources, or gear from your hero's pack, for others; another player takes your bounty at once. What you offer, and a %d%% fee on the resources, leave your stores (and the pack) when you post it; when it is taken you get what you asked for, less %d%%. Called off, what you offered comes back; the fee does not."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:702
+#: client/scripts/screens/game_screen_village.gd:704
 msgid "%d of %d open here · at most %d a side"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:708
+#: client/scripts/screens/game_screen_village.gd:710
 msgid "Yours, from %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:709
+#: client/scripts/screens/game_screen_village.gd:711
 msgid "%s: offers %s for %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:713
+#: client/scripts/screens/game_screen_village.gd:715
 msgid "Call off"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:715
+#: client/scripts/screens/game_screen_village.gd:717
 msgid "Take"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:722
+#: client/scripts/screens/game_screen_village.gd:724
 msgid "Your hero has that gear already"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:726
+#: client/scripts/screens/game_screen_village.gd:728
 msgid "No bounties on the board."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:732
+#: client/scripts/screens/game_screen_village.gd:734
 msgid "Post a bounty"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:733
+#: client/scripts/screens/game_screen_village.gd:735
 msgid "You give"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:733
+#: client/scripts/screens/game_screen_village.gd:735
 msgid "You want"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:753
+#: client/scripts/screens/game_screen_village.gd:755
 msgid "Gear from your hero's pack"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:778
+#: client/scripts/screens/game_screen_village.gd:780
 msgid "Post bounty"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:800
+#: client/scripts/screens/game_screen_village.gd:802
 msgid "You pay %s (%s and a %d%% fee)"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:800
+#: client/scripts/screens/game_screen_village.gd:802
 msgid "Type what you give."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:802
+#: client/scripts/screens/game_screen_village.gd:804
 msgid "Gear offered: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:806
+#: client/scripts/screens/game_screen_village.gd:808
 msgid "You get %s when it is taken"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:806
+#: client/scripts/screens/game_screen_village.gd:808
 msgid "Type what you want for it."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:884
+#: client/scripts/screens/game_screen_village.gd:886
 msgid "Sure? Tear it down"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:884
+#: client/scripts/screens/game_screen_village.gd:886
 msgid "Tear down"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:896
+#: client/scripts/screens/game_screen_village.gd:898
 msgid "Tap again to tear down the %s. You get back %s, as far as the stores hold it."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:917
+#: client/scripts/screens/game_screen_village.gd:919
 msgid "Sure? Abandon %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:917
+#: client/scripts/screens/game_screen_village.gd:919
 msgid "Abandon this village"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:929
+#: client/scripts/screens/game_screen_village.gd:931
 msgid "Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:992
+#: client/scripts/screens/game_screen_village.gd:994
 msgid "%s +%d/h → +%d/h"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:996
+#: client/scripts/screens/game_screen_village.gd:998
 msgid "; level %d: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:999
+#: client/scripts/screens/game_screen_village.gd:1001
 msgid "Slots %d/%d · queue %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1001
+#: client/scripts/screens/game_screen_village.gd:1003
 msgid "Lv %d: slots %d · queue %d · builds %d%% faster"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1012
+#: client/scripts/screens/game_screen_village.gd:1014
 msgid "Holds %d of each resource above the base; the village keeps %d in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1016
+#: client/scripts/screens/game_screen_village.gd:1018
 msgid "Holds %d grain above the base; the village keeps %d grain in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1020
+#: client/scripts/screens/game_screen_village.gd:1022
 msgid "Research +%d/h now, +%d/h at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1022
+#: client/scripts/screens/game_screen_village.gd:1024
 msgid "Trades at %d%% now, %d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1025
+#: client/scripts/screens/game_screen_village.gd:1027
 msgid "%d%% of the garrison's fallen get up again when it holds the village"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1029
+#: client/scripts/screens/game_screen_village.gd:1031
 msgid "%s +%d%% now, +%d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1041
+#: client/scripts/screens/game_screen_village.gd:1043
 msgid "%s queued"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1041
+#: client/scripts/screens/game_screen_village.gd:1043
 msgid "Queued"
 msgstr ""
 
@@ -8293,6 +8329,22 @@ msgstr ""
 
 #: data/smithing.json
 msgid "The unit marches faster; an army keeps the pace of its slowest unit."
+msgstr ""
+
+#: data/smithing.json
+msgid "Fire arrows"
+msgstr ""
+
+#: data/smithing.json
+msgid "Its blows set the foe burning: a tenth of each hit hurts again in each of the next three rounds."
+msgstr ""
+
+#: data/smithing.json
+msgid "Poisoned blades"
+msgstr ""
+
+#: data/smithing.json
+msgid "Its blows poison: the side it strikes fights 15% weaker in attack and defense for the next two rounds."
 msgstr ""
 
 #: data/terrain.json

@@ -55,10 +55,19 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 			for target in u.counters:
 				strong.append("%s ×%.1f" % [target, float(u.counters[target])])
 			text += UI.t(" · strong against %s") % ", ".join(strong)
+		text += afflictions_text(u)
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
 		out.append([UI.t(u.name), text, "unit/%s" % id, id])
 	return out
+
+
+## What a unit's blows carry (battle.json afflictions), or "".
+static func afflictions_text(u: Dictionary) -> String:
+	var text := ""
+	for a in u.get("inflicts", []):
+		text += UI.t(" · its blows set the foe burning") if a == "burn" else UI.t(" · its blows poison")
+	return text
 
 
 ## Every enemy unit, front by front and tier by tier, with its numbers.
@@ -85,6 +94,7 @@ static func _enemies(data: Dictionary, speed := 1.0) -> Array:
 				for target in u.counters:
 					strong.append("%s ×%.1f" % [UI.t(String(target).capitalize()), float(u.counters[target])])
 				text += UI.t(" · strong against %s") % ", ".join(strong)
+			text += afflictions_text(u)
 			out.append([UI.t(u.name), text, "unit/%s" % id])
 	return out
 
@@ -121,6 +131,11 @@ static func _stances(data: Dictionary) -> Array:
 		for target in data.battle.counters[family]:
 			counters.append(UI.t("%s beat %s (×%.1f)") % [String(family).capitalize(), target, float(data.battle.counters[family][target])])
 	out.append([UI.t("Counters"), ", ".join(counters), ""])
+	var rules: Dictionary = data.battle.get("afflictions", {})
+	if rules.is_empty():
+		return out
+	out.append([UI.t("Burning"), UI.t("A burning unit's blow hurts its targets again: %d%% of it in each of the next %d rounds.") % [roundi(float(rules.burn.share) * 100.0), int(rules.burn.rounds)], ""])
+	out.append([UI.t("Poison"), UI.t("A side struck by a poisoner fights at %d%% of its attack and defense for the next %d rounds.") % [roundi(float(rules.poison.factor) * 100.0), int(rules.poison.rounds)], ""])
 	return out
 
 

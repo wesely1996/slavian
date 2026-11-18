@@ -1,8 +1,8 @@
 // The Blacksmith (data/smithing.json): each player forges improvements for
 // their own units, one at a time; every level of a line adds perLevel to
 // that unit's stat, for all the player's villages and armies.
-import type { GameData, SmithLine } from '../data/index.js';
-import { SMITH_LINES } from '../data/index.js';
+import type { Affliction, GameData, SmithLine } from '../data/index.js';
+import { AFFLICTIONS, SMITH_LINES } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { mapResources, type Resources } from './resources.js';
 import { bonus, type Bonuses } from './research.js';
@@ -21,12 +21,37 @@ export interface SmithWork {
   completesAt: string;
 }
 
+// A line that forges an affliction (burn, poison) rather than a stat.
+export function isAffliction(line: string): line is Affliction {
+  return (AFFLICTIONS as readonly string[]).includes(line);
+}
+
 // The lines a unit can be improved along: a stat it has (speed for any
-// unit that moves).
+// unit that moves), and an affliction for the families (or engines) it
+// serves, for a unit that strikes and doesn't already carry it.
 export function smithLines(data: GameData, unit: string): SmithLine[] {
   const def = data.units.units[unit];
   if (!def) return [];
-  return SMITH_LINES.filter((line) => (def[line] ?? 0) > 0);
+  return SMITH_LINES.filter((line) => {
+    if (!isAffliction(line)) return (def[line] ?? 0) > 0;
+    const rules = data.smithing.lines[line];
+    const serves = (rules.families ?? []).includes(def.family) || (rules.engines === true && def.engine === true);
+    return serves && def.attack > 0 && !(def.inflicts ?? []).includes(line);
+  });
+}
+
+// How many levels a line has, and the Blacksmith level each needs.
+export function smithLineLevels(data: GameData, line: SmithLine): number {
+  return data.smithing.lines[line].levels ?? data.smithing.levels;
+}
+
+export function smithyLevelFor(data: GameData, line: SmithLine, level: number): number {
+  return (data.smithing.lines[line].smithyLevels ?? data.smithing.smithyLevels)[level - 1] ?? 1;
+}
+
+// The level a line's `level` is priced and timed as.
+function pricedLevel(data: GameData, line: SmithLine, level: number): number {
+  return (data.smithing.lines[line].costLevel ?? 1) + level - 1;
 }
 
 export function smithLevel(smithing: Smithing, unit: string, line: SmithLine): number {
@@ -35,15 +60,16 @@ export function smithLevel(smithing: Smithing, unit: string, line: SmithLine): n
 
 // What forging `unit`'s `line` to `level` costs and how long it takes (ms;
 // `smithTime` the forging village's bonus, from its Blacksmith).
-export function smithCost(data: GameData, unit: string, level: number): Resources {
+export function smithCost(data: GameData, unit: string, line: SmithLine, level: number): Resources {
   const def = data.units.units[unit]!;
-  return mapResources((k) => Math.round(def.cost[k] * data.smithing.costFactor * level));
+  const priced = pricedLevel(data, line, level);
+  return mapResources((k) => Math.round(def.cost[k] * data.smithing.costFactor * priced));
 }
 
-export function smithMs(data: GameData, unit: string, level: number, worldSpeed: number, bonuses: Bonuses = {}): number {
+export function smithMs(data: GameData, unit: string, line: SmithLine, level: number, worldSpeed: number, bonuses: Bonuses = {}): number {
   const def = data.units.units[unit]!;
   const { base, perTier } = data.smithing.hours;
-  const hours = (base + perTier * def.requiresLevel) * level;
+  const hours = (base + perTier * def.requiresLevel) * pricedLevel(data, line, level);
   return Math.round((hours * 3_600_000 * Math.max(0.1, 1 + bonus(bonuses, 'smithTime'))) / worldSpeed);
 }
 
@@ -57,20 +83,21 @@ export function nextSmithLevel(data: GameData, smithing: Smithing, unit: string,
   }
   if (busy) throw new RuleError('Your Blacksmith is busy; one improvement at a time');
   const level = smithLevel(smithing, unit, line as SmithLine) + 1;
-  if (level > data.smithing.levels) throw new RuleError(`The ${def.name}'s ${data.smithing.lines[line as SmithLine].name.toLowerCase()} is as good as it gets`);
-  const needs = data.smithing.smithyLevels[level - 1] ?? 1;
+  if (level > smithLineLevels(data, line as SmithLine)) throw new RuleError(`The ${def.name}'s ${data.smithing.lines[line as SmithLine].name.toLowerCase()} is as good as it gets`);
+  const needs = smithyLevelFor(data, line as SmithLine, level);
   if (smithyLevel < needs) throw new RuleError(`That needs a Blacksmith of level ${needs}`);
   return level;
 }
 
 // What the forged levels give: per unit, its stats' bonuses
-// (attack.unit.<id>, defense.unit.<id>, health.unit.<id>, speed.unit.<id>).
+// (attack.unit.<id>, defense.unit.<id>, health.unit.<id>, speed.unit.<id>),
+// and 1 for each affliction its blows now carry (burn.unit.<id>, poison.unit.<id>).
 export function smithingBonuses(data: GameData, smithing: Smithing): Record<string, number> {
   const out: Record<string, number> = {};
   for (const [unit, lines] of Object.entries(smithing).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     for (const line of SMITH_LINES) {
       const level = lines[line] ?? 0;
-      if (level > 0) out[`${line}.unit.${unit}`] = level * data.smithing.perLevel;
+      if (level > 0) out[`${line}.unit.${unit}`] = isAffliction(line) ? 1 : level * data.smithing.perLevel;
     }
   }
   return out;

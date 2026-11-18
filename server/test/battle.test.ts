@@ -210,3 +210,35 @@ describe('champions', () => {
     expect(r.defenderLosses.general).toBeUndefined();
   });
 });
+
+describe('afflictions (battle.json)', () => {
+  const stats = playerStats(data);
+  const rng = () => 0.5;
+  it('a poisoner poisons the side it strikes for the next rounds; poison weakens it', () => {
+    const r1 = resolveRound(data, { units: { poison_archer: 20 }, stance: 'balanced', stats, home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng);
+    expect(r1.afflictions.defender.poisoned).toBe(data.battle.afflictions.poison.rounds);
+    expect(r1.afflictions.attacker.poisoned).toBe(0);
+    // Poisoned, the spearmen kill fewer and fall more.
+    const clean = resolveRound(data, { units: { archer: 20 }, stance: 'balanced', stats, home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng);
+    const sick = resolveRound(data, { units: { archer: 20 }, stance: 'balanced', stats, home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng, {
+      attacker: { burn: [], poisoned: 0 },
+      defender: { burn: [], poisoned: 1 },
+    });
+    expect(total(sick.attackerLosses)).toBeLessThanOrEqual(total(clean.attackerLosses));
+    expect(total(sick.defenderLosses)).toBeGreaterThanOrEqual(total(clean.defenderLosses));
+    // The poison wears off.
+    expect(sick.afflictions.defender.poisoned).toBe(0);
+  });
+
+  it('burning blows burn on: a share of each in the next rounds, which land like a blow', () => {
+    const burning = playerStats(data, { 'burn.unit.archer': 1 });
+    const r1 = resolveRound(data, { units: { archer: 400 }, stance: 'balanced', stats: burning, home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng);
+    const owed = r1.afflictions.defender.burn;
+    expect(owed).toHaveLength(data.battle.afflictions.burn.rounds);
+    expect(owed[0]!).toBeGreaterThan(0);
+    // Without striking at all, the burning still fells spearmen.
+    const r2 = resolveRound(data, { units: { archer: 400 }, stance: 'balanced', stats: (u) => ({ ...stats(u), attack: 0 }), home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng, r1.afflictions);
+    expect(total(r2.defenderLosses)).toBeGreaterThan(0);
+    expect(r2.afflictions.defender.burn).toHaveLength(data.battle.afflictions.burn.rounds - 1);
+  });
+});

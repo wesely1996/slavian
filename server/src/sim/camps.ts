@@ -2,7 +2,7 @@
 // grow and feed the next wave, armies clearing them, and caravan ambushes.
 // Numbers in data/camps.json.
 import type { GameData, TerrainId } from '../data/index.js';
-import { battleOutcome, battleRng, enemyStats, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
+import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import type { Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
@@ -147,13 +147,17 @@ export function assault(
   let armyNow = { ...input.army };
   let campNow = { ...input.camp };
   const rounds: AssaultRound[] = [];
+  // Burning and poison carry from round to round.
+  let afflictions = NO_AFFLICTIONS;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
       { units: armyNow, stance: input.armyStance, stats: armyStats, home: false, champions },
       { units: campNow, stance, stats: campStats, home: true },
       battleRng(input.seed, input.id + 0x10000, round),
+      afflictions,
     );
+    afflictions = result.afflictions;
     for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
     champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);
@@ -221,13 +225,17 @@ export function repelRaid(
   const raiderStats = enemyStats(data, input.front);
   let armyNow = { ...input.army };
   let raidersNow = { ...input.raiders };
+  // Burning and poison carry from round to round.
+  let afflictions = NO_AFFLICTIONS;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
       { units: raidersNow, stance: input.raiderStance, stats: raiderStats, home: false },
       { units: armyNow, stance: input.armyStance, stats: input.armyStats, home: false },
       battleRng(input.seed, input.id + 0x20000, round),
+      afflictions,
     );
+    afflictions = result.afflictions;
     raidersNow = subtractUnits(raidersNow, result.attackerLosses);
     armyNow = subtractUnits(armyNow, result.defenderLosses);
     const outcome = battleOutcome(data, {

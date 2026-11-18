@@ -135,6 +135,10 @@ const terrainFileSchema = z.object({
 });
 
 export const UNIT_FAMILIES = ['infantry', 'archers', 'cavalry', 'scout'] as const;
+// What a unit's blows leave behind (battle.json afflictions): burning, which
+// keeps hurting, or poison, which weakens.
+export const AFFLICTIONS = ['burn', 'poison'] as const;
+export type Affliction = (typeof AFFLICTIONS)[number];
 export type UnitFamily = (typeof UNIT_FAMILIES)[number];
 export const STANCES = ['defensive', 'balanced', 'offensive', 'hold_the_line'] as const;
 export type Stance = (typeof STANCES)[number];
@@ -174,6 +178,8 @@ const unitSchema = z.object({
   carry: z.number().nonnegative(),
   // Its own counters, in place of its family's (battle.json).
   counters: familyMultipliers.optional(),
+  // What its blows inflict (battle.json afflictions), without any forging.
+  inflicts: z.array(z.enum(AFFLICTIONS)).optional(),
   // A clan's own unit: only that clan trains it.
   clan: z.string().optional(),
   // A healer (the Shaman): each one gives every soldier who falls beside it
@@ -219,6 +225,8 @@ const enemyUnitSchema = z.object({
   defense: z.number().nonnegative(),
   health: z.number().positive(),
   speed: z.number().positive(),
+  // What its blows inflict (battle.json afflictions).
+  inflicts: z.array(z.enum(AFFLICTIONS)).optional(),
   // How hard it batters walls each round (walls.json).
   siege: z.number().nonnegative().optional(),
   // A climbing engine: how many men it carries over the walls a round.
@@ -323,6 +331,13 @@ const battleFileSchema = z.object({
     }),
   ),
   matchups: z.partialRecord(z.enum(STANCES), stanceMultipliers),
+  // Burning: `share` of a burning unit's blow hurts its target again in
+  // each of the next `rounds` rounds. Poison: a side struck by a poisoner
+  // fights at `factor` of its attack and defense for the next `rounds` rounds.
+  afflictions: z.object({
+    burn: z.object({ share: z.number().min(0).max(1), rounds: z.number().int().positive() }),
+    poison: z.object({ factor: z.number().positive().max(1), rounds: z.number().int().positive() }),
+  }),
 });
 
 const logisticsFileSchema = z.object({
@@ -1052,8 +1067,22 @@ const eventsFileSchema = z.object({
 export type EventsData = z.infer<typeof eventsFileSchema>;
 
 // The Blacksmith's improvements (smithing.json).
-export const SMITH_LINES = ['attack', 'defense', 'health', 'speed'] as const;
+export const SMITH_LINES = ['attack', 'defense', 'health', 'speed', 'burn', 'poison'] as const;
 export type SmithLine = (typeof SMITH_LINES)[number];
+// A line of the Blacksmith's work: `levels`, `smithyLevels` and its first
+// level priced as level `costLevel` in place of the file's own (the
+// afflictions: one level, dearer). `families` (or `engines`) are the units it
+// serves; the stat lines serve every unit with that stat.
+const smithLineSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  levels: z.number().int().positive().optional(),
+  smithyLevels: z.array(z.number().int().positive()).optional(),
+  costLevel: z.number().int().positive().optional(),
+  families: z.array(z.enum(UNIT_FAMILIES)).optional(),
+  engines: z.boolean().optional(),
+});
+
 const smithingFileSchema = z.object({
   version: z.number().int(),
   levels: z.number().int().positive(),
@@ -1061,7 +1090,7 @@ const smithingFileSchema = z.object({
   smithyLevels: z.array(z.number().int().positive()),
   costFactor: z.number().positive(),
   hours: z.object({ base: z.number().nonnegative(), perTier: z.number().nonnegative() }),
-  lines: z.object(Object.fromEntries(SMITH_LINES.map((k) => [k, z.object({ name: z.string(), description: z.string() })])) as Record<SmithLine, z.ZodObject<{ name: z.ZodString; description: z.ZodString }>>),
+  lines: z.object(Object.fromEntries(SMITH_LINES.map((k) => [k, smithLineSchema])) as Record<SmithLine, typeof smithLineSchema>),
 });
 export type SmithingData = z.infer<typeof smithingFileSchema>;
 

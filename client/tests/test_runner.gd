@@ -916,6 +916,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("heroquest-scenario.json", "local hero quests and army quests")
 	_replay_scenario("market-scenario.json", "local bounty board and caravans bringing back")
 	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")
+	_replay_scenario("afflictions-scenario.json", "local burn and poison: fire arrows, poison archers, a horde and a raid")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

@@ -1,3 +1,4 @@
+import type { Afflictions } from '../sim/battle.js';
 import type { Stance } from '../data/index.js';
 import { NotFoundError } from '../errors.js';
 import type { Resources } from '../sim/resources.js';
@@ -68,6 +69,9 @@ export interface BattleSetup {
   // The home force (a village's garrison, the Holy City's guard): what it
   // started with, and whether it has broken (it fights no more).
   home?: { initial: Record<string, number>; broken?: boolean };
+  // What burns and poisons each side carries into the next round
+  // (battle.json afflictions), while anything does.
+  afflictions?: Afflictions;
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

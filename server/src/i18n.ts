@@ -80,6 +80,7 @@ const SERBIAN: Record<string, string> = {
 	// The Blacksmith
 	'The Blacksmith finished: {unit}, {line} {level}': 'Kovačnica je završila: {unit}, {line} {level}',
 	'{line} for every {unit} of yours: +{share}% from now on.': '{line} za svakog tvog: {unit}, +{share}% od sada.',
+	'{line} for every {unit} of yours from now on.': '{line} za svakog tvog: {unit}, od sada.',
 	'{name} is wounded': '{name} je ranjen',
 	'Back on their feet in a few hours.': 'Na nogama za nekoliko sati.',
 	'{name} reached level {level}': '{name} je stigao do nivoa {level}',

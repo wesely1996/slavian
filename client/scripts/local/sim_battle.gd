@@ -6,6 +6,42 @@ extends RefCounted
 ## server's (`LocalStore`), since every target draws from the RNG.
 
 const MAX_RETREAT_AT := 0.95
+const AFFLICTIONS := ["burn", "poison"]
+
+
+## battle.ts NO_AFFLICTIONS: nothing burns or poisons either side.
+static func no_afflictions() -> Dictionary:
+	return {"attacker": {"burn": [], "poisoned": 0}, "defender": {"burn": [], "poisoned": 0}}
+
+
+## battle.ts afflicted: whether anything still burns or poisons either side.
+static func afflicted(a: Variant) -> bool:
+	if not a is Dictionary:
+		return false
+	for side in [a.attacker, a.defender]:
+		if not side.burn.is_empty() or int(side.poisoned) > 0:
+			return true
+	return false
+
+
+## battle.ts withAfflictions: a battle's setup with the afflictions the round
+## left (none kept once nothing burns or poisons); the same one when nothing changed.
+static func with_afflictions(setup: Dictionary, next: Dictionary) -> Dictionary:
+	if afflicted(next):
+		var out := setup.duplicate()
+		out.afflictions = next
+		return out
+	if not setup.has("afflictions"):
+		return setup
+	var rest := setup.duplicate()
+	rest.erase("afflictions")
+	return rest
+
+
+## A unit's own afflictions and those forged for it (burn.unit.<id>, poison.unit.<id>).
+static func _inflicts_of(own: Variant, bonuses: Dictionary, unit: String) -> Array:
+	var have: Array = own if own is Array else []
+	return AFFLICTIONS.filter(func(a: String) -> bool: return a in have or LocalVillage.bonus(bonuses, a + ".unit." + unit) > 0)
 
 
 static func total(units: Dictionary) -> int:
@@ -35,6 +71,9 @@ static func player_stats(data: Dictionary, bonuses: Dictionary = {}, home := fal
 			"health": float(def.health) * (1.0 + LocalVillage.bonus(bonuses, "health.unit." + String(unit)))}
 		if def.get("counters") != null:
 			stats.counters = def.counters
+		var inflicts := _inflicts_of(def.get("inflicts"), bonuses, String(unit))
+		if not inflicts.is_empty():
+			stats.inflicts = inflicts
 		return stats
 
 
@@ -42,7 +81,10 @@ static func enemy_stats(data: Dictionary, front: String) -> Callable:
 	var units: Dictionary = data.enemies.fronts.get(front, {}).get("units", {})
 	return func(unit: String) -> Dictionary:
 		var def: Dictionary = units.get(unit, {"attack": 0, "defense": 1, "health": 1, "family": "infantry"})
-		return {"family": def.family, "attack": float(def.attack), "defense": float(def.defense), "health": float(def.health)}
+		var stats := {"family": def.family, "attack": float(def.attack), "defense": float(def.defense), "health": float(def.health)}
+		if def.get("inflicts") != null:
+			stats.inflicts = def.inflicts
+		return stats
 
 
 static func battle_rng(seed_value: int, battle_id: int, round: int) -> LocalRng:
@@ -69,9 +111,11 @@ static func champion_of(data: Dictionary, id: String, level: int) -> Dictionary:
 
 
 ## Kills `from` inflicts on `to` this round, by unit type, for each of
-## `to`'s groups, and the champions it strikes down there ({losses, fallen}).
-## A side: {units, stance, stats: Callable, home, groups?, champions?}.
-static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng) -> Dictionary:
+## `to`'s groups, and the champions it strikes down there ({losses, fallen,
+## burnHit, poisons}): the blows of its burning units, and whether a poisoner
+## struck. A side: {units, stance, stats: Callable, home, groups?, champions?};
+## `plight`: {fromWeak, toWeak, burning} (battle.ts Plight).
+static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: LocalRng, plight: Dictionary) -> Dictionary:
 	var battle: Dictionary = data.battle
 	var strikers := _groups(from)
 	var groups := _groups(to)
@@ -80,6 +124,15 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 	for g in groups:
 		result.append({})
 		fallen.append([])
+	var poisons := false
+	for g in strikers:
+		var g_stats: Callable = g.stats if g.has("stats") else from.stats
+		for unit in g.units:
+			var st: Dictionary = g_stats.call(unit)
+			if int(g.units[unit]) > 0 and float(st.attack) > 0 and "poison" in st.get("inflicts", []):
+				poisons = true
+	var burn_hit := 0.0
+	var from_weak := float(plight.fromWeak)
 	var targets: Array = []
 	var target_total := 0
 	for i in groups.size():
@@ -93,7 +146,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			targets.append([i, c.id, 1, c])
 			target_total += 1
 	if target_total == 0:
-		return {"losses": result, "fallen": fallen}
+		return {"losses": result, "fallen": fallen, "burnHit": burn_hit, "poisons": false}
 	# Attack is a range: each unit type strikes this round with its own roll.
 	var rolled: Array = []
 	for striker in strikers:
@@ -110,6 +163,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 		var stats: Dictionary = {"attack": champion.attack, "defense": champion.defense, "health": champion.health, "family": "infantry"} if champion != null \
 			else (group.stats if group.has("stats") else to.stats).call(target)
 		var damage := 0.0
+		var burning := 0.0
 		for s in strikers.size():
 			var striker: Dictionary = strikers[s]
 			var from_stance: Dictionary = battle.stances[striker.stance]
@@ -121,17 +175,23 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 					continue
 				var attacker: Dictionary = striker_stats.call(unit)
 				var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
-				damage += count * float(attacker.attack) * float(rolled[s][unit]) * float(from_stance.attack) * matchup * counter
+				var blow: float = count * float(attacker.attack) * float(rolled[s][unit]) * float(from_stance.attack) * matchup * counter * from_weak
+				damage += blow
+				if "burn" in attacker.get("inflicts", []):
+					burning += blow
 			# Its champions strike too, at no family's weakness.
 			for c in striker.get("champions", []):
-				damage += float(c.attack) * float(from_stance.attack) * matchup
+				damage += float(c.attack) * float(from_stance.attack) * matchup * from_weak
+		# What still burns from earlier rounds, spread like any blow.
+		damage += float(plight.burning)
 		var share := float(target_count) / target_total
+		burn_hit += burning * share
 		# Defense is a range too: this target's roll for the round.
 		var guard := 1.0 + float(battle.statSpread) * (rng.next() * 2.0 - 1.0)
 		# Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
 		# Each of the target's health that lands (hardened by its stance and
 		# by fighting at home) fells one.
-		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense)) * guard)
+		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense) * float(plight.toWeak)) * guard)
 		var toughness := maxf(1.0, float(stats.health)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
 		var expected := (damage * share * float(battle.casualtyScale) * lands) / toughness
 		# Round randomly so small fights still take losses on average.
@@ -141,7 +201,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			fallen[t[0]].append(champion.id)
 		elif dead > 0:
 			result[t[0]][target] = int(result[t[0]].get(target, 0)) + dead
-	return {"losses": result, "fallen": fallen}
+	return {"losses": result, "fallen": fallen, "burnHit": burn_hit, "poisons": poisons}
 
 
 static func _merged(losses: Array) -> Dictionary:
@@ -152,13 +212,36 @@ static func _merged(losses: Array) -> Dictionary:
 	return out
 
 
+## battle.ts carried: what a side carries into the next round.
+static func _carried(data: Dictionary, now: Dictionary, burn_hit: float, poisoned: bool) -> Dictionary:
+	var rules: Dictionary = data.battle.afflictions
+	var owed: Array = now.burn.slice(1)
+	var added := burn_hit * float(rules.burn.share)
+	if added > 0:
+		for k in int(rules.burn.rounds):
+			if k < owed.size():
+				owed[k] = float(owed[k]) + added
+			else:
+				owed.append(0.0 + added)
+	return {"burn": owed, "poisoned": int(rules.poison.rounds) if poisoned else maxi(0, int(now.poisoned) - 1)}
+
+
+static func _weak(data: Dictionary, side: Dictionary) -> float:
+	return float(data.battle.afflictions.poison.factor) if int(side.poisoned) > 0 else 1.0
+
+
 ## Simultaneous: both sides strike with the numbers they had at the start.
-## With defender groups, also their losses by group (defenderGroupLosses).
-static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng) -> Dictionary:
-	var struck := _kills(data, defender, attacker, rng)
-	var by_group := _kills(data, attacker, defender, rng)
+## With defender groups, also their losses by group (defenderGroupLosses);
+## and what burns and poisons both sides carry into the next round (afflictions).
+static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng, afflictions: Variant = null) -> Dictionary:
+	var now: Dictionary = afflictions if afflictions is Dictionary else no_afflictions()
+	var struck := _kills(data, defender, attacker, rng, {"fromWeak": _weak(data, now.defender), "toWeak": _weak(data, now.attacker),
+		"burning": float(now.attacker.burn[0]) if not now.attacker.burn.is_empty() else 0.0})
+	var by_group := _kills(data, attacker, defender, rng, {"fromWeak": _weak(data, now.attacker), "toWeak": _weak(data, now.defender),
+		"burning": float(now.defender.burn[0]) if not now.defender.burn.is_empty() else 0.0})
 	var result := {"attackerLosses": _merged(struck.losses), "defenderLosses": _merged(by_group.losses),
-		"attackerFallen": struck.fallen, "defenderFallen": by_group.fallen}
+		"attackerFallen": struck.fallen, "defenderFallen": by_group.fallen,
+		"afflictions": {"attacker": _carried(data, now.attacker, struck.burnHit, struck.poisons), "defender": _carried(data, now.defender, by_group.burnHit, by_group.poisons)}}
 	if defender.has("groups"):
 		result.defenderGroupLosses = by_group.losses
 	return result

@@ -29,6 +29,7 @@ import {
   roundMs,
   subtractUnits,
   total,
+  withAfflictions,
 } from '../sim/battle.js';
 import { amountsAt } from '../sim/resources.js';
 import { breachWalls, completeTraining, joinGarrison, healerChance, hospitalHealed, loseGarrison, plunder, setBesieged } from '../sim/village.js';
@@ -219,12 +220,14 @@ export const battleHandlers: HandlerRegistry = {
         ],
       },
       rng,
+      battle.setup.afflictions,
     );
     const attackerLosses = addUnits(result.attackerLosses, smashed);
     const attackerNow = subtractUnits(wave.composition, attackerLosses);
     // The horde batters the walls with what came at them this round.
     let wallLeft: number | undefined;
-    let setup: BattleSetup = battle.setup;
+    // Burning and poison carry into the next round.
+    let setup: BattleSetup = withAfflictions(battle.setup, result.afflictions);
     if (standing && !volley) {
       wallLeft = Math.max(0, Math.round(wall.integrity - siegeDamage(data, wave.front, assault, state.plots)));
       setup = { ...setup, wall: { ...wall, integrity: wallLeft } };
