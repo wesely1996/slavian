@@ -1051,6 +1051,20 @@ const eventsFileSchema = z.object({
 });
 export type EventsData = z.infer<typeof eventsFileSchema>;
 
+// The Blacksmith's improvements (smithing.json).
+export const SMITH_LINES = ['attack', 'defense', 'health', 'speed'] as const;
+export type SmithLine = (typeof SMITH_LINES)[number];
+const smithingFileSchema = z.object({
+  version: z.number().int(),
+  levels: z.number().int().positive(),
+  perLevel: z.number().positive(),
+  smithyLevels: z.array(z.number().int().positive()),
+  costFactor: z.number().positive(),
+  hours: z.object({ base: z.number().nonnegative(), perTier: z.number().nonnegative() }),
+  lines: z.object(Object.fromEntries(SMITH_LINES.map((k) => [k, z.object({ name: z.string(), description: z.string() })])) as Record<SmithLine, z.ZodObject<{ name: z.ZodString; description: z.ZodString }>>),
+});
+export type SmithingData = z.infer<typeof smithingFileSchema>;
+
 export interface GameData {
   buildings: BuildingsData;
   terrain: TerrainData;
@@ -1062,6 +1076,7 @@ export interface GameData {
   logistics: LogisticsData;
   expansion: ExpansionData;
   research: ResearchData;
+  smithing: SmithingData;
   heroes: HeroesData;
   quests: QuestsData;
   achievements: z.infer<typeof achievementsFileSchema>;
@@ -1097,6 +1112,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     logistics: logisticsFileSchema.parse(read('logistics.json')),
     expansion: expansionFileSchema.parse(read('expansion.json')),
     research: researchFileSchema.parse(read('research.json')),
+    smithing: smithingFileSchema.parse(read('smithing.json')),
     heroes: heroesFileSchema.parse(read('heroes.json')),
     quests: questsFileSchema.parse(read('quests.json')),
     achievements: achievementsFileSchema.parse(read('achievements.json')),

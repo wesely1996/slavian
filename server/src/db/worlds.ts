@@ -1,3 +1,4 @@
+import type { Smithing, SmithWork } from '../sim/smithing.js';
 import type { Difficulty, TerrainId } from '../data/index.js';
 import type { QuietWindow } from '../sim/difficulty.js';
 import type { Front, WorldMap } from '../sim/mapgen.js';
@@ -110,10 +111,18 @@ export interface Member {
   embers: number;
   // When they may send their next merchant caravan (null: now).
   merchantReadyAt: Date | null;
+  // Their Blacksmith's work: forged levels (unit -> line -> level), and the
+  // improvement being forged (null: none).
+  smithing: Smithing;
+  smithWork: SmithWork | null;
 }
 
 export async function setMerchantReadyAt(client: DbClient, worldId: number, accountId: number, at: Date): Promise<void> {
   await client.query('UPDATE world_members SET merchant_ready_at = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, at]);
+}
+
+export async function setSmithing(client: DbClient, worldId: number, accountId: number, smithing: Smithing, work: SmithWork | null): Promise<void> {
+  await client.query('UPDATE world_members SET smithing = $3, smith_work = $4 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, JSON.stringify(smithing), work === null ? null : JSON.stringify(work)]);
 }
 
 export async function addMember(client: DbClient, worldId: number, accountId: number): Promise<void> {
@@ -127,7 +136,8 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
             m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought,
-            m.rally_village_id AS "rallyVillageId", m.embers, m.merchant_ready_at AS "merchantReadyAt"
+            m.rally_village_id AS "rallyVillageId", m.embers, m.merchant_ready_at AS "merchantReadyAt",
+            m.smithing, m.smith_work AS "smithWork"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
      ORDER BY m.joined_at, m.account_id`,

@@ -415,11 +415,102 @@ func _plot_section(village: Dictionary) -> void:
 		_market_section(village, level)
 	if building == "heroes_hall" and level > 0:
 		_generals_section(village)
+	if building == "blacksmith" and level > 0:
+		_smithy_section(village, level)
 	if def.get("deities") != null and level > 0:
 		_shrine_section(village, holds, def, level)
 	_demolish_row(village, building, level)
 	if building == Rules.HALL:
 		_abandon_row(village)
+
+
+## The Blacksmith (data/smithing.json): what is being forged, and a unit's
+## lines (attack, defense, health, speed), each with its level, the next
+## level's cost and time, and a button to forge it.
+func _smithy_section(village: Dictionary, level: int) -> void:
+	var village_id := int(village.id)
+	var rules: Dictionary = Game.data.smithing
+	var member := Game.my_member()
+	var smithing: Dictionary = member.get("smithing", {}) if member.get("smithing") is Dictionary else {}
+	var work: Variant = member.get("smithWork")
+	_panel_body.add_child(UI.with_info(UI.label(tr("Forging"), UI.HEADING_SIZE),
+		tr("The Blacksmith improves one kind of unit at a time: each line has %d levels of +%d%%, for all your villages and armies. Level 2 needs a Blacksmith of level %d, level 3 one of level %d. A higher Blacksmith forges faster.") % [
+			int(rules.levels), roundi(float(rules.perLevel) * 100.0), int(rules.smithyLevels[1]), int(rules.smithyLevels[2])]))
+	if work is Dictionary:
+		var done_at := TimeUtil.parse_iso(work.completesAt)
+		var busy := UI.label("", UI.SMALL_SIZE, UI.ACCENT)
+		_panel_body.add_child(busy)
+		var what := tr("%s, %s %d") % [tr(Game.data.units.units.get(work.unit, {}).get("name", work.unit)), tr(rules.lines[work.line].name), int(work.level)]
+		_tick(busy, func() -> String: return tr("Forging %s · %s") % [what, TimeUtil.format_duration(done_at - Game.server_now())])
+	var clan: Variant = member.get("clan")
+	var units: Array = Game.data.units.units.keys().filter(func(u: String) -> bool:
+		var def: Dictionary = Game.data.units.units[u]
+		return (def.get("clan") == null or def.get("clan") == clan) and not _smith_lines(u).is_empty())
+	if not _smith_unit in units:
+		_smith_unit = units[0]
+	var picker := UI.options(units.map(func(u: String) -> String: return tr(Game.data.units.units[u].name)), units.find(_smith_unit))
+	picker.item_selected.connect(func(i: int) -> void:
+		_smith_unit = units[i]
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	var unit := _smith_unit
+	var def: Dictionary = Game.data.units.units[unit]
+	var effects: Dictionary = _building_def("blacksmith").get("effects", {})
+	var factor := maxf(0.1, 1.0 + float(village.get("bonuses", {}).get("smithTime", 0.0)) + float(effects.get("smithTime", 0.0)) * level)
+	for line in _smith_lines(unit):
+		var have_level := int(smithing.get(unit, {}).get(line, 0))
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var share := roundi(have_level * float(rules.perLevel) * 100.0)
+		info.add_child(UI.label(tr("%s  %d/%d") % [tr(rules.lines[line].name), have_level, int(rules.levels)] + (tr(" (+%d%%)") % share if share > 0 else "")))
+		var row := UI.hbox(8)
+		row.add_child(info)
+		_panel_body.add_child(row)
+		var next := have_level + 1
+		if next > int(rules.levels):
+			info.add_child(UI.label(tr(rules.lines[line].description), UI.SMALL_SIZE, UI.MUTED))
+			continue
+		var needs := int(rules.smithyLevels[next - 1])
+		if level < needs:
+			info.add_child(UI.label(tr("Level %d needs a Blacksmith of level %d") % [next, needs], UI.SMALL_SIZE, UI.MUTED))
+			continue
+		var cost := {}
+		for kind in Ledger.KINDS:
+			cost[kind] = roundi(float(def.cost[kind]) * float(rules.costFactor) * next)
+		var hours := (float(rules.hours.base) + float(rules.hours.perTier) * float(def.requiresLevel)) * next
+		var seconds := hours * 3600.0 * factor / float(Game.world.speed)
+		var cost_line := UI.rich("")
+		info.add_child(cost_line)
+		var forge := UI.button(tr("Forge"), func() -> void: _start_smithing(village_id, unit, line), "icon/build")
+		forge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(forge)
+		_tick(cost_line, func() -> String:
+			var home: Dictionary = Game.villages.get(village_id, village)
+			var have := Ledger.amounts_at(home.resources, Game.server_now())
+			forge.disabled = work != null or not Ledger.can_afford(have, cost)
+			return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
+
+
+## The lines a unit can be improved along: the stats it has.
+func _smith_lines(unit: String) -> Array:
+	var def: Dictionary = Game.data.units.units.get(unit, {})
+	return ["attack", "defense", "health", "speed"].filter(func(line: String) -> bool: return float(def.get(line, 0)) > 0)
+
+
+func _start_smithing(village_id: int, unit: String, line: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/smith" % village_id, {"unit": unit, "line": line})
+	if not response.ok:
+		_status.text = response.error
+		Sound.effect("error")
+		return
+	Sound.effect("done")
+	Game.note_server_time(response.data.serverTime)
+	var member := Game.my_member()
+	if not member.is_empty():
+		member.smithWork = response.data.smithWork
+	Game.update_village(response.data.village)
+	_rebuild_panel()
 
 
 ## The Shrine's god: picked (a card each, what it gives at this level);

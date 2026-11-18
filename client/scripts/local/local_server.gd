@@ -45,7 +45,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"difficulty": String(params.get("difficulty", "baron")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
-			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "merchantReadyAt": null}],
+			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "merchantReadyAt": null, "smithing": {}, "smithWork": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
@@ -182,7 +182,9 @@ func player_bonuses(world: Dictionary, account_id: int) -> Dictionary:
 	var states: Array = world.villages.filter(func(v: Dictionary) -> bool:
 		return v.ownerAccountId != null and int(v.ownerAccountId) == account_id and v.get("ruin") == null).map(func(v: Dictionary) -> Dictionary: return v.state)
 	var gods := LocalVillage.shrine_bonuses(data, states)
-	return LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(research, lore), blessed), own), gods)
+	# What the player's Blacksmiths forged, for their units.
+	var forged := LocalSmithing.smithing_bonuses(data, member.get("smithing", {}))
+	return LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(LocalHeroes.combine(research, lore), blessed), own), gods), forged)
 
 
 func _ensure_sites(world: Dictionary) -> void:
@@ -697,6 +699,10 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 					extra = ["expedition", LocalScouting.expeditions_view({"expeditions": [result.expedition]})[0]]
 			"armies", "raids", "strike", "forts", "supply-points", "crossings", "roads", "terraform":
 				return _field_command(world, village, action, body, now, changed)
+			"smith":
+				result = LocalSmithing.start(self, world, village, body if body is Dictionary else {}, now)
+				if result.has("work"):
+					extra = ["smithWork", result.work]
 			"caravans", "caravans/fetch", "caravans/merchant":
 				if action == "caravans/merchant":
 					result = LocalLogistics.merchant_caravan(self, world, village, body if body is Dictionary else {}, now)
@@ -714,7 +720,7 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		# The group's Embers changed (a Shrine's level queued or called off).
 		if result.get("embersChanged", false):
 			changed.append(["world"])
-		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "caravans/merchant", "scout", "scout/ruins", "found", "market/sell", "generals"]:
+		if action in ["research", "research/fund", "rebuild", "caravans", "caravans/fetch", "caravans/merchant", "scout", "scout/ruins", "found", "market/sell", "generals", "smith"]:
 			changed.append(["world"])
 		if step != "":
 			onboarding_step(world, int(village.ownerAccountId), step, now, changed)
@@ -1145,6 +1151,10 @@ func _on_research_complete(world: Dictionary, event: Dictionary, changed: Array)
 	LocalResearch.on_research_complete(self, world, event, changed)
 
 
+func _on_smith_done(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalSmithing.on_smith_done(self, world, event, changed)
+
+
 func _on_caravan_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalLogistics.on_caravan_arrive(self, world, event, changed)
 
@@ -1328,7 +1338,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"rallyVillageId": m.get("rallyVillageId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "embers": int(world.embers), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "smithing": m.get("smithing", {}), "smithWork": m.get("smithWork"), "embers": int(world.embers), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:
@@ -1630,6 +1640,8 @@ func _load_all() -> void:
 				m.merge({"rallyVillageId": null})
 				# Worlds saved before merchant caravans.
 				m.merge({"merchantReadyAt": null})
+				# Worlds saved before the Blacksmith (migration 076).
+				m.merge({"smithing": {}, "smithWork": null})
 			# Worlds saved before the difficulty titles (migration 075).
 			world.difficulty = {"story": "baron", "normal": "baron", "hard": "viscount", "nightmare": "count"}.get(String(world.get("difficulty", "baron")), String(world.get("difficulty", "baron")))
 			# Worlds saved before generals.

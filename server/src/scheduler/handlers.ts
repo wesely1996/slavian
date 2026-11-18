@@ -27,6 +27,7 @@ import { refreshBonuses, researchHandlers, settleResearchPoints } from './resear
 import { outpostHandlers, outpostStanding } from './outposts.js';
 import { tell } from './notices.js';
 import { scoutingHandlers } from './scouting.js';
+import { smithingHandlers } from './smithing.js';
 import { waveHandlers } from './waves.js';
 
 export const buildCompletePayload = z.object({
@@ -95,6 +96,7 @@ export const handlers: HandlerRegistry = {
   ...caravanHandlers,
   ...expeditionHandlers,
   ...researchHandlers,
+  ...smithingHandlers,
   ...heroHandlers,
   ...generalHandlers,
   ...questHandlers,

@@ -1,3 +1,4 @@
+import type { Bonuses } from '../sim/research.js';
 // Armies on the scheduler: army_arrive (station, join a battle, hold a hex,
 // join a garrison, or turn back), army_return (home again), army_hunger
 // (an army out of food losing men, or lost). Battles (battles.ts, field.ts)
@@ -134,7 +135,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   }
   if (grain > 0) state = { ...state, ledger: spend(state.ledger, input.at, grainOnly(grain)) };
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
-  const speed = armySpeed(data, units) * supplySpeedFactor(data, supplied, input.at, world.speed);
+  const speed = armySpeed(data, units, home.state.bonuses) * supplySpeedFactor(data, supplied, input.at, world.speed);
   const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed, terrainRelief(data, units));
 
   let heroAccountId: number | null = null;
@@ -265,14 +266,14 @@ export async function moveArmy(
     // It finishes the hex it is crossing, then takes the new road; the road
     // it came by stays (one coming home turns on that road, backwards).
     const fed = supplied(army);
-    const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+    const speed = armySpeed(data, army.units, await ownerBonuses(client, army)) * supplySpeedFactor(data, fed, at, world.speed);
     const road = army.status === 'returning' ? reversedRoute(army.path) : army.path;
     departsAt = army.status === 'returning' ? army.leavesAt! : army.departsAt;
     path = spliceRoute(road, at.getTime() - departsAt.getTime(), (from) => roadRoute(data, land, from, dest, speed, world.speed, terrainRelief(data, army.units)));
   } else {
     army = await setOff(client, data, world, army, at);
     const fed = supplied(army);
-    const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+    const speed = armySpeed(data, army.units, await ownerBonuses(client, army)) * supplySpeedFactor(data, fed, at, world.speed);
     path = roadRoute(data, land, here, dest, speed, world.speed, terrainRelief(data, army.units));
   }
   const moving: Army = {
@@ -596,7 +597,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
   const home = await loadVillage(client, army.homeVillageId).catch(() => null);
   if (home && data && (path[0]!.q !== home.q || path[0]!.r !== home.r)) {
     const fed = supplied(army);
-    const speed = armySpeed(data, army.units) * supplySpeedFactor(data, fed, at, world.speed);
+    const speed = armySpeed(data, army.units, home.state.bonuses) * supplySpeedFactor(data, fed, at, world.speed);
     path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), hex(army.targetQ, army.targetR), speed, world.speed, terrainRelief(data, army.units));
   }
   const back: Army = {
@@ -1129,4 +1130,10 @@ export async function splitArmy(
   const left = await planHunger(client, data, world, await quarter(client, data, world, kept, at), at);
   const split = await planHunger(client, data, world, await quarter(client, data, world, { ...created, status: 'stationed', wagonFortAt: null }, at), at);
   return { army: left, split };
+}
+
+// The bonuses of an army's owner, as its home village keeps them (its
+// units' forged harness sets their pace).
+export async function ownerBonuses(client: DbClient, army: Army): Promise<Bonuses> {
+  return (await loadVillage(client, army.homeVillageId).catch(() => null))?.state.bonuses ?? {};
 }

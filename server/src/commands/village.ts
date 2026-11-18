@@ -1,3 +1,4 @@
+import { unitSpeed } from '../sim/smithing.js';
 import { riverEdgesAt } from '../db/rivers.js';
 import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
@@ -438,7 +439,7 @@ export async function foundVillageCommand(
       if (error instanceof NotEnoughUnitsError) throw new RuleError(`Founding a village takes ${settlers} settlers at home`);
       throw error;
     }
-    const path = roadRoute(deps.data, terrain, home, cell, deps.data.units.units[SETTLER]!.speed, world.speed);
+    const path = roadRoute(deps.data, terrain, home, cell, unitSpeed(deps.data, SETTLER, village.state.bonuses), world.speed);
     const travelMs = path.at(-1)!.atMs;
     const arrivesAt = new Date(input.now.getTime() + travelMs);
     // A name of its own unless the player gave one: none the world's towns

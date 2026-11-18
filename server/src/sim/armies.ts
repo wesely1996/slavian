@@ -1,3 +1,5 @@
+import { unitSpeed } from './smithing.js';
+import type { Bonuses } from './research.js';
 // Armies: troops out of their village, marching to another village to
 // support it, reinforce a battle there, or harass the horde.
 import type { GameData } from '../data/index.js';
@@ -43,7 +45,7 @@ export function terrainRelief(data: GameData, units: Units): number {
 // first, each wagon taking `engines` of them, then foot soldiers into the
 // wagons left, `infantry` a wagon; the slowest ride first. Those riding
 // don't set the pace.
-export function armySpeed(data: GameData, units: Units): number {
+export function armySpeed(data: GameData, units: Units, bonuses: Bonuses = {}): number {
   const walking: Record<string, number> = Object.fromEntries(Object.entries(units).filter(([, n]) => n > 0));
   const def = (u: string) => data.units.units[u];
   const slowestFirst = (a: string, b: string) => (def(a)?.speed ?? 1) - (def(b)?.speed ?? 1) || (a < b ? -1 : a > b ? 1 : 0);
@@ -67,7 +69,8 @@ export function armySpeed(data: GameData, units: Units): number {
     infantrySeats += (wagons - (perWagon > 0 ? Math.ceil(loaded / perWagon) : 0)) * infantry;
   }
   board(foot, infantrySeats);
-  const speeds = Object.keys(walking).filter((u) => walking[u]! > 0).map((u) => data.units.units[u]?.speed ?? 1);
+  // Each at its own speed, with its owner's forged harness (smithing.json).
+  const speeds = Object.keys(walking).filter((u) => walking[u]! > 0).map((u) => unitSpeed(data, u, bonuses));
   return speeds.length ? Math.min(...speeds) : 1;
 }
 

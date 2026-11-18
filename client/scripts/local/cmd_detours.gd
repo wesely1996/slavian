@@ -117,7 +117,7 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 	for army in _by_departure(world.armies.filter(func(a: Dictionary) -> bool: return a.status != "done"), "departsAt"):
 		if army.status == "marching" and enters_before(army.path, int(army.departsAt), at, cell, until):
 			var dest := Vector2i(int(army.targetQ), int(army.targetR))
-			var path: Array = best_way(army.path, at - int(army.departsAt), cell, until - int(army.departsAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, dest, at, world))
+			var path: Array = best_way(army.path, at - int(army.departsAt), cell, until - int(army.departsAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, dest, at, world, LocalArmies.owner_bonuses(server, world, army)))
 			army.path = path
 			army.arrivesAt = int(army.departsAt) + int(path[-1].atMs)
 			server.schedule(world, int(army.arrivesAt), "army_arrive", {"armyId": army.id})
@@ -128,7 +128,7 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 			var home := server.find_village(world, int(army.homeVillageId))
 			if home.is_empty():
 				continue
-			var back: Array = best_way(road, at - int(army.leavesAt), cell, until - int(army.leavesAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, Vector2i(home.q, home.r), at, world))
+			var back: Array = best_way(road, at - int(army.leavesAt), cell, until - int(army.leavesAt), func(from: Vector2i) -> Variant: return _army_road(data, land, army, from, Vector2i(home.q, home.r), at, world, home.state.bonuses))
 			army.path = LocalLogistics.reversed_route(back)
 			army.returnsAt = int(army.leavesAt) + int(back[-1].atMs)
 			server.schedule(world, int(army.returnsAt), "army_return", {"armyId": army.id})
@@ -154,11 +154,12 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 			caravan.returnsAt = int(caravan.arrivesAt) + int(back[-1].atMs)
 			_reroute_caravan(server, world, caravan, "back", "caravan_return", int(caravan.returnsAt), at)
 	# Settlers, on their way or walking home.
-	var settler_speed := float(data.units.units.settler.speed)
 	for expedition in _by_departure(world.expeditions.filter(func(e: Dictionary) -> bool: return e.status in ["outbound", "returning"]), "departsAt"):
 		var home := server.find_village(world, int(expedition.villageId))
 		if home.is_empty():
 			continue
+		# At the settlers' pace, with their owner's forged harness.
+		var settler_speed := LocalSmithing.unit_speed(data, "settler", home.state.bonuses)
 		if expedition.status == "outbound" and enters_before(expedition.path, int(expedition.departsAt), at, cell, until):
 			var goal := Vector2i(int(expedition.q), int(expedition.r))
 			var path: Array = best_way(expedition.path, at - int(expedition.departsAt), cell, until - int(expedition.departsAt), func(from: Vector2i) -> Variant: return LocalLogistics.road_route(data, land, from, goal, settler_speed, world.speed))
@@ -176,8 +177,8 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 			server.schedule(world, int(expedition.returnsAt), "settlers_return", {"expeditionId": expedition.id})
 
 
-static func _army_road(data: Dictionary, land: Dictionary, army: Dictionary, from: Vector2i, to: Vector2i, at: int, world: Dictionary) -> Variant:
-	var speed := LocalArmies.army_speed(data, army.units) * LocalSupply.speed_factor(data, army if LocalArmies.supplied(army) else null, at, world.speed)
+static func _army_road(data: Dictionary, land: Dictionary, army: Dictionary, from: Vector2i, to: Vector2i, at: int, world: Dictionary, bonuses: Dictionary) -> Variant:
+	var speed := LocalArmies.army_speed(data, army.units, bonuses) * LocalSupply.speed_factor(data, army if LocalArmies.supplied(army) else null, at, world.speed)
 	return LocalLogistics.road_route(data, land, from, to, speed, world.speed, LocalArmies.terrain_relief(data, army.units))
 
 

@@ -1,3 +1,4 @@
+import { startSmithingCommand } from '../commands/smithing.js';
 import { releaseFromEnv } from '../push/announce.js';
 import { cancelBountyCommand, postBountyCommand, takeBountyCommand } from '../commands/bounties.js';
 import websocket from '@fastify/websocket';
@@ -170,6 +171,7 @@ const caravanBody = z.object({
 });
 const fetchBody = z.object({ load: loadSchema, escort: escortSchema });
 const merchantBody = z.object({ destinationVillageId: z.number().int().nullable() });
+const smithBody = z.object({ unit: z.string(), line: z.string() });
 // Achievements earned in solo runs, from the device.
 const soloAchievementsBody = z.object({
   achievements: z
@@ -1144,6 +1146,15 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   });
 
   // A merchant caravan to another settlement (null: the Holy City).
+  // The Blacksmith forges the next level of a unit's line (smithing.json).
+  app.post('/v1/villages/:id/smith', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { unit, line } = smithBody.parse(request.body);
+    const { village, work } = await startSmithingCommand(db, scheduler, { accountId: account.id, villageId: id, unit, line, now: clock() });
+    return { village: villageView(village), smithWork: work, serverTime: clock().toISOString() };
+  });
+
   app.post('/v1/villages/:id/caravans/merchant', async (request) => {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);

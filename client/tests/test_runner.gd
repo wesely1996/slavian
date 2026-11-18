@@ -243,7 +243,7 @@ func _test_village_layout() -> void:
 	_check(Rules.planned_plot(village, "f2") == {"building": "woodcutter", "level": 0}, "untouched field")
 	_check(not Rules.is_locked(data, village, "c3") and Rules.is_locked(data, village, "c10"), "slots past the Hall's reach are locked")
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
-	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "shrine", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "grain_silo", "market"],
+	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "shrine", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "grain_silo", "blacksmith", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
 	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
@@ -915,6 +915,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("quarters-scenario.json", "local quarters, floors, merging, splitting and answering battles")
 	_replay_scenario("heroquest-scenario.json", "local hero quests and army quests")
 	_replay_scenario("market-scenario.json", "local bounty board and caravans bringing back")
+	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
