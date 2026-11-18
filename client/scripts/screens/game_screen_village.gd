@@ -269,11 +269,11 @@ func _ruin_section(village: Dictionary) -> void:
 	button.custom_minimum_size.x = 160
 	row.add_child(button)
 	_panel_body.add_child(row)
-	var cost_text := tr("%s · %s") % [UI.costs(cost), TimeUtil.format_duration(seconds)]
 	_tick(cost_line, func() -> String:
 		var current: Dictionary = Game.villages.get(village_id, village)
-		button.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), cost)
-		return cost_text)
+		var have := Ledger.amounts_at(current.resources, Game.server_now())
+		button.disabled = not Ledger.can_afford(have, cost)
+		return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
 
 
 func _rebuild_village(village_id: int) -> void:

@@ -2248,13 +2248,13 @@ msgstr "Nivo %d"
 msgid "%s · %s · %s"
 msgstr "%s · %s · %s"
 
-#: client/scripts/screens/game_screen_army.gd:482
+#: client/scripts/screens/game_screen_army.gd:484
+msgid "Send to…"
+msgstr "Pošalji u…"
+
+#: client/scripts/screens/game_screen_army.gd:484
 msgid "Send to %s"
 msgstr "Pošalji u %s"
-
-#: client/scripts/screens/game_screen_army.gd:489
-msgid "Dismiss"
-msgstr "Otpusti"
 
 #: client/scripts/screens/game_screen_army.gd:497
 msgid "Name (optional)"
@@ -2264,486 +2264,490 @@ msgstr "Ime (opciono)"
 msgid "Recruit"
 msgstr "Unajmi"
 
-#: client/scripts/screens/game_screen_army.gd:513
+#: client/scripts/screens/game_screen_army.gd:519
 msgid "A general: %s · %s"
 msgstr "General: %s · %s"
 
-#: client/scripts/screens/game_screen_army.gd:518
+#: client/scripts/screens/game_screen_army.gd:519
 msgid "  (raise a Hero's Hall for more)"
 msgstr "  (podigni Dvoranu junaka za više)"
 
-#: client/scripts/screens/game_screen_army.gd:568
+#: client/scripts/screens/game_screen_army.gd:560
 msgid "Army from %s"
 msgstr "Vojska iz: %s"
 
-#: client/scripts/screens/game_screen_army.gd:568
+#: client/scripts/screens/game_screen_army.gd:560
 msgid "Army"
 msgstr "Vojska"
 
-#: client/scripts/screens/game_screen_army.gd:573
+#: client/scripts/screens/game_screen_army.gd:565
 msgid "This army is no more: it came home, was disbanded or was lost."
 msgstr "Ove vojske više nema: vratila se kući, raspuštena je ili izgubljena."
 
-#: client/scripts/screens/game_screen_army.gd:594
+#: client/scripts/screens/game_screen_army.gd:586
 msgid "Orders"
 msgstr "Naredbe"
 
-#: client/scripts/screens/game_screen_army.gd:595
+#: client/scripts/screens/game_screen_army.gd:587
 msgid "Troops & leaders"
 msgstr "Trupe i vođe"
 
-#: client/scripts/screens/game_screen_army.gd:596
+#: client/scripts/screens/game_screen_army.gd:588
 msgid "Supply"
 msgstr "Zalihe"
 
-#: client/scripts/screens/game_screen_army.gd:598
+#: client/scripts/screens/game_screen_army.gd:590
 msgid "Settings"
 msgstr "Podešavanja"
 
-#: client/scripts/screens/game_screen_army.gd:609
+#: client/scripts/screens/game_screen_army.gd:601
 msgid "Strike on the horde of %s"
 msgstr "Napad na hordu sa %s"
 
-#: client/scripts/screens/game_screen_army.gd:611
+#: client/scripts/screens/game_screen_army.gd:603
 msgid "Raid on %s"
 msgstr "Pohod na %s"
 
-#: client/scripts/screens/game_screen_army.gd:616
+#: client/scripts/screens/game_screen_army.gd:608
 msgid "Found: %s"
 msgstr "Nađeno: %s"
 
-#: client/scripts/screens/game_screen_army.gd:618
+#: client/scripts/screens/game_screen_army.gd:610
 msgid "Carries %d of %d loot"
 msgstr "Nosi %d od %d plena"
 
-#: client/scripts/screens/game_screen_army.gd:623
+#: client/scripts/screens/game_screen_army.gd:615
 msgid "Stance"
 msgstr "Stav"
 
-#: client/scripts/screens/game_screen_army.gd:629
+#: client/scripts/screens/game_screen_army.gd:621
 msgid "Its stance can't be changed in the middle of a battle."
 msgstr "Stav joj se ne može menjati usred bitke."
 
-#: client/scripts/screens/game_screen_army.gd:635
+#: client/scripts/screens/game_screen_army.gd:627
 msgid "Move: tap a hex"
 msgstr "Pomeri: dodirni polje"
 
-#: client/scripts/screens/game_screen_army.gd:661
+#: client/scripts/screens/game_screen_army.gd:653
 msgid "Led by %s"
 msgstr "Predvodi %s"
 
-#: client/scripts/screens/game_screen_army.gd:665
+#: client/scripts/screens/game_screen_army.gd:657
 msgid "Scouts: +%d%% attack and defense"
 msgstr "Izviđači: +%d%% napad i odbrana"
 
-#: client/scripts/screens/game_screen_army.gd:666
+#: client/scripts/screens/game_screen_army.gd:658
 msgid "Scouts with an army never fight, but it fights the better for knowing the enemy: +%d%% for each scout (pathfinders count two, assassins three), at most +%d%%."
 msgstr "Izviđači uz vojsku se nikad ne bore, ali se vojska bolje bori jer poznaje neprijatelja: +%d%% za svakog izviđača (tragači vrede dva, ubice tri), najviše +%d%%."
 
-#: client/scripts/screens/game_screen_army.gd:669
+#: client/scripts/screens/game_screen_army.gd:661
 msgid "Troops"
 msgstr "Trupe"
 
-#: client/scripts/screens/game_screen_army.gd:680
+#: client/scripts/screens/game_screen_army.gd:672
 msgid "Each eats %s grain an hour · carries food for %s"
 msgstr "Svaki jede %s žita na sat · nosi hranu za %s"
 
-#: client/scripts/screens/game_screen_army.gd:682
+#: client/scripts/screens/game_screen_army.gd:674
 msgid "each wagon %d grain more"
 msgstr "svaka kola još %d žita"
 
-#: client/scripts/screens/game_screen_army.gd:700
+#: client/scripts/screens/game_screen_army.gd:692
 msgid "Fed by its home village: %s grain an hour."
 msgstr "Hrani ga matično selo: %s žita na sat."
 
-#: client/scripts/screens/game_screen_army.gd:714
+#: client/scripts/screens/game_screen_army.gd:706
 msgid "Grain %d (+%d) of %d · eats %s an hour"
 msgstr "Žito %d (+%d) od %d · jede %s na sat"
 
-#: client/scripts/screens/game_screen_army.gd:715
+#: client/scripts/screens/game_screen_army.gd:707
 msgid "The extra grain is left behind when they march off."
 msgstr "Višak žita ostaje kad krenu dalje."
 
-#: client/scripts/screens/game_screen_army.gd:716
+#: client/scripts/screens/game_screen_army.gd:708
 msgid "Grain %d of %d · eats %s an hour"
 msgstr "Žito %d od %d · jede %s na sat"
 
-#: client/scripts/screens/game_screen_army.gd:718
+#: client/scripts/screens/game_screen_army.gd:710
 msgid "Quartered: fed from the stores where it stands, %s grain an hour; its own grain keeps."
 msgstr "Smeštena: hrani se iz zaliha gde stoji, %s žita na sat; njeno žito ostaje netaknuto."
 
-#: client/scripts/screens/game_screen_army.gd:719
+#: client/scripts/screens/game_screen_army.gd:711
 msgid "An army standing in a settlement, fort or supply point eats half its upkeep from its stores, never below the floor set there. Once the floor is reached it eats its own grain again."
 msgstr "Vojska koja stoji u naselju, tvrđavi ili tački snabdevanja jede polovinu svog održavanja iz njenih zaliha, nikad ispod tamo postavljene granice. Kad se granica dostigne, ponovo jede svoje žito."
 
-#: client/scripts/screens/game_screen_army.gd:724
+#: client/scripts/screens/game_screen_army.gd:716
 msgid "Fatigue"
 msgstr "Umor"
 
-#: client/scripts/screens/game_screen_army.gd:727
+#: client/scripts/screens/game_screen_army.gd:719
 msgid "Fatigue comes from hunger alone: out of food an army marches slower, after %s it starts losing men, and after %s it is lost."
 msgstr "Umor dolazi samo od gladi: bez hrane vojska maršira sporije, posle %s počinje da gubi ljude, a posle %s je izgubljena."
 
-#: client/scripts/screens/game_screen_army.gd:738
+#: client/scripts/screens/game_screen_army.gd:730
 msgid "Supply point"
 msgstr "Žitnica"
 
-#: client/scripts/screens/game_screen_army.gd:738
+#: client/scripts/screens/game_screen_army.gd:730
 msgid "Fort"
 msgstr "Utvrda"
 
-#: client/scripts/screens/game_screen_army.gd:739
+#: client/scripts/screens/game_screen_army.gd:731
 msgid "%s here: %d of %d grain"
 msgstr "%s ovde: %d od %d žita"
 
-#: client/scripts/screens/game_screen_army.gd:750
+#: client/scripts/screens/game_screen_army.gd:742
 msgid "Wagon fort: ready in %s (+%d%% defense)"
 msgstr "Kolski tabor: spreman za %s (+%d%% odbrane)"
 
-#: client/scripts/screens/game_screen_army.gd:751
+#: client/scripts/screens/game_screen_army.gd:743
 msgid "Wagon fort: +%d%% defense"
 msgstr "Kolski tabor: +%d%% odbrane"
 
-#: client/scripts/screens/game_screen_army.gd:773
+#: client/scripts/screens/game_screen_army.gd:765
 msgid "Armies may draw it down to %d grain"
 msgstr "Vojske smeju da ga isprazne do %d žita"
 
-#: client/scripts/screens/game_screen_army.gd:792
+#: client/scripts/screens/game_screen_army.gd:784
 msgid "Answer battles within %d hexes"
 msgstr "Odaziva se na bitke u krugu od %d heksa"
 
-#: client/scripts/screens/game_screen_army.gd:796
+#: client/scripts/screens/game_screen_army.gd:788
 msgid "Standing still, it marches to any battle that starts within %d hexes, and comes back here once it is over."
 msgstr "Dok stoji, kreće u svaku bitku koja počne u krugu od %d heksa i vraća se ovamo kad se završi."
 
-#: client/scripts/screens/game_screen_army.gd:805
+#: client/scripts/screens/game_screen_army.gd:797
 msgid "Home: %s"
 msgstr "Dom: %s"
 
-#: client/scripts/screens/game_screen_army.gd:826
+#: client/scripts/screens/game_screen_army.gd:818
 msgid "Hero"
 msgstr "Junak"
 
-#: client/scripts/screens/game_screen_army.gd:830
+#: client/scripts/screens/game_screen_army.gd:822
 msgid "Hero leaves"
 msgstr "Junak odlazi"
 
-#: client/scripts/screens/game_screen_army.gd:832
+#: client/scripts/screens/game_screen_army.gd:824
 msgid "%s takes command"
 msgstr "%s preuzima komandu"
 
-#: client/scripts/screens/game_screen_army.gd:834
+#: client/scripts/screens/game_screen_army.gd:826
 msgid "General leaves"
 msgstr "General odlazi"
 
-#: client/scripts/screens/game_screen_army.gd:838
+#: client/scripts/screens/game_screen_army.gd:830
 msgid "General…"
 msgstr "General…"
 
-#: client/scripts/screens/game_screen_army.gd:840
+#: client/scripts/screens/game_screen_army.gd:832
 msgid "%s (Lv %d) takes command"
 msgstr "%s (nivo %d) preuzima komandu"
 
-#: client/scripts/screens/game_screen_army.gd:855
+#: client/scripts/screens/game_screen_army.gd:847
 msgid "Merge in: %s"
 msgstr "Pripoji: %s"
 
-#: client/scripts/screens/game_screen_army.gd:858
+#: client/scripts/screens/game_screen_army.gd:850
 msgid "Split off"
 msgstr "Odvoji"
 
-#: client/scripts/screens/game_screen_army.gd:860
+#: client/scripts/screens/game_screen_army.gd:852
 msgid "Split them off"
 msgstr "Odvoj ih"
 
-#: client/scripts/screens/game_screen_army.gd:879
+#: client/scripts/screens/game_screen_army.gd:871
 msgid "Call home"
 msgstr "Pozovi kući"
 
-#: client/scripts/screens/game_screen_army.gd:881
+#: client/scripts/screens/game_screen_army.gd:873
 msgid "Take on grain"
 msgstr "Uzmi žito"
 
-#: client/scripts/screens/game_screen_army.gd:883
+#: client/scripts/screens/game_screen_army.gd:875
 msgid "Disband"
 msgstr "Raspusti"
 
-#: client/scripts/screens/game_screen_army.gd:899
+#: client/scripts/screens/game_screen_army.gd:891
 msgid "Circle the wagons (+%d%% defense)"
 msgstr "Zbij kola u krug (+%d%% odbrane)"
 
-#: client/scripts/screens/game_screen_army.gd:901
+#: client/scripts/screens/game_screen_army.gd:893
 msgid "The wagons are drawn into a ring, ready in %s: +%d%% defense for each wagon per %d soldiers, at most +%d%%. The ring breaks up when the army moves."
 msgstr "Kola se zbijaju u krug, spremna za %s: +%d%% odbrane za svaka kola na %d vojnika, najviše +%d%%. Krug se rasturi kad vojska krene."
 
-#: client/scripts/screens/game_screen_army.gd:916
+#: client/scripts/screens/game_screen_army.gd:908
 msgid "Take grain"
 msgstr "Uzmi žito"
 
-#: client/scripts/screens/game_screen_army.gd:917
+#: client/scripts/screens/game_screen_army.gd:909
 msgid "Leave half its grain"
 msgstr "Ostavi pola žita"
 
-#: client/scripts/screens/game_screen_army.gd:956
+#: client/scripts/screens/game_screen_army.gd:948
 msgid "Garrison"
 msgstr "Posada"
 
-#: client/scripts/screens/game_screen_army.gd:957
+#: client/scripts/screens/game_screen_army.gd:949
 msgid "Train"
 msgstr "Obuka"
 
-#: client/scripts/screens/game_screen_army.gd:960
+#: client/scripts/screens/game_screen_army.gd:952
 msgid "Search for ruins"
 msgstr "Traži ruševine"
 
-#: client/scripts/screens/game_screen_army.gd:976
+#: client/scripts/screens/game_screen_army.gd:968
 msgid "%s (Lv %d) commands this garrison: %s"
 msgstr "%s (nivo %d) zapoveda ovom posadom: %s"
 
-#: client/scripts/screens/game_screen_army.gd:982
+#: client/scripts/screens/game_screen_army.gd:974
 msgid "Recommended garrison: %d (%d at home)"
 msgstr "Preporučena posada: %d (%d kod kuće)"
 
-#: client/scripts/screens/game_screen_army.gd:984
+#: client/scripts/screens/game_screen_army.gd:976
 msgid "At home"
 msgstr "Kod kuće"
 
-#: client/scripts/screens/game_screen_army.gd:993
+#: client/scripts/screens/game_screen_army.gd:985
 msgid "Away"
 msgstr "Odsutni"
 
-#: client/scripts/screens/game_screen_army.gd:1003
+#: client/scripts/screens/game_screen_army.gd:995
 msgid "Build a Scout Lodge to send scouts searching for ruins."
 msgstr "Izgradi Izviđačnicu da bi slao izviđače u potragu za ruševinama."
 
-#: client/scripts/screens/game_screen_army.gd:1014
+#: client/scripts/screens/game_screen_army.gd:1006
 msgid "Scouts search the land up to %d hexes around the village for %s. Each scout gives a %d%% chance of finding a forgotten ruin (at most %d%%), which then waits to be explored."
 msgstr "Izviđači pretražuju zemlju do %d polja oko sela tokom %s. Svaki izviđač daje %d%% šanse da se nađe zaboravljena ruševina (najviše %d%%), koja zatim čeka da bude istražena."
 
-#: client/scripts/screens/game_screen_army.gd:1016
+#: client/scripts/screens/game_screen_army.gd:1008
 msgid "Up to %d scouts go at a time, and you can send a search once every %s (over all your villages)."
 msgstr "Najviše %d izviđača ide odjednom, a potragu možeš poslati jednom u %s (za sva tvoja sela zajedno)."
 
-#: client/scripts/screens/game_screen_army.gd:1023
+#: client/scripts/screens/game_screen_army.gd:1015
 msgid "%d scouts searching · back in %s"
 msgstr "%d izviđača traga · vraćaju se za %s"
 
-#: client/scripts/screens/game_screen_army.gd:1030
+#: client/scripts/screens/game_screen_army.gd:1022
 msgid "%d scouts came back empty-handed"
 msgstr "%d izviđača se vratilo praznih ruku"
 
-#: client/scripts/screens/game_screen_army.gd:1032
+#: client/scripts/screens/game_screen_army.gd:1024
 msgid "%d scouts found a %s at (%d, %d)"
 msgstr "%d izviđača je našlo: %s na (%d, %d)"
 
-#: client/scripts/screens/game_screen_army.gd:1042
+#: client/scripts/screens/game_screen_army.gd:1034
 msgid "Send to search (%d home)"
 msgid_plural "Send to search (%d home)"
 msgstr[0] "Pošalji u potragu (%d kod kuće)"
 msgstr[1] "Pošalji u potragu (%d kod kuće)"
 msgstr[2] "Pošalji u potragu (%d kod kuće)"
 
-#: client/scripts/screens/game_screen_army.gd:1054
+#: client/scripts/screens/game_screen_army.gd:1046
 msgid "Your scouts rest after a search: they can go again in %s"
 msgstr "Tvoji izviđači se odmaraju posle potrage: mogu ponovo za %s"
 
-#: client/scripts/screens/game_screen_army.gd:1074
+#: client/scripts/screens/game_screen_army.gd:1066
 msgid "Dismiss soldiers"
 msgstr "Otpusti vojnike"
 
-#: client/scripts/screens/game_screen_army.gd:1096
+#: client/scripts/screens/game_screen_army.gd:1068
+msgid "Dismiss"
+msgstr "Otpusti"
+
+#: client/scripts/screens/game_screen_army.gd:1088
 msgid "Training (%d/%d)"
 msgstr "Obuka (%d/%d)"
 
-#: client/scripts/screens/game_screen_army.gd:1097
+#: client/scripts/screens/game_screen_army.gd:1089
 msgid "Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place."
 msgstr "Grupe koje čekaju obuku. Svakih %d nivoa Kasarne, Strelišta i Konjušnice dodaje po jedno mesto."
 
-#: client/scripts/screens/game_screen_army.gd:1099
+#: client/scripts/screens/game_screen_army.gd:1091
 msgid "Nobody in training."
 msgstr "Nema nikoga na obuci."
 
-#: client/scripts/screens/game_screen_army.gd:1112
+#: client/scripts/screens/game_screen_army.gd:1104
 msgid "Cancel"
 msgstr "Otkaži"
 
-#: client/scripts/screens/game_screen_army.gd:1113
+#: client/scripts/screens/game_screen_army.gd:1105
 msgid "Call it off: those not yet trained are paid back in full."
 msgstr "Otkaži: oni koji još nisu obučeni vraćaju se u celosti."
 
-#: client/scripts/screens/game_screen_army.gd:1123
+#: client/scripts/screens/game_screen_army.gd:1115
 msgid "%s %d/%d   finishing…"
 msgstr "%s %d/%d   završava se…"
 
-#: client/scripts/screens/game_screen_army.gd:1125
+#: client/scripts/screens/game_screen_army.gd:1117
 msgid "%s %d/%d   next %s · all %s"
 msgstr "%s %d/%d   sledeće za %s · sve za %s"
 
-#: client/scripts/screens/game_screen_army.gd:1140
+#: client/scripts/screens/game_screen_army.gd:1132
 msgid "Build a Barracks, Shooting Range or Stables in the village to train troops."
 msgstr "Izgradi Kasarnu, Strelište ili Konjušnicu u selu da bi obučavao trupe."
 
-#: client/scripts/screens/game_screen_army.gd:1145
+#: client/scripts/screens/game_screen_army.gd:1137
 msgid "%s (Lv %d)"
 msgstr "%s (nivo %d)"
 
-#: client/scripts/screens/game_screen_army.gd:1172
+#: client/scripts/screens/game_screen_army.gd:1164
 msgid "%s/h"
 msgstr "%s/h"
 
-#: client/scripts/screens/game_screen_army.gd:1173
+#: client/scripts/screens/game_screen_army.gd:1165
 msgid "Attack · Defense · Health · Speed (hexes/h) · Grain eaten"
 msgstr "Napad · Odbrana · Zdravlje · Brzina (polja/h) · Žito koje jede"
 
-#: client/scripts/screens/game_screen_army.gd:1177
+#: client/scripts/screens/game_screen_army.gd:1169
 msgid "Needs %s level %d"
 msgstr "Potrebno: %s nivo %d"
 
-#: client/scripts/screens/game_screen_army.gd:1194
+#: client/scripts/screens/game_screen_army.gd:1186
 msgid "Max"
 msgstr "Maks"
 
-#: client/scripts/screens/game_screen_army.gd:1207
+#: client/scripts/screens/game_screen_army.gd:1199
 msgid "Dearer for every %d recruited (%d so far)."
 msgstr "Skuplje za svakih %d regrutovanih (do sada %d)."
 
-#: client/scripts/screens/game_screen_army.gd:1208
+#: client/scripts/screens/game_screen_army.gd:1200
 msgid "Counted over all your villages, from the moment one is queued. Each one that dies or is called off brings the price back down (the dearest is paid back); founding a village with them does not."
 msgstr "Broji se u svim tvojim selima, od trenutka kad se jedan stavi u red. Svaki koji pogine ili se otkaže vraća cenu nazad (vraća se najskuplji); osnivanje sela sa njima ne vraća."
 
-#: client/scripts/screens/game_screen_army.gd:1222
+#: client/scripts/screens/game_screen_army.gd:1214
 msgid "%s · %s each"
 msgstr "%s · po %s"
 
-#: client/scripts/screens/game_screen_army.gd:1223
+#: client/scripts/screens/game_screen_army.gd:1215
 msgid "  (queue full)"
 msgstr "  (red pun)"
 
-#: client/scripts/screens/game_screen_army.gd:1228
+#: client/scripts/screens/game_screen_army.gd:1220
 msgid "Stance when attacked"
 msgstr "Stav pri napadu"
 
-#: client/scripts/screens/game_screen_army.gd:1229
+#: client/scripts/screens/game_screen_army.gd:1221
 msgid "How the garrison fights, and the stance new armies take. Risk against reward: the earlier a stance breaks, the harder it hits or holds."
 msgstr "Kako se garnizon bori i koji stav uzimaju nove vojske. Rizik protiv nagrade: što se stav ranije slomi, to jače udara ili drži."
 
-#: client/scripts/screens/game_screen_army.gd:1253
+#: client/scripts/screens/game_screen_army.gd:1245
 msgid "%s: attack ×%.2f, defense ×%.2f, %s."
 msgstr "%s: napad ×%.2f, odbrana ×%.2f, %s."
 
-#: client/scripts/screens/game_screen_army.gd:1269
+#: client/scripts/screens/game_screen_army.gd:1261
 msgid "Each army fights in its own stance and breaks on its own losses: one that breaks falls back home beaten (its hero wounded, its general killed) while the others fight on."
 msgstr "Svaka vojska se bori u svom stavu i slama se po svojim gubicima: ona koja se slomi povlači se kući poražena (njen junak ranjen, njen general ubijen) dok se ostale bore dalje."
 
-#: client/scripts/screens/game_screen_army.gd:1297
+#: client/scripts/screens/game_screen_army.gd:1289
 msgid "Our men are outside the walls, fighting in the open."
 msgstr "Naši su van zidina, bore se na otvorenom."
 
-#: client/scripts/screens/game_screen_army.gd:1301
+#: client/scripts/screens/game_screen_army.gd:1293
 msgid "Sure? Charge out"
 msgstr "Sigurno? Juriš napolje"
 
-#: client/scripts/screens/game_screen_army.gd:1301
+#: client/scripts/screens/game_screen_army.gd:1293
 msgid "Charge out of the walls"
 msgstr "Juriš van zidina"
 
-#: client/scripts/screens/game_screen_army.gd:1310
+#: client/scripts/screens/game_screen_army.gd:1302
 msgid "The garrison and the armies with it leave the walls and fight in the open from the next round: no wall defense, no shooting from the walls, and the horde's fighters are no longer held back. A horde still building its engines is fought at once. No going back in this battle."
 msgstr "Posada i vojske uz nju napuštaju zidine i od sledeće runde se bore na otvorenom: nema odbrane zidina ni gađanja sa njih, a borci horde više nisu zadržani. Horda koja još gradi sprave napada se odmah. U ovoj bici nema povratka unutra."
 
-#: client/scripts/screens/game_screen_army.gd:1344
+#: client/scripts/screens/game_screen_army.gd:1336
 msgid "Training %d × %s"
 msgstr "Obuka %d × %s"
 
-#: client/scripts/screens/game_screen_army.gd:1364
+#: client/scripts/screens/game_screen_army.gd:1356
 msgid "In battle: attack · defense · health"
 msgstr "U bici: napad · odbrana · zdravlje"
 
-#: client/scripts/screens/game_screen_army.gd:1365
+#: client/scripts/screens/game_screen_army.gd:1357
 msgid "The hero fights in the ranks as a champion, striking like a band of soldiers. It commands the troops it stands with; struck down, it is carried home wounded and a general with it takes command."
 msgstr "Junak se bori u redovima kao šampion i udara kao čitava četa. Zapoveda trupama uz koje stoji; kad padne, odnose ga ranjenog kući, a general koji je s njim preuzima zapovedništvo."
 
-#: client/scripts/screens/game_screen_army.gd:1366
+#: client/scripts/screens/game_screen_army.gd:1358
 msgid "A general fights in the ranks too, a lesser champion than the hero. It commands the troops it stands with when no hero does, and takes command when the hero falls; struck down, it dies."
 msgstr "I general se bori u redovima, kao slabiji šampion od junaka. Zapoveda trupama uz koje stoji kad junaka nema, i preuzima zapovedništvo kad junak padne; kad padne, gine."
 
-#: client/scripts/screens/game_screen_army.gd:1378
+#: client/scripts/screens/game_screen_army.gd:1370
 msgid "No rally point"
 msgstr "Nema zbornog mesta"
 
-#: client/scripts/screens/game_screen_army.gd:1380
+#: client/scripts/screens/game_screen_army.gd:1372
 msgid "Rally point: troops trained in your other settlements march here once done."
 msgstr "Zborna tačka: trupe obučene u tvojim drugim naseljima dolaze ovamo čim budu spremne."
 
-#: client/scripts/screens/game_screen_army.gd:1382
+#: client/scripts/screens/game_screen_army.gd:1374
 msgid "Rally point: %s. Troops trained here march there once done."
 msgstr "Zborna tačka: %s. Trupe obučene ovde idu tamo čim budu spremne."
 
-#: client/scripts/screens/game_screen_army.gd:1387
+#: client/scripts/screens/game_screen_army.gd:1379
 msgid "Stop rallying"
 msgstr "Ukini zbornu tačku"
 
-#: client/scripts/screens/game_screen_army.gd:1389
+#: client/scripts/screens/game_screen_army.gd:1381
 msgid "Rally here"
 msgstr "Zborna tačka ovde"
 
-#: client/scripts/screens/game_screen_army.gd:1390
+#: client/scripts/screens/game_screen_army.gd:1382
 msgid "One of your settlements can be your rally point: every batch of troops trained in your other settlements marches there as soon as it is done, to join its garrison. Settlers stay home, and so do troops of a village under siege."
 msgstr "Jedno tvoje naselje može biti zborna tačka: svaka grupa trupa obučena u tvojim drugim naseljima kreće tamo čim bude spremna i pridružuje se tamošnjem garnizonu. Doseljenici ostaju kod kuće, kao i trupe sela pod opsadom."
 
-#: client/scripts/screens/game_screen_army.gd:1413
+#: client/scripts/screens/game_screen_army.gd:1405
 msgid "All troops"
 msgstr "Sve trupe"
 
-#: client/scripts/screens/game_screen_army.gd:1414
+#: client/scripts/screens/game_screen_army.gd:1406
 msgid "By village"
 msgstr "Po selima"
 
-#: client/scripts/screens/game_screen_army.gd:1418
+#: client/scripts/screens/game_screen_army.gd:1410
 msgid "Your hero"
 msgstr "Tvoj junak"
 
-#: client/scripts/screens/game_screen_army.gd:1442
+#: client/scripts/screens/game_screen_army.gd:1434
 msgid "No troops yet. Train them in a village's Troops tab."
 msgstr "Još nema trupa. Obuči ih na kartici Trupe u selu."
 
-#: client/scripts/screens/game_screen_army.gd:1454
+#: client/scripts/screens/game_screen_army.gd:1446
 msgid "%d at home · %d out · %d in training"
 msgstr "%d kod kuće · %d napolju · %d na obuci"
 
-#: client/scripts/screens/game_screen_army.gd:1459
+#: client/scripts/screens/game_screen_army.gd:1451
 msgid "%d in all"
 msgstr "ukupno %d"
 
-#: client/scripts/screens/game_screen_army.gd:1483
+#: client/scripts/screens/game_screen_army.gd:1475
 msgid "Training"
 msgstr "Obuka"
 
-#: client/scripts/screens/game_screen_army.gd:1487
+#: client/scripts/screens/game_screen_army.gd:1479
 msgid "Open"
 msgstr "Otvori"
 
-#: client/scripts/screens/game_screen_army.gd:1503
+#: client/scripts/screens/game_screen_army.gd:1495
 msgid "No armies out"
 msgstr "Nema vojski na terenu"
 
-#: client/scripts/screens/game_screen_army.gd:1503
+#: client/scripts/screens/game_screen_army.gd:1495
 msgid "No armies out. Send them from a village's Troops tab, or from a hex on the map."
 msgstr "Nijedna vojska nije napolju. Pošalji ih sa kartice Trupe u selu ili sa polja na mapi."
 
-#: client/scripts/screens/game_screen_army.gd:1511
+#: client/scripts/screens/game_screen_army.gd:1503
 msgid "%s → %s"
 msgstr "%s → %s"
 
-#: client/scripts/screens/game_screen_army.gd:1516
+#: client/scripts/screens/game_screen_army.gd:1508
 msgid "Show"
 msgstr "Prikaži"
 
-#: client/scripts/screens/game_screen_army.gd:1541
+#: client/scripts/screens/game_screen_army.gd:1533
 msgid "%s  Lv %d"
 msgstr "%s  nivo %d"
 
-#: client/scripts/screens/game_screen_army.gd:1544
+#: client/scripts/screens/game_screen_army.gd:1536
 msgid "Open the hero"
 msgstr "Otvori junaka"
 
@@ -3163,10 +3167,6 @@ msgstr "Nijedan karavan nije na putu."
 #: client/scripts/screens/game_screen_logistics.gd:343
 msgid "Turn back"
 msgstr "Vrati nazad"
-
-#: client/scripts/screens/game_screen_logistics.gd:346
-msgid "Send to…"
-msgstr "Pošalji u…"
 
 #: client/scripts/screens/game_screen_logistics.gd:448
 msgid "The caravan is on its way"
@@ -3698,215 +3698,215 @@ msgstr "nema prelaza. Ni horde ne mogu preći."
 msgid "Build bridge"
 msgstr "Gradi most"
 
-#: client/scripts/screens/game_screen_map.gd:637
+#: client/scripts/screens/game_screen_map.gd:642
 msgid "Build a bridge: %s · %s"
 msgstr "Gradi most: %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:652
+#: client/scripts/screens/game_screen_map.gd:653
 msgid "NE"
 msgstr "SI"
 
-#: client/scripts/screens/game_screen_map.gd:652
+#: client/scripts/screens/game_screen_map.gd:653
 msgid "NW"
 msgstr "SZ"
 
-#: client/scripts/screens/game_screen_map.gd:652
+#: client/scripts/screens/game_screen_map.gd:653
 msgid "SW"
 msgstr "JZ"
 
-#: client/scripts/screens/game_screen_map.gd:652
+#: client/scripts/screens/game_screen_map.gd:653
 msgid "SE"
 msgstr "JI"
 
-#: client/scripts/screens/game_screen_map.gd:661
+#: client/scripts/screens/game_screen_map.gd:662
 msgid " (being built)"
 msgstr " (u gradnji)"
 
-#: client/scripts/screens/game_screen_map.gd:661
+#: client/scripts/screens/game_screen_map.gd:662
 msgid " (being improved)"
 msgstr " (poboljšava se)"
 
-#: client/scripts/screens/game_screen_map.gd:670
+#: client/scripts/screens/game_screen_map.gd:671
 msgid "Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. A dirt track, a stone road and a paved road are each faster; the march takes %s of the time."
 msgstr "Putevi ubrzavaju marš svima na njima, i ljudskim hordama, ali zveri Severa ih izbegavaju. Zemljani, kameni i popločan put su svaki brži; marš traje %s vremena."
 
-#: client/scripts/screens/game_screen_map.gd:672
+#: client/scripts/screens/game_screen_map.gd:673
 msgid "Roads run %s."
 msgstr "Putevi vode %s."
 
-#: client/scripts/screens/game_screen_map.gd:682
+#: client/scripts/screens/game_screen_map.gd:683
 msgid "Improve"
 msgstr "Poboljšaj"
 
-#: client/scripts/screens/game_screen_map.gd:686
+#: client/scripts/screens/game_screen_map.gd:694
 msgid "%s to a %s: %s · %s"
 msgstr "%s u %s: %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:703
+#: client/scripts/screens/game_screen_map.gd:707
 msgid "A mountain pass: %s · %s"
 msgstr "Planinski prolaz: %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:705
+#: client/scripts/screens/game_screen_map.gd:709
 msgid "A road into the mountains costs and takes %d times as much. Armies, caravans and scouts then cross the mountain along it, slowly; none can stop there, and the hordes keep off the passes."
 msgstr "Put kroz planine košta i traje %d puta više. Vojske, karavani i izviđači tada prelaze planinu njime, sporo; niko tamo ne može da stane, a horde se klone prolaza."
 
-#: client/scripts/screens/game_screen_map.gd:706
+#: client/scripts/screens/game_screen_map.gd:710
 msgid "Build a road"
 msgstr "Izgradi put"
 
-#: client/scripts/screens/game_screen_map.gd:710
+#: client/scripts/screens/game_screen_map.gd:714
 msgid "Tap the hex next to this one to build the road to."
 msgstr "Dodirni susedno polje do kog ide put."
 
-#: client/scripts/screens/game_screen_map.gd:712
+#: client/scripts/screens/game_screen_map.gd:721
 msgid "A road: %s · %s"
 msgstr "Put: %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:772
+#: client/scripts/screens/game_screen_map.gd:777
 msgid "Grain the army takes from the granary to eat on the way. When it runs out the army goes hungry: it marches slower and then loses soldiers. It can fill up again in your villages, forts and supply points."
 msgstr "Žito koje vojska uzima iz žitnice da jede usput. Kad ga nestane, vojska gladuje: maršira sporije, a zatim gubi vojnike. Može se ponovo snabdeti u tvojim selima, utvrđenjima i tačkama snabdevanja."
 
-#: client/scripts/screens/game_screen_map.gd:782
+#: client/scripts/screens/game_screen_map.gd:787
 msgid "Grain for the march: pick the troops first."
 msgstr "Žito za marš: prvo izaberi trupe."
 
-#: client/scripts/screens/game_screen_map.gd:783
+#: client/scripts/screens/game_screen_map.gd:788
 msgid "Takes %d grain · lasts %s · they can carry %d"
 msgstr "Nosi %d žita · traje %s · mogu da ponesu %d"
 
-#: client/scripts/screens/game_screen_map.gd:814
+#: client/scripts/screens/game_screen_map.gd:819
 msgid "Nothing guards it: no fight."
 msgstr "Niko ga ne čuva: nema borbe."
 
-#: client/scripts/screens/game_screen_map.gd:817
+#: client/scripts/screens/game_screen_map.gd:822
 msgid "Danger unknown: nobody has seen what guards it."
 msgstr "Opasnost nepoznata: niko nije video šta ga čuva."
 
-#: client/scripts/screens/game_screen_map.gd:818
+#: client/scripts/screens/game_screen_map.gd:823
 msgid "Scouts sent alone count the guardians and turn back; then the odds show here."
 msgstr "Izviđači poslati sami prebroje čuvare i vrate se; tada se ovde vide izgledi."
 
-#: client/scripts/screens/game_screen_map.gd:822
+#: client/scripts/screens/game_screen_map.gd:827
 msgid "A guess from %d fights played out with what you know: the enemy's numbers (who exactly is among them is guessed from their front), your troops, their stance and your bonuses. Heroes and generals are not counted."
 msgstr "Procena iz %d odigranih borbi sa onim što znaš: broj neprijatelja (ko je tačno među njima pretpostavlja se po njihovom frontu), tvoje trupe, njihov stav i tvoji bonusi. Heroji i generali se ne računaju."
 
-#: client/scripts/screens/game_screen_map.gd:827
+#: client/scripts/screens/game_screen_map.gd:832
 msgid "%d enemies there."
 msgstr "Tamo je %d neprijatelja."
 
-#: client/scripts/screens/game_screen_map.gd:840
+#: client/scripts/screens/game_screen_map.gd:845
 msgid "Your armies standing elsewhere"
 msgstr "Tvoje vojske koje stoje drugde"
 
-#: client/scripts/screens/game_screen_map.gd:848
+#: client/scripts/screens/game_screen_map.gd:853
 msgid "Move here"
 msgstr "Pomeri ovamo"
 
-#: client/scripts/screens/game_screen_map.gd:878
+#: client/scripts/screens/game_screen_map.gd:883
 msgid "Settlers on their way to found %s · %s"
 msgstr "Doseljenici na putu da osnuju %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:880
+#: client/scripts/screens/game_screen_map.gd:885
 msgid "Settlers coming home (%s) · %s"
 msgstr "Doseljenici se vraćaju kući (%s) · %s"
 
-#: client/scripts/screens/game_screen_map.gd:882
+#: client/scripts/screens/game_screen_map.gd:887
 msgid "Founded %s"
 msgstr "Osnovano %s"
 
-#: client/scripts/screens/game_screen_map.gd:883
+#: client/scripts/screens/game_screen_map.gd:888
 msgid "Settlers came home from (%d, %d)"
 msgstr "Doseljenici su se vratili sa (%d, %d)"
 
-#: client/scripts/screens/game_screen_map.gd:903
+#: client/scripts/screens/game_screen_map.gd:908
 msgid "On fire: nothing gets through · out in %s"
 msgstr "Gori: ništa ne prolazi · gasi se za %s"
 
-#: client/scripts/screens/game_screen_map.gd:904
+#: client/scripts/screens/game_screen_map.gd:909
 msgid "Under way · done in %s"
 msgstr "U toku · gotovo za %s"
 
-#: client/scripts/screens/game_screen_map.gd:916
+#: client/scripts/screens/game_screen_map.gd:921
 msgid "A village reshapes the land within %d hexes of it, where nothing stands: paid at once, mostly in grain to feed the workers, and done after a while."
 msgstr "Selo preoblikuje zemlju do %d polja od sebe, gde ništa ne stoji: plaća se odmah, uglavnom žitom za radnike, i završava posle nekog vremena."
 
-#: client/scripts/screens/game_screen_map.gd:918
+#: client/scripts/screens/game_screen_map.gd:923
 msgid "None of your villages is within %d hexes."
 msgstr "Nijedno tvoje selo nije unutar %d polja."
 
-#: client/scripts/screens/game_screen_map.gd:935
+#: client/scripts/screens/game_screen_map.gd:940
 msgid "brings %s"
 msgstr "donosi %s"
 
-#: client/scripts/screens/game_screen_map.gd:936
+#: client/scripts/screens/game_screen_map.gd:941
 msgid "%s → %s · %s · %s"
 msgstr "%s → %s · %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:952
+#: client/scripts/screens/game_screen_map.gd:957
 msgid "Something stands there"
 msgstr "Tu nešto stoji"
 
-#: client/scripts/screens/game_screen_map.gd:954
+#: client/scripts/screens/game_screen_map.gd:959
 msgid "An army stands there: no fire can be set"
 msgstr "Tu stoji vojska: vatra se ne može podmetnuti"
 
-#: client/scripts/screens/game_screen_map.gd:981
+#: client/scripts/screens/game_screen_map.gd:986
 msgid "%d settlers from %s walk here and found it (%d at home). Train them in a Settlers' Lodge."
 msgstr "%d doseljenika iz %s ide ovamo i osniva ga (%d kod kuće). Obučavaj ih u Loži doseljenika."
 
-#: client/scripts/screens/game_screen_map.gd:986
+#: client/scripts/screens/game_screen_map.gd:991
 msgid "Send settlers"
 msgstr "Pošalji doseljenike"
 
-#: client/scripts/screens/game_screen_map.gd:1012
+#: client/scripts/screens/game_screen_map.gd:1017
 msgid "A %s here would gather %s."
 msgstr "Ovde (%s) bi se sakupljalo %s."
 
-#: client/scripts/screens/game_screen_map.gd:1030
+#: client/scripts/screens/game_screen_map.gd:1035
 msgid "Claim"
 msgstr "Prisvoji"
 
-#: client/scripts/screens/game_screen_map.gd:1072
+#: client/scripts/screens/game_screen_map.gd:1076
 msgid "Ally: %s"
 msgstr "Saveznik: %s"
 
-#: client/scripts/screens/game_screen_map.gd:1080
+#: client/scripts/screens/game_screen_map.gd:1084
 msgid "Hero %s (Lv %d) leads the garrison"
 msgstr "Junak %s (nivo %d) vodi posadu"
 
-#: client/scripts/screens/game_screen_map.gd:1083
+#: client/scripts/screens/game_screen_map.gd:1087
 msgid "Send resources"
 msgstr "Pošalji resurse"
 
-#: client/scripts/screens/game_screen_map.gd:1092
+#: client/scripts/screens/game_screen_map.gd:1096
 msgid "Hall %d · Building %d/%d · Outposts %d/%d"
 msgstr "Dom %d · Gradnja %d/%d · Ispostave %d/%d"
 
-#: client/scripts/screens/game_screen_map.gd:1095
+#: client/scripts/screens/game_screen_map.gd:1099
 msgid "Under siege: outposts produce nothing until the battle ends."
 msgstr "Pod opsadom: ispostave ne proizvode ništa dok se bitka ne završi."
 
-#: client/scripts/screens/game_screen_map.gd:1097
+#: client/scripts/screens/game_screen_map.gd:1101
 msgid "In ruins: rebuild it from the village view."
 msgstr "U ruševinama: obnovi ga iz prikaza sela."
 
-#: client/scripts/screens/game_screen_map.gd:1099
+#: client/scripts/screens/game_screen_map.gd:1103
 msgid "A refugee camp"
 msgstr "Izbeglički logor"
 
-#: client/scripts/screens/game_screen_map.gd:1099
+#: client/scripts/screens/game_screen_map.gd:1103
 msgid "Hordes raid a refugee camp but never burn it."
 msgstr "Horde pljačkaju izbeglički logor, ali ga nikad ne spale."
 
-#: client/scripts/screens/game_screen_map.gd:1103
+#: client/scripts/screens/game_screen_map.gd:1107
 msgid "Enter village"
 msgstr "Uđi u selo"
 
-#: client/scripts/screens/game_screen_map.gd:1115
+#: client/scripts/screens/game_screen_map.gd:1119
 msgid "Merchants trade with another village or outpost, or the Holy City."
 msgstr "Trgovci trguju sa drugim selom ili predstražom, ili sa Svetim gradom."
 
-#: client/scripts/screens/game_screen_map.gd:1130
+#: client/scripts/screens/game_screen_map.gd:1134
 msgid "A caravan can go to a village or outpost, the Holy City, a shipyard, or a fort or supply point."
 msgstr "Karavan može da ide u selo ili ispostavu, Sveti grad, brodogradilište, ili utvrdu ili tačku snabdevanja."
 
