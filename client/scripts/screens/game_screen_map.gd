@@ -699,7 +699,9 @@ func _road_section(cell: Vector2i) -> void:
 	_panel_body.add_child(info)
 	if plain.size() < targets.size():
 		var pass_cost := LocalLand.road_level_cost(Game.data, 1, true)
-		_panel_body.add_child(UI.with_info(UI.label(tr("A mountain pass: %s · %s") % [UI.costs(pass_cost.cost), TimeUtil.format_duration(float(pass_cost.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED),
+		# (Rich text: the costs are icons.)
+		var pass_line := UI.rich(tr("A mountain pass: %s · %s") % [UI.costs(pass_cost.cost), TimeUtil.format_duration(float(pass_cost.buildSeconds) / float(Game.world.speed))], UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(UI.with_info(pass_line,
 			tr("A road into the mountains costs and takes %d times as much. Armies, caravans and scouts then cross the mountain along it, slowly; none can stop there, and the hordes keep off the passes.") % int(Game.data.field.road.mountainFactor)))
 	var build := UI.button(tr("Build a road"), func() -> void:
 		_road_from = cell
