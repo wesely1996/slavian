@@ -38,8 +38,11 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	var taken := LocalBattles.taken_hexes(world)
 	for f in world.forts:
 		taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+	# A fire may be set on a bandit camp or a lair, to burn it out.
+	var on_camp: bool = data.field.terraform.actions.get(action, {}).has("fire") and world.camps.any(func(c: Dictionary) -> bool:
+		return int(c.q) == cell.x and int(c.r) == cell.y and c.kind in ["bandit", "lair"])
 	var reason := problem(data, action, world.hexes.get(LocalLand.key(cell)), HexMath.distance(cell, Vector2i(village.q, village.r)),
-		taken.has(LocalLand.key(cell)), not work_at(world, cell).is_empty(), not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty())
+		taken.has(LocalLand.key(cell)) and not on_camp, not work_at(world, cell).is_empty(), not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty())
 	if reason != "":
 		return LocalVillage.rule(reason)
 	var def: Dictionary = data.field.terraform.actions[action]
@@ -52,9 +55,65 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	world.terraforms.append(work)
 	server.schedule(world, work.completesAt, "terraform_done", {"q": cell.x, "r": cell.y})
 	if def.has("fire"):
+		burn_camps(server, world, cell, at)
 		LocalDetours.avoid_fire(server, world, cell, int(work.completesAt), at)
 		_spread(server, world, work, at)
 	return work
+
+
+## scheduler/terraform.ts burnCamps: a camp on a burning hex is gone; a
+## bandit camp's or a lair's survivors flee as a small horde of its front
+## from where it stood, and the front hates the more.
+static func burn_camps(server: LocalServer, world: Dictionary, cell: Vector2i, at: int) -> void:
+	var data := server.data
+	for camp in world.camps.duplicate():
+		if int(camp.q) != cell.x or int(camp.r) != cell.y:
+			continue
+		world.camps.erase(camp)
+		if not camp.kind in ["bandit", "lair"]:
+			continue
+		var fled := fleeing(data, camp.units, int(world.seed), int(camp.id))
+		var count := 0
+		for unit in fled:
+			count += int(fled[unit])
+		if count > 0:
+			var last := LocalBridgeCommands._last_horde(world)
+			var wave := {"id": world.next.wave, "index": int(last.index) if not last.is_empty() else 0, "front": camp.front, "status": "scheduled",
+				"threat": LocalWaves.threat_of(data, fled), "stance": "offensive", "composition": fled, "initial": fled.duplicate(), "spawnAt": at,
+				"spawn": null, "targetVillageId": null, "path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [],
+				"ritual": false, "leaderId": null, "hatred": 0.0, "bandOf": last.id if not last.is_empty() else null,
+				"errand": {"kind": "fled", "target": null, "from": {"q": int(camp.q), "r": int(camp.r)}}}
+			world.next.wave += 1
+			world.waves.append(wave)
+			# They flee at once (scheduler/waves.ts setOutNow).
+			LocalCultists.send(server, world, wave, at)
+			for member in world.members:
+				LocalInbox.tell(server, world, member.accountId, {"kind": "camp", "tier": "push", "title": "The camp at ({q}, {r}) burns",
+					"body": "{count} of them flee the flames and march on the villages.", "vars": {"q": camp.q, "r": camp.r, "count": count}}, at)
+		LocalHordes.anger_front(server, world, String(camp.front), float(data.camps.burnt.hatred), at)
+
+
+## sim/camps.ts fleeing: a seeded share of each kind of the camp's troops.
+static func fleeing(data: Dictionary, units: Dictionary, seed_value: int, camp_id: int) -> Dictionary:
+	var rules: Dictionary = data.camps.burnt.fleeShare
+	var roll := LocalRng.new((seed_value ^ LocalRng.imul(camp_id + 1, 0x2c1b3c6d) ^ 0xf1ee) & 0xffffffff).next()
+	var share := float(rules.min) + (float(rules.max) - float(rules.min)) * roll
+	var out := {}
+	var most := ""
+	var most_n := 0
+	for unit in units:
+		var n := int(units[unit])
+		if n <= 0:
+			continue
+		if most == "" or n > most_n:
+			most = unit
+			most_n = n
+		var fled := LocalWaves.js_round(n * share)
+		if fled > 0:
+			out[unit] = fled
+	if out.is_empty() and most != "":
+		out[most] = 1
+	return out
 
 
 ## fireCatches: one roll for each neighbouring hex, from the world's seed.
@@ -127,9 +186,7 @@ static func on_fire_spread(server: LocalServer, world: Dictionary, event: Dictio
 		world.forts.erase(fort)
 		LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "Fire burned your stronghold at ({q}, {r})",
 			"body": "Nothing is left of it, nor of its grain.", "vars": {"q": cell.x, "r": cell.y}}, at)
-	for camp in world.camps.duplicate():
-		if int(camp.q) == cell.x and int(camp.r) == cell.y:
-			world.camps.erase(camp)
+	burn_camps(server, world, cell, at)
 	world.merge({"terraforms": []})
 	var work := {"cell": cell, "action": String(p.action), "villageId": p.villageId, "completesAt": LocalTime.ms(at + float(def.hours) * 3600000.0 / world.speed), "generation": int(p.generation)}
 	world.terraforms.append(work)

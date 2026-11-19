@@ -164,6 +164,7 @@ Hatred belongs to a **front**, not to one horde. It grows, with no limit, for:
 | A raid battle won on its side | +0.05 (+0.15 for sacking its stronghold) |
 | A strike on its gathering horde | +0.6 |
 | A map event left undone on its land | +0.2 |
+| One of its camps or lairs burnt by fire | +0.2 |
 
 - **Spending it.** The front's next horde to set out **takes all of it**, as a
   share added to its attack and defense, and the front's hatred starts again
@@ -200,7 +201,12 @@ Bandit camps (human fronts) and monster lairs (the North) rise on the map.
 - **Loot.** 15 wood, 15 stone, 15 grain and 8 iron per camp unit, carried home.
 - **For the hero** leading it, a 35% chance of gear.
 - **Lairs** also give a 75% chance of a **Svarog's Ember**.
-- **Fire** destroys a camp outright ([page 2](02-map-and-movement.md#fire)).
+- **Burning it.** Fire can be set on a camp in forest or wooded hills, or
+  spread onto one ([page 2](02-map-and-movement.md#fire)). The camp is gone,
+  but 50–100% of its troops flee at once as a small horde on the nearest
+  player village, and its front's hatred rises by +0.2. The fleeing horde
+  waits out quiet hours like any other, leaves no new camps behind when it
+  is over, and settles into a camp again if its rampage runs out.
 
 ## Bridge construction raids
 

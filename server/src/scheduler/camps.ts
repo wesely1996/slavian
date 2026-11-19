@@ -101,8 +101,8 @@ export async function createCamp(
 
 // A wave is over: new camps of its front rise near its road.
 async function spawnAfterWave(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
-  // A band leaves no camps behind, nor does the Avatar.
-  if (wave.bandOf !== null || wave.errand?.kind === 'avatar') return;
+  // A band leaves no camps behind, nor does the Avatar or a burnt camp's survivors.
+  if (wave.bandOf !== null || wave.errand?.kind === 'avatar' || wave.errand?.kind === 'fled') return;
   const rules = data.camps.spawn;
   // The limit is per front, so one front's bandits never crowd out another's lairs.
   const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front && !isEventCamp(c.kind)).length;

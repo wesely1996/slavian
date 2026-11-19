@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/api/app.js';
 import { startRitual } from '../src/scheduler/cultists.js';
 import { raiseMountainCity } from '../src/scheduler/mapEvents.js';
+import { createCamp } from '../src/scheduler/camps.js';
 import { getWorld } from '../src/db/worlds.js';
 import type { Front } from '../src/sim/mapgen.js';
 import { loadGameData } from '../src/data/index.js';
@@ -48,6 +49,8 @@ export type WorldSet = {
   // Masons would raise a mountain city at a mountain hex (events.json
   // mountain_city), as the rare daily event would; `raiders` strike it.
   mountainCity?: { q: number; r: number; front: string; raiders: Record<string, number> };
+  // A bandit camp or lair rises at a hex (camps.json), as one would after a wave.
+  camp?: { q: number; r: number; kind: 'bandit' | 'lair'; front: string; units: Record<string, number> };
   // Units standing in the player's (first) village, by unit (their upkeep
   // counts from the village's next change).
   garrison?: Record<string, number>;
@@ -136,6 +139,15 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
               const client = await db.connect();
               try {
                 await raiseMountainCity(client, scheduler.data, await getWorld(client, world.id), { cell: { q: m.q, r: m.r }, front: m.front as Front, raiders: m.raiders }, now);
+              } finally {
+                client.release();
+              }
+            }
+            if (step.set.camp) {
+              const c = step.set.camp;
+              const client = await db.connect();
+              try {
+                await createCamp(client, scheduler.data, await getWorld(client, world.id), { kind: c.kind, front: c.front as Front, q: c.q, r: c.r, units: c.units, waveId: null }, now);
               } finally {
                 client.release();
               }

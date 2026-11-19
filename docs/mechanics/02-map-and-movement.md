@@ -135,7 +135,8 @@ A village can reshape the land within **2 hexes** of it.
 Burning a forest is a weapon as well as a way to clear land.
 
 - **Where it can be set.** On forest or wooded hills only, and never where an
-  army stands.
+  army stands. It can be set on a hex where a bandit camp or lair stands, to
+  burn it out (no other work can be done there).
 - **Nothing enters while it burns.** For its 6 game hours, no army, caravan,
   scout or horde can enter the hex. Those already on a road into it plan
   their way again from where they are: round it, or wait at its edge until it
@@ -148,7 +149,11 @@ Burning a forest is a weapon as well as a way to clear land.
 - **What burns.** On every hex the fire reaches:
   - **Outposts** are burnt to ruins, whoever owns them.
   - **Forts** and **supply points** are destroyed, with their grain.
-  - **Bandit camps and lairs** are destroyed.
+  - **Bandit camps and lairs** are destroyed, but not everyone in them dies:
+    50–100% of the camp's troops (a seeded share) flee at once as a small
+    horde of its front, marching from where it stood on the nearest player
+    village. That front's hatred rises by **+0.2** ([page 9](09-hordes-and-threats.md#hatred)).
+  - **Event camps** (captives, cultists) are destroyed outright.
   - **Any other terraforming work** under way there is lost.
   - **The terrain** becomes plains (or hills), and the timber is lost.
 - **What doesn't burn.** Roads, ruins, ancient sites, shipyards and the

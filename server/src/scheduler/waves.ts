@@ -224,7 +224,7 @@ async function sendBand(client: DbClient, data: GameData, world: World, band: Wa
 // City). With no way there, it scatters.
 async function sendErrand(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const errand = wave.errand!;
-  if (errand.kind === 'avatar') return sendAvatar(client, data, world, wave, at);
+  if (errand.kind === 'avatar' || errand.kind === 'fled') return sendFromHex(client, data, world, wave, at);
   const village = errand.target === null ? null : await loadVillage(client, errand.target).catch(() => null);
   const target: Target = village && !village.ruin ? { id: village.id, cell: hex(village.q, village.r) } : { id: null, cell: hex(0, 0) };
   let march: March | null = null;
@@ -247,9 +247,16 @@ async function sendErrand(client: DbClient, data: GameData, world: World, wave: 
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
 }
 
-// The Avatar of Černobog rises where its cultists stood and marches on the
-// villages, choosing as a horde does; with none to reach, it sinks away.
-async function sendAvatar(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
+// A horde on an errand sets out at once (those who fled a burnt camp).
+export async function setOutNow(client: DbClient, data: GameData, world: World, waveId: number, at: Date): Promise<void> {
+  const wave = await loadWave(client, waveId);
+  if (wave.status === 'scheduled' && wave.errand !== null) await sendErrand(client, data, world, wave, at);
+}
+
+// The Avatar of Černobog rises where its cultists stood (and those who fled
+// a burnt camp set out from where it stood) and marches on the villages,
+// choosing as a horde does; with none to reach, it sinks away.
+async function sendFromHex(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const from = hex(wave.errand!.from!.q, wave.errand!.from!.r);
   const targets: Target[] = (await listVillages(client, world.id))
     .filter((v) => !v.ruin && v.ownerAccountId !== null)
@@ -261,7 +268,7 @@ async function sendAvatar(client: DbClient, data: GameData, world: World, wave: 
         targets,
         front: wave.front,
         composition: wave.composition,
-        rng: rngFor(world.seed, wave.index, 0xa7),
+        rng: rngFor(world.seed, wave.index, wave.errand!.kind === 'fled' ? 0xf7 : 0xa7),
         startMs: 0,
         worldSpeed: world.speed,
       })
@@ -272,7 +279,8 @@ async function sendAvatar(client: DbClient, data: GameData, world: World, wave: 
     return;
   }
   const march: March = { spawn: from, targetVillageId: route.targetVillageId, path: route.path, arrivesAt: new Date(at.getTime() + route.arrivesMs) };
-  await markMarching(client, wave.id, march);
+  // Those who fled a fire wait out the group's quiet hours like any horde.
+  await markMarching(client, wave.id, wave.errand!.kind === 'fled' ? holdForQuiet(world, wave.spawnAt, march) : march);
   await scheduleEvent(client, world.id, (await loadWave(client, wave.id)).arrivesAt!, 'wave_arrive', { waveId: wave.id } satisfies WavePayload);
   await planRaids(client, data, world, wave.id);
   await planIntercepts(client, world, wave.id);
