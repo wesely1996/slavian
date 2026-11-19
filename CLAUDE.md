@@ -1,6 +1,6 @@
 # Slavian — notes for Claude
 
-- Design and roadmap: `PLAN.md`. Setup, CI/CD: `README.md`.
+- Design and roadmap: `PLAN.md`. Setup, CI/CD: `README.md`. Game mechanics for players and designers: `docs/mechanics/` (update the page a rule change touches).
 - **All changes go on a feature branch and are merged into `main` through a pull request.** Never push to `main` directly.
 - PRs are **squash-merged** and their branch is **deleted** after merging. Claude may merge its own PRs this way once CI is green. Start every follow-up from the latest `main` (a reused branch name is recreated from `main`, never stacked on the squashed history).
 - Before pushing: `cd server && npm run typecheck && npm test` (set `TEST_DATABASE_URL` for the Postgres tests), and the Godot headless tests (`godot --headless --path client --script res://tests/test_runner.gd`).
