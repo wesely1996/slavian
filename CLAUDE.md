@@ -1,8 +1,9 @@
 # Slavian — notes for Claude
 
-- Design and roadmap: `PLAN.md`. Setup, CI/CD: `README.md`. Game mechanics for players and designers: `docs/mechanics/` (update the page a rule change touches).
+- Design and roadmap: `PLAN.md`. Setup, CI/CD: `README.md`. Game mechanics for players and designers: `docs/mechanics/`.
 - **All changes go on a feature branch and are merged into `main` through a pull request.** Never push to `main` directly.
 - PRs are **squash-merged** and their branch is **deleted** after merging. Claude may merge its own PRs this way once CI is green. Start every follow-up from the latest `main` (a reused branch name is recreated from `main`, never stacked on the squashed history).
 - Before pushing: `cd server && npm run typecheck && npm test` (set `TEST_DATABASE_URL` for the Postgres tests), and the Godot headless tests (`godot --headless --path client --script res://tests/test_runner.gd`).
 - Hex math exists in both `server/src/sim/hex.ts` and `client/scripts/hex/hex_math.gd`; change both and keep `data/fixtures/hex-vectors.json` passing on both sides.
 - The solo engine (`client/scripts/local/`) must answer like the server: a new rule or route comes with a scenario step (`server/test/*-scenario.test.ts`, re-record with `UPDATE_FIXTURES=1`); `server/test/parity.test.ts` fails on routes or plot kinds no scenario plays.
+- **Keep `docs/mechanics/` up to date in the same PR** as any change to how the game plays: a new or changed rule, unit, building, event, formula or number in `data/*.json`. Update the page that covers it (the index in `docs/mechanics/README.md` says which), add a new section or page when nothing covers it yet, and fix every other page that states the old behaviour (search the docs for the old number or name). Numbers in the docs must match the data. Keep each page under 400 lines (split it if it grows past that), link related pages with `[text](page.md#heading)`, and check that every such link still points at an existing heading.
