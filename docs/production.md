@@ -2,9 +2,9 @@
 
 PLAN.md M5 step 17. The playtest setup (`docs/playtest.md`) runs the server on
 your own computer behind a Cloudflare quick tunnel. Production runs it on a
-small server (VPS) with its own domain and HTTPS, nightly backups, error
-alerts and an uptime check. The database stays on Neon, or can run on the
-same machine.
+small server (VPS) with its own domain and HTTPS, nightly backups copied off
+the machine, error alerts and an uptime check. The database runs on the same
+machine (it can run on Neon instead; "Moving the database here" moves it off).
 
 ## What runs where
 
@@ -12,8 +12,9 @@ same machine.
 |---|---|---|
 | Game server | `ops/production/docker-compose.yml`, service `server` | The image CI publishes on every merge to main: `ghcr.io/wesely1996/slavian-server:main`, plus one tagged with the commit's sha. |
 | HTTPS | service `caddy` | Fetches and renews the certificate for `DOMAIN` by itself; the live WebSocket passes through. |
-| Database | Neon (`DATABASE_URL`) | Use Neon's *direct* connection string, not the pooled one. `--profile local-db` runs Postgres on the VPS instead. |
-| Backups | service `backup` | A `pg_dump` every night into `ops/production/backups/`, the last 14 days kept. Neon's point-in-time restore comes on top. |
+| Database | service `postgres` (profile `local-db`) | Postgres on the VPS, reached only by the other services (no port is open to the internet). Without the profile, `DATABASE_URL` points at a hosted one such as Neon (its *direct* connection string, not the pooled one). |
+| Backups | service `backup` | A `pg_dump` every night into `ops/production/backups/`, the last 14 days kept. |
+| Off-site backups | service `offsite` (profile `offsite`) | An hour later, the dumps copied to an S3-compatible bucket such as Cloudflare R2, the last 30 days kept there. |
 | Push | `fcm.json` beside the compose file | The Firebase service-account key (`docs/push.md`), never baked into the image. |
 | Costs | `costs.json` beside the compose file | A copy of `site/costs.json`, edited each month without a redeploy. |
 
@@ -26,7 +27,7 @@ same machine.
 4. **The files**, on the VPS:
    ```sh
    git clone https://github.com/wesely1996/slavian.git && cd slavian/ops/production
-   cp .env.example .env              # DOMAIN, DATABASE_URL, ALERT_WEBHOOK_URL…
+   cp .env.example .env              # DOMAIN, POSTGRES_PASSWORD (and the same in DATABASE_URL), OFFSITE_*, ALERT_WEBHOOK_URL…
    cp ../../site/costs.json costs.json
    cp ~/fcm.json fcm.json            # optional: push notifications
    docker compose up -d
@@ -80,16 +81,51 @@ To go back to an earlier release, run it with that tag. To run the latest
 `main` between releases (every merge publishes a `main` image), set
 `SLAVIAN_TAG=main` in `.env` and run `docker compose pull && docker compose up -d`.
 
+## Moving the database here
+
+From Neon to Postgres on the VPS (`ops/production/move-db.sh`). The game is
+down for a few minutes; pick a quiet hour.
+
+1. **The files:** the script comes with the release after this change. Before
+   that, in `/opt/slavian`: `git fetch origin && git checkout origin/main`
+   (the next release's deploy checks out its tag again).
+2. **Docker Compose 2.20 or newer** (`docker compose version`), for the services that wait on the database. **Memory:** `free -h`. Postgres here takes about 150–300 MB beside the
+   game server.
+3. **Run it**, in `ops/production`:
+   ```sh
+   ./move-db.sh
+   ```
+   It reads Neon's Postgres version and runs the same one here, makes a
+   password, stops the game server, backs Neon up, restores the backup here,
+   and checks every table's rows against Neon's. Only when they all match
+   does it point `.env` at the database here (`DATABASE_URL`,
+   `COMPOSE_PROFILES=local-db`; Neon's address stays as
+   `HOSTED_DATABASE_URL`, the old file as `.env.before-move`) and start the
+   server again. If anything fails, `.env` is put back and the server runs on
+   Neon as before. Neon itself is never changed.
+4. **Check:** `curl https://<DOMAIN>/health` and play a turn.
+5. **Off-site backups:** set the `OFFSITE_*` lines (`.env.example`), add
+   `offsite` to `COMPOSE_PROFILES`, `docker compose up -d`, and try one copy:
+   `docker compose run --rm -e OFFSITE_ONCE=1 offsite`.
+6. **After a week** without trouble, delete the Neon project and cancel its
+   plan.
+
+**Going back to Neon** (what was played since the move stays here unless you
+restore a fresh backup into Neon first): `cp .env.before-move .env && docker compose up -d`.
+
 ## Backups
 
 - Nightly at `BACKUP_HOUR` (UTC), into `ops/production/backups/slavian-<date>.dump`.
-- Back up by hand: `docker compose run --rm -e BACKUP_ONCE=1 backup`.
-- Restore into an empty database:
+- An hour later (`offsite`), copied to the bucket; there the last `OFFSITE_KEEP_DAYS` (30) are kept. A backup on the same disk doesn't survive losing the VPS: keep `offsite` on.
+- Back up by hand: `docker compose run --rm -e BACKUP_ONCE=1 backup`; copy off by hand: `docker compose run --rm -e OFFSITE_ONCE=1 offsite`.
+- Restore into the database here (the server stopped: `docker compose stop server`):
   ```sh
-  pg_restore --clean --if-exists --no-owner -d "$DATABASE_URL" backups/slavian-20261020-0300.dump
+  docker compose exec -T postgres dropdb -U slavian slavian
+  docker compose exec -T postgres createdb -U slavian slavian
+  docker compose exec -T postgres pg_restore --no-owner --no-privileges -U slavian -d slavian < backups/slavian-20261020-0300.dump
+  docker compose start server
   ```
-- Copy the backups off the machine now and then, for example with `rclone` to cloud storage. A backup on the same disk doesn't survive losing the VPS.
-- On Neon, its point-in-time restore (the history window of your plan) is the faster way back from a bad migration or a mistake.
+- A backup from the bucket: download it from the bucket's page (R2: Storage → the bucket → the file) into `ops/production/backups/`, then restore it as above.
 
 ## Errors and uptime
 
