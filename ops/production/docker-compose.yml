@@ -1,8 +1,11 @@
 # Production (PLAN.md M5 step 17; docs/production.md): the game server from
 # the image CI publishes on every merge to main, Caddy in front of it for
 # HTTPS on your domain (certificates are fetched and renewed by themselves),
-# and a nightly database backup. The database is Neon by default
-# (DATABASE_URL in .env); `--profile local-db` runs Postgres here instead.
+# Postgres on this machine, a nightly database backup and its copy off the
+# machine. COMPOSE_PROFILES in .env picks the optional parts: `local-db`
+# (Postgres here; without it DATABASE_URL points at a hosted one such as
+# Neon) and `offsite` (backups copied to S3-compatible storage such as
+# Cloudflare R2). Moving an existing Neon database here: move-db.sh.
 #   cp .env.example .env   # then fill it in
 #   docker compose -f ops/production/docker-compose.yml up -d
 #   docker compose -f ops/production/docker-compose.yml pull && docker compose -f ops/production/docker-compose.yml up -d   # update
@@ -20,6 +23,11 @@ services:
       - ./fcm.json:/run/secrets/fcm.json:ro
       # The month's costs (site/costs.json), edited here without a redeploy.
       - ./costs.json:/app/site/costs.json:ro
+    # With the local database, the server starts once it accepts connections.
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
     restart: unless-stopped
     logging:
       driver: json-file
@@ -42,27 +50,55 @@ services:
     restart: unless-stopped
 
   # Every night: a pg_dump of the database into ./backups, the last
-  # BACKUP_KEEP_DAYS kept (Neon's own point-in-time restore comes on top).
+  # BACKUP_KEEP_DAYS kept. Its tools match the database's major version.
   backup:
-    image: postgres:17
+    image: postgres:${POSTGRES_VERSION:-17}
     env_file: .env
     volumes:
       - ./backups:/backups
       - ./backup.sh:/backup.sh:ro
     entrypoint: ["sh", "/backup.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
     restart: unless-stopped
 
-  # Only with --profile local-db: Postgres on this machine instead of Neon
-  # (DATABASE_URL=postgres://slavian:<password>@postgres:5432/slavian).
+  # Profile local-db: Postgres on this machine
+  # (DATABASE_URL=postgres://slavian:<POSTGRES_PASSWORD>@postgres:5432/slavian).
+  # Only the other services reach it: no port is opened to the internet.
   postgres:
-    image: postgres:16
+    image: postgres:${POSTGRES_VERSION:-17}
     profiles: [local-db]
     environment:
       POSTGRES_USER: slavian
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-slavian}
+      # Postgres refuses to start without one (move-db.sh makes it).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: slavian
+    # Sized for a small machine (2 GB of memory) shared with the game server.
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "effective_cache_size=512MB", "-c", "max_connections=50"]
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slavian -d slavian"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  # Profile offsite: an hour after each backup, the backups copied to
+  # S3-compatible storage (offsite.sh), so they outlive this machine.
+  offsite:
+    image: rclone/rclone:1.68
+    profiles: [offsite]
+    env_file: .env
+    volumes:
+      - ./backups:/backups:ro
+      - ./offsite.sh:/offsite.sh:ro
+    entrypoint: ["sh", "/offsite.sh"]
     restart: unless-stopped
 
 volumes:
