@@ -1,6 +1,6 @@
 # Slavian
 
-A cooperative PvE hex-map strategy game for small groups of busy adults: defend the Holy City and build the Kalinov Bridge. Android first. The full design is in [PLAN.md](PLAN.md).
+A cooperative PvE hex-map strategy game for small groups of busy adults: defend the Holy City and build the Kalinov Bridge. Android first. The full design is in [PLAN.md](PLAN.md); how every game mechanic works, with its numbers, is in [docs/mechanics](docs/mechanics/README.md).
 
 ## Layout
 
