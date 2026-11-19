@@ -44,9 +44,10 @@ export interface Wave {
 }
 
 export interface WaveErrand {
-  kind: 'bridge' | 'quest' | 'avatar';
+  kind: 'bridge' | 'quest' | 'avatar' | 'fled';
   target: number | null;
-  // The Avatar of Černobog rises where its cultists stood.
+  // The Avatar of Černobog rises where its cultists stood; those who fled a
+  // burnt camp set out from where it stood.
   from?: { q: number; r: number };
 }
 

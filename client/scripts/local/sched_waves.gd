@@ -423,7 +423,7 @@ static func send_band(server: LocalServer, world: Dictionary, band: Dictionary, 
 static func send_errand(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	var data := server.data
 	var errand: Dictionary = wave.errand
-	if errand.kind == "avatar":
+	if errand.kind == "avatar" or errand.kind == "fled":
 		LocalCultists.send(server, world, wave, at)
 		return
 	var village: Dictionary = server.find_village(world, int(errand.target)) if errand.target != null else {}

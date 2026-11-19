@@ -2,6 +2,7 @@
 // grow and feed the next wave, armies clearing them, and caravan ambushes.
 // Numbers in data/camps.json.
 import type { GameData, TerrainId } from '../data/index.js';
+import { createRng } from './rng.js';
 import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import type { Front } from './mapgen.js';
@@ -250,4 +251,22 @@ export function repelRaid(
     if (outcome !== 'ongoing') return { held: outcome === 'defended', armyNow, raidersNow };
   }
   return { held: false, armyNow, raidersNow };
+}
+
+// A camp burnt by fire (camps.json burnt): the troops that flee it, a
+// seeded share between fleeShare.min and max of each kind (at least one
+// in all while it had anyone); the rest perish.
+export function fleeing(data: GameData, units: Units, seed: number, campId: number): Units {
+  const { min, max } = data.camps.burnt.fleeShare;
+  const share = min + (max - min) * createRng((seed ^ Math.imul(campId + 1, 0x2c1b3c6d) ^ 0xf1ee) >>> 0)();
+  const out: Record<string, number> = {};
+  let most: [string, number] | null = null;
+  for (const [unit, n] of Object.entries(units)) {
+    if (n <= 0) continue;
+    if (!most || n > most[1]) most = [unit, n];
+    const fled = Math.round(n * share);
+    if (fled > 0) out[unit] = fled;
+  }
+  if (Object.keys(out).length === 0 && most) out[most[0]] = 1;
+  return out;
 }

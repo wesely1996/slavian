@@ -61,16 +61,20 @@ static func send(server: LocalServer, world: Dictionary, wave: Dictionary, at: i
 			targets.append({"id": v.id, "cell": Vector2i(v.q, v.r)})
 	var route: Variant = null
 	if not targets.is_empty():
-		route = LocalHordes.route_from(server.data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition, {}, LocalWaves.rng_for(int(world.seed), int(wave.index), 0xa7), 0.0, world.speed)
+		route = LocalHordes.route_from(server.data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition, {}, LocalWaves.rng_for(int(world.seed), int(wave.index), 0xf7 if wave.errand.kind == "fled" else 0xa7), 0.0, world.speed)
 	if route == null:
 		wave.status = "dispersed"
 		wave.endsAt = at
 		return
+	var march := {"path": route.path, "arrivesAt": at + int(route.arrivesMs)}
+	# Those who fled a fire wait out the group's quiet hours like any horde.
+	if wave.errand.kind == "fled":
+		march = LocalHordes.hold_for_quiet(world, int(wave.spawnAt), march)
 	wave.status = "marching"
 	wave.spawn = {"q": from.x, "r": from.y}
 	wave.targetVillageId = route.targetVillageId
-	wave.path = route.path
-	wave.arrivesAt = at + int(route.arrivesMs)
+	wave.path = march.path
+	wave.arrivesAt = int(march.arrivesAt)
 	server.schedule(world, int(wave.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, 0)
 	LocalArmies.plan_intercepts(server, world, wave)

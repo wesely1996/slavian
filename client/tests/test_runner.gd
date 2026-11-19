@@ -917,6 +917,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("market-scenario.json", "local bounty board and caravans bringing back")
 	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")
 	_replay_scenario("afflictions-scenario.json", "local burn and poison: fire arrows, poison archers, a horde and a raid")
+	_replay_scenario("campfire-scenario.json", "local burning a bandit camp: its survivors flee as a small horde")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -1093,6 +1094,10 @@ func _replay_scenario(file: String, name: String) -> void:
 			if step.set.has("mountainCity"):
 				var m: Dictionary = step.set.mountainCity
 				LocalEvents.raise_mountain_city(local, world, Vector2i(int(m.q), int(m.r)), String(m.front), m.raiders, now)
+			if step.set.has("camp"):
+				var c: Dictionary = step.set.camp
+				LocalBattles.create_camp(local, world, {"kind": String(c.kind), "front": String(c.front), "q": int(c.q), "r": int(c.r),
+					"units": LocalServer._decode(c.units), "waveId": null}, now)
 			if step.set.has("frontHatred"):
 				if not world.has("hatred"):
 					world.hatred = {}

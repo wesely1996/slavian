@@ -783,6 +783,10 @@ const campsFileSchema = z.object({
   }),
   fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
   starter: z.object({ units: z.number().int().positive(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive() }),
+  // A bandit camp or lair burnt by fire: `fleeShare` (min-max) of its
+  // troops flee as a small horde on the nearest village, and its front's
+  // hatred rises by `hatred`.
+  burnt: z.object({ fleeShare: z.object({ min: z.number().min(0).max(1), max: z.number().min(0).max(1) }), hatred: z.number().nonnegative() }),
 });
 export type CampsData = z.infer<typeof campsFileSchema>;
 // Raids beyond the map's edge (raids.json).

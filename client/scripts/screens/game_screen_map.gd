@@ -922,15 +922,19 @@ func _terraform_panel(terrain: String) -> void:
 	if home.is_empty():
 		_panel_body.add_child(UI.label(tr("None of your villages is within %d hexes.") % int(rules.range), UI.SMALL_SIZE, UI.MUTED))
 		return
-	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty() or not Game.camp_at(cell).is_empty() \
+	var camp := Game.camp_at(cell)
+	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty() or not camp.is_empty() \
 		or not Game.site_at(cell).is_empty() or Game.forts.any(func(f: Dictionary) -> bool: return int(f.q) == cell.x and int(f.r) == cell.y)
+	# A fire may be set on a bandit camp or a lair, to burn it out.
+	var burnable_camp: bool = not camp.is_empty() and String(camp.get("kind", "")) in ["bandit", "lair"]
 	# An army standing there: no fire can be set on it.
 	var held := Game.armies.any(func(a: Dictionary) -> bool: return a.status in ["stationed", "engaged"] and ArmyText.held_hex(a) == cell)
 	var village_id := int(home.id)
 	var speed := float(Game.world.speed)
 	for action in options:
 		var def: Dictionary = rules.actions[action]
-		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken, false, held)
+		var burns_camp: bool = def.has("fire") and burnable_camp
+		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken and not burns_camp, false, held)
 		var into := Terrain.display_name(String(def.from[terrain]), Game.data)
 		var row := UI.hbox()
 		var info := UI.vbox(2)
@@ -941,6 +945,10 @@ func _terraform_panel(terrain: String) -> void:
 		var text := tr("%s → %s · %s · %s") % [Terrain.display_name(terrain, Game.data), into, UI.costs(def.cost, 30, Ledger.amounts_at(home.resources, Game.server_now())), TimeUtil.format_duration(float(def.hours) * 3600.0 / speed)] + brings
 		var cost_line := UI.rich(text, UI.SMALL_SIZE, UiTheme.TEXT)
 		info.add_child(cost_line)
+		if burns_camp:
+			var burnt: Dictionary = Game.data.camps.burnt
+			info.add_child(UI.label(tr("The camp burns: %d–%d%% of its troops flee at once and march on the nearest village, and its front's hatred rises by %d%%.") % [
+				roundi(float(burnt.fleeShare.min) * 100.0), roundi(float(burnt.fleeShare.max) * 100.0), roundi(float(burnt.hatred) * 100.0)], UI.SMALL_SIZE, UI.ERROR))
 		row.add_child(info)
 		var start := UI.button(tr("Start"), func() -> void: _terraform(village_id, cell, action))
 		start.custom_minimum_size.x = 130

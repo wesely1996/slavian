@@ -3858,79 +3858,83 @@ msgstr "Selo preoblikuje zemlju do %d polja od sebe, gde ništa ne stoji: plaća
 msgid "None of your villages is within %d hexes."
 msgstr "Nijedno tvoje selo nije unutar %d polja."
 
-#: client/scripts/screens/game_screen_map.gd:940
+#: client/scripts/screens/game_screen_map.gd:944
 msgid "brings %s"
 msgstr "donosi %s"
 
-#: client/scripts/screens/game_screen_map.gd:941
+#: client/scripts/screens/game_screen_map.gd:945
 msgid "%s → %s · %s · %s"
 msgstr "%s → %s · %s · %s"
 
-#: client/scripts/screens/game_screen_map.gd:957
+#: client/scripts/screens/game_screen_map.gd:950
+msgid "The camp burns: %d–%d%% of its troops flee at once and march on the nearest village, and its front's hatred rises by %d%%."
+msgstr "Logor gori: %d–%d%% njegovih trupa odmah beži i maršira na najbliže selo, a mržnja njegovog fronta raste za %d%%."
+
+#: client/scripts/screens/game_screen_map.gd:965
 msgid "Something stands there"
 msgstr "Tu nešto stoji"
 
-#: client/scripts/screens/game_screen_map.gd:959
+#: client/scripts/screens/game_screen_map.gd:967
 msgid "An army stands there: no fire can be set"
 msgstr "Tu stoji vojska: vatra se ne može podmetnuti"
 
-#: client/scripts/screens/game_screen_map.gd:986
+#: client/scripts/screens/game_screen_map.gd:994
 msgid "%d settlers from %s walk here and found it (%d at home). Train them in a Settlers' Lodge."
 msgstr "%d doseljenika iz %s ide ovamo i osniva ga (%d kod kuće). Obučavaj ih u Loži doseljenika."
 
-#: client/scripts/screens/game_screen_map.gd:991
+#: client/scripts/screens/game_screen_map.gd:999
 msgid "Send settlers"
 msgstr "Pošalji doseljenike"
 
-#: client/scripts/screens/game_screen_map.gd:1017
+#: client/scripts/screens/game_screen_map.gd:1025
 msgid "A %s here would gather %s."
 msgstr "Ovde (%s) bi se sakupljalo %s."
 
-#: client/scripts/screens/game_screen_map.gd:1035
+#: client/scripts/screens/game_screen_map.gd:1043
 msgid "Claim"
 msgstr "Prisvoji"
 
-#: client/scripts/screens/game_screen_map.gd:1076
+#: client/scripts/screens/game_screen_map.gd:1084
 msgid "Ally: %s"
 msgstr "Saveznik: %s"
 
-#: client/scripts/screens/game_screen_map.gd:1084
+#: client/scripts/screens/game_screen_map.gd:1092
 msgid "Hero %s (Lv %d) leads the garrison"
 msgstr "Junak %s (nivo %d) vodi posadu"
 
-#: client/scripts/screens/game_screen_map.gd:1087
+#: client/scripts/screens/game_screen_map.gd:1095
 msgid "Send resources"
 msgstr "Pošalji resurse"
 
-#: client/scripts/screens/game_screen_map.gd:1096
+#: client/scripts/screens/game_screen_map.gd:1104
 msgid "Hall %d · Building %d/%d · Outposts %d/%d"
 msgstr "Dom %d · Gradnja %d/%d · Ispostave %d/%d"
 
-#: client/scripts/screens/game_screen_map.gd:1099
+#: client/scripts/screens/game_screen_map.gd:1107
 msgid "Under siege: outposts produce nothing until the battle ends."
 msgstr "Pod opsadom: ispostave ne proizvode ništa dok se bitka ne završi."
 
-#: client/scripts/screens/game_screen_map.gd:1101
+#: client/scripts/screens/game_screen_map.gd:1109
 msgid "In ruins: rebuild it from the village view."
 msgstr "U ruševinama: obnovi ga iz prikaza sela."
 
-#: client/scripts/screens/game_screen_map.gd:1103
+#: client/scripts/screens/game_screen_map.gd:1111
 msgid "A refugee camp"
 msgstr "Izbeglički logor"
 
-#: client/scripts/screens/game_screen_map.gd:1103
+#: client/scripts/screens/game_screen_map.gd:1111
 msgid "Hordes raid a refugee camp but never burn it."
 msgstr "Horde pljačkaju izbeglički logor, ali ga nikad ne spale."
 
-#: client/scripts/screens/game_screen_map.gd:1107
+#: client/scripts/screens/game_screen_map.gd:1115
 msgid "Enter village"
 msgstr "Uđi u selo"
 
-#: client/scripts/screens/game_screen_map.gd:1119
+#: client/scripts/screens/game_screen_map.gd:1127
 msgid "Merchants trade with another village or outpost, or the Holy City."
 msgstr "Trgovci trguju sa drugim selom ili predstražom, ili sa Svetim gradom."
 
-#: client/scripts/screens/game_screen_map.gd:1134
+#: client/scripts/screens/game_screen_map.gd:1142
 msgid "A caravan can go to a village or outpost, the Holy City, a shipyard, or a fort or supply point."
 msgstr "Karavan može da ide u selo ili ispostavu, Sveti grad, brodogradilište, ili utvrdu ili tačku snabdevanja."
 

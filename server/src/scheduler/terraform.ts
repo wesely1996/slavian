@@ -21,6 +21,12 @@ import { takenHexes } from './horde.js';
 import { tell, tellOwner } from './notices.js';
 import { avoidFire } from './detours.js';
 import { armiesHolding } from '../db/armies.js';
+import { insertWave, lastWave } from '../db/waves.js';
+import { listMembers } from '../db/worlds.js';
+import { fleeing } from '../sim/camps.js';
+import type { Front } from '../sim/mapgen.js';
+import { threatOf } from '../sim/waves.js';
+import { angerFront, setOutNow } from './waves.js';
 
 const workPayload = z.object({ q: z.number().int(), r: z.number().int() });
 const firePayload = z.object({ q: z.number().int(), r: z.number().int(), action: z.string(), generation: z.number().int(), villageId: z.number().int().nullable() });
@@ -95,9 +101,7 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
       vars: { q: cell.q, r: cell.r },
     }, at);
   }
-  for (const camp of await listCamps(client, world.id)) {
-    if (camp.q === cell.q && camp.r === cell.r) await deleteCamp(client, camp.id);
-  }
+  await burnCamps(client, data, world, cell, at);
   const work: Terraform = { cell, action, villageId, completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed), generation };
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
@@ -105,6 +109,43 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
   await spreadFire(client, data, world, work, at);
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
+}
+
+// A camp on a burning hex is gone. A bandit camp's or a lair's survivors
+// (camps.json burnt) flee at once as a small horde of its front from where
+// it stood, on the nearest player village, and the front hates the more.
+async function burnCamps(client: DbClient, data: GameData, world: World, cell: Hex, at: Date): Promise<void> {
+  for (const camp of await listCamps(client, world.id)) {
+    if (camp.q !== cell.q || camp.r !== cell.r) continue;
+    await deleteCamp(client, camp.id);
+    if (camp.kind !== 'bandit' && camp.kind !== 'lair') continue;
+    const fled = fleeing(data, camp.units, world.seed, camp.id);
+    const count = Object.values(fled).reduce((sum, n) => sum + n, 0);
+    if (count > 0) {
+      const last = await lastWave(client, world.id);
+      const wave = await insertWave(
+        client,
+        world.id,
+        { index: last?.index ?? 0, front: camp.front as Front, spawnAt: at, composition: fled, threat: threatOf(data, fled), stance: 'offensive' },
+        false,
+        last?.id ?? null,
+        { kind: 'fled', target: null, from: { q: camp.q, r: camp.r } },
+      );
+      // They flee at once, not at the scheduler's next pass.
+      await setOutNow(client, data, world, wave.id, at);
+      for (const member of await listMembers(client, world.id)) {
+        await tell(client, world, member.accountId, {
+          kind: 'camp',
+          tier: 'push',
+          title: 'The camp at ({q}, {r}) burns',
+          body: '{count} of them flee the flames and march on the villages.',
+          vars: { q: camp.q, r: camp.r, count },
+        }, at);
+      }
+    }
+    await angerFront(client, data, world, camp.front as Front, data.camps.burnt.hatred, at);
+    await notifyWorld(client, { worldId: world.id, type: 'waves' });
+  }
 }
 
 // Why `action` can't be done on a hex of `terrain` `distance` from the
@@ -121,6 +162,11 @@ export function terraformProblem(data: GameData, action: string, terrain: Terrai
   return '';
 }
 
+// Whether a bandit camp or a lair stands on `cell` (and nothing else there).
+async function burnableCampAt(client: DbClient, worldId: number, cell: Hex): Promise<boolean> {
+  return (await listCamps(client, worldId)).some((c) => c.q === cell.q && c.r === cell.r && (c.kind === 'bandit' || c.kind === 'lair'));
+}
+
 export async function startTerraform(client: DbClient, data: GameData, world: World, villageId: number, cell: Hex, action: string, at: Date): Promise<Terraform> {
   const village = await loadVillage(client, villageId);
   const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t])).get(hexKey(cell));
@@ -129,7 +175,8 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
     action,
     terrain,
     hexDistance(cell, hex(village.q, village.r)),
-    (await takenHexes(client, world.id)).has(hexKey(cell)),
+    // A fire may be set on a bandit camp or a lair, to burn it out.
+    (await takenHexes(client, world.id)).has(hexKey(cell)) && !(data.field.terraform.actions[action]?.fire && (await burnableCampAt(client, world.id, cell))),
     (await terraformAt(client, world.id, cell)) !== null,
     (await armiesHolding(client, world.id, cell.q, cell.r, ['stationed', 'engaged'])).length > 0,
   );
@@ -140,6 +187,7 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
   if (def.fire) {
+    await burnCamps(client, data, world, cell, at);
     await avoidFire(client, data, world, cell, work.completesAt, at);
     await spreadFire(client, data, world, work, at);
   }
