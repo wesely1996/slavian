@@ -75,8 +75,9 @@ services:
       # Postgres refuses to start without one (move-db.sh makes it).
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: slavian
-    # Sized for a small machine (2 GB of memory) shared with the game server.
-    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "effective_cache_size=512MB", "-c", "max_connections=50"]
+    # Sized for the smallest machine (1 GB of memory, with swap) shared with
+    # the game server; raise both on a bigger one (a quarter and half of it).
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "effective_cache_size=256MB", "-c", "max_connections=30"]
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

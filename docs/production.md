@@ -89,8 +89,17 @@ down for a few minutes; pick a quiet hour.
 1. **The files:** the script comes with the release after this change. Before
    that, in `/opt/slavian`: `git fetch origin && git checkout origin/main`
    (the next release's deploy checks out its tag again).
-2. **Docker Compose 2.20 or newer** (`docker compose version`), for the services that wait on the database. **Memory:** `free -h`. Postgres here takes about 150–300 MB beside the
-   game server.
+2. **Docker Compose 2.20 or newer** (`docker compose version`), for the
+   services that wait on the database. **Memory:** `free -h`. On a 1 GB
+   machine, add swap first (Hetzner's have none), so a busy moment slows the
+   server down instead of a process being killed:
+   ```sh
+   fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+   echo '/swapfile none swap sw 0 0' >> /etc/fstab
+   ```
+   If memory stays short, Rescale the server to the next size in Hetzner's
+   console and raise Postgres's `shared_buffers` and `effective_cache_size` in
+   the compose file.
 3. **Run it**, in `ops/production`:
    ```sh
    ./move-db.sh
