@@ -17,6 +17,9 @@ export interface Village {
   ruin?: Ruin | null;
   // A refugee camp: raided, never razed.
   refuge?: boolean;
+  // When it was founded (null: before this was kept); in a PvP world it is
+  // safe from other players for armies.json pvp.protectionHours after.
+  foundedAt?: Date | null;
 }
 
 export interface Ruin {
@@ -52,6 +55,7 @@ interface VillageRow {
   bonuses: Record<string, number>;
   ruin: Ruin | null;
   refuge: boolean;
+  founded_at: Date | null;
 }
 
 function fromRow(row: VillageRow): Village {
@@ -78,6 +82,7 @@ function fromRow(row: VillageRow): Village {
     r: row.r,
     ruin: row.ruin,
     refuge: row.refuge,
+    foundedAt: row.founded_at,
     state: {
       plots: row.plots ?? {},
       levels: row.levels,
@@ -107,8 +112,8 @@ export async function insertVillage(
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
     `INSERT INTO villages
-       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, army_floor)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, army_floor, founded_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
      RETURNING *`,
     [
       village.worldId,
@@ -131,6 +136,8 @@ export async function insertVillage(
       state.adminUpkeep,
       JSON.stringify(state.bonuses),
       state.armyFloor ?? null,
+      // Founded as its stores start.
+      state.ledger.settledAt,
     ],
   );
   return fromRow(rows[0]!);

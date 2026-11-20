@@ -9,7 +9,8 @@ import type { Units } from './training.js';
 
 // `garrison`: marching into one of its owner's villages to join the garrison.
 // `raid`: off beyond the map's edge to raid a front's lands (data/raids.json).
-export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear' | 'explore' | 'garrison' | 'raid';
+// 'attack' and 'raze': on another player's village in a PvP world (armies.json pvp).
+export type ArmyOrders = 'support' | 'reinforce' | 'harass' | 'hold' | 'clear' | 'explore' | 'garrison' | 'raid' | 'attack' | 'raze';
 const FIGHTERS = new Set(['infantry', 'archers', 'cavalry']);
 
 export function total(units: Units): number {

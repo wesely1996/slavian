@@ -28,6 +28,7 @@ balance changes land there first.
 | 12 | [Scouting, exploration and expansion](12-scouting-and-expansion.md) | Scouts and reports, assassins, ruin searches, ancient sites, outposts, founding villages |
 | 13 | [Events and raids beyond the edge](13-events-and-raids.md) | Daily map events (captives, ruins, shipyards, the cultist ritual, the mountain city), raids into enemy lands, strikes on gathering hordes |
 | 14 | [The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) | The five bridge stages, their quests, construction raids, Ritual Night, winning and losing, achievements |
+| 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
 
 ## Reading the numbers
 

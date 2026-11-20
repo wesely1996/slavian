@@ -47,6 +47,8 @@ export interface RoundLog {
 // integrity (what is left, and in full), and the engines the horde built
 // on site before its assault (sim/walls.ts).
 export interface BattleSetup {
+  // Another player's attack (armies.json pvp): who attacked, with which army, to raze.
+  pvp?: { attackerAccountId: number | null; armyId: number; raze: boolean };
   ambush?: boolean;
   choke?: boolean;
   fort?: boolean;

@@ -661,6 +661,9 @@ const armiesFileSchema = z.object({
   quarters: z.object({ upkeep: z.number().min(0).max(1), settlementFloor: z.number().min(0).max(1) }),
   // A standing army answers battles this many hexes away.
   respond: z.object({ range: z.number().int().nonnegative() }),
+  // PvP worlds: a village is safe from other players for protectionHours
+  // after it is founded; a won attack plunders lootShare of every store.
+  pvp: z.object({ protectionHours: z.number().nonnegative(), lootShare: z.number().min(0).max(1) }),
 });
 
 const fieldFileSchema = z.object({

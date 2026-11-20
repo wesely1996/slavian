@@ -42,6 +42,7 @@ import { lastRuinSearches, listRuinSearches, type RuinSearch } from '../db/ruinS
 import { ruinSearchReadyAt } from '../commands/village.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
 import { armySlotsOf } from '../scheduler/slots.js';
+import { protectedUntil } from '../sim/pvp.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { armyQuestOf, heroQuestOffers, type ArmyQuest } from '../scheduler/quests.js';
 import { forecastMarches } from '../scheduler/waves.js';
@@ -615,6 +616,8 @@ export function worldSummary(world: World) {
     // set out takes it all.
     hatred: world.hatred,
     difficulty: world.difficulty,
+    // Players may attack each other's villages (armies.json pvp).
+    pvp: world.pvp,
     // Hordes don't arrive in the group's quiet hours (minutes after local midnight).
     quietHours: quietWindow(world),
     // When Ritual Night's hordes set out, and when the run ended.
@@ -755,6 +758,10 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       },
     })),
     villages: villages.map(villageView),
+    // PvP worlds: until when each village is safe from other players (armies.json pvp).
+    ...(world.pvp
+      ? { protectedUntil: Object.fromEntries(villages.map((v) => [v.id, protectedUntil(data, world, v.foundedAt)?.toISOString() ?? null])) }
+      : {}),
     waves,
     scouting,
     ruinSearches,

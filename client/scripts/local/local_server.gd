@@ -1368,7 +1368,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	return {
 		"id": world.id, "name": world.name, "status": world.status, "inviteCode": null, "speed": world.speed,
 		"maxPlayers": world.maxPlayers, "hostAccountId": world.hostAccountId, "startedAt": LocalTime.iso(world.startedAt),
-		"sanctity": world.sanctity, "embers": world.embers, "hatred": world.get("hatred", {}).duplicate(), "difficulty": world.difficulty, "quietHours": _quiet_window(world),
+		"sanctity": world.sanctity, "embers": world.embers, "hatred": world.get("hatred", {}).duplicate(), "difficulty": world.difficulty, "pvp": false, "quietHours": _quiet_window(world),
 		"ritualAt": LocalTime.iso(world.ritualAt) if world.ritualAt != null else null,
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "ruinSearches": LocalScouting.ruin_searches_view(world), "battles": _battles_view(world), "raids": _raids_view(world),

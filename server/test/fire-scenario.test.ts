@@ -89,6 +89,8 @@ scenario('fire-scenario.json', START, async ({ started, play }) => {
     await play({ advance: 2 * MINUTE });
   }
   await play({ set: { amounts: { wood: 5000, stone: 5000, grain: 5000, iron: 5000 } } });
+  // No attacks between players outside a PvP world (armies.json pvp).
+  await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'attack', targetVillageId: 2, units: { spearman: 1 } } });
   const caravan = (await play({ method: 'POST', path: '/v1/villages/1/caravans', body: { destinationVillageId: 2, load: { wood: 100, stone: 0, grain: 0, iron: 0 } } })).body?.caravan;
   for (let i = 0; i < 200 && caravan; i++) {
     await play({ advance: 3000 });

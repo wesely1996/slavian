@@ -103,6 +103,8 @@ func _send_troops(village: Dictionary) -> void:
 		var orders := "support"
 		if Game.is_mine(target):
 			orders = "garrison" if _army_join else "support"
+		elif _rival(target):
+			orders = "raze" if _army_raze else "attack"
 		elif _army_harass and _horde_against(int(target.id)):
 			orders = "harass"
 		body = {"targetVillageId": int(target.id), "orders": orders}
@@ -143,6 +145,19 @@ func _send_troops(village: Dictionary) -> void:
 	_picked_hint(go, home_units)
 	if not target.is_empty() and Game.is_mine(target):
 		_panel_body.add_child(_join_check())
+	elif not target.is_empty() and _rival(target):
+		var raze := CheckBox.new()
+		raze.text = tr("Raze it if they win (else they plunder it)")
+		raze.add_theme_font_size_override("font_size", UI.SMALL_SIZE)
+		raze.button_pressed = _army_raze
+		raze.toggled.connect(func(on: bool) -> void:
+			_army_raze = on
+			_rebuild_panel())
+		_panel_body.add_child(raze)
+		var until: Variant = Game.world.get("protectedUntil", {}).get(str(int(target.id)))
+		if until != null and TimeUtil.parse_iso(String(until)) > Game.server_now():
+			var left := TimeUtil.parse_iso(String(until)) - Game.server_now()
+			_panel_body.add_child(UI.label(tr("%s is under protection for another %s.") % [target.name, TimeUtil.format_duration(left)], UI.SMALL_SIZE, UI.ERROR))
 	elif not target.is_empty() and _horde_against(int(target.id)):
 		var harass := CheckBox.new()
 		harass.text = tr("Harass the horde against it (strike, then come home)")
@@ -162,6 +177,11 @@ func _send_troops(village: Dictionary) -> void:
 	# Support and holding stay until called home, unless told to come back once done.
 	if stays:
 		_panel_body.add_child(_return_check(_army_return, ArmyText.return_text(String(body.orders), Game.shipyard_at(cell)), func(on: bool) -> void: _army_return = on))
+
+
+## In a PvP world, another player's village (armies.json pvp).
+func _rival(target: Dictionary) -> bool:
+	return bool(Game.world.get("pvp", false)) and target.get("ownerAccountId") != null and not Game.is_mine(target)
 
 
 ## Onto one of your settlements: whether the army joins its garrison there
@@ -465,6 +485,7 @@ func _send_army(village_id: int, body: Dictionary) -> void:
 	_send_target = Vector2i.MAX
 	_army_join = false
 	_army_harass = false
+	_army_raze = false
 	_army_hero = false
 	_army_general = 0
 	_army_stance = ""

@@ -304,6 +304,9 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 				return LocalVillage.rule("No such village in this world")
 			if order.orders == "garrison" and int(target.ownerAccountId) != int(home.ownerAccountId):
 				return LocalVillage.rule("Troops only join the garrisons of your own villages")
+			# Player against player (armies.json pvp): never in a solo world.
+			if order.orders in ["attack", "raze"]:
+				return LocalVillage.rule("Players don't attack each other in this world")
 			# Harassers strike a horde, never a friendly village: only where
 			# one fights or marches on it.
 			if order.orders == "harass" and not horde_against(world, int(target.id)):
@@ -1214,7 +1217,7 @@ static func on_army_return(server: LocalServer, world: Dictionary, event: Dictio
 static func send_army(server: LocalServer, world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
 	var target: Variant = body.get("target")
 	var units: Variant = body.get("units")
-	if not units is Dictionary or not String(body.get("orders", "")) in ["support", "reinforce", "harass", "hold", "clear", "explore", "garrison"]:
+	if not units is Dictionary or not String(body.get("orders", "")) in ["support", "reinforce", "harass", "hold", "clear", "explore", "garrison", "attack", "raze"]:
 		return {"error": "Give the army its units and orders", "kind": "invalid"}
 	if body.get("stance") != null and not String(body.stance) in server.data.battle.stances:
 		return {"error": "Unknown stance", "kind": "invalid"}

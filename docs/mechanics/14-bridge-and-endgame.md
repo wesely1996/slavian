@@ -1,6 +1,6 @@
 # 14. The Kalinov Bridge and the endgame
 
-[← Events and raids beyond the edge](13-events-and-raids.md) · [Index](README.md)
+[← Events and raids beyond the edge](13-events-and-raids.md) · [Index](README.md) · Next: [Player against player →](15-player-vs-player.md)
 
 ## The story
 

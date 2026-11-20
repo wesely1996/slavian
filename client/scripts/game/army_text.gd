@@ -12,6 +12,8 @@ static func order_text(order: String) -> String:
 		"clear": UI.t("Clear: storms a camp or lair and holds its hex with the loot until moved or called home."),
 		"explore": UI.t("Explore: fights any guardians, searches the site for some hours, then holds its hex with what it found. Scouts may go too."),
 		"garrison": UI.t("Garrison: marches into your village and joins its garrison, bringing what grain it has left."),
+		"attack": UI.t("Attack: fights the village's garrison and the armies in it at once; if they win, they plunder its stores (as much as they carry) and come home."),
+		"raze": UI.t("Raze: fights the village's garrison and the armies in it at once; if they win, they burn it to a ruin and come home."),
 	}.get(order, order)
 
 
