@@ -1134,7 +1134,9 @@ func _on_map_tapped(world_position: Vector2) -> void:
 	# Holy City's vault, a shipyard or a fort or supply point.
 	if _caravan_picking != 0 and _merchant_picking:
 		var trade := _caravan_target_at(cell, _caravan_picking)
-		if not trade.get("kind") in ["vault", "village"]:
+		# (Nobody trades in ruins.)
+		var ruined: bool = trade.get("kind") == "village" and Game.villages.get(int(trade.id), {}).get("ruin") != null
+		if not trade.get("kind") in ["vault", "village"] or ruined:
 			_status.text = tr("Merchants trade with another village or outpost, or the Holy City.")
 			return
 		var home := _caravan_picking
