@@ -229,6 +229,8 @@ const enemyUnitSchema = z.object({
   inflicts: z.array(z.enum(AFFLICTIONS)).optional(),
   // How hard it batters walls each round (walls.json).
   siege: z.number().nonnegative().optional(),
+  // Sanctity a survivor of it takes at the Holy City, in place of its tier's.
+  sanctity: z.number().nonnegative().optional(),
   // A climbing engine: how many men it carries over the walls a round.
   escalade: z.number().nonnegative().optional(),
   // How long building it on site takes (x walls.siege.setupHours x siegeCraft).
@@ -757,6 +759,8 @@ const hordeFileSchema = z.object({
     guardGrowthPerWave: z.number().min(1),
     stance: z.enum(STANCES),
     damagePerUnit: z.number().nonnegative(),
+    // Sanctity a survivor takes by its tier (1-4).
+    damageByTier: z.array(z.number().nonnegative()).length(4),
   }),
 });
 export type HordeData = z.infer<typeof hordeFileSchema>;

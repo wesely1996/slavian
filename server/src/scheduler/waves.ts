@@ -30,6 +30,7 @@ import { planRaids } from './outposts.js';
 import { planIntercepts } from './field.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { afterErrand } from './bridgeQuests.js';
+import { avatarTargets } from './horde.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -258,9 +259,13 @@ export async function setOutNow(client: DbClient, data: GameData, world: World, 
 // choosing as a horde does; with none to reach, it sinks away.
 async function sendFromHex(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const from = hex(wave.errand!.from!.q, wave.errand!.from!.r);
-  const targets: Target[] = (await listVillages(client, world.id))
-    .filter((v) => !v.ruin && v.ownerAccountId !== null)
-    .map((v) => ({ id: v.id, cell: hex(v.q, v.r) }));
+  // The Avatar goes for every village before the Holy City; those who fled a
+  // burnt camp for the villages alone.
+  const villages = await listVillages(client, world.id);
+  const targets: Target[] =
+    wave.errand!.kind === 'avatar'
+      ? avatarTargets(villages)
+      : villages.filter((v) => !v.ruin && v.ownerAccountId !== null).map((v) => ({ id: v.id, cell: hex(v.q, v.r) }));
   const route = targets.length
     ? routeFrom(data, {
         terrain: await loadLand(client, world.id),

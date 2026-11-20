@@ -129,8 +129,20 @@ export function holyCityGuard(data: GameData, waveIndex: number): Record<string,
   return Object.fromEntries(Object.entries(data.horde.holyCity.guard).map(([unit, n]) => [unit, Math.round(n * growth)]));
 }
 
-export function sanctityDamage(data: GameData, survivors: number): number {
-  return Math.ceil(survivors * data.horde.holyCity.damagePerUnit);
+// Sanctity a victorious horde takes (horde.json holyCity): each survivor by
+// its tier, an untiered one (an engine) damagePerUnit, a unit with its own
+// `sanctity` (the Avatar of Černobog) that much.
+export function sanctityDamage(data: GameData, front: Front, survivors: Readonly<Record<string, number>>): number {
+  const rules = data.horde.holyCity;
+  const units = data.enemies.fronts[front]?.units ?? {};
+  let damage = 0;
+  for (const [unit, n] of Object.entries(survivors)) {
+    if (n <= 0) continue;
+    const def = units[unit];
+    const each = def?.sanctity ?? (def?.tier ? rules.damageByTier[def.tier - 1]! : rules.damagePerUnit);
+    damage += n * each;
+  }
+  return Math.ceil(damage);
 }
 
 export function fearLeft(data: GameData, killed: number): number {

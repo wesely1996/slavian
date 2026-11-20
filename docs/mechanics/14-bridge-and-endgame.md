@@ -94,8 +94,9 @@ When the Ritual Arch stands, **Ritual Night** begins:
 ## Losing
 
 The run is lost the moment the Holy City's **Sanctity reaches 0**. Every
-horde that wins there takes 0.5 Sanctity for each of its surviving soldiers
-([page 1](01-world-and-run.md#the-holy-city-and-sanctity)).
+horde that wins there takes Sanctity for each of its surviving soldiers, more
+the higher their tier ([page 1](01-world-and-run.md#sanctity-damage)). The
+Avatar of Černobog, if it gets there, destroys the Holy City outright.
 
 > *The walls are breached and the sanctuary fires are out. The hordes pour
 > over the Kalinov Bridge unopposed. Some of the people escaped into the

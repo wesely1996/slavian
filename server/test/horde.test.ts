@@ -84,7 +84,12 @@ describe('the Holy City', () => {
   it('has a guard that grows each wave and loses Sanctity to survivors', () => {
     expect(holyCityGuard(data, 0)).toEqual(data.horde.holyCity.guard);
     expect(holyCityGuard(data, 5).spearman!).toBeGreaterThan(data.horde.holyCity.guard.spearman!);
-    expect(sanctityDamage(data, 9)).toBe(Math.ceil(9 * data.horde.holyCity.damagePerUnit));
+    // By tier: 4 Zealots (tier 1) and 2 Templars (tier 3) take 4 x 0.5 + 2 x 1.5.
+    const [t1, , t3] = data.horde.holyCity.damageByTier;
+    expect(sanctityDamage(data, 'south', { zealot: 4, templar: 2 })).toBe(Math.ceil(4 * t1! + 2 * t3!));
+    // An untiered engine at damagePerUnit; the Avatar of Černobog takes it all.
+    expect(sanctityDamage(data, 'south', { siege_ram: 3 })).toBe(Math.ceil(3 * data.horde.holyCity.damagePerUnit));
+    expect(sanctityDamage(data, 'north', { chernobog_avatar: 1 })).toBeGreaterThanOrEqual(data.horde.holyCity.sanctity);
   });
 });
 

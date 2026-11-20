@@ -126,8 +126,24 @@ static func holy_city_guard(data: Dictionary, wave_index: int) -> Dictionary:
 	return out
 
 
-static func sanctity_damage(data: Dictionary, survivors: int) -> int:
-	return ceili(survivors * float(data.horde.holyCity.damagePerUnit))
+## horde.ts sanctityDamage: each survivor by its tier, an untiered one (an
+## engine) damagePerUnit, a unit with its own `sanctity` that much.
+static func sanctity_damage(data: Dictionary, front: String, survivors: Dictionary) -> int:
+	var rules: Dictionary = data.horde.holyCity
+	var units: Dictionary = data.enemies.fronts.get(front, {}).get("units", {})
+	var damage := 0.0
+	for unit in survivors:
+		var n := int(survivors[unit])
+		if n <= 0:
+			continue
+		var def: Dictionary = units.get(unit, {})
+		var each := float(rules.damagePerUnit)
+		if def.get("sanctity") != null:
+			each = float(def.sanctity)
+		elif def.get("tier") != null:
+			each = float(rules.damageByTier[int(def.tier) - 1])
+		damage += n * each
+	return ceili(damage)
 
 
 static func fear_left(data: Dictionary, killed: int) -> float:

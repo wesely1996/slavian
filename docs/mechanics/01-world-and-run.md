@@ -29,7 +29,7 @@ The Holy City stands at the centre of the map, `(0, 0)`.
 | Sanctity at the start | 100 |
 | Its own guard | 20 Spearmen and 10 Archers, growing ×1.057 every wave |
 | The guard's stance | Defensive |
-| Damage from a horde that wins there | 0.5 Sanctity for every horde soldier still standing |
+| Damage from a horde that wins there | By what survives, by each soldier's tier ([below](#sanctity-damage)) |
 | Rebuilding | Impossible: a fallen Holy City ends the run |
 
 - Every horde counts the Holy City as a possible target, as if it were the
@@ -37,6 +37,23 @@ The Holy City stands at the centre of the map, `(0, 0)`.
 - The Holy City holds the group's shared **vault** ([page 4](04-economy-and-logistics.md#the-holy-city-vault))
   and the **Kalinov Bridge**.
 - Armies of any player can stand there and fight its battles.
+
+### Sanctity damage
+
+A horde that beats the Holy City's defenders takes Sanctity for every soldier
+still standing, by tier ([page 9](09-hordes-and-threats.md#enemy-units)):
+
+| Survivor | Sanctity each |
+|---|---|
+| Tier 1 | 0.5 |
+| Tier 2 | 1 |
+| Tier 3 | 1.5 |
+| Tier 4 | 2.5 |
+| Siege engine (no tier) | 0.5 |
+| The Avatar of Černobog | 100: the whole of it |
+
+The total is rounded up. Example: 4 tier-1 and 2 tier-3 survivors take
+4 × 0.5 + 2 × 1.5 = 5 Sanctity.
 
 ## The map
 

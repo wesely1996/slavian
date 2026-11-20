@@ -55,7 +55,7 @@ import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
 import { combatants } from '../sim/scouting.js';
 import { capacity, levelsOf, newVillage, outpostHex, outpostPlots, researchPerHour, villageRates, type VillageState } from '../sim/village.js';
 import { withRates } from '../sim/resources.js';
-import { rngFor, routeFrom, targetsOf } from '../sim/waves.js';
+import { rngFor, routeFrom, targetsOf, type Target } from '../sim/waves.js';
 import { terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { cancelPlans, planIntercepts } from './field.js';
@@ -101,7 +101,8 @@ export async function hordeWins(
   const fresh = await loadWave(client, wave.id);
   const rampageLeftMs = (fresh.rampageEndsAt?.getTime() ?? at.getTime()) - at.getTime();
   const preset = presetOf(data, world.difficulty);
-  const decision = decideRaze(data, {
+  // The Avatar of Černobog spares nothing it beats.
+  const decision: Decision = wave.errand?.kind === 'avatar' ? { choice: 'raze', reasons: ['the Avatar of Černobog spares nothing'] } : decideRaze(data, {
     front: wave.front,
     waveIndex: wave.index,
     graceWaves: preset.graceWaves,
@@ -123,6 +124,13 @@ export async function hordeWins(
     await setWaveStrength(client, wave.id, recruit(data, fresh.initial, attackerNow));
   }
   return decision;
+}
+
+// Where the Avatar of Černobog goes: every player village still standing
+// (refugee camps aside), and the Holy City only once none is left.
+export function avatarTargets(villages: readonly { id: number; q: number; r: number; ownerAccountId: number | null; refuge?: boolean; ruin?: unknown }[]): Target[] {
+  const standing = villages.filter((v) => !v.ruin && v.ownerAccountId !== null && v.refuge !== true);
+  return standing.length > 0 ? standing.map((v) => ({ id: v.id, cell: hex(v.q, v.r) })) : [{ id: null, cell: hex(0, 0) }];
 }
 
 // Every hex something stands on: villages, outposts, forts, camps and sites.
@@ -176,14 +184,16 @@ async function settle(client: DbClient, data: GameData, world: World, wave: Wave
 // (or the Holy City), if the rampage clock allows; otherwise settle.
 export async function moveOn(client: DbClient, data: GameData, world: World, waveId: number, from: Hex, at: Date): Promise<void> {
   const wave = await loadWave(client, waveId);
-  const endsAt = wave.rampageEndsAt;
-  if (!endsAt || at >= endsAt || total(wave.composition) === 0) return settle(client, data, world, wave, from, at);
+  // The Avatar of Černobog's rampage never ends while a village stands.
+  const avatar = wave.errand?.kind === 'avatar';
+  const endsAt = avatar ? null : wave.rampageEndsAt;
+  if ((!avatar && (!endsAt || at >= endsAt)) || total(wave.composition) === 0) return settle(client, data, world, wave, from, at);
   const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && !wave.struck.includes(v.id));
   const sinceSpawn = at.getTime() - wave.spawnAt.getTime();
   const route = routeFrom(data, {
     terrain: await terrainOf(client, world.id),
     from,
-    targets: targetsOf(villages).filter((t) => t.cell.q !== from.q || t.cell.r !== from.r),
+    targets: (avatar ? avatarTargets(villages) : targetsOf(villages)).filter((t) => t.cell.q !== from.q || t.cell.r !== from.r),
     front: wave.front,
     composition: wave.composition,
     fear: await fearOf(client, data, world),
@@ -194,7 +204,7 @@ export async function moveOn(client: DbClient, data: GameData, world: World, wav
   if (!route) return settle(client, data, world, wave, from, at);
   const march = holdForQuiet(world, wave.spawnAt, { path: route.path, arrivesAt: new Date(wave.spawnAt.getTime() + route.arrivesMs) });
   const arrivesAt = march.arrivesAt;
-  if (arrivesAt > endsAt) return settle(client, data, world, wave, from, at);
+  if (endsAt && arrivesAt > endsAt) return settle(client, data, world, wave, from, at);
   await marchOnward(client, wave.id, route.targetVillageId, march.path, arrivesAt);
   await cancelPlans(client, world.id, wave.id);
   await scheduleEvent(client, world.id, arrivesAt, 'wave_arrive', { waveId: wave.id });
