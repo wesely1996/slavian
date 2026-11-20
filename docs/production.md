@@ -6,6 +6,12 @@ small server (VPS) with its own domain and HTTPS, nightly backups copied off
 the machine, error alerts and an uptime check. The database runs on the same
 machine (it can run on Neon instead; "Moving the database here" moves it off).
 
+A release never switches the database. The server keeps using the one its
+`.env` names (`DATABASE_URL`); the local Postgres and the off-site copies only
+start once `COMPOSE_PROFILES` in that `.env` lists them, and a deploy changes
+nothing in it but `SLAVIAN_TAG`. A server still on Neon stays on Neon until
+`move-db.sh` is run ("Moving the database here").
+
 ## What runs where
 
 | Piece | Where | Notes |
