@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, type Stance } from '../src/data/index.js';
+import { combatants } from '../src/sim/scouting.js';
 import {
   battleOutcome,
   battleRng,
@@ -240,5 +241,23 @@ describe('afflictions (battle.json)', () => {
     const r2 = resolveRound(data, { units: { archer: 400 }, stance: 'balanced', stats: (u) => ({ ...stats(u), attack: 0 }), home: false }, { units: { spearman: 40 }, stance: 'balanced', stats, home: false }, rng, r1.afflictions);
     expect(total(r2.defenderLosses)).toBeGreaterThan(0);
     expect(r2.afflictions.defender.burn).toHaveLength(data.battle.afflictions.burn.rounds - 1);
+  });
+});
+
+describe('the wagon wall (units.json wagon)', () => {
+  const stats = playerStats(data);
+  it('wagons in the fight shield their side\'s archers: the blows aimed at them fall on the wagons', () => {
+    const rng = () => 0.5;
+    const attacker = { units: { axeman: 60 }, stance: 'offensive' as const, stats, home: false };
+    const walled = resolveRound(data, attacker, { units: { archer: 20, supply_wagon: 6 }, stance: 'balanced', stats, home: false }, rng);
+    expect(walled.defenderLosses.archer ?? 0).toBe(0);
+    expect(walled.defenderLosses.supply_wagon ?? 0).toBeGreaterThan(0);
+    const open = resolveRound(data, attacker, { units: { archer: 20 }, stance: 'balanced', stats, home: false }, rng);
+    expect(open.defenderLosses.archer ?? 0).toBeGreaterThan(0);
+  });
+  it('support units never fight: scouts, healers and wagons stay out of combatants unless the wagons stand in a ring', () => {
+    const army = { spearman: 5, scout: 2, shaman: 3, supply_wagon: 2 };
+    expect(combatants(data, army)).toEqual({ spearman: 5 });
+    expect(combatants(data, army, true)).toEqual({ spearman: 5, supply_wagon: 2 });
   });
 });

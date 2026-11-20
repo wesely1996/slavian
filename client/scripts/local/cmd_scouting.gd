@@ -71,10 +71,21 @@ static func with_intel(data: Dictionary, units: Dictionary, stats: Callable) -> 
 
 
 ## sim/scouting.ts combatants: the units that fight (all but scouts).
-static func combatants(data: Dictionary, units: Dictionary) -> Dictionary:
+## scouting.ts isSupport: a scout, a healer or a wagon. They stand aside in
+## battle, never struck, and ride home with their army.
+static func is_support(data: Dictionary, unit: String) -> bool:
+	var def: Dictionary = data.units.units.get(unit, {})
+	return not def.is_empty() and (def.family == "scout" or def.get("heals") != null or def.get("wagon", false) == true)
+
+
+## scouting.ts combatants: the units that fight; with `wall`, an army's
+## wagons drawn into a wagon fort fight too, as a wall before its archers.
+static func combatants(data: Dictionary, units: Dictionary, wall := false) -> Dictionary:
 	var out := {}
 	for unit in units:
-		if int(units[unit]) > 0 and not is_scout(data, unit):
+		if int(units[unit]) <= 0:
+			continue
+		if not is_support(data, unit) or (wall and data.units.units.get(unit, {}).get("wagon", false) == true):
 			out[unit] = int(units[unit])
 	return out
 

@@ -1311,7 +1311,9 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 	wave.status = "battling"
 	var defenders := {}
 	for a in holders:
-		defenders = LocalCamps.add_units(defenders, LocalScouting.combatants(data, a.units))
+		# Wagons in a ring by now fight, as a wall before the archers.
+		var ringed: bool = a.get("wagonFortAt") != null and int(a.wagonFortAt) <= at
+		defenders = LocalCamps.add_units(defenders, LocalScouting.combatants(data, a.units, ringed))
 	var battle := LocalBattles.insert_battle(world, {"waveId": wave.id, "villageId": null, "q": cell.x, "r": cell.y, "setup": setup,
 		"attackerStance": wave.stance, "attackerInitial": wave.composition, "defenderInitial": defenders, "startedAt": at})
 	for army in holders:

@@ -56,6 +56,8 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 				strong.append("%s ×%.1f" % [target, float(u.counters[target])])
 			text += UI.t(" · strong against %s") % ", ".join(strong)
 		text += afflictions_text(u)
+		if LocalScouting.is_support(data, id):
+			text += UI.t(" · support: never fights, but wagons drawn into a wagon fort stand as a wall before the archers") if u.get("wagon", false) == true else UI.t(" · support: never fights")
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
 		out.append([UI.t(u.name), text, "unit/%s" % id, id])

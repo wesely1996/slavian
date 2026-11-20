@@ -131,10 +131,7 @@ static func capacity(data: Dictionary, units: Dictionary) -> float:
 		var n := int(units[unit])
 		if def.is_empty() or n <= 0:
 			continue
-		if float(def.get("supplyGrain", 0)) > 0:
-			carry += float(data.raids.carry.perWagon) * n
-		elif def.family != "scout" and unit != "settler":
-			carry += float(data.raids.carry.perSoldier) * n
+		carry += float(def.carry) * n
 	return carry
 
 

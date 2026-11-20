@@ -79,9 +79,9 @@ Cost is wood / stone / grain / iron. "Bldg" is the building level needed.
 |---|---|---|---|---|---|---|---|---|---|
 | Horse Raider | 1 | 40/30/60/80 | 120 s | 45 | 25 | 200 | 10 | 2 | Carries 80 |
 | Raider | 2 | 35/20/50/50 | 90 s | 35 | 15 | 130 | 12 | 1 | Carries 120 |
-| Military Caravan | 2 | 120/20/40/30 | 150 s | 2 | 10 | 90 | 5 | 0.5 | Wagon: +200 grain for its army |
+| Military Caravan | 2 | 120/20/40/30 | 150 s | 0 | 60 | 450 | 5 | 0.5 | Support (wagon): +200 grain for its army; carries 400 loot |
 | Horse Archer | 4 | 70/30/80/90 | 180 s | 55 | 30 | 230 | 11 | 2 | ×1.5 archers, ×1.3 infantry |
-| Large Military Caravan | 4 | 260/40/80/70 | 300 s | 2 | 12 | 105 | 7 | 1 | Wagon: +300 grain; carries 1 engine or 10 foot soldiers |
+| Large Military Caravan | 4 | 260/40/80/70 | 300 s | 0 | 80 | 600 | 7 | 1 | Support (wagon): +300 grain; carries 1 engine or 10 foot soldiers; carries 600 loot |
 | Bear Rider | 6 | 80/60/160/140 | 300 s | 85 | 70 | 410 | 7 | 4 | ×1.5 archers, ×1.2 infantry |
 | Svarog's Raider | 8 | 150/90/180/260 | 420 s | 130 | 80 | 445 | 11 | 4 | |
 
@@ -100,7 +100,7 @@ Lower **stealth** is better: it scales the chance of being caught
 
 | Unit | Building | Cost | Notes |
 |---|---|---|---|
-| Shaman | Hospital 2 | 40/20/80/20 | **Healer:** each gives every fallen soldier of its side a 5% chance to get up again, at most 50% |
+| Shaman | Hospital 2 | 40/20/80/20 | **Support (healer):** never fights; each gives every fallen soldier of its side a 5% chance to get up again, at most 50% |
 | Settler | Settlers' Lodge 1 | 300/250/300/150 | Founds villages (3 per village); trains one at a time; costs ×1.5 for every 3 bought |
 
 ### Clan units
@@ -157,10 +157,14 @@ Only members of that clan can train these ([page 10](10-heroes-generals-clans.md
 
 ### Wagons and transports
 
-- **Not soldiers.** Military caravans are wagons. They carry extra grain for
-  their army (200 or 300).
+- **Not soldiers.** Military caravans are wagons, support units: they don't
+  fight and aren't struck. They carry extra grain for their army (200 or 300)
+  and the most loot of any unit (400 and 600).
 - **Wagon fort.** On open ground they can be drawn into a wagon fort
-  ([page 8](08-armies-and-field.md#wagon-fort)).
+  ([page 8](08-armies-and-field.md#wagon-fort)). Only then do they fight: as
+  a **wall before the army's archers**. While any wagon stands, the blows aimed
+  at the archers fall on the wagons instead. That's why they're tough: 60
+  defense and 450 health for a Military Caravan, 80 and 600 for a large one.
 - **Transport.** A Large Military Caravan carries, per wagon, either 1 siege
   engine (loaded first) or 10 foot soldiers, the slowest first. Those riding
   move at the wagon's pace (7) and don't set the army's speed.
@@ -174,9 +178,19 @@ Only members of that clan can train these ([page 10](10-heroes-generals-clans.md
 - **Onager and Thunder Thrower:** heavy throwers.
 - **Speed.** All engines are slow (2–4) and carry little food.
 
-### Scouts in armies
+### Support units
 
-- **Never fight.** Scouts stand aside in battle and ride home with their army.
+Scouts, healers (the Shaman) and wagons (military caravans) are **support
+units**:
+
+- **Never fighting.** They stand aside in every battle, aren't struck, and
+  ride home with their army. The one exception is wagons in a wagon fort,
+  above.
+- **What they still do.** Healers still heal and scouts still give intel.
+- **Riding home.** An army left with only support units, every soldier fallen,
+  rides home.
+
+### Scouts in armies
 - **Intel.** Each point of their intel makes the army fight 2% better in
   attack and defense, at most +10% ([page 12](12-scouting-and-expansion.md#scouts-with-an-army)).
 

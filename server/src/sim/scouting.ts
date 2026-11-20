@@ -73,9 +73,21 @@ export function withIntel<S extends { attack: number; defense: number }>(
 }
 
 // The units that fight: all but scouts.
-export function combatants(data: GameData, units: Readonly<Record<string, number>>): Record<string, number> {
+// A support unit (units.json): a scout, a healer or a wagon. They stand
+// aside in battle, never struck, and ride home with their army.
+export function isSupport(data: GameData, unit: string): boolean {
+  const def = data.units.units[unit];
+  return !!def && (def.family === 'scout' || !!def.heals || def.wagon === true);
+}
+
+// The units that fight: all but the support units; with `wall`, an army's
+// wagons drawn into a wagon fort fight too, as a wall before its archers.
+export function combatants(data: GameData, units: Readonly<Record<string, number>>, wall = false): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const [unit, n] of Object.entries(units)) if (n > 0 && !isScout(data, unit)) out[unit] = n;
+  for (const [unit, n] of Object.entries(units)) {
+    if (n <= 0) continue;
+    if (!isSupport(data, unit) || (wall && data.units.units[unit]?.wagon === true)) out[unit] = n;
+  }
   return out;
 }
 

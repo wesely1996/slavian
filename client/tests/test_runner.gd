@@ -665,9 +665,10 @@ func _test_lake_lanes() -> void:
 
 
 func _test_raid_text() -> void:
-	var data := {"raids": {"stageHours": 3, "carry": {"perSoldier": 30, "perWagon": 400}, "fronts": {"east": {"stronghold": "Nomad Encampment"}}},
-		"units": {"units": {"spearman": {"family": "infantry", "upkeepPerHour": 1}, "scout": {"family": "scout", "upkeepPerHour": 1}, "supply_wagon": {"family": "cavalry", "supplyGrain": 200, "upkeepPerHour": 0.5}}}}
-	_check(RaidText.capacity(data, {"spearman": 10, "scout": 3, "supply_wagon": 2}) == 1100, "raid carry: soldiers and wagons, not scouts")
+	var data := {"raids": {"stageHours": 3, "fronts": {"east": {"stronghold": "Nomad Encampment"}}},
+		"units": {"units": {"spearman": {"family": "infantry", "upkeepPerHour": 1, "carry": 40}, "scout": {"family": "scout", "upkeepPerHour": 1, "carry": 0},
+			"supply_wagon": {"family": "cavalry", "supplyGrain": 200, "upkeepPerHour": 0.5, "carry": 400}}}}
+	_check(RaidText.capacity(data, {"spearman": 10, "scout": 3, "supply_wagon": 2}) == 1200, "raid carry: each unit's own carry, wagons the most")
 	_check(RaidText.plan(data, "east", 2) == "2 fields, then the Nomad Encampment", "raid plan")
 	_check(is_equal_approx(RaidText.stage_hours(data, 2), 9.0), "raid hours beyond the edge")
 	_check(is_equal_approx(RaidText.upkeep(data, {"spearman": 4, "supply_wagon": 2}), 5.0), "raid upkeep")

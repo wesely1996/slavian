@@ -148,15 +148,13 @@ export function raidBattle(
   return { won: false, rounds, armyNow, enemyNow, fallen };
 }
 
-// How much an army can carry home: each fighting unit, and each military
-// caravan's wagon.
+// How much an army can carry home: each unit's own carry (units.json),
+// wagons the most.
 export function raidCapacity(data: GameData, units: Units): number {
   let carry = 0;
   for (const [unit, n] of Object.entries(units)) {
     const def = data.units.units[unit];
-    if (!def || n <= 0) continue;
-    if (def.supplyGrain) carry += data.raids.carry.perWagon * n;
-    else if (def.family !== 'scout' && unit !== 'settler') carry += data.raids.carry.perSoldier * n;
+    if (def && n > 0) carry += def.carry * n;
   }
   return carry;
 }
