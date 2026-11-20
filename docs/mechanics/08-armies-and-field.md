@@ -11,6 +11,14 @@
   number of troops.
 - **Home:** an army's home is the settlement it was raised in. It can be
   moved to another of your settlements.
+- **A home in ruins:** when an army's home is razed
+  ([page 9](09-hordes-and-threats.md#raid-or-raze)), it finds another place:
+  - **Your nearest standing village,** measured from where the army is,
+    becomes its home. An army on its way home turns there at once, and an
+    army called home later goes there.
+  - **None left?** It marches to the **nearest ally's village** and stands
+    there in support.
+  - **No ally either?** It goes to your refugee camp.
 - **Leaders:** an army has at most one hero and one general
   ([page 10](10-heroes-generals-clans.md)).
 

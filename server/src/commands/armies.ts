@@ -22,6 +22,8 @@ import {
   setArmyHome,
   setRespond,
   setReturnHome,
+  shelterOf,
+  armyHex,
   splitArmy,
   stockStore,
 } from '../scheduler/armies.js';
@@ -241,10 +243,14 @@ export async function recallArmyCommand(db: Db, deps: SchedulerDeps, input: { ac
     if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
     if (army.status === 'returning') throw new RuleError('They are already on their way home');
     const world = await getWorld(client, army.worldId);
-    // One on the march turns for home where it is, into the garrison.
+    // One on the march turns for home where it is, into the garrison (with
+    // its home in ruins, for its shelter: shelterOf).
+    const shelter = army.status === 'marching' ? await shelterOf(client, army, armyHex(army, input.now)) : null;
     const back =
       army.status === 'marching'
-        ? await moveArmy(client, deps.data, world, army, { villageId: army.homeVillageId }, input.now)
+        ? shelter && !shelter.own
+          ? await moveArmy(client, deps.data, world, { ...army, returnHome: false }, { villageId: shelter.village.id, orders: 'support' }, input.now)
+          : await moveArmy(client, deps.data, world, shelter ? { ...army, homeVillageId: shelter.village.id } : army, { villageId: shelter?.village.id ?? army.homeVillageId }, input.now)
         : army.status === 'stationed'
           ? await sendHome(client, world, army, input.now, deps.data)
           : null;
