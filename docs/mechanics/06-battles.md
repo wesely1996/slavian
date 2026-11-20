@@ -175,6 +175,14 @@ Some units' blows leave something behind:
   Fights resolved at once (camps, raids, shipyard raiders) carry it from round
   to round inside the fight.
 
+## Who fights
+
+- **Support units stay out.** Scouts, healers and wagons don't fight and
+  aren't struck ([page 5](05-units-and-training.md#support-units)).
+- **Wagons in a wagon fort** do fight, as a wall: the share of the blows aimed
+  at their side's archers falls on the wagons instead, split among the wagon
+  kinds by their numbers, while any wagon stands.
+
 ## Healing
 
 - **The Hospital:** when a garrison holds its own village, 5% a level of its
@@ -192,8 +200,9 @@ Some units' blows leave something behind:
 | Camp cleared | 15 wood, 15 stone, 15 grain and 8 iron for every camp unit, carried home; a 35% gear chance; a lair also a 75% chance of a Svarog's Ember |
 | Raid battle won | Loot per kill, the stronghold's stores ([page 13](13-events-and-raids.md#raids-beyond-the-edge)) |
 
-**Raid loot** is limited by what the army can carry: each unit's `carry`
-(30–120), 400 for each military caravan.
+**Raid loot** is limited by what the army can carry: the sum of each unit's
+`carry` (30–120 for most troops, 400 for a Military Caravan, 600 for a large
+one).
 
 ## Battle reports
 

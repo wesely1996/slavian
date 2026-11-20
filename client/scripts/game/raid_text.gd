@@ -30,17 +30,7 @@ static func strike_share(data: Dictionary, hours_early: float) -> float:
 
 ## What a raid of `units` can carry home (sim/raids.ts raidCapacity).
 static func capacity(data: Dictionary, units: Dictionary) -> int:
-	var carry := 0.0
-	for unit in units:
-		var def: Dictionary = data.units.units.get(unit, {})
-		var n := int(units[unit])
-		if def.is_empty() or n <= 0:
-			continue
-		if float(def.get("supplyGrain", 0)) > 0:
-			carry += float(data.raids.carry.perWagon) * n
-		elif def.get("family") != "scout" and unit != "settler":
-			carry += float(data.raids.carry.perSoldier) * n
-	return int(carry)
+	return int(LocalRaids.capacity(data, units))
 
 
 ## Game hours a raid of `depth` spends beyond the edge (the stages).

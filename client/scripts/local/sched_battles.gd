@@ -581,6 +581,8 @@ static func fall_back(server: LocalServer, world: Dictionary, army: Dictionary, 
 
 
 static func field_round(server: LocalServer, world: Dictionary, battle: Dictionary, at: int, changed: Array) -> bool:
+	# Wagons in a ring by now (field.json wagonFort) fight, as a wall before the archers.
+	var ringed := func(a: Dictionary) -> bool: return a.get("wagonFortAt") != null and int(a.wagonFortAt) <= at
 	var data := server.data
 	var wave := server.find_wave(world, int(battle.waveId))
 	var round := int(battle.round) + 1
@@ -641,7 +643,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		var army: Dictionary = engaged[i]
 		var army_stance: String = army.get("stance", "balanced")
 		# Scouts never fight; an army's tell it what it faces (intel).
-		groups.append({"units": LocalScouting.combatants(data, army.units), "stance": army_stance, "stats": LocalScouting.with_intel(data, army.units, stats_for.call(army_stance)),
+		groups.append({"units": LocalScouting.combatants(data, army.units, ringed.call(army)), "stance": army_stance, "stats": LocalScouting.with_intel(data, army.units, stats_for.call(army_stance)),
 			"champions": LocalChampions.champions_of(data, army_leaders[i][0], army_leaders[i][1], army_leaders[i][2])})
 	var chief := horde_stats(server, world, wave, LocalBattle.enemy_stats(data, wave.front), null)
 	var horde_base: Callable = chief.stats
@@ -673,13 +675,13 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var guard_fighting: Dictionary = guard_now.duplicate() if guard_now != null and not guard_broken else {}
 	var defenders_now: Dictionary = guard_fighting.duplicate()
 	for army in armies:
-		defenders_now = LocalCamps.add_units(defenders_now, LocalScouting.combatants(data, army.units))
+		defenders_now = LocalCamps.add_units(defenders_now, LocalScouting.combatants(data, army.units, ringed.call(army)))
 	var outcome_groups: Array = []
 	if guard != null:
 		outcome_groups.append({"stance": guard_stance, "initial": home_initial, "now": guard_fighting})
 	for army in armies:
 		outcome_groups.append({"stance": army.get("stance", "balanced"),
-			"initial": LocalScouting.combatants(data, army.engagedUnits if army.get("engagedUnits") != null else army.units), "now": LocalScouting.combatants(data, army.units)})
+			"initial": LocalScouting.combatants(data, army.engagedUnits if army.get("engagedUnits") != null else army.units, ringed.call(army)), "now": LocalScouting.combatants(data, army.units, ringed.call(army))})
 	var outcome := LocalBattle.battle_outcome(data, {
 		"round": round, "attackerStance": battle.attackerStance, "attackerInitial": battle.attackerInitial, "attackerNow": attacker_now,
 		"defenderStance": groups[0].stance if not groups.is_empty() else "balanced", "defenderInitial": battle.defenderInitial, "defenderNow": defenders_now,
@@ -689,9 +691,9 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	# While the fight goes on, an army that broke falls back home beaten,
 	# and a guard that broke fights no more.
 	var breaks := func(a: Dictionary) -> bool:
-		var fighting := LocalScouting.combatants(data, a.units)
+		var fighting := LocalScouting.combatants(data, a.units, ringed.call(a))
 		return outcome == "ongoing" and LocalBattle.total(fighting) > 0 \
-			and LocalBattle.broken(data, a.get("stance", "balanced"), LocalScouting.combatants(data, a.engagedUnits if a.get("engagedUnits") != null else a.units), fighting)
+			and LocalBattle.broken(data, a.get("stance", "balanced"), LocalScouting.combatants(data, a.engagedUnits if a.get("engagedUnits") != null else a.units, ringed.call(a)), fighting)
 	var home_broke: bool = outcome == "ongoing" and guard != null and not guard_broken and LocalBattle.total(guard_fighting) > 0 \
 		and LocalBattle.broken(data, guard_stance, home_initial, guard_fighting)
 	if guard_now != null:
@@ -702,7 +704,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		battle.setup = setup
 	var log := {"round": round, "at": LocalTime.iso(at), "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
 		"attackerLeft": LocalBattle.total(attacker_now), "defenderLeft": LocalBattle.total(defenders_now)}
-	var broke: Array = armies.filter(breaks).map(func(a: Dictionary) -> Dictionary: return {"armyId": a.id, "villageId": a.homeVillageId, "stance": a.get("stance", "balanced"), "units": LocalScouting.combatants(data, a.units)})
+	var broke: Array = armies.filter(breaks).map(func(a: Dictionary) -> Dictionary: return {"armyId": a.id, "villageId": a.homeVillageId, "stance": a.get("stance", "balanced"), "units": LocalScouting.combatants(data, a.units, ringed.call(a))})
 	if not broke.is_empty():
 		log.broke = broke
 	if home_broke:
@@ -712,7 +714,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		for army in armies:
 			if breaks.call(army):
 				fall_back(server, world, army, kills_so_far, int(battle.id), at)
-			elif LocalBattle.total(army.units) > 0 and LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
+			elif LocalBattle.total(army.units) > 0 and LocalBattle.total(LocalScouting.combatants(data, army.units, ringed.call(army))) == 0:
 				# Scouts left without fighters ride home.
 				LocalArmies.send_home(server, world, army, at)
 			elif LocalBattle.total(army.units) == 0:

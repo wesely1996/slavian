@@ -119,7 +119,12 @@ async function owners(armies: readonly Army[]): Promise<number[]> {
   return [...new Set(armies.map((a) => a.ownerAccountId).filter((id): id is number => id !== null))];
 }
 
+// An army whose wagons stand in a ring by `at` (field.json wagonFort): its
+// wagons fight, as a wall before its archers.
+const ringedAt = (at: Date) => (a: Army) => !!a.wagonFortAt && a.wagonFortAt.getTime() <= at.getTime();
+
 async function startFieldBattle(client: DbClient, data: GameData, world: World, wave: Wave, cell: Hex, at: Date): Promise<Battle | null> {
+  const ringed = ringedAt(at);
   const holders = await armiesHolding(client, world.id, cell.q, cell.r, ['stationed']);
   if (holders.length === 0) return null;
   const readySince = new Date(Math.min(...holders.map((a) => a.arrivesAt.getTime())));
@@ -144,7 +149,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     setup,
     attackerStance: wave.stance,
     attackerInitial: wave.composition,
-    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units)), {}),
+    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units, ringed(a))), {}),
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
@@ -189,6 +194,7 @@ export async function fallBack(client: DbClient, data: GameData, world: World, a
 // on open ground, or at the Holy City, whose guard fights beside any armies
 // holding it, behind its walls.
 export async function fieldRound(client: DbClient, data: GameData, world: World, battle: Battle, at: Date): Promise<void> {
+  const ringed = ringedAt(at);
   const wave = await loadWave(client, battle.waveId!);
   const round = battle.round + 1;
   const engaged = await armiesInBattle(client, battle.id);
@@ -237,7 +243,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const groups = [
     ...(guard ? [{ units: guardForce, stance: guardStance, stats: statsFor(guardStance) }] : []),
     ...engaged.map((a, i) => ({
-      units: combatants(data, a.units),
+      units: combatants(data, a.units, ringed(a)),
       stance: a.stance,
       stats: withIntel(data, a.units, statsFor(a.stance)),
       champions: championsOf(data, armyLeaders[i]!.hero, armyLeaders[i]!.general, armyLeaders[i]!.owned),
@@ -276,7 +282,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const armies: Army[] = [];
   for (const [i, army] of engaged.entries()) armies.push(await armyLosses(client, data, world, army, shares[i + offset]!, at));
   const guardFighting = guardNow && !guardBroken ? guardNow : {};
-  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units)), { ...guardFighting });
+  const defendersNow = armies.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units, ringed(a))), { ...guardFighting });
 
   const outcome = battleOutcome(data, {
     round,
@@ -289,15 +295,15 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     attackerNerve: personality(data, wave).nerve * (1 + chief.nerve),
     defenderGroups: [
       ...(guard ? [{ stance: guardStance, initial: battle.setup.home?.initial ?? battle.defenderInitial, now: guardFighting }] : []),
-      ...armies.map((a) => ({ stance: a.stance, initial: combatants(data, a.engagedUnits ?? a.units), now: combatants(data, a.units) })),
+      ...armies.map((a) => ({ stance: a.stance, initial: combatants(data, a.engagedUnits ?? a.units, ringed(a)), now: combatants(data, a.units, ringed(a)) })),
     ],
   });
   // While the fight goes on, an army that broke falls back home beaten,
   // and a guard that broke fights no more.
   const breaks = (a: Army) =>
-    outcome === 'ongoing' && total(combatants(data, a.units)) > 0 && broken(data, a.stance, combatants(data, a.engagedUnits ?? a.units), combatants(data, a.units));
+    outcome === 'ongoing' && total(combatants(data, a.units, ringed(a))) > 0 && broken(data, a.stance, combatants(data, a.engagedUnits ?? a.units, ringed(a)), combatants(data, a.units, ringed(a)));
   // Scouts left without fighters ride home.
-  const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units)) === 0;
+  const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units, ringed(a))) === 0;
   const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
   const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
   // Burning and poison carry into the next round.
@@ -311,7 +317,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderLosses: result.defenderLosses,
     attackerLeft: total(attackerNow),
     defenderLeft: total(defendersNow),
-    ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units) })) } : {}),
+    ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units, ringed(a)) })) } : {}),
     ...(homeBroke ? { homeBroke: true } : {}),
   };
 

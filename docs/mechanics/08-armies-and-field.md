@@ -160,6 +160,9 @@ bonus = wagons × 10% ÷ ⌈soldiers ÷ 10⌉, at most +30%
 ```
 
   Example: 3 wagons with 25 soldiers give 3 × 10% ÷ 3 = +10%.
+- **A wall before the archers.** Wagons in the ring fight (they don't otherwise
+  fight at all): the blows aimed at the army's archers fall on the wagons
+  while any stand ([page 6](06-battles.md#who-fights)).
 - **Moving** the army breaks the ring up.
 
 ## Hordes passing through

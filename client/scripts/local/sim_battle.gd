@@ -147,6 +147,33 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			target_total += 1
 	if target_total == 0:
 		return {"losses": result, "fallen": fallen, "burnHit": burn_hit, "poisons": false}
+	# battle.ts: wagons in a ring stand as a wall before their side's archers:
+	# the blows aimed at the archers fall on the wagons, each kind by its share.
+	var weights: Array = targets.map(func(t: Array) -> float: return float(t[2]))
+	for i in groups.size():
+		var wagons: Array = []
+		var shooters: Array = []
+		var g_stats: Callable = groups[i].stats if groups[i].has("stats") else to.stats
+		for k in targets.size():
+			var t: Array = targets[k]
+			if int(t[0]) != i or t[3] != null:
+				continue
+			if data.units.units.get(t[1], {}).get("wagon", false) == true:
+				wagons.append(k)
+			if g_stats.call(t[1]).family == "archers":
+				shooters.append(k)
+		if wagons.is_empty() or shooters.is_empty():
+			continue
+		var shield := 0
+		for k in shooters:
+			shield += int(targets[k][2])
+		var wall := 0
+		for k in wagons:
+			wall += int(targets[k][2])
+		for k in shooters:
+			weights[k] = 0.0
+		for k in wagons:
+			weights[k] = float(targets[k][2]) + (float(shield) * float(targets[k][2])) / float(wall)
 	# Attack is a range: each unit type strikes this round with its own roll.
 	var rolled: Array = []
 	for striker in strikers:
@@ -155,7 +182,11 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 			if int(striker.units[unit]) > 0:
 				rolls[unit] = 1.0 + float(battle.statSpread) * (rng.next() * 2.0 - 1.0)
 		rolled.append(rolls)
-	for t in targets:
+	for k in targets.size():
+		var t: Array = targets[k]
+		# Behind a wall of wagons: nothing reaches them.
+		if float(weights[k]) == 0.0:
+			continue
 		var group: Dictionary = groups[t[0]]
 		var target: String = t[1]
 		var target_count: int = t[2]
@@ -184,7 +215,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 				damage += float(c.attack) * float(from_stance.attack) * matchup * from_weak
 		# What still burns from earlier rounds, spread like any blow.
 		damage += float(plight.burning)
-		var share := float(target_count) / target_total
+		var share := float(weights[k]) / target_total
 		burn_hit += burning * share
 		# Defense is a range too: this target's roll for the round.
 		var guard := 1.0 + float(battle.statSpread) * (rng.next() * 2.0 - 1.0)

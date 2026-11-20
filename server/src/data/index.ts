@@ -800,7 +800,6 @@ const raidsFileSchema = z.object({
   enemy: z.object({ baseUnits: z.number().positive(), growthPerStage: z.number().min(1), growthPerWave: z.number().min(1) }),
   stronghold: z.object({ sizeFactor: z.number().positive(), walls: z.number().nonnegative(), stance: z.enum(STANCES) }),
   loot: z.object({ perKill: resourceAmounts, stronghold: resourceAmounts }),
-  carry: z.object({ perSoldier: z.number().nonnegative(), perWagon: z.number().nonnegative() }),
   hatred: z.object({ perBattle: z.number().nonnegative(), stronghold: z.number().nonnegative() }),
   strike: z.object({ name: z.string(), gatherHours: z.number().positive(), minShare: z.number().min(0).max(1), hatred: z.number().nonnegative() }),
   north: z.object({

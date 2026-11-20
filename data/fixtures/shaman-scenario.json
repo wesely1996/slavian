@@ -3387,7 +3387,7 @@
       },
       "queue": [],
       "garrison": {
-       "shaman": 3
+       "shaman": 4
       },
       "away": {},
       "stance": "balanced",
@@ -3407,13 +3407,13 @@
        "amounts": {
         "iron": 239.5,
         "wood": 242.5,
-        "grain": 160.73333333333332,
+        "grain": 181.73333333333332,
         "stone": 251
        },
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 71.9,
+        "grain": 69.2,
         "stone": 60
        },
        "capacity": {
@@ -3608,7 +3608,7 @@
       "r": 5,
       "setup": {},
       "status": "repelled",
-      "round": 3,
+      "round": 1,
       "attackerStance": "defensive",
       "attackerInitial": {
        "zealot": 3,
@@ -3626,31 +3626,9 @@
         "at": "2026-06-01T12:03:36.000Z",
         "round": 1,
         "attackerLeft": 4,
-        "defenderLeft": 3,
+        "defenderLeft": 0,
         "attackerLosses": {},
-        "defenderLosses": {
-         "shaman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T12:03:36.000Z",
-        "round": 2,
-        "attackerLeft": 4,
-        "defenderLeft": 2,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "shaman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T12:03:36.000Z",
-        "round": 3,
-        "attackerLeft": 4,
-        "defenderLeft": 1,
-        "attackerLosses": {},
-        "defenderLosses": {
-         "shaman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -3737,7 +3715,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "shaman": 3
+       "shaman": 4
       },
       "status": "done",
       "battleId": null,

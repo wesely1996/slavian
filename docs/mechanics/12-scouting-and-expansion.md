@@ -14,7 +14,7 @@ The Scout Lodge trains three kinds of scout:
 
 - **Sending them.** Scouts of every kind can go together, at the pace of the
   slowest. A mission takes up to 20.
-- **Never fighting.** Scouts stand aside in battle.
+- **Never fighting.** Scouts are support units: they stand aside in battle and aren't struck.
 
 ## Scouting a horde
 

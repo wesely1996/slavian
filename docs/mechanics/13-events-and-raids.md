@@ -144,8 +144,8 @@ enemy's lands**:
 - **Loot per kill:** 14 wood, 10 stone, 16 grain and 8 iron per enemy killed
   (×the front's greed).
 - **The stronghold** adds 500 / 400 / 500 / 300 when sacked.
-- **Carrying.** All of it as far as the army can carry: 30 per fighting unit,
-  400 per military caravan.
+- **Carrying.** All of it as far as the army can carry: the sum of its units'
+  `carry` (a Raider 120, a Military Caravan 400, a large one 600).
 
 **Raiding the North** brings only 30% of that in resources, but every battle
 won has a chance at a rare find:

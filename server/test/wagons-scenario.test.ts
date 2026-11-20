@@ -43,7 +43,8 @@ scenario('wagons-scenario.json', START, async ({ started, now, play }) => {
 
   // The caravans' army holds a hex on the first horde's road (as forecast),
   // with grain from the reserve and more in its wagons; it circles its
-  // wagons once it stands there, and only once.
+  // wagons once it stands there, and only once; its wagons fight as a wall
+  // before its archers.
   const forecast = before.waves[0].forecast;
   const road = (forecast?.path ?? []) as [number, number, number][];
   const onRoad = road.find(([q, r]) => {
@@ -51,7 +52,9 @@ scenario('wagons-scenario.json', START, async ({ started, now, play }) => {
     return d >= 1 && d <= 3 && passable(q, r);
   });
   const cell = onRoad ? { q: onRoad[0], r: onRoad[1] } : { q: near[0]!.q, r: near[0]!.r };
-  const ring = (await army({ orders: 'hold', target: cell, units: { spearman: 3, supply_wagon: 2 } })).body.army;
+  // Archers go with them: the ring stands as a wall before them.
+  await play({ set: { garrison: { archer: 4 } } });
+  const ring = (await army({ orders: 'hold', target: cell, units: { spearman: 3, archer: 4, supply_wagon: 2 } })).body.army;
   await play({ method: 'POST', path: `/v1/armies/${ring.id}/wagon-fort`, body: {} });
   await play({ advance: 5 * MINUTE });
   await play({ method: 'POST', path: `/v1/armies/${ring.id}/wagon-fort`, body: {} });

@@ -182,12 +182,28 @@ function kills(
   ];
   const targetTotal = targets.reduce((sum, t) => sum + t.n, 0);
   if (targetTotal === 0) return { losses: result, fallen, burnHit, poisons: false };
+  // Wagons in a ring (units.json wagon; only a wagon fort's fight) stand as a
+  // wall before their side's archers: the blows aimed at the archers fall on
+  // the wagons, each kind by its share of them, while any stand.
+  const weights = targets.map((t) => t.n);
+  for (const i of groups.keys()) {
+    const indexes = (pick: (t: (typeof targets)[number]) => boolean) => targets.flatMap((t, k) => (t.i === i && !t.champion && pick(t) ? [k] : []));
+    const wagons = indexes((t) => data.units.units[t.unit]?.wagon === true);
+    const shooters = indexes((t) => (groups[i]!.stats ?? to.stats)(t.unit).family === 'archers');
+    if (wagons.length === 0 || shooters.length === 0) continue;
+    const shield = shooters.reduce((sum, k) => sum + targets[k]!.n, 0);
+    const wall = wagons.reduce((sum, k) => sum + targets[k]!.n, 0);
+    for (const k of shooters) weights[k] = 0;
+    for (const k of wagons) weights[k] = targets[k]!.n + (shield * targets[k]!.n) / wall;
+  }
 
   // Attack is a range: each unit type strikes this round with its own roll.
   const rolled = strikers.map((striker) =>
     Object.fromEntries(Object.entries(striker.units).filter(([, count]) => count > 0).map(([unit]) => [unit, 1 + battle.statSpread * (rng() * 2 - 1)])),
   );
-  for (const { i, unit: target, n: targetCount, champion } of targets) {
+  for (const [k, { i, unit: target, n: targetCount, champion }] of targets.entries()) {
+    // Behind a wall of wagons: nothing reaches them.
+    if (weights[k] === 0) continue;
     const group = groups[i]!;
     const stats = champion ? championStats(champion) : (group.stats ?? to.stats)(target);
     let damage = 0;
@@ -208,7 +224,7 @@ function kills(
     }
     // What still burns from earlier rounds, spread like any blow.
     damage += plight.burning;
-    const share = targetCount / targetTotal;
+    const share = weights[k]! / targetTotal;
     burnHit += burning * share;
     // Defense is a range too: this target's roll for the round.
     const guard = 1 + battle.statSpread * (rng() * 2 - 1);
