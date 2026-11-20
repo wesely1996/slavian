@@ -149,6 +149,8 @@ A horde that **razes** a village leaves a **ruin** ([page 9](09-hordes-and-threa
 - **Stores** in the village are lost.
 - **Rebuilding** costs **40%** of everything that stood there and takes 6 game
   hours, after which the village returns as it was.
+- **Room for it.** Until it is rebuilt, a ruin's stores hold at least what
+  rebuilding it costs, however small its storehouse is now.
 - **What a ruin can still do.** It can't build or train. Armies, forts,
   roads, bridges and terraforming can still be sent from it.
 - **The refugee camp.** A player left with nothing but ruins gets one on the

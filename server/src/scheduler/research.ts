@@ -1,3 +1,4 @@
+import { ruinStorage } from '../sim/horde.js';
 import { smithingBonuses } from '../sim/smithing.js';
 import { findBridge } from '../db/bridges.js';
 import { listShipyards } from '../db/shipyards.js';
@@ -52,7 +53,10 @@ export async function refreshBonuses(client: DbClient, data: GameData, world: Wo
     const bonuses = await playerBonuses(client, data, world.id, accountId);
     for (const village of await listVillages(client, world.id)) {
       if (village.ownerAccountId !== accountId) continue;
-      await saveVillageState(client, village.id, withBonuses(data, village.state, bonuses, at, world.speed));
+      const state = withBonuses(data, village.state, bonuses, at, world.speed);
+      // A ruin's stores still hold what rebuilding it costs.
+      const ledger = village.ruin ? { ...state.ledger, capacity: ruinStorage(data, state.ledger.capacity, village.ruin.plots) } : state.ledger;
+      await saveVillageState(client, village.id, { ...state, ledger });
       await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
     }
   }

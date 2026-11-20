@@ -90,6 +90,13 @@ export function rebuildCost(data: GameData, plots: Readonly<Record<string, Plot>
   return mapResources((kind) => Math.round(sum[kind] * data.horde.ruins.rebuildCostShare));
 }
 
+// A ruin's stores hold at least what rebuilding it costs, until it is
+// rebuilt: `capacity` raised to the rebuild cost of what stood (`plots`).
+export function ruinStorage(data: GameData, capacity: Resources, plots: Readonly<Record<string, Plot>>): Resources {
+  const cost = rebuildCost(data, plots);
+  return mapResources((kind) => Math.max(capacity[kind], cost[kind]));
+}
+
 export function rebuildMs(data: GameData, worldSpeed: number): number {
   return (data.horde.ruins.rebuildHours * MS_PER_HOUR) / worldSpeed;
 }
