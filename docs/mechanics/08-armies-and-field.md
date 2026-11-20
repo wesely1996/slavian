@@ -37,6 +37,7 @@ its errand is finished.
 | Clear | Storms a bandit camp or lair ([page 9](09-hordes-and-threats.md#camps-and-lairs)) |
 | Explore | Searches an ancient site, fighting its guardians first ([page 12](12-scouting-and-expansion.md#ancient-sites)) |
 | Raid / Strike | Marches beyond the map's edge ([page 13](13-events-and-raids.md#raids-beyond-the-edge)) |
+| Attack / Raze | PvP worlds: storms another player's village to plunder or burn it ([page 15](15-player-vs-player.md)) |
 
 More things you can do with an army:
 

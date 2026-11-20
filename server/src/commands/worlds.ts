@@ -66,7 +66,7 @@ export function normalizeInviteCode(code: string): string {
 
 export async function createWorldCommand(
   db: Db,
-  input: { account: Account; name: string; maxPlayers: number; speed: number; difficulty?: Difficulty },
+  input: { account: Account; name: string; maxPlayers: number; speed: number; difficulty?: Difficulty; pvp?: boolean },
 ): Promise<World> {
   for (let attempt = 0; ; attempt++) {
     try {
@@ -79,6 +79,7 @@ export async function createWorldCommand(
           maxPlayers: input.maxPlayers,
           inviteCode: newInviteCode(),
           difficulty: input.difficulty ?? 'baron',
+          pvp: input.pvp ?? false,
         });
         await addMember(client, world.id, input.account.id);
         return world;

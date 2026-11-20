@@ -601,11 +601,16 @@ func _friends_form() -> void:
 	row.add_child(_form_options("difficulty", GroupText.DIFFICULTY_LABELS.map(tr), 0))
 	row.add_child(UI.info(GroupText.difficulty_info(LocalData.load_data())))
 	_content.add_child(row)
+	# Player against player (armies.json pvp).
+	var pvp_row := UI.hbox()
+	pvp_row.add_child(_form_options("pvp", [tr("Co-op: no attacks between players"), tr("PvP: players may attack each other")], 0))
+	pvp_row.add_child(UI.info(tr("In a PvP world any player may send an army to plunder or raze another player's village. A village is safe for %d game hours after it is founded. Armies help only their own player's villages; caravans still go anywhere.") % int(LocalData.load_data().armies.pvp.protectionHours)))
+	_content.add_child(pvp_row)
 	if not await _choices_with_data():
 		return
 	var create := UI.primary(tr("Create world"), func() -> void:
 		var typed := world_name.text.strip_edges()
-		_create_world(typed if typed != "" else world_name.placeholder_text, int(_form.get("players", 1)) + 1, SPEEDS[int(_form.get("speed", 0))], GroupText.DIFFICULTIES[int(_form.get("difficulty", 0))]))
+		_create_world(typed if typed != "" else world_name.placeholder_text, int(_form.get("players", 1)) + 1, SPEEDS[int(_form.get("speed", 0))], GroupText.DIFFICULTIES[int(_form.get("difficulty", 0))], int(_form.get("pvp", 0)) == 1))
 	_needs_choices(create)
 	_content.add_child(create)
 
@@ -651,8 +656,8 @@ func _login(display_name: String) -> void:
 	_render(_page)
 
 
-func _create_world(world_name: String, max_players: int, speed: int, difficulty := "baron") -> void:
-	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty})
+func _create_world(world_name: String, max_players: int, speed: int, difficulty := "baron", pvp := false) -> void:
+	var response := await Api.post_json("/v1/worlds", {"name": world_name, "maxPlayers": max_players, "speed": speed, "difficulty": difficulty, "pvp": pvp})
 	_handle_world_response(await _with_choices(response))
 
 

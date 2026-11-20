@@ -231,7 +231,7 @@ function ruinedState(data: GameData, state: VillageState, at: Date, worldSpeed: 
   return { ...next, ledger: withRates(next.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
 }
 
-async function ruinVillage(client: DbClient, data: GameData, world: World, village: Village, at: Date): Promise<void> {
+export async function ruinVillage(client: DbClient, data: GameData, world: World, village: Village, at: Date): Promise<void> {
   if (village.ruin) return;
   if (researchPerHour(data, village.state.plots, world.speed) > 0 && village.ownerAccountId !== null) {
     await settleResearchPoints(client, data, world, village.ownerAccountId, at);

@@ -185,6 +185,8 @@ var _army_units: Dictionary[String, int] = {}
 var _army_join := false
 
 var _army_harass := false
+## PvP: an attack on a rival's village razes it (else plunders it).
+var _army_raze := false
 
 ## The village whose new army waits for a hex to march to (0: none).
 var _army_sending := 0

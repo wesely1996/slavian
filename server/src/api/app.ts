@@ -134,6 +134,8 @@ const createWorldBody = z.object({
   maxPlayers: z.number().int().min(1).max(6).default(6),
   speed: z.number().min(1).max(100).default(1),
   difficulty: z.enum(DIFFICULTIES).default('baron'),
+  // Players may attack each other's villages (armies.json pvp).
+  pvp: z.boolean().default(false),
 });
 // A run under way can be joined too: the clan and hero chosen go with it.
 const joinWorldBody = z.object({ inviteCode: z.string().min(1).max(16), clan: z.string().max(32).optional(), hero: z.string().max(32).optional() });
@@ -236,7 +238,7 @@ const armyBody = z.object({
   targetVillageId: z.number().int().positive().nullable().default(null),
   target: hexBody.optional(),
   units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)),
-  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore', 'garrison']),
+  orders: z.enum(['support', 'reinforce', 'harass', 'hold', 'clear', 'explore', 'garrison', 'attack', 'raze']),
   withHero: z.boolean().optional(),
   // One of the caller's generals at home in the village leads it.
   generalId: z.number().int().positive().optional(),

@@ -89,6 +89,8 @@ stateDiagram-v2
   ongoing --> raided: the horde wins (then raid or raze)
   ongoing --> cleared: camp, guardians or raid enemy beaten
   ongoing --> repelled: the attacking army is beaten there
+  [*] --> raided: a player's attack wins (PvP, fought at once)
+  [*] --> defended: a player's attack is beaten off (PvP)
   defended --> [*]
   raided --> [*]
   cleared --> [*]
@@ -107,6 +109,7 @@ stateDiagram-v2
   marching --> engaged: army_arrive into a battle under way
   marching --> marching: move (turned on the road), shelter after its home is razed
   marching --> done: army_arrive into its own settlement (joins the garrison)
+  marching --> returning: army_arrive attacking a rival's village (PvP: fought at once, then home)
   stationed --> engaged: a battle starts there, or it answers one within 3 hexes
   stationed --> marching: move, reinforce
   stationed --> returning: recall, come home when done
@@ -317,7 +320,7 @@ A village has no `status` column. Its state follows from `ruin` and
 stateDiagram-v2
   [*] --> standing: start of the run, settlers found it
   [*] --> refuge: last village razed (refugee camp)
-  standing --> ruin: wave_raze
+  standing --> ruin: wave_raze, or razed by a player (PvP)
   ruin --> rebuilding: rebuild (paid)
   rebuilding --> standing: village_rebuilt
 ```

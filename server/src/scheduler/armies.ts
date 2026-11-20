@@ -43,6 +43,8 @@ import { interceptAt } from './field.js';
 import { deliverLoot, stormCamp } from './camps.js';
 import { arriveAtSite } from './sites.js';
 import { reachEdge } from './raids.js';
+import { attackVillage } from './pvp.js';
+import { checkAttack } from '../sim/pvp.js';
 import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
 import { fortAt, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
@@ -110,6 +112,10 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
     const target = await loadVillage(client, input.targetVillageId).catch(() => null);
     if (!target || target.worldId !== world.id) throw new RuleError('No such village in this world');
     if (input.orders === 'garrison' && target.ownerAccountId !== home.ownerAccountId) throw new RuleError('Troops only join the garrisons of your own villages');
+    // Player against player (armies.json pvp): attacks on rivals' villages,
+    // and no help for them.
+    if (input.orders === 'attack' || input.orders === 'raze') checkAttack(data, world, home, target, input.at);
+    else if (world.pvp && target.ownerAccountId !== home.ownerAccountId) throw new RuleError('In a PvP world your armies help only your own villages');
     // Harassers strike a horde, never a friendly village: only where one
     // fights or marches on it.
     if (input.orders === 'harass') {
@@ -236,6 +242,8 @@ export async function moveArmy(
     if (!village || village.worldId !== world.id) throw new RuleError('No such village in this world');
     dest = hex(village.q, village.r);
     orders = to.orders ?? (village.ownerAccountId === army.ownerAccountId && to.join !== false ? 'garrison' : 'support');
+    if (orders === 'attack' || orders === 'raze') checkAttack(data, world, { ownerAccountId: army.ownerAccountId }, village, at);
+    else if (world.pvp && village.ownerAccountId !== army.ownerAccountId) throw new RuleError('In a PvP world your armies help only your own villages');
     targetVillageId = village.id;
   } else {
     if (!to.hex) throw new RuleError('Say where they should go');
@@ -864,6 +872,11 @@ export const armyHandlers: HandlerRegistry = {
     }
     if (army.orders === 'raid') {
       await reachEdge(client, data, world, army, event.dueAt);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+      return;
+    }
+    if (army.orders === 'attack' || army.orders === 'raze') {
+      await attackVillage(client, data, world, army, event.dueAt);
       await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
     }

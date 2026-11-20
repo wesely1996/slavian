@@ -35,6 +35,8 @@ export interface World {
   endedAt: Date | null;
   // Each front's hatred (horde.json hatred), taken by its next horde to set out.
   hatred: Partial<Record<Front, number>>;
+  // Players may attack each other's villages (armies.json pvp).
+  pvp: boolean;
 }
 
 export function quietWindow(world: World): QuietWindow | null {
@@ -50,19 +52,20 @@ export interface NewWorld {
   maxPlayers?: number;
   inviteCode?: string;
   difficulty?: Difficulty;
+  pvp?: boolean;
 }
 
 const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", host_account_id AS "hostAccountId",
   max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity,
   (SELECT COALESCE(sum(m.embers), 0) FROM world_members m WHERE m.world_id = worlds.id AND m.left_at IS NULL)::int AS embers,
   difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
-  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred`;
+  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred, pvp`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
-    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code, difficulty)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${COLUMNS}`,
-    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'baron'],
+    `INSERT INTO worlds (name, seed, speed, host_account_id, max_players, invite_code, difficulty, pvp)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ${COLUMNS}`,
+    [world.name, world.seed, world.speed, world.hostAccountId ?? null, world.maxPlayers ?? 6, world.inviteCode ?? null, world.difficulty ?? 'baron', world.pvp ?? false],
   );
   return rows[0]!;
 }
