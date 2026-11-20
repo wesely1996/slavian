@@ -39,7 +39,8 @@ func _merchant_tab(village: Dictionary) -> void:
 		_panel_body.add_child(UI.label(tr("Needs a Caravan Yard"), UI.SMALL_SIZE, UI.MUTED))
 		return
 	# Where they go: anywhere standing but here.
-	var target_gone: bool = _merchant_target.get("kind") == "village" and (int(_merchant_target.id) == village_id or _caravan_limits(_merchant_target).is_empty())
+	var target_gone: bool = _merchant_target.get("kind") == "village" and (int(_merchant_target.id) == village_id or _caravan_limits(_merchant_target).is_empty()
+		or Game.villages.get(int(_merchant_target.id), {}).get("ruin") != null)
 	if target_gone:
 		_merchant_target = {"kind": "vault"}
 	_panel_body.add_child(UI.label(tr("To %s") % CaravanText.target_name(_merchant_target)))
@@ -372,7 +373,8 @@ func _reroute_caravan(caravan_id: int, body: Dictionary) -> void:
 
 ## Where a caravan from `from_village_id` goes when `cell` is tapped: the
 ## vault (the Holy City), an open shipyard, a standing fort or supply point,
-## or a village (an outpost's village); {} for anywhere else.
+## or a village (an outpost's village), a ruin too (to rebuild it); {} for
+## anywhere else.
 func _caravan_target_at(cell: Vector2i, from_village_id: int) -> Dictionary:
 	if Game.terrain.get(cell) == "holy_city":
 		return {"kind": "vault"}
@@ -386,7 +388,7 @@ func _caravan_target_at(cell: Vector2i, from_village_id: int) -> Dictionary:
 	var village := Game.village_at(cell)
 	if village.is_empty():
 		village = Game.outpost_owner(cell)
-	if not village.is_empty() and village.get("ruin") == null and int(village.id) != from_village_id:
+	if not village.is_empty() and int(village.id) != from_village_id:
 		return {"kind": "village", "id": int(village.id)}
 	return {}
 
@@ -399,7 +401,7 @@ func _caravan_limits(target: Dictionary) -> Dictionary:
 			return {"wood": null, "stone": null, "grain": null, "iron": null}
 		"village":
 			var village: Dictionary = Game.villages.get(int(target.id), {})
-			return {} if village.is_empty() or village.get("ruin") != null else {"wood": null, "stone": null, "grain": null, "iron": null}
+			return {} if village.is_empty() else {"wood": null, "stone": null, "grain": null, "iron": null}
 		"fort":
 			var fort := Game.fort_at_id(int(target.id))
 			return {} if fort.is_empty() or fort.get("status") != "standing" else {"grain": null}
