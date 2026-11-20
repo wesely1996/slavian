@@ -1,6 +1,6 @@
 import { listTerraforms } from './terraforms.js';
 import type { RiverEdge } from '../sim/mapgen.js';
-import { standingRoads } from './roads.js';
+import { damagedRoads, standingRoads } from './roads.js';
 import { edgeKey, landOf, riverLanes, type Land } from '../sim/land.js';
 import { listShipyards } from './shipyards.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
@@ -98,7 +98,8 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   const rivers = await listRiverEdges(client, worldId);
   const blocked = rivers.filter((e) => e.crossing !== 'standing').map((e) => edgeKey(e.a, e.b));
   const roads = await standingRoads(client, worldId);
+  const damaged = await damagedRoads(client, worldId);
   const lanes = (await listShipyards(client, worldId)).filter((s) => s.kind === 'boat' && s.status === 'done').flatMap((s) => riverLanes(rivers, s.edge, terrain));
   const burning = (await listTerraforms(client, worldId)).filter((t) => t.action === 'burn').map((t) => hexKey(t.cell));
-  return landOf(terrain, blocked, roads, lanes, burning);
+  return landOf(terrain, blocked, roads, lanes, burning, damaged);
 }

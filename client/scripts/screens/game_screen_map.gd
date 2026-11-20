@@ -649,6 +649,7 @@ func _road_section(cell: Vector2i) -> void:
 	var home := _my_village()
 	var roads := RiverText.roads_at(Game.roads, cell)
 	var levels := RiverText.road_levels_at(Game.roads, cell)
+	var damaged := RiverText.damaged_roads_at(Game.roads, cell)
 	var road_levels: Array = Game.data.field.road.levels
 	var names := ["E", "NE", "NW", "W", "SW", "SE"]  # tr
 	var open: Array[int] = []
@@ -659,9 +660,11 @@ func _road_section(cell: Vector2i) -> void:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
 		var buildable: bool = not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other) == ""
 		if roads.has(other):
-			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being improved)")}.get(roads[other], "")
+			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being improved)"), "repairing": tr(" (being repaired)")}.get(roads[other], "")
+			if damaged.has(other) and roads[other] != "repairing":
+				state += tr(" (damaged)")
 			built.append("%s%s%s" % [tr(names[i]), " (%s)" % RiverText.road_tier_name(int(levels[other])) if roads[other] != "building" else "", state])
-			if buildable and roads[other] == "standing" and int(levels[other]) < road_levels.size():
+			if buildable and roads[other] == "standing" and (damaged.has(other) or int(levels[other]) < road_levels.size()):
 				better.append(i)
 		elif buildable:
 			open.append(i)
@@ -671,26 +674,34 @@ func _road_section(cell: Vector2i) -> void:
 		tr("Roads speed the march for everyone on them, the human hordes too, but the beasts of the North keep off them. A dirt track, a stone road and a paved road are each faster; the march takes %s of the time.") % RiverText.road_speeds(Game.data)))
 	if not built.is_empty():
 		_panel_body.add_child(UI.label(tr("Roads run %s.") % ", ".join(built), UI.SMALL_SIZE))
+	if not damaged.is_empty():
+		_panel_body.add_child(UI.with_info(UI.label(tr("Fire damaged a road here"), UI.SMALL_SIZE, UI.MUTED),
+			tr("A damaged road saves only %d%% of the time it would, and adds only %d%% of its bonus to outposts, until it is repaired. Repairing costs %d%% of its level's price and time; it can't be improved before.") % [
+				roundi(float(Game.data.field.road.damage.effect) * 100.0), roundi(float(Game.data.field.road.damage.effect) * 100.0), roundi(float(Game.data.field.road.damage.repairShare) * 100.0)]))
 	var village_id := int(home.id) if not home.is_empty() else 0
 	for i in better:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
 		var next := int(levels[other]) + 1
-		var step := LocalLand.road_level_cost(Game.data, next, RiverText.is_pass(Game.data, Game.terrain, cell, other))
+		var repair: bool = damaged.has(other)
+		var mountain_pass := RiverText.is_pass(Game.data, Game.terrain, cell, other)
+		var step := LocalLand.road_repair_cost(Game.data, int(levels[other]), mountain_pass) if repair else LocalLand.road_level_cost(Game.data, next, mountain_pass)
 		var row := UI.hbox()
 		var line := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(line)
-		var improve := UI.button(tr("Improve"), func() -> void: _build_road(village_id, cell, other))
+		var improve := UI.button(tr("Repair") if repair else tr("Improve"), func() -> void: _build_road(village_id, cell, other))
 		improve.custom_minimum_size.x = 130
 		row.add_child(improve)
 		_panel_body.add_child(row)
 		var direction := tr(names[i])
-		var tier := RiverText.road_tier_name(next).to_lower()
+		var tier := RiverText.road_tier_name(int(levels[other]) if repair else next).to_lower()
 		var step_time := TimeUtil.format_duration(float(step.buildSeconds) / float(Game.world.speed))
 		_tick(line, func() -> String:
 			var current: Dictionary = Game.villages.get(village_id, home)
 			var have := Ledger.amounts_at(current.resources, Game.server_now())
 			improve.disabled = not Ledger.can_afford(have, step.cost)
+			if repair:
+				return tr("Repair the %s %s: %s · %s") % [tier, direction, UI.costs(step.cost, 30, have), step_time]
 			return tr("%s to a %s: %s · %s") % [direction, tier, UI.costs(step.cost, 30, have), step_time])
 	if open.is_empty():
 		return

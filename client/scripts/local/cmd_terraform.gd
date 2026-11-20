@@ -56,9 +56,27 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	server.schedule(world, work.completesAt, "terraform_done", {"q": cell.x, "r": cell.y})
 	if def.has("fire"):
 		burn_camps(server, world, cell, at)
+		damage_roads(server, world, cell, at, [])
 		LocalDetours.avoid_fire(server, world, cell, int(work.completesAt), at)
 		_spread(server, world, work, at)
 	return work
+
+
+## scheduler/terraform.ts damageRoads: every road into a burning hex is
+## damaged (field.json road.damage); a repair under way there is undone.
+## Roads still being built are spared.
+static func damage_roads(server: LocalServer, world: Dictionary, cell: Vector2i, at: int, changed: Array) -> void:
+	var touched := false
+	for road in world.roads:
+		if road.status == "building" or (Vector2i(road.a) != cell and Vector2i(road.b) != cell):
+			continue
+		touched = true
+		if road.status == "repairing":
+			road.status = "standing"
+			road.completesAt = null
+		road.damaged = true
+	if touched:
+		LocalArmies.relink_outposts(server, world, at, changed)
 
 
 ## scheduler/terraform.ts burnCamps: a camp on a burning hex is gone; a
@@ -187,6 +205,7 @@ static func on_fire_spread(server: LocalServer, world: Dictionary, event: Dictio
 		LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "Fire burned your stronghold at ({q}, {r})",
 			"body": "Nothing is left of it, nor of its grain.", "vars": {"q": cell.x, "r": cell.y}}, at)
 	burn_camps(server, world, cell, at)
+	damage_roads(server, world, cell, at, changed)
 	world.merge({"terraforms": []})
 	var work := {"cell": cell, "action": String(p.action), "villageId": p.villageId, "completesAt": LocalTime.ms(at + float(def.hours) * 3600000.0 / world.speed), "generation": int(p.generation)}
 	world.terraforms.append(work)

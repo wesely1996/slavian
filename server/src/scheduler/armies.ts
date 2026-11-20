@@ -585,9 +585,8 @@ export async function endArmy(client: DbClient, data: GameData, world: World, ar
 }
 
 // Where an army goes home to from `from`: its home while it stands; with
-// its home in ruins, the nearest standing village of its owner's (a refugee
-// camp only when no other stands and no ally's does), else the nearest of
-// an ally's (`own` false: it goes there to support it). Ties go to the
+// its home in ruins, the nearest standing village of its owner's (its
+// refugee camp only when no other stands), else the nearest of an ally's (`own` false: it goes there to support it). Ties go to the
 // lowest id. Null: nowhere stands at all.
 export async function shelterOf(client: DbClient, army: Army, from: Hex): Promise<{ village: Village; own: boolean } | null> {
   const home = await loadVillage(client, army.homeVillageId).catch(() => null);
@@ -596,7 +595,7 @@ export async function shelterOf(client: DbClient, army: Army, from: Hex): Promis
 }
 
 // The nearest standing village of `owner`'s that isn't a refugee camp, else
-// the nearest of an ally's (`own` false), else the owner's refugee camp.
+// the owner's refugee camp, else the nearest of an ally's (`own` false).
 export function pickShelter<V extends { id: number; q: number; r: number; ownerAccountId: number | null; ruin?: unknown; refuge?: boolean }>(
   villages: readonly V[],
   owner: number | null,
@@ -605,12 +604,10 @@ export function pickShelter<V extends { id: number; q: number; r: number; ownerA
   const standing = villages.filter((v) => !v.ruin && v.ownerAccountId !== null);
   const nearest = (list: V[]) => [...list].sort((a, b) => hexDistance(from, hex(a.q, a.r)) - hexDistance(from, hex(b.q, b.r)) || a.id - b.id)[0];
   const own = standing.filter((v) => v.ownerAccountId === owner);
-  const village = nearest(own.filter((v) => !v.refuge));
+  const village = nearest(own.filter((v) => !v.refuge)) ?? nearest(own);
   if (village) return { village, own: true };
   const ally = nearest(standing.filter((v) => v.ownerAccountId !== owner && !v.refuge));
-  if (ally) return { village: ally, own: false };
-  const refuge = nearest(own);
-  return refuge ? { village: refuge, own: true } : null;
+  return ally ? { village: ally, own: false } : null;
 }
 
 // Its home razed, an army on its way there turns for its shelter: its

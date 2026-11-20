@@ -4,7 +4,7 @@ import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinS
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
-import { standingRoads } from '../db/roads.js';
+import { damagedRoads, standingRoads } from '../db/roads.js';
 import { roadLink } from '../sim/land.js';
 import type { OnboardingStep } from '../data/index.js';
 import { onboardingStep } from '../scheduler/onboarding.js';
@@ -352,7 +352,7 @@ export async function claimOutpostCommand(
       for (const plot of outpostPlots(other.state.plots)) taken.add(hexKey(outpostHex(plot)!));
     }
     const home = hex(village.q, village.r);
-    const site = { cell, terrain, home, taken, road: roadLink(deps.data, await standingRoads(client, world.id), cell, home) };
+    const site = { cell, terrain, home, taken, road: roadLink(deps.data, await standingRoads(client, world.id), cell, home, await damagedRoads(client, world.id)) };
     const { state, queued } = claimOutpost(deps.data, village.state, site, input.now, world.speed);
     const payload: BuildCompletePayload = {
       villageId: village.id,

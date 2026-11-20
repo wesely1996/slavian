@@ -857,7 +857,7 @@ func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, no
 			taken[LocalLand.key(LocalVillage.outpost_hex(plot))] = true
 	var home := Vector2i(village.q, village.r)
 	var site := {"cell": cell, "terrain": terrain, "home": home, "taken": taken,
-		"road": LocalLand.road_link(data, LocalHordes.land_of(world).roads, cell, home)}
+		"road": LocalLand.road_link(data, LocalHordes.land_of(world).roads, cell, home, LocalHordes.land_of(world).damaged)}
 	var result := LocalVillage.claim_outpost(data, village.state, site, now, world.speed)
 	if result.has("state"):
 		var q: Dictionary = result.queued
@@ -1357,7 +1357,10 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 	var roads: Array = []
 	for e in world.roads:
 		var ab := _ordered(e.a, e.b)
-		roads.append([ab[0].x, ab[0].y, ab[1].x, ab[1].y, e.status, int(e.get("level", 1))])
+		var row: Array = [ab[0].x, ab[0].y, ab[1].x, ab[1].y, e.status, int(e.get("level", 1))]
+		if e.get("damaged", false):
+			row.append(true)
+		roads.append(row)
 	roads.sort_custom(by_ends)
 	return {
 		"id": world.id, "name": world.name, "status": world.status, "inviteCode": null, "speed": world.speed,

@@ -5,7 +5,7 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to its
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
-import { canCross, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
+import { canCross, edgeKey, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
@@ -220,7 +220,7 @@ export function routeFrom(
   const roads = input.front !== 'north';
   const stepCost = (from: Hex, to: Hex): number | null => {
     const cost = canCross(terrain, from, to) ? moveCost(to) : null;
-    return cost !== null && roads ? cost * roadFactor(data, roadLevel(terrain, from, to)) : cost;
+    return cost !== null && roads ? cost * roadFactor(data, roadLevel(terrain, from, to), !!terrain.damaged?.has(edgeKey(from, to))) : cost;
   };
   const searchCost = (from: Hex, to: Hex): number | null => {
     const cost = stepCost(from, to);

@@ -2,7 +2,8 @@
 // woods planted round the village, then fires set in the way of what is on
 // the road: an army, a caravan, settlers and a horde each finish the hex
 // they are crossing and go round the fire to where they were going. No fire
-// can be set where an army stands.
+// can be set where an army stands. Last, a road into a wood that burns is
+// damaged, repaired, then improved.
 import { hex, hexDistance, type Hex } from '../src/sim/hex.js';
 import { MINUTE, scenario } from './scenario.js';
 
@@ -107,4 +108,25 @@ scenario('fire-scenario.json', START, async ({ started, play }) => {
   }
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
+
+  // A road into a wood that then burns is damaged: half as good until it
+  // is repaired (for half its level's price), and it can't be improved
+  // before. A fire reaching it while it is repaired undoes the work.
+  const roadside = ring.find((c) => hexDistance(c, home) === 1 && !burnt.has(`${c.q},${c.r}`) && `${c.q},${c.r}` !== `${guard.q},${guard.r}`);
+  if (roadside) {
+    const road = () => play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: roadside.q, r: roadside.r } } });
+    await play({ set: { amounts: { wood: 5000, stone: 5000, grain: 5000, iron: 5000 } } });
+    await road();
+    await play({ advance: 5 * MINUTE });
+    await work(roadside, 'burn');
+    burnt.add(`${roadside.q},${roadside.r}`);
+    await play({ method: 'GET', path: world });
+    await road();
+    await road();
+    await play({ advance: 5 * MINUTE });
+    await play({ method: 'GET', path: world });
+    await road();
+    await play({ advance: 5 * MINUTE });
+    await play({ method: 'GET', path: world });
+  }
 }, 30_000);

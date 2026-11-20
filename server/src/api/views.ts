@@ -713,7 +713,7 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
           rivers: (await listRiverEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.crossing, e.size]),
           // [aq, ar, bq, br, status, level]: roads ('building', 'standing',
           // or 'upgrading': standing at `level` while improved to the next).
-          roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level]),
+          roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level, ...(e.damaged ? [true] : [])]),
           // [q, r, action, villageId, completesAt]: land being reshaped (field.json terraform).
           terraforms: (await listTerraforms(client, world.id)).map((t) => [t.cell.q, t.cell.r, t.action, t.villageId, t.completesAt.toISOString()]),
         };

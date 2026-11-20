@@ -839,8 +839,8 @@ static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictio
 
 
 ## Where an army goes home to from `from`: its home while it stands; with its
-## home in ruins, the nearest standing village of its owner's (a refugee camp
-## only when no other stands and no ally's does), else the nearest of an
+## home in ruins, the nearest standing village of its owner's (its refugee
+## camp only when no other stands), else the nearest of an
 ## ally's (`own` false: it goes there to support it). Ties go to the lowest
 ## id. Empty: nowhere stands at all.
 static func shelter_of(server: LocalServer, world: Dictionary, army: Dictionary, from: Vector2i) -> Dictionary:
@@ -862,13 +862,12 @@ static func shelter_of(server: LocalServer, world: Dictionary, army: Dictionary,
 	var standing: Array = world.villages.filter(func(v: Dictionary) -> bool: return v.ruin == null and v.ownerAccountId != null)
 	var own: Array = standing.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == owner)
 	var village: Dictionary = nearest.call(own.filter(func(v: Dictionary) -> bool: return not v.get("refuge", false)))
+	if village.is_empty():
+		village = nearest.call(own)
 	if not village.is_empty():
 		return {"village": village, "own": true}
 	var ally: Dictionary = nearest.call(standing.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) != owner and not v.get("refuge", false)))
-	if not ally.is_empty():
-		return {"village": ally, "own": false}
-	var refuge: Dictionary = nearest.call(own)
-	return {} if refuge.is_empty() else {"village": refuge, "own": true}
+	return {} if ally.is_empty() else {"village": ally, "own": false}
 
 
 ## Its home razed, an army on its way there turns for its shelter: its
@@ -1676,9 +1675,13 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 		return LocalVillage.rule("A road is being built there")
 	if existing.get("status") == "upgrading":
 		return LocalVillage.rule("That road is being improved")
-	if not existing.is_empty() and int(existing.level) >= rules.levels.size():
+	if existing.get("status") == "repairing":
+		return LocalVillage.rule("That road is being repaired")
+	# A damaged road is repaired (field.json road.damage) before anything else.
+	var repair: bool = existing.get("damaged", false)
+	if not existing.is_empty() and not repair and int(existing.level) >= rules.levels.size():
 		return LocalVillage.rule("That road is as good as it gets")
-	var level := LocalLand.road_level_cost(data, int(existing.level) + 1 if not existing.is_empty() else 1, mountain_pass)
+	var level := LocalLand.road_repair_cost(data, int(existing.level), mountain_pass) if repair else LocalLand.road_level_cost(data, int(existing.level) + 1 if not existing.is_empty() else 1, mountain_pass)
 	var ledger := LocalLedger.spend(village.state.ledger, at, level.cost)
 	if ledger.has("missing"):
 		return ledger
@@ -1690,7 +1693,7 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 		road = {"a": ends[0], "b": ends[1], "status": "building", "level": 1, "builtBy": village.id, "completesAt": completes_at}
 		world.roads.append(road)
 	else:
-		road.status = "upgrading"
+		road.status = "repairing" if repair else "upgrading"
 		road.builtBy = village.id
 		road.completesAt = completes_at
 	server.schedule(world, completes_at, "road_built", {"aq": a.x, "ar": a.y, "bq": b.x, "br": b.y})
@@ -1700,10 +1703,13 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 static func on_road_built(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
 	var road := _road_edge(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
-	if road.is_empty() or road.status == "standing":
+	if road.is_empty() or road.status == "standing" or road.completesAt == null or int(road.completesAt) != int(event.dueAt):
 		return
+	# Built, improved (a damaged road stays damaged), or repaired.
 	if road.status == "upgrading":
 		road.level = int(road.level) + 1
+	else:
+		road.erase("damaged")
 	road.status = "standing"
 	road.completesAt = null
 	# Outposts joined to their village by it gather more.
@@ -1713,12 +1719,14 @@ static func on_road_built(server: LocalServer, world: Dictionary, event: Diction
 
 ## scheduler/outposts.ts relinkOutposts: every outpost's road link anew.
 static func relink_outposts(server: LocalServer, world: Dictionary, at: int, changed: Array) -> void:
-	var roads: Dictionary = LocalHordes.land_of(world).roads
+	var land := LocalHordes.land_of(world)
+	var roads: Dictionary = land.roads
+	var damaged: Dictionary = land.damaged
 	for village in world.villages:
 		if LocalVillage.outpost_plots(village.state.plots).is_empty():
 			continue
 		var home := Vector2i(village.q, village.r)
-		var link := func(cell: Vector2i) -> float: return LocalLand.road_link(server.data, roads, cell, home)
+		var link := func(cell: Vector2i) -> float: return LocalLand.road_link(server.data, roads, cell, home, damaged)
 		var next := LocalVillage.with_road_links(server.data, village.state, link, at, world.speed)
 		if next == village.state:
 			continue

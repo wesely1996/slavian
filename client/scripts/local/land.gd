@@ -124,10 +124,26 @@ class _Heap:
 
 
 ## sim/land.ts roadFactor: the share of the terrain's move cost a road of
-## `level` costs (1: no road).
-static func road_factor(data: Dictionary, level: int) -> float:
+## `level` costs (1: no road); a damaged one saves only damage.effect of what
+## it would.
+static func road_factor(data: Dictionary, level: int, damaged := false) -> float:
 	var levels: Array = data.field.road.levels
-	return 1.0 if level <= 0 else float(levels[mini(level, levels.size()) - 1].factor)
+	if level <= 0:
+		return 1.0
+	var factor := float(levels[mini(level, levels.size()) - 1].factor)
+	return 1.0 - (1.0 - factor) * float(data.field.road.damage.effect) if damaged else factor
+
+
+## sim/land.ts roadRepairCost: what repairing a damaged road of `level`
+## costs and how long it takes (game seconds): damage.repairShare of
+## building that level.
+static func road_repair_cost(data: Dictionary, level: int, mountain_pass: bool) -> Dictionary:
+	var build := road_level_cost(data, level, mountain_pass)
+	var share := float(data.field.road.damage.repairShare)
+	var cost := {}
+	for kind in build.cost:
+		cost[kind] = float(roundi(float(build.cost[kind]) * share))
+	return {"cost": cost, "buildSeconds": float(build.buildSeconds) * share}
 
 
 ## sim/land.ts fastestRoad: the cheapest a step can be (the path search's
@@ -142,9 +158,11 @@ static func fastest_road(data: Dictionary) -> float:
 ## sim/land.ts roadLink: what a road link to the village adds to an
 ## outpost's yield (0: none): over the fewest road steps from `from` to `to`
 ## (of those, the best built), the average of each step's level
-## `outpostBonus`. `roads`: edge key -> level of each standing road.
-static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: Vector2i) -> float:
+## `outpostBonus`. `roads`: edge key -> level of each standing road; a
+## damaged one (`damaged`: edge key -> true) adds only damage.effect of it.
+static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: Vector2i, damaged := {}) -> float:
 	var levels: Array = data.field.road.levels
+	var effect := float(data.field.road.damage.effect)
 	var goal := key(to)
 	var best := {key(from): {"steps": 0, "sum": 0.0}}
 	var layer: Array = [from]
@@ -158,7 +176,7 @@ static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: V
 				if level <= 0:
 					continue
 				var k := key(n)
-				var sum := float(here.sum) + float(levels[mini(level, levels.size()) - 1].outpostBonus)
+				var sum := float(here.sum) + float(levels[mini(level, levels.size()) - 1].outpostBonus) * (effect if damaged.has(edge_key(cell, n)) else 1.0)
 				if not best.has(k):
 					best[k] = {"steps": steps, "sum": sum}
 					next.append(n)
@@ -262,7 +280,7 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, reli
 		var cost: float = 1.0 + (float(base) - 1.0) * (1.0 - relief) if not sailed and relief > 0.0 and float(base) > 1.0 else float(base)
 		if not roads:
 			return float(cost)
-		var road := road_factor(data, level)
+		var road := road_factor(data, level, land.get("damaged", {}).has(edge_key(from, to)))
 		return float(cost) * (minf(road, lane_factor(data)) if land.get("lanes", {}).has(edge_key(from, to)) else road)
 
 
