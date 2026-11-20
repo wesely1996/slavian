@@ -277,13 +277,19 @@ func _raid_tab(village: Dictionary) -> void:
 	_choice_rows(front_choices)
 	var max_depth := int(data.raids.maxDepth)
 	_raid_depth = clampi(_raid_depth, 1, max_depth)
+	# Hordes so far (the enemy grows with them): the latest that set out.
+	var waves_so_far := 0
+	for w in Game.waves:
+		if w.get("bandOf") == null and TimeUtil.parse_iso(String(w.spawnAt)) <= Game.server_now():
+			waves_so_far = maxi(waves_so_far, int(w.index) + 1)
 	_panel_body.add_child(UI.label(tr("How deep"), UI.SMALL_SIZE, UI.MUTED))
 	var depth_choices: Array = []
 	for depth in range(1, max_depth + 1):
 		var hate := roundi((float(data.raids.hatred.perBattle) * (depth + 1) + float(data.raids.hatred.stronghold)) * 100.0)
 		depth_choices.append({"text": tr_n("%d field", "%d fields", depth) % depth, "selected": _raid_depth == depth, "pick": func() -> void: _raid_depth = depth,
 			"info": tr("%d battles, the last at the stronghold's walls · about %s beyond the edge · up to +%d%% hatred if all are won") % [
-				depth + 1, TimeUtil.format_duration(RaidText.stage_hours(data, depth) * 3600.0 / float(Game.world.speed)), hate]})
+				depth + 1, TimeUtil.format_duration(RaidText.stage_hours(data, depth) * 3600.0 / float(Game.world.speed)), hate]
+				+ "\n" + tr("Loot if every battle is won: about %s") % _loot_words(_rounded(RaidText.loot_estimate(data, _raid_front, depth, waves_so_far)))})
 	_choice_rows(depth_choices)
 	_panel_body.add_child(UI.label(RaidText.plan(data, _raid_front, _raid_depth), UI.SMALL_SIZE, UI.ACCENT))
 	_panel_body.add_child(UI.label(RaidText.prize(_raid_front), UI.SMALL_SIZE, UI.MUTED))
@@ -302,6 +308,7 @@ func _raid_tab(village: Dictionary) -> void:
 	sums.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_panel_body.add_child(sums)
 	var depth_now := _raid_depth
+	var front_now := _raid_front
 	_tick(sums, func() -> String:
 		var picked := _picked_units(home_units)
 		if picked.is_empty():
@@ -311,10 +318,11 @@ func _raid_tab(village: Dictionary) -> void:
 		var spare := FieldRules.village_spare(data, current, float(Ledger.amounts_at(current.resources, Game.server_now()).grain))
 		var grain := minf(LocalSupply.full_supply(data, picked), spare)
 		var lasts := grain / eats if eats > 0.0 else INF
+		var expected := LocalLogistics.total(RaidText.loot_estimate(data, front_now, depth_now, waves_so_far))
 		return tr("Carries up to %d loot · grain for about %s · %s of battles beyond the edge, besides the march there and back") % [
 			RaidText.capacity(data, picked), TimeUtil.format_duration(lasts * 3600.0 / float(Game.world.speed)) if lasts < INF else tr("ever"),
-			TimeUtil.format_duration(RaidText.stage_hours(data, depth_now) * 3600.0 / float(Game.world.speed))])
-	var front_now := _raid_front
+			TimeUtil.format_duration(RaidText.stage_hours(data, depth_now) * 3600.0 / float(Game.world.speed))] \
+			+ "\n" + tr("If every battle is won: about %d loot, %d of it brought home") % [roundi(expected), mini(roundi(expected), RaidText.capacity(data, picked))])
 	var go := UI.button(tr("Raid %s") % RaidText.front_name(front_now), func() -> void:
 		var body := {"front": front_now, "depth": depth_now, "units": _picked_units(home_units), "withHero": _army_hero and hero_ready, "stance": _army_stance}
 		if _ready_general(village_id) > 0:
@@ -322,6 +330,45 @@ func _raid_tab(village: Dictionary) -> void:
 		_send_raid(village_id, body), "map/camp_bandit")
 	_panel_body.add_child(go)
 	_picked_hint(go, home_units)
+	_campaign_reports()
+
+
+## The campaigns of yours that came home lately (their armies' raid
+## records): each battle's base stats, the loot by resource, what was found.
+func _campaign_reports() -> void:
+	var done: Array = Game.armies.filter(func(a: Dictionary) -> bool:
+		return a.status == "done" and a.get("raid") is Dictionary and a.raid.get("waveId") == null \
+			and a.get("ownerAccountId") != null and int(a.ownerAccountId) == Game.my_account_id())
+	if done.is_empty():
+		return
+	_panel_body.add_child(UI.label(tr("Campaigns that came home"), UI.HEADING_SIZE))
+	for army in done:
+		var raid: Dictionary = army.raid
+		var won: int = raid.battles.filter(func(b: Dictionary) -> bool: return b.won).size()
+		_panel_body.add_child(UI.label(tr("Against %s: %d of %d battles won") % [tr(Game.front_faction(String(raid.front))), won, raid.battles.size()], UI.SMALL_SIZE, UI.ACCENT))
+		for line in RaidText.battles(raid):
+			var row := UI.label(line, UI.SMALL_SIZE)
+			row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			_panel_body.add_child(row)
+		_panel_body.add_child(UI.rich(tr("Brought home: %s") % UI.costs(RaidText.campaign_loot(raid), 24), UI.SMALL_SIZE, UiTheme.TEXT))
+		if not raid.get("finds", []).is_empty():
+			_panel_body.add_child(UI.label(tr("Found: %s") % ", ".join(raid.finds), UI.SMALL_SIZE, UI.GOOD))
+
+
+## "150 wood, 110 stone, 150 grain, 90 iron" (plain text, for a choice's line).
+func _loot_words(amounts: Dictionary) -> String:
+	var parts := PackedStringArray()
+	for kind in Ledger.KINDS:
+		parts.append("%d %s" % [int(amounts.get(kind, 0)), UI.resource_name(kind).to_lower()])
+	return ", ".join(parts)
+
+
+## An estimate's amounts, rounded to tens.
+func _rounded(amounts: Dictionary) -> Dictionary:
+	var out := {}
+	for kind in amounts:
+		out[kind] = roundi(float(amounts[kind]) / 10.0) * 10
+	return out
 
 
 ## Choices one under another, each a full-width button with a line of what

@@ -26,7 +26,7 @@ import { generalBonuses } from '../sim/generals.js';
 import { hex } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
 import { carryHome, northFinds, raidBattle, raidCapacity, raidEdge, raidLoot, raidStage, strikeShare, strikeStage, type RaidFind } from '../sim/raids.js';
-import { emptyResources } from '../sim/resources.js';
+import { emptyResources, mapResources } from '../sim/resources.js';
 import { createRng } from '../sim/rng.js';
 import { combatants, withIntel } from '../sim/scouting.js';
 import { armyLosses, dispatchArmy, sendHome, terrainOf } from './armies.js';
@@ -242,7 +242,19 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
   }
   // Its front hates the more.
   await angerFront(client, data, world, wave.front, data.raids.strike.hatred, at);
-  const entry = { stage: 1, name: stage.name, stronghold: true, won: result.won, battleId: battle.id, kills, lost: total(lost) };
+  const entry = {
+    stage: 1,
+    name: stage.name,
+    stronghold: true,
+    won: result.won,
+    battleId: battle.id,
+    kills,
+    lost: total(lost),
+    army: total(fighters),
+    enemy: total(stage.enemy),
+    rounds: result.rounds.length,
+    loot: emptyResources(),
+  };
   after = { ...after, raid: { ...raid, stage: 1, battles: [entry] } };
   await sendHome(client, world, after, at, data);
   await tell(client, world, army.ownerAccountId, {
@@ -363,7 +375,19 @@ export const raidHandlers: HandlerRegistry = {
         }
       }
     }
-    const entry = { stage: payload.stage, name: stage.name, stronghold: stage.stronghold, won: result.won, battleId: battle.id, kills, lost: total(lost) };
+    const entry = {
+      stage: payload.stage,
+      name: stage.name,
+      stronghold: stage.stronghold,
+      won: result.won,
+      battleId: battle.id,
+      kills,
+      lost: total(lost),
+      army: total(fighters),
+      enemy: total(stage.enemy),
+      rounds: result.rounds.length,
+      loot: mapResources((kind) => loot[kind] - carried[kind]),
+    };
     const nextRaid: ArmyRaid = { ...raid, stage: payload.stage, battles: [...raid.battles, entry], finds: [...raid.finds, ...finds] };
     after = { ...after, raid: nextRaid, loot };
     const done = !result.won || stage.stronghold || total(combatants(data, after.units)) === 0;

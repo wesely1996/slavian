@@ -160,6 +160,19 @@ won has a chance at a rare find:
   sacking the stronghold +0.15 more.
 - **Going home.** A raid beaten in any battle, or left with no one, comes home
   with what it carries.
+- **Before it sets out.** Picking how deep to go shows, for each depth, about
+  how much loot the campaign would win if every battle is won. The estimate
+  assumes each enemy force breaks at its stance's retreat point. Below the
+  troop picker, a line shows how much of that the chosen army could carry
+  home.
+- **The campaign report.** Each battle records its base stats: your fighting
+  troops and the enemy's at its start, its rounds, kills and losses, and the
+  loot it won. The army sheet lists them while the campaign is under way.
+  When the army comes home, its owner gets a push: battles won, and resources
+  brought home. The Raid tab's *Campaigns that came home* shows the full
+  report: every battle, the loot by resource, and anything found. It stays
+  there about a day, until finished armies are cleared away. A raid called
+  home before its first battle sends no report.
 - **The Eye of Veles.** The bridge's fourth stage needs a raid on the North to
   its full depth with the stronghold sacked ([page 14](14-bridge-and-endgame.md#the-five-stages)).
 

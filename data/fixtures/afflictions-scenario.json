@@ -20445,10 +20445,19 @@
        "battles": [
         {
          "won": true,
+         "army": 42,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 2,
          "name": "Frozen Marsh",
+         "enemy": 13,
          "kills": 10,
          "stage": 1,
+         "rounds": 1,
          "battleId": 4,
          "stronghold": false
         }
@@ -23579,19 +23588,37 @@
        "battles": [
         {
          "won": true,
+         "army": 42,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 2,
          "name": "Frozen Marsh",
+         "enemy": 13,
          "kills": 10,
          "stage": 1,
+         "rounds": 1,
          "battleId": 4,
          "stronghold": false
         },
         {
          "won": true,
+         "army": 40,
+         "loot": {
+          "iron": 74,
+          "wood": 125,
+          "grain": 130,
+          "stone": 97
+         },
          "lost": 5,
          "name": "Monster Lair",
+         "enemy": 30,
          "kills": 14,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -26741,19 +26768,37 @@
        "battles": [
         {
          "won": true,
+         "army": 42,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 2,
          "name": "Frozen Marsh",
+         "enemy": 13,
          "kills": 10,
          "stage": 1,
+         "rounds": 1,
          "battleId": 4,
          "stronghold": false
         },
         {
          "won": true,
+         "army": 40,
+         "loot": {
+          "iron": 74,
+          "wood": 125,
+          "grain": 130,
+          "stone": 97
+         },
          "lost": 5,
          "name": "Monster Lair",
+         "enemy": 30,
          "kills": 14,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -29998,19 +30043,37 @@
        "battles": [
         {
          "won": true,
+         "army": 42,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 2,
          "name": "Frozen Marsh",
+         "enemy": 13,
          "kills": 10,
          "stage": 1,
+         "rounds": 1,
          "battleId": 4,
          "stronghold": false
         },
         {
          "won": true,
+         "army": 40,
+         "loot": {
+          "iron": 74,
+          "wood": 125,
+          "grain": 130,
+          "stone": 97
+         },
          "lost": 5,
          "name": "Monster Lair",
+         "enemy": 30,
          "kills": 14,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -32133,7 +32196,7 @@
    "response": {
     "notifications": [
      {
-      "id": 33,
+      "id": 34,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -32142,7 +32205,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 33,
       "kind": "battle_result",
       "tier": "push",
       "title": "The Holy City was struck",
@@ -32151,7 +32214,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 32,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -32160,7 +32223,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 31,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-1, 8)",
@@ -32169,12 +32232,21 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 30,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-8, 2) gave up and left",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T11:21:36.000Z",
+      "read": false
+     },
+     {
+      "id": 29,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "The campaign against the Monsters of the North is over",
+      "body": "2 of 2 battles won; 512 resources brought home. The full report is in the Raid tab.",
+      "createdAt": "2026-06-01T11:12:01.000Z",
       "read": false
      },
      {
@@ -32430,7 +32502,7 @@
       "read": false
      }
     ],
-    "unread": 33,
+    "unread": 34,
     "serverTime": "2026-06-01T11:26:25.000Z"
    }
   }

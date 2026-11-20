@@ -73,6 +73,13 @@ export interface RaidBattleEntry {
   battleId: number;
   kills: number;
   lost: number;
+  // The campaign summary's numbers (older raids lack them): the army's
+  // fighters and the enemy as the battle began, its rounds, and the loot it
+  // won (taken up as far as the army could carry).
+  army?: number;
+  enemy?: number;
+  rounds?: number;
+  loot?: Resources;
 }
 
 export interface ArmyRaid {

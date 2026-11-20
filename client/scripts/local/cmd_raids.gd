@@ -326,7 +326,9 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 						for member in world.members:
 							server.refresh_bonuses(world, int(member.accountId), at, changed)
 						finds.append("the scroll \"%s\"" % data.lore.scrolls.get(picked.scroll, {}).get("name", picked.scroll))
-	var entry := {"stage": stage_no, "name": stage.name, "stronghold": stage.stronghold, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost)}
+	var entry := {"stage": stage_no, "name": stage.name, "stronghold": stage.stronghold, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost),
+		"army": LocalBattle.total(fighters), "enemy": LocalBattle.total(stage.enemy), "rounds": result.rounds.size(),
+		"loot": LocalVillage.resources(func(kind: String) -> float: return float(taken[kind]) - float(carried[kind]))}
 	after.raid = {"front": front, "depth": raid.depth, "stage": stage_no, "battles": raid.battles + [entry], "finds": raid.finds + finds}
 	after.loot = taken
 	var done: bool = not result.won or stage.stronghold or LocalBattle.total(LocalScouting.combatants(data, after.units)) == 0
@@ -398,7 +400,8 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 		wave.composition = left
 	# Its front hates the more.
 	LocalHordes.anger_front(server, world, String(front), float(data.raids.strike.hatred), at)
-	var entry := {"stage": 1, "name": stage.name, "stronghold": true, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost)}
+	var entry := {"stage": 1, "name": stage.name, "stronghold": true, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost),
+		"army": LocalBattle.total(fighters), "enemy": LocalBattle.total(stage.enemy), "rounds": result.rounds.size(), "loot": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}}
 	var next_raid: Dictionary = raid.duplicate()
 	next_raid.stage = 1
 	next_raid.battles = [entry]

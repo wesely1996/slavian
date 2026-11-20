@@ -13484,10 +13484,19 @@
        "battles": [
         {
          "won": false,
+         "army": 2,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 2,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 0,
          "stage": 1,
+         "rounds": 2,
          "battleId": 2,
          "stronghold": false
         }
@@ -13602,10 +13611,19 @@
        "battles": [
         {
          "won": true,
+         "army": 10,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 3,
          "name": "Frozen Marsh",
+         "enemy": 12,
          "kills": 10,
          "stage": 1,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         }
@@ -16642,10 +16660,19 @@
        "battles": [
         {
          "won": true,
+         "army": 15,
+         "loot": {
+          "iron": 51,
+          "wood": 90,
+          "grain": 102,
+          "stone": 64
+         },
          "lost": 4,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 8,
          "stage": 1,
+         "rounds": 5,
          "battleId": 4,
          "stronghold": false
         }
@@ -16827,10 +16854,19 @@
        "battles": [
         {
          "won": false,
+         "army": 2,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 2,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 0,
          "stage": 1,
+         "rounds": 2,
          "battleId": 2,
          "stronghold": false
         }
@@ -16945,10 +16981,19 @@
        "battles": [
         {
          "won": true,
+         "army": 10,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 3,
          "name": "Frozen Marsh",
+         "enemy": 12,
          "kills": 10,
          "stage": 1,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         }
@@ -20050,10 +20095,19 @@
        "battles": [
         {
          "won": true,
+         "army": 15,
+         "loot": {
+          "iron": 51,
+          "wood": 90,
+          "grain": 102,
+          "stone": 64
+         },
          "lost": 4,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 8,
          "stage": 1,
+         "rounds": 5,
          "battleId": 4,
          "stronghold": false
         }
@@ -20235,10 +20289,19 @@
        "battles": [
         {
          "won": false,
+         "army": 2,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 2,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 0,
          "stage": 1,
+         "rounds": 2,
          "battleId": 2,
          "stronghold": false
         }
@@ -20353,19 +20416,37 @@
        "battles": [
         {
          "won": true,
+         "army": 10,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 3,
          "name": "Frozen Marsh",
+         "enemy": 12,
          "kills": 10,
          "stage": 1,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
          "won": false,
+         "army": 7,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 4,
          "name": "Monster Lair",
+         "enemy": 29,
          "kills": 2,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -23544,19 +23625,37 @@
        "battles": [
         {
          "won": true,
+         "army": 15,
+         "loot": {
+          "iron": 51,
+          "wood": 90,
+          "grain": 102,
+          "stone": 64
+         },
          "lost": 4,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 8,
          "stage": 1,
+         "rounds": 5,
          "battleId": 4,
          "stronghold": false
         },
         {
          "won": false,
+         "army": 11,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 8,
          "name": "Fortress of the Order",
+         "enemy": 29,
          "kills": 2,
          "stage": 2,
+         "rounds": 3,
          "battleId": 6,
          "stronghold": true
         }
@@ -23738,10 +23837,19 @@
        "battles": [
         {
          "won": false,
+         "army": 2,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 2,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 0,
          "stage": 1,
+         "rounds": 2,
          "battleId": 2,
          "stronghold": false
         }
@@ -23851,19 +23959,37 @@
        "battles": [
         {
          "won": true,
+         "army": 10,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 3,
          "name": "Frozen Marsh",
+         "enemy": 12,
          "kills": 10,
          "stage": 1,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
          "won": false,
+         "army": 7,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 4,
          "name": "Monster Lair",
+         "enemy": 29,
          "kills": 2,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -27066,19 +27192,37 @@
        "battles": [
         {
          "won": true,
+         "army": 15,
+         "loot": {
+          "iron": 51,
+          "wood": 90,
+          "grain": 102,
+          "stone": 64
+         },
          "lost": 4,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 8,
          "stage": 1,
+         "rounds": 5,
          "battleId": 4,
          "stronghold": false
         },
         {
          "won": false,
+         "army": 11,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 8,
          "name": "Fortress of the Order",
+         "enemy": 29,
          "kills": 2,
          "stage": 2,
+         "rounds": 3,
          "battleId": 6,
          "stronghold": true
         }
@@ -27260,10 +27404,19 @@
        "battles": [
         {
          "won": false,
+         "army": 2,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 2,
          "name": "Olive Groves",
+         "enemy": 12,
          "kills": 0,
          "stage": 1,
+         "rounds": 2,
          "battleId": 2,
          "stronghold": false
         }
@@ -27373,19 +27526,37 @@
        "battles": [
         {
          "won": true,
+         "army": 10,
+         "loot": {
+          "iron": 14,
+          "wood": 25,
+          "grain": 29,
+          "stone": 18
+         },
          "lost": 3,
          "name": "Frozen Marsh",
+         "enemy": 12,
          "kills": 10,
          "stage": 1,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
          "won": false,
+         "army": 7,
+         "loot": {
+          "iron": 0,
+          "wood": 0,
+          "grain": 0,
+          "stone": 0
+         },
          "lost": 4,
          "name": "Monster Lair",
+         "enemy": 29,
          "kills": 2,
          "stage": 2,
+         "rounds": 2,
          "battleId": 5,
          "stronghold": true
         }
@@ -29484,7 +29655,7 @@
    "response": {
     "notifications": [
      {
-      "id": 23,
+      "id": 25,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -29493,7 +29664,16 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 24,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "The campaign against the Order of the One Throne is over",
+      "body": "1 of 2 battles won; 307 resources brought home. The full report is in the Raid tab.",
+      "createdAt": "2026-06-01T10:39:12.000Z",
+      "read": false
+     },
+     {
+      "id": 23,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -29502,7 +29682,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 22,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: The Black God Walks",
@@ -29511,7 +29691,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "The Avatar of Černobog walks at (1, -3)",
@@ -29520,12 +29700,21 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
       "body": "The horde was beaten at its walls after 1 rounds.",
       "createdAt": "2026-06-01T10:37:36.000Z",
+      "read": false
+     },
+     {
+      "id": 19,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "The campaign against the Monsters of the North is over",
+      "body": "1 of 2 battles won; 86 resources brought home. The full report is in the Raid tab.",
+      "createdAt": "2026-06-01T10:34:24.000Z",
       "read": false
      },
      {
@@ -29691,7 +29880,7 @@
       "read": false
      }
     ],
-    "unread": 23,
+    "unread": 25,
     "serverTime": "2026-06-01T10:48:48.000Z"
    }
   }
