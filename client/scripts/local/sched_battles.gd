@@ -947,7 +947,8 @@ static func ruined_state(data: Dictionary, state: Dictionary, at: int, world_spe
 	next.besieged = false
 	next.ledger.amounts = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
 	next.ledger.settledAt = at
-	next.ledger = LocalLedger.with_rates(next.ledger, at, LocalVillage.village_rates(data, next, world_speed), LocalVillage.capacity(data, next.plots, state.bonuses))
+	# Its stores hold at least what rebuilding costs (sim/horde.ts ruinStorage).
+	next.ledger = LocalLedger.with_rates(next.ledger, at, LocalVillage.village_rates(data, next, world_speed), LocalHorde.ruin_storage(data, LocalVillage.capacity(data, next.plots, state.bonuses), state.plots))
 	return next
 
 

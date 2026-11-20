@@ -163,6 +163,9 @@ func refresh_bonuses(world: Dictionary, account_id: int, at: int, changed: Array
 	for village in world.villages:
 		if int(village.ownerAccountId) == account_id:
 			village.state = LocalVillage.with_bonuses(data, village.state, bonuses, at, world.speed)
+			# A ruin's stores still hold what rebuilding it costs.
+			if village.ruin != null:
+				village.state.ledger.capacity = LocalHorde.ruin_storage(data, village.state.ledger.capacity, village.ruin.plots)
 			changed.append(["village", village.id])
 
 
@@ -1672,6 +1675,10 @@ func _load_all() -> void:
 				a.merge({"returnHome": false, "raid": null})
 			for e in world.rivers:
 				e.merge({"builtBy": null, "completesAt": null})
+			# Ruins from before their stores held the rebuild cost.
+			for v in world.villages:
+				if v.get("ruin") != null:
+					v.state.ledger.capacity = LocalHorde.ruin_storage(data, v.state.ledger.capacity, v.ruin.plots)
 			# Roads from before road levels: level 1, as fast as they were.
 			for e in world.roads:
 				e.merge({"level": 1})

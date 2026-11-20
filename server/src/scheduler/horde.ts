@@ -49,6 +49,7 @@ import {
   recruit,
   refugeeSite,
   ruinPlots,
+  ruinStorage,
   type Decision,
 } from '../sim/horde.js';
 import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
@@ -228,7 +229,8 @@ function ruinedState(data: GameData, state: VillageState, at: Date, worldSpeed: 
     besieged: false,
     ledger: { ...state.ledger, amounts: { wood: 0, stone: 0, grain: 0, iron: 0 }, settledAt: at },
   };
-  return { ...next, ledger: withRates(next.ledger, at, villageRates(data, next, worldSpeed), capacity(data, plots, state.bonuses)) };
+  // Its stores hold at least what rebuilding costs (sim/horde.ts ruinStorage).
+  return { ...next, ledger: withRates(next.ledger, at, villageRates(data, next, worldSpeed), ruinStorage(data, capacity(data, plots, state.bonuses), state.plots)) };
 }
 
 export async function ruinVillage(client: DbClient, data: GameData, world: World, village: Village, at: Date): Promise<void> {

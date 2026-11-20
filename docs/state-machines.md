@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.18.0
+Documented for version: 0.19.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -325,4 +325,5 @@ stateDiagram-v2
   rebuilding --> standing: village_rebuilt
 ```
 
-A refugee camp is raided but never razed.
+A refugee camp is raided but never razed by a horde. While a village is a
+`ruin`, its stores hold at least what rebuilding it costs.

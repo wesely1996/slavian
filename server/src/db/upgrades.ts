@@ -13,6 +13,8 @@ import { getWorld } from './worlds.js';
 import { inTransaction, type Db } from './pool.js';
 import { isDefaultName, townName } from '../sim/names.js';
 import { createRng } from '../sim/rng.js';
+import { ruinStorage } from '../sim/horde.js';
+import { RESOURCE_KINDS, type Resources } from '../sim/resources.js';
 
 interface LegacyRow {
   id: number;
@@ -132,5 +134,23 @@ export async function upgradeTownNames(db: Db, data: GameData): Promise<number> 
       }
     }
     return renamed;
+  });
+}
+
+// Ruins from before a ruin's stores held its rebuild cost (sim/horde.ts
+// ruinStorage): raise their capacity to it.
+export async function upgradeRuinStorage(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number; capacity: Resources; ruin: { plots: Record<string, Plot> } }>(
+      'SELECT id, capacity, ruin FROM villages WHERE ruin IS NOT NULL FOR UPDATE',
+    );
+    let raised = 0;
+    for (const row of rows) {
+      const capacity = ruinStorage(data, row.capacity, row.ruin.plots ?? {});
+      if (RESOURCE_KINDS.every((kind) => capacity[kind] === row.capacity[kind])) continue;
+      await client.query('UPDATE villages SET capacity = $2 WHERE id = $1', [row.id, JSON.stringify(capacity)]);
+      raised++;
+    }
+    return raised;
   });
 }

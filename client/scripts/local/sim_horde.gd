@@ -69,6 +69,16 @@ static func ruin_plots(plots: Dictionary) -> Dictionary:
 	return out
 
 
+## sim/horde.ts ruinStorage: a ruin's stores hold at least what rebuilding
+## it costs, until it is rebuilt.
+static func ruin_storage(data: Dictionary, capacity: Dictionary, plots: Dictionary) -> Dictionary:
+	var cost := rebuild_cost(data, plots)
+	var out := {}
+	for kind in capacity:
+		out[kind] = maxf(float(capacity[kind]), float(cost.get(kind, 0)))
+	return out
+
+
 ## A share of what everything that stood cost to build.
 static func rebuild_cost(data: Dictionary, plots: Dictionary) -> Dictionary:
 	var sum := {"wood": 0.0, "stone": 0.0, "grain": 0.0, "iron": 0.0}
