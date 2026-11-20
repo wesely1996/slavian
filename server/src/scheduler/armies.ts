@@ -35,7 +35,7 @@ import { completeTraining, healFallen, healerChance, joinGarrison, leaveGarrison
 import { createRng } from '../sim/rng.js';
 import { quarterOwed, quarterTickMs, settlementFloor, spareGrain, storeFloor } from '../sim/quarters.js';
 import { addSupply, fullSupply, hungerStrikes, nextHungerCheck, outOfFoodAt, settleSupply, supplyLeft, supplyRoom, supplySpeedFactor, trimSupply, type Supplied } from '../sim/supply.js';
-import { amountsAt, mapResources, spend, type Resources } from '../sim/resources.js';
+import { amountsAt, emptyResources, mapResources, spend, type Resources } from '../sim/resources.js';
 import { receive } from '../sim/logistics.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { tell } from './notices.js';
@@ -561,6 +561,18 @@ async function joinVillage(client: DbClient, data: GameData, world: World, army:
   if (general) {
     await saveGeneral(client, { ...general, status: 'home', villageId: village.id, armyId: null });
     await notifyWorld(client, { worldId: world.id, type: 'generals' });
+  }
+  // A campaign beyond the edge is over: its summary (the army's raid record)
+  // stays on the army; the owner is told how it went.
+  if (army.raid && army.raid.waveId === undefined && army.raid.battles.length > 0) {
+    const battles = army.raid.battles;
+    await tell(client, world, army.ownerAccountId, {
+      kind: 'battle_result',
+      tier: 'push',
+      title: 'The campaign against the {faction} is over',
+      body: '{won} of {battles} battles won; {loot} resources brought home. The full report is in the Raid tab.',
+      vars: { faction: data.enemies.fronts[army.raid.front]?.faction ?? army.raid.front, won: battles.filter((b) => b.won).length, battles: battles.length, loot: total(army.loot ?? emptyResources()) },
+    }, at);
   }
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
 }

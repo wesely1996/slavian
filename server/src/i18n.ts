@@ -77,6 +77,9 @@ const SERBIAN: Record<string, string> = {
 	'{name} founded': '{name} je osnovano',
 	'Your settlers built a new village.': 'Tvoji doseljenici su sagradili novo selo.',
 	'{tech} researched': '{tech} je istraženo',
+	// A campaign beyond the edge, home
+	'The campaign against the {faction} is over': 'Pohod protiv: {faction} je završen',
+	'{won} of {battles} battles won; {loot} resources brought home. The full report is in the Raid tab.': 'Dobijeno {won} od {battles} bitaka; doneto kući {loot} resursa. Ceo izveštaj je u kartici Pohod.',
 	// A burnt camp
 	'The camp at ({q}, {r}) burns': 'Logor kod ({q}, {r}) gori',
 	'{count} of them flee the flames and march on the villages.': '{count} njih beži od plamena i maršira na sela.',

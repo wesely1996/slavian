@@ -550,6 +550,7 @@ static func join_village(server: LocalServer, world: Dictionary, army: Dictionar
 	var data := server.data
 	# Quartered where it stood (perhaps this very village): that is paid first.
 	unquarter(server, world, army, at)
+	var brought := int(LocalLogistics.total(army.loot)) if army.get("loot") is Dictionary else 0
 	var village := server.find_village(world, village_id)
 	var state := LocalVillage.complete_training(village.state, at)
 	if supplied(army):
@@ -585,6 +586,16 @@ static func join_village(server: LocalServer, world: Dictionary, army: Dictionar
 		general.status = "home"
 		general.villageId = village.id
 		general.armyId = null
+	# scheduler/armies.ts joinVillage: a campaign beyond the edge is over.
+	var raid: Variant = army.get("raid")
+	if raid is Dictionary and raid.get("waveId") == null and not raid.battles.is_empty():
+		var won := 0
+		for b in raid.battles:
+			if b.won:
+				won += 1
+		LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "push", "title": "The campaign against the {faction} is over",
+			"body": "{won} of {battles} battles won; {loot} resources brought home. The full report is in the Raid tab.",
+			"vars": {"faction": data.enemies.fronts.get(raid.front, {}).get("faction", raid.front), "won": won, "battles": raid.battles.size(), "loot": brought}}, at)
 
 
 ## An army done with its errand stands on the hex it reached, holding it.

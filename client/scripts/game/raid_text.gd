@@ -63,7 +63,9 @@ static func progress(army: Dictionary) -> String:
 	return UI.t("Back home")
 
 
-## One line per battle fought: "Won at the Open Steppe: 14 killed, 2 lost".
+## One line per battle fought: "Won at the Open Steppe: 24 against 31 ·
+## 4 rounds · 14 killed, 2 lost · +520 loot" (the base stats where the raid
+## recorded them).
 static func battles(raid: Dictionary) -> Array:
 	var out: Array = []
 	for b in raid.get("battles", []):
@@ -71,8 +73,46 @@ static func battles(raid: Dictionary) -> Array:
 		var line := (UI.t("Won at the %s") if b.won else UI.t("Beaten at the %s")) % name
 		if b.stronghold and b.won:
 			line = UI.t("Sacked the %s") % name
-		out.append(line + ": " + UI.t("%d killed, %d lost") % [int(b.kills), int(b.lost)])
+		var parts := PackedStringArray()
+		if b.get("army") != null:
+			parts.append(UI.t("%d against %d") % [int(b.army), int(b.enemy)])
+			parts.append(UI.tn("%d round", "%d rounds", int(b.rounds)) % int(b.rounds))
+		parts.append(UI.t("%d killed, %d lost") % [int(b.kills), int(b.lost)])
+		if b.get("loot") is Dictionary and LocalLogistics.total(b.loot) > 0:
+			parts.append(UI.t("+%d loot") % int(LocalLogistics.total(b.loot)))
+		out.append(line + ": " + " · ".join(parts))
 	return out
+
+
+## Loot a campaign won, by resource (the battles' own, where recorded).
+static func campaign_loot(raid: Dictionary) -> Dictionary:
+	var sum := {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	for b in raid.get("battles", []):
+		if b.get("loot") is Dictionary:
+			for kind in sum:
+				sum[kind] = int(sum[kind]) + int(b.loot.get(kind, 0))
+	return sum
+
+
+## Loot a raid of `front` to `depth` would win if every battle is won: each
+## enemy force (sim/raids.ts raidStage's size, `waves` hordes so far) beaten
+## when it breaks (its stance's retreat share times its front's nerve), the
+## stronghold's stores besides. An estimate: before what the troops can carry.
+static func loot_estimate(data: Dictionary, front: String, depth: int, waves: int) -> Dictionary:
+	var rules: Dictionary = data.raids
+	var nerve := float(data.enemies.fronts.get(front, {}).get("personality", {}).get("nerve", 1.0))
+	var sum := {"wood": 0.0, "stone": 0.0, "grain": 0.0, "iron": 0.0}
+	for stage in range(1, depth + 2):
+		var stronghold := stage > depth
+		var size := float(rules.enemy.baseUnits) * pow(float(rules.enemy.growthPerStage), stage - 1) * pow(float(rules.enemy.growthPerWave), waves) \
+			* (float(rules.stronghold.sizeFactor) if stronghold else 1.0)
+		var stance := String(rules.stronghold.stance) if stronghold else String(rules.fieldStance)
+		var retreat: Variant = data.battle.stances[stance].retreatAt
+		var share := 1.0 if retreat == null else minf(0.95, float(retreat) * nerve)
+		var gain := LocalRaids.loot(data, front, roundi(maxf(1.0, roundf(size)) * share), stronghold)
+		for kind in sum:
+			sum[kind] = float(sum[kind]) + float(gain[kind])
+	return sum
 
 
 ## A raid battle's report line (battle.setup.raid): "" for other battles.
