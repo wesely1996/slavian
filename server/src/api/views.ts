@@ -41,6 +41,7 @@ import { listMissions, type ScoutMission } from '../db/scouting.js';
 import { lastRuinSearches, listRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import { ruinSearchReadyAt } from '../commands/village.js';
 import { listActiveWaves, type Wave } from '../db/waves.js';
+import { armySlotsOf } from '../scheduler/slots.js';
 import { getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { armyQuestOf, heroQuestOffers, type ArmyQuest } from '../scheduler/quests.js';
 import { forecastMarches } from '../scheduler/waves.js';
@@ -717,6 +718,9 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
           // [q, r, action, villageId, completesAt]: land being reshaped (field.json terraform).
           terraforms: (await listTerraforms(client, world.id)).map((t) => [t.cell.q, t.cell.r, t.action, t.villageId, t.completesAt.toISOString()]),
         };
+  // Each member's army slots (sim/slots.ts): used and given.
+  const slots = new Map<number, { used: number; cap: number }>();
+  for (const m of members) slots.set(m.accountId, await armySlotsOf(client, data, world.id, m.accountId));
   return {
     ...worldSummary(world),
     members: members.map((m) => ({
@@ -738,6 +742,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       smithWork: m.smithWork,
       // Their own Svarog's Embers (the world's `embers` is everyone's together).
       embers: m.embers,
+      // Their army slots (units.json armySlots): {used, cap}.
+      armySlots: slots.get(m.accountId),
       // When their scouts may next search for ruins (null: never searched).
       ruinSearchReadyAt: lastSearches.has(m.accountId) ? ruinSearchReadyAt(data, lastSearches.get(m.accountId)!, world.speed).toISOString() : null,
       // Research their Academies brought in by settledAt (null: none yet),

@@ -478,6 +478,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 0,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -2973,6 +2977,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 30,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -5614,6 +5622,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 30,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -8302,6 +8314,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 30,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -10943,6 +10959,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 30,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -13679,6 +13699,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 19,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -13825,7 +13849,7 @@
       "garrison": {
        "archer": 5,
        "spearman": 9,
-       "poison_archer": 4
+       "poison_archer": 5
       },
       "away": {},
       "stance": "balanced",
@@ -13853,7 +13877,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 156.99999999999997,
+        "grain": 143.5,
         "stone": 300
        },
        "capacity": {
@@ -14156,12 +14180,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        }
       ],
@@ -16628,6 +16652,10 @@
       },
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 42,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -17103,12 +17131,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        },
        {
@@ -19572,6 +19600,10 @@
       },
       "smithWork": null,
       "embers": 1,
+      "armySlots": {
+       "used": 40,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -20394,12 +20426,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        },
        {
@@ -22889,6 +22921,10 @@
       },
       "smithWork": null,
       "embers": 1,
+      "armySlots": {
+       "used": 35,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -23667,8 +23703,8 @@
       },
       "attackerNow": {
        "rusalka": 4,
-       "grey_wolf": 7,
-       "leshy_thrall": 5
+       "grey_wolf": 5,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -23679,12 +23715,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 1,
-        "attackerLeft": 22,
+        "attackerLeft": 20,
         "defenderLeft": 37,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 5,
-         "leshy_thrall": 1
+         "grey_wolf": 6,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -23695,12 +23731,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 2,
-        "attackerLeft": 16,
+        "attackerLeft": 12,
         "defenderLeft": 35,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
-         "leshy_thrall": 1
+         "grey_wolf": 5,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -23709,10 +23745,10 @@
        }
       ],
       "loot": {
-       "iron": 88,
-       "wood": 150,
-       "grain": 159,
-       "stone": 115
+       "iron": 94,
+       "wood": 160,
+       "grain": 171,
+       "stone": 122
       },
       "decision": null,
       "startedAt": "2026-06-01T11:08:25.000Z",
@@ -23834,12 +23870,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        },
        {
@@ -24057,10 +24093,10 @@
       "orders": "raid",
       "stance": "balanced",
       "loot": {
-       "iron": 88,
-       "wood": 150,
-       "grain": 159,
-       "stone": 115
+       "iron": 94,
+       "wood": 160,
+       "grain": 171,
+       "stone": 122
       },
       "units": {
        "archer": 9,
@@ -24177,15 +24213,15 @@
          "won": true,
          "army": 40,
          "loot": {
-          "iron": 74,
-          "wood": 125,
-          "grain": 130,
-          "stone": 97
+          "iron": 80,
+          "wood": 135,
+          "grain": 142,
+          "stone": 104
          },
          "lost": 5,
          "name": "Monster Lair",
          "enemy": 30,
-         "kills": 14,
+         "kills": 18,
          "stage": 2,
          "rounds": 2,
          "battleId": 5,
@@ -26368,6 +26404,10 @@
       },
       "smithWork": null,
       "embers": 1,
+      "armySlots": {
+       "used": 35,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -27146,8 +27186,8 @@
       },
       "attackerNow": {
        "rusalka": 4,
-       "grey_wolf": 7,
-       "leshy_thrall": 5
+       "grey_wolf": 5,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -27158,12 +27198,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 1,
-        "attackerLeft": 22,
+        "attackerLeft": 20,
         "defenderLeft": 37,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 5,
-         "leshy_thrall": 1
+         "grey_wolf": 6,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -27174,12 +27214,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 2,
-        "attackerLeft": 16,
+        "attackerLeft": 12,
         "defenderLeft": 35,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
-         "leshy_thrall": 1
+         "grey_wolf": 5,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -27188,10 +27228,10 @@
        }
       ],
       "loot": {
-       "iron": 88,
-       "wood": 150,
-       "grain": 159,
-       "stone": 115
+       "iron": 94,
+       "wood": 160,
+       "grain": 171,
+       "stone": 122
       },
       "decision": null,
       "startedAt": "2026-06-01T11:08:25.000Z",
@@ -27313,12 +27353,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        },
        {
@@ -27536,10 +27576,10 @@
       "orders": "raid",
       "stance": "balanced",
       "loot": {
-       "iron": 88,
-       "wood": 150,
-       "grain": 159,
-       "stone": 115
+       "iron": 94,
+       "wood": 160,
+       "grain": 171,
+       "stone": 122
       },
       "units": {
        "archer": 9,
@@ -27656,15 +27696,15 @@
          "won": true,
          "army": 40,
          "loot": {
-          "iron": 74,
-          "wood": 125,
-          "grain": 130,
-          "stone": 97
+          "iron": 80,
+          "wood": 135,
+          "grain": 142,
+          "stone": 104
          },
          "lost": 5,
          "name": "Monster Lair",
          "enemy": 30,
-         "kills": 14,
+         "kills": 18,
          "stage": 2,
          "rounds": 2,
          "battleId": 5,
@@ -29847,6 +29887,10 @@
       },
       "smithWork": null,
       "embers": 1,
+      "armySlots": {
+       "used": 35,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -30309,10 +30353,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 2215.5,
-        "wood": 4332.5,
+        "iron": 2221.5,
+        "wood": 4342.5,
         "grain": 4684.291666666667,
-        "stone": 4270
+        "stone": 4277
        },
        "ratesPerHour": {
         "iron": 150,
@@ -30506,7 +30550,7 @@
       "index": 4,
       "front": "north",
       "status": "scheduled",
-      "threat": "Low",
+      "threat": "Moderate",
       "spawnAt": "2026-06-01T12:19:12.000Z",
       "spawn": null,
       "targetVillageId": null,
@@ -30623,12 +30667,12 @@
       "round": 0,
       "attackerStance": "offensive",
       "attackerInitial": {
-       "rusalka": 3,
+       "rusalka": 4,
        "grey_wolf": 8,
        "leshy_thrall": 3
       },
       "attackerNow": {
-       "rusalka": 3,
+       "rusalka": 4,
        "grey_wolf": 8,
        "leshy_thrall": 3
       },
@@ -30671,8 +30715,8 @@
       },
       "attackerNow": {
        "rusalka": 4,
-       "grey_wolf": 7,
-       "leshy_thrall": 5
+       "grey_wolf": 5,
+       "leshy_thrall": 3
       },
       "defenderInitial": {
        "archer": 11,
@@ -30683,12 +30727,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 1,
-        "attackerLeft": 22,
+        "attackerLeft": 20,
         "defenderLeft": 37,
         "attackerLosses": {
          "rusalka": 2,
-         "grey_wolf": 5,
-         "leshy_thrall": 1
+         "grey_wolf": 6,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -30699,12 +30743,12 @@
        {
         "at": "2026-06-01T11:08:25.000Z",
         "round": 2,
-        "attackerLeft": 16,
+        "attackerLeft": 12,
         "defenderLeft": 35,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 4,
-         "leshy_thrall": 1
+         "grey_wolf": 5,
+         "leshy_thrall": 2
         },
         "defenderLosses": {
          "archer": 1,
@@ -30713,10 +30757,10 @@
        }
       ],
       "loot": {
-       "iron": 88,
-       "wood": 150,
-       "grain": 159,
-       "stone": 115
+       "iron": 94,
+       "wood": 160,
+       "grain": 171,
+       "stone": 122
       },
       "decision": null,
       "startedAt": "2026-06-01T11:08:25.000Z",
@@ -30890,12 +30934,12 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 18,
+        "defenderLeft": 19,
         "attackerLosses": {},
         "defenderLosses": {
          "archer": 5,
          "spearman": 3,
-         "poison_archer": 4
+         "poison_archer": 3
         }
        },
        {
@@ -31228,15 +31272,15 @@
          "won": true,
          "army": 40,
          "loot": {
-          "iron": 74,
-          "wood": 125,
-          "grain": 130,
-          "stone": 97
+          "iron": 80,
+          "wood": 135,
+          "grain": 142,
+          "stone": 104
          },
          "lost": 5,
          "name": "Monster Lair",
          "enemy": 30,
-         "kills": 14,
+         "kills": 18,
          "stage": 2,
          "rounds": 2,
          "battleId": 5,
@@ -33375,7 +33419,7 @@
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 14 is fighting your garrison of 35.",
+      "body": "A horde of 15 is fighting your garrison of 35.",
       "createdAt": "2026-06-01T11:25:40.800Z",
       "read": false
      },
@@ -33438,7 +33482,7 @@
       "kind": "battle_result",
       "tier": "push",
       "title": "The campaign against the Monsters of the North is over",
-      "body": "2 of 2 battles won; 512 resources brought home. The full report is in the Raid tab.",
+      "body": "2 of 2 battles won; 547 resources brought home. The full report is in the Raid tab.",
       "createdAt": "2026-06-01T11:12:15.400Z",
       "read": false
      },
@@ -33447,7 +33491,7 @@
       "kind": "battle_result",
       "tier": "push",
       "title": "Your raid sacked the Monster Lair",
-      "body": "It comes home with 512 resources and Mail Shirt, the scroll \"Weave of Mokosh\".",
+      "body": "It comes home with 547 resources and Mail Shirt, the scroll \"Weave of Mokosh\".",
       "createdAt": "2026-06-01T11:08:25.000Z",
       "read": false
      },

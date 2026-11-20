@@ -18,7 +18,7 @@ balance changes land there first.
 | 2 | [Map, movement and terrain](02-map-and-movement.md) | Terrain, move costs, roads and mountain passes, rivers and bridges, the river boat lanes, terraforming, fire |
 | 3 | [Villages and buildings](03-villages-and-buildings.md) | Plots and slots, the Elder's Hall, build costs and times, every building, cancelling, demolishing, ruins |
 | 4 | [Economy and logistics](04-economy-and-logistics.md) | Resources, production, storage, grain upkeep, outposts, the Market and bounty board, caravans, merchants, the vault, standing orders |
-| 5 | [Units and training](05-units-and-training.md) | Unit families and tiers, the full unit list, training queues and speed, special units (healers, wagons, siege engines, scouts, settlers) |
+| 5 | [Units and training](05-units-and-training.md) | Unit families and tiers, the full unit list, training queues and speed, army slots, special units (healers, wagons, siege engines, scouts, settlers) |
 | 6 | [Battles](06-battles.md) | Rounds, the damage formula, stances, counters, matchups, breaking, champions, burn and poison, loot |
 | 7 | [Walls and sieges](07-walls-and-sieges.md) | Wall tiers, towers, manning, escalade, siege engines, volley rounds, breaching, charging out, the hospital |
 | 8 | [Armies in the field](08-armies-and-field.md) | Armies on the map, orders, grain and quarters, attrition, reinforcements (pincer, hammer, harassment), field setups, forts, supply points, wagon forts |

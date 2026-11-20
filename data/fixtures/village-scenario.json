@@ -1089,6 +1089,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 0,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -4400,6 +4404,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -7133,6 +7141,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -9639,6 +9651,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -12294,18 +12310,31 @@
    "path": "/v1/villages/1/train",
    "body": {
     "unit": "spearman",
-    "count": 50
+    "count": 30
    },
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":397.8333333333335,\"stone\":0,\"grain\":180,\"iron\":792.5}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":0,\"iron\":192.5}",
     "missing": {
-     "wood": 397.8333333333335,
+     "wood": 0,
      "stone": 0,
-     "grain": 180,
-     "iron": 792.5
+     "grain": 0,
+     "iron": 192.5
     }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "spearman",
+    "count": 50
+   },
+   "status": 400,
+   "response": {
+    "error": "rule",
+    "message": "Your army has 35 of 40 slots free; 50 Spearman take 50. Raise an Elder's Hall or found a village for more."
    }
   },
   {
@@ -12352,6 +12381,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -15684,6 +15717,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -18233,6 +18270,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -21937,6 +21978,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -25344,6 +25389,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -28362,6 +28411,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,
@@ -31374,6 +31427,10 @@
       "smithing": {},
       "smithWork": null,
       "embers": 0,
+      "armySlots": {
+       "used": 5,
+       "cap": 40
+      },
       "ruinSearchReadyAt": null,
       "research": {
        "points": 0,

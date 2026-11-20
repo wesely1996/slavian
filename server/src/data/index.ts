@@ -164,6 +164,8 @@ const unitSchema = z.object({
     .optional(),
   trainSeconds: z.number().positive(),
   upkeepPerHour: z.number().nonnegative(),
+  // Army slots it takes of its owner's (units.json armySlots).
+  slots: z.number().int().nonnegative(),
   // Game hours of its own upkeep it carries when it marches out with an army.
   supplyHours: z.number().positive(),
   // Grain it carries on top of that (a Military Caravan's wagon).
@@ -204,6 +206,8 @@ const unitsFileSchema = z.object({
   trainingSlotBuildings: z.array(z.string()),
   buildingLevelsPerTrainingSlot: z.number().int().positive(),
   maxBatch: z.number().int().positive(),
+  // Each standing village's army slots: base + perHallLevel x its Elder's Hall level.
+  armySlots: z.object({ base: z.number().int().nonnegative(), perHallLevel: z.number().int().nonnegative() }),
   trainingSpeedup: z.number().positive().max(1),
   units: z.record(z.string(), unitSchema),
 });

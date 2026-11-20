@@ -1165,6 +1165,12 @@ func _train_tab(village: Dictionary) -> void:
 				TimeUtil.format_duration(next_at - now), TimeUtil.format_duration(done_at - now)])
 
 	_rally_row(village)
+	# Army slots (units.json armySlots): what the player's troops take of what their villages give.
+	var slots: Dictionary = Game.my_member().get("armySlots", {})
+	if not slots.is_empty():
+		var full: bool = int(slots.used) >= int(slots.cap)
+		_panel_body.add_child(UI.with_info(UI.label(tr("Army slots: %d / %d") % [int(slots.used), int(slots.cap)], UI.SMALL_SIZE, UI.ERROR if full else UI.MUTED),
+			tr("Every unit takes army slots: 1 below a building level of 4, 2 from 4 to 6, 3 from 7 (siege engines 2, scouts and settlers none). Each village gives %d, plus %d for each Elder's Hall level. Garrisons, troops in training, armies and caravan escorts all count; nothing more is trained once they are full.") % [int(Game.data.units.armySlots.base), int(Game.data.units.armySlots.perHallLevel)]))
 
 	var queue_full := training.size() >= limit
 	var max_batch := int(Game.data.units.maxBatch)
@@ -1211,6 +1217,8 @@ func _train_tab(village: Dictionary) -> void:
 			["resource/grain", tr("%s/h") % UI.number(TimeUtil.per_real_hour(float(def.upkeepPerHour) * float(Game.world.speed)))]])
 		stats.tooltip_text = tr("Attack · Defense · Health · Speed (hexes/h) · Grain eaten")
 		info.add_child(stats)
+		if int(def.get("slots", 0)) > 0:
+			info.add_child(UI.label(tr("Takes %d army slots") % int(def.slots) if int(def.slots) != 1 else tr("Takes 1 army slot"), UI.SMALL_SIZE, UI.MUTED))
 		_panel_body.add_child(frame)
 		if not unlocked:
 			info.add_child(UI.label(tr("Needs %s level %d") % [tr(_building_def(def.building).name), def.requiresLevel], UI.SMALL_SIZE, UI.ERROR))

@@ -819,6 +819,9 @@ func _queue_build(world: Dictionary, village: Dictionary, body: Dictionary, now:
 func _train(world: Dictionary, village: Dictionary, body: Dictionary, now: int) -> Dictionary:
 	var owned: int = world.villages.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == int(village.ownerAccountId)).size()
 	var unit := String(body.get("unit", ""))
+	var full := LocalSlots.check(data, LocalSlots.of(data, world, int(village.ownerAccountId)), unit, int(body.get("count", 0)))
+	if not full.is_empty():
+		return full
 	var member := member_of(world, int(village.ownerAccountId))
 	var result := LocalVillage.queue_training(data, village.state, unit, int(body.get("count", 0)), now, world.speed, owned, int(member.get("bought", {}).get(unit, 0)))
 	if result.has("state") and data.units.units.get(unit, {}).get("costStep") != null:
@@ -1338,7 +1341,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"rallyVillageId": m.get("rallyVillageId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "smithing": m.get("smithing", {}), "smithWork": m.get("smithWork"), "embers": int(world.embers), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "smithing": m.get("smithing", {}), "smithWork": m.get("smithWork"), "embers": int(world.embers), "armySlots": LocalSlots.of(data, world, int(m.accountId)), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:
