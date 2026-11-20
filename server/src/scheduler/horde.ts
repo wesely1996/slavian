@@ -11,7 +11,7 @@ import { achieve } from './achievements.js';
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { armiesInBattle, listArmies, saveArmy } from '../db/armies.js';
-import { answerBattle, respondersTo } from './armies.js';
+import { answerBattle, rehomeArmies, respondersTo } from './armies.js';
 import { addAttackers, insertBattle, loadBattle, type Battle } from '../db/battles.js';
 import { listCamps } from '../db/camps.js';
 import { listSites } from '../db/sites.js';
@@ -278,6 +278,8 @@ async function ruinVillage(client: DbClient, data: GameData, world: World, villa
       }, at);
     }
   }
+  // Armies on their way home there turn for their shelter.
+  await rehomeArmies(client, data, world, village, at);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 

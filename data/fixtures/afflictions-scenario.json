@@ -20604,7 +20604,7 @@
      {
       "id": 1,
       "ownerAccountId": 1,
-      "homeVillageId": 1,
+      "homeVillageId": 2,
       "targetVillageId": null,
       "target": [
        -2,
@@ -24046,7 +24046,7 @@
      {
       "id": 1,
       "ownerAccountId": 1,
-      "homeVillageId": 1,
+      "homeVillageId": 2,
       "targetVillageId": null,
       "target": [
        -2,
@@ -24071,70 +24071,75 @@
       "battleId": null,
       "path": [
        [
-        -2,
+        -1,
         2,
         0
        ],
        [
-        -2,
+        0,
         1,
         14400
        ],
        [
-        -2,
+        0,
         0,
         28800
        ],
        [
-        -2,
+        0,
         -1,
         43200
        ],
        [
-        -1,
+        0,
         -2,
         57600
        ],
        [
-        -1,
+        0,
         -3,
         72000
        ],
        [
-        -1,
+        0,
         -4,
         86400
        ],
        [
-        -1,
+        0,
         -5,
         100800
        ],
        [
-        -1,
+        0,
         -6,
         115200
        ],
        [
-        -1,
+        0,
         -7,
         129600
        ],
        [
         -1,
+        -7,
+        144000
+       ],
+       [
+        -1,
         -8,
-        172800
+        187200
        ],
        [
         -2,
         -8,
-        216000
+        230400
        ]
       ],
       "departsAt": "2026-06-01T10:57:37.000Z",
       "arrivesAt": "2026-06-01T11:01:13.000Z",
       "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:01.000Z",
+      "returnsAt": "2026-06-01T11:12:15.400Z",
       "supply": 656,
       "supplyAt": "2026-06-01T11:08:25.000Z",
       "hungrySince": null,
@@ -26503,11 +26508,7 @@
       },
       "levels": {},
       "queue": [],
-      "garrison": {
-       "archer": 9,
-       "spearman": 19,
-       "poison_archer": 7
-      },
+      "garrison": {},
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -26652,15 +26653,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 108,
-        "wood": 210,
-        "grain": 763.3333333333334,
-        "stone": 155
+        "iron": 10,
+        "wood": 30,
+        "grain": 26.666666666666668,
+        "stone": 20
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -72.50000000000006,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -26669,7 +26670,7 @@
         "grain": 1100,
         "stone": 1100
        },
-       "settledAt": "2026-06-01T11:12:01.000Z"
+       "settledAt": "2026-06-01T11:08:25.000Z"
       }
      },
      {
@@ -27524,7 +27525,7 @@
      {
       "id": 1,
       "ownerAccountId": 1,
-      "homeVillageId": 1,
+      "homeVillageId": 2,
       "targetVillageId": null,
       "target": [
        -2,
@@ -27534,82 +27535,92 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
-      "loot": null,
+      "loot": {
+       "iron": 88,
+       "wood": 150,
+       "grain": 159,
+       "stone": 115
+      },
       "units": {
        "archer": 9,
        "spearman": 19,
        "poison_archer": 7
       },
-      "status": "done",
+      "status": "returning",
       "battleId": null,
       "path": [
        [
-        -2,
+        -1,
         2,
         0
        ],
        [
-        -2,
+        0,
         1,
         14400
        ],
        [
-        -2,
+        0,
         0,
         28800
        ],
        [
-        -2,
+        0,
         -1,
         43200
        ],
        [
-        -1,
+        0,
         -2,
         57600
        ],
        [
-        -1,
+        0,
         -3,
         72000
        ],
        [
-        -1,
+        0,
         -4,
         86400
        ],
        [
-        -1,
+        0,
         -5,
         100800
        ],
        [
-        -1,
+        0,
         -6,
         115200
        ],
        [
-        -1,
+        0,
         -7,
         129600
        ],
        [
         -1,
+        -7,
+        144000
+       ],
+       [
+        -1,
         -8,
-        172800
+        187200
        ],
        [
         -2,
         -8,
-        216000
+        230400
        ]
       ],
       "departsAt": "2026-06-01T10:57:37.000Z",
       "arrivesAt": "2026-06-01T11:01:13.000Z",
       "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:01.000Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T11:12:01.000Z",
+      "returnsAt": "2026-06-01T11:12:15.400Z",
+      "supply": 656,
+      "supplyAt": "2026-06-01T11:08:25.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -29976,11 +29987,7 @@
       },
       "levels": {},
       "queue": [],
-      "garrison": {
-       "archer": 9,
-       "spearman": 19,
-       "poison_archer": 7
-      },
+      "garrison": {},
       "away": {},
       "stance": "balanced",
       "besieged": false,
@@ -30125,15 +30132,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 108,
-        "wood": 210,
-        "grain": 763.3333333333334,
-        "stone": 155
+        "iron": 10,
+        "wood": 30,
+        "grain": 26.666666666666668,
+        "stone": 20
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -72.50000000000006,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -30142,7 +30149,7 @@
         "grain": 1100,
         "stone": 1100
        },
-       "settledAt": "2026-06-01T11:12:01.000Z"
+       "settledAt": "2026-06-01T11:08:25.000Z"
       }
      },
      {
@@ -30278,7 +30285,11 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "archer": 9,
+       "spearman": 19,
+       "poison_archer": 7
+      },
       "away": {},
       "stance": "balanced",
       "besieged": true,
@@ -30298,15 +30309,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 2127.5,
-        "wood": 4182.5,
-        "grain": 4173.333333333333,
-        "stone": 4155
+        "iron": 2215.5,
+        "wood": 4332.5,
+        "grain": 4684.291666666667,
+        "stone": 4270
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 400,
+        "grain": -72.50000000000006,
         "stone": 300
        },
        "capacity": {
@@ -30601,7 +30612,11 @@
       "r": 2,
       "setup": {
        "home": {
-        "initial": {}
+        "initial": {
+         "archer": 9,
+         "spearman": 19,
+         "poison_archer": 7
+        }
        }
       },
       "status": "ongoing",
@@ -30617,7 +30632,11 @@
        "grey_wolf": 8,
        "leshy_thrall": 3
       },
-      "defenderInitial": {},
+      "defenderInitial": {
+       "archer": 9,
+       "spearman": 19,
+       "poison_archer": 7
+      },
       "rounds": [],
       "loot": null,
       "decision": null,
@@ -31083,7 +31102,7 @@
      {
       "id": 1,
       "ownerAccountId": 1,
-      "homeVillageId": 1,
+      "homeVillageId": 2,
       "targetVillageId": null,
       "target": [
        -2,
@@ -31103,72 +31122,77 @@
       "battleId": null,
       "path": [
        [
-        -2,
+        -1,
         2,
         0
        ],
        [
-        -2,
+        0,
         1,
         14400
        ],
        [
-        -2,
+        0,
         0,
         28800
        ],
        [
-        -2,
+        0,
         -1,
         43200
        ],
        [
-        -1,
+        0,
         -2,
         57600
        ],
        [
-        -1,
+        0,
         -3,
         72000
        ],
        [
-        -1,
+        0,
         -4,
         86400
        ],
        [
-        -1,
+        0,
         -5,
         100800
        ],
        [
-        -1,
+        0,
         -6,
         115200
        ],
        [
-        -1,
+        0,
         -7,
         129600
        ],
        [
         -1,
+        -7,
+        144000
+       ],
+       [
+        -1,
         -8,
-        172800
+        187200
        ],
        [
         -2,
         -8,
-        216000
+        230400
        ]
       ],
       "departsAt": "2026-06-01T10:57:37.000Z",
       "arrivesAt": "2026-06-01T11:01:13.000Z",
       "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:01.000Z",
+      "returnsAt": "2026-06-01T11:12:15.400Z",
       "supply": 0,
-      "supplyAt": "2026-06-01T11:12:01.000Z",
+      "supplyAt": "2026-06-01T11:12:15.400Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -33351,7 +33375,7 @@
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 14 is fighting your garrison of 0.",
+      "body": "A horde of 14 is fighting your garrison of 35.",
       "createdAt": "2026-06-01T11:25:40.800Z",
       "read": false
      },
@@ -33415,7 +33439,7 @@
       "tier": "push",
       "title": "The campaign against the Monsters of the North is over",
       "body": "2 of 2 battles won; 512 resources brought home. The full report is in the Raid tab.",
-      "createdAt": "2026-06-01T11:12:01.000Z",
+      "createdAt": "2026-06-01T11:12:15.400Z",
       "read": false
      },
      {

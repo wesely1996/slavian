@@ -131,6 +131,9 @@ A horde that beats a village either **raids** it (plunders) or **razes** it
   recruits 10% of its starting strength.
 - **The Avatar of Černobog** always razes ([page 13](13-events-and-raids.md#the-cultist-ritual)).
 
+Armies whose home is razed turn for another village
+([page 8](08-armies-and-field.md#armies-and-garrisons)).
+
 **Ruins** rebuild at 40% of what stood, over 6 game hours. A player with
 nothing but ruins gets a **refugee camp**, which hordes raid but never raze
 ([page 3](03-villages-and-buildings.md#ruins-and-rebuilding)).

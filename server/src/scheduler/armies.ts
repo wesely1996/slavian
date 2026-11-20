@@ -584,8 +584,58 @@ export async function endArmy(client: DbClient, data: GameData, world: World, ar
   return sendHome(client, world, gone, at, data);
 }
 
+// Where an army goes home to from `from`: its home while it stands; with
+// its home in ruins, the nearest standing village of its owner's (a refugee
+// camp only when no other stands and no ally's does), else the nearest of
+// an ally's (`own` false: it goes there to support it). Ties go to the
+// lowest id. Null: nowhere stands at all.
+export async function shelterOf(client: DbClient, army: Army, from: Hex): Promise<{ village: Village; own: boolean } | null> {
+  const home = await loadVillage(client, army.homeVillageId).catch(() => null);
+  if (home && !home.ruin) return { village: home, own: true };
+  return pickShelter(await listVillages(client, army.worldId), army.ownerAccountId, from);
+}
+
+// The nearest standing village of `owner`'s that isn't a refugee camp, else
+// the nearest of an ally's (`own` false), else the owner's refugee camp.
+export function pickShelter<V extends { id: number; q: number; r: number; ownerAccountId: number | null; ruin?: unknown; refuge?: boolean }>(
+  villages: readonly V[],
+  owner: number | null,
+  from: Hex,
+): { village: V; own: boolean } | null {
+  const standing = villages.filter((v) => !v.ruin && v.ownerAccountId !== null);
+  const nearest = (list: V[]) => [...list].sort((a, b) => hexDistance(from, hex(a.q, a.r)) - hexDistance(from, hex(b.q, b.r)) || a.id - b.id)[0];
+  const own = standing.filter((v) => v.ownerAccountId === owner);
+  const village = nearest(own.filter((v) => !v.refuge));
+  if (village) return { village, own: true };
+  const ally = nearest(standing.filter((v) => v.ownerAccountId !== owner && !v.refuge));
+  if (ally) return { village: ally, own: false };
+  const refuge = nearest(own);
+  return refuge ? { village: refuge, own: true } : null;
+}
+
+// Its home razed, an army on its way there turns for its shelter: its
+// owner's village becomes its home; an ally's it marches to and supports.
+export async function rehomeArmies(client: DbClient, data: GameData, world: World, ruined: Village, at: Date): Promise<void> {
+  const armies = (await listArmies(client, world.id)).sort((a, b) => a.id - b.id);
+  for (const army of armies) {
+    if (army.homeVillageId !== ruined.id || army.status === 'done') continue;
+    const shelter = await shelterOf(client, army, armyHex(army, at));
+    if (!shelter) continue;
+    const homed: Army = shelter.own ? { ...army, homeVillageId: shelter.village.id } : army;
+    if (shelter.own) await saveArmy(client, homed);
+    const homeward = army.status === 'returning' || (army.status === 'marching' && army.targetVillageId === ruined.id && army.orders === 'garrison');
+    if (!homeward) continue;
+    const turned = shelter.own ? homed : { ...homed, returnHome: false };
+    // (No road there: it keeps on for the ruins.)
+    await moveArmy(client, data, world, turned, { villageId: shelter.village.id, ...(shelter.own ? {} : { orders: 'support' as const }) }, at).catch((e: unknown) => {
+      if (!(e instanceof RuleError)) throw e;
+    });
+  }
+}
+
 // Turns an army for home, along the road it came. An army with no one left
-// is done; its hero is carried home wounded, and its general is dead.
+// is done; its hero is carried home wounded, and its general is dead. With
+// its home in ruins it goes to its shelter instead (shelterOf).
 export async function sendHome(client: DbClient, world: World, army: Army, at: Date, data?: GameData): Promise<Army> {
   if (total(army.units) === 0) {
     const gone: Army = { ...army, status: 'done', battleId: null, leavesAt: at, returnsAt: at };
@@ -602,6 +652,19 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
     return gone;
   }
   if (data) army = await setOff(client, data, world, army, at);
+  if (data) {
+    const shelter = await shelterOf(client, army, hex(army.targetQ, army.targetR));
+    if (shelter && shelter.village.id !== army.homeVillageId) {
+      if (shelter.own) army = { ...army, homeVillageId: shelter.village.id };
+      else {
+        const marching = await marchTo(client, data, world, { ...army, returnHome: false }, shelter.village, 'support', at).catch((e: unknown) => {
+          if (!(e instanceof RuleError)) throw e;
+          return null;
+        });
+        if (marching) return marching;
+      }
+    }
+  }
   // An army that moved on from where it first went takes the road home
   // from where it stands (drawn backwards, as every road home is).
   // (Without its halts: a wait for a fire on the way out isn't waited again.)
@@ -625,6 +688,32 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
   const payload: ArmyPayload = { armyId: army.id };
   await scheduleEvent(client, world.id, back.returnsAt!, 'army_return', payload);
   return back;
+}
+
+// An army (standing, or done with a battle) marches from where it stands
+// into a village with these orders.
+async function marchTo(client: DbClient, data: GameData, world: World, army: Army, village: Village, orders: ArmyOrders, at: Date): Promise<Army> {
+  const fed = supplied(army);
+  const speed = armySpeed(data, army.units, await ownerBonuses(client, army)) * supplySpeedFactor(data, fed, at, world.speed);
+  const path = roadRoute(data, await terrainOf(client, world.id), hex(army.targetQ, army.targetR), hex(village.q, village.r), speed, world.speed, terrainRelief(data, army.units));
+  const moving: Army = {
+    ...army,
+    orders,
+    targetVillageId: village.id,
+    targetQ: village.q,
+    targetR: village.r,
+    path,
+    status: 'marching',
+    battleId: null,
+    wagonFortAt: null,
+    departsAt: at,
+    arrivesAt: new Date(at.getTime() + path.at(-1)!.atMs),
+    leavesAt: null,
+    returnsAt: null,
+  };
+  await saveArmy(client, moving);
+  await scheduleEvent(client, world.id, moving.arrivesAt, 'army_arrive', { armyId: army.id } satisfies ArmyPayload);
+  return moving;
 }
 
 // An army joins the battle at its target village from the next round.
@@ -985,7 +1074,7 @@ export async function armyHero(client: DbClient, data: GameData, world: World, a
 
 // Where an army is now: the hex it stands on, or for one on the road the
 // last hex it reached.
-function armyHex(army: Army, at: Date): Hex {
+export function armyHex(army: Army, at: Date): Hex {
   if (army.status === 'stationed' || army.status === 'engaged') return hex(army.targetQ, army.targetR);
   const road = army.status === 'returning' ? reversedRoute(army.path) : army.path;
   const since = at.getTime() - (army.status === 'returning' ? army.leavesAt! : army.departsAt).getTime();

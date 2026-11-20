@@ -838,8 +838,92 @@ static func on_army_hunger(server: LocalServer, world: Dictionary, event: Dictio
 		plan_hunger(server, world, army, at)
 
 
+## Where an army goes home to from `from`: its home while it stands; with its
+## home in ruins, the nearest standing village of its owner's (a refugee camp
+## only when no other stands and no ally's does), else the nearest of an
+## ally's (`own` false: it goes there to support it). Ties go to the lowest
+## id. Empty: nowhere stands at all.
+static func shelter_of(server: LocalServer, world: Dictionary, army: Dictionary, from: Vector2i) -> Dictionary:
+	var home := server.find_village(world, int(army.homeVillageId))
+	if not home.is_empty() and home.ruin == null:
+		return {"village": home, "own": true}
+	var owner := int(army.ownerAccountId)
+	var nearest := func(list: Array) -> Dictionary:
+		var best: Dictionary = {}
+		for v in list:
+			if best.is_empty():
+				best = v
+				continue
+			var d := HexMath.distance(from, Vector2i(v.q, v.r))
+			var bd := HexMath.distance(from, Vector2i(best.q, best.r))
+			if d < bd or (d == bd and int(v.id) < int(best.id)):
+				best = v
+		return best
+	var standing: Array = world.villages.filter(func(v: Dictionary) -> bool: return v.ruin == null and v.ownerAccountId != null)
+	var own: Array = standing.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) == owner)
+	var village: Dictionary = nearest.call(own.filter(func(v: Dictionary) -> bool: return not v.get("refuge", false)))
+	if not village.is_empty():
+		return {"village": village, "own": true}
+	var ally: Dictionary = nearest.call(standing.filter(func(v: Dictionary) -> bool: return int(v.ownerAccountId) != owner and not v.get("refuge", false)))
+	if not ally.is_empty():
+		return {"village": ally, "own": false}
+	var refuge: Dictionary = nearest.call(own)
+	return {} if refuge.is_empty() else {"village": refuge, "own": true}
+
+
+## Its home razed, an army on its way there turns for its shelter: its
+## owner's village becomes its home; an ally's it marches to and supports.
+static func rehome_armies(server: LocalServer, world: Dictionary, ruined: Dictionary, at: int) -> void:
+	var armies: Array = world.armies.duplicate()
+	armies.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+	for army in armies:
+		if int(army.homeVillageId) != int(ruined.id) or army.status == "done":
+			continue
+		var shelter := shelter_of(server, world, army, _army_hex(army, at))
+		if shelter.is_empty():
+			continue
+		if shelter.own:
+			army.homeVillageId = shelter.village.id
+		var homeward: bool = army.status == "returning" or (army.status == "marching" and army.targetVillageId != null and int(army.targetVillageId) == int(ruined.id) and army.orders == "garrison")
+		if not homeward:
+			continue
+		var body := {"villageId": shelter.village.id}
+		var keep: bool = army.returnHome
+		if not shelter.own:
+			body.orders = "support"
+			army.returnHome = false
+		# (No road there: it keeps on for the ruins.)
+		if move(server, world, army, body, at).has("error"):
+			army.returnHome = keep
+
+
+## An army (standing, or done with a battle) marches from where it stands
+## into a village with these orders. Empty: no road leads there.
+static func _march_to(server: LocalServer, world: Dictionary, army: Dictionary, village: Dictionary, orders: String, at: int) -> Dictionary:
+	var data := server.data
+	var speed := army_speed(data, army.units, owner_bonuses(server, world, army)) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
+	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(army.targetQ, army.targetR), Vector2i(village.q, village.r), speed, world.speed, terrain_relief(data, army.units))
+	if path == null:
+		return {}
+	army.orders = orders
+	army.targetVillageId = village.id
+	army.targetQ = int(village.q)
+	army.targetR = int(village.r)
+	army.path = path
+	army.status = "marching"
+	army.battleId = null
+	army.wagonFortAt = null
+	army.departsAt = at
+	army.arrivesAt = at + int(path[-1].atMs)
+	army.leavesAt = null
+	army.returnsAt = null
+	server.schedule(world, int(army.arrivesAt), "army_arrive", {"armyId": army.id})
+	return army
+
+
 ## Turns an army for home along the road it came. An army with no one left
-## is done; its hero is carried home wounded, and its general is dead.
+## is done; its hero is carried home wounded, and its general is dead. With
+## its home in ruins it goes to its shelter instead (shelter_of).
 static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> Dictionary:
 	if LocalBattle.total(army.units) == 0:
 		army.status = "done"
@@ -859,6 +943,16 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 			LocalGenerals.kill(server, world, general, at)
 		return army
 	_set_off(server, world, army, at)
+	var shelter := shelter_of(server, world, army, Vector2i(army.targetQ, army.targetR))
+	if not shelter.is_empty() and int(shelter.village.id) != int(army.homeVillageId):
+		if shelter.own:
+			army.homeVillageId = shelter.village.id
+		else:
+			var keep: bool = army.returnHome
+			army.returnHome = false
+			if not _march_to(server, world, army, shelter.village, "support", at).is_empty():
+				return army
+			army.returnHome = keep
 	# An army that moved on from where it first went takes the road home from
 	# where it stands (drawn backwards, as every road home is), without the
 	# halts where it waited for a fire on the way out.
@@ -1160,9 +1254,24 @@ static func recall(server: LocalServer, world: Dictionary, army_id: int, now: in
 		return LocalVillage.rule("That army is in the middle of a battle")
 	if army.status == "returning":
 		return LocalVillage.rule("They are already on their way home")
-	# One on the march turns for home where it is, into the garrison.
+	# One on the march turns for home where it is, into the garrison (with its
+	# home in ruins, for its shelter: shelter_of).
 	if army.status == "marching":
-		return move(server, world, army, {"villageId": army.homeVillageId}, now)
+		var shelter := shelter_of(server, world, army, _army_hex(army, now))
+		if shelter.is_empty():
+			return move(server, world, army, {"villageId": army.homeVillageId}, now)
+		var keep: Array = [army.returnHome, army.homeVillageId]
+		var body := {"villageId": shelter.village.id}
+		if shelter.own:
+			army.homeVillageId = shelter.village.id
+		else:
+			army.returnHome = false
+			body.orders = "support"
+		var back := move(server, world, army, body, now)
+		if back.has("error"):
+			army.returnHome = keep[0]
+			army.homeVillageId = keep[1]
+		return back
 	if army.status != "stationed":
 		return LocalVillage.rule("Only armies out in the field can be called home")
 	return send_home(server, world, army, now)

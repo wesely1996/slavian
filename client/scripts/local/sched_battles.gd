@@ -983,6 +983,8 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 		camp.refuge = true
 		LocalInbox.tell(server, world, owner, {"kind": "refuge", "tier": "push", "title": "A refuge by the Holy City",
 			"body": "{camp} takes in your people at ({q}, {r}).", "vars": {"camp": camp.name, "q": site.x, "r": site.y}}, at)
+	# Armies on their way home there turn for their shelter.
+	LocalArmies.rehome_armies(server, world, village, at)
 
 
 static func on_wave_raze(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
