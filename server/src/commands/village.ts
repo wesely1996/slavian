@@ -1,3 +1,5 @@
+import { checkSlots } from '../sim/slots.js';
+import { armySlotsOf } from '../scheduler/slots.js';
 import { unitSpeed } from '../sim/smithing.js';
 import { riverEdgesAt } from '../db/rivers.js';
 import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
@@ -162,6 +164,7 @@ export async function trainUnitsCommand(
   input: VillageCommandInput & { unit: string; count: number },
 ): Promise<{ village: Village; batch: TrainingBatch }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'queued training' }, async ({ client, world, village }) => {
+    checkSlots(deps.data, await armySlotsOf(client, deps.data, world.id, village.ownerAccountId!), input.unit, input.count);
     const owned = await countVillagesOwned(client, world.id, village.ownerAccountId!);
     const bought = await boughtCount(client, world.id, village.ownerAccountId!, input.unit);
     const { state, batch } = queueTraining(deps.data, village.state, input.unit, input.count, input.now, world.speed, owned, bought);

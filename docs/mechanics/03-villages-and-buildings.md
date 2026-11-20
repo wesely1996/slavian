@@ -32,6 +32,8 @@ The heart of the village, up to level 20. Each level:
 - **Every 3 levels** adds a place in the build queue (5 at the start) and a
   standing order slot ([page 4](04-economy-and-logistics.md#standing-orders)).
 - **Every 2 levels** allows one more outpost (1 at the start).
+- **Army slots.** Adds 10 army slots, on top of the village's 30
+  ([page 5](05-units-and-training.md#army-slots)).
 
 ## Cost and time of a level
 
@@ -59,7 +61,7 @@ Costs are wood / stone / grain / iron at level 1, then ×growth each level.
 
 | Building | Max | Level 1 cost | Growth | Time | What it does |
 |---|---|---|---|---|---|
-| Elder's Hall | 20 | 200/200/100/80 | ×1.6 | 180 s ×1.5 | Slots, build speed, queue, outposts (above) |
+| Elder's Hall | 20 | 200/200/100/80 | ×1.6 | 180 s ×1.5 | Slots, build speed, queue, outposts, army slots (above) |
 | Woodcutter (field) | 20 | 40/60/30/20 | ×1.6 | 90 s ×1.55 | 15 wood/h at level 1, ×1.35 a level |
 | Quarry (field) | 20 | 70/30/30/20 | ×1.6 | 90 s ×1.55 | 12 stone/h, ×1.35 a level |
 | Farm (field) | 20 | 50/40/20/10 | ×1.6 | 75 s ×1.55 | 15 grain/h, ×1.35 a level |

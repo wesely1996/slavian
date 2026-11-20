@@ -47,6 +47,8 @@ scenario('village-scenario.json', START, async ({ started, play }) => {
     { method: 'POST', path: '/v1/worlds/-1/onboarding/claim', body: { step: 'outpost' } },
     { method: 'GET', path: '/v1/worlds/-1' },
     { method: 'POST', path: '/v1/villages/1/outposts/abandon', body: { q: outpost.q, r: outpost.r } },
+    { method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 30 } },
+    // More than the army slots left (units.json armySlots): refused.
     { method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 50 } },
     { advance: 45 * MINUTE + 17_000 },
     { method: 'GET', path: '/v1/worlds/-1' },
