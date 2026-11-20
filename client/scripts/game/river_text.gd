@@ -44,9 +44,10 @@ static func bridge_problem(data: Dictionary, home: Vector2i, a: Vector2i, b: Vec
 	return ""
 
 
-## Roads between neighbouring hexes: [aq, ar, bq, br, status, level] in
-## Game.roads (status "building", "standing" or "upgrading": standing at
-## `level` while it is improved to the next).
+## Roads between neighbouring hexes: [aq, ar, bq, br, status, level,
+## damaged?] in Game.roads (status "building", "standing", "upgrading":
+## standing at `level` while it is improved to the next, or "repairing";
+## a seventh `true` when a fire damaged it).
 ## The neighbours of `cell` a road runs to: {Vector2i: status}.
 static func roads_at(roads: Array, cell: Vector2i) -> Dictionary:
 	var out := {}
@@ -57,6 +58,21 @@ static func roads_at(roads: Array, cell: Vector2i) -> Dictionary:
 			out[b] = String(e[4])
 		elif b == cell:
 			out[a] = String(e[4])
+	return out
+
+
+## The roads from `cell` a fire damaged: {Vector2i: true}.
+static func damaged_roads_at(roads: Array, cell: Vector2i) -> Dictionary:
+	var out := {}
+	for e in roads:
+		if e.size() <= 6 or e[6] != true:
+			continue
+		var a := Vector2i(int(e[0]), int(e[1]))
+		var b := Vector2i(int(e[2]), int(e[3]))
+		if a == cell:
+			out[b] = true
+		elif b == cell:
+			out[a] = true
 	return out
 
 

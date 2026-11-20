@@ -10,6 +10,8 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   readonly blocked?: ReadonlySet<string>;
   // The level of each standing road, by edge key.
   readonly roads?: ReadonlyMap<string, number>;
+  // The roads a fire damaged, by edge key.
+  readonly damaged?: ReadonlySet<string>;
   // Steps (edge keys) along a river a finished boat sails (riverLanes).
   readonly lanes?: ReadonlySet<string>;
   // Hexes (hexKey) on fire: nothing enters them until the fire is out.
@@ -32,10 +34,21 @@ export function roadLevel(land: Land, from: Hex, to: Hex): number {
   return land.roads?.get(edgeKey(from, to)) ?? 0;
 }
 
-// The share of the terrain's move cost a road of `level` costs (1: none).
-export function roadFactor(data: GameData, level: number): number {
+// The share of the terrain's move cost a road of `level` costs (1: none);
+// a damaged one saves only damage.effect of what it would.
+export function roadFactor(data: GameData, level: number, damaged = false): number {
   const levels = data.field.road.levels;
-  return level <= 0 ? 1 : levels[Math.min(level, levels.length) - 1]!.factor;
+  if (level <= 0) return 1;
+  const factor = levels[Math.min(level, levels.length) - 1]!.factor;
+  return damaged ? 1 - (1 - factor) * data.field.road.damage.effect : factor;
+}
+
+// What repairing a damaged road of `level` costs and how long it takes
+// (game seconds): damage.repairShare of building that level.
+export function roadRepairCost(data: GameData, level: number, pass: boolean): { cost: Resources; buildSeconds: number } {
+  const build = roadLevelCost(data, level, pass);
+  const share = data.field.road.damage.repairShare;
+  return { cost: mapResources((kind) => Math.round(build.cost[kind] * share)), buildSeconds: build.buildSeconds * share };
 }
 
 // What building a road to `level` costs and how long it takes (game
@@ -134,7 +147,7 @@ export function moveCostOn(data: GameData, land: Land, roads = true, relief = 0)
     if (base === null) return null;
     const cost = !sailed && relief > 0 && base > 1 ? 1 + (base - 1) * (1 - relief) : base;
     if (!roads) return cost;
-    const road = roadFactor(data, level);
+    const road = roadFactor(data, level, !!land.damaged?.has(edgeKey(from, to)));
     return cost * (land.lanes?.has(edgeKey(from, to)) ? Math.min(road, laneFactor(data)) : road);
   };
 }
@@ -146,17 +159,20 @@ export function landOf(
   roads: Iterable<readonly [string, number]> = [],
   lanes: Iterable<string> = [],
   burning: Iterable<string> = [],
+  damaged: Iterable<string> = [],
 ): Land {
   const land = new Map(terrain) as Map<string, TerrainId> & {
     blocked?: ReadonlySet<string>;
     roads?: ReadonlyMap<string, number>;
     lanes?: ReadonlySet<string>;
     burning?: ReadonlySet<string>;
+    damaged?: ReadonlySet<string>;
   };
   land.blocked = new Set(blocked);
   land.roads = new Map(roads);
   land.lanes = new Set(lanes);
   land.burning = new Set(burning);
+  land.damaged = new Set(damaged);
   return land;
 }
 
@@ -169,10 +185,12 @@ export function commonNeighbors(a: Hex, b: Hex): Hex[] {
 // What a road link to the village adds to an outpost's yield (0: none):
 // over the fewest road steps from `from` to `to` (of those, the best
 // built), the average of each step's level `outpostBonus`. `roads`: the
-// level of each standing road, by edge key.
-export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, from: Hex, to: Hex): number {
+// level of each standing road, by edge key; a damaged one (`damaged`) adds
+// only damage.effect of its bonus.
+export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, from: Hex, to: Hex, damaged: ReadonlySet<string> = new Set()): number {
   const levels = data.field.road.levels;
-  const gain = (level: number) => levels[Math.min(level, levels.length) - 1]!.outpostBonus;
+  const effect = data.field.road.damage.effect;
+  const gain = (level: number, edge: string) => levels[Math.min(level, levels.length) - 1]!.outpostBonus * (damaged.has(edge) ? effect : 1);
   const goal = hexKey(to);
   const best = new Map<string, { steps: number; sum: number }>([[hexKey(from), { steps: 0, sum: 0 }]]);
   let layer: Hex[] = [from];
@@ -185,7 +203,7 @@ export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, fro
         if (level <= 0) continue;
         const k = hexKey(n);
         const seen = best.get(k);
-        const sum = here.sum + gain(level);
+        const sum = here.sum + gain(level, edgeKey(cell, n));
         if (!seen) {
           best.set(k, { steps, sum });
           next.push(n);

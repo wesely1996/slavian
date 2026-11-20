@@ -720,6 +720,9 @@ const fieldFileSchema = z.object({
     // A road into impassable land with a roadMoveCost (a mountain pass) costs
     // and takes this many times as much.
     mountainFactor: z.number().min(1),
+    // A road a fire reached: `effect` of its good until repaired, for
+    // `repairShare` of its level's cost and time.
+    damage: z.object({ effect: z.number().min(0).max(1), repairShare: z.number().positive() }),
     levels: z
       .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive(), outpostBonus: z.number().min(0) }))
       .min(1),

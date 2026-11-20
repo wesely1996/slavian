@@ -66,7 +66,7 @@ Build times are game time and shrink with world speed.
 - **While being improved.** A road keeps its old level until the work is done.
 - **Who uses roads.** Players and the human hordes (East, South, West) use
   them alike. The **Monsters of the North keep off roads.**
-- **Fire** doesn't damage roads ([below](#fire)).
+- **Fire damages roads** ([below](#damaged-roads)).
 - **Outpost bonus.** An outpost joined to its village by road gathers more.
   The game takes the route with the fewest road steps between the two (of
   those, the best built), and adds the *average* level bonus of its steps to
@@ -155,8 +155,28 @@ Burning a forest is a weapon as well as a way to clear land.
     village. That front's hatred rises by **+0.2** ([page 9](09-hordes-and-threats.md#hatred)).
   - **Event camps** (captives, cultists) are destroyed outright.
   - **Any other terraforming work** under way there is lost.
+  - **Roads** into the hex are damaged ([below](#damaged-roads)).
   - **The terrain** becomes plains (or hills), and the timber is lost.
-- **What doesn't burn.** Roads, ruins, ancient sites, shipyards and the
-  mountain city (none of those stand on forest).
+- **What doesn't burn.** Ruins, ancient sites, shipyards and the mountain
+  city (none of those stand on forest).
 - **Who is told.** Owners of a burnt outpost or fort get a push at once. The
   player who set the fire is told when it burns out.
+
+### Damaged roads
+
+Every standing road into a hex the fire reaches is **damaged** (a road still
+being built is spared). On the map it is scorched black in patches.
+
+- **Half as good.** A damaged road saves only **50%** of the time it would:
+  a road of factor f costs 1 − (1 − f) × 0.5 of the terrain. A dirt track
+  (×0.5) becomes ×0.75, a stone road (×0.35) ×0.675, a paved road (×0.25)
+  ×0.625. Its outpost bonus is halved too.
+- **Repairing.** A village in range repairs it with the road's button, for
+  **50%** of its level's cost and build time (a mountain pass's ×3
+  included). Example: a damaged stone road costs 100 / 175 / 38 / 13 and
+  22.5 game minutes.
+- **No improving before.** A damaged road can't be improved until it is
+  repaired. One being improved when the fire reaches it is finished, still
+  damaged.
+- **Fire during a repair** undoes the work: the road is damaged again and
+  what was paid is lost.

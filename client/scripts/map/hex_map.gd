@@ -282,7 +282,8 @@ func _draw() -> void:
 ## road.levels): a dirt track with wheel ruts, a stone road of gravel, a
 ## paved road of flagstones between kerbs, each wider than the last. Into a
 ## mountain it climbs in switchbacks, low walls on the outer bends. Being
-## built: faded and dashed; being built or improved: a pick and shovel.
+## built: faded and dashed; being built, improved or repaired: a pick and
+## shovel. Damaged by fire: scorched black in patches.
 func _draw_road(road: Array) -> void:
 	var from := Vector2i(int(road[0]), int(road[1]))
 	var to := Vector2i(int(road[2]), int(road[3]))
@@ -298,6 +299,8 @@ func _draw_road(road: Array) -> void:
 		_draw_road_body(points, look, w, tier)
 		for bend in bends:
 			_draw_road_wall(bend[0], bend[1], w)
+		if road.size() > 6 and road[6] == true:
+			_draw_road_scorch(points, w, from)
 	if status != "standing":
 		_draw_road_works(_along(points, 0.5), w)
 
@@ -403,6 +406,23 @@ func _draw_road_body(points: PackedVector2Array, look: Dictionary, w: float, tie
 					draw_line(at - across * w * 0.42, at + across * w * 0.42, Color(look.detail, 0.45), maxf(1.0, w * 0.06), true)
 				for side in [-0.42, 0.42]:
 					draw_line(a + across * w * side, b + across * w * side, Color(look.detail, 0.55), maxf(1.0, w * 0.08), true)
+
+
+## A road a fire damaged: soot over the surface in patches and a few
+## cracks across it, the same each time.
+func _draw_road_scorch(points: PackedVector2Array, w: float, seed_cell: Vector2i) -> void:
+	var soot := Color(0.1, 0.08, 0.07, 0.7)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(seed_cell)
+	for t in [0.18, 0.4, 0.62, 0.85]:
+		var at := _along(points, t + rng.randf_range(-0.05, 0.05))
+		draw_circle(at, w * rng.randf_range(0.45, 0.7), soot)
+	for t in [0.3, 0.52, 0.74]:
+		var at := _along(points, t)
+		var next := _along(points, minf(1.0, t + 0.02))
+		var dir := (next - at).normalized()
+		var across := Vector2(-dir.y, dir.x)
+		draw_line(at - across * w * 0.5, at + across * w * 0.3 + dir * w * 0.3, Color(0.05, 0.04, 0.03, 0.85), maxf(1.0, w * 0.1), true)
 
 
 ## A road being built: its line dashed and faded.

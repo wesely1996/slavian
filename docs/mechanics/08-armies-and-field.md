@@ -16,9 +16,9 @@
   - **Your nearest standing village,** measured from where the army is,
     becomes its home. An army on its way home turns there at once, and an
     army called home later goes there.
-  - **None left?** It marches to the **nearest ally's village** and stands
-    there in support.
-  - **No ally either?** It goes to your refugee camp.
+  - **None left?** It goes to your **refugee camp**, which becomes its home.
+  - **No refugee camp either?** It marches to the **nearest ally's village**
+    and stands there in support.
 - **Leaders:** an army has at most one hero and one general
   ([page 10](10-heroes-generals-clans.md)).
 

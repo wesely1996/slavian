@@ -27,6 +27,8 @@ import { fleeing } from '../sim/camps.js';
 import type { Front } from '../sim/mapgen.js';
 import { threatOf } from '../sim/waves.js';
 import { angerFront, setOutNow } from './waves.js';
+import { listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
+import { relinkOutposts } from './outposts.js';
 
 const workPayload = z.object({ q: z.number().int(), r: z.number().int() });
 const firePayload = z.object({ q: z.number().int(), r: z.number().int(), action: z.string(), generation: z.number().int(), villageId: z.number().int().nullable() });
@@ -102,6 +104,7 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
     }, at);
   }
   await burnCamps(client, data, world, cell, at);
+  await damageRoads(client, data, world, cell, at);
   const work: Terraform = { cell, action, villageId, completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed), generation };
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
@@ -109,6 +112,18 @@ async function catchFire(client: DbClient, data: GameData, world: World, cell: H
   await spreadFire(client, data, world, work, at);
   await notifyWorld(client, { worldId: world.id, type: 'armies' });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
+}
+
+// Every road into a burning hex is damaged (field.json road.damage); a
+// repair under way there is undone. Roads still being built are spared.
+async function damageRoads(client: DbClient, data: GameData, world: World, cell: Hex, at: Date): Promise<void> {
+  const key = hexKey(cell);
+  const roads = (await listRoadEdges(client, world.id)).filter((e) => e.status !== 'building' && (hexKey(e.a) === key || hexKey(e.b) === key));
+  for (const road of roads) {
+    if (road.status === 'repairing') await markRoadStanding(client, world.id, road.a, road.b, road.level, true);
+    else if (!road.damaged) await markRoadDamaged(client, world.id, road.a, road.b);
+  }
+  if (roads.length) await relinkOutposts(client, data, world, at);
 }
 
 // A camp on a burning hex is gone. A bandit camp's or a lair's survivors
@@ -188,6 +203,7 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
   if (def.fire) {
     await burnCamps(client, data, world, cell, at);
+    await damageRoads(client, data, world, cell, at);
     await avoidFire(client, data, world, cell, work.completesAt, at);
     await spreadFire(client, data, world, work, at);
   }
