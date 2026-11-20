@@ -1,7 +1,8 @@
 name: Release
 
 # Makes a release: CI on the release's commit (building its version; bump
-# config/version in client/project.godot on main to match), then the APK
+# config/version in client/project.godot on main to match, with
+# docs/state-machines.md reviewed and its version line set), then the APK
 # published as a GitHub release (not a pre-release, so
 # cleanup-dev-builds.yml keeps it) with the APK attached, the server image
 # as ghcr.io/<owner>/slavian-server:<tag>, and that version deployed to the
