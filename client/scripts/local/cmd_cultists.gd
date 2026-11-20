@@ -55,10 +55,15 @@ static func ritual_ends(server: LocalServer, world: Dictionary, camp: Dictionary
 ## a horde does; with none to reach, it sinks away.
 static func send(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	var from := Vector2i(int(wave.errand.from.q), int(wave.errand.from.r))
+	# The Avatar goes for every village before the Holy City; those who fled a
+	# burnt camp for the villages alone.
 	var targets: Array = []
-	for v in world.villages:
-		if v.ruin == null and v.ownerAccountId != null:
-			targets.append({"id": v.id, "cell": Vector2i(v.q, v.r)})
+	if wave.errand.kind == "avatar":
+		targets = LocalBattles.avatar_targets(world.villages)
+	else:
+		for v in world.villages:
+			if v.ruin == null and v.ownerAccountId != null:
+				targets.append({"id": v.id, "cell": Vector2i(v.q, v.r)})
 	var route: Variant = null
 	if not targets.is_empty():
 		route = LocalHordes.route_from(server.data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition, {}, LocalWaves.rng_for(int(world.seed), int(wave.index), 0xf7 if wave.errand.kind == "fled" else 0xa7), 0.0, world.speed)

@@ -6,7 +6,9 @@
 // one sent to hold a hex with an unsearched site searches it too.
 // Last, armies told to come home once done: one holding a hex comes straight
 // back, one sent to support the village it came from is refused, and one
-// standing is told to come home and turns back at once.
+// standing is told to come home and turns back at once. (A cultist ritual
+// in this world raises the Avatar of Černobog, which razes the village before
+// the last steps, so the first army plays the come-home toggle early too.)
 import { hex, hexDistance } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -63,6 +65,9 @@ scenario('reroute-scenario.json', START, async ({ started, play }) => {
   await move(first.id, { target: { q: far[0], r: far[1] } });
   await play({ advance: 10 * MINUTE });
   const standing = (await play({ method: 'GET', path: world })).body;
+  // Standing, it is told to come home once done, then told not to after all.
+  await play({ method: 'POST', path: `/v1/armies/${first.id}/return-home`, body: { returnHome: true } });
+  await play({ method: 'POST', path: `/v1/armies/${first.id}/return-home`, body: { returnHome: false } });
 
   // Moved onto the camp, it storms it; another moved onto a site explores it.
   const camp = standing.camps[0] as { q: number; r: number } | undefined;

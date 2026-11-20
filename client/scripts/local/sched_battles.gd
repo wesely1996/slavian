@@ -784,7 +784,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 ## A horde beat the Holy City's defenders: Sanctity falls by its survivors,
 ## and the horde, its rampage done, scatters. At none, the run is lost.
 static func holy_city_falls(server: LocalServer, world: Dictionary, wave: Dictionary, survivors: Dictionary, at: int, changed: Array) -> void:
-	var damage := LocalHorde.sanctity_damage(server.data, LocalBattle.total(survivors))
+	var damage := LocalHorde.sanctity_damage(server.data, String(wave.front), survivors)
 	if int(world.sanctity) - damage <= 0:
 		world.status = "lost"
 		world.endedAt = at
@@ -820,7 +820,8 @@ static func horde_wins(server: LocalServer, world: Dictionary, wave: Dictionary,
 	var data := server.data
 	var rampage_left := (int(wave.rampageEndsAt) if wave.rampageEndsAt != null else at) - at
 	var preset: Dictionary = data.difficulty.presets[world.difficulty]
-	var decision := LocalHorde.decide_raze(data, {
+	# The Avatar of Černobog spares nothing it beats.
+	var decision := {"choice": "raze", "reasons": ["the Avatar of Černobog spares nothing"]} if is_avatar(wave) else LocalHorde.decide_raze(data, {
 		"front": wave.front, "waveIndex": wave.index, "graceWaves": preset.get("graceWaves"), "thresholdOffset": preset.get("razeThreshold"),
 		"refuge": village.refuge == true, "hordeNow": LocalBattle.total(attacker_now), "hordeInitial": LocalBattle.total(wave.initial),
 		"helpNearby": help_nearby(server, world, village), "rampageLeftMs": rampage_left, "worldSpeed": world.speed,
@@ -834,6 +835,22 @@ static func horde_wins(server: LocalServer, world: Dictionary, wave: Dictionary,
 	else:
 		wave.composition = LocalHorde.recruit(data, wave.initial, attacker_now)
 	return decision
+
+
+static func is_avatar(wave: Dictionary) -> bool:
+	return wave.get("errand") is Dictionary and wave.errand.kind == "avatar"
+
+
+## horde.ts avatarTargets: every player village still standing (refugee
+## camps aside), and the Holy City only once none is left.
+static func avatar_targets(villages: Array) -> Array:
+	var out: Array = []
+	for v in villages:
+		if v.get("ruin") == null and v.get("ownerAccountId") != null and v.get("refuge") != true:
+			out.append({"id": v.id, "cell": Vector2i(v.q, v.r)})
+	if out.is_empty():
+		out.append({"id": null, "cell": Vector2i.ZERO})
+	return out
 
 
 ## Villages, outposts, forts, camps and sites (horde.ts takenHexes).
@@ -881,15 +898,19 @@ static func settle(server: LocalServer, world: Dictionary, wave: Dictionary, fro
 ## (or the Holy City), if the rampage clock allows; otherwise settle.
 static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, from: Vector2i, at: int, changed: Array) -> void:
 	var data := server.data
-	var ends_at: Variant = wave.rampageEndsAt
-	if ends_at == null or at >= int(ends_at) or LocalBattle.total(wave.composition) == 0:
+	# The Avatar of Černobog's rampage never ends while a village stands.
+	var avatar := is_avatar(wave)
+	var ends_at: Variant = null if avatar else wave.rampageEndsAt
+	if (not avatar and (ends_at == null or at >= int(ends_at))) or LocalBattle.total(wave.composition) == 0:
 		settle(server, world, wave, from, at, changed)
 		return
 	var villages: Array = []
+	var standing: Array = []
 	for v in world.villages:
 		if v.ruin == null and not wave.struck.any(func(id: Variant) -> bool: return int(id) == int(v.id)):
 			villages.append({"id": v.id, "q": v.q, "r": v.r})
-	var targets: Array = LocalHordes.targets_of(villages).filter(func(t: Dictionary) -> bool: return t.cell != from)
+			standing.append(v)
+	var targets: Array = (avatar_targets(standing) if avatar else LocalHordes.targets_of(villages)).filter(func(t: Dictionary) -> bool: return t.cell != from)
 	var since_spawn := at - int(wave.spawnAt)
 	var route: Variant = LocalHordes.route_from(data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition,
 		LocalHordes.fear_of(server, world), LocalWaves.rng_for(int(world.seed), int(wave.index), 0x90 + wave.struck.size()), since_spawn, world.speed)
@@ -897,7 +918,7 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 		settle(server, world, wave, from, at, changed)
 		return
 	var march := LocalHordes.hold_for_quiet(world, int(wave.spawnAt), {"path": route.path, "arrivesAt": int(wave.spawnAt) + int(route.arrivesMs)})
-	if int(march.arrivesAt) > int(ends_at):
+	if ends_at != null and int(march.arrivesAt) > int(ends_at):
 		settle(server, world, wave, from, at, changed)
 		return
 	wave.status = "marching"

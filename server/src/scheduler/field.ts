@@ -403,7 +403,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
 // A horde beat the Holy City's defenders: Sanctity falls by its survivors,
 // and the horde, its rampage done, scatters.
 async function holyCityFalls(client: DbClient, data: GameData, world: World, wave: Wave, survivors: Record<string, number>, at: Date): Promise<void> {
-  const sanctity = await damageSanctity(client, world.id, sanctityDamage(data, total(survivors)), at);
+  const sanctity = await damageSanctity(client, world.id, sanctityDamage(data, wave.front, survivors), at);
   await finishWave(client, data, world, wave.id, 'dispersed', at);
   if (sanctity <= 0) await runLost(client, data, world, at, wave.front);
   await notifyWorld(client, { worldId: world.id, type: 'world' });

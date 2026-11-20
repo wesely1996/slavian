@@ -75,8 +75,18 @@ Rare.
   soldier of yours who falls fighting them brings the end **20 game minutes
   closer**.
 - **Clearing the camp** stops it, for the event's bounty.
-- **If it ends,** the **Avatar of Černobog** rises where they stood, and
-  marches on the villages like a horde of the camp's front:
+- **If it ends,** the **Avatar of Černobog** rises where they stood, as a
+  horde of the camp's front. It is not like other hordes:
+  - **It razes** every village it beats, even while other hordes still only
+    raid.
+  - **It doesn't stop.** It marches from village to village, nearest first,
+    until every player's village is a ruin (refugee camps aside). Its rampage
+    has no end.
+  - **Then the Holy City.** Only when no village stands does it march on the
+    Holy City. If it beats the guard there, it takes **100 Sanctity**: the
+    Holy City falls and the run is lost
+    ([page 1](01-world-and-run.md#sanctity-damage)).
+
 
 | Avatar of Černobog | |
 |---|---|

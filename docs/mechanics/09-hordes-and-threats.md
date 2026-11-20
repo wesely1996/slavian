@@ -40,7 +40,10 @@ added after it, so later hordes are mostly the newest troops.
   (from wave 10), Siege Towers (13) and Catapults (15), in groups of 2–3 or
   more.
 - **The Avatar of Černobog** only appears through the cultist ritual
-  ([page 13](13-events-and-raids.md#the-cultist-ritual)).
+  ([page 13](13-events-and-raids.md#the-cultist-ritual)). It razes every
+  village before it turns on the Holy City.
+- **Tiers and the Holy City.** A horde that wins at the Holy City takes more
+  Sanctity for higher-tier survivors ([page 1](01-world-and-run.md#sanctity-damage)).
 - **The almanac** lists every enemy with its numbers.
 
 ## The wave schedule
@@ -126,6 +129,7 @@ A horde that beats a village either **raids** it (plunders) or **razes** it
 - **Otherwise it raids:** it carries off up to 30% of the stores, less the
   more of it fell ([page 6](06-battles.md#what-victory-brings)). A raid also
   recruits 10% of its starting strength.
+- **The Avatar of Černobog** always razes ([page 13](13-events-and-raids.md#the-cultist-ritual)).
 
 **Ruins** rebuild at 40% of what stood, over 6 game hours. A player with
 nothing but ruins gets a **refugee camp**, which hordes raid but never raze
