@@ -93,8 +93,8 @@ export async function attackVillage(client: DbClient, data: GameData, world: Wor
     ground: await groundOf(client, data, world.id, { q: target.q, r: target.r }),
     // In lines; nobody maneuvers at standing walls.
     lines: {
-      attacker: commandOf(army.maneuver, [{ hero, general }]),
-      defender: commandOf(
+      attacker: commandOf(data, army.maneuver, [{ hero, general }]),
+      defender: commandOf(data, 
         target.state.maneuver ?? 'encircle',
         [{ hero: villageHero, general: villageGeneral }, ...leaders],
         await roadAt(client, world.id, { q: target.q, r: target.r }),

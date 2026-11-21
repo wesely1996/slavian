@@ -122,7 +122,21 @@ describe('battle lines', () => {
   });
 
   it("takes a side's best ranks among its leaders", () => {
-    const command = commandOf('pincer', [{ hero: { skills: { battle_fury: 2 } } }, { hero: { skills: { battle_fury: 4 } }, general: { level: 3 } }]);
-    expect(command).toEqual({ cap: 'pincer', general: 3, skills: { battle_fury: 4 }, leader: 0, road: false });
+    const command = commandOf(data, 'pincer', [{ hero: { skills: { battle_fury: 2 } } }, { hero: { skills: { battle_fury: 4 } }, general: { level: 3, id: 1 } }]);
+    expect(command).toMatchObject({ cap: 'pincer', general: 3, skills: { battle_fury: 4 }, leader: 0, road: false });
+  });
+
+  it("lets commanders' traits strengthen one maneuver and weaken another", () => {
+    // Dobrynya: his riders hit a flank harder; he is no hand at encircling.
+    const dobrynya = commandOf(data, 'encircle', [{ hero: { skills: {}, kind: 'dobrynya' } }]);
+    expect(dobrynya.power).toEqual({ flank: 0.2, encircle: -0.1 });
+    const plain = battleLines(data, input(), c(20, 30), c(20, 20));
+    const led = battleLines(data, input({ attacker: dobrynya }), c(20, 30), c(20, 20));
+    expect(led.attacker.dealt.cavalry).toBeGreaterThan(plain.attacker.dealt.cavalry);
+    const around = battleLines(data, input({ attacker: dobrynya }), c(60), c(20));
+    expect(around.attacker.dealt.infantry).toBeCloseTo(rules.encircle.dealt * 0.9);
+    // Traits add up, within the cap.
+    const stacked = commandOf(data, 'encircle', [{ hero: { skills: {}, kind: 'svyatogor' } }, { general: { level: 1, id: 5 } }, { general: { level: 1, id: 11 } }]);
+    expect(stacked.power?.encircle).toBe(rules.traitCap);
   });
 });

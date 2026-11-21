@@ -536,6 +536,9 @@ func _generals_section(village: Dictionary) -> void:
 		var xp := tr("Lv %d · %d/%d XP") % [int(general.level), int(general.xp), int(general.xpToNext)] if general.get("xpToNext") != null else tr("Lv %d") % int(general.level)
 		info.add_child(UI.label(tr("%s · %s · %s") % [general.name, xp, GeneralText.bonuses(general)], UI.SMALL_SIZE))
 		info.add_child(_champion_line("general", int(general.level)))
+		var trait_: Variant = general.get("trait")
+		if trait_ is Dictionary:
+			info.add_child(UI.label(tr("%s: %s (%s)") % [tr(trait_.name), tr(trait_.description), HeroText.effects(trait_.effects)], UI.SMALL_SIZE, UI.MUTED))
 		var where := UI.label("", UI.SMALL_SIZE, UI.MUTED)
 		info.add_child(where)
 		var place := Game.village_name(general.villageId)

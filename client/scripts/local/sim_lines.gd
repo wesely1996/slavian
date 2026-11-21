@@ -8,23 +8,47 @@ const ORDER := ["none", "flank", "pincer", "encircle"]
 const FAMILIES := ["infantry", "cavalry", "archers"]
 
 
-## A side's command (sim/lines.ts Command).
-static func command_of(cap: String, leaders: Array, road := false, leader := 0) -> Dictionary:
+## A side's command (sim/lines.ts commandOf): its cap, best general, its
+## heroes' best skill ranks, a horde's leader, and its commanders' traits
+## added up (maneuver.* effects, within battle.json lines.traitCap).
+static func command_of(data: Dictionary, cap: String, leaders: Array, road := false, leader := 0) -> Dictionary:
 	var skills := {}
 	var general := 0
+	var shares := {}
+	var add := func(effects: Dictionary) -> void:
+		for key in effects:
+			var parts := String(key).split(".")
+			if parts.size() == 2 and parts[0] == "maneuver" and parts[1] in ["flank", "pincer", "encircle", "breakthrough"]:
+				shares[parts[1]] = float(shares.get(parts[1], 0.0)) + float(effects[key])
 	for l in leaders:
 		var hero: Variant = l.get("hero")
 		if hero is Dictionary and not hero.is_empty():
 			for id in hero.get("skills", {}):
 				skills[id] = maxi(int(skills.get(id, 0)), int(hero.skills[id]))
+			var kind: Variant = hero.get("kind")
+			if kind != null and data.heroes.roster.has(kind):
+				for t in data.heroes.roster[kind].get("traits", []):
+					add.call(t.effects)
 		var g: Variant = l.get("general")
 		if g is Dictionary and not g.is_empty():
 			general = maxi(general, int(g.get("level", 0)))
-	return {"cap": cap, "general": general, "skills": skills, "leader": leader, "road": road}
+			add.call(LocalGenerals.trait_of(data, int(g.id)).effects)
+	var out := {"cap": cap, "general": general, "skills": skills, "leader": leader, "road": road}
+	if not shares.is_empty():
+		var limit := float(data.battle.lines.traitCap)
+		var power := {}
+		for k in shares:
+			power[k] = maxf(-limit, minf(limit, float(shares[k])))
+		out.power = power
+	return out
 
 
 static func no_command() -> Dictionary:
-	return command_of("encircle", [])
+	return {"cap": "encircle", "general": 0, "skills": {}, "leader": 0, "road": false}
+
+
+static func _power(command: Dictionary, kind: String) -> float:
+	return float(command.get("power", {}).get(kind, 0.0))
 
 
 ## The lines input for `round` of a battle set up so (sim/lines.ts linesFor).
@@ -195,18 +219,19 @@ static func battle_lines(data: Dictionary, input: Dictionary, attacker: Dictiona
 
 	if maneuver != null:
 		var x := tb - ts
+		var boost := 1.0 + _power(input[big], maneuver.kind)
 		if maneuver.kind == "encircle":
-			line[big] = {"dealt": _flat(float(rules.encircle.dealt)), "taken": float(rules.encircle.taken)}
+			line[big] = {"dealt": _flat(float(rules.encircle.dealt) * boost), "taken": float(rules.encircle.taken)}
 		else:
 			var r: Dictionary = rules[maneuver.kind]
-			line[big] = {"dealt": _flat((ts + float(r.surplusDealt) * x) / tb), "taken": (ts + float(r.surplusTaken) * x) / tb}
+			line[big] = {"dealt": _flat((ts + float(r.surplusDealt) * boost * x) / tb), "taken": (ts + float(r.surplusTaken) * x) / tb}
 		if _shield_bearer(data, input[small]):
 			line[small] = {"dealt": line[small].dealt, "taken": float(line[small].taken) * float(rules.shieldBearer.taken)}
 	var through: Variant = next.get("breakthrough")
 	if through is Dictionary:
 		var side: String = through.by
 		var share := minf(1.0, float(through.base) / float(maxi(1, _sum(counts[side]))))
-		var dealt := (float(rules.encircle.dealt) if through.kind == "encircle" else float(rules[through.kind].surplusDealt)) + float(rules.breakthrough.dealtBonus)
+		var dealt := (float(rules.encircle.dealt) if through.kind == "encircle" else float(rules[through.kind].surplusDealt)) + float(rules.breakthrough.dealtBonus) * (1.0 + _power(input[side], "breakthrough"))
 		var taken := float(rules.encircle.taken) if through.kind == "encircle" else float(rules[through.kind].surplusTaken)
 		var d := 1.0 + (dealt - 1.0) * share
 		var was: Dictionary = line[side].dealt

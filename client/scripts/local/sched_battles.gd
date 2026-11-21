@@ -363,8 +363,8 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		rng, battle.setup.get("afflictions"), LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))),
 		# In lines; nobody maneuvers while the walls stand.
 		LocalLines.lines_for({
-			"attacker": LocalLines.command_of("encircle", [], false, int(led.level)),
-			"defender": LocalLines.command_of(String(state.get("maneuver", "encircle")), [{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
+			"attacker": LocalLines.command_of(data, "encircle", [], false, int(led.level)),
+			"defender": LocalLines.command_of(data, String(state.get("maneuver", "encircle")), [{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
 				LocalGround.road_at(world, Vector2i(int(village.q), int(village.r)))),
 			"still": standing}, round, battle.setup.get("lines")))
 	# Burning and poison carry into the next round, and so do the lines.
@@ -671,8 +671,8 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		# In lines: a fort's holders maneuver more easily, an ambush needs no
 		# opening volley, and a river crossing is fought on the bridge.
 		LocalLines.lines_for({
-			"attacker": LocalLines.command_of("encircle", [], false, int(chief.level)),
-			"defender": LocalLines.command_of(String(engaged[0].get("maneuver", "encircle")) if not engaged.is_empty() else "encircle",
+			"attacker": LocalLines.command_of(data, "encircle", [], false, int(chief.level)),
+			"defender": LocalLines.command_of(data, String(engaged[0].get("maneuver", "encircle")) if not engaged.is_empty() else "encircle",
 				[{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
 				LocalGround.road_at(world, Vector2i(int(battle.q), int(battle.r)))),
 			"fort": "defender" if battle.setup.get("fort", false) else null,

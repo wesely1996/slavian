@@ -12,12 +12,63 @@
   "champion": { "attack": 150, "defense": 80, "health": 1600, "growthPerLevel": 0.1 },
   "generals": {
     "champion": { "attack": 90, "defense": 55, "health": 1000, "growthPerLevel": 0.08 },
-    "_comment": "Generals (voivodes): lesser heroes recruited at a Hero's Hall. They have levels but no skills, gear or quests. A general leads an army it marches with, or commands the garrison of the village it stands in (the highest-level general at home there); `effectsPerLevel` x its level adds to the research effects of those troops when no hero leads them (it takes command when the hero falls). XP comes from enemies killed in its battles (level L needs levelXp.base x growth^(L-1) to reach L+1). Only the hero is wounded: a general whose side loses a battle is killed. Recruiting costs `cost` x costGrowth^(generals the player already has) and takes recruitHours game hours. A player may have `perHall` generals for each Hero's Hall plus one more every `hallLevelsPerGeneral` levels of it. Each Hero's Hall level cuts the time the hero spends wounded in that village by `hallRecoveryPerLevel`.",
+    "_comment": "Generals (voivodes): lesser heroes recruited at a Hero's Hall. They have levels but no skills, gear or quests. A general leads an army it marches with, or commands the garrison of the village it stands in (the highest-level general at home there); `effectsPerLevel` x its level adds to the research effects of those troops when no hero leads them; each has one of `traits` (by its id), whose maneuver.* effects strengthen or weaken its side's maneuvers when it commands (battle.json lines); it takes command when the hero falls. XP comes from enemies killed in its battles (level L needs levelXp.base x growth^(L-1) to reach L+1). Only the hero is wounded: a general whose side loses a battle is killed. Recruiting costs `cost` x costGrowth^(generals the player already has) and takes recruitHours game hours. A player may have `perHall` generals for each Hero's Hall plus one more every `hallLevelsPerGeneral` levels of it. Each Hero's Hall level cuts the time the hero spends wounded in that village by `hallRecoveryPerLevel`.",
     "names": ["Radoslav", "Vyshata", "Putyata", "Svenald", "Pretich", "Volchy Khvost", "Blud", "Dobrogost", "Gostomysl", "Zhiroslav", "Velimir", "Rogvolod", "Tverdislav", "Ostromir", "Miroslava", "Dobrava"],
     "speed": 6,
     "maxLevel": 10,
     "levelXp": { "base": 40, "growth": 1.4 },
     "effectsPerLevel": { "attack.all": 0.02, "defense.all": 0.02 },
+    "traits": [
+      {
+        "name": "Horseman",
+        "description": "Rides round the enemy's wing; slow to close a ring.",
+        "effects": {
+          "maneuver.flank": 0.2,
+          "maneuver.encircle": -0.1
+        }
+      },
+      {
+        "name": "Hammer and anvil",
+        "description": "Closes a pincer hard; careless of a breakthrough.",
+        "effects": {
+          "maneuver.pincer": 0.2,
+          "maneuver.breakthrough": -0.1
+        }
+      },
+      {
+        "name": "Netmaker",
+        "description": "Surrounds the enemy like a net; his flanks are thin.",
+        "effects": {
+          "maneuver.encircle": 0.15,
+          "maneuver.flank": -0.1
+        }
+      },
+      {
+        "name": "Steadfast",
+        "description": "Holds and strikes back when the enemy overreaches; no hand for pincers.",
+        "effects": {
+          "maneuver.breakthrough": 0.2,
+          "maneuver.pincer": -0.1
+        }
+      },
+      {
+        "name": "Old wolf",
+        "description": "Knows every flank and pincer, and wins none of them by much.",
+        "effects": {
+          "maneuver.flank": 0.1,
+          "maneuver.pincer": 0.1,
+          "maneuver.encircle": -0.1
+        }
+      },
+      {
+        "name": "Shield wall",
+        "description": "Breaks through when beset; never spreads his men to surround a foe.",
+        "effects": {
+          "maneuver.breakthrough": 0.15,
+          "maneuver.encircle": -0.15
+        }
+      }
+    ],
     "cost": { "wood": 250, "stone": 200, "grain": 250, "iron": 100 },
     "costGrowth": 1.5,
     "recruitHours": 2,
@@ -261,6 +312,14 @@
           "effects": {
             "homeDefense": 0.06
           }
+        },
+        {
+          "name": "Hammer of the flank",
+          "description": "His riders crash into the enemy's flank; he has little patience for long sieges of men.",
+          "effects": {
+            "maneuver.flank": 0.2,
+            "maneuver.encircle": -0.1
+          }
         }
       ]
     },
@@ -282,6 +341,14 @@
             "scoutSpeed": 0.2,
             "scoutSurvival": 0.15
           }
+        },
+        {
+          "name": "Turn of the tide",
+          "description": "She waits for the enemy to overreach, then strikes back hard; she will not close a trap herself.",
+          "effects": {
+            "maneuver.breakthrough": 0.25,
+            "maneuver.pincer": -0.1
+          }
         }
       ]
     },
@@ -301,6 +368,14 @@
           "effects": {
             "woundTime": -0.5,
             "heroXp": 0.2
+          }
+        },
+        {
+          "name": "Wolf pack",
+          "description": "He sends his men round the enemy like wolves round a herd, but loathes a simple flank.",
+          "effects": {
+            "maneuver.encircle": 0.15,
+            "maneuver.flank": -0.1
           }
         }
       ]
@@ -322,6 +397,14 @@
           "effects": {
             "lootTaken": -0.2
           }
+        },
+        {
+          "name": "River sense",
+          "description": "He knows where a flank lies open, but panics when the line breaks.",
+          "effects": {
+            "maneuver.flank": 0.1,
+            "maneuver.breakthrough": -0.1
+          }
         }
       ]
     },
@@ -342,6 +425,14 @@
             "trainTime.spearman": -0.15,
             "homeDefense": 0.04
           }
+        },
+        {
+          "name": "Iron counter",
+          "description": "Her spearmen hold, then break through; she never spreads them thin enough to surround a foe.",
+          "effects": {
+            "maneuver.breakthrough": 0.2,
+            "maneuver.encircle": -0.15
+          }
         }
       ]
     },
@@ -361,6 +452,14 @@
           "effects": {
             "woundTime": -0.3
           }
+        },
+        {
+          "name": "Two-handed blow",
+          "description": "He closes the pincer like a mace swung from both sides; once beaten back, he is slow to recover.",
+          "effects": {
+            "maneuver.pincer": 0.15,
+            "maneuver.breakthrough": -0.1
+          }
         }
       ]
     },
@@ -374,6 +473,14 @@
           "name": "Sharp wit",
           "description": "His scouts ride faster, and raiders carry off less of what he guards.",
           "effects": { "scoutSpeed": 0.2, "lootTaken": -0.1 }
+        },
+        {
+          "name": "Trickster's trap",
+          "description": "He lures the enemy between his wings, but his men scatter when told to surround.",
+          "effects": {
+            "maneuver.pincer": 0.2,
+            "maneuver.encircle": -0.1
+          }
         }
       ]
     },
@@ -387,6 +494,14 @@
           "name": "Mother earth's son",
           "description": "Full barns: every village stores a tenth more.",
           "effects": { "storage": 0.1 }
+        },
+        {
+          "name": "The furrow closes",
+          "description": "He ploughs round the enemy as round a field, but his farmers make clumsy pincers.",
+          "effects": {
+            "maneuver.encircle": 0.1,
+            "maneuver.pincer": -0.1
+          }
         }
       ]
     },
@@ -400,6 +515,15 @@
           "name": "Queen of the steppe",
           "description": "She rides ahead of her own armies.",
           "effects": { "heroSpeed": 0.15 }
+        },
+        {
+          "name": "Steppe horns",
+          "description": "Her horsemen sweep both flanks of the foe; she gives no thought to being broken through.",
+          "effects": {
+            "maneuver.flank": 0.15,
+            "maneuver.pincer": 0.1,
+            "maneuver.breakthrough": -0.15
+          }
         }
       ]
     },
@@ -413,6 +537,14 @@
           "name": "The earth groans",
           "description": "Hordes falter before the gates he stands behind.",
           "effects": { "homeDefense": 0.05 }
+        },
+        {
+          "name": "Ring of mountains",
+          "description": "He walls the enemy in on every side; his bulk is wasted on a flank.",
+          "effects": {
+            "maneuver.encircle": 0.25,
+            "maneuver.flank": -0.15
+          }
         }
       ]
     }

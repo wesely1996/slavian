@@ -29,7 +29,7 @@ import { listExpeditions, type Expedition } from '../db/expeditions.js';
 import { listResearch, type ResearchEntry } from '../db/research.js';
 import { listHeroes, type Hero } from '../db/heroes.js';
 import { listGenerals, type General } from '../db/generals.js';
-import { generalBonuses, generalXpToNext } from '../sim/generals.js';
+import { generalBonuses, generalXpToNext, generalTrait } from '../sim/generals.js';
 import { listOrders, type StoredOrder } from '../db/orders.js';
 import { listArmies, type Army } from '../db/armies.js';
 import { listNotifications, unreadCount, type Notification } from '../db/notifications.js';
@@ -487,6 +487,8 @@ export function generalView(data: GameData, general: General) {
     xpToNext: general.level >= data.heroes.generals.maxLevel ? null : generalXpToNext(data, general.level),
     // What it adds to the troops it leads.
     bonuses: generalBonuses(data, general),
+    // Its trait: how it maneuvers (battle.json lines).
+    trait: generalTrait(data, general.id),
     path: general.path?.map((step) => [step.q, step.r, step.atMs]) ?? null,
     departsAt: general.departsAt?.toISOString() ?? null,
     // Ready (recruiting) or arriving (traveling).

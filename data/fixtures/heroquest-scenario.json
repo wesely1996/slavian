@@ -199,7 +199,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -2790,7 +2792,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -5319,7 +5323,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -7809,7 +7815,9 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
      },
      "armyFloor": null,
      "ruin": null,
@@ -8249,7 +8257,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -10867,7 +10877,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -13522,7 +13534,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -16177,7 +16191,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -18843,7 +18859,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -21553,7 +21571,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -21762,9 +21782,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -21786,12 +21806,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -21877,7 +21897,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 4,
-      "xp": 40,
+      "xp": 45,
       "xpToNext": 74,
       "skillPoints": 3,
       "skills": {},
@@ -24289,7 +24309,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -24498,9 +24520,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -24522,12 +24544,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -24613,7 +24635,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},
@@ -27052,7 +27074,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -27261,9 +27285,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -27285,12 +27309,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -27376,7 +27400,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},
@@ -29815,7 +29839,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -30024,9 +30050,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -30048,12 +30074,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -30139,7 +30165,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},
@@ -32575,7 +32601,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -32784,9 +32812,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -32808,12 +32836,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -32899,7 +32927,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},
@@ -35153,7 +35181,7 @@
      "villageId": null,
      "armyId": 1,
      "level": 5,
-     "xp": 76,
+     "xp": 81,
      "xpToNext": 100,
      "skillPoints": 4,
      "skills": {},
@@ -35468,7 +35496,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -35677,9 +35707,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -35701,12 +35731,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -35792,7 +35822,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},
@@ -38243,7 +38273,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -38452,9 +38484,9 @@
        "leshy_thrall": 14
       },
       "attackerNow": {
-       "rusalka": 8,
-       "grey_wolf": 7,
-       "leshy_thrall": 7
+       "rusalka": 7,
+       "grey_wolf": 4,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
        "archer": 49,
@@ -38476,12 +38508,12 @@
        {
         "at": "2026-06-01T10:40:36.000Z",
         "round": 2,
-        "attackerLeft": 22,
+        "attackerLeft": 17,
         "defenderLeft": 142,
         "attackerLosses": {
-         "rusalka": 5,
-         "grey_wolf": 21,
-         "leshy_thrall": 3
+         "rusalka": 6,
+         "grey_wolf": 24,
+         "leshy_thrall": 4
         },
         "defenderLosses": {
          "archer": 1,
@@ -38567,7 +38599,7 @@
       "villageId": null,
       "armyId": 1,
       "level": 5,
-      "xp": 76,
+      "xp": 81,
       "xpToNext": 100,
       "skillPoints": 4,
       "skills": {},

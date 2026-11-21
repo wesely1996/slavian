@@ -245,8 +245,8 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     id: camp.id,
     ground: await groundOf(client, data, world.id, { q: camp.q, r: camp.r }),
     lines: {
-      attacker: commandOf(army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: camp.q, r: camp.r })),
-      defender: commandOf('encircle', []),
+      attacker: commandOf(data, army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: camp.q, r: camp.r })),
+      defender: commandOf(data, 'encircle', []),
     },
   });
   // Reports keep the enemy as the attacker, like every other battle.

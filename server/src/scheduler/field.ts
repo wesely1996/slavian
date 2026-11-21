@@ -276,8 +276,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     // opening volley, and a river crossing is fought on the bridge.
     linesFor(
       {
-        attacker: commandOf('encircle', [], false, chief.level),
-        defender: commandOf(engaged[0]?.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: battle.q, r: battle.r })),
+        attacker: commandOf(data, 'encircle', [], false, chief.level),
+        defender: commandOf(data, engaged[0]?.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: battle.q, r: battle.r })),
         fort: battle.setup.fort ? 'defender' : null,
         bridge: !!battle.setup.river,
         noOpening: !!battle.setup.ambush,

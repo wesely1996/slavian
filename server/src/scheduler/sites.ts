@@ -135,8 +135,8 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       id: site.id + 0x5000,
       ground: await groundOf(client, data, world.id, { q: site.q, r: site.r }),
       lines: {
-        attacker: commandOf(army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: site.q, r: site.r })),
-        defender: commandOf('encircle', []),
+        attacker: commandOf(data, army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: site.q, r: site.r })),
+        defender: commandOf(data, 'encircle', []),
       },
     });
     const battle = await insertBattle(client, {
