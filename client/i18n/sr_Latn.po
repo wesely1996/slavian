@@ -4097,71 +4097,79 @@ msgstr "%s → %s · %s · %s"
 msgid "The camp burns: %d–%d%% of its troops flee at once and march on the nearest village, and its front's hatred rises by %d%%."
 msgstr "Logor gori: %d–%d%% njegovih trupa odmah beži i maršira na najbliže selo, a mržnja njegovog fronta raste za %d%%."
 
-#: client/scripts/screens/game_screen_map.gd:976
+#: client/scripts/screens/game_screen_map.gd:969
+msgid "No river here to dig on from"
+msgstr "Ovde nema reke koja bi se mogla produžiti"
+
+#: client/scripts/screens/game_screen_map.gd:971
+msgid "Toward (%d, %d)"
+msgstr "Prema (%d, %d)"
+
+#: client/scripts/screens/game_screen_map.gd:987
 msgid "Something stands there"
 msgstr "Tu nešto stoji"
 
-#: client/scripts/screens/game_screen_map.gd:978
+#: client/scripts/screens/game_screen_map.gd:989
 msgid "An army stands there: no fire can be set"
 msgstr "Tu stoji vojska: vatra se ne može podmetnuti"
 
-#: client/scripts/screens/game_screen_map.gd:1005
+#: client/scripts/screens/game_screen_map.gd:1041
 msgid "%d settlers from %s walk here and found it (%d at home). Train them in a Settlers' Lodge."
 msgstr "%d doseljenika iz %s ide ovamo i osniva ga (%d kod kuće). Obučavaj ih u Loži doseljenika."
 
-#: client/scripts/screens/game_screen_map.gd:1010
+#: client/scripts/screens/game_screen_map.gd:1046
 msgid "Send settlers"
 msgstr "Pošalji doseljenike"
 
-#: client/scripts/screens/game_screen_map.gd:1036
+#: client/scripts/screens/game_screen_map.gd:1072
 msgid "A %s here would gather %s."
 msgstr "Ovde (%s) bi se sakupljalo %s."
 
-#: client/scripts/screens/game_screen_map.gd:1054
+#: client/scripts/screens/game_screen_map.gd:1090
 msgid "Claim"
 msgstr "Prisvoji"
 
-#: client/scripts/screens/game_screen_map.gd:1095
+#: client/scripts/screens/game_screen_map.gd:1131
 msgid "Ally: %s"
 msgstr "Saveznik: %s"
 
-#: client/scripts/screens/game_screen_map.gd:1103
+#: client/scripts/screens/game_screen_map.gd:1139
 msgid "Hero %s (Lv %d) leads the garrison"
 msgstr "Junak %s (nivo %d) vodi posadu"
 
-#: client/scripts/screens/game_screen_map.gd:1106
+#: client/scripts/screens/game_screen_map.gd:1142
 msgid "Send resources"
 msgstr "Pošalji resurse"
 
-#: client/scripts/screens/game_screen_map.gd:1115
+#: client/scripts/screens/game_screen_map.gd:1151
 msgid "Hall %d · Building %d/%d · Outposts %d/%d"
 msgstr "Dom %d · Gradnja %d/%d · Ispostave %d/%d"
 
-#: client/scripts/screens/game_screen_map.gd:1118
+#: client/scripts/screens/game_screen_map.gd:1154
 msgid "Under siege: outposts produce nothing until the battle ends."
 msgstr "Pod opsadom: ispostave ne proizvode ništa dok se bitka ne završi."
 
-#: client/scripts/screens/game_screen_map.gd:1120
+#: client/scripts/screens/game_screen_map.gd:1156
 msgid "In ruins: rebuild it from the village view."
 msgstr "U ruševinama: obnovi ga iz prikaza sela."
 
-#: client/scripts/screens/game_screen_map.gd:1122
+#: client/scripts/screens/game_screen_map.gd:1158
 msgid "A refugee camp"
 msgstr "Izbeglički logor"
 
-#: client/scripts/screens/game_screen_map.gd:1122
+#: client/scripts/screens/game_screen_map.gd:1158
 msgid "Hordes raid a refugee camp but never burn it."
 msgstr "Horde pljačkaju izbeglički logor, ali ga nikad ne spale."
 
-#: client/scripts/screens/game_screen_map.gd:1126
+#: client/scripts/screens/game_screen_map.gd:1162
 msgid "Enter village"
 msgstr "Uđi u selo"
 
-#: client/scripts/screens/game_screen_map.gd:1140
+#: client/scripts/screens/game_screen_map.gd:1176
 msgid "Merchants trade with another village or outpost, or the Holy City."
 msgstr "Trgovci trguju sa drugim selom ili predstražom, ili sa Svetim gradom."
 
-#: client/scripts/screens/game_screen_map.gd:1155
+#: client/scripts/screens/game_screen_map.gd:1191
 msgid "A caravan can go to a village or outpost, the Holy City, a shipyard, or a fort or supply point."
 msgstr "Karavan može da ide u selo ili ispostavu, Sveti grad, brodogradilište, ili utvrdu ili tačku snabdevanja."
 
@@ -7347,6 +7355,30 @@ msgstr "Spali šumu"
 #: data/field.json
 msgid "Set the forest alight: nothing gets through while it burns, and the fire may spread to the trees around it, burning what stands there. Forest becomes plains, wooded hills bare hills; the timber is lost."
 msgstr "Zapali šumu: ništa ne prolazi dok gori, a vatra se može proširiti na drveće oko nje i spaliti ono što tamo stoji. Šuma postaje ravnica, šumovita brda gola brda; drvo je izgubljeno."
+
+#: data/field.json
+msgid "Make a lake"
+msgstr "Napravi jezero"
+
+#: data/field.json
+msgid "Dam the streams until the plains or the swamp lie under water: a lake for fishermen and boats, and a wall no army crosses."
+msgstr "Pregradi potoke dok ravnica ili močvara ne potonu pod vodu: jezero za ribare i čamce, i zid koji nijedna vojska ne prelazi."
+
+#: data/field.json
+msgid "Make a wetland"
+msgstr "Napravi močvaru"
+
+#: data/field.json
+msgid "Turn the streams onto the plains until they are swamp: slow, treacherous ground for any horde."
+msgstr "Skreni potoke na ravnicu dok ne postane močvara: spor, varljiv teren za svaku hordu."
+
+#: data/field.json
+msgid "Extend a river"
+msgstr "Produži reku"
+
+#: data/field.json
+msgid "Dig the river on along this hex's edge, toward the hex you choose: nothing crosses it without a bridge."
+msgstr "Prokopaj reku dalje duž ivice ovog polja, prema polju koje izabereš: niko je ne prelazi bez mosta."
 
 #: data/heroes.json
 msgid "Horseman"

@@ -749,6 +749,9 @@ const fieldFileSchema = z.object({
         gain: resourcesSchema.optional(),
         // A fire: nothing enters the hex while it burns, and it may spread.
         fire: z.object({ spreadChance: z.number().min(0).max(1), spreadHours: z.number().positive(), generations: z.number().int().min(0) }).optional(),
+        // Digs a river along the hex's edge toward a neighbour, on from a
+        // river already there (the terrain stays as it is).
+        river: z.boolean().optional(),
       }),
     ),
   }),

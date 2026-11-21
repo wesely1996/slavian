@@ -284,6 +284,38 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, reli
 		return float(cost) * (minf(road, lane_factor(data)) if land.get("lanes", {}).has(edge_key(from, to)) else road)
 
 
+## sim/land.ts edgesMeet: whether edges a|b and c|d meet at a corner.
+static func edges_meet(a: Vector2i, b: Vector2i, c: Vector2i, d: Vector2i) -> bool:
+	var shared: Array = [a, b].filter(func(h: Vector2i) -> bool: return h == c or h == d)
+	if shared.size() != 1:
+		return false
+	var p: Vector2i = b if a == shared[0] else a
+	var q: Vector2i = d if c == shared[0] else c
+	return HexMath.neighbors(p).has(q)
+
+
+## sim/land.ts reachable: the settlements of `cells` a march from the Holy
+## City can reach over `land` (by key).
+static func reachable(data: Dictionary, land: Dictionary, cells: Array) -> Dictionary:
+	var step := move_cost_on(data, land)
+	var wanted := {}
+	for c in cells:
+		wanted[key(c)] = true
+	var seen := {key(Vector2i.ZERO): true}
+	var queue: Array = [Vector2i.ZERO]
+	var out := {}
+	while not queue.is_empty():
+		var at: Vector2i = queue.pop_front()
+		if wanted.has(key(at)):
+			out[key(at)] = true
+		for n in HexMath.neighbors(at):
+			if seen.has(key(n)) or float(step.call(at, n)) < 0.0:
+				continue
+			seen[key(n)] = true
+			queue.append(n)
+	return out
+
+
 ## sim/land.ts roadLevelCost: what building a road to `level` costs and how
 ## long it takes (game seconds), a mountain pass mountainFactor times both.
 static func road_level_cost(data: Dictionary, level: int, mountain_pass: bool) -> Dictionary:

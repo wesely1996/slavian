@@ -796,7 +796,10 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 		"terraform":
 			if not body is Dictionary or not (body.get("q") is float or body.get("q") is int) or not (body.get("r") is float or body.get("r") is int) or not body.get("action") is String:
 				return _fail(400, "invalid_request", "Say where and what")
-			result = LocalTerraform.start(self, world, village, Vector2i(int(body.q), int(body.r)), String(body.action), now)
+			var toward: Variant = null
+			if body.get("toward") is Dictionary:
+				toward = Vector2i(int(body.toward.get("q", 0)), int(body.toward.get("r", 0)))
+			result = LocalTerraform.start(self, world, village, Vector2i(int(body.q), int(body.r)), String(body.action), now, toward)
 	if result.has("error") or result.has("missing"):
 		return _rule_answer(result)
 	changed.append(["village", village.id])

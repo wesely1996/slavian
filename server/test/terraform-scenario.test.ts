@@ -1,8 +1,10 @@
 // Terraforming in a solo session: trees planted on plains and hills beside
 // the village, paid in grain at once and grown after their hours; the new
 // forest then cleared, its timber brought home. Refused too far away, on
-// land the work doesn't fit, twice on one hex, and on an outpost.
-import { hex, hexDistance, neighbors } from '../src/sim/hex.js';
+// land the work doesn't fit, twice on one hex, and on an outpost. Then a
+// wetland made, a lake, and a river dug on from one already there.
+import { hex, hexDistance, hexKey, neighbors } from '../src/sim/hex.js';
+import { edgeKey, edgesMeet } from '../src/sim/land.js';
 import { MINUTE, scenario } from './scenario.js';
 
 const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Terraforming', displayName: 'You', speed: 50, difficulty: 'baron' };
@@ -69,4 +71,31 @@ scenario('terraform-scenario.json', START, async ({ started, play }) => {
   await play({ advance: 10 * MINUTE });
   await play({ method: 'GET', path: world });
   await play({ method: 'GET', path: '/v1/worlds/-1/notifications' });
+
+  // A wetland, a lake, and a river dug on (field.json terraform soak, flood, river).
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 5000, iron: 1000 } } });
+  const now = (await play({ method: 'GET', path: world })).body;
+  const land = new Map<string, string>((now.map.hexes as [number, number, string][]).map(([q, r, t]) => [`${q},${r}`, t]));
+  const busy = new Set<string>([...taken, ...(now.map.terraforms as [number, number][]).map(([q, r]) => `${q},${r}`), ...grove.map(hexKey), hexKey(plains)]);
+  const open = (c: { q: number; r: number }, d: number) => land.get(hexKey(c)) === 'plains' && hexDistance(c, home) === d && !busy.has(hexKey(c));
+  const wet = cells.find((c) => open(c, 2))!;
+  await work(wet, 'soak');
+  busy.add(hexKey(wet));
+  const pond = cells.find((c) => open(c, 2))!;
+  await work(pond, 'flood');
+  busy.add(hexKey(pond));
+  // On from a river: one laid beside the village, dug on corner to corner.
+  const ground = ['plains', 'forest', 'hills', 'wooded_hills', 'swamp'];
+  const isLand = (c: { q: number; r: number }) => ground.includes(land.get(hexKey(c)) ?? '');
+  const bank = cells.find((c) => hexDistance(c, home) === 1 && isLand(c) && !busy.has(hexKey(c)))!;
+  const other = neighbors(bank).find((n) => isLand(n) && neighbors(n).some((m) => isLand(m) && neighbors(bank).some((x) => hexKey(x) === hexKey(m))))!;
+  const toward = neighbors(bank).find((m) => isLand(m) && edgesMeet(bank, other, bank, m) && edgeKey(bank, m) !== edgeKey(bank, other))!;
+  await play({ set: { river: { a: bank, b: other } } });
+  const river = (body: object) => play({ method: 'POST', path: '/v1/villages/1/terraform', body });
+  // Without a neighbour to run toward, or nowhere near a river: refused.
+  await river({ q: bank.q, r: bank.r, action: 'river' });
+  await river({ q: bank.q, r: bank.r, action: 'river', toward: neighbors(bank).find((m) => !edgesMeet(bank, other, bank, m) && hexKey(m) !== hexKey(other))! });
+  await river({ q: bank.q, r: bank.r, action: 'river', toward });
+  await play({ advance: 30 * MINUTE });
+  await play({ method: 'GET', path: world });
 });

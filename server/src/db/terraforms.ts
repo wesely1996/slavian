@@ -9,6 +9,8 @@ export interface Terraform {
   completesAt: Date;
   // A fire: 0 where it was set, +1 for each hex it spread to.
   generation: number;
+  // A river dug: the neighbouring hex it runs toward (along their edge).
+  toward?: Hex | null;
 }
 
 interface Row {
@@ -18,9 +20,18 @@ interface Row {
   village_id: string | null;
   completes_at: Date;
   generation: number;
+  tq: number | null;
+  tr: number | null;
 }
 
-const fromRow = (r: Row): Terraform => ({ cell: hex(r.q, r.r), action: r.action, villageId: r.village_id === null ? null : Number(r.village_id), completesAt: r.completes_at, generation: r.generation });
+const fromRow = (r: Row): Terraform => ({
+  cell: hex(r.q, r.r),
+  action: r.action,
+  villageId: r.village_id === null ? null : Number(r.village_id),
+  completesAt: r.completes_at,
+  generation: r.generation,
+  toward: r.tq === null || r.tr === null ? null : hex(r.tq, r.tr),
+});
 
 export async function listTerraforms(client: DbClient, worldId: number): Promise<Terraform[]> {
   const { rows } = await client.query<Row>('SELECT * FROM terraforms WHERE world_id = $1 ORDER BY q, r', [worldId]);
@@ -33,7 +44,7 @@ export async function terraformAt(client: DbClient, worldId: number, cell: Hex):
 }
 
 export async function insertTerraform(client: DbClient, worldId: number, work: Terraform): Promise<void> {
-  await client.query('INSERT INTO terraforms (world_id, q, r, action, village_id, completes_at, generation) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
+  await client.query('INSERT INTO terraforms (world_id, q, r, action, village_id, completes_at, generation, tq, tr) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
     worldId,
     work.cell.q,
     work.cell.r,
@@ -41,6 +52,8 @@ export async function insertTerraform(client: DbClient, worldId: number, work: T
     work.villageId,
     work.completesAt,
     work.generation,
+    work.toward?.q ?? null,
+    work.toward?.r ?? null,
   ]);
 }
 
