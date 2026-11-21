@@ -30,7 +30,8 @@ import { endWave, loadWave, reinforceWave, type Wave } from '../db/waves.js';
 import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
 import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, starterSite, addUnits } from '../sim/camps.js';
-import { campsPerWave } from '../sim/difficulty.js';
+import { campFactor, campsPerWave, type GroupPower } from '../sim/difficulty.js';
+import { groupPower } from './waves.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
 import { frontOf, type Front } from '../sim/mapgen.js';
@@ -124,10 +125,18 @@ async function spawnAfterWave(client: DbClient, data: GameData, world: World, wa
     count,
   });
   const players = (await listMembers(client, world.id)).length;
+  // As strong as the group has grown (difficulty.json power).
+  const size = grownCampSize(data, world.difficulty, await groupPower(client, data, world, wave.index), wave.index);
   for (const [i, cell] of sites.entries()) {
-    const units = composeWave(data, wave.front, wave.index, campSize(data, wave.index), world.seed ^ (0xc0 + i), players);
+    const units = composeWave(data, wave.front, wave.index, size, world.seed ^ (0xc0 + i), players);
     await createCamp(client, data, world, { kind: wave.front === 'north' ? 'lair' : 'bandit', front: wave.front, q: cell.q, r: cell.r, units, waveId: wave.id }, at);
   }
+}
+
+// A camp rising after wave `index`: its base size, grown with the group's
+// power (the starter camps keep theirs).
+function grownCampSize(data: GameData, difficulty: World['difficulty'], power: GroupPower, index: number): number {
+  return Math.max(1, Math.round(campSize(data, index) * campFactor(data, difficulty, power)));
 }
 
 // When a run starts: a small bandit camp near every village, the first one
@@ -173,7 +182,8 @@ export async function revealLair(client: DbClient, data: GameData, world: World,
   });
   if (!cell) return false;
   const players = (await listMembers(client, world.id)).length;
-  const units = composeWave(data, 'north', wave.index, campSize(data, wave.index), world.seed ^ 0x1a1, players);
+  const size = grownCampSize(data, world.difficulty, await groupPower(client, data, world, wave.index), wave.index);
+  const units = composeWave(data, 'north', wave.index, size, world.seed ^ 0x1a1, players);
   await createCamp(client, data, world, { kind: 'lair', front: 'north', q: cell.q, r: cell.r, units, waveId: wave.id }, at);
   return true;
 }

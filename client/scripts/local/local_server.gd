@@ -235,13 +235,13 @@ func find_wave(world: Dictionary, id: int) -> Dictionary:
 ## What the group has built up, for wave sizes (difficulty.ts GroupPower).
 func _group_power(world: Dictionary, index: int) -> Dictionary:
 	var villages: Array = world.villages.filter(func(v: Dictionary) -> bool: return v.ruin == null)
-	var attack := 0.0
+	var power := 0.0
 	for village in villages:
 		var fed := LocalVillage.units_fed(village.state)
 		for unit in fed:
 			var def: Dictionary = data.units.units.get(unit, {})
 			if def.get("family") in ["infantry", "archers", "cavalry"] and unit != "settler" and int(fed[unit]) > 0:
-				attack += int(fed[unit]) * float(def.get("attack", 0))
+				power += int(fed[unit]) * LocalWaves.unit_power(data, unit)
 	# Armies out on the map count too.
 	var field: Array = world.armies.filter(func(a: Dictionary) -> bool: return a.status != "done" and LocalArmies.supplied(a))
 	field.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
@@ -249,8 +249,8 @@ func _group_power(world: Dictionary, index: int) -> Dictionary:
 		for unit in army.units:
 			var def: Dictionary = data.units.units.get(unit, {})
 			if def.get("family") in ["infantry", "archers", "cavalry"] and unit != "settler" and int(army.units[unit]) > 0:
-				attack += int(army.units[unit]) * float(def.get("attack", 0))
-	return {"players": world.members.size(), "villages": villages.size(), "armyAttack": attack, "waveIndex": index,
+				power += int(army.units[unit]) * LocalWaves.unit_power(data, unit)
+	return {"players": world.members.size(), "villages": villages.size(), "armyPower": power, "waveIndex": index,
 		"bridgeStages": int(world.bridge.stage) if world.has("bridge") else 0}
 
 

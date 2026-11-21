@@ -883,7 +883,11 @@ const difficultyFileSchema = z.object({
   version: z.number().int(),
   default: z.enum(DIFFICULTIES),
   presets: z.record(z.enum(DIFFICULTIES), presetSchema),
-  power: z.object({ attackPerPlayer: z.number().positive(), growthPerWave: z.number().nonnegative() }),
+  power: z.object({
+    perPlayer: z.number().positive(),
+    growthPerWave: z.number().nonnegative(),
+    weights: z.object({ attack: z.number().nonnegative(), defense: z.number().nonnegative(), health: z.number().nonnegative() }),
+  }),
 });
 export type DifficultyData = z.infer<typeof difficultyFileSchema>;
 

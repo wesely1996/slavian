@@ -18,7 +18,7 @@ import { decayFear, loadFear } from '../db/fear.js';
 import { findBridge } from '../db/bridges.js';
 import { stagesStanding } from '../sim/bridge.js';
 import { fighters } from '../sim/armies.js';
-import { afterQuiet, presetOf, waveFactor, type GroupPower } from '../sim/difficulty.js';
+import { afterQuiet, presetOf, unitPower, waveFactor, type GroupPower } from '../sim/difficulty.js';
 import { unitsFed } from '../sim/village.js';
 import { fieldArmies } from '../db/armies.js';
 import { hex } from '../sim/hex.js';
@@ -51,16 +51,16 @@ export async function waveContext(client: DbClient, world: World): Promise<WaveC
 // What the group has built up, for wave sizes (difficulty.ts).
 export async function groupPower(client: DbClient, data: GameData, world: World, waveIndex: number): Promise<GroupPower> {
   const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin);
-  let armyAttack = 0;
+  let armyPower = 0;
   for (const village of villages) {
-    for (const [unit, n] of Object.entries(fighters(data, unitsFed(village.state)))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
+    for (const [unit, n] of Object.entries(fighters(data, unitsFed(village.state)))) armyPower += n * unitPower(data, unit);
   }
   // Armies out on the map count too.
   for (const army of await fieldArmies(client, world.id)) {
-    for (const [unit, n] of Object.entries(fighters(data, army.units))) armyAttack += n * (data.units.units[unit]?.attack ?? 0);
+    for (const [unit, n] of Object.entries(fighters(data, army.units))) armyPower += n * unitPower(data, unit);
   }
   const bridgeStages = stagesStanding(await findBridge(client, world.id));
-  return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyAttack, waveIndex, bridgeStages };
+  return { players: (await listMembers(client, world.id)).length, villages: villages.length, armyPower, waveIndex, bridgeStages };
 }
 
 async function announceWave(
