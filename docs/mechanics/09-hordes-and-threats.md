@@ -92,6 +92,11 @@ A horde goes for the **nearest settlement** by road, with costs that steer it:
 - **The Holy City** is always a target, counted like the nearest settlement:
   it is struck when no village is closer, and a tie goes to the village.
 - **Erratic fronts** jitter their costs: monsters choose wildly.
+- **Forts an army holds** have a zone of control
+  ([page 8](08-armies-and-field.md#forts)). A horde never steps onto a hex
+  next to one, so it keeps two hexes away. If going round costs more than
+  50% more than the straight road, it marches on the fort first, fights its
+  holders, and goes on to its target after.
 
 Once it reaches its first target, the horde's **rampage clock** starts:
 **18 game hours**. Until the clock runs out it moves on to the next village it
