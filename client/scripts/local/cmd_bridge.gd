@@ -138,7 +138,8 @@ static func reveal_lair(server: LocalServer, world: Dictionary, at: int) -> bool
 	if cells.is_empty():
 		return false
 	var cell: Vector2i = cells[0]
-	var units := LocalWaves.compose_wave(data, "north", int(wave.index), LocalCamps.camp_size(data, int(wave.index)), int(world.seed) ^ 0x1a1, world.members.size())
+	var size := LocalWaves.grown_camp_size(data, world.difficulty, server._group_power(world, int(wave.index)), int(wave.index))
+	var units := LocalWaves.compose_wave(data, "north", int(wave.index), size, int(world.seed) ^ 0x1a1, world.members.size())
 	LocalBattles.create_camp(server, world, {"kind": "lair", "front": "north", "q": cell.x, "r": cell.y, "units": units, "waveId": wave.id}, at)
 	return true
 

@@ -180,10 +180,35 @@ static func plan_wave(data: Dictionary, ctx: Dictionary, index: int, previous_sp
 ## How much bigger than its base size a wave comes (difficulty.ts).
 static func wave_factor(data: Dictionary, difficulty: String, power: Dictionary) -> float:
 	var p: Dictionary = data.difficulty.presets[difficulty]
+	var bridge := 1.0 + float(data.bridge.powerPerStage) * float(power.get("bridgeStages", 0))
+	var factor := float(p.waveScale) * _strength(data, difficulty, power) * bridge
+	return minf(float(p.maxFactor), maxf(float(p.floor), factor))
+
+
+## difficulty.ts strength: how much stronger than expected the group is.
+static func _strength(data: Dictionary, difficulty: String, power: Dictionary) -> float:
+	var p: Dictionary = data.difficulty.presets[difficulty]
 	var players := maxf(1.0, float(power.players))
 	var extra_villages := maxf(0.0, float(power.villages) / players - 1.0)
-	var expected := players * float(data.difficulty.power.attackPerPlayer) * (1.0 + float(data.difficulty.power.growthPerWave) * int(power.waveIndex))
-	var extra_army := maxf(0.0, float(power.armyAttack) / expected - 1.0)
-	var bridge := 1.0 + float(data.bridge.powerPerStage) * float(power.get("bridgeStages", 0))
-	var factor := float(p.waveScale) * (1.0 + float(p.powerWeight) * (extra_villages + extra_army)) * bridge
-	return minf(float(p.maxFactor), maxf(float(p.floor), factor))
+	var expected := players * float(data.difficulty.power.perPlayer) * (1.0 + float(data.difficulty.power.growthPerWave) * int(power.waveIndex))
+	var extra_army := maxf(0.0, float(power.armyPower) / expected - 1.0)
+	return 1.0 + float(p.powerWeight) * (extra_villages + extra_army)
+
+
+## difficulty.ts campFactor: how much bigger camps rising after a wave come.
+static func camp_factor(data: Dictionary, difficulty: String, power: Dictionary) -> float:
+	return minf(float(data.difficulty.presets[difficulty].maxFactor), maxf(1.0, _strength(data, difficulty, power)))
+
+
+## difficulty.ts unitPower: one unit's share of the group's collective power.
+static func unit_power(data: Dictionary, unit: String) -> float:
+	var def: Dictionary = data.units.units.get(unit, {})
+	if def.is_empty():
+		return 0.0
+	var w: Dictionary = data.difficulty.power.weights
+	return float(def.attack) * float(w.attack) + float(def.defense) * float(w.defense) + float(def.health) * float(w.health)
+
+
+## scheduler/camps.ts grownCampSize: a camp rising after wave `index`.
+static func grown_camp_size(data: Dictionary, difficulty: String, power: Dictionary, index: int) -> int:
+	return maxi(1, js_round(float(LocalCamps.camp_size(data, index)) * camp_factor(data, difficulty, power)))

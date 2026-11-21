@@ -73,9 +73,11 @@ size   = base × factor
 ```
 
 - **Extra villages:** villages per player above one.
-- **Extra army:** how much the group's total attack (every fighting unit's
-  attack, summed) is above what's expected. Expected is 600 per player,
-  growing 6% a wave.
+- **Extra army:** how much the group's **collective power** is above what's
+  expected. Collective power adds up every fighting unit the group has (at
+  home, in training, out in the field), each counting attack + defense +
+  0.1 × health. An Axe Levy counts 25 + 15 + 13 = 53. Expected is 1,250 per
+  player, growing 6% a wave. It is measured each time a horde is planned.
 - **The point.** A group that grows faster than expected faces bigger hordes,
   so it's worth staying ahead.
 - **Hatred** doesn't add troops: it makes them stronger ([below](#hatred)).
@@ -196,8 +198,11 @@ Bandit camps (human fronts) and monster lairs (the North) rise on the map.
 - **When.** When a wave ends, 1 camp of its front rises near its road
   (×the title's camp rate), within 1 hex of the road and at least 3 hexes from
   any village. There are at most 4 per front, more through hatred.
-- **Size.** It starts with 6 × 1.057^wave index units of its front, and grows
-  10% every 24 game hours, up to 150.
+- **Size.** It starts with 6 × 1.057^wave index units of its front, times
+  the group's strength: 1 + power weight × (extra villages + extra army), as
+  in [wave size](#wave-size). That factor is never below 1 and at most the
+  title's max factor. It then grows 10% every 24 game hours, up to 150.
+  Starter camps don't grow with the group.
 - **Feeding hordes.** When a horde of its front sets out, every camp sends half
   its units with it.
 - **Ambushes.** Caravans passing within 1 hex are ambushed

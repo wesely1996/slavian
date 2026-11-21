@@ -13,8 +13,9 @@ export function presetOf(data: GameData, difficulty: Difficulty): DifficultyPres
 export interface GroupPower {
   readonly players: number;
   readonly villages: number;
-  // Total attack of every fighting unit the group has (home, away, training).
-  readonly armyAttack: number;
+  // The collective power of every fighting unit the group has (home, away,
+  // training): unitPower summed.
+  readonly armyPower: number;
   readonly waveIndex: number;
   // Stages of the Kalinov Bridge standing.
   readonly bridgeStages?: number;
@@ -25,13 +26,34 @@ export interface GroupPower {
 // the expected curve, between the preset's floor and cap.
 export function waveFactor(data: GameData, difficulty: Difficulty, power: GroupPower): number {
   const p = presetOf(data, difficulty);
+  const bridge = 1 + data.bridge.powerPerStage * (power.bridgeStages ?? 0);
+  const factor = p.waveScale * strength(data, difficulty, power) * bridge;
+  return Math.min(p.maxFactor, Math.max(p.floor, factor));
+}
+
+// How much stronger than expected the group is: 1, plus powerWeight for
+// every village beyond one per player and for every share of army power
+// beyond the expected curve.
+function strength(data: GameData, difficulty: Difficulty, power: GroupPower): number {
+  const p = presetOf(data, difficulty);
   const players = Math.max(1, power.players);
   const extraVillages = Math.max(0, power.villages / players - 1);
-  const expected = players * data.difficulty.power.attackPerPlayer * (1 + data.difficulty.power.growthPerWave * power.waveIndex);
-  const extraArmy = Math.max(0, power.armyAttack / expected - 1);
-  const bridge = 1 + data.bridge.powerPerStage * (power.bridgeStages ?? 0);
-  const factor = p.waveScale * (1 + p.powerWeight * (extraVillages + extraArmy)) * bridge;
-  return Math.min(p.maxFactor, Math.max(p.floor, factor));
+  const expected = players * data.difficulty.power.perPlayer * (1 + data.difficulty.power.growthPerWave * power.waveIndex);
+  const extraArmy = Math.max(0, power.armyPower / expected - 1);
+  return 1 + p.powerWeight * (extraVillages + extraArmy);
+}
+
+// How much bigger camps rising after a wave come (not the starter camps):
+// the group's strength, at least 1, at most the preset's maxFactor.
+export function campFactor(data: GameData, difficulty: Difficulty, power: GroupPower): number {
+  return Math.min(presetOf(data, difficulty).maxFactor, Math.max(1, strength(data, difficulty, power)));
+}
+
+// One unit's share of the group's collective power (difficulty.json power.weights).
+export function unitPower(data: GameData, unit: string): number {
+  const def = data.units.units[unit];
+  const w = data.difficulty.power.weights;
+  return def ? def.attack * w.attack + def.defense * w.defense + def.health * w.health : 0;
 }
 
 // Camps rising when a wave ends: the base count times the preset's rate,

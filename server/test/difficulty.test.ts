@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
 import type { World } from '../src/db/worlds.js';
 import { holdForQuiet } from '../src/scheduler/waves.js';
-import { afterQuiet, campsPerWave, waveFactor } from '../src/sim/difficulty.js';
+import { afterQuiet, campFactor, campsPerWave, unitPower, waveFactor } from '../src/sim/difficulty.js';
 import { decideRaze } from '../src/sim/horde.js';
 
 const data = loadGameData();
 const quiet = { start: 22 * 60, end: 7 * 60, utcOffsetMinutes: 120 };
 
 describe('difficulty', () => {
-  const base = { players: 2, villages: 2, armyAttack: 0, waveIndex: 3 };
+  const base = { players: 2, villages: 2, armyPower: 0, waveIndex: 3 };
   const normal = data.difficulty.presets.baron.waveScale;
 
   it('scales waves by preset, between floor and cap', () => {
@@ -34,9 +34,23 @@ describe('difficulty', () => {
 
   it('grows waves with extra villages and an army above the curve', () => {
     expect(waveFactor(data, 'baron', { ...base, villages: 4 })).toBeCloseTo(1.5 * normal);
-    const expected = 2 * data.difficulty.power.attackPerPlayer * (1 + data.difficulty.power.growthPerWave * 3);
-    expect(waveFactor(data, 'baron', { ...base, armyAttack: expected })).toBeCloseTo(normal);
-    expect(waveFactor(data, 'baron', { ...base, armyAttack: expected * 2 })).toBeCloseTo(1.5 * normal);
+    const expected = 2 * data.difficulty.power.perPlayer * (1 + data.difficulty.power.growthPerWave * 3);
+    expect(waveFactor(data, 'baron', { ...base, armyPower: expected })).toBeCloseTo(normal);
+    expect(waveFactor(data, 'baron', { ...base, armyPower: expected * 2 })).toBeCloseTo(1.5 * normal);
+  });
+
+  it('counts every unit by its attack, defense and health', () => {
+    const w = data.difficulty.power.weights;
+    const levy = data.units.units.axe_levy!;
+    expect(unitPower(data, 'axe_levy')).toBeCloseTo(levy.attack * w.attack + levy.defense * w.defense + levy.health * w.health);
+    expect(unitPower(data, 'nobody')).toBe(0);
+  });
+
+  it('grows the camps that rise after a wave with the group, never shrinks them', () => {
+    const expected = 2 * data.difficulty.power.perPlayer * (1 + data.difficulty.power.growthPerWave * 3);
+    expect(campFactor(data, 'baron', base)).toBe(1);
+    expect(campFactor(data, 'baron', { ...base, armyPower: expected * 2 })).toBeCloseTo(1.5);
+    expect(campFactor(data, 'baron', { ...base, villages: 40 })).toBe(data.difficulty.presets.baron.maxFactor);
   });
 
   it('sets how many camps rise and how hordes decide', () => {

@@ -1154,9 +1154,11 @@ static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dicti
 		return
 	var villages: Array = world.villages.map(func(v: Dictionary) -> Vector2i: return Vector2i(v.q, v.r))
 	var sites := LocalCamps.spawn_sites(data, world.hexes, wave.path, villages, occupied_hexes(world), LocalWaves.rng_for(int(world.seed), int(wave.index), 0xca), count)
+	# As strong as the group has grown (difficulty.json power).
+	var size := LocalWaves.grown_camp_size(data, world.difficulty, server._group_power(world, int(wave.index)), int(wave.index))
 	for i in sites.size():
 		var cell: Vector2i = sites[i]
-		var units := LocalWaves.compose_wave(data, wave.front, int(wave.index), LocalCamps.camp_size(data, int(wave.index)), int(world.seed) ^ (0xc0 + i), world.members.size())
+		var units := LocalWaves.compose_wave(data, wave.front, int(wave.index), size, int(world.seed) ^ (0xc0 + i), world.members.size())
 		create_camp(server, world, {"kind": "lair" if wave.front == "north" else "bandit", "front": wave.front, "q": cell.x, "r": cell.y,
 			"units": units, "waveId": wave.id}, at)
 
