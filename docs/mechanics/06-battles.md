@@ -11,6 +11,10 @@ and around the fight:
   and field setups ([page 8](08-armies-and-field.md#field-setups)).
 - **When help arrives:** reinforcements ([page 8](08-armies-and-field.md#reinforcements)).
 
+Every battle is fought in **lines**: the smaller army sets the width, round 1
+is an opening volley of arrows, and the larger side may flank, close a
+pincer or encircle ([page 16](16-battle-lines.md)).
+
 ## Rounds
 
 - **Length.** A battle is fought in **rounds of 10 real minutes**, whatever

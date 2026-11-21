@@ -70,3 +70,11 @@ static func factors(data: Dictionary, ground: Variant, family: String, shares: V
 				attack += float(s.get("attack", 0.0)) * times
 				defense += float(s.get("defense", 0.0)) * times
 	return {"attack": maxf(0.0, 1.0 + attack), "defense": maxf(0.0, 1.0 + defense)}
+
+
+## scheduler/ground.ts roadAt: whether a standing road runs into `cell`.
+static func road_at(world: Dictionary, cell: Vector2i) -> bool:
+	for e in world.roads:
+		if e.status != "building" and int(e.get("level", 1)) > 0 and (Vector2i(e.a) == cell or Vector2i(e.b) == cell):
+			return true
+	return false

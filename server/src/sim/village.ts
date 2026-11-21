@@ -1,4 +1,4 @@
-import type { BuildingDef, GameData, Stance, TerrainId } from '../data/index.js';
+import type { BuildingDef, GameData, Maneuver, Stance, TerrainId } from '../data/index.js';
 import { openTowerSlots, towerIndex, towerPlot, WALL, WALL_PLOT } from './walls.js';
 import { clanName, hasClan, villageBonuses } from './clans.js';
 import { RuleError } from '../errors.js';
@@ -67,6 +67,8 @@ export interface VillageState {
   readonly away: Units;
   // How the garrison fights when the village is attacked.
   readonly stance: Stance;
+  // How far it maneuvers at most (battle.json lines; none kept: encircle).
+  readonly maneuver?: Maneuver;
   // A horde is fighting at the gates: outposts stop producing.
   readonly besieged: boolean;
   // Grain per hour (at world speed 1) every village after an owner's

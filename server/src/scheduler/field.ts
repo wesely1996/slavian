@@ -38,7 +38,8 @@ import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
-import { groundOf } from './ground.js';
+import { groundOf, roadAt } from './ground.js';
+import { commandOf, linesFor, linesLog, withLines } from '../sim/lines.js';
 import { afterBattle, answerBattle, armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
@@ -271,6 +272,19 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     battleRng(world.seed, battle.id, round),
     battle.setup.afflictions,
     await groundOf(client, data, world.id, { q: battle.q, r: battle.r }),
+    // In lines: a fort's holders maneuver more easily, an ambush needs no
+    // opening volley, and a river crossing is fought on the bridge.
+    linesFor(
+      {
+        attacker: commandOf('encircle', [], false, chief.level),
+        defender: commandOf(engaged[0]?.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: battle.q, r: battle.r })),
+        fort: battle.setup.fort ? 'defender' : null,
+        bridge: !!battle.setup.river,
+        noOpening: !!battle.setup.ambush,
+      },
+      round,
+      battle.setup.lines,
+    ),
   );
   const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
   await setWaveStrength(client, wave.id, attackerNow);
@@ -308,8 +322,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const spent = (a: Army) => total(a.units) > 0 && total(combatants(data, a.units, ringed(a))) === 0;
   const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
   const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
-  // Burning and poison carry into the next round.
-  const carried = withAfflictions(battle.setup, result.afflictions);
+  // Burning and poison carry into the next round, and so do the lines.
+  const carried = withLines(withAfflictions(battle.setup, result.afflictions), result.lines);
   if (guardNow) await saveSetup(client, battle.id, { ...carried, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
   else if (carried !== battle.setup) await saveSetup(client, battle.id, carried);
   const log: RoundLog = {
@@ -321,6 +335,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     defenderLeft: total(defendersNow),
     ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units, ringed(a)) })) } : {}),
     ...(homeBroke ? { homeBroke: true } : {}),
+    ...linesLog(result.lines),
   };
 
   if (outcome === 'ongoing') {

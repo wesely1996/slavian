@@ -161,6 +161,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -347,6 +348,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -631,6 +633,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -3162,6 +3165,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -5541,6 +5545,7 @@
      "generalId": null,
      "orders": "raid",
      "stance": "offensive",
+     "maneuver": "encircle",
      "loot": {
       "wood": 0,
       "stone": 0,
@@ -5647,6 +5652,7 @@
      "generalId": null,
      "orders": "raid",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": {
       "wood": 0,
       "stone": 0,
@@ -5939,6 +5945,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -6220,6 +6227,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": {
        "iron": 0,
        "wood": 0,
@@ -6327,6 +6335,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "offensive",
+      "maneuver": "encircle",
       "loot": {
        "iron": 0,
        "wood": 0,
@@ -8674,6 +8683,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -9121,6 +9131,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": {
        "iron": 0,
        "wood": 0,
@@ -9247,6 +9258,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "offensive",
+      "maneuver": "encircle",
       "loot": {
        "iron": 0,
        "wood": 0,
@@ -11613,6 +11625,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -12160,6 +12173,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -12281,6 +12295,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "offensive",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -14621,6 +14636,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -15203,6 +15219,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -15324,6 +15341,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "offensive",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -17682,6 +17700,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -17696,10 +17715,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 317.5,
+        "iron": 342.5,
         "wood": 1000,
-        "grain": 767.6666666666665,
-        "stone": 855
+        "grain": 825.3333333333331,
+        "stone": 905
        },
        "ratesPerHour": {
         "iron": 150,
@@ -17713,7 +17732,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:07:54.000Z"
+       "settledAt": "2026-06-01T10:17:54.000Z"
       }
      }
     ],
@@ -18038,10 +18057,21 @@
         "initial": {
          "spearman": 4
         }
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 0,
+          "cavalry": 1,
+          "infantry": 0
+         }
+        }
        }
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "grey_wolf": 1
@@ -18054,6 +18084,18 @@
        {
         "at": "2026-06-01T10:07:54.000Z",
         "round": 1,
+        "attackerLeft": 1,
+        "defenderLeft": 4,
+        "attackerLosses": {},
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T10:17:54.000Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
         "attackerLeft": 0,
         "defenderLeft": 4,
         "attackerLosses": {
@@ -18065,7 +18107,7 @@
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T09:57:54.000Z",
-      "endedAt": "2026-06-01T10:07:54.000Z"
+      "endedAt": "2026-06-01T10:17:54.000Z"
      },
      {
       "id": 2,
@@ -18337,6 +18379,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -18458,6 +18501,7 @@
       "generalId": null,
       "orders": "raid",
       "stance": "offensive",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -18670,7 +18714,7 @@
      {
       "accountId": 1,
       "achievement": "first_defense",
-      "earnedAt": "2026-06-01T10:07:54.000Z"
+      "earnedAt": "2026-06-01T10:17:54.000Z"
      }
     ],
     "shipyards": [
@@ -20671,8 +20715,8 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
-      "body": "The horde was beaten after 1 rounds.",
-      "createdAt": "2026-06-01T10:07:54.000Z",
+      "body": "The horde was beaten after 2 rounds.",
+      "createdAt": "2026-06-01T10:17:54.000Z",
       "read": false
      },
      {
@@ -20681,7 +20725,7 @@
       "tier": "push",
       "title": "Achievement: Shield of the Village",
       "body": "Beat a horde at one of your villages.",
-      "createdAt": "2026-06-01T10:07:54.000Z",
+      "createdAt": "2026-06-01T10:17:54.000Z",
       "read": false
      },
      {

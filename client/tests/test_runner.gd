@@ -68,6 +68,7 @@ func _initialize() -> void:
 	_test_walls()
 	_test_rivers()
 	_test_ground()
+	_test_lines()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -1396,3 +1397,34 @@ func _test_ground() -> void:
 	var axeman: Dictionary = LocalBattle.player_stats(data, LocalVillage.clan_bonuses(data, "zmija")).call("serpent_axeman")
 	var f := LocalGround.factors(data, {"wetland": 1, "water": 3}, axeman.family, axeman.get("terrain"))
 	_check(is_equal_approx(float(f.attack), 1.2) and is_equal_approx(float(f.defense), 1.4), "ground: Rod Zmije's axemen in the wetlands")
+
+
+## sim/lines.ts (server test/lines.test.ts): battle lines and maneuvers.
+func _test_lines() -> void:
+	var data := LocalData.load_data()
+	var rules: Dictionary = data.battle.lines
+	var c := func(i: int, cav := 0, a := 0) -> Dictionary: return {"infantry": i, "cavalry": cav, "archers": a}
+	var none := LocalLines.no_command()
+	var input := func(over: Dictionary) -> Dictionary:
+		var out := {"opening": false, "attacker": none, "defender": none, "ground": {"flat": 1}}
+		out.merge(over, true)
+		return out
+	var width := LocalLines.battle_lines(data, input.call({"attacker": LocalLines.command_of("none", [])}), c.call(100), c.call(25))
+	_check(is_equal_approx(float(width.attacker.dealt.infantry), 0.25), "lines: the smaller army sets the width")
+	var flank := LocalLines.battle_lines(data, input.call({}), c.call(20, 30), c.call(20, 20))
+	_check(flank.maneuver == {"by": "attacker", "kind": "flank"} and is_equal_approx(float(flank.attacker.taken), 45.0 / 50.0), "lines: a flank on flat land")
+	var general := none.duplicate()
+	general.general = int(rules.commander.general)
+	_check(LocalLines.battle_lines(data, input.call({"attacker": general}), c.call(10, 40), c.call(10, 15)).maneuver.kind == "pincer", "lines: a general closes a pincer")
+	_check(LocalLines.battle_lines(data, input.call({"attacker": general, "ground": {"flat": 1, "water": 1}}), c.call(10, 40), c.call(10, 15)).maneuver.kind == "flank", "lines: no pincer by the water")
+	_check(LocalLines.battle_lines(data, input.call({"fort": "defender", "ground": {"flat": 1, "water": 1}}), c.call(60), c.call(20)).maneuver == null, "lines: a fort by the water is never encircled")
+	var broken := LocalLines.battle_lines(data, input.call({"state": flank.state}), c.call(20, 25), c.call(18, 18))
+	_check(broken.breakthrough == {"by": "defender", "kind": "flank"} and is_equal_approx(float(broken.defender.dealt.infantry), 1.0 + float(rules.breakthrough.dealtBonus)), "lines: a breakthrough")
+	_check(LocalLines.battle_lines(data, input.call({"state": broken.state}), c.call(20, 25), c.call(10, 5)).maneuver == null, "lines: no maneuver after a breakthrough")
+	var shield := none.duplicate()
+	shield.skills = {"shield_bearer": int(rules.shieldBearer.rank)}
+	var kept_start := LocalLines.battle_lines(data, input.call({"attacker": shield}), c.call(20, 30), c.call(20, 20))
+	var kept := LocalLines.battle_lines(data, input.call({"attacker": shield, "state": kept_start.state}), c.call(20, 25), c.call(18, 18))
+	_check(kept.maneuver == {"by": "attacker", "kind": "flank"} and kept.breakthrough.by == "defender", "lines: a Shield Bearer keeps his flank")
+	var bridge := LocalLines.battle_lines(data, input.call({"bridge": true}), c.call(100, 20, 40), c.call(20, 0, 30))
+	_check(is_equal_approx(float(bridge.attacker.dealt.infantry), 10.0 / 120.0) and is_equal_approx(float(bridge.defender.dealt.archers), 10.0 / 30.0), "lines: a narrow front at a bridge")

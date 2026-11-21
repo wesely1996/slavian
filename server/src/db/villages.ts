@@ -1,4 +1,4 @@
-import type { Stance } from '../data/index.js';
+import type { Maneuver, Stance } from '../data/index.js';
 import type { Resources } from '../sim/resources.js';
 import type { TrainingBatch } from '../sim/training.js';
 import type { Plot, QueuedBuild, VillageState } from '../sim/village.js';
@@ -49,6 +49,7 @@ interface VillageRow {
   training: { unit: string; count: number; startsAt: string; perUnitMs: number; size?: number }[];
   away: Record<string, number>;
   stance: Stance;
+  maneuver: Maneuver;
   besieged: boolean;
   admin_upkeep: number;
   army_floor: number | null;
@@ -91,6 +92,7 @@ function fromRow(row: VillageRow): Village {
       training,
       away: row.away,
       stance: row.stance,
+      maneuver: row.maneuver,
       besieged: row.besieged,
       adminUpkeep: Number(row.admin_upkeep),
       bonuses: row.bonuses,
@@ -112,8 +114,8 @@ export async function insertVillage(
   const { state } = village;
   const { rows } = await client.query<VillageRow>(
     `INSERT INTO villages
-       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, army_floor, founded_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+       (world_id, owner_account_id, name, q, r, levels, amounts, rates_per_hour, capacity, settled_at, queue, garrison, training, away, stance, plots, besieged, admin_upkeep, bonuses, army_floor, founded_at, maneuver)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
      RETURNING *`,
     [
       village.worldId,
@@ -138,6 +140,7 @@ export async function insertVillage(
       state.armyFloor ?? null,
       // Founded as its stores start.
       state.ledger.settledAt,
+      state.maneuver ?? 'encircle',
     ],
   );
   return fromRow(rows[0]!);
@@ -158,7 +161,8 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
   await client.query(
     `UPDATE villages
      SET levels = $2, amounts = $3, rates_per_hour = $4, capacity = $5, settled_at = $6, queue = $7,
-         garrison = $8, training = $9, away = $10, stance = $11, plots = $12, besieged = $13, admin_upkeep = $14, bonuses = $15, army_floor = $16
+         garrison = $8, training = $9, away = $10, stance = $11, plots = $12, besieged = $13, admin_upkeep = $14, bonuses = $15, army_floor = $16,
+         maneuver = $17
      WHERE id = $1`,
     [
       id,
@@ -177,6 +181,7 @@ export async function saveVillageState(client: DbClient, id: number, state: Vill
       state.adminUpkeep,
       JSON.stringify(state.bonuses),
       state.armyFloor ?? null,
+      state.maneuver ?? 'encircle',
     ],
   );
 }

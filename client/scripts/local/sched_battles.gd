@@ -194,7 +194,7 @@ static func horde_stats(server: LocalServer, world: Dictionary, wave: Dictionary
 			s.defense = float(s.defense) * (1.0 + hatred)
 			return s
 	if wave.leaderId == null:
-		return {"stats": base, "nerve": 0.0, "loot": 0.0}
+		return {"stats": base, "nerve": 0.0, "loot": 0.0, "level": 0}
 	var leader := _leader(world, int(wave.leaderId))
 	var effects := LocalHordes.leader_effects(server.data, leader)
 	var grudge: bool = village_id != null and leader.grudgeVillageId != null and int(leader.grudgeVillageId) == int(village_id)
@@ -205,7 +205,7 @@ static func horde_stats(server: LocalServer, world: Dictionary, wave: Dictionary
 		s.attack = float(s.attack) * attack
 		s.defense = float(s.defense) * defense
 		return s
-	return {"stats": stats, "nerve": effects.nerve, "loot": effects.loot}
+	return {"stats": stats, "nerve": effects.nerve, "loot": effects.loot, "level": 0 if leader.get("status") == "dead" else int(leader.level)}
 
 
 static func _leader(world: Dictionary, id: int) -> Dictionary:
@@ -360,9 +360,15 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 			s.attack = float(s.attack) * river * (1.0 if s.family == "archers" else held)
 			return s},
 		{"units": defenders, "stance": state.stance, "home": true, "stats": home_stats, "groups": groups},
-		rng, battle.setup.get("afflictions"), LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))))
-	# Burning and poison carry into the next round.
-	battle.setup = LocalBattle.with_afflictions(battle.setup, result.afflictions)
+		rng, battle.setup.get("afflictions"), LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))),
+		# In lines; nobody maneuvers while the walls stand.
+		LocalLines.lines_for({
+			"attacker": LocalLines.command_of("encircle", [], false, int(led.level)),
+			"defender": LocalLines.command_of(String(state.get("maneuver", "encircle")), [{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
+				LocalGround.road_at(world, Vector2i(int(village.q), int(village.r)))),
+			"still": standing}, round, battle.setup.get("lines")))
+	# Burning and poison carry into the next round, and so do the lines.
+	battle.setup = LocalLines.with_lines(LocalBattle.with_afflictions(battle.setup, result.afflictions), result.get("lines"))
 	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
 	var attacker_now := LocalCamps.subtract_units(wave.composition, attacker_losses)
 	# The horde batters the walls with what came at them this round.
@@ -463,6 +469,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 		log.homeBroke = true
 	if not engaged.is_empty():
 		log.garrisonLosses = shares[0]
+	log.merge(LocalLines.lines_log(result.get("lines")))
 	# Armies after the round: harassers ride home; when the battle is over,
 	# support stays on guard, armies that answered it go back where they
 	# stood, and other reinforcements go home.
@@ -626,6 +633,8 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var choke: bool = ground.get("choke", false)
 	var choke_bonus := float(data.field.choke.holdTheLineDefense)
 	var hold_attack := (1.0 + float(data.field.ambush.bonus) + float(bonuses.get("ambush", 0.0))) if ambush and first else 1.0
+	if ground.get("fort", false):
+		hold_attack += float(data.field.fort.attackBonus)
 	var horde_attack := (float(data.field.choke.attackerFactor) if ground.get("choke", false) else 1.0) * (float(data.field.river.attackerFactor) if ground.get("river", false) else 1.0)
 	var holder_base := LocalBattle.player_stats(data, bonuses, false)
 	var stats_for := func(stance: String) -> Callable:
@@ -658,9 +667,19 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				return st},
 		{"units": defenders, "stance": groups[0].stance if not groups.is_empty() else "balanced", "home": holy, "stats": stats_for.call("balanced"), "groups": groups},
 		LocalBattle.battle_rng(int(world.seed), int(battle.id), round), battle.setup.get("afflictions"),
-		LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))))
-	# Burning and poison carry into the next round.
-	battle.setup = LocalBattle.with_afflictions(battle.setup, result.afflictions)
+		LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))),
+		# In lines: a fort's holders maneuver more easily, an ambush needs no
+		# opening volley, and a river crossing is fought on the bridge.
+		LocalLines.lines_for({
+			"attacker": LocalLines.command_of("encircle", [], false, int(chief.level)),
+			"defender": LocalLines.command_of(String(engaged[0].get("maneuver", "encircle")) if not engaged.is_empty() else "encircle",
+				[{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
+				LocalGround.road_at(world, Vector2i(int(battle.q), int(battle.r)))),
+			"fort": "defender" if battle.setup.get("fort", false) else null,
+			"bridge": battle.setup.get("river", false),
+			"noOpening": battle.setup.get("ambush", false)}, round, battle.setup.get("lines")))
+	# Burning and poison carry into the next round, and so do the lines.
+	battle.setup = LocalLines.with_lines(LocalBattle.with_afflictions(battle.setup, result.afflictions), result.get("lines"))
 	var attacker_now := LocalCamps.subtract_units(wave.composition, result.attackerLosses)
 	wave.composition = attacker_now
 	var shares: Array = result.defenderGroupLosses
@@ -710,6 +729,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		log.broke = broke
 	if home_broke:
 		log.homeBroke = true
+	log.merge(LocalLines.lines_log(result.get("lines")))
 	if outcome == "ongoing":
 		var kills_so_far := LocalBattle.total(battle.attackerInitial) - LocalBattle.total(attacker_now)
 		for army in armies:

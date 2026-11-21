@@ -687,6 +687,10 @@ func _army_tab_orders(army: Dictionary) -> void:
 		_panel_body.add_child(UI.label(_stance_text(stance), UI.SMALL_SIZE, UI.MUTED))
 		if own and army.status == "engaged":
 			_panel_body.add_child(UI.label(tr("Its stance can't be changed in the middle of a battle."), UI.SMALL_SIZE, UI.MUTED))
+	# How far it maneuvers: yours can change it any time it is out, mid-battle too.
+	if own and army.status in ["stationed", "marching", "engaged"]:
+		var moving_army := int(army.id)
+		_maneuver_grid(String(army.get("maneuver", "encircle")), func(next: String) -> void: _set_army_maneuver(moving_army, next))
 
 	var mine: bool = army.get("ownerAccountId") != null and int(army.ownerAccountId) == Game.my_account_id()
 	if not mine or not army.status in ["stationed", "marching", "returning"]:
@@ -1296,6 +1300,7 @@ func _stance_picker(village: Dictionary) -> void:
 	_panel_body.add_child(UI.with_info(UI.label(tr("Stance when attacked"), UI.SMALL_SIZE, UI.MUTED),
 		tr("How the garrison fights, and the stance new armies take. Risk against reward: the earlier a stance breaks, the harder it hits or holds.")))
 	_stance_grid(village.get("stance", "balanced"), func(stance: String) -> void: _set_stance(village_id, stance))
+	_maneuver_grid(String(village.get("maneuver", "encircle")), func(maneuver: String) -> void: _set_village_maneuver(village_id, maneuver))
 
 
 ## A button for each stance (the current one pressed), and what it does.
@@ -1312,6 +1317,45 @@ func _stance_grid(current: String, pick: Callable, enabled := true) -> void:
 		button.disabled = stance == current or not enabled
 		grid.add_child(button)
 	_panel_body.add_child(UI.label(_stance_text(current), UI.SMALL_SIZE, UI.MUTED))
+
+
+## How far a side maneuvers at most (battle.json lines): a button for each.
+func _maneuver_grid(current: String, pick: Callable) -> void:
+	_panel_body.add_child(UI.with_info(UI.label(tr("Maneuver up to"), UI.HEADING_SIZE),
+		tr("The smaller army sets the width of the battle line; the larger one's surplus waits behind unless it maneuvers. Flank: cavalry 1.5 times the enemy's on flat land, infantry on hills. Pincer: twice as many (or 2.2 times both together), a general of level 5 or a hero with Battle Fury 5, Horse Lord 3 on flat land or Spearhead 3 on hills, and no river, lake or mountain beside the battle. Encircle: three times the enemy. If the enemy destroys your surplus, it breaks through and strikes back hard: a lower cap is the safer choice.")))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	_panel_body.add_child(grid)
+	for kind in LocalLines.ORDER:
+		var button := UI.button(_maneuver_name(kind), func() -> void: pick.call(kind))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = kind == current
+		grid.add_child(button)
+
+
+static func _maneuver_name(kind: String) -> String:
+	return {"none": UI.t("Hold the line"), "flank": UI.t("Flank"), "pincer": UI.t("Pincer"), "encircle": UI.t("Encircle")}.get(kind, kind)
+
+
+func _set_army_maneuver(army_id: int, maneuver: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/armies/%d/maneuver" % army_id, {"maneuver": maneuver})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
+
+
+func _set_village_maneuver(village_id: int, maneuver: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/maneuver" % village_id, {"maneuver": maneuver})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.update_village(response.data.village)
 
 
 ## A stance's numbers: what it gives, and when it breaks.

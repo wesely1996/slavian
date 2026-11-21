@@ -21,6 +21,7 @@ import {
   moveArmyCommand,
   recallArmyCommand,
   armyStanceCommand,
+  armyManeuverCommand,
   armyReturnHomeCommand,
   resupplyArmyCommand,
   circleWagonsCommand,
@@ -57,6 +58,7 @@ import {
   sendScoutsCommand,
   searchRuinsCommand,
   setStanceCommand,
+  setManeuverCommand,
   sallyCommand,
   startResearchCommand,
   fundResearchCommand,
@@ -66,7 +68,7 @@ import {
   cancelTrainingCommand,
   pickDeityCommand,
 } from '../commands/village.js';
-import { DIFFICULTIES, HERO_SLOTS, STANCES } from '../data/index.js';
+import { DIFFICULTIES, HERO_SLOTS, MANEUVERS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
 import { claimOnboardingCommand, skipOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, setRallyCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
@@ -156,6 +158,7 @@ const plotBody = z.object({ plot: z.string().regex(/^([fc]\d{1,2}|w|t\d{1,2})$/)
 const tradeBody = z.object({ give: z.enum(RESOURCE_KINDS), get: z.enum(RESOURCE_KINDS), amount: z.number().int().positive().max(1_000_000) });
 const trainBody = z.object({ unit: z.string().min(1).max(64), count: z.number().int().positive() });
 const stanceBody = z.object({ stance: z.enum(STANCES) });
+const maneuverBody = z.object({ maneuver: z.enum(MANEUVERS) });
 const returnHomeBody = z.object({ returnHome: z.boolean() });
 const amount = z.number().int().min(0).max(1_000_000);
 const loadSchema = z.object({ wood: amount, stone: amount, grain: amount, iron: amount });
@@ -732,6 +735,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     return { village: villageView(village), serverTime: clock().toISOString() };
   });
 
+  app.post('/v1/villages/:id/maneuver', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { maneuver } = maneuverBody.parse(request.body);
+    const { village } = await setManeuverCommand(db, scheduler, { accountId: account.id, villageId: id, maneuver, now: clock() });
+    return { village: villageView(village), serverTime: clock().toISOString() };
+  });
+
   // Leave the walls and charge the horde (for the battle under way).
   app.post('/v1/villages/:id/sally', async (request) => {
     const account = await authenticate(db, request);
@@ -933,6 +944,14 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const { stance } = stanceBody.parse(request.body);
     const army = await armyStanceCommand(db, scheduler, { accountId: account.id, armyId: id, stance, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/maneuver', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { maneuver } = maneuverBody.parse(request.body);
+    const army = await armyManeuverCommand(db, scheduler, { accountId: account.id, armyId: id, maneuver, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
   });
 

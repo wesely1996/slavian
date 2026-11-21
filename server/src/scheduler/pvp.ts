@@ -21,8 +21,9 @@ import { wallFactors, wallIntegrity } from '../sim/walls.js';
 import { armyLosses, sendHome } from './armies.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { ruinVillage } from './horde.js';
-import { groundOf } from './ground.js';
+import { groundOf, roadAt } from './ground.js';
 import { tell } from './notices.js';
+import { commandOf } from '../sim/lines.js';
 
 export async function attackVillage(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<void> {
   const target = army.targetVillageId !== null ? await loadVillage(client, army.targetVillageId).catch(() => null) : null;
@@ -90,6 +91,16 @@ export async function attackVillage(client: DbClient, data: GameData, world: Wor
     seed: world.seed,
     id: army.id,
     ground: await groundOf(client, data, world.id, { q: target.q, r: target.r }),
+    // In lines; nobody maneuvers at standing walls.
+    lines: {
+      attacker: commandOf(army.maneuver, [{ hero, general }]),
+      defender: commandOf(
+        target.state.maneuver ?? 'encircle',
+        [{ hero: villageHero, general: villageGeneral }, ...leaders],
+        await roadAt(client, world.id, { q: target.q, r: target.r }),
+      ),
+      still: standing > 0,
+    },
   });
   const battle = await insertBattle(client, {
     worldId: world.id,

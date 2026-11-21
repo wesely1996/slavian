@@ -128,8 +128,8 @@ holds matters:
 |---|---|---|
 | **Ambush** | Forest, hills, wooded hills or swamp, with the army in place 60 game minutes before the horde arrives | The army's first round hits +30% harder (Rys and Vasilisa more), and the horde fights it without its stance |
 | **Choke point** | A passable hex with at least 3 impassable neighbours | The horde strikes at 70%; Hold the Line gains +30% defense |
-| **River** | The horde crossed a river (over a bridge) into the hex | The horde strikes at 80% |
-| **Fort** | A fort on the hex | +30% defense for armies holding it |
+| **River** | The horde crossed a river (over a bridge) into the hex | The horde strikes at 80%, and the fight is on a narrow front ([page 16](16-battle-lines.md#ground-that-shapes-the-line)) |
+| **Fort** | A fort on the hex | +30% defense and +30% attack for armies holding it; easier maneuvers ([page 16](16-battle-lines.md#ground-that-shapes-the-line)) |
 | **Wagon fort** | The army circled its wagons ([below](#wagon-fort)) | Up to +30% defense |
 
 ### Forts
@@ -137,7 +137,9 @@ holds matters:
 - **Building.** A village builds a fort within **4 hexes** of it, on open
   ground. Cost: 600 / 900 / 200 / 200 (Medvěd −20%, Sokol +30%). It takes 1
   game hour.
-- **Defense.** Armies holding it get **+30% defense**.
+- **Defense.** Armies holding it get **+30% defense** and **+30% attack**.
+  They maneuver more easily, the enemy less so, and by a river or lake they
+  can't be encircled ([page 16](16-battle-lines.md#ground-that-shapes-the-line)).
 - **Grain.** It keeps up to **3,000 grain**, safe behind its walls: hordes
   don't burn it.
 - **Abandoned.** A fort no army has held for **48 game hours** is taken by

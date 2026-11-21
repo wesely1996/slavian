@@ -34,6 +34,17 @@
       "archers": { "flat": { "attack": 0.1 }, "woods": { "attack": -0.2 }, "hills": { "attack": 0.3 }, "mountain": { "attack": 0.1 } }
     }
   },
+  "lines": {
+    "_comment": "Armies meet in a battle line, and the smaller army sets its width: the larger one fights with as many of its troops as the smaller has, the rest wait behind (they strike only when a maneuver brings them in). Round 1 is an exchange of missiles: only archers shoot, at the enemy's infantry. From round 2 the larger side may maneuver, up to its commander's cap (none, flank, pincer, encircle). flank: on flat land (with or without woods) cavalry of flank.ratio times the enemy's, on hills infantry; the surplus strikes at surplusDealt and takes surplusTaken of the blows. pincer: on flat land cavalry pincer.ratio times the enemy's or cavalry and infantry together pincer.mixedRatio times, on hills infantry (or infantry and cavalry); it needs a commander (a general of commander.general, a hero with Battle Fury commander.battleFury, on flat land Horse Lord commander.horseLord, on hills Spearhead commander.spearhead, a horde's leader of commander.leader), and no mountain, river or lake beside the battle. encircle: all troops encircle.ratio times the enemy's; every unit strikes at dealt and takes taken; never around a fort by the water. A maneuver whose surplus the smaller side destroys (its ratio no longer met against the smaller side as it was when the maneuver began) turns into a breakthrough: the smaller side strikes at the maneuver's dealt + breakthrough.dealtBonus and takes its taken, diluted by any troops that joined it since; the larger loses its maneuver for the rest of the battle. A side led by a Shield Bearer of shieldBearer.rank keeps its flank through a breakthrough and, outmaneuvered, takes shieldBearer.taken of the blows. A player's road through the battle's hex lowers the ratios by road.ratioCut and the commander's ranks by road.rankCut. A fort's holders need fort.holderFactor of every ratio, the side attacking them fort.attackerFactor. At a bridge the front is half the smaller side's infantry wide: no more troops of each side than that fight, nor archers, and nobody maneuvers.",
+    "flank": { "ratio": 1.5, "surplusDealt": 1, "surplusTaken": 0.5 },
+    "pincer": { "ratio": 2, "mixedRatio": 2.2, "surplusDealt": 2, "surplusTaken": 0.5 },
+    "encircle": { "ratio": 3, "dealt": 2, "taken": 0.25 },
+    "commander": { "general": 5, "battleFury": 5, "horseLord": 3, "spearhead": 3, "leader": 5 },
+    "breakthrough": { "dealtBonus": 0.5 },
+    "shieldBearer": { "rank": 5, "taken": 0.75 },
+    "road": { "ratioCut": 0.1, "rankCut": 1 },
+    "fort": { "holderFactor": 0.8, "attackerFactor": 1.25 }
+  },
   "afflictions": {
     "burn": { "share": 0.1, "rounds": 3 },
     "poison": { "factor": 0.85, "rounds": 2 }

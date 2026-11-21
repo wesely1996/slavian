@@ -29,6 +29,7 @@ balance changes land there first.
 | 13 | [Events and raids beyond the edge](13-events-and-raids.md) | Daily map events (captives, ruins, shipyards, the cultist ritual, the mountain city), raids into enemy lands, strikes on gathering hordes |
 | 14 | [The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) | The five bridge stages, their quests, construction raids, Ritual Night, winning and losing, achievements |
 | 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
+| 16 | [Battle lines and maneuvers](16-battle-lines.md) | The line's width, the opening volley, flank, pincer, encirclement, breakthrough, Shield Bearer, bridges, roads and forts |
 
 ## Reading the numbers
 

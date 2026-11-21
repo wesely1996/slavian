@@ -35,14 +35,14 @@ describe('field battles', () => {
     const { ambush, choke, fort } = data.field;
     const all = { ambush: true, choke: true, fort: true };
     expect(setupFactors(data, all, { round: 1, holdersStance: 'hold_the_line' })).toEqual({
-      holderAttack: 1 + ambush.bonus,
+      holderAttack: 1 + ambush.bonus + fort.attackBonus,
       holderDefense: 1 + fort.defenseBonus + choke.holdTheLineDefense,
       hordeAttack: choke.attackerFactor,
       hordeStanceless: true,
     });
     // The surprise lasts one round; the choke only helps a line that holds.
     expect(setupFactors(data, all, { round: 2, holdersStance: 'balanced' })).toEqual({
-      holderAttack: 1,
+      holderAttack: 1 + fort.attackBonus,
       holderDefense: 1 + fort.defenseBonus,
       hordeAttack: choke.attackerFactor,
       hordeStanceless: false,

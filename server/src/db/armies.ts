@@ -1,6 +1,6 @@
 import type { Front } from '../sim/mapgen.js';
 import { NotFoundError } from '../errors.js';
-import type { Stance } from '../data/index.js';
+import type { Maneuver, Stance } from '../data/index.js';
 import type { ArmyOrders } from '../sim/armies.js';
 import type { Resources } from '../sim/resources.js';
 import type { PathStep } from '../sim/waves.js';
@@ -23,6 +23,8 @@ export interface Army {
   orders: ArmyOrders;
   // Its own battle stance.
   stance: Stance;
+  // How far it maneuvers at most (battle.json lines).
+  maneuver: Maneuver;
   units: Record<string, number>;
   status: ArmyStatus;
   // What it had when it joined its battle (it breaks on its losses since).
@@ -108,6 +110,7 @@ interface ArmyRow {
   general_id: number | null;
   orders: ArmyOrders;
   stance: Stance;
+  maneuver?: Maneuver;
   units: Record<string, number>;
   status: ArmyStatus;
   engaged_units: Record<string, number> | null;
@@ -145,6 +148,7 @@ function fromRow(row: ArmyRow): Army {
     generalId: row.general_id === null ? null : Number(row.general_id),
     orders: row.orders,
     stance: row.stance,
+    maneuver: row.maneuver ?? 'encircle',
     units: row.units,
     status: row.status,
     engagedUnits: row.engaged_units,
@@ -180,6 +184,7 @@ export async function insertArmy(
       supply?: number | null;
       supplyAt?: Date | null;
       stance?: Stance;
+      maneuver?: Maneuver;
       returnHome?: boolean;
       raid?: ArmyRaid | null;
       quarteredAt?: Date | null;
@@ -188,8 +193,8 @@ export async function insertArmy(
 ): Promise<Army> {
   const { rows } = await client.query<ArmyRow>(
     `INSERT INTO armies (world_id, owner_account_id, home_village_id, target_village_id, orders, units, path, departs_at, arrives_at,
-       target_q, target_r, hero_account_id, general_id, supply, supply_at, stance, return_home, raid, quartered_at, respond)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
+       target_q, target_r, hero_account_id, general_id, supply, supply_at, stance, return_home, raid, quartered_at, respond, maneuver)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
     [
       a.worldId,
       a.ownerAccountId,
@@ -211,6 +216,7 @@ export async function insertArmy(
       a.raid ? JSON.stringify(a.raid) : null,
       a.quarteredAt ?? null,
       a.respond ?? true,
+      a.maneuver ?? 'encircle',
     ],
   );
   return fromRow(rows[0]!);
@@ -227,7 +233,7 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
     `UPDATE armies SET units = $2, status = $3, battle_id = $4, joins_round = $5, join_bonus = $6, leaves_at = $7, returns_at = $8, loot = $9,
        orders = $10, target_village_id = $11, target_q = $12, target_r = $13, path = $14, departs_at = $15, arrives_at = $16,
        supply = $17, supply_at = $18, hungry_since = $19, hunger_at = $20, wagon_fort_at = $21, stance = $22, engaged_units = $23,
-       return_home = $24, raid = $25, home_village_id = $26, quartered_at = $27, respond = $28, post = $29
+       return_home = $24, raid = $25, home_village_id = $26, quartered_at = $27, respond = $28, post = $29, maneuver = $30
      WHERE id = $1`,
     [
       a.id,
@@ -259,6 +265,7 @@ export async function saveArmy(client: DbClient, a: Army): Promise<void> {
       a.quarteredAt,
       a.respond,
       a.post ? JSON.stringify(a.post) : null,
+      a.maneuver,
     ],
   );
 }

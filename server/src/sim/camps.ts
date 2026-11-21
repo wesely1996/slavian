@@ -4,6 +4,7 @@
 import type { GameData, TerrainId } from '../data/index.js';
 import { createRng } from './rng.js';
 import type { Ground } from './ground.js';
+import { linesFor, linesLog, type LineSetup, type LineState, type Move, type SideId } from './lines.js';
 import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import type { Front } from './mapgen.js';
@@ -117,6 +118,8 @@ function strength(units: Units, stats: (unit: string) => UnitStats): number {
 
 export interface AssaultRound {
   round: number;
+  maneuver?: { by: SideId; kind: Move };
+  breakthrough?: { by: SideId; kind: Move };
   attackerLosses: Units;
   defenderLosses: Units;
   attackerLeft: number;
@@ -141,6 +144,8 @@ export function assault(
     statsWithoutHero?: (unit: string) => UnitStats;
     // The camp's hex (battle.json terrain).
     ground?: Ground;
+    // Fought in lines (battle.json lines): the army attacks.
+    lines?: LineSetup;
   },
 ): { cleared: boolean; rounds: AssaultRound[]; armyNow: Units; campNow: Units; fallen: string[] } {
   const campStats = enemyStats(data, input.front);
@@ -151,8 +156,9 @@ export function assault(
   let armyNow = { ...input.army };
   let campNow = { ...input.camp };
   const rounds: AssaultRound[] = [];
-  // Burning and poison carry from round to round.
+  // Burning and poison carry from round to round, and so do the lines.
   let afflictions = NO_AFFLICTIONS;
+  let lineState: LineState | undefined;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
@@ -161,13 +167,15 @@ export function assault(
       battleRng(input.seed, input.id + 0x10000, round),
       afflictions,
       input.ground,
+      input.lines ? linesFor(input.lines, round, lineState) : undefined,
     );
     afflictions = result.afflictions;
+    lineState = result.lines?.state;
     for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
     champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);
     campNow = subtractUnits(campNow, result.defenderLosses);
-    rounds.push({ round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(campNow) });
+    rounds.push({ ...linesLog(result.lines), round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(campNow) });
     const outcome = battleOutcome(data, {
       round,
       attackerStance: input.armyStance,
@@ -226,13 +234,16 @@ export function repelRaid(
     seed: number;
     id: number;
     ground?: Ground;
+    // Fought in lines: the raiders attack.
+    lines?: LineSetup;
   },
 ): { held: boolean; armyNow: Units; raidersNow: Units } {
   const raiderStats = enemyStats(data, input.front);
   let armyNow = { ...input.army };
   let raidersNow = { ...input.raiders };
-  // Burning and poison carry from round to round.
+  // Burning and poison carry from round to round, and so do the lines.
   let afflictions = NO_AFFLICTIONS;
+  let lineState: LineState | undefined;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
@@ -241,8 +252,10 @@ export function repelRaid(
       battleRng(input.seed, input.id + 0x20000, round),
       afflictions,
       input.ground,
+      input.lines ? linesFor(input.lines, round, lineState) : undefined,
     );
     afflictions = result.afflictions;
+    lineState = result.lines?.state;
     raidersNow = subtractUnits(raidersNow, result.attackerLosses);
     armyNow = subtractUnits(armyNow, result.defenderLosses);
     const outcome = battleOutcome(data, {

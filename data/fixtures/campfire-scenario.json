@@ -214,6 +214,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -2739,6 +2740,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -5275,6 +5277,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -7814,6 +7817,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -10400,6 +10404,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -12993,6 +12998,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -15586,6 +15592,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -18179,6 +18186,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -20772,6 +20780,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -23358,6 +23367,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -23374,7 +23384,7 @@
        "amounts": {
         "iron": 5000,
         "wood": 5000,
-        "grain": 19376.666666666668,
+        "grain": 19355.583333333336,
         "stone": 5000
        },
        "ratesPerHour": {
@@ -23389,7 +23399,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:31:07.200Z"
+       "settledAt": "2026-06-01T08:41:07.200Z"
       }
      }
     ],
@@ -23589,19 +23599,27 @@
          "archer": 10,
          "spearman": 30
         }
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 4,
+          "cavalry": 0,
+          "infantry": 6
+         }
+        }
        }
       },
       "status": "defended",
-      "round": 1,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "zealot": 7,
        "crossbowman": 4
       },
-      "attackerNow": {
-       "zealot": 3,
-       "crossbowman": 2
-      },
+      "attackerNow": {},
       "defenderInitial": {
        "archer": 10,
        "spearman": 30
@@ -23610,22 +23628,37 @@
        {
         "at": "2026-06-01T08:31:07.200Z",
         "round": 1,
-        "attackerLeft": 5,
-        "defenderLeft": 38,
+        "attackerLeft": 10,
+        "defenderLeft": 39,
         "attackerLosses": {
-         "zealot": 4,
-         "crossbowman": 2
+         "zealot": 1
         },
         "defenderLosses": {
-         "archer": 1,
          "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T08:41:07.200Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 0,
+        "defenderLeft": 38,
+        "attackerLosses": {
+         "zealot": 6,
+         "crossbowman": 4
+        },
+        "defenderLosses": {
+         "archer": 1
         }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T08:21:07.200Z",
-      "endedAt": "2026-06-01T08:31:07.200Z"
+      "endedAt": "2026-06-01T08:41:07.200Z"
      }
     ],
     "raids": [],
@@ -23640,7 +23673,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 6,
+      "xp": 11,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -23818,7 +23851,7 @@
      {
       "accountId": 1,
       "achievement": "first_defense",
-      "earnedAt": "2026-06-01T08:31:07.200Z"
+      "earnedAt": "2026-06-01T08:41:07.200Z"
      }
     ],
     "shipyards": [
@@ -23874,7 +23907,7 @@
      [
       -2,
       2,
-      11.2
+      12.2
      ]
     ],
     "delegations": [],
@@ -25801,8 +25834,8 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Vruchiy held",
-      "body": "The horde was beaten after 1 rounds.",
-      "createdAt": "2026-06-01T08:31:07.200Z",
+      "body": "The horde was beaten after 2 rounds.",
+      "createdAt": "2026-06-01T08:41:07.200Z",
       "read": false
      },
      {
@@ -25811,7 +25844,7 @@
       "tier": "push",
       "title": "Achievement: Shield of the Village",
       "body": "Beat a horde at one of your villages.",
-      "createdAt": "2026-06-01T08:31:07.200Z",
+      "createdAt": "2026-06-01T08:41:07.200Z",
       "read": false
      },
      {

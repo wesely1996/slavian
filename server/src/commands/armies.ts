@@ -3,7 +3,7 @@ import type { Terraform } from '../db/terraforms.js';
 import { loadArmy, saveArmy, type Army } from '../db/armies.js';
 import type { StoredRiverEdge } from '../db/rivers.js';
 import { authorize } from '../db/delegations.js';
-import type { GameData, Stance } from '../data/index.js';
+import type { GameData, Maneuver, Stance } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
@@ -304,6 +304,17 @@ export async function armyStanceCommand(db: Db, deps: SchedulerDeps, input: { ac
     if (army.status === 'engaged') throw new RuleError('That army is in the middle of a battle');
     if (army.status === 'returning' || army.status === 'done') throw new RuleError('Only armies out in the field take a stance');
     const next = { ...army, stance: input.stance };
+    await saveArmy(client, next);
+    return next;
+  });
+}
+
+// How far an army maneuvers at most in battle (battle.json lines); it can
+// change its mind in the middle of one.
+export async function armyManeuverCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; armyId: number; maneuver: Maneuver; now: Date }): Promise<Army> {
+  return armyCommand(db, deps, input, "set how far an army maneuvers", async ({ client, army }) => {
+    if (army.status === 'returning' || army.status === 'done') throw new RuleError('Only armies out in the field maneuver');
+    const next = { ...army, maneuver: input.maneuver };
     await saveArmy(client, next);
     return next;
   });

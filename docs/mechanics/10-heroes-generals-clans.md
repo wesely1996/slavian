@@ -49,6 +49,11 @@ Within a group, each hero can be taken by only one player.
 | Wayfinder | Keen Eyes | Scouts 5 points likelier to return | 3 |
 | Wayfinder | Quartermaster | Caravans carry 10% more | 3 |
 
+**Maneuvers** ([page 16](16-battle-lines.md#maneuvers)): Battle Fury 5, or
+Horse Lord 3 on flat land, or Spearhead 3 on hills, lets the hero's side
+close a pincer. Shield Bearer 5 keeps a flank through a breakthrough and
+closes ranks when outmaneuvered.
+
 ### Gear
 
 - **Slots.** Five: weapon, armor, amulet, banner, mount.
@@ -131,6 +136,8 @@ Generals (voivodes) are lesser heroes recruited at a **Hero's Hall**.
 - **Levels, no skills.** Up to level 10, from kills: level L needs
   40 × 1.4^(L−1) XP. Each level gives the troops it commands **+2% attack and
   defense**. Generals have no skills, gear or quests.
+- **Pincer.** A general of level 5 can lead a pincer
+  ([page 16](16-battle-lines.md#maneuvers)).
 - **Commanding.** A general leads the army it marches with, or commands the
   garrison of the village it stands in (the highest-level general there).
   Its effects count only when no hero leads those troops.

@@ -161,6 +161,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -347,6 +348,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -587,6 +589,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -2933,6 +2936,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "spearman": 6
@@ -3007,6 +3011,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "offensive",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "spearman": 2
@@ -3076,6 +3081,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "hold_the_line",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "spearman": 6
@@ -3117,6 +3123,258 @@
      "quarteredAt": null,
      "respond": true,
      "post": null
+    },
+    "serverTime": "2026-06-01T10:14:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/armies/2/maneuver",
+   "body": {
+    "maneuver": "flank"
+   },
+   "status": 200,
+   "response": {
+    "army": {
+     "id": 2,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      0,
+      -1
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "offensive",
+     "maneuver": "flank",
+     "loot": null,
+     "units": {
+      "spearman": 2
+     },
+     "status": "stationed",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -2,
+       1,
+       14400
+      ],
+      [
+       -1,
+       0,
+       28800
+      ],
+      [
+       0,
+       -1,
+       43200
+      ]
+     ],
+     "departsAt": "2026-06-01T10:09:00.000Z",
+     "arrivesAt": "2026-06-01T10:09:43.200Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 48,
+     "supplyAt": "2026-06-01T10:09:00.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
+    },
+    "serverTime": "2026-06-01T10:14:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/maneuver",
+   "body": {
+    "maneuver": "none"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "barracks": 1,
+      "elder_hall": 1
+     },
+     "queue": [],
+     "garrison": {
+      "spearman": 0
+     },
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "none",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 322.5,
+       "wood": 1000,
+       "grain": 671.8,
+       "stone": 865
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T10:09:00.000Z"
+     }
     },
     "serverTime": "2026-06-01T10:14:00.000Z"
    }
@@ -3313,6 +3571,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -3594,6 +3853,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -3649,6 +3909,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -5937,6 +6198,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -6324,6 +6586,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -6379,6 +6642,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -8686,6 +8950,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -9112,6 +9377,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -9167,6 +9433,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -11474,6 +11741,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -11900,6 +12168,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -11955,6 +12224,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -14274,6 +14544,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -14700,6 +14971,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -14755,6 +15027,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -17062,6 +17335,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -17488,6 +17762,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -17543,6 +17818,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -19850,6 +20126,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -20276,6 +20553,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -20331,6 +20609,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -22638,6 +22917,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -23064,6 +23344,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -23119,6 +23400,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -25426,6 +25708,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -25852,6 +26135,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -25907,6 +26191,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -28214,6 +28499,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -28640,6 +28926,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
        "spearman": 2
@@ -28695,6 +28982,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "hold_the_line",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 6
@@ -30851,7 +31139,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 6,
+       "used": 8,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -30998,10 +31286,11 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 1
+       "spearman": 0
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "none",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -31016,15 +31305,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 395,
+        "iron": 322.5,
         "wood": 1000,
-        "grain": 865.2666666666667,
-        "stone": 1000
+        "grain": 671.8,
+        "stone": 865
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 386.5,
+        "grain": 400,
         "stone": 300
        },
        "capacity": {
@@ -31033,7 +31322,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T10:38:04.800Z"
+       "settledAt": "2026-06-01T10:09:00.000Z"
       }
      }
     ],
@@ -31374,8 +31663,8 @@
        "leshy_thrall": 2
       },
       "attackerNow": {
-       "rusalka": 2,
-       "grey_wolf": 3,
+       "rusalka": 3,
+       "grey_wolf": 4,
        "leshy_thrall": 2
       },
       "defenderInitial": {
@@ -31384,26 +31673,11 @@
       "rounds": [
        {
         "at": "2026-06-01T10:37:21.600Z",
-        "broke": [
-         {
-          "units": {
-           "spearman": 1
-          },
-          "armyId": 2,
-          "stance": "offensive",
-          "villageId": 1
-         }
-        ],
         "round": 1,
-        "attackerLeft": 7,
-        "defenderLeft": 6,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {
-         "spearman": 2
-        }
+        "attackerLeft": 9,
+        "defenderLeft": 8,
+        "attackerLosses": {},
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -31514,64 +31788,10 @@
       "generalId": null,
       "orders": "hold",
       "stance": "offensive",
+      "maneuver": "flank",
       "loot": null,
       "units": {
-       "spearman": 1
-      },
-      "status": "done",
-      "battleId": null,
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -2,
-        1,
-        14400
-       ],
-       [
-        -1,
-        0,
-        28800
-       ],
-       [
-        0,
-        -1,
-        43200
-       ]
-      ],
-      "departsAt": "2026-06-01T10:09:00.000Z",
-      "arrivesAt": "2026-06-01T10:09:43.200Z",
-      "leavesAt": "2026-06-01T10:37:21.600Z",
-      "returnsAt": "2026-06-01T10:38:04.800Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T10:38:04.800Z",
-      "hungrySince": null,
-      "wagonFortAt": null,
-      "returnHome": false,
-      "raid": null,
-      "quarteredAt": null,
-      "respond": true,
-      "post": null
-     },
-     {
-      "id": 1,
-      "ownerAccountId": 1,
-      "homeVillageId": 1,
-      "targetVillageId": null,
-      "target": [
-       0,
-       -1
-      ],
-      "heroAccountId": null,
-      "generalId": null,
-      "orders": "hold",
-      "stance": "hold_the_line",
-      "loot": null,
-      "units": {
-       "spearman": 5
+       "spearman": 2
       },
       "status": "engaged",
       "battleId": 1,
@@ -31601,8 +31821,64 @@
       "arrivesAt": "2026-06-01T10:09:43.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 2.1999999999999886,
-      "supplyAt": "2026-06-01T10:37:21.600Z",
+      "supply": 48,
+      "supplyAt": "2026-06-01T10:09:00.000Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     },
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": null,
+      "target": [
+       0,
+       -1
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "hold",
+      "stance": "hold_the_line",
+      "maneuver": "encircle",
+      "loot": null,
+      "units": {
+       "spearman": 6
+      },
+      "status": "engaged",
+      "battleId": 1,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -2,
+        1,
+        14400
+       ],
+       [
+        -1,
+        0,
+        28800
+       ],
+       [
+        0,
+        -1,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T10:09:00.000Z",
+      "arrivesAt": "2026-06-01T10:09:43.200Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 144,
+      "supplyAt": "2026-06-01T10:09:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,

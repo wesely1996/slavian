@@ -44,13 +44,13 @@ export async function hordeStats(
   wave: Wave,
   base: (unit: string) => UnitStats,
   villageId: number | null,
-): Promise<{ stats: (unit: string) => UnitStats; nerve: number; loot: number }> {
+): Promise<{ stats: (unit: string) => UnitStats; nerve: number; loot: number; level: number }> {
   base = hatedStats(base, wave.hatred);
-  if (wave.leaderId === null) return { stats: base, nerve: 0, loot: 0 };
+  if (wave.leaderId === null) return { stats: base, nerve: 0, loot: 0, level: 0 };
   const leader = await loadLeader(client, wave.leaderId);
   const effects = leaderEffects(data, leader);
   const grudge = villageId !== null && leader.grudgeVillageId === villageId;
-  return { stats: ledStats(data, base, effects, grudge), nerve: effects.nerve, loot: effects.loot };
+  return { stats: ledStats(data, base, effects, grudge), nerve: effects.nerve, loot: effects.loot, level: leader.status === 'dead' ? 0 : leader.level };
 }
 
 // After a battle the horde fought: experience, wounds, a grudge, or death.
