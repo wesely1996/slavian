@@ -4,7 +4,7 @@ import { unitSpeed } from '../sim/smithing.js';
 import { riverEdgesAt } from '../db/rivers.js';
 import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
-import type { GameData, Stance, TerrainId } from '../data/index.js';
+import type { GameData, Maneuver, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
 import { damagedRoads, standingRoads } from '../db/roads.js';
 import { roadLink } from '../sim/land.js';
@@ -314,6 +314,19 @@ export async function setStanceCommand(
 ): Promise<{ village: Village }> {
   const { village } = await ownVillageCommand(db, deps, { ...input, action: 'changed the stance' }, async ({ village }) => ({
     state: { ...village.state, stance: input.stance },
+    result: null,
+  }));
+  return { village };
+}
+
+// How far the garrison maneuvers at most in battle (battle.json lines).
+export async function setManeuverCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: VillageCommandInput & { maneuver: Maneuver },
+): Promise<{ village: Village }> {
+  const { village } = await ownVillageCommand(db, deps, { ...input, action: 'changed how far the garrison maneuvers' }, async ({ village }) => ({
+    state: { ...village.state, maneuver: input.maneuver },
     result: null,
   }));
   return { village };

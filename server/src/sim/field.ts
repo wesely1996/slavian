@@ -61,7 +61,7 @@ export function setupFactors(
   holderDefense += setup.wagonFort ?? 0;
   if (setup.choke && input.holdersStance === 'hold_the_line') holderDefense += data.field.choke.holdTheLineDefense;
   return {
-    holderAttack: setup.ambush && first ? 1 + data.field.ambush.bonus + (input.ambushBonus ?? 0) : 1,
+    holderAttack: (setup.ambush && first ? 1 + data.field.ambush.bonus + (input.ambushBonus ?? 0) : 1) + (setup.fort ? data.field.fort.attackBonus : 0),
     holderDefense,
     hordeAttack: (setup.choke ? data.field.choke.attackerFactor : 1) * (setup.river ? data.field.river.attackerFactor : 1),
     hordeStanceless: setup.ambush && first,

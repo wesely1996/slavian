@@ -161,6 +161,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -358,6 +359,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -553,6 +555,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -740,6 +743,7 @@
      "garrison": {},
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -937,6 +941,7 @@
      },
      "away": {},
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -1179,6 +1184,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -3525,6 +3531,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "spearman": 2
@@ -3594,6 +3601,7 @@
      "generalId": null,
      "orders": "garrison",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "spearman": 2
@@ -3666,6 +3674,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "archer": 4,
@@ -3745,6 +3754,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "archer": 4,
@@ -4000,6 +4010,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -4281,6 +4292,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "archer": 4,
@@ -4338,6 +4350,7 @@
       "generalId": null,
       "orders": "garrison",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -6619,6 +6632,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -7048,6 +7062,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "archer": 4,
@@ -7105,6 +7120,7 @@
       "generalId": null,
       "orders": "garrison",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -9402,6 +9418,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -9831,6 +9848,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "archer": 4,
@@ -9888,6 +9906,7 @@
       "generalId": null,
       "orders": "garrison",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2
@@ -12188,6 +12207,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -12562,8 +12582,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 3,
-       "leshy_thrall": 2
+       "grey_wolf": 4,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "archer": 4,
@@ -12577,7 +12597,7 @@
         "attackerLeft": 8,
         "defenderLeft": 8,
         "attackerLosses": {
-         "grey_wolf": 1
+         "leshy_thrall": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -12692,6 +12712,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "archer": 4,
@@ -12749,6 +12770,7 @@
       "generalId": null,
       "orders": "garrison",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "spearman": 2

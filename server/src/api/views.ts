@@ -66,6 +66,7 @@ export interface VillageView {
   garrison: Record<string, number>;
   away: Record<string, number>;
   stance: string;
+  maneuver: string;
   // A battle at the gates: outposts produce nothing until it ends.
   besieged: boolean;
   // Grain per hour (world speed 1) for administration (founded villages).
@@ -111,6 +112,7 @@ export function villageView(village: Village): VillageView {
     garrison: { ...garrison },
     away: { ...village.state.away },
     stance: village.state.stance,
+    maneuver: village.state.maneuver ?? 'encircle',
     besieged: village.state.besieged,
     adminUpkeep: village.state.adminUpkeep,
     bonuses: { ...village.state.bonuses },
@@ -542,6 +544,8 @@ export function armyView(army: Army) {
     orders: army.orders,
     // Its own battle stance.
     stance: army.stance,
+    // How far it maneuvers at most (battle.json lines).
+    maneuver: army.maneuver,
     // Carried home from a cleared camp.
     loot: army.loot,
     units: army.units,

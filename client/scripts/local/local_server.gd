@@ -439,6 +439,14 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(army)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "maneuver":
+		if not String(body.get("maneuver", "")) in LocalLines.ORDER:
+			return _fail(400, "invalid_request", "Unknown maneuver")
+		var army := LocalArmies.set_maneuver(world, int(parts[2]), String(body.maneuver))
+		if army.has("error"):
+			return _rule_answer(army)
+		changed.append(["world"])
+		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] == "stance":
 		if not String(body.get("stance", "")) in data.battle.stances:
 			return _fail(400, "invalid_request", "Unknown stance")
@@ -565,6 +573,12 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				result = LocalVillage.abandon_outpost(data, village.state, LocalVillage.outpost_plot(Vector2i(int(body.get("q", 0)), int(body.get("r", 0)))), now, world.speed)
 				if not result.has("error"):
 					result = {"state": result}
+			"maneuver":
+				if not String(body.get("maneuver", "")) in LocalLines.ORDER:
+					return _fail(400, "invalid_request", "Unknown maneuver")
+				var moved: Dictionary = village.state.duplicate(true)
+				moved.maneuver = String(body.maneuver)
+				result = {"state": moved}
 			"stance":
 				if not String(body.get("stance", "")) in data.battle.stances:
 					return _fail(400, "invalid_request", "Unknown stance")
@@ -1402,7 +1416,7 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 	return {
 		"id": village.id, "worldId": world.id, "ownerAccountId": village.ownerAccountId, "name": village.name, "q": village.q, "r": village.r,
 		"plots": s.plots.duplicate(true), "levels": s.levels.duplicate(), "queue": queue, "garrison": s.garrison.duplicate(),
-		"away": s.away.duplicate(), "stance": s.stance, "besieged": s.besieged, "adminUpkeep": s.adminUpkeep,
+		"away": s.away.duplicate(), "stance": s.stance, "maneuver": s.get("maneuver", "encircle"), "besieged": s.besieged, "adminUpkeep": s.adminUpkeep,
 		"bonuses": s.bonuses.duplicate(), "armyFloor": s.get("armyFloor"), "ruin": village.ruin, "refuge": village.refuge == true,
 		"training": training,
 		"resources": {"amounts": s.ledger.amounts, "ratesPerHour": s.ledger.ratesPerHour, "capacity": s.ledger.capacity,

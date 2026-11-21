@@ -278,6 +278,10 @@ static func on_map_event_end(server: LocalServer, world: Dictionary, event: Dict
 		if LocalArmies.armies_holding(world, Vector2i(site.q, site.r), ["marching", "engaged", "stationed"]).any(func(a: Dictionary) -> bool: return a.orders == "explore"):
 			return
 		world.sites.erase(site)
+		# Its battles forget it, as the server's do (ON DELETE SET NULL).
+		for b in world.battles:
+			if b.get("siteId") != null and int(b.siteId) == int(site.id):
+				b.siteId = null
 		if LocalHeroCommands.army_quest_gone(server, world, site.get("quest"), int(event.dueAt)):
 			changed.append(["world"])
 			return
@@ -364,7 +368,10 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 		var home := server.find_village(world, int(army.homeVillageId))
 		var result := LocalArmies.repel_raid(data, fighting, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, LocalVillage.village_bonuses(data, home.state), false)), army.get("stance", "balanced"),
 			raiders, String(rules.raiderStance), String(yard.front), int(world.seed), int(yard.id) * 64 + int(yard.raids) * 8 + i,
-			LocalGround.at(data, world, Vector2i(int(yard.q), int(yard.r))))
+			LocalGround.at(data, world, Vector2i(int(yard.q), int(yard.r))),
+			{"attacker": LocalLines.no_command(), "defender": LocalLines.command_of(String(army.get("maneuver", "encircle")),
+				[{"hero": LocalArmies.hero_with_army(world, int(army.id)), "general": LocalGenerals.general_with_army(world, int(army.id))}],
+				LocalGround.road_at(world, Vector2i(int(yard.q), int(yard.r))))})
 		var lost := {}
 		for unit in fighting:
 			var n := int(fighting[unit]) - int(result.armyNow.get(unit, 0))

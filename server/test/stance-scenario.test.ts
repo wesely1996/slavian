@@ -3,7 +3,8 @@
 // in the village's stance and set to Hold the Line where it stands. The
 // horde runs into them; the Offensive army breaks first and falls back
 // home while the other fights on. A stance can't be changed in the middle
-// of the battle, nor for an army on its way home.
+// of the battle, nor for an army on its way home. How far an army or the
+// garrison maneuvers is its own choice too.
 import { hex, hexDistance, neighbors } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -42,6 +43,10 @@ scenario('stance-scenario.json', START, async ({ started, now, play }) => {
   const bold = (await army({ orders: 'hold', target: cell, units: { spearman: 2 }, stance: 'offensive' })).body.army;
   await play({ advance: 5 * MINUTE });
   if (steady) await stance(steady.id, 'hold_the_line');
+  // How far they maneuver (battle.json lines): the bold one only flanks; the
+  // village's garrison doesn't maneuver at all.
+  if (bold) await play({ method: 'POST', path: `/v1/armies/${bold.id}/maneuver`, body: { maneuver: 'flank' } });
+  await play({ method: 'POST', path: '/v1/villages/1/maneuver', body: { maneuver: 'none' } });
   await play({ method: 'GET', path: world });
 
   // The horde runs into them (when it reaches the hex): round by round.

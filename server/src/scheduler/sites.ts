@@ -37,7 +37,8 @@ import { refreshBonuses } from './research.js';
 import type { BridgeQuest } from '../data/index.js';
 import { bridgeQuest } from './bridge.js';
 import { rewardEvent } from './eventOutcomes.js';
-import { groundOf } from './ground.js';
+import { groundOf, roadAt } from './ground.js';
+import { commandOf } from '../sim/lines.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -133,6 +134,10 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       seed: world.seed,
       id: site.id + 0x5000,
       ground: await groundOf(client, data, world.id, { q: site.q, r: site.r }),
+      lines: {
+        attacker: commandOf(army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: site.q, r: site.r })),
+        defender: commandOf('encircle', []),
+      },
     });
     const battle = await insertBattle(client, {
       worldId: world.id,

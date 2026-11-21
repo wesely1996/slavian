@@ -1,6 +1,6 @@
 # 15. Player against player
 
-[← The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) · [Index](README.md)
+[← The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) · [Index](README.md) · Next: [Battle lines and maneuvers →](16-battle-lines.md)
 
 A world created with **PvP** on lets players attack each other's villages.
 In a co-op world (the default) nobody can. Solo runs are always co-op.

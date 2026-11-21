@@ -150,6 +150,17 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 		for c in groups[i].get("champions", []):
 			targets.append([i, c.id, 1, c])
 			target_total += 1
+	# The opening volley falls on the front line, the infantry, while it stands.
+	if plight.get("opening", false):
+		var front: Array = []
+		var front_total := 0
+		for t in targets:
+			if t[3] == null and (groups[t[0]].stats if groups[t[0]].has("stats") else to.stats).call(t[1]).family == "infantry":
+				front.append(t)
+				front_total += int(t[2])
+		if not front.is_empty():
+			targets = front
+			target_total = front_total
 	if target_total == 0:
 		return {"losses": result, "fallen": fallen, "burnHit": burn_hit, "poisons": false}
 	# battle.ts: wagons in a ring stand as a wall before their side's archers:
@@ -210,17 +221,24 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 				if count <= 0:
 					continue
 				var attacker: Dictionary = striker_stats.call(unit)
+				if plight.get("opening", false) and attacker.family != "archers":
+					continue
 				var counter := float(attacker.get("counters", battle.counters.get(attacker.family, {})).get(stats.family, 1.0))
 				var on_ground := float(LocalGround.factors(data, plight.get("ground"), attacker.family, attacker.get("terrain")).attack)
-				var blow: float = count * float(attacker.attack) * on_ground * float(rolled[s][unit]) * float(from_stance.attack) * matchup * counter * from_weak
+				var from_line: Variant = plight.get("from")
+				var in_line := float(from_line.dealt.get(attacker.family, 1.0)) if from_line is Dictionary else 1.0
+				var blow: float = count * float(attacker.attack) * on_ground * in_line * float(rolled[s][unit]) * float(from_stance.attack) * matchup * counter * from_weak
 				damage += blow
 				if "burn" in attacker.get("inflicts", []):
 					burning += blow
 			# Its champions strike too, at no family's weakness.
-			for c in striker.get("champions", []):
+			for c in [] if plight.get("opening", false) else striker.get("champions", []):
 				damage += float(c.attack) * float(from_stance.attack) * matchup * from_weak
 		# What still burns from earlier rounds, spread like any blow.
 		damage += float(plight.burning)
+		# Of what is aimed at the side, its line lets this much land.
+		if plight.get("to") is Dictionary:
+			damage *= float(plight.to.taken)
 		var share := float(weights[k]) / target_total
 		burn_hit += burning * share
 		# Defense is a range too: this target's roll for the round.
@@ -271,18 +289,41 @@ static func _weak(data: Dictionary, side: Dictionary) -> float:
 ## Simultaneous: both sides strike with the numbers they had at the start.
 ## With defender groups, also their losses by group (defenderGroupLosses);
 ## and what burns and poisons both sides carry into the next round (afflictions).
-## `ground`: where it is fought (LocalGround.at; null beyond the map's edge).
-static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng, afflictions: Variant = null, ground: Variant = null) -> Dictionary:
+## A side's fighting troops by family (battle.ts familyCounts).
+static func family_counts(side: Dictionary) -> Dictionary:
+	var out := {"infantry": 0, "cavalry": 0, "archers": 0}
+	for g in _groups(side):
+		var g_stats: Callable = g.stats if g.has("stats") else side.stats
+		for unit in g.units:
+			var family: String = g_stats.call(unit).family
+			if int(g.units[unit]) > 0 and out.has(family):
+				out[family] = int(out[family]) + int(g.units[unit])
+	return out
+
+
+## `ground`: where it is fought (LocalGround.at; null beyond the map's edge);
+## `lines`: fought in lines (LocalLines.lines_for), the result carrying them.
+static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng, afflictions: Variant = null, ground: Variant = null, lines: Variant = null) -> Dictionary:
 	var now: Dictionary = afflictions if afflictions is Dictionary else no_afflictions()
+	var drawn: Variant = null
+	if lines is Dictionary:
+		var input: Dictionary = lines.duplicate()
+		input.ground = ground
+		drawn = LocalLines.battle_lines(data, input, family_counts(attacker), family_counts(defender))
+	var opening: bool = drawn.opening if drawn is Dictionary else false
 	var struck := _kills(data, defender, attacker, rng, {"fromWeak": _weak(data, now.defender), "toWeak": _weak(data, now.attacker),
-		"burning": float(now.attacker.burn[0]) if not now.attacker.burn.is_empty() else 0.0, "ground": ground})
+		"burning": float(now.attacker.burn[0]) if not now.attacker.burn.is_empty() else 0.0, "ground": ground,
+		"from": drawn.defender if drawn is Dictionary else null, "to": drawn.attacker if drawn is Dictionary else null, "opening": opening})
 	var by_group := _kills(data, attacker, defender, rng, {"fromWeak": _weak(data, now.attacker), "toWeak": _weak(data, now.defender),
-		"burning": float(now.defender.burn[0]) if not now.defender.burn.is_empty() else 0.0, "ground": ground})
+		"burning": float(now.defender.burn[0]) if not now.defender.burn.is_empty() else 0.0, "ground": ground,
+		"from": drawn.attacker if drawn is Dictionary else null, "to": drawn.defender if drawn is Dictionary else null, "opening": opening})
 	var result := {"attackerLosses": _merged(struck.losses), "defenderLosses": _merged(by_group.losses),
 		"attackerFallen": struck.fallen, "defenderFallen": by_group.fallen,
 		"afflictions": {"attacker": _carried(data, now.attacker, struck.burnHit, struck.poisons), "defender": _carried(data, now.defender, by_group.burnHit, by_group.poisons)}}
 	if defender.has("groups"):
 		result.defenderGroupLosses = by_group.losses
+	if drawn is Dictionary:
+		result.lines = drawn
 	return result
 
 

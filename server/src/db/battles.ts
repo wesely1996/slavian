@@ -1,3 +1,4 @@
+import type { LineState, Move, SideId } from '../sim/lines.js';
 import type { Afflictions } from '../sim/battle.js';
 import type { Stance } from '../data/index.js';
 import { NotFoundError } from '../errors.js';
@@ -11,6 +12,9 @@ export type BattleStatus = 'ongoing' | 'defended' | 'raided' | 'cleared' | 'repe
 export interface RoundLog {
   round: number;
   at: string;
+  // A maneuver made this round, a breakthrough (battle.json lines).
+  maneuver?: { by: SideId; kind: Move };
+  breakthrough?: { by: SideId; kind: Move };
   attackerLosses: Record<string, number>;
   defenderLosses: Record<string, number>;
   attackerLeft: number;
@@ -74,6 +78,8 @@ export interface BattleSetup {
   // What burns and poisons each side carries into the next round
   // (battle.json afflictions), while anything does.
   afflictions?: Afflictions;
+  // The battle lines' state: a maneuver under way, a breakthrough.
+  lines?: LineState;
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

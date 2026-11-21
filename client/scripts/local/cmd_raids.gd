@@ -53,7 +53,7 @@ static func raid_stage(data: Dictionary, front: String, depth: int, stage: int, 
 ## `stats_without_hero`: its stats once the hero has fallen (the general in
 ## command). Also returns the champions that fell (fallen).
 static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, stage: Dictionary, front: String, seed_value: int, id: int,
-		champions: Array = [], stats_without_hero: Callable = Callable()) -> Dictionary:
+		champions: Array = [], stats_without_hero: Callable = Callable(), lines: Variant = null) -> Dictionary:
 	var rules: Dictionary = data.raids
 	var field: Variant = stage.field
 	# Battering rams take the stronghold's walls off its defenders, a share each.
@@ -80,17 +80,27 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 	var rounds: Array = []
 	# Burning and poison carry from round to round.
 	var afflictions := LocalBattle.no_afflictions()
+	# Fought in lines; nobody maneuvers at a stronghold's walls.
+	var line_state: Variant = null
+	var setup: Variant = null
+	if lines is Dictionary:
+		setup = lines.duplicate()
+		setup.still = stage.stronghold
 	for round in range(1, int(data.battle.maxRounds) + 1):
 		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": army_at, "home": false, "champions": fighting},
-			{"units": enemy_now, "stance": enemy_stance, "stats": enemy_at, "home": stage.stronghold}, LocalBattle.battle_rng(seed_value, id + 0x30000, round), afflictions)
+			{"units": enemy_now, "stance": enemy_stance, "stats": enemy_at, "home": stage.stronghold}, LocalBattle.battle_rng(seed_value, id + 0x30000, round), afflictions,
+			null, LocalLines.lines_for(setup, round, line_state) if setup != null else null)
 		afflictions = result.afflictions
+		line_state = result.lines.state if result.has("lines") else null
 		for c in result.attackerFallen[0]:
 			fallen.append(c)
 		fighting = fighting.filter(func(c: Dictionary) -> bool: return not c.id in fallen)
 		army_now = LocalCamps.subtract_units(army_now, result.attackerLosses)
 		enemy_now = LocalCamps.subtract_units(enemy_now, result.defenderLosses)
-		rounds.append({"round": round, "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
+		var entry := LocalLines.lines_log(result.get("lines"))
+		entry.merge({"round": round, "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
 			"attackerLeft": LocalBattle.total(army_now), "defenderLeft": LocalBattle.total(enemy_now)})
+		rounds.append(entry)
 		var outcome := LocalBattle.battle_outcome(data, {"round": round, "attackerStance": army_stance, "attackerInitial": army, "attackerNow": army_now,
 			"defenderStance": enemy_stance, "defenderInitial": stage.enemy, "defenderNow": enemy_now})
 		if outcome != "ongoing":
@@ -274,7 +284,8 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var succession := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + stage_no,
-		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
+		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
+		{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)
@@ -369,7 +380,8 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 	var succession := LocalArmies._led_bonuses(data, LocalVillage.village_bonuses(data, home.state), {}, general)
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + 1,
-		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)))
+		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
+		{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)

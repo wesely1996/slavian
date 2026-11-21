@@ -212,6 +212,7 @@
       },
       "away": {},
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -2622,6 +2623,7 @@
      "generalId": null,
      "orders": "hold",
      "stance": "balanced",
+     "maneuver": "encircle",
      "loot": null,
      "units": {
       "scout": 4,
@@ -2827,6 +2829,7 @@
       "pathfinder": 4
      },
      "stance": "balanced",
+     "maneuver": "encircle",
      "besieged": false,
      "adminUpkeep": 0,
      "bonuses": {
@@ -3079,6 +3082,7 @@
        "pathfinder": 4
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -3486,6 +3490,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -5798,6 +5803,7 @@
        "pathfinder": 4
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -6205,6 +6211,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -8517,6 +8524,7 @@
        "pathfinder": 4
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -8924,6 +8932,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -11236,6 +11245,7 @@
        "pathfinder": 3
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -11674,6 +11684,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -13986,6 +13997,7 @@
        "pathfinder": 3
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -14424,6 +14436,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -16736,6 +16749,7 @@
        "pathfinder": 3
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -17213,6 +17227,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -19525,6 +19540,7 @@
        "pathfinder": 0
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -20002,6 +20018,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -22314,6 +22331,7 @@
        "pathfinder": 0
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -22791,6 +22809,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -25103,6 +25122,7 @@
        "pathfinder": 0
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": false,
       "adminUpkeep": 0,
       "bonuses": {
@@ -25580,6 +25600,7 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
@@ -27736,7 +27757,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 6,
+       "used": 7,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -27892,6 +27913,7 @@
        "pathfinder": 0
       },
       "stance": "balanced",
+      "maneuver": "encircle",
       "besieged": true,
       "adminUpkeep": 0,
       "bonuses": {
@@ -28334,6 +28356,17 @@
       "setup": {
        "fort": false,
        "choke": false,
+       "lines": {
+        "active": {
+         "by": "attacker",
+         "kind": "flank",
+         "weak": {
+          "archers": 0,
+          "cavalry": 0,
+          "infantry": 8
+         }
+        }
+       },
        "river": false,
        "ambush": false
       },
@@ -28347,8 +28380,8 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 2,
-       "leshy_thrall": 1
+       "grey_wolf": 3,
+       "leshy_thrall": 2
       },
       "defenderInitial": {
        "spearman": 8
@@ -28357,21 +28390,20 @@
        {
         "at": "2026-06-01T10:37:21.600Z",
         "round": 1,
-        "attackerLeft": 7,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "grey_wolf": 1,
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "attackerLeft": 9,
+        "defenderLeft": 8,
+        "attackerLosses": {},
+        "defenderLosses": {}
        },
        {
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
-        "attackerLeft": 6,
-        "defenderLeft": 6,
+        "maneuver": {
+         "by": "attacker",
+         "kind": "flank"
+        },
+        "attackerLeft": 8,
+        "defenderLeft": 7,
         "attackerLosses": {
          "grey_wolf": 1
         },
@@ -28488,10 +28520,11 @@
       "generalId": null,
       "orders": "hold",
       "stance": "balanced",
+      "maneuver": "encircle",
       "loot": null,
       "units": {
        "scout": 4,
-       "spearman": 6
+       "spearman": 7
       },
       "status": "engaged",
       "battleId": 1,
@@ -28521,7 +28554,7 @@
       "arrivesAt": "2026-06-01T10:19:43.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 108.73333333333333,
+      "supply": 100.39999999999998,
       "supplyAt": "2026-06-01T10:47:21.600Z",
       "hungrySince": null,
       "wagonFortAt": null,

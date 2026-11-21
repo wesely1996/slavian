@@ -2,6 +2,7 @@
 // edge on a front's side, fights `depth` field battles in the enemy's lands
 // and then besieges the front's stronghold, carrying home what it takes.
 import type { GameData, Stance, TerrainId } from '../data/index.js';
+import { linesFor, linesLog, type LineSetup, type LineState, type Move, type SideId } from './lines.js';
 import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
@@ -95,8 +96,10 @@ export function raidBattle(
     // hero has fallen (the general in command).
     champions?: readonly Champion[];
     statsWithoutHero?: (unit: string) => UnitStats;
+    // Fought in lines (battle.json lines); nobody maneuvers at a stronghold's walls.
+    lines?: LineSetup;
   },
-): { won: boolean; rounds: { round: number; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units; fallen: string[] } {
+): { won: boolean; rounds: { round: number; maneuver?: { by: SideId; kind: Move }; breakthrough?: { by: SideId; kind: Move }; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units; fallen: string[] } {
   const rules = data.raids;
   const field = input.stage.field;
   // Battering rams take the stronghold's walls off its defenders, a share each.
@@ -120,6 +123,8 @@ export function raidBattle(
   const rounds = [];
   // Burning and poison carry from round to round.
   let afflictions = NO_AFFLICTIONS;
+  let lineState: LineState | undefined;
+  const lines = input.lines ? { ...input.lines, still: input.stage.stronghold } : undefined;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const result = resolveRound(
       data,
@@ -127,13 +132,16 @@ export function raidBattle(
       { units: enemyNow, stance: enemyStance, stats: enemyStatsAt, home: input.stage.stronghold },
       battleRng(input.seed, input.id + 0x30000, round),
       afflictions,
+      undefined,
+      lines ? linesFor(lines, round, lineState) : undefined,
     );
     afflictions = result.afflictions;
+    lineState = result.lines?.state;
     for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
     champions = champions.filter((c) => !fallen.includes(c.id));
     armyNow = subtractUnits(armyNow, result.attackerLosses);
     enemyNow = subtractUnits(enemyNow, result.defenderLosses);
-    rounds.push({ round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(enemyNow) });
+    rounds.push({ ...linesLog(result.lines), round, attackerLosses: result.attackerLosses, defenderLosses: result.defenderLosses, attackerLeft: total(armyNow), defenderLeft: total(enemyNow) });
     const outcome = battleOutcome(data, {
       round,
       attackerStance: input.armyStance,

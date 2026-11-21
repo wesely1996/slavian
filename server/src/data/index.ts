@@ -148,6 +148,9 @@ export const AFFLICTIONS = ['burn', 'poison'] as const;
 export type Affliction = (typeof AFFLICTIONS)[number];
 export type UnitFamily = (typeof UNIT_FAMILIES)[number];
 export const STANCES = ['defensive', 'balanced', 'offensive', 'hold_the_line'] as const;
+// How far a side maneuvers in battle at most (battle.json lines).
+export const MANEUVERS = ['none', 'flank', 'pincer', 'encircle'] as const;
+export type Maneuver = (typeof MANEUVERS)[number];
 export type Stance = (typeof STANCES)[number];
 
 const familyMultipliers = z.partialRecord(z.enum(UNIT_FAMILIES), z.number().positive());
@@ -349,6 +352,16 @@ const battleFileSchema = z.object({
   ),
   matchups: z.partialRecord(z.enum(STANCES), stanceMultipliers),
   terrain: z.object({ maxStack: z.number().int().positive(), families: z.partialRecord(z.enum(UNIT_FAMILIES), terrainShares) }),
+  lines: z.object({
+    flank: z.object({ ratio: z.number().positive(), surplusDealt: z.number().nonnegative(), surplusTaken: z.number().nonnegative() }),
+    pincer: z.object({ ratio: z.number().positive(), mixedRatio: z.number().positive(), surplusDealt: z.number().nonnegative(), surplusTaken: z.number().nonnegative() }),
+    encircle: z.object({ ratio: z.number().positive(), dealt: z.number().positive(), taken: z.number().positive() }),
+    commander: z.object({ general: z.number().int(), battleFury: z.number().int(), horseLord: z.number().int(), spearhead: z.number().int(), leader: z.number().int() }),
+    breakthrough: z.object({ dealtBonus: z.number().nonnegative() }),
+    shieldBearer: z.object({ rank: z.number().int().positive(), taken: z.number().positive() }),
+    road: z.object({ ratioCut: z.number().min(0).max(1), rankCut: z.number().int().nonnegative() }),
+    fort: z.object({ holderFactor: z.number().positive(), attackerFactor: z.number().positive() }),
+  }),
   // Burning: `share` of a burning unit's blow hurts its target again in
   // each of the next `rounds` rounds. Poison: a side struck by a poisoner
   // fights at `factor` of its attack and defense for the next `rounds` rounds.
@@ -700,6 +713,7 @@ const fieldFileSchema = z.object({
     cost: resourcesSchema,
     buildSeconds: z.number().positive(),
     defenseBonus: z.number().nonnegative(),
+    attackBonus: z.number().nonnegative(),
     // Grain a fort keeps for armies holding it.
     grainCapacity: z.number().int().positive(),
   }),

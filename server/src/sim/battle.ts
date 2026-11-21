@@ -5,6 +5,7 @@
 import { AFFLICTIONS, type Affliction, type GameData, type Stance, type UnitFamily } from '../data/index.js';
 import type { Front } from './mapgen.js';
 import { groundFactors, playerShares, type Ground, type TerrainShares } from './ground.js';
+import { battleLines, LINE_FAMILIES, type Counts, type LineFamily, type Lines, type LinesInput, type SideLine } from './lines.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
 import type { Units } from './training.js';
@@ -97,6 +98,8 @@ export interface RoundResult {
   readonly defenderFallen: string[][];
   // What burns and poisons both sides carry into the next round.
   readonly afflictions: Afflictions;
+  // The battle lines this round (when the fight is fought in lines).
+  readonly lines?: Lines;
 }
 
 export type Outcome = 'ongoing' | 'defended' | 'raided';
@@ -162,6 +165,12 @@ interface Plight {
   burning: number;
   // Where the battle is fought (battle.json terrain).
   ground?: Ground | undefined;
+  // The lines (battle.json lines): how much of each side strikes and how
+  // much of what is aimed at the other lands; in the opening only archers
+  // shoot, at the infantry.
+  from?: SideLine | undefined;
+  to?: SideLine | undefined;
+  opening?: boolean | undefined;
 }
 
 // Kills `from` inflicts on `to` this round, by unit type, for each of
@@ -191,6 +200,11 @@ function kills(
     // Champions stand among their men: each is one more to strike at.
     ...groups.flatMap((g, i) => (g.champions ?? []).map((c) => ({ i, unit: c.id, n: 1, champion: c }))),
   ];
+  // The opening volley falls on the front line, the infantry, while it stands.
+  if (plight.opening) {
+    const front = targets.filter((t) => !t.champion && (groups[t.i]!.stats ?? to.stats)(t.unit).family === 'infantry');
+    if (front.length > 0) targets.splice(0, targets.length, ...front);
+  }
   const targetTotal = targets.reduce((sum, t) => sum + t.n, 0);
   if (targetTotal === 0) return { losses: result, fallen, burnHit, poisons: false };
   // Wagons in a ring (units.json wagon; only a wagon fort's fight) stand as a
@@ -225,17 +239,21 @@ function kills(
       for (const [unit, count] of Object.entries(striker.units)) {
         if (count <= 0) continue;
         const attacker = (striker.stats ?? from.stats)(unit);
+        if (plight.opening && attacker.family !== 'archers') continue;
         const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
         const onGround = groundFactors(data, plight.ground, attacker.family, attacker.terrain).attack;
-        const blow = count * attacker.attack * onGround * rolled[s]![unit]! * fromStance.attack * matchup * counter * plight.fromWeak;
+        const inLine = plight.from?.dealt[attacker.family as LineFamily] ?? 1;
+        const blow = count * attacker.attack * onGround * inLine * rolled[s]![unit]! * fromStance.attack * matchup * counter * plight.fromWeak;
         damage += blow;
         if ((attacker.inflicts ?? []).includes('burn')) burning += blow;
       }
       // Its champions strike too, at no family's weakness.
-      for (const c of striker.champions ?? []) damage += c.attack * fromStance.attack * matchup * plight.fromWeak;
+      for (const c of plight.opening ? [] : (striker.champions ?? [])) damage += c.attack * fromStance.attack * matchup * plight.fromWeak;
     }
     // What still burns from earlier rounds, spread like any blow.
     damage += plight.burning;
+    // Of what is aimed at the side, its line lets this much land.
+    damage *= plight.to?.taken ?? 1;
     const share = weights[k]! / targetTotal;
     burnHit += burning * share;
     // Defense is a range too: this target's roll for the round.
@@ -275,6 +293,20 @@ function carried(data: GameData, now: SideAfflictions, burnHit: number, poisoned
 
 // `ground`: where the battle is fought (battle.json terrain); none for a
 // fight beyond the map's edge.
+// A side's fighting troops by family (battle.json lines).
+export function familyCounts(side: Side): Counts {
+  const out: Record<LineFamily, number> = { infantry: 0, cavalry: 0, archers: 0 };
+  for (const g of groupsOf(side)) {
+    for (const [unit, n] of Object.entries(g.units)) {
+      const family = (g.stats ?? side.stats)(unit).family;
+      if (n > 0 && (LINE_FAMILIES as readonly string[]).includes(family)) out[family as LineFamily] += n;
+    }
+  }
+  return out;
+}
+
+// `lines`: the battle is fought in lines (battle.json lines), with its
+// state carried from the last round; the result carries the next.
 export function resolveRound(
   data: GameData,
   attacker: Side,
@@ -282,11 +314,30 @@ export function resolveRound(
   rng: () => number,
   afflictions: Afflictions = NO_AFFLICTIONS,
   ground?: Ground,
+  lines?: LinesInput,
 ): RoundResult {
   const weak = (side: SideAfflictions) => (side.poisoned > 0 ? data.battle.afflictions.poison.factor : 1);
+  const drawn = lines ? battleLines(data, { ...lines, ground }, familyCounts(attacker), familyCounts(defender)) : undefined;
+  const opening = drawn?.opening ?? false;
   // Simultaneous: both sides strike with the numbers they had at the start.
-  const struck = kills(data, defender, attacker, rng, { fromWeak: weak(afflictions.defender), toWeak: weak(afflictions.attacker), burning: afflictions.attacker.burn[0] ?? 0, ground });
-  const byGroup = kills(data, attacker, defender, rng, { fromWeak: weak(afflictions.attacker), toWeak: weak(afflictions.defender), burning: afflictions.defender.burn[0] ?? 0, ground });
+  const struck = kills(data, defender, attacker, rng, {
+    fromWeak: weak(afflictions.defender),
+    toWeak: weak(afflictions.attacker),
+    burning: afflictions.attacker.burn[0] ?? 0,
+    ground,
+    from: drawn?.defender,
+    to: drawn?.attacker,
+    opening,
+  });
+  const byGroup = kills(data, attacker, defender, rng, {
+    fromWeak: weak(afflictions.attacker),
+    toWeak: weak(afflictions.defender),
+    burning: afflictions.defender.burn[0] ?? 0,
+    ground,
+    from: drawn?.attacker,
+    to: drawn?.defender,
+    opening,
+  });
   return {
     afflictions: {
       attacker: carried(data, afflictions.attacker, struck.burnHit, struck.poisons),
@@ -297,6 +348,7 @@ export function resolveRound(
     ...(defender.groups ? { defenderGroupLosses: byGroup.losses } : {}),
     attackerFallen: struck.fallen,
     defenderFallen: byGroup.fallen,
+    ...(drawn ? { lines: drawn } : {}),
   };
 }
 

@@ -52,7 +52,8 @@ import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
 import { record } from '../db/telemetry.js';
-import { groundOf } from './ground.js';
+import { groundOf, roadAt } from './ground.js';
+import { commandOf, linesFor, linesLog, withLines } from '../sim/lines.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -223,13 +224,23 @@ export const battleHandlers: HandlerRegistry = {
       rng,
       battle.setup.afflictions,
       await groundOf(client, data, world.id, { q: village.q, r: village.r }),
+      // In lines; nobody maneuvers while the walls stand.
+      linesFor(
+        {
+          attacker: commandOf('encircle', [], false, led.level),
+          defender: commandOf(state.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: village.q, r: village.r })),
+          still: standing,
+        },
+        round,
+        battle.setup.lines,
+      ),
     );
     const attackerLosses = addUnits(result.attackerLosses, smashed);
     const attackerNow = subtractUnits(wave.composition, attackerLosses);
     // The horde batters the walls with what came at them this round.
     let wallLeft: number | undefined;
-    // Burning and poison carry into the next round.
-    let setup: BattleSetup = withAfflictions(battle.setup, result.afflictions);
+    // Burning and poison carry into the next round, and so do the lines.
+    let setup: BattleSetup = withLines(withAfflictions(battle.setup, result.afflictions), result.lines);
     if (standing && !volley) {
       wallLeft = Math.max(0, Math.round(wall.integrity - siegeDamage(data, wave.front, assault, state.plots)));
       setup = { ...setup, wall: { ...wall, integrity: wallLeft } };
@@ -315,6 +326,7 @@ export const battleHandlers: HandlerRegistry = {
       ...(total(smashed) ? { smashed } : {}),
       ...(over > 0 ? { over: Math.round(over * 100) / 100 } : {}),
       ...(engaged.length ? { garrisonLosses: shares[0]! } : {}),
+      ...linesLog(result.lines),
     };
     // Armies after the round: harassers ride home; when the battle is over,
     // support stays on guard (unless told to come home once done),

@@ -140,6 +140,29 @@ static func opening(data: Dictionary, battle: Dictionary, ctx: Dictionary) -> St
 	return text
 
 
+## The maneuvers of a round (battle.json lines): who flanked, closed a
+## pincer or encircled whom, and who broke through.
+static func maneuver_lines(battle: Dictionary, entry: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	# Storming a camp, a site or a raid's stage, we are the side that attacks.
+	var setup: Dictionary = battle.get("setup", {}) if battle.get("setup") is Dictionary else {}
+	var ours := "attacker" if battle.get("campId") != null or battle.get("siteId") != null or setup.get("raid") != null else "defender"
+	var m: Variant = entry.get("maneuver")
+	if m is Dictionary:
+		var we: bool = m.by == ours
+		match String(m.kind):
+			"flank":
+				out.append(UI.t("Our men outflanked them: the troops beyond the line fall on their flank.") if we else UI.t("They outflanked us: their troops beyond the line fall on our flank."))
+			"pincer":
+				out.append(UI.t("Our men closed a pincer on both their flanks.") if we else UI.t("They closed a pincer on both our flanks."))
+			"encircle":
+				out.append(UI.t("Our men surrounded them.") if we else UI.t("They surrounded us."))
+	var b: Variant = entry.get("breakthrough")
+	if b is Dictionary:
+		out.append(UI.t("Our men cut down their surplus and broke through!") if b.by == ours else UI.t("They cut down our surplus and broke through!"))
+	return out
+
+
 ## Round `round` (from 1) in a few sentences.
 static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dictionary) -> String:
 	var rounds: Array = battle.get("rounds", [])
@@ -152,6 +175,9 @@ static func narrate(data: Dictionary, battle: Dictionary, round: int, ctx: Dicti
 		lines.append(UI.t("They are still building their engines: only the archers of both sides shoot."))
 	if entry.get("sally", false):
 		lines.append(UI.t("The gates opened and our men charged out: the walls play no part any more."))
+	if round == 1 and not entry.get("volley", false):
+		lines.append(UI.t("It opened with an exchange of arrows at the front line."))
+	lines.append_array(maneuver_lines(battle, entry))
 	for army in entry.get("joined", []):
 		var how: String = {"harass": UI.t("harried the flank"), "pincer": UI.t("struck from behind"), "support": UI.t("joined the line")}.get(String(army.orders), UI.t("joined the fight"))
 		# The hammer to the walls' anvil.

@@ -16,6 +16,7 @@ import {
   type UnitStats,
 } from './battle.js';
 import type { Ground } from './ground.js';
+import { linesFor, linesLog, type LineSetup, type LineState, type Move, type SideId } from './lines.js';
 import type { Units } from './training.js';
 
 // When a village founded at `foundedAt` stops being safe from other
@@ -52,6 +53,8 @@ export interface PvpForce {
 
 export interface PvpRound {
   round: number;
+  maneuver?: { by: SideId; kind: Move };
+  breakthrough?: { by: SideId; kind: Move };
   attackerLosses: Record<string, number>;
   defenderLosses: Record<string, number>;
   attackerLeft: number;
@@ -71,6 +74,8 @@ export function pvpAssault(
     id: number;
     // The village's hex (battle.json terrain).
     ground?: Ground;
+    // Fought in lines (battle.json lines).
+    lines?: LineSetup;
   },
 ): {
   won: boolean;
@@ -86,6 +91,7 @@ export function pvpAssault(
   const defenderFallen: string[][] = input.defenders.map(() => []);
   const rounds: PvpRound[] = [];
   let afflictions = NO_AFFLICTIONS;
+  let lineState: LineState | undefined;
   let won = false;
   for (let round = 1; round <= data.battle.maxRounds; round++) {
     const heroDown = attackerFallen.includes('hero') && input.statsWithoutHero;
@@ -116,14 +122,17 @@ export function pvpAssault(
       battleRng(input.seed, input.id + 0x20000, round),
       afflictions,
       input.ground,
+      input.lines ? linesFor(input.lines, round, lineState) : undefined,
     );
     afflictions = result.afflictions;
+    lineState = result.lines?.state;
     for (const id of result.attackerFallen[0] ?? []) attackerFallen.push(id);
     for (const [i, ids] of result.defenderFallen.entries()) for (const id of ids) defenderFallen[i]?.push(id);
     attackerNow = subtractUnits(attackerNow, result.attackerLosses);
     const shares = result.defenderGroupLosses!;
     defendersNow = defendersNow.map((d, i) => subtractUnits(d, shares[i] ?? {}));
     rounds.push({
+      ...linesLog(result.lines),
       round,
       attackerLosses: result.attackerLosses,
       defenderLosses: result.defenderLosses,

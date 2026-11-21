@@ -48,7 +48,8 @@ import { afterErrand } from './bridgeQuests.js';
 import type { BridgeQuest } from '../data/index.js';
 import { findBridge } from '../db/bridges.js';
 import { embersWanted } from '../sim/bridge.js';
-import { groundOf } from './ground.js';
+import { groundOf, roadAt } from './ground.js';
+import { commandOf } from '../sim/lines.js';
 
 // Whether the group has fewer Embers than the open bridge stage wants.
 async function embersShort(client: DbClient, data: GameData, worldId: number): Promise<boolean> {
@@ -243,6 +244,10 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     seed: world.seed,
     id: camp.id,
     ground: await groundOf(client, data, world.id, { q: camp.q, r: camp.r }),
+    lines: {
+      attacker: commandOf(army.maneuver, [{ hero, general }], await roadAt(client, world.id, { q: camp.q, r: camp.r })),
+      defender: commandOf('encircle', []),
+    },
   });
   // Reports keep the enemy as the attacker, like every other battle.
   const battle = await insertBattle(client, {
