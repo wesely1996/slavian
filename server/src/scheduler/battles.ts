@@ -227,8 +227,8 @@ export const battleHandlers: HandlerRegistry = {
       // In lines; nobody maneuvers while the walls stand.
       linesFor(
         {
-          attacker: commandOf('encircle', [], false, led.level),
-          defender: commandOf(state.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: village.q, r: village.r })),
+          attacker: commandOf(data, 'encircle', [], false, led.level),
+          defender: commandOf(data, state.maneuver ?? 'encircle', [{ hero, general }, ...armyLeaders], await roadAt(client, world.id, { q: village.q, r: village.r })),
           still: standing,
         },
         round,

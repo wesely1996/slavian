@@ -138,6 +138,9 @@ Generals (voivodes) are lesser heroes recruited at a **Hero's Hall**.
   defense**. Generals have no skills, gear or quests.
 - **Pincer.** A general of level 5 can lead a pincer
   ([page 16](16-battle-lines.md#maneuvers)).
+- **Trait.** Each general has one trait that strengthens one maneuver and
+  weakens another ([page 16](16-battle-lines.md#commander-traits)). So does
+  each hero.
 - **Commanding.** A general leads the army it marches with, or commands the
   garrison of the village it stands in (the highest-level general there).
   Its effects count only when no hero leads those troops.

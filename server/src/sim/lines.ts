@@ -5,6 +5,7 @@
 // encircle) and bring its surplus in; if the smaller side destroys that
 // surplus, it breaks through and the tables turn.
 import type { GameData, Maneuver } from '../data/index.js';
+import { generalTrait } from './generals.js';
 import type { Ground } from './ground.js';
 
 export type SideId = 'attacker' | 'defender';
@@ -27,9 +28,14 @@ export interface Command {
   readonly leader: number;
   // A player's side fighting on its own road (battle.json lines.road).
   readonly road: boolean;
+  // Its commanders' traits: how much stronger (or weaker) each maneuver,
+  // and a breakthrough, comes off (maneuver.<kind> effects).
+  readonly power?: Readonly<Partial<Record<Move | 'breakthrough', number>>>;
 }
 
 export const NO_COMMAND: Command = { cap: 'encircle', general: 0, skills: {}, leader: 0, road: false };
+
+const power = (command: Command, kind: Move | 'breakthrough') => command.power?.[kind] ?? 0;
 
 // What a battle carries from round to round.
 export interface LineState {
@@ -200,11 +206,12 @@ export function battleLines(data: GameData, input: LinesInput, attacker: Counts,
 
   if (maneuver) {
     const x = tb - ts;
+    const boost = 1 + power(input[big], maneuver.kind);
     if (maneuver.kind === 'encircle') {
-      line[big] = { dealt: flat(rules.encircle.dealt), taken: rules.encircle.taken };
+      line[big] = { dealt: flat(rules.encircle.dealt * boost), taken: rules.encircle.taken };
     } else {
       const r = rules[maneuver.kind];
-      line[big] = { dealt: flat((ts + r.surplusDealt * x) / tb), taken: (ts + r.surplusTaken * x) / tb };
+      line[big] = { dealt: flat((ts + r.surplusDealt * boost * x) / tb), taken: (ts + r.surplusTaken * x) / tb };
     }
     // Outmaneuvered, a Shield Bearer's men close up.
     if (shieldBearer(data, input[small])) line[small] = { ...line[small], taken: line[small].taken * rules.shieldBearer.taken };
@@ -215,7 +222,7 @@ export function battleLines(data: GameData, input: LinesInput, attacker: Counts,
   if (through) {
     const side = through.by;
     const share = Math.min(1, through.base / Math.max(1, sum(counts[side])));
-    const dealt = (through.kind === 'encircle' ? rules.encircle.dealt : rules[through.kind].surplusDealt) + rules.breakthrough.dealtBonus;
+    const dealt = (through.kind === 'encircle' ? rules.encircle.dealt : rules[through.kind].surplusDealt) + rules.breakthrough.dealtBonus * (1 + power(input[side], 'breakthrough'));
     const taken = through.kind === 'encircle' ? rules.encircle.taken : rules[through.kind].surplusTaken;
     const d = 1 + (dealt - 1) * share;
     line[side] = {
@@ -254,20 +261,40 @@ export function linesFor(setup: LineSetup, round: number, state: LineState | und
 
 // A side's command: its cap, its best general, its leading hero's skills
 // (the best rank of each among its heroes), a horde's leader.
+// Its commanders' traits add up (heroes.json roster traits, generals.traits).
 export function commandOf(
+  data: GameData,
   cap: Maneuver,
-  leaders: readonly { readonly hero?: { readonly skills: Readonly<Record<string, number>> } | null; readonly general?: { readonly level: number } | null }[],
+  leaders: readonly {
+    readonly hero?: { readonly skills: Readonly<Record<string, number>>; readonly kind?: string | null } | null;
+    readonly general?: { readonly level: number; readonly id: number } | null;
+  }[],
   road = false,
   leader = 0,
 ): Command {
   const skills: Record<string, number> = {};
   let general = 0;
+  const shares: Partial<Record<Move | 'breakthrough', number>> = {};
+  const add = (effects: Readonly<Record<string, number>>) => {
+    for (const [key, value] of Object.entries(effects)) {
+      const kind = MANEUVER_KEY.exec(key)?.[1] as Move | 'breakthrough' | undefined;
+      if (kind) shares[kind] = (shares[kind] ?? 0) + value;
+    }
+  };
   for (const l of leaders) {
     for (const [id, rank] of Object.entries(l.hero?.skills ?? {})) skills[id] = Math.max(skills[id] ?? 0, rank);
-    general = Math.max(general, l.general?.level ?? 0);
+    for (const t of (l.hero?.kind ? data.heroes.roster[l.hero.kind]?.traits : undefined) ?? []) add(t.effects);
+    if (l.general) {
+      general = Math.max(general, l.general.level);
+      add(generalTrait(data, l.general.id).effects);
+    }
   }
-  return { cap, general, skills, leader, road };
+  const limit = data.battle.lines.traitCap;
+  const power = Object.fromEntries(Object.entries(shares).map(([k, v]) => [k, Math.max(-limit, Math.min(limit, v))]));
+  return { cap, general, skills, leader, road, ...(Object.keys(power).length > 0 ? { power } : {}) };
 }
+
+const MANEUVER_KEY = /^maneuver\.(flank|pincer|encircle|breakthrough)$/;
 
 // The round's report: the maneuver made, the breakthrough.
 export function linesLog(lines: Lines | undefined): { maneuver?: { by: SideId; kind: Move }; breakthrough?: { by: SideId; kind: Move } } {

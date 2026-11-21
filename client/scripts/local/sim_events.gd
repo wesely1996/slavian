@@ -369,7 +369,7 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 		var result := LocalArmies.repel_raid(data, fighting, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, LocalVillage.village_bonuses(data, home.state), false)), army.get("stance", "balanced"),
 			raiders, String(rules.raiderStance), String(yard.front), int(world.seed), int(yard.id) * 64 + int(yard.raids) * 8 + i,
 			LocalGround.at(data, world, Vector2i(int(yard.q), int(yard.r))),
-			{"attacker": LocalLines.no_command(), "defender": LocalLines.command_of(String(army.get("maneuver", "encircle")),
+			{"attacker": LocalLines.no_command(), "defender": LocalLines.command_of(data, String(army.get("maneuver", "encircle")),
 				[{"hero": LocalArmies.hero_with_army(world, int(army.id)), "general": LocalGenerals.general_with_army(world, int(army.id))}],
 				LocalGround.road_at(world, Vector2i(int(yard.q), int(yard.r))))})
 		var lost := {}

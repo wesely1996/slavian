@@ -22,6 +22,12 @@ export function generalName(data: GameData, id: number): string {
   return names[(id - 1) % names.length]!;
 }
 
+// A general's trait (heroes.json generals.traits), fixed by its id.
+export function generalTrait(data: GameData, id: number): GameData['heroes']['generals']['traits'][number] {
+  const traits = data.heroes.generals.traits;
+  return traits[((id - 1) * 5) % traits.length]!;
+}
+
 export function generalXpToNext(data: GameData, level: number): number {
   const { base, growth } = data.heroes.generals.levelXp;
   return Math.round(base * growth ** (level - 1));

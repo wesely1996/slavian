@@ -169,8 +169,8 @@ export const mapEventHandlers: HandlerRegistry = {
         id: shipyard.id * 64 + shipyard.raids * 8 + i,
         ground: await groundOf(client, data, world.id, where),
         lines: {
-          attacker: commandOf('encircle', []),
-          defender: commandOf(army.maneuver, [{ hero: await heroWithArmy(client, army.id), general: await generalWithArmy(client, army.id) }], await roadAt(client, world.id, where)),
+          attacker: commandOf(data, 'encircle', []),
+          defender: commandOf(data, army.maneuver, [{ hero: await heroWithArmy(client, army.id), general: await generalWithArmy(client, army.id) }], await roadAt(client, world.id, where)),
         },
       });
       const lost: Record<string, number> = {};

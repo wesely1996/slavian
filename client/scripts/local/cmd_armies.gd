@@ -1877,7 +1877,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		army.get("stance", "balanced"), camp.units, camp.front, int(world.seed), int(camp.id),
 		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
 		LocalGround.at(data, world, Vector2i(int(camp.q), int(camp.r))),
-		{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(camp.q), int(camp.r)))),
+		{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(camp.q), int(camp.r)))),
 			"defender": LocalLines.no_command()})
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
@@ -2008,7 +2008,7 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 			army.get("stance", "balanced"), site.guardians, "north", int(world.seed), int(site.id) + 0x5000,
 			LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
 			LocalGround.at(data, world, Vector2i(int(site.q), int(site.r))),
-			{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(site.q), int(site.r)))),
+			{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(site.q), int(site.r)))),
 				"defender": LocalLines.no_command()})
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},

@@ -15,6 +15,12 @@ static func name_for(data: Dictionary, id: int) -> String:
 	return names[(id - 1) % names.size()]
 
 
+## A general's trait (heroes.json generals.traits), fixed by its id.
+static func trait_of(data: Dictionary, id: int) -> Dictionary:
+	var traits: Array = data.heroes.generals.traits
+	return traits[((id - 1) * 5) % traits.size()]
+
+
 static func xp_to_next(data: Dictionary, level: int) -> int:
 	var xp: Dictionary = data.heroes.generals.levelXp
 	return LocalWaves.js_round(float(xp.base) * pow(float(xp.growth), level - 1))
@@ -256,6 +262,6 @@ static func view(data: Dictionary, g: Dictionary) -> Dictionary:
 		path = g.path.map(func(step: Dictionary) -> Array: return [step.q, step.r, step.atMs])
 	return {"id": g.id, "accountId": g.accountId, "name": g.name, "status": g.status, "villageId": g.villageId, "armyId": g.armyId,
 		"level": g.level, "xp": g.xp, "xpToNext": null if int(g.level) >= int(data.heroes.generals.maxLevel) else xp_to_next(data, int(g.level)),
-		"bonuses": bonuses(data, g), "path": path,
+		"bonuses": bonuses(data, g), "trait": trait_of(data, int(g.id)), "path": path,
 		"departsAt": LocalTime.iso(g.departsAt) if g.departsAt != null else null,
 		"until": LocalTime.iso(g.until) if g.until != null else null}

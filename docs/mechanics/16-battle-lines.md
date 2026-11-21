@@ -78,6 +78,43 @@ A side led by a hero with **Shield Bearer 5**:
   beside it shares this. After it breaks through, it keeps the 75% on top of
   the breakthrough.
 
+## Commander traits
+
+Every hero and every general has a trait that makes one maneuver stronger
+and another weaker. A side adds up the traits of all its commanders (its
+heroes and generals), at most ±50% each.
+- **On a maneuver:** the surplus's strike (a flank's 100%, a pincer's 200%,
+  or an encirclement's 200% for every unit) is multiplied by 1 + the
+  trait's share.
+- **On a breakthrough:** the +50 points are multiplied by 1 + the share.
+
+Example: Dobrynya's flank strikes at 100% × 1.2 = 120% for the surplus, but
+his encirclement at 200% × 0.9 = 180%.
+
+| Hero | Trait | Stronger | Weaker |
+|---|---|---|---|
+| Dobrynya | Hammer of the flank | Flank +20% | Encircle −10% |
+| Vasilisa | Turn of the tide | Breakthrough +25% | Pincer −10% |
+| Volkh | Wolf pack | Encircle +15% | Flank −10% |
+| Sadko | River sense | Flank +10% | Breakthrough −10% |
+| Nastasya | Iron counter | Breakthrough +20% | Encircle −15% |
+| Ilya | Two-handed blow | Pincer +15% | Breakthrough −10% |
+| Alyosha | Trickster's trap | Pincer +20% | Encircle −10% |
+| Mikula | The furrow closes | Encircle +10% | Pincer −10% |
+| Marya | Steppe horns | Flank +15%, pincer +10% | Breakthrough −15% |
+| Svyatogor | Ring of mountains | Encircle +25% | Flank −15% |
+
+A general's trait is fixed when it is recruited (by its number), one of six:
+
+| General | Stronger | Weaker |
+|---|---|---|
+| Horseman | Flank +20% | Encircle −10% |
+| Hammer and anvil | Pincer +20% | Breakthrough −10% |
+| Netmaker | Encircle +15% | Flank −10% |
+| Steadfast | Breakthrough +20% | Pincer −10% |
+| Old wolf | Flank +10%, pincer +10% | Encircle −10% |
+| Shield wall | Breakthrough +15% | Encircle −15% |
+
 ## Ground that shapes the line
 
 | Ground | Effect |

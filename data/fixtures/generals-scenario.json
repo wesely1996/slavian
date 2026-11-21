@@ -178,7 +178,9 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
      },
      "armyFloor": null,
      "ruin": null,
@@ -376,7 +378,9 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
      },
      "armyFloor": null,
      "ruin": null,
@@ -563,7 +567,9 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
      },
      "armyFloor": null,
      "ruin": null,
@@ -604,6 +610,14 @@
      "bonuses": {
       "attack.all": 0.02,
       "defense.all": 0.02
+     },
+     "trait": {
+      "name": "Horseman",
+      "description": "Rides round the enemy's wing; slow to close a ring.",
+      "effects": {
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
+      }
      },
      "path": null,
      "departsAt": null,
@@ -788,7 +802,9 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
-      "attack.cavalry": 0.06
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
      },
      "armyFloor": null,
      "ruin": null,
@@ -1040,7 +1056,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -1312,6 +1330,14 @@
       "bonuses": {
        "attack.all": 0.02,
        "defense.all": 0.02
+      },
+      "trait": {
+       "name": "Horseman",
+       "description": "Rides round the enemy's wing; slow to close a ring.",
+       "effects": {
+        "maneuver.flank": 0.2,
+        "maneuver.encircle": -0.1
+       }
       },
       "path": null,
       "departsAt": null,
@@ -3567,7 +3593,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -3919,6 +3947,14 @@
       "bonuses": {
        "attack.all": 0.02,
        "defense.all": 0.02
+      },
+      "trait": {
+       "name": "Horseman",
+       "description": "Rides round the enemy's wing; slow to close a ring.",
+       "effects": {
+        "maneuver.flank": 0.2,
+        "maneuver.encircle": -0.1
+       }
       },
       "path": null,
       "departsAt": null,
@@ -6312,7 +6348,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -6672,6 +6710,14 @@
       "bonuses": {
        "attack.all": 0.02,
        "defense.all": 0.02
+      },
+      "trait": {
+       "name": "Horseman",
+       "description": "Rides round the enemy's wing; slow to close a ring.",
+       "effects": {
+        "maneuver.flank": 0.2,
+        "maneuver.encircle": -0.1
+       }
       },
       "path": null,
       "departsAt": null,
@@ -9036,7 +9082,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -9559,6 +9607,14 @@
       "bonuses": {
        "attack.all": 0.02,
        "defense.all": 0.02
+      },
+      "trait": {
+       "name": "Horseman",
+       "description": "Rides round the enemy's wing; slow to close a ring.",
+       "effects": {
+        "maneuver.flank": 0.2,
+        "maneuver.encircle": -0.1
+       }
       },
       "path": null,
       "departsAt": null,
@@ -11990,7 +12046,9 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
-       "attack.cavalry": 0.06
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
       },
       "armyFloor": null,
       "ruin": null,
@@ -12513,6 +12571,14 @@
       "bonuses": {
        "attack.all": 0.02,
        "defense.all": 0.02
+      },
+      "trait": {
+       "name": "Horseman",
+       "description": "Rides round the enemy's wing; slow to close a ring.",
+       "effects": {
+        "maneuver.flank": 0.2,
+        "maneuver.encircle": -0.1
+       }
       },
       "path": null,
       "departsAt": null,

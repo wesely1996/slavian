@@ -22,6 +22,8 @@ static func effect_name(key: String) -> String:
 		"terrain.hills.defense": UI.t("defense in hills"), "terrain.wetland.defense": UI.t("defense in wetlands"),
 		"terrain.mountain.attack": UI.t("attack for each mountain beside the battle (up to 2)"),
 		"terrain.water.defense": UI.t("defense for each river or lake beside the battle (up to 2)"),
+		"maneuver.flank": UI.t("flanking strength"), "maneuver.pincer": UI.t("pincer strength"),
+		"maneuver.encircle": UI.t("encircling strength"), "maneuver.breakthrough": UI.t("breakthrough strength"),
 	}.get(key, key)
 
 

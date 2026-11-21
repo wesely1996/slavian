@@ -285,7 +285,7 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + stage_no,
 		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
-		{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
+		{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)
@@ -381,7 +381,7 @@ static func _strike_battle(server: LocalServer, world: Dictionary, army: Diction
 	var result := raid_battle(data, fighters, LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, bonuses, false)),
 		army.get("stance", "balanced"), stage, front, int(world.seed), int(army.id) * 8 + 1,
 		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
-		{"attacker": LocalLines.command_of(String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
+		{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}]), "defender": LocalLines.no_command()})
 	var kills := LocalBattle.total(stage.enemy) - LocalBattle.total(result.enemyNow)
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)

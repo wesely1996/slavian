@@ -194,7 +194,7 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
     front: wave.front,
     seed: world.seed,
     id: army.id * 8 + 1,
-    lines: { attacker: commandOf(army.maneuver, [{ hero, general }]), defender: commandOf('encircle', []) },
+    lines: { attacker: commandOf(data, army.maneuver, [{ hero, general }]), defender: commandOf(data, 'encircle', []) },
   });
   const battle = await insertBattle(client, {
     worldId: world.id,
@@ -308,7 +308,7 @@ export const raidHandlers: HandlerRegistry = {
       front,
       seed: world.seed,
       id: army.id * 8 + payload.stage,
-      lines: { attacker: commandOf(army.maneuver, [{ hero, general }]), defender: commandOf('encircle', []) },
+      lines: { attacker: commandOf(data, army.maneuver, [{ hero, general }]), defender: commandOf(data, 'encircle', []) },
     });
     // Reports keep the enemy as the attacker, like every other battle.
     const battle = await insertBattle(client, {

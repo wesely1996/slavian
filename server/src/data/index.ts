@@ -358,6 +358,7 @@ const battleFileSchema = z.object({
     encircle: z.object({ ratio: z.number().positive(), dealt: z.number().positive(), taken: z.number().positive() }),
     commander: z.object({ general: z.number().int(), battleFury: z.number().int(), horseLord: z.number().int(), spearhead: z.number().int(), leader: z.number().int() }),
     breakthrough: z.object({ dealtBonus: z.number().nonnegative() }),
+    traitCap: z.number().nonnegative(),
     shieldBearer: z.object({ rank: z.number().int().positive(), taken: z.number().positive() }),
     road: z.object({ ratioCut: z.number().min(0).max(1), rankCut: z.number().int().nonnegative() }),
     fort: z.object({ holderFactor: z.number().positive(), attackerFactor: z.number().positive() }),
@@ -531,6 +532,8 @@ const heroesFileSchema = z.object({
     maxLevel: z.number().int().positive(),
     levelXp: z.object({ base: z.number().positive(), growth: z.number().min(1) }),
     effectsPerLevel: effectsSchema,
+    // One each, by its id (sim/generals.ts generalTrait).
+    traits: z.array(z.object({ name: z.string(), description: z.string(), effects: effectsSchema })).min(1),
     cost: resourcesSchema,
     costGrowth: z.number().min(1),
     recruitHours: z.number().positive(),

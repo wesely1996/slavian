@@ -1410,7 +1410,7 @@ func _test_lines() -> void:
 		var out := {"opening": false, "attacker": none, "defender": none, "ground": {"flat": 1}}
 		out.merge(over, true)
 		return out
-	var width := LocalLines.battle_lines(data, input.call({"attacker": LocalLines.command_of("none", [])}), c.call(100), c.call(25))
+	var width := LocalLines.battle_lines(data, input.call({"attacker": LocalLines.command_of(data, "none", [])}), c.call(100), c.call(25))
 	_check(is_equal_approx(float(width.attacker.dealt.infantry), 0.25), "lines: the smaller army sets the width")
 	var flank := LocalLines.battle_lines(data, input.call({}), c.call(20, 30), c.call(20, 20))
 	_check(flank.maneuver == {"by": "attacker", "kind": "flank"} and is_equal_approx(float(flank.attacker.taken), 45.0 / 50.0), "lines: a flank on flat land")
@@ -1427,6 +1427,12 @@ func _test_lines() -> void:
 	var kept_start := LocalLines.battle_lines(data, input.call({"attacker": shield}), c.call(20, 30), c.call(20, 20))
 	var kept := LocalLines.battle_lines(data, input.call({"attacker": shield, "state": kept_start.state}), c.call(20, 25), c.call(18, 18))
 	_check(kept.maneuver == {"by": "attacker", "kind": "flank"} and kept.breakthrough.by == "defender", "lines: a Shield Bearer keeps his flank")
+	var dobrynya := LocalLines.command_of(data, "encircle", [{"hero": {"skills": {}, "kind": "dobrynya"}}])
+	_check(dobrynya.power == {"flank": 0.2, "encircle": -0.1}, "lines: Dobrynya's trait")
+	var around := LocalLines.battle_lines(data, input.call({"attacker": dobrynya}), c.call(60), c.call(20))
+	_check(is_equal_approx(float(around.attacker.dealt.infantry), float(rules.encircle.dealt) * 0.9), "lines: a weak trait weakens the encirclement")
+	var stacked := LocalLines.command_of(data, "encircle", [{"hero": {"skills": {}, "kind": "svyatogor"}}, {"general": {"level": 1, "id": 5}}, {"general": {"level": 1, "id": 11}}])
+	_check(is_equal_approx(float(stacked.power.encircle), float(rules.traitCap)), "lines: traits add up within the cap")
 	var bridge := LocalLines.battle_lines(data, input.call({"bridge": true}), c.call(100, 20, 40), c.call(20, 0, 30))
 	_check(is_equal_approx(float(bridge.attacker.dealt.infantry), 10.0 / 120.0) and is_equal_approx(float(bridge.defender.dealt.archers), 10.0 / 30.0), "lines: a narrow front at a bridge")
 
