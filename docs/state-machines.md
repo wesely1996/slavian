@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.19.1
+Documented for version: 0.20.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -98,7 +98,8 @@ stateDiagram-v2
 ```
 
 Fights resolved at once (camps, sites, raid stages) go from `ongoing` to
-their end in the same handler.
+their end in the same handler. A maneuver under way and a breakthrough
+(battle.json lines) ride in the battle's setup (`lines`), not its status.
 
 ## Army
 
@@ -225,7 +226,7 @@ it is repaired.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> none: a river edge on the map
+  [*] --> none: a river edge on the map, or a river dug (terraform river)
   none --> building: build a bridge
   building --> standing: crossing_built
 ```
