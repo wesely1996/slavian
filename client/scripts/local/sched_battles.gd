@@ -360,7 +360,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 			s.attack = float(s.attack) * river * (1.0 if s.family == "archers" else held)
 			return s},
 		{"units": defenders, "stance": state.stance, "home": true, "stats": home_stats, "groups": groups},
-		rng, battle.setup.get("afflictions"))
+		rng, battle.setup.get("afflictions"), LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))))
 	# Burning and poison carry into the next round.
 	battle.setup = LocalBattle.with_afflictions(battle.setup, result.afflictions)
 	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
@@ -657,7 +657,8 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				st.attack = float(st.attack) * horde_attack
 				return st},
 		{"units": defenders, "stance": groups[0].stance if not groups.is_empty() else "balanced", "home": holy, "stats": stats_for.call("balanced"), "groups": groups},
-		LocalBattle.battle_rng(int(world.seed), int(battle.id), round), battle.setup.get("afflictions"))
+		LocalBattle.battle_rng(int(world.seed), int(battle.id), round), battle.setup.get("afflictions"),
+		LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))))
 	# Burning and poison carry into the next round.
 	battle.setup = LocalBattle.with_afflictions(battle.setup, result.afflictions)
 	var attacker_now := LocalCamps.subtract_units(wave.composition, result.attackerLosses)

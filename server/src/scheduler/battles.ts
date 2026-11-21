@@ -52,6 +52,7 @@ import { hordeBeaten, hordeWins, moveOn } from './horde.js';
 import { hex } from '../sim/hex.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, siegeWorks, towerLevel, wallFactors, wallIntegrity, wallLevel } from '../sim/walls.js';
 import { record } from '../db/telemetry.js';
+import { groundOf } from './ground.js';
 
 export function personality(data: GameData, wave: Wave) {
   return data.enemies.fronts[wave.front]!.personality;
@@ -221,6 +222,7 @@ export const battleHandlers: HandlerRegistry = {
       },
       rng,
       battle.setup.afflictions,
+      await groundOf(client, data, world.id, { q: village.q, r: village.r }),
     );
     const attackerLosses = addUnits(result.attackerLosses, smashed);
     const attackerNow = subtractUnits(wave.composition, attackerLosses);

@@ -37,6 +37,7 @@ import { refreshBonuses } from './research.js';
 import type { BridgeQuest } from '../data/index.js';
 import { bridgeQuest } from './bridge.js';
 import { rewardEvent } from './eventOutcomes.js';
+import { groundOf } from './ground.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -131,6 +132,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       front: 'north',
       seed: world.seed,
       id: site.id + 0x5000,
+      ground: await groundOf(client, data, world.id, { q: site.q, r: site.r }),
     });
     const battle = await insertBattle(client, {
       worldId: world.id,

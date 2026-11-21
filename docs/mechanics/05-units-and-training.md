@@ -42,7 +42,7 @@ Cost is wood / stone / grain / iron. "Bldg" is the building level needed.
 | Axe Levy | 1 | 30/10/25/15 | 45 s | 25 | 15 | 130 | 5 | 1 | 1 | Cheap, quick, soon spent |
 | Warrior | 1 | 40/20/35/35 | 65 s | 31 | 30 | 235 | 5 | 1 | 1 |  |
 | Spearman | 1 | 35/20/30/30 | 60 s | 20 | 40 | 285 | 5 | 1 | 1 | Holds walls, stops riders |
-| Ambusher | 1 | 40/15/35/40 | 75 s | 40 | 20 | 190 | 6 | 1 | 1 | ×1.5 archers, ×1.2 cavalry |
+| Ambusher | 1 | 40/15/35/40 | 75 s | 40 | 20 | 190 | 6 | 1 | 1 | ×1.5 archers, ×1.2 cavalry; +15% attack in woods |
 | Axeman | 2 | 45/25/35/50 | 80 s | 49 | 25 | 245 | 5 | 1 | 1 |  |
 | Horse Cutter | 3 | 40/25/35/45 | 80 s | 41 | 30 | 315 | 5 | 1 | 1 | ×2 cavalry |
 | Warrior of Perun | 4 | 70/40/60/80 | 140 s | 80 | 45 | 445 | 5 | 2 | 2 |  |
@@ -70,7 +70,7 @@ Cost is wood / stone / grain / iron. "Bldg" is the building level needed.
 | Noble Skirmisher | 5 | 80/40/60/80 | 150 s | 80 | 40 | 445 | 7 | 2 | 2 | ×1.5 infantry, ×1.3 cavalry |
 | Poison Hunter | 5 | 90/30/60/80 | 160 s | 100 | 25 | 395 | 6 | 2 | 2 | **Poisons**; ×1.9 infantry, ×1.5 cavalry |
 | Onager | 6 | 250/200/80/120 | 400 s | 90 | 20 | 165 | 3 | 3 | 2 | Siege engine; ×1.8 infantry, ×1.2 archers |
-| Devana's Hunter | 7 | 130/50/100/140 | 280 s | 195 | 45 | 665 | 7 | 2 | 3 | ×1.5 infantry, ×1.3 cavalry |
+| Devana's Hunter | 7 | 130/50/100/140 | 280 s | 195 | 45 | 665 | 7 | 2 | 3 | ×1.5 infantry, ×1.3 cavalry; +20% attack in woods |
 | Perun's Thunder Thrower | 9 | 200/120/150/260 | 450 s | 140 | 40 | 285 | 4 | 4 | 2 | Siege engine; ×1.6 inf, ×1.4 cav, ×1.2 archers |
 
 ### Cavalry (Stables)
@@ -80,9 +80,9 @@ Cost is wood / stone / grain / iron. "Bldg" is the building level needed.
 | Horse Raider | 1 | 40/30/60/80 | 120 s | 45 | 25 | 200 | 10 | 2 | 1 | Carries 80 |
 | Raider | 2 | 35/20/50/50 | 90 s | 42 | 15 | 155 | 12 | 1 | 1 | Carries 120 |
 | Military Caravan | 2 | 120/20/40/30 | 150 s | 0 | 60 | 450 | 5 | 0.5 | 1 | Support (wagon): +200 grain for its army; carries 400 loot |
-| Horse Archer | 4 | 70/30/80/90 | 180 s | 75 | 30 | 310 | 11 | 2 | 2 | ×1.5 archers, ×1.3 infantry |
+| Horse Archer | 4 | 70/30/80/90 | 180 s | 75 | 30 | 310 | 11 | 2 | 2 | ×1.5 archers, ×1.3 infantry; +10% attack on open ground |
 | Large Military Caravan | 4 | 260/40/80/70 | 300 s | 0 | 80 | 600 | 7 | 1 | 1 | Support (wagon): +300 grain; carries 1 engine or 10 foot soldiers; carries 600 loot |
-| Bear Rider | 6 | 80/60/160/140 | 300 s | 115 | 70 | 555 | 7 | 4 | 2 | ×1.5 archers, ×1.2 infantry |
+| Bear Rider | 6 | 80/60/160/140 | 300 s | 115 | 70 | 555 | 7 | 4 | 2 | ×1.5 archers, ×1.2 infantry; +10% defense in woods |
 | Svarog's Raider | 8 | 150/90/180/260 | 420 s | 250 | 80 | 860 | 11 | 4 | 3 |  |
 
 ### Scouts (Scout Lodge)
@@ -105,17 +105,18 @@ Lower **stealth** is better: it scales the chance of being caught
 
 ### Clan units
 
-Only members of that clan can train these ([page 10](10-heroes-generals-clans.md#clans)):
+Only members of that clan can train these ([page 10](10-heroes-generals-clans.md#clans)).
+Terrain notes are on top of the family's ([page 6](06-battles.md#terrain)):
 
 | Unit | Clan | Bldg | Atk | Def | HP | Spd | Slots | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Forest Archer | Rys (Lynx) | Range 2 | 47 | 28 | 230 | 6 | 1 |  |
-| River Barge | Bobr (Beaver) | Barracks 2 | 30 | 45 | 625 | 7 | 1 | Carries 200 |
-| Border Rider | Sokol (Falcon) | Stables 3 | 55 | 32 | 260 | 14 | 1 |  |
-| Aurochs Guard | Tur (Aurochs) | Barracks 2 | 29 | 62 | 410 | 4 | 1 |  |
-| Raven Javelineer | Gavran (Raven) | Range 2 | 48 | 24 | 210 | 7 | 1 |  |
-| Fox Rider | Lisica (Fox) | Stables 3 | 50 | 28 | 260 | 13 | 1 | Carries 120 |
-| Serpent Axeman | Zmija (Serpent) | Barracks 3 | 60 | 30 | 340 | 5 | 1 |  |
+| Forest Archer | Rys (Lynx) | Range 2 | 47 | 28 | 230 | 6 | 1 | +20% attack in woods |
+| River Barge | Bobr (Beaver) | Barracks 2 | 30 | 45 | 625 | 7 | 1 | Carries 200; +15% defense by each river or lake |
+| Border Rider | Sokol (Falcon) | Stables 3 | 55 | 32 | 260 | 14 | 1 | +10% attack on open ground |
+| Aurochs Guard | Tur (Aurochs) | Barracks 2 | 29 | 62 | 410 | 4 | 1 | +10% defense on open ground |
+| Raven Javelineer | Gavran (Raven) | Range 2 | 48 | 24 | 210 | 7 | 1 | +10% attack in hills |
+| Fox Rider | Lisica (Fox) | Stables 3 | 50 | 28 | 260 | 13 | 1 | Carries 120; +15% attack in woods |
+| Serpent Axeman | Zmija (Serpent) | Barracks 3 | 60 | 30 | 340 | 5 | 1 | +20% attack in wetlands |
 
 ## Training
 

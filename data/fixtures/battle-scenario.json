@@ -12291,7 +12291,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 2,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -12442,7 +12442,7 @@
       "garrison": {
        "archer": 0,
        "ambusher": 0,
-       "spearman": 3
+       "spearman": 2
       },
       "away": {},
       "stance": "balanced",
@@ -12468,7 +12468,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 359.5,
+        "grain": 373,
         "stone": 300
        },
        "capacity": {
@@ -12839,7 +12839,7 @@
         "breach": true,
         "wallLeft": 0,
         "attackerLeft": 1,
-        "defenderLeft": 3,
+        "defenderLeft": 2,
         "attackerLosses": {
          "zealot": 9,
          "crossbowman": 3,
@@ -12848,7 +12848,7 @@
         "defenderLosses": {
          "archer": 1,
          "ambusher": 1,
-         "spearman": 3
+         "spearman": 4
         }
        }
       ],
@@ -15180,7 +15180,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 2,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -15331,7 +15331,7 @@
       "garrison": {
        "archer": 0,
        "ambusher": 0,
-       "spearman": 3
+       "spearman": 2
       },
       "away": {},
       "stance": "balanced",
@@ -15357,7 +15357,7 @@
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 359.5,
+        "grain": 373,
         "stone": 300
        },
        "capacity": {
@@ -15558,7 +15558,7 @@
         }
        },
        "guard": {
-        "archer": 11,
+        "archer": 10,
         "spearman": 22
        },
        "holyCity": true
@@ -15584,13 +15584,15 @@
         "at": "2026-06-01T11:34:43.200Z",
         "round": 1,
         "attackerLeft": 3,
-        "defenderLeft": 33,
+        "defenderLeft": 32,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 8,
          "leshy_thrall": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1
+        }
        }
       ],
       "loot": null,
@@ -15660,7 +15662,7 @@
         "breach": true,
         "wallLeft": 0,
         "attackerLeft": 1,
-        "defenderLeft": 3,
+        "defenderLeft": 2,
         "attackerLosses": {
          "zealot": 9,
          "crossbowman": 3,
@@ -15669,7 +15671,7 @@
         "defenderLosses": {
          "archer": 1,
          "ambusher": 1,
-         "spearman": 3
+         "spearman": 4
         }
        }
       ],
@@ -15824,7 +15826,7 @@
       "wins": 0,
       "losses": 2,
       "razed": 0,
-      "kills": 2,
+      "kills": 3,
       "grudgeVillageId": null,
       "diedAt": null
      },

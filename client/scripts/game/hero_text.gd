@@ -18,6 +18,10 @@ static func effect_name(key: String) -> String:
 		"coldDefense": UI.t("defense against the North"), "fortCost": UI.t("fort cost"), "outpostYield": UI.t("outpost yield"),
 		"storage": UI.t("storage"), "champion": UI.t("hero's strength in battle"), "generalChampion": UI.t("generals' strength in battle"),
 		"marketRate": UI.t("market trades"), "siteLoot": UI.t("finds in ancient sites"),
+		"terrain.flat.attack": UI.t("attack on open ground"), "terrain.woods.defense": UI.t("defense in woods"),
+		"terrain.hills.defense": UI.t("defense in hills"), "terrain.wetland.defense": UI.t("defense in wetlands"),
+		"terrain.mountain.attack": UI.t("attack for each mountain beside the battle (up to 2)"),
+		"terrain.water.defense": UI.t("defense for each river or lake beside the battle (up to 2)"),
 	}.get(key, key)
 
 

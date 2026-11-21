@@ -56,12 +56,28 @@ static func _units(data: Dictionary, speed := 1.0) -> Array:
 				strong.append("%s ×%.1f" % [target, float(u.counters[target])])
 			text += UI.t(" · strong against %s") % ", ".join(strong)
 		text += afflictions_text(u)
+		text += terrain_text(u)
 		if LocalScouting.is_support(data, id):
 			text += UI.t(" · support: never fights, but wagons drawn into a wagon fort stand as a wall before the archers") if u.get("wagon", false) == true else UI.t(" · support: never fights")
 		if u.get("clan") != null:
 			text += UI.t(" · only %s") % UI.t(data.clans.clans[u.clan].name)
 		out.append([UI.t(u.name), text, "unit/%s" % id, id])
 	return out
+
+
+## A unit's own strength on some ground (units.json terrain), or "".
+static func terrain_text(u: Dictionary) -> String:
+	var shares: Variant = u.get("terrain")
+	if not (shares is Dictionary):
+		return ""
+	var names := {"flat": UI.t("on open ground"), "woods": UI.t("in woods"), "hills": UI.t("in hills"), "wetland": UI.t("in wetlands"),
+		"mountain": UI.t("by mountains"), "water": UI.t("by rivers and lakes")}
+	var text := ""
+	for feature in shares:
+		for stat in shares[feature]:
+			var percent := roundi(float(shares[feature][stat]) * 100.0)
+			text += UI.t(" · %s%d%% %s %s") % ["+" if percent > 0 else "−", absi(percent), UI.t("attack") if stat == "attack" else UI.t("defense"), names.get(feature, feature)]
+	return text
 
 
 ## What a unit's blows carry (battle.json afflictions), or "".

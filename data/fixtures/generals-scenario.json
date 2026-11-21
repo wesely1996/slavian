@@ -8868,7 +8868,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 2,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -9325,7 +9325,7 @@
        "amounts": {
         "iron": 315,
         "wood": 545,
-        "grain": 535.5,
+        "grain": 537,
         "stone": 530
        },
        "ratesPerHour": {
@@ -9676,7 +9676,7 @@
        "sergeant_rider": 1
       },
       "defenderInitial": {
-       "spearman": 3
+       "spearman": 2
       },
       "rounds": [],
       "loot": null,
@@ -9785,12 +9785,14 @@
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
         "attackerLeft": 4,
-        "defenderLeft": 3,
+        "defenderLeft": 2,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": null,
@@ -9871,7 +9873,7 @@
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 1,
+      "kills": 2,
       "grudgeVillageId": 1,
       "diedAt": null
      },
@@ -9918,7 +9920,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 3
+       "spearman": 2
       },
       "status": "engaged",
       "battleId": 3,
@@ -9948,7 +9950,7 @@
       "arrivesAt": "2026-06-01T10:56:24.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 7.199999999999996,
+      "supply": 14.73333333333333,
       "supplyAt": "2026-06-01T11:00:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -12141,7 +12143,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 2,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -12598,7 +12600,7 @@
        "amounts": {
         "iron": 315,
         "wood": 545,
-        "grain": 535.5,
+        "grain": 537,
         "stone": 530
        },
        "ratesPerHour": {
@@ -12949,7 +12951,7 @@
        "sergeant_rider": 1
       },
       "defenderInitial": {
-       "spearman": 3
+       "spearman": 2
       },
       "rounds": [],
       "loot": null,
@@ -13058,12 +13060,14 @@
         "at": "2026-06-01T10:47:21.600Z",
         "round": 2,
         "attackerLeft": 4,
-        "defenderLeft": 3,
+        "defenderLeft": 2,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        }
       ],
       "loot": null,
@@ -13144,7 +13148,7 @@
       "wins": 0,
       "losses": 1,
       "razed": 0,
-      "kills": 1,
+      "kills": 2,
       "grudgeVillageId": 1,
       "diedAt": null
      },
@@ -13191,7 +13195,7 @@
       "stance": "balanced",
       "loot": null,
       "units": {
-       "spearman": 3
+       "spearman": 2
       },
       "status": "engaged",
       "battleId": 3,
@@ -13221,7 +13225,7 @@
       "arrivesAt": "2026-06-01T10:56:24.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 7.199999999999996,
+      "supply": 14.73333333333333,
       "supplyAt": "2026-06-01T11:00:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,

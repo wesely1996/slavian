@@ -160,5 +160,25 @@ players may pick the same one.
 | Rod Zmije | Serpent | Stone, iron, ancient sites | +10% stone, +10% iron, +25% site loot | Troops eat 10% more | Serpent Axeman |
 
 - **Effects** join the player's own bonuses in all their villages.
+
+### Clans on their ground
+
+Each clan also fights better on its own kind of land ([page 6](06-battles.md#terrain)).
+These count for every unit of the clan's players, on top of the families'
+terrain shares. Mountains and waters count once for each one beside the
+battle's hex, at most twice.
+
+| Clan | Woods | Open ground | Hills | Wetland | Each mountain beside | Each river or lake |
+|---|---|---|---|---|---|---|
+| Rod Jelena | +10% def | +10% atk | | | | +10% def |
+| Rod Rysa | +10% def | | +10% def | | +10% atk | |
+| Rod Medvěda | +10% def | | +10% def | | +10% atk | |
+| Rod Bobra | +10% def | +10% atk | | | | +10% def |
+| Rod Sokola | | +10% atk | | | +10% atk | |
+| Rod Volka | +10% def | | +10% def | | +10% atk | |
+| Rod Tura | | +10% atk | | | | +10% def |
+| Rod Gavrana | +10% def | +10% atk | | | +10% atk | |
+| Rod Lisice | +10% def | | +10% def | | +10% atk | |
+| Rod Zmije | +10% def | | +10% def | +20% def | | +10% def |
 - **Clan units and buildings** are listed on [page 5](05-units-and-training.md#clan-units)
   and [page 3](03-villages-and-buildings.md#clan-buildings).

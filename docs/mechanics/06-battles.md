@@ -7,8 +7,8 @@ seed always play out the same way. What players control is everything before
 and around the fight:
 - **Who fights:** troops and leaders.
 - **How they fight:** stances.
-- **Where they fight:** walls ([page 7](07-walls-and-sieges.md)) and field
-  setups ([page 8](08-armies-and-field.md#field-setups)).
+- **Where they fight:** the [terrain](#terrain), walls ([page 7](07-walls-and-sieges.md))
+  and field setups ([page 8](08-armies-and-field.md#field-setups)).
 - **When help arrives:** reinforcements ([page 8](08-armies-and-field.md#reinforcements)).
 
 ## Rounds
@@ -72,6 +72,47 @@ health  = base × (1 + forged health)
   top.
 - **Enemy units** are scaled by their leader's skills, their front's hatred
   and their own conditions (a river, ambush, choke point).
+
+## Terrain
+
+Where a battle is fought changes how hard each side hits and holds. The
+battle's hex decides it: a village's own hex, the field hex, the camp, the
+site. Raids beyond the map's edge have no terrain.
+
+**What the hex counts as.** Plains, steppe, ice, Hallowed Lands and the Holy
+City are *open ground*. Forest and Dark Forest are *woods*. Hills and a
+mountain city are *hills*. Wooded hills are both woods and hills. Swamp is
+*wetland*.
+
+**What lies beside it.** Each mountain next to the hex counts, and each river
+along one of its six edges or lake next to it counts as *water*. Mountains
+and waters each count **at most twice**: three mountains beside a battle give
+the same as two.
+
+**Unit families** (every side, hordes included):
+
+| Family | Open ground | Woods | Hills | Each mountain beside |
+|---|---|---|---|---|
+| Cavalry | +30% attack | | | |
+| Infantry | | +10% attack | +20% attack | |
+| Archers | +10% attack | −20% attack | +30% attack | +10% attack |
+
+**Clans** add their own ([page 10](10-heroes-generals-clans.md#clans-on-their-ground)),
+and some units have their own on top ([page 5](05-units-and-training.md)).
+
+All the shares a unit gets add up, and the sum multiplies its attack or
+defense:
+
+```
+attack  × (1 + family's + unit's own + clan's)
+defense × (1 + unit's own + clan's)
+```
+
+Example: Rod Zmije's Serpent Axemen fight in a swamp with three rivers around
+it. Attack: +20% (their own, wetland) = ×1.2. Defense: +20% (clan, wetland)
++ 2 × 10% (clan, water, counted twice) = ×1.4.
+
+Champions are not affected by terrain.
 
 ## Stances
 

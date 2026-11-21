@@ -67,6 +67,7 @@ func _initialize() -> void:
 	_test_translation()
 	_test_walls()
 	_test_rivers()
+	_test_ground()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -1379,3 +1380,19 @@ func _test_walls() -> void:
 	_check(clear, "walls and slots laid out clear of the rest, for any village")
 	_check(differ, "each village has its own outline")
 
+
+## sim/ground.ts (server test/ground.test.ts): the ground a battle is fought on.
+func _test_ground() -> void:
+	var data := LocalData.load_data()
+	var ring := HexMath.neighbors(Vector2i.ZERO)
+	var hexes := {LocalLand.key(Vector2i.ZERO): "wooded_hills"}
+	var around := ["mountain", "mountain", "mountain", "plains", "lake", "plains"]
+	for i in ring.size():
+		hexes[LocalLand.key(ring[i])] = around[i]
+	var world := {"hexes": hexes, "rivers": [{"a": Vector2i.ZERO, "b": ring[3]}]}
+	_check(LocalGround.at(data, world, Vector2i.ZERO) == {"woods": 1, "hills": 1, "mountain": 3, "water": 2}, "ground: woods, hills, 3 mountains, 2 waters")
+	_check(is_equal_approx(float(LocalGround.factors(data, {"flat": 1}, "cavalry", null).attack), 1.3), "ground: cavalry +30% on flat land")
+	_check(is_equal_approx(float(LocalGround.factors(data, {"hills": 1, "mountain": 3}, "archers", null).attack), 1.5), "ground: archers on hills under mountains")
+	var axeman: Dictionary = LocalBattle.player_stats(data, LocalVillage.clan_bonuses(data, "zmija")).call("serpent_axeman")
+	var f := LocalGround.factors(data, {"wetland": 1, "water": 3}, axeman.family, axeman.get("terrain"))
+	_check(is_equal_approx(float(f.attack), 1.2) and is_equal_approx(float(f.defense), 1.4), "ground: Rod Zmije's axemen in the wetlands")

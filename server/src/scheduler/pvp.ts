@@ -21,6 +21,7 @@ import { wallFactors, wallIntegrity } from '../sim/walls.js';
 import { armyLosses, sendHome } from './armies.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { ruinVillage } from './horde.js';
+import { groundOf } from './ground.js';
 import { tell } from './notices.js';
 
 export async function attackVillage(client: DbClient, data: GameData, world: World, army: Army, at: Date): Promise<void> {
@@ -88,6 +89,7 @@ export async function attackVillage(client: DbClient, data: GameData, world: Wor
     defenders: forces,
     seed: world.seed,
     id: army.id,
+    ground: await groundOf(client, data, world.id, { q: target.q, r: target.r }),
   });
   const battle = await insertBattle(client, {
     worldId: world.id,

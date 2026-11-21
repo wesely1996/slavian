@@ -15,6 +15,7 @@ import {
   type Champion,
   type UnitStats,
 } from './battle.js';
+import type { Ground } from './ground.js';
 import type { Units } from './training.js';
 
 // When a village founded at `foundedAt` stops being safe from other
@@ -68,6 +69,8 @@ export function pvpAssault(
     defenders: readonly PvpForce[];
     seed: number;
     id: number;
+    // The village's hex (battle.json terrain).
+    ground?: Ground;
   },
 ): {
   won: boolean;
@@ -112,6 +115,7 @@ export function pvpAssault(
       },
       battleRng(input.seed, input.id + 0x20000, round),
       afflictions,
+      input.ground,
     );
     afflictions = result.afflictions;
     for (const id of result.attackerFallen[0] ?? []) attackerFallen.push(id);
