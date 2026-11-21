@@ -119,7 +119,9 @@ builds a boat on a river.
 
 ## Terraforming
 
-A village can reshape the land within **2 hexes** of it.
+A village can reshape the land within **2 hexes** of it: clear or plant
+forest, drain a swamp, level hills, burn a forest, make a lake or a
+wetland, or extend a river.
 
 - **Where.** On a hex with no village, outpost, fort, camp or site, and no
   other work under way there.
@@ -133,6 +135,23 @@ A village can reshape the land within **2 hexes** of it.
 | Drain the swamp | Swamp → plains | 600 | 16 h | — |
 | Level the hills | Hills → plains | 700 | 24 h | 900 stone |
 | Burn the forest | Forest → plains, wooded hills → hills | 100 | 6 h | — (the timber is lost) |
+| Make a lake | Plains or swamp → lake | 800 (+300 wood, 300 stone) | 24 h | — |
+| Make a wetland | Plains → swamp | 500 | 12 h | — |
+| Extend a river | A river along the hex's edge toward a neighbour | 800 (+200 wood, 400 stone) | 24 h | — |
+
+**Lakes and rivers change the map for good.**
+- **A lake** is impassable, like any lake: a wall for armies and hordes, a
+  fishing ground, and water for the battles beside it
+  ([page 6](06-battles.md#terrain)).
+- **A river** is dug along the edge between the hex and a neighbour you
+  choose. It must run on from a river already there: the new edge meets an
+  existing river edge corner to corner. Both hexes must be land (plains,
+  forest, hills, wooded hills or swamp). Nothing crosses it without a
+  bridge.
+- **No village is cut off.** Neither a lake nor a river may be made where
+  it would cut any village off from the Holy City.
+- **Those already on the road** when the work is done keep their road; any
+  road planned after goes round, or over a bridge.
 
 ## Fire
 

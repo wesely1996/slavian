@@ -961,6 +961,17 @@ func _terraform_panel(terrain: String) -> void:
 			info.add_child(UI.label(tr("The camp burns: %d–%d%% of its troops flee at once and march on the nearest village, and its front's hatred rises by %d%%.") % [
 				roundi(float(burnt.fleeShare.min) * 100.0), roundi(float(burnt.fleeShare.max) * 100.0), roundi(float(burnt.hatred) * 100.0)], UI.SMALL_SIZE, UI.ERROR))
 		row.add_child(info)
+		# A river: one button for each neighbour it can run toward.
+		if def.get("river", false):
+			_panel_body.add_child(row)
+			var ways := _river_ways(cell, def)
+			if ways.is_empty():
+				info.add_child(UI.label(tr("No river here to dig on from"), UI.SMALL_SIZE, UI.MUTED))
+			for toward in ways:
+				var dig := UI.button(tr("Toward (%d, %d)") % [toward.x, toward.y], func() -> void: _terraform(village_id, cell, action, toward))
+				dig.disabled = problem != ""
+				_panel_body.add_child(dig)
+			continue
 		var start := UI.button(tr("Start"), func() -> void: _terraform(village_id, cell, action))
 		start.custom_minimum_size.x = 130
 		row.add_child(start)
@@ -978,9 +989,34 @@ func _terraform_panel(terrain: String) -> void:
 		_panel_body.add_child(UI.label(tr("An army stands there: no fire can be set"), UI.SMALL_SIZE, UI.MUTED))
 
 
-func _terraform(village_id: int, cell: Vector2i, action: String) -> void:
+## The neighbours a river can be dug toward from `cell`: land, no river
+## there yet, corner to corner with one already there.
+func _river_ways(cell: Vector2i, def: Dictionary) -> Array:
+	var out: Array = []
+	for n in HexMath.neighbors(cell):
+		var there: Variant = Game.terrain.get(n)
+		if there == null or not def.from.has(there):
+			continue
+		var here := false
+		var meets := false
+		for e in Game.rivers:
+			var a := Vector2i(int(e[0]), int(e[1]))
+			var b := Vector2i(int(e[2]), int(e[3]))
+			if LocalLand.edge_key(a, b) == LocalLand.edge_key(cell, n):
+				here = true
+			elif LocalLand.edges_meet(a, b, cell, n):
+				meets = true
+		if meets and not here:
+			out.append(n)
+	return out
+
+
+func _terraform(village_id: int, cell: Vector2i, action: String, toward: Variant = null) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/terraform" % village_id, {"q": cell.x, "r": cell.y, "action": action})
+	var body := {"q": cell.x, "r": cell.y, "action": action}
+	if toward is Vector2i:
+		body.toward = {"q": toward.x, "r": toward.y}
+	var response := await Api.post_json("/v1/villages/%d/terraform" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
 		return

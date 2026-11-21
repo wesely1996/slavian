@@ -1102,6 +1102,10 @@ func _replay_scenario(file: String, name: String) -> void:
 				var c: Dictionary = step.set.camp
 				LocalBattles.create_camp(local, world, {"kind": String(c.kind), "front": String(c.front), "q": int(c.q), "r": int(c.r),
 					"units": LocalServer._decode(c.units), "waveId": null}, now)
+			if step.set.has("river"):
+				var rv: Dictionary = step.set.river
+				var ends := LocalServer._ordered(Vector2i(int(rv.a.q), int(rv.a.r)), Vector2i(int(rv.b.q), int(rv.b.r)))
+				world.rivers.append({"a": ends[0], "b": ends[1], "crossing": "none", "size": 1, "builtBy": null, "completesAt": null})
 			if step.set.has("frontHatred"):
 				if not world.has("hatred"):
 					world.hatred = {}

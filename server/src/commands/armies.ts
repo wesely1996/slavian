@@ -201,13 +201,13 @@ export async function buildRoadCommand(
 export async function terraformCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { accountId: number; villageId: number; cell: Hex; action: string; now: Date },
+  input: { accountId: number; villageId: number; cell: Hex; action: string; toward?: Hex | null; now: Date },
 ): Promise<Terraform> {
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'reshaped the land', villageId: village.id });
-    return startTerraform(client, deps.data, world, village.id, input.cell, input.action, input.now);
+    return startTerraform(client, deps.data, world, village.id, input.cell, input.action, input.now, input.toward ?? null);
   });
 }
 

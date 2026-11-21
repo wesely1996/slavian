@@ -29,6 +29,8 @@ import { threatOf } from '../sim/waves.js';
 import { angerFront, setOutNow } from './waves.js';
 import { listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
 import { relinkOutposts } from './outposts.js';
+import { insertRivers, listRiverEdges, loadLand } from '../db/rivers.js';
+import { edgeKey, edgesMeet, landOf, reachable, type Land } from '../sim/land.js';
 
 const workPayload = z.object({ q: z.number().int(), r: z.number().int() });
 const firePayload = z.object({ q: z.number().int(), r: z.number().int(), action: z.string(), generation: z.number().int(), villageId: z.number().int().nullable() });
@@ -182,7 +184,58 @@ async function burnableCampAt(client: DbClient, worldId: number, cell: Hex): Pro
   return (await listCamps(client, worldId)).some((c) => c.q === cell.q && c.r === cell.r && (c.kind === 'bandit' || c.kind === 'lair'));
 }
 
-export async function startTerraform(client: DbClient, data: GameData, world: World, villageId: number, cell: Hex, action: string, at: Date): Promise<Terraform> {
+// Why a river can't be dug along cell|toward, or a lake made at `cell`
+// ('' when it can): rivers on from rivers, between land, never cutting a
+// village off from the Holy City.
+export function reshapeProblem(
+  data: GameData,
+  input: {
+    action: string;
+    cell: Hex;
+    toward: Hex | null;
+    land: Land;
+    rivers: readonly { a: Hex; b: Hex }[];
+    villages: readonly Hex[];
+  },
+): string {
+  const def = data.field.terraform.actions[input.action];
+  if (!def) return '';
+  const { land, cell, toward } = input;
+  let after: Land | null = null;
+  if (def.river) {
+    if (!toward || !neighbors(cell).some((n) => hexKey(n) === hexKey(toward))) return 'Choose a neighbouring hex for the river to run toward';
+    const there = land.get(hexKey(toward));
+    if (!there || !def.from[there]) return 'A river runs between land';
+    if (input.rivers.some((e) => edgeKey(e.a, e.b) === edgeKey(cell, toward))) return 'A river runs there already';
+    if (!input.rivers.some((e) => edgesMeet(e.a, e.b, cell, toward))) return 'A river is dug on from a river';
+    after = landOf(land, [...(land.blocked ?? []), edgeKey(cell, toward)], land.roads ?? [], land.lanes ?? [], land.burning ?? [], land.damaged ?? [], land.forts ?? []);
+  } else {
+    const terrain = land.get(hexKey(cell));
+    const into = terrain ? def.from[terrain] : undefined;
+    if (into && data.terrain.terrain[into].moveCost === null) {
+      const reshaped = new Map(land);
+      reshaped.set(hexKey(cell), into);
+      after = landOf(reshaped, land.blocked ?? [], land.roads ?? [], land.lanes ?? [], land.burning ?? [], land.damaged ?? [], land.forts ?? []);
+    }
+  }
+  if (after) {
+    const before = reachable(data, land, input.villages);
+    const now = reachable(data, after, input.villages);
+    if ([...before].some((key) => !now.has(key))) return 'That would cut a village off from the Holy City';
+  }
+  return '';
+}
+
+export async function startTerraform(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  villageId: number,
+  cell: Hex,
+  action: string,
+  at: Date,
+  toward: Hex | null = null,
+): Promise<Terraform> {
   const village = await loadVillage(client, villageId);
   const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t])).get(hexKey(cell));
   const problem = terraformProblem(
@@ -196,9 +249,25 @@ export async function startTerraform(client: DbClient, data: GameData, world: Wo
     (await armiesHolding(client, world.id, cell.q, cell.r, ['stationed', 'engaged'])).length > 0,
   );
   if (problem) throw new RuleError(problem);
+  const reshaping = reshapeProblem(data, {
+    action,
+    cell,
+    toward,
+    land: await loadLand(client, world.id),
+    rivers: await listRiverEdges(client, world.id),
+    villages: (await listVillages(client, world.id)).map((v) => hex(v.q, v.r)),
+  });
+  if (reshaping) throw new RuleError(reshaping);
   const def = data.field.terraform.actions[action]!;
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, def.cost) });
-  const work: Terraform = { cell, action, villageId: village.id, completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed), generation: 0 };
+  const work: Terraform = {
+    cell,
+    action,
+    villageId: village.id,
+    completesAt: new Date(at.getTime() + (def.hours * 3_600_000) / world.speed),
+    generation: 0,
+    ...(def.river ? { toward } : {}),
+  };
   await insertTerraform(client, world.id, work);
   await scheduleEvent(client, world.id, work.completesAt, 'terraform_done', { q: cell.q, r: cell.r });
   if (def.fire) {
@@ -226,7 +295,9 @@ export const terraformHandlers: HandlerRegistry = {
     const def = data.field.terraform.actions[work.action];
     const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t])).get(hexKey(cell));
     const into = def && terrain ? def.from[terrain] : undefined;
-    if (into) await setHexTerrain(client, world.id, cell.q, cell.r, into);
+    if (into && into !== terrain) await setHexTerrain(client, world.id, cell.q, cell.r, into);
+    // A river dug: nothing crosses the edge from now on without a bridge.
+    if (def?.river && work.toward) await insertRivers(client, world.id, [{ a: cell, b: work.toward, bridge: false, size: 1 }]);
     if (work.villageId !== null) {
       const village = await loadVillage(client, work.villageId).catch(() => null);
       // A fire tells only the one who set it, where they set it.

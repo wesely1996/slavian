@@ -223,3 +223,37 @@ export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, fro
   const link = best.get(goal);
   return link && link.steps > 0 ? link.sum / link.steps : 0;
 }
+
+// Whether the edges a|b and c|d meet at a corner: they share one hex, and
+// their other two hexes are neighbours (a river can run on from one to the
+// other).
+export function edgesMeet(a: Hex, b: Hex, c: Hex, d: Hex): boolean {
+  const k = [hexKey(a), hexKey(b)];
+  const l = [hexKey(c), hexKey(d)];
+  const shared = k.filter((x) => l.includes(x));
+  if (shared.length !== 1) return false;
+  const p = [a, b].find((h) => hexKey(h) !== shared[0])!;
+  const q = [c, d].find((h) => hexKey(h) !== shared[0])!;
+  return neighbors(p).some((n) => hexKey(n) === hexKey(q));
+}
+
+// The settlements of `cells` a march from the Holy City can reach over
+// `land` (by their hexKey).
+export function reachable(data: GameData, land: Land, cells: readonly Hex[]): Set<string> {
+  const step = moveCostOn(data, land);
+  const wanted = new Set(cells.map(hexKey));
+  const seen = new Set([hexKey({ q: 0, r: 0 })]);
+  const queue: Hex[] = [{ q: 0, r: 0 }];
+  const out = new Set<string>();
+  while (queue.length > 0) {
+    const at = queue.shift()!;
+    if (wanted.has(hexKey(at))) out.add(hexKey(at));
+    for (const n of neighbors(at)) {
+      const key = hexKey(n);
+      if (seen.has(key) || step(at, n) === null) continue;
+      seen.add(key);
+      queue.push(n);
+    }
+  }
+  return out;
+}
