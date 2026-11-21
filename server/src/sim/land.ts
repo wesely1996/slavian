@@ -16,6 +16,9 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   readonly lanes?: ReadonlySet<string>;
   // Hexes (hexKey) on fire: nothing enters them until the fire is out.
   readonly burning?: ReadonlySet<string>;
+  // Forts (hexKey) an army holds: hordes keep out of their zone of control
+  // (field.json fort.zoneDetour).
+  readonly forts?: ReadonlySet<string>;
 }
 
 // One key for the edge between two neighbouring hexes, whichever way round.
@@ -160,6 +163,7 @@ export function landOf(
   lanes: Iterable<string> = [],
   burning: Iterable<string> = [],
   damaged: Iterable<string> = [],
+  forts: Iterable<string> = [],
 ): Land {
   const land = new Map(terrain) as Map<string, TerrainId> & {
     blocked?: ReadonlySet<string>;
@@ -167,12 +171,14 @@ export function landOf(
     lanes?: ReadonlySet<string>;
     burning?: ReadonlySet<string>;
     damaged?: ReadonlySet<string>;
+    forts?: ReadonlySet<string>;
   };
   land.blocked = new Set(blocked);
   land.roads = new Map(roads);
   land.lanes = new Set(lanes);
   land.burning = new Set(burning);
   land.damaged = new Set(damaged);
+  land.forts = new Set(forts);
   return land;
 }
 

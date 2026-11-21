@@ -8,7 +8,7 @@
 import { canCross, edgeKey, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
-import { findPath, hex, hexDistance, hexKey, type Hex } from './hex.js';
+import { findPath, hex, hexDistance, hexKey, neighbors, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
 import { createRng } from './rng.js';
 
@@ -230,10 +230,37 @@ export function routeFrom(
   let best: { id: number | null; path: Hex[]; score: number } | null = null;
   let holy: { path: Hex[]; cost: number } | null = null;
   let cheapestVillage = Infinity;
+  const minStep = roads ? fastestRoad(data) : 1;
+  const costOf = (path: readonly Hex[]) => path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
+  // Forts an army holds keep hordes out of the hexes beside them (field.json
+  // fort.zoneDetour); one the horde already stands beside or on is no bar.
+  const forts = [...(terrain.forts ?? [])]
+    .map((key) => {
+      const [q, r] = key.split(',').map(Number);
+      return hex(q!, r!);
+    })
+    .filter((f) => hexDistance(f, input.from) > 1);
+  const zone = new Map<string, Hex>();
+  for (const f of forts) for (const n of neighbors(f)) if (!zone.has(hexKey(n))) zone.set(hexKey(n), f);
+  // The way to `goal`: straight, round the forts' zones, or (when that is
+  // too far) on to the first fort in the way and from it to the goal.
+  const wayTo = (goal: Hex): Hex[] | null => {
+    const straight = findPath(input.from, goal, searchCost, minStep);
+    if (!straight || zone.size === 0) return straight;
+    const goalKey = hexKey(goal);
+    const barred = straight.slice(1).find((cell) => hexKey(cell) !== goalKey && zone.has(hexKey(cell)));
+    if (!barred) return straight;
+    const around = findPath(input.from, goal, (from, to) => (hexKey(to) !== goalKey && zone.has(hexKey(to)) ? null : searchCost(from, to)), minStep);
+    if (around && costOf(around) <= costOf(straight) * (1 + data.field.fort.zoneDetour)) return around;
+    const fort = zone.get(hexKey(barred))!;
+    const toFort = findPath(input.from, fort, searchCost, minStep);
+    const onward = toFort ? findPath(fort, goal, searchCost, minStep) : null;
+    return toFort && onward ? [...toFort, ...onward.slice(1)] : (around ?? straight);
+  };
   for (const target of input.targets) {
-    const path = findPath(input.from, target.cell, searchCost, roads ? fastestRoad(data) : 1);
+    const path = wayTo(target.cell);
     if (!path) continue;
-    const road = path.slice(1).reduce((sum, cell, i) => sum + searchCost(path[i]!, cell)!, 0);
+    const road = costOf(path);
     const cost = road + rules.fear.targetWeight * (fear?.get(hexKey(target.cell)) ?? 0);
     if (target.id === null) {
       holy = { path, cost: cost + rules.holyCityExtraCost };

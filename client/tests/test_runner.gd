@@ -69,6 +69,7 @@ func _initialize() -> void:
 	_test_rivers()
 	_test_ground()
 	_test_lines()
+	_test_fort_zone()
 	_test_everything_loads("res://scripts")
 	_test_everything_loads("res://scenes")
 	print("%d checks, %d failures" % [_checks, _failures])
@@ -1428,3 +1429,25 @@ func _test_lines() -> void:
 	_check(kept.maneuver == {"by": "attacker", "kind": "flank"} and kept.breakthrough.by == "defender", "lines: a Shield Bearer keeps his flank")
 	var bridge := LocalLines.battle_lines(data, input.call({"bridge": true}), c.call(100, 20, 40), c.call(20, 0, 30))
 	_check(is_equal_approx(float(bridge.attacker.dealt.infantry), 10.0 / 120.0) and is_equal_approx(float(bridge.defender.dealt.archers), 10.0 / 30.0), "lines: a narrow front at a bridge")
+
+
+## server test/fort-zone.test.ts: hordes keep out of a held fort's zone of
+## control, or march on it when the way round is too long.
+func _test_fort_zone() -> void:
+	var data := LocalData.load_data()
+	var open := {}
+	for q in range(-8, 9):
+		for r in range(-8, 9):
+			if HexMath.distance(Vector2i(q, r), Vector2i.ZERO) <= 8:
+				open[LocalLand.key(Vector2i(q, r))] = "plains"
+	var route := func(terrain: Dictionary, forts: Array) -> Array:
+		var land := {"terrain": terrain, "blocked": {}, "roads": {}, "lanes": {}, "burning": {}, "damaged": {}, "forts": forts}
+		var out: Variant = LocalHordes.route_from(data, land, Vector2i(0, -6), [{"id": 1, "cell": Vector2i(0, 6)}], "south", {"zealot": 10}, {}, LocalRng.new(1), 0.0, 1.0)
+		return out.path.map(func(st: Dictionary) -> Vector2i: return Vector2i(int(st.q), int(st.r)))
+	var round_path: Array = route.call(open, ["0,0"])
+	_check(round_path.all(func(c: Vector2i) -> bool: return HexMath.distance(c, Vector2i.ZERO) >= 2) and round_path[-1] == Vector2i(0, 6), "fort zone: hordes keep two hexes away")
+	var walled := open.duplicate()
+	for q in range(-8, 9):
+		if q != 0:
+			walled[LocalLand.key(Vector2i(q, 0))] = "mountain"
+	_check((route.call(walled, ["0,0"]) as Array).has(Vector2i.ZERO), "fort zone: a long way round makes the horde march on the fort")

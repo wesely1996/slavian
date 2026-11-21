@@ -714,6 +714,7 @@ const fieldFileSchema = z.object({
     buildSeconds: z.number().positive(),
     defenseBonus: z.number().nonnegative(),
     attackBonus: z.number().nonnegative(),
+    zoneDetour: z.number().nonnegative(),
     // Grain a fort keeps for armies holding it.
     grainCapacity: z.number().int().positive(),
   }),

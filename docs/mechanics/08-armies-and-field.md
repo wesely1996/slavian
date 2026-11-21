@@ -144,6 +144,12 @@ holds matters:
   don't burn it.
 - **Abandoned.** A fort no army has held for **48 game hours** is taken by
   bandits: it becomes a bandit camp of 8 units.
+- **Zone of control.** While an army holds it, no horde steps onto a hex
+  beside it. Hordes plan their road at least two hexes away. If that way
+  round costs more than 50% more than the straight road, the horde attacks
+  the fort first, then goes on. Forts channel hordes and make their attacks
+  predictable. Hordes plan around the forts held when they set out (or
+  re-plan, for a fire or a new road).
 - **Fire** destroys it ([page 2](02-map-and-movement.md#fire)).
 
 ### Supply points

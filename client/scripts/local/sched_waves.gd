@@ -43,7 +43,17 @@ static func land_of(world: Dictionary) -> Dictionary:
 	for w in world.get("terraforms", []):
 		if w.action == "burn":
 			burning[LocalLand.key(w.cell)] = true
-	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged}
+	# Forts an army holds: hordes keep out of their zone of control.
+	var held := {}
+	for a in world.armies:
+		if a.status == "stationed" and a.targetVillageId == null:
+			held[LocalLand.key(Vector2i(int(a.targetQ), int(a.targetR)))] = true
+	var forts: Array = []
+	for f in world.forts:
+		var key := LocalLand.key(Vector2i(int(f.q), int(f.r)))
+		if f.get("kind", "fort") == "fort" and f.status == "standing" and held.has(key) and not key in forts:
+			forts.append(key)
+	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged, "forts": forts}
 
 
 ## The cheapest target from `from`: road cost plus fear, plus extra for the
@@ -69,13 +79,52 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 	var best: Variant = null
 	var holy: Variant = null
 	var cheapest_village := INF
+	var min_step := LocalLand.fastest_road(data) if roads else 1.0
+	var cost_of := func(path: Array) -> float:
+		var sum := 0.0
+		for i in range(1, path.size()):
+			sum += float(search_cost.call(path[i - 1], path[i]))
+		return sum
+	# Forts an army holds keep hordes out of the hexes beside them (field.json
+	# fort.zoneDetour); one the horde already stands beside or on is no bar.
+	var zone := {}
+	for key in land.get("forts", []):
+		var parts: PackedStringArray = String(key).split(",")
+		var fort := Vector2i(int(parts[0]), int(parts[1]))
+		if HexMath.distance(fort, from) <= 1:
+			continue
+		for n in HexMath.neighbors(fort):
+			if not zone.has(LocalLand.key(n)):
+				zone[LocalLand.key(n)] = fort
+	var way_to := func(goal: Vector2i) -> Variant:
+		var straight: Variant = LocalLand.find_path(from, goal, search_cost, min_step)
+		if straight == null or zone.is_empty():
+			return straight
+		var goal_key := LocalLand.key(goal)
+		var barred: Variant = null
+		for i in range(1, straight.size()):
+			var k := LocalLand.key(straight[i])
+			if k != goal_key and zone.has(k):
+				barred = straight[i]
+				break
+		if barred == null:
+			return straight
+		var around: Variant = LocalLand.find_path(from, goal, func(a: Vector2i, b: Vector2i) -> float:
+			var kb := LocalLand.key(b)
+			return -1.0 if kb != goal_key and zone.has(kb) else float(search_cost.call(a, b)), min_step)
+		if around != null and float(cost_of.call(around)) <= float(cost_of.call(straight)) * (1.0 + float(data.field.fort.zoneDetour)):
+			return around
+		var fort: Vector2i = zone[LocalLand.key(barred)]
+		var to_fort: Variant = LocalLand.find_path(from, fort, search_cost, min_step)
+		var onward: Variant = LocalLand.find_path(fort, goal, search_cost, min_step) if to_fort != null else null
+		if to_fort != null and onward != null:
+			return to_fort + onward.slice(1)
+		return around if around != null else straight
 	for target in targets:
-		var path: Variant = LocalLand.find_path(from, target.cell, search_cost, LocalLand.fastest_road(data) if roads else 1.0)
+		var path: Variant = way_to.call(target.cell)
 		if path == null:
 			continue
-		var road := 0.0
-		for i in range(1, path.size()):
-			road += float(search_cost.call(path[i - 1], path[i]))
+		var road: float = cost_of.call(path)
 		var cost := road + float(rules.fear.targetWeight) * float(fear.get(LocalLand.key(target.cell), 0.0))
 		if target.id == null:
 			holy = {"path": path, "cost": cost + float(rules.holyCityExtraCost)}
