@@ -35,6 +35,7 @@ import { takenHexes } from './horde.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
 import { armyQuestGone } from './quests.js';
+import { groundOf } from './ground.js';
 
 const MS_PER_HOUR = 3_600_000;
 const mapEventPayload = z.object({ day: z.number().int().positive() });
@@ -163,6 +164,7 @@ export const mapEventHandlers: HandlerRegistry = {
         front: shipyard.front as Front,
         seed: world.seed,
         id: shipyard.id * 64 + shipyard.raids * 8 + i,
+        ground: await groundOf(client, data, world.id, where),
       });
       const lost: Record<string, number> = {};
       for (const [unit, n] of Object.entries(combatants(data, army.units))) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);

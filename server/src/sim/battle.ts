@@ -4,6 +4,7 @@
 // so a battle replays the same way.
 import { AFFLICTIONS, type Affliction, type GameData, type Stance, type UnitFamily } from '../data/index.js';
 import type { Front } from './mapgen.js';
+import { groundFactors, playerShares, type Ground, type TerrainShares } from './ground.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
 import type { Units } from './training.js';
@@ -20,6 +21,9 @@ export interface UnitStats {
   readonly counters?: Partial<Record<UnitFamily, number>>;
   // What its blows inflict (battle.json afflictions).
   readonly inflicts?: readonly Affliction[] | undefined;
+  // Its strength on some ground beyond its family's (battle.json terrain):
+  // its own, and its clan's for a player's unit.
+  readonly terrain?: TerrainShares | undefined;
 }
 
 // What burns and poisons a side carries into the next round
@@ -117,6 +121,7 @@ export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false)
       health: def.health * (1 + bonus(bonuses, `health.unit.${unit}`)),
       ...('counters' in def && def.counters ? { counters: def.counters } : {}),
       ...inflictsOf('inflicts' in def ? def.inflicts : undefined, bonuses, unit),
+      ...terrainOf(playerShares('terrain' in def ? def.terrain : undefined, bonuses)),
     };
   };
 }
@@ -125,6 +130,10 @@ export function playerStats(data: GameData, bonuses: Bonuses = {}, home = false)
 function inflictsOf(own: readonly Affliction[] | undefined, bonuses: Bonuses, unit: string): { inflicts?: Affliction[] } {
   const inflicts = AFFLICTIONS.filter((a) => (own ?? []).includes(a) || bonus(bonuses, `${a}.unit.${unit}`) > 0);
   return inflicts.length > 0 ? { inflicts } : {};
+}
+
+function terrainOf(shares: TerrainShares | undefined): { terrain?: TerrainShares } {
+  return shares && Object.keys(shares).length > 0 ? { terrain: shares } : {};
 }
 
 export function enemyStats(data: GameData, front: Front): (unit: string) => UnitStats {
@@ -151,6 +160,8 @@ interface Plight {
   fromWeak: number;
   toWeak: number;
   burning: number;
+  // Where the battle is fought (battle.json terrain).
+  ground?: Ground | undefined;
 }
 
 // Kills `from` inflicts on `to` this round, by unit type, for each of
@@ -215,7 +226,8 @@ function kills(
         if (count <= 0) continue;
         const attacker = (striker.stats ?? from.stats)(unit);
         const counter = (attacker.counters ?? battle.counters[attacker.family])?.[stats.family] ?? 1;
-        const blow = count * attacker.attack * rolled[s]![unit]! * fromStance.attack * matchup * counter * plight.fromWeak;
+        const onGround = groundFactors(data, plight.ground, attacker.family, attacker.terrain).attack;
+        const blow = count * attacker.attack * onGround * rolled[s]![unit]! * fromStance.attack * matchup * counter * plight.fromWeak;
         damage += blow;
         if ((attacker.inflicts ?? []).includes('burn')) burning += blow;
       }
@@ -231,7 +243,8 @@ function kills(
     // Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
     // Each of the target's health that lands (hardened by its stance and by
     // fighting at home) fells one.
-    const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense * plight.toWeak) * guard);
+    const held = champion ? 1 : groundFactors(data, plight.ground, stats.family, stats.terrain).defense;
+    const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense * held * plight.toWeak) * guard);
     const toughness = Math.max(1, stats.health) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
     const expected = (damage * share * battle.casualtyScale * lands) / toughness;
     // Round randomly so small fights still take losses on average.
@@ -260,11 +273,20 @@ function carried(data: GameData, now: SideAfflictions, burnHit: number, poisoned
   return { burn: owed, poisoned: poisoned ? poison.rounds : Math.max(0, now.poisoned - 1) };
 }
 
-export function resolveRound(data: GameData, attacker: Side, defender: Side, rng: () => number, afflictions: Afflictions = NO_AFFLICTIONS): RoundResult {
+// `ground`: where the battle is fought (battle.json terrain); none for a
+// fight beyond the map's edge.
+export function resolveRound(
+  data: GameData,
+  attacker: Side,
+  defender: Side,
+  rng: () => number,
+  afflictions: Afflictions = NO_AFFLICTIONS,
+  ground?: Ground,
+): RoundResult {
   const weak = (side: SideAfflictions) => (side.poisoned > 0 ? data.battle.afflictions.poison.factor : 1);
   // Simultaneous: both sides strike with the numbers they had at the start.
-  const struck = kills(data, defender, attacker, rng, { fromWeak: weak(afflictions.defender), toWeak: weak(afflictions.attacker), burning: afflictions.attacker.burn[0] ?? 0 });
-  const byGroup = kills(data, attacker, defender, rng, { fromWeak: weak(afflictions.attacker), toWeak: weak(afflictions.defender), burning: afflictions.defender.burn[0] ?? 0 });
+  const struck = kills(data, defender, attacker, rng, { fromWeak: weak(afflictions.defender), toWeak: weak(afflictions.attacker), burning: afflictions.attacker.burn[0] ?? 0, ground });
+  const byGroup = kills(data, attacker, defender, rng, { fromWeak: weak(afflictions.attacker), toWeak: weak(afflictions.defender), burning: afflictions.defender.burn[0] ?? 0, ground });
   return {
     afflictions: {
       attacker: carried(data, afflictions.attacker, struck.burnHit, struck.poisons),

@@ -127,6 +127,8 @@ const terrainSchema = z.object({
   hordesPass: z.boolean().optional(),
   settleable: z.boolean(),
   edge: z.boolean(),
+  // What a battle fought on it counts it as (battle.json terrain).
+  ground: z.array(z.enum(['flat', 'woods', 'hills', 'wetland'])).optional(),
 });
 
 const terrainFileSchema = z.object({
@@ -135,6 +137,11 @@ const terrainFileSchema = z.object({
 });
 
 export const UNIT_FAMILIES = ['infantry', 'archers', 'cavalry', 'scout'] as const;
+// What a battle's hex gives (battle.json terrain): its own ground, and the
+// mountains beside it and the waters along it, each counted.
+export const GROUND_FEATURES = ['flat', 'woods', 'hills', 'wetland', 'mountain', 'water'] as const;
+export type GroundFeature = (typeof GROUND_FEATURES)[number];
+const terrainShares = z.partialRecord(z.enum(GROUND_FEATURES), z.object({ attack: z.number().optional(), defense: z.number().optional() }));
 // What a unit's blows leave behind (battle.json afflictions): burning, which
 // keeps hurting, or poison, which weakens.
 export const AFFLICTIONS = ['burn', 'poison'] as const;
@@ -180,6 +187,8 @@ const unitSchema = z.object({
   carry: z.number().nonnegative(),
   // Its own counters, in place of its family's (battle.json).
   counters: familyMultipliers.optional(),
+  // Its own strength on some ground, on top of its family's (battle.json terrain).
+  terrain: terrainShares.optional(),
   // What its blows inflict (battle.json afflictions), without any forging.
   inflicts: z.array(z.enum(AFFLICTIONS)).optional(),
   // A clan's own unit: only that clan trains it.
@@ -231,6 +240,8 @@ const enemyUnitSchema = z.object({
   speed: z.number().positive(),
   // What its blows inflict (battle.json afflictions).
   inflicts: z.array(z.enum(AFFLICTIONS)).optional(),
+  // Its own strength on some ground, on top of its family's (battle.json terrain).
+  terrain: terrainShares.optional(),
   // How hard it batters walls each round (walls.json).
   siege: z.number().nonnegative().optional(),
   // Sanctity a survivor of it takes at the Holy City, in place of its tier's.
@@ -337,6 +348,7 @@ const battleFileSchema = z.object({
     }),
   ),
   matchups: z.partialRecord(z.enum(STANCES), stanceMultipliers),
+  terrain: z.object({ maxStack: z.number().int().positive(), families: z.partialRecord(z.enum(UNIT_FAMILIES), terrainShares) }),
   // Burning: `share` of a burning unit's blow hurts its target again in
   // each of the next `rounds` rounds. Poison: a side struck by a poisoner
   // fights at `factor` of its attack and defense for the next `rounds` rounds.

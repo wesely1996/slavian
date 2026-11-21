@@ -25,6 +25,15 @@
     "balanced": { "defensive": 1.1 },
     "hold_the_line": { "offensive": 1.1, "defensive": 0.9 }
   },
+  "terrain": {
+    "_comment": "Where a battle is fought changes how hard each side hits and holds. Each feature of the battle's hex (terrain.json ground: flat, woods, hills, wetland), and each mountain beside it and each river along it or lake beside it (mountain, water; at most maxStack of each count), adds its share to a unit's attack or defense: its family's below, its own (units.json terrain) and, for the players, their clan's (clans.json effects terrain.<feature>.<attack|defense>). They add up; the sum multiplies the stat.",
+    "maxStack": 2,
+    "families": {
+      "cavalry": { "flat": { "attack": 0.3 } },
+      "infantry": { "woods": { "attack": 0.1 }, "hills": { "attack": 0.2 } },
+      "archers": { "flat": { "attack": 0.1 }, "woods": { "attack": -0.2 }, "hills": { "attack": 0.3 }, "mountain": { "attack": 0.1 } }
+    }
+  },
   "afflictions": {
     "burn": { "share": 0.1, "rounds": 3 },
     "poison": { "factor": 0.85, "rounds": 2 }

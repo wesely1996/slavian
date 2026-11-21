@@ -101,167 +101,203 @@ msgstr "%s · napad %s · odbrana %s · zdravlje %d · brzina %s polja/h · nosi
 msgid " · strong against %s"
 msgstr " · jak protiv: %s"
 
-#: client/scripts/game/almanac_text.gd:60
+#: client/scripts/game/almanac_text.gd:61
 msgid " · support: never fights, but wagons drawn into a wagon fort stand as a wall before the archers"
 msgstr " · podrška: nikad se ne bori, ali kola postavljena u kolsku tvrđavu stoje kao zid ispred strelaca"
 
-#: client/scripts/game/almanac_text.gd:60
+#: client/scripts/game/almanac_text.gd:61
 msgid " · support: never fights"
 msgstr " · podrška: nikad se ne bori"
 
-#: client/scripts/game/almanac_text.gd:62
+#: client/scripts/game/almanac_text.gd:63
 msgid " · only %s"
 msgstr " · samo %s"
 
-#: client/scripts/game/almanac_text.gd:71
+#: client/scripts/game/almanac_text.gd:73
+msgid "on open ground"
+msgstr "na otvorenom"
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in woods"
+msgstr "u šumi"
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in hills"
+msgstr "u brdima"
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in wetlands"
+msgstr "u močvari"
+
+#: client/scripts/game/almanac_text.gd:74
+msgid "by mountains"
+msgstr "uz planine"
+
+#: client/scripts/game/almanac_text.gd:74
+msgid "by rivers and lakes"
+msgstr "uz reke i jezera"
+
+#: client/scripts/game/almanac_text.gd:79
+msgid " · %s%d%% %s %s"
+msgstr " · %s%d%% %s %s"
+
+#: client/scripts/game/almanac_text.gd:79
+msgid "attack"
+msgstr "napad"
+
+#: client/scripts/game/almanac_text.gd:79
+msgid "defense"
+msgstr "odbrana"
+
+#: client/scripts/game/almanac_text.gd:87
 msgid " · its blows set the foe burning"
 msgstr " · njeni udarci pale neprijatelja"
 
-#: client/scripts/game/almanac_text.gd:71
+#: client/scripts/game/almanac_text.gd:87
 msgid " · its blows poison"
 msgstr " · njeni udarci truju"
 
-#: client/scripts/game/almanac_text.gd:90
+#: client/scripts/game/almanac_text.gd:106
 msgid "tier %d (from wave %d)"
 msgstr "rang %d (od talasa %d)"
 
-#: client/scripts/game/almanac_text.gd:90
+#: client/scripts/game/almanac_text.gd:106
 msgid "siege engine"
 msgstr "opsadna sprava"
 
-#: client/scripts/game/almanac_text.gd:91
+#: client/scripts/game/almanac_text.gd:107
 msgid "%s · %s · %s · attack %s · defense %s · health %d · speed %s hexes/h"
 msgstr "%s · %s · %s · napad %s · odbrana %s · zdravlje %d · brzina %s polja/h"
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Field around the village"
 msgstr "Polje oko sela"
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Building in the village"
 msgstr "Zgrada u selu"
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Outpost on a nearby hex"
 msgstr "Ispostava na obližnjem polju"
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:126
 msgid "%s · up to level %d"
 msgstr "%s · do nivoa %d"
 
-#: client/scripts/game/almanac_text.gd:112
+#: client/scripts/game/almanac_text.gd:128
 msgid " · makes %s"
 msgstr " · proizvodi %s"
 
-#: client/scripts/game/almanac_text.gd:116
+#: client/scripts/game/almanac_text.gd:132
 msgid "%s %+d%%"
 msgstr "%s %+d%%"
 
-#: client/scripts/game/almanac_text.gd:117
+#: client/scripts/game/almanac_text.gd:133
 msgid " · per level: "
 msgstr " · po nivou: "
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:145
 msgid "never breaks"
 msgstr "nikada se ne slama"
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:145
 msgid "breaks at %d%% losses"
 msgstr "slama se pri %d%% gubitaka"
 
-#: client/scripts/game/almanac_text.gd:130
+#: client/scripts/game/almanac_text.gd:146
 msgid "attack ×%.2f · defense ×%.2f · %s"
 msgstr "napad ×%.2f · odbrana ×%.2f · %s"
 
-#: client/scripts/game/almanac_text.gd:134
+#: client/scripts/game/almanac_text.gd:150
 msgid "%s beat %s (×%.1f)"
 msgstr "%s pobeđuje %s (×%.1f)"
 
-#: client/scripts/game/almanac_text.gd:135
+#: client/scripts/game/almanac_text.gd:151
 msgid "Counters"
 msgstr "Protivmere"
 
-#: client/scripts/game/almanac_text.gd:139
+#: client/scripts/game/almanac_text.gd:155
 msgid "Burning"
 msgstr "Gorenje"
 
-#: client/scripts/game/almanac_text.gd:139
+#: client/scripts/game/almanac_text.gd:155
 msgid "A burning unit's blow hurts its targets again: %d%% of it in each of the next %d rounds."
 msgstr "Udarac zapaljive jedinice ponovo ranjava mete: %d%% njega u svakoj od sledećih %d rundi."
 
-#: client/scripts/game/almanac_text.gd:140
+#: client/scripts/game/almanac_text.gd:156
 msgid "Poison"
 msgstr "Otrov"
 
-#: client/scripts/game/almanac_text.gd:140
+#: client/scripts/game/almanac_text.gd:156
 msgid "A side struck by a poisoner fights at %d%% of its attack and defense for the next %d rounds."
 msgstr "Strana koju pogodi trovač bori se sa %d%% svog napada i odbrane u sledećih %d rundi."
 
-#: client/scripts/game/almanac_text.gd:157
+#: client/scripts/game/almanac_text.gd:173
 msgid "Tier %d (from wave %d): %s"
 msgstr "Rang %d (od talasa %d): %s"
 
-#: client/scripts/game/almanac_text.gd:163
+#: client/scripts/game/almanac_text.gd:179
 msgid "Engines: %s"
 msgstr "Sprave: %s"
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:180
 msgid "%s (%s front)"
 msgstr "%s (strana: %s)"
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:180
 msgid "%s Units: %s."
 msgstr "%s Jedinice: %s."
 
-#: client/scripts/game/almanac_text.gd:172
+#: client/scripts/game/almanac_text.gd:188
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: client/scripts/game/almanac_text.gd:172
+#: client/scripts/game/almanac_text.gd:188
 msgid "%s %s"
 msgstr "%s %s"
 
-#: client/scripts/game/almanac_text.gd:181
+#: client/scripts/game/almanac_text.gd:197
 msgid "impassable"
 msgstr "neprohodno"
 
-#: client/scripts/game/almanac_text.gd:181
+#: client/scripts/game/almanac_text.gd:197
 msgid "move cost %s"
 msgstr "cena kretanja %s"
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "%s · %s"
 msgstr "%s · %s"
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "villages can be founded here"
 msgstr "ovde se mogu osnovati sela"
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "no villages"
 msgstr "nema sela"
 
-#: client/scripts/game/almanac_text.gd:188
+#: client/scripts/game/almanac_text.gd:204
 msgid "The Kalinov Bridge"
 msgstr "Kalinov most"
 
-#: client/scripts/game/almanac_text.gd:189
+#: client/scripts/game/almanac_text.gd:205
 msgid "Ritual Night"
 msgstr "Obredna noć"
 
-#: client/scripts/game/almanac_text.gd:190
+#: client/scripts/game/almanac_text.gd:206
 msgid "Winning"
 msgstr "Pobeda"
 
-#: client/scripts/game/almanac_text.gd:190
+#: client/scripts/game/almanac_text.gd:206
 msgid "%s: the Holy City still stands when Ritual Night's last horde is done."
 msgstr "%s: Sveti grad još stoji kada padne poslednja horda Obredne noći."
 
-#: client/scripts/game/almanac_text.gd:191
+#: client/scripts/game/almanac_text.gd:207
 msgid "Losing"
 msgstr "Poraz"
 
-#: client/scripts/game/almanac_text.gd:191
+#: client/scripts/game/almanac_text.gd:207
 msgid "%s: its Sanctity reaches 0."
 msgstr "%s: njegova svetost padne na 0."
 
@@ -1223,10 +1259,6 @@ msgid "Even the first horde may burn a village."
 msgstr "Već prva horda može spaliti selo."
 
 #: client/scripts/game/hero_text.gd:9
-msgid "attack"
-msgstr "napad"
-
-#: client/scripts/game/hero_text.gd:9
 msgid "infantry attack"
 msgstr "napad pešadije"
 
@@ -1237,10 +1269,6 @@ msgstr "napad strelaca"
 #: client/scripts/game/hero_text.gd:9
 msgid "cavalry attack"
 msgstr "napad konjice"
-
-#: client/scripts/game/hero_text.gd:10
-msgid "defense"
-msgstr "odbrana"
 
 #: client/scripts/game/hero_text.gd:10
 msgid "infantry defense"
@@ -1366,70 +1394,94 @@ msgstr "trgovina na pijaci"
 msgid "finds in ancient sites"
 msgstr "nalazi na drevnim mestima"
 
-#: client/scripts/game/hero_text.gd:36
+#: client/scripts/game/hero_text.gd:21
+msgid "attack on open ground"
+msgstr "napad na otvorenom"
+
+#: client/scripts/game/hero_text.gd:21
+msgid "defense in woods"
+msgstr "odbrana u šumi"
+
+#: client/scripts/game/hero_text.gd:22
+msgid "defense in hills"
+msgstr "odbrana u brdima"
+
+#: client/scripts/game/hero_text.gd:22
+msgid "defense in wetlands"
+msgstr "odbrana u močvari"
+
+#: client/scripts/game/hero_text.gd:23
+msgid "attack for each mountain beside the battle (up to 2)"
+msgstr "napad za svaku planinu uz bojište (do 2)"
+
+#: client/scripts/game/hero_text.gd:24
+msgid "defense for each river or lake beside the battle (up to 2)"
+msgstr "odbrana za svaku reku ili jezero uz bojište (do 2)"
+
+#: client/scripts/game/hero_text.gd:40
 msgid "Rides %s hexes an hour"
 msgstr "Jaše %s polja na sat"
 
-#: client/scripts/game/hero_text.gd:37
+#: client/scripts/game/hero_text.gd:41
 msgid "Wounded for %s after a lost fight"
 msgstr "Ranjen %s posle izgubljene bitke"
 
-#: client/scripts/game/hero_text.gd:38
+#: client/scripts/game/hero_text.gd:42
 msgid "Gear: %d of %d slots worn"
 msgstr "Oprema: nosi %d od %d mesta"
 
-#: client/scripts/game/hero_text.gd:39
+#: client/scripts/game/hero_text.gd:43
 msgid "skill point"
 msgid_plural "skill points"
 msgstr[0] "poen veštine"
 msgstr[1] "poena veštine"
 msgstr[2] "poena veštine"
 
-#: client/scripts/game/hero_text.gd:39
+#: client/scripts/game/hero_text.gd:43
 msgid "%d %s to spend"
 msgstr "%d %s za trošenje"
 
-#: client/scripts/game/hero_text.gd:100
+#: client/scripts/game/hero_text.gd:104
 msgid "No hero yet"
 msgstr "Još nema junaka"
 
-#: client/scripts/game/hero_text.gd:101
+#: client/scripts/game/hero_text.gd:105
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: client/scripts/game/hero_text.gd:108
+#: client/scripts/game/hero_text.gd:112
 msgid "%s: %s (%s)"
 msgstr "%s: %s (%s)"
 
-#: client/scripts/game/hero_text.gd:130
+#: client/scripts/game/hero_text.gd:134
 msgid "%s%d%% %s"
 msgstr "%s%d%% %s"
 
-#: client/scripts/game/hero_text.gd:142
+#: client/scripts/game/hero_text.gd:146
 msgid "%s lies wounded in %s · %s"
 msgstr "%s leži ranjen u %s · %s"
 
-#: client/scripts/game/hero_text.gd:147
+#: client/scripts/game/hero_text.gd:151
 msgid "%s is away on a quest · back in %s"
 msgstr "%s je na zadatku · vraća se za %s"
 
-#: client/scripts/game/hero_text.gd:149
+#: client/scripts/game/hero_text.gd:153
 msgid "Hero %s (Lv %d) leads this garrison"
 msgstr "Junak %s (nivo %d) vodi ovu posadu"
 
-#: client/scripts/game/hero_text.gd:150
+#: client/scripts/game/hero_text.gd:154
 msgid "Hero %s (Lv %d) stands in %s"
 msgstr "Junak %s (nivo %d) stoji u %s"
 
-#: client/scripts/game/hero_text.gd:158
+#: client/scripts/game/hero_text.gd:162
 msgid "ancient site"
 msgstr "drevno mesto"
 
-#: client/scripts/game/hero_text.gd:166
+#: client/scripts/game/hero_text.gd:170
 msgid "%d hold it · within %d hexes · gone in %s · +%d XP"
 msgstr "%d ga drži · do %d polja · nestaje za %s · +%d iskustva"
 
-#: client/scripts/game/hero_text.gd:167
+#: client/scripts/game/hero_text.gd:171
 msgid "%s · %d%% risk · +%d XP"
 msgstr "%s · %d%% rizik · +%d iskustva"
 

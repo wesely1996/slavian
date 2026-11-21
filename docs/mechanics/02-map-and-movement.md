@@ -24,6 +24,10 @@ Impassable terrain has none.
 | Steppe | 1 | No | Edge belt, East spawn |
 | Hallowed Lands | 2 | No | Edge belt, South and West spawn |
 
+**In battle** each terrain counts as open ground, woods, hills or wetland,
+and mountains and waters beside a hex count too. They change each family's
+strength there ([page 6](06-battles.md#terrain)).
+
 **Choke point:** any passable hex with at least 3 impassable neighbours
 (mountain, lake, ocean). It matters in field battles ([page 8](08-armies-and-field.md#field-setups)).
 

@@ -38,6 +38,7 @@ import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { outpostHex, outpostPlots } from '../sim/village.js';
+import { groundOf } from './ground.js';
 import { afterBattle, answerBattle, armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { heroAfterBattle } from './heroes.js';
@@ -269,6 +270,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     },
     battleRng(world.seed, battle.id, round),
     battle.setup.afflictions,
+    await groundOf(client, data, world.id, { q: battle.q, r: battle.r }),
   );
   const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
   await setWaveStrength(client, wave.id, attackerNow);

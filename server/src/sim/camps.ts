@@ -3,6 +3,7 @@
 // Numbers in data/camps.json.
 import type { GameData, TerrainId } from '../data/index.js';
 import { createRng } from './rng.js';
+import type { Ground } from './ground.js';
 import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
 import { hexDistance, hexKey, spiral, type Hex } from './hex.js';
 import type { Front } from './mapgen.js';
@@ -138,6 +139,8 @@ export function assault(
     // hero has fallen (the general in command).
     champions?: readonly Champion[];
     statsWithoutHero?: (unit: string) => UnitStats;
+    // The camp's hex (battle.json terrain).
+    ground?: Ground;
   },
 ): { cleared: boolean; rounds: AssaultRound[]; armyNow: Units; campNow: Units; fallen: string[] } {
   const campStats = enemyStats(data, input.front);
@@ -157,6 +160,7 @@ export function assault(
       { units: campNow, stance, stats: campStats, home: true },
       battleRng(input.seed, input.id + 0x10000, round),
       afflictions,
+      input.ground,
     );
     afflictions = result.afflictions;
     for (const id of result.attackerFallen[0] ?? []) fallen.push(id);
@@ -221,6 +225,7 @@ export function repelRaid(
     front: Front;
     seed: number;
     id: number;
+    ground?: Ground;
   },
 ): { held: boolean; armyNow: Units; raidersNow: Units } {
   const raiderStats = enemyStats(data, input.front);
@@ -235,6 +240,7 @@ export function repelRaid(
       { units: armyNow, stance: input.armyStance, stats: input.armyStats, home: false },
       battleRng(input.seed, input.id + 0x20000, round),
       afflictions,
+      input.ground,
     );
     afflictions = result.afflictions;
     raidersNow = subtractUnits(raidersNow, result.attackerLosses);

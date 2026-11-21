@@ -99,167 +99,203 @@ msgstr ""
 msgid " · strong against %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:60
+#: client/scripts/game/almanac_text.gd:61
 msgid " · support: never fights, but wagons drawn into a wagon fort stand as a wall before the archers"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:60
+#: client/scripts/game/almanac_text.gd:61
 msgid " · support: never fights"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:62
+#: client/scripts/game/almanac_text.gd:63
 msgid " · only %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:71
+#: client/scripts/game/almanac_text.gd:73
+msgid "on open ground"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in woods"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in hills"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:73
+msgid "in wetlands"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:74
+msgid "by mountains"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:74
+msgid "by rivers and lakes"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:79
+msgid " · %s%d%% %s %s"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:79
+msgid "attack"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:79
+msgid "defense"
+msgstr ""
+
+#: client/scripts/game/almanac_text.gd:87
 msgid " · its blows set the foe burning"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:71
+#: client/scripts/game/almanac_text.gd:87
 msgid " · its blows poison"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:90
+#: client/scripts/game/almanac_text.gd:106
 msgid "tier %d (from wave %d)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:90
+#: client/scripts/game/almanac_text.gd:106
 msgid "siege engine"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:91
+#: client/scripts/game/almanac_text.gd:107
 msgid "%s · %s · %s · attack %s · defense %s · health %d · speed %s hexes/h"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Field around the village"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Building in the village"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:109
+#: client/scripts/game/almanac_text.gd:125
 msgid "Outpost on a nearby hex"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:110
+#: client/scripts/game/almanac_text.gd:126
 msgid "%s · up to level %d"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:112
+#: client/scripts/game/almanac_text.gd:128
 msgid " · makes %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:116
+#: client/scripts/game/almanac_text.gd:132
 msgid "%s %+d%%"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:117
+#: client/scripts/game/almanac_text.gd:133
 msgid " · per level: "
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:145
 msgid "never breaks"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:129
+#: client/scripts/game/almanac_text.gd:145
 msgid "breaks at %d%% losses"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:130
+#: client/scripts/game/almanac_text.gd:146
 msgid "attack ×%.2f · defense ×%.2f · %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:134
+#: client/scripts/game/almanac_text.gd:150
 msgid "%s beat %s (×%.1f)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:135
+#: client/scripts/game/almanac_text.gd:151
 msgid "Counters"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:139
+#: client/scripts/game/almanac_text.gd:155
 msgid "Burning"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:139
+#: client/scripts/game/almanac_text.gd:155
 msgid "A burning unit's blow hurts its targets again: %d%% of it in each of the next %d rounds."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:140
+#: client/scripts/game/almanac_text.gd:156
 msgid "Poison"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:140
+#: client/scripts/game/almanac_text.gd:156
 msgid "A side struck by a poisoner fights at %d%% of its attack and defense for the next %d rounds."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:157
+#: client/scripts/game/almanac_text.gd:173
 msgid "Tier %d (from wave %d): %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:163
+#: client/scripts/game/almanac_text.gd:179
 msgid "Engines: %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:180
 msgid "%s (%s front)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:164
+#: client/scripts/game/almanac_text.gd:180
 msgid "%s Units: %s."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:172
+#: client/scripts/game/almanac_text.gd:188
 msgid "%s (%s)"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:172
+#: client/scripts/game/almanac_text.gd:188
 msgid "%s %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:181
+#: client/scripts/game/almanac_text.gd:197
 msgid "impassable"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:181
+#: client/scripts/game/almanac_text.gd:197
 msgid "move cost %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "%s · %s"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "villages can be founded here"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:182
+#: client/scripts/game/almanac_text.gd:198
 msgid "no villages"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:188
+#: client/scripts/game/almanac_text.gd:204
 msgid "The Kalinov Bridge"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:189
+#: client/scripts/game/almanac_text.gd:205
 msgid "Ritual Night"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:190
+#: client/scripts/game/almanac_text.gd:206
 msgid "Winning"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:190
+#: client/scripts/game/almanac_text.gd:206
 msgid "%s: the Holy City still stands when Ritual Night's last horde is done."
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:191
+#: client/scripts/game/almanac_text.gd:207
 msgid "Losing"
 msgstr ""
 
-#: client/scripts/game/almanac_text.gd:191
+#: client/scripts/game/almanac_text.gd:207
 msgid "%s: its Sanctity reaches 0."
 msgstr ""
 
@@ -1218,10 +1254,6 @@ msgid "Even the first horde may burn a village."
 msgstr ""
 
 #: client/scripts/game/hero_text.gd:9
-msgid "attack"
-msgstr ""
-
-#: client/scripts/game/hero_text.gd:9
 msgid "infantry attack"
 msgstr ""
 
@@ -1231,10 +1263,6 @@ msgstr ""
 
 #: client/scripts/game/hero_text.gd:9
 msgid "cavalry attack"
-msgstr ""
-
-#: client/scripts/game/hero_text.gd:10
-msgid "defense"
 msgstr ""
 
 #: client/scripts/game/hero_text.gd:10
@@ -1361,69 +1389,93 @@ msgstr ""
 msgid "finds in ancient sites"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:36
+#: client/scripts/game/hero_text.gd:21
+msgid "attack on open ground"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:21
+msgid "defense in woods"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:22
+msgid "defense in hills"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:22
+msgid "defense in wetlands"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:23
+msgid "attack for each mountain beside the battle (up to 2)"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:24
+msgid "defense for each river or lake beside the battle (up to 2)"
+msgstr ""
+
+#: client/scripts/game/hero_text.gd:40
 msgid "Rides %s hexes an hour"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:37
+#: client/scripts/game/hero_text.gd:41
 msgid "Wounded for %s after a lost fight"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:38
+#: client/scripts/game/hero_text.gd:42
 msgid "Gear: %d of %d slots worn"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:39
+#: client/scripts/game/hero_text.gd:43
 msgid "skill point"
 msgid_plural "skill points"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/scripts/game/hero_text.gd:39
+#: client/scripts/game/hero_text.gd:43
 msgid "%d %s to spend"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:100
+#: client/scripts/game/hero_text.gd:104
 msgid "No hero yet"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:101
+#: client/scripts/game/hero_text.gd:105
 msgid "%s, %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:108
+#: client/scripts/game/hero_text.gd:112
 msgid "%s: %s (%s)"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:130
+#: client/scripts/game/hero_text.gd:134
 msgid "%s%d%% %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:142
+#: client/scripts/game/hero_text.gd:146
 msgid "%s lies wounded in %s · %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:147
+#: client/scripts/game/hero_text.gd:151
 msgid "%s is away on a quest · back in %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:149
+#: client/scripts/game/hero_text.gd:153
 msgid "Hero %s (Lv %d) leads this garrison"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:150
+#: client/scripts/game/hero_text.gd:154
 msgid "Hero %s (Lv %d) stands in %s"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:158
+#: client/scripts/game/hero_text.gd:162
 msgid "ancient site"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:166
+#: client/scripts/game/hero_text.gd:170
 msgid "%d hold it · within %d hexes · gone in %s · +%d XP"
 msgstr ""
 
-#: client/scripts/game/hero_text.gd:167
+#: client/scripts/game/hero_text.gd:171
 msgid "%s · %d%% risk · +%d XP"
 msgstr ""
 
