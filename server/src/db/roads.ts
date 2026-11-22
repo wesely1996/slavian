@@ -80,6 +80,13 @@ export async function markRoadStanding(client: DbClient, worldId: number, a: Hex
   );
 }
 
+// The land under a hex sank (a lake made there): every road into it,
+// standing or being worked on, is gone.
+export async function deleteRoadsAt(client: DbClient, worldId: number, cell: Hex): Promise<number> {
+  const { rowCount } = await client.query('DELETE FROM road_edges WHERE world_id = $1 AND ((aq = $2 AND ar = $3) OR (bq = $2 AND br = $3))', [worldId, cell.q, cell.r]);
+  return rowCount ?? 0;
+}
+
 // A fire reached a road (one improved keeps on being improved).
 export async function markRoadDamaged(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<void> {
   const [p, q] = ordered(a, b);
