@@ -37,7 +37,7 @@ import { buildInFort, tearDownFort } from '../scheduler/forts.js';
 import type { RoadEdge } from '../db/roads.js';
 import type { Shipyard } from '../db/shipyards.js';
 import { payShipyard } from '../scheduler/mapEvents.js';
-import { startRaid, startStrike } from '../scheduler/raids.js';
+import { expedition, startRaid, startStrike } from '../scheduler/raids.js';
 import type { Front } from '../sim/mapgen.js';
 
 async function worldOfVillage(db: Db, villageId: number): Promise<number> {
@@ -397,6 +397,16 @@ async function worldOfFort(db: Db, fortId: number): Promise<number> {
   const fort = await inTransaction(db, (client) => loadFort(client, fortId));
   if (!fort) throw new NotFoundError('No such fort');
   return fort.worldId;
+}
+
+// An army of the caller's out in the field (or in a fort) sets out on a
+// raid beyond the map's edge, or a strike on a gathering horde.
+export async function armyExpeditionCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; armyId: number; order: { front: Front; depth: number } | { waveId: number }; now: Date },
+): Promise<Army> {
+  return armyCommand(db, deps, input, 'sent an army on an expedition', ({ client, world, army }) => expedition(client, deps.data, world, army, input.order, input.now));
 }
 
 // An army's home: another of its owner's settlements.

@@ -222,6 +222,44 @@ static func start_strike(server: LocalServer, world: Dictionary, village: Dictio
 	return army
 
 
+## scheduler/raids.ts expedition: an army out in the field (or in a fort)
+## sets out on a raid (`body` front, depth) or a strike (`body` waveId) from
+## where it stands, to the map's edge on that side nearest to it.
+static func expedition(server: LocalServer, world: Dictionary, army: Dictionary, body: Dictionary, now: int) -> Dictionary:
+	var data := server.data
+	if army.status != "stationed" or army.targetVillageId != null:
+		return LocalVillage.rule("Only an army standing out in the field or in a fort sets out from where it stands")
+	if army.get("raid") != null:
+		return LocalVillage.rule("They are on a raid already")
+	if LocalBattle.total(LocalScouting.combatants(data, army.units)) == 0:
+		return LocalVillage.rule("Scouts alone don't raid")
+	var raid: Dictionary
+	if body.has("waveId"):
+		var wave := server.find_wave(world, int(body.waveId))
+		if wave.is_empty() or wave.get("bandOf") != null:
+			return LocalVillage.rule("No such horde")
+		if wave.status != "scheduled":
+			return LocalVillage.rule("That horde has already set out")
+		raid = {"front": String(wave.front), "depth": 0, "stage": 0, "battles": [], "finds": [], "waveId": wave.id}
+	else:
+		var front := String(body.get("front", ""))
+		var depth := int(body.get("depth", 0))
+		if not front in world.activeFronts:
+			return LocalVillage.rule("No enemy comes from that side in this world")
+		if depth < 1 or depth > int(data.raids.maxDepth):
+			return LocalVillage.rule("A raid goes 1 to %d fields deep" % int(data.raids.maxDepth))
+		raid = {"front": front, "depth": depth, "stage": 0, "battles": [], "finds": []}
+	var edge := raid_edge(data, world.hexes, int(world.radius), String(raid.front), Vector2i(int(army.targetQ), int(army.targetR)))
+	if edge == Vector2i.MAX:
+		return LocalVillage.rule("There is no way out to that side of the map")
+	var moved := LocalArmies.move(server, world, army, {"target": {"q": edge.x, "r": edge.y}, "orders": "raid"}, now)
+	if moved.has("error"):
+		return moved
+	moved.raid = raid
+	moved.loot = {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
+	return moved
+
+
 ## scheduler/raids.ts reachEdge: it stands at the edge (beyond it) and the
 ## first battle comes one stage later (a strike's at once).
 static func reach_edge(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:

@@ -125,7 +125,8 @@ Once built, it stands for good:
 ## Raids beyond the edge
 
 An army can march to the map's edge on a front's side and **raid into the
-enemy's lands**:
+enemy's lands**. It can set out from a village, or, already out, from the
+hex or fort where it stands ([expeditions](#expeditions-from-the-field)):
 
 - **The road in.** It marches to the nearest passable hex of that front on the
   map's last ring. Then it fights its way in: `depth` field battles (1 to 3),
@@ -198,3 +199,20 @@ won has a chance at a rare find:
 - **Hatred.** Win or lose, the front's hatred rises by **+0.6**. Its next horde
   takes it all as extra attack and defense.
 - **Going home.** The army comes home after the one battle.
+
+## Expeditions from the field
+
+An army **already out**, standing on open ground or in a fort, can be
+sent on a raid or a strike **from where it stands**. It doesn't go back to
+a village first.
+
+- **The road.** It marches to the map's edge on that front's side nearest
+  to it, then fights as any raid or strike does.
+- **The spoils** go to its **home settlement**. It carries them home at the
+  end, as any raid does.
+- **Who can go.** An army standing (not marching or fighting) outside a
+  settlement, with soldiers, not on a raid already.
+- **Camps and ruins.** An army out in the field storms a camp or explores a
+  site by being moved onto its hex ([page 8](08-armies-and-field.md#orders)).
+  What it wins there goes to its home settlement **at once**. The army stays
+  out, free to march on.

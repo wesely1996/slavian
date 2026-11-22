@@ -31,6 +31,7 @@ import {
   setVillageFloorCommand,
   setFortFloorCommand,
   buildInFortCommand,
+  armyExpeditionCommand,
   tearDownFortCommand,
   armyHomeCommand,
   armyRespondCommand,
@@ -273,6 +274,9 @@ const strikeBody = z.object({
   generalId: z.number().int().positive().optional(),
   stance: z.enum(STANCES).optional(),
 });
+// An army out in the field setting out on a raid or a strike.
+const armyRaidBody = z.object({ front: z.enum(['north', 'east', 'south', 'west']), depth: z.number().int().min(1).max(10) });
+const armyStrikeBody = z.object({ waveId: z.number().int().positive() });
 const generalMoveBody = z.object({ villageId: z.number().int().positive() });
 // Grain a standing army leaves in a fort or supply point.
 const stockBody = z.object({ grain: z.number().int().positive().max(1_000_000) });
@@ -1060,6 +1064,24 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     await tearDownFortCommand(db, scheduler, { accountId: account.id, fortId: id, now: clock() });
     return { serverTime: clock().toISOString() };
+  });
+
+  // An army out in the field (or in a fort) sets out on a raid beyond the
+  // map's edge, or a strike on a gathering horde, from where it stands.
+  app.post('/v1/armies/:id/raid', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { front, depth } = armyRaidBody.parse(request.body);
+    const army = await armyExpeditionCommand(db, scheduler, { accountId: account.id, armyId: id, order: { front, depth }, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  app.post('/v1/armies/:id/strike', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { waveId } = armyStrikeBody.parse(request.body);
+    const army = await armyExpeditionCommand(db, scheduler, { accountId: account.id, armyId: id, order: { waveId }, now: clock() });
+    return { army: armyView(army), serverTime: clock().toISOString() };
   });
 
   // An army's home: another of its owner's settlements.

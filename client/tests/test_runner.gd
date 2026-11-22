@@ -925,6 +925,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("campfire-scenario.json", "local burning a bandit camp: its survivors flee as a small horde")
 	_replay_scenario("fort-scenario.json", "local forts: buildings, shared hex, zone, rally, upkeep, tear-down, bandits")
 	_replay_scenario("fort-siege-scenario.json", "local fort siege: the Garrison's defenders and the wall rings")
+	_replay_scenario("expedition-scenario.json", "local expeditions: raids, strikes and camps from the field")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.

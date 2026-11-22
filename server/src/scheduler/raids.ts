@@ -29,7 +29,7 @@ import { carryHome, northFinds, raidBattle, raidCapacity, raidEdge, raidLoot, ra
 import { emptyResources, mapResources } from '../sim/resources.js';
 import { createRng } from '../sim/rng.js';
 import { combatants, withIntel } from '../sim/scouting.js';
-import { armyLosses, dispatchArmy, sendHome, terrainOf } from './armies.js';
+import { armyLosses, dispatchArmy, moveArmy, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { generalAfterBattle } from './generals.js';
 import { heroAfterBattle } from './heroes.js';
@@ -119,6 +119,41 @@ export async function startStrike(client: DbClient, data: GameData, world: World
   const striking: Army = { ...army, raid, loot: emptyResources() };
   await saveArmy(client, striking);
   return striking;
+}
+
+// An army out in the field (or in a fort) sets out on a raid or a strike
+// from where it stands: to the map's edge on the front's side, nearest to
+// it. What it wins it carries home, to its home settlement, at the end.
+export async function expedition(
+  client: DbClient,
+  data: GameData,
+  world: World,
+  army: Army,
+  order: { front: Front; depth: number } | { waveId: number },
+  at: Date,
+): Promise<Army> {
+  if (army.status !== 'stationed' || army.targetVillageId !== null) throw new RuleError('Only an army standing out in the field or in a fort sets out from where it stands');
+  if (army.raid) throw new RuleError('They are on a raid already');
+  if (total(combatants(data, army.units)) === 0) throw new RuleError('Scouts alone don\'t raid');
+  if (world.radius === null) throw new RuleError('This world has no map yet');
+  let raid: ArmyRaid;
+  if ('waveId' in order) {
+    const wave = await loadWave(client, order.waveId).catch(() => null);
+    if (!wave || wave.worldId !== world.id || wave.bandOf !== null) throw new RuleError('No such horde');
+    if (wave.status !== 'scheduled') throw new RuleError('That horde has already set out');
+    raid = { front: wave.front, depth: 0, stage: 0, battles: [], finds: [], waveId: wave.id };
+  } else {
+    if (!world.activeFronts.includes(order.front)) throw new RuleError('No enemy comes from that side in this world');
+    if (!Number.isInteger(order.depth) || order.depth < 1 || order.depth > data.raids.maxDepth) throw new RuleError(`A raid goes 1 to ${data.raids.maxDepth} fields deep`);
+    raid = { front: order.front, depth: order.depth, stage: 0, battles: [], finds: [] };
+  }
+  const edge = raidEdge(data, await terrainOf(client, world.id), world.radius, raid.front as Front, hex(army.targetQ, army.targetR));
+  if (!edge) throw new RuleError('There is no way out to that side of the map');
+  const marching = await moveArmy(client, data, world, army, { hex: edge, orders: 'raid' }, at);
+  const raiding: Army = { ...marching, raid, loot: emptyResources() };
+  await saveArmy(client, raiding);
+  await notifyWorld(client, { worldId: world.id, type: 'armies' });
+  return raiding;
 }
 
 // At the map's edge: it stands there (beyond it, in the enemy's lands) and

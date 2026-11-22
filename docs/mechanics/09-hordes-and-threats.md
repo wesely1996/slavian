@@ -216,7 +216,8 @@ Bandit camps (human fronts) and monster lairs (the North) rise on the map.
 - **The fight.** An army with orders *clear* storms it on arrival. The fight is
   resolved round by round at once, with the camp fighting from behind its
   palisade (home bonus, defensive stance).
-- **Loot.** 15 wood, 15 stone, 15 grain and 8 iron per camp unit, carried home.
+- **Loot.** 15 wood, 15 stone, 15 grain and 8 iron per camp unit, sent to
+  the army's home settlement at once.
 - **For the hero** leading it, a 35% chance of gear.
 - **Lairs** also give a 75% chance of a **Svarog's Ember**.
 - **Burning it.** Fire can be set on a camp in forest or wooded hills, or

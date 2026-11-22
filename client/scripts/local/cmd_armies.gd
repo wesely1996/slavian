@@ -1992,7 +1992,11 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		LocalBattles.hero_after_battle(server, world, hero, {"kills": kills, "won": result.cleared, "battleId": battle.id, "at": at})
 	if not general.is_empty() and not "general" in result.fallen:
 		LocalGenerals.after_battle(server, world, general, {"kills": kills, "won": result.cleared, "at": at})
-	# Cleared, the army stands on the camp's hex until it is moved or called home.
+	# Its spoils go to its home settlement at once; cleared, the army stands
+	# on the camp's hex until it is moved or called home.
+	var spoils: Variant = after.get("loot")
+	if result.cleared and spoils != null:
+		send_loot_home(server, world, after, at)
 	if result.cleared and LocalBattle.total(after.units) > 0:
 		hold_hex(server, world, after, at)
 	else:
@@ -2000,10 +2004,10 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 	var where := "%s at (%d, %d)" % ["lair" if camp.kind == "lair" else ("captives' camp" if camp.kind == "captives" else ("cultists' circle" if camp.kind == "cultists" else "bandit camp")), int(camp.q), int(camp.r)]
 	var body := "{kills} of them fell; {defenders} still hold it."
 	if result.cleared:
-		body = "It carries home {loot} resources and a Svarog's Ember for the group." if ember else "It carries home {loot} resources."
+		body = "It sends home {loot} resources, and a Svarog's Ember for the group." if ember else "It sends home {loot} resources."
 	LocalInbox.tell(server, world, army.ownerAccountId, {"kind": "battle_result", "tier": "digest",
 		"title": "Your army cleared the {where}" if result.cleared else "Your army was driven off from the {where}", "body": body,
-		"vars": {"where": where, "loot": int(LocalLogistics.total(after.loot if result.cleared and after.get("loot") != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
+		"vars": {"where": where, "loot": int(LocalLogistics.total(spoils if result.cleared and spoils != null else camp_loot(data, camp.units))), "kills": kills, "defenders": LocalBattle.total(result.campNow)}}, at)
 	if result.cleared and camp.kind != "cultists":
 		LocalAchievements.achieve(server, world, army.ownerAccountId, "lair_cleared" if camp.kind == "lair" else ("captives_freed" if camp.kind == "captives" else "camp_cleared"), at)
 	# A hero's army quest done.
@@ -2192,14 +2196,25 @@ static func on_site_explored(server: LocalServer, world: Dictionary, event: Dict
 	var searcher := server.find_village(world, int(army.homeVillageId))
 	var loot_factor := (float(data.events.kinds.ruin.lootFactor) if site.get("hard", false) else 1.0) * (1.0 + float(searcher.state.get("bonuses", {}).get("siteLoot", 0.0)))
 	var find := LocalSites.roll_find(data, site.kind, int(world.seed), int(site.id), distance, LocalResearch.scrolls(world), gear, loot_factor, world.members.size())
-	# Scouts along find more besides: resources carried home with the find.
+	# Scouts along find more besides: resources sent home with the find.
 	var extra := scout_loot(data, scouts_in(data, army.units), distance, loot_factor)
 	if find.type == "resources" or LocalLogistics.total(extra) > 0:
 		var found: Dictionary = find.resources if find.type == "resources" else {}
 		army.loot = LocalVillage.resources(func(k: String) -> int: return int(found.get(k, 0)) + int(extra[k]))
 	claim_find(server, world, site, army.ownerAccountId, owner_hero, find, at, changed)
+	# What it found goes to its home settlement at once.
+	send_loot_home(server, world, army, at)
 	# Searched, the army stands on the site's hex until it is moved or called home.
 	hold_hex(server, world, army, at)
+
+
+## An army's loot goes to its home settlement at once (camps.ts sendLootHome).
+static func send_loot_home(server: LocalServer, world: Dictionary, army: Dictionary, at: int) -> void:
+	if army.get("loot") == null:
+		return
+	var home := server.find_village(world, int(army.homeVillageId))
+	home.state.ledger = LocalLogistics.receive(home.state.ledger, at, army.loot).ledger
+	army.loot = null
 
 
 ## Recorded army views: on the road or abroad, plus the latest five home.

@@ -26,6 +26,7 @@ import { assault } from '../sim/camps.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { hex, hexDistance } from '../sim/hex.js';
 import { listCamps } from '../db/camps.js';
+import { sendLootHome } from './camps.js';
 import { distanceShare, placeSites, rollFind, scoutLoot, scoutsIn, searchMs, withEmber, type Find } from '../sim/sites.js';
 import { mapResources } from '../sim/resources.js';
 import { armyLosses, holdHex, sendHome } from './armies.js';
@@ -275,13 +276,13 @@ export const siteHandlers: HandlerRegistry = {
       ownedGear: new Set(ownerHero ? [...ownerHero.inventory, ...Object.values(ownerHero.gear)] : []),
       players: (await listMembers(client, world.id)).length,
     });
-    // Scouts along find more besides: resources carried home with the find.
+    // Scouts along find more besides: resources sent home with the find.
     const extra = scoutLoot(data, scoutsIn(data, army.units), distance, lootFactor);
     const found = find.type === 'resources' ? find.resources : null;
     const loot = found || total(extra) > 0 ? mapResources((kind) => (found?.[kind] ?? 0) + extra[kind]) : null;
-    let after = army;
-    if (loot) after = { ...army, loot };
     await claimFind(client, data, world, site, army.ownerAccountId, ownerHero, find, event.dueAt);
+    // What it found goes to its home settlement at once.
+    const after = loot ? await sendLootHome(client, world, { ...army, loot }, event.dueAt) : army;
     if (after !== army) await saveArmy(client, after);
     // Searched, the army stands on the site's hex until it is moved or called home.
     await holdHex(client, data, world, after, event.dueAt);

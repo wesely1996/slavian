@@ -29,7 +29,7 @@ Every unit belongs to a **family**, which decides the counters in battle
 | Speed | Hexes per hour on plains |
 | Upkeep | Grain per hour |
 | Supply hours | Game hours of its own upkeep it carries when marching out with an army |
-| Carry | Loot it carries home from a raid or a camp |
+| Carry | Loot it carries home from a raid |
 
 ## The units
 
