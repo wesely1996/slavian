@@ -180,8 +180,9 @@ const SERBIAN: Record<string, string> = {
 		'Horda je odnela {loot} resursa posle {rounds} rundi. Radovi na {buildings} građevini su izgubljeni.',
 	'The horde carried off {loot} resources after {rounds} rounds. The work on {buildings} buildings was lost.':
 		'Horda je odnela {loot} resursa posle {rounds} rundi. Radovi na {buildings} građevinama su izgubljeni.',
-	"It carries home {loot} resources and a Svarog's Ember for the group.": 'Kući nosi {loot} resursa i Svarogov žar za družinu.',
 	'It carries home {loot} resources.': 'Kući nosi {loot} resursa.',
+	"It sends home {loot} resources, and a Svarog's Ember for the group.": 'Kući šalje {loot} resursa, i Svarogov žar za družinu.',
+	'It sends home {loot} resources.': 'Kući šalje {loot} resursa.',
 	'{kills} of them fell; {defenders} still hold it.': '{kills} njih je palo; {defenders} ga još drži.',
 	'Its escort drove off the {enemy} at ({q}, {r}).': 'Njegova pratnja je oterala {enemy} na ({q}, {r}).',
 	'It lost {lost} of its load near ({q}, {r}).': 'Izgubio je {lost} svog tereta blizu ({q}, {r}).',

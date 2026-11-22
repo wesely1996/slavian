@@ -242,7 +242,7 @@ Some units' blows leave something behind:
 | Village defended | The hero's XP from the kills, a 40% chance of hero gear, fear left on that place for the horde AI ([page 9](09-hordes-and-threats.md#fear)) |
 | Village raided | The horde carries off up to 30% of the stores (×its front's greed and leader's Greed), less the more of it fell; less again with `lootTaken` bonuses such as Hidden Cellars (−25%) |
 | Village razed | A ruin ([page 3](03-villages-and-buildings.md#ruins-and-rebuilding)) |
-| Camp cleared | 15 wood, 15 stone, 15 grain and 8 iron for every camp unit, carried home; a 35% gear chance; a lair also a 75% chance of a Svarog's Ember |
+| Camp cleared | 15 wood, 15 stone, 15 grain and 8 iron for every camp unit, sent to the army's home settlement at once; a 35% gear chance; a lair also a 75% chance of a Svarog's Ember |
 | Raid battle won | Loot per kill, the stronghold's stores ([page 13](13-events-and-raids.md#raids-beyond-the-edge)) |
 
 **Raid loot** is limited by what the army can carry: the sum of each unit's

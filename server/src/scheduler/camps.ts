@@ -326,7 +326,10 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     );
   }
   if (general && !result.fallen.includes('general')) await generalAfterBattle(client, data, world, general, { kills, won: result.cleared, at });
-  // Cleared, the army stands on the camp's hex until it is moved or called home.
+  // Its spoils go to its home settlement at once; cleared, the army stands
+  // on the camp's hex until it is moved or called home.
+  const spoils = after.loot;
+  if (result.cleared && spoils) after = await sendLootHome(client, world, after, at);
   if (result.cleared && total(after.units) > 0) await holdHex(client, data, world, after, at);
   else await sendHome(client, world, after, at, data);
   await tell(client, world, army.ownerAccountId, {
@@ -335,10 +338,10 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     title: result.cleared ? 'Your army cleared the {where}' : 'Your army was driven off from the {where}',
     body: result.cleared
       ? ember
-        ? "It carries home {loot} resources and a Svarog's Ember for the group."
-        : 'It carries home {loot} resources.'
+        ? "It sends home {loot} resources, and a Svarog's Ember for the group."
+        : 'It sends home {loot} resources.'
       : '{kills} of them fell; {defenders} still hold it.',
-    vars: { where, loot: total(result.cleared && after.loot ? after.loot : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
+    vars: { where, loot: total(result.cleared && spoils ? spoils : campLoot(data, camp.units)), kills, defenders: total(result.campNow) },
   }, at);
   if (result.cleared && camp.kind !== 'cultists') await achieve(client, data, world, army.ownerAccountId, camp.kind === 'lair' ? 'lair_cleared' : camp.kind === 'captives' ? 'captives_freed' : 'camp_cleared', at);
   // A hero's army quest done.
@@ -535,6 +538,17 @@ export const campHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'armies' });
   },
 };
+
+// An army's loot goes to its home settlement at once (it stays out): the
+// army, loot gone, for the caller to save.
+export async function sendLootHome(client: DbClient, world: World, army: Army, at: Date): Promise<Army> {
+  if (!army.loot) return army;
+  const home = await loadVillage(client, army.homeVillageId);
+  const received = receive(home.state.ledger, at, army.loot);
+  await saveVillageState(client, home.id, { ...home.state, ledger: received.ledger });
+  await notifyWorld(client, { worldId: world.id, type: 'village', villageId: home.id });
+  return { ...army, loot: null };
+}
 
 export async function deliverLoot(client: DbClient, world: World, army: Army, at: Date): Promise<void> {
   if (!army.loot) return;

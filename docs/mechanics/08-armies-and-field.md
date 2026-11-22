@@ -52,6 +52,13 @@ More things you can do with an army:
 - **Join the garrison:** marched into one of your own settlements, an army
   either joins the garrison or stands there as an army.
 - **Disband** a standing army.
+- **Send it on an expedition:** a standing army out in the field or in a
+  fort can set out on a raid or a strike from where it stands
+  ([page 13](13-events-and-raids.md#expeditions-from-the-field)), or be moved
+  onto a camp to storm it or a site to explore it.
+- **Spoils go home.** What an army wins storming a camp or exploring a site
+  goes to its home settlement at once. Raids and strikes carry their loot
+  home at the end.
 
 ## Grain and supply
 

@@ -952,6 +952,32 @@ func _army_orders_row(army: Dictionary, with_supply := true) -> void:
 	if standing and with_supply:
 		_store_row(army)
 		_wagon_row(army)
+	if standing:
+		_expedition_rows(army)
+
+
+## For your army standing out in the field or in a fort: set out from
+## where it stands on a raid beyond the edge (as deep as picked on the raid
+## tab) or a strike on a horde still gathering. What it wins goes home.
+func _expedition_rows(army: Dictionary) -> void:
+	if army.targetVillageId != null or army.get("raid") != null:
+		return
+	var map: Variant = Game.world.get("map")
+	var fronts: Array = map.activeFronts if map is Dictionary else []
+	if fronts.is_empty():
+		return
+	var army_id := int(army.id)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Expeditions from here"), UI.SMALL_SIZE, UI.MUTED),
+		tr("This army sets out from where it stands, to the map's edge on that side nearest to it: a raid into the enemy's lands, or a strike on a horde still gathering. It carries what it wins home to its own settlement at the end.")))
+	var depth := clampi(_raid_depth, 1, int(Game.data.raids.maxDepth))
+	var row := UI.hbox(8)
+	for front in fronts:
+		var picked := String(front)
+		row.add_child(UI.button(tr("Raid %s (%d)") % [RaidText.front_name(picked), depth], func() -> void: _army_command(army_id, "raid", {"front": picked, "depth": depth}), WaveMath.front_icon(picked)))
+	_panel_body.add_child(row)
+	for wave in Game.waves.filter(func(w: Dictionary) -> bool: return w.status == "scheduled" and w.get("bandOf") == null):
+		var wave_id := int(wave.id)
+		_panel_body.add_child(UI.button(tr("Strike the gathering horde of %s") % RaidText.front_name(String(wave.front)), func() -> void: _army_command(army_id, "strike", {"waveId": wave_id}), "map/camp_bandit"))
 
 
 ## For your army holding open ground with wagons: draw them into a ring.

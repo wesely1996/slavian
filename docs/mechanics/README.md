@@ -26,7 +26,7 @@ balance changes land there first.
 | 10 | [Heroes, generals and clans](10-heroes-generals-clans.md) | The hero roster, skills, gear, wounds, quests and army quests, generals, the ten clans |
 | 11 | [Research, faith and the Blacksmith](11-research-faith-smithing.md) | Shared research, lore scrolls, Svarog's Embers, the Shrine and its gods, the Blacksmith's forging |
 | 12 | [Scouting, exploration and expansion](12-scouting-and-expansion.md) | Scouts and reports, assassins, ruin searches, ancient sites, outposts, founding villages |
-| 13 | [Events and raids beyond the edge](13-events-and-raids.md) | Daily map events (captives, ruins, shipyards, the cultist ritual, the mountain city), raids into enemy lands, strikes on gathering hordes |
+| 13 | [Events and raids beyond the edge](13-events-and-raids.md) | Daily map events (captives, ruins, shipyards, the cultist ritual, the mountain city), raids into enemy lands, strikes on gathering hordes, expeditions from the field |
 | 14 | [The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) | The five bridge stages, their quests, construction raids, Ritual Night, winning and losing, achievements |
 | 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
 | 16 | [Battle lines and maneuvers](16-battle-lines.md) | The line's width, the opening volley, flank, pincer, encirclement, breakthrough, Shield Bearer, bridges, roads and forts |

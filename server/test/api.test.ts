@@ -1634,15 +1634,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(storm.loot.wood).toBeGreaterThan(0);
     expect(w.camps.some((c: { id: number }) => c.id === camp.id)).toBe(false);
     const marching = w.armies.find((a: { id: number }) => a.id === army.body.army.id);
-    // It stands on the camp's hex with the loot until called home.
-    expect(marching).toMatchObject({ status: 'stationed', orders: 'hold', loot: storm.loot });
+    // Its spoils went home at once; it stands on the camp's hex until called home.
+    expect(marching).toMatchObject({ status: 'stationed', orders: 'hold', loot: null });
     expect([0, 1]).toContain(w.embers);
-    const before = (await village()).resources.amounts.iron;
+    expect((await village()).resources.amounts.iron).toBeGreaterThan(0);
     const called = await call('POST', `/v1/armies/${marching.id}/recall`, bogdan.token);
     expect(called.body.army.status).toBe('returning');
     now = new Date(called.body.army.returnsAt);
     await tick(db, now, scheduler);
-    expect((await village()).resources.amounts.iron).toBeGreaterThanOrEqual(Math.min(before + storm.loot.iron, (await village()).resources.capacity.iron) - 1);
 
     // A fort with no grain that nobody holds falls to bandits.
     const taken = new Set(w.camps.map((c: { q: number; r: number }) => `${c.q},${c.r}`));

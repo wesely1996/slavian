@@ -430,6 +430,24 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(moved)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(moved), "serverTime": LocalTime.iso(now)}}
+	# An army out in the field sets out on a raid or a strike (commands/
+	# armies.ts armyExpeditionCommand).
+	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["raid", "strike"]:
+		var b: Dictionary = body if body is Dictionary else {}
+		var valid: bool = (b.get("front") in ["north", "east", "south", "west"] and (b.get("depth") is int or b.get("depth") is float) and float(b.depth) == floorf(float(b.depth)) and float(b.depth) >= 1 and float(b.depth) <= 10) \
+			if parts[3] == "raid" else ((b.get("waveId") is int or b.get("waveId") is float) and float(b.waveId) == floorf(float(b.waveId)) and float(b.waveId) > 0)
+		if not valid:
+			return _fail(400, "invalid_request", "Invalid request")
+		var found := LocalArmies.find_army(world, int(parts[2]))
+		if found.is_empty():
+			return _fail(404, "not_found", "No such army")
+		if found.ownerAccountId == null or int(found.ownerAccountId) != int(world.hostAccountId):
+			return _fail(403, "forbidden", "Not your army")
+		var sent := LocalRaids.expedition(self, world, found, {"waveId": int(b.waveId)} if parts[3] == "strike" else {"front": String(b.front), "depth": int(b.depth)}, now)
+		if sent.has("error"):
+			return _rule_answer(sent)
+		changed.append(["world"])
+		return {"status": 200, "data": {"army": LocalArmies.army_view(sent), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "caravans" and parts[3] == "reroute":
 		var caravan := LocalLogistics.find_caravan(world, int(parts[2]))
 		if caravan.is_empty():

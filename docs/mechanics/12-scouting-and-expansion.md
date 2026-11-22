@@ -118,8 +118,8 @@ An army with orders *explore* searches the site (after any guardians):
 - **Time.** The site's hours, divided by 1 + 5% for every unit beyond the
   first, never under a quarter.
 - **Without scouts** it takes **3×** as long.
-- **One find.** The army comes home with one find, picked by the site's
-  weights:
+- **One find.** The army makes one find, picked by the site's weights.
+  Resources go to its home settlement at once:
   - **Resources:** 400 wood, 400 stone, 300 grain, 250 iron, ×(1 + how far
     out it lies), Zmija +25%.
   - **A piece of hero gear.**

@@ -5478,10 +5478,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 507.5,
-        "wood": 922.5,
-        "grain": 400,
-        "stone": 915
+        "iron": 571.5,
+        "wood": 1042.5,
+        "grain": 520,
+        "stone": 1035
        },
        "ratesPerHour": {
         "iron": 150,
@@ -5864,12 +5864,7 @@
       "orders": "hold",
       "stance": "balanced",
       "maneuver": "encircle",
-      "loot": {
-       "iron": 64,
-       "wood": 120,
-       "grain": 120,
-       "stone": 120
-      },
+      "loot": null,
       "units": {
        "spearman": 30
       },
@@ -8210,10 +8205,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 507.5,
-        "wood": 922.5,
-        "grain": 400,
-        "stone": 915
+        "iron": 571.5,
+        "wood": 1042.5,
+        "grain": 520,
+        "stone": 1035
        },
        "ratesPerHour": {
         "iron": 150,
@@ -8643,12 +8638,7 @@
       "orders": "hold",
       "stance": "balanced",
       "maneuver": "encircle",
-      "loot": {
-       "iron": 64,
-       "wood": 120,
-       "grain": 120,
-       "stone": 120
-      },
+      "loot": null,
       "units": {},
       "status": "done",
       "battleId": null,
@@ -10996,10 +10986,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 675,
-        "wood": 1000,
+        "iron": 739,
+        "wood": 1042.5,
         "grain": 0,
-        "stone": 1000
+        "stone": 1035
        },
        "ratesPerHour": {
         "iron": 150,
@@ -11463,12 +11453,7 @@
       "orders": "hold",
       "stance": "balanced",
       "maneuver": "encircle",
-      "loot": {
-       "iron": 64,
-       "wood": 120,
-       "grain": 120,
-       "stone": 120
-      },
+      "loot": null,
       "units": {},
       "status": "done",
       "battleId": null,
@@ -13784,7 +13769,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army cleared the cultists' circle at (-2, 0)",
-      "body": "It carries home 424 resources.",
+      "body": "It sends home 424 resources.",
       "createdAt": "2026-06-01T08:03:28.800Z",
       "read": false
      },
@@ -13948,7 +13933,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army cleared the cultists' circle at (-2, 0)",
-      "body": "It carries home 424 resources.",
+      "body": "It sends home 424 resources.",
       "createdAt": "2026-06-01T08:03:28.800Z",
       "read": false
      },
