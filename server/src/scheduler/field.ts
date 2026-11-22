@@ -14,9 +14,10 @@ import { bonus } from '../sim/research.js';
 import { z } from 'zod';
 import type { GameData, Stance } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
-import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
-import { inFortZone, startingPlots } from '../sim/forts.js';
-import { fortAt, insertFort, listForts, loadFort, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
+import { insertBattle, recordRound, saveSetup, type Battle, type BattleSetup, type RoundLog } from '../db/battles.js';
+import { ballistaKills, heldBack, overTheWalls, siegeDamage, wallFactors, wallIntegrity } from '../sim/walls.js';
+import { inFortZone, levelOf, ringPlots, standingRings, startingPlots } from '../sim/forts.js';
+import { fortAt, insertFort, listForts, loadFort, manned, setFortDefenders, saveFortBuildings, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
 import { campAt } from '../db/camps.js';
 import { siteAt } from '../db/sites.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
@@ -38,7 +39,7 @@ import { cameOverRiver, setupAt, setupFactors, stepInto, wagonFortBonus, type Se
 import { sanctityDamage } from '../sim/horde.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
-import { hex, hexDistance, type Hex } from '../sim/hex.js';
+import { hex, hexDistance, hexKey, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
 import { groundOf, roadAt } from './ground.js';
 import { commandOf, linesFor, linesLog, withLines } from '../sim/lines.js';
@@ -88,7 +89,16 @@ async function heldHexes(client: DbClient, worldId: number): Promise<Hex[]> {
      WHERE world_id = $1 AND orders = 'hold' AND target_village_id IS NULL AND status = 'stationed'`,
     [worldId],
   );
-  return rows.map((row) => hex(row.q, row.r));
+  const held = rows.map((row) => hex(row.q, row.r));
+  // And forts their own defenders hold.
+  const seen = new Set(held.map(hexKey));
+  for (const f of await listForts(client, worldId)) {
+    if (f.kind === 'fort' && f.status === 'standing' && manned(f) && !seen.has(hexKey(hex(f.q, f.r)))) {
+      seen.add(hexKey(hex(f.q, f.r)));
+      held.push(hex(f.q, f.r));
+    }
+  }
+  return held;
 }
 
 // A horde has (re)started its march: plan its run-ins with held hexes.
@@ -130,19 +140,30 @@ const ringedAt = (at: Date) => (a: Army) => !!a.wagonFortAt && a.wagonFortAt.get
 async function startFieldBattle(client: DbClient, data: GameData, world: World, wave: Wave, cell: Hex, at: Date): Promise<Battle | null> {
   const ringed = ringedAt(at);
   const holders = await armiesHolding(client, world.id, cell.q, cell.r, ['stationed']);
-  if (holders.length === 0) return null;
-  const readySince = new Date(Math.min(...holders.map((a) => a.arrivesAt.getTime())));
-  let setup: Setup = setupAt(data, {
+  // A fort's own defenders hold it with or without an army (forts.json garrison).
+  const fort = await standingFort(client, world.id, cell);
+  const guard = fort && manned(fort) ? fort.defenders : null;
+  if (holders.length === 0 && !guard) return null;
+  const readySince = holders.length ? new Date(Math.min(...holders.map((a) => a.arrivesAt.getTime()))) : (fort!.mannedAt ?? fort!.completesAt);
+  let setup: BattleSetup = setupAt(data, {
     terrain: await terrainOf(client, world.id),
     cell,
     readySince,
     hordeArrives: at,
     worldSpeed: world.speed,
-    fort: (await standingFort(client, world.id, cell)) !== null,
+    fort: fort !== null,
     river: cameOverRiver(wave.path ?? [], cell, await riverKeys(client, world.id)),
   });
   const ring = wagonFortBonus(data, holders, at);
   if (ring > 0) setup = { ...setup, wagonFort: ring };
+  // Its wall rings, outer to inner, each to be battered down in turn.
+  if (fort) {
+    const rings = standingRings(fort.plots).map((r) => {
+      const integrity = wallIntegrity(data, ringPlots(fort.plots, r));
+      return { ring: r, integrity, max: integrity };
+    });
+    setup = { ...setup, fortId: fort.id, ...(rings.length ? { rings } : {}), ...(guard ? { guard } : {}) };
+  }
   await markBattling(client, wave.id);
   const battle = await insertBattle(client, {
     worldId: world.id,
@@ -153,7 +174,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     setup,
     attackerStance: wave.stance,
     attackerInitial: wave.composition,
-    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units, ringed(a))), {}),
+    defenderInitial: holders.reduce<Record<string, number>>((sum, a) => addUnits(sum, combatants(data, a.units, ringed(a))), { ...(guard ?? {}) }),
     startedAt: at,
   });
   for (const army of holders) await saveArmy(client, { ...army, status: 'engaged', battleId: battle.id, joinsRound: 1, joinBonus: 0, engagedUnits: army.units });
@@ -163,6 +184,16 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
   const ground = [setup.ambush && 'an ambush', setup.choke && 'a choke point', setup.fort && 'a fort', setup.wagonFort && 'a wagon fort', setup.river && 'a river crossing']
     .filter(Boolean)
     .join(', ');
+  // A fort held by its defenders alone: its owner hears of it.
+  if (holders.length === 0 && fort) {
+    await tell(client, world, fort.ownerAccountId, {
+      kind: 'under_attack',
+      tier: 'push',
+      title: 'A horde attacks your fort at ({q}, {r})',
+      body: '{enemy} against its {defenders} defenders.',
+      vars: { q: cell.q, r: cell.r, enemy: total(wave.composition), defenders: total(battle.defenderInitial) },
+    }, at);
+  }
   for (const owner of await owners(holders)) {
     await tell(client, world, owner, {
       kind: 'under_attack',
@@ -203,11 +234,15 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const round = battle.round + 1;
   const engaged = await armiesInBattle(client, battle.id);
   const holy = battle.setup.holyCity === true;
-  const guard = holy ? (battle.setup.guard ?? {}) : null;
-  const leader = engaged[0] ? await loadVillage(client, engaged[0].homeVillageId) : null;
-  // Each army fights in its own stance, the Holy City's guard in its own;
-  // a guard that broke fights no more.
-  const guardStance = data.horde.holyCity.stance;
+  // A fort's battle: the fort (gone if it burned), its defenders fighting
+  // as its guard, and the ring of its walls the horde now batters.
+  const fort = battle.setup.fortId !== undefined ? await loadFort(client, battle.setup.fortId) : null;
+  const guard = holy || battle.setup.guard ? (battle.setup.guard ?? {}) : null;
+  const fortVillage = fort?.villageId != null ? await loadVillage(client, fort.villageId).catch(() => null) : null;
+  const leader = engaged[0] ? await loadVillage(client, engaged[0].homeVillageId) : fortVillage;
+  // Each army fights in its own stance, the Holy City's guard (or the
+  // fort's defenders) in its own; a guard that broke fights no more.
+  const guardStance = holy ? data.horde.holyCity.stance : data.forts.garrison.stance;
   const guardBroken = battle.setup.home?.broken === true;
   const guardForce = guard && !guardBroken ? guard : {};
   // The holders fight with their owner's research and the hero leading them.
@@ -239,9 +274,29 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const factorsFor = (stance: Stance) => setupFactors(data, ground, { round, holdersStance: stance, ambushBonus: bonus(bonuses, 'ambush') });
   const factors = factorsFor('balanced');
   const holderBase = playerStats(data, bonuses, false);
+  const rng = battleRng(world.seed, battle.id, round);
+  // The ring standing: while it does it shelters the defenders like a
+  // village's walls (sim/walls.ts), its ballistae smash engines and the
+  // horde's fighters come to grips only where climbers carry them over.
+  const rings = battle.setup.rings ?? [];
+  const ringAt = fort ? rings.find((r) => r.integrity > 0) : undefined;
+  const wallPlots = ringAt ? ringPlots(fort!.plots, ringAt.ring) : null;
+  const smashed = wallPlots ? ballistaKills(data, wave.front, wave.composition, wallPlots, rng) : {};
+  const assault = subtractUnits(wave.composition, smashed);
+  const shooters = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)].reduce(
+    (n, units) => n + Object.entries(units).reduce((m, [unit, k]) => m + (data.units.units[unit]?.family === 'archers' ? k : 0), 0),
+    0,
+  );
+  const over = wallPlots ? overTheWalls(data, wave.front, assault, wallPlots) : 0;
+  const walls = wallPlots ? wallFactors(data, wallPlots, shooters, over) : { defense: 1, attack: 1, archers: 1 };
+  const held = wallPlots ? heldBack(data, over) : 1;
   const statsFor = (stance: Stance) => {
     const f = factorsFor(stance);
-    return (unit: string) => ({ ...holderBase(unit), attack: holderBase(unit).attack * f.holderAttack, defense: holderBase(unit).defense * f.holderDefense });
+    return (unit: string) => {
+      const base = holderBase(unit);
+      const shooting = base.family === 'archers' ? walls.archers : 1;
+      return { ...base, attack: base.attack * f.holderAttack * walls.attack * shooting, defense: base.defense * f.holderDefense * walls.defense };
+    };
   };
   // Scouts never fight; an army's tell it what it faces (intel).
   const groups = [
@@ -258,10 +313,10 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const result = resolveRound(
     data,
     {
-      units: wave.composition,
+      units: assault,
       // Caught by surprise, the horde can't keep its formation.
       stance: factors.hordeStanceless ? 'balanced' : battle.attackerStance,
-      stats: (unit) => ({ ...hordeBase(unit), attack: hordeBase(unit).attack * factors.hordeAttack }),
+      stats: (unit) => ({ ...hordeBase(unit), attack: hordeBase(unit).attack * factors.hordeAttack * (hordeBase(unit).family === 'archers' ? 1 : held) }),
       home: false,
     },
     {
@@ -271,7 +326,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       home: holy,
       groups,
     },
-    battleRng(world.seed, battle.id, round),
+    rng,
     battle.setup.afflictions,
     await groundOf(client, data, world.id, { q: battle.q, r: battle.r }),
     // In lines: a fort's holders maneuver more easily, an ambush needs no
@@ -283,12 +338,23 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
         fort: battle.setup.fort ? 'defender' : null,
         bridge: !!battle.setup.river,
         noOpening: !!battle.setup.ambush,
+        // Nobody maneuvers while a ring stands.
+        still: !!wallPlots,
       },
       round,
       battle.setup.lines,
     ),
   );
-  const attackerNow = subtractUnits(wave.composition, result.attackerLosses);
+  const attackerLosses = addUnits(result.attackerLosses, smashed);
+  const attackerNow = subtractUnits(wave.composition, attackerLosses);
+  // The horde batters the ring with what came at it this round; once it is
+  // down the next one takes its place.
+  let ringsNow = rings;
+  let ringLeft: number | undefined;
+  if (ringAt && wallPlots) {
+    ringLeft = Math.max(0, Math.round(ringAt.integrity - siegeDamage(data, wave.front, assault, wallPlots)));
+    ringsNow = rings.map((r) => (r.ring === ringAt.ring ? { ...r, integrity: ringLeft! } : r));
+  }
   await setWaveStrength(client, wave.id, attackerNow);
   const shares = result.defenderGroupLosses!;
   const guardNow = guard ? subtractUnits(guard, shares[0]!) : null;
@@ -325,16 +391,19 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   const homeInitial = battle.setup.home?.initial ?? battle.defenderInitial;
   const homeBroke = outcome === 'ongoing' && guard !== null && !guardBroken && total(guardFighting) > 0 && broken(data, guardStance, homeInitial, guardFighting);
   // Burning and poison carry into the next round, and so do the lines.
-  const carried = withLines(withAfflictions(battle.setup, result.afflictions), result.lines);
+  let carried = withLines(withAfflictions(battle.setup, result.afflictions), result.lines);
+  if (ringsNow !== rings) carried = { ...carried, rings: ringsNow };
   if (guardNow) await saveSetup(client, battle.id, { ...carried, guard: guardNow, ...(homeBroke ? { home: { initial: homeInitial, broken: true } } : {}) });
   else if (carried !== battle.setup) await saveSetup(client, battle.id, carried);
   const log: RoundLog = {
     round,
     at: at.toISOString(),
-    attackerLosses: result.attackerLosses,
+    attackerLosses,
     defenderLosses: result.defenderLosses,
     attackerLeft: total(attackerNow),
     defenderLeft: total(defendersNow),
+    ...(ringAt ? { ring: ringAt.ring, wallLeft: ringLeft!, ...(ringLeft === 0 ? { breach: true } : {}), ...(over > 0 ? { over } : {}) } : {}),
+    ...(Object.keys(smashed).length ? { smashed } : {}),
     ...(armies.some(breaks) ? { broke: armies.filter(breaks).map((a) => ({ armyId: a.id, villageId: a.homeVillageId, stance: a.stance, units: combatants(data, a.units, ringed(a)) })) } : {}),
     ...(homeBroke ? { homeBroke: true } : {}),
     ...linesLog(result.lines),
@@ -380,6 +449,28 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       if (won && army.post) await afterBattle(client, data, world, army, at);
       else if (won && total(army.units) && (await staysOut(client, world, army))) await saveArmy(client, { ...army, status: 'stationed', battleId: null, joinsRound: null, joinBonus: 0 });
       else await sendHome(client, world, army, at, data);
+    }
+    if (fort) {
+      // The defenders left go back to the fort; each ring battered down
+      // loses walls.json breachLevelsLost levels.
+      if (guard) await setFortDefenders(client, fort.id, Object.fromEntries(Object.entries(guardNow ?? {}).filter(([, n]) => n > 0)));
+      const plots = { ...fort.plots };
+      for (const r of ringsNow) {
+        if (r.integrity > 0) continue;
+        const level = levelOf(plots, `w${r.ring}`) - data.walls.breachLevelsLost;
+        if (level > 0) plots[`w${r.ring}`] = { kind: 'wall', level };
+        else delete plots[`w${r.ring}`];
+      }
+      if (JSON.stringify(plots) !== JSON.stringify(fort.plots)) await saveFortBuildings(client, fort.id, plots, fort.work);
+      if (!engaged.some((a) => a.ownerAccountId === fort.ownerAccountId)) {
+        await tell(client, world, fort.ownerAccountId, {
+          kind: 'battle_result',
+          tier: won ? 'digest' : 'push',
+          title: won ? 'Your fort at ({q}, {r}) held' : 'A horde got past your fort at ({q}, {r})',
+          body: won ? 'The horde was beaten after {rounds} rounds.' : 'The horde marches on, {rounds} rounds late.',
+          vars: { q: battle.q, r: battle.r, rounds: round },
+        }, at);
+      }
     }
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });
     if (won) {

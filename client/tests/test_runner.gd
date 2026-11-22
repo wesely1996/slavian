@@ -923,6 +923,8 @@ func _test_local_waves() -> void:
 	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")
 	_replay_scenario("afflictions-scenario.json", "local burn and poison: fire arrows, poison archers, a horde and a raid")
 	_replay_scenario("campfire-scenario.json", "local burning a bandit camp: its survivors flee as a small horde")
+	_replay_scenario("fort-scenario.json", "local forts: buildings, shared hex, zone, rally, upkeep, tear-down, bandits")
+	_replay_scenario("fort-siege-scenario.json", "local fort siege: the Garrison's defenders and the wall rings")
 
 
 ## Solo worlds are saved on the device, read back, and deleted.
@@ -1103,6 +1105,17 @@ func _replay_scenario(file: String, name: String) -> void:
 				var c: Dictionary = step.set.camp
 				LocalBattles.create_camp(local, world, {"kind": String(c.kind), "front": String(c.front), "q": int(c.q), "r": int(c.r),
 					"units": LocalServer._decode(c.units), "waveId": null}, now)
+			if step.set.has("fort"):
+				var held := LocalArmies.find_fort(world, int(step.set.fort.id))
+				held.plots = step.set.fort.plots.duplicate(true)
+				for plot in held.plots:
+					held.plots[plot].level = int(held.plots[plot].level)
+				held.grain = float(step.set.fort.grain)
+				held.defenders = {}
+				for unit in step.set.fort.get("defenders", {}):
+					held.defenders[unit] = int(step.set.fort.defenders[unit])
+				if step.set.fort.has("defenders"):
+					LocalArmies.intercept_at(local, world, Vector2i(int(held.q), int(held.r)), now)
 			if step.set.has("river"):
 				var rv: Dictionary = step.set.river
 				var ends := LocalServer._ordered(Vector2i(int(rv.a.q), int(rv.a.r)), Vector2i(int(rv.b.q), int(rv.b.r)))

@@ -603,6 +603,8 @@ export function fortView(fort: Fort) {
     // rising ({plot, kind, level, completesAt}, or null).
     plots: fort.plots,
     work: fort.work,
+    // Its Fort Garrison's defenders (unit -> count), who never leave it.
+    defenders: fort.defenders,
     // When an army last held it, or it last had grain (bandits take it
     // forts.json takeoverHours after, once it has neither).
     mannedAt: fort.mannedAt?.toISOString() ?? null,

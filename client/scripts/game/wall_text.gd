@@ -111,6 +111,17 @@ static func round_text(battle: Dictionary, entry: Dictionary) -> String:
 		climbing = UI.t(" Their ladders and towers put every man of them on the walls.")
 	elif over > 0.0:
 		climbing = UI.t(" Their ladders and towers carried %d%% of them onto the walls.") % roundi(over * 100.0)
+	# A fort's ring (forts.json): inner, middle or outer.
+	if entry.has("ring"):
+		var names := [UI.t("The inner wall"), UI.t("The middle wall"), UI.t("The outer wall")]
+		var name: String = names[clampi(int(entry.ring), 0, 2)]
+		if entry.get("breach", false):
+			return UI.t("%s is breached!") % name + climbing
+		var most := int(entry.wallLeft)
+		for r in battle.get("setup", {}).get("rings", []):
+			if int(r.ring) == int(entry.ring):
+				most = int(r.max)
+		return UI.t("%s holds: %d of %d left.") % [name, int(entry.wallLeft), most] + climbing
 	if entry.get("breach", false):
 		return UI.t("The walls are breached!") + climbing
 	var wall: Dictionary = battle.get("setup", {}).get("wall", {})

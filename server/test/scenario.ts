@@ -10,6 +10,7 @@ import { buildApp } from '../src/api/app.js';
 import { insertRivers } from '../src/db/rivers.js';
 import { startRitual } from '../src/scheduler/cultists.js';
 import { raiseMountainCity } from '../src/scheduler/mapEvents.js';
+import { interceptAt } from '../src/scheduler/field.js';
 import { createCamp } from '../src/scheduler/camps.js';
 import { getWorld } from '../src/db/worlds.js';
 import type { Front } from '../src/sim/mapgen.js';
@@ -52,6 +53,9 @@ export type WorldSet = {
   mountainCity?: { q: number; r: number; front: string; raiders: Record<string, number> };
   // A bandit camp or lair rises at a hex (camps.json), as one would after a wave.
   camp?: { q: number; r: number; kind: 'bandit' | 'lair'; front: string; units: Record<string, number> };
+  // A fort's buildings (forts.json plots), grain and defenders, by id; as
+  // a muster would, newly manned it stands in the way of hordes on the march.
+  fort?: { id: number; plots: Record<string, { kind: string; level: number }>; grain: number; defenders?: Record<string, number> };
   // A river runs along the edge between two hexes (as the map would lay it).
   river?: { a: { q: number; r: number }; b: { q: number; r: number } };
   // Units standing in the player's (first) village, by unit (their upkeep
@@ -153,6 +157,23 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
                 await createCamp(client, scheduler.data, await getWorld(client, world.id), { kind: c.kind, front: c.front as Front, q: c.q, r: c.r, units: c.units, waveId: null }, now);
               } finally {
                 client.release();
+              }
+            }
+            if (step.set.fort) {
+              const f = step.set.fort;
+              const { rows } = await db.query<{ q: number; r: number }>('UPDATE forts SET plots = $2, grain = $3, defenders = $4 WHERE id = $1 RETURNING q, r', [
+                f.id,
+                JSON.stringify(f.plots),
+                f.grain,
+                JSON.stringify(f.defenders ?? {}),
+              ]);
+              if (f.defenders && rows[0]) {
+                const client = await db.connect();
+                try {
+                  await interceptAt(client, scheduler.data, await getWorld(client, world.id), { q: rows[0].q, r: rows[0].r }, now);
+                } finally {
+                  client.release();
+                }
               }
             }
             if (step.set.river) {

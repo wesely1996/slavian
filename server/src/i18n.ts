@@ -48,6 +48,10 @@ const SERBIAN: Record<string, string> = {
 	'The horde was beaten at its walls after {rounds} rounds.': 'Horda je pobeđena kod njegovih zidina posle {rounds} rundi.',
 	'Its Sanctity fell to {sanctity}.': 'Njegova svetost je pala na {sanctity}.',
 	'Your army held ({q}, {r})': 'Tvoja vojska se održala na ({q}, {r})',
+	'Your fort at ({q}, {r}) held': 'Tvoja utvrda na ({q}, {r}) je odolela',
+	'A horde got past your fort at ({q}, {r})': 'Horda je prošla pored tvoje utvrde na ({q}, {r})',
+	'A horde attacks your fort at ({q}, {r})': 'Horda napada tvoju utvrdu na ({q}, {r})',
+	'{enemy} against its {defenders} defenders.': '{enemy} protiv njenih {defenders} branilaca.',
 	'Your army fell back from ({q}, {r})': 'Tvoja vojska se povukla sa ({q}, {r})',
 	'The horde marches on, {rounds} rounds late.': 'Horda nastavlja dalje, {rounds} rundi zakašnjela.',
 	// Camps and lairs

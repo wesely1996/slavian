@@ -31,6 +31,8 @@ export interface RoundLog {
   // round, and the engines the ballistae smashed (also in attackerLosses).
   wallLeft?: number;
   breach?: boolean;
+  // At a fort: the ring (0 inner, 2 outer) the horde battered this round.
+  ring?: number;
   smashed?: Record<string, number>;
   // The share of the horde's fighters its climbers carried over the walls.
   over?: number;
@@ -80,6 +82,10 @@ export interface BattleSetup {
   afflictions?: Afflictions;
   // The battle lines' state: a maneuver under way, a breakthrough.
   lines?: LineState;
+  // A fort's battle (forts.json): the fort, and its wall rings the horde
+  // meets, outer to inner, with what is left of each.
+  fortId?: number;
+  rings?: { ring: number; integrity: number; max: number }[];
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

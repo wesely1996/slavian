@@ -1,12 +1,21 @@
 {
   "version": 1,
-  "_comment": "Forts as strongholds (field.json fort is where and how one is first built). A fort has its own buildings on plots: the Keep (`keep`), the Storage (`storage`) and three wall rings round them, inner to outer (`rings`, plots w0-w2), each with its wall building and its slots for towers (plots t<ring>-<slot>). A fort starts with the Keep and the Storage at level 1. Its buildings rise one at a time (each level's cost is `cost` x `costGrowth`^(level-1), paid from the village that built it; done after `buildSeconds` x `timeGrowth`^(level-1) real seconds, divided by world speed). A ring's wall can be built once the Keep reaches its `keepLevel`, costs its `costFactor` of the village wall (buildings.json wall), as do the towers on it (the village's tower kinds), and rises to `wallMaxLevel`; its towers open once its wall stands and never rise above it. The Keep's zone of influence reaches `zone.base` hexes, one more every `zone.every` Keep levels after the first: the village that built the fort can reshape the land and build roads within it as near its own walls. The Storage keeps `storage.grainBase` + `storage.grainPerLevel` per level of grain. Upkeep: a standing fort eats `upkeep.grainPerHour` grain a game hour, `upkeep.perKeepLevel` more for each Keep level, counted every `upkeep.everyHours` game hours. A fort with no grain and no army holding it for `takeoverHours` game hours is taken by bandits: a camp of `banditUnits` units. A fort or supply point can be torn down; whatever it stored is lost.",
+  "_comment": "Forts as strongholds (field.json fort is where and how one is first built). A fort has its own buildings on plots: the Keep (`keep`), the Storage (`storage`) and three wall rings round them, inner to outer (`rings`, plots w0-w2), each with its wall building and its slots for towers (plots t<ring>-<slot>). A fort starts with the Keep and the Storage at level 1. Its buildings rise one at a time (each level's cost is `cost` x `costGrowth`^(level-1), paid from the village that built it; done after `buildSeconds` x `timeGrowth`^(level-1) real seconds, divided by world speed). A ring's wall can be built once the Keep reaches its `keepLevel`, costs its `costFactor` of the village wall (buildings.json wall), as do the towers on it (the village's tower kinds), and rises to `wallMaxLevel`; its towers open once its wall stands and never rise above it. The Keep's zone of influence reaches `zone.base` hexes, one more every `zone.every` Keep levels after the first: the village that built the fort can reshape the land and build roads within it as near its own walls. The Storage keeps `storage.grainBase` + `storage.grainPerLevel` per level of grain. The Fort Garrison (`garrison`, plot `garrison`) keeps `garrison.perLevel` defenders for each of its levels: they never leave the fort, fight in its battles in `garrison.stance`, and, while the fort has grain, one fallen defender comes back every `garrison.musterHours` game hours, free (the kind most short first). Upkeep: a standing fort eats `upkeep.grainPerHour` grain a game hour, `upkeep.perKeepLevel` more for each Keep level and `upkeep.perDefender` for each defender, counted every `upkeep.everyHours` game hours; when its grain runs out its defenders desert. A fort with defenders counts as held: hordes keep out of its zone of control, and one that marches on it fights them. Sieges: a horde battering a fort meets its wall rings from the outside in; each built ring stands with the integrity, defense, archers and towers of a village's walls of its level (walls.json), and once battered down the next takes its place; each ring breached loses walls.json breachLevelsLost levels when the battle ends. While a ring stands nobody maneuvers. A fort with no grain and no army holding it for `takeoverHours` game hours is taken by bandits: a camp of `banditUnits` units. A fort or supply point can be torn down; whatever it stored is lost.",
   "buildings": {
     "keep": {
       "name": "Keep",
       "description": "The fort's heart. Each level widens the land the fort's village can reshape and build roads on; levels 4 and 7 open the middle and the outer wall.",
       "maxLevel": 10,
       "cost": { "wood": 300, "stone": 500, "grain": 100, "iron": 100 },
+      "costGrowth": 1.45,
+      "buildSeconds": 900,
+      "timeGrowth": 1.35
+    },
+    "garrison": {
+      "name": "Fort Garrison",
+      "description": "Quarters for the fort's own defenders: a few spearmen, archers and horsemen for every level, who never leave the fort. The fallen are replaced, one at a time.",
+      "maxLevel": 10,
+      "cost": { "wood": 200, "stone": 150, "grain": 150, "iron": 100 },
       "costGrowth": 1.45,
       "buildSeconds": 900,
       "timeGrowth": 1.35
@@ -30,7 +39,8 @@
   "towerMaxLevel": 10,
   "zone": { "base": 1, "every": 3 },
   "storage": { "grainBase": 2000, "grainPerLevel": 1000 },
-  "upkeep": { "everyHours": 4, "grainPerHour": 5, "perKeepLevel": 2 },
+  "upkeep": { "everyHours": 4, "grainPerHour": 5, "perKeepLevel": 2, "perDefender": 0.5 },
+  "garrison": { "perLevel": { "spearman": 2, "archer": 2, "horseman": 1 }, "musterHours": 1, "stance": "defensive" },
   "takeoverHours": 12,
   "banditUnits": 8
 }

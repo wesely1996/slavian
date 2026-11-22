@@ -1,4 +1,4 @@
-import { listForts } from './forts.js';
+import { listForts, manned } from './forts.js';
 import { listTerraforms } from './terraforms.js';
 import type { RiverEdge } from '../sim/mapgen.js';
 import { damagedRoads, standingRoads } from './roads.js';
@@ -102,12 +102,13 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   const damaged = await damagedRoads(client, worldId);
   const lanes = (await listShipyards(client, worldId)).filter((s) => s.kind === 'boat' && s.status === 'done').flatMap((s) => riverLanes(rivers, s.edge, terrain));
   const burning = (await listTerraforms(client, worldId)).filter((t) => t.action === 'burn').map((t) => hexKey(t.cell));
-  // Forts an army holds (stationed there): their zone of control.
+  // Forts an army holds (stationed there), or their defenders: their zone of control.
   const held = new Set(
     (await client.query<{ q: number; r: number }>("SELECT DISTINCT target_q AS q, target_r AS r FROM armies WHERE world_id = $1 AND status = 'stationed' AND target_village_id IS NULL", [worldId])).rows.map(
       (r) => `${r.q},${r.r}`,
     ),
   );
-  const forts = (await listForts(client, worldId)).filter((f) => f.kind === 'fort' && f.status === 'standing' && held.has(`${f.q},${f.r}`)).map((f) => `${f.q},${f.r}`);
+  // Or its own defenders hold.
+  const forts = (await listForts(client, worldId)).filter((f) => f.kind === 'fort' && f.status === 'standing' && (held.has(`${f.q},${f.r}`) || manned(f))).map((f) => `${f.q},${f.r}`);
   return landOf(terrain, blocked, roads, lanes, burning, damaged, forts);
 }

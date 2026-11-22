@@ -1355,6 +1355,12 @@ static func held_hexes(world: Dictionary) -> Array:
 			if not seen.has(cell):
 				seen[cell] = true
 				out.append(cell)
+	# And forts their own defenders hold.
+	for f in world.forts:
+		var at := Vector2i(int(f.q), int(f.r))
+		if f.get("kind", "fort") == "fort" and f.status == "standing" and LocalForts.is_manned(f) and not seen.has(at):
+			seen[at] = true
+			out.append(at)
 	return out
 
 
@@ -1439,20 +1445,35 @@ static func on_field_intercept(server: LocalServer, world: Dictionary, event: Di
 static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dictionary, cell: Vector2i, at: int) -> void:
 	var data := server.data
 	var holders := armies_holding(world, cell, ["stationed"])
-	if holders.is_empty():
+	# A fort's own defenders hold it with or without an army.
+	var fort := fort_at(world, cell, "fort")
+	if not fort.is_empty() and fort.status != "standing":
+		fort = {}
+	var guard: Variant = fort.defenders.duplicate() if not fort.is_empty() and LocalForts.is_manned(fort) else null
+	if holders.is_empty() and guard == null:
 		return
-	var ready_since: int = holders.map(func(a: Dictionary) -> int: return int(a.arrivesAt)).min()
+	var ready_since: int = holders.map(func(a: Dictionary) -> int: return int(a.arrivesAt)).min() if not holders.is_empty() \
+		else int(fort.mannedAt if fort.get("mannedAt") != null else fort.completesAt)
 	var rivers := {}
 	for e in world.rivers:
 		rivers[LocalLand.edge_key(e.a, e.b)] = true
-	var fort := fort_at(world, cell, "fort")
-	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing",
+	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty(),
 		LocalBattles.came_over_river(wave.path if wave.path != null else [], cell, rivers))
 	var ring := wagon_fort_bonus(data, holders, at)
 	if ring > 0:
 		setup.wagonFort = ring
+	# Its wall rings, outer to inner, each to be battered down in turn.
+	if not fort.is_empty():
+		var rings: Array = LocalForts.standing_rings(fort.plots).map(func(r: int) -> Dictionary:
+			var integrity := LocalWalls.wall_integrity(data, LocalForts.ring_plots(fort.plots, r))
+			return {"ring": r, "integrity": integrity, "max": integrity})
+		setup.fortId = fort.id
+		if not rings.is_empty():
+			setup.rings = rings
+		if guard != null:
+			setup.guard = guard
 	wave.status = "battling"
-	var defenders := {}
+	var defenders: Dictionary = guard.duplicate() if guard != null else {}
 	for a in holders:
 		# Wagons in a ring by now fight, as a wall before the archers.
 		var ringed: bool = a.get("wagonFortAt") != null and int(a.wagonFortAt) <= at
@@ -1473,6 +1494,10 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		if setup.get(pair[0], false):
 			ground.append(pair[1])
 	var text := ", ".join(ground)
+	# A fort held by its defenders alone: its owner hears of it.
+	if holders.is_empty() and not fort.is_empty():
+		LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "under_attack", "tier": "push", "title": "A horde attacks your fort at ({q}, {r})",
+			"body": "{enemy} against its {defenders} defenders.", "vars": {"q": cell.x, "r": cell.y, "enemy": LocalBattle.total(wave.composition), "defenders": LocalBattle.total(battle.defenderInitial)}}, at)
 	for owner in owners(holders):
 		LocalInbox.tell(server, world, owner, {"kind": "under_attack", "tier": "push", "title": "A horde ran into your army at ({q}, {r})",
 			"body": "{enemy} against {defenders}, with {ground}." if text != "" else "{enemy} against {defenders}.",
@@ -1554,7 +1579,7 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 	village.state.ledger = ledger
 	var fort := {"id": world.next.fort, "kind": kind, "ownerAccountId": village.ownerAccountId, "villageId": village.id, "q": cell.x, "r": cell.y,
 		"status": "building", "completesAt": LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed), "grain": 0.0,
-		"plots": LocalForts.starting_plots() if kind == "fort" else {}, "work": null}
+		"plots": LocalForts.starting_plots() if kind == "fort" else {}, "work": null, "defenders": {}}
 	# As the server's insertFort: held, as it were, from when it stands.
 	fort.mannedAt = fort.completesAt
 	world.next.fort += 1
@@ -1569,7 +1594,7 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 static func fort_view(f: Dictionary) -> Dictionary:
 	return {"id": f.id, "kind": f.get("kind", "fort"), "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
 		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor"), "neutral": f.get("neutral", false),
-		"plots": f.get("plots", {}), "work": f.get("work"), "mannedAt": LocalTime.iso(f.mannedAt) if f.get("mannedAt") != null else null}
+		"plots": f.get("plots", {}), "work": f.get("work"), "defenders": f.get("defenders", {}), "mannedAt": LocalTime.iso(f.mannedAt) if f.get("mannedAt") != null else null}
 
 
 static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1619,12 +1644,23 @@ static func on_fort_check(server: LocalServer, world: Dictionary, event: Diction
 	var at := int(event.dueAt)
 	var every := _hours_ms(float(data.forts.upkeep.everyHours), world.speed)
 	var since: int = LocalTime.parse(String(p.since)) if p.get("since") != null else LocalTime.ms(at - every)
-	var rate := LocalForts.upkeep(data, fort.get("plots", {}))
-	var eaten := (rate * float(at - since) * float(world.speed)) / LocalTime.MS_PER_HOUR
+	var rate := LocalForts.upkeep(data, fort.get("plots", {}), fort.get("defenders", {}))
+	var hours := (float(at - since) * float(world.speed)) / LocalTime.MS_PER_HOUR
+	var eaten := rate * hours
 	var before := float(fort.get("grain", 0.0))
 	var grain := maxf(0.0, before - eaten)
 	if grain != before:
 		fort.grain = grain
+		changed.append(["world"])
+	# Fed, the Garrison musters its fallen one at a time; unfed, its
+	# defenders desert.
+	var was_manned := LocalForts.is_manned(fort)
+	var defenders := LocalForts.muster(data, fort.get("plots", {}), fort.get("defenders", {}), floori(hours / float(data.forts.garrison.musterHours))) if grain > 0 else {}
+	if defenders != fort.get("defenders", {}):
+		fort.defenders = defenders
+		# Newly manned, the fort stands in the way of hordes on the march.
+		if not was_manned and LocalForts.is_manned(fort):
+			intercept_at(server, world, Vector2i(int(fort.q), int(fort.r)), at)
 		changed.append(["world"])
 	if grain > 0 or not armies_holding(world, Vector2i(fort.q, fort.r), ["stationed", "engaged"]).is_empty():
 		fort.mannedAt = at

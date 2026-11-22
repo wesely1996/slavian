@@ -26,6 +26,8 @@ export interface Fort {
   // A fort's buildings (forts.json; none for a supply point) and the one rising.
   plots: FortPlots;
   work: FortWork | null;
+  // The Fort Garrison's defenders (unit -> count), who never leave it.
+  defenders: Record<string, number>;
 }
 
 interface FortRow {
@@ -44,6 +46,7 @@ interface FortRow {
   neutral: boolean | null;
   plots: FortPlots | null;
   work: FortWork | null;
+  defenders: Record<string, number> | null;
 }
 
 function fromRow(row: FortRow): Fort {
@@ -63,6 +66,7 @@ function fromRow(row: FortRow): Fort {
     neutral: row.neutral ?? false,
     plots: row.plots ?? {},
     work: row.work ?? null,
+    defenders: row.defenders ?? {},
   };
 }
 
@@ -124,4 +128,13 @@ export async function setFortFloor(client: DbClient, id: number, floor: number |
 
 export async function saveFortBuildings(client: DbClient, id: number, plots: FortPlots, work: FortWork | null): Promise<void> {
   await client.query('UPDATE forts SET plots = $2, work = $3 WHERE id = $1', [id, JSON.stringify(plots), work === null ? null : JSON.stringify(work)]);
+}
+
+export async function setFortDefenders(client: DbClient, id: number, defenders: Record<string, number>): Promise<void> {
+  await client.query('UPDATE forts SET defenders = $2 WHERE id = $1', [id, JSON.stringify(defenders)]);
+}
+
+// Whether the fort has defenders of its own.
+export function manned(fort: Pick<Fort, 'defenders'>): boolean {
+  return Object.values(fort.defenders).some((n) => n > 0);
 }
