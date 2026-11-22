@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.20.0
+Documented for version: 0.21.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -83,7 +83,7 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-  [*] --> ongoing: a horde reaches a village, the Holy City or a holding army; an army storms a camp, a site or a raid stage
+  [*] --> ongoing: a horde reaches a village, the Holy City, a holding army or a manned fort; an army storms a camp, a site or a raid stage
   ongoing --> ongoing: battle_round (every 10 real minutes, at most 12)
   ongoing --> defended: the horde breaks (village, field, Holy City)
   ongoing --> raided: the horde wins (then raid or raze)
@@ -112,7 +112,7 @@ stateDiagram-v2
   marching --> done: army_arrive into its own settlement (joins the garrison)
   marching --> returning: army_arrive attacking a rival's village (PvP: fought at once, then home)
   stationed --> engaged: a battle starts there, or it answers one within 3 hexes
-  stationed --> marching: move, reinforce
+  stationed --> marching: move, reinforce, an expedition (raid or strike from the field or a fort)
   stationed --> returning: recall, come home when done
   stationed --> done: disband, merge, join the garrison where it stands
   engaged --> stationed: battle won and it stays
