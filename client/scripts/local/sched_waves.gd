@@ -51,7 +51,7 @@ static func land_of(world: Dictionary) -> Dictionary:
 	var forts: Array = []
 	for f in world.forts:
 		var key := LocalLand.key(Vector2i(int(f.q), int(f.r)))
-		if f.get("kind", "fort") == "fort" and f.status == "standing" and held.has(key) and not key in forts:
+		if f.get("kind", "fort") == "fort" and f.status == "standing" and (held.has(key) or LocalForts.is_manned(f)) and not key in forts:
 			forts.append(key)
 	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged, "forts": forts}
 

@@ -30,7 +30,7 @@ static func ring_of(plot: String) -> int:
 
 ## Every plot of a fort, in order (sim/forts.ts fortPlotIds).
 static func plot_ids(data: Dictionary) -> Array:
-	var out := ["keep", "storage"]
+	var out := ["keep", "storage", "garrison"]
 	var rings: Array = data.forts.rings
 	for i in rings.size():
 		out.append("w%d" % i)
@@ -41,7 +41,7 @@ static func plot_ids(data: Dictionary) -> Array:
 
 ## The building a plot holds or would hold (fortBuildingDef), or {}.
 static func building_def(data: Dictionary, plot: String, kind: String) -> Dictionary:
-	if plot == "keep" or plot == "storage":
+	if plot == "keep" or plot == "storage" or plot == "garrison":
 		return data.forts.buildings[plot] if kind == plot else {}
 	var ring := ring_of(plot)
 	if ring < 0:
@@ -121,9 +121,69 @@ static func grain_capacity(data: Dictionary, fort: Dictionary) -> float:
 	return float(data.forts.storage.grainBase) + float(data.forts.storage.grainPerLevel) * level_of(fort.get("plots", {}), "storage")
 
 
-## The grain a standing fort eats a game hour.
-static func upkeep(data: Dictionary, plots: Dictionary) -> float:
-	return float(data.forts.upkeep.grainPerHour) + float(data.forts.upkeep.perKeepLevel) * level_of(plots, "keep")
+## The grain a standing fort eats a game hour (its defenders' too).
+static func upkeep(data: Dictionary, plots: Dictionary, defenders := {}) -> float:
+	var men := 0
+	for unit in defenders:
+		men += int(defenders[unit])
+	return float(data.forts.upkeep.grainPerHour) + float(data.forts.upkeep.perKeepLevel) * level_of(plots, "keep") + float(data.forts.upkeep.perDefender) * men
+
+
+## The defenders the Fort Garrison keeps at its level.
+static func defenders_wanted(data: Dictionary, plots: Dictionary) -> Dictionary:
+	var level := level_of(plots, "garrison")
+	var out := {}
+	for unit in data.forts.garrison.perLevel:
+		var n := int(data.forts.garrison.perLevel[unit]) * level
+		if n > 0:
+			out[unit] = n
+	return out
+
+
+## `count` fallen defenders come back, one at a time, each the kind most
+## short (sim/forts.ts musterDefenders).
+static func muster(data: Dictionary, plots: Dictionary, defenders: Dictionary, count: int) -> Dictionary:
+	var wanted := defenders_wanted(data, plots)
+	var out := {}
+	for unit in defenders:
+		if int(defenders[unit]) > 0 and int(wanted.get(unit, 0)) > 0:
+			out[unit] = mini(int(defenders[unit]), int(wanted[unit]))
+	for i in count:
+		var best := ""
+		var short := 0
+		for unit in data.forts.garrison.perLevel:
+			var gap := int(wanted.get(unit, 0)) - int(out.get(unit, 0))
+			if gap > short:
+				best = unit
+				short = gap
+		if best == "":
+			break
+		out[best] = int(out.get(best, 0)) + 1
+	return out
+
+
+static func is_manned(fort: Dictionary) -> bool:
+	for unit in fort.get("defenders", {}):
+		if int(fort.defenders[unit]) > 0:
+			return true
+	return false
+
+
+## A wall ring's plots as a village's (sim/walls.ts): "w" and "t0"...
+static func ring_plots(plots: Dictionary, ring: int) -> Dictionary:
+	var out := {}
+	var wall: Variant = plots.get("w%d" % ring)
+	if wall != null:
+		out["w"] = {"building": "wall", "level": int(wall.level)}
+	for id in plots:
+		if _is_tower(id) and int(String(id)[1]) == ring:
+			out["t" + String(id).substr(3)] = {"building": plots[id].kind, "level": int(plots[id].level)}
+	return out
+
+
+## The rings a horde meets, outer to inner: those with walls built.
+static func standing_rings(plots: Dictionary) -> Array:
+	return [2, 1, 0].filter(func(r: int) -> bool: return level_of(plots, "w%d" % r) > 0)
 
 
 # --- On the scheduler (scheduler/forts.ts) ------------------------------------------

@@ -632,6 +632,14 @@ func _stronghold_panel(fort_id: int) -> void:
 				var warn := UI.label("", UI.SMALL_SIZE, UI.ERROR)
 				_panel_body.add_child(warn)
 				_tick(warn, func() -> String: return tr("No grain and nobody holds it: bandits take it in %s") % TimeUtil.format_duration(maxf(0.0, falls - Game.server_now())))
+			var wanted := LocalForts.defenders_wanted(Game.data, fort.get("plots", {}))
+			if not wanted.is_empty():
+				var have: Dictionary = fort.get("defenders", {})
+				var parts := PackedStringArray()
+				for unit in wanted:
+					parts.append("%s %d/%d" % [tr(String(Game.data.units.units.get(unit, {}).get("name", unit))), int(have.get(unit, 0)), int(wanted[unit])])
+				_panel_body.add_child(UI.with_info(UI.label(tr("Defenders: %s") % " · ".join(parts), UI.SMALL_SIZE),
+					tr("The Fort Garrison's own defenders never leave the fort and fight in its battles, even with no army there. While the fort has grain, one fallen defender comes back every %s game hours; with no grain they desert.") % String.num(float(Game.data.forts.garrison.musterHours), 1)))
 			var zone := LocalForts.zone_radius(Game.data, fort.get("plots", {}))
 			_panel_body.add_child(UI.with_info(UI.label(tr("Zone of influence: %d hexes") % zone, UI.SMALL_SIZE, UI.MUTED),
 				tr("Its village can reshape the land and build roads anywhere within this many hexes of the fort, as near its own walls. The Keep widens it.")))
@@ -679,7 +687,7 @@ func _fort_buildings(fort: Dictionary) -> void:
 	var plot := _fort_plot
 	var ring := LocalForts.ring_of(plot)
 	var kinds: Array = []
-	if plot == "keep" or plot == "storage":
+	if plot == "keep" or plot == "storage" or plot == "garrison":
 		kinds = [plot]
 	elif plot.begins_with("w"):
 		kinds = ["wall"]

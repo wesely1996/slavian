@@ -140,21 +140,22 @@ holds matters:
 - **Defense.** Armies holding it get **+30% defense** and **+30% attack**.
   They maneuver more easily, the enemy less so, and by a river or lake they
   can't be encircled ([page 16](16-battle-lines.md#ground-that-shapes-the-line)).
-- **A stronghold.** A built fort has its own buildings: a Keep, a Storage
-  and three wall rings with towers. It eats grain, and with no grain and no
-  army for 12 game hours it falls to bandits
-  ([page 17](17-forts.md)).
+- **A stronghold.** A built fort has its own buildings: a Keep, a Storage,
+  a Fort Garrison and three wall rings with towers. Its own defenders hold
+  it even with no army there, and a horde must batter its rings down one by
+  one. It eats grain, and with no grain and no army for 12 game hours it
+  falls to bandits ([page 17](17-forts.md)).
 - **Grain.** Its Storage keeps 3,000 grain at level 1, more as it rises
   ([page 17](17-forts.md#grain-and-upkeep)). The grain is safe behind its
   walls: hordes don't burn it.
 - **Sharing a hex.** A supply point and an outpost may stand on the same
   hex ([page 17](17-forts.md#sharing-a-hex)).
-- **Zone of control.** While an army holds it, no horde steps onto a hex
-  beside it. Hordes plan their road at least two hexes away. If that way
-  round costs more than 50% more than the straight road, the horde attacks
-  the fort first, then goes on. Forts channel hordes and make their attacks
-  predictable. Hordes plan around the forts held when they set out (or
-  re-plan, for a fire or a new road).
+- **Zone of control.** While an army or its own defenders hold it, no
+  horde steps onto a hex beside it. Hordes plan their road at least two
+  hexes away. If that way round costs more than 50% more than the straight
+  road, the horde attacks the fort first, then goes on. Forts channel
+  hordes and make their attacks predictable. Hordes plan around the forts
+  held when they set out (or re-plan, for a fire or a new road).
 - **Fire** destroys it ([page 2](02-map-and-movement.md#fire)).
 
 ### Supply points

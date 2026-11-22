@@ -53,7 +53,7 @@ export function ringOf(plot: string): number | null {
 // Every plot of a fort, in order: the Keep, the Storage, then each ring's
 // wall and its tower slots.
 export function fortPlotIds(data: GameData): string[] {
-  const out = ['keep', 'storage'];
+  const out = ['keep', 'storage', 'garrison'];
   data.forts.rings.forEach((ring, i) => {
     out.push(`w${i}`);
     for (let s = 0; s < ring.slots; s++) out.push(`t${i}-${s}`);
@@ -64,7 +64,7 @@ export function fortPlotIds(data: GameData): string[] {
 // The building a plot holds or would hold: its cost and times as a
 // BuildingDef, its ring's share of the village's for walls and towers.
 export function fortBuildingDef(data: GameData, plot: string, kind: string): FortBuildingDef | null {
-  if (plot === 'keep' || plot === 'storage') {
+  if (plot === 'keep' || plot === 'storage' || plot === 'garrison') {
     if (kind !== plot) return null;
     return data.forts.buildings[plot];
   }
@@ -148,7 +148,56 @@ export function grainCapacity(data: GameData, fort: { readonly kind: string; rea
   return data.forts.storage.grainBase + data.forts.storage.grainPerLevel * levelOf(fort.plots ?? {}, 'storage');
 }
 
-// The grain a standing fort eats a game hour.
-export function fortUpkeep(data: GameData, plots: FortPlots): number {
-  return data.forts.upkeep.grainPerHour + data.forts.upkeep.perKeepLevel * levelOf(plots, 'keep');
+// The grain a standing fort eats a game hour (its defenders' too).
+export function fortUpkeep(data: GameData, plots: FortPlots, defenders: Readonly<Record<string, number>> = {}): number {
+  const men = Object.values(defenders).reduce((a, b) => a + b, 0);
+  return data.forts.upkeep.grainPerHour + data.forts.upkeep.perKeepLevel * levelOf(plots, 'keep') + data.forts.upkeep.perDefender * men;
+}
+
+// The defenders the Fort Garrison keeps at its level.
+export function defendersWanted(data: GameData, plots: FortPlots): Record<string, number> {
+  const level = levelOf(plots, 'garrison');
+  const out: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(data.forts.garrison.perLevel)) if (n * level > 0) out[unit] = n * level;
+  return out;
+}
+
+// `count` fallen defenders come back, one at a time, each the kind most
+// short of what the Garrison keeps (in perLevel's order on a tie).
+export function musterDefenders(data: GameData, plots: FortPlots, defenders: Readonly<Record<string, number>>, count: number): Record<string, number> {
+  const wanted = defendersWanted(data, plots);
+  const out: Record<string, number> = {};
+  for (const [unit, n] of Object.entries(defenders)) if (n > 0 && (wanted[unit] ?? 0) > 0) out[unit] = Math.min(n, wanted[unit]!);
+  for (let i = 0; i < count; i++) {
+    let best: string | null = null;
+    let short = 0;
+    for (const unit of Object.keys(data.forts.garrison.perLevel)) {
+      const gap = (wanted[unit] ?? 0) - (out[unit] ?? 0);
+      if (gap > short) {
+        best = unit;
+        short = gap;
+      }
+    }
+    if (!best) break;
+    out[best] = (out[best] ?? 0) + 1;
+  }
+  return out;
+}
+
+// The village-style plots of a fort's wall ring (sim/walls.ts): its wall
+// on "w" and its towers on "t0"...
+export function ringPlots(plots: FortPlots, ring: number): Record<string, { building: string; level: number }> {
+  const out: Record<string, { building: string; level: number }> = {};
+  const wall = plots[`w${ring}`];
+  if (wall) out.w = { building: 'wall', level: wall.level };
+  for (const [id, p] of Object.entries(plots)) {
+    const m = TOWER.exec(id);
+    if (m && Number(m[1]) === ring) out[`t${m[2]}`] = { building: p.kind, level: p.level };
+  }
+  return out;
+}
+
+// The rings a horde meets, outer to inner: those with walls built.
+export function standingRings(plots: FortPlots): number[] {
+  return [2, 1, 0].filter((ring) => levelOf(plots, `w${ring}`) > 0);
 }

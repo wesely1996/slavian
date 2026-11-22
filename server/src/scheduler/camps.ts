@@ -17,8 +17,9 @@ import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
 import { campAt, insertCamp, isEventCamp, listCamps, loadCamp, markCleared, saveCampUnits, type Camp } from '../db/camps.js';
 import { avatarEnds, quickenRitual } from './cultists.js';
 import { loadCaravan, recordAmbush, type Caravan } from '../db/caravans.js';
-import { deleteFort, listForts, loadFort, markFortManned, setFortGrain } from '../db/forts.js';
-import { fortUpkeep } from '../sim/forts.js';
+import { deleteFort, listForts, loadFort, manned, markFortManned, setFortDefenders, setFortGrain } from '../db/forts.js';
+import { interceptAt } from './field.js';
+import { fortUpkeep, musterDefenders } from '../sim/forts.js';
 import { heroWithArmy } from '../db/heroes.js';
 import { generalWithArmy } from '../db/generals.js';
 import { generalBonuses } from '../sim/generals.js';
@@ -484,10 +485,20 @@ export const campHandlers: HandlerRegistry = {
     const at = event.dueAt;
     const every = hoursMs(data.forts.upkeep.everyHours, world.speed);
     const since = payload.since ? new Date(payload.since) : new Date(at.getTime() - every);
-    const rate = fortUpkeep(data, fort.plots);
-    const eaten = (rate * (at.getTime() - since.getTime()) * world.speed) / MS_PER_HOUR;
+    const rate = fortUpkeep(data, fort.plots, fort.defenders);
+    const hours = ((at.getTime() - since.getTime()) * world.speed) / MS_PER_HOUR;
+    const eaten = rate * hours;
     const grain = Math.max(0, fort.grain - eaten);
     if (grain !== fort.grain) await setFortGrain(client, fort.id, grain);
+    // Fed, the Garrison musters its fallen one at a time; unfed, its
+    // defenders desert.
+    const defenders = grain > 0 ? musterDefenders(data, fort.plots, fort.defenders, Math.floor(hours / data.forts.garrison.musterHours)) : {};
+    if (JSON.stringify(defenders) !== JSON.stringify(fort.defenders)) {
+      await setFortDefenders(client, fort.id, defenders);
+      // Newly manned, the fort stands in the way of hordes on the march.
+      if (!manned(fort) && manned({ defenders })) await interceptAt(client, data, world, hex(fort.q, fort.r), at);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+    }
     const holders = await armiesHolding(client, world.id, fort.q, fort.r, ['stationed', 'engaged']);
     if (grain > 0 || holders.length) {
       await markFortManned(client, fort.id, at);

@@ -1157,7 +1157,7 @@ const fortBuildingSchema = z.object({
 });
 const fortsFileSchema = z.object({
   version: z.number().int(),
-  buildings: z.object({ keep: fortBuildingSchema, storage: fortBuildingSchema }),
+  buildings: z.object({ keep: fortBuildingSchema, garrison: fortBuildingSchema, storage: fortBuildingSchema }),
   // The wall rings, inner to outer.
   rings: z
     .array(z.object({ name: z.string(), keepLevel: z.number().int().positive(), slots: z.number().int().nonnegative(), costFactor: z.number().positive() }))
@@ -1166,7 +1166,9 @@ const fortsFileSchema = z.object({
   towerMaxLevel: z.number().int().positive(),
   zone: z.object({ base: z.number().int().nonnegative(), every: z.number().int().positive() }),
   storage: z.object({ grainBase: z.number().nonnegative(), grainPerLevel: z.number().nonnegative() }),
-  upkeep: z.object({ everyHours: z.number().positive(), grainPerHour: z.number().nonnegative(), perKeepLevel: z.number().nonnegative() }),
+  upkeep: z.object({ everyHours: z.number().positive(), grainPerHour: z.number().nonnegative(), perKeepLevel: z.number().nonnegative(), perDefender: z.number().nonnegative() }),
+  // The Fort Garrison's defenders (by unit, per level), their muster and stance.
+  garrison: z.object({ perLevel: z.record(z.string(), z.number().int().nonnegative()), musterHours: z.number().positive(), stance: z.enum(STANCES) }),
   takeoverHours: z.number().positive(),
   banditUnits: z.number().int().positive(),
 });

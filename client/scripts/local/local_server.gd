@@ -1738,6 +1738,8 @@ func _load_all() -> void:
 				f.merge({"kind": "fort", "grain": 0.0})
 				# Worlds saved before forts had buildings (migration 081).
 				f.merge({"plots": LocalForts.starting_plots() if f.kind == "fort" else {}, "work": null})
+				# Worlds saved before Fort Garrisons.
+				f.merge({"defenders": {}})
 			for c in world.caravans:
 				c.merge({"destinationFortId": null})
 			world.hexes = _by_row(world.hexes)

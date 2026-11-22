@@ -595,11 +595,15 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	var round := int(battle.round) + 1
 	var engaged := LocalArmies.armies_in_battle(world, int(battle.id))
 	var holy: bool = battle.setup.get("holyCity", false) == true
-	var guard: Variant = battle.setup.get("guard", {}) if holy else null
-	var leader: Dictionary = server.find_village(world, int(engaged[0].homeVillageId)) if not engaged.is_empty() else {}
-	# Each army fights in its own stance, the Holy City's guard in its own;
-	# a guard that broke fights no more.
-	var guard_stance: String = data.horde.holyCity.stance
+	# A fort's battle: the fort (gone if it burned), its defenders fighting
+	# as its guard, and the ring of its walls the horde now batters.
+	var fort: Dictionary = LocalArmies.find_fort(world, int(battle.setup.fortId)) if battle.setup.get("fortId") != null else {}
+	var guard: Variant = battle.setup.get("guard", {}) if holy or battle.setup.has("guard") else null
+	var fort_village: Dictionary = server.find_village(world, int(fort.villageId)) if not fort.is_empty() and fort.get("villageId") != null else {}
+	var leader: Dictionary = server.find_village(world, int(engaged[0].homeVillageId)) if not engaged.is_empty() else fort_village
+	# Each army fights in its own stance, the Holy City's guard (or the
+	# fort's defenders) in its own; a guard that broke fights no more.
+	var guard_stance: String = data.horde.holyCity.stance if holy else data.forts.garrison.stance
 	var guard_broken: bool = battle.setup.get("home", {}).get("broken", false)
 	var home_initial: Dictionary = battle.setup.get("home", {}).get("initial", battle.defenderInitial)
 	# The holders fight with their owner's research and the hero leading them.
@@ -637,12 +641,36 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		hold_attack += float(data.field.fort.attackBonus)
 	var horde_attack := (float(data.field.choke.attackerFactor) if ground.get("choke", false) else 1.0) * (float(data.field.river.attackerFactor) if ground.get("river", false) else 1.0)
 	var holder_base := LocalBattle.player_stats(data, bonuses, false)
+	var rng := LocalBattle.battle_rng(int(world.seed), int(battle.id), round)
+	# The ring standing: while it does it shelters the defenders like a
+	# village's walls, its ballistae smash engines and the horde's fighters
+	# come to grips only where climbers carry them over.
+	var rings: Array = battle.setup.get("rings", [])
+	var ring_at: Dictionary = {}
+	if not fort.is_empty():
+		for r in rings:
+			if int(r.integrity) > 0:
+				ring_at = r
+				break
+	var wall_plots: Variant = LocalForts.ring_plots(fort.plots, int(ring_at.ring)) if not ring_at.is_empty() else null
+	var smashed: Dictionary = LocalWalls.ballista_kills(data, wave.front, wave.composition, wall_plots, rng) if wall_plots != null else {}
+	var assault := LocalCamps.subtract_units(wave.composition, smashed)
+	var shooters := 0
+	var forces: Array = ([guard] if guard != null else []) + engaged.map(func(a: Dictionary) -> Dictionary: return a.units)
+	for units in forces:
+		for unit in units:
+			if data.units.units.get(unit, {}).get("family") == "archers":
+				shooters += int(units[unit])
+	var over := LocalWalls.over_the_walls(data, wave.front, assault, wall_plots) if wall_plots != null else 0.0
+	var walls: Dictionary = LocalWalls.wall_factors(data, wall_plots, shooters, over) if wall_plots != null else {"defense": 1.0, "attack": 1.0, "archers": 1.0}
+	var held := LocalWalls.held_back(data, over) if wall_plots != null else 1.0
 	var stats_for := func(stance: String) -> Callable:
 		var hold_defense := base_defense + (choke_bonus if choke and stance == "hold_the_line" else 0.0)
 		return func(unit: String) -> Dictionary:
 			var st: Dictionary = holder_base.call(unit).duplicate()
-			st.attack = float(st.attack) * hold_attack
-			st.defense = float(st.defense) * hold_defense
+			var shooting := float(walls.archers) if st.family == "archers" else 1.0
+			st.attack = float(st.attack) * hold_attack * float(walls.attack) * shooting
+			st.defense = float(st.defense) * hold_defense * float(walls.defense)
 			return st
 	var groups: Array = []
 	if guard != null:
@@ -660,13 +688,13 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 	for g in groups:
 		defenders = LocalCamps.add_units(defenders, g.units)
 	var result := LocalBattle.resolve_round(data,
-		{"units": wave.composition, "stance": "balanced" if ambush and first else battle.attackerStance, "home": false,
+		{"units": assault, "stance": "balanced" if ambush and first else battle.attackerStance, "home": false,
 			"stats": func(unit: String) -> Dictionary:
 				var st: Dictionary = horde_base.call(unit).duplicate()
-				st.attack = float(st.attack) * horde_attack
+				st.attack = float(st.attack) * horde_attack * (1.0 if st.family == "archers" else held)
 				return st},
 		{"units": defenders, "stance": groups[0].stance if not groups.is_empty() else "balanced", "home": holy, "stats": stats_for.call("balanced"), "groups": groups},
-		LocalBattle.battle_rng(int(world.seed), int(battle.id), round), battle.setup.get("afflictions"),
+		rng, battle.setup.get("afflictions"),
 		LocalGround.at(data, world, Vector2i(int(battle.q), int(battle.r))),
 		# In lines: a fort's holders maneuver more easily, an ambush needs no
 		# opening volley, and a river crossing is fought on the bridge.
@@ -677,10 +705,28 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				LocalGround.road_at(world, Vector2i(int(battle.q), int(battle.r)))),
 			"fort": "defender" if battle.setup.get("fort", false) else null,
 			"bridge": battle.setup.get("river", false),
-			"noOpening": battle.setup.get("ambush", false)}, round, battle.setup.get("lines")))
+			"noOpening": battle.setup.get("ambush", false),
+			# Nobody maneuvers while a ring stands.
+			"still": wall_plots != null}, round, battle.setup.get("lines")))
 	# Burning and poison carry into the next round, and so do the lines.
 	battle.setup = LocalLines.with_lines(LocalBattle.with_afflictions(battle.setup, result.afflictions), result.get("lines"))
-	var attacker_now := LocalCamps.subtract_units(wave.composition, result.attackerLosses)
+	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
+	var attacker_now := LocalCamps.subtract_units(wave.composition, attacker_losses)
+	# The horde batters the ring with what came at it this round; once it
+	# is down the next one takes its place.
+	var rings_now: Array = rings
+	var ring_left := -1
+	if wall_plots != null:
+		ring_left = maxi(0, LocalWaves.js_round(float(ring_at.integrity) - LocalWalls.siege_damage(data, wave.front, assault, wall_plots)))
+		rings_now = rings.map(func(r: Dictionary) -> Dictionary:
+			if int(r.ring) == int(ring_at.ring):
+				var n := r.duplicate()
+				n.integrity = ring_left
+				return n
+			return r)
+		var next_setup: Dictionary = battle.setup.duplicate()
+		next_setup.rings = rings_now
+		battle.setup = next_setup
 	wave.composition = attacker_now
 	var shares: Array = result.defenderGroupLosses
 	var guard_now: Variant = LocalCamps.subtract_units(guard, shares[0]) if guard != null else null
@@ -722,8 +768,17 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 		if home_broke:
 			setup.home = {"initial": home_initial, "broken": true}
 		battle.setup = setup
-	var log := {"round": round, "at": LocalTime.iso(at), "attackerLosses": result.attackerLosses, "defenderLosses": result.defenderLosses,
+	var log := {"round": round, "at": LocalTime.iso(at), "attackerLosses": attacker_losses, "defenderLosses": result.defenderLosses,
 		"attackerLeft": LocalBattle.total(attacker_now), "defenderLeft": LocalBattle.total(defenders_now)}
+	if wall_plots != null:
+		log.ring = int(ring_at.ring)
+		log.wallLeft = ring_left
+		if ring_left == 0:
+			log.breach = true
+		if over > 0:
+			log.over = over
+	if not smashed.is_empty():
+		log.smashed = smashed
 	var broke: Array = armies.filter(breaks).map(func(a: Dictionary) -> Dictionary: return {"armyId": a.id, "villageId": a.homeVillageId, "stance": a.get("stance", "balanced"), "units": LocalScouting.combatants(data, a.units, ringed.call(a))})
 	if not broke.is_empty():
 		log.broke = broke
@@ -774,6 +829,29 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				army.joinBonus = 0
 			else:
 				LocalArmies.send_home(server, world, army, at)
+		if not fort.is_empty():
+			# The defenders left go back to the fort; each ring battered
+			# down loses walls.json breachLevelsLost levels.
+			if guard != null:
+				var back := {}
+				for unit in guard_now:
+					if int(guard_now[unit]) > 0:
+						back[unit] = int(guard_now[unit])
+				fort.defenders = back
+			for r in rings_now:
+				if int(r.integrity) > 0:
+					continue
+				var level := LocalForts.level_of(fort.plots, "w%d" % int(r.ring)) - int(data.walls.breachLevelsLost)
+				if level > 0:
+					fort.plots["w%d" % int(r.ring)] = {"kind": "wall", "level": level}
+				else:
+					fort.plots.erase("w%d" % int(r.ring))
+			var owns := engaged.any(func(a: Dictionary) -> bool: return a.ownerAccountId != null and fort.ownerAccountId != null and int(a.ownerAccountId) == int(fort.ownerAccountId))
+			if not owns:
+				LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "battle_result", "tier": "digest" if won else "push",
+					"title": "Your fort at ({q}, {r}) held" if won else "A horde got past your fort at ({q}, {r})",
+					"body": "The horde was beaten after {rounds} rounds." if won else "The horde marches on, {rounds} rounds late.",
+					"vars": {"q": battle.q, "r": battle.r, "rounds": round}}, at)
 		_record_round(battle, log, {"status": "defended" if won else "raided", "at": at, "loot": null})
 		if won:
 			horde_beaten(server, world, Vector2i(battle.q, battle.r), kills)
@@ -881,6 +959,8 @@ static func taken_hexes(world: Dictionary) -> Dictionary:
 		taken[LocalLand.key(Vector2i(v.q, v.r))] = true
 		for plot in LocalVillage.outpost_plots(v.state.plots):
 			taken[LocalLand.key(LocalVillage.outpost_hex(plot))] = true
+	for f in world.forts:
+		taken[LocalLand.key(Vector2i(int(f.q), int(f.r)))] = true
 	for c in world.camps:
 		if c.status == "active":
 			taken[LocalLand.key(Vector2i(c.q, c.r))] = true
@@ -1129,9 +1209,22 @@ static func create_camp(server: LocalServer, world: Dictionary, camp: Dictionary
 	return created
 
 
-## Every occupied hex: villages, outposts, forts, camps and sites.
+## Every occupied hex: villages, outposts, forts, camps and sites (not
+## shipyards: scheduler/camps.ts occupiedHexes).
 static func occupied_hexes(world: Dictionary) -> Dictionary:
-	return taken_hexes(world)
+	var taken := {}
+	for v in world.villages:
+		taken[LocalLand.key(Vector2i(v.q, v.r))] = true
+		for plot in LocalVillage.outpost_plots(v.state.plots):
+			taken[LocalLand.key(LocalVillage.outpost_hex(plot))] = true
+	for f in world.forts:
+		taken[LocalLand.key(Vector2i(int(f.q), int(f.r)))] = true
+	for c in world.camps:
+		if c.status == "active":
+			taken[LocalLand.key(Vector2i(c.q, c.r))] = true
+	for s in world.sites:
+		taken[LocalLand.key(Vector2i(s.q, s.r))] = true
+	return taken
 
 
 ## A wave is over: new camps of its front rise near its road.

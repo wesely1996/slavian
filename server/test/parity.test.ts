@@ -87,8 +87,8 @@ describe('server and solo engine parity', () => {
     const built = (prefix: string) => played.filter((s) => s.path!.startsWith(prefix) && s.path!.endsWith('/build') && typeof s.body?.plot === 'string').map((s) => String(s.body!.plot));
     const kind = (plot: string) => (/^o-?\d/.test(plot) ? 'o' : plot.replace(/\d+$/, ''));
     expect(new Set(built('/v1/villages/').map(kind))).toEqual(new Set(['f', 'c', 'w', 't', 'o']));
-    // A fort's (forts.json): the Keep, the Storage, a wall and a tower.
+    // A fort's (forts.json): the Keep, the Storage, the Garrison, a wall and a tower.
     const fortKind = (plot: string) => plot.replace(/\d.*$/, '');
-    expect(new Set(built('/v1/forts/').map(fortKind))).toEqual(new Set(['keep', 'storage', 'w', 't']));
+    expect(new Set(built('/v1/forts/').map(fortKind))).toEqual(new Set(['keep', 'storage', 'garrison', 'w', 't']));
   });
 });

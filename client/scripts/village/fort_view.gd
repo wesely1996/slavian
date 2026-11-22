@@ -1,7 +1,7 @@
 class_name FortView
 extends Control
-## The inside of a fort (data/forts.json): the Keep and the Storage in the
-## middle, three wall rings round them, inner to outer, each with its wall
+## The inside of a fort (data/forts.json): the Keep, the Storage and the
+## Fort Garrison in the middle, three wall rings round them, inner to outer, each with its wall
 ## building at the bottom of the ring and its tower slots along it. A ring
 ## the Keep has not opened yet is drawn faint. Tap a plot to pick it.
 
@@ -56,6 +56,7 @@ func _places() -> Dictionary:
 	var mid := _middle()
 	out["keep"] = [mid + Vector2(-CENTER * 0.9, -CENTER * 0.1) * half, CENTER * half]
 	out["storage"] = [mid + Vector2(CENTER * 1.0, CENTER * 0.35) * half, CENTER * 0.75 * half]
+	out["garrison"] = [mid + Vector2(CENTER * 0.55, -CENTER * 1.45) * half, CENTER * 0.75 * half]
 	var rings: Array = data.forts.rings
 	for i in rings.size():
 		var r: float = RINGS[i] * half
@@ -108,7 +109,7 @@ func _draw() -> void:
 			draw_texture_rect(tex, box, false, Color.WHITE if fill != LOCKED else Color(1, 1, 1, 0.45))
 			if rising:
 				draw_arc(at, s * 0.62, 0, TAU, 32, RISING, 3.0, true)
-		elif plot == "keep" or plot == "storage":
+		elif plot == "keep" or plot == "storage" or plot == "garrison":
 			draw_rect(Rect2(at - Vector2(s, s) * 0.5, Vector2(s, s)), fill)
 			draw_rect(Rect2(at - Vector2(s, s) * 0.5, Vector2(s, s)), INK, false, 2.0)
 		else:
@@ -121,6 +122,8 @@ func _draw() -> void:
 			label = UI.t("Keep")
 		elif plot == "storage":
 			label = UI.t("Storage")
+		elif plot == "garrison":
+			label = UI.t("Fort Garrison")
 		var level := int(held.level) if held != null else 0
 		if level > 0:
 			label = ("%s %d" % [label, level]).strip_edges()
@@ -138,6 +141,8 @@ func _art_id(plot: String, held: Variant, ring: int) -> String:
 		return "map/fort"
 	if plot == "storage":
 		return Art.building_id("storehouse", maxi(level, 1))
+	if plot == "garrison":
+		return Art.building_id("barracks", maxi(level, 1)) if held != null else "plot/empty"
 	if ring >= 0 and not _open(ring):
 		return "plot/locked"
 	if held == null:
