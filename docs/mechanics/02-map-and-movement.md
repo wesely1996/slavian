@@ -144,10 +144,14 @@ wetland, or extend a river.
   fishing ground, and water for the battles beside it
   ([page 6](06-battles.md#terrain)).
 - **A river** is dug along the edge between the hex and a neighbour you
-  choose. It must run on from a river already there: the new edge meets an
-  existing river edge corner to corner. Both hexes must be land (plains,
+  choose. It must run on from a river already there (the new edge meets an
+  existing river edge corner to corner) or from a lake (a lake touches the
+  new edge at one of its corners). Both hexes must be land (plains,
   forest, hills, wooded hills or swamp). Nothing crosses it without a
   bridge.
+- **A lake drowns roads.** When a lake is made, every road into its hex is
+  gone, built or still being built. No road can be started into a hex
+  while it is being flooded.
 - **No village is cut off.** Neither a lake nor a river may be made where
   it would cut any village off from the Holy City.
 - **Those already on the road** when the work is done keep their road; any

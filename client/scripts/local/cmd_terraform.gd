@@ -25,6 +25,20 @@ static func problem(data: Dictionary, action: String, terrain: Variant, distance
 	return ""
 
 
+## Whether a road can run into land of `terrain` (terraform.ts roadsCross).
+static func roads_cross(data: Dictionary, terrain: String) -> bool:
+	var def: Dictionary = data.terrain.terrain[terrain]
+	return def.moveCost != null or def.has("roadMoveCost")
+
+
+## What a work under way would make of land of `terrain` (terraform.ts becomes; "" for nothing).
+static func becomes(data: Dictionary, action: String, terrain: Variant) -> String:
+	var def: Dictionary = data.field.terraform.actions.get(action, {})
+	if def.is_empty() or def.get("river", false) or terrain == null:
+		return ""
+	return String(def.from.get(terrain, ""))
+
+
 static func work_at(world: Dictionary, cell: Vector2i) -> Dictionary:
 	for w in world.get("terraforms", []):
 		if w.cell == cell:
@@ -49,8 +63,10 @@ static func reshape_problem(data: Dictionary, world: Dictionary, action: String,
 		var key := LocalLand.edge_key(cell, toward)
 		if world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edge_key(e.a, e.b) == key):
 			return "A river runs there already"
-		if not world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edges_meet(e.a, e.b, cell, toward)):
-			return "A river is dug on from a river"
+		# From a river, or from a lake at a corner of the edge.
+		var from_lake := HexMath.neighbors(cell).any(func(n: Vector2i) -> bool: return HexMath.distance(n, toward) == 1 and land.terrain.get(LocalLand.key(n)) == "lake")
+		if not from_lake and not world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edges_meet(e.a, e.b, cell, toward)):
+			return "A river is dug on from a river or a lake"
 		after = land.duplicate()
 		var blocked: Dictionary = land.blocked.duplicate()
 		blocked[key] = true
@@ -272,6 +288,12 @@ static func on_done(server: LocalServer, world: Dictionary, event: Dictionary, c
 	if not def.is_empty() and terrain != null and def.from.has(terrain) and def.from[terrain] != terrain:
 		world.hexes[LocalLand.key(cell)] = def.from[terrain]
 		server.forget_hexes_view(world)
+		# Under water (a lake): the roads into it are gone.
+		if not roads_cross(server.data, def.from[terrain]):
+			var kept: Array = world.roads.filter(func(e: Dictionary) -> bool: return e.a != cell and e.b != cell)
+			if kept.size() != world.roads.size():
+				world.roads = kept
+				LocalArmies.relink_outposts(server, world, int(event.dueAt), changed)
 	# A river dug: nothing crosses the edge from now on without a bridge.
 	if def.get("river", false) and work.get("toward") is Vector2i:
 		var key := LocalLand.edge_key(cell, work.toward)

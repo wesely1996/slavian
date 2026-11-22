@@ -23,6 +23,8 @@ import { generalWithArmy, type General } from '../db/generals.js';
 import { generalBonuses } from '../sim/generals.js';
 import { generalAfterBattle } from './generals.js';
 import { notifyWorld } from '../db/notify.js';
+import { terraformAt } from '../db/terraforms.js';
+import { becomes, roadsCross } from './terraform.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
 import { listActiveWaves, loadWave, markBattling, resumeMarch, setWaveStrength, type Wave } from '../db/waves.js';
@@ -528,6 +530,12 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
     if (def.moveCost === null) pass = true;
   }
   if (land.blocked?.has(edgeKey(a, b))) throw new RuleError('A river lies between; build a bridge first');
+  // Land being flooded (a lake made there) takes no road.
+  for (const end of [a, b]) {
+    const work = await terraformAt(client, world.id, end);
+    const into = work ? becomes(data, work.action, land.get(`${end.q},${end.r}`)) : null;
+    if (into && !roadsCross(data, into)) throw new RuleError('That land is being flooded');
+  }
   const existing = await roadEdge(client, world.id, a, b);
   if (existing?.status === 'building') throw new RuleError('A road is being built there');
   if (existing?.status === 'upgrading') throw new RuleError('That road is being improved');

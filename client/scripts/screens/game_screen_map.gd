@@ -990,7 +990,8 @@ func _terraform_panel(terrain: String) -> void:
 
 
 ## The neighbours a river can be dug toward from `cell`: land, no river
-## there yet, corner to corner with one already there.
+## there yet, corner to corner with one already there or with a lake at a
+## corner of the edge.
 func _river_ways(cell: Vector2i, def: Dictionary) -> Array:
 	var out: Array = []
 	for n in HexMath.neighbors(cell):
@@ -1005,6 +1006,9 @@ func _river_ways(cell: Vector2i, def: Dictionary) -> Array:
 			if LocalLand.edge_key(a, b) == LocalLand.edge_key(cell, n):
 				here = true
 			elif LocalLand.edges_meet(a, b, cell, n):
+				meets = true
+		for m in HexMath.neighbors(cell):
+			if HexMath.distance(m, n) == 1 and Game.terrain.get(m) == "lake":
 				meets = true
 		if meets and not here:
 			out.append(n)

@@ -2,7 +2,8 @@
 // the village, paid in grain at once and grown after their hours; the new
 // forest then cleared, its timber brought home. Refused too far away, on
 // land the work doesn't fit, twice on one hex, and on an outpost. Then a
-// wetland made, a lake, and a river dug on from one already there.
+// wetland made, a lake (drowning the road into it; no road is built while
+// it floods), a river dug on from one already there, and one from the lake.
 import { hex, hexDistance, hexKey, neighbors } from '../src/sim/hex.js';
 import { edgeKey, edgesMeet } from '../src/sim/land.js';
 import { MINUTE, scenario } from './scenario.js';
@@ -78,15 +79,22 @@ scenario('terraform-scenario.json', START, async ({ started, play }) => {
   const land = new Map<string, string>((now.map.hexes as [number, number, string][]).map(([q, r, t]) => [`${q},${r}`, t]));
   const busy = new Set<string>([...taken, ...(now.map.terraforms as [number, number][]).map(([q, r]) => `${q},${r}`), ...grove.map(hexKey), hexKey(plains)]);
   const open = (c: { q: number; r: number }, d: number) => land.get(hexKey(c)) === 'plains' && hexDistance(c, home) === d && !busy.has(hexKey(c));
+  const ground = ['plains', 'forest', 'hills', 'wooded_hills', 'swamp'];
+  const isLand = (c: { q: number; r: number }) => ground.includes(land.get(hexKey(c)) ?? '');
   const wet = cells.find((c) => open(c, 2))!;
   await work(wet, 'soak');
   busy.add(hexKey(wet));
   const pond = cells.find((c) => open(c, 2))!;
+  // A road into it before the lake is made; none while it is being flooded,
+  // and the lake drowns the one there.
+  const shores = neighbors(pond).filter((n) => isLand(n) && !busy.has(hexKey(n)));
+  await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: pond.q, r: pond.r }, b: { q: shores[0]!.q, r: shores[0]!.r } } });
+  await play({ advance: MINUTE });
+  await play({ method: 'GET', path: world });
   await work(pond, 'flood');
   busy.add(hexKey(pond));
+  await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: pond.q, r: pond.r }, b: { q: shores[1]!.q, r: shores[1]!.r } } });
   // On from a river: one laid beside the village, dug on corner to corner.
-  const ground = ['plains', 'forest', 'hills', 'wooded_hills', 'swamp'];
-  const isLand = (c: { q: number; r: number }) => ground.includes(land.get(hexKey(c)) ?? '');
   const bank = cells.find((c) => hexDistance(c, home) === 1 && isLand(c) && !busy.has(hexKey(c)))!;
   const other = neighbors(bank).find((n) => isLand(n) && neighbors(n).some((m) => isLand(m) && neighbors(bank).some((x) => hexKey(x) === hexKey(m))))!;
   const toward = neighbors(bank).find((m) => isLand(m) && edgesMeet(bank, other, bank, m) && edgeKey(bank, m) !== edgeKey(bank, other))!;
@@ -98,4 +106,16 @@ scenario('terraform-scenario.json', START, async ({ started, play }) => {
   await river({ q: bank.q, r: bank.r, action: 'river', toward });
   await play({ advance: 30 * MINUTE });
   await play({ method: 'GET', path: world });
+
+  // On from the lake: along an edge with the lake at its corner.
+  const dug = new Set([edgeKey(bank, other), edgeKey(bank, toward)]);
+  const lakeside = neighbors(pond).filter((c) => isLand(c) && hexDistance(c, home) <= 2);
+  const spring = lakeside.find((c) => neighbors(c).some((m) => isLand(m) && hexDistance(m, pond) === 1 && !dug.has(edgeKey(c, m))));
+  const downstream = spring && neighbors(spring).find((m) => isLand(m) && hexDistance(m, pond) === 1 && !dug.has(edgeKey(spring, m)));
+  if (spring && downstream) {
+    await play({ set: { amounts: { wood: 2000, stone: 2000, grain: 5000, iron: 1000 } } });
+    await river({ q: spring.q, r: spring.r, action: 'river', toward: { q: downstream.q, r: downstream.r } });
+    await play({ advance: 30 * MINUTE });
+    await play({ method: 'GET', path: world });
+  }
 });

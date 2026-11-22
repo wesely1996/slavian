@@ -27,7 +27,7 @@ import { fleeing } from '../sim/camps.js';
 import type { Front } from '../sim/mapgen.js';
 import { threatOf } from '../sim/waves.js';
 import { angerFront, setOutNow } from './waves.js';
-import { listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
+import { deleteRoadsAt, listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
 import { relinkOutposts } from './outposts.js';
 import { insertRivers, listRiverEdges, loadLand } from '../db/rivers.js';
 import { edgeKey, edgesMeet, landOf, reachable, type Land } from '../sim/land.js';
@@ -184,9 +184,23 @@ async function burnableCampAt(client: DbClient, worldId: number, cell: Hex): Pro
   return (await listCamps(client, worldId)).some((c) => c.q === cell.q && c.r === cell.r && (c.kind === 'bandit' || c.kind === 'lair'));
 }
 
+// Whether a road can run into land of `terrain` (impassable land only with
+// a road move cost: a mountain pass).
+export function roadsCross(data: GameData, terrain: TerrainId): boolean {
+  const def = data.terrain.terrain[terrain];
+  return def.moveCost !== null || def.roadMoveCost !== undefined;
+}
+
+// What a work under way would make of `cell`'s `terrain` (null: nothing).
+export function becomes(data: GameData, action: string, terrain: TerrainId | undefined): TerrainId | null {
+  const def = data.field.terraform.actions[action];
+  return (def && !def.river && terrain ? def.from[terrain] : undefined) ?? null;
+}
+
 // Why a river can't be dug along cell|toward, or a lake made at `cell`
-// ('' when it can): rivers on from rivers, between land, never cutting a
-// village off from the Holy City.
+// ('' when it can): rivers on from rivers or from a lake (one at a corner
+// of the edge), between land, never cutting a village off from the Holy
+// City.
 export function reshapeProblem(
   data: GameData,
   input: {
@@ -207,7 +221,8 @@ export function reshapeProblem(
     const there = land.get(hexKey(toward));
     if (!there || !def.from[there]) return 'A river runs between land';
     if (input.rivers.some((e) => edgeKey(e.a, e.b) === edgeKey(cell, toward))) return 'A river runs there already';
-    if (!input.rivers.some((e) => edgesMeet(e.a, e.b, cell, toward))) return 'A river is dug on from a river';
+    const fromLake = neighbors(cell).some((n) => hexDistance(n, toward) === 1 && land.get(hexKey(n)) === 'lake');
+    if (!fromLake && !input.rivers.some((e) => edgesMeet(e.a, e.b, cell, toward))) return 'A river is dug on from a river or a lake';
     after = landOf(land, [...(land.blocked ?? []), edgeKey(cell, toward)], land.roads ?? [], land.lanes ?? [], land.burning ?? [], land.damaged ?? [], land.forts ?? []);
   } else {
     const terrain = land.get(hexKey(cell));
@@ -295,7 +310,11 @@ export const terraformHandlers: HandlerRegistry = {
     const def = data.field.terraform.actions[work.action];
     const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t])).get(hexKey(cell));
     const into = def && terrain ? def.from[terrain] : undefined;
-    if (into && into !== terrain) await setHexTerrain(client, world.id, cell.q, cell.r, into);
+    if (into && into !== terrain) {
+      await setHexTerrain(client, world.id, cell.q, cell.r, into);
+      // Under water (a lake): the roads into it are gone.
+      if (!roadsCross(data, into) && (await deleteRoadsAt(client, world.id, cell)) > 0) await relinkOutposts(client, data, world, event.dueAt);
+    }
     // A river dug: nothing crosses the edge from now on without a bridge.
     if (def?.river && work.toward) await insertRivers(client, world.id, [{ a: cell, b: work.toward, bridge: false, size: 1 }]);
     if (work.villageId !== null) {
