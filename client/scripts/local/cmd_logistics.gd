@@ -469,7 +469,7 @@ static func on_caravan_arrive(server: LocalServer, world: Dictionary, event: Dic
 		# A supply route: grain goes into the store as far as it fits; the
 		# rest (everything, if the store is gone) comes back.
 		var fort := LocalArmies.find_fort(world, int(caravan.destinationFortId))
-		var room := maxf(0.0, LocalArmies.grain_capacity(data, fort.get("kind", "fort")) - float(fort.grain)) if not fort.is_empty() and fort.status == "standing" else 0.0
+		var room := maxf(0.0, LocalArmies.grain_capacity(data, fort) - float(fort.grain)) if not fort.is_empty() and fort.status == "standing" else 0.0
 		var grain := minf(room, float(caravan.cargo.grain))
 		# And takes back what grain it was told to, as far as there is.
 		var there := (float(fort.grain) if not fort.is_empty() else 0.0) + grain

@@ -718,8 +718,6 @@ const fieldFileSchema = z.object({
     defenseBonus: z.number().nonnegative(),
     attackBonus: z.number().nonnegative(),
     zoneDetour: z.number().nonnegative(),
-    // Grain a fort keeps for armies holding it.
-    grainCapacity: z.number().int().positive(),
   }),
   // Supply points: grain stores on the map, built like forts.
   supplyPoint: z.object({
@@ -828,7 +826,6 @@ const campsFileSchema = z.object({
     cargoShare: z.number().min(0).max(1),
     escortLoss: z.number().min(0).max(1),
   }),
-  fort: z.object({ abandonHours: z.number().positive(), units: z.number().int().positive() }),
   starter: z.object({ units: z.number().int().positive(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive() }),
   // A bandit camp or lair burnt by fire: `fleeShare` (min-max) of its
   // troops flee as a small horde on the nearest village, and its front's
@@ -1148,6 +1145,33 @@ const smithingFileSchema = z.object({
 });
 export type SmithingData = z.infer<typeof smithingFileSchema>;
 
+// Forts as strongholds (forts.json, sim/forts.ts).
+const fortBuildingSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  maxLevel: z.number().int().positive(),
+  cost: resourcesSchema,
+  costGrowth: z.number().positive(),
+  buildSeconds: z.number().positive(),
+  timeGrowth: z.number().positive(),
+});
+const fortsFileSchema = z.object({
+  version: z.number().int(),
+  buildings: z.object({ keep: fortBuildingSchema, storage: fortBuildingSchema }),
+  // The wall rings, inner to outer.
+  rings: z
+    .array(z.object({ name: z.string(), keepLevel: z.number().int().positive(), slots: z.number().int().nonnegative(), costFactor: z.number().positive() }))
+    .length(3),
+  wallMaxLevel: z.number().int().positive(),
+  towerMaxLevel: z.number().int().positive(),
+  zone: z.object({ base: z.number().int().nonnegative(), every: z.number().int().positive() }),
+  storage: z.object({ grainBase: z.number().nonnegative(), grainPerLevel: z.number().nonnegative() }),
+  upkeep: z.object({ everyHours: z.number().positive(), grainPerHour: z.number().nonnegative(), perKeepLevel: z.number().nonnegative() }),
+  takeoverHours: z.number().positive(),
+  banditUnits: z.number().int().positive(),
+});
+export type FortsData = z.infer<typeof fortsFileSchema>;
+
 export interface GameData {
   buildings: BuildingsData;
   terrain: TerrainData;
@@ -1180,6 +1204,7 @@ export interface GameData {
   bridge: BridgeData;
   clans: ClansData;
   onboarding: OnboardingData;
+  forts: FortsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -1216,6 +1241,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     bridge: bridgeFileSchema.parse(read('bridge.json')),
     clans: clansFileSchema.parse(read('clans.json')),
     onboarding: onboardingFileSchema.parse(read('onboarding.json')),
+    forts: fortsFileSchema.parse(read('forts.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

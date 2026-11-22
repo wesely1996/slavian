@@ -30,6 +30,8 @@ import {
   strikeCommand,
   setVillageFloorCommand,
   setFortFloorCommand,
+  buildInFortCommand,
+  tearDownFortCommand,
   armyHomeCommand,
   armyRespondCommand,
   armyHeroCommand,
@@ -217,8 +219,9 @@ const heroPickBody = z.object({ kind: z.string().min(1).max(32) });
 const claimBody = z.object({ step: z.string().min(1).max(32) });
 const delegateBody = z.object({ to: z.number().int().positive(), days: z.number().int() });
 const endDelegationBody = z.object({ owner: z.number().int().positive().optional() });
-// A player's rally point: one of their villages, or null for none.
-const rallyBody = z.object({ villageId: z.number().int().positive().nullable() });
+// A player's rally point: one of their villages or forts, or null for none.
+const fortBuildBody = z.object({ plot: z.string().min(1).max(16), kind: z.string().min(1).max(40) });
+const rallyBody = z.object({ villageId: z.number().int().positive().nullable(), fortId: z.number().int().positive().nullable().optional() });
 
 // The group's quiet hours (null start/end: none), set by the host.
 const quietBody = z.object({
@@ -501,8 +504,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.put('/v1/worlds/:id/rally', async (request) => {
     const account = await authenticate(db, request);
     const { id } = idParams.parse(request.params);
-    const { villageId } = rallyBody.parse(request.body);
-    await setRallyCommand(db, scheduler, { account, worldId: id, villageId, now: clock() });
+    const { villageId, fortId } = rallyBody.parse(request.body);
+    await setRallyCommand(db, scheduler, { account, worldId: id, villageId, fortId: fortId ?? null, now: clock() });
     return fullWorldView(id);
   });
 
@@ -1040,6 +1043,23 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { grain } = floorBody.parse(request.body);
     const fort = await setFortFloorCommand(db, { accountId: account.id, fortId: id, grain, now: clock() });
     return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  // Raises a fort's building (on `plot`, of `kind`) a level.
+  app.post('/v1/forts/:id/build', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const { plot, kind } = fortBuildBody.parse(request.body);
+    const fort = await buildInFortCommand(db, scheduler, { accountId: account.id, fortId: id, plot, kind, now: clock() });
+    return { fort: fortView(fort), serverTime: clock().toISOString() };
+  });
+
+  // Tears a fort or supply point down.
+  app.delete('/v1/forts/:id', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await tearDownFortCommand(db, scheduler, { accountId: account.id, fortId: id, now: clock() });
+    return { serverTime: clock().toISOString() };
   });
 
   // An army's home: another of its owner's settlements.

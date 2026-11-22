@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "_comment": "Forts as strongholds (field.json fort is where and how one is first built). A fort has its own buildings on plots: the Keep (`keep`), the Storage (`storage`) and three wall rings round them, inner to outer (`rings`, plots w0-w2), each with its wall building and its slots for towers (plots t<ring>-<slot>). A fort starts with the Keep and the Storage at level 1. Its buildings rise one at a time (each level's cost is `cost` x `costGrowth`^(level-1), paid from the village that built it; done after `buildSeconds` x `timeGrowth`^(level-1) real seconds, divided by world speed). A ring's wall can be built once the Keep reaches its `keepLevel`, costs its `costFactor` of the village wall (buildings.json wall), as do the towers on it (the village's tower kinds), and rises to `wallMaxLevel`; its towers open once its wall stands and never rise above it. The Keep's zone of influence reaches `zone.base` hexes, one more every `zone.every` Keep levels after the first: the village that built the fort can reshape the land and build roads within it as near its own walls. The Storage keeps `storage.grainBase` + `storage.grainPerLevel` per level of grain. Upkeep: a standing fort eats `upkeep.grainPerHour` grain a game hour, `upkeep.perKeepLevel` more for each Keep level, counted every `upkeep.everyHours` game hours. A fort with no grain and no army holding it for `takeoverHours` game hours is taken by bandits: a camp of `banditUnits` units. A fort or supply point can be torn down; whatever it stored is lost.",
+  "buildings": {
+    "keep": {
+      "name": "Keep",
+      "description": "The fort's heart. Each level widens the land the fort's village can reshape and build roads on; levels 4 and 7 open the middle and the outer wall.",
+      "maxLevel": 10,
+      "cost": { "wood": 300, "stone": 500, "grain": 100, "iron": 100 },
+      "costGrowth": 1.45,
+      "buildSeconds": 900,
+      "timeGrowth": 1.35
+    },
+    "storage": {
+      "name": "Storage",
+      "description": "The fort's grain store: for the armies holding it and for its own upkeep.",
+      "maxLevel": 10,
+      "cost": { "wood": 250, "stone": 150, "grain": 0, "iron": 20 },
+      "costGrowth": 1.4,
+      "buildSeconds": 600,
+      "timeGrowth": 1.3
+    }
+  },
+  "rings": [
+    { "name": "Inner wall", "keepLevel": 1, "slots": 1, "costFactor": 0.5 },
+    { "name": "Middle wall", "keepLevel": 4, "slots": 3, "costFactor": 0.75 },
+    { "name": "Outer wall", "keepLevel": 7, "slots": 4, "costFactor": 1 }
+  ],
+  "wallMaxLevel": 10,
+  "towerMaxLevel": 10,
+  "zone": { "base": 1, "every": 3 },
+  "storage": { "grainBase": 2000, "grainPerLevel": 1000 },
+  "upkeep": { "everyHours": 4, "grainPerHour": 5, "perKeepLevel": 2 },
+  "takeoverHours": 12,
+  "banditUnits": 8
+}

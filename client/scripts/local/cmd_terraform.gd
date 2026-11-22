@@ -7,7 +7,7 @@ extends RefCounted
 
 
 ## terraformProblem: why `action` can't be done ("" when it can).
-static func problem(data: Dictionary, action: String, terrain: Variant, distance: int, taken: bool, busy: bool, held := false) -> String:
+static func problem(data: Dictionary, action: String, terrain: Variant, distance: int, taken: bool, busy: bool, held := false, in_zone := false) -> String:
 	var rules: Dictionary = data.field.terraform
 	var def: Dictionary = rules.actions.get(action, {})
 	if def.is_empty():
@@ -16,8 +16,8 @@ static func problem(data: Dictionary, action: String, terrain: Variant, distance
 		return "Something stands there"
 	if def.has("fire") and held:
 		return "An army stands there"
-	if distance < 1 or distance > int(rules.range):
-		return "Land is reshaped within %d hexes of the village" % int(rules.range)
+	if not in_zone and (distance < 1 or distance > int(rules.range)):
+		return "Land is reshaped within %d hexes of the village or in its forts' zones" % int(rules.range)
 	if busy:
 		return "Work is already under way there"
 	if terrain == null or not def.from.has(terrain):
@@ -99,7 +99,8 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	var on_camp: bool = data.field.terraform.actions.get(action, {}).has("fire") and world.camps.any(func(c: Dictionary) -> bool:
 		return int(c.q) == cell.x and int(c.r) == cell.y and c.kind in ["bandit", "lair"])
 	var reason := problem(data, action, world.hexes.get(LocalLand.key(cell)), HexMath.distance(cell, Vector2i(village.q, village.r)),
-		taken.has(LocalLand.key(cell)) and not on_camp, not work_at(world, cell).is_empty(), not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty())
+		taken.has(LocalLand.key(cell)) and not on_camp, not work_at(world, cell).is_empty(), not LocalArmies.armies_holding(world, cell, ["stationed", "engaged"]).is_empty(),
+		LocalForts.in_zone(data, world.forts, int(village.id), cell))
 	if reason != "":
 		return LocalVillage.rule(reason)
 	var reshaping := reshape_problem(data, world, action, cell, toward)
@@ -263,7 +264,7 @@ static func on_fire_spread(server: LocalServer, world: Dictionary, event: Dictio
 	for fort in world.forts.duplicate():
 		if int(fort.q) != cell.x or int(fort.r) != cell.y:
 			continue
-		world.forts.erase(fort)
+		LocalForts.remove(world, fort)
 		LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "Fire burned your stronghold at ({q}, {r})",
 			"body": "Nothing is left of it, nor of its grain.", "vars": {"q": cell.x, "r": cell.y}}, at)
 	burn_camps(server, world, cell, at)

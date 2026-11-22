@@ -237,8 +237,12 @@ stateDiagram-v2
 stateDiagram-v2
   [*] --> building: build
   building --> standing: fort_complete
-  standing --> [*]: fire, a horde burns a supply point, fort_check (abandoned 48 h, becomes a bandit camp)
+  standing --> [*]: fire, a horde burns a supply point, fort_check (no grain and no army 12 h, becomes a bandit camp), torn down
+  building --> [*]: fire, torn down
 ```
+
+A standing fort also raises its buildings one at a time (`work`, done at
+`fort_work_done`); that is not a status.
 
 ## Camp
 

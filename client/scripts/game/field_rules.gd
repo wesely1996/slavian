@@ -40,7 +40,7 @@ static func ground(data: Dictionary, terrain: Dictionary, cell: Vector2i, fort: 
 		var bonus := roundi(float(data.field.fort.defenseBonus) * 100.0)
 		lines.append(UI.t("Fort: +%d%% defense.") % bonus if fort.status == "standing" else UI.t("Fort being built (+%d%% defense when done).") % bonus)
 	if not fort.is_empty() and fort.status == "standing":
-		lines.append(UI.t("Grain kept here: %d of %d.") % [floori(float(fort.get("grain", 0))), int(grain_capacity(data, fort.get("kind", "fort")))])
+		lines.append(UI.t("Grain kept here: %d of %d.") % [floori(float(fort.get("grain", 0))), int(grain_capacity(data, fort))])
 	if lines.is_empty():
 		lines.append(UI.t("Open ground: no help from the land."))
 	return lines
@@ -98,9 +98,9 @@ static func village_spare(data: Dictionary, village: Dictionary, grain_now: floa
 	return maxf(0.0, grain_now - settlement_floor(data, village.get("armyFloor"), capacity))
 
 
-## The grain a fort or supply point keeps at most (data/field.json).
-static func grain_capacity(data: Dictionary, kind: String) -> float:
-	return float(data.field.supplyPoint.grainCapacity if kind == "supply" else data.field.fort.grainCapacity)
+## The grain a fort or supply point keeps at most (a fort's by its Storage).
+static func grain_capacity(data: Dictionary, fort: Dictionary) -> float:
+	return LocalForts.grain_capacity(data, fort)
 
 
 ## What a fort costs a village with these bonuses (some clans pay more,

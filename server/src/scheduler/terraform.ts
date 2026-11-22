@@ -14,6 +14,7 @@ import { createRng } from '../sim/rng.js';
 import { outpostHex, outpostPlots, raidOutpost } from '../sim/village.js';
 import { deleteCamp, listCamps } from '../db/camps.js';
 import { deleteFort, listForts } from '../db/forts.js';
+import { inFortZone } from '../sim/forts.js';
 import { receive } from '../sim/logistics.js';
 import { spend } from '../sim/resources.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -166,14 +167,16 @@ async function burnCamps(client: DbClient, data: GameData, world: World, cell: H
 }
 
 // Why `action` can't be done on a hex of `terrain` `distance` from the
-// village ('' when it can): the rules that need no database.
-export function terraformProblem(data: GameData, action: string, terrain: TerrainId | undefined, distance: number, taken: boolean, busy: boolean, held = false): string {
+// village ('' when it can): the rules that need no database. `inZone`: the
+// hex lies in the zone of influence of a fort the village built
+// (forts.json zone), where the village reshapes the land at any distance.
+export function terraformProblem(data: GameData, action: string, terrain: TerrainId | undefined, distance: number, taken: boolean, busy: boolean, held = false, inZone = false): string {
   const rules = data.field.terraform;
   const def = rules.actions[action];
   if (!def) return 'No such work';
   if (taken) return 'Something stands there';
   if (def.fire && held) return 'An army stands there';
-  if (distance < 1 || distance > rules.range) return `Land is reshaped within ${rules.range} hexes of the village`;
+  if (!inZone && (distance < 1 || distance > rules.range)) return `Land is reshaped within ${rules.range} hexes of the village or in its forts' zones`;
   if (busy) return 'Work is already under way there';
   if (!terrain || !def.from[terrain]) return 'That work cannot be done on this land';
   return '';
@@ -262,6 +265,7 @@ export async function startTerraform(
     (await takenHexes(client, world.id)).has(hexKey(cell)) && !(data.field.terraform.actions[action]?.fire && (await burnableCampAt(client, world.id, cell))),
     (await terraformAt(client, world.id, cell)) !== null,
     (await armiesHolding(client, world.id, cell.q, cell.r, ['stationed', 'engaged'])).length > 0,
+    inFortZone(data, await listForts(client, world.id), village.id, cell),
   );
   if (problem) throw new RuleError(problem);
   const reshaping = reshapeProblem(data, {

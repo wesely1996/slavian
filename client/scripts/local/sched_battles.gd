@@ -1107,7 +1107,7 @@ static func on_supply_raid(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	if not LocalArmies.armies_holding(world, Vector2i(point.q, point.r), ["stationed", "engaged"]).is_empty():
 		return
-	world.forts.erase(point)
+	LocalForts.remove(world, point)
 	LocalInbox.tell(server, world, point.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "A horde burned the supply point at ({q}, {r})",
 		"body": "Its {grain} grain burned with it.", "vars": {"q": point.q, "r": point.r, "grain": floori(float(point.grain))}}, int(event.dueAt))
 	changed.append(["world"])

@@ -31,7 +31,7 @@ static func validate(data: Dictionary, spec: Dictionary) -> Dictionary:
 			if not (fort_id is int or fort_id is float) or float(fort_id) != floorf(float(fort_id)) or float(fort_id) < 1 \
 					or not (target is int or target is float) or float(target) != floorf(float(target)):
 				return {"error": "Say which fort or supply point to keep stocked, and how full", "kind": "invalid"}
-			var most := maxi(int(data.field.fort.grainCapacity), int(data.field.supplyPoint.grainCapacity))
+			var most := maxi(int(LocalForts.grain_capacity(data, {"kind": "fort", "plots": {"storage": {"kind": "storage", "level": int(data.forts.buildings.storage.maxLevel)}}})), int(data.field.supplyPoint.grainCapacity))
 			if int(target) < int(data.orders.supplyMinLoad) or int(target) > most:
 				return LocalVillage.rule("Keep between %d and %d grain there" % [int(data.orders.supplyMinLoad), most])
 			return {"kind": "supply", "fortId": int(fort_id), "target": int(target)}
@@ -152,7 +152,7 @@ static func _run_order(server: LocalServer, world: Dictionary, village: Dictiona
 		var where := "(%d, %d)" % [int(fort.q), int(fort.r)]
 		if fort.status != "standing":
 			return LocalVillage.rule("The store at %s is still being built" % where)
-		var room := LocalArmies.grain_capacity(data, fort.get("kind", "fort"))
+		var room := LocalArmies.grain_capacity(data, fort)
 		var goal := mini(int(spec.target), int(room))
 		var on_the_way := grain_on_the_way(world, int(fort.id))
 		if floori(goal - float(fort.grain) - on_the_way) < int(data.orders.supplyMinLoad):

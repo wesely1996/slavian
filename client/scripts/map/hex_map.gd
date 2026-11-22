@@ -797,8 +797,11 @@ func _draw_camp(camp: Dictionary) -> void:
 ## how full its grain store is.
 func _draw_fort(fort: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(fort.q), int(fort.r)), hex_size)
+	# A supply point beside a fort on the same hex stands off to one side.
+	if fort.get("kind", "fort") == "supply" and not Game.fort_at_kind(Vector2i(int(fort.q), int(fort.r)), "fort").is_empty():
+		c += Vector2(hex_size * 0.45, hex_size * 0.3)
 	if fort.status == "standing":
-		_draw_grain_bar(c + Vector2(0, hex_size * 0.62), float(fort.get("grain", 0)) / FieldRules.grain_capacity(Game.data, fort.get("kind", "fort")))
+		_draw_grain_bar(c + Vector2(0, hex_size * 0.62), float(fort.get("grain", 0)) / maxf(1.0, FieldRules.grain_capacity(Game.data, fort)))
 	_draw_fort_body(fort, c)
 
 

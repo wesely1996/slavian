@@ -207,7 +207,8 @@ Bandit camps (human fronts) and monster lairs (the North) rise on the map.
   its units with it.
 - **Ambushes.** Caravans passing within 1 hex are ambushed
   ([page 4](04-economy-and-logistics.md#caravans)).
-- **Abandoned forts** become camps of 8 ([page 8](08-armies-and-field.md#forts)).
+- **Abandoned forts** become camps of 8: with no grain and no army for 12
+  game hours ([page 17](17-forts.md#grain-and-upkeep)).
 - **Starter camps.** Every village gets a small one of 3 at the start of the
   run, 2–3 hexes away.
 

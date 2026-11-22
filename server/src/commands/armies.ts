@@ -33,6 +33,7 @@ import type { ArmyOrders } from '../sim/armies.js';
 import type { Hex } from '../sim/hex.js';
 import { loadFort, setFortFloor, type Fort } from '../db/forts.js';
 import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
+import { buildInFort, tearDownFort } from '../scheduler/forts.js';
 import type { RoadEdge } from '../db/roads.js';
 import type { Shipyard } from '../db/shipyards.js';
 import { payShipyard } from '../scheduler/mapEvents.js';
@@ -369,6 +370,33 @@ export async function setFortFloorCommand(db: Db, input: { accountId: number; fo
     await notifyWorld(client, { worldId: fort.worldId, type: 'armies' });
     return { ...fort, armyFloor: floor };
   });
+}
+
+// Raises a building in one of the caller's forts a level, paid from the
+// village that built it.
+export async function buildInFortCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; fortId: number; plot: string; kind: string; now: Date }): Promise<Fort> {
+  const worldId = await worldOfFort(db, input.fortId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
+    const fort = (await loadFort(client, input.fortId))!;
+    await authorize(client, { worldId, ownerAccountId: fort.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built in a fort', ...(fort.villageId !== null ? { villageId: fort.villageId } : {}), refusal: 'Not your fort' });
+    return buildInFort(client, deps.data, world, fort, input.plot, input.kind, input.now);
+  });
+}
+
+// Tears down one of the caller's forts or supply points.
+export async function tearDownFortCommand(db: Db, deps: SchedulerDeps, input: { accountId: number; fortId: number; now: Date }): Promise<void> {
+  const worldId = await worldOfFort(db, input.fortId);
+  await withWorld(db, worldId, input.now, deps, async (client, world) => {
+    const fort = (await loadFort(client, input.fortId))!;
+    await authorize(client, { worldId, ownerAccountId: fort.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'tore down a fort', ...(fort.villageId !== null ? { villageId: fort.villageId } : {}), refusal: 'Not your fort' });
+    await tearDownFort(client, world, fort);
+  });
+}
+
+async function worldOfFort(db: Db, fortId: number): Promise<number> {
+  const fort = await inTransaction(db, (client) => loadFort(client, fortId));
+  if (!fort) throw new NotFoundError('No such fort');
+  return fort.worldId;
 }
 
 // An army's home: another of its owner's settlements.

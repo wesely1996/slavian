@@ -301,9 +301,15 @@ func fort_at_id(id: int) -> Dictionary:
 	return {}
 
 
+## The fort on a hex, or (with none there) its supply point.
 func fort_at(cell: Vector2i) -> Dictionary:
+	var fort := fort_at_kind(cell, "fort")
+	return fort if not fort.is_empty() else fort_at_kind(cell, "supply")
+
+
+func fort_at_kind(cell: Vector2i, kind: String) -> Dictionary:
 	for fort in forts:
-		if Vector2i(int(fort.q), int(fort.r)) == cell:
+		if Vector2i(int(fort.q), int(fort.r)) == cell and fort.get("kind", "fort") == kind:
 			return fort
 	return {}
 
@@ -598,6 +604,16 @@ func my_research() -> Dictionary:
 
 ## The player's rally point: the village their newly trained troops march to
 ## (0: none).
+## The fort that is the player's rally point (0: none).
+func rally_fort(account_id: int = -1) -> int:
+	var who := my_account_id() if account_id < 0 else account_id
+	for member in world.get("members", []):
+		if int(member.accountId) == who:
+			var id: Variant = member.get("rallyFortId")
+			return int(id) if id != null else 0
+	return 0
+
+
 func rally_village(account_id: int = -1) -> int:
 	var who := my_account_id() if account_id < 0 else account_id
 	for member in world.get("members", []):

@@ -1,3 +1,4 @@
+import type { FortPlots, FortWork } from '../sim/forts.js';
 import type { DbClient } from './pool.js';
 
 // A fort, or a supply point (a grain store with no walls).
@@ -22,6 +23,9 @@ export interface Fort {
   // Nobody's (a mountain city's supply point): any army draws on it, any
   // caravan fills it; no horde burns it, no bandit takes it.
   neutral: boolean;
+  // A fort's buildings (forts.json; none for a supply point) and the one rising.
+  plots: FortPlots;
+  work: FortWork | null;
 }
 
 interface FortRow {
@@ -38,6 +42,8 @@ interface FortRow {
   grain: number;
   army_floor: number | null;
   neutral: boolean | null;
+  plots: FortPlots | null;
+  work: FortWork | null;
 }
 
 function fromRow(row: FortRow): Fort {
@@ -55,13 +61,15 @@ function fromRow(row: FortRow): Fort {
     grain: row.grain,
     armyFloor: row.army_floor === null || row.army_floor === undefined ? null : Number(row.army_floor),
     neutral: row.neutral ?? false,
+    plots: row.plots ?? {},
+    work: row.work ?? null,
   };
 }
 
-export async function insertFort(client: DbClient, f: Pick<Fort, 'kind' | 'worldId' | 'ownerAccountId' | 'villageId' | 'q' | 'r' | 'completesAt'>): Promise<Fort> {
+export async function insertFort(client: DbClient, f: Pick<Fort, 'kind' | 'worldId' | 'ownerAccountId' | 'villageId' | 'q' | 'r' | 'completesAt' | 'plots'>): Promise<Fort> {
   const { rows } = await client.query<FortRow>(
-    `INSERT INTO forts (kind, world_id, owner_account_id, village_id, q, r, completes_at, manned_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $7) RETURNING *`,
-    [f.kind, f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt],
+    `INSERT INTO forts (kind, world_id, owner_account_id, village_id, q, r, completes_at, manned_at, plots) VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8) RETURNING *`,
+    [f.kind, f.worldId, f.ownerAccountId, f.villageId, f.q, f.r, f.completesAt, JSON.stringify(f.plots)],
   );
   return fromRow(rows[0]!);
 }
@@ -76,8 +84,11 @@ export async function insertNeutralSupply(client: DbClient, worldId: number, q: 
   return fromRow(rows[0]!);
 }
 
-export async function fortAt(client: DbClient, worldId: number, q: number, r: number): Promise<Fort | null> {
-  const { rows } = await client.query<FortRow>('SELECT * FROM forts WHERE world_id = $1 AND q = $2 AND r = $3', [worldId, q, r]);
+// The fort on a hex, or (with no `kind`, and no fort there) its supply point.
+export async function fortAt(client: DbClient, worldId: number, q: number, r: number, kind?: FortKind): Promise<Fort | null> {
+  const { rows } = kind
+    ? await client.query<FortRow>('SELECT * FROM forts WHERE world_id = $1 AND q = $2 AND r = $3 AND kind = $4', [worldId, q, r, kind])
+    : await client.query<FortRow>(`SELECT * FROM forts WHERE world_id = $1 AND q = $2 AND r = $3 ORDER BY (kind <> 'fort'), id LIMIT 1`, [worldId, q, r]);
   return rows[0] ? fromRow(rows[0]) : null;
 }
 
@@ -109,4 +120,8 @@ export async function setFortGrain(client: DbClient, id: number, grain: number):
 
 export async function setFortFloor(client: DbClient, id: number, floor: number | null): Promise<void> {
   await client.query('UPDATE forts SET army_floor = $2 WHERE id = $1', [id, floor]);
+}
+
+export async function saveFortBuildings(client: DbClient, id: number, plots: FortPlots, work: FortWork | null): Promise<void> {
+  await client.query('UPDATE forts SET plots = $2, work = $3 WHERE id = $1', [id, JSON.stringify(plots), work === null ? null : JSON.stringify(work)]);
 }

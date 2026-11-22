@@ -1,6 +1,7 @@
 // Standing orders: what each kind would do now. The scheduler applies it.
 import type { GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
+import { grainCapacity } from './forts.js';
 import { mapResources, RESOURCE_KINDS, type Resources } from './resources.js';
 import { outpostPlots, type VillageState } from './village.js';
 
@@ -32,7 +33,7 @@ export function validateOrder(data: GameData, order: StandingOrder): StandingOrd
     }
   }
   if (order.kind === 'supply') {
-    const most = Math.max(data.field.fort.grainCapacity, data.field.supplyPoint.grainCapacity);
+    const most = Math.max(grainCapacity(data, { kind: 'fort', plots: { storage: { kind: 'storage', level: data.forts.buildings.storage.maxLevel } } }), data.field.supplyPoint.grainCapacity);
     if (!Number.isInteger(order.target) || order.target < data.orders.supplyMinLoad || order.target > most) {
       throw new RuleError(`Keep between ${data.orders.supplyMinLoad} and ${most} grain there`);
     }

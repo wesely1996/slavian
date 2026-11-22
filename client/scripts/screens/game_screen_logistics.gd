@@ -627,7 +627,7 @@ func _supply_order_form(village_id: int) -> void:
 		_supply_fort = ids[i]
 		_rebuild_panel())
 	_panel_body.add_child(picker)
-	var most := maxi(int(Game.data.field.fort.grainCapacity), int(Game.data.field.supplyPoint.grainCapacity))
+	var most := maxi(int(LocalForts.grain_capacity(Game.data, {"kind": "fort", "plots": {"storage": {"kind": "storage", "level": int(Game.data.forts.buildings.storage.maxLevel)}}})), int(Game.data.field.supplyPoint.grainCapacity))
 	var row := UI.hbox(8)
 	row.add_child(UI.label(tr("Keep"), UI.SMALL_SIZE))
 	row.add_child(_number_field("supply", _supply_target, int(Game.data.orders.supplyMinLoad), most, func(n: int) -> void: _supply_target = n))

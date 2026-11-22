@@ -45,7 +45,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"difficulty": String(params.get("difficulty", "baron")), "seed": seed_value, "maxPlayers": 1,
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
-			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "merchantReadyAt": null, "smithing": {}, "smithWork": null}],
+			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "rallyFortId": null, "merchantReadyAt": null, "smithing": {}, "smithWork": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [],
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
@@ -317,15 +317,23 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 	# (commands/worlds.ts setRallyCommand).
 	if method == "PUT" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "rally":
 		var to: Variant = body.get("villageId")
-		if not body.has("villageId") or not (to == null or ((to is int or to is float) and float(to) == floorf(float(to)) and float(to) > 0)):
+		var to_fort: Variant = body.get("fortId")
+		var whole := func(v: Variant) -> bool: return v == null or ((v is int or v is float) and float(v) == floorf(float(v)) and float(v) > 0)
+		if not body.has("villageId") or not whole.call(to) or not whole.call(to_fort):
 			return _fail(400, "invalid_request", "Invalid request")
 		if to != null:
+			to_fort = null
 			var rallied := find_village(world, int(to))
 			if rallied.is_empty() or rallied.ownerAccountId == null or int(rallied.ownerAccountId) != int(world.hostAccountId) or rallied.ruin != null:
 				return _rule_answer(LocalVillage.rule("The rally point is one of your own settlements"))
+		if to_fort != null:
+			var held := LocalArmies.find_fort(world, int(to_fort))
+			if held.is_empty() or held.ownerAccountId == null or int(held.ownerAccountId) != int(world.hostAccountId) or held.get("kind", "fort") != "fort":
+				return _rule_answer(LocalVillage.rule("The rally point is one of your own settlements or forts"))
 		for m in world.members:
 			if int(m.accountId) == int(world.hostAccountId):
 				m.rallyVillageId = null if to == null else int(to)
+				m.rallyFortId = null if to_fort == null else int(to_fort)
 		changed.append(["world"])
 		return {"status": 200, "data": world_view(world, now)}
 	if method == "PUT" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "quiet":
@@ -461,6 +469,26 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 			return _rule_answer(army)
 		changed.append(["world"])
 		return {"status": 200, "data": {"army": LocalArmies.army_view(army), "serverTime": LocalTime.iso(now)}}
+	# A fort's buildings and tearing one down (commands/armies.ts
+	# buildInFortCommand, tearDownFortCommand).
+	if (method == "POST" and parts.size() == 4 and parts[1] == "forts" and parts[3] == "build") or (method == "DELETE" and parts.size() == 3 and parts[1] == "forts"):
+		var plot: Variant = body.get("plot") if body is Dictionary else null
+		var kind: Variant = body.get("kind") if body is Dictionary else null
+		if method == "POST" and not (plot is String and kind is String and plot.length() >= 1 and plot.length() <= 16 and kind.length() >= 1 and kind.length() <= 40):
+			return _fail(400, "invalid_request", "Invalid request")
+		var fort := LocalArmies.find_fort(world, int(parts[2]))
+		if fort.is_empty():
+			return _fail(404, "not_found", "No such fort")
+		if fort.ownerAccountId == null or int(fort.ownerAccountId) != int(world.hostAccountId):
+			return _fail(403, "forbidden", "Not your fort")
+		var done := LocalForts.tear_down(world, fort) if method == "DELETE" else LocalForts.build(self, world, fort, plot, kind, now)
+		if done.has("error") or done.has("missing"):
+			return _rule_answer(done)
+		changed.append(["world"])
+		if method == "DELETE":
+			return {"status": 200, "data": {"serverTime": LocalTime.iso(now)}}
+		changed.append(["village", fort.villageId])
+		return {"status": 200, "data": {"fort": LocalArmies.fort_view(fort), "serverTime": LocalTime.iso(now)}}
 	if method == "PUT" and parts.size() == 4 and parts[1] in ["villages", "forts"] and parts[3] == "army-floor":
 		# How low its grain may fall for armies (null: the default).
 		var grain: Variant = body.get("grain", 0) if body is Dictionary and body.has("grain") else -1
@@ -1223,6 +1251,10 @@ func _on_field_intercept(world: Dictionary, event: Dictionary, changed: Array) -
 	LocalArmies.on_field_intercept(self, world, event, changed)
 
 
+func _on_fort_work_done(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalForts.on_work_done(self, world, event, changed)
+
+
 func _on_fort_complete(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalArmies.on_fort_complete(self, world, event, changed)
 
@@ -1361,7 +1393,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		var settled: Variant = m.get("researchSettledAt")
 		members.append({"accountId": m.accountId, "displayName": m.displayName, "clan": m.clan, "heroKind": m.heroKind,
 			"onboarding": m.onboarding, "onboardingClaimed": m.onboardingClaimed, "bought": m.get("bought", {}),
-			"rallyVillageId": m.get("rallyVillageId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "smithing": m.get("smithing", {}), "smithWork": m.get("smithWork"), "embers": int(world.embers), "armySlots": LocalSlots.of(data, world, int(m.accountId)), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
+			"rallyVillageId": m.get("rallyVillageId"), "rallyFortId": m.get("rallyFortId"), "merchantReadyAt": _iso_or_null(m.get("merchantReadyAt")), "smithing": m.get("smithing", {}), "smithWork": m.get("smithWork"), "embers": int(world.embers), "armySlots": LocalSlots.of(data, world, int(m.accountId)), "ruinSearchReadyAt": _iso_or_null(LocalScouting.ruin_search_ready_at(self, world, m.accountId)), "research": {"points": m.get("researchPoints", 0), "perHour": LocalResearch.research_rate(self, world, int(m.accountId)),
 				"settledAt": LocalTime.iso(settled) if settled != null else null}})
 	var villages: Array = []
 	for v in world.villages:
@@ -1664,6 +1696,8 @@ func _load_all() -> void:
 				m.merge({"bought": {}})
 				# Worlds saved before rally points.
 				m.merge({"rallyVillageId": null})
+				# Worlds saved before rally forts.
+				m.merge({"rallyFortId": null})
 				# Worlds saved before merchant caravans.
 				m.merge({"merchantReadyAt": null})
 				# Worlds saved before the Blacksmith (migration 076).
@@ -1702,6 +1736,8 @@ func _load_all() -> void:
 			# Worlds saved before supply points and grain in forts.
 			for f in world.forts:
 				f.merge({"kind": "fort", "grain": 0.0})
+				# Worlds saved before forts had buildings (migration 081).
+				f.merge({"plots": LocalForts.starting_plots() if f.kind == "fort" else {}, "work": null})
 			for c in world.caravans:
 				c.merge({"destinationFortId": null})
 			world.hexes = _by_row(world.hexes)

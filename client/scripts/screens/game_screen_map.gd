@@ -178,8 +178,15 @@ func _terrain_panel() -> Array:
 	elif not site.is_empty() and Art.has("site/%s" % site.kind):
 		hold_art = "site/%s" % site.kind
 	parts.append(["hold", hold_art, tr("Send an army"), _hold_panel.bind(id)])
-	parts.append(["fort", "map/fort", tr("Build a fort"), _fort_panel.bind(id)])
-	parts.append(["supply", "map/supply_point", tr("Build a supply point"), _fort_panel.bind(id, "supply")])
+	# Your fort or supply point here: its buildings, rally point, tearing down.
+	for fort in Game.forts:
+		if Vector2i(int(fort.q), int(fort.r)) == _selected and fort.get("ownerAccountId") != null and int(fort.ownerAccountId) == Game.my_account_id():
+			var supply: bool = fort.get("kind", "fort") == "supply"
+			parts.append(["stronghold" if not supply else "store", "map/supply_point" if supply else "map/fort", tr("Supply point") if supply else tr("Fort"), _stronghold_panel.bind(int(fort.id))])
+	if Game.fort_at_kind(_selected, "fort").is_empty():
+		parts.append(["fort", "map/fort", tr("Build a fort"), _fort_panel.bind(id)])
+	if Game.fort_at_kind(_selected, "supply").is_empty():
+		parts.append(["supply", "map/supply_point", tr("Build a supply point"), _fort_panel.bind(id, "supply")])
 	return parts
 
 
@@ -555,11 +562,12 @@ func _fort_panel(terrain_id: String, kind := "fort") -> void:
 	var supply := kind == "supply"
 	if home.is_empty() or terrain_id == "holy_city" or not FieldRules.passable(Game.data, Game.terrain, cell):
 		return
-	if not Game.fort_at(cell).is_empty() or not Game.camp_at(cell).is_empty() or not Game.site_at(cell).is_empty():
+	if not Game.fort_at_kind(cell, kind).is_empty() or not Game.camp_at(cell).is_empty() or not Game.site_at(cell).is_empty():
 		return
 	var village_id := int(home.id)
 	_panel_body.add_child(UI.label(tr("Build a supply point") if supply else tr("Build a fort"), UI.HEADING_SIZE))
-	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty()
+	# A fort, a supply point and an outpost may share a hex.
+	var taken := not Game.village_at(cell).is_empty()
 	var problem := FieldRules.fort_problem(Game.data, home, cell, terrain_id, taken, kind)
 	if problem != "":
 		_panel_body.add_child(UI.label(problem, UI.SMALL_SIZE, UI.MUTED))
@@ -574,7 +582,8 @@ func _fort_panel(terrain_id: String, kind := "fort") -> void:
 		info.add_child(UI.with_info(UI.label(tr("A grain store for armies (%d grain)") % int(rules.grainCapacity)),
 			tr("Armies standing here fill up from its grain, and can leave grain here. A supply route keeps it stocked by caravan. A horde passing close burns it unless an army stands on it.")))
 	else:
-		info.add_child(UI.label(tr("Build a fort (+%d%% defense here)") % roundi(float(Game.data.field.fort.defenseBonus) * 100.0)))
+		info.add_child(UI.with_info(UI.label(tr("Build a fort (+%d%% defense here)") % roundi(float(Game.data.field.fort.defenseBonus) * 100.0)),
+			tr("A fort starts with its Keep and Storage at level 1 and grows from there: walls in three rings and towers on them. It eats grain; with no grain and no army holding it for %d hours, bandits take it.") % int(Game.data.forts.takeoverHours)))
 	var cost_line := UI.rich()
 	info.add_child(cost_line)
 	row.add_child(info)
@@ -587,6 +596,160 @@ func _fort_panel(terrain_id: String, kind := "fort") -> void:
 		var have := Ledger.amounts_at(current.resources, Game.server_now())
 		button.disabled = not Ledger.can_afford(have, cost)
 		return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
+
+
+## The fort's picked plot in its view.
+var _fort_plot := "keep"
+## A tear-down asked for once: the next tap does it.
+var _tearing := 0
+
+
+## One of your forts or supply points: a fort's buildings round its Keep
+## (data/forts.json), its grain and what it eats, the rally point, and
+## tearing it down.
+func _stronghold_panel(fort_id: int) -> void:
+	var fort := Game.fort_at_id(fort_id)
+	if fort.is_empty():
+		return
+	var supply: bool = fort.get("kind", "fort") == "supply"
+	var speed := float(Game.world.speed)
+	_panel_body.add_child(UI.label((tr("Supply point at (%d, %d)") if supply else tr("Fort at (%d, %d)")) % [int(fort.q), int(fort.r)], UI.HEADING_SIZE))
+	if fort.status != "standing":
+		var built := UI.label("", UI.SMALL_SIZE, UI.MUTED)
+		_panel_body.add_child(built)
+		var done_at := TimeUtil.parse_iso(String(fort.completesAt))
+		_tick(built, func() -> String: return tr("Being built: ready in %s") % TimeUtil.format_duration(maxf(0.0, done_at - Game.server_now())))
+	else:
+		var grain := floori(float(fort.get("grain", 0)))
+		var line := tr("Grain: %d of %d") % [grain, int(LocalForts.grain_capacity(Game.data, fort))]
+		if not supply:
+			var eats := LocalForts.upkeep(Game.data, fort.get("plots", {}))
+			_panel_body.add_child(UI.with_info(UI.label(tr("%s · eats %s a game hour") % [line, String.num(eats, 1)], UI.SMALL_SIZE),
+				tr("A fort eats grain every hour, more with a bigger Keep. Armies and caravans fill its Storage. With no grain and no army holding it for %d game hours, bandits take it.") % int(Game.data.forts.takeoverHours)))
+			var held := Game.armies.any(func(a: Dictionary) -> bool: return ArmyText.held_hex(a) == Vector2i(int(fort.q), int(fort.r)) and a.status in ["stationed", "engaged"])
+			if grain <= 0 and not held and fort.get("mannedAt") != null:
+				var falls := TimeUtil.parse_iso(String(fort.mannedAt)) + float(Game.data.forts.takeoverHours) * 3600.0 / speed
+				var warn := UI.label("", UI.SMALL_SIZE, UI.ERROR)
+				_panel_body.add_child(warn)
+				_tick(warn, func() -> String: return tr("No grain and nobody holds it: bandits take it in %s") % TimeUtil.format_duration(maxf(0.0, falls - Game.server_now())))
+			var zone := LocalForts.zone_radius(Game.data, fort.get("plots", {}))
+			_panel_body.add_child(UI.with_info(UI.label(tr("Zone of influence: %d hexes") % zone, UI.SMALL_SIZE, UI.MUTED),
+				tr("Its village can reshape the land and build roads anywhere within this many hexes of the fort, as near its own walls. The Keep widens it.")))
+		else:
+			_panel_body.add_child(UI.label(line, UI.SMALL_SIZE))
+	if not supply and fort.status == "standing":
+		_fort_buildings(fort)
+		var rallied := Game.rally_fort() == fort_id
+		var row := UI.hbox(8)
+		var label := UI.label(tr("Rally point: troops trained in your settlements march here to hold it once done.") if rallied else tr("Not your rally point"), UI.SMALL_SIZE, UI.ACCENT if rallied else UI.MUTED)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(label)
+		row.add_child(UI.button(tr("Stop rallying") if rallied else tr("Rally here"), func() -> void: _rally_fort(0 if rallied else fort_id)))
+		_panel_body.add_child(row)
+	var tear := UI.button(tr("Tap again to tear it down: its grain is lost") if _tearing == fort_id else (tr("Tear down the supply point") if supply else tr("Tear down the fort")), func() -> void:
+		if _tearing != fort_id:
+			_tearing = fort_id
+			_rebuild_panel()
+			return
+		_tearing = 0
+		_tear_down(fort_id))
+	_panel_body.add_child(tear)
+
+
+## The fort's view and the picked plot: what stands there, and what it
+## takes to raise it (or, on an empty tower slot, each tower).
+func _fort_buildings(fort: Dictionary) -> void:
+	var view := FortView.new()
+	view.selected = _fort_plot
+	view.show_fort(Game.data, fort)
+	var fort_id := int(fort.id)
+	view.plot_tapped.connect(func(plot: String) -> void:
+		_fort_plot = plot
+		_rebuild_panel())
+	_panel_body.add_child(view)
+	var plots: Dictionary = fort.get("plots", {})
+	var work: Variant = fort.get("work")
+	if work != null:
+		var rising := UI.label("", UI.SMALL_SIZE, UI.ACCENT)
+		_panel_body.add_child(rising)
+		var def := LocalForts.building_def(Game.data, String(work.plot), String(work.kind))
+		var done_at := TimeUtil.parse_iso(String(work.completesAt))
+		_tick(rising, func() -> String: return tr("Rising: %s %d, done in %s") % [tr(String(def.get("name", work.kind))), int(work.level), TimeUtil.format_duration(maxf(0.0, done_at - Game.server_now()))])
+	var plot := _fort_plot
+	var ring := LocalForts.ring_of(plot)
+	var kinds: Array = []
+	if plot == "keep" or plot == "storage":
+		kinds = [plot]
+	elif plot.begins_with("w"):
+		kinds = ["wall"]
+	elif plots.has(plot):
+		kinds = [plots[plot].kind]
+	else:
+		kinds = Game.data.walls.towers.keys()
+	if ring >= 0:
+		_panel_body.add_child(UI.label(tr(String(Game.data.forts.rings[ring].name)), UI.SMALL_SIZE, UI.MUTED))
+	var village: Dictionary = Game.villages.get(int(fort.villageId), {}) if fort.get("villageId") != null else {}
+	for kind in kinds:
+		var def := LocalForts.building_def(Game.data, plot, kind)
+		if def.is_empty():
+			continue
+		var level := LocalForts.level_of(plots, plot)
+		var row := UI.hbox()
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var title := tr(String(def.name)) if level == 0 else tr("%s, level %d") % [tr(String(def.name)), level]
+		var about: String = Game.data.forts.buildings[kind].description if Game.data.forts.buildings.has(kind) else String(Game.data.buildings.buildings.get(kind, {}).get("description", ""))
+		info.add_child(UI.with_info(UI.label(title), tr(about)))
+		var problem := LocalForts.build_problem(Game.data, plots, null, plot, kind)
+		if problem != "":
+			info.add_child(UI.label(tr(problem), UI.SMALL_SIZE, UI.MUTED))
+			row.add_child(info)
+			_panel_body.add_child(row)
+			continue
+		var cost := LocalForts.level_cost(def, level + 1)
+		var cost_line := UI.rich()
+		info.add_child(cost_line)
+		row.add_child(info)
+		var picked: String = kind
+		var button := UI.button(tr("Build") if level == 0 else tr("Raise"), func() -> void: _build_in_fort(fort_id, plot, picked))
+		button.custom_minimum_size.x = 120
+		row.add_child(button)
+		_panel_body.add_child(row)
+		var seconds := float(LocalForts.build_ms(def, level + 1, float(Game.world.speed))) / 1000.0
+		_tick(cost_line, func() -> String:
+			var have: Dictionary = Ledger.amounts_at(Game.villages.get(int(village.get("id", 0)), village).get("resources", {}), Game.server_now()) if not village.is_empty() else {}
+			button.disabled = work != null or village.is_empty() or not Ledger.can_afford(have, cost)
+			return tr("%s · %s") % [UI.costs(cost, 30, have), TimeUtil.format_duration(seconds)])
+
+
+func _build_in_fort(fort_id: int, plot: String, kind: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/forts/%d/build" % fort_id, {"plot": plot, "kind": kind})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.note_server_time(response.data.serverTime)
+	_sync_after_command()
+
+
+func _tear_down(fort_id: int) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_DELETE, "/v1/forts/%d" % fort_id)
+	if not response.ok:
+		_status.text = response.error
+		return
+	_sync_after_command()
+
+
+func _rally_fort(fort_id: int) -> void:
+	_status.text = ""
+	var response := await Api.request(HTTPClient.METHOD_PUT, "/v1/worlds/%d/rally" % Game.world_id(), {"villageId": null, "fortId": fort_id if fort_id != 0 else null})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+	_rebuild_panel()
 
 
 func _build_fort(village_id: int, cell: Vector2i, kind := "fort") -> void:
@@ -658,7 +821,8 @@ func _road_section(cell: Vector2i) -> void:
 	var built := PackedStringArray()
 	for i in 6:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
-		var buildable: bool = not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other) == ""
+		var buildable: bool = not home.is_empty() and RiverText.road_problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other,
+			LocalForts.in_zone(Game.data, Game.forts, int(home.id), cell) or LocalForts.in_zone(Game.data, Game.forts, int(home.id), other)) == ""
 		if roads.has(other):
 			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being improved)"), "repairing": tr(" (being repaired)")}.get(roads[other], "")
 			if damaged.has(other) and roads[other] != "repairing":
@@ -928,10 +1092,16 @@ func _terraform_panel(terrain: String) -> void:
 		var d := HexMath.distance(cell, Vector2i(int(v.q), int(v.r)))
 		if d <= int(rules.range) and (home.is_empty() or d < HexMath.distance(cell, Vector2i(int(home.q), int(home.r)))):
 			home = v
-	_panel_body.add_child(UI.with_info(UI.label(tr("Reshape the land"), UI.HEADING_SIZE),
-		tr("A village reshapes the land within %d hexes of it, where nothing stands: paid at once, mostly in grain to feed the workers, and done after a while.") % int(rules.range)))
+	# Or a village whose fort's zone of influence reaches here.
 	if home.is_empty():
-		_panel_body.add_child(UI.label(tr("None of your villages is within %d hexes.") % int(rules.range), UI.SMALL_SIZE, UI.MUTED))
+		for v in Game.my_villages():
+			if LocalForts.in_zone(Game.data, Game.forts, int(v.id), cell):
+				home = v
+				break
+	_panel_body.add_child(UI.with_info(UI.label(tr("Reshape the land"), UI.HEADING_SIZE),
+		tr("A village reshapes the land within %d hexes of it, or in the zone of influence of a fort it built, where nothing stands: paid at once, mostly in grain to feed the workers, and done after a while.") % int(rules.range)))
+	if home.is_empty():
+		_panel_body.add_child(UI.label(tr("None of your villages is within %d hexes, nor any of your forts' zones.") % int(rules.range), UI.SMALL_SIZE, UI.MUTED))
 		return
 	var camp := Game.camp_at(cell)
 	var taken := not Game.village_at(cell).is_empty() or not Game.outpost_owner(cell).is_empty() or not camp.is_empty() \
@@ -945,7 +1115,8 @@ func _terraform_panel(terrain: String) -> void:
 	for action in options:
 		var def: Dictionary = rules.actions[action]
 		var burns_camp: bool = def.has("fire") and burnable_camp
-		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken and not burns_camp, false, held)
+		var problem := LocalTerraform.problem(Game.data, action, terrain, HexMath.distance(cell, Vector2i(int(home.q), int(home.r))), taken and not burns_camp, false, held,
+			LocalForts.in_zone(Game.data, Game.forts, village_id, cell))
 		var into := Terrain.display_name(String(def.from[terrain]), Game.data)
 		var row := UI.hbox()
 		var info := UI.vbox(2)
