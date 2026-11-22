@@ -1004,7 +1004,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     now = new Date(now.getTime() + scheduler.data.battle.roundMinutes * 60_000);
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, rada.token)).body;
-    expect(world.battles[0]).toMatchObject({ villageId: second, status: 'raided' });
+    // An earlier horde may still be fighting at the Holy City (ongoing battles
+    // list first): look for this one's.
+    expect(world.battles.find((b: { waveId: number }) => b.waveId === next.id)).toMatchObject({ villageId: second, status: 'raided' });
     expect(world.heroes[0].status).toBe('wounded');
     expect((await hero('move', { villageId: village.id })).body.message).toMatch(/wounded/);
     now = new Date(world.heroes[0].woundedUntil);
