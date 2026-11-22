@@ -562,9 +562,10 @@ func _test_field() -> void:
 		"field": {
 			"ambush": {"terrain": ["forest"], "prepMinutes": 60, "bonus": 0.3},
 			"choke": {"minBlockedNeighbors": 3, "attackerFactor": 0.7, "holdTheLineDefense": 0.3},
-			"fort": {"range": 4, "defenseBonus": 0.3, "grainCapacity": 3000},
+			"fort": {"range": 4, "defenseBonus": 0.3},
 			"supplyPoint": {"range": 5, "grainCapacity": 6000},
 		},
+		"forts": {"storage": {"grainBase": 2000, "grainPerLevel": 1000}},
 	}
 	var terrain := {Vector2i.ZERO: "forest"}
 	for i in 6:
@@ -574,7 +575,7 @@ func _test_field() -> void:
 	for cell in HexMath.spiral(Vector2i.ZERO, 1):
 		open[cell] = "plains"
 	_check(not FieldRules.is_choke_point(data, open, Vector2i.ZERO), "open plains are no choke point")
-	var lines := FieldRules.ground(data, terrain, Vector2i.ZERO, {"status": "standing", "grain": 120.6}, 10.0)
+	var lines := FieldRules.ground(data, terrain, Vector2i.ZERO, {"status": "standing", "grain": 120.6, "plots": {"storage": {"kind": "storage", "level": 1}}}, 10.0)
 	_check(lines.size() == 4 and lines[0].begins_with("Ambush ground: +30%") and lines[2] == "Fort: +30% defense." and lines[3] == "Grain kept here: 120 of 3000.", "ground: %s" % lines)
 	var store := FieldRules.ground(data, open, Vector2i.ZERO, {"kind": "supply", "status": "standing", "grain": 0}, 10.0)
 	_check(store == PackedStringArray(["Supply point: armies here fill up from its grain.", "Grain kept here: 0 of 6000."]), "supply point ground: %s" % store)

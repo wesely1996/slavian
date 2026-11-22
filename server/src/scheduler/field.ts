@@ -15,7 +15,8 @@ import { z } from 'zod';
 import type { GameData, Stance } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, saveSetup, type Battle, type RoundLog } from '../db/battles.js';
-import { fortAt, insertFort, loadFort, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
+import { inFortZone, startingPlots } from '../sim/forts.js';
+import { fortAt, insertFort, listForts, loadFort, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
 import { campAt } from '../db/camps.js';
 import { siteAt } from '../db/sites.js';
 import { heroWithArmy, type Hero } from '../db/heroes.js';
@@ -39,7 +40,6 @@ import { combine, heroBonuses } from '../sim/heroes.js';
 import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { hex, hexDistance, type Hex } from '../sim/hex.js';
 import { mapResources, spend, type Resources } from '../sim/resources.js';
-import { outpostHex, outpostPlots } from '../sim/village.js';
 import { groundOf, roadAt } from './ground.js';
 import { commandOf, linesFor, linesLog, withLines } from '../sim/lines.js';
 import { afterBattle, answerBattle, armyLosses, sendHome, staysOut, terrainOf } from './armies.js';
@@ -115,8 +115,8 @@ export async function cancelPlans(client: DbClient, worldId: number, waveId: num
 
 // A standing fort (not a supply point) on the hex.
 async function standingFort(client: DbClient, worldId: number, cell: Hex): Promise<Fort | null> {
-  const fort = await fortAt(client, worldId, cell.q, cell.r);
-  return fort?.status === 'standing' && fort.kind === 'fort' ? fort : null;
+  const fort = await fortAt(client, worldId, cell.q, cell.r, 'fort');
+  return fort?.status === 'standing' ? fort : null;
 }
 
 async function owners(armies: readonly Army[]): Promise<number[]> {
@@ -464,10 +464,8 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
   if (!terrain || terrain === 'holy_city' || data.terrain.terrain[terrain].moveCost === null) throw new RuleError(`No ${what} can stand there`);
   const villages = await listVillages(client, world.id);
   if (villages.some((v) => v.q === cell.q && v.r === cell.r)) throw new RuleError('There is a village there');
-  const outposts = villages.flatMap((v) => outpostPlots(v.state.plots).map((plot) => outpostHex(plot)!));
-  if (outposts.some((o) => o.q === cell.q && o.r === cell.r)) throw new RuleError('There is an outpost there');
-  const there = await fortAt(client, world.id, cell.q, cell.r);
-  if (there) throw new RuleError(there.kind === 'supply' ? 'There is a supply point there already' : 'There is a fort there already');
+  // A fort, a supply point and an outpost may share a hex.
+  if (await fortAt(client, world.id, cell.q, cell.r, kind)) throw new RuleError(kind === 'supply' ? 'There is a supply point there already' : 'There is a fort there already');
   if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
   if ((await siteAt(client, world.id, cell.q, cell.r))?.status === 'unexplored') throw new RuleError('An ancient site lies there');
   const cost = kind === 'supply' ? data.field.supplyPoint.cost : fortCost(data, village.state.bonuses);
@@ -480,6 +478,7 @@ export async function buildFort(client: DbClient, data: GameData, world: World, 
     q: cell.q,
     r: cell.r,
     completesAt: new Date(at.getTime() + (rules.buildSeconds * 1000) / world.speed),
+    plots: kind === 'fort' ? startingPlots() : {},
   });
   const payload: FortPayload = { fortId: fort.id };
   await scheduleEvent(client, world.id, fort.completesAt, 'fort_complete', payload);
@@ -520,7 +519,13 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
   const village = await loadVillage(client, villageId);
   const home = hex(village.q, village.r);
   if (hexDistance(a, b) !== 1) throw new RuleError('A road joins two neighbouring hexes');
-  if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) throw new RuleError(`Roads go within ${rules.range} hexes of the village`);
+  if (Math.min(hexDistance(a, home), hexDistance(b, home)) > rules.range) {
+    // In the zone of influence of a fort the village built, at any distance.
+    const forts = await listForts(client, world.id);
+    if (!inFortZone(data, forts, village.id, a) && !inFortZone(data, forts, village.id, b)) {
+      throw new RuleError(`Roads go within ${rules.range} hexes of the village or in its forts' zones`);
+    }
+  }
   const land = await terrainOf(client, world.id);
   let pass = false;
   for (const end of [a, b]) {

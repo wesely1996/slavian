@@ -110,6 +110,8 @@ export interface Member {
   bought: Record<string, number>;
   // Their rally point: the village their newly trained troops march to.
   rallyVillageId: number | null;
+  // Or one of their forts: troops march there and hold it.
+  rallyFortId: number | null;
   // Their Svarog's Embers: each player's own.
   embers: number;
   // When they may send their next merchant caravan (null: now).
@@ -139,7 +141,7 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
   const { rows } = await client.query<Member>(
     `SELECT m.account_id AS "accountId", a.display_name AS "displayName", m.joined_at AS "joinedAt", m.clan, m.hero_kind AS "heroKind", m.onboarding, m.onboarding_claimed AS "onboardingClaimed",
             m.research_points AS "researchPoints", m.research_settled_at AS "researchSettledAt", m.bought,
-            m.rally_village_id AS "rallyVillageId", m.embers, m.merchant_ready_at AS "merchantReadyAt",
+            m.rally_village_id AS "rallyVillageId", m.rally_fort_id AS "rallyFortId", m.embers, m.merchant_ready_at AS "merchantReadyAt",
             m.smithing, m.smith_work AS "smithWork"
      FROM world_members m JOIN accounts a ON a.id = m.account_id
      WHERE m.world_id = $1 AND m.left_at IS NULL
@@ -149,17 +151,17 @@ export async function listMembers(client: DbClient, worldId: number): Promise<Me
   return rows;
 }
 
-// A player's rally point (null: none).
-export async function rallyPoint(client: DbClient, worldId: number, accountId: number): Promise<number | null> {
-  const { rows } = await client.query<{ id: number | null }>(
-    'SELECT rally_village_id AS id FROM world_members WHERE world_id = $1 AND account_id = $2',
+// A player's rally point: one of their villages or forts (both null: none).
+export async function rallyPoint(client: DbClient, worldId: number, accountId: number): Promise<{ villageId: number | null; fortId: number | null }> {
+  const { rows } = await client.query<{ villageId: number | null; fortId: number | null }>(
+    'SELECT rally_village_id AS "villageId", rally_fort_id AS "fortId" FROM world_members WHERE world_id = $1 AND account_id = $2',
     [worldId, accountId],
   );
-  return rows[0]?.id ?? null;
+  return { villageId: rows[0]?.villageId ?? null, fortId: rows[0]?.fortId ?? null };
 }
 
-export async function setRallyPoint(client: DbClient, worldId: number, accountId: number, villageId: number | null): Promise<void> {
-  await client.query('UPDATE world_members SET rally_village_id = $3 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, villageId]);
+export async function setRallyPoint(client: DbClient, worldId: number, accountId: number, villageId: number | null, fortId: number | null = null): Promise<void> {
+  await client.query('UPDATE world_members SET rally_village_id = $3, rally_fort_id = $4 WHERE world_id = $1 AND account_id = $2', [worldId, accountId, villageId, fortId]);
 }
 
 // How many of `unit` a player has bought (units.json costStep).

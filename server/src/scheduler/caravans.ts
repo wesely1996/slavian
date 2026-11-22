@@ -14,7 +14,7 @@ import { amountsAt, emptyResources, mapResources, spend } from '../sim/resources
 import { loadShipyard } from '../db/shipyards.js';
 import { payIntoShipyard } from './mapEvents.js';
 import { loadFort, setFortGrain } from '../db/forts.js';
-import { grainCapacity } from '../sim/field.js';
+import { grainCapacity } from '../sim/forts.js';
 import { tell } from './notices.js';
 import { planAmbushes } from './camps.js';
 import { returnHome } from '../sim/village.js';
@@ -36,7 +36,7 @@ export const caravanHandlers: HandlerRegistry = {
       // A supply route: grain goes into the store as far as it fits; the
       // rest (everything, if the store is gone) comes back.
       const fort = await loadFort(client, caravan.destinationFortId);
-      const room = fort?.status === 'standing' ? Math.max(0, grainCapacity(data, fort.kind) - fort.grain) : 0;
+      const room = fort?.status === 'standing' ? Math.max(0, grainCapacity(data, fort) - fort.grain) : 0;
       const grain = Math.min(room, caravan.cargo.grain);
       // And takes back what grain it was told to, as far as there is.
       const there = (fort?.grain ?? 0) + grain;

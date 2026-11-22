@@ -47,9 +47,9 @@ import { attackVillage } from './pvp.js';
 import { checkAttack } from '../sim/pvp.js';
 import { siteAt } from '../db/sites.js';
 import { campAt } from '../db/camps.js';
-import { fortAt, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
+import { fortAt, loadFort, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
 import { listShipyards } from '../db/shipyards.js';
-import { grainCapacity } from '../sim/field.js';
+import { grainCapacity } from '../sim/forts.js';
 
 export const armyPayload = z.object({ armyId: z.number().int() });
 export type ArmyPayload = z.infer<typeof armyPayload>;
@@ -397,7 +397,7 @@ export async function stockStore(client: DbClient, data: GameData, world: World,
   if (!store) throw new RuleError('They stand on no fort or supply point');
   const fed = supplied(army);
   if (!fed) throw new RuleError('Their village feeds them');
-  const room = grainCapacity(data, store.kind) - store.grain;
+  const room = grainCapacity(data, store) - store.grain;
   if (room <= 0) throw new RuleError('Its stores are full');
   const amount = Math.min(grain, supplyLeft(data, fed, at, world.speed), room);
   if (amount <= 0) throw new RuleError('They have no grain to spare');
@@ -975,9 +975,16 @@ export async function rallyTrained(client: DbClient, data: GameData, world: Worl
   const home = await loadVillage(client, villageId);
   if (home.ownerAccountId === null || home.state.besieged || batches.length === 0) return;
   const rally = await rallyPoint(client, world.id, home.ownerAccountId);
-  if (rally === null || rally === home.id) return;
-  const target = await loadVillage(client, rally).catch(() => null);
-  if (!target || target.worldId !== world.id || target.ownerAccountId !== home.ownerAccountId || target.ruin) return;
+  let target: Village | null = null;
+  let fort: Fort | null = null;
+  if (rally.fortId !== null) {
+    fort = await loadFort(client, rally.fortId);
+    if (!fort || fort.worldId !== world.id || fort.ownerAccountId !== home.ownerAccountId || fort.status !== 'standing') return;
+  } else {
+    if (rally.villageId === null || rally.villageId === home.id) return;
+    target = await loadVillage(client, rally.villageId).catch(() => null);
+    if (!target || target.worldId !== world.id || target.ownerAccountId !== home.ownerAccountId || target.ruin) return;
+  }
   const units: Record<string, number> = {};
   for (const batch of batches) {
     const def = data.units.units[batch.unit];
@@ -990,7 +997,8 @@ export async function rallyTrained(client: DbClient, data: GameData, world: Worl
   if (total(fighters(data, units)) === 0) return;
   await client.query('SAVEPOINT rally');
   try {
-    await dispatchArmy(client, data, world, { homeVillageId: home.id, targetVillageId: target.id, units, orders: 'garrison', at });
+    if (fort) await dispatchArmy(client, data, world, { homeVillageId: home.id, targetVillageId: null, targetHex: hex(fort.q, fort.r), units, orders: 'hold', at });
+    else await dispatchArmy(client, data, world, { homeVillageId: home.id, targetVillageId: target!.id, units, orders: 'garrison', at });
     await client.query('RELEASE SAVEPOINT rally');
   } catch (error) {
     await client.query('ROLLBACK TO SAVEPOINT rally');

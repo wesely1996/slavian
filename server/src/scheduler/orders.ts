@@ -16,7 +16,7 @@ import { rebuildTargets, supplyLoad, surplusLoad, trainCount, type StandingOrder
 import { amountsAt, InsufficientResourcesError, mapResources, spend } from '../sim/resources.js';
 import { caravansOut, grainOnTheWay } from '../db/caravans.js';
 import { loadFort } from '../db/forts.js';
-import { grainCapacity } from '../sim/field.js';
+import { grainCapacity } from '../sim/forts.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { completeTraining, outpostHex, queueBuild, queueTraining, unitsFed, type VillageState } from '../sim/village.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
@@ -98,11 +98,11 @@ async function runOrder(
     if (!fort || fort.worldId !== world.id || fort.ownerAccountId !== village.ownerAccountId) throw new RuleError('That fort or supply point is gone');
     const where = `(${fort.q}, ${fort.r})`;
     if (fort.status !== 'standing') throw new RuleError(`The store at ${where} is still being built`);
-    const goal = Math.min(spec.target, grainCapacity(data, fort.kind));
+    const goal = Math.min(spec.target, grainCapacity(data, fort));
     const onTheWay = await grainOnTheWay(client, fort.id);
     if (Math.floor(goal - fort.grain - onTheWay) < data.orders.supplyMinLoad) return { state, result: `${goal} grain kept at ${where}` };
     if (free <= 0) return { state, result: 'All caravans are out' };
-    const grain = supplyLoad(data, { target: spec.target, stored: fort.grain, onTheWay, capacity: grainCapacity(data, fort.kind), grain: amountsAt(state.ledger, at).grain, canCarry: free * capacity });
+    const grain = supplyLoad(data, { target: spec.target, stored: fort.grain, onTheWay, capacity: grainCapacity(data, fort), grain: amountsAt(state.ledger, at).grain, canCarry: free * capacity });
     if (grain <= 0) return { state, result: 'Waiting for resources' };
     const load = mapResources((kind) => (kind === 'grain' ? grain : 0));
     await dispatchCaravan(client, data, world, { ...village, state }, 'deliver', { destinationVillageId: null, destinationFortId: fort.id, load }, at);

@@ -599,6 +599,13 @@ export function fortView(fort: Fort) {
     armyFloor: fort.armyFloor,
     // Nobody's: a built mountain city's supply point.
     neutral: fort.neutral,
+    // A fort's buildings (forts.json; plot -> {kind, level}) and the one
+    // rising ({plot, kind, level, completesAt}, or null).
+    plots: fort.plots,
+    work: fort.work,
+    // When an army last held it, or it last had grain (bandits take it
+    // forts.json takeoverHours after, once it has neither).
+    mannedAt: fort.mannedAt?.toISOString() ?? null,
   };
 }
 
@@ -743,6 +750,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
       bought: m.bought,
       // Their rally point: where newly trained troops march (null: none).
       rallyVillageId: m.rallyVillageId,
+      // Or their rally fort: troops march there and hold it.
+      rallyFortId: m.rallyFortId,
       // When they may send their next merchant caravan (null: now).
       merchantReadyAt: m.merchantReadyAt?.toISOString() ?? null,
       // Their Blacksmith's forged levels (unit -> line -> level) and the

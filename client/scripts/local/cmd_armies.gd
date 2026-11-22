@@ -240,11 +240,20 @@ static func site_at(world: Dictionary, cell: Vector2i) -> Dictionary:
 	return {}
 
 
-static func fort_at(world: Dictionary, cell: Vector2i) -> Dictionary:
+## The fort on a hex, or (with no `kind`, and no fort there) its supply
+## point (db/forts.ts fortAt).
+static func fort_at(world: Dictionary, cell: Vector2i, kind := "") -> Dictionary:
+	var other := {}
 	for f in world.forts:
 		if int(f.q) == cell.x and int(f.r) == cell.y:
-			return f
-	return {}
+			var k: String = f.get("kind", "fort")
+			if kind != "" and k != kind:
+				continue
+			if k == "fort":
+				return f
+			if other.is_empty():
+				other = f
+	return other
 
 
 static func find_fort(world: Dictionary, id: int) -> Dictionary:
@@ -506,8 +515,8 @@ static func unquarter(server: LocalServer, world: Dictionary, army: Dictionary, 
 
 
 ## The grain a fort or supply point keeps at most.
-static func grain_capacity(data: Dictionary, kind: String) -> float:
-	return float(data.field.supplyPoint.grainCapacity if kind == "supply" else data.field.fort.grainCapacity)
+static func grain_capacity(data: Dictionary, fort: Dictionary) -> float:
+	return LocalForts.grain_capacity(data, fort)
 
 
 ## The standing fort or supply point an army stands on, out in the field ({} if none).
@@ -533,7 +542,7 @@ static func store_command(server: LocalServer, world: Dictionary, army: Dictiona
 		return LocalVillage.rule("They stand on no fort or supply point")
 	if not supplied(army):
 		return LocalVillage.rule("Their village feeds them")
-	var room := grain_capacity(data, store.get("kind", "fort")) - float(store.grain)
+	var room := grain_capacity(data, store) - float(store.grain)
 	if room <= 0:
 		return LocalVillage.rule("Its stores are full")
 	var amount := minf(minf(float(grain), LocalSupply.supply_left(data, army, at, world.speed)), room)
@@ -1436,8 +1445,8 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 	var rivers := {}
 	for e in world.rivers:
 		rivers[LocalLand.edge_key(e.a, e.b)] = true
-	var fort := fort_at(world, cell)
-	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing" and fort.get("kind", "fort") == "fort",
+	var fort := fort_at(world, cell, "fort")
+	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty() and fort.status == "standing",
 		LocalBattles.came_over_river(wave.path if wave.path != null else [], cell, rivers))
 	var ring := wagon_fort_bonus(data, holders, at)
 	if ring > 0:
@@ -1530,11 +1539,8 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 		return LocalVillage.rule("No %s can stand there" % what)
 	if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == cell.x and int(v.r) == cell.y):
 		return LocalVillage.rule("There is a village there")
-	for v in world.villages:
-		for plot in LocalVillage.outpost_plots(v.state.plots):
-			if LocalVillage.outpost_hex(plot) == cell:
-				return LocalVillage.rule("There is an outpost there")
-	var there := fort_at(world, cell)
+	# A fort, a supply point and an outpost may share a hex.
+	var there := fort_at(world, cell, kind)
 	if not there.is_empty():
 		return LocalVillage.rule("There is a supply point there already" if there.get("kind", "fort") == "supply" else "There is a fort there already")
 	if not camp_at(world, cell).is_empty():
@@ -1547,7 +1553,10 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 		return ledger
 	village.state.ledger = ledger
 	var fort := {"id": world.next.fort, "kind": kind, "ownerAccountId": village.ownerAccountId, "villageId": village.id, "q": cell.x, "r": cell.y,
-		"status": "building", "completesAt": LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed), "mannedAt": null, "grain": 0.0}
+		"status": "building", "completesAt": LocalTime.ms(at + (float(rules.buildSeconds) * 1000.0) / world.speed), "grain": 0.0,
+		"plots": LocalForts.starting_plots() if kind == "fort" else {}, "work": null}
+	# As the server's insertFort: held, as it were, from when it stands.
+	fort.mannedAt = fort.completesAt
 	world.next.fort += 1
 	world.forts.append(fort)
 	server.schedule(world, int(fort.completesAt), "fort_complete", {"fortId": fort.id})
@@ -1559,7 +1568,8 @@ static func build_fort(server: LocalServer, world: Dictionary, village: Dictiona
 
 static func fort_view(f: Dictionary) -> Dictionary:
 	return {"id": f.id, "kind": f.get("kind", "fort"), "ownerAccountId": f.ownerAccountId, "villageId": f.villageId, "q": f.q, "r": f.r, "status": f.status,
-		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor"), "neutral": f.get("neutral", false)}
+		"completesAt": LocalTime.iso(f.completesAt), "grain": f.get("grain", 0.0), "armyFloor": f.get("armyFloor"), "neutral": f.get("neutral", false),
+		"plots": f.get("plots", {}), "work": f.get("work"), "mannedAt": LocalTime.iso(f.mannedAt) if f.get("mannedAt") != null else null}
 
 
 static func on_fort_complete(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1584,7 +1594,7 @@ static func _hours_ms(hours: float, world_speed: float) -> float:
 
 
 static func _plan_fort_check(server: LocalServer, world: Dictionary, fort_id: int, from: int) -> void:
-	server.schedule(world, LocalTime.ms(from + _hours_ms(float(server.data.camps.fort.abandonHours), world.speed)), "fort_check", {"fortId": fort_id})
+	server.schedule(world, LocalTime.ms(from + _hours_ms(float(server.data.forts.upkeep.everyHours), world.speed)), "fort_check", {"fortId": fort_id, "since": LocalTime.iso(from)})
 
 
 ## The front whose bandits would take over a fort here.
@@ -1598,28 +1608,45 @@ static func bandit_front(world: Dictionary, cell: Vector2i) -> String:
 	return world.activeFronts[0] if not world.activeFronts.is_empty() else "south"
 
 
+## A standing fort eats its upkeep since the last check; with no grain and
+## no army holding it for takeoverHours, bandits take it (camps.ts fort_check).
 static func on_fort_check(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var data := server.data
-	var fort := find_fort(world, int(event.payload.fortId))
-	if fort.is_empty() or fort.status != "standing":
+	var p: Dictionary = event.payload
+	var fort := find_fort(world, int(p.fortId))
+	if fort.is_empty() or fort.get("kind", "fort") != "fort" or fort.status != "standing":
 		return
 	var at := int(event.dueAt)
-	if not armies_holding(world, Vector2i(fort.q, fort.r), ["stationed", "engaged"]).is_empty():
+	var every := _hours_ms(float(data.forts.upkeep.everyHours), world.speed)
+	var since: int = LocalTime.parse(String(p.since)) if p.get("since") != null else LocalTime.ms(at - every)
+	var rate := LocalForts.upkeep(data, fort.get("plots", {}))
+	var eaten := (rate * float(at - since) * float(world.speed)) / LocalTime.MS_PER_HOUR
+	var before := float(fort.get("grain", 0.0))
+	var grain := maxf(0.0, before - eaten)
+	if grain != before:
+		fort.grain = grain
+		changed.append(["world"])
+	if grain > 0 or not armies_holding(world, Vector2i(fort.q, fort.r), ["stationed", "engaged"]).is_empty():
 		fort.mannedAt = at
 		_plan_fort_check(server, world, int(fort.id), at)
 		return
-	var since := int(fort.mannedAt if fort.mannedAt != null else fort.completesAt)
-	var abandon_ms := _hours_ms(float(data.camps.fort.abandonHours), world.speed)
-	if at - since < abandon_ms:
-		server.schedule(world, LocalTime.ms(since + abandon_ms), "fort_check", {"fortId": fort.id})
+	# Unfed and empty since its grain ran out (or since it was last held).
+	var empty := int(fort.mannedAt if fort.mannedAt != null else fort.completesAt)
+	if before > 0:
+		empty = since + LocalWaves.js_round(_hours_ms(before / rate, world.speed))
+		fort.mannedAt = empty
+	var takeover := _hours_ms(float(data.forts.takeoverHours), world.speed)
+	if at - empty < takeover:
+		var next := mini(LocalTime.ms(at + every), empty + LocalWaves.js_round(takeover))
+		server.schedule(world, next, "fort_check", {"fortId": fort.id, "since": LocalTime.iso(at)})
 		return
 	# Left empty too long: bandits move in.
-	world.forts.erase(fort)
+	LocalForts.remove(world, fort)
 	var front := bandit_front(world, Vector2i(fort.q, fort.r))
-	var units := LocalWaves.compose_wave(data, front, 0, int(data.camps.fort.units), int(world.seed) ^ int(fort.id), world.members.size())
+	var units := LocalWaves.compose_wave(data, front, 0, int(data.forts.banditUnits), int(world.seed) ^ int(fort.id), world.members.size())
 	LocalBattles.create_camp(server, world, {"kind": "bandit", "front": front, "q": fort.q, "r": fort.r, "units": units, "waveId": null}, at)
 	LocalInbox.tell(server, world, fort.ownerAccountId, {"kind": "camp", "tier": "push", "title": "Bandits took the fort at ({q}, {r})",
-		"body": "No army held it, and now it is their camp. Send an army to clear it.", "vars": {"q": fort.q, "r": fort.r}}, at)
+		"body": "Its grain ran out and no army held it; now it is their camp. Send an army to clear it.", "vars": {"q": fort.q, "r": fort.r}}, at)
 	changed.append(["world"])
 
 
@@ -1675,7 +1702,9 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 	if HexMath.distance(a, b) != 1:
 		return LocalVillage.rule("A road joins two neighbouring hexes")
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > int(rules.range):
-		return LocalVillage.rule("Roads go within %d hexes of the village" % int(rules.range))
+		# In the zone of influence of a fort the village built, at any distance.
+		if not LocalForts.in_zone(server.data, world.forts, int(village.id), a) and not LocalForts.in_zone(server.data, world.forts, int(village.id), b):
+			return LocalVillage.rule("Roads go within %d hexes of the village or in its forts' zones" % int(rules.range))
 	var mountain_pass := false
 	for end in [a, b]:
 		var type: Variant = world.hexes.get(LocalLand.key(end))
@@ -2180,14 +2209,23 @@ static func rally_trained(server: LocalServer, world: Dictionary, home: Dictiona
 	if home.ownerAccountId == null or home.state.besieged or batches.is_empty():
 		return
 	var rally: Variant = null
+	var rally_fort: Variant = null
 	for m in world.members:
 		if int(m.accountId) == int(home.ownerAccountId):
 			rally = m.get("rallyVillageId")
-	if rally == null or int(rally) == int(home.id):
-		return
-	var target := server.find_village(world, int(rally))
-	if target.is_empty() or target.ownerAccountId == null or int(target.ownerAccountId) != int(home.ownerAccountId) or target.ruin != null:
-		return
+			rally_fort = m.get("rallyFortId")
+	var target := {}
+	var fort := {}
+	if rally_fort != null:
+		fort = find_fort(world, int(rally_fort))
+		if fort.is_empty() or fort.ownerAccountId == null or int(fort.ownerAccountId) != int(home.ownerAccountId) or fort.status != "standing":
+			return
+	else:
+		if rally == null or int(rally) == int(home.id):
+			return
+		target = server.find_village(world, int(rally))
+		if target.is_empty() or target.ownerAccountId == null or int(target.ownerAccountId) != int(home.ownerAccountId) or target.ruin != null:
+			return
 	var units := {}
 	for batch in batches:
 		var def: Dictionary = data.units.units.get(batch.unit, {})
@@ -2200,7 +2238,10 @@ static func rally_trained(server: LocalServer, world: Dictionary, home: Dictiona
 			units[batch.unit] = int(units.get(batch.unit, 0)) + n
 	if LocalBattle.total(fighters(data, units)) == 0:
 		return
-	dispatch_army(server, world, {"homeVillageId": home.id, "targetVillageId": target.id, "units": units, "orders": "garrison", "at": at})
+	if not fort.is_empty():
+		dispatch_army(server, world, {"homeVillageId": home.id, "targetVillageId": null, "targetHex": Vector2i(int(fort.q), int(fort.r)), "units": units, "orders": "hold", "at": at})
+	else:
+		dispatch_army(server, world, {"homeVillageId": home.id, "targetVillageId": target.id, "units": units, "orders": "garrison", "at": at})
 
 
 ## A leader leaving an army out in the field makes their own way to a

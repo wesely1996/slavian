@@ -30,6 +30,7 @@ balance changes land there first.
 | 14 | [The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) | The five bridge stages, their quests, construction raids, Ritual Night, winning and losing, achievements |
 | 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
 | 16 | [Battle lines and maneuvers](16-battle-lines.md) | The line's width, the opening volley, flank, pincer, encirclement, breakthrough, Shield Bearer, bridges, roads and forts |
+| 17 | [Forts](17-forts.md) | A fort's Keep, Storage, wall rings and towers, the zone of influence, grain upkeep and bandit takeover, sharing a hex, the rally point, tearing down |
 
 ## Reading the numbers
 

@@ -1,3 +1,4 @@
+import { loadFort } from '../db/forts.js';
 import { openStage } from '../scheduler/bridgeQuests.js';
 import { randomInt } from 'node:crypto';
 import { insertRivers } from '../db/rivers.js';
@@ -278,22 +279,30 @@ export async function skipOnboardingCommand(db: Db, deps: SchedulerDeps, input: 
   });
 }
 
-// A player sets their rally point: one of their own villages, where every
-// batch trained in their other villages marches once done (null: none).
+// A player sets their rally point: one of their own villages, or one of
+// their forts, where every batch trained in their other villages marches
+// once done (both null: none).
 export async function setRallyCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { account: Account; worldId: number; villageId: number | null; now: Date },
+  input: { account: Account; worldId: number; villageId: number | null; fortId?: number | null; now: Date },
 ): Promise<void> {
   await withWorld(db, input.worldId, input.now, deps, async (client, world) => {
     if (!(await isMember(client, world.id, input.account.id))) throw new ForbiddenError('Not a member of this world');
+    const fortId = input.villageId === null ? (input.fortId ?? null) : null;
     if (input.villageId !== null) {
       const village = await loadVillage(client, input.villageId).catch(() => null);
       if (!village || village.worldId !== world.id || village.ownerAccountId !== input.account.id || village.ruin) {
         throw new RuleError('The rally point is one of your own settlements');
       }
     }
-    await setRallyPoint(client, world.id, input.account.id, input.villageId);
+    if (fortId !== null) {
+      const fort = await loadFort(client, fortId);
+      if (!fort || fort.worldId !== world.id || fort.ownerAccountId !== input.account.id || fort.kind !== 'fort') {
+        throw new RuleError('The rally point is one of your own settlements or forts');
+      }
+    }
+    await setRallyPoint(client, world.id, input.account.id, input.villageId, fortId);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
   });
 }

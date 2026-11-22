@@ -803,7 +803,7 @@ func _army_tab_supply(army: Dictionary) -> void:
 	var store := Game.fort_at(ArmyText.held_hex(army)) if army.status in ["stationed", "engaged"] else {}
 	if not store.is_empty() and store.status == "standing":
 		var place := tr("Supply point") if store.get("kind", "fort") == "supply" else tr("Fort")
-		_panel_body.add_child(UI.label(tr("%s here: %d of %d grain") % [place, floori(float(store.get("grain", 0))), int(FieldRules.grain_capacity(data, store.get("kind", "fort")))], UI.SMALL_SIZE))
+		_panel_body.add_child(UI.label(tr("%s here: %d of %d grain") % [place, floori(float(store.get("grain", 0))), int(FieldRules.grain_capacity(data, store))], UI.SMALL_SIZE))
 		_store_floor_rows(store)
 	# Its wagons drawn into a ring.
 	if army.get("wagonFortAt") != null and army.status in ["stationed", "engaged"]:
@@ -843,7 +843,7 @@ func _store_floor_rows(store: Dictionary) -> void:
 	var fort_id := int(store.id)
 	var row := UI.hbox(8)
 	var picked := [int(floor_value if floor_value != null else 0)]
-	row.add_child(_number_input("fort-floor:%d" % fort_id, picked[0], 0, int(FieldRules.grain_capacity(Game.data, store.get("kind", "fort"))), func(n: int) -> void: picked[0] = n))
+	row.add_child(_number_input("fort-floor:%d" % fort_id, picked[0], 0, int(FieldRules.grain_capacity(Game.data, store)), func(n: int) -> void: picked[0] = n))
 	row.add_child(UI.button(tr("Set"), func() -> void:
 		_drafts.erase("fort-floor:%d" % fort_id)
 		_set_floor("/v1/forts/%d/army-floor" % fort_id, picked[0])))
@@ -1495,6 +1495,10 @@ func _rally_row(village: Dictionary) -> void:
 		text = tr("Rally point: troops trained in your other settlements march here once done.")
 	elif rally != 0:
 		text = tr("Rally point: %s. Troops trained here march there once done.") % Game.villages.get(rally, {}).get("name", "?")
+	elif Game.rally_fort() != 0:
+		var fort := Game.fort_at_id(Game.rally_fort())
+		text = tr("Rally point: the fort at (%d, %d). Troops trained here march there to hold it once done.") % [int(fort.get("q", 0)), int(fort.get("r", 0))]
+		rally = Game.rally_fort()
 	var label := UI.label(text, UI.SMALL_SIZE, UI.ACCENT if rally != 0 else UI.MUTED)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)

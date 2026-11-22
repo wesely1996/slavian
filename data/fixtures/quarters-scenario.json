@@ -807,6 +807,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -3836,6 +3837,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -6587,6 +6589,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -9227,6 +9230,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -11892,7 +11896,19 @@
      "completesAt": "2026-06-01T19:51:00.000Z",
      "grain": 0,
      "armyFloor": null,
-     "neutral": false
+     "neutral": false,
+     "plots": {
+      "keep": {
+       "kind": "keep",
+       "level": 1
+      },
+      "storage": {
+       "kind": "storage",
+       "level": 1
+      }
+     },
+     "work": null,
+     "mannedAt": "2026-06-01T19:51:00.000Z"
     },
     "serverTime": "2026-06-01T19:45:00.000Z"
    }
@@ -11919,7 +11935,19 @@
      "completesAt": "2026-06-01T19:51:00.000Z",
      "grain": 0,
      "armyFloor": 50,
-     "neutral": false
+     "neutral": false,
+     "plots": {
+      "keep": {
+       "kind": "keep",
+       "level": 1
+      },
+      "storage": {
+       "kind": "storage",
+       "level": 1
+      }
+     },
+     "work": null,
+     "mannedAt": "2026-06-01T19:51:00.000Z"
     },
     "serverTime": "2026-06-01T19:53:00.000Z"
    }
@@ -11943,7 +11971,19 @@
      "completesAt": "2026-06-01T19:51:00.000Z",
      "grain": 0,
      "armyFloor": null,
-     "neutral": false
+     "neutral": false,
+     "plots": {
+      "keep": {
+       "kind": "keep",
+       "level": 1
+      },
+      "storage": {
+       "kind": "storage",
+       "level": 1
+      }
+     },
+     "work": null,
+     "mannedAt": "2026-06-01T19:51:00.000Z"
     },
     "serverTime": "2026-06-01T19:53:00.000Z"
    }
@@ -12106,6 +12146,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -12770,7 +12811,19 @@
       "completesAt": "2026-06-01T19:51:00.000Z",
       "grain": 40,
       "armyFloor": null,
-      "neutral": false
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "mannedAt": "2026-06-01T19:55:24.000Z"
      }
     ],
     "camps": [
@@ -14921,6 +14974,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -15585,7 +15639,19 @@
       "completesAt": "2026-06-01T19:51:00.000Z",
       "grain": 40,
       "armyFloor": null,
-      "neutral": false
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "mannedAt": "2026-06-01T19:55:24.000Z"
      }
     ],
     "camps": [
@@ -17739,6 +17805,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -18393,7 +18460,7 @@
       "arrivesAt": "2026-06-01T20:19:12.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 169.60000000000002,
+      "supply": 141.60000000000002,
       "supplyAt": "2026-06-01T20:15:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -18464,7 +18531,19 @@
       "completesAt": "2026-06-01T19:51:00.000Z",
       "grain": 0,
       "armyFloor": null,
-      "neutral": false
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "mannedAt": "2026-06-01T20:15:00.000Z"
      }
     ],
     "camps": [
@@ -20618,6 +20697,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -21243,7 +21323,7 @@
       "arrivesAt": "2026-06-01T20:40:24.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 156.26666666666668,
+      "supply": 128.26666666666668,
       "supplyAt": "2026-06-01T20:25:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -21310,7 +21390,19 @@
       "completesAt": "2026-06-01T19:51:00.000Z",
       "grain": 0,
       "armyFloor": null,
-      "neutral": false
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "mannedAt": "2026-06-01T21:03:00.000Z"
      }
     ],
     "camps": [
@@ -23488,7 +23580,7 @@
      "arrivesAt": "2026-06-01T21:19:00.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 156.26666666666668,
+     "supply": 128.26666666666668,
      "supplyAt": "2026-06-01T20:25:36.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -23539,6 +23631,7 @@
       "onboardingClaimed": {},
       "bought": {},
       "rallyVillageId": null,
+      "rallyFortId": null,
       "merchantReadyAt": null,
       "smithing": {},
       "smithWork": null,
@@ -23715,7 +23808,7 @@
        "amounts": {
         "iron": 847,
         "wood": 1400,
-        "grain": 977.1800000000001,
+        "grain": 949.1800000000001,
         "stone": 1100
        },
        "ratesPerHour": {
@@ -24221,7 +24314,19 @@
       "completesAt": "2026-06-01T19:51:00.000Z",
       "grain": 0,
       "armyFloor": null,
-      "neutral": false
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "mannedAt": "2026-06-01T21:03:00.000Z"
      }
     ],
     "camps": [

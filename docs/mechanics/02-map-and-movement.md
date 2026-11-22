@@ -55,7 +55,8 @@ where speed is hexes per hour on plains.
 ## Roads
 
 A village builds roads between two neighbouring hexes within **4 hexes** of
-it. Each road has three levels, each paid from the village and built over
+it, or in the zone of influence of a fort it built
+([page 17](17-forts.md#the-keeps-zone-of-influence)). Each road has three levels, each paid from the village and built over
 time. Moving along a road costs the road's **factor** times the terrain's
 move cost:
 
@@ -119,7 +120,9 @@ builds a boat on a river.
 
 ## Terraforming
 
-A village can reshape the land within **2 hexes** of it: clear or plant
+A village can reshape the land within **2 hexes** of it, or anywhere in
+the zone of influence of a fort it built
+([page 17](17-forts.md#the-keeps-zone-of-influence)): clear or plant
 forest, drain a swamp, level hills, burn a forest, make a lake or a
 wetland, or extend a river.
 

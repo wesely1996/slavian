@@ -1644,7 +1644,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     expect((await village()).resources.amounts.iron).toBeGreaterThanOrEqual(Math.min(before + storm.loot.iron, (await village()).resources.capacity.iron) - 1);
 
-    // A fort nobody holds falls to bandits.
+    // A fort with no grain that nobody holds falls to bandits.
     const taken = new Set(w.camps.map((c: { q: number; r: number }) => `${c.q},${c.r}`));
     const [sq, sr] = [...terrain.entries()]
       .map(([key, t]) => [...key.split(',').map(Number), t] as [number, number, TerrainId])
@@ -1653,7 +1653,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await db.query(`UPDATE villages SET amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [home.id]);
     const fort = await call('POST', `/v1/villages/${home.id}/forts`, bogdan.token, { q: site.q, r: site.r });
     expect(fort.body.fort.status).toBe('building');
-    now = new Date(new Date(fort.body.fort.completesAt).getTime() + scheduler.data.camps.fort.abandonHours * hourMs + 1);
+    now = new Date(new Date(fort.body.fort.completesAt).getTime() + scheduler.data.forts.takeoverHours * hourMs + 1);
     await tick(db, now, scheduler);
     w = await world();
     expect(w.forts.some((f: { q: number; r: number }) => f.q === site.q && f.r === site.r)).toBe(false);

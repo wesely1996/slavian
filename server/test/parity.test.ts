@@ -84,8 +84,11 @@ describe('server and solo engine parity', () => {
   });
 
   it('builds on every kind of plot', () => {
-    const plots = played.filter((s) => s.path!.endsWith('/build') && typeof s.body?.plot === 'string').map((s) => String(s.body!.plot));
+    const built = (prefix: string) => played.filter((s) => s.path!.startsWith(prefix) && s.path!.endsWith('/build') && typeof s.body?.plot === 'string').map((s) => String(s.body!.plot));
     const kind = (plot: string) => (/^o-?\d/.test(plot) ? 'o' : plot.replace(/\d+$/, ''));
-    expect(new Set(plots.map(kind))).toEqual(new Set(['f', 'c', 'w', 't', 'o']));
+    expect(new Set(built('/v1/villages/').map(kind))).toEqual(new Set(['f', 'c', 'w', 't', 'o']));
+    // A fort's (forts.json): the Keep, the Storage, a wall and a tower.
+    const fortKind = (plot: string) => plot.replace(/\d.*$/, '');
+    expect(new Set(built('/v1/forts/').map(fortKind))).toEqual(new Set(['keep', 'storage', 'w', 't']));
   });
 });

@@ -17,7 +17,8 @@ import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
 import { campAt, insertCamp, isEventCamp, listCamps, loadCamp, markCleared, saveCampUnits, type Camp } from '../db/camps.js';
 import { avatarEnds, quickenRitual } from './cultists.js';
 import { loadCaravan, recordAmbush, type Caravan } from '../db/caravans.js';
-import { deleteFort, listForts, loadFort, markFortManned } from '../db/forts.js';
+import { deleteFort, listForts, loadFort, markFortManned, setFortGrain } from '../db/forts.js';
+import { fortUpkeep } from '../sim/forts.js';
 import { heroWithArmy } from '../db/heroes.js';
 import { generalWithArmy } from '../db/generals.js';
 import { generalBonuses } from '../sim/generals.js';
@@ -63,7 +64,8 @@ const MS_PER_HOUR = 3_600_000;
 export const campPayload = z.object({ campId: z.number().int() });
 export const ambushPayload = z.object({ caravanId: z.number().int(), campId: z.number().int(), leg: z.enum(['out', 'back']) });
 export type AmbushPayload = z.infer<typeof ambushPayload>;
-export const fortCheckPayload = z.object({ fortId: z.number().int() });
+// `since`: the last check (its upkeep is counted from there).
+export const fortCheckPayload = z.object({ fortId: z.number().int(), since: z.string().optional() });
 
 function hoursMs(hours: number, worldSpeed: number): number {
   return (hours * MS_PER_HOUR) / worldSpeed;
@@ -401,7 +403,7 @@ async function planAmbushesFor(client: DbClient, data: GameData, world: World, _
 // --- Abandoned forts --------------------------------------------------------
 
 export async function planFortCheck(client: DbClient, data: GameData, world: World, fortId: number, from: Date): Promise<void> {
-  await scheduleEvent(client, world.id, new Date(from.getTime() + hoursMs(data.camps.fort.abandonHours, world.speed)), 'fort_check', { fortId });
+  await scheduleEvent(client, world.id, new Date(from.getTime() + hoursMs(data.forts.upkeep.everyHours, world.speed)), 'fort_check', { fortId, since: from.toISOString() });
 }
 
 // The front whose bandits would take over a fort here.
@@ -472,32 +474,51 @@ export const campHandlers: HandlerRegistry = {
     await notifyWorld(client, { worldId: world.id, type: 'caravans' });
   },
 
+  // A standing fort eats its upkeep (forts.json upkeep) since the last
+  // check; with no grain and no army holding it for takeoverHours, bandits
+  // take it.
   async fort_check({ client, data, world }, event) {
-    const fort = await loadFort(client, fortCheckPayload.parse(event.payload).fortId);
-    if (!fort || fort.status !== 'standing') return;
+    const payload = fortCheckPayload.parse(event.payload);
+    const fort = await loadFort(client, payload.fortId);
+    if (!fort || fort.kind !== 'fort' || fort.status !== 'standing') return;
+    const at = event.dueAt;
+    const every = hoursMs(data.forts.upkeep.everyHours, world.speed);
+    const since = payload.since ? new Date(payload.since) : new Date(at.getTime() - every);
+    const rate = fortUpkeep(data, fort.plots);
+    const eaten = (rate * (at.getTime() - since.getTime()) * world.speed) / MS_PER_HOUR;
+    const grain = Math.max(0, fort.grain - eaten);
+    if (grain !== fort.grain) await setFortGrain(client, fort.id, grain);
     const holders = await armiesHolding(client, world.id, fort.q, fort.r, ['stationed', 'engaged']);
-    if (holders.length) {
-      await markFortManned(client, fort.id, event.dueAt);
-      await planFortCheck(client, data, world, fort.id, event.dueAt);
+    if (grain > 0 || holders.length) {
+      await markFortManned(client, fort.id, at);
+      await planFortCheck(client, data, world, fort.id, at);
+      if (grain !== fort.grain) await notifyWorld(client, { worldId: world.id, type: 'armies' });
       return;
     }
-    const since = fort.mannedAt ?? fort.completesAt;
-    const abandonMs = hoursMs(data.camps.fort.abandonHours, world.speed);
-    if (event.dueAt.getTime() - since.getTime() < abandonMs) {
-      await scheduleEvent(client, world.id, new Date(since.getTime() + abandonMs), 'fort_check', { fortId: fort.id });
+    // Unfed and empty since its grain ran out (or since it was last held).
+    let empty = fort.mannedAt ?? fort.completesAt;
+    if (fort.grain > 0) {
+      empty = new Date(since.getTime() + Math.round(hoursMs(fort.grain / rate, world.speed)));
+      await markFortManned(client, fort.id, empty);
+      await notifyWorld(client, { worldId: world.id, type: 'armies' });
+    }
+    const takeover = hoursMs(data.forts.takeoverHours, world.speed);
+    if (at.getTime() - empty.getTime() < takeover) {
+      const next = new Date(Math.min(at.getTime() + every, empty.getTime() + Math.round(takeover)));
+      await scheduleEvent(client, world.id, next, 'fort_check', { fortId: fort.id, since: at.toISOString() });
       return;
     }
     // Left empty too long: bandits move in.
     await deleteFort(client, fort.id);
     const front = banditFront(world, hex(fort.q, fort.r));
     const players = (await listMembers(client, world.id)).length;
-    const units = composeWave(data, front, 0, data.camps.fort.units, world.seed ^ fort.id, players);
+    const units = composeWave(data, front, 0, data.forts.banditUnits, world.seed ^ fort.id, players);
     await createCamp(client, data, world, { kind: 'bandit', front, q: fort.q, r: fort.r, units, waveId: null }, event.dueAt);
     await tell(client, world, fort.ownerAccountId, {
       kind: 'camp',
       tier: 'push',
       title: 'Bandits took the fort at ({q}, {r})',
-      body: 'No army held it, and now it is their camp. Send an army to clear it.',
+      body: 'Its grain ran out and no army held it; now it is their camp. Send an army to clear it.',
       vars: { q: fort.q, r: fort.r },
     }, event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'armies' });

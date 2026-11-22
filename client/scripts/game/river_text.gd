@@ -136,9 +136,9 @@ static func road_speeds(data: Dictionary) -> String:
 
 
 ## Why no road can be built from a to b from `home`, or "".
-static func road_problem(data: Dictionary, terrain: Dictionary, rivers: Array, home: Vector2i, a: Vector2i, b: Vector2i) -> String:
+static func road_problem(data: Dictionary, terrain: Dictionary, rivers: Array, home: Vector2i, a: Vector2i, b: Vector2i, in_zone := false) -> String:
 	var range_ := int(data.field.road.range)
-	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > range_:
+	if not in_zone and mini(HexMath.distance(a, home), HexMath.distance(b, home)) > range_:
 		return UI.t("Roads go within %d hexes of your village") % range_
 	for end in [a, b]:
 		var type: String = terrain.get(end, "")
