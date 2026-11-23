@@ -56,6 +56,23 @@ static func button(text: String, on_pressed: Callable, icon_id := "") -> Button:
 	return node
 
 
+## A button as wide as its sheet whose text wraps onto more lines instead
+## of widening the sheet past a phone's edge.
+static func wide_button(text: String, on_pressed: Callable, icon_id := "") -> Button:
+	var node := button(text, on_pressed, icon_id)
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return node
+
+
+## Buttons side by side that move onto the next line when they don't fit.
+static func flow(separation := 8) -> HFlowContainer:
+	var node := HFlowContainer.new()
+	node.add_theme_constant_override("h_separation", separation)
+	node.add_theme_constant_override("v_separation", separation)
+	return node
+
+
 ## The main action of a sheet, in malachite.
 static func primary(text: String, on_pressed: Callable, icon_id := "") -> Button:
 	var node := button(text, on_pressed, icon_id)
