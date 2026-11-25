@@ -56,7 +56,7 @@ tower (each up to level 20; effects are per level):
 - **Siege power.** Every enemy unit batters the walls each round with its
   `siege` value. Units without one batter at 2% of their attack. Dedicated
   attackers: Cave Bear 3, Div 10, Zmey Whelp 8, Siege Ram 40, Catapult 60.
-  The Avatar of Černobog batters at 60.
+  The Avatar of Černobog batters at 60, the Leshen at 40.
 - **The moat** cuts battering by 5% a level.
 - **Breaching.** When integrity reaches 0, the walls are breached: they lose
   **one level**, and from then on they give no defense, archer platform or

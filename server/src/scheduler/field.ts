@@ -475,7 +475,8 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
     await recordRound(client, battle.id, log, { status: won ? 'defended' : 'raided', at, loot: null });
     if (won) {
       await hordeBeaten(client, data, world, hex(battle.q, battle.r), kills);
-      await finishWave(client, data, world, wave.id, 'defeated', at);
+      const victor = engaged.find((a) => a.ownerAccountId !== null)?.ownerAccountId ?? fort?.ownerAccountId ?? null;
+      await finishWave(client, data, world, wave.id, 'defeated', at, victor);
       // A strong point held: a choke, or a fort built on the horde's road.
       if (battle.setup.choke || battle.setup.fort) await bridgeQuest(client, data, world, 'choke', at);
     } else if (holy) {

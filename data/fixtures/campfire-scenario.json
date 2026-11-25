@@ -21055,6 +21055,53 @@
        "target": null
       },
       "forecast": null
+     },
+     {
+      "id": 4,
+      "index": 1,
+      "front": "north",
+      "status": "marching",
+      "threat": "Severe",
+      "spawnAt": "2026-06-01T08:27:36.000Z",
+      "spawn": {
+       "q": -4,
+       "r": 2
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        -4,
+        2,
+        0
+       ],
+       [
+        -3,
+        2,
+        18000
+       ],
+       [
+        -2,
+        2,
+        54000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T08:28:30.000Z",
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 2,
+      "errand": {
+       "from": {
+        "q": -4,
+        "r": 2
+       },
+       "kind": "leshen",
+       "target": null
+      },
+      "forecast": null
      }
     ],
     "scouting": [],
@@ -23244,7 +23291,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 38,
+       "used": 39,
        "cap": 40
       },
       "ruinSearchReadyAt": null,
@@ -23390,7 +23437,7 @@
       },
       "queue": [],
       "garrison": {
-       "archer": 9,
+       "archer": 10,
        "spearman": 29
       },
       "away": {},
@@ -23414,13 +23461,13 @@
        "amounts": {
         "iron": 5000,
         "wood": 5000,
-        "grain": 19355.583333333336,
+        "grain": 19376.666666666668,
         "stone": 5000
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": -113,
+        "grain": -126.5,
         "stone": 300
        },
        "capacity": {
@@ -23429,7 +23476,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:41:07.200Z"
+       "settledAt": "2026-06-01T08:31:07.200Z"
       }
      }
     ],
@@ -23629,27 +23676,23 @@
          "archer": 10,
          "spearman": 30
         }
-       },
-       "lines": {
-        "active": {
-         "by": "defender",
-         "kind": "encircle",
-         "weak": {
-          "archers": 4,
-          "cavalry": 0,
-          "infantry": 6
-         }
-        }
        }
       },
       "status": "defended",
-      "round": 2,
+      "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
+       "leshen": 1,
+       "zealot": 7,
+       "rusalka": 7,
+       "grey_wolf": 16,
+       "crossbowman": 4,
+       "leshy_thrall": 7
+      },
+      "attackerNow": {
        "zealot": 7,
        "crossbowman": 4
       },
-      "attackerNow": {},
       "defenderInitial": {
        "archer": 10,
        "spearman": 30
@@ -23658,37 +23701,23 @@
        {
         "at": "2026-06-01T08:31:07.200Z",
         "round": 1,
-        "attackerLeft": 10,
+        "attackerLeft": 11,
         "defenderLeft": 39,
         "attackerLosses": {
-         "zealot": 1
+         "leshen": 1,
+         "rusalka": 7,
+         "grey_wolf": 16,
+         "leshy_thrall": 7
         },
         "defenderLosses": {
          "spearman": 1
-        }
-       },
-       {
-        "at": "2026-06-01T08:41:07.200Z",
-        "round": 2,
-        "maneuver": {
-         "by": "defender",
-         "kind": "encircle"
-        },
-        "attackerLeft": 0,
-        "defenderLeft": 38,
-        "attackerLosses": {
-         "zealot": 6,
-         "crossbowman": 4
-        },
-        "defenderLosses": {
-         "archer": 1
         }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T08:21:07.200Z",
-      "endedAt": "2026-06-01T08:41:07.200Z"
+      "endedAt": "2026-06-01T08:31:07.200Z"
      }
     ],
     "raids": [],
@@ -23702,10 +23731,10 @@
       "status": "home",
       "villageId": 1,
       "armyId": null,
-      "level": 1,
-      "xp": 11,
-      "xpToNext": 30,
-      "skillPoints": 0,
+      "level": 2,
+      "xp": 1,
+      "xpToNext": 41,
+      "skillPoints": 1,
       "skills": {},
       "gear": {},
       "inventory": [
@@ -23880,8 +23909,13 @@
     "achievements": [
      {
       "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T08:28:30.000Z"
+     },
+     {
+      "accountId": 1,
       "achievement": "first_defense",
-      "earnedAt": "2026-06-01T08:41:07.200Z"
+      "earnedAt": "2026-06-01T08:31:07.200Z"
      }
     ],
     "shipyards": [
@@ -23937,7 +23971,7 @@
      [
       -2,
       2,
-      12.2
+      16.2
      ]
     ],
     "delegations": [],
@@ -25851,7 +25885,7 @@
    "response": {
     "notifications": [
      {
-      "id": 10,
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -25860,25 +25894,34 @@
       "read": false
      },
      {
-      "id": 9,
-      "kind": "battle_result",
+      "id": 14,
+      "kind": "hero",
       "tier": "digest",
-      "title": "Vruchiy held",
-      "body": "The horde was beaten after 2 rounds.",
-      "createdAt": "2026-06-01T08:41:07.200Z",
+      "title": "Dobrynya reached level 2",
+      "body": "A new skill point to spend.",
+      "createdAt": "2026-06-01T08:31:07.200Z",
       "read": false
      },
      {
-      "id": 8,
+      "id": 13,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Vruchiy held",
+      "body": "The horde was beaten after 1 rounds.",
+      "createdAt": "2026-06-01T08:31:07.200Z",
+      "read": false
+     },
+     {
+      "id": 12,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Shield of the Village",
       "body": "Beat a horde at one of your villages.",
-      "createdAt": "2026-06-01T08:41:07.200Z",
+      "createdAt": "2026-06-01T08:31:07.200Z",
       "read": false
      },
      {
-      "id": 7,
+      "id": 11,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",
@@ -25887,11 +25930,47 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 10,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Many Banners",
+      "body": "Stand against two hordes in one battle.",
+      "createdAt": "2026-06-01T08:28:30.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "Another horde joins the battle at (-2, 2)",
+      "body": "31 more from the north fight alongside the horde already there.",
+      "createdAt": "2026-06-01T08:28:30.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
+      "kind": "wave_soon",
+      "tier": "push",
+      "title": "A horde is coming to Vruchiy",
+      "body": "The severe north horde arrives within the hour. Check the garrison and its stance.",
+      "createdAt": "2026-06-01T08:27:36.000Z",
+      "read": false
+     },
+     {
+      "id": 7,
       "kind": "build_done",
       "tier": "digest",
       "title": "The land near Vruchiy is reshaped",
       "body": "The work at (-4, 2) is done.",
+      "createdAt": "2026-06-01T08:27:36.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "event",
+      "tier": "push",
+      "title": "The Leshen rises from the ashes at (-4, 2)",
+      "body": "The burnt forest wakes its lord. The wrath of nature marches on the villages with the beasts of the North. Slay his host for a great bounty.",
       "createdAt": "2026-06-01T08:27:36.000Z",
       "read": false
      },
@@ -25941,7 +26020,7 @@
       "read": false
      }
     ],
-    "unread": 10,
+    "unread": 15,
     "serverTime": "2026-06-01T08:57:36.000Z"
    }
   }

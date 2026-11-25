@@ -44,11 +44,18 @@ export interface Wave {
 }
 
 export interface WaveErrand {
-  kind: 'bridge' | 'quest' | 'avatar' | 'fled';
+  kind: 'bridge' | 'quest' | 'avatar' | 'fled' | 'leshen';
   target: number | null;
-  // The Avatar of Černobog rises where its cultists stood; those who fled a
-  // burnt camp set out from where it stood.
+  // The Avatar of Černobog rises where its cultists stood, the Leshen where
+  // a forest burnt; those who fled a burnt camp set out from where it stood.
   from?: { q: number; r: number };
+}
+
+// The Avatar of Černobog and the Leshen (events.json leshen): they raze
+// whatever they beat, go for every village before the Holy City, rampage
+// while a village stands and never make camp.
+export function isWrath(wave: { errand: WaveErrand | null }): boolean {
+  return wave.errand?.kind === 'avatar' || wave.errand?.kind === 'leshen';
 }
 
 interface WaveRow {

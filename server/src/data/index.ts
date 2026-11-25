@@ -1062,6 +1062,16 @@ const eventsFileSchema = z.object({
   range: z.object({ min: z.number().int().positive(), max: z.number().int().positive() }),
   reward: z.object({ resources: resourcesSchema, growthPerDay: z.number().nonnegative() }),
   failure: z.object({ hatred: z.number().nonnegative() }),
+  // The Leshen, the wrath of nature: a forest a player burns may wake him.
+  leshen: z.object({
+    chance: z.number().min(0).max(1),
+    unit: z.string(),
+    minions: z.number().int().nonnegative(),
+    bountyFactor: z.number().nonnegative(),
+    // Felled: the North hates the more, and whoever felled it gets Embers.
+    hatred: z.number().nonnegative(),
+    embers: z.number().int().nonnegative(),
+  }),
   kinds: z.object({
     captives: z.object({
       weight: z.number().nonnegative(),

@@ -199,6 +199,10 @@ Burning a forest is a weapon as well as a way to clear land.
   city (none of those stand on forest).
 - **Who is told.** Owners of a burnt outpost or fort get a push at once. The
   player who set the fire is told when it burns out.
+- **The forest's wrath.** When the fire a player set burns out, there is a
+  **5% chance** the Leshen rises from the ashes
+  ([page 13](13-events-and-raids.md#the-leshen-the-wrath-of-nature)). Only
+  the hex the fire was set on rolls, not those it spread to.
 
 ### Damaged roads
 

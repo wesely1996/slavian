@@ -4803,87 +4803,95 @@ msgstr ""
 msgid "The Avatar of Černobog"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:569
-msgid "Raiders of the bridge · %s"
+#: client/scripts/screens/game_screen_threats.gd:565
+msgid "The Leshen, the wrath of nature"
+msgstr ""
+
+#: client/scripts/screens/game_screen_threats.gd:566
+msgid "Woken by a burnt forest, he marches with beasts of the North on the nearest village, razes every village he beats and turns on the Holy City only when none is left. Fell his whole host for a great bounty and a Svarog's Ember, though the North will hate you for it."
 msgstr ""
 
 #: client/scripts/screens/game_screen_threats.gd:572
+msgid "Raiders of the bridge · %s"
+msgstr ""
+
+#: client/scripts/screens/game_screen_threats.gd:575
 msgid "A band of horde %d · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:574
+#: client/scripts/screens/game_screen_threats.gd:577
 msgid "Wave %d · %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:576
+#: client/scripts/screens/game_screen_threats.gd:579
 msgid " · composition unknown"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:581
+#: client/scripts/screens/game_screen_threats.gd:584
 msgid "%s front · %s threat%s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:590
+#: client/scripts/screens/game_screen_threats.gd:593
 msgid "Hatred of the %s front: +%d%% attack and defense"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:591
+#: client/scripts/screens/game_screen_threats.gd:594
 msgid "The front's hatred grows with every ambush, harassing strike, raid and strike against its hordes, and every map event left undone. Its next horde to set out takes all of it, and the front's hatred starts again from nothing. Each time it passes another 100%%, the front's next horde sends a band of %d%% of its troops against the nearest village. A horde that took it leaves %s more camps behind when it is over (the whole part surely, the rest by chance). Ambushes on the front are riskier, and worth more."
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:596
+#: client/scripts/screens/game_screen_threats.gd:599
 msgid "Hatred: +%d%% attack and defense"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:597
+#: client/scripts/screens/game_screen_threats.gd:600
 msgid "It took all of its front's hatred as it set out. When it is over, it leaves %s more camps behind (the whole part surely, the rest by chance)."
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:604
+#: client/scripts/screens/game_screen_threats.gd:607
 msgid "Appears in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:607
+#: client/scripts/screens/game_screen_threats.gd:610
 msgid " → %s in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:610
+#: client/scripts/screens/game_screen_threats.gd:613
 msgid "Marching on %s · arrives in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:612
+#: client/scripts/screens/game_screen_threats.gd:615
 msgid "At the gates of %s · leaves in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:614
+#: client/scripts/screens/game_screen_threats.gd:617
 msgid "Burning %s · done in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:617
+#: client/scripts/screens/game_screen_threats.gd:620
 msgid "Fighting at %s · round %d of %d · %d of them left"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:639
+#: client/scripts/screens/game_screen_threats.gd:642
 msgid "Scouts from %s: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:652
+#: client/scripts/screens/game_screen_threats.gd:655
 msgid "%d scouts en route · report in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:653
+#: client/scripts/screens/game_screen_threats.gd:656
 msgid "Scouts heading home · back in %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:665
+#: client/scripts/screens/game_screen_threats.gd:668
 msgid "No scouts at home."
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:678
+#: client/scripts/screens/game_screen_threats.gd:681
 msgid "%s · %d home"
 msgstr ""
 
-#: client/scripts/screens/game_screen_threats.gd:682
+#: client/scripts/screens/game_screen_threats.gd:685
 msgid "Send scouts"
 msgstr ""
 
@@ -7235,6 +7243,10 @@ msgstr ""
 
 #: data/enemies.json
 msgid "Avatar of Černobog"
+msgstr ""
+
+#: data/enemies.json
+msgid "Leshen, the Wrath of Nature"
 msgstr ""
 
 #: data/enemies.json

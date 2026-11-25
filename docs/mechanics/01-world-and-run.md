@@ -51,6 +51,7 @@ still standing, by tier ([page 9](09-hordes-and-threats.md#enemy-units)):
 | Tier 4 | 2.5 |
 | Siege engine (no tier) | 0.5 |
 | The Avatar of Černobog | 100: the whole of it |
+| The Leshen | 50 |
 
 The total is rounded up. Example: 4 tier-1 and 2 tier-3 survivors take
 4 × 0.5 + 2 × 1.5 = 5 Sanctity.

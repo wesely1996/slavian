@@ -32,6 +32,7 @@ import {
   markStruck,
   marchOnward,
   endWave,
+  isWrath,
   setWaveStrength,
   startRampage,
   type Wave,
@@ -102,8 +103,9 @@ export async function hordeWins(
   const fresh = await loadWave(client, wave.id);
   const rampageLeftMs = (fresh.rampageEndsAt?.getTime() ?? at.getTime()) - at.getTime();
   const preset = presetOf(data, world.difficulty);
-  // The Avatar of Černobog spares nothing it beats.
-  const decision: Decision = wave.errand?.kind === 'avatar' ? { choice: 'raze', reasons: ['the Avatar of Černobog spares nothing'] } : decideRaze(data, {
+  // The Avatar of Černobog and the Leshen spare nothing they beat.
+  const wrath = wave.errand?.kind === 'leshen' ? 'the Leshen spares nothing' : 'the Avatar of Černobog spares nothing';
+  const decision: Decision = isWrath(wave) ? { choice: 'raze', reasons: [wrath] } : decideRaze(data, {
     front: wave.front,
     waveIndex: wave.index,
     graceWaves: preset.graceWaves,
@@ -152,8 +154,8 @@ export async function takenHexes(client: DbClient, worldId: number): Promise<Set
 // The rampage is over: survivors make camp near where they stand.
 async function settle(client: DbClient, data: GameData, world: World, wave: Wave, from: Hex, at: Date): Promise<void> {
   const units = wave.composition;
-  // The Avatar never makes camp: its rampage over, it sinks into the earth.
-  if (wave.errand?.kind === 'avatar') return finishWave(client, data, world, wave.id, 'dispersed', at);
+  // The Avatar (or the Leshen) never makes camp: its rampage over, it sinks into the earth.
+  if (isWrath(wave)) return finishWave(client, data, world, wave.id, 'dispersed', at);
   const site = total(units) > 0 ? campSite(data, await terrainOf(client, world.id), from, await takenHexes(client, world.id)) : null;
   if (!site) {
     await finishWave(client, data, world, wave.id, 'dispersed', at);
@@ -185,8 +187,8 @@ async function settle(client: DbClient, data: GameData, world: World, wave: Wave
 // (or the Holy City), if the rampage clock allows; otherwise settle.
 export async function moveOn(client: DbClient, data: GameData, world: World, waveId: number, from: Hex, at: Date): Promise<void> {
   const wave = await loadWave(client, waveId);
-  // The Avatar of Černobog's rampage never ends while a village stands.
-  const avatar = wave.errand?.kind === 'avatar';
+  // The Avatar of Černobog's (and the Leshen's) rampage never ends while a village stands.
+  const avatar = isWrath(wave);
   const endsAt = avatar ? null : wave.rampageEndsAt;
   if ((!avatar && (!endsAt || at >= endsAt)) || total(wave.composition) === 0) return settle(client, data, world, wave, from, at);
   const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && !wave.struck.includes(v.id));

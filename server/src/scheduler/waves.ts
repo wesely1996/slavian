@@ -11,7 +11,7 @@ import type { Front } from '../sim/mapgen.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage } from '../db/villages.js';
-import { endWave, insertWave, lastWave, loadWave, markDispersed, markMarching, markStruck, setWaveHatred, setWaveStrength, type Wave } from '../db/waves.js';
+import { endWave, insertWave, isWrath, lastWave, loadWave, markDispersed, markMarching, markStruck, setWaveHatred, setWaveStrength, type Wave } from '../db/waves.js';
 import { addFrontHatred, drainFrontHatred, getWorld, listMembers, loadHexes, quietWindow, type World } from '../db/worlds.js';
 import { hatredCrossings, planMarch, planWave, routeFrom, rngFor, splitBand, threatOf, waveHexAt, type March, type PathStep, type PlannedWave, type Target, type WaveContext } from '../sim/waves.js';
 import { decayFear, loadFear } from '../db/fear.js';
@@ -225,7 +225,7 @@ async function sendBand(client: DbClient, data: GameData, world: World, band: Wa
 // City). With no way there, it scatters.
 async function sendErrand(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
   const errand = wave.errand!;
-  if (errand.kind === 'avatar' || errand.kind === 'fled') return sendFromHex(client, data, world, wave, at);
+  if (errand.kind === 'avatar' || errand.kind === 'leshen' || errand.kind === 'fled') return sendFromHex(client, data, world, wave, at);
   const village = errand.target === null ? null : await loadVillage(client, errand.target).catch(() => null);
   const target: Target = village && !village.ruin ? { id: village.id, cell: hex(village.q, village.r) } : { id: null, cell: hex(0, 0) };
   let march: March | null = null;
@@ -263,7 +263,7 @@ async function sendFromHex(client: DbClient, data: GameData, world: World, wave:
   // burnt camp for the villages alone.
   const villages = await listVillages(client, world.id);
   const targets: Target[] =
-    wave.errand!.kind === 'avatar'
+    isWrath(wave)
       ? avatarTargets(villages)
       : villages.filter((v) => !v.ruin && v.ownerAccountId !== null).map((v) => ({ id: v.id, cell: hex(v.q, v.r) }));
   const route = targets.length

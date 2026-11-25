@@ -322,6 +322,9 @@ static func on_done(server: LocalServer, world: Dictionary, event: Dictionary, c
 			if kept.size() != world.roads.size():
 				world.roads = kept
 				LocalArmies.relink_outposts(server, world, int(event.dueAt), changed)
+	# A forest a player set alight burnt out: it may wake the Leshen.
+	if def.has("fire") and int(work.get("generation", 0)) == 0 and work.get("villageId") != null:
+		LocalLeshen.maybe_rise(server, world, cell, int(event.dueAt), changed)
 	# A river dug: nothing crosses the edge from now on without a bridge.
 	if def.get("river", false) and work.get("toward") is Vector2i:
 		var key := LocalLand.edge_key(cell, work.toward)

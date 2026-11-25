@@ -58,7 +58,7 @@ static func send(server: LocalServer, world: Dictionary, wave: Dictionary, at: i
 	# The Avatar goes for every village before the Holy City; those who fled a
 	# burnt camp for the villages alone.
 	var targets: Array = []
-	if wave.errand.kind == "avatar":
+	if LocalBattles.is_avatar(wave):
 		targets = LocalBattles.avatar_targets(world.villages)
 	else:
 		for v in world.villages:

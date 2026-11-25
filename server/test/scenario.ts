@@ -12,6 +12,7 @@ import { startRitual } from '../src/scheduler/cultists.js';
 import { raiseMountainCity } from '../src/scheduler/mapEvents.js';
 import { interceptAt } from '../src/scheduler/field.js';
 import { createCamp } from '../src/scheduler/camps.js';
+import { leshenRises, leshenSeed } from '../src/scheduler/leshen.js';
 import { getWorld } from '../src/db/worlds.js';
 import type { Front } from '../src/sim/mapgen.js';
 import { loadGameData } from '../src/data/index.js';
@@ -58,6 +59,8 @@ export type WorldSet = {
   fort?: { id: number; plots: Record<string, { kind: string; level: number }>; grain: number; defenders?: Record<string, number> };
   // A river runs along the edge between two hexes (as the map would lay it).
   river?: { a: { q: number; r: number }; b: { q: number; r: number } };
+  // The Leshen rises there now, as if a fire had woken him (events.json leshen).
+  leshen?: { q: number; r: number };
   // Units standing in the player's (first) village, by unit (their upkeep
   // counts from the village's next change).
   garrison?: Record<string, number>;
@@ -174,6 +177,16 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
                 } finally {
                   client.release();
                 }
+              }
+            }
+            if (step.set.leshen) {
+              const client = await db.connect();
+              try {
+                const w = await getWorld(client, world.id);
+                const cell = { q: step.set.leshen.q, r: step.set.leshen.r };
+                await leshenRises(client, scheduler.data, w, cell, now, leshenSeed(w, cell, now));
+              } finally {
+                client.release();
               }
             }
             if (step.set.river) {
