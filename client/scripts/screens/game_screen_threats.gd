@@ -561,6 +561,9 @@ func _wave_entry(wave: Dictionary) -> void:
 	var errand: Variant = wave.get("errand")
 	if errand is Dictionary and errand.kind == "avatar":
 		_panel_body.add_child(UI.label(tr("The Avatar of Černobog"), UI.HEADING_SIZE, UI.ERROR))
+	elif errand is Dictionary and errand.kind == "leshen":
+		_panel_body.add_child(UI.with_info(UI.label(tr("The Leshen, the wrath of nature"), UI.HEADING_SIZE, UI.ERROR),
+			tr("Woken by a burnt forest, he marches with beasts of the North on the nearest village, razes every village he beats and turns on the Holy City only when none is left. Fell his whole host for a great bounty and a Svarog's Ember, though the North will hate you for it.")))
 	elif errand is Dictionary and errand.kind == "quest":
 		# A bridge quest's host, apart from the hordes.
 		_panel_body.add_child(UI.label(tr("%s · %s") % [tr(String(Game.data.bridge.questPlaces.defense.name)), tr(Game.front_faction(wave.front))]))

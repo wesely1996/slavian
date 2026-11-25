@@ -403,7 +403,7 @@ export const battleHandlers: HandlerRegistry = {
         body: total(healed) > 0 ? 'The horde was beaten after {rounds} rounds; the hospital and shamans saved {healed} of the fallen.' : 'The horde was beaten after {rounds} rounds.',
         vars: { village: village.name, rounds: round, healed: total(healed) },
       }, at);
-      await finishWave(client, data, world, wave.id, 'defeated', at);
+      await finishWave(client, data, world, wave.id, 'defeated', at, village.ownerAccountId);
     }
 
     // A breach knocks the walls down a level.

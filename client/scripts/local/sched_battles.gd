@@ -920,7 +920,8 @@ static func horde_wins(server: LocalServer, world: Dictionary, wave: Dictionary,
 	var rampage_left := (int(wave.rampageEndsAt) if wave.rampageEndsAt != null else at) - at
 	var preset: Dictionary = data.difficulty.presets[world.difficulty]
 	# The Avatar of Černobog spares nothing it beats.
-	var decision := {"choice": "raze", "reasons": ["the Avatar of Černobog spares nothing"]} if is_avatar(wave) else LocalHorde.decide_raze(data, {
+	var wrath := "the Leshen spares nothing" if is_avatar(wave) and wave.errand.kind == "leshen" else "the Avatar of Černobog spares nothing"
+	var decision := {"choice": "raze", "reasons": [wrath]} if is_avatar(wave) else LocalHorde.decide_raze(data, {
 		"front": wave.front, "waveIndex": wave.index, "graceWaves": preset.get("graceWaves"), "thresholdOffset": preset.get("razeThreshold"),
 		"refuge": village.refuge == true, "hordeNow": LocalBattle.total(attacker_now), "hordeInitial": LocalBattle.total(wave.initial),
 		"helpNearby": help_nearby(server, world, village), "rampageLeftMs": rampage_left, "worldSpeed": world.speed,
@@ -936,8 +937,11 @@ static func horde_wins(server: LocalServer, world: Dictionary, wave: Dictionary,
 	return decision
 
 
+## The Avatar of Černobog or the Leshen (db/waves.ts isWrath): they raze
+## whatever they beat, go for every village before the Holy City, rampage
+## while a village stands and never make camp.
 static func is_avatar(wave: Dictionary) -> bool:
-	return wave.get("errand") is Dictionary and wave.errand.kind == "avatar"
+	return wave.get("errand") is Dictionary and wave.errand.kind in ["avatar", "leshen"]
 
 
 ## horde.ts avatarTargets: every player village still standing (refugee
@@ -976,7 +980,7 @@ static func taken_hexes(world: Dictionary) -> Dictionary:
 static func settle(server: LocalServer, world: Dictionary, wave: Dictionary, from: Vector2i, at: int, changed: Array) -> void:
 	var units: Dictionary = wave.composition
 	# The Avatar never makes camp: its rampage over, it sinks into the earth.
-	if wave.get("errand") is Dictionary and wave.errand.kind == "avatar":
+	if is_avatar(wave):
 		finish_wave(server, world, wave, "dispersed", at, changed)
 		return
 	var site: Variant = LocalHorde.camp_site(server.data, world.hexes, from, taken_hexes(world)) if LocalBattle.total(units) > 0 else null
@@ -1230,7 +1234,7 @@ static func occupied_hexes(world: Dictionary) -> Dictionary:
 ## A wave is over: new camps of its front rise near its road.
 static func spawn_after_wave(server: LocalServer, world: Dictionary, wave: Dictionary, at: int) -> void:
 	# A band leaves no camps behind, nor does the Avatar.
-	if wave.get("bandOf") != null or (wave.get("errand") is Dictionary and wave.errand.kind == "avatar"):
+	if wave.get("bandOf") != null or is_avatar(wave):
 		return
 	var data := server.data
 	var rules: Dictionary = data.camps.spawn
@@ -1262,6 +1266,7 @@ static func finish_wave(server: LocalServer, world: Dictionary, wave: Dictionary
 	wave.endsAt = at
 	spawn_after_wave(server, world, wave, at)
 	LocalCultists.avatar_ends(server, world, wave, status, at, changed)
+	LocalLeshen.ends(server, world, wave, status, at, changed)
 	bridge_quest(server, world, "unscathed", at)
 	# A bridge quest's host beaten: the quest is done (not beaten: another comes).
 	if LocalBridgeCommands.after_errand(server, world, wave, status, at):

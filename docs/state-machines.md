@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.21.0
+Documented for version: 0.22.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -75,9 +75,9 @@ stateDiagram-v2
 - `arrived` survives only from old worlds: hordes that camped at an unguarded
   Holy City. New hordes never enter it.
 - `settled` creates a [camp](#camp).
-- The **Avatar of Černobog** (errand `avatar`) never settles. Its rampage
-  has no end until no player village stands. It always razes, then marches on
-  the Holy City.
+- The **Avatar of Černobog** (errand `avatar`) and the **Leshen** (errand
+  `leshen`) never settle. Their rampage has no end until no player village
+  stands. They always raze, then march on the Holy City.
 
 ## Battle
 
@@ -205,6 +205,9 @@ stateDiagram-v2
   done --> [*]
 ```
 
+Where (or whether) the scouts find a ruin is settled when they set out
+(`plan`), and sets when `ruin_search` falls due.
+
 ## Road
 
 ```mermaid
@@ -227,6 +230,7 @@ it is repaired.
 ```mermaid
 stateDiagram-v2
   [*] --> none: a river edge on the map, or a river dug (terraform river)
+  [*] --> standing: a river dug across a road (terraform river, bridge paid with it)
   none --> building: build a bridge
   building --> standing: crossing_built
 ```

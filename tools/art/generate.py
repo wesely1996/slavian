@@ -1187,6 +1187,20 @@ def enemy(kind):
             s.ellipse(x, 46, 6, 4, glow, stroke="none", sw=0)
         s.path("M48,108 L56,74 L64,96 L72,74 L80,108", "none", stroke="#a83a2c", sw=3, opacity=0.8)
         return s
+    if kind == "leshen":
+        # The forest's lord: a bark-dark face crowned with antlers, mossy
+        # beard and green-glowing eyes.
+        bark = s.lin([(0, "#5a4632"), (1, "#24190f")], 0, 0, 0, 1)
+        moss = s.lin([(0, "#8fbf5a"), (1, "#3f6a26")], 0, 0, 0, 1)
+        s.path("M30,110 Q34,66 64,56 Q94,66 98,110 Z", moss, stroke="none", sw=0)
+        s.path("M44,50 Q44,30 64,28 Q84,30 84,50 L80,82 Q64,98 48,82 Z", bark, stroke="none", sw=0)
+        for side in (-1, 1):
+            s.path(f"M{64 + side * 12},32 Q{64 + side * 26},20 {64 + side * 30},6 M{64 + side * 22},22 Q{64 + side * 34},20 {64 + side * 42},14 M{64 + side * 27},13 Q{64 + side * 22},6 {64 + side * 20},2", "none", stroke=pale, sw=4)
+        glow = s.rad([(0, "#f4ffb0"), (0.5, "#9ee04a"), (1, "#3f6a26", 0)])
+        for x in (56, 72):
+            s.ellipse(x, 50, 5, 3.5, glow, stroke="none", sw=0)
+        s.path("M52,74 Q64,104 76,74 Q70,84 64,86 Q58,84 52,74 Z", moss, stroke="none", sw=0)
+        return s
     if kind in ("grey_wolf", "volkolak"):
         wolf_head(s, pale)
         if kind == "volkolak":
@@ -2595,6 +2609,7 @@ def assets():
     for front in ["north", "east", "order"]:
         out[f"faction/{front}"] = faction(front)
     out["unit/chernobog_avatar"] = enemy("chernobog_avatar")
+    out["unit/leshen"] = enemy("leshen")
     for units in ENEMY_UNITS.values():
         for kind in units:
             out[f"unit/{kind}"] = enemy(kind)

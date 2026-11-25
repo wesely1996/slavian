@@ -16,6 +16,7 @@ import { armiesHolding, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
 import { campAt, insertCamp, isEventCamp, listCamps, loadCamp, markCleared, saveCampUnits, type Camp } from '../db/camps.js';
 import { avatarEnds, quickenRitual } from './cultists.js';
+import { leshenEnds } from './leshen.js';
 import { loadCaravan, recordAmbush, type Caravan } from '../db/caravans.js';
 import { deleteFort, listForts, loadFort, manned, markFortManned, setFortDefenders, setFortGrain } from '../db/forts.js';
 import { interceptAt } from './field.js';
@@ -28,7 +29,7 @@ import { listSites } from '../db/sites.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState } from '../db/villages.js';
-import { endWave, loadWave, reinforceWave, type Wave } from '../db/waves.js';
+import { endWave, isWrath, loadWave, reinforceWave, type Wave } from '../db/waves.js';
 import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
 import { playerStats, total } from '../sim/battle.js';
 import { ambush, assault, campLoot, campSize, feed, grow, passesCamp, spawnSites, starterSite, addUnits } from '../sim/camps.js';
@@ -107,8 +108,8 @@ export async function createCamp(
 
 // A wave is over: new camps of its front rise near its road.
 async function spawnAfterWave(client: DbClient, data: GameData, world: World, wave: Wave, at: Date): Promise<void> {
-  // A band leaves no camps behind, nor does the Avatar or a burnt camp's survivors.
-  if (wave.bandOf !== null || wave.errand?.kind === 'avatar' || wave.errand?.kind === 'fled') return;
+  // A band leaves no camps behind, nor does the Avatar, the Leshen or a burnt camp's survivors.
+  if (wave.bandOf !== null || isWrath(wave) || wave.errand?.kind === 'fled') return;
   const rules = data.camps.spawn;
   // The limit is per front, so one front's bandits never crowd out another's lairs.
   const active = (await listCamps(client, world.id)).filter((c) => c.front === wave.front && !isEventCamp(c.kind)).length;
@@ -199,11 +200,14 @@ export async function finishWave(
   waveId: number,
   status: 'defeated' | 'dispersed',
   at: Date,
+  // Whose village or army beat it (the Leshen drops an Ember for them).
+  victor: number | null = null,
 ): Promise<void> {
   await endWave(client, waveId, status, at);
   const wave = await loadWave(client, waveId);
   await spawnAfterWave(client, data, world, wave, at);
   await avatarEnds(client, data, world, wave, status, at);
+  await leshenEnds(client, data, world, wave, status, at, victor);
   await bridgeQuest(client, data, world, 'unscathed', at);
   // A bridge quest's host beaten: the quest is done (not beaten: another comes).
   if (await afterErrand(client, data, world, wave, status, at)) await bridgeQuest(client, data, world, 'defense', at);

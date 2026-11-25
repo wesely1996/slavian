@@ -42,6 +42,9 @@ added after it, so later hordes are mostly the newest troops.
 - **The Avatar of Černobog** only appears through the cultist ritual
   ([page 13](13-events-and-raids.md#the-cultist-ritual)). It razes every
   village before it turns on the Holy City.
+- **The Leshen** only rises from a forest a player burnt
+  ([page 13](13-events-and-raids.md#the-leshen-the-wrath-of-nature)), with
+  beasts of the North, and goes about it the same way.
 - **Tiers and the Holy City.** A horde that wins at the Holy City takes more
   Sanctity for higher-tier survivors ([page 1](01-world-and-run.md#sanctity-damage)).
 - **The almanac** lists every enemy with its numbers.
@@ -136,7 +139,7 @@ A horde that beats a village either **raids** it (plunders) or **razes** it
 - **Otherwise it raids:** it carries off up to 30% of the stores, less the
   more of it fell ([page 6](06-battles.md#what-victory-brings)). A raid also
   recruits 10% of its starting strength.
-- **The Avatar of Černobog** always razes ([page 13](13-events-and-raids.md#the-cultist-ritual)).
+- **The Avatar of Černobog** and **the Leshen** always raze ([page 13](13-events-and-raids.md#the-cultist-ritual)).
 
 Armies whose home is razed turn for another village
 ([page 8](08-armies-and-field.md#armies-and-garrisons)).
@@ -179,6 +182,7 @@ Hatred belongs to a **front**, not to one horde. It grows, with no limit, for:
 | A strike on its gathering horde | +0.6 |
 | A map event left undone on its land | +0.2 |
 | One of its camps or lairs burnt by fire | +0.2 |
+| The Leshen felled (the North) | +1 |
 
 - **Spending it.** The front's next horde to set out **takes all of it**, as a
   share added to its attack and defense, and the front's hatred starts again

@@ -122,6 +122,36 @@ Once built, it stands for good:
 - **Safe.** Hordes never come into the mountains, so none burns it, and no
   bandits take it.
 
+## The Leshen, the wrath of nature
+
+Burning a forest angers the woods
+([page 2](02-map-and-movement.md#fire)).
+
+- **When he wakes.** When a fire a player set burns out, there is a **5%
+  chance** the Leshen rises from the ashes on that hex.
+- **His host.** He comes with **30 beasts of the North**, of the kinds the
+  latest horde would bring. Everyone in the world is told where he rose.
+- **How he marches.** Like the
+  [Avatar of Černobog](#the-cultist-ritual):
+  - **Nearest first.** He goes for the nearest village first.
+  - **He razes** every village he beats.
+  - **No end to it.** His rampage lasts until no player village stands
+    (refugee camps aside), and only then does he march on the Holy City.
+  - **No camp.** He never makes camp.
+
+| Leshen, the Wrath of Nature | |
+|---|---|
+| Attack / defense / health | 1,400 / 120 / 4,000 |
+| Speed | 4 |
+| Siege | 40 a round |
+| Sanctity at the Holy City | 50 |
+
+- **Felling him** (beating his whole host) brings:
+  - **2×** the bounty to every member;
+  - **a Svarog's Ember**, always, to the player whose village or army beat
+    the host;
+  - the **North's hatred +100%** ([page 9](09-hordes-and-threats.md#hatred)).
+
 ## Raids beyond the edge
 
 An army can march to the map's edge on a front's side and **raid into the

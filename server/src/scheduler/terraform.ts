@@ -30,6 +30,7 @@ import { threatOf } from '../sim/waves.js';
 import { angerFront, setOutNow } from './waves.js';
 import { deleteRoadsAt, listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
 import { relinkOutposts } from './outposts.js';
+import { maybeLeshen } from './leshen.js';
 import { insertRivers, listRiverEdges, loadLand } from '../db/rivers.js';
 import { edgeKey, edgesMeet, landOf, reachable, type Land } from '../sim/land.js';
 
@@ -334,6 +335,8 @@ export const terraformHandlers: HandlerRegistry = {
       // Under water (a lake): the roads into it are gone.
       if (!roadsCross(data, into) && (await deleteRoadsAt(client, world.id, cell)) > 0) await relinkOutposts(client, data, world, event.dueAt);
     }
+    // A forest a player set alight burnt out: it may wake the Leshen.
+    if (def?.fire && work.generation === 0 && work.villageId !== null) await maybeLeshen(client, data, world, cell, event.dueAt);
     // A river dug: nothing crosses the edge from now on without a bridge
     // (dug across a road, one stands over it).
     if (def?.river && work.toward) await insertRivers(client, world.id, [{ a: cell, b: work.toward, bridge: !!work.bridge, size: 1 }]);
