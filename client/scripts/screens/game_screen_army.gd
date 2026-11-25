@@ -1102,10 +1102,12 @@ func _ruin_search_section(village: Dictionary) -> void:
 	var village_id := int(village.id)
 	var searches: Array = Game.world.get("ruinSearches", []).filter(func(s: Dictionary) -> bool: return int(s.villageId) == village_id)
 	var rules: Dictionary = Game.data.scouting.ruinSearch
-	var duration := TimeUtil.format_duration(float(rules.hours) * 3600.0 / float(Game.world.speed))
+	var speed := float(Game.world.speed)
+	var search_time := TimeUtil.format_duration(float(rules.searchHours) * 3600.0 / speed)
+	var per_hex := TimeUtil.format_duration(2.0 * float(rules.hoursPerHex) * 3600.0 / speed)
 	_panel_body.add_child(UI.with_info(UI.label(tr("Search for ruins"), UI.SMALL_SIZE, UI.MUTED),
-		tr("Scouts search the land up to %d hexes around the village for %s. Each scout gives a %d%% chance of finding a forgotten ruin (at most %d%%), which then waits to be explored.") % [
-			int(rules.range), duration, roundi(float(rules.chancePerScout) * 100.0), roundi(float(rules.maxChance) * 100.0)]
+		tr("Scouts search outward from the village, as far as the map's edge, for the nearest ground where a forgotten ruin may lie. Each scout gives a %d%% chance of finding one (at most %d%%), which then waits to be explored. They are back after %s, and %s more for each hex to the ruin; finding nothing, they comb the land to the map's edge and are away the longest.") % [
+			roundi(float(rules.chancePerScout) * 100.0), roundi(float(rules.maxChance) * 100.0), search_time, per_hex]
 		+ " " + tr("Up to %d scouts go at a time, and you can send a search once every %s (over all your villages).") % [
 			int(rules.get("maxScouts", Game.data.scouting.maxScouts)), TimeUtil.format_duration(float(rules.get("cooldownHours", 0)) * 3600.0 / float(Game.world.speed))]))
 	for search in searches:

@@ -1,4 +1,5 @@
 import { NotFoundError } from '../errors.js';
+import type { PlacedSite } from '../sim/sites.js';
 import type { DbClient } from './pool.js';
 
 // Scouts out searching for a forgotten ruin (data/scouting.json `ruinSearch`).
@@ -12,6 +13,8 @@ export interface RuinSearch {
   returnsAt: Date;
   // The site they found, once back (null: nothing, or not back yet).
   foundSiteId: number | null;
+  // Where they will find a ruin, settled when they set out (null: nowhere).
+  plan: PlacedSite | null;
 }
 
 interface Row {
@@ -23,6 +26,7 @@ interface Row {
   departs_at: Date;
   returns_at: Date;
   found_site_id: number | null;
+  plan: PlacedSite | null;
 }
 
 function fromRow(row: Row): RuinSearch {
@@ -35,6 +39,7 @@ function fromRow(row: Row): RuinSearch {
     departsAt: row.departs_at,
     returnsAt: row.returns_at,
     foundSiteId: row.found_site_id,
+    plan: row.plan ?? null,
   };
 }
 
@@ -43,6 +48,16 @@ export async function insertRuinSearch(client: DbClient, s: Pick<RuinSearch, 'wo
     'INSERT INTO ruin_searches (world_id, village_id, scouts, departs_at, returns_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
     [s.worldId, s.villageId, s.scouts, s.departsAt, s.returnsAt],
   );
+  return fromRow(rows[0]!);
+}
+
+// Where (or whether) the search finds a ruin, and so when it is back.
+export async function planRuinSearch(client: DbClient, id: number, plan: PlacedSite | null, returnsAt: Date): Promise<RuinSearch> {
+  const { rows } = await client.query<Row>('UPDATE ruin_searches SET plan = $2, returns_at = $3 WHERE id = $1 RETURNING *', [
+    id,
+    plan === null ? null : JSON.stringify(plan),
+    returnsAt,
+  ]);
   return fromRow(rows[0]!);
 }
 

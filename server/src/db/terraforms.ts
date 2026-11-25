@@ -11,6 +11,8 @@ export interface Terraform {
   generation: number;
   // A river dug: the neighbouring hex it runs toward (along their edge).
   toward?: Hex | null;
+  // A river dug across a road: a bridge over it comes with it.
+  bridge?: boolean;
 }
 
 interface Row {
@@ -22,6 +24,7 @@ interface Row {
   generation: number;
   tq: number | null;
   tr: number | null;
+  bridge: boolean;
 }
 
 const fromRow = (r: Row): Terraform => ({
@@ -31,6 +34,7 @@ const fromRow = (r: Row): Terraform => ({
   completesAt: r.completes_at,
   generation: r.generation,
   toward: r.tq === null || r.tr === null ? null : hex(r.tq, r.tr),
+  bridge: r.bridge,
 });
 
 export async function listTerraforms(client: DbClient, worldId: number): Promise<Terraform[]> {
@@ -44,7 +48,7 @@ export async function terraformAt(client: DbClient, worldId: number, cell: Hex):
 }
 
 export async function insertTerraform(client: DbClient, worldId: number, work: Terraform): Promise<void> {
-  await client.query('INSERT INTO terraforms (world_id, q, r, action, village_id, completes_at, generation, tq, tr) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+  await client.query('INSERT INTO terraforms (world_id, q, r, action, village_id, completes_at, generation, tq, tr, bridge) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [
     worldId,
     work.cell.q,
     work.cell.r,
@@ -54,6 +58,7 @@ export async function insertTerraform(client: DbClient, worldId: number, work: T
     work.generation,
     work.toward?.q ?? null,
     work.toward?.r ?? null,
+    work.bridge ?? false,
   ]);
 }
 

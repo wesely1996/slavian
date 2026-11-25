@@ -62,9 +62,9 @@ move cost:
 
 | Level | Look | Factor | Outpost bonus | Cost (w/s/g/i) | Build time |
 |---|---|---|---|---|---|
-| 1 | Dirt track with wheel ruts | ×0.5 | +10% | 150 / 250 / 50 / 0 | 30 min |
-| 2 | Stone road (gravel) | ×0.35 | +20% | 200 / 350 / 75 / 25 | 45 min |
-| 3 | Paved road between kerbs | ×0.25 | +30% | 300 / 500 / 100 / 75 | 60 min |
+| 1 | Dirt track with wheel ruts | ×0.5 | +50% | 150 / 250 / 50 / 0 | 30 min |
+| 2 | Stone road (gravel) | ×0.35 | +100% | 200 / 350 / 75 / 25 | 45 min |
+| 3 | Paved road between kerbs | ×0.25 | +200% | 300 / 500 / 100 / 75 | 60 min |
 
 Build times are game time and shrink with world speed.
 
@@ -75,7 +75,7 @@ Build times are game time and shrink with world speed.
 - **Outpost bonus.** An outpost joined to its village by road gathers more.
   The game takes the route with the fewest road steps between the two (of
   those, the best built), and adds the *average* level bonus of its steps to
-  the outpost's yield. Three steps of paved road add +30%.
+  the outpost's yield. Three steps of paved road add +200% (the outpost gathers three times as much); a dirt track and two paved steps add (50 + 200 + 200) ÷ 3 = +150%.
 
 ### Mountain passes
 
@@ -127,7 +127,9 @@ forest, drain a swamp, level hills, burn a forest, make a lake or a
 wetland, or extend a river.
 
 - **Where.** On a hex with no village, outpost, fort, camp or site, and no
-  other work under way there.
+  other work under way there. A river is the exception: it runs along a
+  hex's edge, so it can be dug whatever stands on the hex, a village's own
+  hex included.
 - **Cost.** The work is paid at once, mostly in grain to feed the workers, and
   is done after its game hours.
 
@@ -152,6 +154,12 @@ wetland, or extend a river.
   new edge at one of its corners). Both hexes must be land (plains,
   forest, hills, wooded hills or swamp). Nothing crosses it without a
   bridge.
+- **A river across a road** comes with a bridge. When a road (built or
+  being built) runs along the edge, the river costs a bridge's price on
+  top: 800 wood, 600 stone, 100 grain and 150 iron, for 1,000 wood, 1,000
+  stone, 900 grain and 150 iron in all. When the river is done, the bridge
+  stands over it and the road carries on. No new road can be started along
+  an edge while a river is being dug there without one.
 - **A lake drowns roads.** When a lake is made, every road into its hex is
   gone, built or still being built. No road can be started into a hex
   while it is being flooded.

@@ -308,8 +308,10 @@ const scoutingFileSchema = z.object({
     maxScouts: z.number().int().positive(),
     // Game hours between a player's searches (from when the last set out).
     cooldownHours: z.number().nonnegative(),
-    hours: z.number().positive(),
-    range: z.number().int().positive(),
+    // Away for searchHours + 2 x hoursPerHex for each hex to what they find
+    // (or to the map's edge, finding nothing).
+    searchHours: z.number().nonnegative(),
+    hoursPerHex: z.number().nonnegative(),
     spacing: z.number().int().nonnegative(),
     chancePerScout: z.number().min(0).max(1),
     maxChance: z.number().min(0).max(1),

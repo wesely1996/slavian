@@ -142,10 +142,24 @@ export function siteKey(site: { q: number; r: number }): string {
   return hexKey(hex(site.q, site.r));
 }
 
+// How far from `center` scouts may search: to the map's farthest edge.
+export function ruinSearchReach(center: Hex, radius: number): number {
+  return radius + hexDistance(center, hex(0, 0));
+}
+
+// Real-time ms scouts searching from `center` are away: searchHours, and
+// hoursPerHex there and back for each hex to the ruin they find (finding
+// nothing, they comb the land out to the map's edge).
+export function ruinSearchMs(data: GameData, center: Hex, radius: number, found: Hex | null, worldSpeed: number): number {
+  const rules = data.scouting.ruinSearch;
+  const distance = found ? hexDistance(center, found) : ruinSearchReach(center, radius);
+  return Math.round(((rules.searchHours + 2 * rules.hoursPerHex * distance) * 3_600_000) / worldSpeed);
+}
+
 // What scouts searching around `center` turn up, seeded by the search: a
-// forgotten ruin on free ground within `ruinSearch.range` that suits a kind
-// of site, at least `spacing` from the other sites; null when the roll
-// fails or there is no such ground.
+// forgotten ruin on the nearest free ground (ring by ring, out to the map's
+// edge) that suits a kind of site, at least `spacing` from the unexplored
+// sites (`sites`). Null when the roll fails or there is no such ground.
 export function searchRuin(
   data: GameData,
   input: {
@@ -163,7 +177,8 @@ export function searchRuin(
   if (rng() >= Math.min(rules.maxChance, rules.chancePerScout * input.scouts)) return null;
   const kinds = Object.entries(data.sites.kinds);
   const usable: { cell: Hex; type: TerrainId }[] = [];
-  for (let d = 1; d <= rules.range; d++) {
+  const reach = ruinSearchReach(input.center, input.radius);
+  for (let d = 1; d <= reach && !usable.length; d++) {
     for (const cell of ring(input.center, d)) {
       const type = input.terrain.get(hexKey(cell));
       if (!type || type === 'holy_city' || data.terrain.terrain[type].moveCost === null || input.taken.has(hexKey(cell))) continue;

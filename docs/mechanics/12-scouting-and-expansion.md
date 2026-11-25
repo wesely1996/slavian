@@ -75,11 +75,23 @@ The hero's "Ride beyond the border" quest gives a full report too
 
 Scouts can search for **forgotten ruins**:
 
-- **Who goes.** 2 to 6 scouts leave the village for **3 game hours**.
-- **What they find.** When they come back, they have found a new ancient site
-  with a **15% chance per scout**, at most 90%. The site lies within 5 hexes
-  of the village, on free ground that suits a kind of site, at least 3 hexes
-  from other sites.
+- **Who goes.** 2 to 6 scouts leave the village.
+- **Whether they find one.** They find a new ancient site with a **15% chance
+  per scout**, at most 90% (6 scouts).
+- **Where.** On the nearest free ground to the village that suits a kind of
+  site, at least 3 hexes from other unexplored sites. They search ring by ring
+  outward, as far as the map's edge. Explored sites are spent and don't stand
+  in the way.
+- **How long.** They are back after **1 game hour**, plus **half a game hour
+  for each hex** to the ruin (there and back):
+
+  ```
+  time away = 1 h + 2 × 0.25 h × distance to the ruin
+  ```
+
+  A ruin 2 hexes away: 2 h; 10 hexes away: 6 h. **Finding nothing**, they
+  comb the land out to the map's edge, so they are away as long as a ruin
+  that far off would take.
 - **How often.** A player sends one search at most every **12 game hours**,
   over all their villages.
 

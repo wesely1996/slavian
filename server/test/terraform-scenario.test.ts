@@ -4,6 +4,9 @@
 // land the work doesn't fit, twice on one hex, and on an outpost. Then a
 // wetland made, a lake (drowning the road into it; no road is built while
 // it floods), a river dug on from one already there, and one from the lake.
+// Last, rivers along the village's own hex: one across a road, paid for
+// with a bridge that stands over it when done; another along an edge with
+// no road, where no new road is started while it is dug.
 import { hex, hexDistance, hexKey, neighbors } from '../src/sim/hex.js';
 import { edgeKey, edgesMeet } from '../src/sim/land.js';
 import { MINUTE, scenario } from './scenario.js';
@@ -115,6 +118,25 @@ scenario('terraform-scenario.json', START, async ({ started, play }) => {
   if (spring && downstream) {
     await play({ set: { amounts: { wood: 2000, stone: 2000, grain: 5000, iron: 1000 } } });
     await river({ q: spring.q, r: spring.r, action: 'river', toward: { q: downstream.q, r: downstream.r } });
+    await play({ advance: 30 * MINUTE });
+    await play({ method: 'GET', path: world });
+  }
+
+  // Along the village's own hex (something stands there: still allowed).
+  const around = neighbors(home).filter(isLand);
+  const source = around.find((n) => around.filter((m) => hexDistance(m, n) === 1).length >= 2);
+  if (source) {
+    const [crossing, plain] = around.filter((m) => hexDistance(m, source) === 1);
+    await play({ set: { amounts: { wood: 5000, stone: 5000, grain: 5000, iron: 1000 } } });
+    await play({ set: { river: { a: home, b: source } } });
+    // A road out of the village along the edge the river will take.
+    await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: crossing!.q, r: crossing!.r } } });
+    // Across it: the river comes with a bridge, at a bridge's price more.
+    await river({ q: home.q, r: home.r, action: 'river', toward: { q: crossing!.q, r: crossing!.r } });
+    await play({ method: 'GET', path: world });
+    // From the other bank, along an edge with no road: no road is started there while it is dug.
+    await river({ q: plain!.q, r: plain!.r, action: 'river', toward: { q: home.q, r: home.r } });
+    await play({ method: 'POST', path: '/v1/villages/1/roads', body: { a: { q: home.q, r: home.r }, b: { q: plain!.q, r: plain!.r } } });
     await play({ advance: 30 * MINUTE });
     await play({ method: 'GET', path: world });
   }

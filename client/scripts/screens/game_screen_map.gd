@@ -61,6 +61,10 @@ func _hex_panel() -> void:
 			parts.append(["village", look, village.name, _own_village_panel.bind(village)])
 		else:
 			parts.append(["village", look, village.name, _ally_village_panel.bind(village)])
+		# A river may be dug along a village's hex.
+		var ground: Variant = Game.terrain.get(cell)
+		if ground != null:
+			parts.append(["terraform", "icon/terraform", tr("Reshape the land"), _terraform_panel.bind(String(ground))])
 	parts.append(["river", "feature/reeds", tr("Rivers"), _river_section.bind(cell)])
 	parts.append(["road", "icon/map", tr("Roads"), _road_section.bind(cell)])
 	parts = parts.filter(func(part: Array) -> bool: return _has_content(part[3]))
@@ -1092,6 +1096,9 @@ func _terraform_panel(terrain: String) -> void:
 			return tr("Under way · done in %s") % TimeUtil.format_duration(maxf(0.0, left)))
 		return
 	var options: Array = rules.actions.keys().filter(func(a: String) -> bool: return rules.actions[a].from.has(terrain))
+	# On a village's hex, only a river along its edge.
+	if not Game.village_at(cell).is_empty():
+		options = options.filter(func(a: String) -> bool: return rules.actions[a].get("river", false))
 	if options.is_empty():
 		return
 	# The nearest of your villages within reach does the work.
@@ -1146,8 +1153,15 @@ func _terraform_panel(terrain: String) -> void:
 			var ways := _river_ways(cell, def)
 			if ways.is_empty():
 				info.add_child(UI.label(tr("No river here to dig on from"), UI.SMALL_SIZE, UI.MUTED))
+			var roads := RiverText.roads_at(Game.roads, cell)
 			for toward in ways:
-				var dig := UI.button(tr("Toward (%d, %d)") % [toward.x, toward.y], func() -> void: _terraform(village_id, cell, action, toward))
+				# Across a road: a bridge comes with it, and is paid for too.
+				var bridged: bool = roads.has(toward)
+				var label := tr("Toward (%d, %d) with a bridge") % [toward.x, toward.y] if bridged else tr("Toward (%d, %d)") % [toward.x, toward.y]
+				var dig := UI.wide_button(label, func() -> void: _terraform(village_id, cell, action, toward))
+				if bridged:
+					_panel_body.add_child(UI.rich(tr("A road crosses there: a bridge is built with the river. All in: %s") % UI.costs(LocalTerraform.cost(Game.data, action, true), 26,
+						Ledger.amounts_at(home.resources, Game.server_now())), UI.SMALL_SIZE, UI.MUTED))
 				dig.disabled = problem != ""
 				_panel_body.add_child(dig)
 			continue
@@ -1162,7 +1176,8 @@ func _terraform_panel(terrain: String) -> void:
 			var current: Dictionary = Game.villages.get(village_id, home)
 			start.disabled = not Ledger.can_afford(Ledger.amounts_at(current.resources, Game.server_now()), def.cost)
 			return text)
-	if taken:
+	# A river may run past whatever stands there; the other works may not.
+	if taken and options.any(func(a: String) -> bool: return not rules.actions[a].get("river", false)):
 		_panel_body.add_child(UI.label(tr("Something stands there"), UI.SMALL_SIZE, UI.MUTED))
 	elif held:
 		_panel_body.add_child(UI.label(tr("An army stands there: no fire can be set"), UI.SMALL_SIZE, UI.MUTED))
