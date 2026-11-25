@@ -1750,13 +1750,16 @@ static func build_road(server: LocalServer, world: Dictionary, village: Dictiona
 			mountain_pass = true
 	if LocalHordes.land_of(world).blocked.has(LocalLand.edge_key(a, b)):
 		return LocalVillage.rule("A river lies between; build a bridge first")
-	# Land being flooded (a lake made there) takes no road.
+	var existing := _road_edge(world, a, b)
+	# Land being flooded (a lake made there) takes no road, nor an edge a
+	# river is being dug along (with no bridge, as no road ran there).
 	for end in [a, b]:
 		var work := LocalTerraform.work_at(world, end)
 		var into := LocalTerraform.becomes(server.data, work.action, world.hexes.get(LocalLand.key(end))) if not work.is_empty() else ""
 		if into != "" and not LocalTerraform.roads_cross(server.data, into):
 			return LocalVillage.rule("That land is being flooded")
-	var existing := _road_edge(world, a, b)
+		if existing.is_empty() and work.get("toward") is Vector2i and not work.get("bridge", false) and LocalLand.edge_key(end, work.toward) == LocalLand.edge_key(a, b):
+			return LocalVillage.rule("A river is being dug there")
 	if existing.get("status") == "building":
 		return LocalVillage.rule("A road is being built there")
 	if existing.get("status") == "upgrading":

@@ -2,7 +2,9 @@ import { checkSlots } from '../sim/slots.js';
 import { armySlotsOf } from '../scheduler/slots.js';
 import { unitSpeed } from '../sim/smithing.js';
 import { riverEdgesAt } from '../db/rivers.js';
-import { insertRuinSearch, lastRuinSearches, type RuinSearch } from '../db/ruinSearches.js';
+import { insertRuinSearch, lastRuinSearches, planRuinSearch, type RuinSearch } from '../db/ruinSearches.js';
+import { planRuin } from '../scheduler/scouting.js';
+import { ruinSearchMs } from '../sim/sites.js';
 import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { GameData, Maneuver, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
@@ -277,8 +279,9 @@ export function ruinSearchReadyAt(data: GameData, last: Date, worldSpeed: number
   return new Date(last.getTime() + Math.round((data.scouting.ruinSearch.cooldownHours * 3_600_000) / worldSpeed));
 }
 
-// Sends scouts from the caller's village to search the land around it for a
-// forgotten ruin; they are back after `ruinSearch.hours` game hours.
+// Sends scouts from the caller's village to search the land for a forgotten
+// ruin: where (or whether) they find one is settled now, and they are back
+// the sooner the nearer it lies (scouting.json ruinSearch).
 export async function searchRuinsCommand(
   db: Db,
   deps: SchedulerDeps,
@@ -296,8 +299,11 @@ export async function searchRuinsCommand(
       throw new RuleError('Your scouts searched for ruins not long ago; let them rest before the next search');
     }
     const state = sendAway(deps.data, village.state, SCOUT_UNIT, input.count, input.now, world.speed);
-    const returnsAt = new Date(input.now.getTime() + Math.round((rules.hours * 3_600_000) / world.speed));
-    const search = await insertRuinSearch(client, { worldId: world.id, villageId: village.id, scouts: input.count, departsAt: input.now, returnsAt });
+    const inserted = await insertRuinSearch(client, { worldId: world.id, villageId: village.id, scouts: input.count, departsAt: input.now, returnsAt: input.now });
+    const center = hex(village.q, village.r);
+    const plan = await planRuin(client, deps.data, world, center, input.count, inserted.id);
+    const returnsAt = new Date(input.now.getTime() + ruinSearchMs(deps.data, center, world.radius ?? 0, plan, world.speed));
+    const search = await planRuinSearch(client, inserted.id, plan, returnsAt);
     const payload: RuinSearchPayload = { searchId: search.id };
     await scheduleEvent(client, world.id, returnsAt, 'ruin_search', payload);
     await notifyWorld(client, { worldId: world.id, type: 'world' });

@@ -124,9 +124,24 @@ static func with_ember(find: Dictionary) -> bool:
 	return find.get("type") == "ember" or find.get("ember", false) == true
 
 
+## How far from `center` scouts may search: to the map's farthest edge
+## (sim/sites.ts ruinSearchReach).
+static func ruin_search_reach(center: Vector2i, radius: int) -> int:
+	return radius + HexMath.distance(center, Vector2i.ZERO)
+
+
+## Real-time ms scouts searching from `center` are away (sim/sites.ts
+## ruinSearchMs): `found` is the ruin's cell, or null finding nothing.
+static func ruin_search_ms(data: Dictionary, center: Vector2i, radius: int, found: Variant, world_speed: float) -> int:
+	var rules: Dictionary = data.scouting.ruinSearch
+	var distance := HexMath.distance(center, found) if found is Vector2i else ruin_search_reach(center, radius)
+	return LocalWaves.js_round((float(rules.searchHours) + 2.0 * float(rules.hoursPerHex) * distance) * 3600000.0 / world_speed)
+
+
 ## What scouts searching around `center` turn up, seeded by the search
-## (sim/sites.ts searchRuin): a placed site, or {} when the roll fails or
-## there is no free ground for one. `taken` is {"q,r": true}; `sites` cells.
+## (sim/sites.ts searchRuin): a placed site on the nearest free ground, or
+## {} when the roll fails or there is none. `taken` is {"q,r": true};
+## `sites` the unexplored sites' cells.
 static func search_ruin(data: Dictionary, terrain: Dictionary, radius: int, center: Vector2i, taken: Dictionary, sites: Array, scouts: int, seed_value: int) -> Dictionary:
 	var rules: Dictionary = data.scouting.ruinSearch
 	var rng := LocalRng.new((seed_value ^ 0x7417) & MASK)
@@ -134,7 +149,10 @@ static func search_ruin(data: Dictionary, terrain: Dictionary, radius: int, cent
 		return {}
 	var kinds: Dictionary = data.sites.kinds
 	var usable: Array = []
-	for d in range(1, int(rules.range) + 1):
+	# The nearest free ground, ring by ring out to the map's edge.
+	for d in range(1, ruin_search_reach(center, radius) + 1):
+		if not usable.is_empty():
+			break
 		for cell in HexMath.ring(center, d):
 			var key := "%d,%d" % [cell.x, cell.y]
 			var type: String = terrain.get(key, "")

@@ -13,8 +13,11 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { finishRuinSearch, loadRuinSearch } from '../db/ruinSearches.js';
 import { insertSites, listSites, siteAt } from '../db/sites.js';
 import { loadHexes } from '../db/worlds.js';
-import { hex } from '../sim/hex.js';
-import { searchRuin } from '../sim/sites.js';
+import { hex, hexKey, type Hex } from '../sim/hex.js';
+import { searchRuin, type PlacedSite } from '../sim/sites.js';
+import type { World } from '../db/worlds.js';
+import type { GameData } from '../data/index.js';
+import type { DbClient } from '../db/pool.js';
 import { takenHexes } from './horde.js';
 import { tell } from './notices.js';
 
@@ -22,6 +25,23 @@ export const missionPayload = z.object({ missionId: z.number().int() });
 export const ruinSearchPayload = z.object({ searchId: z.number().int() });
 export type RuinSearchPayload = z.infer<typeof ruinSearchPayload>;
 export type MissionPayload = z.infer<typeof missionPayload>;
+
+// Where scouts searching from `center` will find a ruin (null: nowhere),
+// seeded by the search.
+export async function planRuin(client: DbClient, data: GameData, world: World, center: Hex, scouts: number, searchId: number): Promise<PlacedSite | null> {
+  if (world.radius === null) return null;
+  const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const));
+  return searchRuin(data, {
+    terrain,
+    radius: world.radius,
+    center,
+    taken: await takenHexes(client, world.id),
+    // Explored ruins are spent: new ones may lie near them.
+    sites: (await listSites(client, world.id)).filter((s) => s.status === 'unexplored').map((s) => hex(s.q, s.r)),
+    scouts,
+    seed: (world.seed ^ Math.imul(searchId, 0x2c1b3c6d)) >>> 0,
+  });
+}
 
 export const scoutingHandlers: HandlerRegistry = {
   // Scouts back from searching for ruins: with a new site, or nothing.
@@ -31,17 +51,17 @@ export const scoutingHandlers: HandlerRegistry = {
     const village = await loadVillage(client, search.villageId).catch(() => null);
     let siteId: number | null = null;
     if (village && world.radius !== null) {
-      const terrain = new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const));
-      const sites = await listSites(client, world.id);
-      const placed = searchRuin(data, {
-        terrain,
-        radius: world.radius,
-        center: hex(village.q, village.r),
-        taken: await takenHexes(client, world.id),
-        sites: sites.map((s) => hex(s.q, s.r)),
-        scouts: search.scouts,
-        seed: (world.seed ^ Math.imul(search.id, 0x2c1b3c6d)) >>> 0,
-      });
+      // The ruin they found when they set out. Were its ground taken since
+      // (or a search sent before plans were kept), the same search again.
+      let placed = search.plan;
+      const cell = placed ? hexKey(hex(placed.q, placed.r)) : '';
+      if (
+        !placed ||
+        (await takenHexes(client, world.id)).has(cell) ||
+        (await listSites(client, world.id)).some((s) => hexKey(hex(s.q, s.r)) === cell)
+      ) {
+        placed = await planRuin(client, data, world, hex(village.q, village.r), search.scouts, search.id);
+      }
       if (placed) {
         await insertSites(client, world.id, [placed]);
         siteId = (await siteAt(client, world.id, placed.q, placed.r))?.id ?? null;

@@ -67,7 +67,7 @@ Where production bonuses come from:
 | Lake | Fishing boat | 8 grain |
 
 On top of that:
-- **Roads.** The road bonus adds up to +30%, half that over roads a fire damaged ([page 2](02-map-and-movement.md#roads)).
+- **Roads.** The road bonus adds up to +200%, half that over roads a fire damaged ([page 2](02-map-and-movement.md#roads)).
 - **Research.** `outpostYield`: Frontier Steadings +20%, Frontier Tithes +25%.
 - **Sieges.** Outposts produce nothing while their village is besieged.
 - **Hordes.** A marching horde **burns every outpost within its raid reach of

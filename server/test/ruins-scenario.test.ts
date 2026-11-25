@@ -1,7 +1,8 @@
 // Scouts searching for forgotten ruins in a solo session: searches refused
 // for too few or too many scouts, or scouts the village doesn't have; one
 // party sent out, another refused until the player's scouts have rested,
-// then more, coming back with a new site or with nothing.
+// then more, coming back with a new site or with nothing: away the
+// longer the farther off the ruin they find, longest finding none.
 import { MINUTE, scenario } from './scenario.js';
 
 const START = { seed: 5151, at: '2026-06-01T08:00:00.000Z', name: 'Ruins', displayName: 'You', speed: 50, difficulty: 'baron' };
@@ -28,7 +29,7 @@ scenario('ruins-scenario.json', START, async ({ play }) => {
   await search(3);
   await play({ method: 'GET', path: '/v1/worlds/-1' });
   await play({ advance: 10 * MINUTE });
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     await search(5);
     await play({ advance: 15 * MINUTE });
   }

@@ -629,7 +629,7 @@
      "scouts": 2,
      "status": "out",
      "departsAt": "2026-06-01T08:40:00.000Z",
-     "returnsAt": "2026-06-01T08:43:36.000Z",
+     "returnsAt": "2026-06-01T08:48:24.000Z",
      "siteId": null
     },
     "serverTime": "2026-06-01T08:40:00.000Z"
@@ -1043,7 +1043,7 @@
       "scouts": 2,
       "status": "out",
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "returnsAt": "2026-06-01T08:43:36.000Z",
+      "returnsAt": "2026-06-01T08:48:24.000Z",
       "siteId": null
      }
     ],
@@ -3399,10 +3399,10 @@
       },
       "queue": [],
       "garrison": {
-       "scout": 5
+       "scout": 3
       },
       "away": {
-       "scout": 0
+       "scout": 2
       },
       "stance": "balanced",
       "maneuver": "encircle",
@@ -3422,15 +3422,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 337.5,
-        "wood": 572.5,
-        "grain": 616.7416666666667,
-        "stone": 535
+        "iron": 330,
+        "wood": 550,
+        "grain": 604.1666666666666,
+        "stone": 520
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 332.5,
+        "grain": 251.5,
         "stone": 300
        },
        "capacity": {
@@ -3439,7 +3439,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:43:36.000Z"
+       "settledAt": "2026-06-01T08:40:00.000Z"
       }
      }
     ],
@@ -3606,9 +3606,9 @@
       "id": 1,
       "villageId": 1,
       "scouts": 2,
-      "status": "done",
+      "status": "out",
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "returnsAt": "2026-06-01T08:43:36.000Z",
+      "returnsAt": "2026-06-01T08:48:24.000Z",
       "siteId": null
      }
     ],
@@ -5933,7 +5933,7 @@
       "amounts": {
        "wood": 662.5,
        "stone": 595,
-       "grain": 683.2416666666667,
+       "grain": 676.4916666666666,
        "iron": 367.5
       },
       "ratesPerHour": {
@@ -5957,7 +5957,7 @@
      "scouts": 5,
      "status": "out",
      "departsAt": "2026-06-01T08:55:00.000Z",
-     "returnsAt": "2026-06-01T08:58:36.000Z",
+     "returnsAt": "2026-06-01T09:03:24.000Z",
      "siteId": null
     },
     "serverTime": "2026-06-01T08:55:00.000Z"
@@ -6134,7 +6134,7 @@
       "amounts": {
        "wood": 775,
        "stone": 670,
-       "grain": 756.2416666666667,
+       "grain": 732.6166666666666,
        "iron": 405
       },
       "ratesPerHour": {
@@ -6158,7 +6158,7 @@
      "scouts": 5,
      "status": "out",
      "departsAt": "2026-06-01T09:10:00.000Z",
-     "returnsAt": "2026-06-01T09:13:36.000Z",
+     "returnsAt": "2026-06-01T09:18:24.000Z",
      "siteId": null
     },
     "serverTime": "2026-06-01T09:10:00.000Z"
@@ -6335,7 +6335,7 @@
       "amounts": {
        "wood": 887.5,
        "stone": 745,
-       "grain": 829.2416666666667,
+       "grain": 788.7416666666666,
        "iron": 442.5
       },
       "ratesPerHour": {
@@ -6359,10 +6359,211 @@
      "scouts": 5,
      "status": "out",
      "departsAt": "2026-06-01T09:25:00.000Z",
-     "returnsAt": "2026-06-01T09:28:36.000Z",
+     "returnsAt": "2026-06-01T09:33:24.000Z",
      "siteId": null
     },
     "serverTime": "2026-06-01T09:25:00.000Z"
+   }
+  },
+  {
+   "advance": 900000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/scout/ruins",
+   "body": {
+    "count": 5
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Mirogost",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "scout_lodge"
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "elder_hall": 1,
+      "scout_lodge": 1
+     },
+     "queue": [],
+     "garrison": {
+      "scout": 0
+     },
+     "away": {
+      "scout": 5
+     },
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 1000,
+       "stone": 820,
+       "grain": 844.8666666666666,
+       "iron": 480
+      },
+      "ratesPerHour": {
+       "wood": 450,
+       "stone": 300,
+       "grain": 130,
+       "iron": 150
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T09:40:00.000Z"
+     }
+    },
+    "search": {
+     "id": 5,
+     "villageId": 1,
+     "scouts": 5,
+     "status": "out",
+     "departsAt": "2026-06-01T09:40:00.000Z",
+     "returnsAt": "2026-06-01T09:41:48.000Z",
+     "siteId": null
+    },
+    "serverTime": "2026-06-01T09:40:00.000Z"
    }
   },
   {
@@ -6413,7 +6614,7 @@
        "used": 0,
        "cap": 40
       },
-      "ruinSearchReadyAt": "2026-06-01T09:39:24.000Z",
+      "ruinSearchReadyAt": "2026-06-01T09:54:24.000Z",
       "research": {
        "points": 0,
        "perHour": 0,
@@ -6580,10 +6781,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 450,
-        "wood": 910,
-        "grain": 835.7416666666667,
-        "stone": 760
+        "iron": 482.5,
+        "wood": 1000,
+        "grain": 847.0333333333332,
+        "stone": 825
        },
        "ratesPerHour": {
         "iron": 150,
@@ -6597,7 +6798,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:28:36.000Z"
+       "settledAt": "2026-06-01T09:41:48.000Z"
       }
      }
     ],
@@ -6761,12 +6962,21 @@
     "scouting": [],
     "ruinSearches": [
      {
+      "id": 5,
+      "villageId": 1,
+      "scouts": 5,
+      "status": "done",
+      "departsAt": "2026-06-01T09:40:00.000Z",
+      "returnsAt": "2026-06-01T09:41:48.000Z",
+      "siteId": 8
+     },
+     {
       "id": 4,
       "villageId": 1,
       "scouts": 5,
       "status": "done",
       "departsAt": "2026-06-01T09:25:00.000Z",
-      "returnsAt": "2026-06-01T09:28:36.000Z",
+      "returnsAt": "2026-06-01T09:33:24.000Z",
       "siteId": null
      },
      {
@@ -6775,7 +6985,7 @@
       "scouts": 5,
       "status": "done",
       "departsAt": "2026-06-01T09:10:00.000Z",
-      "returnsAt": "2026-06-01T09:13:36.000Z",
+      "returnsAt": "2026-06-01T09:18:24.000Z",
       "siteId": null
      },
      {
@@ -6784,7 +6994,7 @@
       "scouts": 5,
       "status": "done",
       "departsAt": "2026-06-01T08:55:00.000Z",
-      "returnsAt": "2026-06-01T08:58:36.000Z",
+      "returnsAt": "2026-06-01T09:03:24.000Z",
       "siteId": null
      },
      {
@@ -6793,7 +7003,7 @@
       "scouts": 2,
       "status": "done",
       "departsAt": "2026-06-01T08:40:00.000Z",
-      "returnsAt": "2026-06-01T08:43:36.000Z",
+      "returnsAt": "2026-06-01T08:48:24.000Z",
       "siteId": null
      }
     ],
@@ -6824,27 +7034,7 @@
       "quest": null,
       "offers": [
        {
-        "id": "10:hoard",
-        "kind": "hoard",
-        "front": null,
-        "siteId": null,
-        "distance": 4,
-        "hours": 6.333333333333333,
-        "xp": 30,
-        "risk": 0.2
-       },
-       {
-        "id": "10:tribute",
-        "kind": "tribute",
-        "front": null,
-        "siteId": null,
-        "distance": 6,
-        "hours": 7,
-        "xp": 25,
-        "risk": 0.1
-       },
-       {
-        "id": "10:ambush",
+        "id": "11:ambush",
         "kind": "ambush",
         "front": "south",
         "siteId": null,
@@ -6852,6 +7042,26 @@
         "hours": 5.666666666666667,
         "xp": 40,
         "risk": 0.25
+       },
+       {
+        "id": "11:ruins",
+        "kind": "ruins",
+        "front": null,
+        "siteId": 8,
+        "distance": 1,
+        "hours": 4.333333333333333,
+        "xp": 35,
+        "risk": 0.15
+       },
+       {
+        "id": "11:tribute",
+        "kind": "tribute",
+        "front": null,
+        "siteId": null,
+        "distance": 6,
+        "hours": 7,
+        "xp": 25,
+        "risk": 0.1
        }
       ],
       "armyQuest": null
@@ -6979,6 +7189,20 @@
       "hard": true,
       "endsAt": null,
       "quest": "relic"
+     },
+     {
+      "id": 8,
+      "kind": "old_hillfort",
+      "q": -1,
+      "r": 2,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
      }
     ],
     "lore": [],
@@ -8982,7 +9206,7 @@
      "roads": [],
      "terraforms": []
     },
-    "serverTime": "2026-06-01T09:40:00.000Z"
+    "serverTime": "2026-06-01T09:55:00.000Z"
    }
   },
   {
@@ -8992,12 +9216,21 @@
    "response": {
     "notifications": [
      {
+      "id": 13,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Scouts from Mirogost found a forgotten ruin",
+      "body": "A Old Hillfort lies at (-1, 2). Send an army to explore it.",
+      "createdAt": "2026-06-01T09:41:48.000Z",
+      "read": false
+     },
+     {
       "id": 12,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T09:28:36.000Z",
+      "createdAt": "2026-06-01T09:33:24.000Z",
       "read": false
      },
      {
@@ -9024,7 +9257,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T09:13:36.000Z",
+      "createdAt": "2026-06-01T09:18:24.000Z",
       "read": false
      },
      {
@@ -9033,7 +9266,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:58:36.000Z",
+      "createdAt": "2026-06-01T09:03:24.000Z",
       "read": false
      },
      {
@@ -9051,7 +9284,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:43:36.000Z",
+      "createdAt": "2026-06-01T08:48:24.000Z",
       "read": false
      },
      {
@@ -9100,8 +9333,8 @@
       "read": false
      }
     ],
-    "unread": 12,
-    "serverTime": "2026-06-01T09:40:00.000Z"
+    "unread": 13,
+    "serverTime": "2026-06-01T09:55:00.000Z"
    }
   },
   {
@@ -9111,12 +9344,21 @@
    "response": {
     "notifications": [
      {
+      "id": 13,
+      "kind": "site",
+      "tier": "digest",
+      "title": "Scouts from Mirogost found a forgotten ruin",
+      "body": "A Old Hillfort lies at (-1, 2). Send an army to explore it.",
+      "createdAt": "2026-06-01T09:41:48.000Z",
+      "read": false
+     },
+     {
       "id": 12,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T09:28:36.000Z",
+      "createdAt": "2026-06-01T09:33:24.000Z",
       "read": false
      },
      {
@@ -9143,7 +9385,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T09:13:36.000Z",
+      "createdAt": "2026-06-01T09:18:24.000Z",
       "read": false
      },
      {
@@ -9152,7 +9394,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:58:36.000Z",
+      "createdAt": "2026-06-01T09:03:24.000Z",
       "read": false
      },
      {
@@ -9170,7 +9412,7 @@
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
-      "createdAt": "2026-06-01T08:43:36.000Z",
+      "createdAt": "2026-06-01T08:48:24.000Z",
       "read": false
      },
      {
@@ -9219,8 +9461,8 @@
       "read": false
      }
     ],
-    "unread": 12,
-    "serverTime": "2026-06-01T09:40:00.000Z"
+    "unread": 13,
+    "serverTime": "2026-06-01T09:55:00.000Z"
    }
   }
  ]

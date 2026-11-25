@@ -626,13 +626,15 @@ export async function buildRoad(client: DbClient, data: GameData, world: World, 
     if (def.moveCost === null) pass = true;
   }
   if (land.blocked?.has(edgeKey(a, b))) throw new RuleError('A river lies between; build a bridge first');
-  // Land being flooded (a lake made there) takes no road.
+  const existing = await roadEdge(client, world.id, a, b);
+  // Land being flooded (a lake made there) takes no road, nor an edge a
+  // river is being dug along (with no bridge, as no road ran there).
   for (const end of [a, b]) {
     const work = await terraformAt(client, world.id, end);
     const into = work ? becomes(data, work.action, land.get(`${end.q},${end.r}`)) : null;
     if (into && !roadsCross(data, into)) throw new RuleError('That land is being flooded');
+    if (!existing && work?.toward && !work.bridge && edgeKey(end, work.toward) === edgeKey(a, b)) throw new RuleError('A river is being dug there');
   }
-  const existing = await roadEdge(client, world.id, a, b);
   if (existing?.status === 'building') throw new RuleError('A road is being built there');
   if (existing?.status === 'upgrading') throw new RuleError('That road is being improved');
   if (existing?.status === 'repairing') throw new RuleError('That road is being repaired');

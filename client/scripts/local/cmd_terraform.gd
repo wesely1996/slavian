@@ -12,11 +12,13 @@ static func problem(data: Dictionary, action: String, terrain: Variant, distance
 	var def: Dictionary = rules.actions.get(action, {})
 	if def.is_empty():
 		return "No such work"
-	if taken:
+	# A river runs along the hex's edge: whatever stands there may stay.
+	if taken and not def.get("river", false):
 		return "Something stands there"
 	if def.has("fire") and held:
 		return "An army stands there"
-	if not in_zone and (distance < 1 or distance > int(rules.range)):
+	# A river may run along the village's own hex too.
+	if not in_zone and (distance < (0 if def.get("river", false) else 1) or distance > int(rules.range)):
 		return "Land is reshaped within %d hexes of the village or in its forts' zones" % int(rules.range)
 	if busy:
 		return "Work is already under way there"
@@ -48,7 +50,7 @@ static func work_at(world: Dictionary, cell: Vector2i) -> Dictionary:
 
 ## reshapeProblem: why a river can't be dug along cell|toward, or a lake
 ## made at `cell` ("" when it can).
-static func reshape_problem(data: Dictionary, world: Dictionary, action: String, cell: Vector2i, toward: Variant) -> String:
+static func reshape_problem(data: Dictionary, world: Dictionary, action: String, cell: Vector2i, toward: Variant, bridged := false) -> String:
 	var def: Dictionary = data.field.terraform.actions.get(action, {})
 	if def.is_empty():
 		return ""
@@ -67,10 +69,12 @@ static func reshape_problem(data: Dictionary, world: Dictionary, action: String,
 		var from_lake := HexMath.neighbors(cell).any(func(n: Vector2i) -> bool: return HexMath.distance(n, toward) == 1 and land.terrain.get(LocalLand.key(n)) == "lake")
 		if not from_lake and not world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edges_meet(e.a, e.b, cell, toward)):
 			return "A river is dug on from a river or a lake"
-		after = land.duplicate()
-		var blocked: Dictionary = land.blocked.duplicate()
-		blocked[key] = true
-		after.blocked = blocked
+		# A river dug across a road comes with a bridge: it cuts nothing off.
+		if not bridged:
+			after = land.duplicate()
+			var blocked: Dictionary = land.blocked.duplicate()
+			blocked[key] = true
+			after.blocked = blocked
 	else:
 		var terrain: Variant = land.terrain.get(LocalLand.key(cell))
 		var into: Variant = def.from.get(terrain) if terrain != null else null
@@ -89,6 +93,26 @@ static func reshape_problem(data: Dictionary, world: Dictionary, action: String,
 	return ""
 
 
+## Whether a road runs along cell|toward: a river dug there brings a bridge.
+static func crosses_road(roads: Array, cell: Vector2i, toward: Variant) -> bool:
+	if not (toward is Vector2i):
+		return false
+	var key := LocalLand.edge_key(cell, toward)
+	return roads.any(func(e: Dictionary) -> bool: return LocalLand.edge_key(Vector2i(e.a), Vector2i(e.b)) == key)
+
+
+## terraformCost: a river dug across a road (`bridged`) adds the bridge
+## over it (field.json bridge.cost).
+static func cost(data: Dictionary, action: String, bridged: bool) -> Dictionary:
+	var def: Dictionary = data.field.terraform.actions[action]
+	if not def.get("river", false) or not bridged:
+		return def.cost
+	var out := {}
+	for kind in def.cost:
+		out[kind] = float(def.cost[kind]) + float(data.field.bridge.cost.get(kind, 0))
+	return out
+
+
 ## startTerraform: the work under way, or {"error"} / {"missing"}.
 static func start(server: LocalServer, world: Dictionary, village: Dictionary, cell: Vector2i, action: String, at: int, toward: Variant = null) -> Dictionary:
 	var data := server.data
@@ -103,11 +127,13 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 		LocalForts.in_zone(data, world.forts, int(village.id), cell))
 	if reason != "":
 		return LocalVillage.rule(reason)
-	var reshaping := reshape_problem(data, world, action, cell, toward)
+	var def: Dictionary = data.field.terraform.actions[action]
+	# A river dug across a road: a bridge carries the road over it.
+	var bridged: bool = def.get("river", false) and crosses_road(world.roads, cell, toward)
+	var reshaping := reshape_problem(data, world, action, cell, toward, bridged)
 	if reshaping != "":
 		return LocalVillage.rule(reshaping)
-	var def: Dictionary = data.field.terraform.actions[action]
-	var ledger := LocalLedger.spend(village.state.ledger, at, def.cost)
+	var ledger := LocalLedger.spend(village.state.ledger, at, cost(data, action, bridged))
 	if ledger.has("missing"):
 		return ledger
 	village.state.ledger = ledger
@@ -115,6 +141,7 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, c
 	var work := {"cell": cell, "action": action, "villageId": village.id, "completesAt": LocalTime.ms(at + float(def.hours) * 3600000.0 / world.speed), "generation": 0}
 	if def.get("river", false):
 		work.toward = toward
+		work.bridge = bridged
 	world.terraforms.append(work)
 	server.schedule(world, work.completesAt, "terraform_done", {"q": cell.x, "r": cell.y})
 	if def.has("fire"):
@@ -300,7 +327,8 @@ static func on_done(server: LocalServer, world: Dictionary, event: Dictionary, c
 		var key := LocalLand.edge_key(cell, work.toward)
 		if not world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edge_key(e.a, e.b) == key):
 			var ends := LocalServer._ordered(cell, work.toward)
-			world.rivers.append({"a": ends[0], "b": ends[1], "crossing": "none", "size": 1, "builtBy": null, "completesAt": null})
+			# Dug across a road: a bridge stands over it.
+			world.rivers.append({"a": ends[0], "b": ends[1], "crossing": "standing" if work.get("bridge", false) else "none", "size": 1, "builtBy": null, "completesAt": null})
 	if work.villageId != null:
 		var village := server.find_village(world, int(work.villageId))
 		# A fire tells only the one who set it, where they set it.

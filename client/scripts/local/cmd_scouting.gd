@@ -367,12 +367,29 @@ static func search_ruins(server: LocalServer, world: Dictionary, village: Dictio
 	var state := LocalVillage.send_away(data, village.state, SCOUT, int(count), now, world.speed)
 	if state.has("error"):
 		return state
+	# Where (or whether) they find a ruin is settled now: the nearer, the sooner back.
+	var center := Vector2i(village.q, village.r)
+	var plan := plan_ruin(server, world, center, int(count), int(world.next.ruinSearch))
+	var found: Variant = Vector2i(int(plan.q), int(plan.r)) if not plan.is_empty() else null
 	var search := {"id": world.next.ruinSearch, "villageId": village.id, "scouts": int(count), "status": "out", "departsAt": now,
-		"returnsAt": now + LocalWaves.js_round(float(rules.hours) * 3600000.0 / float(world.speed)), "foundSiteId": null}
+		"returnsAt": now + LocalSites.ruin_search_ms(data, center, int(world.radius), found, float(world.speed)), "foundSiteId": null, "plan": plan}
 	world.next.ruinSearch += 1
 	world.ruinSearches.append(search)
 	server.schedule(world, int(search.returnsAt), "ruin_search", {"searchId": search.id})
 	return {"state": state, "search": search}
+
+
+## Where scouts searching from `center` will find a ruin ({}: nowhere),
+## seeded by the search (scheduler/scouting.ts planRuin).
+static func plan_ruin(server: LocalServer, world: Dictionary, center: Vector2i, scouts: int, search_id: int) -> Dictionary:
+	var taken := LocalBattles.taken_hexes(world)
+	for f in world.forts:
+		taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+	var seed_value: int = (int(world.seed) ^ LocalRng.imul(search_id, 0x2c1b3c6d)) & 0xffffffff
+	# Explored ruins are spent: new ones may lie near them.
+	return LocalSites.search_ruin(server.data, world.hexes, int(world.radius), center, taken,
+		world.sites.filter(func(s: Dictionary) -> bool: return s.status == "unexplored").map(func(s: Dictionary) -> Vector2i: return Vector2i(s.q, s.r)),
+		scouts, seed_value)
 
 
 ## Scouts back from searching: with a new site, or nothing (scheduler/scouting.ts ruin_search).
@@ -386,12 +403,18 @@ static func on_ruin_search(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	var village := server.find_village(world, int(search.villageId))
 	if not village.is_empty():
-		var taken := LocalBattles.taken_hexes(world)
-		for f in world.forts:
-			taken[LocalLand.key(Vector2i(f.q, f.r))] = true
-		var seed_value: int = (int(world.seed) ^ LocalRng.imul(int(search.id), 0x2c1b3c6d)) & 0xffffffff
-		var placed := LocalSites.search_ruin(data, world.hexes, int(world.radius), Vector2i(village.q, village.r), taken,
-			world.sites.map(func(s: Dictionary) -> Vector2i: return Vector2i(s.q, s.r)), int(search.scouts), seed_value)
+		# The ruin they found when they set out. Were its ground taken since
+		# (or a search sent before plans were kept), the same search again.
+		var placed: Dictionary = search.get("plan", {})
+		var redo := placed.is_empty()
+		if not redo:
+			var cell := Vector2i(int(placed.q), int(placed.r))
+			var taken := LocalBattles.taken_hexes(world)
+			for f in world.forts:
+				taken[LocalLand.key(Vector2i(f.q, f.r))] = true
+			redo = taken.has(LocalLand.key(cell)) or world.sites.any(func(s: Dictionary) -> bool: return int(s.q) == cell.x and int(s.r) == cell.y)
+		if redo:
+			placed = plan_ruin(server, world, Vector2i(village.q, village.r), int(search.scouts), int(search.id))
 		if not placed.is_empty():
 			search.foundSiteId = world.next.site
 			world.sites.append({"id": world.next.site, "kind": placed.kind, "q": placed.q, "r": placed.r, "guardians": placed.guardians, "guardiansSeen": false,
