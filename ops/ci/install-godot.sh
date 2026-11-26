@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Installs Godot (and, with --android, its Android export templates) on a CI
-# runner and puts `godot` on the PATH. Re-runs are cheap when ~/godot and the
-# templates directory are cached.
+# Installs Godot (and, with --android or --windows, those export templates)
+# on a CI runner and puts `godot` on the PATH. Re-runs are cheap when ~/godot
+# and the templates directory are cached.
 #
-#   GODOT_VERSION=4.5.1 ops/ci/install-godot.sh [--android]
+#   GODOT_VERSION=4.5.1 ops/ci/install-godot.sh [--android | --windows]
 set -euo pipefail
 
 version=${GODOT_VERSION:?GODOT_VERSION is required}
@@ -22,13 +22,16 @@ if [[ -n "${GITHUB_PATH:-}" ]]; then
   echo "$dir" >> "$GITHUB_PATH"
 fi
 
-if [[ "${1:-}" == "--android" ]]; then
-  templates="${XDG_DATA_HOME:-$HOME/.local/share}/godot/export_templates/${version}.stable"
-  if [[ ! -f "$templates/android_debug.apk" ]]; then
-    mkdir -p "$templates"
-    curl -sSfL -o "$tmp/templates.tpz" "$base/Godot_v${version}-stable_export_templates.tpz"
-    # Only the Android templates; the full archive is >1 GB.
-    unzip -q -j -o "$tmp/templates.tpz" 'templates/android_*' 'templates/version.txt' -d "$templates"
-    rm "$tmp/templates.tpz"
-  fi
+templates="${XDG_DATA_HOME:-$HOME/.local/share}/godot/export_templates/${version}.stable"
+case "${1:-}" in
+  --android) wanted=("android_debug.apk" 'templates/android_*') ;;
+  --windows) wanted=("windows_release_x86_64.exe" 'templates/windows_*_x86_64*') ;;
+  *) wanted=() ;;
+esac
+if (( ${#wanted[@]} )) && [[ ! -f "$templates/${wanted[0]}" ]]; then
+  mkdir -p "$templates"
+  curl -sSfL -o "$tmp/templates.tpz" "$base/Godot_v${version}-stable_export_templates.tpz"
+  # Only the templates asked for; the full archive is >1 GB.
+  unzip -q -j -o "$tmp/templates.tpz" "${wanted[1]}" 'templates/version.txt' -d "$templates"
+  rm "$tmp/templates.tpz"
 fi

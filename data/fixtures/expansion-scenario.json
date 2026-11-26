@@ -208,38 +208,6 @@
     "plot": "c3",
     "building": "barracks"
    },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":190,\"stone\":62,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 190,
-     "stone": 62,
-     "grain": 0,
-     "iron": 0
-    }
-   }
-  },
-  {
-   "set": {
-    "amounts": {
-     "wood": 1000,
-     "stone": 1000,
-     "grain": 1000,
-     "iron": 1000
-    }
-   }
-  },
-  {
-   "advance": 1200000
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/train",
-   "body": {
-    "unit": "settler",
-    "count": 1
-   },
    "status": 200,
    "response": {
     "village": {
@@ -263,8 +231,8 @@
        "building": null
       },
       "c2": {
-       "level": 1,
-       "building": "settlers_lodge"
+       "level": 0,
+       "building": null
       },
       "c3": {
        "level": 0,
@@ -372,6 +340,220 @@
       }
      },
      "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "c2",
+       "building": "settlers_lodge",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:06.000Z"
+      },
+      {
+       "plot": "c3",
+       "building": "barracks",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:06.000Z",
+       "completesAt": "2026-06-01T08:00:13.640Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 128,
+       "wood": 20,
+       "grain": 228,
+       "stone": 106
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
+   }
+  },
+  {
+   "advance": 1200000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "settler",
+    "count": 1
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "settlers_lodge"
+      },
+      "c3": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -471,8 +653,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -576,6 +758,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -671,8 +854,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -776,6 +959,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -883,8 +1067,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -988,6 +1172,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -1083,8 +1268,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -1188,6 +1373,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -1286,8 +1472,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -1391,6 +1577,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -1485,8 +1672,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -1590,6 +1777,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -1689,8 +1877,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -1794,6 +1982,7 @@
       }
      },
      "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -1993,8 +2182,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -2098,6 +2287,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
       },
@@ -4818,8 +5008,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -4924,6 +5114,7 @@
      },
      "levels": {
       "market": 1,
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -5057,8 +5248,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -5163,6 +5354,7 @@
      },
      "levels": {
       "market": 1,
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -5316,8 +5508,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -5422,6 +5614,7 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
       },
@@ -8069,19 +8262,6 @@
     "unit": "spearman",
     "count": 4
    },
-   "status": 400,
-   "response": {
-    "error": "rule",
-    "message": "Spearman needs Barracks level 1"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/build",
-   "body": {
-    "plot": "c4",
-    "building": "caravan_yard"
-   },
    "status": 200,
    "response": {
     "village": {
@@ -8109,8 +8289,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 0,
@@ -8215,6 +8395,207 @@
      },
      "levels": {
       "market": 1,
+      "barracks": 1,
+      "elder_hall": 1,
+      "settlers_lodge": 1
+     },
+     "queue": [],
+     "garrison": {
+      "settler": 1
+     },
+     "away": {
+      "settler": 0
+     },
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [
+      {
+       "unit": "spearman",
+       "count": 4,
+       "startsAt": "2026-06-01T09:30:00.000Z",
+       "perUnitMs": 1200,
+       "completesAt": "2026-06-01T09:30:04.800Z"
+      }
+     ],
+     "resources": {
+      "amounts": {
+       "iron": 794,
+       "wood": 660,
+       "grain": 571.0333333333333,
+       "stone": 670
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 319,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T09:30:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T09:30:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c4",
+    "building": "caravan_yard"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "settlers_lodge"
+      },
+      "c3": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 1,
+       "building": "market"
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "market": 1,
+      "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
      },
@@ -8248,18 +8629,26 @@
      "armyFloor": null,
      "ruin": null,
      "refuge": false,
-     "training": [],
+     "training": [
+      {
+       "unit": "spearman",
+       "count": 4,
+       "startsAt": "2026-06-01T09:30:00.000Z",
+       "perUnitMs": 1200,
+       "completesAt": "2026-06-01T09:30:04.800Z"
+      }
+     ],
      "resources": {
       "amounts": {
-       "iron": 812,
-       "wood": 494,
-       "grain": 538.0333333333333,
-       "stone": 495
+       "iron": 746,
+       "wood": 516,
+       "grain": 499.0333333333333,
+       "stone": 550
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 373,
+       "grain": 319,
        "stone": 300
       },
       "capacity": {
@@ -8316,8 +8705,8 @@
        "building": "settlers_lodge"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "barracks"
       },
       "c4": {
        "level": 1,
@@ -8422,13 +8811,15 @@
      },
      "levels": {
       "market": 1,
+      "barracks": 1,
       "elder_hall": 1,
       "caravan_yard": 1,
       "settlers_lodge": 1
      },
      "queue": [],
      "garrison": {
-      "settler": 1
+      "settler": 1,
+      "spearman": 0
      },
      "away": {
       "settler": 0
@@ -8451,10 +8842,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 544,
-       "stone": 595,
-       "grain": 612.3666666666667,
-       "iron": 862
+       "wood": 566,
+       "stone": 650,
+       "grain": 477.3666666666667,
+       "iron": 796
       },
       "ratesPerHour": {
        "iron": 150,
@@ -8573,7 +8964,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 0,
+       "used": 4,
        "cap": 100
       },
       "ruinSearchReadyAt": null,
@@ -8610,8 +9001,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -8716,13 +9107,15 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
       "garrison": {
-       "settler": 1
+       "settler": 1,
+       "spearman": 0
       },
       "away": {
        "settler": 0
@@ -8745,10 +9138,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 862,
-        "wood": 544,
-        "grain": 612.3666666666667,
-        "stone": 595
+        "iron": 796,
+        "wood": 566,
+        "grain": 477.3666666666667,
+        "stone": 650
        },
        "ratesPerHour": {
         "iron": 150,
@@ -8898,7 +9291,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "spearman": 4
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -8918,15 +9313,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 150,
-        "wood": 300,
-        "grain": 300,
-        "stone": 300
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 250,
+        "grain": 196,
         "stone": 300
        },
        "capacity": {
@@ -8935,7 +9330,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:02:24.000Z"
+       "settledAt": "2026-06-01T09:31:45.600Z"
       }
      }
     ],
@@ -9203,7 +9598,69 @@
     "generals": [],
     "leaders": [],
     "orders": [],
-    "armies": [],
+    "armies": [
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": 2,
+      "target": [
+       -6,
+       6
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "garrison",
+      "stance": "balanced",
+      "maneuver": "encircle",
+      "loot": null,
+      "units": {
+       "spearman": 4
+      },
+      "status": "done",
+      "battleId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -3,
+        3,
+        14400
+       ],
+       [
+        -4,
+        4,
+        28800
+       ],
+       [
+        -5,
+        5,
+        86400
+       ],
+       [
+        -6,
+        6,
+        100800
+       ]
+      ],
+      "departsAt": "2026-06-01T09:30:04.800Z",
+      "arrivesAt": "2026-06-01T09:31:45.600Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T09:31:45.600Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     }
+    ],
     "forts": [],
     "camps": [
      {
@@ -11424,7 +11881,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 0,
+       "used": 4,
        "cap": 100
       },
       "ruinSearchReadyAt": null,
@@ -11461,8 +11918,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -11567,13 +12024,15 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
       "garrison": {
-       "settler": 1
+       "settler": 1,
+       "spearman": 0
       },
       "away": {
        "settler": 0
@@ -11596,10 +12055,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 862,
-        "wood": 544,
-        "grain": 612.3666666666667,
-        "stone": 595
+        "iron": 796,
+        "wood": 566,
+        "grain": 477.3666666666667,
+        "stone": 650
        },
        "ratesPerHour": {
         "iron": 150,
@@ -11749,7 +12208,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "spearman": 4
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -11769,15 +12230,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 150,
-        "wood": 300,
-        "grain": 300,
-        "stone": 300
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 250,
+        "grain": 196,
         "stone": 300
        },
        "capacity": {
@@ -11786,7 +12247,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:02:24.000Z"
+       "settledAt": "2026-06-01T09:31:45.600Z"
       }
      }
     ],
@@ -12054,7 +12515,69 @@
     "generals": [],
     "leaders": [],
     "orders": [],
-    "armies": [],
+    "armies": [
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": 2,
+      "target": [
+       -6,
+       6
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "garrison",
+      "stance": "balanced",
+      "maneuver": "encircle",
+      "loot": null,
+      "units": {
+       "spearman": 4
+      },
+      "status": "done",
+      "battleId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -3,
+        3,
+        14400
+       ],
+       [
+        -4,
+        4,
+        28800
+       ],
+       [
+        -5,
+        5,
+        86400
+       ],
+       [
+        -6,
+        6,
+        100800
+       ]
+      ],
+      "departsAt": "2026-06-01T09:30:04.800Z",
+      "arrivesAt": "2026-06-01T09:31:45.600Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T09:31:45.600Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     }
+    ],
     "forts": [],
     "camps": [
      {
@@ -14311,7 +14834,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 7,
        "cap": 100
       },
       "ruinSearchReadyAt": null,
@@ -14348,8 +14871,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -14454,6 +14977,7 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
@@ -14461,7 +14985,8 @@
       "queue": [],
       "garrison": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 0
       },
       "away": {
        "settler": 0
@@ -14484,10 +15009,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 862,
-        "wood": 544,
-        "grain": 612.3666666666667,
-        "stone": 595
+        "iron": 796,
+        "wood": 566,
+        "grain": 477.3666666666667,
+        "stone": 650
        },
        "ratesPerHour": {
         "iron": 150,
@@ -14637,7 +15162,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "spearman": 4
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -14657,15 +15184,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 150,
-        "wood": 300,
-        "grain": 300,
-        "stone": 300
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 250,
+        "grain": 196,
         "stone": 300
        },
        "capacity": {
@@ -14674,7 +15201,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:02:24.000Z"
+       "settledAt": "2026-06-01T09:31:45.600Z"
       }
      }
     ],
@@ -14942,7 +15469,69 @@
     "generals": [],
     "leaders": [],
     "orders": [],
-    "armies": [],
+    "armies": [
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": 2,
+      "target": [
+       -6,
+       6
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "garrison",
+      "stance": "balanced",
+      "maneuver": "encircle",
+      "loot": null,
+      "units": {
+       "spearman": 4
+      },
+      "status": "done",
+      "battleId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -3,
+        3,
+        14400
+       ],
+       [
+        -4,
+        4,
+        28800
+       ],
+       [
+        -5,
+        5,
+        86400
+       ],
+       [
+        -6,
+        6,
+        100800
+       ]
+      ],
+      "departsAt": "2026-06-01T09:30:04.800Z",
+      "arrivesAt": "2026-06-01T09:31:45.600Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T09:31:45.600Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     }
+    ],
     "forts": [],
     "camps": [
      {
@@ -17163,7 +17752,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 7,
        "cap": 100
       },
       "ruinSearchReadyAt": null,
@@ -17200,8 +17789,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -17306,6 +17895,7 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
@@ -17313,7 +17903,8 @@
       "queue": [],
       "garrison": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 0
       },
       "away": {
        "settler": 0
@@ -17336,10 +17927,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 869.5,
-        "wood": 566.5,
-        "grain": 631.0166666666667,
-        "stone": 610
+        "iron": 803.5,
+        "wood": 588.5,
+        "grain": 496.01666666666665,
+        "stone": 665
        },
        "ratesPerHour": {
         "iron": 150,
@@ -17489,7 +18080,9 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "spearman": 4
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -17511,13 +18104,13 @@
        "amounts": {
         "iron": 272.5,
         "wood": 767.5,
-        "grain": 554.1666666666666,
+        "grain": 626.5666666666667,
         "stone": 545
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 250,
+        "grain": 196,
         "stone": 300
        },
        "capacity": {
@@ -17794,7 +18387,69 @@
     "generals": [],
     "leaders": [],
     "orders": [],
-    "armies": [],
+    "armies": [
+     {
+      "id": 1,
+      "ownerAccountId": 1,
+      "homeVillageId": 1,
+      "targetVillageId": 2,
+      "target": [
+       -6,
+       6
+      ],
+      "heroAccountId": null,
+      "generalId": null,
+      "orders": "garrison",
+      "stance": "balanced",
+      "maneuver": "encircle",
+      "loot": null,
+      "units": {
+       "spearman": 4
+      },
+      "status": "done",
+      "battleId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -3,
+        3,
+        14400
+       ],
+       [
+        -4,
+        4,
+        28800
+       ],
+       [
+        -5,
+        5,
+        86400
+       ],
+       [
+        -6,
+        6,
+        100800
+       ]
+      ],
+      "departsAt": "2026-06-01T09:30:04.800Z",
+      "arrivesAt": "2026-06-01T09:31:45.600Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T09:31:45.600Z",
+      "hungrySince": null,
+      "wagonFortAt": null,
+      "returnHome": false,
+      "raid": null,
+      "quarteredAt": null,
+      "respond": true,
+      "post": null
+     }
+    ],
     "forts": [],
     "camps": [
      {
@@ -19997,7 +20652,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 7,
        "cap": 50
       },
       "ruinSearchReadyAt": null,
@@ -20034,8 +20689,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -20140,6 +20795,7 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
@@ -20147,7 +20803,8 @@
       "queue": [],
       "garrison": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "away": {
        "settler": 0
@@ -20170,15 +20827,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 937,
-        "wood": 769,
-        "grain": 798.8666666666667,
-        "stone": 745
+        "iron": 871,
+        "wood": 791,
+        "grain": 663.8666666666667,
+        "stone": 800
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -20635,10 +21292,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -22644,7 +23301,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 3,
+       "used": 7,
        "cap": 50
       },
       "ruinSearchReadyAt": null,
@@ -22681,8 +23338,8 @@
         "building": "settlers_lodge"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c4": {
         "level": 1,
@@ -22787,6 +23444,7 @@
       },
       "levels": {
        "market": 1,
+       "barracks": 1,
        "elder_hall": 1,
        "caravan_yard": 1,
        "settlers_lodge": 1
@@ -22794,7 +23452,8 @@
       "queue": [],
       "garrison": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "away": {
        "settler": 0
@@ -22817,15 +23476,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 975,
-        "wood": 794,
-        "grain": 869.8666666666668,
-        "stone": 545
+        "iron": 921,
+        "wood": 800,
+        "grain": 707.8666666666667,
+        "stone": 600
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 292,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
@@ -23109,7 +23768,8 @@
        "home": {
         "initial": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        }
       },
@@ -23124,7 +23784,8 @@
       },
       "defenderInitial": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "rounds": [],
       "loot": null,
@@ -23546,10 +24207,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -25493,10 +26154,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":355,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":300,\"grain\":0,\"iron\":0}",
     "missing": {
      "wood": 0,
-     "stone": 355,
+     "stone": 300,
      "grain": 0,
      "iron": 0
     }
@@ -25602,7 +26263,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -25743,8 +26404,8 @@
          "building": "settlers_lodge"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "barracks"
         },
         "c4": {
          "level": 1,
@@ -26027,10 +26688,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 342.5,
-        "wood": 627.5,
-        "grain": 613.3333333333334,
-        "stone": 585
+        "iron": 2352.5,
+        "wood": 4657.5,
+        "grain": 4640,
+        "stone": 4605
        },
        "ratesPerHour": {
         "iron": 150,
@@ -26044,7 +26705,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:25:40.800Z"
+       "settledAt": "2026-06-01T11:29:12.000Z"
       }
      }
     ],
@@ -26137,55 +26798,6 @@
       "hatred": 0.2,
       "bandOf": null,
       "errand": null,
-      "forecast": null
-     },
-     {
-      "id": 4,
-      "index": 2,
-      "front": "south",
-      "status": "battling",
-      "threat": "Severe",
-      "spawnAt": "2026-06-01T10:38:24.000Z",
-      "spawn": {
-       "q": -10,
-       "r": 9
-      },
-      "targetVillageId": null,
-      "path": [
-       [
-        -2,
-        2,
-        1776000
-       ],
-       [
-        -1,
-        1,
-        1824000
-       ],
-       [
-        0,
-        0,
-        1848000
-       ]
-      ],
-      "arrivesAt": "2026-06-01T11:09:12.000Z",
-      "endsAt": null,
-      "rampageEndsAt": "2026-06-01T11:06:00.000Z",
-      "struck": [
-       1
-      ],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0,
-      "bandOf": 3,
-      "errand": {
-       "from": {
-        "q": -10,
-        "r": 9
-       },
-       "kind": "avatar",
-       "target": null
-      },
       "forecast": null
      },
      {
@@ -26415,24 +27027,32 @@
         }
        },
        "guard": {
-        "archer": 7,
-        "spearman": 19
+        "archer": 10,
+        "spearman": 21
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 2,
+          "cavalry": 0,
+          "infantry": 8
+         }
+        }
        },
        "holyCity": true
       },
-      "status": "ongoing",
+      "status": "defended",
       "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "zealot": 8,
-       "crossbowman": 3,
-       "sergeant_rider": 1,
+       "crossbowman": 2,
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 6,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
@@ -26443,7 +27063,7 @@
        {
         "at": "2026-06-01T11:19:12.000Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 10,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 1
@@ -26453,22 +27073,26 @@
        {
         "at": "2026-06-01T11:29:12.000Z",
         "round": 2,
-        "attackerLeft": 10,
-        "defenderLeft": 26,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 3,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "zealot": 5,
+         "crossbowman": 2
         },
         "defenderLosses": {
-         "archer": 4,
-         "spearman": 3
+         "archer": 1,
+         "spearman": 1
         }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:09:12.000Z",
-      "endedAt": null
+      "endedAt": "2026-06-01T11:29:12.000Z"
      },
      {
       "id": 2,
@@ -26484,17 +27108,18 @@
        "home": {
         "initial": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        },
        "lines": {
         "active": {
          "by": "attacker",
-         "kind": "encircle",
+         "kind": "flank",
          "weak": {
           "archers": 0,
           "cavalry": 3,
-          "infantry": 1
+          "infantry": 5
          }
         }
        }
@@ -26509,21 +27134,20 @@
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 6,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "rounds": [
        {
         "at": "2026-06-01T10:54:24.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 4,
+        "defenderLeft": 8,
         "attackerLosses": {},
         "defenderLosses": {}
        },
@@ -26532,16 +27156,19 @@
         "round": 2,
         "maneuver": {
          "by": "attacker",
-         "kind": "encircle"
+         "kind": "flank"
         },
-        "attackerLeft": 13,
+        "attackerLeft": 11,
         "defenderLeft": 0,
         "attackerLosses": {
-         "zealot": 1
+         "zealot": 1,
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        }
       ],
@@ -26703,7 +27330,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 3,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -26972,13 +27599,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "hero_fallen",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T11:08:00.000Z"
      },
      {
       "accountId": 1,
-      "achievement": "village_ruined",
-      "earnedAt": "2026-06-01T11:08:00.000Z"
+      "achievement": "avatar_slain",
+      "earnedAt": "2026-06-01T11:29:12.000Z"
      }
     ],
     "shipyards": [],
@@ -27001,7 +27628,7 @@
      [
       0,
       0,
-      7.7
+      19.3
      ]
     ],
     "delegations": [],
@@ -27011,10 +27638,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -29038,7 +29665,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -29179,8 +29806,8 @@
          "building": "settlers_lodge"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "barracks"
         },
         "c4": {
          "level": 1,
@@ -29463,10 +30090,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1757.5,
-        "wood": 3501.5,
-        "grain": 3484.666666666667,
-        "stone": 3452
+        "iron": 1466.5,
+        "wood": 2903.5,
+        "grain": 2892,
+        "stone": 2871
        },
        "ratesPerHour": {
         "iron": 150,
@@ -29807,7 +30434,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 6,
+      "id": 7,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -29864,7 +30491,7 @@
       "endedAt": null
      },
      {
-      "id": 5,
+      "id": 6,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -29903,10 +30530,10 @@
        }
       ],
       "loot": {
-       "iron": 554,
-       "wood": 1105,
-       "grain": 1100,
-       "stone": 1089
+       "iron": 463,
+       "wood": 916,
+       "grain": 913,
+       "stone": 906
       },
       "decision": {
        "choice": "raid",
@@ -29916,6 +30543,85 @@
       },
       "startedAt": "2026-06-01T11:53:41.280Z",
       "endedAt": "2026-06-01T12:03:41.280Z"
+     },
+     {
+      "id": 5,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 22
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 22
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 3,
+          "cavalry": 8,
+          "infantry": 0
+         }
+        }
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 8,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {},
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 22
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T11:46:09.600Z",
+        "round": 1,
+        "attackerLeft": 11,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "leshy_thrall": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:56:09.600Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 0,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "rusalka": 3,
+         "grey_wolf": 8
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T11:36:09.600Z",
+      "endedAt": "2026-06-01T11:56:09.600Z"
      },
      {
       "id": 4,
@@ -29940,11 +30646,7 @@
        "grey_wolf": 8,
        "leshy_thrall": 2
       },
-      "attackerNow": {
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
-      },
+      "attackerNow": {},
       "defenderInitial": {},
       "rounds": [
        {
@@ -29957,10 +30659,10 @@
        }
       ],
       "loot": {
-       "iron": 66,
-       "wood": 126,
-       "grain": 122,
-       "stone": 114
+       "iron": 423,
+       "wood": 838,
+       "grain": 835,
+       "stone": 828
       },
       "decision": {
        "choice": "raid",
@@ -29989,27 +30691,32 @@
         }
        },
        "guard": {
-        "archer": 3,
-        "spearman": 14
+        "archer": 10,
+        "spearman": 21
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 2,
+          "cavalry": 0,
+          "infantry": 8
+         }
+        }
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 3,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "zealot": 8,
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "crossbowman": 3,
-       "leshy_thrall": 2,
-       "sergeant_rider": 1,
+       "crossbowman": 2,
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 5,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
@@ -30020,7 +30727,7 @@
        {
         "at": "2026-06-01T11:19:12.000Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 10,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 1
@@ -30030,38 +30737,26 @@
        {
         "at": "2026-06-01T11:29:12.000Z",
         "round": 2,
-        "attackerLeft": 10,
-        "defenderLeft": 26,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 3,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "zealot": 5,
+         "crossbowman": 2
         },
         "defenderLosses": {
-         "archer": 4,
-         "spearman": 3
-        }
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 3,
-        "attackerLeft": 9,
-        "defenderLeft": 17,
-        "attackerLosses": {
-         "zealot": 1,
-         "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 4,
-         "spearman": 5
+         "archer": 1,
+         "spearman": 1
         }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:09:12.000Z",
-      "endedAt": "2026-06-01T11:39:12.000Z"
+      "endedAt": "2026-06-01T11:29:12.000Z"
      },
      {
       "id": 2,
@@ -30077,17 +30772,18 @@
        "home": {
         "initial": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        },
        "lines": {
         "active": {
          "by": "attacker",
-         "kind": "encircle",
+         "kind": "flank",
          "weak": {
           "archers": 0,
           "cavalry": 3,
-          "infantry": 1
+          "infantry": 5
          }
         }
        }
@@ -30102,21 +30798,20 @@
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 5,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "rounds": [
        {
         "at": "2026-06-01T10:54:24.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 4,
+        "defenderLeft": 8,
         "attackerLosses": {},
         "defenderLosses": {}
        },
@@ -30125,16 +30820,19 @@
         "round": 2,
         "maneuver": {
          "by": "attacker",
-         "kind": "encircle"
+         "kind": "flank"
         },
-        "attackerLeft": 13,
+        "attackerLeft": 11,
         "defenderLeft": 0,
         "attackerLosses": {
-         "zealot": 1
+         "zealot": 1,
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        }
       ],
@@ -30296,7 +30994,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 3,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -30426,10 +31124,22 @@
      },
      {
       "id": 7,
+      "kind": "lair",
+      "front": "north",
+      "q": 1,
+      "r": -1,
+      "size": 4,
+      "waveId": 3,
+      "reward": null,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 8,
       "kind": "captives",
       "front": "north",
-      "q": -3,
-      "r": -1,
+      "q": -5,
+      "r": 1,
       "size": 18,
       "waveId": null,
       "reward": {
@@ -30560,18 +31270,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "hero_fallen",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
-     },
-     {
-      "accountId": 1,
       "achievement": "village_ruined",
       "earnedAt": "2026-06-01T11:08:00.000Z"
      },
      {
       "accountId": 1,
       "achievement": "avatar_slain",
-      "earnedAt": "2026-06-01T11:39:12.000Z"
+      "earnedAt": "2026-06-01T11:29:12.000Z"
      }
     ],
     "shipyards": [],
@@ -30594,7 +31299,7 @@
      [
       0,
       0,
-      14
+      23.1
      ]
     ],
     "delegations": [],
@@ -30604,10 +31309,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -32631,7 +33336,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -32772,8 +33477,8 @@
          "building": "settlers_lodge"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "barracks"
         },
         "c4": {
          "level": 1,
@@ -33056,10 +33761,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1096.5,
-        "wood": 2182.5,
-        "grain": 2172.666666666667,
-        "stone": 2152
+        "iron": 915.5,
+        "wood": 1810.5,
+        "grain": 1803,
+        "stone": 1790
        },
        "ratesPerHour": {
         "iron": 150,
@@ -33310,7 +34015,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 9,
+      "id": 10,
       "front": "south",
       "leaderId": null,
       "waveId": 7,
@@ -33356,7 +34061,7 @@
       "endedAt": null
      },
      {
-      "id": 8,
+      "id": 9,
       "front": "south",
       "leaderId": null,
       "waveId": 7,
@@ -33395,10 +34100,10 @@
        }
       ],
       "loot": {
-       "iron": 345,
-       "wood": 689,
-       "grain": 685,
-       "stone": 679
+       "iron": 288,
+       "wood": 571,
+       "grain": 569,
+       "stone": 565
       },
       "decision": {
        "choice": "raid",
@@ -33410,7 +34115,7 @@
       "endedAt": "2026-06-01T13:01:07.200Z"
      },
      {
-      "id": 7,
+      "id": 8,
       "front": "north",
       "leaderId": 1,
       "waveId": 6,
@@ -33429,30 +34134,30 @@
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
+       "grey_wolf": 10,
+       "leshy_thrall": 3
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
+       "grey_wolf": 11,
+       "leshy_thrall": 3
       },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T12:32:33.600Z",
         "round": 1,
-        "attackerLeft": 13,
+        "attackerLeft": 16,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 316,
-       "wood": 630,
-       "grain": 627,
-       "stone": 621
+       "iron": 263,
+       "wood": 522,
+       "grain": 520,
+       "stone": 516
       },
       "decision": {
        "choice": "raid",
@@ -33464,7 +34169,7 @@
       "endedAt": "2026-06-01T12:32:33.600Z"
      },
      {
-      "id": 6,
+      "id": 7,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -33482,16 +34187,16 @@
        },
        "guard": {
         "archer": 11,
-        "spearman": 23
+        "spearman": 24
        },
        "lines": {
         "active": {
          "by": "defender",
          "kind": "encircle",
          "weak": {
-          "archers": 4,
-          "cavalry": 0,
-          "infantry": 7
+          "archers": 3,
+          "cavalry": 1,
+          "infantry": 6
          }
         }
        },
@@ -33503,9 +34208,9 @@
       "attackerInitial": {
        "zealot": 9,
        "rusalka": 3,
-       "grey_wolf": 8,
+       "grey_wolf": 11,
        "crossbowman": 4,
-       "leshy_thrall": 2,
+       "leshy_thrall": 3,
        "sergeant_rider": 1
       },
       "attackerNow": {},
@@ -33527,25 +34232,26 @@
        {
         "at": "2026-06-01T12:24:10.080Z",
         "round": 2,
-        "attackerLeft": 13,
-        "defenderLeft": 34,
-        "attackerLosses": {},
+        "attackerLeft": 11,
+        "defenderLeft": 35,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
         "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
+         "archer": 1
         }
        },
        {
         "at": "2026-06-01T12:34:10.080Z",
         "round": 3,
-        "attackerLeft": 11,
-        "defenderLeft": 34,
+        "attackerLeft": 10,
+        "defenderLeft": 35,
         "attackerLosses": {
          "zealot": 1,
          "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2,
-         "sergeant_rider": 1
+         "grey_wolf": 11,
+         "leshy_thrall": 3
         },
         "defenderLosses": {}
        },
@@ -33556,11 +34262,12 @@
          "by": "defender",
          "kind": "encircle"
         },
-        "attackerLeft": 4,
-        "defenderLeft": 34,
+        "attackerLeft": 3,
+        "defenderLeft": 35,
         "attackerLosses": {
          "zealot": 4,
-         "crossbowman": 3
+         "crossbowman": 2,
+         "sergeant_rider": 1
         },
         "defenderLosses": {}
        },
@@ -33572,9 +34279,9 @@
          "kind": "encircle"
         },
         "attackerLeft": 0,
-        "defenderLeft": 34,
+        "defenderLeft": 35,
         "attackerLosses": {
-         "zealot": 3,
+         "zealot": 2,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -33586,7 +34293,7 @@
       "endedAt": "2026-06-01T12:54:10.080Z"
      },
      {
-      "id": 5,
+      "id": 6,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -33621,10 +34328,10 @@
        }
       ],
       "loot": {
-       "iron": 554,
-       "wood": 1105,
-       "grain": 1100,
-       "stone": 1089
+       "iron": 463,
+       "wood": 916,
+       "grain": 913,
+       "stone": 906
       },
       "decision": {
        "choice": "raid",
@@ -33634,6 +34341,85 @@
       },
       "startedAt": "2026-06-01T11:53:41.280Z",
       "endedAt": "2026-06-01T12:03:41.280Z"
+     },
+     {
+      "id": 5,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 22
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 22
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 3,
+          "cavalry": 8,
+          "infantry": 0
+         }
+        }
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 8,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {},
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 22
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T11:46:09.600Z",
+        "round": 1,
+        "attackerLeft": 11,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "leshy_thrall": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:56:09.600Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 0,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "rusalka": 3,
+         "grey_wolf": 8
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T11:36:09.600Z",
+      "endedAt": "2026-06-01T11:56:09.600Z"
      },
      {
       "id": 4,
@@ -33658,11 +34444,7 @@
        "grey_wolf": 8,
        "leshy_thrall": 2
       },
-      "attackerNow": {
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
-      },
+      "attackerNow": {},
       "defenderInitial": {},
       "rounds": [
        {
@@ -33675,10 +34457,10 @@
        }
       ],
       "loot": {
-       "iron": 66,
-       "wood": 126,
-       "grain": 122,
-       "stone": 114
+       "iron": 423,
+       "wood": 838,
+       "grain": 835,
+       "stone": 828
       },
       "decision": {
        "choice": "raid",
@@ -33707,27 +34489,32 @@
         }
        },
        "guard": {
-        "archer": 3,
-        "spearman": 14
+        "archer": 10,
+        "spearman": 21
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 2,
+          "cavalry": 0,
+          "infantry": 8
+         }
+        }
        },
        "holyCity": true
       },
       "status": "defended",
-      "round": 3,
+      "round": 2,
       "attackerStance": "offensive",
       "attackerInitial": {
        "zealot": 8,
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "crossbowman": 3,
-       "leshy_thrall": 2,
-       "sergeant_rider": 1,
+       "crossbowman": 2,
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 5,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
@@ -33738,7 +34525,7 @@
        {
         "at": "2026-06-01T11:19:12.000Z",
         "round": 1,
-        "attackerLeft": 12,
+        "attackerLeft": 10,
         "defenderLeft": 33,
         "attackerLosses": {
          "zealot": 1
@@ -33748,38 +34535,26 @@
        {
         "at": "2026-06-01T11:29:12.000Z",
         "round": 2,
-        "attackerLeft": 10,
-        "defenderLeft": 26,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 3,
+        "defenderLeft": 31,
         "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
+         "zealot": 5,
+         "crossbowman": 2
         },
         "defenderLosses": {
-         "archer": 4,
-         "spearman": 3
-        }
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 3,
-        "attackerLeft": 9,
-        "defenderLeft": 17,
-        "attackerLosses": {
-         "zealot": 1,
-         "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 4,
-         "spearman": 5
+         "archer": 1,
+         "spearman": 1
         }
        }
       ],
       "loot": null,
       "decision": null,
       "startedAt": "2026-06-01T11:09:12.000Z",
-      "endedAt": "2026-06-01T11:39:12.000Z"
+      "endedAt": "2026-06-01T11:29:12.000Z"
      },
      {
       "id": 2,
@@ -33795,17 +34570,18 @@
        "home": {
         "initial": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        },
        "lines": {
         "active": {
          "by": "attacker",
-         "kind": "encircle",
+         "kind": "flank",
          "weak": {
           "archers": 0,
           "cavalry": 3,
-          "infantry": 1
+          "infantry": 5
          }
         }
        }
@@ -33820,21 +34596,20 @@
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 5,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
+       "zealot": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
        "settler": 1,
-       "horseman": 3
+       "horseman": 3,
+       "spearman": 4
       },
       "rounds": [
        {
         "at": "2026-06-01T10:54:24.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 4,
+        "defenderLeft": 8,
         "attackerLosses": {},
         "defenderLosses": {}
        },
@@ -33843,16 +34618,19 @@
         "round": 2,
         "maneuver": {
          "by": "attacker",
-         "kind": "encircle"
+         "kind": "flank"
         },
-        "attackerLeft": 13,
+        "attackerLeft": 11,
         "defenderLeft": 0,
         "attackerLosses": {
-         "zealot": 1
+         "zealot": 1,
+         "crossbowman": 1,
+         "sergeant_rider": 1
         },
         "defenderLosses": {
          "settler": 1,
-         "horseman": 3
+         "horseman": 3,
+         "spearman": 4
         }
        }
       ],
@@ -34014,7 +34792,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 3,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -34111,7 +34889,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 1,
       "grudgeVillageId": null,
       "diedAt": "2026-06-01T12:54:10.080Z"
      }
@@ -34146,10 +34924,22 @@
      },
      {
       "id": 7,
+      "kind": "lair",
+      "front": "north",
+      "q": 1,
+      "r": -1,
+      "size": 6,
+      "waveId": 3,
+      "reward": null,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 8,
       "kind": "captives",
       "front": "north",
-      "q": -3,
-      "r": -1,
+      "q": -5,
+      "r": 1,
       "size": 18,
       "waveId": null,
       "reward": {
@@ -34161,7 +34951,7 @@
       "quest": null
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "captives",
       "front": "south",
       "q": 2,
@@ -34177,10 +34967,10 @@
       "quest": null
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "bandit",
       "front": "south",
-      "q": 1,
+      "q": 0,
       "r": -1,
       "size": 7,
       "waveId": 5,
@@ -34294,18 +35084,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "hero_fallen",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
-     },
-     {
-      "accountId": 1,
       "achievement": "village_ruined",
       "earnedAt": "2026-06-01T11:08:00.000Z"
      },
      {
       "accountId": 1,
       "achievement": "avatar_slain",
-      "earnedAt": "2026-06-01T11:39:12.000Z"
+      "earnedAt": "2026-06-01T11:29:12.000Z"
      }
     ],
     "shipyards": [],
@@ -34328,7 +35113,7 @@
      [
       0,
       0,
-      26.8
+      35
      ]
     ],
     "delegations": [],
@@ -34338,10 +35123,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -36366,7 +37151,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "barracks"
        },
        "c4": {
         "level": 0,
@@ -36507,8 +37292,8 @@
          "building": "settlers_lodge"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "barracks"
         },
         "c4": {
          "level": 1,
@@ -36791,10 +37576,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 942,
-        "wood": 1790.5,
-        "grain": 1781.666666666667,
-        "stone": 1765
+        "iron": 855,
+        "wood": 1485.5,
+        "grain": 1479,
+        "stone": 1468
        },
        "ratesPerHour": {
         "iron": 150,
@@ -37125,7 +37910,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 12,
+      "id": 13,
       "front": "south",
       "leaderId": 3,
       "waveId": 9,
@@ -37143,14 +37928,14 @@
       "round": 0,
       "attackerStance": "defensive",
       "attackerInitial": {
-       "zealot": 14,
-       "crossbowman": 6,
-       "sergeant_rider": 3
+       "zealot": 12,
+       "crossbowman": 5,
+       "sergeant_rider": 2
       },
       "attackerNow": {
-       "zealot": 14,
-       "crossbowman": 6,
-       "sergeant_rider": 3
+       "zealot": 12,
+       "crossbowman": 5,
+       "sergeant_rider": 2
       },
       "defenderInitial": {},
       "rounds": [],
@@ -37160,7 +37945,7 @@
       "endedAt": null
      },
      {
-      "id": 11,
+      "id": 12,
       "front": "north",
       "leaderId": 1,
       "waveId": 8,
@@ -37178,7 +37963,7 @@
        },
        "guard": {
         "archer": 14,
-        "spearman": 27
+        "spearman": 28
        },
        "holyCity": true
       },
@@ -37187,13 +37972,13 @@
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
-       "grey_wolf": 9,
+       "grey_wolf": 12,
        "leshy_thrall": 3
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 9,
-       "leshy_thrall": 2
+       "grey_wolf": 12,
+       "leshy_thrall": 1
       },
       "defenderInitial": {
        "archer": 14,
@@ -37203,14 +37988,12 @@
        {
         "at": "2026-06-01T13:41:50.400Z",
         "round": 1,
-        "attackerLeft": 14,
-        "defenderLeft": 41,
+        "attackerLeft": 16,
+        "defenderLeft": 42,
         "attackerLosses": {
-         "leshy_thrall": 1
+         "leshy_thrall": 2
         },
-        "defenderLosses": {
-         "spearman": 1
-        }
+        "defenderLosses": {}
        }
       ],
       "loot": null,
@@ -37219,7 +38002,7 @@
       "endedAt": null
      },
      {
-      "id": 10,
+      "id": 11,
       "front": "north",
       "leaderId": 1,
       "waveId": 8,
@@ -37238,30 +38021,30 @@
       "attackerStance": "offensive",
       "attackerInitial": {
        "rusalka": 3,
-       "grey_wolf": 9,
+       "grey_wolf": 11,
        "leshy_thrall": 3
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 9,
-       "leshy_thrall": 2
+       "grey_wolf": 12,
+       "leshy_thrall": 1
       },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T13:31:21.600Z",
         "round": 1,
-        "attackerLeft": 15,
+        "attackerLeft": 17,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 197,
-       "wood": 392,
-       "grain": 391,
-       "stone": 387
+       "iron": 178,
+       "wood": 325,
+       "grain": 324,
+       "stone": 322
       },
       "decision": {
        "choice": "raid",
@@ -37273,7 +38056,7 @@
       "endedAt": "2026-06-01T13:31:21.600Z"
      },
      {
-      "id": 9,
+      "id": 10,
       "front": "south",
       "leaderId": null,
       "waveId": 7,
@@ -37290,16 +38073,16 @@
         }
        },
        "guard": {
-        "archer": 12,
-        "spearman": 26
+        "archer": 11,
+        "spearman": 24
        },
        "lines": {
         "active": {
          "by": "defender",
          "kind": "encircle",
          "weak": {
-          "archers": 2,
-          "cavalry": 0,
+          "archers": 3,
+          "cavalry": 1,
           "infantry": 8
          }
         }
@@ -37326,24 +38109,25 @@
         "at": "2026-06-01T13:11:36.000Z",
         "round": 1,
         "attackerLeft": 14,
-        "defenderLeft": 39,
+        "defenderLeft": 38,
         "attackerLosses": {
          "zealot": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T13:21:36.000Z",
         "round": 2,
-        "attackerLeft": 10,
-        "defenderLeft": 38,
+        "attackerLeft": 12,
+        "defenderLeft": 36,
         "attackerLosses": {
-         "zealot": 2,
-         "crossbowman": 1,
-         "sergeant_rider": 1
+         "zealot": 2
         },
         "defenderLosses": {
-         "archer": 1
+         "archer": 1,
+         "spearman": 1
         }
        },
        {
@@ -37354,12 +38138,15 @@
          "kind": "encircle"
         },
         "attackerLeft": 2,
-        "defenderLeft": 38,
+        "defenderLeft": 35,
         "attackerLosses": {
          "zealot": 6,
-         "crossbowman": 2
+         "crossbowman": 3,
+         "sergeant_rider": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "archer": 1
+        }
        }
       ],
       "loot": null,
@@ -37368,7 +38155,7 @@
       "endedAt": "2026-06-01T13:31:36.000Z"
      },
      {
-      "id": 8,
+      "id": 9,
       "front": "south",
       "leaderId": null,
       "waveId": 7,
@@ -37405,10 +38192,10 @@
        }
       ],
       "loot": {
-       "iron": 345,
-       "wood": 689,
-       "grain": 685,
-       "stone": 679
+       "iron": 288,
+       "wood": 571,
+       "grain": 569,
+       "stone": 565
       },
       "decision": {
        "choice": "raid",
@@ -37420,7 +38207,7 @@
       "endedAt": "2026-06-01T13:01:07.200Z"
      },
      {
-      "id": 7,
+      "id": 8,
       "front": "north",
       "leaderId": 1,
       "waveId": 6,
@@ -37439,30 +38226,30 @@
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
+       "grey_wolf": 10,
+       "leshy_thrall": 3
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
+       "grey_wolf": 11,
+       "leshy_thrall": 3
       },
       "defenderInitial": {},
       "rounds": [
        {
         "at": "2026-06-01T12:32:33.600Z",
         "round": 1,
-        "attackerLeft": 13,
+        "attackerLeft": 16,
         "defenderLeft": 0,
         "attackerLosses": {},
         "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 316,
-       "wood": 630,
-       "grain": 627,
-       "stone": 621
+       "iron": 263,
+       "wood": 522,
+       "grain": 520,
+       "stone": 516
       },
       "decision": {
        "choice": "raid",
@@ -37474,7 +38261,7 @@
       "endedAt": "2026-06-01T12:32:33.600Z"
      },
      {
-      "id": 6,
+      "id": 7,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -37492,16 +38279,16 @@
        },
        "guard": {
         "archer": 11,
-        "spearman": 23
+        "spearman": 24
        },
        "lines": {
         "active": {
          "by": "defender",
          "kind": "encircle",
          "weak": {
-          "archers": 4,
-          "cavalry": 0,
-          "infantry": 7
+          "archers": 3,
+          "cavalry": 1,
+          "infantry": 6
          }
         }
        },
@@ -37513,9 +38300,9 @@
       "attackerInitial": {
        "zealot": 9,
        "rusalka": 3,
-       "grey_wolf": 8,
+       "grey_wolf": 11,
        "crossbowman": 4,
-       "leshy_thrall": 2,
+       "leshy_thrall": 3,
        "sergeant_rider": 1
       },
       "attackerNow": {},
@@ -37537,25 +38324,26 @@
        {
         "at": "2026-06-01T12:24:10.080Z",
         "round": 2,
-        "attackerLeft": 13,
-        "defenderLeft": 34,
-        "attackerLosses": {},
+        "attackerLeft": 11,
+        "defenderLeft": 35,
+        "attackerLosses": {
+         "zealot": 1,
+         "crossbowman": 1
+        },
         "defenderLosses": {
-         "archer": 1,
-         "spearman": 1
+         "archer": 1
         }
        },
        {
         "at": "2026-06-01T12:34:10.080Z",
         "round": 3,
-        "attackerLeft": 11,
-        "defenderLeft": 34,
+        "attackerLeft": 10,
+        "defenderLeft": 35,
         "attackerLosses": {
          "zealot": 1,
          "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2,
-         "sergeant_rider": 1
+         "grey_wolf": 11,
+         "leshy_thrall": 3
         },
         "defenderLosses": {}
        },
@@ -37566,11 +38354,12 @@
          "by": "defender",
          "kind": "encircle"
         },
-        "attackerLeft": 4,
-        "defenderLeft": 34,
+        "attackerLeft": 3,
+        "defenderLeft": 35,
         "attackerLosses": {
          "zealot": 4,
-         "crossbowman": 3
+         "crossbowman": 2,
+         "sergeant_rider": 1
         },
         "defenderLosses": {}
        },
@@ -37582,9 +38371,9 @@
          "kind": "encircle"
         },
         "attackerLeft": 0,
-        "defenderLeft": 34,
+        "defenderLeft": 35,
         "attackerLosses": {
-         "zealot": 3,
+         "zealot": 2,
          "crossbowman": 1
         },
         "defenderLosses": {}
@@ -37596,7 +38385,7 @@
       "endedAt": "2026-06-01T12:54:10.080Z"
      },
      {
-      "id": 5,
+      "id": 6,
       "front": "south",
       "leaderId": 2,
       "waveId": 5,
@@ -37631,10 +38420,10 @@
        }
       ],
       "loot": {
-       "iron": 554,
-       "wood": 1105,
-       "grain": 1100,
-       "stone": 1089
+       "iron": 463,
+       "wood": 916,
+       "grain": 913,
+       "stone": 906
       },
       "decision": {
        "choice": "raid",
@@ -37644,6 +38433,85 @@
       },
       "startedAt": "2026-06-01T11:53:41.280Z",
       "endedAt": "2026-06-01T12:03:41.280Z"
+     },
+     {
+      "id": 5,
+      "front": "north",
+      "leaderId": null,
+      "waveId": 3,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 11,
+         "spearman": 22
+        }
+       },
+       "guard": {
+        "archer": 11,
+        "spearman": 22
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 3,
+          "cavalry": 8,
+          "infantry": 0
+         }
+        }
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 8,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {},
+      "defenderInitial": {
+       "archer": 11,
+       "spearman": 22
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T11:46:09.600Z",
+        "round": 1,
+        "attackerLeft": 11,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "leshy_thrall": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:56:09.600Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 0,
+        "defenderLeft": 33,
+        "attackerLosses": {
+         "rusalka": 3,
+         "grey_wolf": 8
+        },
+        "defenderLosses": {}
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T11:36:09.600Z",
+      "endedAt": "2026-06-01T11:56:09.600Z"
      },
      {
       "id": 4,
@@ -37668,11 +38536,7 @@
        "grey_wolf": 8,
        "leshy_thrall": 2
       },
-      "attackerNow": {
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "leshy_thrall": 2
-      },
+      "attackerNow": {},
       "defenderInitial": {},
       "rounds": [
        {
@@ -37685,10 +38549,10 @@
        }
       ],
       "loot": {
-       "iron": 66,
-       "wood": 126,
-       "grain": 122,
-       "stone": 114
+       "iron": 423,
+       "wood": 838,
+       "grain": 835,
+       "stone": 828
       },
       "decision": {
        "choice": "raid",
@@ -37698,98 +38562,6 @@
       },
       "startedAt": "2026-06-01T11:25:40.800Z",
       "endedAt": "2026-06-01T11:35:40.800Z"
-     },
-     {
-      "id": 3,
-      "front": "south",
-      "leaderId": null,
-      "waveId": 4,
-      "campId": null,
-      "siteId": null,
-      "villageId": null,
-      "q": 0,
-      "r": 0,
-      "setup": {
-       "home": {
-        "initial": {
-         "archer": 11,
-         "spearman": 22
-        }
-       },
-       "guard": {
-        "archer": 3,
-        "spearman": 14
-       },
-       "holyCity": true
-      },
-      "status": "defended",
-      "round": 3,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "zealot": 8,
-       "rusalka": 3,
-       "grey_wolf": 8,
-       "crossbowman": 3,
-       "leshy_thrall": 2,
-       "sergeant_rider": 1,
-       "chernobog_avatar": 1
-      },
-      "attackerNow": {
-       "zealot": 5,
-       "crossbowman": 2,
-       "sergeant_rider": 1,
-       "chernobog_avatar": 1
-      },
-      "defenderInitial": {
-       "archer": 11,
-       "spearman": 22
-      },
-      "rounds": [
-       {
-        "at": "2026-06-01T11:19:12.000Z",
-        "round": 1,
-        "attackerLeft": 12,
-        "defenderLeft": 33,
-        "attackerLosses": {
-         "zealot": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T11:29:12.000Z",
-        "round": 2,
-        "attackerLeft": 10,
-        "defenderLeft": 26,
-        "attackerLosses": {
-         "zealot": 1,
-         "crossbowman": 1
-        },
-        "defenderLosses": {
-         "archer": 4,
-         "spearman": 3
-        }
-       },
-       {
-        "at": "2026-06-01T11:39:12.000Z",
-        "round": 3,
-        "attackerLeft": 9,
-        "defenderLeft": 17,
-        "attackerLosses": {
-         "zealot": 1,
-         "rusalka": 3,
-         "grey_wolf": 8,
-         "leshy_thrall": 2
-        },
-        "defenderLosses": {
-         "archer": 4,
-         "spearman": 5
-        }
-       }
-      ],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T11:09:12.000Z",
-      "endedAt": "2026-06-01T11:39:12.000Z"
      }
     ],
     "raids": [],
@@ -37856,7 +38628,7 @@
       "villageId": 1,
       "armyId": null,
       "level": 1,
-      "xp": 0,
+      "xp": 3,
       "xpToNext": 30,
       "skillPoints": 0,
       "skills": {},
@@ -37978,7 +38750,7 @@
       "wins": 1,
       "losses": 1,
       "razed": 0,
-      "kills": 2,
+      "kills": 1,
       "grudgeVillageId": null,
       "diedAt": "2026-06-01T12:54:10.080Z"
      }
@@ -38012,10 +38784,22 @@
       "quest": null
      },
      {
-      "id": 9,
+      "id": 7,
+      "kind": "lair",
+      "front": "north",
+      "q": 1,
+      "r": -1,
+      "size": 5,
+      "waveId": 3,
+      "reward": null,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 10,
       "kind": "bandit",
       "front": "south",
-      "q": 1,
+      "q": 0,
       "r": -1,
       "size": 5,
       "waveId": 5,
@@ -38024,7 +38808,7 @@
       "quest": null
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "captives",
       "front": "north",
       "q": 5,
@@ -38040,18 +38824,6 @@
        }
       },
       "endsAt": "2026-06-01T14:14:24.000Z",
-      "quest": null
-     },
-     {
-      "id": 11,
-      "kind": "bandit",
-      "front": "south",
-      "q": 0,
-      "r": -1,
-      "size": 4,
-      "waveId": 7,
-      "reward": null,
-      "endsAt": null,
       "quest": null
      }
     ],
@@ -38160,18 +38932,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "hero_fallen",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
-     },
-     {
-      "accountId": 1,
       "achievement": "village_ruined",
       "earnedAt": "2026-06-01T11:08:00.000Z"
      },
      {
       "accountId": 1,
       "achievement": "avatar_slain",
-      "earnedAt": "2026-06-01T11:39:12.000Z"
+      "earnedAt": "2026-06-01T11:29:12.000Z"
      }
     ],
     "shipyards": [
@@ -38227,7 +38994,7 @@
      [
       0,
       0,
-      28.1
+      33.5
      ]
     ],
     "delegations": [],
@@ -38237,10 +39004,10 @@
     "vault": {
      "level": 1,
      "amounts": {
-      "iron": 104,
-      "wood": 260,
-      "grain": 130,
-      "stone": 260
+      "iron": 48,
+      "wood": 120,
+      "grain": 60,
+      "stone": 120
      },
      "capacity": 3000,
      "upgradingTo": null,
@@ -40181,16 +40948,16 @@
    "response": {
     "notifications": [
      {
-      "id": 71,
+      "id": 73,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 23 is fighting your garrison of 0.",
+      "body": "A horde of 19 is fighting your garrison of 0.",
       "createdAt": "2026-06-01T13:48:43.200Z",
       "read": false
      },
      {
-      "id": 70,
+      "id": 72,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40199,7 +40966,7 @@
       "read": false
      },
      {
-      "id": 69,
+      "id": 71,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-5, -1)",
@@ -40208,7 +40975,7 @@
       "read": false
      },
      {
-      "id": 68,
+      "id": 70,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 6) were taken away",
@@ -40217,16 +40984,16 @@
       "read": false
      },
      {
-      "id": 67,
+      "id": 69,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
-      "body": "15 of them against its guard of 42.",
+      "body": "18 of them against its guard of 42.",
       "createdAt": "2026-06-01T13:31:50.400Z",
       "read": false
      },
      {
-      "id": 66,
+      "id": 68,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40235,25 +41002,25 @@
       "read": false
      },
      {
-      "id": 65,
+      "id": 67,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 1367 resources after 1 rounds.",
+      "body": "The horde carried off 1149 resources after 1 rounds.",
       "createdAt": "2026-06-01T13:31:21.600Z",
       "read": false
      },
      {
-      "id": 64,
+      "id": 66,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 15 is fighting your garrison of 0.",
+      "body": "A horde of 17 is fighting your garrison of 0.",
       "createdAt": "2026-06-01T13:21:21.600Z",
       "read": false
      },
      {
-      "id": 63,
+      "id": 65,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40262,7 +41029,7 @@
       "read": false
      },
      {
-      "id": 62,
+      "id": 64,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (5, 2)",
@@ -40271,16 +41038,16 @@
       "read": false
      },
      {
-      "id": 61,
+      "id": 63,
       "kind": "event",
       "tier": "push",
-      "title": "The captives at (-3, -1) were taken away",
+      "title": "The captives at (-5, 1) were taken away",
       "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
       "createdAt": "2026-06-01T13:16:48.000Z",
       "read": false
      },
      {
-      "id": 60,
+      "id": 62,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40289,16 +41056,16 @@
       "read": false
      },
      {
-      "id": 59,
+      "id": 61,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 2398 resources after 1 rounds.",
+      "body": "The horde carried off 1993 resources after 1 rounds.",
       "createdAt": "2026-06-01T13:01:07.200Z",
       "read": false
      },
      {
-      "id": 58,
+      "id": 60,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -40307,7 +41074,7 @@
       "read": false
      },
      {
-      "id": 57,
+      "id": 59,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar has fallen",
@@ -40316,7 +41083,7 @@
       "read": false
      },
      {
-      "id": 56,
+      "id": 58,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -40325,7 +41092,7 @@
       "read": false
      },
      {
-      "id": 55,
+      "id": 57,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40334,7 +41101,7 @@
       "read": false
      },
      {
-      "id": 54,
+      "id": 56,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 6)",
@@ -40343,7 +41110,7 @@
       "read": false
      },
      {
-      "id": 53,
+      "id": 55,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (4, 2) sank back into the earth",
@@ -40352,7 +41119,7 @@
       "read": false
      },
      {
-      "id": 52,
+      "id": 54,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -40361,25 +41128,25 @@
       "read": false
      },
      {
-      "id": 51,
+      "id": 53,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 2194 resources after 1 rounds.",
+      "body": "The horde carried off 1821 resources after 1 rounds.",
       "createdAt": "2026-06-01T12:32:33.600Z",
       "read": false
      },
      {
-      "id": 50,
+      "id": 52,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
-      "body": "A horde of 13 is fighting your garrison of 0.",
+      "body": "A horde of 16 is fighting your garrison of 0.",
       "createdAt": "2026-06-01T12:22:33.600Z",
       "read": false
      },
      {
-      "id": 49,
+      "id": 51,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40388,16 +41155,16 @@
       "read": false
      },
      {
-      "id": 48,
+      "id": 50,
       "kind": "event",
       "tier": "push",
-      "title": "Captives are held at (-3, -1)",
+      "title": "Captives are held at (-5, 1)",
       "body": "Clear the camp to free them before they are taken away, for a bounty of at least 4200 resources. If they are taken, the next horde from the north hates you the more.",
       "createdAt": "2026-06-01T12:19:12.000Z",
       "read": false
      },
      {
-      "id": 47,
+      "id": 49,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 6) were taken away",
@@ -40406,7 +41173,7 @@
       "read": false
      },
      {
-      "id": 46,
+      "id": 48,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40415,16 +41182,25 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 47,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 3848 resources after 1 rounds.",
+      "body": "The horde carried off 3198 resources after 1 rounds.",
       "createdAt": "2026-06-01T12:03:41.280Z",
       "read": false
      },
      {
-      "id": 44,
+      "id": 46,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T11:56:09.600Z",
+      "read": false
+     },
+     {
+      "id": 45,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -40433,7 +41209,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 44,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40442,7 +41218,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 43,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (4, 2)",
@@ -40451,7 +41227,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 42,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -40460,39 +41236,48 @@
       "read": false
      },
      {
+      "id": 41,
+      "kind": "under_attack",
+      "tier": "push",
+      "title": "A horde is at the Holy City",
+      "body": "13 of them against its guard of 33.",
+      "createdAt": "2026-06-01T11:36:09.600Z",
+      "read": false
+     },
+     {
       "id": 40,
       "kind": "battle_result",
       "tier": "digest",
-      "title": "The Holy City held",
-      "body": "The horde was beaten at its walls after 3 rounds.",
-      "createdAt": "2026-06-01T11:39:12.000Z",
+      "title": "You's refuge was raided",
+      "body": "The horde carried off 2924 resources after 1 rounds.",
+      "createdAt": "2026-06-01T11:35:40.800Z",
       "read": false
      },
      {
       "id": 39,
-      "kind": "achievement",
-      "tier": "push",
-      "title": "Achievement: Godslayer",
-      "body": "Slay the Avatar of Černobog.",
-      "createdAt": "2026-06-01T11:39:12.000Z",
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "The Holy City held",
+      "body": "The horde was beaten at its walls after 2 rounds.",
+      "createdAt": "2026-06-01T11:29:12.000Z",
       "read": false
      },
      {
       "id": 38,
-      "kind": "event",
+      "kind": "achievement",
       "tier": "push",
-      "title": "The Avatar of Černobog is slain",
-      "body": "Its flesh falls to ash. Every village of the group gets 14000 resources.",
-      "createdAt": "2026-06-01T11:39:12.000Z",
+      "title": "Achievement: Godslayer",
+      "body": "Slay the Avatar of Černobog.",
+      "createdAt": "2026-06-01T11:29:12.000Z",
       "read": false
      },
      {
       "id": 37,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "You's refuge was raided",
-      "body": "The horde carried off 428 resources after 1 rounds.",
-      "createdAt": "2026-06-01T11:35:40.800Z",
+      "kind": "event",
+      "tier": "push",
+      "title": "The Avatar of Černobog is slain",
+      "body": "Its flesh falls to ash. Every village of the group gets 14000 resources.",
+      "createdAt": "2026-06-01T11:29:12.000Z",
       "read": false
      },
      {
@@ -40521,27 +41306,9 @@
       "body": "Clear the camp to free them before they are taken away, for a bounty of at least 3500 resources. If they are taken, the next horde from the south hates you the more.",
       "createdAt": "2026-06-01T11:21:36.000Z",
       "read": false
-     },
-     {
-      "id": 33,
-      "kind": "event",
-      "tier": "push",
-      "title": "The boatwrights at (-8, 2) gave up and left",
-      "body": "The next horde from the north hates you the more for it: +20% attack and defense.",
-      "createdAt": "2026-06-01T11:21:36.000Z",
-      "read": false
-     },
-     {
-      "id": 32,
-      "kind": "under_attack",
-      "tier": "push",
-      "title": "A horde is at the Holy City",
-      "body": "13 of them against its guard of 33.",
-      "createdAt": "2026-06-01T11:09:12.000Z",
-      "read": false
      }
     ],
-    "unread": 71,
+    "unread": 73,
     "serverTime": "2026-06-01T13:50:00.000Z"
    }
   }

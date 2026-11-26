@@ -1278,6 +1278,27 @@ func _test_art() -> void:
 		for kind in MapFeatures.FEATURES.get(terrain, []):
 			_check(Art.has(kind[0]), "%s on %s" % [kind[0], terrain])
 	_check(Art.texture("no/such") == null, "missing art is null")
+	# The map's features are drawn in strips: every grid edge once, every
+	# feature in one strip, the strips top to bottom.
+	var features := MapFeatures.new()
+	var flower := {Vector2i.ZERO: "forest"}
+	for n in HexMath.neighbors(Vector2i.ZERO):
+		flower[n] = "plains"
+	features.build(flower, 48.0, {})
+	var edges := 0
+	var placed := 0
+	var last_y := -INF
+	var ordered := true
+	for strip in features.get_children():
+		edges += strip.grid.size() / 2
+		placed += strip.placed.size()
+		for entry in strip.placed:
+			ordered = ordered and float(entry[0]) >= last_y
+			last_y = float(entry[0])
+	_check(edges == 30, "seven hexes: 30 grid edges, each once (%d)" % edges)
+	_check(placed == features._placed.size() and placed > 0, "every feature in a strip")
+	_check(ordered, "strips run top to bottom, back to front")
+	features.free()
 	_check(Art.settlement_id(1) == "settlement/village_1" and Art.settlement_id(2) == "settlement/village_1", "hall 1-2: stage 1")
 	_check(Art.settlement_id(5) == "settlement/village_3" and Art.settlement_id(10) == "settlement/village_5", "hall 5: stage 3, hall 10: stage 5")
 	_check(Art.settlement_id(0) == "settlement/village_1" and Art.settlement_id(14) == "settlement/village_5", "stages clamp")

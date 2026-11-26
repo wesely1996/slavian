@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 92,
-       "wood": 32,
-       "grain": 240,
-       "stone": 84
+       "iron": 204,
+       "wood": 284,
+       "grain": 380,
+       "stone": 308
       },
       "ratesPerHour": {
        "iron": 30,
@@ -208,57 +208,6 @@
     "plot": "c2",
     "building": "barracks"
    },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":358,\"stone\":228,\"grain\":0,\"iron\":64}",
-    "missing": {
-     "wood": 358,
-     "stone": 228,
-     "grain": 0,
-     "iron": 64
-    }
-   }
-  },
-  {
-   "set": {
-    "amounts": {
-     "wood": 1000,
-     "stone": 1000,
-     "grain": 1000,
-     "iron": 1000
-    }
-   }
-  },
-  {
-   "method": "PUT",
-   "path": "/v1/villages/1/army-floor",
-   "body": {
-    "grain": 100
-   },
-   "status": 200,
-   "response": {
-    "armyFloor": 100,
-    "serverTime": "2026-06-01T08:00:00.000Z"
-   }
-  },
-  {
-   "advance": 2400000
-  },
-  {
-   "set": {
-    "amounts": {
-     "wood": 2000,
-     "stone": 2000,
-     "grain": 1000,
-     "iron": 1000
-    }
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/generals",
-   "body": {},
    "status": 200,
    "response": {
     "village": {
@@ -278,8 +227,8 @@
        "building": "elder_hall"
       },
       "c1": {
-       "level": 1,
-       "building": "heroes_hall"
+       "level": 0,
+       "building": null
       },
       "c2": {
        "level": 0,
@@ -391,6 +340,239 @@
       }
      },
      "levels": {
+      "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "c1",
+       "building": "heroes_hall",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:51.000Z"
+      },
+      {
+       "plot": "c2",
+       "building": "barracks",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:51.000Z",
+       "completesAt": "2026-06-01T08:01:29.200Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 132,
+       "wood": 104,
+       "grain": 308,
+       "stone": 164
+      },
+      "ratesPerHour": {
+       "iron": 30,
+       "wood": 90,
+       "grain": 80,
+       "stone": 60
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
+   }
+  },
+  {
+   "method": "PUT",
+   "path": "/v1/villages/1/army-floor",
+   "body": {
+    "grain": 100
+   },
+   "status": 200,
+   "response": {
+    "armyFloor": 100,
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "advance": 2400000
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 2000,
+     "stone": 2000,
+     "grain": 1000,
+     "iron": 1000
+    }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/generals",
+   "body": {},
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vitichev",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 1,
+       "building": "heroes_hall"
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "barracks": 1,
       "elder_hall": 1,
       "heroes_hall": 1
      },
@@ -679,8 +861,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -788,6 +970,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -3720,8 +3903,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -3829,6 +4012,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -6483,8 +6667,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -6592,6 +6776,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -9135,8 +9320,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -9244,6 +9429,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -12065,8 +12251,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -12174,6 +12360,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -14905,8 +15092,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -15014,6 +15201,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -17748,8 +17936,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -17857,6 +18045,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -20652,8 +20841,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -20761,6 +20950,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -23598,8 +23788,8 @@
         "building": "heroes_hall"
        },
        "c2": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "barracks"
        },
        "c3": {
         "level": 0,
@@ -23707,6 +23897,7 @@
        }
       },
       "levels": {
+       "barracks": 1,
        "elder_hall": 1,
        "heroes_hall": 1
       },
@@ -26402,7 +26593,7 @@
    "response": {
     "notifications": [
      {
-      "id": 18,
+      "id": 19,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -26411,7 +26602,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 18,
       "kind": "leader",
       "tier": "digest",
       "title": "Morok the Hungry has fallen",
@@ -26420,7 +26611,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 17,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -26429,7 +26620,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-4, 7)",
@@ -26438,7 +26629,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (1, -5) sank back into the earth",
@@ -26447,7 +26638,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 14,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Palisade",
@@ -26456,7 +26647,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 3) finished",
@@ -26465,16 +26656,16 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "digest",
       "tier": "push",
       "title": "Today in Quarters",
-      "body": "1 update, 1 build finished, 1 hero report",
+      "body": "1 update, 2 builds finished, 1 hero report",
       "createdAt": "2026-06-01T18:00:00.000Z",
       "read": false
      },
      {
-      "id": 10,
+      "id": 11,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, 9)",
@@ -26483,7 +26674,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 10,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (4, 2) gave up and left",
@@ -26492,7 +26683,7 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (1, -5)",
@@ -26501,7 +26692,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (-2, -5) sank back into the earth",
@@ -26510,7 +26701,7 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (4, 2)",
@@ -26519,7 +26710,7 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 6,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (-2, -5)",
@@ -26528,12 +26719,21 @@
       "read": false
      },
      {
-      "id": 4,
+      "id": 5,
       "kind": "hero",
       "tier": "digest",
       "title": "Radoslav answers your call",
       "body": "A new general stands ready.",
       "createdAt": "2026-06-01T08:52:00.000Z",
+      "read": false
+     },
+     {
+      "id": 4,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Barracks level 1 in Vitichev",
+      "body": "Finished.",
+      "createdAt": "2026-06-01T08:01:29.200Z",
       "read": false
      },
      {
@@ -26564,7 +26764,7 @@
       "read": false
      }
     ],
-    "unread": 18,
+    "unread": 19,
     "serverTime": "2026-06-01T21:26:36.000Z"
    }
   }

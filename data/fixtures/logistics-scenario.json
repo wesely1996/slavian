@@ -208,27 +208,6 @@
     "plot": "c3",
     "building": "caravan_yard"
    },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":56,\"stone\":55,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 56,
-     "stone": 55,
-     "grain": 0,
-     "iron": 0
-    }
-   }
-  },
-  {
-   "advance": 900000
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/research",
-   "body": {
-    "tech": "felling_axes"
-   },
    "status": 200,
    "response": {
     "village": {
@@ -252,8 +231,8 @@
        "building": null
       },
       "c2": {
-       "level": 1,
-       "building": "academy"
+       "level": 0,
+       "building": null
       },
       "c3": {
        "level": 0,
@@ -361,8 +340,211 @@
       }
      },
      "levels": {
-      "academy": 1,
       "elder_hall": 1
+     },
+     "queue": [
+      {
+       "plot": "c2",
+       "building": "academy",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:00.000Z",
+       "completesAt": "2026-06-01T08:00:06.000Z"
+      },
+      {
+       "plot": "c3",
+       "building": "caravan_yard",
+       "targetLevel": 1,
+       "startsAt": "2026-06-01T08:00:06.000Z",
+       "completesAt": "2026-06-01T08:00:13.500Z"
+      }
+     ],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 102,
+       "wood": 106,
+       "grain": 278,
+       "stone": 80
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "advance": 900000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/research",
+   "body": {
+    "tech": "felling_axes"
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "academy"
+      },
+      "c3": {
+       "level": 1,
+       "building": "caravan_yard"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "academy": 1,
+      "elder_hall": 1,
+      "caravan_yard": 1
      },
      "queue": [],
      "garrison": {},
@@ -385,10 +567,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 150,
-       "wood": 250,
-       "grain": 350,
-       "stone": 200
+       "iron": 102,
+       "wood": 106,
+       "grain": 278,
+       "stone": 80
       },
       "ratesPerHour": {
        "iron": 150,
@@ -402,7 +584,7 @@
        "grain": 1000,
        "stone": 1000
       },
-      "settledAt": "2026-06-01T08:00:06.000Z"
+      "settledAt": "2026-06-01T08:00:13.500Z"
      }
     },
     "research": {
@@ -483,8 +665,8 @@
        "building": "academy"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "caravan_yard"
       },
       "c4": {
        "level": 0,
@@ -589,7 +771,8 @@
      },
      "levels": {
       "academy": 1,
-      "elder_hall": 1
+      "elder_hall": 1,
+      "caravan_yard": 1
      },
      "queue": [],
      "garrison": {},
@@ -614,8 +797,8 @@
       "amounts": {
        "wood": 0.5,
        "stone": 0,
-       "grain": 210,
-       "iron": 7.5
+       "grain": 138,
+       "iron": 0.5
       },
       "ratesPerHour": {
        "iron": 150,
@@ -646,10 +829,10 @@
       "stone": 300
      },
      "paid": {
-      "wood": 362,
-      "stone": 275,
+      "wood": 218,
+      "stone": 155,
       "grain": 240,
-      "iron": 180
+      "iron": 139
      }
     },
     "serverTime": "2026-06-01T08:15:00.000Z"
@@ -679,8 +862,14 @@
    },
    "status": 400,
    "response": {
-    "error": "rule",
-    "message": "Build a Caravan Yard first"
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":99.5,\"stone\":50,\"grain\":0,\"iron\":0}",
+    "missing": {
+     "wood": 99.5,
+     "stone": 50,
+     "grain": 0,
+     "iron": 0
+    }
    }
   },
   {
@@ -694,10 +883,224 @@
      "iron": 0
     }
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "Build a Caravan Yard first"
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "academy"
+      },
+      "c3": {
+       "level": 1,
+       "building": "caravan_yard"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "academy": 1,
+      "elder_hall": 1,
+      "caravan_yard": 1
+     },
+     "queue": [],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 0.5,
+       "wood": 0.5,
+       "grain": 138,
+       "stone": 0
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:15:00.000Z"
+     }
+    },
+    "caravan": {
+     "id": 2,
+     "villageId": 1,
+     "destinationVillageId": null,
+     "destinationFortId": null,
+     "destinationShipyardId": null,
+     "kind": "fetch",
+     "caravans": 1,
+     "cargo": {
+      "iron": 0,
+      "wood": 100,
+      "grain": 0,
+      "stone": 0
+     },
+     "carriedBack": null,
+     "status": "outbound",
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -1,
+       1,
+       28800
+      ],
+      [
+       0,
+       0,
+       43200
+      ]
+     ],
+     "departsAt": "2026-06-01T08:15:00.000Z",
+     "arrivesAt": "2026-06-01T08:15:43.200Z",
+     "returnsAt": "2026-06-01T08:16:26.400Z",
+     "escort": {},
+     "ambush": null,
+     "retrieve": null
+    },
+    "serverTime": "2026-06-01T08:15:00.000Z"
    }
   },
   {
@@ -715,7 +1118,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Build a Caravan Yard first"
+    "message": "Send it to another village"
    }
   },
   {
@@ -935,8 +1338,8 @@
         "building": "academy"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -1041,7 +1444,8 @@
       },
       "levels": {
        "academy": 1,
-       "elder_hall": 1
+       "elder_hall": 1,
+       "caravan_yard": 1
       },
       "queue": [],
       "garrison": {},
@@ -1064,10 +1468,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 7.5,
-        "wood": 0.5,
-        "grain": 210,
-        "stone": 0
+        "iron": 3,
+        "wood": 8,
+        "grain": 144.66666666666666,
+        "stone": 5
        },
        "ratesPerHour": {
         "iron": 150,
@@ -1081,7 +1485,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:15:00.000Z"
+       "settledAt": "2026-06-01T08:16:26.400Z"
       }
      }
     ],
@@ -1272,10 +1676,10 @@
        "stone": 300
       },
       "paid": {
-       "iron": 180,
-       "wood": 362,
+       "iron": 139,
+       "wood": 218,
        "grain": 240,
-       "stone": 275
+       "stone": 155
       }
      }
     ],
@@ -1481,7 +1885,53 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -3432,8 +3882,8 @@
        "building": "academy"
       },
       "c3": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "caravan_yard"
       },
       "c4": {
        "level": 0,
@@ -3538,7 +3988,8 @@
      },
      "levels": {
       "academy": 1,
-      "elder_hall": 1
+      "elder_hall": 1,
+      "caravan_yard": 1
      },
      "queue": [],
      "garrison": {},
@@ -3561,10 +4012,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "wood": 137.5,
-       "stone": 125,
-       "grain": 410,
-       "iron": 82.5
+       "wood": 0.5,
+       "stone": 5,
+       "grain": 338,
+       "iron": 34.5
       },
       "ratesPerHour": {
        "iron": 150,
@@ -3584,10 +4035,10 @@
     "research": {
      "accountId": 1,
      "tech": "felling_axes",
-     "status": "researching",
+     "status": "funding",
      "villageId": 1,
      "startedAt": "2026-06-01T08:15:00.000Z",
-     "completesAt": "2026-06-01T08:45:24.000Z",
+     "completesAt": "2026-06-01T08:15:00.000Z",
      "cost": {
       "iron": 180,
       "wood": 450,
@@ -3595,7 +4046,7 @@
       "stone": 300
      },
      "paid": {
-      "wood": 450,
+      "wood": 443,
       "stone": 300,
       "grain": 240,
       "iron": 180
@@ -3615,10 +4066,224 @@
      "iron": 0
     }
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "Build a Caravan Yard first"
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "academy"
+      },
+      "c3": {
+       "level": 1,
+       "building": "caravan_yard"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "academy": 1,
+      "elder_hall": 1,
+      "caravan_yard": 1
+     },
+     "queue": [],
+     "garrison": {},
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "iron": 34.5,
+       "wood": 0.5,
+       "grain": 338,
+       "stone": 5
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 400,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T08:45:00.000Z"
+     }
+    },
+    "caravan": {
+     "id": 3,
+     "villageId": 1,
+     "destinationVillageId": null,
+     "destinationFortId": null,
+     "destinationShipyardId": null,
+     "kind": "fetch",
+     "caravans": 1,
+     "cargo": {
+      "iron": 0,
+      "wood": 150,
+      "grain": 0,
+      "stone": 50
+     },
+     "carriedBack": null,
+     "status": "outbound",
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -1,
+       1,
+       28800
+      ],
+      [
+       0,
+       0,
+       43200
+      ]
+     ],
+     "departsAt": "2026-06-01T08:45:00.000Z",
+     "arrivesAt": "2026-06-01T08:45:43.200Z",
+     "returnsAt": "2026-06-01T08:46:26.400Z",
+     "escort": {},
+     "ambush": null,
+     "retrieve": null
+    },
+    "serverTime": "2026-06-01T08:45:00.000Z"
    }
   },
   {
@@ -3705,8 +4370,8 @@
         "building": "academy"
        },
        "c3": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -3811,7 +4476,8 @@
       },
       "levels": {
        "academy": 1,
-       "elder_hall": 1
+       "elder_hall": 1,
+       "caravan_yard": 1
       },
       "queue": [],
       "garrison": {},
@@ -3826,7 +4492,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -3835,14 +4500,14 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 82.5,
-        "wood": 137.5,
-        "grain": 410,
-        "stone": 125
+        "iron": 37,
+        "wood": 8,
+        "grain": 344.6666666666667,
+        "stone": 10
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -3852,7 +4517,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:45:24.000Z"
+       "settledAt": "2026-06-01T08:46:26.400Z"
       }
      }
     ],
@@ -4032,10 +4697,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -4044,7 +4709,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -4252,7 +4917,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -6248,7 +7004,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -6365,7 +7121,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -6388,8 +7143,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -6506,7 +7261,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -6664,7 +7419,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -6674,13 +7428,13 @@
       "resources": {
        "amounts": {
         "iron": 1701.5,
-        "wood": 3389.25,
+        "wood": 3377.5,
         "grain": 3365,
         "stone": 3340
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -7122,7 +7876,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -7245,7 +7999,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -7393,10 +8147,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -7405,7 +8159,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -7712,7 +8466,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -9726,7 +10571,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -9843,7 +10688,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -9866,8 +10710,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -9984,7 +10828,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -10142,7 +10986,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -10152,13 +10995,13 @@
       "resources": {
        "amounts": {
         "iron": 1293.5,
-        "wood": 2576.25,
+        "wood": 2567.5,
         "grain": 2558,
         "stone": 2539
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -10481,7 +11324,7 @@
       ],
       "loot": {
        "iron": 408,
-       "wood": 813,
+       "wood": 810,
        "grain": 807,
        "stone": 801
       },
@@ -10610,7 +11453,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -10733,7 +11576,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -10881,10 +11724,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -10893,7 +11736,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -11214,7 +12057,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -13265,7 +14199,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -13382,7 +14316,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -13405,8 +14338,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -13523,7 +14456,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -13681,7 +14614,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -13691,13 +14623,13 @@
       "resources": {
        "amounts": {
         "iron": 1293.5,
-        "wood": 2576.25,
+        "wood": 2567.5,
         "grain": 2558,
         "stone": 2539
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -14133,7 +15065,7 @@
       ],
       "loot": {
        "iron": 408,
-       "wood": 813,
+       "wood": 810,
        "grain": 807,
        "stone": 801
       },
@@ -14262,7 +15194,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -14385,7 +15317,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -14533,10 +15465,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -14545,7 +15477,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -14863,7 +15795,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -16865,7 +17888,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -16982,7 +18005,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -17005,8 +18027,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -17123,7 +18145,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -17281,7 +18303,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -17291,13 +18312,13 @@
       "resources": {
        "amounts": {
         "iron": 1293.5,
-        "wood": 2576.25,
+        "wood": 2567.5,
         "grain": 2558,
         "stone": 2539
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -17733,7 +18754,7 @@
       ],
       "loot": {
        "iron": 408,
-       "wood": 813,
+       "wood": 810,
        "grain": 807,
        "stone": 801
       },
@@ -17862,7 +18883,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -17985,7 +19006,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -18133,10 +19154,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -18145,7 +19166,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -18463,7 +19484,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -20622,7 +21734,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -20739,7 +21851,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -20762,8 +21873,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -20880,7 +21991,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -21038,7 +22149,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -21048,13 +22158,13 @@
       "resources": {
        "amounts": {
         "iron": 1293.5,
-        "wood": 2576.25,
+        "wood": 2567.5,
         "grain": 2558,
         "stone": 2539
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -21490,7 +22600,7 @@
       ],
       "loot": {
        "iron": 408,
-       "wood": 813,
+       "wood": 810,
        "grain": 807,
        "stone": 801
       },
@@ -21619,7 +22729,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -21742,7 +22852,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -21890,10 +23000,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -21902,7 +23012,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -22220,7 +23330,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -24215,7 +25416,7 @@
        },
        "c3": {
         "level": 0,
-        "building": null
+        "building": "caravan_yard"
        },
        "c4": {
         "level": 0,
@@ -24332,7 +25533,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -24355,8 +25555,8 @@
          "building": "academy"
         },
         "c3": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "caravan_yard"
         },
         "c4": {
          "level": 0,
@@ -24473,7 +25673,7 @@
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -24631,7 +25831,6 @@
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
-       "production.wood": 0.1,
        "maneuver.encircle": -0.1
       },
       "armyFloor": null,
@@ -24641,13 +25840,13 @@
       "resources": {
        "amounts": {
         "iron": 1293.5,
-        "wood": 2576.25,
+        "wood": 2567.5,
         "grain": 2558,
         "stone": 2539
        },
        "ratesPerHour": {
         "iron": 150,
-        "wood": 495.00000000000006,
+        "wood": 450,
         "grain": 400,
         "stone": 300
        },
@@ -25131,7 +26330,7 @@
       ],
       "loot": {
        "iron": 408,
-       "wood": 813,
+       "wood": 810,
        "grain": 807,
        "stone": 801
       },
@@ -25260,7 +26459,7 @@
       ],
       "loot": {
        "iron": 373,
-       "wood": 743,
+       "wood": 741,
        "grain": 738,
        "stone": 732
       },
@@ -25383,7 +26582,7 @@
       ],
       "loot": {
        "iron": 78,
-       "wood": 141,
+       "wood": 139,
        "grain": 137,
        "stone": 133
       },
@@ -25531,10 +26730,10 @@
      {
       "accountId": 1,
       "tech": "felling_axes",
-      "status": "done",
+      "status": "funding",
       "villageId": 1,
       "startedAt": "2026-06-01T08:15:00.000Z",
-      "completesAt": "2026-06-01T08:45:24.000Z",
+      "completesAt": "2026-06-01T08:15:00.000Z",
       "cost": {
        "iron": 180,
        "wood": 450,
@@ -25543,7 +26742,7 @@
       },
       "paid": {
        "iron": 180,
-       "wood": 450,
+       "wood": 443,
        "grain": 240,
        "stone": 300
       }
@@ -25861,7 +27060,98 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [],
+    "caravans": [
+     {
+      "id": 3,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 150,
+       "grain": 0,
+       "stone": 50
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:45:00.000Z",
+      "arrivesAt": "2026-06-01T08:45:43.200Z",
+      "returnsAt": "2026-06-01T08:46:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     },
+     {
+      "id": 2,
+      "villageId": 1,
+      "destinationVillageId": null,
+      "destinationFortId": null,
+      "destinationShipyardId": null,
+      "kind": "fetch",
+      "caravans": 1,
+      "cargo": {
+       "iron": 0,
+       "wood": 100,
+       "grain": 0,
+       "stone": 0
+      },
+      "carriedBack": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "status": "done",
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -1,
+        1,
+        28800
+       ],
+       [
+        0,
+        0,
+        43200
+       ]
+      ],
+      "departsAt": "2026-06-01T08:15:00.000Z",
+      "arrivesAt": "2026-06-01T08:15:43.200Z",
+      "returnsAt": "2026-06-01T08:16:26.400Z",
+      "escort": {},
+      "ambush": null,
+      "retrieve": null
+     }
+    ],
     "vault": {
      "level": 1,
      "amounts": {
@@ -27834,7 +29124,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 2829 resources after 1 rounds.",
+      "body": "The horde carried off 2826 resources after 1 rounds.",
       "createdAt": "2026-06-01T12:03:45.600Z",
       "read": false
      },
@@ -27897,7 +29187,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 2586 resources after 1 rounds.",
+      "body": "The horde carried off 2584 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:35:40.800Z",
       "read": false
      },
@@ -27969,7 +29259,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
-      "body": "The horde carried off 489 resources after 1 rounds.",
+      "body": "The horde carried off 487 resources after 1 rounds.",
       "createdAt": "2026-06-01T11:05:26.400Z",
       "read": false
      },

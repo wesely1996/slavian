@@ -9,7 +9,7 @@ until they are battered down or climbed.
 ## The walls
 
 - **The plot.** The walls are their own building (plot `w`), up to level 10.
-  Cost: 450 / 750 / 100 / 100 at level 1, ×2.25 a level. Time: 9 min 48 s,
+  Cost: 216 / 360 / 48 / 48 at level 1, ×1.5 a level. Time: 9 min 48 s,
   ×2.1025 a level.
 - **Material.** As they rise, the walls change material:
 

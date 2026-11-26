@@ -4,7 +4,7 @@ name: Release
 # config/version in client/project.godot on main to match, with
 # docs/state-machines.md reviewed and its version line set), then the APK
 # published as a GitHub release (not a pre-release, so
-# cleanup-dev-builds.yml keeps it) with the APK attached, the server image
+# cleanup-dev-builds.yml keeps it) with the APK and the Windows build attached, the server image
 # as ghcr.io/<owner>/slavian-server:<tag>, and that version deployed to the
 # production server (job "deploy"). Either:
 #   - Actions > Release > Run workflow on main (the version defaults to
@@ -28,6 +28,10 @@ concurrency:
 
 permissions:
   contents: read
+
+env:
+  # The same Godot as ci.yml.
+  GODOT_VERSION: 4.5.1
 
 jobs:
   # The release's tag: the one pushed, or (run from the button) v<version>,
@@ -78,9 +82,46 @@ jobs:
       version: ${{ needs.tag.outputs.version }}
     secrets: inherit
 
+  # The Windows build (ops/export-windows.sh): one Slavian.exe, zipped.
+  windows:
+    name: Windows build
+    needs: [tag, ci]
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.name.outputs.artifact }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-templates-windows-${{ env.GODOT_VERSION }}
+      - run: ops/ci/install-godot.sh --windows
+      - name: Name
+        id: name
+        env:
+          VERSION_NAME: ${{ needs.ci.outputs.version_name }}
+        run: |
+          # The version the release builds wins over config/version, as for the APK.
+          sed -i "s|^config/version=.*|config/version=\"$VERSION_NAME\"|" client/project.godot
+          echo "artifact=slavian-${VERSION_NAME}-windows" >> "$GITHUB_OUTPUT"
+      - name: Export
+        env:
+          VERSION_NAME: ${{ needs.ci.outputs.version_name }}
+        run: ops/export-windows.sh "build/${{ steps.name.outputs.artifact }}.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.artifact }}
+          path: build/${{ steps.name.outputs.artifact }}.zip
+          retention-days: 7
+          if-no-files-found: error
+
   publish:
     name: Publish release
-    needs: [tag, ci]
+    needs: [tag, ci, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -89,6 +130,10 @@ jobs:
         with:
           name: ${{ needs.ci.outputs.apk_artifact }}
           path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.windows.outputs.artifact }}
+          path: dist
 
       - name: Create release
         env:
@@ -96,14 +141,14 @@ jobs:
           TAG: ${{ needs.tag.outputs.tag }}
           VERSION_NAME: ${{ needs.ci.outputs.version_name }}
         run: |
-          # Made here, with the APK on it (gh uploads it to a draft, then
+          # Made here, with the APK and the Windows zip on it (gh uploads them to a draft, then
           # publishes, so immutable releases keep it). A draft made by hand
           # in GitHub's UI on this tag gets the APK, then is published. A
           # release already published by hand takes no more files: the APK
           # stays in this run's artifacts and the deploy goes ahead.
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG"
           if draft=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null); then
-            if ! gh release upload "$TAG" dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber; then
+            if ! gh release upload "$TAG" dist/*.apk dist/*.zip --repo "$GITHUB_REPOSITORY" --clobber; then
               echo "::warning::Could not add the APK to release $TAG: it was published by hand in GitHub's UI and is immutable. Next time use Actions > Release > Run workflow (or push the tag) and let the workflow make the release. The APK is in this run's artifacts."
               echo "APK not attached to [$TAG]($url): it was published by hand and is immutable. It is in this run's artifacts; next time use Actions > Release > Run workflow." >> "$GITHUB_STEP_SUMMARY"
               exit 0
@@ -112,13 +157,13 @@ jobs:
               gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
             fi
           else
-            gh release create "$TAG" dist/*.apk \
+            gh release create "$TAG" dist/*.apk dist/*.zip \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --title "Slavian ${VERSION_NAME}" \
               --generate-notes
           fi
-          echo "Published [$TAG]($url) with the APK" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published [$TAG]($url) with the APK and the Windows build" >> "$GITHUB_STEP_SUMMARY"
 
   server-image:
     name: Publish server image
