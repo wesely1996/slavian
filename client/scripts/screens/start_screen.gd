@@ -590,6 +590,15 @@ func _guest_step(why: String) -> void:
 	var name_edit := UI.line_edit(tr("e.g. Vesna"))
 	_content.add_child(name_edit)
 	_content.add_child(UI.primary(tr("Play as guest"), func() -> void: _login(name_edit.text)))
+	# Already playing on another device: sign in to that account with a code from it.
+	_content.add_child(UI.with_info(UI.label(tr("Already playing on another device?"), UI.SMALL_SIZE, UI.MUTED),
+		tr("On the device you play on, open Settings, Account and tap Show a sign-in code. Type the code here within 10 minutes to play on the same account here too.")))
+	var code_row := UI.hbox()
+	var code_edit := UI.line_edit(tr("Sign-in code, e.g. ABCDE-FGHJK"))
+	code_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	code_row.add_child(code_edit)
+	code_row.add_child(UI.button(tr("Sign in"), func() -> void: _login_with_code(code_edit.text)))
+	_content.add_child(code_row)
 
 
 func _friends_form() -> void:
@@ -645,6 +654,24 @@ func _login(display_name: String) -> void:
 	if display_name.strip_edges() != "":
 		body.displayName = display_name.strip_edges()
 	var response := await Api.post_json("/v1/auth/guest", body)
+	if not response.ok:
+		_set_status(response.error)
+		return
+	Session.token = response.data.token
+	Session.account = response.data.account
+	Session.save()
+	Session.report_language()
+	Push.register()
+	_render(_page)
+
+
+## Signs in to the account another device plays on, with the code it showed.
+func _login_with_code(code: String) -> void:
+	_set_status("")
+	if code.strip_edges() == "":
+		_set_status(tr("Type the code the other device shows."))
+		return
+	var response := await Api.post_json("/v1/auth/code", {"code": code.strip_edges()})
 	if not response.ok:
 		_set_status(response.error)
 		return
@@ -948,12 +975,34 @@ func _account_page() -> void:
 	_content.add_child(UI.button(tr("Sign out"), func() -> void:
 		Session.log_out()
 		_render("account")))
+	_content.add_child(UI.label(tr("Play on another device"), UI.HEADING_SIZE))
+	_content.add_child(UI.label(tr("Show a code here, then type it on the other device (a phone, or the Windows game) under Settings, Account. It works once, within 10 minutes, and both devices stay signed in."), UI.SMALL_SIZE, UI.MUTED))
+	var shown := VBoxContainer.new()
+	_content.add_child(UI.button(tr("Show a sign-in code"), func() -> void: _show_sign_in_code(shown)))
+	_content.add_child(shown)
 	_content.add_child(UI.label(tr("Your data"), UI.HEADING_SIZE))
 	_content.add_child(UI.button(tr("Export my data"), _export_data))
 	var gap := Control.new()
 	gap.custom_minimum_size.y = 24
 	_content.add_child(gap)
 	_content.add_child(UI.button(tr("Delete my account"), _confirm_delete))
+
+
+## Asks the server for a code another device signs in with, and shows it.
+func _show_sign_in_code(into: Container) -> void:
+	_set_status("")
+	var response := await Api.post_json("/v1/me/sign-in-code", {})
+	if not response.ok:
+		_set_status(response.error)
+		return
+	if not is_instance_valid(into):
+		return
+	for child in into.get_children():
+		child.queue_free()
+	var code := UI.label(String(response.data.code), UI.HEADING_SIZE * 2)
+	code.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	into.add_child(code)
+	into.add_child(UI.label(tr("Good for 10 minutes, for one sign-in. A new code replaces this one."), UI.SMALL_SIZE, UI.MUTED))
 
 
 func _rename(display_name: String) -> void:

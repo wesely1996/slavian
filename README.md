@@ -68,6 +68,8 @@ DATABASE_URL=postgres://slavian:slavian@localhost:5432/slavian_sim npm run sim:m
 | Method | Path | |
 |---|---|---|
 | `POST` | `/v1/auth/guest` | Create a guest account → `{ token, account }`. Send `Authorization: Bearer <token>` afterwards. |
+| `POST` | `/v1/me/sign-in-code` | A one-time code (`ABCDE-FGHJK`, 10 minutes) to sign in to this account on another device → `{ code, expiresAt }`. |
+| `POST` | `/v1/auth/code` | `{ code }` → `{ token, account }`: a new session on the account that made the code. Wrong or expired: 400; after 60 wrong codes in a minute server-wide: 429. |
 | `GET` / `PATCH` | `/v1/me` | Your account and worlds / rename, report your language. |
 | `GET` | `/v1/me/export` | Everything kept about you, as JSON. |
 | `DELETE` | `/v1/me` | Delete your account and its data (sessions, memberships, devices). |

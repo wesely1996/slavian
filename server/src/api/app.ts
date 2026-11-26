@@ -75,7 +75,17 @@ import { DIFFICULTIES, HERO_SLOTS, MANEUVERS, STANCES } from '../data/index.js';
 import { RESOURCE_KINDS } from '../sim/resources.js';
 import { claimOnboardingCommand, skipOnboardingCommand, createWorldCommand, joinWorldCommand, leaveWorldCommand, pickHeroCommand, setClanCommand, setQuietHoursCommand, setRallyCommand, startWorldCommand } from '../commands/worlds.js';
 import { craftRitualCommand, donateCommand } from '../scheduler/bridge.js';
-import { accountForToken, createGuestAccount, deleteAccount, exportAccount, renameAccount, setAccountLanguage, type Account } from '../db/accounts.js';
+import {
+  accountForToken,
+  createGuestAccount,
+  createSignInCode,
+  deleteAccount,
+  exportAccount,
+  redeemSignInCode,
+  renameAccount,
+  setAccountLanguage,
+  type Account,
+} from '../db/accounts.js';
 import { inTransaction, type Db } from '../db/pool.js';
 import { saveReport } from '../db/reports.js';
 import { loadCosts } from '../site.js';
@@ -127,6 +137,10 @@ const chatQuery = z.object({ before: z.coerce.number().int().positive().optional
 const chatReadBody = z.object({ id: z.number().int().nonnegative() });
 
 const guestBody = z.object({ displayName: displayName.optional() }).default({});
+const signInCodeBody = z.object({ code: z.string().min(1).max(40) });
+// Wrong sign-in codes the whole server takes in a minute before it asks
+// for a pause: guessing a code takes far more than that.
+const SIGN_IN_TRIES_PER_MINUTE = 60;
 const renameBody = z.object({ name: displayName });
 const meBody = z.object({ displayName: displayName.optional(), language: z.string().max(16).optional() });
 const reportBody = z.object({
@@ -371,6 +385,30 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const name = body.displayName ?? `Guest ${Math.floor(1000 + Math.random() * 9000)}`;
     const { account, token } = await inTransaction(db, (client) => createGuestAccount(client, name));
     return { token, account };
+  });
+
+  // Signing in on another device: the device signed in asks for a code...
+  app.post('/v1/me/sign-in-code', async (request) => {
+    const account = await authenticate(db, request);
+    const { code, expiresAt } = await inTransaction(db, (client) => createSignInCode(client, account.id));
+    return { code, expiresAt: expiresAt.toISOString() };
+  });
+
+  // ...and the other one types it in: a session of its own on that account.
+  const wrongCodes: number[] = [];
+  app.post('/v1/auth/code', async (request, reply) => {
+    const body = signInCodeBody.parse(request.body ?? {});
+    const now = Date.now();
+    while (wrongCodes.length > 0 && wrongCodes[0]! < now - 60_000) wrongCodes.shift();
+    if (wrongCodes.length >= SIGN_IN_TRIES_PER_MINUTE) {
+      return reply.status(429).send({ error: 'too_many', message: 'Too many wrong codes just now. Wait a minute and try again.' });
+    }
+    const signedIn = await inTransaction(db, (client) => redeemSignInCode(client, body.code));
+    if (!signedIn) {
+      wrongCodes.push(now);
+      throw new RuleError('That code is wrong or has run out. Make a new one on the device you play on.');
+    }
+    return signedIn;
   });
 
   app.get('/v1/me', async (request) => {
