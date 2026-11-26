@@ -425,7 +425,7 @@ Names are animals in Interslavic. **(to verify: spelling/declension with an Inte
   - **Beat the Smith-Breakers** (Iron Span): a quest army of its own, apart from the hordes, sets out 3 game hours after the stage opens and marches on the Holy City; scattered or victorious instead of beaten, another comes 12 game hours later.
   - **The Eye of Veles** (Guardian Rails): an army raids the North to its full depth and sacks its stronghold.
   - **The ritual torc** (Ritual Arch): forged from a Svarog's Ember.
-- **Raids on the builders:** while a stage is raised, every active front sends a small horde (5 + 2 a stage), each at a different target: the group's villages first, then the Holy City (`constructionRaids`).
+- **Raids on the builders:** while a stage is raised, a small horde (5 + 2 a stage) sets out 1 hour later against each of the group's villages, the fronts taking them in turn; each goes for its own village, and only after striking it for the nearest one it hasn't struck (`constructionRaids`).
 - Bridge progress increases wave difficulty (it is part of group power).
 - **Every stage that stands rewards the group** (`reward` in `data/bridge.json`): each member gets resources in their first village (400/400/400/200 for the first stage, rising to 1000/1000/1000/500 for the fourth) and a **blessing** on all their villages for the rest of the run: +10% production (Foundation Stones), −20% build time, +10% defense, +10% attack. The bridge sheet shows what the open stage brings, so building it early pays.
 - **Stage 5 → Ritual Night:** all active fronts attack at once (respecting quiet hours). Surviving it with Sanctity above 0 **wins the run**.

@@ -218,6 +218,26 @@ static func fastest_step(data: Dictionary, land: Dictionary) -> float:
 	return best
 
 
+## sim/land.ts roadConnected: how many of `villages` (cells) the roads
+## (edge keys) join to `from`.
+static func road_connected(roads: Array, from: Vector2i, villages: Array) -> int:
+	var next := {}
+	for edge in roads:
+		var ends: PackedStringArray = String(edge).split("|")
+		for i in 2:
+			if not next.has(ends[i]):
+				next[ends[i]] = []
+			next[ends[i]].append(ends[1 - i])
+	var reached := {key(from): true}
+	var queue: Array = [key(from)]
+	while not queue.is_empty():
+		for n in next.get(queue.pop_front(), []):
+			if not reached.has(n):
+				reached[n] = true
+				queue.append(n)
+	return villages.filter(func(v: Vector2i) -> bool: return v != from and reached.has(key(v))).size()
+
+
 ## sim/land.ts riverBanks: every step between two neighbouring hexes on the
 ## banks of the same river (edge key -> true).
 static func river_banks(rivers: Array) -> Dictionary:

@@ -9,7 +9,7 @@ import type { RuinSearchPayload } from '../scheduler/scouting.js';
 import type { GameData, Maneuver, Stance, TerrainId } from '../data/index.js';
 import { loadLand } from '../db/rivers.js';
 import { damagedRoads, standingRoads } from '../db/roads.js';
-import { roadLink } from '../sim/land.js';
+import { roadConnected, roadLink } from '../sim/land.js';
 import type { OnboardingStep } from '../data/index.js';
 import { onboardingStep } from '../scheduler/onboarding.js';
 import { authorize } from '../db/delegations.js';
@@ -605,8 +605,13 @@ export async function tradeCommand(
   deps: SchedulerDeps,
   input: VillageCommandInput & { give: ResourceKind; get: ResourceKind; amount: number },
 ): Promise<{ village: Village; got: number }> {
-  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'traded at the market' }, async ({ village }) => {
-    const { state, got } = trade(deps.data, village.state, input, input.now);
+  const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'traded at the market' }, async ({ client, world, village }) => {
+    // Villages joined to it by roads (its owner's, or in co-op an ally's) trade the better.
+    const others = (await listVillages(client, world.id))
+      .filter((v) => !v.ruin && !v.refuge && v.ownerAccountId !== null && (!world.pvp || v.ownerAccountId === village.ownerAccountId))
+      .map((v) => hex(v.q, v.r));
+    const connected = roadConnected((await standingRoads(client, world.id)).keys(), hex(village.q, village.r), others);
+    const { state, got } = trade(deps.data, village.state, input, input.now, connected);
     return { state, result: got };
   });
   return { village, got: result };

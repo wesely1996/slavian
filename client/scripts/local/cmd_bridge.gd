@@ -323,8 +323,9 @@ static func send_quest_army(server: LocalServer, world: Dictionary, stage: int, 
 	_errand_wave(server, world, last, front, composition, spawn_at, {"kind": "quest", "target": null})
 
 
-## A stage starts to be raised: every active front sends a small horde, each
-## at its own target.
+## A stage starts to be raised: a small horde for each of the group's
+## villages, each going for its own (the Holy City once none is left), and
+## setting out delayHours later.
 static func send_construction_raids(server: LocalServer, world: Dictionary, bridge: Dictionary, at: int) -> void:
 	var data := server.data
 	var last := _last_horde(world)
@@ -332,16 +333,16 @@ static func send_construction_raids(server: LocalServer, world: Dictionary, brid
 		return
 	var villages: Array = []
 	for v in world.villages:
-		if v.ruin == null and v.ownerAccountId != null:
+		if v.ruin == null and v.ownerAccountId != null and v.get("refuge") != true:
 			villages.append(v.id)
-	var fronts: Array = world.activeFronts
-	var targets := LocalBridge.construction_targets(fronts, villages)
-	for i in fronts.size():
-		var front := String(fronts[i])
+	var raids := LocalBridge.construction_raids(world.activeFronts, villages)
+	var spawn_at := LocalTime.ms(at + (float(data.bridge.constructionRaids.delayHours) * LocalTime.MS_PER_HOUR) / world.speed)
+	for i in raids.size():
+		var front := String(raids[i].front)
 		var composition := LocalWaves.compose_wave(data, front, maxi(1, int(last.index)), LocalBridge.construction_size(data, int(bridge.stage)), _stage_seed(world, int(bridge.stage), 0xb00 + i), world.members.size())
-		_errand_wave(server, world, last, front, composition, at, {"kind": "bridge", "target": targets[i]})
+		_errand_wave(server, world, last, front, composition, spawn_at, {"kind": "bridge", "target": raids[i].target})
 	LocalInbox.tell_everyone(server, world, {"kind": "bridge", "tier": "push", "title": "Nav strikes at the builders",
-		"body": "While {stage} is raised, every front sends a band at a different target.", "vars": {"stage": data.bridge.stages[int(bridge.stage)].name}}, at)
+		"body": "While {stage} is raised, a band sets out against every village of the group.", "vars": {"stage": data.bridge.stages[int(bridge.stage)].name}}, at)
 
 
 ## A horde on an errand is over: the quest's host, beaten, answers its

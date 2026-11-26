@@ -108,6 +108,10 @@ const buildingsFileSchema = z.object({
     market: z.object({
       baseRate: z.number().positive(),
       ratePerLevel: z.number().nonnegative(),
+      // Each other village joined to it by roads (own, or an ally's) adds this;
+      // no rate is ever better than maxRate.
+      perConnectedCity: z.number().nonnegative(),
+      maxRate: z.number().positive(),
       gearValue: resourcesSchema,
       // The bounty board: the fee, how many open bounties a Market keeps, how much each.
       bounties: z.object({ feeShare: z.number().min(0).max(1), levelsPerBounty: z.number().int().positive(), amountPerLevel: z.number().int().positive() }),
@@ -1010,9 +1014,10 @@ const bridgeFileSchema = z.object({
     )
     .min(1),
   quests: z.record(z.enum(BRIDGE_QUESTS), z.object({ name: z.string(), description: z.string() })),
-  // While a stage is raised, every active front sends a small horde of
-  // units + unitsPerStage x the stage's number, each at its own target.
-  constructionRaids: z.object({ units: z.number().int().positive(), unitsPerStage: z.number().int().nonnegative() }),
+  // While a stage is raised, a small horde of units + unitsPerStage x the
+  // stage's number sets out against each of the group's villages,
+  // delayHours (game hours) after the raising starts.
+  constructionRaids: z.object({ units: z.number().int().positive(), unitsPerStage: z.number().int().nonnegative(), delayHours: z.number().nonnegative() }),
   // The places and host the quests raise when their stage opens.
   questPlaces: z.object({
     relic: z.object({ name: z.string(), siteKind: z.string(), front: z.string(), minDistance: z.number().int().positive(), maxDistance: z.number().int().positive(), units: z.number().int().positive() }),

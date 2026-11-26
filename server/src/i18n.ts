@@ -152,7 +152,7 @@ const SERBIAN: Record<string, string> = {
 	'{place} gather': '{place} se okupljaju',
 	'{story}': '{story}',
 	'Nav strikes at the builders': 'Nav udara na graditelje',
-	'While {stage} is raised, every front sends a band at a different target.': 'Dok se {stage} podiže, svaki front šalje odred na drugu metu.',
+	'While {stage} is raised, a band sets out against every village of the group.': 'Dok se {stage} podiže, na svako selo družine kreće po jedan odred.',
 	'Everything it needs is in place; the builders are at work.': 'Sve što je potrebno je na mestu; graditelji rade.',
 	'{stage}: {quest}': '{stage}: {quest}',
 	'{name} stands': '{name} stoji',

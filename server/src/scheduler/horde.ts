@@ -58,6 +58,7 @@ import { combatants } from '../sim/scouting.js';
 import { capacity, levelsOf, newVillage, outpostHex, outpostPlots, researchPerHour, villageRates, type VillageState } from '../sim/village.js';
 import { withRates } from '../sim/resources.js';
 import { rngFor, routeFrom, targetsOf, type Target } from '../sim/waves.js';
+import { nextConstructionTarget } from '../sim/bridge.js';
 import { terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { cancelPlans, planIntercepts } from './field.js';
@@ -192,11 +193,15 @@ export async function moveOn(client: DbClient, data: GameData, world: World, wav
   const endsAt = avatar ? null : wave.rampageEndsAt;
   if ((!avatar && (!endsAt || at >= endsAt)) || total(wave.composition) === 0) return settle(client, data, world, wave, from, at);
   const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && !wave.struck.includes(v.id));
+  // A band sent at the bridge's builders goes on to the nearest village it hasn't struck.
+  const bridgeBand = wave.errand?.kind === 'bridge';
   const sinceSpawn = at.getTime() - wave.spawnAt.getTime();
   const route = routeFrom(data, {
     terrain: await terrainOf(client, world.id),
     from,
-    targets: (avatar ? avatarTargets(villages) : targetsOf(villages)).filter((t) => t.cell.q !== from.q || t.cell.r !== from.r),
+    targets: (avatar ? avatarTargets(villages) : bridgeBand ? [nextConstructionTarget(from, villages.filter((v) => v.ownerAccountId !== null && v.refuge !== true))] : targetsOf(villages)).filter(
+      (t) => t.cell.q !== from.q || t.cell.r !== from.r,
+    ),
     front: wave.front,
     composition: wave.composition,
     fear: await fearOf(client, data, world),

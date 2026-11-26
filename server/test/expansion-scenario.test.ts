@@ -1,9 +1,10 @@
 // Founding a second village in a solo session (docs/local-engine.md,
 // part 5): settlers trained, some called off, and sent out; then the hero moves
 // there, a caravan and an army go between the villages, a road and a fort
-// rise, and the hordes keep coming. The new village is given up (refused
+// rise, and the hordes keep coming. The market trades better once a road
+// joins the two villages. The new village is given up (refused
 // while an army guards it), and the first can't be.
-import { hexDistance, hex, spiral } from '../src/sim/hex.js';
+import { hexDistance, hex, neighbors, spiral, type Hex } from '../src/sim/hex.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
 const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Kin', displayName: 'You', speed: 50, difficulty: 'baron' };
@@ -53,6 +54,17 @@ scenario('expansion-scenario.json', START, async ({ started, play }) => {
   const second = founded.villages.find((v: { name: string }) => v.name === 'Novgorod');
   if (second) {
     await play({ method: 'POST', path: `${world}/hero/move`, body: { villageId: second.id } });
+    // A trade at home, then again once a road joins the two villages: 1% better.
+    await play({ set: { plots: { c5: { building: 'market', level: 1 } }, amounts: { wood: 1000 } } });
+    await play({ method: 'POST', path: '/v1/villages/1/market/trade', body: { give: 'wood', get: 'iron', amount: 100 } });
+    const path: { a: Hex; b: Hex }[] = [];
+    for (let at: Hex = hex(home.q, home.r); hexDistance(at, hex(second.q, second.r)) > 0; ) {
+      const next: Hex = neighbors(at).sort((x, y) => hexDistance(x, hex(second.q, second.r)) - hexDistance(y, hex(second.q, second.r)))[0]!;
+      path.push({ a: at, b: next });
+      at = next;
+    }
+    await play({ set: { roads: path } });
+    await play({ method: 'POST', path: '/v1/villages/1/market/trade', body: { give: 'wood', get: 'iron', amount: 100 } });
     // A rally point: only one of the player's own settlements; once set,
     // the spearmen trained at home march there as soon as they are done.
     await play({ method: 'PUT', path: `${world}/rally`, body: { villageId: 999 } });

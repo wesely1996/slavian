@@ -4,7 +4,7 @@
 import type { BridgeQuest, GameData } from '../data/index.js';
 import { RuleError } from '../errors.js';
 import { mapResources, RESOURCE_KINDS, type Resources } from './resources.js';
-import { hex, hexKey, ring, type Hex } from './hex.js';
+import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
 
 export interface BridgeState {
   // The stage being built (0-based); stages.length once the bridge stands.
@@ -135,12 +135,29 @@ export function questCell(data: GameData, terrain: ReadonlyMap<string, string>, 
   return null;
 }
 
-// Who each front's small horde strikes while a stage is raised: the group's
-// villages in order, then the Holy City (null), each front its own while
-// there are enough.
-export function constructionTargets(fronts: readonly string[], villages: readonly number[]): (number | null)[] {
-  const targets: (number | null)[] = [...villages, null];
-  return fronts.map((_, i) => targets[i % targets.length]!);
+// The small hordes sent while a stage is raised: one for each of the
+// group's villages, the active fronts dealt out in turn, each going for its
+// own village; with no village left, one goes for the Holy City (null).
+export function constructionRaids(fronts: readonly string[], villages: readonly number[]): { front: string; target: number | null }[] {
+  if (fronts.length === 0) return [];
+  if (villages.length === 0) return [{ front: fronts[0]!, target: null }];
+  return villages.map((target, i) => ({ front: fronts[i % fronts.length]!, target }));
+}
+
+// Where a construction horde goes once it has struck its village: the
+// nearest village it hasn't struck yet (fewest hexes, then the lowest id),
+// or the Holy City once none is left.
+export function nextConstructionTarget(from: Hex, villages: readonly { id: number; q: number; r: number }[]): { id: number | null; cell: Hex } {
+  let best: { id: number | null; cell: Hex } = { id: null, cell: hex(0, 0) };
+  let bestDistance = Infinity;
+  for (const v of [...villages].sort((a, b) => a.id - b.id)) {
+    const d = hexDistance(from, hex(v.q, v.r));
+    if (d > 0 && d < bestDistance) {
+      best = { id: v.id, cell: hex(v.q, v.r) };
+      bestDistance = d;
+    }
+  }
+  return best;
 }
 
 // How big each of those hordes is, for the stage being raised (0-based).

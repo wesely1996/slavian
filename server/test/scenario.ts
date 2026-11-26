@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/api/app.js';
 import { insertRivers } from '../src/db/rivers.js';
+import { edgeKey } from '../src/sim/land.js';
 import { startRitual } from '../src/scheduler/cultists.js';
 import { raiseMountainCity } from '../src/scheduler/mapEvents.js';
 import { interceptAt } from '../src/scheduler/field.js';
@@ -63,6 +64,9 @@ export type WorldSet = {
   leshen?: { q: number; r: number };
   // Rivers the players dug already, along these edges (field.json terraform river).
   dugRivers?: { a: { q: number; r: number }; b: { q: number; r: number } }[];
+  // Roads standing already (level 1), along these edges, built by the
+  // player's (first) village.
+  roads?: { a: { q: number; r: number }; b: { q: number; r: number } }[];
   // What the player has forged already (smithing.json), by unit and line.
   smithing?: Record<string, Record<string, number>>;
   // Units standing in the player's (first) village, by unit (their upkeep
@@ -217,6 +221,14 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
               } finally {
                 client.release();
               }
+            }
+            for (const e of step.set.roads ?? []) {
+              const [p, q] = edgeKey(e.a, e.b).startsWith(`${e.a.q},${e.a.r}|`) ? [e.a, e.b] : [e.b, e.a];
+              await db.query(
+                `INSERT INTO road_edges (world_id, aq, ar, bq, br, status, level, built_by, completes_at)
+                 SELECT $1, $2, $3, $4, $5, 'standing', 1, id, NULL FROM villages WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)`,
+                [world.id, p!.q, p!.r, q!.q, q!.r],
+              );
             }
             if (step.set.smithing) {
               await db.query('UPDATE world_members SET smithing = $2 WHERE world_id = $1', [world.id, JSON.stringify(step.set.smithing)]);

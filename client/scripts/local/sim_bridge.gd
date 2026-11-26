@@ -95,15 +95,35 @@ static func quest_cell(data: Dictionary, terrain: Dictionary, taken: Dictionary,
 	return Vector2i.MAX
 
 
-## Who each front's small horde strikes while a stage is raised: the
-## group's villages in order, then the Holy City (null).
-static func construction_targets(fronts: Array, villages: Array) -> Array:
-	var targets: Array = villages.duplicate()
-	targets.append(null)
+## sim/bridge.ts constructionRaids: one small horde for each of the
+## group's villages, the active fronts dealt out in turn, each going for its
+## own village; with no village left, one goes for the Holy City (null).
+static func construction_raids(fronts: Array, villages: Array) -> Array:
+	if fronts.is_empty():
+		return []
+	if villages.is_empty():
+		return [{"front": String(fronts[0]), "target": null}]
 	var out: Array = []
-	for i in fronts.size():
-		out.append(targets[i % targets.size()])
+	for i in villages.size():
+		out.append({"front": String(fronts[i % fronts.size()]), "target": villages[i]})
 	return out
+
+
+## sim/bridge.ts nextConstructionTarget: once it has struck its village, the
+## nearest village it hasn't struck yet (fewest hexes, then the lowest id),
+## or the Holy City once none is left.
+static func next_construction_target(from: Vector2i, villages: Array) -> Dictionary:
+	var sorted: Array = villages.duplicate()
+	sorted.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.id) < int(b.id))
+	var best := {"id": null, "cell": Vector2i.ZERO}
+	var best_distance := 1 << 30
+	for v in sorted:
+		var cell := Vector2i(int(v.q), int(v.r))
+		var d := HexMath.distance(from, cell)
+		if d > 0 and d < best_distance:
+			best = {"id": v.id, "cell": cell}
+			best_distance = d
+	return best
 
 
 static func construction_size(data: Dictionary, stage: int) -> int:

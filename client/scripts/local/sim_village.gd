@@ -689,15 +689,21 @@ static func demolish(data: Dictionary, state: Dictionary, plot: String, at: int,
 	return {"state": next, "refund": refund}
 
 
-static func market_rate(data: Dictionary, market_level: int) -> float:
+## sim/village.ts marketRate: better by level and by the `connected`
+## villages joined to it by roads, times a trading clan's bonus, never
+## better than maxRate.
+static func market_rate(data: Dictionary, market_level: int, connected := 0, bonuses: Dictionary = {}) -> float:
 	var market: Dictionary = data.buildings.village.market
-	return float(market.baseRate) + float(market.ratePerLevel) * (market_level - 1) if market_level > 0 else 0.0
+	if market_level <= 0:
+		return 0.0
+	return minf(float(market.maxRate), (float(market.baseRate) + float(market.ratePerLevel) * (market_level - 1) + float(market.perConnectedCity) * connected) \
+		* (1.0 + float(bonuses.get("marketRate", 0.0))))
 
 
 ## Trades `amount` of `give` for `get` at the Market: {state, got} or {"error"}.
-static func trade(data: Dictionary, state: Dictionary, give: String, get: String, amount: int, at: int) -> Dictionary:
+static func trade(data: Dictionary, state: Dictionary, give: String, get: String, amount: int, at: int, connected := 0) -> Dictionary:
 	# A clan of traders gets more for what it gives (clans.json marketRate).
-	var rate := market_rate(data, int(state.levels.get(MARKET, 0))) * (1.0 + float(state.get("bonuses", {}).get("marketRate", 0.0)))
+	var rate := market_rate(data, int(state.levels.get(MARKET, 0)), connected, state.get("bonuses", {}))
 	if rate <= 0:
 		return rule("Build a Market to trade")
 	if give == get:
