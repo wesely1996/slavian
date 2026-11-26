@@ -41,8 +41,10 @@ The heart of the village, up to level 10. Each level:
 
 The regular buildings, fields and towers went up to level 20 until version
 0.23. Each level now stands for two of the old ones: level *L* gives what old
-level 2*L* gave, and costs and takes about what the two old levels did
-together. Villages saved before then were put on the new scale: each such
+level 2*L* gave, and takes about as long as the two old levels did
+together. Since 0.24 a level costs what the same old level did, plus 20%
+(old level *L* × 1.2), so all ten levels can be built within a run. Villages
+saved before 0.23 were put on the new scale: each such
 level halved, rounded up (old level 7 became 4). The land's and the
 specialists' own buildings (Academy, Shrine, boosters, terrain buildings)
 keep their 5 levels.
@@ -73,38 +75,38 @@ Costs are wood / stone / grain / iron at level 1, then ×growth each level.
 
 | Building | Max | Level 1 cost | Growth | Time | What it does |
 |---|---|---|---|---|---|
-| Elder's Hall | 10 | 520/520/260/208 | ×2.56 | 450 s ×2.25 | Slots, build speed, queue, outposts, army slots (above) |
-| Woodcutter (field) | 10 | 104/156/78/52 | ×2.56 | 229 s ×2.4025 | 20.25 wood/h at level 1, ×1.8225 a level |
-| Quarry (field) | 10 | 182/78/78/52 | ×2.56 | 229 s ×2.4025 | 16.2 stone/h, ×1.8225 a level |
-| Farm (field) | 10 | 130/104/52/26 | ×2.56 | 191 s ×2.4025 | 20.25 grain/h, ×1.8225 a level |
-| Iron Mine (field) | 10 | 212/212/106/0 | ×2.7225 | 312 s ×2.56 | 10.8 iron/h, ×1.8225 a level |
-| Storehouse | 10 | 300/250/100/50 | ×2.25 | 250 s ×2.25 | Storage for every resource (several allowed) |
-| Grain Silo | 10 | 350/300/50/50 | ×2.25 | 275 s ×2.25 | Storage for grain alone (several allowed) |
+| Elder's Hall | 10 | 240/240/120/96 | ×1.6 | 450 s ×2.25 | Slots, build speed, queue, outposts, army slots (above) |
+| Woodcutter (field) | 10 | 48/72/36/24 | ×1.6 | 229 s ×2.4025 | 20.25 wood/h at level 1, ×1.8225 a level |
+| Quarry (field) | 10 | 84/36/36/24 | ×1.6 | 229 s ×2.4025 | 16.2 stone/h, ×1.8225 a level |
+| Farm (field) | 10 | 60/48/24/12 | ×1.6 | 191 s ×2.4025 | 20.25 grain/h, ×1.8225 a level |
+| Iron Mine (field) | 10 | 96/96/48/0 | ×1.65 | 312 s ×2.56 | 10.8 iron/h, ×1.8225 a level |
+| Storehouse | 10 | 144/120/48/24 | ×1.5 | 250 s ×2.25 | Storage for every resource (several allowed) |
+| Grain Silo | 10 | 168/144/24/24 | ×1.5 | 275 s ×2.25 | Storage for grain alone (several allowed) |
 
 ### Military
 
 | Building | Max | Level 1 cost | Growth | What it does |
 |---|---|---|---|---|
-| Barracks | 10 | 390/312/156/156 | ×2.56 | Trains infantry; faster each level; higher levels open stronger troops |
-| Shooting Range | 10 | 442/234/156/130 | ×2.56 | Trains archers, skirmishers, throwers and engines |
-| Stables | 10 | 416/260/312/182 | ×2.56 | Trains riders and military caravans |
-| Scout Lodge | 10 | 260/208/104/52 | ×2.56 | Trains scouts, pathfinders, assassins |
-| Hospital | 10 | 468/416/312/104 | ×2.56 | 10% a level of a garrison's fallen get up again when it holds its village; trains the Shaman |
-| Hero's Hall | 10 | 468/416/260/208 | ×2.56 | Recruits generals; heals the hero 16% faster a level there |
-| Blacksmith | 10 | 520/468/156/572 | ×2.56 | Forges unit improvements, 6% faster a level ([page 11](11-research-faith-smithing.md#the-blacksmith)) |
+| Barracks | 10 | 180/144/72/72 | ×1.6 | Trains infantry; faster each level; higher levels open stronger troops |
+| Shooting Range | 10 | 204/108/72/60 | ×1.6 | Trains archers, skirmishers, throwers and engines |
+| Stables | 10 | 192/120/144/84 | ×1.6 | Trains riders and military caravans |
+| Scout Lodge | 10 | 120/96/48/24 | ×1.6 | Trains scouts, pathfinders, assassins |
+| Hospital | 10 | 216/192/144/48 | ×1.6 | 10% a level of a garrison's fallen get up again when it holds its village; trains the Shaman |
+| Hero's Hall | 10 | 216/192/120/96 | ×1.6 | Recruits generals; heals the hero 16% faster a level there |
+| Blacksmith | 10 | 240/216/72/264 | ×1.6 | Forges unit improvements, 6% faster a level ([page 11](11-research-faith-smithing.md#the-blacksmith)) |
 | Walls and towers | 10 | see [page 7](07-walls-and-sieges.md) | | |
 
 ### Economy and growth
 
 | Building | Max | Level 1 cost | Growth | What it does |
 |---|---|---|---|---|
-| Caravan Yard | 10 | 306/255/153/102 | ×2.4025 | Two caravans per level; merchants ([page 4](04-economy-and-logistics.md#caravans)) |
-| Market | 10 | 416/312/260/104 | ×2.56 | Trades resources; bounty board; buys spare gear |
+| Caravan Yard | 10 | 144/120/72/48 | ×1.55 | Two caravans per level; merchants ([page 4](04-economy-and-logistics.md#caravans)) |
+| Market | 10 | 192/144/120/48 | ×1.6 | Trades resources; bounty board; buys spare gear |
 | Academy | 5 | 250/300/150/150 | ×1.7 | Research 30/h at level 1, ×1.35 a level ([page 11](11-research-faith-smithing.md)) |
 | Settlers' Lodge | 5 | 300/250/200/100 | ×1.6 | Trains settlers |
 | Shrine | 5 | 60/100/500/20 + 1 Ember a level | ×1.45 | A god's blessing for all your villages; needs Elder's Hall 2 |
-| Masons' Guild | 10 | 520/624/208/156 | ×2.56 | Every building 4% faster a level |
-| Workers' Huts | 10 | 572/416/364/104 | ×2.56 | +4% of every resource a level |
+| Masons' Guild | 10 | 240/288/96/72 | ×1.6 | Every building 4% faster a level |
+| Workers' Huts | 10 | 264/192/168/48 | ×1.6 | +4% of every resource a level |
 | Forester | 5 | 160/120/60/40 | ×1.7 | +5% wood a level; needs a Woodcutter of level 3 |
 | Stonemason | 5 | 120/160/60/40 | ×1.7 | +5% stone a level; needs a Quarry of level 3 |
 | Mill | 5 | 140/120/60/40 | ×1.7 | +5% grain a level; needs a Farm of level 3 |
