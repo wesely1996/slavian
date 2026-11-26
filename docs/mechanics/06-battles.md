@@ -230,7 +230,7 @@ Some units' blows leave something behind:
 
 ## Healing
 
-- **The Hospital:** when a garrison holds its own village, 5% a level of its
+- **The Hospital:** when a garrison holds its own village, 10% a level of its
   fallen get up again.
 - **Shamans:** each gives every fallen soldier of its side a 5% chance to
   rise, at most 50% ([page 5](05-units-and-training.md#healers)).

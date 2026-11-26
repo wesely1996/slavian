@@ -2770,7 +2770,7 @@ msgid "Training (%d/%d)"
 msgstr ""
 
 #: client/scripts/screens/game_screen_army.gd:1195
-msgid "Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place."
+msgid "Batches waiting to be trained. Every %s levels of the Barracks, the Shooting Range and the Stables each add one more place."
 msgstr ""
 
 #: client/scripts/screens/game_screen_army.gd:1197
@@ -3492,7 +3492,7 @@ msgid "Keep %s topped up"
 msgstr ""
 
 #: client/scripts/screens/game_screen_logistics.gd:583
-msgid "Orders %d/%d · +1 every %d Hall levels"
+msgid "Orders %d/%d · +1 every %s Hall levels"
 msgstr ""
 
 #: client/scripts/screens/game_screen_logistics.gd:587
@@ -6592,7 +6592,7 @@ msgid "Elder's Hall"
 msgstr ""
 
 #: data/buildings.json
-msgid "The heart of the village. Each level opens another building slot and builds a little faster; every few levels add a place in the build queue and another outpost."
+msgid "The heart of the village. Each level opens two more building slots, builds faster and allows another outpost; most levels add a place in the build queue."
 msgstr ""
 
 #: data/buildings.json
@@ -6664,7 +6664,7 @@ msgid "Hero's Hall"
 msgstr ""
 
 #: data/buildings.json
-msgid "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and every few levels allow another general."
+msgid "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and each level above the first allows another general."
 msgstr ""
 
 #: data/buildings.json
@@ -6896,7 +6896,7 @@ msgid "Forester"
 msgstr ""
 
 #: data/buildings.json
-msgid "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 5."
+msgid "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 3."
 msgstr ""
 
 #: data/buildings.json
@@ -6904,7 +6904,7 @@ msgid "Stonemason"
 msgstr ""
 
 #: data/buildings.json
-msgid "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 5."
+msgid "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 3."
 msgstr ""
 
 #: data/buildings.json
@@ -6912,7 +6912,7 @@ msgid "Mill"
 msgstr ""
 
 #: data/buildings.json
-msgid "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 5."
+msgid "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 3."
 msgstr ""
 
 #: data/buildings.json
@@ -6920,7 +6920,7 @@ msgid "Smelter"
 msgstr ""
 
 #: data/buildings.json
-msgid "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 5."
+msgid "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 3."
 msgstr ""
 
 #: data/buildings.json
@@ -6928,7 +6928,7 @@ msgid "Hospital"
 msgstr ""
 
 #: data/buildings.json
-msgid "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again."
+msgid "Tends the wounded: when the garrison holds its own village, 10% per level of its fallen get up again."
 msgstr ""
 
 #: data/buildings.json
@@ -6936,7 +6936,7 @@ msgid "Masons' Guild"
 msgstr ""
 
 #: data/buildings.json
-msgid "Master builders who teach the village's hands the craft: every building goes up 2% faster per level."
+msgid "Master builders who teach the village's hands the craft: every building goes up 4% faster per level."
 msgstr ""
 
 #: data/buildings.json
@@ -6944,7 +6944,7 @@ msgid "Workers' Huts"
 msgstr ""
 
 #: data/buildings.json
-msgid "Homes for the hands who work the fields, woods, quarries and mines: 2% more of every resource per level."
+msgid "Homes for the hands who work the fields, woods, quarries and mines: 4% more of every resource per level."
 msgstr ""
 
 #: data/buildings.json
@@ -7000,7 +7000,7 @@ msgid "Blacksmith"
 msgstr ""
 
 #: data/buildings.json
-msgid "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 3% faster and higher levels forge the finer work."
+msgid "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 6% faster and higher levels forge the finer work."
 msgstr ""
 
 #: data/buildings.json

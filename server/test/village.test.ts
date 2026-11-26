@@ -85,11 +85,13 @@ describe('village layout', () => {
 
   it('a bigger Elder\'s Hall unlocks slots and queue places', () => {
     expect(unlockedSlots(data, 1)).toBe(village.slotsUnlockedAtStart);
-    expect(unlockedSlots(data, 5)).toBe(village.slotsUnlockedAtStart + 4 * village.slotsPerHallLevel);
+    expect(unlockedSlots(data, 3)).toBe(village.slotsUnlockedAtStart + 2 * village.slotsPerHallLevel);
     expect(unlockedSlots(data, 99)).toBe(village.centerSlots);
     expect(buildQueueLimit(data, 1)).toBe(village.baseQueueLimit);
-    expect(buildQueueLimit(data, 3)).toBe(village.baseQueueLimit + 1);
-    expect(buildQueueLimit(data, 9)).toBe(village.baseQueueLimit + 3);
+    // One more every one and a half levels: 2 at level 3, 6 at level 9.
+    expect(buildQueueLimit(data, 2)).toBe(village.baseQueueLimit + 1);
+    expect(buildQueueLimit(data, 3)).toBe(village.baseQueueLimit + 2);
+    expect(buildQueueLimit(data, 9)).toBe(village.baseQueueLimit + 6);
   });
 });
 
@@ -170,7 +172,7 @@ describe('building', () => {
       village.startingResources.wood - levelCost(woodcutter, 1).wood - data.buildings.buildings.farm!.cost.wood,
     );
     // Fill the queue up to the limit (one build per field); one more is refused.
-    let state = second.state;
+    let state = rich(second.state);
     const limit = buildQueueLimit(data, 1);
     const fields = ['f1', 'f3', 'f7', 'f10', 'f2', 'f4', 'f8'];
     for (const plot of fields.slice(0, limit - 2)) state = queueBuild(data, state, { plot }, T0, 1).state;
@@ -231,17 +233,18 @@ describe('outposts', () => {
     expect(() => claim(v, site(5, 0))).toThrow(/within 2 hexes/);
     expect(() => claim(v, site(3, 0, 'swamp'))).toThrow(/Nothing to gather on Swamp/);
     expect(() => claim(v, site(3, 0, 'forest', ['3,0']))).toThrow(/already taken/);
-    const one = claim(v, site(3, 0)).state;
-    expect(() => claim(one, site(1, 0))).toThrow(/can hold 1 outpost;/);
+    const two = claim(claim(v, site(3, 0)).state, site(4, -1)).state;
+    expect(() => claim(two, site(1, 0))).toThrow(/can hold 2 outposts;/);
     expect(() => queueBuild(data, v, 'outpost', T0, 1)).toThrow(/Pick a hex/);
   });
 
   it('a bigger Elder\'s Hall allows more outposts', () => {
-    expect(outpostLimit(data, 1)).toBe(village.baseOutposts);
-    expect(outpostLimit(data, 2)).toBe(village.baseOutposts + 1);
+    expect(outpostLimit(data, 0)).toBe(village.baseOutposts);
+    expect(outpostLimit(data, 1)).toBe(village.baseOutposts + 1);
+    expect(outpostLimit(data, 2)).toBe(village.baseOutposts + 2);
     let v = rich(newVillage(data, T0, 1));
     v = build(v, { plot: HALL_PLOT });
-    v = claim(v, site(3, 0)).state;
+    v = claim(claim(v, site(3, 0)).state, site(4, -1)).state;
     expect(claim(v, site(1, 0)).state.plots['o1,0']).toMatchObject({ level: 0 });
   });
 
@@ -320,11 +323,12 @@ describe('more buildings', () => {
     v = build(v, { plot: 'c1', building: 'storehouse' });
     v = build(v, { plot: 'c2', building: 'storehouse' });
     // Two storehouses of level 1 hold what each adds above the base.
-    expect(capacity(data, v.plots).wood).toBeCloseTo(village.baseCapacity * (1 + 2 * (1.3 - 1)));
+    const growth = data.buildings.buildings.storehouse!.capacityGrowth!;
+    expect(capacity(data, v.plots).wood).toBeCloseTo(village.baseCapacity * (1 + 2 * (growth - 1)));
     expect(() => build(v, { plot: 'c3', building: 'barracks' })).not.toThrow();
     expect(() => build(build(v, { plot: 'c3', building: 'barracks' }), { building: 'barracks', plot: 'c1' })).toThrow(/holds a Storehouse/);
-    expect(() => build(v, { plot: 'c3', building: 'forester' })).toThrow('Forester needs Woodcutter level 5');
-    for (let i = 0; i < 5; i++) v = build(v, { plot: 'f0' });
+    expect(() => build(v, { plot: 'c3', building: 'forester' })).toThrow('Forester needs Woodcutter level 3');
+    for (let i = 0; i < 3; i++) v = build(v, { plot: 'f0' });
     const forested = build(build(v, { plot: 'c3', building: 'forester' }), { plot: 'c3' });
     expect(forested.ledger.ratesPerHour.wood).toBeCloseTo(productionPerHour(data, forested.plots, 1).wood * 1.1);
   });
@@ -343,10 +347,10 @@ describe('more buildings', () => {
   it('trades at the market, better with every level', () => {
     const v = build(rich(newVillage(data, T0, 1)), { plot: 'c1', building: 'market' });
     const { state, got } = trade(data, v, { give: 'wood', get: 'iron', amount: 100 }, at(v));
-    expect(got).toBe(40);
+    expect(got).toBe(44);
     expect(amountsAt(state.ledger, at(v)).wood).toBe(amountsAt(v.ledger, at(v)).wood - 100);
     const bigger = build(v, { plot: 'c1' });
-    expect(trade(data, bigger, { give: 'wood', get: 'iron', amount: 100 }, at(bigger)).got).toBe(44);
+    expect(trade(data, bigger, { give: 'wood', get: 'iron', amount: 100 }, at(bigger)).got).toBe(52);
     expect(() => trade(data, rich(newVillage(data, T0, 1)), { give: 'wood', get: 'iron', amount: 100 }, T0)).toThrow(/Build a Market/);
   });
 

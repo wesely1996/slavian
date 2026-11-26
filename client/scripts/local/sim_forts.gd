@@ -170,14 +170,15 @@ static func is_manned(fort: Dictionary) -> bool:
 
 
 ## A wall ring's plots as a village's (sim/walls.ts): "w" and "t0"...
+## sim/forts.ts ringPlots: each fort level is half a village level (rounded up).
 static func ring_plots(plots: Dictionary, ring: int) -> Dictionary:
 	var out := {}
 	var wall: Variant = plots.get("w%d" % ring)
 	if wall != null:
-		out["w"] = {"building": "wall", "level": int(wall.level)}
+		out["w"] = {"building": "wall", "level": ceili(int(wall.level) / 2.0)}
 	for id in plots:
 		if _is_tower(id) and int(String(id)[1]) == ring:
-			out["t" + String(id).substr(3)] = {"building": plots[id].kind, "level": int(plots[id].level)}
+			out["t" + String(id).substr(3)] = {"building": plots[id].kind, "level": ceili(int(plots[id].level) / 2.0)}
 	return out
 
 

@@ -30,113 +30,113 @@
       "iron_mine"
     ],
     "centerSlots": 12,
-    "slotsUnlockedAtStart": 4,
-    "slotsPerHallLevel": 1,
+    "slotsUnlockedAtStart": 5,
+    "slotsPerHallLevel": 2,
     "baseQueueLimit": 5,
-    "hallLevelsPerQueueSlot": 3,
-    "hallBuildSpeedup": 0.96,
+    "hallLevelsPerQueueSlot": 1.5,
+    "hallBuildSpeedup": 0.9216,
     "outpostRange": 2,
     "baseOutposts": 1,
-    "hallLevelsPerOutpost": 2,
+    "hallLevelsPerOutpost": 1,
     "demolishRefund": 0.5,
-    "cancelRefund": { "base": 0.8, "perHallLevel": 0.02 },
+    "cancelRefund": { "base": 0.82, "perHallLevel": 0.04 },
     "abandonRefund": 0.5,
-    "market": { "baseRate": 0.4, "ratePerLevel": 0.04, "perConnectedCity": 0.01, "maxRate": 1, "gearValue": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 },
-      "bounties": { "feeShare": 0.1, "levelsPerBounty": 3, "amountPerLevel": 500 } }
+    "market": { "baseRate": 0.44, "ratePerLevel": 0.08, "perConnectedCity": 0.01, "maxRate": 1, "gearValue": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 },
+      "bounties": { "feeShare": 0.1, "levelsPerBounty": 1.5, "amountPerLevel": 1000 } }
   },
   "buildings": {
     "elder_hall": {
       "name": "Elder's Hall",
-      "description": "The heart of the village. Each level opens another building slot and builds a little faster; every few levels add a place in the build queue and another outpost.",
+      "description": "The heart of the village. Each level opens two more building slots, builds faster and allows another outpost; most levels add a place in the build queue.",
       "kind": "center",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 200,
-        "stone": 200,
-        "grain": 100,
-        "iron": 80
+        "wood": 520,
+        "stone": 520,
+        "grain": 260,
+        "iron": 208
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 180,
-      "timeGrowth": 1.5
+      "costGrowth": 2.56,
+      "buildSeconds": 450,
+      "timeGrowth": 2.25
     },
     "woodcutter": {
       "name": "Woodcutter",
       "description": "Cuts wood in the forest around the village.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 40,
-        "stone": 60,
-        "grain": 30,
-        "iron": 20
+        "wood": 104,
+        "stone": 156,
+        "grain": 78,
+        "iron": 52
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 90,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 229,
+      "timeGrowth": 2.4025,
       "production": {
         "resource": "wood",
-        "basePerHour": 15,
-        "growth": 1.35
+        "basePerHour": 20.25,
+        "growth": 1.8225
       },
       "kind": "field"
     },
     "quarry": {
       "name": "Quarry",
       "description": "Breaks stone from the hills around the village.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 70,
-        "stone": 30,
-        "grain": 30,
-        "iron": 20
+        "wood": 182,
+        "stone": 78,
+        "grain": 78,
+        "iron": 52
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 90,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 229,
+      "timeGrowth": 2.4025,
       "production": {
         "resource": "stone",
-        "basePerHour": 12,
-        "growth": 1.35
+        "basePerHour": 16.2,
+        "growth": 1.8225
       },
       "kind": "field"
     },
     "farm": {
       "name": "Farm",
       "description": "Grows grain, which feeds the village and its troops.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 50,
-        "stone": 40,
-        "grain": 20,
-        "iron": 10
+        "wood": 130,
+        "stone": 104,
+        "grain": 52,
+        "iron": 26
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 75,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 191,
+      "timeGrowth": 2.4025,
       "production": {
         "resource": "grain",
-        "basePerHour": 15,
-        "growth": 1.35
+        "basePerHour": 20.25,
+        "growth": 1.8225
       },
       "kind": "field"
     },
     "iron_mine": {
       "name": "Iron Mine",
       "description": "Digs iron for weapons, armour and walls.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 80,
-        "stone": 80,
-        "grain": 40,
+        "wood": 212,
+        "stone": 212,
+        "grain": 106,
         "iron": 0
       },
-      "costGrowth": 1.65,
-      "buildSeconds": 120,
-      "timeGrowth": 1.6,
+      "costGrowth": 2.7225,
+      "buildSeconds": 312,
+      "timeGrowth": 2.56,
       "production": {
         "resource": "iron",
-        "basePerHour": 8,
-        "growth": 1.35
+        "basePerHour": 10.8,
+        "growth": 1.8225
       },
       "kind": "field"
     },
@@ -144,108 +144,108 @@
       "name": "Storehouse",
       "description": "How much of each resource the village can keep; what comes in above it is lost. A village may build more than one.",
       "multiple": true,
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 120,
-        "stone": 100,
-        "grain": 40,
-        "iron": 20
+        "wood": 300,
+        "stone": 250,
+        "grain": 100,
+        "iron": 50
       },
-      "costGrowth": 1.5,
-      "buildSeconds": 100,
-      "timeGrowth": 1.5,
-      "capacityGrowth": 1.3,
+      "costGrowth": 2.25,
+      "buildSeconds": 250,
+      "timeGrowth": 2.25,
+      "capacityGrowth": 1.69,
       "kind": "center"
     },
     "barracks": {
       "name": "Barracks",
       "description": "Trains infantry. Each level trains them faster, and higher levels open stronger troops.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 150,
-        "stone": 120,
-        "grain": 60,
-        "iron": 60
+        "wood": 390,
+        "stone": 312,
+        "grain": 156,
+        "iron": 156
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 150,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 382,
+      "timeGrowth": 2.4025,
       "kind": "center"
     },
     "stables": {
       "name": "Stables",
       "description": "Breeds horses and trains riders. Each level trains them faster, and higher levels open stronger riders.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 160,
-        "stone": 100,
-        "grain": 120,
-        "iron": 70
+        "wood": 416,
+        "stone": 260,
+        "grain": 312,
+        "iron": 182
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 180,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 459,
+      "timeGrowth": 2.4025,
       "kind": "center"
     },
     "shooting_range": {
       "name": "Shooting Range",
       "description": "Trains archers, skirmishers and throwers. Each level trains them faster, and higher levels open stronger shooters.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 170,
-        "stone": 90,
-        "grain": 60,
-        "iron": 50
+        "wood": 442,
+        "stone": 234,
+        "grain": 156,
+        "iron": 130
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 160,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 408,
+      "timeGrowth": 2.4025,
       "kind": "center"
     },
     "heroes_hall": {
       "name": "Hero's Hall",
-      "description": "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and every few levels allow another general.",
-      "maxLevel": 20,
+      "description": "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and each level above the first allows another general.",
+      "maxLevel": 10,
       "cost": {
-        "wood": 180,
-        "stone": 160,
-        "grain": 100,
-        "iron": 80
+        "wood": 468,
+        "stone": 416,
+        "grain": 260,
+        "iron": 208
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 200,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 510,
+      "timeGrowth": 2.4025,
       "kind": "center"
     },
     "scout_lodge": {
       "name": "Scout Lodge",
       "description": "Trains scouts, who ride out to see a horde before it arrives.",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 100,
-        "stone": 80,
-        "grain": 40,
-        "iron": 20
+        "wood": 260,
+        "stone": 208,
+        "grain": 104,
+        "iron": 52
       },
-      "costGrowth": 1.6,
-      "buildSeconds": 120,
-      "timeGrowth": 1.55,
+      "costGrowth": 2.56,
+      "buildSeconds": 306,
+      "timeGrowth": 2.4025,
       "kind": "center"
     },
     "caravan_yard": {
       "name": "Caravan Yard",
       "description": "Keeps caravans to carry resources to allies and to the Holy City vault; each level adds more.",
       "kind": "center",
-      "maxLevel": 20,
+      "maxLevel": 10,
       "cost": {
-        "wood": 120,
-        "stone": 100,
-        "grain": 60,
-        "iron": 40
+        "wood": 306,
+        "stone": 255,
+        "grain": 153,
+        "iron": 102
       },
-      "costGrowth": 1.55,
-      "buildSeconds": 150,
-      "timeGrowth": 1.5
+      "costGrowth": 2.4025,
+      "buildSeconds": 375,
+      "timeGrowth": 2.25
     },
     "settlers_lodge": {
       "name": "Settlers' Lodge",
@@ -271,7 +271,7 @@
       "costGrowth": 1.45,
       "buildSeconds": 600,
       "timeGrowth": 1.5,
-      "requires": { "elder_hall": 3 },
+      "requires": { "elder_hall": 2 },
       "embers": 1,
       "switchEmbers": 1,
       "deities": {
@@ -353,115 +353,115 @@
       "description": "The stag-folk's own: a temple granary that brings in grain and feeds the troops for less.",
       "clan": "jelen",
       "kind": "center",
-      "maxLevel": 20,
-      "cost": { "wood": 150, "stone": 150, "grain": 60, "iron": 40 },
-      "costGrowth": 1.6,
-      "buildSeconds": 140,
-      "timeGrowth": 1.55,
-      "production": { "resource": "grain", "basePerHour": 12, "growth": 1.3 },
-      "effects": { "upkeep": -0.02 }
+      "maxLevel": 10,
+      "cost": { "wood": 390, "stone": 390, "grain": 156, "iron": 104 },
+      "costGrowth": 2.56,
+      "buildSeconds": 357,
+      "timeGrowth": 2.4025,
+      "production": { "resource": "grain", "basePerHour": 15.6, "growth": 1.69 },
+      "effects": { "upkeep": -0.04 }
     },
     "stone_redoubt": {
       "name": "Stone Redoubt",
       "description": "The bear-folk's own: a stone keep that makes the garrison harder to break.",
       "clan": "medved",
       "kind": "center",
-      "maxLevel": 20,
-      "cost": { "wood": 120, "stone": 260, "grain": 40, "iron": 80 },
-      "costGrowth": 1.6,
-      "buildSeconds": 180,
-      "timeGrowth": 1.55,
-      "effects": { "homeDefense": 0.04 }
+      "maxLevel": 10,
+      "cost": { "wood": 312, "stone": 676, "grain": 104, "iron": 208 },
+      "costGrowth": 2.56,
+      "buildSeconds": 459,
+      "timeGrowth": 2.4025,
+      "effects": { "homeDefense": 0.08 }
     },
     "longhouse_hall": {
       "name": "Longhouse Hall",
       "description": "The wolf-folk's own: a longhouse where warriors eat less and train faster.",
       "clan": "volk",
       "kind": "center",
-      "maxLevel": 20,
-      "cost": { "wood": 200, "stone": 160, "grain": 60, "iron": 40 },
-      "costGrowth": 1.6,
-      "buildSeconds": 160,
-      "timeGrowth": 1.55,
-      "effects": { "upkeep": -0.03, "trainTime": -0.02 }
+      "maxLevel": 10,
+      "cost": { "wood": 520, "stone": 416, "grain": 156, "iron": 104 },
+      "costGrowth": 2.56,
+      "buildSeconds": 408,
+      "timeGrowth": 2.4025,
+      "effects": { "upkeep": -0.06, "trainTime": -0.04 }
     },
     "wall": {
       "name": "Walls",
       "description": "The walls round the village: hordes must break or climb them before they reach the garrison. Higher levels change wood for stone.",
       "kind": "wall",
-      "maxLevel": 20,
-      "cost": { "wood": 180, "stone": 300, "grain": 40, "iron": 40 },
-      "costGrowth": 1.5,
-      "buildSeconds": 240,
-      "timeGrowth": 1.45
+      "maxLevel": 10,
+      "cost": { "wood": 450, "stone": 750, "grain": 100, "iron": 100 },
+      "costGrowth": 2.25,
+      "buildSeconds": 588,
+      "timeGrowth": 2.1025
     },
     "archer_tower": {
       "name": "Archer Tower",
       "description": "A tower on the walls: its archers make the garrison strike harder while the walls stand.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 160, "stone": 120, "grain": 30, "iron": 60 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 408, "stone": 306, "grain": 76, "iron": 153 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "gate_tower": {
       "name": "Gate Tower",
       "description": "Strengthens the gate, so the walls take longer to batter down.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 120, "stone": 260, "grain": 30, "iron": 80 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 306, "stone": 663, "grain": 76, "iron": 204 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "ballista": {
       "name": "Ballista Platform",
       "description": "A great crossbow on the walls that smashes the horde's siege engines.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 220, "stone": 80, "grain": 30, "iron": 140 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 561, "stone": 204, "grain": 76, "iron": 357 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "murder_holes": {
       "name": "Murder Holes",
       "description": "Openings over the gate to rain stones on the attackers: the garrison defends better while the walls stand.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 100, "stone": 220, "grain": 40, "iron": 60 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 255, "stone": 561, "grain": 102, "iron": 153 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "ditch": {
       "name": "Moat",
       "description": "A moat before the walls: it keeps off battering and climbers and slows the building of siege engines; at higher levels it holds water.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 80, "stone": 60, "grain": 80, "iron": 20 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 204, "stone": 153, "grain": 204, "iron": 51 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "watchtower": {
       "name": "Watchtower",
       "description": "Sees hordes coming from farther away, so the warning comes sooner.",
       "kind": "tower",
-      "maxLevel": 20,
-      "cost": { "wood": 180, "stone": 60, "grain": 30, "iron": 20 },
-      "costGrowth": 1.55,
-      "buildSeconds": 200,
-      "timeGrowth": 1.5
+      "maxLevel": 10,
+      "cost": { "wood": 459, "stone": 153, "grain": 76, "iron": 51 },
+      "costGrowth": 2.4025,
+      "buildSeconds": 500,
+      "timeGrowth": 2.25
     },
     "forester": {
       "name": "Forester",
-      "description": "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 5.",
+      "description": "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 3.",
       "kind": "center",
       "maxLevel": 5,
       "multiple": true,
-      "requires": { "woodcutter": 5 },
+      "requires": { "woodcutter": 3 },
       "cost": { "wood": 160, "stone": 120, "grain": 60, "iron": 40 },
       "costGrowth": 1.7,
       "buildSeconds": 240,
@@ -470,11 +470,11 @@
     },
     "stonemason": {
       "name": "Stonemason",
-      "description": "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 5.",
+      "description": "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 3.",
       "kind": "center",
       "maxLevel": 5,
       "multiple": true,
-      "requires": { "quarry": 5 },
+      "requires": { "quarry": 3 },
       "cost": { "wood": 120, "stone": 160, "grain": 60, "iron": 40 },
       "costGrowth": 1.7,
       "buildSeconds": 240,
@@ -483,11 +483,11 @@
     },
     "mill": {
       "name": "Mill",
-      "description": "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 5.",
+      "description": "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 3.",
       "kind": "center",
       "maxLevel": 5,
       "multiple": true,
-      "requires": { "farm": 5 },
+      "requires": { "farm": 3 },
       "cost": { "wood": 140, "stone": 120, "grain": 60, "iron": 40 },
       "costGrowth": 1.7,
       "buildSeconds": 240,
@@ -496,11 +496,11 @@
     },
     "smelter": {
       "name": "Smelter",
-      "description": "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 5.",
+      "description": "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 3.",
       "kind": "center",
       "maxLevel": 5,
       "multiple": true,
-      "requires": { "iron_mine": 5 },
+      "requires": { "iron_mine": 3 },
       "cost": { "wood": 160, "stone": 140, "grain": 60, "iron": 60 },
       "costGrowth": 1.7,
       "buildSeconds": 240,
@@ -509,33 +509,33 @@
     },
     "hospital": {
       "name": "Hospital",
-      "description": "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again.",
+      "description": "Tends the wounded: when the garrison holds its own village, 10% per level of its fallen get up again.",
       "kind": "center",
-      "maxLevel": 20,
-      "cost": { "wood": 180, "stone": 160, "grain": 120, "iron": 40 },
-      "costGrowth": 1.6,
-      "buildSeconds": 200,
-      "timeGrowth": 1.55,
-      "effects": { "hospital": 0.05 }
+      "maxLevel": 10,
+      "cost": { "wood": 468, "stone": 416, "grain": 312, "iron": 104 },
+      "costGrowth": 2.56,
+      "buildSeconds": 510,
+      "timeGrowth": 2.4025,
+      "effects": { "hospital": 0.1 }
     },
-    "masons_guild": {"name": "Masons' Guild", "description": "Master builders who teach the village's hands the craft: every building goes up 2% faster per level.", "kind": "center", "maxLevel": 20, "cost": {"wood": 200, "stone": 240, "grain": 80, "iron": 60}, "costGrowth": 1.6, "buildSeconds": 240, "timeGrowth": 1.55, "effects": {"buildTime": -0.02}},
-    "workers_huts": {"name": "Workers' Huts", "description": "Homes for the hands who work the fields, woods, quarries and mines: 2% more of every resource per level.", "kind": "center", "maxLevel": 20, "cost": {"wood": 220, "stone": 160, "grain": 140, "iron": 40}, "costGrowth": 1.6, "buildSeconds": 220, "timeGrowth": 1.55, "effects": {"production.all": 0.02}},
-    "grain_silo": {"name": "Grain Silo", "description": "A tall store for grain alone: the village keeps more grain, for its people, its garrison and the armies it feeds. A village may build more than one.", "kind": "center", "multiple": true, "maxLevel": 20, "cost": {"wood": 140, "stone": 120, "grain": 20, "iron": 20}, "costGrowth": 1.5, "buildSeconds": 110, "timeGrowth": 1.5, "grainCapacityGrowth": 1.3},
-    "fisherman_hut": {"name": "Fisherman's Hut", "description": "Nets and weirs on the water beside the village bring in fish: grain every hour, more each level. Only for a village beside a lake or on a river.", "kind": "center", "site": "water", "maxLevel": 20, "cost": {"wood": 120, "stone": 60, "grain": 40, "iron": 20}, "costGrowth": 1.6, "buildSeconds": 120, "timeGrowth": 1.55, "production": {"resource": "grain", "basePerHour": 10, "growth": 1.3}},
+    "masons_guild": {"name": "Masons' Guild", "description": "Master builders who teach the village's hands the craft: every building goes up 4% faster per level.", "kind": "center", "maxLevel": 10, "cost": {"wood": 520, "stone": 624, "grain": 208, "iron": 156}, "costGrowth": 2.56, "buildSeconds": 612, "timeGrowth": 2.4025, "effects": {"buildTime": -0.04}},
+    "workers_huts": {"name": "Workers' Huts", "description": "Homes for the hands who work the fields, woods, quarries and mines: 4% more of every resource per level.", "kind": "center", "maxLevel": 10, "cost": {"wood": 572, "stone": 416, "grain": 364, "iron": 104}, "costGrowth": 2.56, "buildSeconds": 561, "timeGrowth": 2.4025, "effects": {"production.all": 0.04}},
+    "grain_silo": {"name": "Grain Silo", "description": "A tall store for grain alone: the village keeps more grain, for its people, its garrison and the armies it feeds. A village may build more than one.", "kind": "center", "multiple": true, "maxLevel": 10, "cost": {"wood": 350, "stone": 300, "grain": 50, "iron": 50}, "costGrowth": 2.25, "buildSeconds": 275, "timeGrowth": 2.25, "grainCapacityGrowth": 1.69},
+    "fisherman_hut": {"name": "Fisherman's Hut", "description": "Nets and weirs on the water beside the village bring in fish: grain every hour, more each level. Only for a village beside a lake or on a river.", "kind": "center", "site": "water", "maxLevel": 10, "cost": {"wood": 312, "stone": 156, "grain": 104, "iron": 52}, "costGrowth": 2.56, "buildSeconds": 306, "timeGrowth": 2.4025, "production": {"resource": "grain", "basePerHour": 13, "growth": 1.69}},
     "water_wheel": {"name": "Water Wheel", "description": "The river turns the wheel and the wheel turns the work: 3% more of every resource and 3% faster building per level. Only for a village beside a lake or on a river.", "kind": "center", "site": "water", "maxLevel": 5, "cost": {"wood": 200, "stone": 160, "grain": 60, "iron": 80}, "costGrowth": 1.7, "buildSeconds": 240, "timeGrowth": 1.6, "effects": {"production.all": 0.03, "buildTime": -0.03}},
     "windmill": {"name": "Windmill", "description": "Sails on the hilltop grind the grain finer: 6% more grain per level. Only for a village on hills.", "kind": "center", "site": "hills", "maxLevel": 5, "cost": {"wood": 180, "stone": 120, "grain": 60, "iron": 40}, "costGrowth": 1.7, "buildSeconds": 240, "timeGrowth": 1.6, "effects": {"production.grain": 0.06}},
     "ranch": {"name": "Ranch", "description": "Herds graze the open plains: grain every hour, more each level, and the village's riders come from better horses, 2% stronger per level (10% at the top). Only for a village on the plains.", "kind": "center", "site": "plains", "maxLevel": 5, "cost": {"wood": 180, "stone": 80, "grain": 120, "iron": 40}, "costGrowth": 1.7, "buildSeconds": 240, "timeGrowth": 1.6, "production": {"resource": "grain", "basePerHour": 12, "growth": 1.35}, "effects": {"attack.cavalry": 0.02, "defense.cavalry": 0.02}},
     "mountain_lodge": {"name": "Mountain Lodge", "description": "Miners, quarrymen and woodcutters who know the mountain's slopes: 5% more wood, stone and iron per level. Only for a village next to a mountain.", "kind": "center", "site": "mountain", "maxLevel": 5, "cost": {"wood": 200, "stone": 160, "grain": 80, "iron": 60}, "costGrowth": 1.7, "buildSeconds": 240, "timeGrowth": 1.6, "effects": {"production.wood": 0.05, "production.stone": 0.05, "production.iron": 0.05}},
-    "blacksmith": { "name": "Blacksmith", "description": "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 3% faster and higher levels forge the finer work.", "kind": "center", "maxLevel": 20, "cost": { "wood": 200, "stone": 180, "grain": 60, "iron": 220 }, "costGrowth": 1.6, "buildSeconds": 240, "timeGrowth": 1.55, "effects": { "smithTime": -0.03 } },
+    "blacksmith": { "name": "Blacksmith", "description": "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 6% faster and higher levels forge the finer work.", "kind": "center", "maxLevel": 10, "cost": { "wood": 520, "stone": 468, "grain": 156, "iron": 572 }, "costGrowth": 2.56, "buildSeconds": 612, "timeGrowth": 2.4025, "effects": { "smithTime": -0.06 } },
     "market": {
       "name": "Market",
       "description": "Trades one resource for another, at better rates every level, and buys the hero's spare gear.",
       "kind": "center",
-      "maxLevel": 20,
-      "cost": { "wood": 160, "stone": 120, "grain": 100, "iron": 40 },
-      "costGrowth": 1.6,
-      "buildSeconds": 180,
-      "timeGrowth": 1.55
+      "maxLevel": 10,
+      "cost": { "wood": 416, "stone": 312, "grain": 260, "iron": 104 },
+      "costGrowth": 2.56,
+      "buildSeconds": 459,
+      "timeGrowth": 2.4025
     }
   }
 }

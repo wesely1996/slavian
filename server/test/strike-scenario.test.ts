@@ -13,6 +13,8 @@ scenario('strike-scenario.json', START, async ({ play }) => {
   const world = '/v1/worlds/-1';
   const strike = (body: object) => play({ method: 'POST', path: '/v1/villages/1/strike', body });
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 20 * MINUTE });
   for (let i = 0; i < 3; i++) {
     await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 8 } });

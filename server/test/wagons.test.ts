@@ -36,7 +36,7 @@ describe('quarters and the grain silo', () => {
     const base = capacity(data, village.plots);
     const silo = capacity(data, { ...village.plots, c2: { building: 'grain_silo', level: 2 } });
     expect(silo.wood).toBe(base.wood);
-    expect(silo.grain).toBeCloseTo(base.grain + data.buildings.village.baseCapacity * (1.3 ** 2 - 1));
+    expect(silo.grain).toBeCloseTo(base.grain + data.buildings.village.baseCapacity * (data.buildings.buildings.grain_silo!.grainCapacityGrowth! ** 2 - 1));
   });
 
   it('settlements and forts feed armies to the last grain unless a floor is set', () => {

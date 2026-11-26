@@ -5,13 +5,13 @@
   "perLevel": 0.1,
   "smithyLevels": [
     1,
-    5,
-    10
+    3,
+    5
   ],
   "costFactor": 8,
   "hours": {
-    "base": 1,
-    "perTier": 0.5
+    "base": 0.5,
+    "perTier": 1
   },
   "lines": {
     "attack": {
@@ -35,7 +35,7 @@
       "description": "Its blows set the foe burning: a tenth of each hit hurts again in each of the next three rounds.",
       "levels": 1,
       "smithyLevels": [
-        10
+        5
       ],
       "costLevel": 3,
       "families": [
@@ -48,7 +48,7 @@
       "description": "Its blows poison: the side it strikes fights 15% weaker in attack and defense for the next two rounds.",
       "levels": 1,
       "smithyLevels": [
-        10
+        5
       ],
       "costLevel": 3,
       "families": [

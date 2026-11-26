@@ -15,6 +15,8 @@ scenario('generals-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: '/v1/villages/1/generals', body: {} });
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'heroes_hall' } });
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 40 * MINUTE });
   // Named by the player.
   await play({ method: 'POST', path: '/v1/villages/1/generals', body: { name: '  Ratibor the Bold ' } });

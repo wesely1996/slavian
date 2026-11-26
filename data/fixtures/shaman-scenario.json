@@ -155,7 +155,7 @@
        "building": "hospital",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:20.000Z"
+       "completesAt": "2026-06-01T08:00:51.000Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 260,
-       "wood": 320,
-       "grain": 380,
-       "stone": 340
+       "iron": 196,
+       "wood": 32,
+       "grain": 188,
+       "stone": 84
       },
       "ratesPerHour": {
        "iron": 30,
@@ -211,7 +211,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Shaman needs Hospital level 2"
+    "message": "Shaman needs Hospital level 1"
    }
   },
   {
@@ -222,6 +222,47 @@
    "path": "/v1/villages/1/build",
    "body": {
     "plot": "c2"
+   },
+   "status": 400,
+   "response": {
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":1076,\"stone\":921,\"grain\":531,\"iron\":40}",
+    "missing": {
+     "wood": 1076,
+     "stone": 921,
+     "grain": 531,
+     "iron": 40
+    }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/build",
+   "body": {
+    "plot": "c3",
+    "building": "barracks"
+   },
+   "status": 400,
+   "response": {
+    "error": "insufficient_resources",
+    "message": "Insufficient resources: missing {\"wood\":268,\"stone\":168,\"grain\":0,\"iron\":0}",
+    "missing": {
+     "wood": 268,
+     "stone": 168,
+     "grain": 0,
+     "iron": 0
+    }
+   }
+  },
+  {
+   "advance": 7200000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "shaman",
+    "count": 4
    },
    "status": 200,
    "response": {
@@ -358,222 +399,6 @@
       "hospital": 1,
       "elder_hall": 1
      },
-     "queue": [
-      {
-       "plot": "c2",
-       "building": "hospital",
-       "targetLevel": 2,
-       "startsAt": "2026-06-01T09:00:00.000Z",
-       "completesAt": "2026-06-01T09:00:31.000Z"
-      }
-     ],
-     "garrison": {},
-     "away": {},
-     "stance": "balanced",
-     "maneuver": "encircle",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06,
-      "maneuver.flank": 0.2,
-      "maneuver.encircle": -0.1
-     },
-     "armyFloor": null,
-     "ruin": null,
-     "refuge": false,
-     "training": [],
-     "resources": {
-      "amounts": {
-       "iron": 226,
-       "wood": 122,
-       "grain": 268,
-       "stone": 144
-      },
-      "ratesPerHour": {
-       "iron": 30,
-       "wood": 90,
-       "grain": 80,
-       "stone": 60
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T09:00:00.000Z"
-     }
-    },
-    "serverTime": "2026-06-01T09:00:00.000Z"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/build",
-   "body": {
-    "plot": "c3",
-    "building": "barracks"
-   },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":28,\"stone\":0,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 28,
-     "stone": 0,
-     "grain": 0,
-     "iron": 0
-    }
-   }
-  },
-  {
-   "advance": 7200000
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/train",
-   "body": {
-    "unit": "shaman",
-    "count": 4
-   },
-   "status": 200,
-   "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Vruchiy",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 2,
-       "building": "hospital"
-      },
-      "c3": {
-       "level": 0,
-       "building": null
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 0,
-       "building": null
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "hospital": 2,
-      "elder_hall": 1
-     },
      "queue": [],
      "garrison": {},
      "away": {},
@@ -688,7 +513,7 @@
       "embers": 0,
       "armySlots": {
        "used": 4,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -720,7 +545,7 @@
         "building": null
        },
        "c2": {
-        "level": 2,
+        "level": 1,
         "building": "hospital"
        },
        "c3": {
@@ -829,7 +654,7 @@
        }
       },
       "levels": {
-       "hospital": 2,
+       "hospital": 1,
        "elder_hall": 1
       },
       "queue": [],
@@ -3276,7 +3101,7 @@
       "embers": 0,
       "armySlots": {
        "used": 4,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -3308,7 +3133,7 @@
         "building": null
        },
        "c2": {
-        "level": 2,
+        "level": 1,
         "building": "hospital"
        },
        "c3": {
@@ -3417,7 +3242,7 @@
        }
       },
       "levels": {
-       "hospital": 2,
+       "hospital": 1,
        "elder_hall": 1
       },
       "queue": [],
@@ -5878,7 +5703,7 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 7,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -5887,7 +5712,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 6,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
@@ -5896,7 +5721,7 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 5,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Train defenders",
@@ -5905,7 +5730,7 @@
       "read": false
      },
      {
-      "id": 5,
+      "id": 4,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 0)",
@@ -5914,21 +5739,12 @@
       "read": false
      },
      {
-      "id": 4,
-      "kind": "build_done",
-      "tier": "digest",
-      "title": "Hospital level 2 in Vruchiy",
-      "body": "Finished.",
-      "createdAt": "2026-06-01T09:00:31.000Z",
-      "read": false
-     },
-     {
       "id": 3,
       "kind": "build_done",
       "tier": "digest",
       "title": "Hospital level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:20.000Z",
+      "createdAt": "2026-06-01T08:00:51.000Z",
       "read": false
      },
      {
@@ -5950,7 +5766,7 @@
       "read": false
      }
     ],
-    "unread": 8,
+    "unread": 7,
     "serverTime": "2026-06-01T14:00:00.000Z"
    }
   }

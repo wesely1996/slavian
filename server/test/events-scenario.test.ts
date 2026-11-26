@@ -12,6 +12,8 @@ const DAY = (24 * 60 * MINUTE) / 50;
 scenario('events-scenario.json', START, async ({ play }) => {
   const world = '/v1/worlds/-1';
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
   await play({ advance: 15 * MINUTE });

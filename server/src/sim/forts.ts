@@ -185,14 +185,15 @@ export function musterDefenders(data: GameData, plots: FortPlots, defenders: Rea
 }
 
 // The village-style plots of a fort's wall ring (sim/walls.ts): its wall
-// on "w" and its towers on "t0"...
+// on "w" and its towers on "t0"... A village's wall level counts for two of
+// a fort's: each fort level is half a village level (rounded up).
 export function ringPlots(plots: FortPlots, ring: number): Record<string, { building: string; level: number }> {
   const out: Record<string, { building: string; level: number }> = {};
   const wall = plots[`w${ring}`];
-  if (wall) out.w = { building: 'wall', level: wall.level };
+  if (wall) out.w = { building: 'wall', level: Math.ceil(wall.level / 2) };
   for (const [id, p] of Object.entries(plots)) {
     const m = TOWER.exec(id);
-    if (m && Number(m[1]) === ring) out[`t${m[2]}`] = { building: p.kind, level: p.level };
+    if (m && Number(m[1]) === ring) out[`t${m[2]}`] = { building: p.kind, level: Math.ceil(p.level / 2) };
   }
   return out;
 }

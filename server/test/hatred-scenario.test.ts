@@ -11,6 +11,8 @@ scenario('hatred-scenario.json', START, async ({ started, now, play }) => {
   const world = '/v1/worlds/-1';
   const firstFront = (started.waves as { front: string }[])[0]!.front;
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/train', body: { unit: 'spearman', count: 6 } });
 

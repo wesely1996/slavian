@@ -26,7 +26,7 @@ scenario('merchant-scenario.json', START, async ({ play }) => {
   await play({ advance: 5 * MINUTE });
   await play({ method: 'GET', path: '/v1/worlds/-1' });
   // A higher yard rests them less.
-  await play({ set: { plots: { c2: { building: 'caravan_yard', level: 20 } } } });
+  await play({ set: { plots: { c2: { building: 'caravan_yard', level: 10 } } } });
   await merchant(null);
   await play({ method: 'GET', path: '/v1/worlds/-1' });
   await play({ advance: 15 * MINUTE });

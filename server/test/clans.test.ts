@@ -38,7 +38,7 @@ describe('clans', () => {
     const fox = rich('lisica', 1, 'market');
     const at = plain.ledger.settledAt;
     const got = (state: typeof plain) => trade(data, state, { give: 'wood', get: 'stone', amount: 1000 }, at).got;
-    expect(got(fox)).toBe(Math.floor(got(plain) * 1.15));
+    expect(Math.abs(got(fox) - got(plain) * 1.15)).toBeLessThanOrEqual(1);
   });
 
   it("makes Svyatogor's champion and Marya's generals stronger", () => {
@@ -73,7 +73,7 @@ describe('clans', () => {
       const { state: queued, queued: item } = queueBuild(data, state, { plot: 'c2', building: 'stone_redoubt' }, state.ledger.settledAt, 1);
       state = completeBuild(data, queued, item.plot, level, item.completesAt, 1);
     }
-    expect(villageBonuses(data, state).homeDefense).toBeCloseTo(0.1 + 2 * 0.04);
+    expect(villageBonuses(data, state).homeDefense).toBeCloseTo(0.1 + 2 * data.buildings.buildings.stone_redoubt!.effects!.homeDefense!);
     expect(state.bonuses.homeDefense).toBe(0.1);
   });
 

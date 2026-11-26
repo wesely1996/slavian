@@ -10,6 +10,8 @@ const START = { seed: 4242, at: '2026-06-01T08:00:00.000Z', name: 'Arch', displa
 scenario('endgame-scenario.json', START, async ({ now, play }) => {
   const world = '/v1/worlds/-1';
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c2', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 20 * MINUTE });
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'train', unit: 'spearman', batch: 2, target: 4 } });
   await play({ method: 'POST', path: '/v1/villages/1/orders', body: { kind: 'train', unit: 'spearman', batch: 3, target: 6 } });

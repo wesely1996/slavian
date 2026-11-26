@@ -1192,7 +1192,7 @@ func _train_tab(village: Dictionary) -> void:
 	var training: Array = village.training
 	var limit := Rules.training_queue_limit(Game.data, village.levels)
 	_panel_body.add_child(UI.with_info(UI.label(tr("Training (%d/%d)") % [training.size(), limit], UI.SMALL_SIZE, UI.MUTED),
-		tr("Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place.") % int(Game.data.units.buildingLevelsPerTrainingSlot)))
+		tr("Batches waiting to be trained. Every %s levels of the Barracks, the Shooting Range and the Stables each add one more place.") % String.num(float(Game.data.units.buildingLevelsPerTrainingSlot))))
 	if training.is_empty():
 		_panel_body.add_child(UI.label(tr("Nobody in training."), UI.SMALL_SIZE, UI.MUTED))
 	var waiting := 0

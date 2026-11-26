@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
 import { createGuestAccount } from '../src/db/accounts.js';
 import { inTransaction, type Db } from '../src/db/pool.js';
-import { upgradeLegacyVillages, upgradeTownNames } from '../src/db/upgrades.js';
+import { upgradeLegacyVillages, upgradeLevelScale, upgradeTownNames } from '../src/db/upgrades.js';
 import { insertVillage, loadVillage } from '../src/db/villages.js';
 import { createWorld } from '../src/db/worlds.js';
 import { scheduleEvent } from '../src/scheduler/events.js';
@@ -22,6 +22,41 @@ describe.skipIf(!TEST_DATABASE_URL)('legacy village upgrade (postgres)', () => {
   });
   afterAll(async () => {
     await cleanup?.();
+  });
+
+  it('puts a village saved before 20 levels became 10 on the new scale, its queued build too', async () => {
+    const { worldId, villageId } = await inTransaction(db, async (client) => {
+      const { account } = await createGuestAccount(client, 'Twenty');
+      const world = await createWorld(client, { name: 'twenty', seed: 1, speed: 1 });
+      const village = await insertVillage(client, { worldId: world.id, ownerAccountId: account.id, name: 'v', q: 2, r: 0, state: newVillage(data, T0, 1) });
+      return { worldId: world.id, villageId: village.id };
+    });
+    // Saved on the old scale: a Hall at 7, a woodcutter at 12, a level-4
+    // Academy (never compressed), the woodcutter's 13th level on its way.
+    const completesAt = new Date(T0.getTime() + 60_000);
+    await db.query(
+      `UPDATE villages SET level_scale = 1,
+         plots = plots || '{"c0": {"building": "elder_hall", "level": 7}, "f0": {"building": "woodcutter", "level": 12}, "c4": {"building": "academy", "level": 4}}'::jsonb,
+         queue = $2 WHERE id = $1`,
+      [villageId, JSON.stringify([{ plot: 'f0', building: 'woodcutter', targetLevel: 13, startsAt: T0, completesAt }])],
+    );
+    await inTransaction(db, (client) => scheduleEvent(client, worldId, completesAt, 'build_complete', { villageId, plot: 'f0', building: 'woodcutter', targetLevel: 13 }));
+
+    expect(await upgradeLevelScale(db, data)).toBe(1);
+    expect(await upgradeLevelScale(db, data)).toBe(0);
+    let village = await inTransaction(db, (client) => loadVillage(client, villageId));
+    expect(village.state.plots.c0).toEqual({ building: 'elder_hall', level: 4 });
+    expect(village.state.plots.f0).toEqual({ building: 'woodcutter', level: 6 });
+    expect(village.state.plots.c4).toEqual({ building: 'academy', level: 4 });
+    expect(village.state.levels).toMatchObject({ elder_hall: 4, woodcutter: 6, academy: 4 });
+    expect(village.state.queue[0]!.targetLevel).toBe(7);
+    // Its rates follow the new levels.
+    const wood = data.buildings.buildings.woodcutter!.production!;
+    expect(village.state.ledger.ratesPerHour.wood).toBeGreaterThan(wood.basePerHour * wood.growth ** 5);
+
+    await tick(db, completesAt, { data, handlers });
+    village = await inTransaction(db, (client) => loadVillage(client, villageId));
+    expect(village.state.plots.f0).toEqual({ building: 'woodcutter', level: 7 });
   });
 
   it('lays out an old village on plots and finishes its pending build', async () => {

@@ -25,8 +25,8 @@ and the Holy City by **caravan**.
 A village's hourly income of each resource is the sum of:
 
 - **A base** of 9 wood, 6 stone, 8 grain and 3 iron per hour.
-- **Its fields:** level 1 gives the building's base (15 wood, 12 stone,
-  15 grain, 8 iron), ×1.35 per level above 1.
+- **Its fields:** level 1 gives the building's base (20.25 wood, 16.2 stone,
+  20.25 grain, 10.8 iron), ×1.8225 per level above 1.
 - **Producing buildings:** Fisherman's Hut, Ranch, the Granary-Temple.
 - **Its outposts** ([below](#outposts)).
 
@@ -51,8 +51,8 @@ Where production bonuses come from:
 ## Outposts
 
 - **Claiming.** An outpost is claimed on a resource hex within **2 hexes** of
-  the village. A village may hold 1 outpost, plus 1 for every 2 Elder's Hall
-  levels.
+  the village. A village may hold 1 outpost, plus 1 for every Elder's Hall
+  level.
 - **Upgrading.** Outposts go up to level 5. Cost: 150 / 100 / 80 / 40 (×1.7 a
   level). Time: 15 min (×1.6 a level).
 - **Yield.** Hourly yield at level 1, ×1.35 for every level above:
@@ -80,10 +80,10 @@ On top of that:
 
 Every village holds a base of **1,000** of each resource.
 
-| | Adds per building at level L | At level 10 | At level 20 |
+| | Adds per building at level L | At level 5 | At level 10 |
 |---|---|---|---|
-| Storehouse (any resource) | 1,000 × (1.3^L − 1) | ~12,800 | ~189,000 |
-| Grain Silo (grain only) | 1,000 × (1.3^L − 1) | ~12,800 | ~189,000 |
+| Storehouse (any resource) | 1,000 × (1.69^L − 1) | ~12,800 | ~189,000 |
+| Grain Silo (grain only) | 1,000 × (1.69^L − 1) | ~12,800 | ~189,000 |
 
 - **Several of each.** A village can build more than one; they add up.
 - **Bonuses.** `storage` bonuses add their share of capacity: Granary Lofts
@@ -113,8 +113,8 @@ How armies carry and draw grain is on [page 8](08-armies-and-field.md#grain-and-
 
 ## The Market
 
-- **Trading.** One resource for another, at a rate of **40%** at level 1 plus
-  4% a level. At 40%, 100 wood buys 40 iron.
+- **Trading.** One resource for another, at a rate of **44%** at level 1 plus
+  8% a level. At 44%, 100 wood buys 44 iron.
 - **Roads between cities.** Every other village joined to this one by
   standing roads adds **+1%**: your own villages, and in co-op any
   player's (in PvP only your own). Ruins and refugee camps don't count.
@@ -123,7 +123,7 @@ How armies carry and draw grain is on [page 8](08-armies-and-field.md#grain-and-
   high the Market, however many villages are joined to it.
 
 ```
-rate = min(100%, (40% + 4% × (level − 1) + 1% × villages joined by road) × clan bonus)
+rate = min(100%, (44% + 8% × (level − 1) + 1% × villages joined by road) × clan bonus)
 ```
 - **Selling gear.** It buys a spare piece of the hero's gear for 150 wood,
   150 stone, 150 grain and 100 iron. Gear the hero wears must be taken off
@@ -141,14 +141,14 @@ offered, several others asked in return.
 - **The poster's share.** The poster's village receives what was asked, less
   10%. Example: 1,000 wood offered for 500 iron. The poster pays 1,100 wood
   and gets 450 iron; the taker pays 500 iron and gets 1,000 wood.
-- **Limits.** A Market keeps 1 open bounty, plus 1 every 3 levels above 1.
-  Each offers and asks at most 500 × the Market's level.
+- **Limits.** A Market keeps 1 open bounty, plus 1 every 1.5 levels above 1
+  (rounded down). Each offers and asks at most 1,000 × the Market's level.
 - **Calling it off.** A bounty can be called off: the offer comes back, the
   fee doesn't.
 
 ## Caravans
 
-The **Caravan Yard** gives one caravan per level.
+The **Caravan Yard** gives two caravans per level.
 
 | | |
 |---|---|
@@ -178,8 +178,8 @@ Caravans:
   out and back**: 10 hexes away, that is 400 of each. It is paid as it turns
   for home, so a camp can ambush it on the way back.
 - **One at a time.** It takes one of the yard's caravans. Afterwards the
-  player's merchants rest 12 game hours, 0.18 h less for every Caravan Yard
-  level above 1 of the sending village, never under 8.5 h.
+  player's merchants rest 11.82 game hours, 0.36 h less for every Caravan
+  Yard level above 1 of the sending village, never under 8.5 h.
 
 ## The Holy City vault
 
@@ -208,4 +208,5 @@ Rules that run by themselves every 20 game minutes, for villages that have any:
 | Surplus | Sends whatever is above a chosen share of storage (30–95%) to the vault, at least 100 in all, with the caravans at home |
 | Supply route | Keeps one of the owner's forts or supply points stocked to N grain from the village, sending at least 50 at a time (counting grain already on the way) |
 
-A village keeps up to 3 standing orders, plus 1 every 3 Elder's Hall levels.
+A village keeps up to 3 standing orders, plus 1 every 1.5 Elder's Hall
+levels (rounded down).

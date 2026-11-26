@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "iron": 144,
+       "wood": 110,
+       "grain": 344,
+       "stone": 188
       },
       "ratesPerHour": {
        "iron": 150,
@@ -199,6 +199,16 @@
      }
     },
     "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -348,14 +358,14 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       },
       {
        "plot": "c3",
        "building": "caravan_yard",
        "targetLevel": 1,
-       "startsAt": "2026-06-01T08:00:03.000Z",
-       "completesAt": "2026-06-01T08:00:06.000Z"
+       "startsAt": "2026-06-01T08:00:07.640Z",
+       "completesAt": "2026-06-01T08:00:15.140Z"
       }
      ],
      "garrison": {},
@@ -378,10 +388,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 200,
-       "wood": 230,
-       "grain": 380,
-       "stone": 280
+       "iron": 898,
+       "wood": 694,
+       "grain": 847,
+       "stone": 745
       },
       "ratesPerHour": {
        "iron": 150,
@@ -576,10 +586,10 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 70,
-       "wood": 170,
-       "grain": 333.33333333333326,
-       "stone": 260
+       "iron": 768,
+       "wood": 634,
+       "grain": 800.3333333333333,
+       "stone": 725
       },
       "ratesPerHour": {
        "iron": 150,
@@ -680,12 +690,12 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":580,\"stone\":690,\"grain\":0,\"iron\":80}",
+    "message": "Insufficient resources: missing {\"wood\":116,\"stone\":225,\"grain\":0,\"iron\":0}",
     "missing": {
-     "wood": 580,
-     "stone": 690,
+     "wood": 116,
+     "stone": 225,
      "grain": 0,
-     "iron": 80
+     "iron": 0
     }
    }
   },
@@ -884,10 +894,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 120,
-       "wood": 20,
-       "grain": 339.6666666666666,
-       "stone": 210
+       "iron": 818,
+       "wood": 484,
+       "grain": 806.6666666666666,
+       "stone": 675
       },
       "ratesPerHour": {
        "iron": 150,
@@ -997,7 +1007,7 @@
       "embers": 0,
       "armySlots": {
        "used": 6,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -1165,10 +1175,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 122.5,
-        "wood": 27.5,
-        "grain": 5.983333333333238,
-        "stone": 215
+        "iron": 820.5,
+        "wood": 491.5,
+        "grain": 411.9833333333333,
+        "stone": 680
        },
        "ratesPerHour": {
         "iron": 150,
@@ -1424,7 +1434,7 @@
       "kind": "supply",
       "fortId": 1,
       "target": 400,
-      "lastResult": "Waiting for resources",
+      "lastResult": "400 grain kept at (-1, 2)",
       "lastRunAt": "2026-06-01T08:42:48.000Z"
      }
     ],
@@ -1439,7 +1449,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 339,
+      "grain": 400,
       "armyFloor": null,
       "neutral": false,
       "plots": {},
@@ -1601,7 +1611,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 339,
+       "grain": 400,
        "stone": 0
       },
       "carriedBack": {
@@ -3582,7 +3592,7 @@
      "arrivesAt": "2026-06-01T08:43:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 16.61666666666657,
+     "supply": 72,
      "supplyAt": "2026-06-01T08:43:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3639,14 +3649,14 @@
       [
        -1,
        1,
-       38400
+       28800
       ]
      ],
      "departsAt": "2026-06-01T08:43:00.000Z",
-     "arrivesAt": "2026-06-01T08:43:38.400Z",
+     "arrivesAt": "2026-06-01T08:43:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 48,
      "supplyAt": "2026-06-01T08:43:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3718,7 +3728,7 @@
      "arrivesAt": "2026-06-01T08:43:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 20.799999999999997,
      "supplyAt": "2026-06-01T08:45:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3737,10 +3747,55 @@
    "body": {
     "grain": 100000
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "They have no grain to spare"
+    "army": {
+     "id": 1,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -1,
+      2
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "loot": null,
+     "units": {
+      "spearman": 3
+     },
+     "status": "stationed",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -1,
+       2,
+       28800
+      ]
+     ],
+     "departsAt": "2026-06-01T08:43:00.000Z",
+     "arrivesAt": "2026-06-01T08:43:28.800Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 0,
+     "supplyAt": "2026-06-01T08:45:00.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null,
+     "quarteredAt": "2026-06-01T08:44:40.800Z",
+     "respond": true,
+     "post": null
+    },
+    "serverTime": "2026-06-01T08:45:00.000Z"
    }
   },
   {
@@ -3869,14 +3924,14 @@
       [
        -2,
        2,
-       38400
+       28800
       ]
      ],
      "departsAt": "2026-06-01T08:45:00.000Z",
-     "arrivesAt": "2026-06-01T08:45:38.400Z",
+     "arrivesAt": "2026-06-01T08:45:28.800Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 0,
+     "supply": 48,
      "supplyAt": "2026-06-01T08:43:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3950,7 +4005,7 @@
       "embers": 0,
       "armySlots": {
        "used": 6,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -4118,10 +4173,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 132.5,
-        "wood": 57.5,
-        "grain": 12.883333333333333,
-        "stone": 235
+        "iron": 830.5,
+        "wood": 521.5,
+        "grain": 359.3666666666666,
+        "stone": 700
        },
        "ratesPerHour": {
         "iron": 150,
@@ -4135,7 +4190,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:45:38.400Z"
+       "settledAt": "2026-06-01T08:45:28.800Z"
       }
      }
     ],
@@ -4507,15 +4562,15 @@
        [
         -2,
         2,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "arrivesAt": "2026-06-01T08:45:28.800Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:45:38.400Z",
+      "supplyAt": "2026-06-01T08:45:28.800Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -4581,7 +4636,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 154.5166666666666,
+      "grain": 270.90000000000003,
       "armyFloor": null,
       "neutral": false,
       "plots": {},
@@ -4769,7 +4824,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 339,
+       "grain": 400,
        "stone": 0
       },
       "carriedBack": {
@@ -6779,7 +6834,7 @@
       "embers": 0,
       "armySlots": {
        "used": 6,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -6947,10 +7002,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 385,
-        "wood": 515,
-        "grain": 518.0416666666666,
-        "stone": 590
+        "iron": 1000,
+        "wood": 700,
+        "grain": 864.5249999999999,
+        "stone": 850
        },
        "ratesPerHour": {
         "iron": 150,
@@ -7438,15 +7493,15 @@
        [
         -2,
         2,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "arrivesAt": "2026-06-01T08:45:28.800Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:45:38.400Z",
+      "supplyAt": "2026-06-01T08:45:28.800Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -7466,7 +7521,7 @@
       "r": 2,
       "status": "standing",
       "completesAt": "2026-06-01T08:40:36.000Z",
-      "grain": 152.2666666666666,
+      "grain": 268.65000000000003,
       "armyFloor": null,
       "neutral": false,
       "plots": {},
@@ -7654,7 +7709,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 339,
+       "grain": 400,
        "stone": 0
       },
       "carriedBack": {
@@ -9594,16 +9649,35 @@
     "q": -2,
     "r": 1
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":215,\"grain\":0,\"iron\":0}",
-    "missing": {
-     "wood": 0,
-     "stone": 215,
+    "fort": {
+     "id": 3,
+     "kind": "fort",
+     "ownerAccountId": 1,
+     "villageId": 1,
+     "q": -2,
+     "r": 1,
+     "status": "building",
+     "completesAt": "2026-06-01T10:46:48.000Z",
      "grain": 0,
-     "iron": 0
-    }
+     "armyFloor": null,
+     "neutral": false,
+     "plots": {
+      "keep": {
+       "kind": "keep",
+       "level": 1
+      },
+      "storage": {
+       "kind": "storage",
+       "level": 1
+      }
+     },
+     "work": null,
+     "defenders": {},
+     "mannedAt": "2026-06-01T10:46:48.000Z"
+    },
+    "serverTime": "2026-06-01T10:45:36.000Z"
    }
   },
   {
@@ -9682,20 +9756,110 @@
    "body": {
     "grain": 20
    },
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "They stand on no fort or supply point"
+    "army": {
+     "id": 3,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -2,
+      1
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "loot": null,
+     "units": {
+      "spearman": 1
+     },
+     "status": "stationed",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -2,
+       1,
+       14400
+      ]
+     ],
+     "departsAt": "2026-06-01T10:47:36.000Z",
+     "arrivesAt": "2026-06-01T10:47:50.400Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 2.333333333333332,
+     "supplyAt": "2026-06-01T10:49:36.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
+    },
+    "serverTime": "2026-06-01T10:49:36.000Z"
    }
   },
   {
    "method": "POST",
    "path": "/v1/armies/3/resupply",
    "body": {},
-   "status": 400,
+   "status": 200,
    "response": {
-    "error": "rule",
-    "message": "They stand in no village, fort or supply point"
+    "army": {
+     "id": 3,
+     "ownerAccountId": 1,
+     "homeVillageId": 1,
+     "targetVillageId": null,
+     "target": [
+      -2,
+      1
+     ],
+     "heroAccountId": null,
+     "generalId": null,
+     "orders": "hold",
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "loot": null,
+     "units": {
+      "spearman": 1
+     },
+     "status": "stationed",
+     "battleId": null,
+     "path": [
+      [
+       -2,
+       2,
+       0
+      ],
+      [
+       -2,
+       1,
+       14400
+      ]
+     ],
+     "departsAt": "2026-06-01T10:47:36.000Z",
+     "arrivesAt": "2026-06-01T10:47:50.400Z",
+     "leavesAt": null,
+     "returnsAt": null,
+     "supply": 22.333333333333332,
+     "supplyAt": "2026-06-01T10:49:36.000Z",
+     "hungrySince": null,
+     "wagonFortAt": null,
+     "returnHome": false,
+     "raid": null,
+     "quarteredAt": null,
+     "respond": true,
+     "post": null
+    },
+    "serverTime": "2026-06-01T10:49:36.000Z"
    }
   },
   {
@@ -9746,7 +9910,7 @@
       "embers": 0,
       "armySlots": {
        "used": 6,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -9914,10 +10078,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 437.5,
-        "wood": 672.5,
-        "grain": 619.8666666666667,
-        "stone": 695
+        "iron": 805,
+        "wood": 257.5,
+        "grain": 766.3499999999999,
+        "stone": 55
        },
        "ratesPerHour": {
         "iron": 150,
@@ -10068,37 +10232,47 @@
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -1,
+         0,
          -2,
          158400
         ],
         [
-         -2,
+         0,
          -1,
          172800
         ],
         [
-         -2,
-         0,
-         187200
+         1,
+         -1,
+         201600
         ],
         [
-         -2,
          1,
-         201600
+         0,
+         216000
+        ],
+        [
+         0,
+         1,
+         230400
+        ],
+        [
+         -1,
+         2,
+         259200
         ],
         [
          -2,
          2,
-         230400
+         288000
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:26:24.000Z"
       }
      },
      {
@@ -10408,8 +10582,8 @@
       "arrivesAt": "2026-06-01T10:47:50.400Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 24,
-      "supplyAt": "2026-06-01T10:47:36.000Z",
+      "supply": 22.333333333333332,
+      "supplyAt": "2026-06-01T10:49:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -10498,15 +10672,15 @@
        [
         -2,
         2,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "arrivesAt": "2026-06-01T08:45:28.800Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:45:38.400Z",
+      "supplyAt": "2026-06-01T08:45:28.800Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -10516,7 +10690,34 @@
       "post": null
      }
     ],
-    "forts": [],
+    "forts": [
+     {
+      "id": 3,
+      "kind": "fort",
+      "ownerAccountId": 1,
+      "villageId": 1,
+      "q": -2,
+      "r": 1,
+      "status": "standing",
+      "completesAt": "2026-06-01T10:46:48.000Z",
+      "grain": 0,
+      "armyFloor": null,
+      "neutral": false,
+      "plots": {
+       "keep": {
+        "kind": "keep",
+        "level": 1
+       },
+       "storage": {
+        "kind": "storage",
+        "level": 1
+       }
+      },
+      "work": null,
+      "defenders": {},
+      "mannedAt": "2026-06-01T10:47:50.400Z"
+     }
+    ],
     "camps": [
      {
       "id": 1,
@@ -10635,6 +10836,11 @@
       "accountId": 1,
       "achievement": "avatar_risen",
       "earnedAt": "2026-06-01T10:38:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T10:46:48.000Z"
      }
     ],
     "shipyards": [
@@ -10708,7 +10914,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 339,
+       "grain": 400,
        "stone": 0
       },
       "carriedBack": {
@@ -12928,7 +13134,7 @@
       "embers": 0,
       "armySlots": {
        "used": 7,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -14146,8 +14352,8 @@
       "arrivesAt": "2026-06-01T11:06:04.800Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 24,
-      "supplyAt": "2026-06-01T10:47:36.000Z",
+      "supply": 22.333333333333332,
+      "supplyAt": "2026-06-01T10:49:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -14242,15 +14448,15 @@
        [
         -2,
         2,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T08:45:00.000Z",
-      "arrivesAt": "2026-06-01T08:45:38.400Z",
+      "arrivesAt": "2026-06-01T08:45:28.800Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T08:45:38.400Z",
+      "supplyAt": "2026-06-01T08:45:28.800Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -14300,6 +14506,18 @@
        }
       },
       "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "bandit",
+      "front": "south",
+      "q": -2,
+      "r": 1,
+      "size": 8,
+      "waveId": null,
+      "reward": null,
+      "endsAt": null,
       "quest": null
      }
     ],
@@ -14398,6 +14616,11 @@
      },
      {
       "accountId": 1,
+      "achievement": "fort_built",
+      "earnedAt": "2026-06-01T10:46:48.000Z"
+     },
+     {
+      "accountId": 1,
       "achievement": "hordes_united",
       "earnedAt": "2026-06-01T10:54:57.600Z"
      },
@@ -14478,7 +14701,7 @@
       "cargo": {
        "iron": 0,
        "wood": 0,
-       "grain": 339,
+       "grain": 400,
        "stone": 0
       },
       "carriedBack": {
@@ -16415,7 +16638,16 @@
    "response": {
     "notifications": [
      {
-      "id": 35,
+      "id": 38,
+      "kind": "camp",
+      "tier": "push",
+      "title": "Bandits took the fort at (-2, 1)",
+      "body": "Its grain ran out and no army held it; now it is their camp. Send an army to clear it.",
+      "createdAt": "2026-06-01T11:15:36.000Z",
+      "read": false
+     },
+     {
+      "id": 37,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from You's refuge starved",
@@ -16424,7 +16656,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 36,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -16433,7 +16665,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 35,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -16442,7 +16674,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 34,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Ashes",
@@ -16451,7 +16683,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 33,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -16460,7 +16692,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 32,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -16469,7 +16701,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 31,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -16478,7 +16710,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 30,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Many Banners",
@@ -16487,7 +16719,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 29,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
@@ -16496,7 +16728,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 28,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16505,7 +16737,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 27,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -16514,7 +16746,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 26,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -16523,7 +16755,7 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 25,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry has fallen",
@@ -16532,11 +16764,29 @@
       "read": false
      },
      {
+      "id": 24,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: Palisade",
+      "body": "Raise a fort in the field.",
+      "createdAt": "2026-06-01T10:46:48.000Z",
+      "read": false
+     },
+     {
+      "id": 23,
+      "kind": "build_done",
+      "tier": "digest",
+      "title": "Fort at (-2, 1) finished",
+      "body": "Armies holding it fight from behind its walls.",
+      "createdAt": "2026-06-01T10:46:48.000Z",
+      "read": false
+     },
+     {
       "id": 22,
       "kind": "outpost_raided",
       "tier": "push",
       "title": "A horde burned the supply point at (-1, 2)",
-      "body": "Its 152 grain burned with it.",
+      "body": "Its 268 grain burned with it.",
       "createdAt": "2026-06-01T10:40:48.000Z",
       "read": false
      },
@@ -16699,7 +16949,7 @@
       "tier": "digest",
       "title": "Caravan Yard level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:06.000Z",
+      "createdAt": "2026-06-01T08:00:15.140Z",
       "read": false
      },
      {
@@ -16708,7 +16958,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:03.000Z",
+      "createdAt": "2026-06-01T08:00:07.640Z",
       "read": false
      },
      {
@@ -16730,7 +16980,7 @@
       "read": false
      }
     ],
-    "unread": 35,
+    "unread": 38,
     "serverTime": "2026-06-01T11:19:36.000Z"
    }
   }

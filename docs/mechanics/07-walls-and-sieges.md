@@ -8,38 +8,38 @@ until they are battered down or climbed.
 
 ## The walls
 
-- **The plot.** The walls are their own building (plot `w`), up to level 20.
-  Cost: 180 / 300 / 40 / 40 at level 1, ×1.5 a level. Time: 4 min, ×1.45 a
-  level.
+- **The plot.** The walls are their own building (plot `w`), up to level 10.
+  Cost: 450 / 750 / 100 / 100 at level 1, ×2.25 a level. Time: 9 min 48 s,
+  ×2.1025 a level.
 - **Material.** As they rise, the walls change material:
 
 | Wall levels | Tier | Toughness |
 |---|---|---|
-| 1–2 | Palisade (wood) | ×1.0 |
-| 3–4 | Timber Rampart | ×1.15 |
-| 5–7 | Stone Wall | ×1.35 |
-| 8+ | Fortress Walls | ×1.6 |
+| 1 | Palisade (wood) | ×1.0 |
+| 2 | Timber Rampart | ×1.15 |
+| 3 | Stone Wall | ×1.35 |
+| 4+ | Fortress Walls | ×1.6 |
 
-- **Integrity** is **120 per level** × the tier's toughness. It is what the
+- **Integrity** is **240 per level** × the tier's toughness. It is what the
   horde must batter down.
-- **Defense.** While they stand, the walls add **+3% defense per level** to
+- **Defense.** While they stand, the walls add **+6% defense per level** to
   the garrison and the armies fighting with it.
-- **Manning.** The walls hold **30 men a level**, archers first. Archers on
-  the walls shoot **+4% harder per wall level**.
+- **Manning.** The walls hold **60 men a level**, archers first. Archers on
+  the walls shoot **+8% harder per wall level**.
 
 ### Towers
 
-Wall slots t0–t4 open at wall levels 1, 3, 5, 7 and 9. Each slot holds a
-tower (each up to level 20; effects are per level):
+Wall slots t0–t4 open at wall levels 1, 2, 3, 4 and 5. Each slot holds a
+tower (each up to level 10; effects are per level):
 
 | Tower | Effect per level |
 |---|---|
-| Archer Tower | Garrison attack +5% while the walls stand |
-| Gate Tower | Wall integrity +8% |
-| Ballista Platform | Smashes 0.35 of the horde's siege engines each round before the assault |
-| Murder Holes | Garrison defense +4% while the walls stand |
-| Moat (ditch) | Battering −5%, engine building +10% slower, climbers −6%. Dry until level 4, then it holds water |
-| Watchtower | Hordes are seen 1 game hour sooner: the warning push comes earlier |
+| Archer Tower | Garrison attack +10% while the walls stand |
+| Gate Tower | Wall integrity +16% |
+| Ballista Platform | Smashes 0.7 of the horde's siege engines each round before the assault |
+| Murder Holes | Garrison defense +8% while the walls stand |
+| Moat (ditch) | Battering −10%, engine building +20% slower, climbers −12%. Dry at level 1, then it holds water |
+| Watchtower | Hordes are seen 2 game hours sooner: the warning push comes earlier |
 
 ## Escalade: getting over the walls
 
@@ -57,7 +57,7 @@ tower (each up to level 20; effects are per level):
   `siege` value. Units without one batter at 2% of their attack. Dedicated
   attackers: Cave Bear 3, Div 10, Zmey Whelp 8, Siege Ram 40, Catapult 60.
   The Avatar of Černobog batters at 60, the Leshen at 40.
-- **The moat** cuts battering by 5% a level.
+- **The moat** cuts battering by 10% a level.
 - **Breaching.** When integrity reaches 0, the walls are breached: they lose
   **one level**, and from then on they give no defense, archer platform or
   hold-back for the rest of the battle.
@@ -75,7 +75,7 @@ engine on site:
 | West | Siege Tower (climbers) | ×0.8 |
 
 - **Time.** Building takes 3 game hours × the front's siege craft × the
-  engine's own setup factor. The moat slows it 10% a level.
+  engine's own setup factor. The moat slows it 20% a level.
 - **Ballistae** smash engines before the horde closes in.
 - **Engines on the march.** Later hordes of the Order may bring rams,
   catapults and siege towers with them (from waves 10, 13 and 15, in bigger

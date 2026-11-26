@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "iron": 144,
+       "wood": 110,
+       "grain": 344,
+       "stone": 188
       },
       "ratesPerHour": {
        "iron": 150,
@@ -199,6 +199,16 @@
      }
     },
     "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -375,10 +385,10 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 50,
-       "wood": 220,
-       "grain": 333.33333333333326,
-       "stone": 320
+       "iron": 760,
+       "wood": 720,
+       "grain": 760,
+       "stone": 840
       },
       "ratesPerHour": {
        "iron": 150,
@@ -449,7 +459,7 @@
       "embers": 0,
       "armySlots": {
        "used": 8,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -616,10 +626,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 50,
-        "wood": 220,
-        "grain": 333.33333333333326,
-        "stone": 320
+        "iron": 760,
+        "wood": 720,
+        "grain": 760,
+        "stone": 840
        },
        "ratesPerHour": {
         "iron": 150,
@@ -3096,7 +3106,7 @@
       "embers": 0,
       "armySlots": {
        "used": 8,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -3263,10 +3273,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 50,
-        "wood": 220,
-        "grain": 333.33333333333326,
-        "stone": 320
+        "iron": 760,
+        "wood": 720,
+        "grain": 760,
+        "stone": 840
        },
        "ratesPerHour": {
         "iron": 150,
@@ -5785,7 +5795,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:03.000Z",
+      "createdAt": "2026-06-01T08:00:07.640Z",
       "read": false
      },
      {
