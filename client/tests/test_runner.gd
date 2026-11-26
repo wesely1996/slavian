@@ -1319,6 +1319,17 @@ func _test_art() -> void:
 
 
 func _test_rivers() -> void:
+	# sim/blessings.ts longestRiver (server/test/blessings.test.ts, same cases):
+	# a river line may end in a lake, at its farthest corner.
+	var mouth := {"a": Vector2i(1, 0), "b": Vector2i(1, -1)}
+	var lakes := func(cells: Array) -> Dictionary:
+		var out := {}
+		for c in cells:
+			out[c] = "lake"
+		return out
+	_check(LocalBlessings.longest_river([], {}) == 0 and LocalBlessings.longest_river([mouth], {}) == 1, "a river line, edge by edge")
+	_check(LocalBlessings.longest_river([mouth], lakes.call(["0,0"])) == 4 and LocalBlessings.longest_river([mouth], lakes.call(["0,0", "-1,0", "-2,0"])) == 8,
+		"a river line runs on into a lake, to its farthest corner")
 	var rivers := [[0, 1, 1, 1, "none"], [1, 0, 1, 1, "standing"]]
 	var at := RiverText.edges_at(rivers, Vector2i(1, 1))
 	_check(at.size() == 2 and at[0].other == Vector2i(0, 1) and at[1].crossing == "standing", "river edges at a hex")

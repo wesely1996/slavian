@@ -163,10 +163,17 @@ world**, for **every player**, and lasts the rest of the run.
 | **The forge god's** | Any player forging a unit to the last level of every line it has ([page 11](11-research-faith-smithing.md#the-blacksmith)) | Forging costs **50%** and takes **50%** as long, for everyone |
 
 - **The river line.** It is measured like a longest road: dug river edges
-  joined corner to corner, each counted once. Rivers the map started with
-  don't count. A lake between two dug rivers counts the **fewest lake
-  edges** from where one meets it to where the next leaves it. The river
-  panel on the map shows how far the group has got.
+  joined corner to corner, each counted once, in one unbroken line. Rivers
+  the map started with don't count. Lakes on the way count too:
+  - **Between two rivers,** a lake counts the **fewest lake edges** from
+    where one river meets it to where the next leaves it. 3 edges of river,
+    a lake crossed in 2, then 2 more edges: 3 + 2 + 2 = **7**.
+  - **At the end of a line,** a lake counts the fewest lake edges from where
+    the river meets it to its **farthest corner**. Lakes that touch count as
+    one lake. 2 edges of river into a lake whose far side is 5 edges away:
+    2 + 5 = **7**.
+  - One lake hex counts 3 edges across, two in a row 5, three in a row 7.
+  - The river panel on the map shows how far the group has got.
 - **What "along a river" means.** A step between two neighbouring hexes on
   the banks of the same river ([page 2](02-map-and-movement.md#rivers-and-bridges)).
   A boat's lanes go twice as fast again: **6×** in all.
