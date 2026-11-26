@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "_comment": "The enemy lands beyond the map's edge (docs/enemy-lands.md): rings past the heartland's radius, only on the sides of active fronts, four bands deep. Each front paints its own terrain: a noise value (about -1..1) plus shift for each band past the first picks the first palette entry whose upTo it is below. Where two fronts' lands meet, a seam of impassable terrain keeps them apart. Bands deeper than sight start in fog; an army that reaches a hex sees one band past it.",
+  "bands": [
+    { "id": "march",     "name": "The March",     "rings": 3 },
+    { "id": "forts",     "name": "The Forts",     "rings": 2 },
+    { "id": "heartland", "name": "The Heartland", "rings": 3 },
+    { "id": "seat",      "name": "The Seat",      "rings": 2 }
+  ],
+  "seam": "rift",
+  "sight": 1,
+  "fronts": {
+    "north": { "shift": 0.15, "palette": [
+      { "terrain": "dark_forest",  "upTo": -0.05 },
+      { "terrain": "frozen_bog",   "upTo": 0.15 },
+      { "terrain": "barrow_field", "upTo": 0.3 },
+      { "terrain": "ice",          "upTo": 99 } ] },
+    "east":  { "shift": 0, "palette": [
+      { "terrain": "steppe",       "upTo": 0.05 },
+      { "terrain": "salt_flat",    "upTo": 0.22 },
+      { "terrain": "kurgan_ridge", "upTo": 99 } ] },
+    "south": { "shift": 0, "palette": [
+      { "terrain": "olive_grove",  "upTo": -0.08 },
+      { "terrain": "vineyard",     "upTo": 0.18 },
+      { "terrain": "hallowed",     "upTo": 99 } ] },
+    "west":  { "shift": 0, "palette": [
+      { "terrain": "mill_meadow",  "upTo": -0.05 },
+      { "terrain": "abbey_orchard", "upTo": 0.2 },
+      { "terrain": "hallowed",     "upTo": 99 } ] }
+  }
+}

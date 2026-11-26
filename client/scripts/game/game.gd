@@ -26,6 +26,9 @@ var data: Dictionary = {}
 var world: Dictionary = {}
 var villages: Dictionary[int, Dictionary] = {}
 var terrain: Dictionary[Vector2i, String] = {}
+## The enemy lands beyond the edge (sim/enemyLands.ts): each hex's band (1..4).
+## Those seen are in `terrain` too; the rest lie in fog.
+var enemy_bands: Dictionary[Vector2i, int] = {}
 ## Waves not yet dispersed, oldest first (see server waveView).
 var waves: Array = []
 ## Scout missions with their shared reports, newest first.
@@ -196,6 +199,16 @@ func set_world(new_world: Dictionary) -> void:
 	if map is Dictionary:
 		for cell in map.hexes:
 			terrain[Vector2i(int(cell[0]), int(cell[1]))] = cell[2]
+	enemy_bands.clear()
+	var enemy: Variant = map.get("enemy") if map is Dictionary else null
+	if enemy is Dictionary and map.get("radius") != null and data.has("enemyLands"):
+		# Made here as the server makes them (sim/enemyLands.ts); bands past
+		# a front's sight lie in fog.
+		var sight: Dictionary = enemy.get("sight", {})
+		for e in LocalEnemyLands.lands(data, int(enemy.seed), int(map.radius), map.activeFronts):
+			enemy_bands[e.cell] = int(e.band)
+			if int(e.band) <= int(sight.get(e.front, 0)):
+				terrain[e.cell] = e.terrain
 	lanes = _lanes(rivers)
 	world_changed.emit()
 
@@ -536,6 +549,16 @@ func village_name(village_id: Variant) -> String:
 	if village_id == null:
 		return tr("the Holy City")
 	return villages.get(int(village_id), {}).get("name", tr("a village"))
+
+
+## The band of the enemy lands a hex lies in (0: the heartland).
+func enemy_band(cell: Vector2i) -> int:
+	return enemy_bands.get(cell, 0)
+
+
+## Whether a hex of the enemy lands still lies in fog.
+func in_fog(cell: Vector2i) -> bool:
+	return enemy_bands.has(cell) and not terrain.has(cell)
 
 
 func front_faction(front: String) -> String:

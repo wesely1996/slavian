@@ -113,8 +113,7 @@ come out.
 - **Supply.**
   - There is no friendly granary beyond the edge: an army lives on what it
     carries.
-  - Supply points can't be set up there, but a captured war camp can serve as
-    one while it is held.
+  - Supply points can't be set up there, and captured places can't be held.
   - Foraging enemy stores is the other way to eat, and it raises hatred.
 - **Scouting.** Enemy lands start in fog.
   - Scouts reveal them band by band, and watch posts may catch them.
@@ -146,11 +145,18 @@ come out.
 - **Retaliation.** Hatred rises with every blow, so pressure comes back as
   **retaliation bands** aimed at the village that struck. This is today's
   100%-hatred band, made specific.
-- **Holding ground.**
-  - Optional, phase 5: a captured war camp can be turned into a fort or a
-    supply point.
-  - **No villages** in enemy lands: they stay unsettleable, so the economy
-    stays at home.
+- **No holding ground.** Nothing beyond the edge can be kept: no villages,
+  no supply points, no captured camps turned into forts. An army that
+  lingers there after its fight (more than 2 game hours on enemy ground
+  without striking a place) draws the front's **guardian**: a god's wrath or
+  a huge monster that **drives the army home** (it is teleported back to its
+  village, losing a share of its men if it stands to fight). Expeditions
+  strike and leave.
+- **Hatred hardens the land.** A front's hatred raises the garrisons **and
+  the walls** of its camps, forts, towns, lairs and seat, as it raises its
+  hordes.
+- **Striking the seat** adds a **lasting +3% hatred** to that front, win or
+  lose: the attack alone is remembered.
 
 ## 6. The hordes, made visible
 
@@ -201,7 +207,7 @@ gods" on page 13 of the mechanics docs).
 
 | System | Change |
 |---|---|
-| Raids (`raids.json`) | Become ordinary army orders on real places. Depth = band (1–4). The Raid tab becomes a "Campaign" tab listing known enemy places by band |
+| Raids (`raids.json`) | **Replaced** by planned campaigns: before setting out, the player picks the target place (its band is the depth), the route through the bands and the places struck on the way. The Raid tab becomes a "Campaign" tab listing known enemy places by band, with the planner |
 | Strike | Becomes an attack on a muster ground: same share-gathered rule, now with a march |
 | Hatred | Unchanged in kind. Sacks, foraging and capital strikes add to it; regrowth speed reads it |
 | Waves | Spawn at muster grounds; size reads standing towns |
@@ -247,7 +253,7 @@ gods" on page 13 of the mechanics docs).
 
 Each phase is one or two PRs, playable on its own, behind no flag.
 
-1. **The land itself.**
+1. **The land itself** (done).
    - Generate the outer bands and seams with per-front terrain; draw them
      with chunked rendering; fog.
    - Nothing lives there yet, but armies and scouts can walk in.
@@ -261,13 +267,14 @@ Each phase is one or two PRs, playable on its own, behind no flag.
    march; towns standing feed wave size.
 4. **Consequences.**
    - Wave reductions for sacked towns; the seat's day without raids.
-   - Retaliation bands; achievements.
-   - The Campaign tab replaces the Raid tab.
+   - Retaliation bands at the village that struck; achievements.
+   - Planned campaigns (target, depth, route) replace the old raid; the
+     Campaign tab replaces the Raid tab.
+   - The guardian that drives lingering armies home; +3% lasting hatred
+     for striking the seat.
 5. **The enemy's gods** (§6b): blessings from hatred, bridge stages and
    events, shown on each front's panel.
-6. **Holding ground** (optional): captured camps as supply points or forts;
-   roads into enemy lands.
-7. **Balance pass.** `runsim` gets bots that campaign. Hatred, regrowth and
+6. **Balance pass.** `runsim` gets bots that campaign. Hatred, regrowth and
    wave reductions are tuned so that pushing out pays, but sitting at home
    still works on Baron difficulty.
 
@@ -283,14 +290,16 @@ Each phase is one or two PRs, playable on its own, behind no flag.
 - **Several hordes per front** may be out at once.
 - **The enemy's gods** bless their fronts, from hatred, the bridge and
   events.
+- **No holding ground:** a guardian (a god or a huge monster) drives armies
+  that linger beyond the edge back home.
+- **Retaliation:** one band aimed at the village that struck.
+- **Raids:** the old abstract raid is replaced by planned campaigns (target,
+  depth and route chosen before setting out).
+- **Hatred** also raises the defences of enemy places, not only hordes.
+- **The seat:** attacking it adds a lasting +3% hatred, whatever the result.
+- **Inactive fronts** stay empty: no enemy lands beyond them (the edge belt
+  stays the map's edge there).
 
 ## 12. Open questions
 
-- **Holding ground:** may players keep anything beyond the edge (camps as
-  forts), or only strike and leave?
-- **Retaliation:** one band at the village that struck (sharp, readable), or
-  a share of the front's next wave (softer)?
-- **Inactive fronts:** stay empty, or become neutral wilds with lairs and
-  ruins for small groups?
-- **Raids:** keep the old abstract raid as a quick option next to real
-  campaigns, or replace it outright?
+None left; tuning numbers are for the balance pass.

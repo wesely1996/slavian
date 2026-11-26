@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "moveCost is the cost of entering the hex; null means impassable. roadMoveCost: impassable land a road can be cut through (a mountain pass, field.json road.mountainFactor times as dear and slow to build): entering it along a standing road costs roadMoveCost times the road's factor; elsewhere it stays impassable, no army can stop on it, and hordes keep off the passes. Edge types form the unsettleable belt around the map. mountain_city is a mountain hex where a mountain city rises (events.json mountain_city): open to armies while it stands. hordesPass false: hordes never enter it (they keep to the land outside the mountains). ground: what a battle fought on the hex counts it as (battle.json terrain): flat, woods, hills or wetland.",
+  "_comment": "moveCost is the cost of entering the hex; null means impassable. roadMoveCost: impassable land a road can be cut through (a mountain pass, field.json road.mountainFactor times as dear and slow to build): entering it along a standing road costs roadMoveCost times the road's factor; elsewhere it stays impassable, no army can stop on it, and hordes keep off the passes. Edge types form the unsettleable belt around the map. enemy: terrain of the enemy lands beyond the edge (enemy-lands.json); no road is built into it. mountain_city is a mountain hex where a mountain city rises (events.json mountain_city): open to armies while it stands. hordesPass false: hordes never enter it (they keep to the land outside the mountains). ground: what a battle fought on the hex counts it as (battle.json terrain): flat, woods, hills or wetland.",
   "terrain": {
     "plains":      { "name": "Plains",         "moveCost": 1,    "settleable": true,  "edge": false, "ground": ["flat"] },
     "forest":      { "name": "Forest",         "moveCost": 2,    "settleable": true,  "edge": false, "ground": ["woods"] },
@@ -15,6 +15,15 @@
     "ice":         { "name": "Ice",            "moveCost": 3,    "settleable": false, "edge": true, "ground": ["flat"] },
     "steppe":      { "name": "Steppe",         "moveCost": 1,    "settleable": false, "edge": true, "ground": ["flat"] },
     "hallowed":    { "name": "Hallowed Lands", "moveCost": 2,    "settleable": false, "edge": true, "ground": ["flat"] },
-    "mountain_city": { "name": "Mountain City", "moveCost": 2,  "settleable": false, "edge": false, "ground": ["hills"], "hordesPass": false }
+    "mountain_city": { "name": "Mountain City", "moveCost": 2,  "settleable": false, "edge": false, "ground": ["hills"], "hordesPass": false },
+    "frozen_bog":  { "name": "Frozen Bog",     "moveCost": 3,    "settleable": false, "edge": true, "enemy": true, "ground": ["wetland"] },
+    "barrow_field": { "name": "Barrow Field",  "moveCost": 2,    "settleable": false, "edge": true, "enemy": true, "ground": ["hills"] },
+    "salt_flat":   { "name": "Salt Flats",     "moveCost": 1,    "settleable": false, "edge": true, "enemy": true, "ground": ["flat"] },
+    "kurgan_ridge": { "name": "Kurgan Ridges", "moveCost": 2,    "settleable": false, "edge": true, "enemy": true, "ground": ["hills"] },
+    "vineyard":    { "name": "Vineyard Terraces", "moveCost": 2, "settleable": false, "edge": true, "enemy": true, "ground": ["hills"] },
+    "olive_grove": { "name": "Olive Groves",   "moveCost": 2,    "settleable": false, "edge": true, "enemy": true, "ground": ["woods"] },
+    "mill_meadow": { "name": "Mill Meadows",   "moveCost": 1,    "settleable": false, "edge": true, "enemy": true, "ground": ["flat"] },
+    "abbey_orchard": { "name": "Abbey Orchards", "moveCost": 2,  "settleable": false, "edge": true, "enemy": true, "ground": ["woods"] },
+    "rift":        { "name": "Rift",           "moveCost": null, "settleable": false, "edge": true, "enemy": true }
   }
 }

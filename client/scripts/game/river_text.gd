@@ -143,7 +143,7 @@ static func road_problem(data: Dictionary, terrain: Dictionary, rivers: Array, h
 	for end in [a, b]:
 		var type: String = terrain.get(end, "")
 		var def: Dictionary = data.terrain.terrain.get(type, {})
-		if type == "" or (def.get("moveCost") == null and def.get("roadMoveCost") == null):
+		if type == "" or def.get("enemy", false) or (def.get("moveCost") == null and def.get("roadMoveCost") == null):
 			return UI.t("No road can run there")
 	for e in edges_at(rivers, a):
 		if e.other == b and e.crossing != "standing":

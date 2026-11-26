@@ -300,7 +300,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 			if target_hex == null:
 				return LocalVillage.rule("Say which hex to hold")
 			to = target_hex
-			var terrain: Variant = world.hexes.get(LocalLand.key(to))
+			var terrain: Variant = LocalEnemyLands.army_terrain(server.data, world).get(LocalLand.key(to))
 			if terrain == null or data.terrain.terrain[terrain].moveCost == null:
 				return LocalVillage.rule("No army can stand there")
 			if to == Vector2i(home.q, home.r):
@@ -340,7 +340,7 @@ static func dispatch_army(server: LocalServer, world: Dictionary, order: Diction
 		state.ledger = LocalLedger.spend(state.ledger, at, _grain_only(grain))
 	var supplied := {"units": units, "supply": grain, "supplyAt": at, "hungrySince": null}
 	var speed := army_speed(data, units, home.state.bonuses) * LocalSupply.speed_factor(data, supplied, at, world.speed)
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(home.q, home.r), to, speed, world.speed, terrain_relief(data, units))
+	var path: Variant = LocalLogistics.road_route(data, LocalEnemyLands.army_land(server.data, world), Vector2i(home.q, home.r), to, speed, world.speed, terrain_relief(data, units))
 	if path == null:
 		return LocalVillage.rule("No road leads there")
 	var hero_account: Variant = null
@@ -703,7 +703,7 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 		if not target is Dictionary:
 			return LocalVillage.rule("Say where they should go")
 		dest = Vector2i(int(target.q), int(target.r))
-		var terrain: Variant = world.hexes.get(LocalLand.key(dest))
+		var terrain: Variant = LocalEnemyLands.army_terrain(server.data, world).get(LocalLand.key(dest))
 		if terrain == null or data.terrain.terrain[terrain].moveCost == null:
 			return LocalVillage.rule("No army can stand there")
 		if world.villages.any(func(v: Dictionary) -> bool: return int(v.q) == dest.x and int(v.r) == dest.y):
@@ -729,7 +729,7 @@ static func move(server: LocalServer, world: Dictionary, army: Dictionary, body:
 			arrive_at_site(server, world, army, at, [])
 			return army
 		return LocalVillage.rule("They are already there")
-	var land := LocalHordes.land_of(world)
+	var land := LocalEnemyLands.army_land(server.data, world)
 	var path: Variant
 	var departs_at := at
 	if on_the_road:
@@ -772,7 +772,7 @@ static func disband(server: LocalServer, world: Dictionary, army: Dictionary, at
 	# Quartered, its place is paid for what it ate till now.
 	unquarter(server, world, army, at)
 	var home := server.find_village(world, int(army.homeVillageId))
-	var land := LocalHordes.land_of(world)
+	var land := LocalEnemyLands.army_land(server.data, world)
 	var here := Vector2i(army.targetQ, army.targetR)
 	army.units = {}
 	army.status = "done"
@@ -913,7 +913,7 @@ static func rehome_armies(server: LocalServer, world: Dictionary, ruined: Dictio
 static func _march_to(server: LocalServer, world: Dictionary, army: Dictionary, village: Dictionary, orders: String, at: int) -> Dictionary:
 	var data := server.data
 	var speed := army_speed(data, army.units, owner_bonuses(server, world, army)) * LocalSupply.speed_factor(data, army if supplied(army) else null, at, world.speed)
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), Vector2i(army.targetQ, army.targetR), Vector2i(village.q, village.r), speed, world.speed, terrain_relief(data, army.units))
+	var path: Variant = LocalLogistics.road_route(data, LocalEnemyLands.army_land(server.data, world), Vector2i(army.targetQ, army.targetR), Vector2i(village.q, village.r), speed, world.speed, terrain_relief(data, army.units))
 	if path == null:
 		return {}
 	army.orders = orders
@@ -971,7 +971,7 @@ static func send_home(server: LocalServer, world: Dictionary, army: Dictionary, 
 	var home := server.find_village(world, int(army.homeVillageId))
 	if not home.is_empty() and (int(army.path[0].q) != int(home.q) or int(army.path[0].r) != int(home.r)):
 		var speed := army_speed(server.data, army.units, home.state.bonuses) * LocalSupply.speed_factor(server.data, army if supplied(army) else null, at, world.speed)
-		army.path = LocalLogistics.road_route(server.data, LocalHordes.land_of(world), Vector2i(home.q, home.r), Vector2i(army.targetQ, army.targetR), speed, world.speed, terrain_relief(server.data, army.units))
+		army.path = LocalLogistics.road_route(server.data, LocalEnemyLands.army_land(server.data, world), Vector2i(home.q, home.r), Vector2i(army.targetQ, army.targetR), speed, world.speed, terrain_relief(server.data, army.units))
 	army.status = "returning"
 	army.battleId = null
 	army.wagonFortAt = null
@@ -1160,6 +1160,8 @@ static func on_army_arrive(server: LocalServer, world: Dictionary, event: Dictio
 		return
 	var at := int(event.dueAt)
 	changed.append(["world"])
+	# In the enemy lands it sees the band past the one it reached.
+	LocalEnemyLands.widen_sight(server.data, world, Vector2i(army.targetQ, army.targetR))
 	# Holding a hex with a site nobody has searched yet: it searches it.
 	if army.orders == "hold" and LocalBattle.total(army.units) > 0 and site_at(world, Vector2i(army.targetQ, army.targetR)).get("status") == "unexplored":
 		army.orders = "explore"
@@ -2302,7 +2304,7 @@ static func rally_trained(server: LocalServer, world: Dictionary, home: Dictiona
 ## village: a hero walks, a general rides.
 static func _hero_to(server: LocalServer, world: Dictionary, hero: Dictionary, from: Vector2i, village: Dictionary, at: int) -> void:
 	var data := server.data
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), from, Vector2i(village.q, village.r), float(data.heroes.speed) * LocalHeroes.hero_factor(data, hero.kind, "heroSpeed"), world.speed)
+	var path: Variant = LocalLogistics.road_route(data, LocalEnemyLands.army_land(server.data, world), from, Vector2i(village.q, village.r), float(data.heroes.speed) * LocalHeroes.hero_factor(data, hero.kind, "heroSpeed"), world.speed)
 	var arrives_at := at + int(path[-1].atMs)
 	hero.status = "traveling"
 	hero.villageId = village.id
@@ -2315,7 +2317,7 @@ static func _hero_to(server: LocalServer, world: Dictionary, hero: Dictionary, f
 
 static func _general_to(server: LocalServer, world: Dictionary, general: Dictionary, from: Vector2i, village: Dictionary, at: int) -> void:
 	var data := server.data
-	var path: Variant = LocalLogistics.road_route(data, LocalHordes.land_of(world), from, Vector2i(village.q, village.r), float(data.heroes.generals.speed), world.speed)
+	var path: Variant = LocalLogistics.road_route(data, LocalEnemyLands.army_land(server.data, world), from, Vector2i(village.q, village.r), float(data.heroes.generals.speed), world.speed)
 	general.status = "traveling"
 	general.villageId = village.id
 	general.armyId = null

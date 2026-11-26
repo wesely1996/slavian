@@ -1,3 +1,4 @@
+import { sightOf } from '../sim/enemyLands.js';
 import { listTerraforms } from '../db/terraforms.js';
 // JSON shapes sent to clients. Timestamps are ISO strings; clients compute
 // current resources from the ledger and their offset to `serverTime`.
@@ -615,6 +616,13 @@ export async function fortsView(client: DbClient, worldId: number) {
   return (await listForts(client, worldId)).map(fortView);
 }
 
+// The enemy lands of a world as the map shows them: the seed they are made
+// from (sim/enemyLands.ts, the client makes them the same way) and how many
+// bands of each front are seen; deeper ones lie in fog.
+export function enemyView(data: GameData, world: World): { seed: number; sight: Record<string, number> } {
+  return { seed: world.seed, sight: Object.fromEntries(world.activeFronts.map((f) => [f, sightOf(data, world, f)])) };
+}
+
 export function worldSummary(world: World) {
   return {
     id: world.id,
@@ -738,6 +746,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
           roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level, ...(e.damaged ? [true] : [])]),
           // [q, r, action, villageId, completesAt]: land being reshaped (field.json terraform).
           terraforms: (await listTerraforms(client, world.id)).map((t) => [t.cell.q, t.cell.r, t.action, t.villageId, t.completesAt.toISOString()]),
+          // The enemy lands beyond the edge: their seed and each front's bands seen.
+          enemy: enemyView(data, world),
         };
   // Each member's army slots (sim/slots.ts): used and given.
   const slots = new Map<number, { used: number; cap: number }>();

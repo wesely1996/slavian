@@ -125,7 +125,12 @@ func refresh() -> void:
 	var map: Variant = Game.world.get("map")
 	radius = int(map.radius) if map is Dictionary else 0
 	if _ground != null:
-		_ground.build(Game.terrain, hex_size)
+		# The enemy lands not yet seen are drawn as fog.
+		var ground: Dictionary = Game.terrain.duplicate()
+		for cell in Game.enemy_bands:
+			if not ground.has(cell):
+				ground[cell] = "fog"
+		_ground.build(ground, hex_size)
 		_features.build(Game.terrain, hex_size, _occupied())
 	queue_redraw()
 
@@ -180,7 +185,11 @@ func show_road_targets(cells: Array) -> void:
 
 ## Bounding rectangle of all hex centres, in local coordinates.
 func get_bounds() -> Rect2:
-	var extent := HexMath.to_pixel(Vector2i(radius, 0), hex_size).x
+	var reach := radius
+	# The enemy lands reach further out.
+	for cell in Game.enemy_bands:
+		reach = maxi(reach, HexMath.distance(cell, Vector2i.ZERO))
+	var extent := HexMath.to_pixel(Vector2i(reach, 0), hex_size).x
 	return Rect2(-extent, -extent, extent * 2.0, extent * 2.0)
 
 

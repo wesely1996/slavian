@@ -20,6 +20,18 @@ const COLORS := {
 	"hallowed": Color("#8d8174"),
 	# A mountain city's hex: dressed stone in the mountain.
 	"mountain_city": Color("#8f8778"),
+	# The enemy lands beyond the edge (enemy-lands.json).
+	"frozen_bog": Color("#6f7f80"),
+	"barrow_field": Color("#6d6a58"),
+	"salt_flat": Color("#cfc6a8"),
+	"kurgan_ridge": Color("#9a8458"),
+	"vineyard": Color("#7c6a4a"),
+	"olive_grove": Color("#77804f"),
+	"mill_meadow": Color("#93a05c"),
+	"abbey_orchard": Color("#6c7c45"),
+	"rift": Color("#24201f"),
+	# Enemy lands not yet seen.
+	"fog": Color("#3a3f46"),
 }
 const HEIGHTS := {
 	"ocean": 0.0,
@@ -36,6 +48,16 @@ const HEIGHTS := {
 	"wooded_hills": 0.62,
 	"mountain": 1.0,
 	"mountain_city": 0.85,
+	"frozen_bog": 0.2,
+	"barrow_field": 0.45,
+	"salt_flat": 0.26,
+	"kurgan_ridge": 0.55,
+	"vineyard": 0.5,
+	"olive_grove": 0.36,
+	"mill_meadow": 0.27,
+	"abbey_orchard": 0.33,
+	"rift": 0.05,
+	"fog": 0.3,
 }
 const UNKNOWN_COLOR := Color("#ff00ff")
 

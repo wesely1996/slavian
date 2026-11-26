@@ -31,6 +31,7 @@ balance changes land there first.
 | 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
 | 16 | [Battle lines and maneuvers](16-battle-lines.md) | The line's width, the opening volley, flank, pincer, encirclement, breakthrough, Shield Bearer, bridges, roads and forts |
 | 17 | [Forts](17-forts.md) | A fort's Keep, Storage, Fort Garrison, wall rings and towers, its defenders, ring-by-ring sieges, the zone of influence, grain upkeep and bandit takeover, sharing a hex, the rally point, tearing down |
+| 18 | [The enemy lands](18-enemy-lands.md) | The lands beyond the edge: four bands per active front, their terrain, rifts between fronts, fog and sight, marching in |
 
 ## Reading the numbers
 
