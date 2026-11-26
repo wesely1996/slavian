@@ -256,11 +256,26 @@ export function commonNeighbors(a: Hex, b: Hex): Hex[] {
 // over the fewest road steps from `from` to `to` (of those, the best
 // built), the average of each step's level `outpostBonus`. `roads`: the
 // level of each standing road, by edge key; a damaged one (`damaged`) adds
-// only damage.effect of its bonus.
-export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, from: Hex, to: Hex, damaged: ReadonlySet<string> = new Set()): number {
+// only damage.effect of its bonus, and a mountain pass (a step into land
+// only a road crosses, by `terrain`) passOutpostFactor times it.
+export function roadLink(
+  data: GameData,
+  roads: ReadonlyMap<string, number>,
+  from: Hex,
+  to: Hex,
+  damaged: ReadonlySet<string> = new Set(),
+  terrain: ReadonlyMap<string, TerrainId> = new Map(),
+): number {
   const levels = data.field.road.levels;
   const effect = data.field.road.damage.effect;
-  const gain = (level: number, edge: string) => levels[Math.min(level, levels.length) - 1]!.outpostBonus * (damaged.has(edge) ? effect : 1);
+  const pass = (cell: Hex) => {
+    const def = data.terrain.terrain[terrain.get(hexKey(cell)) as TerrainId];
+    return def !== undefined && def.moveCost === null && (def.roadMoveCost ?? null) !== null;
+  };
+  const gain = (level: number, a: Hex, b: Hex) =>
+    levels[Math.min(level, levels.length) - 1]!.outpostBonus *
+    (damaged.has(edgeKey(a, b)) ? effect : 1) *
+    (pass(a) || pass(b) ? data.field.road.passOutpostFactor : 1);
   const goal = hexKey(to);
   const best = new Map<string, { steps: number; sum: number }>([[hexKey(from), { steps: 0, sum: 0 }]]);
   let layer: Hex[] = [from];
@@ -273,7 +288,7 @@ export function roadLink(data: GameData, roads: ReadonlyMap<string, number>, fro
         if (level <= 0) continue;
         const k = hexKey(n);
         const seen = best.get(k);
-        const sum = here.sum + gain(level, edgeKey(cell, n));
+        const sum = here.sum + gain(level, cell, n);
         if (!seen) {
           best.set(k, { steps, sum });
           next.push(n);

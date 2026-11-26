@@ -764,6 +764,8 @@ const fieldFileSchema = z.object({
     // A road into impassable land with a roadMoveCost (a mountain pass) costs
     // and takes this many times as much.
     mountainFactor: z.number().min(1),
+    // A step of an outpost's road link through a mountain pass counts this many times its level's outpostBonus.
+    passOutpostFactor: z.number().min(1),
     // A road a fire reached: `effect` of its good until repaired, for
     // `repairShare` of its level's cost and time.
     damage: z.object({ effect: z.number().min(0).max(1), repairShare: z.number().positive() }),

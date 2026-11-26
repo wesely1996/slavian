@@ -348,6 +348,10 @@ func _outpost_panel(holder: Dictionary, plot: String) -> void:
 		_panel_body.add_child(UI.label(tr("Joined to %s by road: +%d%% gathered") % [holder.name, roundi(road * 100.0)], UI.SMALL_SIZE, UI.MUTED))
 	elif mine:
 		var best := float(Game.data.field.road.levels[-1].outpostBonus)
+		# Reached through a mountain pass, the road counts twice.
+		var land: Dictionary = Game.data.terrain.terrain.get(terrain, {})
+		if land.get("moveCost") == null and land.get("roadMoveCost") != null:
+			best *= float(Game.data.field.road.passOutpostFactor)
 		_panel_body.add_child(UI.with_info(UI.label(tr("A road to its village raises the yield"), UI.SMALL_SIZE, UI.MUTED), tr("Join it to %s by road to gather up to +%d%%: the better the roads, the more.") % [holder.name, roundi(best * 100.0)]))
 	if not mine:
 		return

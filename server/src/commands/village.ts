@@ -364,7 +364,8 @@ export async function claimOutpostCommand(
 ): Promise<{ village: Village; queued: QueuedBuild }> {
   const { village, result } = await ownVillageCommand(db, deps, { ...input, action: 'claimed an outpost' }, async ({ client, world, village }) => {
     const cell = hex(input.q, input.r);
-    const terrain = (await loadHexes(client, world.id)).find(([q, r]) => q === cell.q && r === cell.r)?.[2];
+    const hexes = await loadHexes(client, world.id);
+    const terrain = hexes.find(([q, r]) => q === cell.q && r === cell.r)?.[2];
     if (!terrain) throw new RuleError('That hex is not on the map');
     if (await campAt(client, world.id, cell.q, cell.r)) throw new RuleError('A camp stands there; clear it first');
     if ((await siteAt(client, world.id, cell.q, cell.r))?.status === 'unexplored') throw new RuleError('An ancient site lies there');
@@ -374,7 +375,7 @@ export async function claimOutpostCommand(
       for (const plot of outpostPlots(other.state.plots)) taken.add(hexKey(outpostHex(plot)!));
     }
     const home = hex(village.q, village.r);
-    const site = { cell, terrain, home, taken, road: roadLink(deps.data, await standingRoads(client, world.id), cell, home, await damagedRoads(client, world.id)) };
+    const site = { cell, terrain, home, taken, road: roadLink(deps.data, await standingRoads(client, world.id), cell, home, await damagedRoads(client, world.id), new Map(hexes.map(([q, r, t]) => [`${q},${r}`, t]))) };
     const { state, queued } = claimOutpost(deps.data, village.state, site, input.now, world.speed);
     const payload: BuildCompletePayload = {
       villageId: village.id,

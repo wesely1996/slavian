@@ -930,7 +930,7 @@ func _claim_outpost(world: Dictionary, village: Dictionary, body: Dictionary, no
 			taken[LocalLand.key(LocalVillage.outpost_hex(plot))] = true
 	var home := Vector2i(village.q, village.r)
 	var site := {"cell": cell, "terrain": terrain, "home": home, "taken": taken,
-		"road": LocalLand.road_link(data, LocalHordes.land_of(world).roads, cell, home, LocalHordes.land_of(world).damaged)}
+		"road": LocalLand.road_link(data, LocalHordes.land_of(world).roads, cell, home, LocalHordes.land_of(world).damaged, world.hexes)}
 	var result := LocalVillage.claim_outpost(data, village.state, site, now, world.speed)
 	if result.has("state"):
 		var q: Dictionary = result.queued

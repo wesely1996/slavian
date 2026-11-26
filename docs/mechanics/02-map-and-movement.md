@@ -76,6 +76,7 @@ Build times are game time and shrink with world speed.
   The game takes the route with the fewest road steps between the two (of
   those, the best built), and adds the *average* level bonus of its steps to
   the outpost's yield. Three steps of paved road add +200% (the outpost gathers three times as much); a dirt track and two paved steps add (50 + 200 + 200) ÷ 3 = +150%.
+  A step through a mountain pass counts **twice** ([below](#mountain-passes)).
 
 ### Mountain passes
 
@@ -86,6 +87,10 @@ Build times are game time and shrink with world speed.
 - **Off the road** the mountain stays impassable. No army can stop on a
   pass, and hordes keep off them.
 - **On the map** passes are drawn as switchbacks climbing over the mountain.
+- **Outposts.** A step of an outpost's road into or out of a mountain hex
+  adds **twice** its level's bonus: +100% for a dirt track, +200% for a
+  gravel road, +400% for a paved one. A mountain outpost joined to its
+  village by a single paved pass gathers five times as much.
 
 ## Rivers and bridges
 
