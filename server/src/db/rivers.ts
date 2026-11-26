@@ -2,7 +2,7 @@ import { listForts, manned } from './forts.js';
 import { listTerraforms } from './terraforms.js';
 import type { RiverEdge } from '../sim/mapgen.js';
 import { damagedRoads, standingRoads } from './roads.js';
-import { edgeKey, landOf, riverLanes, type Land } from '../sim/land.js';
+import { blessLand, edgeKey, landOf, riverBanks, riverLanes, type Land } from '../sim/land.js';
 import { listShipyards } from './shipyards.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
 import type { DbClient } from './pool.js';
@@ -17,6 +17,8 @@ export interface StoredRiverEdge {
   builtBy: number | null;
   completesAt: Date | null;
   size: number;
+  // Dug by the players (field.json terraform river).
+  dug: boolean;
 }
 
 interface Row {
@@ -28,6 +30,7 @@ interface Row {
   built_by: string | null;
   completes_at: Date | null;
   size: number;
+  dug: boolean;
 }
 
 // Stored with a before b (edgeKey order), so each edge has one row.
@@ -35,12 +38,12 @@ function ordered(a: Hex, b: Hex): [Hex, Hex] {
   return edgeKey(a, b).startsWith(`${a.q},${a.r}|`) ? [a, b] : [b, a];
 }
 
-export async function insertRivers(client: DbClient, worldId: number, rivers: readonly RiverEdge[]): Promise<void> {
+export async function insertRivers(client: DbClient, worldId: number, rivers: readonly RiverEdge[], dug = false): Promise<void> {
   for (const edge of rivers) {
     const [a, b] = ordered(edge.a, edge.b);
     await client.query(
-      'INSERT INTO river_edges (world_id, aq, ar, bq, br, crossing, size) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING',
-      [worldId, a.q, a.r, b.q, b.r, edge.bridge ? 'standing' : 'none', edge.size],
+      'INSERT INTO river_edges (world_id, aq, ar, bq, br, crossing, size, dug) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING',
+      [worldId, a.q, a.r, b.q, b.r, edge.bridge ? 'standing' : 'none', edge.size, dug],
     );
   }
 }
@@ -54,6 +57,7 @@ export async function listRiverEdges(client: DbClient, worldId: number): Promise
     builtBy: r.built_by === null ? null : Number(r.built_by),
     completesAt: r.completes_at,
     size: r.size,
+    dug: r.dug,
   }));
 }
 
@@ -110,5 +114,8 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   );
   // Or its own defenders hold.
   const forts = (await listForts(client, worldId)).filter((f) => f.kind === 'fort' && f.status === 'standing' && (held.has(`${f.q},${f.r}`) || manned(f))).map((f) => `${f.q},${f.r}`);
-  return landOf(terrain, blocked, roads, lanes, burning, damaged, forts);
+  const land = landOf(terrain, blocked, roads, lanes, burning, damaged, forts);
+  // Blessed by the water god: every river's banks are travelled the faster.
+  const { rows } = await client.query<{ water: string | null }>("SELECT blessings->>'water' AS water FROM worlds WHERE id = $1", [worldId]);
+  return rows[0]?.water ? blessLand(land, riverBanks(rivers)) : land;
 }

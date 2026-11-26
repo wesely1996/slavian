@@ -59,18 +59,26 @@ export function smithLevel(smithing: Smithing, unit: string, line: SmithLine): n
 }
 
 // What forging `unit`'s `line` to `level` costs and how long it takes (ms;
-// `smithTime` the forging village's bonus, from its Blacksmith).
-export function smithCost(data: GameData, unit: string, line: SmithLine, level: number): Resources {
+// `smithTime` the forging village's bonus, from its Blacksmith). Blessed by
+// the forge god (`blessed`), less of both (events.json blessings.forge).
+export function smithCost(data: GameData, unit: string, line: SmithLine, level: number, blessed = false): Resources {
   const def = data.units.units[unit]!;
   const priced = pricedLevel(data, line, level);
-  return mapResources((k) => Math.round(def.cost[k] * data.smithing.costFactor * priced));
+  const factor = blessed ? data.events.blessings.forge.costFactor : 1;
+  return mapResources((k) => Math.round(def.cost[k] * data.smithing.costFactor * priced * factor));
 }
 
-export function smithMs(data: GameData, unit: string, line: SmithLine, level: number, worldSpeed: number, bonuses: Bonuses = {}): number {
+export function smithMs(data: GameData, unit: string, line: SmithLine, level: number, worldSpeed: number, bonuses: Bonuses = {}, blessed = false): number {
   const def = data.units.units[unit]!;
   const { base, perTier } = data.smithing.hours;
-  const hours = (base + perTier * def.requiresLevel) * pricedLevel(data, line, level);
+  const hours = (base + perTier * def.requiresLevel) * pricedLevel(data, line, level) * (blessed ? data.events.blessings.forge.timeFactor : 1);
   return Math.round((hours * 3_600_000 * Math.max(0.1, 1 + bonus(bonuses, 'smithTime'))) / worldSpeed);
+}
+
+// Whether `unit` is forged to the last level of every line it has.
+export function smithedOut(data: GameData, smithing: Smithing, unit: string): boolean {
+  const lines = smithLines(data, unit);
+  return lines.length > 0 && lines.every((line) => smithLevel(smithing, unit, line) >= smithLineLevels(data, line));
 }
 
 // Why `unit`'s `line` can't be forged to its next level from a village

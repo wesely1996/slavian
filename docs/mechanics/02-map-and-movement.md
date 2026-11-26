@@ -110,6 +110,9 @@ builds a boat on a river.
 - **Lakes.** A lake the river reaches is sailed too: its hexes cost 1 to
   enter before the lane's ×3, and its shores and the rivers flowing into it
   join the lane. No army can stop on a lake.
+- **The water god's blessing** doubles river travel: every step between two
+  hexes on a river's banks goes **2×** as fast, and a boat's lanes **6×**
+  ([page 13](13-events-and-raids.md#blessings-of-the-gods)).
 
 ## Fog of war
 

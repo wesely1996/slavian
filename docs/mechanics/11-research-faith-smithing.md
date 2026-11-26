@@ -189,6 +189,13 @@ Two more lines add an **affliction** to a unit's blows
 - **Already poisonous.** Units that poison already (Poison Archer, Poison
   Hunter) have no poison line.
 
+### The forge god's blessing
+
+Forging any unit to the last level of every line it has brings the forge
+god's blessing to the whole world: forging costs **50%** and takes **50%**
+as long for everyone, for the rest of the run
+([page 13](13-events-and-raids.md#blessings-of-the-gods)).
+
 ### One at a time
 
 - **One job per player.** A player's Blacksmiths forge one improvement at a

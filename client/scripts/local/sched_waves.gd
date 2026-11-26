@@ -53,7 +53,12 @@ static func land_of(world: Dictionary) -> Dictionary:
 		var key := LocalLand.key(Vector2i(int(f.q), int(f.r)))
 		if f.get("kind", "fort") == "fort" and f.status == "standing" and (held.has(key) or LocalForts.is_manned(f)) and not key in forts:
 			forts.append(key)
-	return {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged, "forts": forts}
+	var land := {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged, "forts": forts}
+	# Blessed by the water god: every river's banks are travelled the faster.
+	if LocalBlessings.has(world, "water"):
+		land.blessed = true
+		land.banks = LocalLand.river_banks(world.rivers)
+	return land
 
 
 ## The cheapest target from `from`: road cost plus fear, plus extra for the
@@ -357,8 +362,8 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 		send_band(server, world, wave, at)
 		changed.append(["world"])
 		return
-	# It takes all of its front's hatred.
-	wave.hatred = drain_front_hatred(world, String(wave.front))
+	# It takes all of its front's hatred, and what the blessings set for good.
+	wave.hatred = drain_front_hatred(world, String(wave.front)) + LocalBlessings.lasting_hatred(server.data, world, String(wave.front))
 	assign_leader(server, world, wave, at)
 	LocalCamps.camps_join(server, world, wave)
 	wave.composition = LocalStore.stored(wave.composition)

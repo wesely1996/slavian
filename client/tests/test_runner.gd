@@ -914,6 +914,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("fire-scenario.json", "local fires turning aside hordes, armies, caravans and settlers")
 	_replay_scenario("cultists-scenario.json", "local cultists and the Avatar of Černobog")
 	_replay_scenario("leshen-scenario.json", "local Leshen, the wrath of nature")
+	_replay_scenario("blessings-scenario.json", "local blessings of the water and forge gods")
 	_replay_scenario("ruins-scenario.json", "local ruin searches")
 	_replay_scenario("stance-scenario.json", "local army stances")
 	_replay_scenario("scouts-scenario.json", "local scouts, assassins and intel")
@@ -1118,6 +1119,17 @@ func _replay_scenario(file: String, name: String) -> void:
 					held.defenders[unit] = int(step.set.fort.defenders[unit])
 				if step.set.fort.has("defenders"):
 					LocalArmies.intercept_at(local, world, Vector2i(int(held.q), int(held.r)), now)
+			if step.set.has("dugRivers"):
+				for e in step.set.dugRivers:
+					var dug_ends := LocalServer._ordered(Vector2i(int(e.a.q), int(e.a.r)), Vector2i(int(e.b.q), int(e.b.r)))
+					world.rivers.append({"a": dug_ends[0], "b": dug_ends[1], "crossing": "none", "size": 1, "builtBy": null, "completesAt": null, "dug": true})
+			if step.set.has("smithing"):
+				var forged := {}
+				for unit in step.set.smithing:
+					forged[unit] = {}
+					for line in step.set.smithing[unit]:
+						forged[unit][line] = int(step.set.smithing[unit][line])
+				world.members[0].smithing = forged
 			if step.set.has("leshen"):
 				var lc := Vector2i(int(step.set.leshen.q), int(step.set.leshen.r))
 				LocalLeshen.rise(local, world, lc, now, LocalLeshen.seed_for(world, lc, now), [])

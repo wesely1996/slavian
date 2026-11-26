@@ -19,6 +19,10 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   // Forts (hexKey) an army holds: hordes keep out of their zone of control
   // (field.json fort.zoneDetour).
   readonly forts?: ReadonlySet<string>;
+  // Blessed by the water god (events.json blessings.water): steps between
+  // two hexes on a river's banks (`banks`), and a boat's, go the faster.
+  readonly blessed?: boolean;
+  readonly banks?: ReadonlySet<string>;
 }
 
 // One key for the edge between two neighbouring hexes, whichever way round.
@@ -74,10 +78,49 @@ export function laneFactor(data: GameData): number {
   return 1 / data.events.kinds.shipyard.laneSpeed;
 }
 
+// How many times as fast river travel is on this land (the water god's blessing).
+export function riverSpeed(data: GameData, land: Land): number {
+  return land.blessed ? data.events.blessings.water.speed : 1;
+}
+
+// The share of the terrain's move cost a step from `from` to `to` costs
+// beside the water: along a boat's river, or (blessed) between two hexes on
+// a river's banks; 1 off the water.
+function waterFactor(data: GameData, land: Land, edge: string): number {
+  const speed = riverSpeed(data, land);
+  const lane = land.lanes?.has(edge) ? laneFactor(data) / speed : 1;
+  const bank = land.banks?.has(edge) ? 1 / speed : 1;
+  return Math.min(lane, bank);
+}
+
 // The cheapest step players can take on this land: along the best road, or
-// along a boat's river where there is one.
+// along a boat's river (or a blessed river's banks) where there is one.
 export function fastestStep(data: GameData, land: Land): number {
-  return land.lanes?.size ? Math.min(fastestRoad(data), laneFactor(data)) : fastestRoad(data);
+  const speed = riverSpeed(data, land);
+  let best = fastestRoad(data);
+  if (land.lanes?.size) best = Math.min(best, laneFactor(data) / speed);
+  if (land.banks?.size) best = Math.min(best, 1 / speed);
+  return best;
+}
+
+// Every step between two neighbouring hexes on the banks of the same river
+// (riverLanes, river by river, lakes aside).
+export function riverBanks(rivers: readonly { a: Hex; b: Hex }[]): string[] {
+  const banks = new Set<string>();
+  const done = new Set<string>();
+  for (const e of rivers) {
+    if (done.has(edgeKey(e.a, e.b))) continue;
+    for (const lane of riverLanes(rivers, e)) banks.add(lane);
+    // The river edges whose banks are already in.
+    const water = riverWater(rivers, e);
+    for (const r of rivers) if (water.has(hexKey(r.a)) && water.has(hexKey(r.b))) done.add(edgeKey(r.a, r.b));
+  }
+  return [...banks].sort();
+}
+
+// The land blessed by the water god, with its rivers' `banks`.
+export function blessLand(land: Land, banks: Iterable<string>): Land {
+  return Object.assign(land, { blessed: true, banks: new Set(banks) });
 }
 
 // The steps a boat built on `edge` sails: between any two neighbouring
@@ -151,7 +194,7 @@ export function moveCostOn(data: GameData, land: Land, roads = true, relief = 0)
     const cost = !sailed && relief > 0 && base > 1 ? 1 + (base - 1) * (1 - relief) : base;
     if (!roads) return cost;
     const road = roadFactor(data, level, !!land.damaged?.has(edgeKey(from, to)));
-    return cost * (land.lanes?.has(edgeKey(from, to)) ? Math.min(road, laneFactor(data)) : road);
+    return cost * Math.min(road, waterFactor(data, land, edgeKey(from, to)));
   };
 }
 

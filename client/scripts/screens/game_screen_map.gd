@@ -1150,6 +1150,7 @@ func _terraform_panel(terrain: String) -> void:
 		# A river: one button for each neighbour it can run toward.
 		if def.get("river", false):
 			_panel_body.add_child(row)
+			_water_blessing_line(info)
 			var ways := _river_ways(cell, def)
 			if ways.is_empty():
 				info.add_child(UI.label(tr("No river here to dig on from"), UI.SMALL_SIZE, UI.MUTED))
@@ -1181,6 +1182,18 @@ func _terraform_panel(terrain: String) -> void:
 		_panel_body.add_child(UI.label(tr("Something stands there"), UI.SMALL_SIZE, UI.MUTED))
 	elif held:
 		_panel_body.add_child(UI.label(tr("An army stands there: no fire can be set"), UI.SMALL_SIZE, UI.MUTED))
+
+
+## How far the group's dug rivers run, and the water god's blessing.
+func _water_blessing_line(into: Control) -> void:
+	var blessings: Dictionary = Game.world.get("blessings", {})
+	var rules: Dictionary = Game.data.events.blessings
+	if blessings.get("water") != null:
+		into.add_child(UI.label(tr("Blessed by the water god: along every river, travel is %d× as fast.") % int(rules.water.speed), UI.SMALL_SIZE, UI.GOOD))
+		return
+	into.add_child(UI.with_info(UI.label(tr("Longest river line your group dug: %d of %d edges") % [int(blessings.get("riverLine", 0)), int(rules.water.riverLine)], UI.SMALL_SIZE, UI.MUTED),
+		tr("Dig a river line of %d edges (only rivers the players dug count; a lake between two dug rivers counts its fewest edges) and the water god blesses the world: along every river, armies, caravans and scouts travel %d× as fast, for everyone. The North hates you +%d%% the more for good.") % [
+			int(rules.water.riverLine), int(rules.water.speed), roundi(float(rules.northHatred) * 100.0)]))
 
 
 ## The neighbours a river can be dug toward from `cell`: land, no river

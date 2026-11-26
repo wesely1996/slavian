@@ -61,6 +61,10 @@ export type WorldSet = {
   river?: { a: { q: number; r: number }; b: { q: number; r: number } };
   // The Leshen rises there now, as if a fire had woken him (events.json leshen).
   leshen?: { q: number; r: number };
+  // Rivers the players dug already, along these edges (field.json terraform river).
+  dugRivers?: { a: { q: number; r: number }; b: { q: number; r: number } }[];
+  // What the player has forged already (smithing.json), by unit and line.
+  smithing?: Record<string, Record<string, number>>;
   // Units standing in the player's (first) village, by unit (their upkeep
   // counts from the village's next change).
   garrison?: Record<string, number>;
@@ -205,6 +209,17 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
                 'UPDATE villages SET garrison = garrison || $2::jsonb WHERE id = (SELECT min(id) FROM villages WHERE world_id = $1)',
                 [world.id, JSON.stringify(step.set.garrison)],
               );
+            }
+            if (step.set.dugRivers) {
+              const client = await db.connect();
+              try {
+                await insertRivers(client, world.id, step.set.dugRivers.map((e) => ({ a: e.a, b: e.b, bridge: false, size: 1 })), true);
+              } finally {
+                client.release();
+              }
+            }
+            if (step.set.smithing) {
+              await db.query('UPDATE world_members SET smithing = $2 WHERE world_id = $1', [world.id, JSON.stringify(step.set.smithing)]);
             }
             if (step.set.bought) {
               await db.query('UPDATE world_members SET bought = bought || $2::jsonb WHERE world_id = $1', [world.id, JSON.stringify(step.set.bought)]);

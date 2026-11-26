@@ -152,6 +152,28 @@ Burning a forest angers the woods
     the host;
   - the **North's hatred +100%** ([page 9](09-hordes-and-threats.md#hatred)).
 
+## Blessings of the gods
+
+Two gods bless a world for great works. Each blessing comes **once per
+world**, for **every player**, and lasts the rest of the run.
+
+| Blessing | Earned by | What it gives |
+|---|---|---|
+| **The water god's** | A river line of **15 edges** dug by the players | Along every river, armies, caravans and scouts travel **2×** as fast |
+| **The forge god's** | Any player forging a unit to the last level of every line it has ([page 11](11-research-faith-smithing.md#the-blacksmith)) | Forging costs **50%** and takes **50%** as long, for everyone |
+
+- **The river line.** It is measured like a longest road: dug river edges
+  joined corner to corner, each counted once. Rivers the map started with
+  don't count. A lake between two dug rivers counts the **fewest lake
+  edges** from where one meets it to where the next leaves it. The river
+  panel on the map shows how far the group has got.
+- **What "along a river" means.** A step between two neighbouring hexes on
+  the banks of the same river ([page 2](02-map-and-movement.md#rivers-and-bridges)).
+  A boat's lanes go twice as fast again: **6×** in all.
+- **The North takes offence.** Each blessing makes the North hate **+5%**
+  more **for good**. Every North horde from then on takes it, on top of the
+  hatred it spends ([page 9](09-hordes-and-threats.md#hatred)).
+
 ## Raids beyond the edge
 
 An army can march to the map's edge on a front's side and **raid into the

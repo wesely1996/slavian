@@ -31,6 +31,7 @@ import { angerFront, setOutNow } from './waves.js';
 import { deleteRoadsAt, listRoadEdges, markRoadDamaged, markRoadStanding } from '../db/roads.js';
 import { relinkOutposts } from './outposts.js';
 import { maybeLeshen } from './leshen.js';
+import { riverDug } from './blessings.js';
 import { insertRivers, listRiverEdges, loadLand } from '../db/rivers.js';
 import { edgeKey, edgesMeet, landOf, reachable, type Land } from '../sim/land.js';
 
@@ -339,7 +340,11 @@ export const terraformHandlers: HandlerRegistry = {
     if (def?.fire && work.generation === 0 && work.villageId !== null) await maybeLeshen(client, data, world, cell, event.dueAt);
     // A river dug: nothing crosses the edge from now on without a bridge
     // (dug across a road, one stands over it).
-    if (def?.river && work.toward) await insertRivers(client, world.id, [{ a: cell, b: work.toward, bridge: !!work.bridge, size: 1 }]);
+    if (def?.river && work.toward) {
+      await insertRivers(client, world.id, [{ a: cell, b: work.toward, bridge: !!work.bridge, size: 1 }], true);
+      // A long enough river line dug: the water god's blessing.
+      await riverDug(client, data, world.id, event.dueAt);
+    }
     if (work.villageId !== null) {
       const village = await loadVillage(client, work.villageId).catch(() => null);
       // A fire tells only the one who set it, where they set it.

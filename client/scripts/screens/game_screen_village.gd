@@ -436,6 +436,15 @@ func _smithy_section(village: Dictionary, level: int) -> void:
 	_panel_body.add_child(UI.with_info(UI.label(tr("Forging"), UI.HEADING_SIZE),
 		tr("The Blacksmith improves one kind of unit at a time: each line has %d levels of +%d%%, for all your villages and armies. Level 2 needs a Blacksmith of level %d, level 3 one of level %d. A higher Blacksmith forges faster.") % [
 			int(rules.levels), roundi(float(rules.perLevel) * 100.0), int(rules.smithyLevels[1]), int(rules.smithyLevels[2])]))
+	# The forge god's blessing, or how to earn it.
+	var forge_rules: Dictionary = Game.data.events.blessings
+	if Game.world.get("blessings", {}).get("forge") != null:
+		_panel_body.add_child(UI.label(tr("Blessed by the forge god: forging costs %d%% and takes %d%% as long, for everyone.") % [
+			roundi(float(forge_rules.forge.costFactor) * 100.0), roundi(float(forge_rules.forge.timeFactor) * 100.0)], UI.SMALL_SIZE, UI.GOOD))
+	else:
+		_panel_body.add_child(UI.with_info(UI.label(tr("The forge god watches"), UI.SMALL_SIZE, UI.MUTED),
+			tr("Forge any unit to the last level of every line and the forge god blesses the world: forging costs %d%% and takes %d%% as long, for everyone. The North hates you +%d%% the more for good.") % [
+				roundi(float(forge_rules.forge.costFactor) * 100.0), roundi(float(forge_rules.forge.timeFactor) * 100.0), roundi(float(forge_rules.northHatred) * 100.0)]))
 	if work is Dictionary:
 		var done_at := TimeUtil.parse_iso(work.completesAt)
 		var busy := UI.label("", UI.SMALL_SIZE, UI.ACCENT)
@@ -484,8 +493,9 @@ func _smithy_section(village: Dictionary, level: int) -> void:
 		if level < needs:
 			info.add_child(UI.label(tr("Level %d needs a Blacksmith of level %d") % [next, needs] if levels > 1 else tr("Needs a Blacksmith of level %d") % needs, UI.SMALL_SIZE, UI.MUTED))
 			continue
-		var cost := LocalSmithing.smith_cost(Game.data, unit, line, next)
-		var hours := (float(rules.hours.base) + float(rules.hours.perTier) * float(def.requiresLevel)) * LocalSmithing.priced_level(Game.data, line, next)
+		var blessed: bool = Game.world.get("blessings", {}).get("forge") != null
+		var cost := LocalSmithing.smith_cost(Game.data, unit, line, next, blessed)
+		var hours := LocalSmithing.smith_hours(Game.data, unit, line, next, blessed)
 		var seconds := hours * 3600.0 * factor / float(Game.world.speed)
 		var cost_line := UI.rich("")
 		info.add_child(cost_line)

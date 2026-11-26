@@ -37,6 +37,24 @@ export interface World {
   hatred: Partial<Record<Front, number>>;
   // Players may attack each other's villages (armies.json pvp).
   pvp: boolean;
+  // The gods' blessings (events.json blessings): when each came (ISO), and
+  // the longest river line the players have dug.
+  blessings: Blessings;
+}
+
+export interface Blessings {
+  water?: string;
+  forge?: string;
+  riverLine?: number;
+}
+
+// How many gods have blessed the world.
+export function blessingCount(world: Pick<World, 'blessings'>): number {
+  return (world.blessings.water ? 1 : 0) + (world.blessings.forge ? 1 : 0);
+}
+
+export async function saveBlessings(client: DbClient, worldId: number, blessings: Blessings): Promise<void> {
+  await client.query('UPDATE worlds SET blessings = $2 WHERE id = $1', [worldId, JSON.stringify(blessings)]);
 }
 
 export function quietWindow(world: World): QuietWindow | null {
@@ -59,7 +77,7 @@ const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", hos
   max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity,
   (SELECT COALESCE(sum(m.embers), 0) FROM world_members m WHERE m.world_id = worlds.id AND m.left_at IS NULL)::int AS embers,
   difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
-  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred, pvp`;
+  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred, pvp, blessings`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(
