@@ -75,6 +75,10 @@ services:
       # Postgres refuses to start without one (move-db.sh makes it).
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: slavian
+      # The data at the volume's root on every version. From 18 the image
+      # keeps it in /var/lib/postgresql/18/docker instead, and refuses to
+      # start with a volume mounted here unless PGDATA names it.
+      PGDATA: /var/lib/postgresql/data
     # Sized for the smallest machine (1 GB of memory, with swap) shared with
     # the game server; raise both on a bigger one (a quarter and half of it).
     command: ["postgres", "-c", "shared_buffers=64MB", "-c", "effective_cache_size=256MB", "-c", "max_connections=30"]
