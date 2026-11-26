@@ -1463,6 +1463,9 @@ func _test_walls() -> void:
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
 	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
 	_check(WallText.tower_effect(data, "watchtower", 1).begins_with("Warns of a horde 2h 00m earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 1))
+	# At its last level a tower or wall tells of no next one.
+	_check(WallText.tower_effect(data, "ditch", 9).contains("Level 10:") and not WallText.tower_effect(data, "ditch", 10).contains("Level 11"), "a tower at its last level: %s" % WallText.tower_effect(data, "ditch", 10))
+	_check(WallText.wall_effect(data, 9).contains("Level 10:") and not WallText.wall_effect(data, 10).contains("Level 11"), "walls at their last level")
 	# A Hero's Hall keeps one general, and one more every level above the first.
 	var heroes := {"heroes": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("heroes.json")))}
 	_check(GeneralText.limit(heroes, [1]) == 1 and GeneralText.limit(heroes, [3]) == 3 and GeneralText.limit(heroes, [9]) == 9 and GeneralText.limit(heroes, [1, 2, 0]) == 3, "generals a Hall keeps")

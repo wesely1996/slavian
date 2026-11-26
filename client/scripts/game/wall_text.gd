@@ -61,20 +61,24 @@ static func wall_effect(data: Dictionary, level: int) -> String:
 		text += " " + UI.tn("%d wall slot open.", "%d wall slots open.", slots) % slots
 	else:
 		text = UI.t("No walls yet: a horde walks straight in.")
-	if level < 10:
+	if level < int(data.get("buildings", {}).get("buildings", {}).get("wall", {}).get("maxLevel", 10)):
 		var next := level + 1
 		text += UI.t(" Level %d: %s, %d to batter down%s.") % [next, tier(data, next), integrity(data, next),
 			UI.t(", opens a wall slot") if Rules.open_tower_slots(data, next) > Rules.open_tower_slots(data, level) else ""]
 	return text
 
 
-## What a tower does at `level` and at the next. `speed` is the world's:
+## What a tower does at `level` and at the next (if any). `speed` is the world's:
 ## the watchtower's warning is told in real time.
 static func tower_effect(data: Dictionary, tower: String, level: int, speed := 1.0) -> String:
 	if data.get("walls", {}).get("towers", {}).get(tower, {}).is_empty():
 		return ""
 	var now: String = tower_at(data, tower, level, speed) if level > 0 else UI.t("Not built yet")
-	return UI.t("%s. Level %d: %s.") % [now.left(1).to_upper() + now.substr(1), level + 1, tower_at(data, tower, level + 1, speed)]
+	now = now.left(1).to_upper() + now.substr(1)
+	# At its last level there is no next one to tell of.
+	if level >= int(data.get("buildings", {}).get("buildings", {}).get(tower, {}).get("maxLevel", 10)):
+		return now + "."
+	return UI.t("%s. Level %d: %s.") % [now, level + 1, tower_at(data, tower, level + 1, speed)]
 
 
 ## What a tower does at `level`, in a few words.
