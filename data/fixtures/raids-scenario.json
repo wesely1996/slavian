@@ -13219,10 +13219,10 @@
        }
       ],
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -13628,10 +13628,10 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "units": {
        "spearman": 7
@@ -13721,10 +13721,10 @@
          "won": true,
          "army": 10,
          "loot": {
-          "iron": 13,
-          "wood": 23,
-          "grain": 26,
-          "stone": 16
+          "iron": 16,
+          "wood": 27,
+          "grain": 31,
+          "stone": 19
          },
          "lost": 3,
          "name": "Frozen Marsh",
@@ -16624,10 +16624,10 @@
        }
       ],
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -17047,10 +17047,10 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "units": {
        "spearman": 7
@@ -17140,10 +17140,10 @@
          "won": true,
          "army": 10,
          "loot": {
-          "iron": 13,
-          "wood": 23,
-          "grain": 26,
-          "stone": 16
+          "iron": 16,
+          "wood": 27,
+          "grain": 31,
+          "stone": 19
          },
          "lost": 3,
          "name": "Frozen Marsh",
@@ -19787,7 +19787,7 @@
        }
       },
       "status": "repelled",
-      "round": 11,
+      "round": 5,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -19795,8 +19795,8 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 5,
-       "grey_wolf": 7,
+       "rusalka": 7,
+       "grey_wolf": 11,
        "leshy_thrall": 7
       },
       "defenderInitial": {
@@ -19814,10 +19814,9 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 6,
         "attackerLosses": {
-         "rusalka": 1,
          "grey_wolf": 1
         },
         "defenderLosses": {
@@ -19827,7 +19826,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 6,
         "attackerLosses": {
          "grey_wolf": 1
@@ -19837,7 +19836,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 25,
+        "attackerLeft": 26,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -19849,67 +19848,10 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 6,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 7,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 8,
-        "attackerLeft": 23,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 9,
-        "attackerLeft": 21,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 10,
-        "attackerLeft": 20,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 11,
-        "attackerLeft": 19,
+        "attackerLeft": 25,
         "defenderLeft": 4,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -20196,10 +20138,10 @@
        }
       ],
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -20619,10 +20561,10 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "units": {
        "spearman": 4
@@ -20712,10 +20654,10 @@
          "won": true,
          "army": 10,
          "loot": {
-          "iron": 13,
-          "wood": 23,
-          "grain": 26,
-          "stone": 16
+          "iron": 16,
+          "wood": 27,
+          "grain": 31,
+          "stone": 19
          },
          "lost": 3,
          "name": "Frozen Marsh",
@@ -20738,9 +20680,9 @@
          "lost": 3,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 10,
+         "kills": 4,
          "stage": 2,
-         "rounds": 11,
+         "rounds": 5,
          "battleId": 5,
          "stronghold": true
         }
@@ -23041,10 +22983,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 158,
-        "wood": 968,
-        "grain": 218.98333333333335,
-        "stone": 846
+        "iron": 161,
+        "wood": 972,
+        "grain": 223.98333333333335,
+        "stone": 849
        },
        "ratesPerHour": {
         "iron": 150,
@@ -23533,7 +23475,7 @@
        }
       },
       "status": "repelled",
-      "round": 11,
+      "round": 5,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -23541,8 +23483,8 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 5,
-       "grey_wolf": 7,
+       "rusalka": 7,
+       "grey_wolf": 11,
        "leshy_thrall": 7
       },
       "defenderInitial": {
@@ -23560,10 +23502,9 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 6,
         "attackerLosses": {
-         "rusalka": 1,
          "grey_wolf": 1
         },
         "defenderLosses": {
@@ -23573,7 +23514,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 6,
         "attackerLosses": {
          "grey_wolf": 1
@@ -23583,7 +23524,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 25,
+        "attackerLeft": 26,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -23595,67 +23536,10 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 6,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 7,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 8,
-        "attackerLeft": 23,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 9,
-        "attackerLeft": 21,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 10,
-        "attackerLeft": 20,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 11,
-        "attackerLeft": 19,
+        "attackerLeft": 25,
         "defenderLeft": 4,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -23942,10 +23826,10 @@
        }
       ],
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -24470,10 +24354,10 @@
          "won": true,
          "army": 10,
          "loot": {
-          "iron": 13,
-          "wood": 23,
-          "grain": 26,
-          "stone": 16
+          "iron": 16,
+          "wood": 27,
+          "grain": 31,
+          "stone": 19
          },
          "lost": 3,
          "name": "Frozen Marsh",
@@ -24496,9 +24380,9 @@
          "lost": 3,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 10,
+         "kills": 4,
          "stage": 2,
-         "rounds": 11,
+         "rounds": 5,
          "battleId": 5,
          "stronghold": true
         }
@@ -26799,10 +26683,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 173,
+        "iron": 176,
         "wood": 1000,
-        "grain": 371.5416666666665,
-        "stone": 940
+        "grain": 376.5416666666665,
+        "stone": 943
        },
        "ratesPerHour": {
         "iron": 150,
@@ -27264,7 +27148,7 @@
        }
       },
       "status": "repelled",
-      "round": 11,
+      "round": 5,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -27272,8 +27156,8 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 5,
-       "grey_wolf": 7,
+       "rusalka": 7,
+       "grey_wolf": 11,
        "leshy_thrall": 7
       },
       "defenderInitial": {
@@ -27291,10 +27175,9 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 27,
+        "attackerLeft": 28,
         "defenderLeft": 6,
         "attackerLosses": {
-         "rusalka": 1,
          "grey_wolf": 1
         },
         "defenderLosses": {
@@ -27304,7 +27187,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 26,
+        "attackerLeft": 27,
         "defenderLeft": 6,
         "attackerLosses": {
          "grey_wolf": 1
@@ -27314,7 +27197,7 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 25,
+        "attackerLeft": 26,
         "defenderLeft": 5,
         "attackerLosses": {
          "grey_wolf": 1
@@ -27326,67 +27209,10 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 6,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 7,
-        "attackerLeft": 24,
-        "defenderLeft": 5,
-        "attackerLosses": {},
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 8,
-        "attackerLeft": 23,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 9,
-        "attackerLeft": 21,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 10,
-        "attackerLeft": 20,
-        "defenderLeft": 5,
-        "attackerLosses": {
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:30:48.000Z",
-        "round": 11,
-        "attackerLeft": 19,
+        "attackerLeft": 25,
         "defenderLeft": 4,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1
         },
         "defenderLosses": {
          "spearman": 1
@@ -27755,10 +27581,10 @@
        }
       ],
       "loot": {
-       "iron": 13,
-       "wood": 23,
-       "grain": 26,
-       "stone": 16
+       "iron": 16,
+       "wood": 27,
+       "grain": 31,
+       "stone": 19
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -28278,10 +28104,10 @@
          "won": true,
          "army": 10,
          "loot": {
-          "iron": 13,
-          "wood": 23,
-          "grain": 26,
-          "stone": 16
+          "iron": 16,
+          "wood": 27,
+          "grain": 31,
+          "stone": 19
          },
          "lost": 3,
          "name": "Frozen Marsh",
@@ -28304,9 +28130,9 @@
          "lost": 3,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 10,
+         "kills": 4,
          "stage": 2,
-         "rounds": 11,
+         "rounds": 5,
          "battleId": 5,
          "stronghold": true
         }
@@ -30472,7 +30298,7 @@
       "kind": "battle_result",
       "tier": "push",
       "title": "The campaign against the Monsters of the North is over",
-      "body": "1 of 2 battles won; 78 resources brought home. The full report is in the Raid tab.",
+      "body": "1 of 2 battles won; 93 resources brought home. The full report is in the Raid tab.",
       "createdAt": "2026-06-01T10:34:24.000Z",
       "read": false
      },
@@ -30490,7 +30316,7 @@
       "kind": "battle_result",
       "tier": "push",
       "title": "Your raid was beaten at the Monster Lair",
-      "body": "It turns for home with 78 resources; 3 of its men fell.",
+      "body": "It turns for home with 93 resources; 3 of its men fell.",
       "createdAt": "2026-06-01T10:30:48.000Z",
       "read": false
      },
@@ -30526,7 +30352,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your raid won the battle of the Frozen Marsh",
-      "body": "9 of the enemy fell; it carries 78 resources and a Svarog's Ember and marches on.",
+      "body": "9 of the enemy fell; it carries 93 resources and a Svarog's Ember and marches on.",
       "createdAt": "2026-06-01T10:27:12.000Z",
       "read": false
      },

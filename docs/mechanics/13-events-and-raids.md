@@ -197,6 +197,9 @@ hex or fort where it stands ([expeditions](#expeditions-from-the-field)):
   Field enemies fight Balanced.
 - **Enemy size.** 12 × 1.3^(stage − 1) × 1.039^(waves so far), more for bigger
   groups.
+- **Deeper is tougher.** Each stage past the first adds **+10%** to the
+  enemies' attack and defense: ×1.1 in the second field, ×1.2 in the third,
+  ×1.3 at a stronghold after three fields.
 - **The stronghold** has 1.8× that, fights Defensive from behind its walls
   (home bonus, +40% defense), and **battering rams** take a quarter of its
   walls off each.
@@ -207,7 +210,14 @@ hex or fort where it stands ([expeditions](#expeditions-from-the-field)):
 - **Loot per kill:** 14 wood, 10 stone, 16 grain and 8 iron per enemy killed
   (×the front's greed).
 - **The stronghold** adds 500 / 400 / 500 / 300 when sacked.
-- **Carrying.** All of it as far as the army can carry: the sum of its units'
+- **Deeper is richer.** All of it ×(1 + 0.5 × (stage − 1)): ×1.5 in the second
+  field, ×2 in the third, ×2.5 at a stronghold after three fields.
+- **Hatred pays.** All of it ×(1 + the front's hatred): the hatred waiting for
+  its next horde ([page 9](09-hordes-and-threats.md#hatred)), plus for the
+  North the +5% each blessing of the gods sets for good
+  ([Blessings of the gods](#blessings-of-the-gods)). At +60% hatred, a battle
+  brings 1.6× the loot. Each battle's loot counts the hatred from before it
+  was won.- **Carrying.** All of it as far as the army can carry: the sum of its units'
   `carry` (a Raider 120, a Military Caravan 400, a large one 600).
 
 **Raiding the North** brings only 30% of that in resources, but every battle

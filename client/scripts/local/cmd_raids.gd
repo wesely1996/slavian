@@ -62,10 +62,12 @@ static func raid_battle(data: Dictionary, army: Dictionary, army_stats: Callable
 		breach += float(data.units.units.get(unit, {}).get("breach", 0.0)) * int(army[unit])
 	var walls := 1.0 + float(rules.stronghold.walls) * maxf(0.0, 1.0 - breach) if stage.stronghold else 1.0
 	var base := LocalBattle.enemy_stats(data, front)
+	# The deeper, the tougher.
+	var tough := 1.0 + float(rules.enemy.toughnessPerStage) * maxi(0, int(stage.stage) - 1)
 	var enemy_at := func(unit: String) -> Dictionary:
 		var s: Dictionary = base.call(unit).duplicate()
-		s.attack = float(s.attack) * (float(field.enemy.attack) if field != null else 1.0)
-		s.defense = float(s.defense) * (float(field.enemy.defense) if field != null else 1.0) * walls
+		s.attack = float(s.attack) * (float(field.enemy.attack) if field != null else 1.0) * tough
+		s.defense = float(s.defense) * (float(field.enemy.defense) if field != null else 1.0) * walls * tough
 		return s
 	var fallen: Array = []
 	var fighting: Array = champions.duplicate()
@@ -145,10 +147,12 @@ static func capacity(data: Dictionary, units: Dictionary) -> float:
 	return carry
 
 
-## sim/raids.ts raidLoot: what a battle won yields.
-static func loot(data: Dictionary, front: String, kills: int, stronghold: bool) -> Dictionary:
+## sim/raids.ts raidLoot: what a battle won yields, more the deeper the
+## battle (`stage`) and the more the front hates (`hatred`).
+static func loot(data: Dictionary, front: String, kills: int, stronghold: bool, stage := 1, hatred := 0.0) -> Dictionary:
 	var rules: Dictionary = data.raids
-	var factor := float(data.enemies.fronts[front].personality.lootFactor) * (float(rules.north.resourceShare) if front == "north" else 1.0)
+	var factor := float(data.enemies.fronts[front].personality.lootFactor) * (float(rules.north.resourceShare) if front == "north" else 1.0) \
+		* (1.0 + float(rules.loot.perStage) * maxi(0, stage - 1)) * (1.0 + float(rules.loot.perHatred) * maxf(0.0, hatred))
 	return LocalVillage.resources(func(k: String) -> int:
 		return LocalWaves.js_round((float(rules.loot.perKill[k]) * kills + (float(rules.loot.stronghold[k]) if stronghold else 0.0)) * factor))
 
@@ -328,7 +332,9 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var lost := LocalArmies._losses({"units": fighters}, result.armyNow)
 	var after := LocalArmies.army_losses(server, world, army, lost, at)
 	var carried: Dictionary = after.loot if after.get("loot") != null else {"wood": 0, "stone": 0, "grain": 0, "iron": 0}
-	var taken := carry_home(carried, loot(data, front, kills, stage.stronghold), capacity(data, after.units)) if result.won else carried
+	# The more the front hates (and the North, what the blessings set for good), the richer.
+	var hatred := LocalHordes.front_hatred(world, front) + LocalBlessings.lasting_hatred(data, world, front)
+	var taken := carry_home(carried, loot(data, front, kills, stage.stronghold, stage_no, hatred), capacity(data, after.units)) if result.won else carried
 	var battle := LocalArmies._assault_battle(world, {"waveId": null, "villageId": null, "q": army.targetQ, "r": army.targetR,
 		"setup": {"raid": {"front": front, "name": stage.name, "stronghold": stage.stronghold, "stage": stage_no}},
 		"attackerStance": data.raids.stronghold.stance if stage.stronghold else data.raids.fieldStance,

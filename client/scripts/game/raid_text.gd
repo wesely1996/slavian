@@ -97,8 +97,9 @@ static func campaign_loot(raid: Dictionary) -> Dictionary:
 ## Loot a raid of `front` to `depth` would win if every battle is won: each
 ## enemy force (sim/raids.ts raidStage's size, `waves` hordes so far) beaten
 ## when it breaks (its stance's retreat share times its front's nerve), the
-## stronghold's stores besides. An estimate: before what the troops can carry.
-static func loot_estimate(data: Dictionary, front: String, depth: int, waves: int) -> Dictionary:
+## stronghold's stores besides, richer the deeper and the more the front
+## hates (`hatred`). An estimate: before what the troops can carry.
+static func loot_estimate(data: Dictionary, front: String, depth: int, waves: int, hatred := 0.0) -> Dictionary:
 	var rules: Dictionary = data.raids
 	var nerve := float(data.enemies.fronts.get(front, {}).get("personality", {}).get("nerve", 1.0))
 	var sum := {"wood": 0.0, "stone": 0.0, "grain": 0.0, "iron": 0.0}
@@ -109,7 +110,7 @@ static func loot_estimate(data: Dictionary, front: String, depth: int, waves: in
 		var stance := String(rules.stronghold.stance) if stronghold else String(rules.fieldStance)
 		var retreat: Variant = data.battle.stances[stance].retreatAt
 		var share := 1.0 if retreat == null else minf(0.95, float(retreat) * nerve)
-		var gain := LocalRaids.loot(data, front, roundi(maxf(1.0, roundf(size)) * share), stronghold)
+		var gain := LocalRaids.loot(data, front, roundi(maxf(1.0, roundf(size)) * share), stronghold, stage, hatred)
 		for kind in sum:
 			sum[kind] = float(sum[kind]) + float(gain[kind])
 	return sum

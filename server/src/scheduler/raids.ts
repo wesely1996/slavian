@@ -17,7 +17,8 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { addScroll, listScrolls } from '../db/sites.js';
 import { loadVillage } from '../db/villages.js';
-import { addEmbers, listMembers, type World } from '../db/worlds.js';
+import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
+import { lastingHatred } from './blessings.js';
 import { RuleError } from '../errors.js';
 import { playerStats, total } from '../sim/battle.js';
 import { combine, heroBonuses } from '../sim/heroes.js';
@@ -363,7 +364,9 @@ export const raidHandlers: HandlerRegistry = {
     for (const [unit, n] of Object.entries(fighters)) if (n - (result.armyNow[unit] ?? 0) > 0) lost[unit] = n - (result.armyNow[unit] ?? 0);
     let after = await armyLosses(client, data, world, army, lost, at);
     const carried = after.loot ?? emptyResources();
-    const loot = result.won ? carryHome(carried, raidLoot(data, front, kills, stage.stronghold), raidCapacity(data, after.units)) : carried;
+    // The more the front hates (and the North, what the blessings set for good), the richer.
+    const hatred = ((await getWorld(client, world.id)).hatred[front] ?? 0) + lastingHatred(data, world, front);
+    const loot = result.won ? carryHome(carried, raidLoot(data, front, kills, stage.stronghold, payload.stage, hatred), raidCapacity(data, after.units)) : carried;
     for (const [i, round] of result.rounds.entries()) {
       const log: RoundLog = {
         round: round.round,

@@ -309,10 +309,13 @@ func _raid_tab(village: Dictionary) -> void:
 		depth_choices.append({"text": tr_n("%d field", "%d fields", depth) % depth, "selected": _raid_depth == depth, "pick": func() -> void: _raid_depth = depth,
 			"info": tr("%d battles, the last at the stronghold's walls · about %s beyond the edge · up to +%d%% hatred if all are won") % [
 				depth + 1, TimeUtil.format_duration(RaidText.stage_hours(data, depth) * 3600.0 / float(Game.world.speed)), hate]
-				+ "\n" + tr("Loot if every battle is won: about %s") % _loot_words(_rounded(RaidText.loot_estimate(data, _raid_front, depth, waves_so_far)))})
+				+ "\n" + tr("Loot if every battle is won: about %s") % _loot_words(_rounded(RaidText.loot_estimate(data, _raid_front, depth, waves_so_far, _front_hatred(_raid_front))))})
 	_choice_rows(depth_choices)
 	_panel_body.add_child(UI.label(RaidText.plan(data, _raid_front, _raid_depth), UI.SMALL_SIZE, UI.ACCENT))
 	_panel_body.add_child(UI.label(RaidText.prize(_raid_front), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(UI.label(tr("Each field deeper: +%d%% loot, and its enemies fight %d%% harder. The front's hatred: +%d%% loot.") % [
+		roundi(float(data.raids.loot.perStage) * 100.0), roundi(float(data.raids.enemy.toughnessPerStage) * 100.0),
+		roundi(float(data.raids.loot.perHatred) * _front_hatred(_raid_front) * 100.0)], UI.SMALL_SIZE, UI.MUTED))
 	var home_units := Rules.garrison_at(village, Game.server_now())
 	_unit_pickers(home_units, true, "raid")
 	var hero := Game.my_hero()
@@ -338,7 +341,7 @@ func _raid_tab(village: Dictionary) -> void:
 		var spare := FieldRules.village_spare(data, current, float(Ledger.amounts_at(current.resources, Game.server_now()).grain))
 		var grain := minf(LocalSupply.full_supply(data, picked), spare)
 		var lasts := grain / eats if eats > 0.0 else INF
-		var expected := LocalLogistics.total(RaidText.loot_estimate(data, front_now, depth_now, waves_so_far))
+		var expected := LocalLogistics.total(RaidText.loot_estimate(data, front_now, depth_now, waves_so_far, _front_hatred(front_now)))
 		return tr("Carries up to %d loot · grain for about %s · %s of battles beyond the edge, besides the march there and back") % [
 			RaidText.capacity(data, picked), TimeUtil.format_duration(lasts * 3600.0 / float(Game.world.speed)) if lasts < INF else tr("ever"),
 			TimeUtil.format_duration(RaidText.stage_hours(data, depth_now) * 3600.0 / float(Game.world.speed))] \
@@ -1691,3 +1694,9 @@ func _forces_hero() -> void:
 	_panel_body.add_child(UI.button(tr("Open the hero"), func() -> void:
 		_panel_mode = "hero"
 		_rebuild_panel(), "icon/profile"))
+
+
+## A front's hatred as raid loot counts it: what waits for its next horde,
+## and for the North what the gods' blessings set for good.
+func _front_hatred(front: String) -> float:
+	return float(Game.world.get("hatred", {}).get(front, 0.0)) + LocalBlessings.lasting_hatred(Game.data, Game.world, front)
