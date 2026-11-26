@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "iron": 144,
+       "wood": 110,
+       "grain": 344,
+       "stone": 188
       },
       "ratesPerHour": {
        "iron": 150,
@@ -199,6 +199,16 @@
      }
     },
     "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -375,10 +385,10 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 50,
-       "wood": 220,
-       "grain": 333.33333333333326,
-       "stone": 320
+       "iron": 760,
+       "wood": 720,
+       "grain": 760,
+       "stone": 840
       },
       "ratesPerHour": {
        "iron": 150,
@@ -974,7 +984,7 @@
       "embers": 0,
       "armySlots": {
        "used": 8,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -1141,10 +1151,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 90,
-        "wood": 340,
-        "grain": 338.32499999999993,
-        "stone": 400
+        "iron": 800,
+        "wood": 840,
+        "grain": 764.9916666666667,
+        "stone": 920
        },
        "ratesPerHour": {
         "iron": 150,
@@ -3848,7 +3858,7 @@
       "embers": 0,
       "armySlots": {
        "used": 8,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -4015,10 +4025,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 90,
-        "wood": 340,
-        "grain": 338.32499999999993,
-        "stone": 400
+        "iron": 800,
+        "wood": 840,
+        "grain": 764.9916666666667,
+        "stone": 920
        },
        "ratesPerHour": {
         "iron": 150,
@@ -6659,7 +6669,7 @@
       "embers": 0,
       "armySlots": {
        "used": 8,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -6826,10 +6836,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 90,
-        "wood": 340,
-        "grain": 338.32499999999993,
-        "stone": 400
+        "iron": 800,
+        "wood": 840,
+        "grain": 764.9916666666667,
+        "stone": 920
        },
        "ratesPerHour": {
         "iron": 150,
@@ -9628,7 +9638,7 @@
       "embers": 1,
       "armySlots": {
        "used": 6,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -9796,10 +9806,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 190,
-        "wood": 640,
-        "grain": 509.9166666666666,
-        "stone": 600
+        "iron": 900,
+        "wood": 1000,
+        "grain": 936.5833333333334,
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -12504,7 +12514,7 @@
       "embers": 1,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -16525,7 +16535,7 @@
       "embers": 1,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -20596,7 +20606,7 @@
       "embers": 1,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -24539,7 +24549,7 @@
       "embers": 1,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {

@@ -48,7 +48,7 @@ static func slot_unlock_level(data: Dictionary, index: int) -> int:
 
 static func queue_limit(data: Dictionary, level: int) -> int:
 	var v: Dictionary = data.buildings.village
-	return int(v.baseQueueLimit) + level / int(v.hallLevelsPerQueueSlot)
+	return int(v.baseQueueLimit) + floori(level / float(v.hallLevelsPerQueueSlot))
 
 
 ## Training batches a village may have waiting: one more for every few
@@ -57,13 +57,13 @@ static func training_queue_limit(data: Dictionary, levels: Dictionary) -> int:
 	var u: Dictionary = data.units
 	var limit := int(u.trainingQueueLimit)
 	for b in u.get("trainingSlotBuildings", []):
-		limit += int(levels.get(b, 0)) / int(u.buildingLevelsPerTrainingSlot)
+		limit += floori(int(levels.get(b, 0)) / float(u.buildingLevelsPerTrainingSlot))
 	return limit
 
 
 ## Standing orders a village may keep: one more every few Hall levels.
 static func orders_limit(data: Dictionary, hall: int) -> int:
-	return int(data.orders.maxPerVillage) + hall / int(data.orders.get("hallLevelsPerOrder", 3))
+	return int(data.orders.maxPerVillage) + floori(hall / float(data.orders.get("hallLevelsPerOrder", 3)))
 
 
 static func hall_speedup(data: Dictionary, level: int) -> float:
@@ -196,7 +196,7 @@ static func outpost_plots(village: Dictionary) -> Array[String]:
 
 static func outpost_limit(data: Dictionary, level: int) -> int:
 	var v: Dictionary = data.buildings.village
-	return int(v.baseOutposts) + level / int(v.hallLevelsPerOutpost)
+	return int(v.baseOutposts) + floori(level / float(v.hallLevelsPerOutpost))
 
 
 ## What an outpost on `terrain` is called and drawn as (buildings.json
@@ -327,7 +327,7 @@ static func bounty_return(data: Dictionary, want: Dictionary) -> Dictionary:
 
 
 static func bounty_slots(data: Dictionary, level: int) -> int:
-	return 1 + floori(float(level - 1) / int(data.buildings.village.market.bounties.levelsPerBounty)) if level > 0 else 0
+	return 1 + floori(float(level - 1) / float(data.buildings.village.market.bounties.levelsPerBounty)) if level > 0 else 0
 
 
 static func bounty_most(data: Dictionary, level: int) -> int:

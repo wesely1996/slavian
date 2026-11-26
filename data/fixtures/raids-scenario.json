@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "iron": 144,
+       "wood": 110,
+       "grain": 344,
+       "stone": 188
       },
       "ratesPerHour": {
        "iron": 150,
@@ -199,6 +199,16 @@
      }
     },
     "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -375,10 +385,10 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 50,
-       "wood": 220,
-       "grain": 333.33333333333326,
-       "stone": 320
+       "iron": 760,
+       "wood": 720,
+       "grain": 760,
+       "stone": 840
       },
       "ratesPerHour": {
        "iron": 150,
@@ -396,28 +406,6 @@
      }
     },
     "serverTime": "2026-06-01T08:20:00.000Z"
-   }
-  },
-  {
-   "advance": 2400000
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/train",
-   "body": {
-    "unit": "spearman",
-    "count": 8
-   },
-   "status": 400,
-   "response": {
-    "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":0,\"grain\":0,\"iron\":90}",
-    "missing": {
-     "wood": 0,
-     "stone": 0,
-     "grain": 0,
-     "iron": 90
-    }
    }
   },
   {
@@ -589,6 +577,205 @@
       {
        "unit": "spearman",
        "count": 8,
+       "startsAt": "2026-06-01T09:00:00.000Z",
+       "perUnitMs": 1200,
+       "completesAt": "2026-06-01T09:00:09.600Z"
+      }
+     ],
+     "resources": {
+      "amounts": {
+       "iron": 620,
+       "wood": 720,
+       "grain": 714.6666666666666,
+       "stone": 840
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 184,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T09:00:00.000Z"
+     }
+    },
+    "serverTime": "2026-06-01T09:00:00.000Z"
+   }
+  },
+  {
+   "advance": 2400000
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/train",
+   "body": {
+    "unit": "spearman",
+    "count": 8
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c3": {
+       "level": 0,
+       "building": null
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 0,
+       "building": null
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "barracks": 1,
+      "elder_hall": 1
+     },
+     "queue": [],
+     "garrison": {
+      "spearman": 16
+     },
+     "away": {},
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [
+      {
+       "unit": "spearman",
+       "count": 8,
        "startsAt": "2026-06-01T09:40:00.000Z",
        "perUnitMs": 1200,
        "completesAt": "2026-06-01T09:40:09.600Z"
@@ -596,15 +783,15 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 10,
-       "wood": 540,
-       "grain": 482.6666666666665,
-       "stone": 560
+       "iron": 480,
+       "wood": 720,
+       "grain": 597.3333333333333,
+       "stone": 840
       },
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 184,
+       "grain": 76,
        "stone": 300
       },
       "capacity": {
@@ -669,8 +856,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 16,
-       "cap": 40
+       "used": 24,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -816,7 +1003,7 @@
       },
       "queue": [],
       "garrison": {
-       "spearman": 16
+       "spearman": 24
       },
       "away": {},
       "stance": "balanced",
@@ -837,15 +1024,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 10,
-        "wood": 540,
-        "grain": 482.6666666666665,
-        "stone": 560
+        "iron": 480,
+        "wood": 720,
+        "grain": 597.3333333333333,
+        "stone": 840
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 184,
+        "grain": 76,
         "stone": 300
        },
        "capacity": {
@@ -3180,7 +3367,7 @@
     "front": "north",
     "depth": 1,
     "units": {
-     "spearman": 10
+     "spearman": 18
     },
     "stance": "offensive"
    },
@@ -3207,7 +3394,7 @@
       "iron": 0
      },
      "units": {
-      "spearman": 10
+      "spearman": 18
      },
      "status": "marching",
      "battleId": null,
@@ -3277,7 +3464,7 @@
      "arrivesAt": "2026-06-01T10:23:36.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 240,
+     "supply": 432,
      "supplyAt": "2026-06-01T10:20:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3611,7 +3798,7 @@
      "arrivesAt": "2026-06-01T10:26:00.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 293.33333333333314,
+     "supply": 143.9999999999999,
      "supplyAt": "2026-06-01T10:20:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -3677,8 +3864,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 31,
-       "cap": 40
+       "used": 39,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -3847,10 +4034,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 110,
-        "wood": 840,
+        "iron": 580,
+        "wood": 1000,
         "grain": 0,
-        "stone": 760
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -4179,7 +4366,7 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 293.33333333333314,
+      "supply": 143.9999999999999,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -4400,7 +4587,7 @@
        "stone": 0
       },
       "units": {
-       "spearman": 10
+       "spearman": 18
       },
       "status": "marching",
       "battleId": null,
@@ -4470,7 +4657,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 240,
+      "supply": 432,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -6587,8 +6774,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 31,
-       "cap": 40
+       "used": 39,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -6757,10 +6944,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 110,
-        "wood": 840,
+        "iron": 580,
+        "wood": 1000,
         "grain": 0,
-        "stone": 760
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -7089,7 +7276,7 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 293.33333333333314,
+      "supply": 143.9999999999999,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -7310,7 +7497,7 @@
        "stone": 0
       },
       "units": {
-       "spearman": 10
+       "spearman": 18
       },
       "status": "marching",
       "battleId": null,
@@ -7380,7 +7567,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 240,
+      "supply": 432,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -9497,8 +9684,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 31,
-       "cap": 40
+       "used": 39,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -9667,10 +9854,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 110,
-        "wood": 840,
+        "iron": 580,
+        "wood": 1000,
         "grain": 0,
-        "stone": 760
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -10105,7 +10292,7 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 293.33333333333314,
+      "supply": 143.9999999999999,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -10326,7 +10513,7 @@
        "stone": 0
       },
       "units": {
-       "spearman": 10
+       "spearman": 18
       },
       "status": "stationed",
       "battleId": null,
@@ -10396,7 +10583,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 240,
+      "supply": 432,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -12633,8 +12820,8 @@
       "smithWork": null,
       "embers": 1,
       "armySlots": {
-       "used": 26,
-       "cap": 40
+       "used": 34,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -12803,10 +12990,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 110,
-        "wood": 840,
+        "iron": 580,
+        "wood": 1000,
         "grain": 0,
-        "stone": 760
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -13154,7 +13341,7 @@
        }
       },
       "status": "cleared",
-      "round": 4,
+      "round": 3,
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
@@ -13162,18 +13349,19 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
+       "rusalka": 1,
        "grey_wolf": 1,
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "spearman": 10
+       "spearman": 18
       },
       "rounds": [
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 1,
         "attackerLeft": 12,
-        "defenderLeft": 9,
+        "defenderLeft": 17,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -13182,11 +13370,11 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 8,
+        "attackerLeft": 7,
+        "defenderLeft": 16,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -13196,8 +13384,8 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 3,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 4,
+        "defenderLeft": 15,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
@@ -13205,24 +13393,13 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T10:27:12.000Z",
-        "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -13396,7 +13573,7 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 293.33333333333314,
+      "supply": 143.9999999999999,
       "supplyAt": "2026-06-01T10:20:00.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -13628,13 +13805,13 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "units": {
-       "spearman": 7
+       "spearman": 15
       },
       "status": "stationed",
       "battleId": null,
@@ -13704,7 +13881,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 180,
+      "supply": 324,
       "supplyAt": "2026-06-01T10:27:12.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -13719,19 +13896,19 @@
        "battles": [
         {
          "won": true,
-         "army": 10,
+         "army": 18,
          "loot": {
-          "iron": 16,
-          "wood": 27,
-          "grain": 31,
-          "stone": 19
+          "iron": 14,
+          "wood": 24,
+          "grain": 28,
+          "stone": 17
          },
          "lost": 3,
          "name": "Frozen Marsh",
          "enemy": 12,
-         "kills": 9,
+         "kills": 8,
          "stage": 1,
-         "rounds": 4,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         }
@@ -15862,8 +16039,8 @@
       "smithWork": null,
       "embers": 1,
       "armySlots": {
-       "used": 20,
-       "cap": 40
+       "used": 28,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -16032,10 +16209,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 130,
-        "wood": 900,
+        "iron": 600,
+        "wood": 1000,
         "grain": 70.33333333333334,
-        "stone": 800
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -16559,7 +16736,7 @@
        }
       },
       "status": "cleared",
-      "round": 4,
+      "round": 3,
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
@@ -16567,18 +16744,19 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
+       "rusalka": 1,
        "grey_wolf": 1,
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "spearman": 10
+       "spearman": 18
       },
       "rounds": [
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 1,
         "attackerLeft": 12,
-        "defenderLeft": 9,
+        "defenderLeft": 17,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -16587,11 +16765,11 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 8,
+        "attackerLeft": 7,
+        "defenderLeft": 16,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -16601,8 +16779,8 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 3,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 4,
+        "defenderLeft": 15,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
@@ -16610,24 +16788,13 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T10:27:12.000Z",
-        "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -16801,9 +16968,9 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 125.33333333333314,
+      "supply": 0,
       "supplyAt": "2026-06-01T10:29:36.000Z",
-      "hungrySince": null,
+      "hungrySince": "2026-06-01T10:28:13.715Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
@@ -17047,13 +17214,13 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "units": {
-       "spearman": 7
+       "spearman": 15
       },
       "status": "stationed",
       "battleId": null,
@@ -17123,7 +17290,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 180,
+      "supply": 324,
       "supplyAt": "2026-06-01T10:27:12.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -17138,19 +17305,19 @@
        "battles": [
         {
          "won": true,
-         "army": 10,
+         "army": 18,
          "loot": {
-          "iron": 16,
-          "wood": 27,
-          "grain": 31,
-          "stone": 19
+          "iron": 14,
+          "wood": 24,
+          "grain": 28,
+          "stone": 17
          },
          "lost": 3,
          "name": "Frozen Marsh",
          "enemy": 12,
-         "kills": 9,
+         "kills": 8,
          "stage": 1,
-         "rounds": 4,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         }
@@ -19249,7 +19416,7 @@
     "sanctity": 100,
     "embers": 1,
     "hatred": {
-     "north": 0.25,
+     "north": 0.45,
      "south": 0.05
     },
     "blessings": {
@@ -19281,8 +19448,8 @@
       "smithWork": null,
       "embers": 1,
       "armySlots": {
-       "used": 17,
-       "cap": 40
+       "used": 23,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -19439,6 +19606,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
@@ -19451,10 +19619,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 130,
-        "wood": 900,
-        "grain": 70.33333333333334,
-        "stone": 800
+        "iron": 605,
+        "wood": 1000,
+        "grain": 83.21666666666667,
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 150,
@@ -19463,12 +19631,12 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
-       "settledAt": "2026-06-01T10:28:24.000Z"
+       "settledAt": "2026-06-01T10:30:48.000Z"
       }
      }
     ],
@@ -19786,8 +19954,8 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 5,
+      "status": "cleared",
+      "round": 7,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -19795,29 +19963,30 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
-       "grey_wolf": 11,
-       "leshy_thrall": 7
+       "rusalka": 4,
+       "grey_wolf": 5,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 15
       },
       "rounds": [
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
         "attackerLeft": 29,
-        "defenderLeft": 7,
+        "defenderLeft": 15,
         "attackerLosses": {},
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 28,
-        "defenderLeft": 6,
+        "attackerLeft": 26,
+        "defenderLeft": 14,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -19826,20 +19995,24 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 27,
-        "defenderLeft": 6,
+        "attackerLeft": 23,
+        "defenderLeft": 13,
         "attackerLosses": {
-         "grey_wolf": 1
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 26,
-        "defenderLeft": 5,
+        "attackerLeft": 20,
+        "defenderLeft": 12,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -19848,17 +20021,46 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 25,
-        "defenderLeft": 4,
+        "attackerLeft": 18,
+        "defenderLeft": 11,
         "attackerLosses": {
-         "rusalka": 1
+         "rusalka": 1,
+         "grey_wolf": 1
         },
         "defenderLosses": {
          "spearman": 1
         }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 6,
+        "attackerLeft": 17,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 7,
+        "attackerLeft": 15,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
        }
       ],
-      "loot": null,
+      "loot": {
+       "iron": 14,
+       "wood": 259,
+       "grain": 28,
+       "stone": 99
+      },
       "decision": null,
       "startedAt": "2026-06-01T10:30:48.000Z",
       "endedAt": "2026-06-01T10:30:48.000Z"
@@ -20073,7 +20275,7 @@
        }
       },
       "status": "cleared",
-      "round": 4,
+      "round": 3,
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
@@ -20081,18 +20283,19 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
+       "rusalka": 1,
        "grey_wolf": 1,
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "spearman": 10
+       "spearman": 18
       },
       "rounds": [
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 1,
         "attackerLeft": 12,
-        "defenderLeft": 9,
+        "defenderLeft": 17,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -20101,11 +20304,11 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 8,
+        "attackerLeft": 7,
+        "defenderLeft": 16,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -20115,8 +20318,8 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 3,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 4,
+        "defenderLeft": 15,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
@@ -20124,24 +20327,13 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T10:27:12.000Z",
-        "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -20165,7 +20357,9 @@
       "skillPoints": 0,
       "skills": {},
       "gear": {},
-      "inventory": [],
+      "inventory": [
+       "mail_shirt"
+      ],
       "bonuses": {},
       "path": null,
       "departsAt": null,
@@ -20315,9 +20509,9 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 125.33333333333314,
+      "supply": 0,
       "supplyAt": "2026-06-01T10:29:36.000Z",
-      "hungrySince": null,
+      "hungrySince": "2026-06-01T10:28:13.715Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
@@ -20561,13 +20755,13 @@
       "stance": "offensive",
       "maneuver": "encircle",
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 259,
+       "grain": 28,
+       "stone": 99
       },
       "units": {
-       "spearman": 4
+       "spearman": 10
       },
       "status": "returning",
       "battleId": null,
@@ -20637,7 +20831,7 @@
       "arrivesAt": "2026-06-01T10:23:36.000Z",
       "leavesAt": "2026-06-01T10:30:48.000Z",
       "returnsAt": "2026-06-01T10:34:24.000Z",
-      "supply": 96,
+      "supply": 240,
       "supplyAt": "2026-06-01T10:30:48.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -20645,44 +20839,46 @@
       "raid": {
        "depth": 1,
        "finds": [
-        "a Svarog's Ember"
+        "a Svarog's Ember",
+        "Mail Shirt",
+        "the scroll \"Weave of Mokosh\""
        ],
        "front": "north",
        "stage": 2,
        "battles": [
         {
          "won": true,
-         "army": 10,
+         "army": 18,
          "loot": {
-          "iron": 16,
-          "wood": 27,
-          "grain": 31,
-          "stone": 19
+          "iron": 14,
+          "wood": 24,
+          "grain": 28,
+          "stone": 17
          },
          "lost": 3,
          "name": "Frozen Marsh",
          "enemy": 12,
-         "kills": 9,
+         "kills": 8,
          "stage": 1,
-         "rounds": 4,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
-         "won": false,
-         "army": 7,
+         "won": true,
+         "army": 15,
          "loot": {
           "iron": 0,
-          "wood": 0,
+          "wood": 235,
           "grain": 0,
-          "stone": 0
+          "stone": 82
          },
-         "lost": 3,
+         "lost": 5,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 4,
+         "kills": 14,
          "stage": 2,
-         "rounds": 5,
+         "rounds": 7,
          "battleId": 5,
          "stronghold": true
         }
@@ -20806,8 +21002,21 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
-    "achievements": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": null,
+      "foundAt": "2026-06-01T10:30:48.000Z"
+     }
+    ],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T10:30:48.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -22781,7 +22990,7 @@
     "sanctity": 100,
     "embers": 1,
     "hatred": {
-     "north": 0.25,
+     "north": 0.45,
      "south": 0.05
     },
     "blessings": {
@@ -22813,8 +23022,8 @@
       "smithWork": null,
       "embers": 1,
       "armySlots": {
-       "used": 12,
-       "cap": 40
+       "used": 18,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -22961,7 +23170,7 @@
       "queue": [],
       "garrison": {
        "scorpion": 0,
-       "spearman": 5,
+       "spearman": 11,
        "battering_ram": 0
       },
       "away": {},
@@ -22971,6 +23180,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
@@ -22983,22 +23193,22 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 161,
-        "wood": 972,
-        "grain": 223.98333333333335,
-        "stone": 849
+        "iron": 629,
+        "wood": 1100,
+        "grain": 346.98333333333335,
+        "stone": 1100
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 332.5,
+        "grain": 251.5,
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T10:34:24.000Z"
       }
@@ -23474,8 +23684,8 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 5,
+      "status": "cleared",
+      "round": 7,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -23483,29 +23693,30 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
-       "grey_wolf": 11,
-       "leshy_thrall": 7
+       "rusalka": 4,
+       "grey_wolf": 5,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 15
       },
       "rounds": [
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
         "attackerLeft": 29,
-        "defenderLeft": 7,
+        "defenderLeft": 15,
         "attackerLosses": {},
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 28,
-        "defenderLeft": 6,
+        "attackerLeft": 26,
+        "defenderLeft": 14,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -23514,20 +23725,24 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 27,
-        "defenderLeft": 6,
+        "attackerLeft": 23,
+        "defenderLeft": 13,
         "attackerLosses": {
-         "grey_wolf": 1
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 26,
-        "defenderLeft": 5,
+        "attackerLeft": 20,
+        "defenderLeft": 12,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -23536,17 +23751,46 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 25,
-        "defenderLeft": 4,
+        "attackerLeft": 18,
+        "defenderLeft": 11,
         "attackerLosses": {
-         "rusalka": 1
+         "rusalka": 1,
+         "grey_wolf": 1
         },
         "defenderLosses": {
          "spearman": 1
         }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 6,
+        "attackerLeft": 17,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 7,
+        "attackerLeft": 15,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
        }
       ],
-      "loot": null,
+      "loot": {
+       "iron": 14,
+       "wood": 259,
+       "grain": 28,
+       "stone": 99
+      },
       "decision": null,
       "startedAt": "2026-06-01T10:30:48.000Z",
       "endedAt": "2026-06-01T10:30:48.000Z"
@@ -23761,7 +24005,7 @@
        }
       },
       "status": "cleared",
-      "round": 4,
+      "round": 3,
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
@@ -23769,18 +24013,19 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
+       "rusalka": 1,
        "grey_wolf": 1,
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "spearman": 10
+       "spearman": 18
       },
       "rounds": [
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 1,
         "attackerLeft": 12,
-        "defenderLeft": 9,
+        "defenderLeft": 17,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -23789,11 +24034,11 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 8,
+        "attackerLeft": 7,
+        "defenderLeft": 16,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -23803,8 +24048,8 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 3,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 4,
+        "defenderLeft": 15,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
@@ -23812,24 +24057,13 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T10:27:12.000Z",
-        "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -23853,7 +24087,9 @@
       "skillPoints": 0,
       "skills": {},
       "gear": {},
-      "inventory": [],
+      "inventory": [
+       "mail_shirt"
+      ],
       "bonuses": {},
       "path": null,
       "departsAt": null,
@@ -24002,9 +24238,9 @@
       "arrivesAt": "2026-06-01T10:26:00.000Z",
       "leavesAt": "2026-06-01T10:33:12.000Z",
       "returnsAt": "2026-06-01T10:39:12.000Z",
-      "supply": 80.33333333333314,
+      "supply": 0,
       "supplyAt": "2026-06-01T10:33:12.000Z",
-      "hungrySince": null,
+      "hungrySince": "2026-06-01T10:28:13.715Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
@@ -24267,7 +24503,7 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "spearman": 4
+       "spearman": 10
       },
       "status": "done",
       "battleId": null,
@@ -24345,44 +24581,46 @@
       "raid": {
        "depth": 1,
        "finds": [
-        "a Svarog's Ember"
+        "a Svarog's Ember",
+        "Mail Shirt",
+        "the scroll \"Weave of Mokosh\""
        ],
        "front": "north",
        "stage": 2,
        "battles": [
         {
          "won": true,
-         "army": 10,
+         "army": 18,
          "loot": {
-          "iron": 16,
-          "wood": 27,
-          "grain": 31,
-          "stone": 19
+          "iron": 14,
+          "wood": 24,
+          "grain": 28,
+          "stone": 17
          },
          "lost": 3,
          "name": "Frozen Marsh",
          "enemy": 12,
-         "kills": 9,
+         "kills": 8,
          "stage": 1,
-         "rounds": 4,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
-         "won": false,
-         "army": 7,
+         "won": true,
+         "army": 15,
          "loot": {
           "iron": 0,
-          "wood": 0,
+          "wood": 235,
           "grain": 0,
-          "stone": 0
+          "stone": 82
          },
-         "lost": 3,
+         "lost": 5,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 4,
+         "kills": 14,
          "stage": 2,
-         "rounds": 5,
+         "rounds": 7,
          "battleId": 5,
          "stronghold": true
         }
@@ -24506,8 +24744,21 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
-    "achievements": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": null,
+      "foundAt": "2026-06-01T10:30:48.000Z"
+     }
+    ],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T10:30:48.000Z"
+     }
+    ],
     "shipyards": [
      {
       "id": 2,
@@ -26481,7 +26732,7 @@
     "sanctity": 100,
     "embers": 1,
     "hatred": {
-     "north": 0.25,
+     "north": 0.45,
      "south": 0.05
     },
     "blessings": {
@@ -26514,7 +26765,7 @@
       "embers": 1,
       "armySlots": {
        "used": 12,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -26661,8 +26912,8 @@
       "queue": [],
       "garrison": {
        "scorpion": 0,
-       "spearman": 8,
-       "battering_ram": 2
+       "spearman": 12,
+       "battering_ram": 0
       },
       "away": {},
       "stance": "balanced",
@@ -26671,6 +26922,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
@@ -26683,22 +26935,22 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 176,
-        "wood": 1000,
-        "grain": 376.5416666666665,
-        "stone": 943
+        "iron": 644,
+        "wood": 1100,
+        "grain": 457.9083333333333,
+        "stone": 1100
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 211,
+        "grain": 238,
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T10:40:48.000Z"
       }
@@ -26949,8 +27201,7 @@
       "setup": {
        "home": {
         "initial": {
-         "spearman": 8,
-         "battering_ram": 2
+         "spearman": 12
         }
        }
       },
@@ -26964,8 +27215,7 @@
        "chernobog_avatar": 1
       },
       "defenderInitial": {
-       "spearman": 8,
-       "battering_ram": 2
+       "spearman": 12
       },
       "rounds": [],
       "loot": null,
@@ -27147,8 +27397,8 @@
         "stronghold": true
        }
       },
-      "status": "repelled",
-      "round": 5,
+      "status": "cleared",
+      "round": 7,
       "attackerStance": "defensive",
       "attackerInitial": {
        "rusalka": 8,
@@ -27156,29 +27406,30 @@
        "leshy_thrall": 7
       },
       "attackerNow": {
-       "rusalka": 7,
-       "grey_wolf": 11,
-       "leshy_thrall": 7
+       "rusalka": 4,
+       "grey_wolf": 5,
+       "leshy_thrall": 6
       },
       "defenderInitial": {
-       "spearman": 7
+       "spearman": 15
       },
       "rounds": [
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 1,
         "attackerLeft": 29,
-        "defenderLeft": 7,
+        "defenderLeft": 15,
         "attackerLosses": {},
         "defenderLosses": {}
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 2,
-        "attackerLeft": 28,
-        "defenderLeft": 6,
+        "attackerLeft": 26,
+        "defenderLeft": 14,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -27187,20 +27438,24 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 3,
-        "attackerLeft": 27,
-        "defenderLeft": 6,
+        "attackerLeft": 23,
+        "defenderLeft": 13,
         "attackerLosses": {
-         "grey_wolf": 1
+         "grey_wolf": 2,
+         "leshy_thrall": 1
         },
-        "defenderLosses": {}
+        "defenderLosses": {
+         "spearman": 1
+        }
        },
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 4,
-        "attackerLeft": 26,
-        "defenderLeft": 5,
+        "attackerLeft": 20,
+        "defenderLeft": 12,
         "attackerLosses": {
-         "grey_wolf": 1
+         "rusalka": 1,
+         "grey_wolf": 2
         },
         "defenderLosses": {
          "spearman": 1
@@ -27209,17 +27464,46 @@
        {
         "at": "2026-06-01T10:30:48.000Z",
         "round": 5,
-        "attackerLeft": 25,
-        "defenderLeft": 4,
+        "attackerLeft": 18,
+        "defenderLeft": 11,
         "attackerLosses": {
-         "rusalka": 1
+         "rusalka": 1,
+         "grey_wolf": 1
         },
         "defenderLosses": {
          "spearman": 1
         }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 6,
+        "attackerLeft": 17,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "grey_wolf": 1
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       },
+       {
+        "at": "2026-06-01T10:30:48.000Z",
+        "round": 7,
+        "attackerLeft": 15,
+        "defenderLeft": 10,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 1
+        },
+        "defenderLosses": {}
        }
       ],
-      "loot": null,
+      "loot": {
+       "iron": 14,
+       "wood": 259,
+       "grain": 28,
+       "stone": 99
+      },
       "decision": null,
       "startedAt": "2026-06-01T10:30:48.000Z",
       "endedAt": "2026-06-01T10:30:48.000Z"
@@ -27516,7 +27800,7 @@
        }
       },
       "status": "cleared",
-      "round": 4,
+      "round": 3,
       "attackerStance": "balanced",
       "attackerInitial": {
        "rusalka": 3,
@@ -27524,18 +27808,19 @@
        "leshy_thrall": 3
       },
       "attackerNow": {
+       "rusalka": 1,
        "grey_wolf": 1,
        "leshy_thrall": 2
       },
       "defenderInitial": {
-       "spearman": 10
+       "spearman": 18
       },
       "rounds": [
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 1,
         "attackerLeft": 12,
-        "defenderLeft": 9,
+        "defenderLeft": 17,
         "attackerLosses": {},
         "defenderLosses": {
          "spearman": 1
@@ -27544,11 +27829,11 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 2,
-        "attackerLeft": 8,
-        "defenderLeft": 8,
+        "attackerLeft": 7,
+        "defenderLeft": 16,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 2,
+         "grey_wolf": 3,
          "leshy_thrall": 1
         },
         "defenderLosses": {
@@ -27558,8 +27843,8 @@
        {
         "at": "2026-06-01T10:27:12.000Z",
         "round": 3,
-        "attackerLeft": 5,
-        "defenderLeft": 7,
+        "attackerLeft": 4,
+        "defenderLeft": 15,
         "attackerLosses": {
          "rusalka": 1,
          "grey_wolf": 2
@@ -27567,24 +27852,13 @@
         "defenderLosses": {
          "spearman": 1
         }
-       },
-       {
-        "at": "2026-06-01T10:27:12.000Z",
-        "round": 4,
-        "attackerLeft": 3,
-        "defenderLeft": 7,
-        "attackerLosses": {
-         "rusalka": 1,
-         "grey_wolf": 1
-        },
-        "defenderLosses": {}
        }
       ],
       "loot": {
-       "iron": 16,
-       "wood": 27,
-       "grain": 31,
-       "stone": 19
+       "iron": 14,
+       "wood": 24,
+       "grain": 28,
+       "stone": 17
       },
       "decision": null,
       "startedAt": "2026-06-01T10:27:12.000Z",
@@ -27608,7 +27882,9 @@
       "skillPoints": 0,
       "skills": {},
       "gear": {},
-      "inventory": [],
+      "inventory": [
+       "mail_shirt"
+      ],
       "bonuses": {},
       "path": null,
       "departsAt": null,
@@ -27696,8 +27972,7 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "spearman": 3,
-       "battering_ram": 2
+       "spearman": 1
       },
       "status": "done",
       "battleId": null,
@@ -27754,7 +28029,7 @@
       "returnsAt": "2026-06-01T10:39:12.000Z",
       "supply": 0,
       "supplyAt": "2026-06-01T10:39:12.000Z",
-      "hungrySince": null,
+      "hungrySince": "2026-06-01T10:28:13.715Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
@@ -28017,7 +28292,7 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "spearman": 4
+       "spearman": 10
       },
       "status": "done",
       "battleId": null,
@@ -28095,44 +28370,46 @@
       "raid": {
        "depth": 1,
        "finds": [
-        "a Svarog's Ember"
+        "a Svarog's Ember",
+        "Mail Shirt",
+        "the scroll \"Weave of Mokosh\""
        ],
        "front": "north",
        "stage": 2,
        "battles": [
         {
          "won": true,
-         "army": 10,
+         "army": 18,
          "loot": {
-          "iron": 16,
-          "wood": 27,
-          "grain": 31,
-          "stone": 19
+          "iron": 14,
+          "wood": 24,
+          "grain": 28,
+          "stone": 17
          },
          "lost": 3,
          "name": "Frozen Marsh",
          "enemy": 12,
-         "kills": 9,
+         "kills": 8,
          "stage": 1,
-         "rounds": 4,
+         "rounds": 3,
          "battleId": 1,
          "stronghold": false
         },
         {
-         "won": false,
-         "army": 7,
+         "won": true,
+         "army": 15,
          "loot": {
           "iron": 0,
-          "wood": 0,
+          "wood": 235,
           "grain": 0,
-          "stone": 0
+          "stone": 82
          },
-         "lost": 3,
+         "lost": 5,
          "name": "Monster Lair",
          "enemy": 29,
-         "kills": 4,
+         "kills": 14,
          "stage": 2,
-         "rounds": 5,
+         "rounds": 7,
          "battleId": 5,
          "stronghold": true
         }
@@ -28256,8 +28533,20 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": null,
+      "foundAt": "2026-06-01T10:30:48.000Z"
+     }
+    ],
     "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T10:30:48.000Z"
+     },
      {
       "accountId": 1,
       "achievement": "avatar_risen",
@@ -30231,7 +30520,7 @@
    "response": {
     "notifications": [
      {
-      "id": 26,
+      "id": 27,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -30240,7 +30529,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 26,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry has fallen",
@@ -30249,16 +30538,16 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 25,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
-      "body": "A horde of 1 is fighting your garrison of 10.",
+      "body": "A horde of 1 is fighting your garrison of 12.",
       "createdAt": "2026-06-01T10:40:48.000Z",
       "read": false
      },
      {
-      "id": 23,
+      "id": 24,
       "kind": "battle_result",
       "tier": "push",
       "title": "The campaign against the Order of the One Throne is over",
@@ -30267,7 +30556,7 @@
       "read": false
      },
      {
-      "id": 22,
+      "id": 23,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -30276,7 +30565,7 @@
       "read": false
      },
      {
-      "id": 21,
+      "id": 22,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: The Black God Walks",
@@ -30285,7 +30574,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "The Avatar of Černobog walks at (1, -3)",
@@ -30294,16 +30583,16 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 20,
       "kind": "battle_result",
       "tier": "push",
       "title": "The campaign against the Monsters of the North is over",
-      "body": "1 of 2 battles won; 93 resources brought home. The full report is in the Raid tab.",
+      "body": "2 of 2 battles won; 400 resources brought home. The full report is in the Raid tab.",
       "createdAt": "2026-06-01T10:34:24.000Z",
       "read": false
      },
      {
-      "id": 18,
+      "id": 19,
       "kind": "battle_result",
       "tier": "push",
       "title": "Your raid was beaten at the Fortress of the Order",
@@ -30312,11 +30601,20 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 18,
       "kind": "battle_result",
       "tier": "push",
-      "title": "Your raid was beaten at the Monster Lair",
-      "body": "It turns for home with 93 resources; 3 of its men fell.",
+      "title": "Your raid sacked the Monster Lair",
+      "body": "It comes home with 400 resources and Mail Shirt, the scroll \"Weave of Mokosh\".",
+      "createdAt": "2026-06-01T10:30:48.000Z",
+      "read": false
+     },
+     {
+      "id": 17,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: To the Heart of Nav",
+      "body": "Sack a stronghold beyond the border.",
       "createdAt": "2026-06-01T10:30:48.000Z",
       "read": false
      },
@@ -30352,7 +30650,7 @@
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your raid won the battle of the Frozen Marsh",
-      "body": "9 of the enemy fell; it carries 93 resources and a Svarog's Ember and marches on.",
+      "body": "8 of the enemy fell; it carries 83 resources and a Svarog's Ember and marches on.",
       "createdAt": "2026-06-01T10:27:12.000Z",
       "read": false
      },
@@ -30443,7 +30741,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:03.000Z",
+      "createdAt": "2026-06-01T08:00:07.640Z",
       "read": false
      },
      {
@@ -30465,7 +30763,7 @@
       "read": false
      }
     ],
-    "unread": 26,
+    "unread": 27,
     "serverTime": "2026-06-01T10:48:48.000Z"
    }
   }

@@ -21,9 +21,9 @@ static func gives(data: Dictionary, building: String, level: int, speed: float) 
 			parts.append(UI.t("yields ×%.2f") % pow(float(def.get("yieldGrowth", 1.0)), level - 1))
 	if building == Rules.HALL:
 		parts.append(UI.t("%d slots · queue %d · %d outposts · %d standing orders") % [Rules.unlocked_slots(data, level), Rules.queue_limit(data, level), Rules.outpost_limit(data, level), Rules.orders_limit(data, level)])
-	var per_slot := int(data.units.get("buildingLevelsPerTrainingSlot", 0))
-	if building in data.units.get("trainingSlotBuildings", []) and per_slot > 0 and level / per_slot > 0:
-		parts.append(UI.t("+%d training queue") % (level / per_slot))
+	var per_slot := float(data.units.get("buildingLevelsPerTrainingSlot", 0))
+	if building in data.units.get("trainingSlotBuildings", []) and per_slot > 0 and floori(level / per_slot) > 0:
+		parts.append(UI.t("+%d training queue") % floori(level / per_slot))
 		var faster := roundi((1.0 - Rules.hall_speedup(data, level)) * 100.0)
 		if faster > 0:
 			parts.append(UI.t("builds %d%% faster") % faster)

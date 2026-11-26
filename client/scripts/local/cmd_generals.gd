@@ -52,7 +52,7 @@ static func limit(data: Dictionary, hall_levels: Array) -> int:
 	var n := 0
 	for level in hall_levels:
 		if int(level) > 0:
-			n += int(g.perHall) + floori(float(int(level) - 1) / int(g.hallLevelsPerGeneral))
+			n += int(g.perHall) + floori(float(int(level) - 1) / float(g.hallLevelsPerGeneral))
 	return n
 
 

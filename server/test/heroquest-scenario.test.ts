@@ -32,6 +32,8 @@ scenario('heroquest-scenario.json', START, async ({ started, now, play }) => {
 
   // An army out in the field, strong enough for the quest, with the hero.
   await play({ method: 'POST', path: '/v1/villages/1/build', body: { plot: 'c1', building: 'barracks' } });
+  // A Barracks costs most of the starting stores: enough again to train.
+  await play({ set: { amounts: { wood: 1000, stone: 1000, grain: 1000, iron: 1000 } } });
   await play({ advance: 30 * MINUTE });
   await play({ set: { garrison: { spearman: 120, archer: 60 } } });
   await play({ method: 'POST', path: '/v1/villages/1/armies', body: { orders: 'hold', target: { q: near[0]!.q, r: near[0]!.r }, units: { spearman: 110, archer: 55 } } });

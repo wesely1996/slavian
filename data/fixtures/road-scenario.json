@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:03.000Z"
+       "completesAt": "2026-06-01T08:00:07.640Z"
       }
      ],
      "garrison": {},
@@ -178,10 +178,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 240,
-       "wood": 350,
-       "grain": 440,
-       "stone": 380
+       "iron": 144,
+       "wood": 110,
+       "grain": 344,
+       "stone": 188
       },
       "ratesPerHour": {
        "iron": 150,
@@ -199,6 +199,16 @@
      }
     },
     "serverTime": "2026-06-01T08:00:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -375,10 +385,10 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 230,
-       "wood": 430,
-       "grain": 513.3333333333333,
-       "stone": 440
+       "iron": 940,
+       "wood": 930,
+       "grain": 940,
+       "stone": 960
       },
       "ratesPerHour": {
        "iron": 150,
@@ -706,10 +716,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 225,
-       "wood": 385,
-       "grain": 518.7499999999998,
-       "stone": 410
+       "iron": 935,
+       "wood": 850,
+       "grain": 920,
+       "stone": 900
       },
       "ratesPerHour": {
        "iron": 150,
@@ -779,7 +789,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -952,10 +962,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 385,
-        "grain": 518.7499999999998,
-        "stone": 410
+        "iron": 935,
+        "wood": 850,
+        "grain": 920,
+        "stone": 900
        },
        "ratesPerHour": {
         "iron": 350,
@@ -3353,7 +3363,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -3526,10 +3536,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 283.3333333333333,
-        "wood": 310,
-        "grain": 530.9166666666664,
-        "stone": 260
+        "iron": 993.3333333333334,
+        "wood": 775,
+        "grain": 932.1666666666666,
+        "stone": 750
        },
        "ratesPerHour": {
         "iron": 350,
@@ -6090,7 +6100,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -6264,9 +6274,9 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 753.3333333333334,
-        "wood": 605,
-        "grain": 864.7999999999997,
+        "iron": 975,
+        "wood": 800,
+        "grain": 925,
         "stone": 650
        },
        "ratesPerHour": {
@@ -8762,7 +8772,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -8936,9 +8946,9 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 753.3333333333334,
-        "wood": 605,
-        "grain": 864.7999999999997,
+        "iron": 975,
+        "wood": 800,
+        "grain": 925,
         "stone": 650
        },
        "ratesPerHour": {
@@ -11552,7 +11562,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -14558,7 +14568,7 @@
       "embers": 0,
       "armySlots": {
        "used": 2,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -17857,7 +17867,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:03.000Z",
+      "createdAt": "2026-06-01T08:00:07.640Z",
       "read": false
      },
      {

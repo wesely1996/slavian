@@ -2787,8 +2787,8 @@ msgid "Training (%d/%d)"
 msgstr "Obuka (%d/%d)"
 
 #: client/scripts/screens/game_screen_army.gd:1195
-msgid "Batches waiting to be trained. Every %d levels of the Barracks, the Shooting Range and the Stables each add one more place."
-msgstr "Grupe koje čekaju obuku. Svakih %d nivoa Kasarne, Strelišta i Konjušnice dodaje po jedno mesto."
+msgid "Batches waiting to be trained. Every %s levels of the Barracks, the Shooting Range and the Stables each add one more place."
+msgstr "Grupe koje čekaju obuku. Svakih %s nivoa Kasarne, Strelišta i Konjušnice dodaje po jedno mesto."
 
 #: client/scripts/screens/game_screen_army.gd:1197
 msgid "Nobody in training."
@@ -3512,8 +3512,8 @@ msgid "Keep %s topped up"
 msgstr "Dopunjavaj %s"
 
 #: client/scripts/screens/game_screen_logistics.gd:583
-msgid "Orders %d/%d · +1 every %d Hall levels"
-msgstr "Naredbe %d/%d · +1 na svaka %d nivoa Doma"
+msgid "Orders %d/%d · +1 every %s Hall levels"
+msgstr "Naredbe %d/%d · +1 na svakih %s nivoa Doma"
 
 #: client/scripts/screens/game_screen_logistics.gd:587
 msgid "Rebuilds the village's raided outposts to the best level they had."
@@ -6616,8 +6616,8 @@ msgid "Elder's Hall"
 msgstr "Starešinska kuća"
 
 #: data/buildings.json
-msgid "The heart of the village. Each level opens another building slot and builds a little faster; every few levels add a place in the build queue and another outpost."
-msgstr "Srce sela. Svaki nivo otvara još jedno mesto za gradnju i gradi malo brže; svakih nekoliko nivoa dodaje mesto u redu gradnje i još jednu ispostavu."
+msgid "The heart of the village. Each level opens two more building slots, builds faster and allows another outpost; most levels add a place in the build queue."
+msgstr "Srce sela. Svaki nivo otvara još dva mesta za gradnju, gradi brže i dozvoljava još jednu ispostavu; većina nivoa dodaje mesto u redu gradnje."
 
 #: data/buildings.json
 msgid "Woodcutter"
@@ -6688,8 +6688,8 @@ msgid "Hero's Hall"
 msgstr "Dvorana junaka"
 
 #: data/buildings.json
-msgid "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and every few levels allow another general."
-msgstr "Unajmljuje generale, koji predvode vojske i zapovedaju posadama. Svaki nivo ovde brže leči junaka od rana, a svakih nekoliko nivoa dozvoljava još jednog generala."
+msgid "Recruits generals, who lead armies and command garrisons. Each level lets the hero recover from wounds faster here, and each level above the first allows another general."
+msgstr "Unajmljuje generale, koji predvode vojske i zapovedaju posadama. Svaki nivo ovde brže leči junaka od rana, a svaki nivo iznad prvog dozvoljava još jednog generala."
 
 #: data/buildings.json
 msgid "Scout Lodge"
@@ -6920,56 +6920,56 @@ msgid "Forester"
 msgstr "Šumar"
 
 #: data/buildings.json
-msgid "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 5."
-msgstr "Neguje šume da ponovo izrastu guste: 5% više drveta po nivou, i sa polja i sa ispostava. Potrebna je Drvoseča nivoa 5."
+msgid "Tends the woods so they grow back thick: 5% more wood per level, from fields and outposts alike. Needs a Woodcutter of level 3."
+msgstr "Neguje šume da ponovo izrastu guste: 5% više drveta po nivou, i sa polja i sa ispostava. Potrebna je Drvoseča nivoa 3."
 
 #: data/buildings.json
 msgid "Stonemason"
 msgstr "Kamenorezac"
 
 #: data/buildings.json
-msgid "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 5."
-msgstr "Obrađuje kamen čim stigne: 5% više kamena po nivou. Potreban je Kamenolom nivoa 5."
+msgid "Dresses the stone as it comes in: 5% more stone per level. Needs a Quarry of level 3."
+msgstr "Obrađuje kamen čim stigne: 5% više kamena po nivou. Potreban je Kamenolom nivoa 3."
 
 #: data/buildings.json
 msgid "Mill"
 msgstr "Vodenica"
 
 #: data/buildings.json
-msgid "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 5."
-msgstr "Melje žito da manje propadne: 5% više žita po nivou. Potrebna je Njiva nivoa 5."
+msgid "Grinds the grain so less goes to waste: 5% more grain per level. Needs a Farm of level 3."
+msgstr "Melje žito da manje propadne: 5% više žita po nivou. Potrebna je Njiva nivoa 3."
 
 #: data/buildings.json
 msgid "Smelter"
 msgstr "Topionica"
 
 #: data/buildings.json
-msgid "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 5."
-msgstr "Topi rudu na jačoj vatri: 5% više gvožđa po nivou. Potreban je Rudnik gvožđa nivoa 5."
+msgid "Smelts the ore hotter: 5% more iron per level. Needs an Iron Mine of level 3."
+msgstr "Topi rudu na jačoj vatri: 5% više gvožđa po nivou. Potreban je Rudnik gvožđa nivoa 3."
 
 #: data/buildings.json
 msgid "Hospital"
 msgstr "Bolnica"
 
 #: data/buildings.json
-msgid "Tends the wounded: when the garrison holds its own village, 5% per level of its fallen get up again."
-msgstr "Leči ranjene: kad posada odbrani svoje selo, 5% njenih palih po nivou ponovo ustaje."
+msgid "Tends the wounded: when the garrison holds its own village, 10% per level of its fallen get up again."
+msgstr "Leči ranjene: kad posada odbrani svoje selo, 10% njenih palih po nivou ponovo ustaje."
 
 #: data/buildings.json
 msgid "Masons' Guild"
 msgstr "Zidarski esnaf"
 
 #: data/buildings.json
-msgid "Master builders who teach the village's hands the craft: every building goes up 2% faster per level."
-msgstr "Majstori graditelji koji uče seoske ruke zanatu: svaka zgrada se gradi 2% brže po nivou."
+msgid "Master builders who teach the village's hands the craft: every building goes up 4% faster per level."
+msgstr "Majstori graditelji koji uče seoske ruke zanatu: svaka zgrada se gradi 4% brže po nivou."
 
 #: data/buildings.json
 msgid "Workers' Huts"
 msgstr "Radničke kolibe"
 
 #: data/buildings.json
-msgid "Homes for the hands who work the fields, woods, quarries and mines: 2% more of every resource per level."
-msgstr "Domovi za ruke koje rade na poljima, u šumama, kamenolomima i rudnicima: 2% više svakog resursa po nivou."
+msgid "Homes for the hands who work the fields, woods, quarries and mines: 4% more of every resource per level."
+msgstr "Domovi za ruke koje rade na poljima, u šumama, kamenolomima i rudnicima: 4% više svakog resursa po nivou."
 
 #: data/buildings.json
 msgid "Grain Silo"
@@ -7024,8 +7024,8 @@ msgid "Blacksmith"
 msgstr "Kovačnica"
 
 #: data/buildings.json
-msgid "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 3% faster and higher levels forge the finer work."
-msgstr "Kuje bolje oružje, oklope i opremu za jednu vrstu jedinica odjednom: oštriji napad, čvršću odbranu, izdržljivije trupe, brži marš. Što iskuješ služi svim tvojim selima. Svaki nivo kuje 3% brže, a viši nivoi kuju finiji rad."
+msgid "Forges better arms, armor and harness for one kind of unit at a time: sharper attack, stouter defense, tougher troops, a faster march. What you forge serves all your villages. Each level forges 6% faster and higher levels forge the finer work."
+msgstr "Kuje bolje oružje, oklope i opremu za jednu vrstu jedinica odjednom: oštriji napad, čvršću odbranu, izdržljivije trupe, brži marš. Što iskuješ služi svim tvojim selima. Svaki nivo kuje 6% brže, a viši nivoi kuju finiji rad."
 
 #: data/buildings.json
 msgid "Market"

@@ -51,7 +51,7 @@
       "embers": 0,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -2650,7 +2650,7 @@
       "embers": 0,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -5187,7 +5187,7 @@
       "embers": 0,
       "armySlots": {
        "used": 0,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -7820,7 +7820,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:31:00.000Z",
-       "completesAt": "2026-06-01T08:31:15.000Z"
+       "completesAt": "2026-06-01T08:31:38.200Z"
       }
      ],
      "garrison": {},
@@ -7843,10 +7843,10 @@
      "training": [],
      "resources": {
       "amounts": {
-       "iron": 255.5,
-       "wood": 396.5,
-       "grain": 940,
-       "stone": 411
+       "iron": 159.5,
+       "wood": 156.5,
+       "grain": 844,
+       "stone": 219
       },
       "ratesPerHour": {
        "iron": 30,
@@ -7864,6 +7864,16 @@
      }
     },
     "serverTime": "2026-06-01T08:31:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "amounts": {
+     "wood": 1000,
+     "stone": 1000,
+     "grain": 1000,
+     "iron": 1000
+    }
    }
   },
   {
@@ -7930,7 +7940,7 @@
      "arrivesAt": "2026-06-01T09:02:12.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 980,
+     "supply": 1000,
      "supplyAt": "2026-06-01T09:01:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -8004,7 +8014,7 @@
      "arrivesAt": "2026-06-01T09:17:12.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 980,
+     "supply": 1000,
      "supplyAt": "2026-06-01T09:01:00.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -8065,7 +8075,7 @@
      "arrivesAt": "2026-06-01T09:17:12.000Z",
      "leavesAt": null,
      "returnsAt": null,
-     "supply": 369.5,
+     "supply": 389.5,
      "supplyAt": "2026-06-01T09:29:12.000Z",
      "hungrySince": null,
      "wagonFortAt": null,
@@ -8123,7 +8133,7 @@
       "embers": 0,
       "armySlots": {
        "used": 180,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -8291,10 +8301,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 281.5,
-        "wood": 474.5,
+        "iron": 1000,
+        "wood": 1000,
         "grain": 0,
-        "stone": 463
+        "stone": 1000
        },
        "ratesPerHour": {
         "iron": 30,
@@ -8560,7 +8570,7 @@
       "arrivesAt": "2026-06-01T09:17:12.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 369.5,
+      "supply": 389.5,
       "supplyAt": "2026-06-01T09:29:12.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -10749,7 +10759,7 @@
       "embers": 0,
       "armySlots": {
        "used": 179,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -10917,7 +10927,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 881,
+        "iron": 1000,
         "wood": 1000,
         "grain": 1000,
         "stone": 1000
@@ -11259,7 +11269,7 @@
       "arrivesAt": "2026-06-01T09:34:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 270.5,
+      "supply": 290.5,
       "supplyAt": "2026-06-01T09:34:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -13407,7 +13417,7 @@
       "embers": 0,
       "armySlots": {
        "used": 179,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -13575,7 +13585,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 881,
+        "iron": 1000,
         "wood": 1000,
         "grain": 1000,
         "stone": 1000
@@ -13917,7 +13927,7 @@
       "arrivesAt": "2026-06-01T09:34:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 270.5,
+      "supply": 290.5,
       "supplyAt": "2026-06-01T09:34:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -16065,7 +16075,7 @@
       "embers": 0,
       "armySlots": {
        "used": 179,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -16233,7 +16243,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 881,
+        "iron": 1000,
         "wood": 1000,
         "grain": 1000,
         "stone": 1000
@@ -16575,7 +16585,7 @@
       "arrivesAt": "2026-06-01T09:34:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 270.5,
+      "supply": 290.5,
       "supplyAt": "2026-06-01T09:34:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -18734,7 +18744,7 @@
       "embers": 0,
       "armySlots": {
        "used": 179,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -18902,7 +18912,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 881,
+        "iron": 1000,
         "wood": 1000,
         "grain": 1000,
         "stone": 1000
@@ -19244,7 +19254,7 @@
       "arrivesAt": "2026-06-01T09:34:36.000Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 270.5,
+      "supply": 290.5,
       "supplyAt": "2026-06-01T09:34:36.000Z",
       "hungrySince": null,
       "wagonFortAt": null,
@@ -21446,8 +21456,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 141,
-       "cap": 40
+       "used": 149,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -21615,7 +21625,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 881,
+        "iron": 1000,
         "wood": 1000,
         "grain": 1000,
         "stone": 1000
@@ -21974,8 +21984,8 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "archer": 42,
-       "spearman": 84
+       "archer": 45,
+       "spearman": 89
       },
       "status": "stationed",
       "battleId": null,
@@ -22011,8 +22021,8 @@
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T10:50:29.781Z",
-      "hungrySince": "2026-06-01T09:44:29.781Z",
+      "supplyAt": "2026-06-01T10:45:13.683Z",
+      "hungrySince": "2026-06-01T09:45:13.683Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -24186,7 +24196,7 @@
       "embers": 0,
       "armySlots": {
        "used": 121,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -24354,7 +24364,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 1400,
         "stone": 1400
@@ -24764,8 +24774,8 @@
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T11:08:29.781Z",
-      "hungrySince": "2026-06-01T09:44:29.781Z",
+      "supplyAt": "2026-06-01T11:09:13.683Z",
+      "hungrySince": "2026-06-01T09:45:13.683Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -26952,7 +26962,7 @@
       "embers": 0,
       "armySlots": {
        "used": 103,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -27120,7 +27130,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 1400,
         "stone": 1400
@@ -27530,8 +27540,8 @@
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T11:26:29.781Z",
-      "hungrySince": "2026-06-01T09:44:29.781Z",
+      "supplyAt": "2026-06-01T11:27:13.683Z",
+      "hungrySince": "2026-06-01T09:45:13.683Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -29717,8 +29727,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 83,
-       "cap": 40
+       "used": 88,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -29886,7 +29896,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 1400,
         "stone": 1400
@@ -30259,8 +30269,8 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "archer": 21,
-       "spearman": 47
+       "archer": 23,
+       "spearman": 50
       },
       "status": "stationed",
       "battleId": null,
@@ -30296,8 +30306,8 @@
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T11:50:29.781Z",
-      "hungrySince": "2026-06-01T09:44:29.781Z",
+      "supplyAt": "2026-06-01T11:45:13.683Z",
+      "hungrySince": "2026-06-01T09:45:13.683Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -32480,8 +32490,8 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 83,
-       "cap": 40
+       "used": 88,
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -32649,7 +32659,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 1400,
         "stone": 1400
@@ -33022,8 +33032,8 @@
       "maneuver": "encircle",
       "loot": null,
       "units": {
-       "archer": 21,
-       "spearman": 47
+       "archer": 23,
+       "spearman": 50
       },
       "status": "stationed",
       "battleId": null,
@@ -33059,8 +33069,8 @@
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T11:50:29.781Z",
-      "hungrySince": "2026-06-01T09:44:29.781Z",
+      "supplyAt": "2026-06-01T11:45:13.683Z",
+      "hungrySince": "2026-06-01T09:45:13.683Z",
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -35264,8 +35274,8 @@
      "maneuver": "encircle",
      "loot": null,
      "units": {
-      "archer": 21,
-      "spearman": 47
+      "archer": 23,
+      "spearman": 50
      },
      "status": "marching",
      "battleId": null,
@@ -35311,8 +35321,8 @@
      "leavesAt": null,
      "returnsAt": null,
      "supply": 0,
-     "supplyAt": "2026-06-01T11:50:29.781Z",
-     "hungrySince": "2026-06-01T09:44:29.781Z",
+     "supplyAt": "2026-06-01T11:45:13.683Z",
+     "hungrySince": "2026-06-01T09:45:13.683Z",
      "wagonFortAt": null,
      "returnHome": false,
      "raid": null,
@@ -35372,7 +35382,7 @@
       "embers": 0,
       "armySlots": {
        "used": 74,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -35540,7 +35550,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 1341,
         "stone": 1400
@@ -38150,7 +38160,7 @@
       "embers": 0,
       "armySlots": {
        "used": 74,
-       "cap": 40
+       "cap": 50
       },
       "ruinSearchReadyAt": null,
       "research": {
@@ -38318,7 +38328,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 1123,
+        "iron": 1200,
         "wood": 1400,
         "grain": 271.60000000000076,
         "stone": 1400
@@ -41053,7 +41063,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Mirogost",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:31:15.000Z",
+      "createdAt": "2026-06-01T08:31:38.200Z",
       "read": false
      },
      {

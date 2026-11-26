@@ -81,7 +81,7 @@ closes ranks when outmaneuvered.
 
 - **The hero never dies.** When its side loses, or its champion is struck down,
   it is **wounded** for 8 game hours and carried home.
-- **Shorter wounds.** Volkh −50%, Ilya −30%, and 8% less per Hero's Hall level
+- **Shorter wounds.** Volkh −50%, Ilya −30%, and 16% less per Hero's Hall level
   in the village where it recovers.
 
 ### Quests
@@ -130,7 +130,7 @@ quests** instead: 2 at a time, one at a time.
 Generals (voivodes) are lesser heroes recruited at a **Hero's Hall**.
 
 - **How many.** A player keeps one general per Hero's Hall, plus one more for
-  every 2 levels of it.
+  every level of it above the first.
 - **Recruiting** takes 2 game hours. It costs 250 / 200 / 250 / 100, ×1.5 for
   every general the player already has. A recruit can be given a name.
 - **Levels, no skills.** Up to level 10, from kills: level L needs

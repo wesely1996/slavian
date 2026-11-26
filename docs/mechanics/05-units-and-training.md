@@ -17,7 +17,8 @@ Every unit belongs to a **family**, which decides the counters in battle
 - **Own counters.** Some units have their own counters instead of their
   family's. A Horse Cutter, for example, strikes cavalry ×2.
 - **Tiers.** A unit's `requiresLevel` is the level its building needs to train
-  it. Levels 1–3 are the first tier, 4–6 the second, 7–9 the third.
+  it, from 1 to 5. The first tier needs levels 1–2, the second 2–3, the third
+  4–5; its tier is in its Slots ([below](#army-slots)).
 
 ## Stats
 
@@ -43,55 +44,55 @@ Cost is wood / stone / grain / iron. "Bldg" is the building level needed.
 | Warrior | 1 | 40/20/35/35 | 65 s | 31 | 30 | 235 | 5 | 1 | 1 |  |
 | Spearman | 1 | 35/20/30/30 | 60 s | 20 | 40 | 285 | 5 | 1 | 1 | Holds walls, stops riders |
 | Ambusher | 1 | 40/15/35/40 | 75 s | 40 | 20 | 190 | 6 | 1 | 1 | ×1.5 archers, ×1.2 cavalry; +15% attack in woods |
-| Axeman | 2 | 45/25/35/50 | 80 s | 49 | 25 | 245 | 5 | 1 | 1 |  |
-| Horse Cutter | 3 | 40/25/35/45 | 80 s | 41 | 30 | 315 | 5 | 1 | 1 | ×2 cavalry |
-| Warrior of Perun | 4 | 70/40/60/80 | 140 s | 80 | 45 | 445 | 5 | 2 | 2 |  |
-| Axe Warrior | 4 | 75/35/60/90 | 150 s | 100 | 35 | 400 | 5 | 2 | 2 |  |
-| Follower of Veles | 5 | 60/60/70/60 | 150 s | 65 | 65 | 635 | 5 | 2 | 2 |  |
-| Horse Butcher | 5 | 60/40/60/80 | 150 s | 80 | 45 | 550 | 5 | 2 | 2 | ×2.2 cavalry |
-| Battering Ram | 5 | 300/40/80/140 | 380 s | 25 | 70 | 360 | 3 | 3 | 2 | Siege engine; breaches stronghold walls |
-| Large Shield | 6 | 80/60/50/70 | 160 s | 47 | 90 | 1115 | 4 | 2 | 2 |  |
-| Noble Spearman | 6 | 70/50/60/90 | 170 s | 75 | 75 | 830 | 5 | 2 | 2 | ×1.8 cavalry |
-| Champion of Perun | 7 | 140/90/120/180 | 300 s | 225 | 70 | 970 | 5 | 3 | 3 |  |
-| Perun's Axe | 8 | 150/80/120/200 | 320 s | 355 | 55 | 1090 | 5 | 3 | 3 |  |
-| Veles' Chosen | 8 | 130/120/130/150 | 320 s | 195 | 100 | 1380 | 5 | 3 | 3 |  |
-| Chosen Shield | 9 | 150/140/120/180 | 360 s | 165 | 140 | 2385 | 4 | 3 | 3 | ×1.8 cavalry |
-| Warlord's Guard | 9 | 180/140/160/240 | 400 s | 350 | 100 | 1750 | 5 | 4 | 3 |  |
+| Axeman | 1 | 45/25/35/50 | 80 s | 49 | 25 | 245 | 5 | 1 | 1 |  |
+| Horse Cutter | 2 | 40/25/35/45 | 80 s | 41 | 30 | 315 | 5 | 1 | 1 | ×2 cavalry |
+| Warrior of Perun | 2 | 70/40/60/80 | 140 s | 80 | 45 | 445 | 5 | 2 | 2 |  |
+| Axe Warrior | 2 | 75/35/60/90 | 150 s | 100 | 35 | 400 | 5 | 2 | 2 |  |
+| Follower of Veles | 3 | 60/60/70/60 | 150 s | 65 | 65 | 635 | 5 | 2 | 2 |  |
+| Horse Butcher | 3 | 60/40/60/80 | 150 s | 80 | 45 | 550 | 5 | 2 | 2 | ×2.2 cavalry |
+| Battering Ram | 3 | 300/40/80/140 | 380 s | 25 | 70 | 360 | 3 | 3 | 2 | Siege engine; breaches stronghold walls |
+| Large Shield | 3 | 80/60/50/70 | 160 s | 47 | 90 | 1115 | 4 | 2 | 2 |  |
+| Noble Spearman | 3 | 70/50/60/90 | 170 s | 75 | 75 | 830 | 5 | 2 | 2 | ×1.8 cavalry |
+| Champion of Perun | 4 | 140/90/120/180 | 300 s | 225 | 70 | 970 | 5 | 3 | 3 |  |
+| Perun's Axe | 4 | 150/80/120/200 | 320 s | 355 | 55 | 1090 | 5 | 3 | 3 |  |
+| Veles' Chosen | 4 | 130/120/130/150 | 320 s | 195 | 100 | 1380 | 5 | 3 | 3 |  |
+| Chosen Shield | 5 | 150/140/120/180 | 360 s | 165 | 140 | 2385 | 4 | 3 | 3 | ×1.8 cavalry |
+| Warlord's Guard | 5 | 180/140/160/240 | 400 s | 350 | 100 | 1750 | 5 | 4 | 3 |  |
 
 ### Archers (Shooting Range)
 
 | Unit | Bldg | Cost | Train | Atk | Def | HP | Spd | Upk | Slots | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Archer | 1 | 50/15/30/40 | 75 s | 35 | 20 | 165 | 5 | 1 | 1 |  |
-| Skirmisher | 2 | 40/15/30/40 | 70 s | 30 | 25 | 200 | 6 | 1 | 1 | ×1.5 infantry, ×1.2 cavalry |
-| Poison Archer | 3 | 50/15/35/50 | 90 s | 49 | 15 | 215 | 5 | 1 | 1 | **Poisons**; ×1.8 infantry, ×1.4 cavalry |
-| Hunter | 4 | 80/25/50/60 | 130 s | 70 | 30 | 300 | 6 | 1 | 2 |  |
-| Scorpion | 4 | 220/60/70/160 | 360 s | 70 | 25 | 150 | 3 | 3 | 2 | Siege engine; ×2 cavalry, ×1.1 infantry |
-| Noble Skirmisher | 5 | 80/40/60/80 | 150 s | 80 | 40 | 445 | 7 | 2 | 2 | ×1.5 infantry, ×1.3 cavalry |
-| Poison Hunter | 5 | 90/30/60/80 | 160 s | 100 | 25 | 395 | 6 | 2 | 2 | **Poisons**; ×1.9 infantry, ×1.5 cavalry |
-| Onager | 6 | 250/200/80/120 | 400 s | 90 | 20 | 165 | 3 | 3 | 2 | Siege engine; ×1.8 infantry, ×1.2 archers |
-| Devana's Hunter | 7 | 130/50/100/140 | 280 s | 195 | 45 | 665 | 7 | 2 | 3 | ×1.5 infantry, ×1.3 cavalry; +20% attack in woods |
-| Perun's Thunder Thrower | 9 | 200/120/150/260 | 450 s | 140 | 40 | 285 | 4 | 4 | 2 | Siege engine; ×1.6 inf, ×1.4 cav, ×1.2 archers |
+| Skirmisher | 1 | 40/15/30/40 | 70 s | 30 | 25 | 200 | 6 | 1 | 1 | ×1.5 infantry, ×1.2 cavalry |
+| Poison Archer | 2 | 50/15/35/50 | 90 s | 49 | 15 | 215 | 5 | 1 | 1 | **Poisons**; ×1.8 infantry, ×1.4 cavalry |
+| Hunter | 2 | 80/25/50/60 | 130 s | 70 | 30 | 300 | 6 | 1 | 2 |  |
+| Scorpion | 2 | 220/60/70/160 | 360 s | 70 | 25 | 150 | 3 | 3 | 2 | Siege engine; ×2 cavalry, ×1.1 infantry |
+| Noble Skirmisher | 3 | 80/40/60/80 | 150 s | 80 | 40 | 445 | 7 | 2 | 2 | ×1.5 infantry, ×1.3 cavalry |
+| Poison Hunter | 3 | 90/30/60/80 | 160 s | 100 | 25 | 395 | 6 | 2 | 2 | **Poisons**; ×1.9 infantry, ×1.5 cavalry |
+| Onager | 3 | 250/200/80/120 | 400 s | 90 | 20 | 165 | 3 | 3 | 2 | Siege engine; ×1.8 infantry, ×1.2 archers |
+| Devana's Hunter | 4 | 130/50/100/140 | 280 s | 195 | 45 | 665 | 7 | 2 | 3 | ×1.5 infantry, ×1.3 cavalry; +20% attack in woods |
+| Perun's Thunder Thrower | 5 | 200/120/150/260 | 450 s | 140 | 40 | 285 | 4 | 4 | 2 | Siege engine; ×1.6 inf, ×1.4 cav, ×1.2 archers |
 
 ### Cavalry (Stables)
 
 | Unit | Bldg | Cost | Train | Atk | Def | HP | Spd | Upk | Slots | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Horse Raider | 1 | 40/30/60/80 | 120 s | 45 | 25 | 200 | 10 | 2 | 1 | Carries 80 |
-| Raider | 2 | 35/20/50/50 | 90 s | 42 | 15 | 155 | 12 | 1 | 1 | Carries 120 |
-| Military Caravan | 2 | 120/20/40/30 | 150 s | 0 | 60 | 450 | 5 | 0.5 | 1 | Support (wagon): +200 grain for its army; carries 400 loot |
-| Horse Archer | 4 | 70/30/80/90 | 180 s | 75 | 30 | 310 | 11 | 2 | 2 | ×1.5 archers, ×1.3 infantry; +10% attack on open ground |
-| Large Military Caravan | 4 | 260/40/80/70 | 300 s | 0 | 80 | 600 | 7 | 1 | 1 | Support (wagon): +300 grain; carries 1 engine or 10 foot soldiers; carries 600 loot |
-| Bear Rider | 6 | 80/60/160/140 | 300 s | 115 | 70 | 555 | 7 | 4 | 2 | ×1.5 archers, ×1.2 infantry; +10% defense in woods |
-| Svarog's Raider | 8 | 150/90/180/260 | 420 s | 250 | 80 | 860 | 11 | 4 | 3 |  |
+| Raider | 1 | 35/20/50/50 | 90 s | 42 | 15 | 155 | 12 | 1 | 1 | Carries 120 |
+| Military Caravan | 1 | 120/20/40/30 | 150 s | 0 | 60 | 450 | 5 | 0.5 | 1 | Support (wagon): +200 grain for its army; carries 400 loot |
+| Horse Archer | 2 | 70/30/80/90 | 180 s | 75 | 30 | 310 | 11 | 2 | 2 | ×1.5 archers, ×1.3 infantry; +10% attack on open ground |
+| Large Military Caravan | 2 | 260/40/80/70 | 300 s | 0 | 80 | 600 | 7 | 1 | 1 | Support (wagon): +300 grain; carries 1 engine or 10 foot soldiers; carries 600 loot |
+| Bear Rider | 3 | 80/60/160/140 | 300 s | 115 | 70 | 555 | 7 | 4 | 2 | ×1.5 archers, ×1.2 infantry; +10% defense in woods |
+| Svarog's Raider | 4 | 150/90/180/260 | 420 s | 250 | 80 | 860 | 11 | 4 | 3 |  |
 
 ### Scouts (Scout Lodge)
 
 | Unit | Bldg | Cost | Train | Spd | Stealth | Intel | Notes |
 |---|---|---|---|---|---|---|---|
 | Scout | 1 | 30/20/20/10 | 45 s | 12 | 1 | 1 | |
-| Pathfinder | 3 | 70/40/50/40 | 120 s | 16 | 0.5 | 2 | Eases harsh terrain for its army (5% each, at most 50%) |
-| Assassin | 6 | 150/80/100/160 | 360 s | 14 | 0.35 | 3 | 10% each to kill a horde's leader |
+| Pathfinder | 2 | 70/40/50/40 | 120 s | 16 | 0.5 | 2 | Eases harsh terrain for its army (5% each, at most 50%) |
+| Assassin | 3 | 150/80/100/160 | 360 s | 14 | 0.35 | 3 | 10% each to kill a horde's leader |
 
 Lower **stealth** is better: it scales the chance of being caught
 ([page 12](12-scouting-and-expansion.md#scouting-a-horde)).
@@ -110,26 +111,26 @@ Terrain notes are on top of the family's ([page 6](06-battles.md#terrain)):
 
 | Unit | Clan | Bldg | Atk | Def | HP | Spd | Slots | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Forest Archer | Rys (Lynx) | Range 2 | 47 | 28 | 230 | 6 | 1 | +20% attack in woods |
-| River Barge | Bobr (Beaver) | Barracks 2 | 30 | 45 | 625 | 7 | 1 | Carries 200; +15% defense by each river or lake |
-| Border Rider | Sokol (Falcon) | Stables 3 | 55 | 32 | 260 | 14 | 1 | +10% attack on open ground |
-| Aurochs Guard | Tur (Aurochs) | Barracks 2 | 29 | 62 | 410 | 4 | 1 | +10% defense on open ground |
-| Raven Javelineer | Gavran (Raven) | Range 2 | 48 | 24 | 210 | 7 | 1 | +10% attack in hills |
-| Fox Rider | Lisica (Fox) | Stables 3 | 50 | 28 | 260 | 13 | 1 | Carries 120; +15% attack in woods |
-| Serpent Axeman | Zmija (Serpent) | Barracks 3 | 60 | 30 | 340 | 5 | 1 | +20% attack in wetlands |
+| Forest Archer | Rys (Lynx) | Range 1 | 47 | 28 | 230 | 6 | 1 | +20% attack in woods |
+| River Barge | Bobr (Beaver) | Barracks 1 | 30 | 45 | 625 | 7 | 1 | Carries 200; +15% defense by each river or lake |
+| Border Rider | Sokol (Falcon) | Stables 2 | 55 | 32 | 260 | 14 | 1 | +10% attack on open ground |
+| Aurochs Guard | Tur (Aurochs) | Barracks 1 | 29 | 62 | 410 | 4 | 1 | +10% defense on open ground |
+| Raven Javelineer | Gavran (Raven) | Range 1 | 48 | 24 | 210 | 7 | 1 | +10% attack in hills |
+| Fox Rider | Lisica (Fox) | Stables 2 | 50 | 28 | 260 | 13 | 1 | Carries 120; +15% attack in woods |
+| Serpent Axeman | Zmija (Serpent) | Barracks 2 | 60 | 30 | 340 | 5 | 1 | +20% attack in wetlands |
 
 ## Training
 
 - **Batches.** A village trains in batches of up to 50 units. It keeps up to
-  3 batches waiting, plus 1 for every 5 levels of *each* of its Barracks,
+  3 batches waiting, plus 1 for every 2.5 levels (rounded down) of *each* of its Barracks,
   Shooting Range and Stables.
-- **Training speed.** A unit's time shrinks ×0.9 for every level of its
+- **Training speed.** A unit's time shrinks ×0.81 for every level of its
   building above the first level it can be trained at, then by `trainTime`
   bonuses and world speed:
   - **Research:** Drill Yards −10%, Svarog's Forge −10%, Svarog's Living
     Flame −15%.
   - **The Shrine** of Svarog −3% a level.
-  - **Longhouse Hall** −2% a level.
+  - **Longhouse Hall** −4% a level.
   - **Per unit:** Nastasya trains Spearmen 15% faster; Medvěd trains settlers
     50% slower.
 - **Paying.** A batch is paid when queued.
@@ -143,15 +144,16 @@ villages give only so many:
 
 | | Slots |
 |---|---|
-| Units needing a building below level 4 | 1 |
-| Units needing level 4 to 6 | 2 |
-| Units needing level 7 or more | 3 |
+| First-tier units | 1 |
+| Second-tier units | 2 |
+| Third-tier units | 3 |
 | Siege engines | 2 |
 | Wagons and Shamans | 1 |
 | Scouts and settlers | 0 |
 
 - **What a player has.** Each of their standing villages gives **30**, plus
-  **10** for each Elder's Hall level. A village at Hall 10 gives 130.
+  **20** for each Elder's Hall level. A village at Hall 5 gives 130, at Hall
+  10 230.
 - **What counts.** All the player's garrisons and troops in training, their
   armies out on the map and their caravans' escorts.
 - **Full.** No more units are trained once the slots are full. Troops
@@ -180,7 +182,7 @@ villages give only so many:
   chance to get up again, up to 50%.
 - **In an army,** this works for every round it fights, but not when it
   starves.
-- **In a garrison,** it adds to the Hospital's 5% a level when the village
+- **In a garrison,** it adds to the Hospital's 10% a level when the village
   holds.
 
 ### Wagons and transports

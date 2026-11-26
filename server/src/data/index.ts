@@ -96,11 +96,11 @@ const buildingsFileSchema = z.object({
     slotsUnlockedAtStart: z.number().int().positive(),
     slotsPerHallLevel: z.number().int().nonnegative(),
     baseQueueLimit: z.number().int().positive(),
-    hallLevelsPerQueueSlot: z.number().int().positive(),
+    hallLevelsPerQueueSlot: z.number().positive(),
     hallBuildSpeedup: z.number().positive().max(1),
     outpostRange: z.number().int().positive(),
     baseOutposts: z.number().int().nonnegative(),
-    hallLevelsPerOutpost: z.number().int().positive(),
+    hallLevelsPerOutpost: z.number().positive(),
     demolishRefund: z.number().min(0).max(1),
     // What a cancelled build gives back: base, plus per Hall level above 1.
     cancelRefund: z.object({ base: z.number().min(0).max(1), perHallLevel: z.number().min(0) }),
@@ -114,7 +114,7 @@ const buildingsFileSchema = z.object({
       maxRate: z.number().positive(),
       gearValue: resourcesSchema,
       // The bounty board: the fee, how many open bounties a Market keeps, how much each.
-      bounties: z.object({ feeShare: z.number().min(0).max(1), levelsPerBounty: z.number().int().positive(), amountPerLevel: z.number().int().positive() }),
+      bounties: z.object({ feeShare: z.number().min(0).max(1), levelsPerBounty: z.number().positive(), amountPerLevel: z.number().int().positive() }),
     }),
   }),
   buildings: z.record(z.string(), buildingSchema),
@@ -220,7 +220,7 @@ const unitsFileSchema = z.object({
   trainingQueueLimit: z.number().int().positive(),
   // One more training batch for every few levels of each of these buildings.
   trainingSlotBuildings: z.array(z.string()),
-  buildingLevelsPerTrainingSlot: z.number().int().positive(),
+  buildingLevelsPerTrainingSlot: z.number().positive(),
   maxBatch: z.number().int().positive(),
   // Each standing village's army slots: base + perHallLevel x its Elder's Hall level.
   armySlots: z.object({ base: z.number().int().nonnegative(), perHallLevel: z.number().int().nonnegative() }),
@@ -474,9 +474,9 @@ const wallsFileSchema = z.object({
     ballista: z.object({ enginesPerLevel: z.number().nonnegative() }),
     murder_holes: z.object({ defensePerLevel: z.number().nonnegative() }),
     ditch: z.object({
-      siegeCutPerLevel: z.number().min(0).max(0.1),
+      siegeCutPerLevel: z.number().min(0).max(0.2),
       setupPerLevel: z.number().nonnegative(),
-      escaladeCutPerLevel: z.number().min(0).max(0.1),
+      escaladeCutPerLevel: z.number().min(0).max(0.2),
       // The moat holds water from this level.
       waterAt: z.number().int().positive(),
     }),
@@ -544,8 +544,8 @@ const heroesFileSchema = z.object({
     costGrowth: z.number().min(1),
     recruitHours: z.number().positive(),
     perHall: z.number().int().min(0),
-    hallLevelsPerGeneral: z.number().int().positive(),
-    hallRecoveryPerLevel: z.number().min(0).max(0.1),
+    hallLevelsPerGeneral: z.number().positive(),
+    hallRecoveryPerLevel: z.number().min(0).max(0.2),
   }),
   names: z.array(z.string()).min(1),
   branches: z.record(z.string(), z.string()),
@@ -655,7 +655,7 @@ const ordersFileSchema = z.object({
   checkMinutes: z.number().positive(),
   maxPerVillage: z.number().int().positive(),
   // One more standing order every this many Elder's Hall levels.
-  hallLevelsPerOrder: z.number().int().positive(),
+  hallLevelsPerOrder: z.number().positive(),
   minSurplus: z.number().nonnegative(),
   // Supply routes send grain once at least this much is missing.
   supplyMinLoad: z.number().int().positive(),

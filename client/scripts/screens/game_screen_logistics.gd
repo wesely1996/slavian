@@ -580,7 +580,7 @@ func _train_order_form(village: Dictionary) -> void:
 func _orders_count(village: Dictionary) -> void:
 	var have := Game.orders.filter(func(o: Dictionary) -> bool: return int(o.villageId) == int(village.id)).size()
 	var most := Rules.orders_limit(Game.data, Rules.hall_level(village))
-	_panel_body.add_child(UI.label(tr("Orders %d/%d · +1 every %d Hall levels") % [have, most, int(Game.data.orders.hallLevelsPerOrder)], UI.SMALL_SIZE, UI.ERROR if have >= most else UI.MUTED))
+	_panel_body.add_child(UI.label(tr("Orders %d/%d · +1 every %s Hall levels") % [have, most, String.num(float(Game.data.orders.hallLevelsPerOrder))], UI.SMALL_SIZE, UI.ERROR if have >= most else UI.MUTED))
 
 
 func _rebuild_order_form(village_id: int) -> void:

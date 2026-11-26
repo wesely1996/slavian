@@ -63,7 +63,7 @@ describe('training batches', () => {
 
   it('trains faster with a bigger barracks and a faster world', () => {
     expect(perUnitMs(data, 'spearman', 1, 1)).toBe(60_000);
-    expect(perUnitMs(data, 'spearman', 3, 1)).toBe(Math.round(60_000 * 0.9 ** 2));
+    expect(perUnitMs(data, 'spearman', 3, 1)).toBe(Math.round(60_000 * data.units.trainingSpeedup ** 2));
     expect(perUnitMs(data, 'spearman', 1, 10)).toBe(6_000);
   });
 });
@@ -81,9 +81,9 @@ describe('settlers', () => {
 describe('queueTraining', () => {
   it('needs the training building at the required level', () => {
     expect(() => queueTraining(data, newVillage(data, T0, 1), 'spearman', 1, T0, 1)).toThrow(/Barracks level 1/);
-    expect(() => queueTraining(data, withBarracks(1), 'axeman', 1, T0, 1)).toThrow(/Barracks level 2/);
+    expect(() => queueTraining(data, withBarracks(1), 'horse_cutter', 1, T0, 1)).toThrow(/Barracks level 2/);
     expect(() => queueTraining(data, withBarracks(1), 'scout', 1, T0, 1)).toThrow(/Scout Lodge/);
-    expect(() => queueTraining(data, withBarracks(2), 'axeman', 1, withBarracks(2).ledger.settledAt, 1)).not.toThrow();
+    expect(() => queueTraining(data, withBarracks(2), 'horse_cutter', 1, withBarracks(2).ledger.settledAt, 1)).not.toThrow();
     // Riders come from the Stables, shooters from the Shooting Range.
     expect(() => queueTraining(data, withBarracks(2), 'horseman', 1, T0, 1)).toThrow(/Stables level 1/);
     expect(() => queueTraining(data, withBarracks(2), 'archer', 1, T0, 1)).toThrow(/Shooting Range level 1/);
@@ -145,10 +145,10 @@ describe('training speed by building level', () => {
   const data = loadGameData();
   it('counts from the first level a building trains anything at', () => {
     expect(trainingFirstLevel(data, 'barracks')).toBe(1);
-    // The Hospital's Shaman needs level 2: no speed-up before then.
-    expect(trainingFirstLevel(data, 'hospital')).toBe(2);
-    expect(trainingSpeedFactor(data, 'hospital', 2)).toBe(1);
-    expect(trainingSpeedFactor(data, 'hospital', 3)).toBeCloseTo(data.units.trainingSpeedup);
+    // The Hospital's Shaman trains from level 1: faster from level 2.
+    expect(trainingFirstLevel(data, 'hospital')).toBe(1);
+    expect(trainingSpeedFactor(data, 'hospital', 1)).toBe(1);
+    expect(trainingSpeedFactor(data, 'hospital', 2)).toBeCloseTo(data.units.trainingSpeedup);
     expect(trainingSpeedFactor(data, 'barracks', 2)).toBeCloseTo(data.units.trainingSpeedup);
   });
 });

@@ -18,6 +18,12 @@ const deps: SchedulerDeps = { data, handlers };
 const T0 = new Date('2026-03-01T08:00:00Z');
 const seconds = (n: number) => new Date(T0.getTime() + n * 1000);
 
+// Stores enough for a few builds in a row (a level costs two of the old 20).
+function stocked(state: ReturnType<typeof newVillage>): ReturnType<typeof newVillage> {
+  const plenty = { wood: 2000, stone: 2000, grain: 2000, iron: 2000 };
+  return { ...state, ledger: { ...state.ledger, amounts: plenty, capacity: { wood: 9000, stone: 9000, grain: 9000, iron: 9000 } } };
+}
+
 describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
   let db: Db;
   let cleanup: () => Promise<void>;
@@ -39,7 +45,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scheduler (postgres)', () => {
         name: 'v',
         q: 2,
         r: 0,
-        state: newVillage(data, T0, speed),
+        state: stocked(newVillage(data, T0, speed)),
       });
       return { worldId: world.id, villageId: village.id, accountId: account.id };
     });

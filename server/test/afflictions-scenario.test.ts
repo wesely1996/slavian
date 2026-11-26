@@ -15,7 +15,7 @@ scenario('afflictions-scenario.json', START, async ({ started, now, play }) => {
   const world = '/v1/worlds/-1';
   const at = (iso: string) => new Date(iso).getTime();
   const smith = (unit: string, line: string) => play({ method: 'POST', path: '/v1/villages/1/smith', body: { unit, line } });
-  await play({ set: { plots: { c2: { building: 'blacksmith', level: 10 } }, amounts: { wood: 9000, stone: 9000, grain: 9000, iron: 9000 } } });
+  await play({ set: { plots: { c2: { building: 'blacksmith', level: 5 } }, amounts: { wood: 9000, stone: 9000, grain: 9000, iron: 9000 } } });
   // Poison archers poison already; spearmen don't shoot fire arrows.
   await smith('poison_archer', 'poison');
   await smith('spearman', 'burn');

@@ -1,7 +1,8 @@
 // Data upgrades that need game rules, run on server start after the SQL
 // migrations. Each is idempotent.
 import type { GameData } from '../data/index.js';
-import { HALL_PLOT, plotsFromLegacyLevels, withWallPlots, type Plot } from '../sim/village.js';
+import { HALL_PLOT, levelsOf, plotsFromLegacyLevels, withBonuses, withWallPlots, type Plot } from '../sim/village.js';
+import { loadVillage, saveVillageState } from './villages.js';
 import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
@@ -152,5 +153,50 @@ export async function upgradeRuinStorage(db: Db, data: GameData): Promise<number
       raised++;
     }
     return raised;
+  });
+}
+
+// The buildings whose 20 levels became 10 (0.23): each new level is two old ones.
+export const COMPRESSED_BUILDINGS: readonly string[] = [
+  'elder_hall', 'woodcutter', 'quarry', 'farm', 'iron_mine', 'storehouse', 'barracks', 'stables', 'shooting_range', 'heroes_hall',
+  'scout_lodge', 'caravan_yard', 'granary_temple', 'stone_redoubt', 'longhouse_hall', 'wall', 'archer_tower', 'gate_tower', 'ballista',
+  'murder_holes', 'ditch', 'watchtower', 'hospital', 'masons_guild', 'workers_huts', 'grain_silo', 'fisherman_hut', 'blacksmith', 'market',
+];
+
+// An old level of `building` on the new scale (half, rounded up).
+export function compressedLevel(building: string | null, level: number): number {
+  return building !== null && COMPRESSED_BUILDINGS.includes(building) ? Math.ceil(level / 2) : level;
+}
+
+function compressPlots(plots: Record<string, Plot>): Record<string, Plot> {
+  return Object.fromEntries(Object.entries(plots).map(([id, p]) => [id, { ...p, level: compressedLevel(p.building, p.level) }]));
+}
+
+// Villages saved before the 20 levels became 10: their buildings, queued
+// builds (and their events) and what a ruin held, on the new scale; then
+// their rates and stores as the new levels give them, from when each was
+// last settled (what came in before then came at the old rates).
+export async function upgradeLevelScale(db: Db, data: GameData): Promise<number> {
+  return inTransaction(db, async (client) => {
+    const { rows } = await client.query<{ id: number; world_id: number }>('SELECT id, world_id FROM villages WHERE level_scale = 1 ORDER BY id FOR UPDATE');
+    for (const row of rows) {
+      const village = await loadVillage(client, row.id);
+      const speed = (await getWorld(client, row.world_id)).speed;
+      const plots = compressPlots(village.state.plots);
+      const queue = village.state.queue.map((item) => ({ ...item, targetLevel: compressedLevel(item.building, item.targetLevel) }));
+      const ruinPlots = village.ruin ? compressPlots(village.ruin.plots) : null;
+      const state = withBonuses(data, { ...village.state, plots, levels: levelsOf(plots), queue }, village.state.bonuses, village.state.ledger.settledAt, speed);
+      // A ruin's stores still hold what rebuilding it costs.
+      const ledger = ruinPlots ? { ...state.ledger, capacity: ruinStorage(data, state.ledger.capacity, ruinPlots) } : state.ledger;
+      await saveVillageState(client, village.id, { ...state, ledger });
+      if (village.ruin) await client.query('UPDATE villages SET ruin = $2 WHERE id = $1', [village.id, JSON.stringify({ ...village.ruin, plots: ruinPlots })]);
+      await client.query(
+        `UPDATE scheduled_events SET payload = jsonb_set(payload, '{targetLevel}', to_jsonb(ceil((payload->>'targetLevel')::numeric / 2)::int))
+         WHERE status = 'pending' AND type = 'build_complete' AND (payload->>'villageId')::bigint = $1 AND payload->>'building' = ANY($2)`,
+        [village.id, COMPRESSED_BUILDINGS],
+      );
+      await client.query('UPDATE villages SET level_scale = 2 WHERE id = $1', [village.id]);
+    }
+    return rows.length;
   });
 }
