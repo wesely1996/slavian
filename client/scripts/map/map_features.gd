@@ -5,8 +5,11 @@ extends Node2D
 ## reeds, stones. Placement is seeded by the hex, so it never shifts, and
 ## everything is drawn back to front. Hexes with a settlement on them are
 ## left clear. Rebuilt only when the terrain or the settlements change.
+## Drawn in horizontal strips (Strip), so what is out of view costs nothing.
 
 const GRID := Color(0, 0, 0, 0.09)
+## Rows of hexes in each strip the map is drawn in.
+const STRIP_ROWS := 4
 ## Per terrain: [art id, how many, size in hex widths, spread (0-1 of the
 ## hex)] for each kind of feature on it.
 const FEATURES := {
@@ -35,8 +38,23 @@ const FEATURES := {
 var hex_size := 48.0
 ## [y, art id, rect] for every feature, sorted back to front.
 var _placed: Array = []
-var _cells: Array = []
 var _built_for := 0
+
+
+## One horizontal strip of the map: its grid lines and the features whose
+## foot stands in it. Strips are drawn top to bottom, so the whole stays back
+## to front, and Godot skips the strips out of view.
+class Strip extends Node2D:
+	var grid := PackedVector2Array()
+	var placed: Array = []
+
+	func _draw() -> void:
+		if not grid.is_empty():
+			draw_multiline(grid, MapFeatures.GRID, 1.2, true)
+		for entry in placed:
+			var texture := Art.texture(entry[1])
+			if texture != null:
+				draw_texture_rect(texture, entry[2], false)
 
 
 func build(terrain: Dictionary, size: float, occupied: Dictionary) -> void:
@@ -45,25 +63,79 @@ func build(terrain: Dictionary, size: float, occupied: Dictionary) -> void:
 		return
 	_built_for = key
 	hex_size = size
-	_cells = terrain.keys()
 	_placed = []
 	for cell in terrain:
 		if occupied.has(cell):
 			continue
 		_place(cell, String(terrain[cell]))
 	_placed.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	queue_redraw()
+	_rebuild_strips(terrain.keys())
 
 
-func _draw() -> void:
-	for cell in _cells:
-		var outline := HexMath.corners(HexMath.to_pixel(cell, hex_size), hex_size)
-		outline.append(outline[0])
-		draw_polyline(outline, GRID, 1.2, true)
+## How tall a strip is: a few rows of hexes.
+func _strip_height() -> float:
+	return hex_size * 1.5 * STRIP_ROWS
+
+
+func _strip_of(y: float) -> int:
+	return floori(y / _strip_height())
+
+
+func _rebuild_strips(cells: Array) -> void:
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	var strips := {}
+	# Each edge of the grid once: an edge belongs to the hex that has it
+	# among its first three sides, or to either if only one is on the map.
+	var on_map := {}
+	for cell in cells:
+		on_map[cell] = true
+	for cell in cells:
+		var center := HexMath.to_pixel(cell, hex_size)
+		var corners := HexMath.corners(center, hex_size)
+		for k in 6:
+			var a: Vector2 = corners[k]
+			var b: Vector2 = corners[(k + 1) % 6]
+			var neighbour := _across(cell, center, (a + b) / 2.0)
+			if on_map.has(neighbour) and _owns(neighbour, cell):
+				continue
+			var strip := _strip(strips, _strip_of(minf(a.y, b.y)))
+			strip.grid.append(a)
+			strip.grid.append(b)
 	for entry in _placed:
-		var texture := Art.texture(entry[1])
-		if texture != null:
-			draw_texture_rect(texture, entry[2], false)
+		_strip(strips, _strip_of(entry[0])).placed.append(entry)
+	var rows := strips.keys()
+	rows.sort()
+	for row in rows:
+		add_child(strips[row])
+		strips[row].queue_redraw()
+
+
+static func _strip(strips: Dictionary, row: int) -> Strip:
+	if not strips.has(row):
+		var strip := Strip.new()
+		strip.show_behind_parent = true
+		strips[row] = strip
+	return strips[row]
+
+
+## The hex on the other side of the edge whose midpoint is `mid`.
+func _across(cell: Vector2i, center: Vector2, mid: Vector2) -> Vector2i:
+	var best := cell
+	var best_d := INF
+	for n in HexMath.neighbors(cell):
+		var d := HexMath.to_pixel(n, hex_size).distance_squared_to(mid)
+		if d < best_d:
+			best_d = d
+			best = n
+	return best
+
+
+## Which of two neighbouring hexes draws the edge between them: the one
+## that comes first (by row, then column).
+static func _owns(a: Vector2i, b: Vector2i) -> bool:
+	return a.y < b.y or (a.y == b.y and a.x < b.x)
 
 
 func _place(cell: Vector2i, terrain: String) -> void:
