@@ -107,9 +107,11 @@ export function raidBattle(
   for (const [unit, n] of Object.entries(input.army)) breach += (data.units.units[unit]?.breach ?? 0) * n;
   const walls = input.stage.stronghold ? 1 + rules.stronghold.walls * Math.max(0, 1 - breach) : 1;
   const base = enemyStats(data, input.front);
+  // The deeper, the tougher.
+  const tough = 1 + rules.enemy.toughnessPerStage * Math.max(0, input.stage.stage - 1);
   const enemyStatsAt = (unit: string): UnitStats => {
     const s = base(unit);
-    return { ...s, attack: s.attack * (field?.enemy.attack ?? 1), defense: s.defense * (field?.enemy.defense ?? 1) * walls };
+    return { ...s, attack: s.attack * (field?.enemy.attack ?? 1) * tough, defense: s.defense * (field?.enemy.defense ?? 1) * walls * tough };
   };
   let champions = [...(input.champions ?? [])];
   const fallen: string[] = [];
@@ -168,10 +170,15 @@ export function raidCapacity(data: GameData, units: Units): number {
 }
 
 // What a battle won yields: per enemy killed, and the stronghold's stores
-// when it is sacked (the North gives little of it).
-export function raidLoot(data: GameData, front: Front, kills: number, stronghold: boolean): Resources {
+// when it is sacked (the North gives little of it); more the deeper the
+// battle (`stage`) and the more the front hates (`hatred`).
+export function raidLoot(data: GameData, front: Front, kills: number, stronghold: boolean, stage = 1, hatred = 0): Resources {
   const rules = data.raids;
-  const factor = data.enemies.fronts[front]!.personality.lootFactor * (front === 'north' ? rules.north.resourceShare : 1);
+  const factor =
+    data.enemies.fronts[front]!.personality.lootFactor *
+    (front === 'north' ? rules.north.resourceShare : 1) *
+    (1 + rules.loot.perStage * Math.max(0, stage - 1)) *
+    (1 + rules.loot.perHatred * Math.max(0, hatred));
   return mapResources((kind) => Math.round((rules.loot.perKill[kind] * kills + (stronghold ? rules.loot.stronghold[kind] : 0)) * factor));
 }
 

@@ -847,9 +847,11 @@ const raidsFileSchema = z.object({
   stageHours: z.number().positive(),
   maxDepth: z.number().int().min(1),
   fieldStance: z.enum(STANCES),
-  enemy: z.object({ baseUnits: z.number().positive(), growthPerStage: z.number().min(1), growthPerWave: z.number().min(1) }),
+  // Deeper enemies fight harder: attack and defense x (1 + toughnessPerStage x (stage - 1)).
+  enemy: z.object({ baseUnits: z.number().positive(), growthPerStage: z.number().min(1), growthPerWave: z.number().min(1), toughnessPerStage: z.number().nonnegative() }),
   stronghold: z.object({ sizeFactor: z.number().positive(), walls: z.number().nonnegative(), stance: z.enum(STANCES) }),
-  loot: z.object({ perKill: resourceAmounts, stronghold: resourceAmounts }),
+  // Loot x (1 + perStage x (stage - 1)) x (1 + perHatred x the front's hatred).
+  loot: z.object({ perKill: resourceAmounts, stronghold: resourceAmounts, perStage: z.number().nonnegative(), perHatred: z.number().nonnegative() }),
   hatred: z.object({ perBattle: z.number().nonnegative(), stronghold: z.number().nonnegative() }),
   strike: z.object({ name: z.string(), gatherHours: z.number().positive(), minShare: z.number().min(0).max(1), hatred: z.number().nonnegative() }),
   north: z.object({
