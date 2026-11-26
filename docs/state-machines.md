@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.22.0
+Documented for version: 0.23.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -78,6 +78,10 @@ stateDiagram-v2
 - The **Avatar of Černobog** (errand `avatar`) and the **Leshen** (errand
   `leshen`) never settle. Their rampage has no end until no player village
   stands. They always raze, then march on the Holy City.
+- A **band sent at the bridge's builders** (errand `bridge`, one for each of
+  the group's villages, setting out a few hours after a stage starts to be
+  raised) moves on from each village it strikes to the nearest one it hasn't
+  struck yet, then to the Holy City.
 
 ## Battle
 
@@ -130,6 +134,10 @@ stateDiagram-v2
   `support`).
 - **Quarters.** A `stationed` army in a settlement, fort or supply point is
   quartered (`quarteredAt`). That is a flag, not a state.
+- **Enemy lands.** An army can march to and hold a hex beyond the map's edge
+  (`sim/enemyLands.ts`), with the same states as on the map. Arriving in a
+  band of a front's enemy lands reveals the band past it (`enemy_sight` on
+  the world, not a status).
 
 ## Hero
 
