@@ -30,7 +30,7 @@ const walled = await upgradeWallPlots(db, scheduler.data);
 if (walled) console.log(`Gave ${walled} older village(s) room for walls`);
 const heroes = await upgradeHeroes(db, scheduler.data);
 const rescaled = await upgradeLevelScale(db, scheduler.data);
-if (rescaled) console.log(`Put ${rescaled} older village(s) on the 10-level scale`);
+if (rescaled) console.log(`Counted the rates of ${rescaled} older village(s) on the current level scale`);
 await upgradeRuinStorage(db, scheduler.data);
 if (heroes) console.log(`Gave ${heroes} player(s) in older worlds a hero`);
 await upgradeDigests(db, new Date());

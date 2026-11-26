@@ -360,7 +360,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // Work started just before the round; the raid will burn it.
     const roundAt = now.getTime() + scheduler.data.battle.roundMinutes * 60_000;
     now = new Date(roundAt - 10_000);
-    const building = (await call('POST', `/v1/villages/${village.id}/build`, ratimir.token, { plot: 'f0' })).body.village.queue[0];
+    const building = (await call('POST', `/v1/villages/${village.id}/build`, ratimir.token, { plot: 'c0' })).body.village.queue[0];
     expect(new Date(building.completesAt).getTime()).toBeGreaterThan(roundAt);
 
     // No defenders: the first round ends in a raid.
@@ -732,7 +732,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
     await db.query(`UPDATE villages SET amounts = '{"wood": 2000, "stone": 2000, "grain": 2000, "iron": 2000}', capacity = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}' WHERE id = $1`, [mine.id]);
 
-    expect((await send({ destinationVillageId: theirs.id, load: load(800, 400) })).body.message).toMatch(/takes 3 caravans; 2 at home/);
+    expect((await send({ destinationVillageId: theirs.id, load: load(400, 200) })).body.message).toMatch(/takes 2 caravans; 1 at home/);
     expect((await send({ destinationVillageId: mine.id, load: load(100) })).body.message).toMatch(/another village/);
     expect((await send({ destinationVillageId: theirs.id, load: load() })).body.message).toMatch(/Nothing to carry/);
     expect((await send({ load: load(-1) })).status).toBe(400);
@@ -743,7 +743,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(trip.body.caravan).toMatchObject({ kind: 'deliver', caravans: 1, status: 'outbound', destinationVillageId: theirs.id });
     // Less the load (the first-gift reward waits to be claimed).
     expect(trip.body.village.resources.amounts.wood).toBeLessThanOrEqual(1600 + 1);
-    expect((await send({ load: load(600) })).body.message).toMatch(/takes 2 caravans; 1 at home/);
+    expect((await send({ load: load(10) })).body.message).toMatch(/0 at home/);
     now = new Date(trip.body.caravan.arrivesAt);
     await tick(db, now, scheduler);
     let w = await world();
@@ -2232,9 +2232,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const started = await call('POST', `/v1/worlds/${worldId}/start`, zora.token);
     const village = started.body.villages[0];
     expect(village.plots.w).toEqual({ building: 'wall', level: 0 });
-    // Raise the walls at once (level 3), with an archer tower in the first slot.
+    // Raise the walls at once (level 6), with an archer tower in the first slot.
     const { rows } = await db.query<{ plots: Record<string, unknown> }>('SELECT plots FROM villages WHERE id = $1', [village.id]);
-    const plots = { ...rows[0]!.plots, w: { building: 'wall', level: 3 }, t0: { building: 'archer_tower', level: 2 } };
+    const plots = { ...rows[0]!.plots, w: { building: 'wall', level: 6 }, t0: { building: 'archer_tower', level: 3 } };
     await db.query(`UPDATE villages SET plots = $2, garrison = '{"spearman": 25}' WHERE id = $1`, [village.id, JSON.stringify(plots)]);
     now = new Date(started.body.waves[0].spawnAt);
     await tick(db, now, scheduler);
@@ -2244,8 +2244,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
     const battle = world.battles[0];
     // Stone walls: toughness 1.35.
-    const integrity = Math.round(240 * 3 * 1.35);
-    expect(battle.setup.wall).toEqual({ level: 3, integrity, max: integrity });
+    const integrity = Math.round(120 * 6 * 1.35);
+    expect(battle.setup.wall).toEqual({ level: 6, integrity, max: integrity });
     // A front that builds engines sets them up first; the assault waits.
     const front = scheduler.data.enemies.fronts[battle.front as 'north']!;
     if (battle.setup.siege) {
@@ -2267,9 +2267,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     // A breach knocks the walls down a level.
     const after = world.villages.find((v: { id: number }) => v.id === village.id);
     const breached = lefts.at(-1) === 0;
-    expect(after.plots.w.level).toBe(breached ? 2 : 3);
+    expect(after.plots.w.level).toBe(breached ? 5 : 6);
     const { rows: results } = await db.query<{ data: { where: string; walls: number } }>("SELECT data FROM telemetry WHERE world_id = $1 AND kind = 'wave_result'", [worldId]);
-    expect(results[0]!.data).toMatchObject({ where: 'village', walls: 3 });
+    expect(results[0]!.data).toMatchObject({ where: 'village', walls: 6 });
     expect(fought.rounds.some((r: { breach?: boolean }) => r.breach)).toBe(breached);
   }));
 

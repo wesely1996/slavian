@@ -9,8 +9,8 @@ The Scout Lodge trains three kinds of scout:
 | Scout | Lodge | Speed | Stealth | Intel | Special |
 |---|---|---|---|---|---|
 | Scout | 1 | 12 | 1.0 | 1 | |
-| Pathfinder | 2 | 16 | 0.5 | 2 | Eases harsh terrain for an army |
-| Assassin | 3 | 14 | 0.35 | 3 | 10% each to kill a horde's leader |
+| Pathfinder | 3 | 16 | 0.5 | 2 | Eases harsh terrain for an army |
+| Assassin | 6 | 14 | 0.35 | 3 | 10% each to kill a horde's leader |
 
 - **Sending them.** Scouts of every kind can go together, at the pace of the
   slowest. A mission takes up to 20.

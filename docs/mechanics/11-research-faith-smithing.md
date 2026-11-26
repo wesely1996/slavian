@@ -120,7 +120,7 @@ Spent on:
 
 A shrine to one of the old gods.
 
-- **Building it.** It needs Elder's Hall 2 and goes up to level 5. Every level
+- **Building it.** It needs Elder's Hall 3 and goes up to level 5. Every level
   takes **one Ember** (returned in full if cancelled), and mostly grain, the
   offering.
 - **Choosing a god.** Once it stands, its village picks one god. The god's
@@ -161,12 +161,12 @@ and armies.
 
 | Level | Needs a Blacksmith of level | Cost | Time (game hours) |
 |---|---|---|---|
-| 1 | 1 | the unit's training cost × 8 | (0.5 + the unit's tier level) |
+| 1 | 1 | the unit's training cost × 8 | (1 + 0.5 × the unit's tier level) |
 | 2 | 3 | × 16 | × 2 |
 | 3 | 5 | × 24 | × 3 |
 
 - **Tier level.** The time uses the unit's `requiresLevel`: a Spearman (1)
-  takes 1.5 game hours for level 1, a Warlord's Guard (5) takes 5.5.
+  takes 1.5 game hours for level 1, a Warlord's Guard (9) takes 5.5.
 - **Faster forging.** Each Blacksmith level forges 6% faster.
 - **Example.** Spearman attack level 1 costs 280 wood, 160 stone, 240 grain
   and 240 iron.

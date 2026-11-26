@@ -355,7 +355,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:06.000Z",
-       "completesAt": "2026-06-01T08:00:13.640Z"
+       "completesAt": "2026-06-01T08:00:09.000Z"
       }
      ],
      "garrison": {},
@@ -5146,7 +5146,7 @@
        "wood": 900,
        "stone": 750,
        "grain": 691.0333333333333,
-       "iron": 869
+       "iron": 865
       },
       "ratesPerHour": {
        "iron": 150,
@@ -5163,7 +5163,7 @@
       "settledAt": "2026-06-01T09:30:00.000Z"
      }
     },
-    "got": 44,
+    "got": 40,
     "serverTime": "2026-06-01T09:30:00.000Z"
    }
   },
@@ -5386,7 +5386,7 @@
        "wood": 800,
        "stone": 750,
        "grain": 691.0333333333333,
-       "iron": 914
+       "iron": 906
       },
       "ratesPerHour": {
        "iron": 150,
@@ -5403,7 +5403,7 @@
       "settledAt": "2026-06-01T09:30:00.000Z"
      }
     },
-    "got": 45,
+    "got": 41,
     "serverTime": "2026-06-01T09:30:00.000Z"
    }
   },
@@ -5643,7 +5643,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 914,
+        "iron": 906,
         "wood": 800,
         "grain": 691.0333333333333,
         "stone": 750
@@ -8432,7 +8432,7 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 794,
+       "iron": 786,
        "wood": 660,
        "grain": 571.0333333333333,
        "stone": 670
@@ -8462,205 +8462,10 @@
     "plot": "c4",
     "building": "caravan_yard"
    },
-   "status": 200,
+   "status": 400,
    "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Vruchiy",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "settlers_lodge"
-      },
-      "c3": {
-       "level": 1,
-       "building": "barracks"
-      },
-      "c4": {
-       "level": 0,
-       "building": null
-      },
-      "c5": {
-       "level": 1,
-       "building": "market"
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "market": 1,
-      "barracks": 1,
-      "elder_hall": 1,
-      "settlers_lodge": 1
-     },
-     "queue": [
-      {
-       "plot": "c4",
-       "building": "caravan_yard",
-       "targetLevel": 1,
-       "startsAt": "2026-06-01T09:30:00.000Z",
-       "completesAt": "2026-06-01T09:30:07.500Z"
-      }
-     ],
-     "garrison": {
-      "settler": 1
-     },
-     "away": {
-      "settler": 0
-     },
-     "stance": "balanced",
-     "maneuver": "encircle",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06,
-      "maneuver.flank": 0.2,
-      "maneuver.encircle": -0.1
-     },
-     "armyFloor": null,
-     "ruin": null,
-     "refuge": false,
-     "training": [
-      {
-       "unit": "spearman",
-       "count": 4,
-       "startsAt": "2026-06-01T09:30:00.000Z",
-       "perUnitMs": 1200,
-       "completesAt": "2026-06-01T09:30:04.800Z"
-      }
-     ],
-     "resources": {
-      "amounts": {
-       "iron": 746,
-       "wood": 516,
-       "grain": 499.0333333333333,
-       "stone": 550
-      },
-      "ratesPerHour": {
-       "iron": 150,
-       "wood": 450,
-       "grain": 319,
-       "stone": 300
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T09:30:00.000Z"
-     }
-    },
-    "serverTime": "2026-06-01T09:30:00.000Z"
+    "error": "rule",
+    "message": "That slot is locked; upgrade the Elder's Hall"
    }
   },
   {
@@ -8678,241 +8483,10 @@
      "iron": 0
     }
    },
-   "status": 200,
+   "status": 400,
    "response": {
-    "village": {
-     "id": 1,
-     "worldId": -1,
-     "ownerAccountId": 1,
-     "name": "Vruchiy",
-     "q": -2,
-     "r": 2,
-     "plots": {
-      "w": {
-       "level": 0,
-       "building": "wall"
-      },
-      "c0": {
-       "level": 1,
-       "building": "elder_hall"
-      },
-      "c1": {
-       "level": 0,
-       "building": null
-      },
-      "c2": {
-       "level": 1,
-       "building": "settlers_lodge"
-      },
-      "c3": {
-       "level": 1,
-       "building": "barracks"
-      },
-      "c4": {
-       "level": 1,
-       "building": "caravan_yard"
-      },
-      "c5": {
-       "level": 1,
-       "building": "market"
-      },
-      "c6": {
-       "level": 0,
-       "building": null
-      },
-      "c7": {
-       "level": 0,
-       "building": null
-      },
-      "c8": {
-       "level": 0,
-       "building": null
-      },
-      "c9": {
-       "level": 0,
-       "building": null
-      },
-      "f0": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f1": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f2": {
-       "level": 0,
-       "building": "woodcutter"
-      },
-      "f3": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f4": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f5": {
-       "level": 0,
-       "building": "quarry"
-      },
-      "f6": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f7": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f8": {
-       "level": 0,
-       "building": "farm"
-      },
-      "f9": {
-       "level": 0,
-       "building": "farm"
-      },
-      "t0": {
-       "level": 0,
-       "building": null
-      },
-      "t1": {
-       "level": 0,
-       "building": null
-      },
-      "t2": {
-       "level": 0,
-       "building": null
-      },
-      "t3": {
-       "level": 0,
-       "building": null
-      },
-      "t4": {
-       "level": 0,
-       "building": null
-      },
-      "c10": {
-       "level": 0,
-       "building": null
-      },
-      "c11": {
-       "level": 0,
-       "building": null
-      },
-      "f10": {
-       "level": 0,
-       "building": "iron_mine"
-      },
-      "f11": {
-       "level": 0,
-       "building": "iron_mine"
-      }
-     },
-     "levels": {
-      "market": 1,
-      "barracks": 1,
-      "elder_hall": 1,
-      "caravan_yard": 1,
-      "settlers_lodge": 1
-     },
-     "queue": [],
-     "garrison": {
-      "settler": 1,
-      "spearman": 0
-     },
-     "away": {
-      "settler": 0
-     },
-     "stance": "balanced",
-     "maneuver": "encircle",
-     "besieged": false,
-     "adminUpkeep": 0,
-     "bonuses": {
-      "upkeep": 0.08,
-      "attack.all": 0.1,
-      "homeDefense": 0.06,
-      "attack.cavalry": 0.06,
-      "maneuver.flank": 0.2,
-      "maneuver.encircle": -0.1
-     },
-     "armyFloor": null,
-     "ruin": null,
-     "refuge": false,
-     "training": [],
-     "resources": {
-      "amounts": {
-       "wood": 566,
-       "stone": 650,
-       "grain": 477.3666666666667,
-       "iron": 796
-      },
-      "ratesPerHour": {
-       "iron": 150,
-       "wood": 450,
-       "grain": 373,
-       "stone": 300
-      },
-      "capacity": {
-       "iron": 1000,
-       "wood": 1000,
-       "grain": 1000,
-       "stone": 1000
-      },
-      "settledAt": "2026-06-01T09:50:00.000Z"
-     }
-    },
-    "caravan": {
-     "id": 1,
-     "villageId": 1,
-     "destinationVillageId": 2,
-     "destinationFortId": null,
-     "destinationShipyardId": null,
-     "kind": "deliver",
-     "caravans": 1,
-     "cargo": {
-      "iron": 0,
-      "wood": 100,
-      "grain": 50,
-      "stone": 0
-     },
-     "carriedBack": null,
-     "status": "outbound",
-     "path": [
-      [
-       -2,
-       2,
-       0
-      ],
-      [
-       -3,
-       3,
-       14400
-      ],
-      [
-       -4,
-       4,
-       28800
-      ],
-      [
-       -5,
-       5,
-       86400
-      ],
-      [
-       -6,
-       6,
-       100800
-      ]
-     ],
-     "departsAt": "2026-06-01T09:50:00.000Z",
-     "arrivesAt": "2026-06-01T09:51:40.800Z",
-     "returnsAt": "2026-06-01T09:53:21.600Z",
-     "escort": {},
-     "ambush": null,
-     "retrieve": null
-    },
-    "serverTime": "2026-06-01T09:50:00.000Z"
+    "error": "rule",
+    "message": "Build a Caravan Yard first"
    }
   },
   {
@@ -9005,8 +8579,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -9109,7 +8683,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -9138,10 +8711,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 796,
-        "wood": 566,
-        "grain": 477.3666666666667,
-        "stone": 650
+        "iron": 786,
+        "wood": 660,
+        "grain": 475.0333333333333,
+        "stone": 670
        },
        "ratesPerHour": {
         "iron": 150,
@@ -9155,7 +8728,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:50:00.000Z"
+       "settledAt": "2026-06-01T09:30:04.800Z"
       }
      },
      {
@@ -9837,58 +9410,7 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "destinationVillageId": 2,
-      "destinationFortId": null,
-      "destinationShipyardId": null,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 100,
-       "grain": 50,
-       "stone": 0
-      },
-      "carriedBack": null,
-      "status": "outbound",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -3,
-        3,
-        14400
-       ],
-       [
-        -4,
-        4,
-        28800
-       ],
-       [
-        -5,
-        5,
-        86400
-       ],
-       [
-        -6,
-        6,
-        100800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:50:00.000Z",
-      "arrivesAt": "2026-06-01T09:51:40.800Z",
-      "returnsAt": "2026-06-01T09:53:21.600Z",
-      "escort": {},
-      "ambush": null,
-      "retrieve": null
-     }
-    ],
+    "caravans": [],
     "vault": {
      "level": 1,
      "amounts": {
@@ -11922,8 +11444,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -12026,7 +11548,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -12055,10 +11576,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 796,
-        "wood": 566,
-        "grain": 477.3666666666667,
-        "stone": 650
+        "iron": 786,
+        "wood": 660,
+        "grain": 475.0333333333333,
+        "stone": 670
        },
        "ratesPerHour": {
         "iron": 150,
@@ -12072,7 +11593,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:50:00.000Z"
+       "settledAt": "2026-06-01T09:30:04.800Z"
       }
      },
      {
@@ -12754,58 +12275,7 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "destinationVillageId": 2,
-      "destinationFortId": null,
-      "destinationShipyardId": null,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 100,
-       "grain": 50,
-       "stone": 0
-      },
-      "carriedBack": null,
-      "status": "outbound",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -3,
-        3,
-        14400
-       ],
-       [
-        -4,
-        4,
-        28800
-       ],
-       [
-        -5,
-        5,
-        86400
-       ],
-       [
-        -6,
-        6,
-        100800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:50:00.000Z",
-      "arrivesAt": "2026-06-01T09:51:40.800Z",
-      "returnsAt": "2026-06-01T09:53:21.600Z",
-      "escort": {},
-      "ambush": null,
-      "retrieve": null
-     }
-    ],
+    "caravans": [],
     "vault": {
      "level": 1,
      "amounts": {
@@ -14875,8 +14345,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -14979,7 +14449,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -15009,10 +14478,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 796,
-        "wood": 566,
-        "grain": 477.3666666666667,
-        "stone": 650
+        "iron": 786,
+        "wood": 660,
+        "grain": 475.0333333333333,
+        "stone": 670
        },
        "ratesPerHour": {
         "iron": 150,
@@ -15026,7 +14495,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:50:00.000Z"
+       "settledAt": "2026-06-01T09:30:04.800Z"
       }
      },
      {
@@ -15708,58 +15177,7 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "destinationVillageId": 2,
-      "destinationFortId": null,
-      "destinationShipyardId": null,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 100,
-       "grain": 50,
-       "stone": 0
-      },
-      "carriedBack": null,
-      "status": "outbound",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -3,
-        3,
-        14400
-       ],
-       [
-        -4,
-        4,
-        28800
-       ],
-       [
-        -5,
-        5,
-        86400
-       ],
-       [
-        -6,
-        6,
-        100800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:50:00.000Z",
-      "arrivesAt": "2026-06-01T09:51:40.800Z",
-      "returnsAt": "2026-06-01T09:53:21.600Z",
-      "escort": {},
-      "ambush": null,
-      "retrieve": null
-     }
-    ],
+    "caravans": [],
     "vault": {
      "level": 1,
      "amounts": {
@@ -17793,8 +17211,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -17897,7 +17315,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -17927,10 +17344,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 803.5,
-        "wood": 588.5,
-        "grain": 496.01666666666665,
-        "stone": 665
+        "iron": 786,
+        "wood": 660,
+        "grain": 475.0333333333333,
+        "stone": 670
        },
        "ratesPerHour": {
         "iron": 150,
@@ -17944,7 +17361,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:53:21.600Z"
+       "settledAt": "2026-06-01T09:30:04.800Z"
       }
      },
      {
@@ -18102,10 +17519,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 272.5,
-        "wood": 767.5,
-        "grain": 626.5666666666667,
-        "stone": 545
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
@@ -18119,7 +17536,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:51:40.800Z"
+       "settledAt": "2026-06-01T09:31:45.600Z"
       }
      }
     ],
@@ -18605,63 +18022,7 @@
     "delegations": [],
     "delegationLog": [],
     "run": null,
-    "caravans": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "destinationVillageId": 2,
-      "destinationFortId": null,
-      "destinationShipyardId": null,
-      "kind": "deliver",
-      "caravans": 1,
-      "cargo": {
-       "iron": 0,
-       "wood": 100,
-       "grain": 50,
-       "stone": 0
-      },
-      "carriedBack": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "status": "done",
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -3,
-        3,
-        14400
-       ],
-       [
-        -4,
-        4,
-        28800
-       ],
-       [
-        -5,
-        5,
-        86400
-       ],
-       [
-        -6,
-        6,
-        100800
-       ]
-      ],
-      "departsAt": "2026-06-01T09:50:00.000Z",
-      "arrivesAt": "2026-06-01T09:51:40.800Z",
-      "returnsAt": "2026-06-01T09:53:21.600Z",
-      "escort": {},
-      "ambush": null,
-      "retrieve": null
-     }
-    ],
+    "caravans": [],
     "vault": {
      "level": 1,
      "amounts": {
@@ -20693,8 +20054,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -20797,7 +20158,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -20827,10 +20187,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 871,
-        "wood": 791,
-        "grain": 663.8666666666667,
-        "stone": 800
+        "iron": 911,
+        "wood": 1000,
+        "grain": 785.8666666666667,
+        "stone": 920
        },
        "ratesPerHour": {
         "iron": 150,
@@ -23342,8 +22702,8 @@
         "building": "barracks"
        },
        "c4": {
-        "level": 1,
-        "building": "caravan_yard"
+        "level": 0,
+        "building": null
        },
        "c5": {
         "level": 1,
@@ -23446,7 +22806,6 @@
        "market": 1,
        "barracks": 1,
        "elder_hall": 1,
-       "caravan_yard": 1,
        "settlers_lodge": 1
       },
       "queue": [],
@@ -23476,10 +22835,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 921,
+        "iron": 961,
         "wood": 800,
-        "grain": 707.8666666666667,
-        "stone": 600
+        "grain": 829.8666666666667,
+        "stone": 650
        },
        "ratesPerHour": {
         "iron": 150,
@@ -26154,10 +25513,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":300,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":250,\"grain\":0,\"iron\":0}",
     "missing": {
      "wood": 0,
-     "stone": 300,
+     "stone": 250,
      "grain": 0,
      "iron": 0
     }
@@ -26267,7 +25626,7 @@
        },
        "c4": {
         "level": 0,
-        "building": "caravan_yard"
+        "building": null
        },
        "c5": {
         "level": 0,
@@ -26408,8 +25767,8 @@
          "building": "barracks"
         },
         "c4": {
-         "level": 1,
-         "building": "caravan_yard"
+         "level": 0,
+         "building": null
         },
         "c5": {
          "level": 1,
@@ -29669,7 +29028,7 @@
        },
        "c4": {
         "level": 0,
-        "building": "caravan_yard"
+        "building": null
        },
        "c5": {
         "level": 0,
@@ -29810,8 +29169,8 @@
          "building": "barracks"
         },
         "c4": {
-         "level": 1,
-         "building": "caravan_yard"
+         "level": 0,
+         "building": null
         },
         "c5": {
          "level": 1,
@@ -33340,7 +32699,7 @@
        },
        "c4": {
         "level": 0,
-        "building": "caravan_yard"
+        "building": null
        },
        "c5": {
         "level": 0,
@@ -33481,8 +32840,8 @@
          "building": "barracks"
         },
         "c4": {
-         "level": 1,
-         "building": "caravan_yard"
+         "level": 0,
+         "building": null
         },
         "c5": {
          "level": 1,
@@ -37155,7 +36514,7 @@
        },
        "c4": {
         "level": 0,
-        "building": "caravan_yard"
+        "building": null
        },
        "c5": {
         "level": 0,
@@ -37296,8 +36655,8 @@
          "building": "barracks"
         },
         "c4": {
-         "level": 1,
-         "building": "caravan_yard"
+         "level": 0,
+         "building": null
         },
         "c5": {
          "level": 1,
@@ -40948,7 +40307,7 @@
    "response": {
     "notifications": [
      {
-      "id": 73,
+      "id": 72,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -40957,7 +40316,7 @@
       "read": false
      },
      {
-      "id": 72,
+      "id": 71,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -40966,7 +40325,7 @@
       "read": false
      },
      {
-      "id": 71,
+      "id": 70,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-5, -1)",
@@ -40975,7 +40334,7 @@
       "read": false
      },
      {
-      "id": 70,
+      "id": 69,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 6) were taken away",
@@ -40984,7 +40343,7 @@
       "read": false
      },
      {
-      "id": 69,
+      "id": 68,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -40993,7 +40352,7 @@
       "read": false
      },
      {
-      "id": 68,
+      "id": 67,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -41002,7 +40361,7 @@
       "read": false
      },
      {
-      "id": 67,
+      "id": 66,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -41011,7 +40370,7 @@
       "read": false
      },
      {
-      "id": 66,
+      "id": 65,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -41020,7 +40379,7 @@
       "read": false
      },
      {
-      "id": 65,
+      "id": 64,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -41029,7 +40388,7 @@
       "read": false
      },
      {
-      "id": 64,
+      "id": 63,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (5, 2)",
@@ -41038,7 +40397,7 @@
       "read": false
      },
      {
-      "id": 63,
+      "id": 62,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-5, 1) were taken away",
@@ -41047,7 +40406,7 @@
       "read": false
      },
      {
-      "id": 62,
+      "id": 61,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -41056,7 +40415,7 @@
       "read": false
      },
      {
-      "id": 61,
+      "id": 60,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -41065,7 +40424,7 @@
       "read": false
      },
      {
-      "id": 60,
+      "id": 59,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -41074,7 +40433,7 @@
       "read": false
      },
      {
-      "id": 59,
+      "id": 58,
       "kind": "leader",
       "tier": "digest",
       "title": "Brother Lothar has fallen",
@@ -41083,7 +40442,7 @@
       "read": false
      },
      {
-      "id": 58,
+      "id": 57,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -41092,7 +40451,7 @@
       "read": false
      },
      {
-      "id": 57,
+      "id": 56,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -41101,7 +40460,7 @@
       "read": false
      },
      {
-      "id": 56,
+      "id": 55,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 6)",
@@ -41110,7 +40469,7 @@
       "read": false
      },
      {
-      "id": 55,
+      "id": 54,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (4, 2) sank back into the earth",
@@ -41119,7 +40478,7 @@
       "read": false
      },
      {
-      "id": 54,
+      "id": 53,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry grows stronger",
@@ -41128,7 +40487,7 @@
       "read": false
      },
      {
-      "id": 53,
+      "id": 52,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -41137,7 +40496,7 @@
       "read": false
      },
      {
-      "id": 52,
+      "id": 51,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -41146,7 +40505,7 @@
       "read": false
      },
      {
-      "id": 51,
+      "id": 50,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -41155,7 +40514,7 @@
       "read": false
      },
      {
-      "id": 50,
+      "id": 49,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, 1)",
@@ -41164,7 +40523,7 @@
       "read": false
      },
      {
-      "id": 49,
+      "id": 48,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 6) were taken away",
@@ -41173,7 +40532,7 @@
       "read": false
      },
      {
-      "id": 48,
+      "id": 47,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -41182,7 +40541,7 @@
       "read": false
      },
      {
-      "id": 47,
+      "id": 46,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -41191,7 +40550,7 @@
       "read": false
      },
      {
-      "id": 46,
+      "id": 45,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -41200,7 +40559,7 @@
       "read": false
      },
      {
-      "id": 45,
+      "id": 44,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -41209,7 +40568,7 @@
       "read": false
      },
      {
-      "id": 44,
+      "id": 43,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -41218,7 +40577,7 @@
       "read": false
      },
      {
-      "id": 43,
+      "id": 42,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (4, 2)",
@@ -41227,7 +40586,7 @@
       "read": false
      },
      {
-      "id": 42,
+      "id": 41,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (0, 7) were taken away",
@@ -41236,7 +40595,7 @@
       "read": false
      },
      {
-      "id": 41,
+      "id": 40,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -41245,7 +40604,7 @@
       "read": false
      },
      {
-      "id": 40,
+      "id": 39,
       "kind": "battle_result",
       "tier": "digest",
       "title": "You's refuge was raided",
@@ -41254,7 +40613,7 @@
       "read": false
      },
      {
-      "id": 39,
+      "id": 38,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -41263,7 +40622,7 @@
       "read": false
      },
      {
-      "id": 38,
+      "id": 37,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Godslayer",
@@ -41272,7 +40631,7 @@
       "read": false
      },
      {
-      "id": 37,
+      "id": 36,
       "kind": "event",
       "tier": "push",
       "title": "The Avatar of Černobog is slain",
@@ -41281,7 +40640,7 @@
       "read": false
      },
      {
-      "id": 36,
+      "id": 35,
       "kind": "under_attack",
       "tier": "push",
       "title": "You's refuge is under attack",
@@ -41290,7 +40649,7 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 34,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to You's refuge",
@@ -41299,7 +40658,7 @@
       "read": false
      },
      {
-      "id": 34,
+      "id": 33,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (2, 6)",
@@ -41308,7 +40667,7 @@
       "read": false
      }
     ],
-    "unread": 73,
+    "unread": 72,
     "serverTime": "2026-06-01T13:50:00.000Z"
    }
   }

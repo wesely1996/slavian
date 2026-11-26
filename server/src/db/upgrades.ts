@@ -172,30 +172,41 @@ function compressPlots(plots: Record<string, Plot>): Record<string, Plot> {
   return Object.fromEntries(Object.entries(plots).map(([id, p]) => [id, { ...p, level: compressedLevel(p.building, p.level) }]));
 }
 
-// Villages saved before the 20 levels became 10: their buildings, queued
-// builds (and their events) and what a ruin held, on the new scale; then
-// their rates and stores as the new levels give them, from when each was
+// The level scale a village is saved on: 1 before the 20 levels became 10
+// (0.23), 2 with each level two of the old ones, 3 with the levels giving
+// what the first ten did again (0.24).
+export const LEVEL_SCALE = 3;
+
+// Villages saved on an older scale. From 1: their buildings, queued builds
+// (and their events) and what a ruin held, on ten levels. Then, from 1 or 2,
+// their rates and stores as the levels now give them, from when each was
 // last settled (what came in before then came at the old rates).
 export async function upgradeLevelScale(db: Db, data: GameData): Promise<number> {
   return inTransaction(db, async (client) => {
-    const { rows } = await client.query<{ id: number; world_id: number }>('SELECT id, world_id FROM villages WHERE level_scale = 1 ORDER BY id FOR UPDATE');
+    const { rows } = await client.query<{ id: number; world_id: number; level_scale: number }>(
+      'SELECT id, world_id, level_scale FROM villages WHERE level_scale < $1 ORDER BY id FOR UPDATE',
+      [LEVEL_SCALE],
+    );
     for (const row of rows) {
       const village = await loadVillage(client, row.id);
       const speed = (await getWorld(client, row.world_id)).speed;
-      const plots = compressPlots(village.state.plots);
-      const queue = village.state.queue.map((item) => ({ ...item, targetLevel: compressedLevel(item.building, item.targetLevel) }));
-      const ruinPlots = village.ruin ? compressPlots(village.ruin.plots) : null;
+      const halve = row.level_scale === 1;
+      const plots = halve ? compressPlots(village.state.plots) : village.state.plots;
+      const queue = halve ? village.state.queue.map((item) => ({ ...item, targetLevel: compressedLevel(item.building, item.targetLevel) })) : village.state.queue;
+      const ruinPlots = village.ruin ? (halve ? compressPlots(village.ruin.plots) : village.ruin.plots) : null;
       const state = withBonuses(data, { ...village.state, plots, levels: levelsOf(plots), queue }, village.state.bonuses, village.state.ledger.settledAt, speed);
       // A ruin's stores still hold what rebuilding it costs.
       const ledger = ruinPlots ? { ...state.ledger, capacity: ruinStorage(data, state.ledger.capacity, ruinPlots) } : state.ledger;
       await saveVillageState(client, village.id, { ...state, ledger });
-      if (village.ruin) await client.query('UPDATE villages SET ruin = $2 WHERE id = $1', [village.id, JSON.stringify({ ...village.ruin, plots: ruinPlots })]);
-      await client.query(
-        `UPDATE scheduled_events SET payload = jsonb_set(payload, '{targetLevel}', to_jsonb(ceil((payload->>'targetLevel')::numeric / 2)::int))
-         WHERE status = 'pending' AND type = 'build_complete' AND (payload->>'villageId')::bigint = $1 AND payload->>'building' = ANY($2)`,
-        [village.id, COMPRESSED_BUILDINGS],
-      );
-      await client.query('UPDATE villages SET level_scale = 2 WHERE id = $1', [village.id]);
+      if (halve && village.ruin) await client.query('UPDATE villages SET ruin = $2 WHERE id = $1', [village.id, JSON.stringify({ ...village.ruin, plots: ruinPlots })]);
+      if (halve) {
+        await client.query(
+          `UPDATE scheduled_events SET payload = jsonb_set(payload, '{targetLevel}', to_jsonb(ceil((payload->>'targetLevel')::numeric / 2)::int))
+           WHERE status = 'pending' AND type = 'build_complete' AND (payload->>'villageId')::bigint = $1 AND payload->>'building' = ANY($2)`,
+          [village.id, COMPRESSED_BUILDINGS],
+        );
+      }
+      await client.query('UPDATE villages SET level_scale = $2 WHERE id = $1', [village.id, LEVEL_SCALE]);
     }
     return rows.length;
   });

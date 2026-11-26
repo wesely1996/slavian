@@ -59,6 +59,26 @@ describe.skipIf(!TEST_DATABASE_URL)('legacy village upgrade (postgres)', () => {
     expect(village.state.plots.f0).toEqual({ building: 'woodcutter', level: 7 });
   });
 
+  it('counts the rates of a village saved on the two-levels-in-one scale again, its levels kept', async () => {
+    const villageId = await inTransaction(db, async (client) => {
+      const { account } = await createGuestAccount(client, 'Scale two');
+      const world = await createWorld(client, { name: 'scale-two', seed: 2, speed: 1 });
+      return (await insertVillage(client, { worldId: world.id, ownerAccountId: account.id, name: 'v', q: 2, r: 0, state: newVillage(data, T0, 1) })).id;
+    });
+    // Saved on scale 2: a level-5 woodcutter and the rate it gave then.
+    await db.query(
+      `UPDATE villages SET level_scale = 2,
+         plots = plots || '{"f0": {"building": "woodcutter", "level": 5}}'::jsonb,
+         rates_per_hour = jsonb_set(rates_per_hour, '{wood}', '9999') WHERE id = $1`,
+      [villageId],
+    );
+    expect(await upgradeLevelScale(db, data)).toBe(1);
+    expect(await upgradeLevelScale(db, data)).toBe(0);
+    const village = await inTransaction(db, (client) => loadVillage(client, villageId));
+    expect(village.state.plots.f0).toEqual({ building: 'woodcutter', level: 5 });
+    expect(village.state.ledger.ratesPerHour.wood).toBeLessThan(1000);
+  });
+
   it('lays out an old village on plots and finishes its pending build', async () => {
     const { worldId, villageId } = await inTransaction(db, async (client) => {
       const { account } = await createGuestAccount(client, 'Old timer');
