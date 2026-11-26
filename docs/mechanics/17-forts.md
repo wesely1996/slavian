@@ -119,6 +119,8 @@ of each fits on a hex.
 
 A fort can be your rally point instead of a village. Every batch of troops
 trained in your settlements then marches there once done, and holds it.
+Troops trained for an army group go to the group instead
+([page 8](08-armies-and-field.md#army-groups)).
 
 ## Tearing down
 

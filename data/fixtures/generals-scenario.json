@@ -825,7 +825,8 @@
        "count": 5,
        "startsAt": "2026-06-01T08:40:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T08:40:06.000Z"
+       "completesAt": "2026-06-01T08:40:06.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1363,6 +1364,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -4019,6 +4021,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -6166,7 +6169,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:25:00.000Z"
    }
@@ -6849,9 +6853,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -9784,9 +9790,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -12761,9 +12769,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {

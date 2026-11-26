@@ -60,6 +60,41 @@ More things you can do with an army:
   goes to its home settlement at once. Raids and strikes carry their loot
   home at the end.
 
+## Army groups
+
+An army group is an army with a set make-up that raises and keeps itself up.
+Make one in the Army sheet's **Army groups** tab with **Create army**.
+
+- **What it is.** A name (yours, or "*home*'s Army"), a **home settlement**
+  and the troops it should hold, by unit: soldiers and scouts, at most 1,000
+  in all. A player keeps at most 10 groups. All three can be changed later.
+- **Recruiting.** At once, and then every 20 game minutes, the group has
+  what it lacks trained. It counts the troops in its army and those already
+  on their way (in training for it, or marching to it). Each missing unit is
+  trained in your settlement **closest to the army** (to its home while it
+  has none) that can train it: its building high enough, room in its queue,
+  your army slots, and resources for at least one. That settlement trains as
+  many as it can pay for at once (all that are missing, else half, a
+  quarter, ... down to one; at most a batch). It pays as for any training.
+- **Only in safe places.** The group recruits while it has no army, and
+  while its army stands in one of your settlements, forts or supply points.
+  Out in the field, on the road or in a battle it doesn't.
+- **Forming at home.** Until the group has an army, its trained troops go to
+  its home: those trained there stand there at once as its army (quartered
+  in the settlement), and those trained elsewhere march there and join it.
+- **Reinforcements.** Once it has an army, troops trained where it stands
+  join it there; troops trained elsewhere march to where it stands, or where
+  it is going, and join it when they reach it. If it has moved on meanwhile,
+  they follow; if it is lost, the first to arrive become its new army.
+- **The army is an army.** Move it, merge it, split it or send it out like
+  any other. Troops beyond the make-up stay in it. If the army is lost or
+  joins a garrison, the group forms again at its home.
+- **Disbanding a group** leaves its army standing as a plain army; troops in
+  training for it join their garrison, and those on the way stand wherever
+  they arrive.
+- **Rally points.** Troops trained for a group go to the group, never to the
+  rally point ([page 17](17-forts.md#rally-point)).
+
 ## Grain and supply
 
 An army carries its own grain.

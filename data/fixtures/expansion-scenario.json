@@ -581,7 +581,8 @@
        "count": 1,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:18.000Z"
+       "completesAt": "2026-06-01T08:20:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -786,14 +787,16 @@
        "count": 1,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:18.000Z"
+       "completesAt": "2026-06-01T08:20:18.000Z",
+       "group": null
       },
       {
        "unit": "settler",
        "count": 2,
        "startsAt": "2026-06-01T08:20:18.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:54.000Z"
+       "completesAt": "2026-06-01T08:20:54.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -987,7 +990,8 @@
        "count": 1,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:18.000Z"
+       "completesAt": "2026-06-01T08:20:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1200,14 +1204,16 @@
        "count": 1,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:18.000Z"
+       "completesAt": "2026-06-01T08:20:18.000Z",
+       "group": null
       },
       {
        "unit": "settler",
        "count": 1,
        "startsAt": "2026-06-01T08:20:18.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:36.000Z"
+       "completesAt": "2026-06-01T08:20:36.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1401,7 +1407,8 @@
        "count": 1,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:20:18.000Z"
+       "completesAt": "2026-06-01T08:20:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1607,7 +1614,8 @@
        "count": 1,
        "startsAt": "2026-06-01T08:40:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T08:40:18.000Z"
+       "completesAt": "2026-06-01T08:40:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1807,7 +1815,8 @@
        "count": 1,
        "startsAt": "2026-06-01T09:00:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T09:00:18.000Z"
+       "completesAt": "2026-06-01T09:00:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -2014,7 +2023,8 @@
        "count": 1,
        "startsAt": "2026-06-01T09:00:00.000Z",
        "perUnitMs": 18000,
-       "completesAt": "2026-06-01T09:00:18.000Z"
+       "completesAt": "2026-06-01T09:00:18.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -2775,6 +2785,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -6138,6 +6149,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -8427,7 +8439,8 @@
        "count": 4,
        "startsAt": "2026-06-01T09:30:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T09:30:04.800Z"
+       "completesAt": "2026-06-01T09:30:04.800Z",
+       "group": null
       }
      ],
      "resources": {
@@ -9231,9 +9244,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -12096,9 +12111,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -14998,9 +15015,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -17864,9 +17883,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -20493,6 +20514,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -23377,6 +23399,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -26791,6 +26814,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -30455,6 +30479,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -34255,6 +34280,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -38116,6 +38142,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {

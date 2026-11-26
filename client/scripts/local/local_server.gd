@@ -48,8 +48,8 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "rallyFortId": null, "merchantReadyAt": null, "smithing": {}, "smithWork": null}],
 		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [], "levelScale": LEVEL_SCALE,
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
-		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
-		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
+		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "armyGroups": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
+		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1, "armyGroup": 1},
 	}
 	# The map, its rivers and bridges.
 	var map := LocalMapgen.generate(data, seed_value, world.members.size())
@@ -405,6 +405,21 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 		if general.has("ok"):
 			return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
 		return {"status": 200, "data": {"general": LocalGenerals.view(data, general), "serverTime": LocalTime.iso(now)}}
+	# Army groups (commands/armyGroups.ts).
+	if method == "POST" and parts.size() == 4 and parts[1] == "worlds" and parts[3] == "army-groups":
+		var made := LocalArmyGroups.create(self, world, body, now)
+		if made.has("error"):
+			return _rule_answer(made)
+		changed.append(["world"])
+		return {"status": 200, "data": {"armyGroup": LocalArmyGroups.view(made), "serverTime": LocalTime.iso(now)}}
+	if method == "POST" and parts.size() in [3, 4] and parts[1] == "army-groups" and (parts.size() == 3 or parts[3] == "disband"):
+		var result := LocalArmyGroups.update(self, world, int(parts[2]), body, now) if parts.size() == 3 else LocalArmyGroups.disband(world, int(parts[2]))
+		if result.has("error"):
+			return _rule_answer(result)
+		changed.append(["world"])
+		if parts.size() == 4:
+			return {"status": 200, "data": {"ok": true, "serverTime": LocalTime.iso(now)}}
+		return {"status": 200, "data": {"armyGroup": LocalArmyGroups.view(result), "serverTime": LocalTime.iso(now)}}
 	if method == "POST" and parts.size() == 4 and parts[1] == "armies" and parts[3] in ["move", "disband", "resupply", "store", "wagon-fort"]:
 		var found := LocalArmies.find_army(world, int(parts[2]))
 		if found.is_empty():
@@ -1262,7 +1277,17 @@ func _on_army_hunger(world: Dictionary, event: Dictionary, changed: Array) -> vo
 
 
 func _on_army_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	var army := LocalArmies.find_army(world, int(event.payload.armyId))
+	var due: bool = not army.is_empty() and army.status == "marching" and int(army.arrivesAt) == int(event.dueAt)
+	var group: Variant = army.get("groupId") if due else null
 	LocalArmies.on_army_arrive(self, world, event, changed)
+	# An army marching to join an army group joins it once it stands.
+	if group != null:
+		LocalArmyGroups.join_group(self, world, army, int(event.dueAt))
+
+
+func _on_group_check(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalArmyGroups.on_group_check(self, world, event, changed)
 
 
 func _on_army_return(world: Dictionary, event: Dictionary, changed: Array) -> void:
@@ -1387,9 +1412,12 @@ func _on_training_complete(world: Dictionary, event: Dictionary, changed: Array)
 		return
 	var done: Array = village.state.training.filter(func(b: Dictionary) -> bool: return LocalVillage.batch_completes_at(b) <= int(event.dueAt))
 	village.state = LocalVillage.complete_training(village.state, int(event.dueAt))
-	# They march on to the owner's rally point, if one is set.
-	LocalArmies.rally_trained(self, world, village, done, int(event.dueAt))
+	# Those trained for an army group march to it; the others on to the
+	# owner's rally point, if one is set.
+	LocalArmyGroups.group_trained(self, world, village, done, int(event.dueAt))
+	LocalArmies.rally_trained(self, world, village, done.filter(func(b: Dictionary) -> bool: return b.get("group") == null), int(event.dueAt))
 	changed.append(["village", village.id])
+	changed.append(["world"])
 
 
 # --- Views (api/views.ts) -----------------------------------------------------
@@ -1447,7 +1475,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"endedAt": LocalTime.iso(world.endedAt) if world.endedAt != null else null,
 		"members": members, "villages": villages, "waves": waves, "scouting": LocalScouting.missions_view(self, world), "ruinSearches": LocalScouting.ruin_searches_view(world), "battles": _battles_view(world), "raids": _raids_view(world),
 		"expeditions": LocalScouting.expeditions_view(world),
-		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "generals": world.generals.map(func(g: Dictionary) -> Dictionary: return LocalGenerals.view(data, g)), "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
+		"research": LocalResearch.entries(world).map(LocalResearch.research_view), "heroes": heroes, "generals": world.generals.map(func(g: Dictionary) -> Dictionary: return LocalGenerals.view(data, g)), "leaders": LocalHordes.leaders_view(data, world), "orders": world.orders.map(LocalOrders.order_view), "armies": LocalArmies.armies_view(world), "armyGroups": LocalArmyGroups.views(world), "forts": world.forts.map(LocalArmies.fort_view), "camps": _camps_view(world), "sites": sites,
 		"lore": world.lore.map(func(l: Dictionary) -> Dictionary:
 			return {"scroll": l.scroll, "accountId": l.accountId, "siteId": l.siteId, "foundAt": LocalTime.iso(l.foundAt)}),
 		"achievements": LocalAchievements.view(world),
@@ -1469,7 +1497,7 @@ func village_view(world: Dictionary, village: Dictionary) -> Dictionary:
 	var training: Array = []
 	for b in s.training:
 		training.append({"unit": b.unit, "count": b.count, "startsAt": LocalTime.iso(b.startsAt), "perUnitMs": b.perUnitMs,
-			"completesAt": LocalTime.iso(int(b.startsAt) + int(b.count) * int(b.perUnitMs))})
+			"completesAt": LocalTime.iso(int(b.startsAt) + int(b.count) * int(b.perUnitMs)), "group": b.get("group")})
 	return {
 		"id": village.id, "worldId": world.id, "ownerAccountId": village.ownerAccountId, "name": village.name, "q": village.q, "r": village.r,
 		"plots": s.plots.duplicate(true), "levels": s.levels.duplicate(), "queue": queue, "garrison": s.garrison.duplicate(),
@@ -1713,6 +1741,9 @@ func _load_all() -> void:
 				"armies": [], "forts": [], "missions": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0})
 			world.next.merge({"leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1,
 				"notification": 1, "general": 1})
+			# Worlds saved before army groups.
+			world.merge({"armyGroups": []})
+			world.next.merge({"armyGroup": 1})
 			# Worlds saved before players counted what they bought.
 			for m in world.members:
 				m.merge({"bought": {}})

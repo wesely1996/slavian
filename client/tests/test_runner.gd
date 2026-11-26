@@ -66,6 +66,7 @@ func _initialize() -> void:
 	_test_leaders()
 	_test_translation()
 	_test_walls()
+	_test_army_groups()
 	_test_rivers()
 	_test_ground()
 	_test_lines()
@@ -958,6 +959,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("scouts-scenario.json", "local scouts, assassins and intel")
 	_replay_scenario("prune-scenario.json", "local daily pruning")
 	_replay_scenario("quarters-scenario.json", "local quarters, floors, merging, splitting and answering battles")
+	_replay_scenario("army-groups-scenario.json", "local army groups: recruited at home, gathered, kept up from a fort")
 	_replay_scenario("heroquest-scenario.json", "local hero quests and army quests")
 	_replay_scenario("market-scenario.json", "local bounty board and caravans bringing back")
 	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")
@@ -1569,3 +1571,16 @@ func _test_fort_zone() -> void:
 		if q != 0:
 			walled[LocalLand.key(Vector2i(q, 0))] = "mountain"
 	_check((route.call(walled, ["0,0"]) as Array).has(Vector2i.ZERO), "fort zone: a long way round makes the horde march on the fort")
+
+
+## Army groups' rules in the solo engine (sim/armyGroups.ts).
+func _test_army_groups() -> void:
+	var data := LocalData.load_data()
+	_check(LocalArmyGroups.group_name("  Iron Guard ", "Krasnogor").name == "Iron Guard" and LocalArmyGroups.group_name("", "Krasnogor").name == "Krasnogor's Army"
+		and LocalArmyGroups.group_name("x".repeat(33), "Krasnogor").has("error"), "army groups are named, or after their home")
+	var made := LocalArmyGroups.validate_composition(data, {"spearman": 4, "archer": 2, "scout": 1, "axeman": 0})
+	_check(made.has("composition") and made.composition.keys() == ["archer", "scout", "spearman"], "a group's make-up, by name: %s" % [made])
+	_check(LocalArmyGroups.validate_composition(data, {"settler": 2}).has("error") and LocalArmyGroups.validate_composition(data, {"scout": 3}).has("error")
+		and LocalArmyGroups.validate_composition(data, {"spearman": int(data.armies.groups.maxUnits) + 1}).has("error"), "a group's make-up refused")
+	_check(LocalArmyGroups.missing_units({"spearman": 10, "archer": 4}, {"spearman": 6}, {"spearman": 2, "archer": 4}) == {"spearman": 2}, "what a group lacks")
+	_check(LocalArmyGroups.batch_tries(300, 100) == [100, 50, 25, 12, 6, 3, 1] and LocalArmyGroups.batch_tries(1, 100) == [1], "ever smaller batches")

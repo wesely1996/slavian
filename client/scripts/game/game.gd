@@ -60,6 +60,9 @@ var chat_more := false
 var armies: Array = []
 ## Forts, built or being built (see server fortView).
 var forts: Array = []
+## Army groups (see server armyGroupView): a name, a home, the troops it
+## should hold and the army it fields.
+var army_groups: Array = []
 ## Bandit camps and monster lairs: {id, kind, front, q, r, size}.
 var camps: Array = []
 ## Shipyards (a daily event), and the steps (edge keys) finished boats sail.
@@ -174,6 +177,7 @@ func set_world(new_world: Dictionary) -> void:
 	orders = new_world.get("orders", [])
 	armies = new_world.get("armies", [])
 	forts = new_world.get("forts", [])
+	army_groups = new_world.get("armyGroups", [])
 	camps = new_world.get("camps", [])
 	shipyards = new_world.get("shipyards", [])
 	sites = new_world.get("sites", [])
@@ -248,6 +252,13 @@ func set_armies(world_id_: int, new_armies: Array) -> void:
 	if world_id_ != world_id():
 		return
 	armies = new_armies
+	armies_changed.emit()
+
+
+func set_army_groups(world_id_: int, groups: Array) -> void:
+	if world_id_ != world_id():
+		return
+	army_groups = groups
 	armies_changed.emit()
 
 

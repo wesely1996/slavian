@@ -20,6 +20,7 @@ signal inbox_updated(world_id: int, notifications: Array, unread: int)
 signal chat_received(world_id: int, message: Dictionary)
 signal armies_updated(world_id: int, armies: Array)
 signal forts_updated(world_id: int, forts: Array)
+signal army_groups_updated(world_id: int, groups: Array)
 
 const RETRY_MIN_SEC := 1.0
 ## Room for one whole message: a running world's view outgrows the
@@ -132,6 +133,7 @@ func _handle(text: String) -> void:
 		"armies":
 			armies_updated.emit(int(message.worldId), message.armies)
 			forts_updated.emit(int(message.worldId), message.get("forts", []))
+			army_groups_updated.emit(int(message.worldId), message.get("armyGroups", []))
 		"notifications":
 			inbox_updated.emit(int(message.worldId), message.notifications, int(message.unread))
 		"chat":

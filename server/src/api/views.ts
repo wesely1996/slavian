@@ -49,6 +49,7 @@ import { armyQuestOf, heroQuestOffers, type ArmyQuest } from '../scheduler/quest
 import { forecastMarches } from '../scheduler/waves.js';
 import type { March } from '../sim/waves.js';
 import type { ArmyQuestOffer, QuestOffer } from '../sim/quests.js';
+import { listArmyGroups, type ArmyGroup } from '../db/armyGroups.js';
 
 export interface VillageView {
   id: number;
@@ -126,6 +127,8 @@ export function villageView(village: Village): VillageView {
       startsAt: batch.startsAt.toISOString(),
       perUnitMs: batch.perUnitMs,
       completesAt: batchCompletesAt(batch).toISOString(),
+      // Recruited for an army group (null: for the garrison).
+      group: batch.group ?? null,
     })),
     resources: {
       amounts: ledger.amounts,
@@ -577,11 +580,30 @@ export function armyView(army: Army) {
     // It answers battles nearby; where it stood before it went to one.
     respond: army.respond,
     post: army.post,
+    // The army group it marches to join (null: none).
+    groupId: army.groupId,
   };
 }
 
 export async function armiesView(client: DbClient, worldId: number) {
   return (await listArmies(client, worldId)).map(armyView);
+}
+
+// An army group: its name, home, the troops it should hold and the army it
+// fields (null: none standing yet).
+export function armyGroupView(group: ArmyGroup) {
+  return {
+    id: group.id,
+    ownerAccountId: group.ownerAccountId,
+    name: group.name,
+    homeVillageId: group.homeVillageId,
+    composition: group.composition,
+    armyId: group.armyId,
+  };
+}
+
+export async function armyGroupsView(client: DbClient, worldId: number) {
+  return (await listArmyGroups(client, worldId)).map(armyGroupView);
 }
 
 export function fortView(fort: Fort) {
@@ -673,6 +695,7 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
   const orders = await ordersView(client, world.id);
   const armies = await armiesView(client, world.id);
   const forts = await fortsView(client, world.id);
+  const armyGroups = await armyGroupsView(client, world.id);
   // Captives (a daily event) carry what freeing them brings, and when they go.
   const camps = (await listCamps(client, world.id)).map((c) => ({
     id: c.id,
@@ -804,6 +827,7 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
     leaders,
     orders,
     armies,
+    armyGroups,
     forts,
     camps,
     // Ancient sites, and the group's lore scrolls.

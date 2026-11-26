@@ -380,7 +380,8 @@
        "count": 8,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T08:20:09.600Z"
+       "completesAt": "2026-06-01T08:20:09.600Z",
+       "group": null
       }
      ],
      "resources": {
@@ -579,7 +580,8 @@
        "count": 8,
        "startsAt": "2026-06-01T09:00:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T09:00:09.600Z"
+       "completesAt": "2026-06-01T09:00:09.600Z",
+       "group": null
       }
      ],
      "resources": {
@@ -778,7 +780,8 @@
        "count": 8,
        "startsAt": "2026-06-01T09:40:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T09:40:09.600Z"
+       "completesAt": "2026-06-01T09:40:09.600Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1278,6 +1281,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -3485,7 +3489,8 @@
      },
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:20:00.000Z"
    }
@@ -3592,7 +3597,8 @@
      },
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:20:00.000Z"
    }
@@ -3699,7 +3705,8 @@
      },
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:20:00.000Z"
    }
@@ -3819,7 +3826,8 @@
      },
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:20:00.000Z"
    }
@@ -4387,7 +4395,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -4479,7 +4488,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -4571,7 +4581,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -4678,9 +4689,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -7304,7 +7317,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -7396,7 +7410,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -7488,7 +7503,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -7595,9 +7611,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -10327,7 +10345,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -10419,7 +10438,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -10511,7 +10531,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -10618,9 +10639,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -12793,7 +12816,8 @@
      },
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:24:48.000Z"
    }
@@ -13615,7 +13639,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -13707,7 +13732,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -13816,7 +13842,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -13944,9 +13971,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -17036,7 +17065,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -17123,7 +17153,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -17232,7 +17263,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -17360,9 +17392,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -20584,7 +20618,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -20671,7 +20706,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -20780,7 +20816,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -20928,9 +20965,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -24338,7 +24377,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -24425,7 +24465,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -24534,7 +24575,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -24677,9 +24719,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -28134,7 +28178,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 3,
@@ -28221,7 +28266,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -28330,7 +28376,8 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -28473,9 +28520,11 @@
       },
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {

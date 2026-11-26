@@ -13,6 +13,9 @@ export interface TrainingBatch {
   readonly perUnitMs: number;
   // How many it was queued with (batches from before: unknown).
   readonly size?: number;
+  // Recruited for this army group (db/armyGroups.ts): once trained they
+  // march to it.
+  readonly group?: number;
 }
 
 export function batchCompletesAt(batch: TrainingBatch): Date {

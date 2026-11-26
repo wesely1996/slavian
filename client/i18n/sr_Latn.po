@@ -1215,7 +1215,7 @@ msgstr "Ovde nijedna utvrda ne može stajati."
 msgid "Something already stands here."
 msgstr "Ovde već nešto stoji."
 
-#: client/scripts/game/game.gd:551
+#: client/scripts/game/game.gd:562
 msgid "a village"
 msgstr "selo"
 
@@ -2974,111 +2974,183 @@ msgstr "Sve trupe"
 msgid "By village"
 msgstr "Po selima"
 
-#: client/scripts/screens/game_screen_army.gd:1568
+#: client/scripts/screens/game_screen_army.gd:1566
+msgid "Army groups"
+msgstr "Vojne grupe"
+
+#: client/scripts/screens/game_screen_army.gd:1569
 msgid "Your hero"
 msgstr "Tvoj junak"
 
-#: client/scripts/screens/game_screen_army.gd:1592
+#: client/scripts/screens/game_screen_army.gd:1593
 msgid "No troops yet. Train them in a village's Troops tab."
 msgstr "Još nema trupa. Obuči ih na kartici Trupe u selu."
 
-#: client/scripts/screens/game_screen_army.gd:1604
+#: client/scripts/screens/game_screen_army.gd:1605
 msgid "%d at home · %d out · %d in training"
 msgstr "%d kod kuće · %d napolju · %d na obuci"
 
-#: client/scripts/screens/game_screen_army.gd:1609
+#: client/scripts/screens/game_screen_army.gd:1610
 msgid "%d in all"
 msgstr "ukupno %d"
 
-#: client/scripts/screens/game_screen_army.gd:1633
+#: client/scripts/screens/game_screen_army.gd:1634
 msgid "Training"
 msgstr "Obuka"
 
-#: client/scripts/screens/game_screen_army.gd:1637
+#: client/scripts/screens/game_screen_army.gd:1638
 msgid "Open"
 msgstr "Otvori"
 
-#: client/scripts/screens/game_screen_army.gd:1653
+#: client/scripts/screens/game_screen_army.gd:1654
 msgid "No armies out"
 msgstr "Nema vojski na terenu"
 
-#: client/scripts/screens/game_screen_army.gd:1653
+#: client/scripts/screens/game_screen_army.gd:1654
 msgid "No armies out. Send them from a village's Troops tab, or from a hex on the map."
 msgstr "Nijedna vojska nije napolju. Pošalji ih sa kartice Trupe u selu ili sa polja na mapi."
 
-#: client/scripts/screens/game_screen_army.gd:1661
+#: client/scripts/screens/game_screen_army.gd:1662
 msgid "%s → %s"
 msgstr "%s → %s"
 
-#: client/scripts/screens/game_screen_army.gd:1666
+#: client/scripts/screens/game_screen_army.gd:1667
 msgid "Show"
 msgstr "Prikaži"
 
-#: client/scripts/screens/game_screen_army.gd:1691
+#: client/scripts/screens/game_screen_army.gd:1692
 msgid "%s  Lv %d"
 msgstr "%s  nivo %d"
 
-#: client/scripts/screens/game_screen_army.gd:1694
+#: client/scripts/screens/game_screen_army.gd:1695
 msgid "Open the hero"
 msgstr "Otvori junaka"
 
-#: client/scripts/screens/game_screen_base.gd:400
+#: client/scripts/screens/game_screen_army.gd:1725
+msgid "An army with a set make-up. Its troops are trained by themselves in your settlement closest to it, and march to it; until it stands they gather at its home."
+msgstr "Vojska zadatog sastava. Njene trupe se same obučavaju u tvom naselju koje joj je najbliže i marširaju do nje; dok se ne formira, okupljaju se u njenom matičnom naselju."
+
+#: client/scripts/screens/game_screen_army.gd:1730
+msgid "Create army"
+msgstr "Napravi vojsku"
+
+#: client/scripts/screens/game_screen_army.gd:1734
+msgid "You keep at most %d army groups."
+msgstr "Možeš imati najviše %d vojnih grupa."
+
+#: client/scripts/screens/game_screen_army.gd:1736
+msgid "No army groups yet."
+msgstr "Još nema vojnih grupa."
+
+#: client/scripts/screens/game_screen_army.gd:1752
+msgid "View army"
+msgstr "Pogledaj vojsku"
+
+#: client/scripts/screens/game_screen_army.gd:1754
+msgid "Disband group"
+msgstr "Raspusti grupu"
+
+#: client/scripts/screens/game_screen_army.gd:1786
+msgid "Gathering at %s"
+msgstr "Okuplja se u naselju %s"
+
+#: client/scripts/screens/game_screen_army.gd:1787
+msgid "Home %s · %s"
+msgstr "Matično naselje %s · %s"
+
+#: client/scripts/screens/game_screen_army.gd:1801
+msgid "Whole: %d of %d troops"
+msgstr "Popunjena: %d od %d vojnika"
+
+#: client/scripts/screens/game_screen_army.gd:1802
+msgid "%d of %d troops · %d on the way"
+msgstr "%d od %d vojnika · %d na putu"
+
+#: client/scripts/screens/game_screen_army.gd:1822
+msgid "Change the army group"
+msgstr "Izmeni vojnu grupu"
+
+#: client/scripts/screens/game_screen_army.gd:1825
+msgid "You need a settlement for its home."
+msgstr "Potrebno ti je naselje koje će joj biti matično."
+
+#: client/scripts/screens/game_screen_army.gd:1829
+msgid "%s's Army"
+msgstr "Vojska naselja %s"
+
+#: client/scripts/screens/game_screen_army.gd:1832
+msgid "Name"
+msgstr "Ime"
+
+#: client/scripts/screens/game_screen_army.gd:1834
+msgid "Home settlement"
+msgstr "Matično naselje"
+
+#: client/scripts/screens/game_screen_army.gd:1834
+msgid "Until its army stands, its troops gather here."
+msgstr "Dok se njena vojska ne formira, trupe se okupljaju ovde."
+
+#: client/scripts/screens/game_screen_army.gd:1870
+msgid "Save"
+msgstr "Sačuvaj"
+
+#: client/scripts/screens/game_screen_base.gd:402
 msgid "The stores of %s: each village keeps its own."
 msgstr "Zalihe sela %s: svako selo čuva svoje."
 
-#: client/scripts/screens/game_screen_base.gd:410
+#: client/scripts/screens/game_screen_base.gd:412
 msgid "%s: %s an hour, credited every minute (next in %s)"
 msgstr "%s: %s na sat, pripisuje se svakog minuta (sledeće za %s)"
 
-#: client/scripts/screens/game_screen_base.gd:411
+#: client/scripts/screens/game_screen_base.gd:413
 msgid "%s/min"
 msgstr "%s/min"
 
-#: client/scripts/screens/game_screen_base.gd:484
+#: client/scripts/screens/game_screen_base.gd:486
 msgid "Your Svarog's Embers: found in ancient sites and lairs, spent on the bridge, the Shrine and the mightiest research."
 msgstr "Tvoj Svarogov žar: nalazi se u drevnim mestima i jazbinama, troši se na most, svetilište i najmoćnija istraživanja."
 
-#: client/scripts/screens/game_screen_base.gd:544
+#: client/scripts/screens/game_screen_base.gd:546
 msgid "Inbox"
 msgstr "Prijemno sanduče"
 
-#: client/scripts/screens/game_screen_base.gd:544
+#: client/scripts/screens/game_screen_base.gd:546
 msgid "Inbox and chat"
 msgstr "Obaveštenja i ćaskanje"
 
-#: client/scripts/screens/game_screen_base.gd:632
+#: client/scripts/screens/game_screen_base.gd:634
 msgid "Tutorial hidden. More → Tutorial brings it back."
 msgstr "Uputstvo je sakriveno. Više → Uputstvo ga vraća."
 
-#: client/scripts/screens/game_screen_base.gd:671
+#: client/scripts/screens/game_screen_base.gd:673
 msgid "Map"
 msgstr "Mapa"
 
-#: client/scripts/screens/game_screen_base.gd:671
+#: client/scripts/screens/game_screen_base.gd:673
 msgid "Village"
 msgstr "Selo"
 
-#: client/scripts/screens/game_screen_base.gd:671
+#: client/scripts/screens/game_screen_base.gd:673
 msgid "More"
 msgstr "Više"
 
-#: client/scripts/screens/game_screen_base.gd:885
+#: client/scripts/screens/game_screen_base.gd:887
 msgid "Show the sheet"
 msgstr "Prikaži list"
 
-#: client/scripts/screens/game_screen_base.gd:885
+#: client/scripts/screens/game_screen_base.gd:887
 msgid "Fold the sheet away"
 msgstr "Skloni list"
 
-#: client/scripts/screens/game_screen_base.gd:1200
+#: client/scripts/screens/game_screen_base.gd:1202
 msgid "Come home when done"
 msgstr "Vrati se kad završi"
 
-#: client/scripts/screens/game_screen_base.gd:1411
+#: client/scripts/screens/game_screen_base.gd:1413
 msgid "No troops"
 msgstr "Nema trupa"
 
-#: client/scripts/screens/game_screen_base.gd:1440
+#: client/scripts/screens/game_screen_base.gd:1442
 msgid "No troops yet."
 msgstr "Još nema trupa."
 
@@ -3184,10 +3256,6 @@ msgstr "Obuci"
 #: client/scripts/screens/game_screen_hero.gd:211
 msgid "Found another village to send the hero there."
 msgstr "Osnuj još jedno selo da bi junaka poslao tamo."
-
-#: client/scripts/screens/game_screen_hero.gd:217
-msgid "Name"
-msgstr "Ime"
 
 #: client/scripts/screens/game_screen_hero.gd:219
 msgid "New name"
@@ -5032,10 +5100,6 @@ msgstr "Prethodni grad"
 #: client/scripts/screens/game_screen_village.gd:169
 msgid "Town name"
 msgstr "Ime grada"
-
-#: client/scripts/screens/game_screen_village.gd:174
-msgid "Save"
-msgstr "Sačuvaj"
 
 #: client/scripts/screens/game_screen_village.gd:188
 msgid "Town %d of %d"

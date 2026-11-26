@@ -46,7 +46,7 @@ interface VillageRow {
   settled_at: Date;
   queue: { plot?: string; building: string; targetLevel: number; startsAt: string; completesAt: string }[];
   garrison: Record<string, number>;
-  training: { unit: string; count: number; startsAt: string; perUnitMs: number; size?: number }[];
+  training: { unit: string; count: number; startsAt: string; perUnitMs: number; size?: number; group?: number }[];
   away: Record<string, number>;
   stance: Stance;
   maneuver: Maneuver;
@@ -73,6 +73,7 @@ function fromRow(row: VillageRow): Village {
     startsAt: new Date(batch.startsAt),
     perUnitMs: batch.perUnitMs,
     ...(batch.size !== undefined ? { size: batch.size } : {}),
+    ...(batch.group !== undefined ? { group: batch.group } : {}),
   }));
   return {
     id: row.id,

@@ -319,6 +319,7 @@ func _ready() -> void:
 	Live.chat_received.connect(Game.add_chat)
 	Live.armies_updated.connect(Game.set_armies)
 	Live.forts_updated.connect(Game.set_forts)
+	Live.army_groups_updated.connect(Game.set_army_groups)
 	Game.armies_changed.connect(_on_waves_changed)
 	Game.forts_changed.connect(_on_waves_changed)
 	Game.inbox_changed.connect(_on_inbox_changed)
@@ -373,6 +374,7 @@ func _exit_tree() -> void:
 	Live.chat_received.disconnect(Game.add_chat)
 	Live.armies_updated.disconnect(Game.set_armies)
 	Live.forts_updated.disconnect(Game.set_forts)
+	Live.army_groups_updated.disconnect(Game.set_army_groups)
 
 
 ## Seconds a round stays on the battle map while it plays.

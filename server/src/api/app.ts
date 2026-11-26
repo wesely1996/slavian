@@ -40,6 +40,7 @@ import {
   mergeArmiesCommand,
   splitArmyCommand,
 } from '../commands/armies.js';
+import { createArmyGroupCommand, disbandArmyGroupCommand, updateArmyGroupCommand } from '../commands/armyGroups.js';
 import { dismissGeneralCommand, moveGeneralCommand, recruitGeneralCommand } from '../commands/generals.js';
 import { equipCommand, learnSkillCommand, moveHeroCommand, renameHeroCommand, startQuestCommand, unequipCommand, cancelQuestCommand } from '../commands/heroes.js';
 import { armyQuestOf, heroQuestOffers } from '../scheduler/quests.js';
@@ -97,6 +98,7 @@ import type { LiveHub } from './live.js';
 import { alert } from '../alerts.js';
 import {
   armyView,
+  armyGroupView,
   caravanView,
   bountyView,
   expeditionView,
@@ -302,6 +304,10 @@ const respondBody = z.object({ respond: z.boolean() });
 const armyHeroBody = z.object({ join: z.boolean() });
 const armyGeneralBody = z.object({ generalId: z.number().int().positive().nullable() });
 const mergeBody = z.object({ armyId: z.number().int().positive() });
+// An army group: its name (else "<home>'s Army"), home and troops.
+const unitCounts = z.record(z.string(), z.number());
+const armyGroupBody = z.object({ name: z.string().max(64).optional(), homeVillageId: z.number().int().positive(), composition: unitCounts });
+const armyGroupUpdateBody = z.object({ name: z.string().max(64).optional(), homeVillageId: z.number().int().positive().optional(), composition: unitCounts.optional() });
 const splitBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)), withHero: z.boolean().optional(), withGeneral: z.boolean().optional() });
 const dismissBody = z.object({ units: z.record(z.string().max(64), z.number().int().min(0).max(100_000)) });
 const researchBody = z.object({ tech: z.string().min(1).max(64) });
@@ -1165,6 +1171,34 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { armyId } = mergeBody.parse(request.body);
     const army = await mergeArmiesCommand(db, scheduler, { accountId: account.id, armyId: id, otherId: armyId, now: clock() });
     return { army: armyView(army), serverTime: clock().toISOString() };
+  });
+
+  // A new army group (data/armies.json groups) in a world: its troops are
+  // recruited by themselves from the owner's closest settlements.
+  app.post('/v1/worlds/:id/army-groups', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await requireMember(account, id);
+    const body = armyGroupBody.parse(request.body);
+    const group = await createArmyGroupCommand(db, scheduler, { accountId: account.id, worldId: id, ...body, now: clock() });
+    return { armyGroup: armyGroupView(group), serverTime: clock().toISOString() };
+  });
+
+  // Renames a group, or gives it another home or composition.
+  app.post('/v1/army-groups/:id', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = armyGroupUpdateBody.parse(request.body);
+    const group = await updateArmyGroupCommand(db, scheduler, { accountId: account.id, groupId: id, ...body, now: clock() });
+    return { armyGroup: armyGroupView(group), serverTime: clock().toISOString() };
+  });
+
+  // Gives a group up (its army stays).
+  app.post('/v1/army-groups/:id/disband', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    await disbandArmyGroupCommand(db, scheduler, { accountId: account.id, groupId: id, now: clock() });
+    return { ok: true, serverTime: clock().toISOString() };
   });
 
   // Some of a standing army's troops become an army of their own.

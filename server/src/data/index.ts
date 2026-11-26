@@ -730,6 +730,9 @@ const armiesFileSchema = z.object({
   // PvP worlds: a village is safe from other players for protectionHours
   // after it is founded; a won attack plunders lootShare of every store.
   pvp: z.object({ protectionHours: z.number().nonnegative(), lootShare: z.number().min(0).max(1) }),
+  // Army groups: at most maxPerPlayer each, of at most maxUnits troops; the
+  // missing are recruited every checkMinutes game minutes (divided by world speed).
+  groups: z.object({ maxPerPlayer: z.number().int().positive(), maxUnits: z.number().int().positive(), checkMinutes: z.number().positive() }),
 });
 
 const fieldFileSchema = z.object({
