@@ -2,7 +2,9 @@
 // world whose rivers run long: its longest river line, measured like a
 // longest road, river edges joined corner to corner; a lake on the way
 // counts the fewest lake edges from where one river meets it to where the
-// next leaves it.
+// next leaves it, and a line may end in a lake: it then counts the lake's
+// edges from where the river meets it to its farthest corner (the fewest
+// edges there, lake hexes that touch being one lake).
 import type { TerrainId } from '../data/index.js';
 import { hexKey, neighbors, type Hex } from './hex.js';
 
@@ -85,6 +87,9 @@ export function longestRiver(rivers: readonly { a: Hex; b: Hex }[], terrain: Rea
         const d = dist.get(mouths[j]!);
         if (d !== undefined && d > 0) links.push({ u: mouths[i]!, v: mouths[j]!, w: d });
       }
+      // Or the line ends in the lake, at its farthest corner from this mouth.
+      const far = Math.max(...dist.values());
+      if (far > 0) links.push({ u: mouths[i]!, v: `lake:${start}:${mouths[i]}`, w: far });
     }
   }
   const byCorner = new Map<string, number[]>();

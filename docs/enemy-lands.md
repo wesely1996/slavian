@@ -42,23 +42,32 @@ come out.
           │  heartland: radius R (10–16 by players)
           │  edge belt: 1–2 rings (dark forest, steppe, hallowed lands)
           ▼
-   ┌───────────────── enemy lands: 6–8 more rings ─────────────────┐
-   │ band 1 (march)   band 2 (heartland)   band 3 (the seat)        │
-   │ camps, patrols   towns, roads         the front's capital      │
-   └────────────────────────────────────────────────────────────────┘
+   ┌─────────────────────── enemy lands: 8–10 more rings ───────────────────────┐
+   │ band 1 (march)   band 2 (forts)    band 3 (heartland)   band 4 (the seat) │
+   │ camps, patrols   the front's       towns, muster        the front's       │
+   │                  border forts      grounds, roads       capital           │
+   └────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Sectors.** Each active front owns the wedge of the outer rings on its side
   (the same sides `mapgen` paints the edge belt on). Wedges meet at
   impassable seams (ice fields, salt marsh, mountain walls), so fronts don't
   bleed into one another.
-- **Bands.** The enemy lands are three bands deep, matching today's raid
-  depth:
+- **Bands.** The enemy lands are four bands deep:
   - **Band 1, the march:** camps and patrols, light garrisons.
-  - **Band 2, the heartland:** towns joined by roads, muster grounds.
-  - **Band 3, the seat:** one capital (the stronghold of today's raids) and
-    its shrine or forge.
-- **Size.** About +60–80% more hexes than today (radius R + 8 rather than
+  - **Band 2, the forts:** a line of the front's border forts, walled and
+    garrisoned, guarding the ways in. An army must take one (or slip past
+    its zone of control) to go deeper.
+  - **Band 3, the heartland:** towns joined by roads, muster grounds.
+  - **Band 4, the seat:** one capital (the stronghold of today's raids) and
+    its shrine or forge. The hardest place in the game to take.
+- **The North is different: monster lands.** It has no forts, towns or
+  capital, only **monster lairs**, in every band. The further north, the
+  **more lairs** and the **more and stronger monsters** in each: band 1
+  holds wolf dens, band 4 the deepest lairs of the Div and the Zmey. Its
+  seat is the Monster Lair of today's raids, the greatest lair of all. What
+  §4–§6 say of camps, forts and towns, the North does with lairs.
+- **Size.** About +80–100% more hexes than today (radius R + 10 rather than
   R + 1). The map client and the server's hex tables must cope (§9).
 - **Terrain per front.** Each front gets its own palette: new terrains with
   their own move costs and battle ground (`data/terrain.json`):
@@ -75,18 +84,26 @@ come out.
 |---|---|---|---|
 | **War camp** | 1 | A garrison and a little loot; scouts' first sight of the front | bandit camp / lair |
 | **Watch post** | 1 | Sees our armies coming: hordes and towns are warned | watchtower rule |
-| **Town** | 2 | Stores, a garrison that regrows, walls; feeds the front's waves | fort (rings, towers, siege) |
-| **Muster ground** | 2 | Where the next horde gathers, visibly, unit by unit | gathering horde, strike |
-| **Road** | 1–3 | Hordes and enemy reinforcements move along them faster | our roads |
-| **Shrine / forge** | 3 | The front's rare finds (Embers, gear, lore) | North raid finds |
-| **Capital** | 3 | The stronghold; sacking it is the deepest blow | raid stronghold |
+| **Border fort** | 2 | Walls, towers and a strong garrison across the way in; a zone of control | fort (rings, towers, siege) |
+| **Town** | 3 | Stores, a garrison that regrows, walls; feeds the front's waves | fort (rings, towers, siege) |
+| **Muster ground** | 3 | Where the next horde gathers, visibly, unit by unit | gathering horde, strike |
+| **Road** | 1–4 | Hordes and enemy reinforcements move along them faster | our roads |
+| **Shrine / forge** | 4 | The front's rare finds (Embers, gear, lore) | North raid finds |
+| **Capital** | 4 | The stronghold; sacking it is the deepest blow | raid stronghold |
+| **Monster lair** (North) | 1–4 | Every place in the North: more and stronger the deeper | lair |
 
 - **Enemy settlements** are a new entity, `enemy_settlements`: front, kind,
   hex, tier, garrison, stores, walls, status (`standing`, `besieged`,
   `sacked`, `rebuilding`) and when it regrows.
-- **Garrisons** are built like a wave of the front (`composeWave`), scaled by
-  band, the waves so far and the front's hatred: the same growth the raid
-  stages use today.
+- **Power.** Garrisons are built like a wave of the front (`composeWave`),
+  scaled the way hordes and camps already are (PR5 power scaling):
+  - by **the group's power** (army and economy), so a place is a fight
+    whatever stage the run is at;
+  - by **difficulty** (`difficulty.json` presets), so Baron stays forgiving
+    and the hardest presets punish;
+  - by **band** (each band clearly harder than the last; the seat far
+    beyond: about what a full Ritual Night host is);
+  - by the front's **hatred** and its **gods' blessings** (§6b).
 
 ## 5. Playing there
 
@@ -106,21 +123,29 @@ come out.
   - Field battles use the hex's own terrain, so no field is rolled any more.
   - Camps are fought like camps. Towns and the capital are besieged ring by
     ring, like our forts (PR B), with the front's engines defending.
-- **Sacking.** Taking a place brings its stores (the 0.23 loot rules: richer
-  by band and by hatred) and a mark on the front:
+- **Sacking.** Taking a place brings its stores and a mark on the front:
   - **A war camp:** loot, and sight of band 2.
+  - **A border fort:** loot, and the way into band 3 open while it is down.
   - **A town:** loot, and the front's waves are **10% smaller** while it lies
     in ruins (stacking, at most −30%).
   - **A muster ground:** the gathering horde loses what stood there, as a
     strike does today, but on the map.
-  - **The capital:** the front's next wave is skipped, and its waves are
-    20% smaller for N days; an achievement.
-- **Regrowth.**
-  - Sacked places rebuild after some game days, faster the more the front
-    hates.
-  - Hatred rises with every blow, so pressure comes back as **retaliation
-    bands** aimed at the village that struck. This is today's 100%-hatred
-    band, made specific.
+  - **The seat:** **no horde of that front sets out for 1 game day**: its
+    raids stop. It should be **very, very hard** (the strongest host in the
+    game behind the strongest walls, after crossing three bands) and **very,
+    very rewarding**: the greatest loot of the run, Embers, rare gear and
+    lore, an achievement.
+- **Rewards fit the risk.** What a sack brings is scaled to:
+  - **the place's power** (band, group power, difficulty, hatred): the
+    harder it was, the more it gives;
+  - **what the expedition spent**: the troops lost and the grain eaten on
+    the way. A costly victory pays for itself and more; a cheap raid on a
+    weak camp pays little. Loot keeps the 0.23 depth and hatred factors.
+- **Repair.** A sacked camp, fort, town or lair **rebuilds after 12 game
+  hours** (the seat too), at full strength.
+- **Retaliation.** Hatred rises with every blow, so pressure comes back as
+  **retaliation bands** aimed at the village that struck. This is today's
+  100%-hatred band, made specific.
 - **Holding ground.**
   - Optional, phase 5: a captured war camp can be turned into a fort or a
     supply point.
@@ -138,6 +163,34 @@ come out.
   - Towns sacked along its road slow it or shrink it.
 - **Wave strength** gains one more input: the front's standing towns (those
   not sacked). Group power, difficulty and bridge stages still apply.
+- **Several at once.** A front may have several hordes out at the same time
+  (as the bridge-stage hordes already are): its muster grounds each gather
+  their own.
+
+## 6b. The enemy's gods
+
+The enemy has gods too, and they answer as ours do (§ "Blessings of the
+gods" on page 13 of the mechanics docs).
+
+- **Earned by the enemy's anger and our deeds:**
+  - **hatred:** each time a front's hatred passes a threshold (e.g. 200%,
+    400%);
+  - **the bridge:** each stage the group raises draws a blessing for every
+    active front (Nav fights the bridge);
+  - **events:** a burned forest's Leshen felled, the Avatar of Černobog
+    risen, a seat sacked, a river god's or forge god's blessing won by the
+    players.
+- **What a blessing gives:** a lasting bonus for that front, such as:
+  - stronger garrisons in a band;
+  - faster repair of sacked places;
+  - a new unit in its hordes;
+  - walls of its forts and towns made tougher.
+
+  Each front has its own gods and blessings: the Order's saints, the
+  nomads' sky-father, the North's Černobog and the old things under the
+  ice.
+- **Shown to the players:** each front's blessings sit on its panel, so the
+  cost of provoking it is visible.
 - **Events reuse the ground.**
   - The Avatar's cultists, the Leshen and mountain cities keep their own
     rules.
@@ -148,14 +201,14 @@ come out.
 
 | System | Change |
 |---|---|
-| Raids (`raids.json`) | Become ordinary army orders on real places. Depth = band. The Raid tab becomes a "Campaign" tab listing known enemy places by band |
+| Raids (`raids.json`) | Become ordinary army orders on real places. Depth = band (1–4). The Raid tab becomes a "Campaign" tab listing known enemy places by band |
 | Strike | Becomes an attack on a muster ground: same share-gathered rule, now with a march |
 | Hatred | Unchanged in kind. Sacks, foraging and capital strikes add to it; regrowth speed reads it |
 | Waves | Spawn at muster grounds; size reads standing towns |
 | Map gen (`mapgen`) | Generates the outer bands, seams, enemy terrain and places, all seeded |
 | Fog | Enemy lands start hidden; scouting reveals them band by band |
 | Achievements | New ones for sacking each kind of place and each capital |
-| Bridge quests | The "artifact" quest (raid the North to full depth) becomes "sack the Monster Lair" |
+| Bridge quests | The "artifact" quest (raid the North to full depth) becomes "sack the Monster Lair". Every raised stage also blesses the enemy (§6b) |
 
 ## 8. Running worlds
 
@@ -170,7 +223,7 @@ come out.
 ## 9. Technical notes
 
 - **Hex count.**
-  - A radius-16 map grows from ~800 hexes to ~1,700.
+  - A radius-16 map grows from ~800 hexes to ~2,000.
   - The client draws terrain in chunks and skips off-screen chunks.
   - The world view keeps sending the map once. Enemy places travel with the
     world view like camps do.
@@ -198,23 +251,41 @@ Each phase is one or two PRs, playable on its own, behind no flag.
    - Generate the outer bands and seams with per-front terrain; draw them
      with chunked rendering; fog.
    - Nothing lives there yet, but armies and scouts can walk in.
-2. **Places.** War camps, watch posts, towns and the capital, with
-   garrisons; scouting reports on them; sieges reuse fort rules; sacking with
-   loot.
+2. **Places.**
+   - War camps, watch posts, border forts, towns and the capital; the
+     North's lairs in every band.
+   - Garrisons scaled by group power, difficulty and band.
+   - Scouting reports; sieges reuse fort rules; sacking with risk-scaled
+     loot; 12-hour repair.
 3. **Muster grounds.** Waves gather and set out from them; strike becomes a
    march; towns standing feed wave size.
-4. **Consequences.** Wave reductions for sacked towns and capitals; regrowth;
-   retaliation bands; the Campaign tab replaces the Raid tab; achievements.
-5. **Holding ground** (optional): captured camps as supply points or forts;
+4. **Consequences.**
+   - Wave reductions for sacked towns; the seat's day without raids.
+   - Retaliation bands; achievements.
+   - The Campaign tab replaces the Raid tab.
+5. **The enemy's gods** (§6b): blessings from hatred, bridge stages and
+   events, shown on each front's panel.
+6. **Holding ground** (optional): captured camps as supply points or forts;
    roads into enemy lands.
-6. **Balance pass.** `runsim` gets bots that campaign. Hatred, regrowth and
+7. **Balance pass.** `runsim` gets bots that campaign. Hatred, regrowth and
    wave reductions are tuned so that pushing out pays, but sitting at home
    still works on Baron difficulty.
 
-## 11. Open questions
+## 11. Settled
 
-- **How deep?** Three bands of 2–3 rings, or one wide band with places
-  scattered by distance?
+- **Four bands** (march, forts, heartland, seat); the North all monster
+  lairs, more and stronger to the north.
+- **The seat:** sacking it stops that front's hordes for 1 game day; very,
+  very hard and very, very rewarding.
+- **Repair:** any sacked place rebuilds in 12 game hours.
+- **Scaling:** place power by group power and difficulty; rewards by the
+  risk and by what the expedition spent.
+- **Several hordes per front** may be out at once.
+- **The enemy's gods** bless their fronts, from hatred, the bridge and
+  events.
+
+## 12. Open questions
+
 - **Holding ground:** may players keep anything beyond the edge (camps as
   forts), or only strike and leave?
 - **Retaliation:** one band at the village that struck (sharp, readable), or

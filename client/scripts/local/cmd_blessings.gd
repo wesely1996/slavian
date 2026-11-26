@@ -74,7 +74,8 @@ static func _edge_corners(a: Vector2i, b: Vector2i) -> Array:
 
 
 ## sim/blessings.ts longestRiver: the longest river line, river edges joined
-## corner to corner, each once, through lakes at their shortest. `rivers`:
+## corner to corner, each once, through lakes at their shortest; a line may
+## end in a lake, at its farthest corner from where the river meets it. `rivers`:
 ## [{a, b}]; `terrain`: {"q,r": id}.
 static func longest_river(rivers: Array, terrain: Dictionary) -> int:
 	var links: Array = []
@@ -128,6 +129,12 @@ static func longest_river(rivers: Array, terrain: Dictionary) -> int:
 				var d: Variant = dist.get(mouths[j])
 				if d != null and int(d) > 0:
 					links.append({"u": mouths[i], "v": mouths[j], "w": int(d)})
+			# Or the line ends in the lake, at its farthest corner from this mouth.
+			var far := 0
+			for c in dist:
+				far = maxi(far, int(dist[c]))
+			if far > 0:
+				links.append({"u": mouths[i], "v": "lake:%s:%s" % [start, mouths[i]], "w": far})
 	var by_corner := {}
 	for i in links.size():
 		for c in [links[i].u, links[i].v]:
