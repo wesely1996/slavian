@@ -140,10 +140,10 @@ All changes go on a feature branch and are merged into `main` through a pull req
 |---|---|---|
 | `ci.yml` | Every pull request | Server typecheck + tests (with Postgres), server Docker image smoke test, client tests + smoke run. The debug APK is built only when it runs for a merge to `main` or a release (uploaded as a run artifact, kept 7 days), not for pull requests. |
 | `dev-build.yml` | Every push to `main` (i.e. merged PRs), or manually | Runs CI, then publishes the APK as a **dev pre-release** tagged `dev-<date>-<sha>`. |
-| `release.yml` | **Actions → Release → Run workflow** on main (version defaults to `config/version`; the workflow makes the tag `v<version>`), or pushing a tag `v<version>`; the version sets what is built, so bump `config/version` on main too. Don't make the release in GitHub's UI: published releases are immutable, so the APK couldn't be attached | Runs CI on the tagged commit, then publishes a full release (kept, not cleaned up) with the APK attached, the server image as `slavian-server:v<version>`, and deploys it to production. |
+| `release.yml` | **Actions → Release → Run workflow** on main (version defaults to `config/version`; the workflow makes the tag `v<version>`), or pushing a tag `v<version>`; the version sets what is built, so bump `config/version` on main too. Don't make the release in GitHub's UI: published releases are immutable, so the APK couldn't be attached | Runs CI on the tagged commit, then publishes a full release (kept, not cleaned up) with the APK and a Windows build (`slavian-<version>-windows.zip`, one `Slavian.exe`) attached, the server image as `slavian-server:v<version>`, and deploys it to production. |
 | `cleanup-dev-builds.yml` | Daily at 03:17 UTC, or manually | Deletes dev pre-releases (and their tags) and CI run artifacts older than 7 days. A manual run can change the age, do a dry run, or delete every dev build and artifact at once (`everything`). |
 
-To test a build on a phone, open the latest **Dev build** under Releases and install the APK (allow installs from unknown sources).
+To test a build on a phone, open the latest **Dev build** under Releases and install the APK (allow installs from unknown sources). On Windows, download a release's `slavian-<version>-windows.zip`, unzip it and run `Slavian.exe` (it isn't signed, so Windows asks once: **More info → Run anyway**). To make one locally: `ops/ci/install-godot.sh --windows`, then `ops/export-windows.sh build/slavian-windows.zip`.
 
 ### One-time repository setup
 

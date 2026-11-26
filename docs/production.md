@@ -48,7 +48,7 @@ nothing in it but `SLAVIAN_TAG`. A server still on Neon stays on Neon until
 `main` (the version defaults to `config/version` in `client/project.godot`;
 the workflow makes the tag), or push a version tag (`git tag v0.2.0
 origin/main && git push origin v0.2.0`). Either runs `release.yml`: CI, the
-release with the APK attached, the server image `slavian-server:v0.2.0`, and
+release with the APK and the Windows build attached, the server image `slavian-server:v0.2.0`, and
 then the **Deploy to production** job. Don't make the release by hand in
 GitHub's UI: a published release is immutable, so the APK can't be added to
 it. It SSHes to the VPS and runs `ops/production/deploy.sh
