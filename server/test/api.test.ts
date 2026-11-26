@@ -1813,10 +1813,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     w = (await call('GET', `/v1/worlds/${worldId}`, rusa.token)).body;
     expect(w.bridge.quests.relic).toBe(now.toISOString());
     expect(w.bridge.status).toBe('raising');
-    // While it is raised, every front sends a small horde, each at its own target.
+    // While it is raised, a small horde sets out against each village, each
+    // at its own, an hour after the raising starts.
     const raiders = w.waves.filter((x: { errand: { kind: string } | null }) => x.errand?.kind === 'bridge');
-    expect(raiders).toHaveLength(w.map.activeFronts.length);
-    expect(new Set(raiders.map((x: { errand: { target: number | null } }) => x.errand.target)).size).toBe(raiders.length);
+    const standing = w.villages.filter((v: { ruin: unknown; ownerAccountId: number | null }) => !v.ruin && v.ownerAccountId !== null);
+    expect(raiders).toHaveLength(standing.length);
+    expect(new Set(raiders.map((x: { errand: { target: number | null } }) => x.errand.target))).toEqual(new Set(standing.map((v: { id: number }) => v.id)));
+    for (const x of raiders) expect(new Date(x.spawnAt).getTime() - now.getTime()).toBe((scheduler.data.bridge.constructionRaids.delayHours * 3_600_000) / 10);
     const { rows: sizes } = await db.query<{ composition: Record<string, number> }>("SELECT composition FROM waves WHERE world_id = $1 AND errand->>'kind' = 'bridge'", [worldId]);
     for (const row of sizes) expect(Object.values(row.composition).reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(scheduler.data.bridge.constructionRaids.units + scheduler.data.bridge.constructionRaids.unitsPerStage);
 

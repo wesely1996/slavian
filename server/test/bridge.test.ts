@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
-import { completeQuest, donate, embersWanted, isReady, needs, newBridge, raised, stagesStanding, startRaising } from '../src/sim/bridge.js';
+import { completeQuest, constructionRaids, donate, embersWanted, isReady, needs, newBridge, nextConstructionTarget, raised, stagesStanding, startRaising } from '../src/sim/bridge.js';
 import { waveFactor } from '../src/sim/difficulty.js';
 
 const data = loadGameData();
@@ -61,5 +61,23 @@ describe('the Kalinov Bridge', () => {
   it('makes waves bigger with every stage standing', () => {
     const base = { players: 1, villages: 1, armyPower: 0, waveIndex: 2 };
     expect(waveFactor(data, 'baron', { ...base, bridgeStages: 3 })).toBeCloseTo((1 + 3 * data.bridge.powerPerStage) * data.difficulty.presets.baron.waveScale);
+  });
+
+  it('sends a construction horde at each village, the fronts in turn', () => {
+    expect(constructionRaids(['north', 'east'], [4, 7, 9])).toEqual([
+      { front: 'north', target: 4 },
+      { front: 'east', target: 7 },
+      { front: 'north', target: 9 },
+    ]);
+    expect(constructionRaids(['north', 'east'], [])).toEqual([{ front: 'north', target: null }]);
+    expect(constructionRaids([], [4])).toEqual([]);
+  });
+
+  it('turns a construction horde on the nearest village it has not struck', () => {
+    const villages = [{ id: 9, q: 3, r: 0 }, { id: 5, q: -3, r: 0 }, { id: 2, q: 1, r: 4 }];
+    // 9 and 5 are both 3 hexes away: the lower id wins.
+    expect(nextConstructionTarget({ q: 0, r: 0 }, villages)).toEqual({ id: 5, cell: { q: -3, r: 0 } });
+    expect(nextConstructionTarget({ q: 2, r: 0 }, villages)).toEqual({ id: 9, cell: { q: 3, r: 0 } });
+    expect(nextConstructionTarget({ q: 2, r: 0 }, [])).toEqual({ id: null, cell: { q: 0, r: 0 } });
   });
 });

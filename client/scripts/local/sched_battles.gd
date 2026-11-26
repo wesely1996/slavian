@@ -1015,7 +1015,10 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 		if v.ruin == null and not wave.struck.any(func(id: Variant) -> bool: return int(id) == int(v.id)):
 			villages.append({"id": v.id, "q": v.q, "r": v.r})
 			standing.append(v)
-	var targets: Array = (avatar_targets(standing) if avatar else LocalHordes.targets_of(villages)).filter(func(t: Dictionary) -> bool: return t.cell != from)
+	# A band sent at the bridge's builders goes on to the nearest village it hasn't struck.
+	var owned: Array = standing.filter(func(v: Dictionary) -> bool: return v.ownerAccountId != null and v.get("refuge") != true)
+	var bridge_band: bool = wave.get("errand") is Dictionary and wave.errand.kind == "bridge"
+	var targets: Array = (avatar_targets(standing) if avatar else [LocalBridge.next_construction_target(from, owned)] if bridge_band else LocalHordes.targets_of(villages)).filter(func(t: Dictionary) -> bool: return t.cell != from)
 	var since_spawn := at - int(wave.spawnAt)
 	var route: Variant = LocalHordes.route_from(data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition,
 		LocalHordes.fear_of(server, world), LocalWaves.rng_for(int(world.seed), int(wave.index), 0x90 + wave.struck.size()), since_spawn, world.speed)

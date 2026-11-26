@@ -692,6 +692,14 @@ func _test_bridge_reward() -> void:
 	var data := {"bridge": {"stages": [stage, {"reward": {"resources": {}, "effects": {"buildTime": -0.1}}}, {"reward": {"resources": {}, "effects": {"production.all": 0.05}}}]}}
 	var blessed := LocalBridge.bridge_bonuses(data, {"stage": 2})
 	_check(is_equal_approx(float(blessed.get("production.all", 0)), 0.05) and is_equal_approx(float(blessed.get("buildTime", 0)), -0.1), "blessings of the stages that stand")
+	# Construction hordes: one at each village, the fronts in turn; then on to the nearest village not struck.
+	var raids := LocalBridge.construction_raids(["north", "east"], [4, 7, 9])
+	_check(raids.size() == 3 and raids[2].front == "north" and raids[1].target == 7, "a construction horde at each village: %s" % [raids])
+	_check(LocalBridge.construction_raids(["north"], []) == [{"front": "north", "target": null}], "no village: one at the Holy City")
+	var spread := [{"id": 9, "q": 3, "r": 0}, {"id": 5, "q": -3, "r": 0}, {"id": 2, "q": 1, "r": 4}]
+	_check(LocalBridge.next_construction_target(Vector2i.ZERO, spread).id == 5, "nearest village, the lower id on a tie")
+	_check(LocalBridge.next_construction_target(Vector2i(2, 0), spread).id == 9, "nearest village from where it struck")
+	_check(LocalBridge.next_construction_target(Vector2i(2, 0), []).id == null, "none left: the Holy City")
 
 
 func _test_group_research() -> void:

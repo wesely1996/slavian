@@ -9,7 +9,7 @@ import { insertWave, lastWave, type Wave } from '../db/waves.js';
 import { getWorld, listMembers, loadHexes, type World } from '../db/worlds.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
-import { constructionSize, constructionTargets, questCell, type BridgeState } from '../sim/bridge.js';
+import { constructionRaids, constructionSize, questCell, type BridgeState } from '../sim/bridge.js';
 import type { Front } from '../sim/mapgen.js';
 import { composeWave, threatOf } from '../sim/waves.js';
 import { createCamp, occupiedHexes } from './camps.js';
@@ -85,28 +85,30 @@ export async function sendQuestArmy(client: DbClient, data: GameData, world: Wor
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
 }
 
-// A stage starts to be raised: every active front sends a small horde, each
-// at its own target (the group's villages, then the Holy City).
+// A stage starts to be raised: a small horde for each of the group's
+// villages, each going for its own (the Holy City once none is left), and
+// setting out delayHours later.
 export async function sendConstructionRaids(client: DbClient, data: GameData, world: World, bridge: BridgeState, at: Date): Promise<void> {
   const last = await lastHorde(client, world.id);
   if (!last) return;
-  const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && v.ownerAccountId !== null).map((v) => v.id);
-  const fronts = world.activeFronts;
-  const targets = constructionTargets(fronts, villages);
+  const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && v.ownerAccountId !== null && v.refuge !== true).map((v) => v.id);
+  const raids = constructionRaids(world.activeFronts, villages);
   const players = (await listMembers(client, world.id)).length;
-  for (const [i, front] of fronts.entries()) {
-    const composition = composeWave(data, front as Front, Math.max(1, last.index), constructionSize(data, bridge.stage), stageSeed(world, bridge.stage, 0xb00 + i), players);
+  const spawnAt = new Date(at.getTime() + (data.bridge.constructionRaids.delayHours * MS_PER_HOUR) / world.speed);
+  for (const [i, raid] of raids.entries()) {
+    const front = raid.front as Front;
+    const composition = composeWave(data, front, Math.max(1, last.index), constructionSize(data, bridge.stage), stageSeed(world, bridge.stage, 0xb00 + i), players);
     const wave = await insertWave(
       client,
       world.id,
-      { index: last.index, front: front as Front, spawnAt: at, composition, threat: threatOf(data, composition), stance: 'offensive' },
+      { index: last.index, front, spawnAt, composition, threat: threatOf(data, composition), stance: 'offensive' },
       false,
       last.id,
-      { kind: 'bridge', target: targets[i]! },
+      { kind: 'bridge', target: raid.target },
     );
-    await scheduleEvent(client, world.id, at, 'wave_spawn', { waveId: wave.id });
+    await scheduleEvent(client, world.id, spawnAt, 'wave_spawn', { waveId: wave.id });
   }
-  await tellAll(client, world, 'Nav strikes at the builders', 'While {stage} is raised, every front sends a band at a different target.', { stage: data.bridge.stages[bridge.stage]!.name }, at);
+  await tellAll(client, world, 'Nav strikes at the builders', 'While {stage} is raised, a band sets out against every village of the group.', { stage: data.bridge.stages[bridge.stage]!.name }, at);
   await notifyWorld(client, { worldId: world.id, type: 'waves' });
 }
 

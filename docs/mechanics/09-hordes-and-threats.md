@@ -234,6 +234,14 @@ Bandit camps (human fronts) and monster lairs (the North) rise on the map.
 
 ## Bridge construction raids
 
-While a bridge stage is being raised, every active front sends one small
-horde at a different target, with 5 + 2 × the stage's number units: the
-group's villages first, then the Holy City ([page 14](14-bridge-and-endgame.md#while-a-stage-is-raised)).
+While a bridge stage is being raised, one small horde of 5 + 2 × the
+stage's number units sets out against **each of the group's villages**,
+1 game hour after the raising starts ([page 14](14-bridge-and-endgame.md#while-a-stage-is-raised)).
+
+- **Fronts.** The active fronts take the villages in turn: with two fronts
+  and three villages, the first front sends two hordes.
+- **Locked on.** Each horde marches on its own village and no other. Only
+  once it has struck it, and if its rampage allows, does it go on, to the
+  nearest village it hasn't struck yet (the Holy City once none is left).
+- **No village left.** A single horde goes for the Holy City.
+- **Intercepts.** Armies and forts can still catch them on the way.

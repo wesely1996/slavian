@@ -68,9 +68,14 @@ The blessings add to every member's bonuses like research.
 
 ### While a stage is raised
 
-- **Construction raids.** During its 12 hours, **every active front sends one
-  small horde** at a different target: 5 + 2 × the stage's number units. The
-  group's villages come first, then the Holy City.
+- **Construction raids.** **One small horde for each of the group's
+  villages** sets out **1 hour** after the raising starts, with 5 + 2 × the
+  stage's number units. The active fronts take the villages in turn.
+  - **Each goes for its own village.** Only once it has struck it does it
+    turn on the nearest village it hasn't struck yet.
+  - With no village left, a single horde goes for the Holy City.
+  - They can be intercepted on the way, like any horde
+    ([page 9](09-hordes-and-threats.md#bridge-construction-raids)).
 - **Bigger waves.** Every finished stage makes waves **10% bigger**
   ([page 9](09-hordes-and-threats.md#wave-size)).
 
