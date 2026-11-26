@@ -630,6 +630,9 @@ export function worldSummary(world: World) {
     // Each front's hatred (horde.json hatred), by front: its next horde to
     // set out takes it all.
     hatred: world.hatred,
+    // The gods' blessings (events.json blessings): when each came (null: not
+    // yet), and the longest river line the players have dug.
+    blessings: { water: world.blessings.water ?? null, forge: world.blessings.forge ?? null, riverLine: world.blessings.riverLine ?? 0 },
     difficulty: world.difficulty,
     // Players may attack each other's villages (armies.json pvp).
     pvp: world.pvp,

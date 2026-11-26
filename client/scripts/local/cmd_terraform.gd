@@ -331,7 +331,9 @@ static func on_done(server: LocalServer, world: Dictionary, event: Dictionary, c
 		if not world.rivers.any(func(e: Dictionary) -> bool: return LocalLand.edge_key(e.a, e.b) == key):
 			var ends := LocalServer._ordered(cell, work.toward)
 			# Dug across a road: a bridge stands over it.
-			world.rivers.append({"a": ends[0], "b": ends[1], "crossing": "standing" if work.get("bridge", false) else "none", "size": 1, "builtBy": null, "completesAt": null})
+			world.rivers.append({"a": ends[0], "b": ends[1], "crossing": "standing" if work.get("bridge", false) else "none", "size": 1, "builtBy": null, "completesAt": null, "dug": true})
+		# A long enough river line dug: the water god's blessing.
+		LocalBlessings.river_dug(server, world, int(event.dueAt), changed)
 	if work.villageId != null:
 		var village := server.find_village(world, int(work.villageId))
 		# A fire tells only the one who set it, where they set it.

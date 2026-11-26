@@ -194,9 +194,45 @@ static func lane_factor(data: Dictionary) -> float:
 	return 1.0 / float(data.events.kinds.shipyard.laneSpeed)
 
 
+## sim/land.ts riverSpeed: how many times as fast river travel is here.
+static func river_speed(data: Dictionary, land: Dictionary) -> float:
+	return float(data.events.blessings.water.speed) if land.get("blessed", false) else 1.0
+
+
+## sim/land.ts waterFactor: along a boat's river, or (blessed) a river's banks.
+static func water_factor(data: Dictionary, land: Dictionary, edge: String) -> float:
+	var speed := river_speed(data, land)
+	var lane := lane_factor(data) / speed if land.get("lanes", {}).has(edge) else 1.0
+	var bank := 1.0 / speed if land.get("banks", {}).has(edge) else 1.0
+	return minf(lane, bank)
+
+
 ## sim/land.ts fastestStep: the cheapest step players can take on this land.
 static func fastest_step(data: Dictionary, land: Dictionary) -> float:
-	return minf(fastest_road(data), lane_factor(data)) if not land.get("lanes", {}).is_empty() else fastest_road(data)
+	var speed := river_speed(data, land)
+	var best := fastest_road(data)
+	if not land.get("lanes", {}).is_empty():
+		best = minf(best, lane_factor(data) / speed)
+	if not land.get("banks", {}).is_empty():
+		best = minf(best, 1.0 / speed)
+	return best
+
+
+## sim/land.ts riverBanks: every step between two neighbouring hexes on the
+## banks of the same river (edge key -> true).
+static func river_banks(rivers: Array) -> Dictionary:
+	var banks := {}
+	var done := {}
+	for e in rivers:
+		if done.has(edge_key(e.a, e.b)):
+			continue
+		for lane in river_lanes(rivers, e.a, e.b):
+			banks[lane] = true
+		var water := river_water(rivers, e.a, e.b)
+		for r in rivers:
+			if water.has(key(r.a)) and water.has(key(r.b)):
+				done[edge_key(r.a, r.b)] = true
+	return banks
 
 
 ## sim/land.ts riverLanes: the steps (edge keys, sorted) a boat built on the
@@ -281,7 +317,7 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, reli
 		if not roads:
 			return float(cost)
 		var road := road_factor(data, level, land.get("damaged", {}).has(edge_key(from, to)))
-		return float(cost) * (minf(road, lane_factor(data)) if land.get("lanes", {}).has(edge_key(from, to)) else road)
+		return float(cost) * minf(road, water_factor(data, land, edge_key(from, to)))
 
 
 ## sim/land.ts edgesMeet: whether edges a|b and c|d meet at a corner.

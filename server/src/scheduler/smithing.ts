@@ -6,7 +6,8 @@ import { listMembers, setSmithing } from '../db/worlds.js';
 import type { HandlerRegistry } from './events.js';
 import { tell } from './notices.js';
 import { refreshBonuses } from './research.js';
-import { isAffliction } from '../sim/smithing.js';
+import { isAffliction, smithedOut } from '../sim/smithing.js';
+import { unitSmithedOut } from './blessings.js';
 
 const smithPayload = z.object({ accountId: z.number().int() });
 
@@ -19,6 +20,8 @@ export const smithingHandlers: HandlerRegistry = {
     const smithing = { ...member.smithing, [work.unit]: { ...(member.smithing[work.unit] ?? {}), [work.line]: work.level } };
     await setSmithing(client, world.id, accountId, smithing, null);
     await refreshBonuses(client, data, world, [accountId], event.dueAt);
+    // Forged to the last level of every line: the forge god's blessing.
+    if (smithedOut(data, smithing, work.unit)) await unitSmithedOut(client, data, world.id, event.dueAt);
     await tell(client, world, accountId, {
       kind: 'build_done',
       tier: 'digest',

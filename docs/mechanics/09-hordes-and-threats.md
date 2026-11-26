@@ -183,6 +183,7 @@ Hatred belongs to a **front**, not to one horde. It grows, with no limit, for:
 | A map event left undone on its land | +0.2 |
 | One of its camps or lairs burnt by fire | +0.2 |
 | The Leshen felled (the North) | +1 |
+| Each blessing of the gods (the North, for good: every horde takes it) | +0.05 |
 
 - **Spending it.** The front's next horde to set out **takes all of it**, as a
   share added to its attack and defense, and the front's hatred starts again

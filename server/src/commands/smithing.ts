@@ -24,9 +24,11 @@ export async function startSmithingCommand(
     const member = (await listMembers(client, world.id)).find((m) => m.accountId === village.ownerAccountId);
     if (!member) throw new RuleError('Only a member of this world can forge');
     const level = nextSmithLevel(deps.data, member.smithing, input.unit, input.line, smithy, member.smithWork !== null);
-    const cost = smithCost(deps.data, input.unit, input.line as SmithLine, level);
+    // Blessed by the forge god: cheaper and quicker for everyone.
+    const blessed = !!world.blessings.forge;
+    const cost = smithCost(deps.data, input.unit, input.line as SmithLine, level, blessed);
     const ledger = spend(village.state.ledger, input.now, cost);
-    const completesAt = new Date(input.now.getTime() + smithMs(deps.data, input.unit, input.line as SmithLine, level, world.speed, villageBonuses(deps.data, village.state)));
+    const completesAt = new Date(input.now.getTime() + smithMs(deps.data, input.unit, input.line as SmithLine, level, world.speed, villageBonuses(deps.data, village.state), blessed));
     const work: SmithWork = { unit: input.unit, line: input.line as SmithLine, level, villageId: village.id, completesAt: completesAt.toISOString() };
     await setSmithing(client, world.id, member.accountId, member.smithing, work);
     await scheduleEvent(client, world.id, completesAt, 'smith_done', { accountId: member.accountId });

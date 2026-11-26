@@ -47,19 +47,33 @@ static func smith_level(smithing: Dictionary, unit: String, line: String) -> int
 	return int(smithing.get(unit, {}).get(line, 0))
 
 
-static func smith_cost(data: Dictionary, unit: String, line: String, level: int) -> Dictionary:
+## sim/smithing.ts smithCost; blessed by the forge god, cheaper.
+static func smith_cost(data: Dictionary, unit: String, line: String, level: int, blessed := false) -> Dictionary:
 	var def: Dictionary = data.units.units[unit]
 	var priced := priced_level(data, line, level)
+	var factor := float(data.events.blessings.forge.costFactor) if blessed else 1.0
 	var out := {}
 	for kind in LocalLedger.KINDS:
-		out[kind] = LocalWaves.js_round(float(def.cost[kind]) * float(data.smithing.costFactor) * priced)
+		out[kind] = LocalWaves.js_round(float(def.cost[kind]) * float(data.smithing.costFactor) * priced * factor)
 	return out
 
 
-static func smith_ms(data: Dictionary, unit: String, line: String, level: int, world_speed: float, bonuses: Dictionary = {}) -> int:
+## Game hours forging takes (before the Blacksmith's bonus and world speed).
+static func smith_hours(data: Dictionary, unit: String, line: String, level: int, blessed := false) -> float:
 	var def: Dictionary = data.units.units[unit]
-	var hours := (float(data.smithing.hours.base) + float(data.smithing.hours.perTier) * float(def.requiresLevel)) * priced_level(data, line, level)
+	return (float(data.smithing.hours.base) + float(data.smithing.hours.perTier) * float(def.requiresLevel)) * priced_level(data, line, level) \
+		* (float(data.events.blessings.forge.timeFactor) if blessed else 1.0)
+
+
+static func smith_ms(data: Dictionary, unit: String, line: String, level: int, world_speed: float, bonuses: Dictionary = {}, blessed := false) -> int:
+	var hours := smith_hours(data, unit, line, level, blessed)
 	return LocalWaves.js_round((hours * 3600000.0 * maxf(0.1, 1.0 + LocalVillage.bonus(bonuses, "smithTime"))) / world_speed)
+
+
+## sim/smithing.ts smithedOut: forged to the last level of every line.
+static func smithed_out(data: Dictionary, smithing: Dictionary, unit: String) -> bool:
+	var lines := smith_lines(data, unit)
+	return not lines.is_empty() and lines.all(func(line: String) -> bool: return smith_level(smithing, unit, line) >= line_levels(data, line))
 
 
 ## Why the line can't be forged (a rule answer), or {"level": next}.
@@ -113,10 +127,12 @@ static func start(server: LocalServer, world: Dictionary, village: Dictionary, b
 	if next.has("error"):
 		return next
 	var level := int(next.level)
-	var ledger := LocalLedger.spend(village.state.ledger, now, smith_cost(data, unit, line, level))
+	# Blessed by the forge god: cheaper and quicker for everyone.
+	var blessed := LocalBlessings.has(world, "forge")
+	var ledger := LocalLedger.spend(village.state.ledger, now, smith_cost(data, unit, line, level, blessed))
 	if ledger.has("missing"):
 		return ledger
-	var completes_at := now + smith_ms(data, unit, line, level, world.speed, LocalVillage.village_bonuses(data, village.state))
+	var completes_at := now + smith_ms(data, unit, line, level, world.speed, LocalVillage.village_bonuses(data, village.state), blessed)
 	var work := {"unit": unit, "line": line, "level": level, "villageId": village.id, "completesAt": LocalTime.iso(completes_at)}
 	member.smithWork = work
 	server.schedule(world, completes_at, "smith_done", {"accountId": int(member.accountId)})
@@ -140,6 +156,9 @@ static func on_smith_done(server: LocalServer, world: Dictionary, event: Diction
 	member.smithing = smithing
 	member.smithWork = null
 	server.refresh_bonuses(world, account_id, int(event.dueAt), changed)
+	# Forged to the last level of every line: the forge god's blessing.
+	if smithed_out(data, smithing, String(work.unit)):
+		LocalBlessings.bless(server, world, "forge", int(event.dueAt), changed)
 	LocalInbox.tell(server, world, account_id, {"kind": "build_done", "tier": "digest",
 		"title": "The Blacksmith finished: {unit}, {line} {level}",
 		"body": "{line} for every {unit} of yours from now on." if is_affliction(String(work.line)) else "{line} for every {unit} of yours: +{share}% from now on.",

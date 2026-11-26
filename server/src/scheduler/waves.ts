@@ -31,6 +31,7 @@ import { planIntercepts } from './field.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { afterErrand } from './bridgeQuests.js';
 import { avatarTargets } from './horde.js';
+import { lastingHatred } from './blessings.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -299,8 +300,8 @@ export const waveHandlers: HandlerRegistry = {
     if (wave.status !== 'scheduled') return;
     if (wave.errand !== null) return sendErrand(client, data, world, wave, event.dueAt);
     if (wave.bandOf !== null) return sendBand(client, data, world, wave, event.dueAt);
-    // It takes all of its front's hatred.
-    await setWaveHatred(client, wave.id, await drainFrontHatred(client, world.id, wave.front));
+    // It takes all of its front's hatred, and what the blessings set for good.
+    await setWaveHatred(client, wave.id, (await drainFrontHatred(client, world.id, wave.front)) + lastingHatred(data, world, wave.front));
     // The front's leader takes its head, if free to.
     await assignLeader(client, data, world, wave, event.dueAt);
     // Camps of its front send part of themselves along.

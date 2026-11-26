@@ -1062,6 +1062,13 @@ const eventsFileSchema = z.object({
   range: z.object({ min: z.number().int().positive(), max: z.number().int().positive() }),
   reward: z.object({ resources: resourcesSchema, growthPerDay: z.number().nonnegative() }),
   failure: z.object({ hatred: z.number().nonnegative() }),
+  // The gods' blessings: once per world, for everyone.
+  blessings: z.object({
+    water: z.object({ riverLine: z.number().int().positive(), speed: z.number().min(1) }),
+    forge: z.object({ costFactor: z.number().positive(), timeFactor: z.number().positive() }),
+    // Each blessing: the North hates this much more, for good.
+    northHatred: z.number().nonnegative(),
+  }),
   // The Leshen, the wrath of nature: a forest a player burns may wake him.
   leshen: z.object({
     chance: z.number().min(0).max(1),
