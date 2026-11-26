@@ -6,6 +6,8 @@ Slavian keeps as little about you as it can.
 
 - The display name you choose (or the guest name given to you).
 - Sign-in sessions (a hashed token; the plain token lives only on your device).
+- A sign-in code for another device, while you have one shown (hashed, used
+  once, gone after 10 minutes at most).
 - The state of the worlds you play in (villages, armies, resources, buildings).
 - What you write in a group's chat, with your name as it was then, for the
   members of that world.
@@ -24,7 +26,7 @@ Slavian keeps as little about you as it can.
 - **Export:** download everything kept about you from the app (**Support and
   privacy → Export my data**). It is saved as a JSON file on your device.
 - **Delete:** delete your account and its data from the app (**Support and
-  privacy → Delete my account**). The account, its sessions, memberships,
+  privacy → Delete my account**). The account, its sessions and sign-in codes, memberships,
   chat messages and device tokens go with it. Bug reports you sent are kept without your account
   link so the developer can still fix what you reported.
 - **Contact:** send a bug report from the app with the current game state.

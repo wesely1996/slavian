@@ -20,9 +20,52 @@ export async function createGuestAccount(
     [displayName],
   );
   const account = rows[0]!;
+  return { account, token: await newSession(client, account.id) };
+}
+
+// A new sign-in for the account: the token goes to the device, only its hash is kept.
+async function newSession(client: DbClient, accountId: number): Promise<string> {
   const token = randomBytes(32).toString('base64url');
-  await client.query('INSERT INTO sessions (token_hash, account_id) VALUES ($1, $2)', [hashToken(token), account.id]);
-  return { account, token };
+  await client.query('INSERT INTO sessions (token_hash, account_id) VALUES ($1, $2)', [hashToken(token), accountId]);
+  return token;
+}
+
+// Signing in on another device: the signed-in device asks for a code, the
+// other types it in. No 0/O or 1/I, so it reads back without doubt;
+// 32^10 codes, each good for one sign-in within SIGN_IN_CODE_MINUTES.
+export const SIGN_IN_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+export const SIGN_IN_CODE_LENGTH = 10;
+export const SIGN_IN_CODE_MINUTES = 10;
+
+// As typed: any case, spaces and dashes left out.
+export function normalizeSignInCode(typed: string): string {
+  return typed.toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+// A new code for the account (an earlier one it had stops working), shown as ABCDE-FGHJK.
+export async function createSignInCode(client: DbClient, accountId: number): Promise<{ code: string; expiresAt: Date }> {
+  await client.query('DELETE FROM sign_in_codes WHERE account_id = $1 OR expires_at < now()', [accountId]);
+  // 256 is a multiple of 32: every letter is as likely.
+  const code = [...randomBytes(SIGN_IN_CODE_LENGTH)].map((b) => SIGN_IN_CODE_ALPHABET[b % SIGN_IN_CODE_ALPHABET.length]).join('');
+  const { rows } = await client.query<{ expiresAt: Date }>(
+    `INSERT INTO sign_in_codes (code_hash, account_id, expires_at) VALUES ($1, $2, now() + make_interval(mins => $3))
+     RETURNING expires_at AS "expiresAt"`,
+    [hashToken(code), accountId, SIGN_IN_CODE_MINUTES],
+  );
+  return { code: `${code.slice(0, 5)}-${code.slice(5)}`, expiresAt: rows[0]!.expiresAt };
+}
+
+// Signs in with a code: a new session on its account, and the code is used
+// up. Null when it is wrong or has run out.
+export async function redeemSignInCode(client: DbClient, typed: string): Promise<{ account: Account; token: string } | null> {
+  const { rows } = await client.query<{ accountId: string }>(
+    'DELETE FROM sign_in_codes WHERE code_hash = $1 AND expires_at > now() RETURNING account_id AS "accountId"',
+    [hashToken(normalizeSignInCode(typed))],
+  );
+  if (!rows[0]) return null;
+  const accountId = Number(rows[0].accountId);
+  const { rows: accounts } = await client.query<Account>('SELECT id, display_name AS "displayName", language FROM accounts WHERE id = $1', [accountId]);
+  return { account: accounts[0]!, token: await newSession(client, accountId) };
 }
 
 // One statement, so it needs no transaction (pass the pool). The session's
@@ -68,8 +111,8 @@ export async function deleteAccount(client: DbClient, accountId: number): Promis
  * Everything kept about an account, for its owner to download (GET
  * /v1/me/export, docs/privacy.md): the account with its settings, the worlds
  * it plays in, its villages, armies, heroes and research, its inbox, its
- * phones, its hand-overs, its bug reports and what it wrote in group chats. Session tokens are left out:
- * only their hashes are kept, and they are of no use to anyone.
+ * phones, its hand-overs, its bug reports and what it wrote in group chats. Session tokens and sign-in
+ * codes are left out: only their hashes are kept, and they are of no use to anyone.
  */
 export async function exportAccount(client: DbClient, accountId: number): Promise<Record<string, unknown>> {
   const rows = async (sql: string) => (await client.query<{ row: unknown }>(sql, [accountId])).rows.map((r) => r.row);

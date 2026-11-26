@@ -17,6 +17,8 @@ const SERVER_ONLY: Record<string, string> = {
   'GET /v1/release': 'the released version, for the start screen to offer its download',
   'GET /v1/data': 'the solo engine bundles the game data',
   'POST /v1/auth/guest': 'accounts',
+  'POST /v1/auth/code': 'accounts (signing in on another device)',
+  'POST /v1/me/sign-in-code': 'accounts (signing in on another device)',
   'GET /v1/me': 'accounts',
   'PATCH /v1/me': 'accounts',
   'DELETE /v1/me': 'accounts',

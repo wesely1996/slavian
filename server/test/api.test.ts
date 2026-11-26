@@ -107,6 +107,51 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect((await call('GET', '/v1/me', 'nope')).status).toBe(401);
   });
 
+  it('signs in on another device with a code from the first', async () => {
+    const ana = await guest('Ana');
+    expect((await call('POST', '/v1/me/sign-in-code')).status).toBe(401);
+    const made = await call('POST', '/v1/me/sign-in-code', ana.token);
+    expect(made.status).toBe(200);
+    expect(made.body.code).toMatch(/^[A-HJ-NP-Z2-9]{5}-[A-HJ-NP-Z2-9]{5}$/);
+    const minutes = (Date.parse(made.body.expiresAt) - Date.now()) / 60_000;
+    expect(minutes).toBeGreaterThan(9);
+    expect(minutes).toBeLessThanOrEqual(10);
+    // Typed loosely on the other device: any case, without the dash.
+    const typed = made.body.code.replace('-', ' ').toLowerCase();
+    const signedIn = await call('POST', '/v1/auth/code', undefined, { code: typed });
+    expect(signedIn.status).toBe(200);
+    expect(signedIn.body.account.id).toBe(ana.accountId);
+    expect(signedIn.body.token).not.toBe(ana.token);
+    const me = await call('GET', '/v1/me', signedIn.body.token);
+    expect(me.body.account.displayName).toBe('Ana');
+    // Both devices stay signed in; the code works once.
+    expect((await call('GET', '/v1/me', ana.token)).status).toBe(200);
+    expect((await call('POST', '/v1/auth/code', undefined, { code: made.body.code })).status).toBe(400);
+    // A new code replaces the last one; a code past its time is refused.
+    const first = (await call('POST', '/v1/me/sign-in-code', ana.token)).body.code;
+    const second = (await call('POST', '/v1/me/sign-in-code', ana.token)).body.code;
+    expect((await call('POST', '/v1/auth/code', undefined, { code: first })).status).toBe(400);
+    await db.query("UPDATE sign_in_codes SET expires_at = now() - interval '1 second'");
+    const late = await call('POST', '/v1/auth/code', undefined, { code: second });
+    expect(late.status).toBe(400);
+    expect(late.body.message).toMatch(/wrong or has run out/);
+    expect((await call('POST', '/v1/auth/code', undefined, {})).status).toBe(400);
+    // Deleting the account takes its codes with it.
+    await call('POST', '/v1/me/sign-in-code', ana.token);
+    await call('DELETE', '/v1/me', ana.token);
+    expect((await db.query('SELECT 1 FROM sign_in_codes')).rowCount).toBe(0);
+  });
+
+  it('asks for a pause after many wrong sign-in codes', async () => {
+    const bea = await guest('Bea');
+    const code = (await call('POST', '/v1/me/sign-in-code', bea.token)).body.code;
+    let status = 0;
+    for (let i = 0; i < 61 && status !== 429; i++) status = (await call('POST', '/v1/auth/code', undefined, { code: 'AAAAA-AAAAA' })).status;
+    expect(status).toBe(429);
+    // Even the right code waits out the minute.
+    expect((await call('POST', '/v1/auth/code', undefined, { code })).status).toBe(429);
+  });
+
   it('serves game data publicly', async () => {
     const { status, body } = await call('GET', '/v1/data');
     expect(status).toBe(200);
