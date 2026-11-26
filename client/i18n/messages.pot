@@ -2061,75 +2061,75 @@ msgstr ""
 msgid "Not built yet"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:77
+#: client/scripts/game/wall_text.gd:81
 msgid "%s. Level %d: %s."
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:85
+#: client/scripts/game/wall_text.gd:89
 msgid "+%d%% attack for the garrison while the walls stand"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:87
+#: client/scripts/game/wall_text.gd:91
 msgid "+%d%% to the walls' strength"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:89
+#: client/scripts/game/wall_text.gd:93
 msgid "smashes %.1f siege engines a round"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:91
+#: client/scripts/game/wall_text.gd:95
 msgid "+%d%% defense while the walls stand"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:93
+#: client/scripts/game/wall_text.gd:97
 msgid "%s keeps off %d%% of the battering and %d%% of the climbers; engines take %d%% longer to build"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:94
+#: client/scripts/game/wall_text.gd:98
 msgid "a water-filled moat"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:94
+#: client/scripts/game/wall_text.gd:98
 msgid "a dry moat with stakes"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:99
+#: client/scripts/game/wall_text.gd:103
 msgid "warns of a horde %s earlier"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:111
+#: client/scripts/game/wall_text.gd:115
 msgid " Their ladders and towers put every man of them on the walls."
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:113
+#: client/scripts/game/wall_text.gd:117
 msgid " Their ladders and towers carried %d%% of them onto the walls."
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:116
+#: client/scripts/game/wall_text.gd:120
 msgid "The inner wall"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:116
+#: client/scripts/game/wall_text.gd:120
 msgid "The middle wall"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:116
+#: client/scripts/game/wall_text.gd:120
 msgid "The outer wall"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:119
+#: client/scripts/game/wall_text.gd:123
 msgid "%s is breached!"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:124
+#: client/scripts/game/wall_text.gd:128
 msgid "%s holds: %d of %d left."
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:126
+#: client/scripts/game/wall_text.gd:130
 msgid "The walls are breached!"
 msgstr ""
 
-#: client/scripts/game/wall_text.gd:128
+#: client/scripts/game/wall_text.gd:132
 msgid "The walls hold: %d of %d left."
 msgstr ""
 
@@ -5373,51 +5373,63 @@ msgstr ""
 msgid "Tap again to give it up for good. %s of what was built goes to the Holy City vault; its troops and your hero there move to your nearest village; what it has stored is lost. It must be quiet: no builds, training, caravans or armies under way."
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1010
+#: client/scripts/screens/game_screen_village.gd:1015
 msgid "%s +%d/h → +%d/h"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1014
+#: client/scripts/screens/game_screen_village.gd:1018
 msgid "; level %d: %s"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1017
+#: client/scripts/screens/game_screen_village.gd:1021
 msgid "Slots %d/%d · queue %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1019
+#: client/scripts/screens/game_screen_village.gd:1023
 msgid "Lv %d: slots %d · queue %d · builds %d%% faster"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1030
+#: client/scripts/screens/game_screen_village.gd:1034
 msgid "Holds %d of each resource above the base; the village keeps %d in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1034
+#: client/scripts/screens/game_screen_village.gd:1038
 msgid "Holds %d grain above the base; the village keeps %d grain in all"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1038
+#: client/scripts/screens/game_screen_village.gd:1043
+msgid "Research +%d/h"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:1044
 msgid "Research +%d/h now, +%d/h at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1040
+#: client/scripts/screens/game_screen_village.gd:1047
+msgid "Trades at %d%%"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:1048
 msgid "Trades at %d%% now, %d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1043
+#: client/scripts/screens/game_screen_village.gd:1051
 msgid "%d%% of the garrison's fallen get up again when it holds the village"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1047
+#: client/scripts/screens/game_screen_village.gd:1056
+msgid "%s +%d%%"
+msgstr ""
+
+#: client/scripts/screens/game_screen_village.gd:1057
 msgid "%s +%d%% now, +%d%% at level %d"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1059
+#: client/scripts/screens/game_screen_village.gd:1069
 msgid "%s queued"
 msgstr ""
 
-#: client/scripts/screens/game_screen_village.gd:1059
+#: client/scripts/screens/game_screen_village.gd:1069
 msgid "Queued"
 msgstr ""
 

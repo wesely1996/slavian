@@ -1001,14 +1001,18 @@ func _build_row(village: Dictionary, plot: String, building: String, target: int
 		return tr("%s · %s") % [price, time] + (tr("  (queue full)") if queue_full else ""))
 
 
-## What a building does at its level, and at the next one.
+## What a building does at its level, and at the next one (nothing about a
+## next level once it stands at its last).
 func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	var def := _building_def(building)
 	var speed := float(Game.world.speed)
+	var top := level >= int(def.maxLevel)
 	if def.has("production"):
 		var resource: String = def.production.resource
-		return tr("%s +%d/h → +%d/h") % [UI.resource_name(resource),
-			roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed))), roundi(TimeUtil.per_real_hour(Rules.field_production(def, level + 1, speed)))]
+		var now := roundi(TimeUtil.per_real_hour(Rules.field_production(def, level, speed)))
+		if top:
+			return tr("%s +%d/h") % [UI.resource_name(resource), now]
+		return tr("%s +%d/h → +%d/h") % [UI.resource_name(resource), now, roundi(TimeUtil.per_real_hour(Rules.field_production(def, level + 1, speed)))]
 	if building == "heroes_hall":
 		var text := GeneralText.hall_gives(Game.data, level)
 		return text.left(1).to_upper() + text.substr(1) + (tr("; level %d: %s") % [level + 1, GeneralText.hall_gives(Game.data, level + 1)] if level < int(def.maxLevel) else "")
@@ -1035,8 +1039,12 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	if def.has("research"):
 		var research: Dictionary = def.research
 		var per_hour := func(l: int) -> int: return roundi(TimeUtil.per_real_hour(float(research.basePerHour) * pow(float(research.growth), l - 1) * speed)) if l > 0 else 0
+		if top:
+			return tr("Research +%d/h") % per_hour.call(level)
 		return tr("Research +%d/h now, +%d/h at level %d") % [per_hour.call(level), per_hour.call(level + 1), level + 1]
 	if building == "market":
+		if top:
+			return tr("Trades at %d%%") % roundi(Rules.market_rate(Game.data, level) * 100.0)
 		return tr("Trades at %d%% now, %d%% at level %d") % [roundi(Rules.market_rate(Game.data, level) * 100.0), roundi(Rules.market_rate(Game.data, level + 1) * 100.0), level + 1]
 	var effects: Dictionary = def.get("effects", {}) if def.get("effects") != null else {}
 	if effects.has("hospital"):
@@ -1044,6 +1052,8 @@ func _effect_text(village: Dictionary, building: String, level: int) -> String:
 	for key in effects:
 		if String(key).begins_with("production."):
 			var kind := String(key).trim_prefix("production.")
+			if top:
+				return tr("%s +%d%%") % [UI.resource_name(kind), roundi(float(effects[key]) * level * 100.0)]
 			return tr("%s +%d%% now, +%d%% at level %d") % [UI.resource_name(kind), roundi(float(effects[key]) * level * 100.0), roundi(float(effects[key]) * (level + 1) * 100.0), level + 1]
 	return ""
 
