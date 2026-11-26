@@ -142,6 +142,25 @@ restore a fresh backup into Neon first): `cp .env.before-move .env && docker com
   ```
 - A backup from the bucket: download it from the bucket's page (R2: Storage → the bucket → the file) into `ops/production/backups/`, then restore it as above.
 
+## The machine's updates
+
+Ubuntu installs its security updates every day. A few of them (the kernel,
+core libraries) only take effect after a restart, which the login banner
+shows as "System restart required"; that comes every few weeks. Once, in
+`ops/production`:
+
+```sh
+./night-reboots.sh
+```
+
+It puts the machine on Europe/Belgrade time and turns on the daily updates
+with a reboot at 03:00 local time, only on nights when an update waits for
+one (`./night-reboots.sh <time zone> <HH:MM>` for others). The game is down
+for a minute or two: every service starts again by itself, and the server
+catches up on everything that came due. The nightly backup keeps its hour in
+UTC (`BACKUP_HOUR`, 03:00 UTC is 04:00 or 05:00 in Belgrade), after the
+reboot.
+
 ## Errors and uptime
 
 - **Alerts:** set `ALERT_WEBHOOK_URL` to a Discord or Slack incoming webhook. These post a line to it:
