@@ -9,17 +9,27 @@ import type { PushSender } from './sender.js';
 export interface Release {
   version: string;
   url: string;
+  // The release's own files, for the app to update itself: the Android APK
+  // and the Windows build (a zip holding Slavian.exe).
+  assets: { android: string; windows: string };
 }
 
 export function releaseFromEnv(env: NodeJS.ProcessEnv = process.env): Release | null {
   const version = env.SLAVIAN_VERSION?.trim();
   if (!version) return null;
-  return { version, url: env.SLAVIAN_RELEASES_URL?.trim() || 'https://github.com/wesely1996/slavian/releases/latest' };
+  // Where the release workflow uploads them (release.yml): slavian-<v>.apk
+  // and slavian-<v>-windows.zip under the release's tag.
+  const files = (env.SLAVIAN_ASSETS_URL?.trim() || 'https://github.com/wesely1996/slavian/releases/download/v{version}').replaceAll('{version}', version);
+  return {
+    version,
+    url: env.SLAVIAN_RELEASES_URL?.trim() || 'https://github.com/wesely1996/slavian/releases/latest',
+    assets: { android: `${files}/slavian-${version}.apk`, windows: `${files}/slavian-${version}-windows.zip` },
+  };
 }
 
 // What the push says. Phones on older versions do nothing when it is
 // tapped, so the address is in the text itself.
-export function releaseMessage(release: Release) {
+export function releaseMessage(release: Pick<Release, 'version' | 'url'>) {
   return {
     title: `Slavian ${release.version} is out`,
     body: `A new version is ready. Download it at ${release.url.replace(/^https?:\/\//, '')}`,
@@ -29,7 +39,7 @@ export function releaseMessage(release: Release) {
 
 // Returns how many devices it went to; 0 when already announced (or no one
 // to tell). A failed send rolls back, so the next start tries again.
-export async function announceRelease(db: Db, sender: PushSender | null, release: Release | null, now: Date): Promise<number> {
+export async function announceRelease(db: Db, sender: PushSender | null, release: Pick<Release, 'version' | 'url'> | null, now: Date): Promise<number> {
   if (!release || !sender) return 0;
   return inTransaction(db, async (client) => {
     const fresh = await client.query(

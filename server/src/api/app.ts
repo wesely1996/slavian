@@ -371,7 +371,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   // The version this server was released as, and where to download its
   // app (null on a dev build): the main menu offers the download when it is
   // newer than the app.
-  app.get('/v1/release', async () => releaseFromEnv() ?? { version: null, url: null });
+  app.get('/v1/release', async () => releaseFromEnv() ?? { version: null, url: null, assets: null });
 
   app.get('/health', async (_request, reply) => {
     try {

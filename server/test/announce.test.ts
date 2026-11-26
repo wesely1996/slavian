@@ -21,7 +21,15 @@ describe('release from the environment', () => {
   it('needs a version; the address defaults to the latest release', () => {
     expect(releaseFromEnv({})).toBeNull();
     expect(releaseFromEnv({ SLAVIAN_VERSION: ' ' })).toBeNull();
-    expect(releaseFromEnv({ SLAVIAN_VERSION: '0.17.0' })).toEqual({ version: '0.17.0', url: 'https://github.com/wesely1996/slavian/releases/latest' });
+    expect(releaseFromEnv({ SLAVIAN_VERSION: '0.17.0' })).toEqual({
+      version: '0.17.0',
+      url: 'https://github.com/wesely1996/slavian/releases/latest',
+      assets: {
+        android: 'https://github.com/wesely1996/slavian/releases/download/v0.17.0/slavian-0.17.0.apk',
+        windows: 'https://github.com/wesely1996/slavian/releases/download/v0.17.0/slavian-0.17.0-windows.zip',
+      },
+    });
+    expect(releaseFromEnv({ SLAVIAN_VERSION: '0.17.0', SLAVIAN_ASSETS_URL: 'https://example.org/{version}' })?.assets.android).toBe('https://example.org/0.17.0/slavian-0.17.0.apk');
     expect(releaseFromEnv({ SLAVIAN_VERSION: '0.17.0', SLAVIAN_RELEASES_URL: 'https://example.org/r' })?.url).toBe('https://example.org/r');
   });
 

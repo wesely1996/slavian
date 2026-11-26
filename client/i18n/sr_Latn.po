@@ -2178,6 +2178,38 @@ msgstr "još %d: %s"
 msgid "Not enough resources: %s."
 msgstr "Nema dovoljno resursa: %s."
 
+#: client/scripts/net/updater.gd:48
+msgid "An update is already on its way."
+msgstr "Ažuriranje je već u toku."
+
+#: client/scripts/net/updater.gd:51
+msgid "This app can't update itself; download the new version instead."
+msgstr "Ova aplikacija ne može sama da se ažurira; preuzmi novu verziju."
+
+#: client/scripts/net/updater.gd:77
+msgid "The download could not start."
+msgstr "Preuzimanje nije moglo da počne."
+
+#: client/scripts/net/updater.gd:85
+msgid "The download failed (%s). Check the connection and try again."
+msgstr "Preuzimanje nije uspelo (%s). Proveri vezu i pokušaj ponovo."
+
+#: client/scripts/net/updater.gd:96
+msgid "The installer did not open. Allow Slavian to install apps in the phone's settings, then try again."
+msgstr "Instalacija se nije otvorila. U podešavanjima telefona dozvoli Slavianu da instalira aplikacije, pa pokušaj ponovo."
+
+#: client/scripts/net/updater.gd:105
+msgid "The download is damaged; try again."
+msgstr "Preuzeta datoteka je oštećena; pokušaj ponovo."
+
+#: client/scripts/net/updater.gd:114
+msgid "The game's folder can't be written to; download the new version instead."
+msgstr "U fasciklu igre ne može da se upisuje; preuzmi novu verziju."
+
+#: client/scripts/net/updater.gd:123
+msgid "The update could not be started; download the new version instead."
+msgstr "Ažuriranje nije moglo da počne; preuzmi novu verziju."
+
 #: client/scripts/screens/game_screen.gd:31
 msgid "○ offline"
 msgstr "○ van mreže"
@@ -6183,23 +6215,51 @@ msgstr "Jaše sa igračem %s"
 msgid "Tap a clan to read about it."
 msgstr "Dodirni rod da pročitaš o njemu."
 
-#: client/scripts/screens/start_screen.gd:1446
+#: client/scripts/screens/start_screen.gd:1450
+msgid "Version %s is out: update now"
+msgstr "Izašla je verzija %s: ažuriraj sada"
+
+#: client/scripts/screens/start_screen.gd:1450
 msgid "Version %s is out: download it"
 msgstr "Izašla je verzija %s: preuzmi je"
 
-#: client/scripts/screens/start_screen.gd:1475
+#: client/scripts/screens/start_screen.gd:1480
+msgid "Downloading… %d%%"
+msgstr "Preuzimanje… %d%%"
+
+#: client/scripts/screens/start_screen.gd:1480
+msgid "Downloading… %.1f MB"
+msgstr "Preuzimanje… %.1f MB"
+
+#: client/scripts/screens/start_screen.gd:1491
+msgid "Download it instead"
+msgstr "Preuzmi je ručno"
+
+#: client/scripts/screens/start_screen.gd:1493
+msgid "Tap Install, then Open: Slavian starts on the new version."
+msgstr "Dodirni Instaliraj, pa Otvori: Slavian se pokreće u novoj verziji."
+
+#: client/scripts/screens/start_screen.gd:1493
+msgid "Restarting on the new version…"
+msgstr "Ponovno pokretanje u novoj verziji…"
+
+#: client/scripts/screens/start_screen.gd:1515
 msgid "A new version is out"
 msgstr "Izašla je nova verzija"
 
-#: client/scripts/screens/start_screen.gd:1476
-msgid "Slavian %s is ready; you have %s. Download the new version to keep playing with everyone."
-msgstr "Slavian %s je spreman; ti imaš %s. Preuzmi novu verziju da bi nastavio da igraš sa svima."
+#: client/scripts/screens/start_screen.gd:1516
+msgid "Slavian %s is ready; you have %s. Update to keep playing with everyone."
+msgstr "Slavian %s je spreman; ti imaš %s. Ažuriraj da bi nastavio da igraš sa svima."
 
-#: client/scripts/screens/start_screen.gd:1481
+#: client/scripts/screens/start_screen.gd:1520
 msgid "Later"
 msgstr "Kasnije"
 
-#: client/scripts/screens/start_screen.gd:1482
+#: client/scripts/screens/start_screen.gd:1522
+msgid "Update now"
+msgstr "Ažuriraj sada"
+
+#: client/scripts/screens/start_screen.gd:1522
 msgid "Download"
 msgstr "Preuzmi"
 
