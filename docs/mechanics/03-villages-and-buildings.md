@@ -42,7 +42,7 @@ The heart of the village, up to level 10. Each level:
 The regular buildings, fields and towers went up to level 20 until version
 0.23. Each level now stands for two of the old ones: level *L* gives what old
 level 2*L* gave, and takes about as long as the two old levels did
-together. Since 0.24 a level costs what the same old level did, plus 20%
+together. Since 0.23.1 a level costs what the same old level did, plus 20%
 (old level *L* × 1.2), so all ten levels can be built within a run. Villages
 saved before 0.23 were put on the new scale: each such
 level halved, rounded up (old level 7 became 4). The land's and the
