@@ -1815,7 +1815,7 @@ static func relink_outposts(server: LocalServer, world: Dictionary, at: int, cha
 		if LocalVillage.outpost_plots(village.state.plots).is_empty():
 			continue
 		var home := Vector2i(village.q, village.r)
-		var link := func(cell: Vector2i) -> float: return LocalLand.road_link(server.data, roads, cell, home, damaged)
+		var link := func(cell: Vector2i) -> float: return LocalLand.road_link(server.data, roads, cell, home, damaged, world.hexes)
 		var next := LocalVillage.with_road_links(server.data, village.state, link, at, world.speed)
 		if next == village.state:
 			continue

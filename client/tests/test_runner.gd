@@ -936,6 +936,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("shipyard-scenario.json", "local shipyards and river lanes")
 	_replay_scenario("road-scenario.json", "local roads")
 	_replay_scenario("pass-scenario.json", "local mountain passes")
+	_replay_scenario("mountain-outpost-scenario.json", "local outposts through a pass")
 	_replay_scenario("terraform-scenario.json", "local terraforming and forest fires")
 	_replay_scenario("fire-scenario.json", "local fires turning aside hordes, armies, caravans and settlers")
 	_replay_scenario("cultists-scenario.json", "local cultists and the Avatar of Černobog")

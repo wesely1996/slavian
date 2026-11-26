@@ -69,6 +69,12 @@ describe('land', () => {
     // ... but of two as short, the better built does.
     const twin = new Map([...two, [edgeKey(v, hex(1, -1)), 3], [edgeKey(hex(1, -1), b), 2]]);
     expect(roadLink(data, twin, b, v)).toBeCloseTo((bonus[2]! + bonus[1]!) / 2);
+
+    // Through a mountain pass: each step into the mountain counts twice.
+    const mountain = new Map<string, TerrainId>([['1,0', 'mountain']]);
+    const pass = data.field.road.passOutpostFactor;
+    expect(roadLink(data, two, b, v, new Set(), mountain)).toBeCloseTo((bonus[0]! * pass + bonus[2]! * pass) / 2);
+    expect(roadLink(data, two, b, v, new Set(), new Map<string, TerrainId>([['1,0', 'hills']]))).toBeCloseTo((bonus[0]! + bonus[2]!) / 2);
   });
 
   it('blocks river edges and makes roads cheaper, the more so the better the road', () => {

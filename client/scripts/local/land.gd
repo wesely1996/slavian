@@ -160,9 +160,13 @@ static func fastest_road(data: Dictionary) -> float:
 ## (of those, the best built), the average of each step's level
 ## `outpostBonus`. `roads`: edge key -> level of each standing road; a
 ## damaged one (`damaged`: edge key -> true) adds only damage.effect of it.
-static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: Vector2i, damaged := {}) -> float:
+static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: Vector2i, damaged := {}, terrain := {}) -> float:
 	var levels: Array = data.field.road.levels
 	var effect := float(data.field.road.damage.effect)
+	# A mountain pass: a step into land only a road crosses.
+	var is_pass := func(cell: Vector2i) -> bool:
+		var def: Variant = data.terrain.terrain.get(terrain.get(key(cell), ""))
+		return def is Dictionary and def.get("moveCost") == null and def.get("roadMoveCost") != null
 	var goal := key(to)
 	var best := {key(from): {"steps": 0, "sum": 0.0}}
 	var layer: Array = [from]
@@ -176,7 +180,8 @@ static func road_link(data: Dictionary, roads: Dictionary, from: Vector2i, to: V
 				if level <= 0:
 					continue
 				var k := key(n)
-				var sum := float(here.sum) + float(levels[mini(level, levels.size()) - 1].outpostBonus) * (effect if damaged.has(edge_key(cell, n)) else 1.0)
+				var sum := float(here.sum) + float(levels[mini(level, levels.size()) - 1].outpostBonus) * (effect if damaged.has(edge_key(cell, n)) else 1.0) \
+					* (float(data.field.road.passOutpostFactor) if is_pass.call(cell) or is_pass.call(n) else 1.0)
 				if not best.has(k):
 					best[k] = {"steps": steps, "sum": sum}
 					next.append(n)
