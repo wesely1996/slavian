@@ -110,6 +110,7 @@ their end in the same handler. A maneuver under way and a breakthrough
 ```mermaid
 stateDiagram-v2
   [*] --> marching: raise an army (dispatch)
+  [*] --> stationed: an army group's troops trained where it forms or stands (they stand there at once)
   marching --> stationed: army_arrive (holds, supports, explores, raids)
   marching --> engaged: army_arrive into a battle under way
   marching --> marching: move (turned on the road), shelter after its home is razed
@@ -134,6 +135,11 @@ stateDiagram-v2
   `support`).
 - **Quarters.** A `stationed` army in a settlement, fort or supply point is
   quartered (`quarteredAt`). That is a flag, not a state.
+- **Army groups.** An army group (`army_groups`, no status of its own) names
+  the army it fields (`army_id`); troops marching to join it carry its id
+  (`armies.group_id`) and, once `stationed` where its army stands, merge into
+  it (`done`), or march on after it (`marching`). With no army standing, the
+  first to stand becomes its army.
 - **Enemy lands.** An army can march to and hold a hex beyond the map's edge
   (`sim/enemyLands.ts`), with the same states as on the map. Arriving in a
   band of a front's enemy lands reveals the band past it (`enemy_sight` on

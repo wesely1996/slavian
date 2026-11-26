@@ -2252,7 +2252,7 @@ static func army_view(a: Dictionary) -> Dictionary:
 		"wagonFortAt": LocalTime.iso(a.wagonFortAt) if a.get("wagonFortAt") != null else null,
 		"returnHome": a.get("returnHome", false), "raid": a.get("raid"),
 		"quarteredAt": LocalTime.iso(a.quarteredAt) if a.get("quarteredAt") != null else null,
-		"respond": a.get("respond", true), "post": a.get("post")}
+		"respond": a.get("respond", true), "post": a.get("post"), "groupId": a.get("groupId")}
 
 
 ## Newly trained troops march to their owner's rally point (scheduler/

@@ -1562,7 +1562,8 @@ func _forces_panel() -> void:
 	var hero := Game.my_hero()
 	var tabs := [["totals", "unit/spearman", tr("All troops"), _forces_totals],
 		["villages", "icon/village", tr("By village"), _forces_villages],
-		["moving", "icon/troops", tr("Armies"), _forces_armies]]
+		["moving", "icon/troops", tr("Armies"), _forces_armies],
+		["groups", "unit/warlords_guard" if Art.has("unit/warlords_guard") else "icon/troops", tr("Army groups"), _forces_groups]]
 	if not hero.is_empty():
 		var face := "hero/%s" % hero.get("kind") if hero.get("kind") != null and Art.has("hero/%s" % hero.get("kind")) else "icon/profile"
 		tabs.append(["hero", face, tr("Your hero"), _forces_hero])
@@ -1700,3 +1701,208 @@ func _forces_hero() -> void:
 ## and for the North what the gods' blessings set for good.
 func _front_hatred(front: String) -> float:
 	return float(Game.world.get("hatred", {}).get(front, 0.0)) + LocalBlessings.lasting_hatred(Game.data, Game.world, front)
+
+
+# --- Army groups (data/armies.json groups; scheduler/armyGroups.ts) -------
+
+## The group being made or changed (-1: a new one; null: the list).
+var _group_editing: Variant = null
+## The form's fields while it is open: name, home and troops.
+var _group_name := ""
+var _group_home := 0
+var _group_units: Dictionary[String, int] = {}
+
+
+## Your army groups: each with its home, how whole its army is, and what is
+## on the way; and a button to raise another.
+func _forces_groups() -> void:
+	if _group_editing != null:
+		_group_form()
+		return
+	var groups: Array = Game.army_groups.filter(func(g: Dictionary) -> bool: return int(g.ownerAccountId) == Game.my_account_id())
+	var most := int(Game.data.armies.groups.maxPerPlayer)
+	var top := UI.hbox(8)
+	var intro := UI.label(tr("An army with a set make-up. Its troops are trained by themselves in your settlement closest to it, and march to it; until it stands they gather at its home."), UI.SMALL_SIZE, UI.MUTED)
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(intro)
+	_panel_body.add_child(top)
+	var create := UI.primary(tr("Create army"), func() -> void: _open_group_form(null), "icon/troops")
+	create.disabled = groups.size() >= most or Game.my_villages().is_empty()
+	_panel_body.add_child(create)
+	if groups.size() >= most:
+		_panel_body.add_child(UI.label(tr("You keep at most %d army groups.") % most, UI.SMALL_SIZE, UI.MUTED))
+	if groups.is_empty():
+		_panel_body.add_child(UI.label(tr("No army groups yet."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	_paged("army groups", groups, 3 if _roomy() else 2, func(group: Dictionary) -> void:
+		var card := UI.card(10)
+		var box := UI.vbox(6)
+		card.add_child(box)
+		var army := _group_army(group)
+		box.add_child(UI.label(String(group.name), UI.HEADING_SIZE))
+		box.add_child(UI.label(_group_where(group, army), UI.SMALL_SIZE, UI.MUTED))
+		var coming := _group_coming(group)
+		box.add_child(UI.label(_group_progress(group, army, coming), UI.SMALL_SIZE))
+		box.add_child(_unit_chips(group.composition, 34.0))
+		var buttons := UI.flow(8)
+		var group_id := int(group.id)
+		if not army.is_empty():
+			var army_id := int(army.id)
+			buttons.add_child(UI.button(tr("View army"), func() -> void: _open_army(army_id)))
+		buttons.add_child(UI.button(tr("Change"), func() -> void: _open_group_form(group)))
+		buttons.add_child(UI.button(tr("Disband group"), func() -> void: _disband_group(group_id)))
+		box.add_child(buttons)
+		_panel_body.add_child(card))
+
+
+## The army a group fields while it stands ({}: none yet).
+func _group_army(group: Dictionary) -> Dictionary:
+	if group.get("armyId") == null:
+		return {}
+	for army in Game.armies:
+		if int(army.id) == int(group.armyId) and army.status != "done":
+			return army
+	return {}
+
+
+## Troops on their way to a group: in training for it, and marching to it.
+func _group_coming(group: Dictionary) -> Dictionary:
+	var coming := {}
+	for village in Game.my_villages():
+		for batch in village.training:
+			if batch.get("group") != null and int(batch.group) == int(group.id):
+				coming[batch.unit] = int(coming.get(batch.unit, 0)) + int(batch.count)
+	for army in Game.armies:
+		if army.get("groupId") != null and int(army.groupId) == int(group.id) and army.status != "done":
+			for unit in army.units:
+				coming[unit] = int(coming.get(unit, 0)) + int(army.units[unit])
+	return coming
+
+
+func _group_where(group: Dictionary, army: Dictionary) -> String:
+	var home := Game.village_name(group.homeVillageId)
+	if army.is_empty():
+		return tr("Gathering at %s") % home
+	return tr("Home %s · %s") % [home, ArmyText.status(army, ArmyText.target_name(army, Game.village_name), Game.server_now(), _search_ends(army))]
+
+
+func _group_progress(group: Dictionary, army: Dictionary, coming: Dictionary) -> String:
+	var want := 0
+	var have := 0
+	var on_way := 0
+	for unit in group.composition:
+		var n := int(group.composition[unit])
+		var here := mini(n, int(army.get("units", {}).get(unit, 0)))
+		want += n
+		have += here
+		on_way += mini(n - here, int(coming.get(unit, 0)))
+	if have >= want:
+		return tr("Whole: %d of %d troops") % [have, want]
+	return tr("%d of %d troops · %d on the way") % [have, want, on_way]
+
+
+func _open_group_form(group: Variant) -> void:
+	_group_editing = -1 if group == null else int(group.id)
+	_group_name = "" if group == null else String(group.name)
+	var villages := Game.my_villages().filter(func(v: Dictionary) -> bool: return v.get("ruin") == null)
+	_group_home = int(group.homeVillageId) if group != null else (Game.current_village_id if villages.any(func(v: Dictionary) -> bool: return int(v.id) == Game.current_village_id) else (int(villages[0].id) if not villages.is_empty() else 0))
+	_group_units.clear()
+	if group != null:
+		for unit in group.composition:
+			_group_units[unit] = int(group.composition[unit])
+	_drafts.clear()
+	_rebuild_panel()
+
+
+## Making or changing a group: its name (like a town's), its home and the
+## troops it should hold.
+func _group_form() -> void:
+	var editing := int(_group_editing)
+	_panel_body.add_child(UI.label(tr("Create army") if editing < 0 else tr("Change the army group"), UI.HEADING_SIZE))
+	var villages := Game.my_villages().filter(func(v: Dictionary) -> bool: return v.get("ruin") == null)
+	if villages.is_empty():
+		_panel_body.add_child(UI.label(tr("You need a settlement for its home."), UI.SMALL_SIZE, UI.MUTED))
+		return
+	var home_index := maxi(0, villages.find_custom(func(v: Dictionary) -> bool: return int(v.id) == _group_home))
+	_group_home = int(villages[home_index].id)
+	var name_field := UI.line_edit(tr("%s's Army") % villages[home_index].name, _group_name)
+	name_field.max_length = 32
+	name_field.text_changed.connect(func(text: String) -> void: _group_name = text)
+	_panel_body.add_child(UI.label(tr("Name"), UI.SMALL_SIZE, UI.MUTED))
+	_panel_body.add_child(name_field)
+	_panel_body.add_child(UI.with_info(UI.label(tr("Home settlement"), UI.SMALL_SIZE, UI.MUTED), tr("Until its army stands, its troops gather here.")))
+	var picker := UI.options(villages.map(func(v: Dictionary) -> String: return String(v.name)), home_index)
+	picker.item_selected.connect(func(i: int) -> void:
+		_group_home = int(villages[i].id)
+		_rebuild_panel())
+	_panel_body.add_child(picker)
+	_panel_body.add_child(UI.label(tr("Troops"), UI.SMALL_SIZE, UI.MUTED))
+	var defs: Dictionary = Game.data.units.units
+	var bonuses: Dictionary = villages[home_index].get("bonuses", {})
+	var kinds: Array = defs.keys().filter(func(unit: String) -> bool:
+		var def: Dictionary = defs[unit]
+		return def.get("family") in ["infantry", "archers", "cavalry", "scout"] and unit != "settler" and ClanText.allowed(def, bonuses))
+	# By training building, then the level each needs.
+	kinds.sort_custom(func(a: String, b: String) -> bool:
+		var ba := String(defs[a].building)
+		var bb := String(defs[b].building)
+		if ba != bb:
+			return ba < bb
+		if int(defs[a].requiresLevel) != int(defs[b].requiresLevel):
+			return int(defs[a].requiresLevel) < int(defs[b].requiresLevel)
+		return a < b)
+	var most := int(Game.data.armies.groups.maxUnits)
+	_paged("group units", kinds, 6 if _roomy() else 4, func(unit: String) -> void:
+		var def: Dictionary = defs[unit]
+		var row := UI.hbox(8)
+		row.tooltip_text = tr(def.name)
+		if Art.has("unit/%s" % unit):
+			row.add_child(UI.icon("unit/%s" % unit, 40))
+		var words := UI.vbox(0)
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_child(UI.label(tr(def.name), UI.SMALL_SIZE))
+		words.add_child(UI.label(tr("%s level %d") % [tr(_building_def(def.building).name), int(def.requiresLevel)], UI.SMALL_SIZE, UI.MUTED))
+		row.add_child(words)
+		row.add_child(_number_field("group:%s" % unit, int(_group_units.get(unit, 0)), 0, most, func(n: int) -> void: _group_units[unit] = n))
+		_panel_body.add_child(row))
+	var buttons := UI.flow(8)
+	buttons.add_child(UI.primary(tr("Create army") if editing < 0 else tr("Save"), _save_group))
+	buttons.add_child(UI.button(tr("Cancel"), func() -> void:
+		_group_editing = null
+		_rebuild_panel()))
+	_panel_body.add_child(buttons)
+
+
+func _save_group() -> void:
+	_status.text = ""
+	var composition := {}
+	for unit in _group_units:
+		if int(_group_units[unit]) > 0:
+			composition[unit] = int(_group_units[unit])
+	# Unnamed: named after its home, in the player's language.
+	var name := _group_name.strip_edges()
+	if name == "":
+		name = tr("%s's Army") % Game.village_name(_group_home)
+	var body := {"name": name, "homeVillageId": _group_home, "composition": composition}
+	var editing := int(_group_editing)
+	var response := await Api.post_json("/v1/worlds/%d/army-groups" % Game.world_id() if editing < 0 else "/v1/army-groups/%d" % editing, body)
+	if not response.ok:
+		_status.text = response.error
+		return
+	var group: Dictionary = response.data.armyGroup
+	Game.set_army_groups(Game.world_id(), Game.army_groups.filter(func(g: Dictionary) -> bool: return int(g.id) != int(group.id)) + [group])
+	_group_editing = null
+	_sync_after_command()
+	_rebuild_panel()
+
+
+func _disband_group(group_id: int) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/army-groups/%d/disband" % group_id, {})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_army_groups(Game.world_id(), Game.army_groups.filter(func(g: Dictionary) -> bool: return int(g.id) != group_id))
+	_sync_after_command()
+	_rebuild_panel()

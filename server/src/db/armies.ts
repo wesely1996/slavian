@@ -58,6 +58,9 @@ export interface Army {
   respond: boolean;
   // Where it stood when it went to answer a battle: it goes back after.
   post: ArmyPost | null;
+  // The army group it marches to join (db/armyGroups.ts; null: none). Set
+  // with setArmyGroupTag, never by saveArmy.
+  groupId: number | null;
 }
 
 export interface ArmyPost {
@@ -133,6 +136,7 @@ interface ArmyRow {
   quartered_at: Date | null;
   respond: boolean | null;
   post: ArmyPost | null;
+  group_id?: number | string | null;
 }
 
 function fromRow(row: ArmyRow): Army {
@@ -171,6 +175,7 @@ function fromRow(row: ArmyRow): Army {
     quarteredAt: row.quartered_at ?? null,
     respond: row.respond ?? true,
     post: row.post ?? null,
+    groupId: row.group_id === null || row.group_id === undefined ? null : Number(row.group_id),
   };
 }
 

@@ -4,6 +4,8 @@ import { loadVillage, saveVillageState } from '../db/villages.js';
 import { completeBuild, completeTraining, outpostHex } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
 import { armyHandlers, rallyTrained } from './armies.js';
+import { groupHandlers, groupTrained, joinGroup } from './armyGroups.js';
+import { loadArmy } from '../db/armies.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { battleHandlers } from './battles.js';
 import { caravanHandlers } from './caravans.js';
@@ -85,8 +87,10 @@ export const handlers: HandlerRegistry = {
     const village = await loadVillage(client, payload.villageId);
     const done = village.state.training.filter((batch) => batchCompletesAt(batch) <= event.dueAt);
     await saveVillageState(client, village.id, completeTraining(village.state, event.dueAt));
-    // They march on to the owner's rally point, if one is set.
-    await rallyTrained(client, data, world, village.id, done, event.dueAt);
+    // Those trained for an army group march to it; the others on to the
+    // owner's rally point, if one is set.
+    await groupTrained(client, data, world, village.id, done, event.dueAt);
+    await rallyTrained(client, data, world, village.id, done.filter((batch) => batch.group === undefined), event.dueAt);
     await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   },
 
@@ -104,6 +108,15 @@ export const handlers: HandlerRegistry = {
   ...orderHandlers,
   ...noticeHandlers,
   ...armyHandlers,
+  // An army marching to join an army group joins it once it stands.
+  async army_arrive(context, event) {
+    const { armyId } = z.object({ armyId: z.number().int() }).parse(event.payload);
+    const before = await loadArmy(context.client, armyId);
+    const due = before.status === 'marching' && before.arrivesAt.getTime() === event.dueAt.getTime();
+    await armyHandlers.army_arrive!(context, event);
+    if (due && before.groupId !== null) await joinGroup(context.client, context.data, context.world, await loadArmy(context.client, armyId), event.dueAt);
+  },
+  ...groupHandlers,
   ...fieldHandlers,
   ...terraformHandlers,
   ...fortHandlers,

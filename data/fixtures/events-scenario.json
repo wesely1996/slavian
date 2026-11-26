@@ -380,7 +380,8 @@
        "count": 6,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T08:20:07.200Z"
+       "completesAt": "2026-06-01T08:20:07.200Z",
+       "group": null
       }
      ],
      "resources": {
@@ -878,6 +879,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -3007,7 +3009,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T08:35:00.000Z"
    }
@@ -3637,9 +3640,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -6333,9 +6338,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -9045,9 +9052,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -12380,9 +12389,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -15774,9 +15785,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -17982,7 +17995,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:59:00.000Z"
    }
@@ -19435,7 +19449,8 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -19499,9 +19514,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {

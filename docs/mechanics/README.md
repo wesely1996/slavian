@@ -21,7 +21,7 @@ balance changes land there first.
 | 5 | [Units and training](05-units-and-training.md) | Unit families and tiers, the full unit list, training queues and speed, army slots, special units (healers, wagons, siege engines, scouts, settlers) |
 | 6 | [Battles](06-battles.md) | Rounds, the damage formula, terrain, stances, counters, matchups, breaking, champions, burn and poison, loot |
 | 7 | [Walls and sieges](07-walls-and-sieges.md) | Wall tiers, towers, manning, escalade, siege engines, volley rounds, breaching, charging out, the hospital |
-| 8 | [Armies in the field](08-armies-and-field.md) | Armies on the map, orders, grain and quarters, attrition, reinforcements (pincer, hammer, harassment), field setups, forts, supply points, wagon forts |
+| 8 | [Armies in the field](08-armies-and-field.md) | Armies on the map, orders, army groups (a set make-up recruited by itself), grain and quarters, attrition, reinforcements (pincer, hammer, harassment), field setups, forts, supply points, wagon forts |
 | 9 | [Hordes and threats](09-hordes-and-threats.md) | Fronts and factions, the wave schedule, wave size, enemy tiers, the horde AI, fear, raiding and razing, enemy leaders, hatred, camps and lairs |
 | 10 | [Heroes, generals and clans](10-heroes-generals-clans.md) | The hero roster, skills, gear, wounds, quests and army quests, generals, the ten clans |
 | 11 | [Research, faith and the Blacksmith](11-research-faith-smithing.md) | Shared research, lore scrolls, Svarog's Embers, the Shrine and its gods, the Blacksmith's forging |

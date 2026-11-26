@@ -27,7 +27,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { loadVillage } from '../db/villages.js';
 import { getWorld, isMember } from '../db/worlds.js';
 import type { GameData } from '../data/index.js';
-import { armiesView, fortsView, battlesView, expeditionsView, generalsView, heroesView, inboxView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, leadersView, wavesView, worldView } from './views.js';
+import { armiesView, armyGroupsView, fortsView, battlesView, expeditionsView, generalsView, heroesView, inboxView, ordersView, logisticsView, researchListView, raidsView, scoutingView, villageView, leadersView, wavesView, worldView } from './views.js';
 
 const clientMessage = z.object({ type: z.literal('subscribe'), worldId: z.number().int().positive() });
 const RECONNECT_MS = 2000;
@@ -148,7 +148,7 @@ export class LiveHub {
           return { type: 'battles', worldId: event.worldId, battles: await battlesView(client, event.worldId), serverTime };
         }
         if (event.type === 'armies') {
-          return { type: 'armies', worldId: event.worldId, armies: await armiesView(client, event.worldId), forts: await fortsView(client, event.worldId), serverTime };
+          return { type: 'armies', worldId: event.worldId, armies: await armiesView(client, event.worldId), forts: await fortsView(client, event.worldId), armyGroups: await armyGroupsView(client, event.worldId), serverTime };
         }
         if (event.type === 'orders') {
           return { type: 'orders', worldId: event.worldId, orders: await ordersView(client, event.worldId), serverTime };

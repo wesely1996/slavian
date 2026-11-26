@@ -530,6 +530,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -3368,6 +3369,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -6211,6 +6213,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -8833,6 +8836,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -11467,6 +11471,7 @@
     "leaders": [],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -13803,7 +13808,8 @@
        "count": 4,
        "startsAt": "2026-06-01T08:19:00.000Z",
        "perUnitMs": 6000,
-       "completesAt": "2026-06-01T08:19:24.000Z"
+       "completesAt": "2026-06-01T08:19:24.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -14346,9 +14352,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -17015,9 +17023,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -19229,7 +19239,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T08:49:00.000Z"
    }
@@ -19746,9 +19757,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -22418,9 +22431,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [
      {
       "id": 1,
@@ -24629,7 +24644,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T09:19:00.000Z"
    }
@@ -25166,9 +25182,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -27804,9 +27822,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {

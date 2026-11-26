@@ -581,7 +581,8 @@
        "count": 5,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T08:20:06.000Z"
+       "completesAt": "2026-06-01T08:20:06.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -776,14 +777,16 @@
        "count": 5,
        "startsAt": "2026-06-01T08:20:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T08:20:06.000Z"
+       "completesAt": "2026-06-01T08:20:06.000Z",
+       "group": null
       },
       {
        "unit": "scout",
        "count": 2,
        "startsAt": "2026-06-01T08:20:06.000Z",
        "perUnitMs": 900,
-       "completesAt": "2026-06-01T08:20:07.800Z"
+       "completesAt": "2026-06-01T08:20:07.800Z",
+       "group": null
       }
      ],
      "resources": {
@@ -984,7 +987,8 @@
        "count": 10,
        "startsAt": "2026-06-01T10:04:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T10:04:12.000Z"
+       "completesAt": "2026-06-01T10:04:12.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1184,7 +1188,8 @@
        "count": 10,
        "startsAt": "2026-06-01T10:04:00.000Z",
        "perUnitMs": 1200,
-       "completesAt": "2026-06-01T10:04:12.000Z"
+       "completesAt": "2026-06-01T10:04:12.000Z",
+       "group": null
       }
      ],
      "resources": {
@@ -1863,6 +1868,7 @@
     ],
     "orders": [],
     "armies": [],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -4009,7 +4015,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:25:00.000Z"
    }
@@ -4731,9 +4738,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -6905,7 +6914,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T10:30:36.000Z"
    }
@@ -7600,7 +7610,8 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -7656,9 +7667,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -10555,7 +10568,8 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -10611,9 +10625,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -12873,7 +12889,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T11:00:36.000Z"
    }
@@ -14276,7 +14293,8 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 1,
@@ -14332,7 +14350,8 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      },
      {
       "id": 2,
@@ -14389,9 +14408,11 @@
       "raid": null,
       "quarteredAt": null,
       "respond": true,
-      "post": null
+      "post": null,
+      "groupId": null
      }
     ],
+    "armyGroups": [],
     "forts": [],
     "camps": [
      {
@@ -16636,7 +16657,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
@@ -16712,7 +16734,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
@@ -16797,7 +16820,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
@@ -16873,7 +16897,8 @@
      "raid": null,
      "quarteredAt": null,
      "respond": true,
-     "post": null
+     "post": null,
+     "groupId": null
     },
     "serverTime": "2026-06-01T12:00:36.000Z"
    }
