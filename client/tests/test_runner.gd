@@ -854,6 +854,10 @@ func _test_local_mapgen() -> void:
 		_check(",".join(terrain) == case.terrain, label + " terrain")
 		_check(str(starts) == str(case.startSites), label + " starts")
 		_check(str(rivers) == str(case.rivers), label + " rivers")
+		var enemy: Array = []
+		for e in LocalEnemyLands.lands(data, int(map.seed), int(map.radius), map.activeFronts):
+			enemy.append("%d:%d:%s:%d" % [e.cell.x, e.cell.y, e.terrain, e.band])
+		_check(",".join(enemy) == case.enemy, label + " enemy lands")
 
 
 ## A solo world started in the app against one started on the server
@@ -937,6 +941,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("road-scenario.json", "local roads")
 	_replay_scenario("pass-scenario.json", "local mountain passes")
 	_replay_scenario("mountain-outpost-scenario.json", "local outposts through a pass")
+	_replay_scenario("enemy-lands-scenario.json", "local enemy lands: an army marches past the edge and sees the next band")
 	_replay_scenario("terraform-scenario.json", "local terraforming and forest fires")
 	_replay_scenario("fire-scenario.json", "local fires turning aside hordes, armies, caravans and settlers")
 	_replay_scenario("cultists-scenario.json", "local cultists and the Avatar of Černobog")

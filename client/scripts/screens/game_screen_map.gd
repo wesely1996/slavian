@@ -65,8 +65,9 @@ func _hex_panel() -> void:
 		var ground: Variant = Game.terrain.get(cell)
 		if ground != null:
 			parts.append(["terraform", "icon/terraform", tr("Reshape the land"), _terraform_panel.bind(String(ground))])
-	parts.append(["river", "feature/reeds", tr("Rivers"), _river_section.bind(cell)])
-	parts.append(["road", "icon/map", tr("Roads"), _road_section.bind(cell)])
+	if Game.enemy_band(cell) == 0:
+		parts.append(["river", "feature/reeds", tr("Rivers"), _river_section.bind(cell)])
+		parts.append(["road", "icon/map", tr("Roads"), _road_section.bind(cell)])
 	parts = parts.filter(func(part: Array) -> bool: return _has_content(part[3]))
 	if parts.size() == 1:
 		parts[0][3].call()
@@ -156,6 +157,14 @@ func _terrain_panel() -> Array:
 	if id == "holy_city":
 		_panel_body.add_child(UI.label(HordeText.sanctity(Game.world, Game.data), UI.SMALL_SIZE, UI.MUTED))
 		return [["bridge", "ui/hero", tr("Kalinov Bridge"), _bridge_panel], ["vault", "icon/coin", tr("Vault"), _vault_panel]]
+	# The enemy lands beyond the edge: only armies go there.
+	var band := Game.enemy_band(_selected)
+	if band > 0:
+		var bands: Array = Game.data.get("enemyLands", {}).get("bands", [])
+		var band_name: String = tr(String(bands[band - 1].name)) if band <= bands.size() else ""
+		_panel_body.add_child(UI.with_info(UI.label(tr("Enemy lands: %s (band %d of %d).") % [band_name, band, bands.size()], UI.SMALL_SIZE, UI.ERROR),
+			tr("Beyond the edge lie the enemy's own lands, four bands deep. Nothing can be built or settled there; armies may march in. An army that reaches a band sees the next one, which lies in fog until then.")))
+		return [["hold", "icon/troops", tr("Send an army"), _hold_panel.bind(id)]]
 	var parts := []
 	var yard := Game.shipyard_at(_selected)
 	if not yard.is_empty():

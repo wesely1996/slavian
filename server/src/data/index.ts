@@ -23,6 +23,16 @@ export const TERRAIN_IDS = [
   'hallowed',
   // A mountain city's hex (events.json mountain_city): open land in the mountain.
   'mountain_city',
+  // The enemy lands beyond the edge (enemy-lands.json).
+  'frozen_bog',
+  'barrow_field',
+  'salt_flat',
+  'kurgan_ridge',
+  'vineyard',
+  'olive_grove',
+  'mill_meadow',
+  'abbey_orchard',
+  'rift',
 ] as const;
 export type TerrainId = (typeof TERRAIN_IDS)[number];
 
@@ -129,6 +139,8 @@ const terrainSchema = z.object({
   roadMoveCost: z.number().positive().optional(),
   // false: hordes never enter it (a mountain city's hex).
   hordesPass: z.boolean().optional(),
+  // Terrain of the enemy lands beyond the edge (enemy-lands.json).
+  enemy: z.boolean().optional(),
   settleable: z.boolean(),
   edge: z.boolean(),
   // What a battle fought on it counts it as (battle.json terrain).
@@ -139,6 +151,26 @@ const terrainFileSchema = z.object({
   version: z.number().int(),
   terrain: z.record(z.enum(TERRAIN_IDS), terrainSchema),
 });
+
+// The enemy lands beyond the map's edge (docs/enemy-lands.md).
+const enemyLandsFileSchema = z.object({
+  version: z.number().int(),
+  // From the edge outward: each band's rings.
+  bands: z.array(z.object({ id: z.string(), name: z.string(), rings: z.number().int().positive() })).min(1),
+  // Impassable terrain where two fronts' lands meet.
+  seam: z.enum(TERRAIN_IDS),
+  // Bands seen from the start (deeper ones lie in fog until an army reaches the band before).
+  sight: z.number().int().nonnegative(),
+  fronts: z.record(
+    z.string(),
+    z.object({
+      // Added to the noise for each band past the first (deeper lands change).
+      shift: z.number(),
+      palette: z.array(z.object({ terrain: z.enum(TERRAIN_IDS), upTo: z.number() })).min(1),
+    }),
+  ),
+});
+export type EnemyLandsData = z.infer<typeof enemyLandsFileSchema>;
 
 export const UNIT_FAMILIES = ['infantry', 'archers', 'cavalry', 'scout'] as const;
 // What a battle's hex gives (battle.json terrain): its own ground, and the
@@ -1235,6 +1267,7 @@ export interface GameData {
   clans: ClansData;
   onboarding: OnboardingData;
   forts: FortsData;
+  enemyLands: EnemyLandsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -1272,9 +1305,15 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     clans: clansFileSchema.parse(read('clans.json')),
     onboarding: onboardingFileSchema.parse(read('onboarding.json')),
     forts: fortsFileSchema.parse(read('forts.json')),
+    enemyLands: enemyLandsFileSchema.parse(read('enemy-lands.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);
+  }
+  for (const front of ['north', 'east', 'south', 'west']) {
+    const lands = data.enemyLands.fronts[front];
+    if (!lands) throw new Error(`enemy-lands.json has no lands for front "${front}"`);
+    for (const p of lands.palette) if (data.terrain.terrain[p.terrain].moveCost === null) throw new Error(`enemy-lands.json: "${p.terrain}" (front ${front}) is impassable`);
   }
   const { buildings } = data.buildings;
   if (buildings.elder_hall?.kind !== 'center') throw new Error('buildings.json needs a center building "elder_hall"');

@@ -247,7 +247,7 @@ function isPlayable(data: GameData, map: WorldMap): boolean {
 }
 
 // Fractal noise in roughly [-1, 1].
-function fbm(noise: NoiseFunction2D, frequency: number, octaves = 4): (x: number, y: number) => number {
+export function fbm(noise: NoiseFunction2D, frequency: number, octaves = 4): (x: number, y: number) => number {
   return (x, y) => {
     let sum = 0;
     let amplitude = 1;

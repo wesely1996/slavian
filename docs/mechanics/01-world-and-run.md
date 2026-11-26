@@ -73,6 +73,9 @@ The total is rounded up. Example: 4 tier-1 and 2 tier-3 survivors take
 
 - **Edge belt.** The outer rings are the unsettleable *edge belt*: ocean,
   dark forest, ice, steppe and the hallowed lands. Hordes come out of it.
+- **The enemy lands.** Past the belt, behind each active front, its own
+  lands run 10 rings further, four bands deep
+  ([page 18](18-enemy-lands.md)).
 - **Inside the belt.** Plains, forest, hills, wooded hills, swamp, lakes,
   mountains and rivers ([page 2](02-map-and-movement.md)). Woods cover about
   a fifth of the inner map and hills about an eighth.

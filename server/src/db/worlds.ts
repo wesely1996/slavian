@@ -40,6 +40,8 @@ export interface World {
   // The gods' blessings (events.json blessings): when each came (ISO), and
   // the longest river line the players have dug.
   blessings: Blessings;
+  // Bands of each front's enemy lands seen (enemy-lands.json sight; absent: the starting sight).
+  enemySight: Partial<Record<Front, number>>;
 }
 
 export interface Blessings {
@@ -51,6 +53,16 @@ export interface Blessings {
 // How many gods have blessed the world.
 export function blessingCount(world: Pick<World, 'blessings'>): number {
   return (world.blessings.water ? 1 : 0) + (world.blessings.forge ? 1 : 0);
+}
+
+// An army reached band `band` of a front's enemy lands: it sees the band past it.
+export async function widenSight(client: DbClient, worldId: number, front: Front, bands: number): Promise<boolean> {
+  const { rowCount } = await client.query(
+    `UPDATE worlds SET enemy_sight = enemy_sight || jsonb_build_object($2::text, $3::int)
+     WHERE id = $1 AND COALESCE((enemy_sight->>$2)::int, 0) < $3`,
+    [worldId, front, bands],
+  );
+  return rowCount === 1;
 }
 
 export async function saveBlessings(client: DbClient, worldId: number, blessings: Blessings): Promise<void> {
@@ -77,7 +89,7 @@ const COLUMNS = `id, name, seed, speed, status, invite_code AS "inviteCode", hos
   max_players AS "maxPlayers", radius, active_fronts AS "activeFronts", started_at AS "startedAt", sanctity,
   (SELECT COALESCE(sum(m.embers), 0) FROM world_members m WHERE m.world_id = worlds.id AND m.left_at IS NULL)::int AS embers,
   difficulty, quiet_start AS "quietStart", quiet_end AS "quietEnd", quiet_utc_offset AS "quietUtcOffset",
-  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred, pvp, blessings`;
+  ritual_at AS "ritualAt", ended_at AS "endedAt", hatred, pvp, blessings, enemy_sight AS "enemySight"`;
 
 export async function createWorld(client: DbClient, world: NewWorld): Promise<World> {
   const { rows } = await client.query<World>(

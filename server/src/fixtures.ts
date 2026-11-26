@@ -10,6 +10,7 @@ import { loadGameData, type GameData } from './data/index.js';
 import { hexKey, spiral, hex } from './sim/hex.js';
 import { localize, NOTICE_TABLES } from './i18n.js';
 import { generateMap } from './sim/mapgen.js';
+import { enemyLands } from './sim/enemyLands.js';
 import { digestSummary, SERBIAN_LABELS } from './sim/notifications.js';
 import { createRng } from './sim/rng.js';
 
@@ -82,6 +83,8 @@ export function mapgenVectors(data: GameData) {
       // Terrain in spiral order from the Holy City.
       terrain: spiral(hex(0, 0), map.radius).map((cell) => map.terrain.get(hexKey(cell))).join(','),
       rivers: map.rivers.map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.bridge ? 1 : 0, e.size]),
+      // The enemy lands beyond the edge (sim/enemyLands.ts): "q:r:terrain:band", ring by ring.
+      enemy: enemyLands(data, map.seed, map.radius, map.activeFronts).map((e) => `${e.cell.q}:${e.cell.r}:${e.terrain}:${e.band}`).join(','),
     };
   });
   return { _comment: 'Written by `npm run fixtures` (server/src/fixtures.ts) from the server rules; the client local engine must match.', rng, noise, maps };

@@ -23,7 +23,7 @@ import type { DbClient } from '../db/pool.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
 import { heroFactor } from '../sim/heroes.js';
 import { loadWave, type Wave } from '../db/waves.js';
-import { loadHexes, rallyPoint, type World } from '../db/worlds.js';
+import { loadHexes, rallyPoint, widenSight, type World } from '../db/worlds.js';
 import type { TrainingBatch } from '../sim/training.js';
 import { RuleError } from '../errors.js';
 import { addUnits, approachAngle, armySpeed, fighters, joinBonus, terrainRelief, total, validateArmy, type ArmyOrders } from '../sim/armies.js';
@@ -50,6 +50,7 @@ import { campAt } from '../db/camps.js';
 import { fortAt, loadFort, markFortManned, setFortGrain, type Fort } from '../db/forts.js';
 import { listShipyards } from '../db/shipyards.js';
 import { grainCapacity } from '../sim/forts.js';
+import { enemyHexAt, withEnemyLands } from '../sim/enemyLands.js';
 
 export const armyPayload = z.object({ armyId: z.number().int() });
 export type ArmyPayload = z.infer<typeof armyPayload>;
@@ -57,6 +58,12 @@ export type ArmyPayload = z.infer<typeof armyPayload>;
 // The world's land: terrain, and the rivers no one can cross yet.
 export async function terrainOf(client: DbClient, worldId: number): Promise<Land> {
   return loadLand(client, worldId);
+}
+
+// The land armies (and the leaders who leave them) walk: the world's, and the
+// enemy lands beyond its edge (sim/enemyLands.ts).
+export async function armyLand(client: DbClient, data: GameData, world: World): Promise<Land> {
+  return withEnemyLands(data, await loadLand(client, world.id), world);
 }
 
 export interface ArmyOrder {
@@ -104,7 +111,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   } else if (input.orders === 'hold') {
     if (!input.targetHex) throw new RuleError('Say which hex to hold');
     to = input.targetHex;
-    const terrain = (await terrainOf(client, world.id)).get(`${to.q},${to.r}`);
+    const terrain = (await armyLand(client, data, world)).get(`${to.q},${to.r}`);
     if (!terrain || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No army can stand there');
     if (hexDistance(to, hex(home.q, home.r)) === 0) throw new RuleError('That is the village itself');
   } else {
@@ -142,7 +149,7 @@ export async function dispatchArmy(client: DbClient, data: GameData, world: Worl
   if (grain > 0) state = { ...state, ledger: spend(state.ledger, input.at, grainOnly(grain)) };
   const supplied: Supplied = { units, supply: grain, supplyAt: input.at, hungrySince: null };
   const speed = armySpeed(data, units, home.state.bonuses) * supplySpeedFactor(data, supplied, input.at, world.speed);
-  const path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), to, speed, world.speed, terrainRelief(data, units));
+  const path = roadRoute(data, await armyLand(client, data, world), hex(home.q, home.r), to, speed, world.speed, terrainRelief(data, units));
 
   let heroAccountId: number | null = null;
   if (input.withHero) {
@@ -248,7 +255,7 @@ export async function moveArmy(
   } else {
     if (!to.hex) throw new RuleError('Say where they should go');
     dest = to.hex;
-    const terrain = (await terrainOf(client, world.id)).get(`${dest.q},${dest.r}`);
+    const terrain = (await armyLand(client, data, world)).get(`${dest.q},${dest.r}`);
     if (!terrain || data.terrain.terrain[terrain].moveCost === null) throw new RuleError('No army can stand there');
     if ((await listVillages(client, world.id)).some((v) => v.q === dest.q && v.r === dest.r)) throw new RuleError('That is a village; send them into it');
     // Sent onto a camp it storms it; onto a site not yet searched, it explores.
@@ -267,7 +274,7 @@ export async function moveArmy(
     }
     throw new RuleError('They are already there');
   }
-  const land = await terrainOf(client, world.id);
+  const land = await armyLand(client, data, world);
   let path: PathStep[];
   let departsAt = at;
   if (onTheRoad) {
@@ -341,7 +348,7 @@ export async function disbandArmy(client: DbClient, data: GameData, world: World
   // Quartered, its place is paid for what it ate till now.
   army = await unquarter(client, data, world, army, at);
   const home = await loadVillage(client, army.homeVillageId);
-  const land = await terrainOf(client, world.id);
+  const land = await armyLand(client, data, world);
   const here = hex(army.targetQ, army.targetR);
   const gone: Army = { ...army, units: {}, status: 'done', battleId: null, leavesAt: at, returnsAt: at, hungerAt: null };
   await saveArmy(client, gone);
@@ -678,7 +685,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
   if (home && data && (path[0]!.q !== home.q || path[0]!.r !== home.r)) {
     const fed = supplied(army);
     const speed = armySpeed(data, army.units, home.state.bonuses) * supplySpeedFactor(data, fed, at, world.speed);
-    path = roadRoute(data, await terrainOf(client, world.id), hex(home.q, home.r), hex(army.targetQ, army.targetR), speed, world.speed, terrainRelief(data, army.units));
+    path = roadRoute(data, await armyLand(client, data, world), hex(home.q, home.r), hex(army.targetQ, army.targetR), speed, world.speed, terrainRelief(data, army.units));
   }
   const back: Army = {
     ...army,
@@ -700,7 +707,7 @@ export async function sendHome(client: DbClient, world: World, army: Army, at: D
 async function marchTo(client: DbClient, data: GameData, world: World, army: Army, village: Village, orders: ArmyOrders, at: Date): Promise<Army> {
   const fed = supplied(army);
   const speed = armySpeed(data, army.units, await ownerBonuses(client, army)) * supplySpeedFactor(data, fed, at, world.speed);
-  const path = roadRoute(data, await terrainOf(client, world.id), hex(army.targetQ, army.targetR), hex(village.q, village.r), speed, world.speed, terrainRelief(data, army.units));
+  const path = roadRoute(data, await armyLand(client, data, world), hex(army.targetQ, army.targetR), hex(village.q, village.r), speed, world.speed, terrainRelief(data, army.units));
   const moving: Army = {
     ...army,
     orders,
@@ -861,6 +868,11 @@ export const armyHandlers: HandlerRegistry = {
     const army = await loadArmy(client, armyPayload.parse(event.payload).armyId);
     // Turned on the road since: a later arrival is planned.
     if (army.status !== 'marching' || army.arrivesAt.getTime() !== event.dueAt.getTime()) return;
+    // In the enemy lands it sees the band past the one it reached.
+    const beyond = enemyHexAt(data, hex(army.targetQ, army.targetR), world);
+    if (beyond && (await widenSight(client, world.id, beyond.front, Math.min(data.enemyLands.bands.length, beyond.band + 1)))) {
+      await notifyWorld(client, { worldId: world.id, type: 'world' });
+    }
     // Holding a hex with a site nobody has searched yet: it searches it.
     if (army.orders === 'hold' && total(army.units) > 0 && (await siteAt(client, world.id, army.targetQ, army.targetR))?.status === 'unexplored') {
       army.orders = 'explore';
@@ -1009,7 +1021,7 @@ export async function rallyTrained(client: DbClient, data: GameData, world: Worl
 // A leader leaving an army out in the field makes their own way to a
 // village: a hero walks, a general rides.
 async function heroTo(client: DbClient, data: GameData, world: World, hero: Hero, from: Hex, village: Village, at: Date): Promise<void> {
-  const land = await terrainOf(client, world.id);
+  const land = await armyLand(client, data, world);
   const path = roadRoute(data, land, from, hex(village.q, village.r), data.heroes.speed * heroFactor(data, hero.kind, 'heroSpeed'), world.speed);
   const arrivesAt = new Date(at.getTime() + path.at(-1)!.atMs);
   await saveHero(client, { ...hero, status: 'traveling', villageId: village.id, armyId: null, path, departsAt: at, arrivesAt });
@@ -1018,7 +1030,7 @@ async function heroTo(client: DbClient, data: GameData, world: World, hero: Hero
 }
 
 async function generalTo(client: DbClient, data: GameData, world: World, general: General, from: Hex, village: Village, at: Date): Promise<void> {
-  const land = await terrainOf(client, world.id);
+  const land = await armyLand(client, data, world);
   const path = roadRoute(data, land, from, hex(village.q, village.r), data.heroes.generals.speed, world.speed);
   const until = new Date(at.getTime() + path.at(-1)!.atMs);
   await saveGeneral(client, { ...general, status: 'traveling', villageId: village.id, armyId: null, path, departsAt: at, until });

@@ -22,6 +22,14 @@ const FEATURES := {
 	"plains": [["feature/bush", 1, 0.26, 0.7], ["feature/grass", 2, 0.24, 0.75]],
 	"ice": [["feature/ice", 2, 0.5, 0.55]],
 	"hallowed": [["feature/blossom", 4, 0.3, 0.6]],
+	"frozen_bog": [["feature/reeds", 3, 0.28, 0.7], ["feature/ice", 1, 0.4, 0.5]],
+	"barrow_field": [["feature/hill", 3, 0.5, 0.65], ["feature/grass", 1, 0.24, 0.75]],
+	"salt_flat": [["feature/grass", 1, 0.2, 0.8]],
+	"kurgan_ridge": [["feature/hill", 2, 0.7, 0.5], ["feature/grass", 2, 0.26, 0.75]],
+	"vineyard": [["feature/hill", 1, 0.7, 0.4], ["feature/bush", 4, 0.24, 0.7]],
+	"olive_grove": [["feature/oak", 5, 0.36, 0.72]],
+	"mill_meadow": [["feature/grass", 3, 0.24, 0.75], ["feature/bush", 1, 0.26, 0.7]],
+	"abbey_orchard": [["feature/blossom", 3, 0.3, 0.6], ["feature/oak", 2, 0.36, 0.72]],
 }
 
 var hex_size := 48.0

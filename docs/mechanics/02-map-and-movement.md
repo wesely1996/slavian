@@ -22,7 +22,12 @@ Impassable terrain has none.
 | Dark forest | 3 | No | Edge belt, North spawn |
 | Ice | 3 | No | Edge belt, North spawn |
 | Steppe | 1 | No | Edge belt, East spawn |
-| Hallowed Lands | 2 | No | Edge belt, South and West spawn |
+| Hallowed Lands | 2 | No | Edge belt, South and West spawn; also in the South's and West's enemy lands |
+
+Past the edge belt lie the **enemy lands**, with terrain of their own: frozen
+bog, barrow fields, salt flats, kurgan ridges, vineyard terraces, olive
+groves, mill meadows, abbey orchards, and the impassable rifts between fronts
+([page 18](18-enemy-lands.md#terrain)).
 
 **In battle** each terrain counts as open ground, woods, hills or wetland,
 and mountains and waters beside a hex count too. They change each family's
@@ -125,6 +130,8 @@ builds a boat on a river.
   and scouts.
 - **What stays.** Terrain, once seen, stays known. Enemies are only shown
   while something of yours can see them.
+- **The enemy lands** have their own fog, band by band
+  ([page 18](18-enemy-lands.md#fog-and-sight)).
 
 ## Terraforming
 
