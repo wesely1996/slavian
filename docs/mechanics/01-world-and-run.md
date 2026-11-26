@@ -147,7 +147,7 @@ Winning a run earns that title's achievement, from *Baron of the Bridge* to
 | First horde | sets out after 5 days (120 game hours) of grace |
 | Afterwards | one horde a day (every 24 game hours), the fronts taking turns |
 | Known ahead | the next 2 hordes are always on the schedule |
-| Warning push | a horde due at your village within 6 game hours, plus 2 hours per Watchtower level |
+| Warning push | a horde due at your village within 6 game hours, plus 1 hour per Watchtower level |
 
 The whole schedule is public. What a horde is made of stays hidden until it
 is scouted ([page 12](12-scouting-and-expansion.md#scouting-a-horde)).
@@ -190,13 +190,13 @@ Each player has a chain of six getting-started quests for the first days:
   units, 2–3 hexes away.
 - **Skipping.** A player can skip the whole chain at once. Every unclaimed
   reward then comes at 55% of its value, and a Storehouse is raised to
-  level 2 on a free slot of the first village to hold it.
+  level 3 on a free slot of the first village to hold it.
 
 ## Notifications
 
 - **Push at once.** A horde due within the warning time, a battle at your
   village, a raided outpost, an Elder's Hall level, or any building reaching
-  level 3.
+  level 5.
 - **Daily digest.** Everything else waits for it, at the player's chosen hour.
 - **Expiry.** A push not delivered within 24 real hours is dropped.
 - **Topics.** Players can turn pushes off by topic: hordes, battles,

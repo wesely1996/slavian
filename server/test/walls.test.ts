@@ -40,37 +40,36 @@ describe('walls', () => {
   it('rise through tiers and open wall slots', () => {
     expect(wallTier(data, 0)).toBeNull();
     expect(wallTier(data, 1)).toBe('Palisade');
-    expect(wallTier(data, 2)).toBe('Timber Rampart');
-    expect(wallTier(data, 3)).toBe('Stone Wall');
-    expect(wallTier(data, 4)).toBe('Fortress Walls');
+    expect(wallTier(data, 3)).toBe('Timber Rampart');
+    expect(wallTier(data, 5)).toBe('Stone Wall');
     expect(wallTier(data, 10)).toBe('Fortress Walls');
     expect(openTowerSlots(data, 0)).toBe(0);
     expect(openTowerSlots(data, 1)).toBe(1);
-    expect(openTowerSlots(data, 2)).toBe(2);
+    expect(openTowerSlots(data, 4)).toBe(2);
     expect(openTowerSlots(data, 10)).toBe(5);
   });
 
   it('toughen the garrison while they stand, with their towers', () => {
-    const plots = walled(3, { gate_tower: 1, archer_tower: 2, murder_holes: 1 });
+    const plots = walled(5, { gate_tower: 2, archer_tower: 3, murder_holes: 1 });
     // Stone (toughness 1.35) and a gate tower.
-    expect(wallIntegrity(data, plots)).toBe(Math.round(240 * 3 * 1.35 * 1.16));
-    expect(wallIntegrity(data, walled(1))).toBe(240);
+    expect(wallIntegrity(data, plots)).toBe(Math.round(120 * 5 * 1.35 * 1.16));
+    expect(wallIntegrity(data, walled(2))).toBe(240);
     const f = wallFactors(data, plots);
-    expect(f.defense).toBeCloseTo(1 + 3 * 0.06 + 0.08);
-    expect(f.attack).toBeCloseTo(1.2);
+    expect(f.defense).toBeCloseTo(1 + 5 * 0.03 + 0.04);
+    expect(f.attack).toBeCloseTo(1.15);
     expect(f.archers).toBe(1);
-    expect(warningHours(data, walled(2, { watchtower: 1 }))).toBe(2);
+    expect(warningHours(data, walled(3, { watchtower: 2 }))).toBe(2);
   });
 
   it('hold archers who shoot from them, as many as fit', () => {
-    const plots = walled(3);
-    expect(wallCapacity(data, plots)).toBe(180);
-    expect(wallFactors(data, plots, 100).archers).toBeCloseTo(1 + 3 * 0.08);
-    expect(wallFactors(data, plots, 300).archers).toBeCloseTo(1 + 3 * 0.08 * 0.6);
+    const plots = walled(5);
+    expect(wallCapacity(data, plots)).toBe(150);
+    expect(wallFactors(data, plots, 100).archers).toBeCloseTo(1 + 5 * 0.04);
+    expect(wallFactors(data, plots, 300).archers).toBeCloseTo(1 + 5 * 0.04 * 0.5);
   });
 
   it('hold the horde back but where climbers carry it over', () => {
-    const plots = walled(3);
+    const plots = walled(5);
     expect(overTheWalls(data, 'east', { steppe_raider: 40 }, plots)).toBe(0);
     expect(heldBack(data, 0)).toBe(data.walls.escalade.meleeHeld);
     expect(overTheWalls(data, 'east', { steppe_raider: 40, scaling_ladders: 2 }, plots)).toBeCloseTo(16 / 40);
@@ -79,17 +78,17 @@ describe('walls', () => {
     // Men over the walls take their share of its shelter away.
     expect(wallFactors(data, plots, 0, 1).defense).toBe(1);
     // A moat keeps climbers off.
-    expect(escaladePower(data, 'east', { scaling_ladders: 2 }, walled(3, { ditch: 2 }))).toBeCloseTo(16 * (1 - 2 * 0.12));
+    expect(escaladePower(data, 'east', { scaling_ladders: 2 }, walled(5, { ditch: 5 }))).toBeCloseTo(16 * 0.7);
   });
 
   it('are battered by siege, less behind a moat', () => {
     expect(siegePower(data, 'south', { siege_ram: 2, zealot: 10 })).toBeCloseTo(80 + 10 * data.enemies.fronts.south!.units.zealot!.attack * 0.02);
-    const ditch = walled(2, { ditch: 2 });
+    const ditch = walled(4, { ditch: 4 });
     expect(siegeDamage(data, 'south', { siege_ram: 1 }, ditch)).toBeCloseTo(40 * 0.8);
   });
 
   it('make a horde build engines first, by its craft', () => {
-    const plots = walled(3);
+    const plots = walled(6);
     const integrity = wallIntegrity(data, plots);
     const order = siegeWorks(data, 'south', { zealot: 20 }, integrity, plots, 1)!;
     expect(order.engine).toBe('siege_ram');
@@ -109,13 +108,13 @@ describe('walls', () => {
   });
 
   it('smash engines with ballistae, the biggest first', () => {
-    const plots = walled(3, { ballista: 3 });
+    const plots = walled(5, { ballista: 6 });
     const kills = ballistaKills(data, 'south', { catapult: 1, siege_ram: 3, zealot: 9 }, plots, createRng(1));
     expect(ballistaKills(data, 'west', { siege_tower: 1, zealot: 9 }, plots, createRng(1)).siege_tower).toBe(1);
     expect(kills.catapult).toBe(1);
     expect((kills.siege_ram ?? 0) + 1).toBeGreaterThanOrEqual(2);
     expect(kills.zealot).toBeUndefined();
-    expect(ballistaKills(data, 'south', { siege_ram: 3 }, walled(3), createRng(1))).toEqual({});
+    expect(ballistaKills(data, 'south', { siege_ram: 3 }, walled(5), createRng(1))).toEqual({});
   });
 
   it('fall a level when breached', () => {

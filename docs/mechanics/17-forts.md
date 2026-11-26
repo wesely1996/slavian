@@ -71,12 +71,9 @@ the fort.
 A horde that fights at a fort meets its wall rings **from the outside in**,
 one at a time.
 
-- **Each ring** stands like a village's walls of half its level, rounded up
-  ([page 7](07-walls-and-sieges.md)): a fort's walls and towers rise to 10
-  levels, a village's to 10 that each count twice. Its towers count the same
-  way.
-  - Integrity of 240 per village level (120 per fort level), times its tier's
-    toughness.
+- **Each ring** stands like a village's walls of its level
+  ([page 7](07-walls-and-sieges.md)):
+  - Integrity of 120 a level, times its tier's toughness.
   - The defense its level gives.
   - Room for archers on it.
   - The effects of the towers in its slots.

@@ -355,7 +355,7 @@
        "building": "caravan_yard",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:06.000Z",
-       "completesAt": "2026-06-01T08:00:13.500Z"
+       "completesAt": "2026-06-01T08:00:09.000Z"
       }
      ],
      "garrison": {},
@@ -584,7 +584,7 @@
        "grain": 1000,
        "stone": 1000
       },
-      "settledAt": "2026-06-01T08:00:13.500Z"
+      "settledAt": "2026-06-01T08:00:09.000Z"
      }
     },
     "research": {
@@ -1118,7 +1118,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Send it to another village"
+    "message": "That takes 1 caravan; 0 at home"
    }
   },
   {

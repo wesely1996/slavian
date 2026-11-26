@@ -208,10 +208,10 @@ func _test_rules() -> void:
 func _test_village_layout() -> void:
 	var path := ProjectSettings.globalize_path("res://").path_join(BUILDINGS_PATH)
 	var data := {"buildings": JSON.parse_string(FileAccess.get_file_as_string(path))}
-	_check(Rules.unlocked_slots(data, 1) == 5, "5 slots open at Hall 1")
-	_check(Rules.unlocked_slots(data, 3) == 9, "two more slots per Hall level")
+	_check(Rules.unlocked_slots(data, 1) == 4, "4 slots open at Hall 1")
+	_check(Rules.unlocked_slots(data, 3) == 6, "one more slot per Hall level")
 	_check(Rules.unlocked_slots(data, 10) == 12, "capped at the slot count")
-	_check(Rules.slot_unlock_level(data, 4) == 1 and Rules.slot_unlock_level(data, 5) == 2 and Rules.slot_unlock_level(data, 11) == 5, "slot unlock levels")
+	_check(Rules.slot_unlock_level(data, 3) == 1 and Rules.slot_unlock_level(data, 4) == 2 and Rules.slot_unlock_level(data, 11) == 9, "slot unlock levels")
 	# Founded villages: fields from the land around (server village.test.ts, same cases).
 	var mixed: Array = []
 	for t in ["forest", "plains", "hills"]:
@@ -229,7 +229,7 @@ func _test_village_layout() -> void:
 		var level := Rules.slot_unlock_level(data, index)
 		_check(Rules.unlocked_slots(data, level) > index and (level == 1 or Rules.unlocked_slots(data, level - 1) <= index), "slot %d opens exactly at Hall %d" % [index, level])
 	var base_queue := int(data.buildings.village.baseQueueLimit)
-	_check(Rules.queue_limit(data, 1) == base_queue and Rules.queue_limit(data, 3) == base_queue + 2 and Rules.queue_limit(data, 9) == base_queue + 6, "queue grows every 1.5 Hall levels")
+	_check(Rules.queue_limit(data, 1) == base_queue and Rules.queue_limit(data, 3) == base_queue + 1 and Rules.queue_limit(data, 9) == base_queue + 3, "queue grows every 3 Hall levels")
 	_check(is_equal_approx(Rules.hall_speedup(data, 1), 1.0) and Rules.hall_speedup(data, 2) < 1.0, "Hall speeds up building")
 
 	var village := {
@@ -248,7 +248,7 @@ func _test_village_layout() -> void:
 	_check(not Rules.is_locked(data, village, "f10"), "fields are never locked")
 	_check(Rules.constructible(data, village) == ["storehouse", "stables", "shooting_range", "heroes_hall", "scout_lodge", "caravan_yard", "settlers_lodge", "shrine", "academy", "forester", "stonemason", "mill", "smelter", "hospital", "masons_guild", "workers_huts", "grain_silo", "blacksmith", "market"],
 		"only buildings not yet built or queued, or ones there may be more of: %s" % [Rules.constructible(data, village)])
-	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 3] and Rules.missing_requirement(data, village, "market") == [],
+	_check(Rules.missing_requirement(data, village, "forester") == ["woodcutter", 5] and Rules.missing_requirement(data, village, "market") == [],
 		"a booster needs its field higher first")
 	var farm: Dictionary = data.buildings.buildings.farm
 	_check(Rules.field_production(farm, 0, 1.0) == 0.0, "unbuilt field produces nothing")
@@ -261,15 +261,13 @@ func _test_village_layout() -> void:
 	_check(Rules.plot_ids(with_outposts) == Rules.plot_ids(village), "outposts are not village plots")
 	_check(Rules.outpost_plots(with_outposts) == ["o3,-2"] and Rules.outpost_hex("o3,-2") == Vector2i(3, -2), "outpost plots")
 	_check(Rules.outpost_plot(Vector2i(-1, 4)) == "o-1,4" and Rules.outpost_hex("o-1,4") == Vector2i(-1, 4), "outpost plot ids round-trip")
-	_check(Rules.outpost_limit(data, 1) == 2 and Rules.outpost_limit(data, 2) == 3 and Rules.outpost_limit(data, 5) == 6, "outposts per Hall level")
+	_check(Rules.outpost_limit(data, 1) == 1 and Rules.outpost_limit(data, 2) == 2 and Rules.outpost_limit(data, 5) == 3, "outposts per Hall level")
 	var forest_yield := Rules.outpost_yield(data, "forest", 2, 10.0)
 	_check(is_equal_approx(forest_yield.wood, 10.0 * 1.35 * 10.0) and forest_yield.stone == 0.0, "outpost yield by terrain and level: %s" % forest_yield)
 	_check(Rules.outpost_yield(data, "hills", 1, 1.0) == {"wood": 0.0, "stone": 6.0, "grain": 0.0, "iron": 4.0}, "hills yield stone and iron")
 	_check(Rules.outpost_yield(data, "forest", 0, 1.0).wood == 0.0, "an outpost in ruins gathers nothing")
 	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, -1), "plains", false) == "", "a free plains hex in range can be claimed")
-	var two_outposts := with_outposts.duplicate(true)
-	two_outposts.plots["o1,1"] = {"building": "outpost", "level": 1, "terrain": "forest"}
-	_check(Rules.claim_problem(data, two_outposts, Vector2i(3, -1), "plains", false).begins_with("Your village can hold 2 outposts;"), "the Hall limits outposts")
+	_check(Rules.claim_problem(data, with_outposts, Vector2i(3, -1), "plains", false).begins_with("Your village can hold 1 outpost;"), "the Hall limits outposts")
 	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(5, 0), "plains", false).begins_with("Outposts go within 2"), "out of range")
 	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, 0), "swamp", false) == "Nothing to gather here.", "no yield")
 	_check(Rules.claim_problem(data, village.merged({"q": 2, "r": 0}), Vector2i(3, 0), "forest", true) == "Already taken.", "taken")
@@ -404,7 +402,7 @@ func _test_caravans() -> void:
 		{"villageId": 2, "caravans": 1, "status": "returning"},
 	]
 	_check(CaravanMath.out(trips, 1) == 2, "caravans still on the road")
-	_check(CaravanMath.available(data, {"id": 1, "levels": {"caravan_yard": 3}}, trips) == 4, "two caravans a yard level, minus those out")
+	_check(CaravanMath.available(data, {"id": 1, "levels": {"caravan_yard": 3}}, trips) == 1, "yard level minus caravans out")
 	_check(CaravanMath.vault_upgrade_cost(data, 2) == {"wood": 800, "stone": 1000, "grain": 400, "iron": 400}, "vault level 2 cost")
 	_check(is_equal_approx(CaravanMath.vault_upgrade_seconds(data, 2, 10.0), 360.0), "vault upgrade time")
 
@@ -897,8 +895,16 @@ func _test_local_start() -> void:
 	var rescaled: Dictionary = LocalServer.new(LocalData.load_data(), dir).worlds[kept.id]
 	var plots: Dictionary = rescaled.villages[0].state.plots
 	_check(plots.c0.level == 4 and plots.f0.level == 6 and plots.c4.level == 4 and rescaled.villages[0].state.levels.woodcutter == 6
-		and rescaled.villages[0].state.queue[0].targetLevel == 7 and rescaled.events[-1].payload.targetLevel == 7 and rescaled.levelScale == 2,
+		and rescaled.villages[0].state.queue[0].targetLevel == 7 and rescaled.events[-1].payload.targetLevel == 7 and rescaled.levelScale == 3,
 		"a world saved on 20 levels is read back on 10: %s" % [plots])
+	# Saved on scale 2 (each level two of the old): levels kept, rates counted again.
+	var two: Dictionary = rescaled.duplicate(true)
+	two.levelScale = 2
+	two.villages[0].state.ledger.ratesPerHour.wood = 9999.0
+	saved.save(two)
+	var recounted: Dictionary = LocalServer.new(LocalData.load_data(), dir).worlds[kept.id]
+	_check(recounted.villages[0].state.plots.f0.level == 6 and float(recounted.villages[0].state.ledger.ratesPerHour.wood) < 1000.0 and recounted.levelScale == 3,
+		"a world saved on scale 2 keeps its levels and counts its rates again")
 
 
 ## A scripted solo session against the answers the server gave
@@ -1449,29 +1455,29 @@ func _test_walls() -> void:
 	var data := {"walls": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("walls.json"))),
 		"enemies": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("enemies.json"))),
 		"buildings": {"village": {"centerSlots": 12, "slotsUnlockedAtStart": 4, "slotsPerHallLevel": 1}}}
-	var village := {"levels": {"elder_hall": 1}, "plots": {"w": {"building": "wall", "level": 2}, "t0": {"building": null, "level": 0}, "t1": {"building": null, "level": 0}, "t2": {"building": null, "level": 0}, "c5": {"building": null, "level": 0}, "f0": {"building": "farm", "level": 0}}}
-	_check(Rules.open_tower_slots(data, 2) == 2 and Rules.tower_unlock_level(data, 2) == 3, "wall slots open with the walls")
+	var village := {"levels": {"elder_hall": 1}, "plots": {"w": {"building": "wall", "level": 3}, "t0": {"building": null, "level": 0}, "t1": {"building": null, "level": 0}, "t2": {"building": null, "level": 0}, "c5": {"building": null, "level": 0}, "f0": {"building": "farm", "level": 0}}}
+	_check(Rules.open_tower_slots(data, 3) == 2 and Rules.tower_unlock_level(data, 2) == 5, "wall slots open with the walls")
 	_check(not Rules.is_locked(data, village, "t1") and Rules.is_locked(data, village, "t2"), "wall slot locks")
 	_check(Rules.is_locked(data, village, "c5") and not Rules.is_locked(data, village, "w") and not Rules.is_locked(data, village, "f0"), "other plots lock as before")
 	_check(Rules.plot_ids(village) == ["f0", "c5", "w", "t0", "t1", "t2"], "plots in layout order: %s" % [Rules.plot_ids(village)])
-	_check(WallText.tier(data, 1) == "Palisade" and WallText.tier(data, 2) == "Timber Rampart" and WallText.tier(data, 4) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
-	_check(WallText.material(data, 1) == "wood" and WallText.material(data, 3) == "stone" and WallText.material(data, 0) == "", "wall materials")
-	_check(WallText.integrity(data, 3, 1) == roundi(240 * 3 * 1.35 * 1.16), "wall integrity by material, with a gate tower: %d" % WallText.integrity(data, 3, 1))
-	_check(WallText.capacity(data, 2) == 120, "the walls hold 60 men a level")
-	_check(not WallText.moat_water(data, 1) and WallText.moat_water(data, 2), "the moat holds water from level 2")
-	_check(WallText.tower_effect(data, "ditch", 1).begins_with("A dry moat with stakes keeps off 10% of the battering and 12% of the climbers"), "moat effect: %s" % WallText.tower_effect(data, "ditch", 1))
+	_check(WallText.tier(data, 2) == "Palisade" and WallText.tier(data, 3) == "Timber Rampart" and WallText.tier(data, 8) == "Fortress Walls" and WallText.tier(data, 0) == "", "wall tiers")
+	_check(WallText.material(data, 1) == "wood" and WallText.material(data, 6) == "stone" and WallText.material(data, 0) == "", "wall materials")
+	_check(WallText.integrity(data, 5, 2) == roundi(120 * 5 * 1.35 * 1.16), "wall integrity by material, with a gate tower: %d" % WallText.integrity(data, 5, 2))
+	_check(WallText.capacity(data, 4) == 120, "the walls hold 30 men a level")
+	_check(not WallText.moat_water(data, 3) and WallText.moat_water(data, 4), "the moat holds water from level 4")
+	_check(WallText.tower_effect(data, "ditch", 1).begins_with("A dry moat with stakes keeps off 5% of the battering and 6% of the climbers"), "moat effect: %s" % WallText.tower_effect(data, "ditch", 1))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 700, "over": 0.25}).ends_with("carried 25% of them onto the walls."), "climbers in the battle story")
 	_check(BattleStory.is_engine(data, "siege_tower") and BattleStory.escalade(data, "scaling_ladders") == 8.0 and not BattleStory.is_engine(data, "zealot"), "engines and climbers")
-	_check(WallText.tower_effect(data, "watchtower", 1).begins_with("Warns of a horde 2h 00m earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 1))
+	_check(WallText.tower_effect(data, "watchtower", 2).begins_with("Warns of a horde 2h 00m earlier."), "watchtower effect: %s" % WallText.tower_effect(data, "watchtower", 2))
 	# At its last level a tower or wall tells of no next one.
 	_check(WallText.tower_effect(data, "ditch", 9).contains("Level 10:") and not WallText.tower_effect(data, "ditch", 10).contains("Level 11"), "a tower at its last level: %s" % WallText.tower_effect(data, "ditch", 10))
 	_check(WallText.wall_effect(data, 9).contains("Level 10:") and not WallText.wall_effect(data, 10).contains("Level 11"), "walls at their last level")
-	# A Hero's Hall keeps one general, and one more every level above the first.
+	# A Hero's Hall keeps one general, and one more every two levels.
 	var heroes := {"heroes": JSON.parse_string(FileAccess.get_file_as_string(root.path_join("heroes.json")))}
-	_check(GeneralText.limit(heroes, [1]) == 1 and GeneralText.limit(heroes, [3]) == 3 and GeneralText.limit(heroes, [9]) == 9 and GeneralText.limit(heroes, [1, 2, 0]) == 3, "generals a Hall keeps")
-	_check(GeneralText.hall_gives(heroes, 3) == "keeps 3 generals · the hero heals 48% faster", "a Hall's level: %s" % GeneralText.hall_gives(heroes, 3))
+	_check(GeneralText.limit(heroes, [1]) == 1 and GeneralText.limit(heroes, [3]) == 2 and GeneralText.limit(heroes, [9]) == 5 and GeneralText.limit(heroes, [1, 2, 0]) == 2, "generals a Hall keeps")
+	_check(GeneralText.hall_gives(heroes, 3) == "keeps 2 generals · the hero heals 24% faster", "a Hall's level: %s" % GeneralText.hall_gives(heroes, 3))
 	# The warning is in game hours, which pass 10 times faster in a speed-10 world.
-	_check(WallText.tower_effect(data, "watchtower", 1, 10.0).begins_with("Warns of a horde 12m 00s earlier."), "watchtower effect at speed 10: %s" % WallText.tower_effect(data, "watchtower", 1, 10.0))
+	_check(WallText.tower_effect(data, "watchtower", 2, 10.0).begins_with("Warns of a horde 12m 00s earlier."), "watchtower effect at speed 10: %s" % WallText.tower_effect(data, "watchtower", 2, 10.0))
 	_check(WallText.round_text({"setup": {"wall": {"max": 720}}}, {"wallLeft": 540}) == "The walls hold: 540 of 720 left." and WallText.round_text({}, {"wallLeft": 0, "breach": true}) == "The walls are breached!", "walls in the battle story")
 	# Every village's own outline keeps its plots clear of each other.
 	var clear := true

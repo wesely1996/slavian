@@ -46,7 +46,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 		"hostAccountId": account_id, "startedAt": now, "embers": 0, "hatred": {}, "ritualAt": null, "endedAt": null,
 		"members": [{"accountId": account_id, "displayName": String(params.get("displayName", "You")), "clan": params.get("clan"),
 			"heroKind": params.get("heroKind"), "onboarding": {}, "onboardingClaimed": {}, "researchPoints": 0, "researchSettledAt": null, "bought": {}, "rallyVillageId": null, "rallyFortId": null, "merchantReadyAt": null, "smithing": {}, "smithWork": null}],
-		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [], "levelScale": 2,
+		"villages": [], "heroes": [], "generals": [], "waves": [], "sites": [], "rivers": [], "roads": [], "terraforms": [], "events": [], "levelScale": LEVEL_SCALE,
 		"vault": {"level": 1, "amounts": {"wood": 0, "stone": 0, "grain": 0, "iron": 0}, "upgradingTo": null, "upgradeCompletesAt": null},
 		"leaders": [], "fear": {}, "camps": [], "battles": [], "raids": [], "research": [], "lore": [], "caravans": [], "armies": [], "forts": [], "missions": [], "ruinSearches": [], "shipyards": [], "achievements": [], "expeditions": [], "orders": [], "notifications": [], "quietStart": null, "quietEnd": null, "quietUtcOffset": 0,
 		"next": {"village": 1, "wave": 1, "site": 1, "event": 1, "leader": 1, "battle": 1, "camp": 1, "raid": 1, "caravan": 1, "army": 1, "fort": 1, "mission": 1, "expedition": 1, "order": 1, "notification": 1, "general": 1, "ruinSearch": 1, "shipyard": 1},
@@ -1775,31 +1775,39 @@ func _load_all() -> void:
 					if w.status == "scheduled" and w.get("bandOf") == null and float(w.get("hatred", 0.0)) > 0:
 						world.hatred[w.front] = float(world.hatred.get(w.front, 0.0)) + float(w.hatred)
 						w.hatred = 0.0
-			# Worlds saved before 20 building levels became 10 (migration 086).
-			if not world.has("levelScale"):
-				_compress_levels(world)
+			# Worlds saved on an older level scale (migrations 086 and 089).
+			if int(world.get("levelScale", 1)) < LEVEL_SCALE:
+				_rescale_levels(world)
 			worlds[int(world.id)] = world
 
 
-## db/upgrades.ts upgradeLevelScale: a world saved before the 20 levels
-## became 10, its buildings, queued builds (and their events) and what its
-## ruins held on the new scale, then its rates, stores and bonuses.
-func _compress_levels(world: Dictionary) -> void:
-	var compress := func(plots: Dictionary) -> void:
-		for id in plots:
-			plots[id].level = compressed_level(plots[id].get("building"), int(plots[id].level))
-	for v in world.villages:
-		compress.call(v.state.plots)
-		v.state.levels = LocalVillage.levels_of(v.state.plots)
-		for item in v.state.queue:
-			item.targetLevel = compressed_level(item.building, int(item.targetLevel))
-		if v.get("ruin") != null:
-			compress.call(v.ruin.plots)
-	for e in world.events:
-		if e.status == "pending" and e.type == "build_complete":
-			e.payload.targetLevel = compressed_level(e.payload.building, int(e.payload.targetLevel))
-	world.levelScale = 2
-	# Rates and stores as the new levels give them, from when each was last
+## db/upgrades.ts LEVEL_SCALE: 1 before the 20 levels became 10 (0.23), 2
+## with each level two of the old ones, 3 with the levels giving what the
+## first ten did again (0.24).
+const LEVEL_SCALE := 3
+
+
+## db/upgrades.ts upgradeLevelScale: a world saved on an older scale. From 1,
+## its buildings, queued builds (and their events) and what its ruins held on
+## ten levels; then, from 1 or 2, its rates and stores as the levels now give
+## them.
+func _rescale_levels(world: Dictionary) -> void:
+	if int(world.get("levelScale", 1)) == 1:
+		var compress := func(plots: Dictionary) -> void:
+			for id in plots:
+				plots[id].level = compressed_level(plots[id].get("building"), int(plots[id].level))
+		for v in world.villages:
+			compress.call(v.state.plots)
+			v.state.levels = LocalVillage.levels_of(v.state.plots)
+			for item in v.state.queue:
+				item.targetLevel = compressed_level(item.building, int(item.targetLevel))
+			if v.get("ruin") != null:
+				compress.call(v.ruin.plots)
+		for e in world.events:
+			if e.status == "pending" and e.type == "build_complete":
+				e.payload.targetLevel = compressed_level(e.payload.building, int(e.payload.targetLevel))
+	world.levelScale = LEVEL_SCALE
+	# Rates and stores as the levels now give them, from when each was last
 	# settled (what came in before then came at the old rates).
 	for v in world.villages:
 		v.state = LocalVillage.with_bonuses(data, v.state, v.state.bonuses, int(v.state.ledger.settledAt), world.speed)

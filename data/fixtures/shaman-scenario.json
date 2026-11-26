@@ -155,7 +155,7 @@
        "building": "hospital",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:51.000Z"
+       "completesAt": "2026-06-01T08:00:20.000Z"
       }
      ],
      "garrison": {},
@@ -211,7 +211,7 @@
    "status": 400,
    "response": {
     "error": "rule",
-    "message": "Shaman needs Hospital level 1"
+    "message": "Shaman needs Hospital level 2"
    }
   },
   {
@@ -364,7 +364,7 @@
        "building": "hospital",
        "targetLevel": 2,
        "startsAt": "2026-06-01T09:00:00.000Z",
-       "completesAt": "2026-06-01T09:02:02.527Z"
+       "completesAt": "2026-06-01T09:00:31.000Z"
       }
      ],
      "garrison": {},
@@ -597,8 +597,8 @@
        "unit": "shaman",
        "count": 4,
        "startsAt": "2026-06-01T11:00:00.000Z",
-       "perUnitMs": 9720,
-       "completesAt": "2026-06-01T11:00:38.880Z"
+       "perUnitMs": 12000,
+       "completesAt": "2026-06-01T11:00:48.000Z"
       }
      ],
      "resources": {
@@ -5933,7 +5933,7 @@
       "tier": "digest",
       "title": "Hospital level 2 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T09:02:02.527Z",
+      "createdAt": "2026-06-01T09:00:31.000Z",
       "read": false
      },
      {
@@ -5942,7 +5942,7 @@
       "tier": "digest",
       "title": "Hospital level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:51.000Z",
+      "createdAt": "2026-06-01T08:00:20.000Z",
       "read": false
      },
      {

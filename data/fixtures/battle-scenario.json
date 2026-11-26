@@ -155,7 +155,7 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:07.640Z"
+       "completesAt": "2026-06-01T08:00:03.000Z"
       }
      ],
      "garrison": {},
@@ -357,14 +357,14 @@
        "building": "barracks",
        "targetLevel": 1,
        "startsAt": "2026-06-01T08:00:00.000Z",
-       "completesAt": "2026-06-01T08:00:07.640Z"
+       "completesAt": "2026-06-01T08:00:03.000Z"
       },
       {
        "plot": "w",
        "building": "wall",
        "targetLevel": 1,
-       "startsAt": "2026-06-01T08:00:07.640Z",
-       "completesAt": "2026-06-01T08:00:19.400Z"
+       "startsAt": "2026-06-01T08:00:03.000Z",
+       "completesAt": "2026-06-01T08:00:07.800Z"
       }
      ],
      "garrison": {},
@@ -760,7 +760,7 @@
        "building": "hospital",
        "targetLevel": 1,
        "startsAt": "2026-06-01T10:14:00.000Z",
-       "completesAt": "2026-06-01T10:14:10.200Z"
+       "completesAt": "2026-06-01T10:14:04.000Z"
       }
      ],
      "garrison": {
@@ -957,7 +957,7 @@
        "building": "hospital",
        "targetLevel": 1,
        "startsAt": "2026-06-01T10:14:00.000Z",
-       "completesAt": "2026-06-01T10:14:10.200Z"
+       "completesAt": "2026-06-01T10:14:04.000Z"
       }
      ],
      "garrison": {
@@ -1162,14 +1162,14 @@
        "building": "hospital",
        "targetLevel": 1,
        "startsAt": "2026-06-01T10:14:00.000Z",
-       "completesAt": "2026-06-01T10:14:10.200Z"
+       "completesAt": "2026-06-01T10:14:04.000Z"
       },
       {
        "plot": "c1",
        "building": "shooting_range",
        "targetLevel": 1,
-       "startsAt": "2026-06-01T10:14:10.200Z",
-       "completesAt": "2026-06-01T10:14:18.360Z"
+       "startsAt": "2026-06-01T10:14:04.000Z",
+       "completesAt": "2026-06-01T10:14:07.200Z"
       }
      ],
      "garrison": {
@@ -10011,9 +10011,9 @@
         }
        },
        "wall": {
-        "max": 240,
+        "max": 120,
         "level": 1,
-        "integrity": 180
+        "integrity": 60
        }
       },
       "status": "ongoing",
@@ -10041,7 +10041,7 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "breach": false,
-        "wallLeft": 180,
+        "wallLeft": 60,
         "attackerLeft": 1,
         "defenderLeft": 12,
         "attackerLosses": {},
@@ -12431,7 +12431,7 @@
       "r": 2,
       "plots": {
        "w": {
-        "level": 1,
+        "level": 0,
         "building": "wall"
        },
        "c0": {
@@ -12552,7 +12552,6 @@
        }
       },
       "levels": {
-       "wall": 1,
        "barracks": 1,
        "hospital": 1,
        "elder_hall": 1,
@@ -12919,9 +12918,9 @@
         }
        },
        "wall": {
-        "max": 240,
+        "max": 120,
         "level": 1,
-        "integrity": 120
+        "integrity": 0
        }
       },
       "status": "defended",
@@ -12946,7 +12945,7 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "breach": false,
-        "wallLeft": 180,
+        "wallLeft": 60,
         "attackerLeft": 1,
         "defenderLeft": 12,
         "attackerLosses": {},
@@ -12955,8 +12954,8 @@
        {
         "at": "2026-06-01T11:00:48.000Z",
         "round": 2,
-        "breach": false,
-        "wallLeft": 120,
+        "breach": true,
+        "wallLeft": 0,
         "attackerLeft": 1,
         "defenderLeft": 6,
         "attackerLosses": {
@@ -15355,7 +15354,7 @@
       "r": 2,
       "plots": {
        "w": {
-        "level": 1,
+        "level": 0,
         "building": "wall"
        },
        "c0": {
@@ -15476,7 +15475,6 @@
        }
       },
       "levels": {
-       "wall": 1,
        "barracks": 1,
        "hospital": 1,
        "elder_hall": 1,
@@ -15867,9 +15865,9 @@
         }
        },
        "wall": {
-        "max": 240,
+        "max": 120,
         "level": 1,
-        "integrity": 120
+        "integrity": 0
        }
       },
       "status": "defended",
@@ -15894,7 +15892,7 @@
         "at": "2026-06-01T10:50:48.000Z",
         "round": 1,
         "breach": false,
-        "wallLeft": 180,
+        "wallLeft": 60,
         "attackerLeft": 1,
         "defenderLeft": 12,
         "attackerLosses": {},
@@ -15903,8 +15901,8 @@
        {
         "at": "2026-06-01T11:00:48.000Z",
         "round": 2,
-        "breach": false,
-        "wallLeft": 120,
+        "breach": true,
+        "wallLeft": 0,
         "attackerLeft": 1,
         "defenderLeft": 6,
         "attackerLosses": {
@@ -18415,7 +18413,7 @@
       "tier": "digest",
       "title": "Shooting Range level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T10:14:18.360Z",
+      "createdAt": "2026-06-01T10:14:07.200Z",
       "read": false
      },
      {
@@ -18424,7 +18422,7 @@
       "tier": "digest",
       "title": "Hospital level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T10:14:10.200Z",
+      "createdAt": "2026-06-01T10:14:04.000Z",
       "read": false
      },
      {
@@ -18496,7 +18494,7 @@
       "tier": "digest",
       "title": "Walls level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:19.400Z",
+      "createdAt": "2026-06-01T08:00:07.800Z",
       "read": false
      },
      {
@@ -18505,7 +18503,7 @@
       "tier": "digest",
       "title": "Barracks level 1 in Vruchiy",
       "body": "Finished.",
-      "createdAt": "2026-06-01T08:00:07.640Z",
+      "createdAt": "2026-06-01T08:00:03.000Z",
       "read": false
      },
      {

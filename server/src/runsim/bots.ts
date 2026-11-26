@@ -219,19 +219,19 @@ function buildChoices(
   const storeMax = data.buildings.buildings.storehouse!.maxLevel;
   if (KINDS.some((k) => amounts[k] > capacity[k] * 0.8) && (levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < storeMax) add('storehouse');
   // Economy first in the opening.
-  if (fieldAvg < 1) for (const f of fieldsByNeed(data, village, amounts)) add(f);
+  if (fieldAvg < 2) for (const f of fieldsByNeed(data, village, amounts)) add(f);
   if (freeSlots > 0) for (const b of style.buildings) if ((levels[b] ?? 0) === 0) add(b);
-  if (freeSlots <= 0 || hall < 1 + Math.floor(fieldAvg / 2)) add('elder_hall');
-  if ((levels.barracks ?? 0) > 0 && (levels.barracks ?? 0) < Math.min(4, 1 + Math.floor(day / 6))) add('barracks');
+  if (freeSlots <= 0 || hall < 2 + Math.floor(fieldAvg / 2)) add('elder_hall');
+  if ((levels.barracks ?? 0) > 0 && (levels.barracks ?? 0) < Math.min(8, 1 + Math.floor(day / 3))) add('barracks');
   // Walls once there is a barracks, and towers on them (archers first).
   if ((levels.barracks ?? 0) > 0 && day >= 2) {
-    if ((levels.wall ?? 0) < Math.min(5, 1 + Math.floor(day / (style.wallEvery * 2)))) add('wall');
+    if ((levels.wall ?? 0) < Math.min(10, 1 + Math.floor(day / style.wallEvery))) add('wall');
     for (const tower of TOWERS) {
-      if ((levels[tower] ?? 0) < Math.min(5, Math.floor(day / (style.wallEvery * 4)))) add(tower);
+      if ((levels[tower] ?? 0) < Math.min(10, Math.floor(day / (style.wallEvery * 2)))) add(tower);
     }
   }
-  if ((levels.caravan_yard ?? 0) > 0 && (levels.caravan_yard ?? 0) < Math.min(3, 1 + Math.floor(day / 10))) add('caravan_yard');
-  if ((levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < Math.min(storeMax, 1 + Math.floor(fieldAvg / 2))) add('storehouse');
+  if ((levels.caravan_yard ?? 0) > 0 && (levels.caravan_yard ?? 0) < Math.min(5, 1 + Math.floor(day / 5))) add('caravan_yard');
+  if ((levels.storehouse ?? 0) > 0 && (levels.storehouse ?? 0) < Math.min(storeMax, 1 + Math.floor(fieldAvg))) add('storehouse');
   for (const f of fieldsByNeed(data, village, amounts)) add(f);
   return out.slice(0, 4);
 }
