@@ -108,6 +108,10 @@ const buildingsFileSchema = z.object({
     market: z.object({
       baseRate: z.number().positive(),
       ratePerLevel: z.number().nonnegative(),
+      // Each other village joined to it by roads (own, or an ally's) adds this;
+      // no rate is ever better than maxRate.
+      perConnectedCity: z.number().nonnegative(),
+      maxRate: z.number().positive(),
       gearValue: resourcesSchema,
       // The bounty board: the fee, how many open bounties a Market keeps, how much each.
       bounties: z.object({ feeShare: z.number().min(0).max(1), levelsPerBounty: z.number().int().positive(), amountPerLevel: z.number().int().positive() }),

@@ -646,8 +646,14 @@ func _building_choice(village: Dictionary, building: String, on_walls: bool) -> 
 
 func _market_section(village: Dictionary, level: int) -> void:
 	var village_id := int(village.id)
-	var rate := Rules.market_rate(Game.data, level)
-	_panel_body.add_child(UI.label(tr("Trade"), UI.HEADING_SIZE))
+	var connected := Rules.road_connected(Game.world, Game.roads, village)
+	var market: Dictionary = Game.data.buildings.village.market
+	var rate := Rules.market_rate(Game.data, level, connected, float(village.get("bonuses", {}).get("marketRate", 0.0)))
+	_panel_body.add_child(UI.with_info(UI.label(tr("Trade"), UI.HEADING_SIZE),
+		tr("Each other village joined to this one by roads (yours, or an ally's) makes trade %d%% better; no trade is ever better than %d%%.") % [
+			roundi(float(market.perConnectedCity) * 100.0), roundi(float(market.maxRate) * 100.0)]))
+	if connected > 0:
+		_panel_body.add_child(UI.label(tr_n("%d village joined by roads: +%d%%", "%d villages joined by roads: +%d%%", connected) % [connected, roundi(connected * float(market.perConnectedCity) * 100.0)], UI.SMALL_SIZE, UI.GOOD))
 	var kinds: Array = Ledger.KINDS
 	var row := UI.hbox(8)
 	var give := UI.options(kinds.map(func(kind: String) -> String: return UI.resource_name(kind)), kinds.find(_trade.give))

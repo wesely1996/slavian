@@ -114,8 +114,17 @@ How armies carry and draw grain is on [page 8](08-armies-and-field.md#grain-and-
 ## The Market
 
 - **Trading.** One resource for another, at a rate of **40%** at level 1 plus
-  4% a level (116% at level 20). At 40%, 100 wood buys 40 iron. Bonus:
-  Lisica clan +15%.
+  4% a level. At 40%, 100 wood buys 40 iron.
+- **Roads between cities.** Every other village joined to this one by
+  standing roads adds **+1%**: your own villages, and in co-op any
+  player's (in PvP only your own). Ruins and refugee camps don't count.
+- **Clans.** Lisica clan: the rate ×1.15.
+- **The cap.** No trade is ever better than **1 for 1** (100%), however
+  high the Market, however many villages are joined to it.
+
+```
+rate = min(100%, (40% + 4% × (level − 1) + 1% × villages joined by road) × clan bonus)
+```
 - **Selling gear.** It buys a spare piece of the hero's gear for 150 wood,
   150 stone, 150 grain and 100 iron. Gear the hero wears must be taken off
   first.

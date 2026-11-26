@@ -4966,6 +4966,453 @@
    }
   },
   {
+   "set": {
+    "plots": {
+     "c5": {
+      "building": "market",
+      "level": 1
+     }
+    },
+    "amounts": {
+     "wood": 1000
+    }
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/market/trade",
+   "body": {
+    "give": "wood",
+    "get": "iron",
+    "amount": 100
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "settlers_lodge"
+      },
+      "c3": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 1,
+       "building": "market"
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "market": 1,
+      "barracks": 1,
+      "elder_hall": 1,
+      "settlers_lodge": 1
+     },
+     "queue": [],
+     "garrison": {
+      "settler": 1
+     },
+     "away": {
+      "settler": 0
+     },
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 900,
+       "stone": 750,
+       "grain": 691.0333333333333,
+       "iron": 865
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 373,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T09:50:00.000Z"
+     }
+    },
+    "got": 40,
+    "serverTime": "2026-06-01T09:50:00.000Z"
+   }
+  },
+  {
+   "set": {
+    "roads": [
+     {
+      "a": {
+       "q": -2,
+       "r": 2
+      },
+      "b": {
+       "q": -3,
+       "r": 3
+      }
+     },
+     {
+      "a": {
+       "q": -3,
+       "r": 3
+      },
+      "b": {
+       "q": -4,
+       "r": 4
+      }
+     },
+     {
+      "a": {
+       "q": -4,
+       "r": 4
+      },
+      "b": {
+       "q": -5,
+       "r": 5
+      }
+     },
+     {
+      "a": {
+       "q": -5,
+       "r": 5
+      },
+      "b": {
+       "q": -6,
+       "r": 6
+      }
+     }
+    ]
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/market/trade",
+   "body": {
+    "give": "wood",
+    "get": "iron",
+    "amount": 100
+   },
+   "status": 200,
+   "response": {
+    "village": {
+     "id": 1,
+     "worldId": -1,
+     "ownerAccountId": 1,
+     "name": "Vruchiy",
+     "q": -2,
+     "r": 2,
+     "plots": {
+      "w": {
+       "level": 0,
+       "building": "wall"
+      },
+      "c0": {
+       "level": 1,
+       "building": "elder_hall"
+      },
+      "c1": {
+       "level": 0,
+       "building": null
+      },
+      "c2": {
+       "level": 1,
+       "building": "settlers_lodge"
+      },
+      "c3": {
+       "level": 1,
+       "building": "barracks"
+      },
+      "c4": {
+       "level": 0,
+       "building": null
+      },
+      "c5": {
+       "level": 1,
+       "building": "market"
+      },
+      "c6": {
+       "level": 0,
+       "building": null
+      },
+      "c7": {
+       "level": 0,
+       "building": null
+      },
+      "c8": {
+       "level": 0,
+       "building": null
+      },
+      "c9": {
+       "level": 0,
+       "building": null
+      },
+      "f0": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f1": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f2": {
+       "level": 0,
+       "building": "woodcutter"
+      },
+      "f3": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f4": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f5": {
+       "level": 0,
+       "building": "quarry"
+      },
+      "f6": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f7": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f8": {
+       "level": 0,
+       "building": "farm"
+      },
+      "f9": {
+       "level": 0,
+       "building": "farm"
+      },
+      "t0": {
+       "level": 0,
+       "building": null
+      },
+      "t1": {
+       "level": 0,
+       "building": null
+      },
+      "t2": {
+       "level": 0,
+       "building": null
+      },
+      "t3": {
+       "level": 0,
+       "building": null
+      },
+      "t4": {
+       "level": 0,
+       "building": null
+      },
+      "c10": {
+       "level": 0,
+       "building": null
+      },
+      "c11": {
+       "level": 0,
+       "building": null
+      },
+      "f10": {
+       "level": 0,
+       "building": "iron_mine"
+      },
+      "f11": {
+       "level": 0,
+       "building": "iron_mine"
+      }
+     },
+     "levels": {
+      "market": 1,
+      "barracks": 1,
+      "elder_hall": 1,
+      "settlers_lodge": 1
+     },
+     "queue": [],
+     "garrison": {
+      "settler": 1
+     },
+     "away": {
+      "settler": 0
+     },
+     "stance": "balanced",
+     "maneuver": "encircle",
+     "besieged": false,
+     "adminUpkeep": 0,
+     "bonuses": {
+      "upkeep": 0.08,
+      "attack.all": 0.1,
+      "homeDefense": 0.06,
+      "attack.cavalry": 0.06,
+      "maneuver.flank": 0.2,
+      "maneuver.encircle": -0.1
+     },
+     "armyFloor": null,
+     "ruin": null,
+     "refuge": false,
+     "training": [],
+     "resources": {
+      "amounts": {
+       "wood": 800,
+       "stone": 750,
+       "grain": 691.0333333333333,
+       "iron": 906
+      },
+      "ratesPerHour": {
+       "iron": 150,
+       "wood": 450,
+       "grain": 373,
+       "stone": 300
+      },
+      "capacity": {
+       "iron": 1000,
+       "wood": 1000,
+       "grain": 1000,
+       "stone": 1000
+      },
+      "settledAt": "2026-06-01T09:50:00.000Z"
+     }
+    },
+    "got": 41,
+    "serverTime": "2026-06-01T09:50:00.000Z"
+   }
+  },
+  {
    "method": "PUT",
    "path": "/v1/worlds/-1/rally",
    "body": {
@@ -5074,8 +5521,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -5171,6 +5618,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -5200,10 +5648,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 755,
-        "wood": 565,
-        "grain": 516.9666666666667,
-        "stone": 610
+        "iron": 906,
+        "wood": 800,
+        "grain": 691.0333333333333,
+        "stone": 750
        },
        "ratesPerHour": {
         "iron": 150,
@@ -5217,7 +5665,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:22:24.000Z"
+       "settledAt": "2026-06-01T09:50:00.000Z"
       }
      },
      {
@@ -7766,7 +8214,40 @@
        1
       ]
      ],
-     "roads": [],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "standing",
+       1
+      ]
+     ],
      "terraforms": []
     },
     "serverTime": "2026-06-01T09:50:00.000Z"
@@ -7814,8 +8295,8 @@
        "building": null
       },
       "c5": {
-       "level": 0,
-       "building": null
+       "level": 1,
+       "building": "market"
       },
       "c6": {
        "level": 0,
@@ -7911,6 +8392,7 @@
       }
      },
      "levels": {
+      "market": 1,
       "barracks": 1,
       "elder_hall": 1,
       "settlers_lodge": 1
@@ -7948,8 +8430,8 @@
      ],
      "resources": {
       "amounts": {
-       "iron": 705,
-       "wood": 635,
+       "iron": 786,
+       "wood": 660,
        "grain": 571.0333333333333,
        "stone": 670
       },
@@ -8099,8 +8581,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -8196,6 +8678,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -8226,8 +8709,8 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 705,
-        "wood": 635,
+        "iron": 786,
+        "wood": 660,
         "grain": 475.0333333333333,
         "stone": 670
        },
@@ -8401,10 +8884,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 525,
-        "grain": 514.6,
-        "stone": 450
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
@@ -8418,7 +8901,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:52:00.000Z"
+       "settledAt": "2026-06-01T09:51:45.600Z"
       }
      }
     ],
@@ -8714,42 +9197,32 @@
         0
        ],
        [
-        -2,
+        -3,
         3,
         14400
        ],
        [
-        -3,
+        -4,
         4,
         28800
        ],
        [
-        -3,
-        5,
-        43200
-       ],
-       [
-        -4,
-        6,
-        57600
-       ],
-       [
         -5,
-        6,
+        5,
         86400
        ],
        [
         -6,
         6,
-        115200
+        100800
        ]
       ],
       "departsAt": "2026-06-01T09:50:04.800Z",
-      "arrivesAt": "2026-06-01T09:52:00.000Z",
+      "arrivesAt": "2026-06-01T09:51:45.600Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T09:52:00.000Z",
+      "supplyAt": "2026-06-01T09:51:45.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -10809,7 +11282,40 @@
        1
       ]
      ],
-     "roads": [],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "standing",
+       1
+      ]
+     ],
      "terraforms": []
     },
     "serverTime": "2026-06-01T10:10:00.000Z"
@@ -10912,8 +11418,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -11009,6 +11515,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -11039,8 +11546,8 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 705,
-        "wood": 635,
+        "iron": 786,
+        "wood": 660,
         "grain": 475.0333333333333,
         "stone": 670
        },
@@ -11214,10 +11721,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 525,
-        "grain": 514.6,
-        "stone": 450
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
@@ -11231,7 +11738,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:52:00.000Z"
+       "settledAt": "2026-06-01T09:51:45.600Z"
       }
      }
     ],
@@ -11527,42 +12034,32 @@
         0
        ],
        [
-        -2,
+        -3,
         3,
         14400
        ],
        [
-        -3,
+        -4,
         4,
         28800
        ],
        [
-        -3,
-        5,
-        43200
-       ],
-       [
-        -4,
-        6,
-        57600
-       ],
-       [
         -5,
-        6,
+        5,
         86400
        ],
        [
         -6,
         6,
-        115200
+        100800
        ]
       ],
       "departsAt": "2026-06-01T09:50:04.800Z",
-      "arrivesAt": "2026-06-01T09:52:00.000Z",
+      "arrivesAt": "2026-06-01T09:51:45.600Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T09:52:00.000Z",
+      "supplyAt": "2026-06-01T09:51:45.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -13622,7 +14119,40 @@
        1
       ]
      ],
-     "roads": [],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "standing",
+       1
+      ]
+     ],
      "terraforms": []
     },
     "serverTime": "2026-06-01T10:10:00.000Z"
@@ -13761,8 +14291,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -13858,6 +14388,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -13889,8 +14420,8 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 705,
-        "wood": 635,
+        "iron": 786,
+        "wood": 660,
         "grain": 475.0333333333333,
         "stone": 670
        },
@@ -14064,10 +14595,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 525,
-        "grain": 514.6,
-        "stone": 450
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
@@ -14081,7 +14612,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:52:00.000Z"
+       "settledAt": "2026-06-01T09:51:45.600Z"
       }
      }
     ],
@@ -14377,42 +14908,32 @@
         0
        ],
        [
-        -2,
+        -3,
         3,
         14400
        ],
        [
-        -3,
+        -4,
         4,
         28800
        ],
        [
-        -3,
-        5,
-        43200
-       ],
-       [
-        -4,
-        6,
-        57600
-       ],
-       [
         -5,
-        6,
+        5,
         86400
        ],
        [
         -6,
         6,
-        115200
+        100800
        ]
       ],
       "departsAt": "2026-06-01T09:50:04.800Z",
-      "arrivesAt": "2026-06-01T09:52:00.000Z",
+      "arrivesAt": "2026-06-01T09:51:45.600Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T09:52:00.000Z",
+      "supplyAt": "2026-06-01T09:51:45.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -16472,7 +16993,40 @@
        1
       ]
      ],
-     "roads": [],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "standing",
+       1
+      ]
+     ],
      "terraforms": []
     },
     "serverTime": "2026-06-01T10:10:00.000Z"
@@ -16575,8 +17129,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -16672,6 +17226,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -16703,8 +17258,8 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 705,
-        "wood": 635,
+        "iron": 786,
+        "wood": 660,
         "grain": 475.0333333333333,
         "stone": 670
        },
@@ -16878,10 +17433,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 225,
-        "wood": 525,
-        "grain": 514.6,
-        "stone": 450
+        "iron": 222.5,
+        "wood": 517.5,
+        "grain": 511.23333333333335,
+        "stone": 445
        },
        "ratesPerHour": {
         "iron": 150,
@@ -16895,7 +17450,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:52:00.000Z"
+       "settledAt": "2026-06-01T09:51:45.600Z"
       }
      }
     ],
@@ -17412,42 +17967,32 @@
         0
        ],
        [
-        -2,
+        -3,
         3,
         14400
        ],
        [
-        -3,
+        -4,
         4,
         28800
        ],
        [
-        -3,
-        5,
-        43200
-       ],
-       [
-        -4,
-        6,
-        57600
-       ],
-       [
         -5,
-        6,
+        5,
         86400
        ],
        [
         -6,
         6,
-        115200
+        100800
        ]
       ],
       "departsAt": "2026-06-01T09:50:04.800Z",
-      "arrivesAt": "2026-06-01T09:52:00.000Z",
+      "arrivesAt": "2026-06-01T09:51:45.600Z",
       "leavesAt": null,
       "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T09:52:00.000Z",
+      "supplyAt": "2026-06-01T09:51:45.600Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
@@ -19519,7 +20064,40 @@
        1
       ]
      ],
-     "roads": [],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "standing",
+       1
+      ]
+     ],
      "terraforms": []
     },
     "serverTime": "2026-06-01T10:40:00.000Z"
@@ -19633,8 +20211,8 @@
         "building": null
        },
        "c5": {
-        "level": 0,
-        "building": null
+        "level": 1,
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -19730,6 +20308,7 @@
        }
       },
       "levels": {
+       "market": 1,
        "barracks": 1,
        "elder_hall": 1,
        "settlers_lodge": 1
@@ -19761,7 +20340,7 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 905,
+        "iron": 986,
         "wood": 1000,
         "grain": 969.6666666666667,
         "stone": 1000
@@ -20000,2916 +20579,21 @@
         ],
         [
          -4,
-         3,
-         144000
-        ],
-        [
-         -3,
-         2,
-         158400
-        ],
-        [
-         -2,
-         2,
-         187200
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:53:31.200Z"
-      }
-     }
-    ],
-    "scouting": [],
-    "ruinSearches": [],
-    "battles": [
-     {
-      "id": 3,
-      "front": "south",
-      "leaderId": null,
-      "waveId": 4,
-      "campId": null,
-      "siteId": null,
-      "villageId": 1,
-      "q": -2,
-      "r": 2,
-      "setup": {
-       "home": {
-        "initial": {
-         "settler": 1,
-         "horseman": 3
-        }
-       }
-      },
-      "status": "ongoing",
-      "round": 0,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "zealot": 8,
-       "crossbowman": 3,
-       "chernobog_avatar": 1
-      },
-      "attackerNow": {
-       "zealot": 8,
-       "crossbowman": 3,
-       "chernobog_avatar": 1
-      },
-      "defenderInitial": {
-       "settler": 1,
-       "horseman": 3
-      },
-      "rounds": [],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T11:08:24.000Z",
-      "endedAt": null
-     },
-     {
-      "id": 1,
-      "front": "north",
-      "leaderId": 1,
-      "waveId": 1,
-      "campId": null,
-      "siteId": null,
-      "villageId": null,
-      "q": 0,
-      "r": 0,
-      "setup": {
-       "home": {
-        "initial": {
-         "archer": 10,
-         "spearman": 20
-        }
-       },
-       "guard": {
-        "archer": 10,
-        "spearman": 19
-       },
-       "lines": {
-        "active": {
-         "by": "defender",
-         "kind": "encircle",
-         "weak": {
-          "archers": 3,
-          "cavalry": 4,
-          "infantry": 1
-         }
-        }
-       },
-       "holyCity": true
-      },
-      "status": "defended",
-      "round": 2,
-      "attackerStance": "offensive",
-      "attackerInitial": {
-       "rusalka": 3,
-       "grey_wolf": 4,
-       "leshy_thrall": 2
-      },
-      "attackerNow": {
-       "leshy_thrall": 1
-      },
-      "defenderInitial": {
-       "archer": 10,
-       "spearman": 20
-      },
-      "rounds": [
-       {
-        "at": "2026-06-01T10:37:36.000Z",
-        "round": 1,
-        "attackerLeft": 8,
-        "defenderLeft": 30,
-        "attackerLosses": {
-         "leshy_thrall": 1
-        },
-        "defenderLosses": {}
-       },
-       {
-        "at": "2026-06-01T10:47:36.000Z",
-        "round": 2,
-        "maneuver": {
-         "by": "defender",
-         "kind": "encircle"
-        },
-        "attackerLeft": 1,
-        "defenderLeft": 29,
-        "attackerLosses": {
-         "rusalka": 3,
-         "grey_wolf": 4
-        },
-        "defenderLosses": {
-         "spearman": 1
-        }
-       }
-      ],
-      "loot": null,
-      "decision": null,
-      "startedAt": "2026-06-01T10:27:36.000Z",
-      "endedAt": "2026-06-01T10:47:36.000Z"
-     }
-    ],
-    "raids": [],
-    "expeditions": [
-     {
-      "id": 1,
-      "villageId": 1,
-      "q": -6,
-      "r": 6,
-      "name": "Novgorod",
-      "settlers": 3,
-      "status": "founded",
-      "failure": null,
-      "foundedVillageId": null,
-      "path": [
-       [
-        -2,
-        2,
-        0
-       ],
-       [
-        -2,
-        3,
-        18000
-       ],
-       [
-        -3,
-        4,
-        36000
-       ],
-       [
-        -3,
-        5,
-        54000
-       ],
-       [
-        -4,
-        6,
-        72000
-       ],
-       [
-        -5,
-        6,
-        108000
-       ],
-       [
-        -6,
-        6,
-        144000
-       ]
-      ],
-      "departsAt": "2026-06-01T09:20:00.000Z",
-      "arrivesAt": "2026-06-01T09:22:24.000Z",
-      "returnsAt": "2026-06-01T09:24:48.000Z"
-     }
-    ],
-    "research": [],
-    "heroes": [
-     {
-      "accountId": 1,
-      "kind": "dobrynya",
-      "name": "Dobrynya",
-      "status": "wounded",
-      "villageId": 1,
-      "armyId": null,
-      "level": 1,
-      "xp": 2,
-      "xpToNext": 30,
-      "skillPoints": 0,
-      "skills": {},
-      "gear": {},
-      "inventory": [],
-      "bonuses": {},
-      "path": null,
-      "departsAt": null,
-      "arrivesAt": null,
-      "woundedUntil": "2026-06-01T11:11:12.000Z",
-      "quest": null,
-      "offers": [
-       {
-        "id": "19:shrine",
-        "kind": "shrine",
-        "front": null,
-        "siteId": null,
-        "distance": 5,
-        "hours": 9.666666666666666,
-        "xp": 80,
-        "risk": 0.05
-       },
-       {
-        "id": "19:scout",
-        "kind": "scout",
-        "front": "south",
-        "siteId": null,
-        "distance": 6,
-        "hours": 5,
-        "xp": 25,
-        "risk": 0.15
-       },
-       {
-        "id": "19:ambush",
-        "kind": "ambush",
-        "front": "north",
-        "siteId": null,
-        "distance": 5,
-        "hours": 5.666666666666667,
-        "xp": 64,
-        "risk": 0.37
-       }
-      ],
-      "armyQuest": null
-     }
-    ],
-    "generals": [],
-    "leaders": [
-     {
-      "id": 1,
-      "front": "north",
-      "name": "Vyrgan",
-      "title": "Vyrgan the Hungry",
-      "level": 1,
-      "xp": 10,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "alive",
-      "woundedUntil": "2026-06-01T11:23:36.000Z",
-      "battles": 1,
-      "wins": 0,
-      "losses": 1,
-      "razed": 0,
-      "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": null
-     },
-     {
-      "id": 2,
-      "front": "south",
-      "name": "Lothar",
-      "title": "Brother Lothar",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "alive",
-      "woundedUntil": null,
-      "battles": 0,
-      "wins": 0,
-      "losses": 0,
-      "razed": 0,
-      "kills": 0,
-      "grudgeVillageId": null,
-      "diedAt": null
-     }
-    ],
-    "orders": [],
-    "armies": [],
-    "forts": [],
-    "camps": [
-     {
-      "id": 1,
-      "kind": "bandit",
-      "front": "south",
-      "q": -2,
-      "r": 5,
-      "size": 6,
-      "waveId": null,
-      "reward": null,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 4,
-      "kind": "lair",
-      "front": "north",
-      "q": 6,
-      "r": -8,
-      "size": 9,
-      "waveId": 1,
-      "reward": null,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 5,
-      "kind": "captives",
-      "front": "south",
-      "q": -1,
-      "r": 8,
-      "size": 14,
-      "waveId": null,
-      "reward": {
-       "units": {
-        "axe_levy": 9
-       }
-      },
-      "endsAt": "2026-06-01T11:50:24.000Z",
-      "quest": null
-     }
-    ],
-    "sites": [
-     {
-      "id": 1,
-      "kind": "stone_idol",
-      "q": -3,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": false,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 2,
-      "kind": "sunken_shrine",
-      "q": 3,
-      "r": 0,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": false,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 3,
-      "kind": "old_hillfort",
-      "q": -8,
-      "r": 1,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": false,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 4,
-      "kind": "frozen_ruin",
-      "q": 0,
-      "r": -9,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": false,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 5,
-      "kind": "old_hillfort",
-      "q": -6,
-      "r": 9,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": false,
-      "endsAt": null,
-      "quest": null
-     },
-     {
-      "id": 6,
-      "kind": "kurgan",
-      "q": 0,
-      "r": -5,
-      "status": "unexplored",
-      "guardians": null,
-      "exploredBy": null,
-      "find": null,
-      "exploredAt": null,
-      "hard": true,
-      "endsAt": null,
-      "quest": "relic"
-     }
-    ],
-    "lore": [],
-    "achievements": [
-     {
-      "accountId": 1,
-      "achievement": "second_village",
-      "earnedAt": "2026-06-01T09:22:24.000Z"
-     },
-     {
-      "accountId": 1,
-      "achievement": "avatar_risen",
-      "earnedAt": "2026-06-01T10:38:24.000Z"
-     },
-     {
-      "accountId": 1,
-      "achievement": "hordes_united",
-      "earnedAt": "2026-06-01T10:54:14.400Z"
-     },
-     {
-      "accountId": 1,
-      "achievement": "village_ruined",
-      "earnedAt": "2026-06-01T11:05:12.000Z"
-     }
-    ],
-    "shipyards": [
-     {
-      "id": 2,
-      "kind": "boat",
-      "q": -5,
-      "r": -1,
-      "edge": [
-       -4,
-       -2,
-       -5,
-       -1
-      ],
-      "status": "open",
-      "cost": {
-       "iron": 150,
-       "wood": 900,
-       "grain": 300,
-       "stone": 300
-      },
-      "paid": {
-       "iron": 0,
-       "wood": 0,
-       "grain": 0,
-       "stone": 0
-      },
-      "front": "north",
-      "raiders": 10,
-      "raids": 0,
-      "burns": 0,
-      "endsAt": "2026-06-01T11:21:36.000Z",
-      "completesAt": null,
-      "nextRaidAt": null
-     }
-    ],
-    "bridge": {
-     "stage": 0,
-     "embers": 0,
-     "quests": {},
-     "status": "open",
-     "donated": {
-      "iron": 0,
-      "wood": 0,
-      "grain": 0,
-      "stone": 0
-     },
-     "raisedAt": null,
-     "stageStartedAt": "2026-06-01T08:00:00.000Z",
-     "sanctityAtStart": 100
-    },
-    "fear": [
-     [
-      0,
-      0,
-      9.5
-     ]
-    ],
-    "delegations": [],
-    "delegationLog": [],
-    "run": null,
-    "caravans": [],
-    "vault": {
-     "level": 1,
-     "amounts": {
-      "iron": 0,
-      "wood": 0,
-      "grain": 0,
-      "stone": 0
-     },
-     "capacity": 3000,
-     "upgradingTo": null,
-     "upgradeCompletesAt": null
-    },
-    "bounties": [],
-    "map": {
-     "radius": 10,
-     "activeFronts": [
-      "north",
-      "south"
-     ],
-     "hexes": [
-      [
-       0,
-       -10,
-       "dark_forest"
-      ],
-      [
-       1,
-       -10,
-       "dark_forest"
-      ],
-      [
-       2,
-       -10,
-       "dark_forest"
-      ],
-      [
-       3,
-       -10,
-       "ice"
-      ],
-      [
-       4,
-       -10,
-       "ice"
-      ],
-      [
-       5,
-       -10,
-       "dark_forest"
-      ],
-      [
-       6,
-       -10,
-       "ice"
-      ],
-      [
-       7,
-       -10,
-       "ice"
-      ],
-      [
-       8,
-       -10,
-       "ice"
-      ],
-      [
-       9,
-       -10,
-       "dark_forest"
-      ],
-      [
-       10,
-       -10,
-       "dark_forest"
-      ],
-      [
-       -1,
-       -9,
-       "dark_forest"
-      ],
-      [
-       0,
-       -9,
-       "dark_forest"
-      ],
-      [
-       1,
-       -9,
-       "dark_forest"
-      ],
-      [
-       2,
-       -9,
-       "dark_forest"
-      ],
-      [
-       3,
-       -9,
-       "dark_forest"
-      ],
-      [
-       4,
-       -9,
-       "dark_forest"
-      ],
-      [
-       5,
-       -9,
-       "dark_forest"
-      ],
-      [
-       6,
-       -9,
-       "dark_forest"
-      ],
-      [
-       7,
-       -9,
-       "dark_forest"
-      ],
-      [
-       8,
-       -9,
-       "dark_forest"
-      ],
-      [
-       9,
-       -9,
-       "dark_forest"
-      ],
-      [
-       10,
-       -9,
-       "dark_forest"
-      ],
-      [
-       -2,
-       -8,
-       "dark_forest"
-      ],
-      [
-       -1,
-       -8,
-       "dark_forest"
-      ],
-      [
-       0,
-       -8,
-       "hills"
-      ],
-      [
-       1,
-       -8,
-       "mountain"
-      ],
-      [
-       2,
-       -8,
-       "hills"
-      ],
-      [
-       3,
-       -8,
-       "plains"
-      ],
-      [
-       4,
-       -8,
-       "plains"
-      ],
-      [
-       5,
-       -8,
-       "plains"
-      ],
-      [
-       6,
-       -8,
-       "plains"
-      ],
-      [
-       7,
-       -8,
-       "forest"
-      ],
-      [
-       8,
-       -8,
-       "swamp"
-      ],
-      [
-       9,
-       -8,
-       "dark_forest"
-      ],
-      [
-       10,
-       -8,
-       "dark_forest"
-      ],
-      [
-       -3,
-       -7,
-       "ocean"
-      ],
-      [
-       -2,
-       -7,
-       "dark_forest"
-      ],
-      [
-       -1,
-       -7,
-       "plains"
-      ],
-      [
-       0,
-       -7,
-       "plains"
-      ],
-      [
-       1,
-       -7,
-       "plains"
-      ],
-      [
-       2,
-       -7,
-       "plains"
-      ],
-      [
-       3,
-       -7,
-       "plains"
-      ],
-      [
-       4,
-       -7,
-       "plains"
-      ],
-      [
-       5,
-       -7,
-       "forest"
-      ],
-      [
-       6,
-       -7,
-       "swamp"
-      ],
-      [
-       7,
-       -7,
-       "swamp"
-      ],
-      [
-       8,
-       -7,
-       "forest"
-      ],
-      [
-       9,
-       -7,
-       "dark_forest"
-      ],
-      [
-       10,
-       -7,
-       "ocean"
-      ],
-      [
-       -4,
-       -6,
-       "ocean"
-      ],
-      [
-       -3,
-       -6,
-       "ocean"
-      ],
-      [
-       -2,
-       -6,
-       "plains"
-      ],
-      [
-       -1,
-       -6,
-       "plains"
-      ],
-      [
-       0,
-       -6,
-       "plains"
-      ],
-      [
-       1,
-       -6,
-       "plains"
-      ],
-      [
-       2,
-       -6,
-       "plains"
-      ],
-      [
-       3,
-       -6,
-       "plains"
-      ],
-      [
-       4,
-       -6,
-       "forest"
-      ],
-      [
-       5,
-       -6,
-       "forest"
-      ],
-      [
-       6,
-       -6,
-       "forest"
-      ],
-      [
-       7,
-       -6,
-       "forest"
-      ],
-      [
-       8,
-       -6,
-       "plains"
-      ],
-      [
-       9,
-       -6,
-       "ocean"
-      ],
-      [
-       10,
-       -6,
-       "ocean"
-      ],
-      [
-       -5,
-       -5,
-       "ocean"
-      ],
-      [
-       -4,
-       -5,
-       "ocean"
-      ],
-      [
-       -3,
-       -5,
-       "mountain"
-      ],
-      [
-       -2,
-       -5,
-       "forest"
-      ],
-      [
-       -1,
-       -5,
-       "plains"
-      ],
-      [
-       0,
-       -5,
-       "plains"
-      ],
-      [
-       1,
-       -5,
-       "plains"
-      ],
-      [
-       2,
-       -5,
-       "plains"
-      ],
-      [
-       3,
-       -5,
-       "plains"
-      ],
-      [
-       4,
-       -5,
-       "forest"
-      ],
-      [
-       5,
-       -5,
-       "forest"
-      ],
-      [
-       6,
-       -5,
-       "forest"
-      ],
-      [
-       7,
-       -5,
-       "forest"
-      ],
-      [
-       8,
-       -5,
-       "forest"
-      ],
-      [
-       9,
-       -5,
-       "ocean"
-      ],
-      [
-       10,
-       -5,
-       "ocean"
-      ],
-      [
-       -6,
-       -4,
-       "ocean"
-      ],
-      [
-       -5,
-       -4,
-       "ocean"
-      ],
-      [
-       -4,
-       -4,
-       "forest"
-      ],
-      [
-       -3,
-       -4,
-       "wooded_hills"
-      ],
-      [
-       -2,
-       -4,
-       "plains"
-      ],
-      [
-       -1,
-       -4,
-       "plains"
-      ],
-      [
-       0,
-       -4,
-       "plains"
-      ],
-      [
-       1,
-       -4,
-       "plains"
-      ],
-      [
-       2,
-       -4,
-       "hills"
-      ],
-      [
-       3,
-       -4,
-       "forest"
-      ],
-      [
-       4,
-       -4,
-       "wooded_hills"
-      ],
-      [
-       5,
-       -4,
-       "wooded_hills"
-      ],
-      [
-       6,
-       -4,
-       "mountain"
-      ],
-      [
-       7,
-       -4,
-       "forest"
-      ],
-      [
-       8,
-       -4,
-       "mountain"
-      ],
-      [
-       9,
-       -4,
-       "ocean"
-      ],
-      [
-       10,
-       -4,
-       "ocean"
-      ],
-      [
-       -7,
-       -3,
-       "ocean"
-      ],
-      [
-       -6,
-       -3,
-       "ocean"
-      ],
-      [
-       -5,
-       -3,
-       "hills"
-      ],
-      [
-       -4,
-       -3,
-       "hills"
-      ],
-      [
-       -3,
-       -3,
-       "hills"
-      ],
-      [
-       -2,
-       -3,
-       "hills"
-      ],
-      [
-       -1,
-       -3,
-       "plains"
-      ],
-      [
-       0,
-       -3,
-       "plains"
-      ],
-      [
-       1,
-       -3,
-       "forest"
-      ],
-      [
-       2,
-       -3,
-       "forest"
-      ],
-      [
-       3,
-       -3,
-       "forest"
-      ],
-      [
-       4,
-       -3,
-       "forest"
-      ],
-      [
-       5,
-       -3,
-       "wooded_hills"
-      ],
-      [
-       6,
-       -3,
-       "hills"
-      ],
-      [
-       7,
-       -3,
-       "hills"
-      ],
-      [
-       8,
-       -3,
-       "forest"
-      ],
-      [
-       9,
-       -3,
-       "ocean"
-      ],
-      [
-       10,
-       -3,
-       "ocean"
-      ],
-      [
-       -8,
-       -2,
-       "ocean"
-      ],
-      [
-       -7,
-       -2,
-       "ocean"
-      ],
-      [
-       -6,
-       -2,
-       "plains"
-      ],
-      [
-       -5,
-       -2,
-       "hills"
-      ],
-      [
-       -4,
-       -2,
-       "hills"
-      ],
-      [
-       -3,
-       -2,
-       "hills"
-      ],
-      [
-       -2,
-       -2,
-       "hills"
-      ],
-      [
-       -1,
-       -2,
-       "plains"
-      ],
-      [
-       0,
-       -2,
-       "plains"
-      ],
-      [
-       1,
-       -2,
-       "forest"
-      ],
-      [
-       2,
-       -2,
-       "forest"
-      ],
-      [
-       3,
-       -2,
-       "wooded_hills"
-      ],
-      [
-       4,
-       -2,
-       "wooded_hills"
-      ],
-      [
-       5,
-       -2,
-       "forest"
-      ],
-      [
-       6,
-       -2,
-       "forest"
-      ],
-      [
-       7,
-       -2,
-       "forest"
-      ],
-      [
-       8,
-       -2,
-       "plains"
-      ],
-      [
-       9,
-       -2,
-       "ocean"
-      ],
-      [
-       10,
-       -2,
-       "ocean"
-      ],
-      [
-       -9,
-       -1,
-       "ocean"
-      ],
-      [
-       -8,
-       -1,
-       "ocean"
-      ],
-      [
-       -7,
-       -1,
-       "hills"
-      ],
-      [
-       -6,
-       -1,
-       "plains"
-      ],
-      [
-       -5,
-       -1,
-       "plains"
-      ],
-      [
-       -4,
-       -1,
-       "mountain"
-      ],
-      [
-       -3,
-       -1,
-       "hills"
-      ],
-      [
-       -2,
-       -1,
-       "plains"
-      ],
-      [
-       -1,
-       -1,
-       "plains"
-      ],
-      [
-       0,
-       -1,
-       "plains"
-      ],
-      [
-       1,
-       -1,
-       "forest"
-      ],
-      [
-       2,
-       -1,
-       "wooded_hills"
-      ],
-      [
-       3,
-       -1,
-       "forest"
-      ],
-      [
-       4,
-       -1,
-       "forest"
-      ],
-      [
-       5,
-       -1,
-       "forest"
-      ],
-      [
-       6,
-       -1,
-       "forest"
-      ],
-      [
-       7,
-       -1,
-       "forest"
-      ],
-      [
-       8,
-       -1,
-       "plains"
-      ],
-      [
-       9,
-       -1,
-       "ocean"
-      ],
-      [
-       10,
-       -1,
-       "ocean"
-      ],
-      [
-       -10,
-       0,
-       "ocean"
-      ],
-      [
-       -9,
-       0,
-       "ocean"
-      ],
-      [
-       -8,
-       0,
-       "forest"
-      ],
-      [
-       -7,
-       0,
-       "plains"
-      ],
-      [
-       -6,
-       0,
-       "plains"
-      ],
-      [
-       -5,
-       0,
-       "mountain"
-      ],
-      [
-       -4,
-       0,
-       "mountain"
-      ],
-      [
-       -3,
-       0,
-       "plains"
-      ],
-      [
-       -2,
-       0,
-       "plains"
-      ],
-      [
-       -1,
-       0,
-       "plains"
-      ],
-      [
-       0,
-       0,
-       "holy_city"
-      ],
-      [
-       1,
-       0,
-       "plains"
-      ],
-      [
-       2,
-       0,
-       "forest"
-      ],
-      [
-       3,
-       0,
-       "forest"
-      ],
-      [
-       4,
-       0,
-       "forest"
-      ],
-      [
-       5,
-       0,
-       "forest"
-      ],
-      [
-       6,
-       0,
-       "plains"
-      ],
-      [
-       7,
-       0,
-       "plains"
-      ],
-      [
-       8,
-       0,
-       "plains"
-      ],
-      [
-       9,
-       0,
-       "ocean"
-      ],
-      [
-       10,
-       0,
-       "ocean"
-      ],
-      [
-       -10,
-       1,
-       "ocean"
-      ],
-      [
-       -9,
-       1,
-       "ocean"
-      ],
-      [
-       -8,
-       1,
-       "plains"
-      ],
-      [
-       -7,
-       1,
-       "forest"
-      ],
-      [
-       -6,
-       1,
-       "forest"
-      ],
-      [
-       -5,
-       1,
-       "plains"
-      ],
-      [
-       -4,
-       1,
-       "plains"
-      ],
-      [
-       -3,
-       1,
-       "plains"
-      ],
-      [
-       -2,
-       1,
-       "plains"
-      ],
-      [
-       -1,
-       1,
-       "hills"
-      ],
-      [
-       0,
-       1,
-       "plains"
-      ],
-      [
-       1,
-       1,
-       "plains"
-      ],
-      [
-       2,
-       1,
-       "forest"
-      ],
-      [
-       3,
-       1,
-       "forest"
-      ],
-      [
-       4,
-       1,
-       "swamp"
-      ],
-      [
-       5,
-       1,
-       "forest"
-      ],
-      [
-       6,
-       1,
-       "plains"
-      ],
-      [
-       7,
-       1,
-       "plains"
-      ],
-      [
-       8,
-       1,
-       "ocean"
-      ],
-      [
-       9,
-       1,
-       "ocean"
-      ],
-      [
-       -10,
-       2,
-       "ocean"
-      ],
-      [
-       -9,
-       2,
-       "ocean"
-      ],
-      [
-       -8,
-       2,
-       "plains"
-      ],
-      [
-       -7,
-       2,
-       "forest"
-      ],
-      [
-       -6,
-       2,
-       "forest"
-      ],
-      [
-       -5,
-       2,
-       "forest"
-      ],
-      [
-       -4,
-       2,
-       "plains"
-      ],
-      [
-       -3,
-       2,
-       "plains"
-      ],
-      [
-       -2,
-       2,
-       "hills"
-      ],
-      [
-       -1,
-       2,
-       "hills"
-      ],
-      [
-       0,
-       2,
-       "plains"
-      ],
-      [
-       1,
-       2,
-       "hills"
-      ],
-      [
-       2,
-       2,
-       "forest"
-      ],
-      [
-       3,
-       2,
-       "forest"
-      ],
-      [
-       4,
-       2,
-       "swamp"
-      ],
-      [
-       5,
-       2,
-       "forest"
-      ],
-      [
-       6,
-       2,
-       "forest"
-      ],
-      [
-       7,
-       2,
-       "ocean"
-      ],
-      [
-       8,
-       2,
-       "ocean"
-      ],
-      [
-       -10,
-       3,
-       "ocean"
-      ],
-      [
-       -9,
-       3,
-       "ocean"
-      ],
-      [
-       -8,
-       3,
-       "plains"
-      ],
-      [
-       -7,
-       3,
-       "forest"
-      ],
-      [
-       -6,
-       3,
-       "forest"
-      ],
-      [
-       -5,
-       3,
-       "forest"
-      ],
-      [
-       -4,
-       3,
-       "hills"
-      ],
-      [
-       -3,
-       3,
-       "hills"
-      ],
-      [
-       -2,
-       3,
-       "plains"
-      ],
-      [
-       -1,
-       3,
-       "plains"
-      ],
-      [
-       0,
-       3,
-       "plains"
-      ],
-      [
-       1,
-       3,
-       "forest"
-      ],
-      [
-       2,
-       3,
-       "forest"
-      ],
-      [
-       3,
-       3,
-       "wooded_hills"
-      ],
-      [
-       4,
-       3,
-       "wooded_hills"
-      ],
-      [
-       5,
-       3,
-       "hills"
-      ],
-      [
-       6,
-       3,
-       "ocean"
-      ],
-      [
-       7,
-       3,
-       "ocean"
-      ],
-      [
-       -10,
-       4,
-       "ocean"
-      ],
-      [
-       -9,
-       4,
-       "ocean"
-      ],
-      [
-       -8,
-       4,
-       "lake"
-      ],
-      [
-       -7,
-       4,
-       "swamp"
-      ],
-      [
-       -6,
-       4,
-       "forest"
-      ],
-      [
-       -5,
-       4,
-       "hills"
-      ],
-      [
-       -4,
-       4,
-       "hills"
-      ],
-      [
-       -3,
-       4,
-       "plains"
-      ],
-      [
-       -2,
-       4,
-       "plains"
-      ],
-      [
-       -1,
-       4,
-       "plains"
-      ],
-      [
-       0,
-       4,
-       "plains"
-      ],
-      [
-       1,
-       4,
-       "forest"
-      ],
-      [
-       2,
-       4,
-       "forest"
-      ],
-      [
-       3,
-       4,
-       "hills"
-      ],
-      [
-       4,
-       4,
-       "mountain"
-      ],
-      [
-       5,
-       4,
-       "ocean"
-      ],
-      [
-       6,
-       4,
-       "ocean"
-      ],
-      [
-       -10,
-       5,
-       "ocean"
-      ],
-      [
-       -9,
-       5,
-       "ocean"
-      ],
-      [
-       -8,
-       5,
-       "forest"
-      ],
-      [
-       -7,
-       5,
-       "hills"
-      ],
-      [
-       -6,
-       5,
-       "hills"
-      ],
-      [
-       -5,
-       5,
-       "mountain"
-      ],
-      [
-       -4,
-       5,
-       "hills"
-      ],
-      [
-       -3,
-       5,
-       "plains"
-      ],
-      [
-       -2,
-       5,
-       "plains"
-      ],
-      [
-       -1,
-       5,
-       "lake"
-      ],
-      [
-       0,
-       5,
-       "plains"
-      ],
-      [
-       1,
-       5,
-       "forest"
-      ],
-      [
-       2,
-       5,
-       "hills"
-      ],
-      [
-       3,
-       5,
-       "mountain"
-      ],
-      [
-       4,
-       5,
-       "ocean"
-      ],
-      [
-       5,
-       5,
-       "ocean"
-      ],
-      [
-       -10,
-       6,
-       "ocean"
-      ],
-      [
-       -9,
-       6,
-       "ocean"
-      ],
-      [
-       -8,
-       6,
-       "forest"
-      ],
-      [
-       -7,
-       6,
-       "hills"
-      ],
-      [
-       -6,
-       6,
-       "hills"
-      ],
-      [
-       -5,
-       6,
-       "hills"
-      ],
-      [
-       -4,
-       6,
-       "plains"
-      ],
-      [
-       -3,
-       6,
-       "plains"
-      ],
-      [
-       -2,
-       6,
-       "plains"
-      ],
-      [
-       -1,
-       6,
-       "plains"
-      ],
-      [
-       0,
-       6,
-       "forest"
-      ],
-      [
-       1,
-       6,
-       "forest"
-      ],
-      [
-       2,
-       6,
-       "plains"
-      ],
-      [
-       3,
-       6,
-       "ocean"
-      ],
-      [
-       4,
-       6,
-       "ocean"
-      ],
-      [
-       -10,
-       7,
-       "ocean"
-      ],
-      [
-       -9,
-       7,
-       "hallowed"
-      ],
-      [
-       -8,
-       7,
-       "wooded_hills"
-      ],
-      [
-       -7,
-       7,
-       "hills"
-      ],
-      [
-       -6,
-       7,
-       "forest"
-      ],
-      [
-       -5,
-       7,
-       "plains"
-      ],
-      [
-       -4,
-       7,
-       "plains"
-      ],
-      [
-       -3,
-       7,
-       "plains"
-      ],
-      [
-       -2,
-       7,
-       "plains"
-      ],
-      [
-       -1,
-       7,
-       "plains"
-      ],
-      [
-       0,
-       7,
-       "plains"
-      ],
-      [
-       1,
-       7,
-       "plains"
-      ],
-      [
-       2,
-       7,
-       "hallowed"
-      ],
-      [
-       3,
-       7,
-       "ocean"
-      ],
-      [
-       -10,
-       8,
-       "hallowed"
-      ],
-      [
-       -9,
-       8,
-       "hallowed"
-      ],
-      [
-       -8,
-       8,
-       "forest"
-      ],
-      [
-       -7,
-       8,
-       "forest"
-      ],
-      [
-       -6,
-       8,
-       "forest"
-      ],
-      [
-       -5,
-       8,
-       "plains"
-      ],
-      [
-       -4,
-       8,
-       "plains"
-      ],
-      [
-       -3,
-       8,
-       "plains"
-      ],
-      [
-       -2,
-       8,
-       "plains"
-      ],
-      [
-       -1,
-       8,
-       "forest"
-      ],
-      [
-       0,
-       8,
-       "plains"
-      ],
-      [
-       1,
-       8,
-       "hallowed"
-      ],
-      [
-       2,
-       8,
-       "hallowed"
-      ],
-      [
-       -10,
-       9,
-       "hallowed"
-      ],
-      [
-       -9,
-       9,
-       "hallowed"
-      ],
-      [
-       -8,
-       9,
-       "hallowed"
-      ],
-      [
-       -7,
-       9,
-       "hallowed"
-      ],
-      [
-       -6,
-       9,
-       "hallowed"
-      ],
-      [
-       -5,
-       9,
-       "hallowed"
-      ],
-      [
-       -4,
-       9,
-       "hallowed"
-      ],
-      [
-       -3,
-       9,
-       "hallowed"
-      ],
-      [
-       -2,
-       9,
-       "hallowed"
-      ],
-      [
-       -1,
-       9,
-       "hallowed"
-      ],
-      [
-       0,
-       9,
-       "hallowed"
-      ],
-      [
-       1,
-       9,
-       "hallowed"
-      ],
-      [
-       -10,
-       10,
-       "hallowed"
-      ],
-      [
-       -9,
-       10,
-       "hallowed"
-      ],
-      [
-       -8,
-       10,
-       "hallowed"
-      ],
-      [
-       -7,
-       10,
-       "hallowed"
-      ],
-      [
-       -6,
-       10,
-       "hallowed"
-      ],
-      [
-       -5,
-       10,
-       "hallowed"
-      ],
-      [
-       -4,
-       10,
-       "hallowed"
-      ],
-      [
-       -3,
-       10,
-       "hallowed"
-      ],
-      [
-       -2,
-       10,
-       "hallowed"
-      ],
-      [
-       -1,
-       10,
-       "hallowed"
-      ],
-      [
-       0,
-       10,
-       "hallowed"
-      ]
-     ],
-     "rivers": [
-      [
-       -8,
-       1,
-       -8,
-       2,
-       "none",
-       2
-      ],
-      [
-       -7,
-       0,
-       -7,
-       1,
-       "none",
-       2
-      ],
-      [
-       -7,
-       1,
-       -8,
-       1,
-       "none",
-       2
-      ],
-      [
-       -7,
-       3,
-       -7,
-       4,
-       "none",
-       2
-      ],
-      [
-       -7,
-       5,
-       -7,
-       6,
-       "none",
-       1
-      ],
-      [
-       -7,
-       6,
-       -8,
-       6,
-       "standing",
-       1
-      ],
-      [
-       -7,
-       6,
-       -8,
-       7,
-       "none",
-       1
-      ],
-      [
-       -6,
-       0,
-       -7,
-       1,
-       "standing",
-       2
-      ],
-      [
-       -6,
-       0,
-       -6,
-       1,
-       "none",
-       2
-      ],
-      [
-       -6,
-       3,
-       -7,
-       4,
-       "standing",
-       2
-      ],
-      [
-       -6,
-       4,
-       -7,
-       4,
-       "none",
-       2
-      ],
-      [
-       -6,
-       4,
-       -7,
-       5,
-       "none",
-       2
-      ],
-      [
-       -6,
-       5,
-       -7,
-       5,
-       "none",
-       2
-      ],
-      [
-       -5,
-       -1,
-       -6,
-       -1,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -1,
-       -6,
-       0,
-       "none",
-       1
-      ],
-      [
-       -5,
-       -1,
-       -5,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -5,
-       0,
-       -6,
-       0,
-       "none",
-       2
-      ],
-      [
-       -4,
-       -2,
-       -5,
-       -1,
-       "standing",
-       1
-      ],
-      [
-       -4,
-       -1,
-       -4,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -3,
-       -4,
-       -2,
-       "none",
-       1
-      ],
-      [
-       -3,
-       -2,
-       -4,
-       -2,
-       "none",
-       1
-      ],
-      [
-       6,
-       -3,
-       7,
-       -4,
-       "none",
-       1
-      ],
-      [
-       7,
-       -5,
-       8,
-       -5,
-       "none",
-       1
-      ],
-      [
-       7,
-       -4,
-       8,
-       -5,
-       "standing",
-       1
-      ],
-      [
-       7,
-       -4,
-       8,
-       -4,
-       "none",
-       1
-      ],
-      [
-       7,
-       -3,
-       7,
-       -4,
-       "none",
-       1
-      ],
-      [
-       8,
-       -5,
-       8,
-       -6,
-       "none",
-       1
-      ]
-     ],
-     "roads": [],
-     "terraforms": []
-    },
-    "serverTime": "2026-06-01T11:10:00.000Z"
-   }
-  },
-  {
-   "method": "POST",
-   "path": "/v1/villages/1/roads",
-   "body": {
-    "a": {
-     "q": -2,
-     "r": 2
-    },
-    "b": {
-     "q": -3,
-     "r": 3
-    }
-   },
-   "status": 200,
-   "response": {
-    "id": -1,
-    "name": "Kin",
-    "status": "running",
-    "inviteCode": null,
-    "speed": 50,
-    "maxPlayers": 1,
-    "hostAccountId": 1,
-    "startedAt": "2026-06-01T08:00:00.000Z",
-    "sanctity": 100,
-    "embers": 0,
-    "hatred": {
-     "north": 0.2
-    },
-    "blessings": {
-     "water": null,
-     "forge": null,
-     "riverLine": 0
-    },
-    "difficulty": "baron",
-    "pvp": false,
-    "quietHours": null,
-    "ritualAt": null,
-    "endedAt": null,
-    "members": [
-     {
-      "accountId": 1,
-      "displayName": "You",
-      "clan": null,
-      "heroKind": "dobrynya",
-      "onboarding": {
-       "build": "2026-06-01T08:00:00.000Z",
-       "train": "2026-06-01T08:40:00.000Z"
-      },
-      "onboardingClaimed": {},
-      "bought": {
-       "settler": 3
-      },
-      "rallyVillageId": null,
-      "rallyFortId": null,
-      "merchantReadyAt": null,
-      "smithing": {},
-      "smithWork": null,
-      "embers": 0,
-      "armySlots": {
-       "used": 3,
-       "cap": 40
-      },
-      "ruinSearchReadyAt": null,
-      "research": {
-       "points": 0,
-       "perHour": 0,
-       "settledAt": null
-      }
-     }
-    ],
-    "villages": [
-     {
-      "id": 1,
-      "worldId": -1,
-      "ownerAccountId": 1,
-      "name": "Vruchiy",
-      "q": -2,
-      "r": 2,
-      "plots": {
-       "w": {
-        "level": 0,
-        "building": "wall"
-       },
-       "c0": {
-        "level": 1,
-        "building": "elder_hall"
-       },
-       "c1": {
-        "level": 0,
-        "building": null
-       },
-       "c2": {
-        "level": 1,
-        "building": "settlers_lodge"
-       },
-       "c3": {
-        "level": 1,
-        "building": "barracks"
-       },
-       "c4": {
-        "level": 0,
-        "building": null
-       },
-       "c5": {
-        "level": 0,
-        "building": null
-       },
-       "c6": {
-        "level": 0,
-        "building": null
-       },
-       "c7": {
-        "level": 0,
-        "building": null
-       },
-       "c8": {
-        "level": 0,
-        "building": null
-       },
-       "c9": {
-        "level": 0,
-        "building": null
-       },
-       "f0": {
-        "level": 0,
-        "building": "woodcutter"
-       },
-       "f1": {
-        "level": 0,
-        "building": "woodcutter"
-       },
-       "f2": {
-        "level": 0,
-        "building": "woodcutter"
-       },
-       "f3": {
-        "level": 0,
-        "building": "quarry"
-       },
-       "f4": {
-        "level": 0,
-        "building": "quarry"
-       },
-       "f5": {
-        "level": 0,
-        "building": "quarry"
-       },
-       "f6": {
-        "level": 0,
-        "building": "farm"
-       },
-       "f7": {
-        "level": 0,
-        "building": "farm"
-       },
-       "f8": {
-        "level": 0,
-        "building": "farm"
-       },
-       "f9": {
-        "level": 0,
-        "building": "farm"
-       },
-       "t0": {
-        "level": 0,
-        "building": null
-       },
-       "t1": {
-        "level": 0,
-        "building": null
-       },
-       "t2": {
-        "level": 0,
-        "building": null
-       },
-       "t3": {
-        "level": 0,
-        "building": null
-       },
-       "t4": {
-        "level": 0,
-        "building": null
-       },
-       "c10": {
-        "level": 0,
-        "building": null
-       },
-       "c11": {
-        "level": 0,
-        "building": null
-       },
-       "f10": {
-        "level": 0,
-        "building": "iron_mine"
-       },
-       "f11": {
-        "level": 0,
-        "building": "iron_mine"
-       }
-      },
-      "levels": {
-       "barracks": 1,
-       "elder_hall": 1,
-       "settlers_lodge": 1
-      },
-      "queue": [],
-      "garrison": {
-       "settler": 1,
-       "horseman": 3,
-       "spearman": 0
-      },
-      "away": {
-       "settler": 0
-      },
-      "stance": "balanced",
-      "maneuver": "encircle",
-      "besieged": true,
-      "adminUpkeep": 0,
-      "bonuses": {
-       "upkeep": 0.08,
-       "attack.all": 0.1,
-       "homeDefense": 0.06,
-       "attack.cavalry": 0.06,
-       "maneuver.flank": 0.2,
-       "maneuver.encircle": -0.1
-      },
-      "armyFloor": null,
-      "ruin": null,
-      "refuge": false,
-      "training": [],
-      "resources": {
-       "amounts": {
-        "iron": 905,
-        "wood": 850,
-        "grain": 919.6666666666667,
-        "stone": 750
-       },
-       "ratesPerHour": {
-        "iron": 150,
-        "wood": 450,
-        "grain": 292,
-        "stone": 300
-       },
-       "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
-       },
-       "settledAt": "2026-06-01T11:10:00.000Z"
-      }
-     }
-    ],
-    "waves": [
-     {
-      "id": 3,
-      "index": 2,
-      "front": "north",
-      "status": "scheduled",
-      "threat": "Moderate",
-      "spawnAt": "2026-06-01T11:21:36.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0,
-      "bandOf": null,
-      "errand": null,
-      "forecast": {
-       "spawn": {
-        "q": 0,
-        "r": -10
-       },
-       "targetVillageId": 1,
-       "path": [
-        [
-         0,
-         -10,
-         0
-        ],
-        [
-         0,
-         -9,
-         43200
-        ],
-        [
-         0,
-         -8,
-         72000
-        ],
-        [
-         0,
-         -7,
-         86400
-        ],
-        [
-         0,
-         -6,
-         100800
-        ],
-        [
-         0,
-         -5,
-         115200
-        ],
-        [
-         0,
-         -4,
-         129600
-        ],
-        [
-         -1,
-         -3,
-         144000
-        ],
-        [
-         -1,
-         -2,
-         158400
-        ],
-        [
-         -2,
-         -1,
-         172800
-        ],
-        [
-         -2,
-         0,
-         187200
-        ],
-        [
-         -2,
-         1,
-         201600
-        ],
-        [
-         -2,
-         2,
-         230400
-        ]
-       ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
-      }
-     },
-     {
-      "id": 4,
-      "index": 2,
-      "front": "south",
-      "status": "battling",
-      "threat": "Severe",
-      "spawnAt": "2026-06-01T10:38:24.000Z",
-      "spawn": {
-       "q": -10,
-       "r": 9
-      },
-      "targetVillageId": 1,
-      "path": [
-       [
-        -6,
-        6,
-        1608000
-       ],
-       [
-        -5,
-        6,
-        1656000
-       ],
-       [
-        -4,
-        6,
-        1680000
-       ],
-       [
-        -3,
-        5,
-        1704000
-       ],
-       [
-        -3,
-        4,
-        1728000
-       ],
-       [
-        -2,
-        3,
-        1752000
-       ],
-       [
-        -2,
-        2,
-        1800000
-       ]
-      ],
-      "arrivesAt": "2026-06-01T11:08:24.000Z",
-      "endsAt": null,
-      "rampageEndsAt": "2026-06-01T11:03:12.000Z",
-      "struck": [
-       2
-      ],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0,
-      "bandOf": 3,
-      "errand": {
-       "from": {
-        "q": -10,
-        "r": 9
-       },
-       "kind": "avatar",
-       "target": null
-      },
-      "forecast": null
-     },
-     {
-      "id": 5,
-      "index": 3,
-      "front": "south",
-      "status": "scheduled",
-      "threat": "Moderate",
-      "spawnAt": "2026-06-01T11:50:24.000Z",
-      "spawn": null,
-      "targetVillageId": null,
-      "path": null,
-      "arrivesAt": null,
-      "endsAt": null,
-      "rampageEndsAt": null,
-      "struck": [],
-      "ritual": false,
-      "leaderId": null,
-      "hatred": 0,
-      "bandOf": null,
-      "errand": null,
-      "forecast": {
-       "spawn": {
-        "q": -9,
-        "r": 7
-       },
-       "targetVillageId": 1,
-       "path": [
-        [
-         -9,
-         7,
-         0
-        ],
-        [
-         -8,
-         6,
-         28800
-        ],
-        [
-         -7,
-         6,
-         57600
-        ],
-        [
-         -6,
-         5,
-         86400
-        ],
-        [
-         -5,
          4,
-         115200
-        ],
-        [
-         -4,
-         3,
          144000
         ],
         [
          -3,
-         2,
+         3,
          158400
         ],
         [
          -2,
          2,
-         187200
+         172800
         ]
        ],
-       "arrivesAt": "2026-06-01T11:53:31.200Z"
+       "arrivesAt": "2026-06-01T11:53:16.800Z"
       }
      }
     ],
@@ -25315,11 +22999,2964 @@
      ],
      "roads": [
       [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
        -2,
        2,
        -3,
        3,
-       "building",
+       "standing",
+       1
+      ]
+     ],
+     "terraforms": []
+    },
+    "serverTime": "2026-06-01T11:10:00.000Z"
+   }
+  },
+  {
+   "method": "POST",
+   "path": "/v1/villages/1/roads",
+   "body": {
+    "a": {
+     "q": -2,
+     "r": 2
+    },
+    "b": {
+     "q": -3,
+     "r": 3
+    }
+   },
+   "status": 200,
+   "response": {
+    "id": -1,
+    "name": "Kin",
+    "status": "running",
+    "inviteCode": null,
+    "speed": 50,
+    "maxPlayers": 1,
+    "hostAccountId": 1,
+    "startedAt": "2026-06-01T08:00:00.000Z",
+    "sanctity": 100,
+    "embers": 0,
+    "hatred": {
+     "north": 0.2
+    },
+    "blessings": {
+     "water": null,
+     "forge": null,
+     "riverLine": 0
+    },
+    "difficulty": "baron",
+    "pvp": false,
+    "quietHours": null,
+    "ritualAt": null,
+    "endedAt": null,
+    "members": [
+     {
+      "accountId": 1,
+      "displayName": "You",
+      "clan": null,
+      "heroKind": "dobrynya",
+      "onboarding": {
+       "build": "2026-06-01T08:00:00.000Z",
+       "train": "2026-06-01T08:40:00.000Z"
+      },
+      "onboardingClaimed": {},
+      "bought": {
+       "settler": 3
+      },
+      "rallyVillageId": null,
+      "rallyFortId": null,
+      "merchantReadyAt": null,
+      "smithing": {},
+      "smithWork": null,
+      "embers": 0,
+      "armySlots": {
+       "used": 3,
+       "cap": 40
+      },
+      "ruinSearchReadyAt": null,
+      "research": {
+       "points": 0,
+       "perHour": 0,
+       "settledAt": null
+      }
+     }
+    ],
+    "villages": [
+     {
+      "id": 1,
+      "worldId": -1,
+      "ownerAccountId": 1,
+      "name": "Vruchiy",
+      "q": -2,
+      "r": 2,
+      "plots": {
+       "w": {
+        "level": 0,
+        "building": "wall"
+       },
+       "c0": {
+        "level": 1,
+        "building": "elder_hall"
+       },
+       "c1": {
+        "level": 0,
+        "building": null
+       },
+       "c2": {
+        "level": 1,
+        "building": "settlers_lodge"
+       },
+       "c3": {
+        "level": 1,
+        "building": "barracks"
+       },
+       "c4": {
+        "level": 0,
+        "building": null
+       },
+       "c5": {
+        "level": 1,
+        "building": "market"
+       },
+       "c6": {
+        "level": 0,
+        "building": null
+       },
+       "c7": {
+        "level": 0,
+        "building": null
+       },
+       "c8": {
+        "level": 0,
+        "building": null
+       },
+       "c9": {
+        "level": 0,
+        "building": null
+       },
+       "f0": {
+        "level": 0,
+        "building": "woodcutter"
+       },
+       "f1": {
+        "level": 0,
+        "building": "woodcutter"
+       },
+       "f2": {
+        "level": 0,
+        "building": "woodcutter"
+       },
+       "f3": {
+        "level": 0,
+        "building": "quarry"
+       },
+       "f4": {
+        "level": 0,
+        "building": "quarry"
+       },
+       "f5": {
+        "level": 0,
+        "building": "quarry"
+       },
+       "f6": {
+        "level": 0,
+        "building": "farm"
+       },
+       "f7": {
+        "level": 0,
+        "building": "farm"
+       },
+       "f8": {
+        "level": 0,
+        "building": "farm"
+       },
+       "f9": {
+        "level": 0,
+        "building": "farm"
+       },
+       "t0": {
+        "level": 0,
+        "building": null
+       },
+       "t1": {
+        "level": 0,
+        "building": null
+       },
+       "t2": {
+        "level": 0,
+        "building": null
+       },
+       "t3": {
+        "level": 0,
+        "building": null
+       },
+       "t4": {
+        "level": 0,
+        "building": null
+       },
+       "c10": {
+        "level": 0,
+        "building": null
+       },
+       "c11": {
+        "level": 0,
+        "building": null
+       },
+       "f10": {
+        "level": 0,
+        "building": "iron_mine"
+       },
+       "f11": {
+        "level": 0,
+        "building": "iron_mine"
+       }
+      },
+      "levels": {
+       "market": 1,
+       "barracks": 1,
+       "elder_hall": 1,
+       "settlers_lodge": 1
+      },
+      "queue": [],
+      "garrison": {
+       "settler": 1,
+       "horseman": 3,
+       "spearman": 0
+      },
+      "away": {
+       "settler": 0
+      },
+      "stance": "balanced",
+      "maneuver": "encircle",
+      "besieged": true,
+      "adminUpkeep": 0,
+      "bonuses": {
+       "upkeep": 0.08,
+       "attack.all": 0.1,
+       "homeDefense": 0.06,
+       "attack.cavalry": 0.06,
+       "maneuver.flank": 0.2,
+       "maneuver.encircle": -0.1
+      },
+      "armyFloor": null,
+      "ruin": null,
+      "refuge": false,
+      "training": [],
+      "resources": {
+       "amounts": {
+        "iron": 961,
+        "wood": 800,
+        "grain": 894.6666666666667,
+        "stone": 650
+       },
+       "ratesPerHour": {
+        "iron": 150,
+        "wood": 450,
+        "grain": 292,
+        "stone": 300
+       },
+       "capacity": {
+        "iron": 1000,
+        "wood": 1000,
+        "grain": 1000,
+        "stone": 1000
+       },
+       "settledAt": "2026-06-01T11:10:00.000Z"
+      }
+     }
+    ],
+    "waves": [
+     {
+      "id": 3,
+      "index": 2,
+      "front": "north",
+      "status": "scheduled",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T11:21:36.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": null,
+      "errand": null,
+      "forecast": {
+       "spawn": {
+        "q": 0,
+        "r": -10
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         0,
+         -10,
+         0
+        ],
+        [
+         0,
+         -9,
+         43200
+        ],
+        [
+         0,
+         -8,
+         72000
+        ],
+        [
+         0,
+         -7,
+         86400
+        ],
+        [
+         0,
+         -6,
+         100800
+        ],
+        [
+         0,
+         -5,
+         115200
+        ],
+        [
+         0,
+         -4,
+         129600
+        ],
+        [
+         -1,
+         -3,
+         144000
+        ],
+        [
+         -1,
+         -2,
+         158400
+        ],
+        [
+         -2,
+         -1,
+         172800
+        ],
+        [
+         -2,
+         0,
+         187200
+        ],
+        [
+         -2,
+         1,
+         201600
+        ],
+        [
+         -2,
+         2,
+         230400
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:25:26.400Z"
+      }
+     },
+     {
+      "id": 4,
+      "index": 2,
+      "front": "south",
+      "status": "battling",
+      "threat": "Severe",
+      "spawnAt": "2026-06-01T10:38:24.000Z",
+      "spawn": {
+       "q": -10,
+       "r": 9
+      },
+      "targetVillageId": 1,
+      "path": [
+       [
+        -6,
+        6,
+        1608000
+       ],
+       [
+        -5,
+        6,
+        1656000
+       ],
+       [
+        -4,
+        6,
+        1680000
+       ],
+       [
+        -3,
+        5,
+        1704000
+       ],
+       [
+        -3,
+        4,
+        1728000
+       ],
+       [
+        -2,
+        3,
+        1752000
+       ],
+       [
+        -2,
+        2,
+        1800000
+       ]
+      ],
+      "arrivesAt": "2026-06-01T11:08:24.000Z",
+      "endsAt": null,
+      "rampageEndsAt": "2026-06-01T11:03:12.000Z",
+      "struck": [
+       2
+      ],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": 3,
+      "errand": {
+       "from": {
+        "q": -10,
+        "r": 9
+       },
+       "kind": "avatar",
+       "target": null
+      },
+      "forecast": null
+     },
+     {
+      "id": 5,
+      "index": 3,
+      "front": "south",
+      "status": "scheduled",
+      "threat": "Moderate",
+      "spawnAt": "2026-06-01T11:50:24.000Z",
+      "spawn": null,
+      "targetVillageId": null,
+      "path": null,
+      "arrivesAt": null,
+      "endsAt": null,
+      "rampageEndsAt": null,
+      "struck": [],
+      "ritual": false,
+      "leaderId": null,
+      "hatred": 0,
+      "bandOf": null,
+      "errand": null,
+      "forecast": {
+       "spawn": {
+        "q": -9,
+        "r": 7
+       },
+       "targetVillageId": 1,
+       "path": [
+        [
+         -9,
+         7,
+         0
+        ],
+        [
+         -8,
+         6,
+         28800
+        ],
+        [
+         -7,
+         6,
+         57600
+        ],
+        [
+         -6,
+         5,
+         86400
+        ],
+        [
+         -5,
+         4,
+         115200
+        ],
+        [
+         -4,
+         4,
+         144000
+        ],
+        [
+         -3,
+         3,
+         158400
+        ],
+        [
+         -2,
+         2,
+         172800
+        ]
+       ],
+       "arrivesAt": "2026-06-01T11:53:16.800Z"
+      }
+     }
+    ],
+    "scouting": [],
+    "ruinSearches": [],
+    "battles": [
+     {
+      "id": 3,
+      "front": "south",
+      "leaderId": null,
+      "waveId": 4,
+      "campId": null,
+      "siteId": null,
+      "villageId": 1,
+      "q": -2,
+      "r": 2,
+      "setup": {
+       "home": {
+        "initial": {
+         "settler": 1,
+         "horseman": 3
+        }
+       }
+      },
+      "status": "ongoing",
+      "round": 0,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "zealot": 8,
+       "crossbowman": 3,
+       "chernobog_avatar": 1
+      },
+      "attackerNow": {
+       "zealot": 8,
+       "crossbowman": 3,
+       "chernobog_avatar": 1
+      },
+      "defenderInitial": {
+       "settler": 1,
+       "horseman": 3
+      },
+      "rounds": [],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T11:08:24.000Z",
+      "endedAt": null
+     },
+     {
+      "id": 1,
+      "front": "north",
+      "leaderId": 1,
+      "waveId": 1,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": 0,
+      "r": 0,
+      "setup": {
+       "home": {
+        "initial": {
+         "archer": 10,
+         "spearman": 20
+        }
+       },
+       "guard": {
+        "archer": 10,
+        "spearman": 19
+       },
+       "lines": {
+        "active": {
+         "by": "defender",
+         "kind": "encircle",
+         "weak": {
+          "archers": 3,
+          "cavalry": 4,
+          "infantry": 1
+         }
+        }
+       },
+       "holyCity": true
+      },
+      "status": "defended",
+      "round": 2,
+      "attackerStance": "offensive",
+      "attackerInitial": {
+       "rusalka": 3,
+       "grey_wolf": 4,
+       "leshy_thrall": 2
+      },
+      "attackerNow": {
+       "leshy_thrall": 1
+      },
+      "defenderInitial": {
+       "archer": 10,
+       "spearman": 20
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T10:37:36.000Z",
+        "round": 1,
+        "attackerLeft": 8,
+        "defenderLeft": 30,
+        "attackerLosses": {
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T10:47:36.000Z",
+        "round": 2,
+        "maneuver": {
+         "by": "defender",
+         "kind": "encircle"
+        },
+        "attackerLeft": 1,
+        "defenderLeft": 29,
+        "attackerLosses": {
+         "rusalka": 3,
+         "grey_wolf": 4
+        },
+        "defenderLosses": {
+         "spearman": 1
+        }
+       }
+      ],
+      "loot": null,
+      "decision": null,
+      "startedAt": "2026-06-01T10:27:36.000Z",
+      "endedAt": "2026-06-01T10:47:36.000Z"
+     }
+    ],
+    "raids": [],
+    "expeditions": [
+     {
+      "id": 1,
+      "villageId": 1,
+      "q": -6,
+      "r": 6,
+      "name": "Novgorod",
+      "settlers": 3,
+      "status": "founded",
+      "failure": null,
+      "foundedVillageId": null,
+      "path": [
+       [
+        -2,
+        2,
+        0
+       ],
+       [
+        -2,
+        3,
+        18000
+       ],
+       [
+        -3,
+        4,
+        36000
+       ],
+       [
+        -3,
+        5,
+        54000
+       ],
+       [
+        -4,
+        6,
+        72000
+       ],
+       [
+        -5,
+        6,
+        108000
+       ],
+       [
+        -6,
+        6,
+        144000
+       ]
+      ],
+      "departsAt": "2026-06-01T09:20:00.000Z",
+      "arrivesAt": "2026-06-01T09:22:24.000Z",
+      "returnsAt": "2026-06-01T09:24:48.000Z"
+     }
+    ],
+    "research": [],
+    "heroes": [
+     {
+      "accountId": 1,
+      "kind": "dobrynya",
+      "name": "Dobrynya",
+      "status": "wounded",
+      "villageId": 1,
+      "armyId": null,
+      "level": 1,
+      "xp": 2,
+      "xpToNext": 30,
+      "skillPoints": 0,
+      "skills": {},
+      "gear": {},
+      "inventory": [],
+      "bonuses": {},
+      "path": null,
+      "departsAt": null,
+      "arrivesAt": null,
+      "woundedUntil": "2026-06-01T11:11:12.000Z",
+      "quest": null,
+      "offers": [
+       {
+        "id": "19:shrine",
+        "kind": "shrine",
+        "front": null,
+        "siteId": null,
+        "distance": 5,
+        "hours": 9.666666666666666,
+        "xp": 80,
+        "risk": 0.05
+       },
+       {
+        "id": "19:scout",
+        "kind": "scout",
+        "front": "south",
+        "siteId": null,
+        "distance": 6,
+        "hours": 5,
+        "xp": 25,
+        "risk": 0.15
+       },
+       {
+        "id": "19:ambush",
+        "kind": "ambush",
+        "front": "north",
+        "siteId": null,
+        "distance": 5,
+        "hours": 5.666666666666667,
+        "xp": 64,
+        "risk": 0.37
+       }
+      ],
+      "armyQuest": null
+     }
+    ],
+    "generals": [],
+    "leaders": [
+     {
+      "id": 1,
+      "front": "north",
+      "name": "Vyrgan",
+      "title": "Vyrgan the Hungry",
+      "level": 1,
+      "xp": 10,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": "2026-06-01T11:23:36.000Z",
+      "battles": 1,
+      "wins": 0,
+      "losses": 1,
+      "razed": 0,
+      "kills": 1,
+      "grudgeVillageId": null,
+      "diedAt": null
+     },
+     {
+      "id": 2,
+      "front": "south",
+      "name": "Lothar",
+      "title": "Brother Lothar",
+      "level": 1,
+      "xp": 0,
+      "xpToNext": 20,
+      "skills": {},
+      "effects": {
+       "attack": 0,
+       "defense": 0,
+       "nerve": 0,
+       "loot": 0
+      },
+      "status": "alive",
+      "woundedUntil": null,
+      "battles": 0,
+      "wins": 0,
+      "losses": 0,
+      "razed": 0,
+      "kills": 0,
+      "grudgeVillageId": null,
+      "diedAt": null
+     }
+    ],
+    "orders": [],
+    "armies": [],
+    "forts": [],
+    "camps": [
+     {
+      "id": 1,
+      "kind": "bandit",
+      "front": "south",
+      "q": -2,
+      "r": 5,
+      "size": 6,
+      "waveId": null,
+      "reward": null,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 4,
+      "kind": "lair",
+      "front": "north",
+      "q": 6,
+      "r": -8,
+      "size": 9,
+      "waveId": 1,
+      "reward": null,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 5,
+      "kind": "captives",
+      "front": "south",
+      "q": -1,
+      "r": 8,
+      "size": 14,
+      "waveId": null,
+      "reward": {
+       "units": {
+        "axe_levy": 9
+       }
+      },
+      "endsAt": "2026-06-01T11:50:24.000Z",
+      "quest": null
+     }
+    ],
+    "sites": [
+     {
+      "id": 1,
+      "kind": "stone_idol",
+      "q": -3,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 2,
+      "kind": "sunken_shrine",
+      "q": 3,
+      "r": 0,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 3,
+      "kind": "old_hillfort",
+      "q": -8,
+      "r": 1,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 4,
+      "kind": "frozen_ruin",
+      "q": 0,
+      "r": -9,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 5,
+      "kind": "old_hillfort",
+      "q": -6,
+      "r": 9,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": false,
+      "endsAt": null,
+      "quest": null
+     },
+     {
+      "id": 6,
+      "kind": "kurgan",
+      "q": 0,
+      "r": -5,
+      "status": "unexplored",
+      "guardians": null,
+      "exploredBy": null,
+      "find": null,
+      "exploredAt": null,
+      "hard": true,
+      "endsAt": null,
+      "quest": "relic"
+     }
+    ],
+    "lore": [],
+    "achievements": [
+     {
+      "accountId": 1,
+      "achievement": "second_village",
+      "earnedAt": "2026-06-01T09:22:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "avatar_risen",
+      "earnedAt": "2026-06-01T10:38:24.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "hordes_united",
+      "earnedAt": "2026-06-01T10:54:14.400Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T11:05:12.000Z"
+     }
+    ],
+    "shipyards": [
+     {
+      "id": 2,
+      "kind": "boat",
+      "q": -5,
+      "r": -1,
+      "edge": [
+       -4,
+       -2,
+       -5,
+       -1
+      ],
+      "status": "open",
+      "cost": {
+       "iron": 150,
+       "wood": 900,
+       "grain": 300,
+       "stone": 300
+      },
+      "paid": {
+       "iron": 0,
+       "wood": 0,
+       "grain": 0,
+       "stone": 0
+      },
+      "front": "north",
+      "raiders": 10,
+      "raids": 0,
+      "burns": 0,
+      "endsAt": "2026-06-01T11:21:36.000Z",
+      "completesAt": null,
+      "nextRaidAt": null
+     }
+    ],
+    "bridge": {
+     "stage": 0,
+     "embers": 0,
+     "quests": {},
+     "status": "open",
+     "donated": {
+      "iron": 0,
+      "wood": 0,
+      "grain": 0,
+      "stone": 0
+     },
+     "raisedAt": null,
+     "stageStartedAt": "2026-06-01T08:00:00.000Z",
+     "sanctityAtStart": 100
+    },
+    "fear": [
+     [
+      0,
+      0,
+      9.5
+     ]
+    ],
+    "delegations": [],
+    "delegationLog": [],
+    "run": null,
+    "caravans": [],
+    "vault": {
+     "level": 1,
+     "amounts": {
+      "iron": 0,
+      "wood": 0,
+      "grain": 0,
+      "stone": 0
+     },
+     "capacity": 3000,
+     "upgradingTo": null,
+     "upgradeCompletesAt": null
+    },
+    "bounties": [],
+    "map": {
+     "radius": 10,
+     "activeFronts": [
+      "north",
+      "south"
+     ],
+     "hexes": [
+      [
+       0,
+       -10,
+       "dark_forest"
+      ],
+      [
+       1,
+       -10,
+       "dark_forest"
+      ],
+      [
+       2,
+       -10,
+       "dark_forest"
+      ],
+      [
+       3,
+       -10,
+       "ice"
+      ],
+      [
+       4,
+       -10,
+       "ice"
+      ],
+      [
+       5,
+       -10,
+       "dark_forest"
+      ],
+      [
+       6,
+       -10,
+       "ice"
+      ],
+      [
+       7,
+       -10,
+       "ice"
+      ],
+      [
+       8,
+       -10,
+       "ice"
+      ],
+      [
+       9,
+       -10,
+       "dark_forest"
+      ],
+      [
+       10,
+       -10,
+       "dark_forest"
+      ],
+      [
+       -1,
+       -9,
+       "dark_forest"
+      ],
+      [
+       0,
+       -9,
+       "dark_forest"
+      ],
+      [
+       1,
+       -9,
+       "dark_forest"
+      ],
+      [
+       2,
+       -9,
+       "dark_forest"
+      ],
+      [
+       3,
+       -9,
+       "dark_forest"
+      ],
+      [
+       4,
+       -9,
+       "dark_forest"
+      ],
+      [
+       5,
+       -9,
+       "dark_forest"
+      ],
+      [
+       6,
+       -9,
+       "dark_forest"
+      ],
+      [
+       7,
+       -9,
+       "dark_forest"
+      ],
+      [
+       8,
+       -9,
+       "dark_forest"
+      ],
+      [
+       9,
+       -9,
+       "dark_forest"
+      ],
+      [
+       10,
+       -9,
+       "dark_forest"
+      ],
+      [
+       -2,
+       -8,
+       "dark_forest"
+      ],
+      [
+       -1,
+       -8,
+       "dark_forest"
+      ],
+      [
+       0,
+       -8,
+       "hills"
+      ],
+      [
+       1,
+       -8,
+       "mountain"
+      ],
+      [
+       2,
+       -8,
+       "hills"
+      ],
+      [
+       3,
+       -8,
+       "plains"
+      ],
+      [
+       4,
+       -8,
+       "plains"
+      ],
+      [
+       5,
+       -8,
+       "plains"
+      ],
+      [
+       6,
+       -8,
+       "plains"
+      ],
+      [
+       7,
+       -8,
+       "forest"
+      ],
+      [
+       8,
+       -8,
+       "swamp"
+      ],
+      [
+       9,
+       -8,
+       "dark_forest"
+      ],
+      [
+       10,
+       -8,
+       "dark_forest"
+      ],
+      [
+       -3,
+       -7,
+       "ocean"
+      ],
+      [
+       -2,
+       -7,
+       "dark_forest"
+      ],
+      [
+       -1,
+       -7,
+       "plains"
+      ],
+      [
+       0,
+       -7,
+       "plains"
+      ],
+      [
+       1,
+       -7,
+       "plains"
+      ],
+      [
+       2,
+       -7,
+       "plains"
+      ],
+      [
+       3,
+       -7,
+       "plains"
+      ],
+      [
+       4,
+       -7,
+       "plains"
+      ],
+      [
+       5,
+       -7,
+       "forest"
+      ],
+      [
+       6,
+       -7,
+       "swamp"
+      ],
+      [
+       7,
+       -7,
+       "swamp"
+      ],
+      [
+       8,
+       -7,
+       "forest"
+      ],
+      [
+       9,
+       -7,
+       "dark_forest"
+      ],
+      [
+       10,
+       -7,
+       "ocean"
+      ],
+      [
+       -4,
+       -6,
+       "ocean"
+      ],
+      [
+       -3,
+       -6,
+       "ocean"
+      ],
+      [
+       -2,
+       -6,
+       "plains"
+      ],
+      [
+       -1,
+       -6,
+       "plains"
+      ],
+      [
+       0,
+       -6,
+       "plains"
+      ],
+      [
+       1,
+       -6,
+       "plains"
+      ],
+      [
+       2,
+       -6,
+       "plains"
+      ],
+      [
+       3,
+       -6,
+       "plains"
+      ],
+      [
+       4,
+       -6,
+       "forest"
+      ],
+      [
+       5,
+       -6,
+       "forest"
+      ],
+      [
+       6,
+       -6,
+       "forest"
+      ],
+      [
+       7,
+       -6,
+       "forest"
+      ],
+      [
+       8,
+       -6,
+       "plains"
+      ],
+      [
+       9,
+       -6,
+       "ocean"
+      ],
+      [
+       10,
+       -6,
+       "ocean"
+      ],
+      [
+       -5,
+       -5,
+       "ocean"
+      ],
+      [
+       -4,
+       -5,
+       "ocean"
+      ],
+      [
+       -3,
+       -5,
+       "mountain"
+      ],
+      [
+       -2,
+       -5,
+       "forest"
+      ],
+      [
+       -1,
+       -5,
+       "plains"
+      ],
+      [
+       0,
+       -5,
+       "plains"
+      ],
+      [
+       1,
+       -5,
+       "plains"
+      ],
+      [
+       2,
+       -5,
+       "plains"
+      ],
+      [
+       3,
+       -5,
+       "plains"
+      ],
+      [
+       4,
+       -5,
+       "forest"
+      ],
+      [
+       5,
+       -5,
+       "forest"
+      ],
+      [
+       6,
+       -5,
+       "forest"
+      ],
+      [
+       7,
+       -5,
+       "forest"
+      ],
+      [
+       8,
+       -5,
+       "forest"
+      ],
+      [
+       9,
+       -5,
+       "ocean"
+      ],
+      [
+       10,
+       -5,
+       "ocean"
+      ],
+      [
+       -6,
+       -4,
+       "ocean"
+      ],
+      [
+       -5,
+       -4,
+       "ocean"
+      ],
+      [
+       -4,
+       -4,
+       "forest"
+      ],
+      [
+       -3,
+       -4,
+       "wooded_hills"
+      ],
+      [
+       -2,
+       -4,
+       "plains"
+      ],
+      [
+       -1,
+       -4,
+       "plains"
+      ],
+      [
+       0,
+       -4,
+       "plains"
+      ],
+      [
+       1,
+       -4,
+       "plains"
+      ],
+      [
+       2,
+       -4,
+       "hills"
+      ],
+      [
+       3,
+       -4,
+       "forest"
+      ],
+      [
+       4,
+       -4,
+       "wooded_hills"
+      ],
+      [
+       5,
+       -4,
+       "wooded_hills"
+      ],
+      [
+       6,
+       -4,
+       "mountain"
+      ],
+      [
+       7,
+       -4,
+       "forest"
+      ],
+      [
+       8,
+       -4,
+       "mountain"
+      ],
+      [
+       9,
+       -4,
+       "ocean"
+      ],
+      [
+       10,
+       -4,
+       "ocean"
+      ],
+      [
+       -7,
+       -3,
+       "ocean"
+      ],
+      [
+       -6,
+       -3,
+       "ocean"
+      ],
+      [
+       -5,
+       -3,
+       "hills"
+      ],
+      [
+       -4,
+       -3,
+       "hills"
+      ],
+      [
+       -3,
+       -3,
+       "hills"
+      ],
+      [
+       -2,
+       -3,
+       "hills"
+      ],
+      [
+       -1,
+       -3,
+       "plains"
+      ],
+      [
+       0,
+       -3,
+       "plains"
+      ],
+      [
+       1,
+       -3,
+       "forest"
+      ],
+      [
+       2,
+       -3,
+       "forest"
+      ],
+      [
+       3,
+       -3,
+       "forest"
+      ],
+      [
+       4,
+       -3,
+       "forest"
+      ],
+      [
+       5,
+       -3,
+       "wooded_hills"
+      ],
+      [
+       6,
+       -3,
+       "hills"
+      ],
+      [
+       7,
+       -3,
+       "hills"
+      ],
+      [
+       8,
+       -3,
+       "forest"
+      ],
+      [
+       9,
+       -3,
+       "ocean"
+      ],
+      [
+       10,
+       -3,
+       "ocean"
+      ],
+      [
+       -8,
+       -2,
+       "ocean"
+      ],
+      [
+       -7,
+       -2,
+       "ocean"
+      ],
+      [
+       -6,
+       -2,
+       "plains"
+      ],
+      [
+       -5,
+       -2,
+       "hills"
+      ],
+      [
+       -4,
+       -2,
+       "hills"
+      ],
+      [
+       -3,
+       -2,
+       "hills"
+      ],
+      [
+       -2,
+       -2,
+       "hills"
+      ],
+      [
+       -1,
+       -2,
+       "plains"
+      ],
+      [
+       0,
+       -2,
+       "plains"
+      ],
+      [
+       1,
+       -2,
+       "forest"
+      ],
+      [
+       2,
+       -2,
+       "forest"
+      ],
+      [
+       3,
+       -2,
+       "wooded_hills"
+      ],
+      [
+       4,
+       -2,
+       "wooded_hills"
+      ],
+      [
+       5,
+       -2,
+       "forest"
+      ],
+      [
+       6,
+       -2,
+       "forest"
+      ],
+      [
+       7,
+       -2,
+       "forest"
+      ],
+      [
+       8,
+       -2,
+       "plains"
+      ],
+      [
+       9,
+       -2,
+       "ocean"
+      ],
+      [
+       10,
+       -2,
+       "ocean"
+      ],
+      [
+       -9,
+       -1,
+       "ocean"
+      ],
+      [
+       -8,
+       -1,
+       "ocean"
+      ],
+      [
+       -7,
+       -1,
+       "hills"
+      ],
+      [
+       -6,
+       -1,
+       "plains"
+      ],
+      [
+       -5,
+       -1,
+       "plains"
+      ],
+      [
+       -4,
+       -1,
+       "mountain"
+      ],
+      [
+       -3,
+       -1,
+       "hills"
+      ],
+      [
+       -2,
+       -1,
+       "plains"
+      ],
+      [
+       -1,
+       -1,
+       "plains"
+      ],
+      [
+       0,
+       -1,
+       "plains"
+      ],
+      [
+       1,
+       -1,
+       "forest"
+      ],
+      [
+       2,
+       -1,
+       "wooded_hills"
+      ],
+      [
+       3,
+       -1,
+       "forest"
+      ],
+      [
+       4,
+       -1,
+       "forest"
+      ],
+      [
+       5,
+       -1,
+       "forest"
+      ],
+      [
+       6,
+       -1,
+       "forest"
+      ],
+      [
+       7,
+       -1,
+       "forest"
+      ],
+      [
+       8,
+       -1,
+       "plains"
+      ],
+      [
+       9,
+       -1,
+       "ocean"
+      ],
+      [
+       10,
+       -1,
+       "ocean"
+      ],
+      [
+       -10,
+       0,
+       "ocean"
+      ],
+      [
+       -9,
+       0,
+       "ocean"
+      ],
+      [
+       -8,
+       0,
+       "forest"
+      ],
+      [
+       -7,
+       0,
+       "plains"
+      ],
+      [
+       -6,
+       0,
+       "plains"
+      ],
+      [
+       -5,
+       0,
+       "mountain"
+      ],
+      [
+       -4,
+       0,
+       "mountain"
+      ],
+      [
+       -3,
+       0,
+       "plains"
+      ],
+      [
+       -2,
+       0,
+       "plains"
+      ],
+      [
+       -1,
+       0,
+       "plains"
+      ],
+      [
+       0,
+       0,
+       "holy_city"
+      ],
+      [
+       1,
+       0,
+       "plains"
+      ],
+      [
+       2,
+       0,
+       "forest"
+      ],
+      [
+       3,
+       0,
+       "forest"
+      ],
+      [
+       4,
+       0,
+       "forest"
+      ],
+      [
+       5,
+       0,
+       "forest"
+      ],
+      [
+       6,
+       0,
+       "plains"
+      ],
+      [
+       7,
+       0,
+       "plains"
+      ],
+      [
+       8,
+       0,
+       "plains"
+      ],
+      [
+       9,
+       0,
+       "ocean"
+      ],
+      [
+       10,
+       0,
+       "ocean"
+      ],
+      [
+       -10,
+       1,
+       "ocean"
+      ],
+      [
+       -9,
+       1,
+       "ocean"
+      ],
+      [
+       -8,
+       1,
+       "plains"
+      ],
+      [
+       -7,
+       1,
+       "forest"
+      ],
+      [
+       -6,
+       1,
+       "forest"
+      ],
+      [
+       -5,
+       1,
+       "plains"
+      ],
+      [
+       -4,
+       1,
+       "plains"
+      ],
+      [
+       -3,
+       1,
+       "plains"
+      ],
+      [
+       -2,
+       1,
+       "plains"
+      ],
+      [
+       -1,
+       1,
+       "hills"
+      ],
+      [
+       0,
+       1,
+       "plains"
+      ],
+      [
+       1,
+       1,
+       "plains"
+      ],
+      [
+       2,
+       1,
+       "forest"
+      ],
+      [
+       3,
+       1,
+       "forest"
+      ],
+      [
+       4,
+       1,
+       "swamp"
+      ],
+      [
+       5,
+       1,
+       "forest"
+      ],
+      [
+       6,
+       1,
+       "plains"
+      ],
+      [
+       7,
+       1,
+       "plains"
+      ],
+      [
+       8,
+       1,
+       "ocean"
+      ],
+      [
+       9,
+       1,
+       "ocean"
+      ],
+      [
+       -10,
+       2,
+       "ocean"
+      ],
+      [
+       -9,
+       2,
+       "ocean"
+      ],
+      [
+       -8,
+       2,
+       "plains"
+      ],
+      [
+       -7,
+       2,
+       "forest"
+      ],
+      [
+       -6,
+       2,
+       "forest"
+      ],
+      [
+       -5,
+       2,
+       "forest"
+      ],
+      [
+       -4,
+       2,
+       "plains"
+      ],
+      [
+       -3,
+       2,
+       "plains"
+      ],
+      [
+       -2,
+       2,
+       "hills"
+      ],
+      [
+       -1,
+       2,
+       "hills"
+      ],
+      [
+       0,
+       2,
+       "plains"
+      ],
+      [
+       1,
+       2,
+       "hills"
+      ],
+      [
+       2,
+       2,
+       "forest"
+      ],
+      [
+       3,
+       2,
+       "forest"
+      ],
+      [
+       4,
+       2,
+       "swamp"
+      ],
+      [
+       5,
+       2,
+       "forest"
+      ],
+      [
+       6,
+       2,
+       "forest"
+      ],
+      [
+       7,
+       2,
+       "ocean"
+      ],
+      [
+       8,
+       2,
+       "ocean"
+      ],
+      [
+       -10,
+       3,
+       "ocean"
+      ],
+      [
+       -9,
+       3,
+       "ocean"
+      ],
+      [
+       -8,
+       3,
+       "plains"
+      ],
+      [
+       -7,
+       3,
+       "forest"
+      ],
+      [
+       -6,
+       3,
+       "forest"
+      ],
+      [
+       -5,
+       3,
+       "forest"
+      ],
+      [
+       -4,
+       3,
+       "hills"
+      ],
+      [
+       -3,
+       3,
+       "hills"
+      ],
+      [
+       -2,
+       3,
+       "plains"
+      ],
+      [
+       -1,
+       3,
+       "plains"
+      ],
+      [
+       0,
+       3,
+       "plains"
+      ],
+      [
+       1,
+       3,
+       "forest"
+      ],
+      [
+       2,
+       3,
+       "forest"
+      ],
+      [
+       3,
+       3,
+       "wooded_hills"
+      ],
+      [
+       4,
+       3,
+       "wooded_hills"
+      ],
+      [
+       5,
+       3,
+       "hills"
+      ],
+      [
+       6,
+       3,
+       "ocean"
+      ],
+      [
+       7,
+       3,
+       "ocean"
+      ],
+      [
+       -10,
+       4,
+       "ocean"
+      ],
+      [
+       -9,
+       4,
+       "ocean"
+      ],
+      [
+       -8,
+       4,
+       "lake"
+      ],
+      [
+       -7,
+       4,
+       "swamp"
+      ],
+      [
+       -6,
+       4,
+       "forest"
+      ],
+      [
+       -5,
+       4,
+       "hills"
+      ],
+      [
+       -4,
+       4,
+       "hills"
+      ],
+      [
+       -3,
+       4,
+       "plains"
+      ],
+      [
+       -2,
+       4,
+       "plains"
+      ],
+      [
+       -1,
+       4,
+       "plains"
+      ],
+      [
+       0,
+       4,
+       "plains"
+      ],
+      [
+       1,
+       4,
+       "forest"
+      ],
+      [
+       2,
+       4,
+       "forest"
+      ],
+      [
+       3,
+       4,
+       "hills"
+      ],
+      [
+       4,
+       4,
+       "mountain"
+      ],
+      [
+       5,
+       4,
+       "ocean"
+      ],
+      [
+       6,
+       4,
+       "ocean"
+      ],
+      [
+       -10,
+       5,
+       "ocean"
+      ],
+      [
+       -9,
+       5,
+       "ocean"
+      ],
+      [
+       -8,
+       5,
+       "forest"
+      ],
+      [
+       -7,
+       5,
+       "hills"
+      ],
+      [
+       -6,
+       5,
+       "hills"
+      ],
+      [
+       -5,
+       5,
+       "mountain"
+      ],
+      [
+       -4,
+       5,
+       "hills"
+      ],
+      [
+       -3,
+       5,
+       "plains"
+      ],
+      [
+       -2,
+       5,
+       "plains"
+      ],
+      [
+       -1,
+       5,
+       "lake"
+      ],
+      [
+       0,
+       5,
+       "plains"
+      ],
+      [
+       1,
+       5,
+       "forest"
+      ],
+      [
+       2,
+       5,
+       "hills"
+      ],
+      [
+       3,
+       5,
+       "mountain"
+      ],
+      [
+       4,
+       5,
+       "ocean"
+      ],
+      [
+       5,
+       5,
+       "ocean"
+      ],
+      [
+       -10,
+       6,
+       "ocean"
+      ],
+      [
+       -9,
+       6,
+       "ocean"
+      ],
+      [
+       -8,
+       6,
+       "forest"
+      ],
+      [
+       -7,
+       6,
+       "hills"
+      ],
+      [
+       -6,
+       6,
+       "hills"
+      ],
+      [
+       -5,
+       6,
+       "hills"
+      ],
+      [
+       -4,
+       6,
+       "plains"
+      ],
+      [
+       -3,
+       6,
+       "plains"
+      ],
+      [
+       -2,
+       6,
+       "plains"
+      ],
+      [
+       -1,
+       6,
+       "plains"
+      ],
+      [
+       0,
+       6,
+       "forest"
+      ],
+      [
+       1,
+       6,
+       "forest"
+      ],
+      [
+       2,
+       6,
+       "plains"
+      ],
+      [
+       3,
+       6,
+       "ocean"
+      ],
+      [
+       4,
+       6,
+       "ocean"
+      ],
+      [
+       -10,
+       7,
+       "ocean"
+      ],
+      [
+       -9,
+       7,
+       "hallowed"
+      ],
+      [
+       -8,
+       7,
+       "wooded_hills"
+      ],
+      [
+       -7,
+       7,
+       "hills"
+      ],
+      [
+       -6,
+       7,
+       "forest"
+      ],
+      [
+       -5,
+       7,
+       "plains"
+      ],
+      [
+       -4,
+       7,
+       "plains"
+      ],
+      [
+       -3,
+       7,
+       "plains"
+      ],
+      [
+       -2,
+       7,
+       "plains"
+      ],
+      [
+       -1,
+       7,
+       "plains"
+      ],
+      [
+       0,
+       7,
+       "plains"
+      ],
+      [
+       1,
+       7,
+       "plains"
+      ],
+      [
+       2,
+       7,
+       "hallowed"
+      ],
+      [
+       3,
+       7,
+       "ocean"
+      ],
+      [
+       -10,
+       8,
+       "hallowed"
+      ],
+      [
+       -9,
+       8,
+       "hallowed"
+      ],
+      [
+       -8,
+       8,
+       "forest"
+      ],
+      [
+       -7,
+       8,
+       "forest"
+      ],
+      [
+       -6,
+       8,
+       "forest"
+      ],
+      [
+       -5,
+       8,
+       "plains"
+      ],
+      [
+       -4,
+       8,
+       "plains"
+      ],
+      [
+       -3,
+       8,
+       "plains"
+      ],
+      [
+       -2,
+       8,
+       "plains"
+      ],
+      [
+       -1,
+       8,
+       "forest"
+      ],
+      [
+       0,
+       8,
+       "plains"
+      ],
+      [
+       1,
+       8,
+       "hallowed"
+      ],
+      [
+       2,
+       8,
+       "hallowed"
+      ],
+      [
+       -10,
+       9,
+       "hallowed"
+      ],
+      [
+       -9,
+       9,
+       "hallowed"
+      ],
+      [
+       -8,
+       9,
+       "hallowed"
+      ],
+      [
+       -7,
+       9,
+       "hallowed"
+      ],
+      [
+       -6,
+       9,
+       "hallowed"
+      ],
+      [
+       -5,
+       9,
+       "hallowed"
+      ],
+      [
+       -4,
+       9,
+       "hallowed"
+      ],
+      [
+       -3,
+       9,
+       "hallowed"
+      ],
+      [
+       -2,
+       9,
+       "hallowed"
+      ],
+      [
+       -1,
+       9,
+       "hallowed"
+      ],
+      [
+       0,
+       9,
+       "hallowed"
+      ],
+      [
+       1,
+       9,
+       "hallowed"
+      ],
+      [
+       -10,
+       10,
+       "hallowed"
+      ],
+      [
+       -9,
+       10,
+       "hallowed"
+      ],
+      [
+       -8,
+       10,
+       "hallowed"
+      ],
+      [
+       -7,
+       10,
+       "hallowed"
+      ],
+      [
+       -6,
+       10,
+       "hallowed"
+      ],
+      [
+       -5,
+       10,
+       "hallowed"
+      ],
+      [
+       -4,
+       10,
+       "hallowed"
+      ],
+      [
+       -3,
+       10,
+       "hallowed"
+      ],
+      [
+       -2,
+       10,
+       "hallowed"
+      ],
+      [
+       -1,
+       10,
+       "hallowed"
+      ],
+      [
+       0,
+       10,
+       "hallowed"
+      ]
+     ],
+     "rivers": [
+      [
+       -8,
+       1,
+       -8,
+       2,
+       "none",
+       2
+      ],
+      [
+       -7,
+       0,
+       -7,
+       1,
+       "none",
+       2
+      ],
+      [
+       -7,
+       1,
+       -8,
+       1,
+       "none",
+       2
+      ],
+      [
+       -7,
+       3,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -7,
+       5,
+       -7,
+       6,
+       "none",
+       1
+      ],
+      [
+       -7,
+       6,
+       -8,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -7,
+       6,
+       -8,
+       7,
+       "none",
+       1
+      ],
+      [
+       -6,
+       0,
+       -7,
+       1,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       0,
+       -6,
+       1,
+       "none",
+       2
+      ],
+      [
+       -6,
+       3,
+       -7,
+       4,
+       "standing",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       4,
+       "none",
+       2
+      ],
+      [
+       -6,
+       4,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -6,
+       5,
+       -7,
+       5,
+       "none",
+       2
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       -1,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -6,
+       0,
+       "none",
+       1
+      ],
+      [
+       -5,
+       -1,
+       -5,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -5,
+       0,
+       -6,
+       0,
+       "none",
+       2
+      ],
+      [
+       -4,
+       -2,
+       -5,
+       -1,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       -1,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -3,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       -3,
+       -2,
+       -4,
+       -2,
+       "none",
+       1
+      ],
+      [
+       6,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -5,
+       8,
+       -5,
+       "none",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -5,
+       "standing",
+       1
+      ],
+      [
+       7,
+       -4,
+       8,
+       -4,
+       "none",
+       1
+      ],
+      [
+       7,
+       -3,
+       7,
+       -4,
+       "none",
+       1
+      ],
+      [
+       8,
+       -5,
+       8,
+       -6,
+       "none",
+       1
+      ]
+     ],
+     "roads": [
+      [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
+       -2,
+       2,
+       -3,
+       3,
+       "upgrading",
        1
       ]
      ],
@@ -25338,10 +25975,10 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":150,\"grain\":0,\"iron\":0}",
+    "message": "Insufficient resources: missing {\"wood\":0,\"stone\":250,\"grain\":0,\"iron\":0}",
     "missing": {
      "wood": 0,
-     "stone": 150,
+     "stone": 250,
      "grain": 0,
      "iron": 0
     }
@@ -25456,7 +26093,7 @@
        },
        "c5": {
         "level": 0,
-        "building": null
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -25597,8 +26234,8 @@
          "building": null
         },
         "c5": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "market"
         },
         "c6": {
          "level": 0,
@@ -25890,7 +26527,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T11:53:45.600Z"
+       "settledAt": "2026-06-01T11:53:41.280Z"
       }
      }
     ],
@@ -25925,43 +26562,38 @@
        ],
        [
         -6,
-        6,
+        5,
         86400
        ],
        [
         -5,
-        6,
+        4,
         115200
        ],
        [
         -4,
-        6,
-        129600
-       ],
-       [
-        -3,
-        5,
+        4,
         144000
        ],
        [
         -3,
-        4,
+        3,
         158400
        ],
        [
         -2,
-        3,
-        172800
+        2,
+        168480
        ],
        [
         -1,
         2,
-        201600
+        197280
        ]
       ],
-      "arrivesAt": "2026-06-01T11:53:45.600Z",
+      "arrivesAt": "2026-06-01T11:53:41.280Z",
       "endsAt": null,
-      "rampageEndsAt": "2026-06-01T12:15:21.600Z",
+      "rampageEndsAt": "2026-06-01T12:15:17.280Z",
       "struck": [],
       "ritual": false,
       "leaderId": 2,
@@ -26181,7 +26813,7 @@
       "rounds": [],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T11:53:45.600Z",
+      "startedAt": "2026-06-01T11:53:41.280Z",
       "endedAt": null
      },
      {
@@ -28707,12 +29339,36 @@
      ],
      "roads": [
       [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
        -2,
        2,
        -3,
        3,
        "standing",
-       1
+       2
       ]
      ],
      "terraforms": []
@@ -28818,7 +29474,7 @@
        },
        "c5": {
         "level": 0,
-        "building": null
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -28959,8 +29615,8 @@
          "building": null
         },
         "c5": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "market"
         },
         "c6": {
          "level": 0,
@@ -29273,22 +29929,22 @@
        [
         -1,
         2,
-        801600
+        797280
        ],
        [
         0,
         1,
-        816000
+        811680
        ],
        [
         0,
         0,
-        830400
+        826080
        ]
       ],
-      "arrivesAt": "2026-06-01T12:04:14.400Z",
+      "arrivesAt": "2026-06-01T12:04:10.080Z",
       "endsAt": null,
-      "rampageEndsAt": "2026-06-01T12:15:21.600Z",
+      "rampageEndsAt": "2026-06-01T12:15:17.280Z",
       "struck": [
        3
       ],
@@ -29532,7 +30188,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T12:14:14.400Z",
+        "at": "2026-06-01T12:14:10.080Z",
         "round": 1,
         "attackerLeft": 19,
         "defenderLeft": 36,
@@ -29542,7 +30198,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:24:14.400Z",
+        "at": "2026-06-01T12:24:10.080Z",
         "round": 2,
         "attackerLeft": 17,
         "defenderLeft": 34,
@@ -29556,7 +30212,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:34:14.400Z",
+        "at": "2026-06-01T12:34:10.080Z",
         "round": 3,
         "attackerLeft": 14,
         "defenderLeft": 34,
@@ -29573,7 +30229,7 @@
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T12:04:14.400Z",
+      "startedAt": "2026-06-01T12:04:10.080Z",
       "endedAt": null
      },
      {
@@ -29660,7 +30316,7 @@
       "defenderInitial": {},
       "rounds": [
        {
-        "at": "2026-06-01T12:03:45.600Z",
+        "at": "2026-06-01T12:03:41.280Z",
         "round": 1,
         "attackerLeft": 20,
         "defenderLeft": 0,
@@ -29680,8 +30336,8 @@
         "an early raiding party"
        ]
       },
-      "startedAt": "2026-06-01T11:53:45.600Z",
-      "endedAt": "2026-06-01T12:03:45.600Z"
+      "startedAt": "2026-06-01T11:53:41.280Z",
+      "endedAt": "2026-06-01T12:03:41.280Z"
      },
      {
       "id": 4,
@@ -32205,12 +32861,36 @@
      ],
      "roads": [
       [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
        -2,
        2,
        -3,
        3,
        "standing",
-       1
+       2
       ]
      ],
      "terraforms": []
@@ -32316,7 +32996,7 @@
        },
        "c5": {
         "level": 0,
-        "building": null
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -32457,8 +33137,8 @@
          "building": null
         },
         "c5": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "market"
         },
         "c6": {
          "level": 0,
@@ -32771,22 +33451,22 @@
        [
         -1,
         2,
-        801600
+        797280
        ],
        [
         0,
         1,
-        816000
+        811680
        ],
        [
         0,
         0,
-        830400
+        826080
        ]
       ],
-      "arrivesAt": "2026-06-01T12:04:14.400Z",
+      "arrivesAt": "2026-06-01T12:04:10.080Z",
       "endsAt": null,
-      "rampageEndsAt": "2026-06-01T12:15:21.600Z",
+      "rampageEndsAt": "2026-06-01T12:15:17.280Z",
       "struck": [
        3
       ],
@@ -33165,7 +33845,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T12:14:14.400Z",
+        "at": "2026-06-01T12:14:10.080Z",
         "round": 1,
         "attackerLeft": 19,
         "defenderLeft": 36,
@@ -33175,7 +33855,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:24:14.400Z",
+        "at": "2026-06-01T12:24:10.080Z",
         "round": 2,
         "attackerLeft": 17,
         "defenderLeft": 34,
@@ -33189,7 +33869,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:34:14.400Z",
+        "at": "2026-06-01T12:34:10.080Z",
         "round": 3,
         "attackerLeft": 14,
         "defenderLeft": 34,
@@ -33204,7 +33884,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:44:14.400Z",
+        "at": "2026-06-01T12:44:10.080Z",
         "round": 4,
         "attackerLeft": 13,
         "defenderLeft": 33,
@@ -33216,7 +33896,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:54:14.400Z",
+        "at": "2026-06-01T12:54:10.080Z",
         "round": 5,
         "attackerLeft": 11,
         "defenderLeft": 32,
@@ -33229,7 +33909,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:04:14.400Z",
+        "at": "2026-06-01T13:04:10.080Z",
         "round": 6,
         "attackerLeft": 23,
         "defenderLeft": 30,
@@ -33243,7 +33923,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:14:14.400Z",
+        "at": "2026-06-01T13:14:10.080Z",
         "round": 7,
         "attackerLeft": 19,
         "defenderLeft": 29,
@@ -33257,7 +33937,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:24:14.400Z",
+        "at": "2026-06-01T13:24:10.080Z",
         "round": 8,
         "attackerLeft": 17,
         "defenderLeft": 29,
@@ -33270,7 +33950,7 @@
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T12:04:14.400Z",
+      "startedAt": "2026-06-01T12:04:10.080Z",
       "endedAt": null
      },
      {
@@ -33411,7 +34091,7 @@
       "defenderInitial": {},
       "rounds": [
        {
-        "at": "2026-06-01T12:03:45.600Z",
+        "at": "2026-06-01T12:03:41.280Z",
         "round": 1,
         "attackerLeft": 20,
         "defenderLeft": 0,
@@ -33431,8 +34111,8 @@
         "an early raiding party"
        ]
       },
-      "startedAt": "2026-06-01T11:53:45.600Z",
-      "endedAt": "2026-06-01T12:03:45.600Z"
+      "startedAt": "2026-06-01T11:53:41.280Z",
+      "endedAt": "2026-06-01T12:03:41.280Z"
      },
      {
       "id": 4,
@@ -35961,12 +36641,36 @@
      ],
      "roads": [
       [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
        -2,
        2,
        -3,
        3,
        "standing",
-       1
+       2
       ]
      ],
      "terraforms": []
@@ -36073,7 +36777,7 @@
        },
        "c5": {
         "level": 0,
-        "building": null
+        "building": "market"
        },
        "c6": {
         "level": 0,
@@ -36214,8 +36918,8 @@
          "building": null
         },
         "c5": {
-         "level": 0,
-         "building": null
+         "level": 1,
+         "building": "market"
         },
         "c6": {
          "level": 0,
@@ -36978,7 +37682,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T12:14:14.400Z",
+        "at": "2026-06-01T12:14:10.080Z",
         "round": 1,
         "attackerLeft": 19,
         "defenderLeft": 36,
@@ -36988,7 +37692,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:24:14.400Z",
+        "at": "2026-06-01T12:24:10.080Z",
         "round": 2,
         "attackerLeft": 17,
         "defenderLeft": 34,
@@ -37002,7 +37706,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:34:14.400Z",
+        "at": "2026-06-01T12:34:10.080Z",
         "round": 3,
         "attackerLeft": 14,
         "defenderLeft": 34,
@@ -37017,7 +37721,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T12:44:14.400Z",
+        "at": "2026-06-01T12:44:10.080Z",
         "round": 4,
         "attackerLeft": 13,
         "defenderLeft": 33,
@@ -37029,7 +37733,7 @@
         }
        },
        {
-        "at": "2026-06-01T12:54:14.400Z",
+        "at": "2026-06-01T12:54:10.080Z",
         "round": 5,
         "attackerLeft": 11,
         "defenderLeft": 32,
@@ -37042,7 +37746,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:04:14.400Z",
+        "at": "2026-06-01T13:04:10.080Z",
         "round": 6,
         "attackerLeft": 23,
         "defenderLeft": 30,
@@ -37056,7 +37760,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:14:14.400Z",
+        "at": "2026-06-01T13:14:10.080Z",
         "round": 7,
         "attackerLeft": 19,
         "defenderLeft": 29,
@@ -37070,7 +37774,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:24:14.400Z",
+        "at": "2026-06-01T13:24:10.080Z",
         "round": 8,
         "attackerLeft": 17,
         "defenderLeft": 29,
@@ -37081,7 +37785,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T13:34:14.400Z",
+        "at": "2026-06-01T13:34:10.080Z",
         "round": 9,
         "attackerLeft": 16,
         "defenderLeft": 28,
@@ -37096,7 +37800,7 @@
         }
        },
        {
-        "at": "2026-06-01T13:44:14.400Z",
+        "at": "2026-06-01T13:44:10.080Z",
         "round": 10,
         "attackerLeft": 15,
         "defenderLeft": 28,
@@ -37106,7 +37810,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T13:54:14.400Z",
+        "at": "2026-06-01T13:54:10.080Z",
         "round": 11,
         "attackerLeft": 13,
         "defenderLeft": 27,
@@ -37119,7 +37823,7 @@
         }
        },
        {
-        "at": "2026-06-01T14:04:14.400Z",
+        "at": "2026-06-01T14:04:10.080Z",
         "round": 12,
         "maneuver": {
          "by": "attacker",
@@ -37138,8 +37842,8 @@
       ],
       "loot": null,
       "decision": null,
-      "startedAt": "2026-06-01T12:04:14.400Z",
-      "endedAt": "2026-06-01T14:04:14.400Z"
+      "startedAt": "2026-06-01T12:04:10.080Z",
+      "endedAt": "2026-06-01T14:04:10.080Z"
      },
      {
       "id": 5,
@@ -37172,7 +37876,7 @@
       "defenderInitial": {},
       "rounds": [
        {
-        "at": "2026-06-01T12:03:45.600Z",
+        "at": "2026-06-01T12:03:41.280Z",
         "round": 1,
         "attackerLeft": 20,
         "defenderLeft": 0,
@@ -37192,8 +37896,8 @@
         "an early raiding party"
        ]
       },
-      "startedAt": "2026-06-01T11:53:45.600Z",
-      "endedAt": "2026-06-01T12:03:45.600Z"
+      "startedAt": "2026-06-01T11:53:41.280Z",
+      "endedAt": "2026-06-01T12:03:41.280Z"
      },
      {
       "id": 4,
@@ -37608,7 +38312,7 @@
        "loot": 0
       },
       "status": "alive",
-      "woundedUntil": "2026-06-01T14:40:14.400Z",
+      "woundedUntil": "2026-06-01T14:40:10.080Z",
       "battles": 2,
       "wins": 1,
       "losses": 1,
@@ -39753,12 +40457,36 @@
      ],
      "roads": [
       [
+       -5,
+       5,
+       -6,
+       6,
+       "standing",
+       1
+      ],
+      [
+       -4,
+       4,
+       -5,
+       5,
+       "standing",
+       1
+      ],
+      [
+       -3,
+       3,
+       -4,
+       4,
+       "standing",
+       1
+      ],
+      [
        -2,
        2,
        -3,
        3,
        "standing",
-       1
+       2
       ]
      ],
      "terraforms": []
@@ -39778,7 +40506,7 @@
       "tier": "digest",
       "title": "The Holy City held",
       "body": "The horde was beaten at its walls after 12 rounds.",
-      "createdAt": "2026-06-01T14:04:14.400Z",
+      "createdAt": "2026-06-01T14:04:10.080Z",
       "read": false
      },
      {
@@ -39787,7 +40515,7 @@
       "tier": "digest",
       "title": "Brother Lothar grows stronger",
       "body": "Brother Lothar is now level 2.",
-      "createdAt": "2026-06-01T14:04:14.400Z",
+      "createdAt": "2026-06-01T14:04:10.080Z",
       "read": false
      },
      {
@@ -39985,7 +40713,7 @@
       "tier": "push",
       "title": "A horde is at the Holy City",
       "body": "21 of them against its guard of 36.",
-      "createdAt": "2026-06-01T12:04:14.400Z",
+      "createdAt": "2026-06-01T12:04:10.080Z",
       "read": false
      },
      {
@@ -39994,7 +40722,7 @@
       "tier": "digest",
       "title": "You's refuge was raided",
       "body": "The horde carried off 4235 resources after 1 rounds.",
-      "createdAt": "2026-06-01T12:03:45.600Z",
+      "createdAt": "2026-06-01T12:03:41.280Z",
       "read": false
      },
      {
@@ -40003,7 +40731,7 @@
       "tier": "push",
       "title": "You's refuge is under attack",
       "body": "A horde of 20 is fighting your garrison of 0.",
-      "createdAt": "2026-06-01T11:53:45.600Z",
+      "createdAt": "2026-06-01T11:53:41.280Z",
       "read": false
      },
      {

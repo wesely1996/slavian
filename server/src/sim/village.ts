@@ -607,10 +607,13 @@ export function demolish(data: GameData, state: VillageState, plot: string, at: 
   return { state: { ...next, ledger: receive(ledger, at, refund).ledger }, refund };
 }
 
-// What one resource fetches of another at the village's Market.
-export function marketRate(data: GameData, marketLevel: number): number {
-  const { baseRate, ratePerLevel } = data.buildings.village.market;
-  return marketLevel > 0 ? baseRate + ratePerLevel * (marketLevel - 1) : 0;
+// What one resource fetches of another at the village's Market: better by
+// its level and by the `connected` villages joined to it by roads, times a
+// trading clan's bonus, never better than maxRate (1 for 1).
+export function marketRate(data: GameData, marketLevel: number, connected = 0, bonuses: Bonuses = {}): number {
+  const { baseRate, ratePerLevel, perConnectedCity, maxRate } = data.buildings.village.market;
+  if (marketLevel <= 0) return 0;
+  return Math.min(maxRate, (baseRate + ratePerLevel * (marketLevel - 1) + perConnectedCity * connected) * (1 + bonus(bonuses, 'marketRate')));
 }
 
 // Trades `amount` of `give` for `get` at the Market: what is bought goes
@@ -620,9 +623,10 @@ export function trade(
   state: VillageState,
   order: { give: ResourceKind; get: ResourceKind; amount: number },
   at: Date,
+  connected = 0,
 ): { state: VillageState; got: number } {
   // A clan of traders gets more for what it gives (clans.json marketRate).
-  const rate = marketRate(data, state.levels[MARKET] ?? 0) * (1 + bonus(state.bonuses, 'marketRate'));
+  const rate = marketRate(data, state.levels[MARKET] ?? 0, connected, state.bonuses);
   if (rate <= 0) throw new RuleError('Build a Market to trade');
   if (order.give === order.get) throw new RuleError('Trade one resource for another');
   if (!Number.isInteger(order.amount) || order.amount < 1) throw new RuleError('Trade at least 1');

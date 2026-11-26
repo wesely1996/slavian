@@ -1123,6 +1123,10 @@ func _replay_scenario(file: String, name: String) -> void:
 				for e in step.set.dugRivers:
 					var dug_ends := LocalServer._ordered(Vector2i(int(e.a.q), int(e.a.r)), Vector2i(int(e.b.q), int(e.b.r)))
 					world.rivers.append({"a": dug_ends[0], "b": dug_ends[1], "crossing": "none", "size": 1, "builtBy": null, "completesAt": null, "dug": true})
+			if step.set.has("roads"):
+				for e in step.set.roads:
+					var road_ends := LocalServer._ordered(Vector2i(int(e.a.q), int(e.a.r)), Vector2i(int(e.b.q), int(e.b.r)))
+					world.roads.append({"a": road_ends[0], "b": road_ends[1], "status": "standing", "level": 1, "builtBy": int(world.villages[0].id), "completesAt": null})
 			if step.set.has("smithing"):
 				var forged := {}
 				for unit in step.set.smithing:

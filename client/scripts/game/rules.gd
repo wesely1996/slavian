@@ -334,9 +334,25 @@ static func bounty_most(data: Dictionary, level: int) -> int:
 	return int(data.buildings.village.market.bounties.amountPerLevel) * level
 
 
-static func market_rate(data: Dictionary, level: int) -> float:
-	var market: Dictionary = data.buildings.village.market
-	return float(market.baseRate) + float(market.ratePerLevel) * (level - 1) if level > 0 else 0.0
+## The other villages joined to `village` by standing roads (its owner's,
+## or in co-op any player's): they better its Market's rate. `roads`: the
+## map's road rows [aq, ar, bq, br, status, ...]; `world`: the world view.
+static func road_connected(world: Dictionary, roads: Array, village: Dictionary) -> int:
+	var edges: Array = []
+	for e in roads:
+		if String(e[4]) != "building":
+			edges.append(LocalLand.edge_key(Vector2i(int(e[0]), int(e[1])), Vector2i(int(e[2]), int(e[3]))))
+	var pvp: bool = world.get("pvp", false)
+	var others: Array = world.get("villages", []).filter(func(v: Dictionary) -> bool:
+		return v.get("ruin") == null and v.get("refuge") != true and v.get("ownerAccountId") != null \
+			and (not pvp or v.ownerAccountId == village.get("ownerAccountId"))).map(func(v: Dictionary) -> Vector2i: return Vector2i(int(v.q), int(v.r)))
+	return LocalLand.road_connected(edges, Vector2i(int(village.q), int(village.r)), others)
+
+
+## sim/village.ts marketRate: by level and the villages joined to it by
+## roads, times a trading clan's bonus, never better than maxRate.
+static func market_rate(data: Dictionary, level: int, connected := 0, clan_bonus := 0.0) -> float:
+	return LocalVillage.market_rate(data, level, connected, {"marketRate": clan_bonus})
 
 
 ## What tearing down `building` of `level` gives back: `share` of all it cost.

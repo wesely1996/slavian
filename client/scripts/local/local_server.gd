@@ -719,7 +719,11 @@ func _route(world: Dictionary, method: String, parts: PackedStringArray, body: D
 				var amount: Variant = body.get("amount")
 				if not give in LocalVillage.KINDS or not get_ in LocalVillage.KINDS or not (amount is float or amount is int) or float(amount) != floorf(float(amount)) or float(amount) < 1:
 					return _fail(400, "invalid_request", "Give two resources and an amount")
-				result = LocalVillage.trade(data, village.state, give, get_, int(amount), now)
+				# Villages joined to it by roads trade the better (commands/village.ts tradeCommand).
+				var others: Array = world.villages.filter(func(v: Dictionary) -> bool: return v.get("ruin") == null and v.get("refuge") != true and v.ownerAccountId != null) \
+					.map(func(v: Dictionary) -> Vector2i: return Vector2i(int(v.q), int(v.r)))
+				var connected := LocalLand.road_connected(LocalHordes.land_of(world).roads.keys(), Vector2i(int(village.q), int(village.r)), others)
+				result = LocalVillage.trade(data, village.state, give, get_, int(amount), now, connected)
 				if result.has("got"):
 					extra = ["got", result.got]
 			"market/sell":

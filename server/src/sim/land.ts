@@ -118,6 +118,27 @@ export function riverBanks(rivers: readonly { a: Hex; b: Hex }[]): string[] {
   return [...banks].sort();
 }
 
+// How many of `villages` (cells) the roads (edge keys) join to `from`.
+export function roadConnected(roads: Iterable<string>, from: Hex, villages: readonly Hex[]): number {
+  const next = new Map<string, string[]>();
+  for (const edge of roads) {
+    const [a, b] = edge.split('|') as [string, string];
+    next.set(a, [...(next.get(a) ?? []), b]);
+    next.set(b, [...(next.get(b) ?? []), a]);
+  }
+  const reached = new Set([hexKey(from)]);
+  const queue = [hexKey(from)];
+  while (queue.length) {
+    for (const n of next.get(queue.shift()!) ?? []) {
+      if (!reached.has(n)) {
+        reached.add(n);
+        queue.push(n);
+      }
+    }
+  }
+  return villages.filter((v) => hexKey(v) !== hexKey(from) && reached.has(hexKey(v))).length;
+}
+
 // The land blessed by the water god, with its rivers' `banks`.
 export function blessLand(land: Land, banks: Iterable<string>): Land {
   return Object.assign(land, { blessed: true, banks: new Set(banks) });

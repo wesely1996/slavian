@@ -41,7 +41,7 @@
     "demolishRefund": 0.5,
     "cancelRefund": { "base": 0.8, "perHallLevel": 0.02 },
     "abandonRefund": 0.5,
-    "market": { "baseRate": 0.4, "ratePerLevel": 0.04, "gearValue": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 },
+    "market": { "baseRate": 0.4, "ratePerLevel": 0.04, "perConnectedCity": 0.01, "maxRate": 1, "gearValue": { "wood": 150, "stone": 150, "grain": 150, "iron": 100 },
       "bounties": { "feeShare": 0.1, "levelsPerBounty": 3, "amountPerLevel": 500 } }
   },
   "buildings": {
