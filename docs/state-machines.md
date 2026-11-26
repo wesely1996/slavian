@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.23.2
+Documented for version: 0.24.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
