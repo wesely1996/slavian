@@ -2165,6 +2165,38 @@ msgstr ""
 msgid "Not enough resources: %s."
 msgstr ""
 
+#: client/scripts/net/updater.gd:48
+msgid "An update is already on its way."
+msgstr ""
+
+#: client/scripts/net/updater.gd:51
+msgid "This app can't update itself; download the new version instead."
+msgstr ""
+
+#: client/scripts/net/updater.gd:77
+msgid "The download could not start."
+msgstr ""
+
+#: client/scripts/net/updater.gd:85
+msgid "The download failed (%s). Check the connection and try again."
+msgstr ""
+
+#: client/scripts/net/updater.gd:96
+msgid "The installer did not open. Allow Slavian to install apps in the phone's settings, then try again."
+msgstr ""
+
+#: client/scripts/net/updater.gd:105
+msgid "The download is damaged; try again."
+msgstr ""
+
+#: client/scripts/net/updater.gd:114
+msgid "The game's folder can't be written to; download the new version instead."
+msgstr ""
+
+#: client/scripts/net/updater.gd:123
+msgid "The update could not be started; download the new version instead."
+msgstr ""
+
 #: client/scripts/screens/game_screen.gd:31
 msgid "○ offline"
 msgstr ""
@@ -6159,23 +6191,51 @@ msgstr ""
 msgid "Tap a clan to read about it."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1446
+#: client/scripts/screens/start_screen.gd:1450
+msgid "Version %s is out: update now"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1450
 msgid "Version %s is out: download it"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1475
+#: client/scripts/screens/start_screen.gd:1480
+msgid "Downloading… %d%%"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1480
+msgid "Downloading… %.1f MB"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1491
+msgid "Download it instead"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1493
+msgid "Tap Install, then Open: Slavian starts on the new version."
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1493
+msgid "Restarting on the new version…"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1515
 msgid "A new version is out"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1476
-msgid "Slavian %s is ready; you have %s. Download the new version to keep playing with everyone."
+#: client/scripts/screens/start_screen.gd:1516
+msgid "Slavian %s is ready; you have %s. Update to keep playing with everyone."
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1481
+#: client/scripts/screens/start_screen.gd:1520
 msgid "Later"
 msgstr ""
 
-#: client/scripts/screens/start_screen.gd:1482
+#: client/scripts/screens/start_screen.gd:1522
+msgid "Update now"
+msgstr ""
+
+#: client/scripts/screens/start_screen.gd:1522
 msgid "Download"
 msgstr ""
 

@@ -1433,31 +1433,71 @@ func _enter_game(world: Dictionary) -> void:
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 
-## A newer release than this app, from the server: a button to download it
-## under the version (nothing when offline, or already up to date).
+## A newer release than this app, from the server: a button to update to it
+## (or, where the app can't update itself, to download it) under the
+## version (nothing when offline, or already up to date).
 func _offer_update(column: Container) -> void:
 	var response := await Api.get_json("/v1/release")
 	if not response.ok or not response.data is Dictionary or response.data.get("version") == null or response.data.get("url") == null:
 		return
-	var latest := String(response.data.version)
+	var release: Dictionary = response.data
+	var latest := String(release.version)
 	if not is_newer_version(latest, String(ProjectSettings.get_setting("application/config/version", ""))):
 		return
-	var url := String(response.data.url)
-	var download := UI.primary(tr("Version %s is out: download it") % latest, func() -> void: OS.shell_open(url))
 	if is_instance_valid(column):
-		column.add_child(download)
+		var box := UI.vbox(6)
+		column.add_child(box)
+		_update_controls(box, release, tr("Version %s is out: update now") % latest, tr("Version %s is out: download it") % latest)
 	# Once a launch, a notice over the menu too.
 	if not _update_noticed.has(latest) and is_inside_tree():
 		_update_noticed[latest] = true
-		_update_notice(latest, url)
+		_update_notice(release)
 
 
 ## Versions the update notice was shown for since the app started.
 static var _update_noticed := {}
 
 
-## "A new version is out" over the whole menu: download it, or later.
-func _update_notice(latest: String, url: String) -> void:
+## A button that updates the app in place (Updater), with its progress
+## under it; where it can't, or the update fails, a button to download the
+## new version in the browser.
+func _update_controls(box: Container, release: Dictionary, update_text: String, download_text: String, on_start := Callable(), ink := false) -> void:
+	var url := String(release.url)
+	var download := func() -> void: OS.shell_open(url)
+	if not Updater.can_update() or Updater.asset_url(release) == "":
+		box.add_child(UI.primary(download_text, download))
+		return
+	var status := UI.label("", UI.SMALL_SIZE, UiTheme.INK if ink else UI.MUTED)
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Made first: a lambda keeps the button it was made with.
+	var button := UI.primary(update_text, func() -> void: pass)
+	button.pressed.connect(func() -> void:
+		button.disabled = true
+		if on_start.is_valid():
+			on_start.call()
+		var shown := func(done: int, total: int) -> void:
+			if is_instance_valid(status):
+				status.text = tr("Downloading… %d%%") % roundi(100.0 * done / total) if total > 0 else tr("Downloading… %.1f MB") % (done / 1048576.0)
+		Updater.progress.connect(shown)
+		var error: String = await Updater.update(release)
+		Updater.progress.disconnect(shown)
+		if not is_instance_valid(status):
+			return
+		if error != "":
+			status.text = error
+			button.disabled = false
+			if not box.has_meta("fallback"):
+				box.set_meta("fallback", true)
+				box.add_child(UI.button(tr("Download it instead"), download))
+			return
+		status.text = tr("Tap Install, then Open: Slavian starts on the new version.") if OS.has_feature("android") else tr("Restarting on the new version…"))
+	box.add_child(button)
+	box.add_child(status)
+
+
+## "A new version is out" over the whole menu: update (or download), or later.
+func _update_notice(release: Dictionary) -> void:
+	var latest := String(release.version)
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.6)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1473,18 +1513,13 @@ func _update_notice(latest: String, url: String) -> void:
 	var box := UI.vbox(16)
 	sheet.add_child(box)
 	box.add_child(UI.label(tr("A new version is out"), UI.HEADING_SIZE, UiTheme.INK))
-	var text := UI.label(tr("Slavian %s is ready; you have %s. Download the new version to keep playing with everyone.") % [
+	var text := UI.label(tr("Slavian %s is ready; you have %s. Update to keep playing with everyone.") % [
 		latest, ProjectSettings.get_setting("application/config/version", "")], UI.SMALL_SIZE, UiTheme.INK)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(text)
-	var row := UI.hbox(12)
-	row.add_child(UI.button(tr("Later"), shade.queue_free))
-	var go := UI.primary(tr("Download"), func() -> void:
-		OS.shell_open(url)
-		shade.queue_free())
-	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(go)
-	box.add_child(row)
+	var later := UI.button(tr("Later"), shade.queue_free)
+	box.add_child(later)
+	_update_controls(box, release, tr("Update now"), tr("Download"), func() -> void: later.disabled = true, true)
 
 
 ## Whether version `a` ("0.17.0") comes after `b`, part by part.

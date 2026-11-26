@@ -68,6 +68,30 @@ From 0.17.0, when the server runs a newer version than the app
 (`GET /v1/release`), opening the app shows a notice with a Download
 button (once a launch), and the main menu offers the download too.
 
+**The app updates itself** (from 0.24.0; `client/scripts/net/updater.gd`).
+`GET /v1/release` also names the release's own files (`assets`: the APK and
+the Windows zip, under `SLAVIAN_ASSETS_URL`, by default the release's tag on
+GitHub). The notice's **Update now** downloads the file into the app's own
+storage, with its progress, then:
+
+- **Android:** the system installer opens on it. The player taps Install,
+  then Open (Android asks for that on every update of an app not from a
+  store; the first time it also asks to allow installs from Slavian:
+  Settings → allow, then back). The APK must be signed with the same key as
+  the installed app (`ANDROID_DEBUG_KEYSTORE_BASE64`), as for any update.
+- **Windows:** `Slavian.exe` from the zip is written beside the running one
+  as `Slavian.new.exe`; the game quits and a hidden PowerShell moves it over
+  `Slavian.exe` and starts it. A folder the game can't write to (such as
+  Program Files) falls back to the browser download.
+
+Every start clears what updates left behind (the downloads in the app's
+storage, a leftover `Slavian.new.exe`) and old Slavian downloads in the
+Downloads folder (`slavian-<version>.apk`, `slavian-<version>-windows.zip`,
+not newer than the running version). On Android 11 and later the system
+doesn't let the app touch files the browser downloaded, so APKs downloaded
+by hand stay until the player deletes them. Versions before 0.24.0 have no
+updater: their update to 0.24.0 is downloaded by hand once.
+
 What it needs, once:
 - **A deploy key** that may run only the script. On the VPS, in
   `/root/.ssh/authorized_keys`:

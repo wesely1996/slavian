@@ -96,6 +96,12 @@ func _test_newer_version() -> void:
 	_check(start.is_newer_version("1.0", "0.99.9"), "1.0 is newer than 0.99.9")
 	_check(not start.is_newer_version("0.17.0", "0.17.0"), "the same version is not newer")
 	_check(not start.is_newer_version("0.16.2", "0.17.0"), "an older version is not newer")
+	# The updater (scripts/net/updater.gd): which old downloads it clears.
+	var updater: GDScript = load("res://scripts/net/updater.gd")
+	_check(updater.old_download_version("slavian-0.23.2.apk") == "0.23.2" and updater.old_download_version("Slavian-0.23.2-windows.zip") == "0.23.2"
+		and updater.old_download_version("slavian-0.23.2 (1).apk") == "0.23.2", "old Slavian downloads are recognised")
+	_check(updater.old_download_version("slavian-0.23.2-windows.apk") == "" and updater.old_download_version("slavian-0.23.2.zip") == ""
+		and updater.old_download_version("holiday.apk") == "" and updater.old_download_version("slavian-notes.zip") == "", "other files are left alone")
 
 
 func _test_hex_vectors() -> void:
