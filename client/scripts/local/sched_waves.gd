@@ -54,6 +54,11 @@ static func land_of(world: Dictionary) -> Dictionary:
 		if f.get("kind", "fort") == "fort" and f.status == "standing" and (held.has(key) or LocalForts.is_manned(f)) and not key in forts:
 			forts.append(key)
 	var land := {"terrain": world.hexes, "blocked": blocked, "roads": roads, "lanes": lanes, "burning": burning, "damaged": damaged, "forts": forts}
+	# Walls along edges: nobody crosses one but the players' own through a
+	# gatehouse; hordes tear them down.
+	var walls := LocalEdgeWalls.land_walls(world)
+	if not walls.is_empty():
+		land.walls = walls
 	# Blessed by the water god: every river's banks are travelled the faster.
 	if LocalBlessings.has(world, "water"):
 		land.blessed = true
@@ -68,6 +73,10 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		fear: Dictionary, rng: LocalRng, start_ms: float, world_speed: float, outposts: Array = []) -> Variant:
 	var rules: Dictionary = data.horde
 	var roads := front != "north"
+	# A wall in the way is torn down: the hours that takes, in road cost at
+	# the horde's pace.
+	var pace := march_speed(data, front, composition)
+	var walls: Dictionary = land.get("walls", {})
 	var step_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var type: Variant = land.terrain.get(LocalLand.key(b))
 		if type == null or land.blocked.has(LocalLand.edge_key(a, b)) or land.get("burning", {}).has(LocalLand.key(b)):
@@ -76,7 +85,9 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		# (Never into a mountain city: hordes keep out of the mountains.)
 		if cost == null or data.terrain.terrain[type].get("hordesPass", true) == false:
 			return -1.0
-		return float(cost) * LocalLand.road_factor(data, int(land.roads.get(LocalLand.edge_key(a, b), 0)), land.get("damaged", {}).has(LocalLand.edge_key(a, b))) if roads else float(cost)
+		var walked: float = float(cost) * LocalLand.road_factor(data, int(land.roads.get(LocalLand.edge_key(a, b), 0)), land.get("damaged", {}).has(LocalLand.edge_key(a, b))) if roads else float(cost)
+		var wall: Variant = walls.get(LocalLand.edge_key(a, b))
+		return walked + (LocalEdgeWalls.break_hours(data, wall) * pace if wall != null else 0.0)
 	var search_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var cost: float = step_cost.call(a, b)
 		return -1.0 if cost < 0.0 else cost + float(rules.fear.pathWeight) * float(fear.get(LocalLand.key(b), 0.0))
@@ -180,7 +191,7 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 			head = head + pick.toIt.slice(1)
 			rest = pick.onward
 		best = {"id": best.id, "path": head + rest.slice(1), "score": best.score}
-	var hours_per_cost := 1.0 / march_speed(data, front, composition)
+	var hours_per_cost := 1.0 / pace
 	var at_ms := start_ms
 	var steps: Array = []
 	for i in best.path.size():
@@ -593,6 +604,16 @@ static func outpost_sites(world: Dictionary) -> Array:
 	return out
 
 
+## The events a horde's timetable plans (scheduler/field.ts cancelPlans).
+const PLANS := ["outpost_raid", "supply_raid", "field_intercept", "wall_breach"]
+
+
+## Drops a wave's pending raids, intercepts and breaches: its timetable has changed.
+static func cancel_plans(world: Dictionary, wave: Dictionary) -> void:
+	world.events = world.events.filter(func(e: Dictionary) -> bool:
+		return not (e.status == "pending" and e.type in PLANS and int(e.payload.get("waveId", -1)) == int(wave.id)))
+
+
 static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary, from_ms: int) -> void:
 	var outposts: Array = []
 	for v in world.villages:
@@ -601,6 +622,7 @@ static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary,
 				outposts.append({"villageId": v.id, "plot": plot, "cell": LocalVillage.outpost_hex(plot)})
 	schedule_raids(server, world, wave, outposts, from_ms)
 	schedule_supply_raids(server, world, wave, world.forts, from_ms)
+	LocalEdgeWalls.plan_breaches(server, world, wave, from_ms)
 
 
 ## A supply point has just been placed: hordes still on the march may pass it.

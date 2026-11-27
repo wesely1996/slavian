@@ -328,6 +328,10 @@ static func move_cost_on(data: Dictionary, land: Dictionary, roads := true, reli
 		var type: Variant = land.terrain.get(key(to))
 		if type == null or land.blocked.has(edge_key(from, to)) or land.get("burning", {}).has(key(to)):
 			return -1.0
+		# A wall (only a gatehouse lets the players' own through).
+		var wall: Variant = land.get("walls", {}).get(edge_key(from, to))
+		if wall != null and not wall.gate:
+			return -1.0
 		# A lake is crossed only by boat.
 		var sailed: bool = roads and type == "lake" and land.get("lanes", {}).has(edge_key(from, to))
 		var level := int(land.roads.get(edge_key(from, to), 0))

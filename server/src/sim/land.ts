@@ -23,6 +23,10 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   // two hexes on a river's banks (`banks`), and a boat's, go the faster.
   readonly blessed?: boolean;
   readonly banks?: ReadonlySet<string>;
+  // Walls standing along edges (data/field.json edgeWalls), by edge key:
+  // nobody crosses a wall, the players' own pass a gatehouse (`gate`);
+  // hordes tear them down (sim/edgeWalls.ts).
+  readonly walls?: ReadonlyMap<string, { readonly gate: boolean; readonly tier: number }>;
 }
 
 // One key for the edge between two neighbouring hexes, whichever way round.
@@ -33,7 +37,19 @@ export function edgeKey(a: Hex, b: Hex): string {
 }
 
 export function canCross(land: Land, from: Hex, to: Hex): boolean {
+  const wall = land.walls?.get(edgeKey(from, to));
+  return !land.blocked?.has(edgeKey(from, to)) && !land.burning?.has(hexKey(to)) && (!wall || wall.gate);
+}
+
+// Whether a horde can cross from `from` to `to` (a wall it tears down:
+// routeFrom counts what that takes).
+export function hordeCanCross(land: Land, from: Hex, to: Hex): boolean {
   return !land.blocked?.has(edgeKey(from, to)) && !land.burning?.has(hexKey(to));
+}
+
+// The land with these walls standing along its edges.
+export function withWalls(land: Land, walls: ReadonlyMap<string, { readonly gate: boolean; readonly tier: number }>): Land {
+  return walls.size === 0 ? land : Object.assign(land, { walls });
 }
 
 // The level of the road between two hexes (0: none).

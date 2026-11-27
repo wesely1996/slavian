@@ -1,8 +1,9 @@
 import { listForts, manned } from './forts.js';
+import { listEdgeWalls } from './edgeWalls.js';
 import { listTerraforms } from './terraforms.js';
 import type { RiverEdge } from '../sim/mapgen.js';
 import { damagedRoads, standingRoads } from './roads.js';
-import { blessLand, edgeKey, landOf, riverBanks, riverLanes, type Land } from '../sim/land.js';
+import { blessLand, edgeKey, landOf, riverBanks, riverLanes, withWalls, type Land } from '../sim/land.js';
 import { listShipyards } from './shipyards.js';
 import { hex, hexKey, type Hex } from '../sim/hex.js';
 import type { DbClient } from './pool.js';
@@ -114,7 +115,11 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   );
   // Or its own defenders hold.
   const forts = (await listForts(client, worldId)).filter((f) => f.kind === 'fort' && f.status === 'standing' && (held.has(`${f.q},${f.r}`) || manned(f))).map((f) => `${f.q},${f.r}`);
-  const land = landOf(terrain, blocked, roads, lanes, burning, damaged, forts);
+  // Walls standing along edges (being raised to the next tier still stand).
+  const walls = new Map(
+    (await listEdgeWalls(client, worldId)).filter((w) => w.status !== 'building').map((w) => [edgeKey(w.a, w.b), { gate: w.kind === 'gate', tier: w.tier }] as const),
+  );
+  const land = withWalls(landOf(terrain, blocked, roads, lanes, burning, damaged, forts), walls);
   // Blessed by the water god: every river's banks are travelled the faster.
   const { rows } = await client.query<{ water: string | null }>("SELECT blessings->>'water' AS water FROM worlds WHERE id = $1", [worldId]);
   return rows[0]?.water ? blessLand(land, riverBanks(rivers)) : land;

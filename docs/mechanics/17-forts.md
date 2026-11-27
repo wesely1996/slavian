@@ -87,6 +87,32 @@ one at a time.
 - **Afterwards.** When the battle ends, each ring that was breached loses
   **1 level**. The defenders left go back into the fort.
 
+### The gatehouse ring
+
+A gatehouse ([page 7](07-walls-and-sieges.md#walls-along-the-edges)) built on
+an edge of the fort's own hex, by the fort's owner, **merges with the fort**:
+
+- **It is the outermost ring.** A horde fighting at the fort batters it first,
+  before the fort's own rings.
+- **It counts as walls of a level**, set by its tier:
+
+| Gatehouse tier | Ring wall level | Integrity |
+|---|---|---|
+| 1 | 3 | 414 |
+| 2 | 6 | 972 |
+| 3 | 10 | 1,920 |
+
+- **No towers.** It has no tower slots. Its walls shelter the defenders and
+  hold back climbers like any ring's.
+- **Breached,** it loses **1 tier** when the battle ends; breached at tier 1,
+  it is gone. A horde marching through a merged gatehouse doesn't tear it
+  down on the way (the fort's battle does that).
+- **On the map** the fort is drawn inside a curtain wall at the gatehouse's
+  tier, with a tower at each corner and the gate on the gatehouse's side.
+  The fort's sheet shows the ring.
+
+With several gatehouses on its edges, the strongest counts.
+
 ## The Keep's zone of influence
 
 The village that built the fort can reshape the land and build roads

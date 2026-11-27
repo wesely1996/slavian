@@ -39,7 +39,7 @@ static func join_horde_battle(server: LocalServer, world: Dictionary, wave: Dict
 	host.composition = LocalCamps.add_units(host.composition, wave.composition)
 	battle.attackerInitial = LocalCamps.add_units(battle.attackerInitial, wave.composition)
 	world.events = world.events.filter(func(e: Dictionary) -> bool:
-		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+		return not (e.status == "pending" and e.type in LocalHordes.PLANS and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	wave.status = "dispersed"
 	wave.endsAt = at
 	# Those fighting it hear of it.
@@ -652,7 +652,9 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 			if int(r.integrity) > 0:
 				ring_at = r
 				break
-	var wall_plots: Variant = LocalForts.ring_plots(fort.plots, int(ring_at.ring)) if not ring_at.is_empty() else null
+	var wall_plots: Variant = null
+	if not ring_at.is_empty():
+		wall_plots = LocalEdgeWalls.gate_ring_plots(data, int(ring_at.get("tier", 1))) if int(ring_at.ring) == LocalEdgeWalls.GATE_RING else LocalForts.ring_plots(fort.plots, int(ring_at.ring))
 	var smashed: Dictionary = LocalWalls.ballista_kills(data, wave.front, wave.composition, wall_plots, rng) if wall_plots != null else {}
 	var assault := LocalCamps.subtract_units(wave.composition, smashed)
 	var shooters := 0
@@ -840,6 +842,10 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 				fort.defenders = back
 			for r in rings_now:
 				if int(r.integrity) > 0:
+					continue
+				# A gatehouse battered down loses a tier (the last: it is gone).
+				if int(r.ring) == LocalEdgeWalls.GATE_RING and r.get("edge") != null:
+					LocalEdgeWalls.breach_gatehouse(world, Vector2i(int(r.edge.aq), int(r.edge.ar)), Vector2i(int(r.edge.bq), int(r.edge.br)))
 					continue
 				var level := LocalForts.level_of(fort.plots, "w%d" % int(r.ring)) - int(data.walls.breachLevelsLost)
 				if level > 0:
@@ -1039,7 +1045,7 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 	wave.endsAt = null
 	# Its timetable changed: raids and intercepts planned on the old road go.
 	world.events = world.events.filter(func(e: Dictionary) -> bool:
-		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+		return not (e.status == "pending" and e.type in LocalHordes.PLANS and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	server.schedule(world, int(march.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, since_spawn + 1)
 	LocalArmies.plan_intercepts(server, world, wave, since_spawn + 1)

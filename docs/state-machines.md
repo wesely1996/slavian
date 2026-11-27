@@ -239,6 +239,24 @@ stateDiagram-v2
 burning hex that is not `building`. A damaged road can't be improved until
 it is repaired.
 
+## Edge wall
+
+```mermaid
+stateDiagram-v2
+  [*] --> building: build a wall or gatehouse (tier 0)
+  building --> standing: edge_wall_built (tier 1)
+  standing --> upgrading: raise a tier (below 3)
+  upgrading --> standing: edge_wall_built (tier + 1)
+  upgrading --> standing: a fort's battle batters its gatehouse (tier - 1, work lost)
+  standing --> standing: a fort's battle batters its gatehouse (tier - 1)
+  standing --> [*]: wall_breach (a horde through it), torn down, battered at tier 1
+  upgrading --> [*]: wall_breach, torn down, battered at tier 1
+  building --> [*]: torn down
+```
+
+`kind` (`wall` or `gate`) is fixed when it is first built. A wall still
+`building` stands in nobody's way.
+
 ## River crossing
 
 ```mermaid

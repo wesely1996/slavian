@@ -113,8 +113,60 @@ A reinforcement reaching a village whose walls still stand falls on the horde
 pinned against them, whatever side it comes from. See
 [reinforcements](08-armies-and-field.md#reinforcements).
 
+## Walls along the edges
+
+Walls can also run along the **edges between two hexes**, like rivers. A
+village builds them out in the land, and raises each one tier by tier.
+
+- **Where.** On an edge with either hex within **4 hexes** of the village, or
+  in the zone of one of its forts ([page 17](17-forts.md#the-keeps-zone-of-influence)).
+  Both hexes must be land an army can enter (not mountains, lakes or the
+  enemy lands). There can't already be a river without a bridge on that
+  edge. The Holy City's edges can be walled too.
+- **Tiers.** Each tier is raised on a standing wall. The first tier is mostly
+  wood, the second wood and stone alike, the third mostly stone. Every tier
+  needs grain for the workers:
+
+| Tier | Wall | Cost (wood / stone / grain / iron) | Time | Horde tears it down in |
+|---|---|---|---|---|
+| 1 | Palisade | 400 / 40 / 120 / 0 | 1 h | 2 h |
+| 2 | Timber-and-stone wall | 450 / 450 / 180 / 30 | 2 h | 4 h |
+| 3 | Stone wall | 120 / 900 / 240 / 60 | 3 h | 7 h |
+
+- **Gatehouses.** A gatehouse is a wall with gates. It costs **twice** the
+  wall's materials, plus **400 / 700 / 1,000 iron** for the gates at tiers
+  1 / 2 / 3. Building it takes **1.5×** as long, and tearing it down takes a
+  horde **1.5×** as long (3 h / 6 h / 10.5 h).
+
+| Tier | Gatehouse cost (wood / stone / grain / iron) | Time |
+|---|---|---|
+| 1 | 800 / 80 / 240 / 400 | 1.5 h |
+| 2 | 900 / 900 / 360 / 760 | 3 h |
+| 3 | 240 / 1,800 / 480 / 1,120 | 4.5 h |
+
+- **Nobody crosses a wall.** Armies, caravans, scouts, settlers and heroes
+  go round it. A wall still being built for the first time is no
+  obstacle yet. An army already on the march keeps its road.
+- **Gatehouses let players through.** Every player's armies, caravans and
+  scouts pass a gatehouse as if it were open ground. Hordes don't.
+- **Hordes tear walls down** when going round would take longer. When a
+  horde plans its road, a wall in the way costs the hours it takes to tear
+  down. If that is quicker than the way round, the horde marches up to the
+  wall, spends those hours, and the wall is **gone** once it is through. The
+  owner hears of it. A wall finished across a marching horde's road makes it
+  plan its road again from the hex it is heading for.
+- **Tearing your own down.** The owner can tear a wall down at any time.
+  Nothing comes back.
+- **A gatehouse on a fort's hex** becomes that fort's outermost wall ring
+  ([page 17](17-forts.md#the-gatehouse-ring)).
+
+The map draws each tier differently: sharpened stakes, timber posts on a
+stone footing, or crenellated stone. A gatehouse shows iron gates between
+two towers.
+
 ## The Holy City
 
-The Holy City has no walls to build. Its guard fights from the city in a
+The Holy City has no walls to build (walls can still run along its edges,
+[above](#walls-along-the-edges)). Its guard fights from the city in a
 defensive stance with the home bonus ([page 1](01-world-and-run.md#the-holy-city-and-sanctity)).
 Armies standing there fight with it.

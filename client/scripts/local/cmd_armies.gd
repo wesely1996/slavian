@@ -1469,6 +1469,11 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		var rings: Array = LocalForts.standing_rings(fort.plots).map(func(r: int) -> Dictionary:
 			var integrity := LocalWalls.wall_integrity(data, LocalForts.ring_plots(fort.plots, r))
 			return {"ring": r, "integrity": integrity, "max": integrity})
+		# A gatehouse merged with it stands outermost.
+		var gate := LocalEdgeWalls.fort_gatehouse(world, cell, fort.ownerAccountId)
+		if not gate.is_empty():
+			var integrity := LocalWalls.wall_integrity(data, LocalEdgeWalls.gate_ring_plots(data, int(gate.tier)))
+			rings.push_front({"ring": LocalEdgeWalls.GATE_RING, "integrity": integrity, "max": integrity, "tier": int(gate.tier), "edge": {"aq": gate.a.x, "ar": gate.a.y, "bq": gate.b.x, "br": gate.b.y}})
 		setup.fortId = fort.id
 		if not rings.is_empty():
 			setup.rings = rings
@@ -1539,7 +1544,7 @@ static func march_on(server: LocalServer, world: Dictionary, wave: Dictionary, c
 	wave.path = late.path
 	wave.arrivesAt = late.arrivesAt
 	world.events = world.events.filter(func(e: Dictionary) -> bool:
-		return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+		return not (e.status == "pending" and e.type in LocalHordes.PLANS and int(e.payload.get("waveId", -1)) == int(wave.id)))
 	server.schedule(world, int(late.arrivesAt), "wave_arrive", {"waveId": wave.id})
 	LocalHordes.plan_raids(server, world, wave, since_spawn)
 	plan_intercepts(server, world, wave, since_spawn + 1)

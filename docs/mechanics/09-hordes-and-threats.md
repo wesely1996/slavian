@@ -101,6 +101,9 @@ A horde goes for the **nearest settlement** by road, with costs that steer it:
   next to one, so it keeps two hexes away. If going round costs more than
   50% more than the straight road, it marches on the fort first, fights its
   holders, and goes on to its target after.
+- **Walls along edges** ([page 7](07-walls-and-sieges.md#walls-along-the-edges))
+  cost the hours it takes to tear them down: a horde goes round when that is
+  quicker, and through (leaving no wall) when it isn't.
 
 Once it reaches its first target, the horde's **rampage clock** starts:
 **18 game hours**. Until the clock runs out it moves on to the next village it

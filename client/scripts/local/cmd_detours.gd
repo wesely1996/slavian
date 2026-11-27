@@ -109,7 +109,7 @@ static func avoid_fire(server: LocalServer, world: Dictionary, cell: Vector2i, u
 		wave.arrivesAt = march.arrivesAt
 		wave.endsAt = null
 		world.events = world.events.filter(func(e: Dictionary) -> bool:
-			return not (e.status == "pending" and e.type in ["outpost_raid", "supply_raid", "field_intercept"] and int(e.payload.get("waveId", -1)) == int(wave.id)))
+			return not (e.status == "pending" and e.type in LocalHordes.PLANS and int(e.payload.get("waveId", -1)) == int(wave.id)))
 		server.schedule(world, int(march.arrivesAt), "wave_arrive", {"waveId": wave.id})
 		LocalHordes.plan_raids(server, world, wave, since_spawn)
 		LocalArmies.plan_intercepts(server, world, wave, since_spawn + 1)

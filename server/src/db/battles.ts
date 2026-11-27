@@ -85,7 +85,9 @@ export interface BattleSetup {
   // A fort's battle (forts.json): the fort, and its wall rings the horde
   // meets, outer to inner, with what is left of each.
   fortId?: number;
-  rings?: { ring: number; integrity: number; max: number }[];
+  // Ring 3: a gatehouse on an edge of the fort's hex (sim/edgeWalls.ts
+  // GATE_RING), at its tier, along a|b.
+  rings?: { ring: number; integrity: number; max: number; tier?: number; edge?: { aq: number; ar: number; bq: number; br: number } }[];
 }
 
 // What a horde that won decided to do (see sim/horde.ts).

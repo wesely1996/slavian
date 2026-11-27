@@ -6,6 +6,7 @@ import { researchPerHour } from '../sim/village.js';
 import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
+import { listEdgeWalls } from '../db/edgeWalls.js';
 import { listShipyards } from '../db/shipyards.js';
 import { listAchievements } from '../db/achievements.js';
 import { listRiverEdges } from '../db/rivers.js';
@@ -767,6 +768,11 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
           // [aq, ar, bq, br, status, level]: roads ('building', 'standing',
           // or 'upgrading': standing at `level` while improved to the next).
           roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level, ...(e.damaged ? [true] : [])]),
+          // [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt]:
+          // walls ('wall') and gatehouses ('gate') along edges (field.json
+          // edgeWalls); 'building' (tier 0), 'standing', or 'upgrading':
+          // standing at `tier` while raised to the next.
+          walls: (await listEdgeWalls(client, world.id)).map((w) => [w.a.q, w.a.r, w.b.q, w.b.r, w.kind, w.status, w.tier, w.ownerAccountId, w.completesAt?.toISOString() ?? null]),
           // [q, r, action, villageId, completesAt]: land being reshaped (field.json terraform).
           terraforms: (await listTerraforms(client, world.id)).map((t) => [t.cell.q, t.cell.r, t.action, t.villageId, t.completesAt.toISOString()]),
           // The enemy lands beyond the edge: their seed and each front's bands seen.

@@ -23,6 +23,7 @@ import { armiesHolding } from '../db/armies.js';
 import { deleteFort, listForts, loadFort, type Fort } from '../db/forts.js';
 import { hex } from '../sim/hex.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
+import { planBreaches } from './edgeWalls.js';
 
 export const supplyRaidPayload = z.object({ waveId: z.number().int(), fortId: z.number().int() });
 export type SupplyRaidPayload = z.infer<typeof supplyRaidPayload>;
@@ -109,6 +110,7 @@ export async function planRaids(client: DbClient, data: GameData, world: World, 
   const wave = await loadWave(client, waveId);
   await scheduleRaids(client, data, world, wave, standingOutposts(await listVillages(client, world.id)), fromMs);
   await scheduleSupplyRaids(client, data, world, wave, await listForts(client, world.id), fromMs);
+  await planBreaches(client, world, wave, fromMs);
 }
 
 // A supply point has just been placed: hordes still on the march may pass it.

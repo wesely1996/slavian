@@ -33,6 +33,8 @@ import type { ArmyOrders } from '../sim/armies.js';
 import type { Hex } from '../sim/hex.js';
 import { loadFort, setFortFloor, type Fort } from '../db/forts.js';
 import { buildCrossing, buildFort, buildRoad } from '../scheduler/field.js';
+import { buildEdgeWall, tearDownEdgeWall } from '../scheduler/edgeWalls.js';
+import type { EdgeWall, EdgeWallKind } from '../db/edgeWalls.js';
 import { buildInFort, tearDownFort } from '../scheduler/forts.js';
 import type { RoadEdge } from '../db/roads.js';
 import type { Shipyard } from '../db/shipyards.js';
@@ -195,6 +197,35 @@ export async function buildRoadCommand(
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'built a road', villageId: village.id });
     return buildRoad(client, deps.data, world, village.id, input.a, input.b, input.now);
+  });
+}
+
+// Raises a wall or a gatehouse (or its next tier) along an edge near the
+// caller's village (field.json edgeWalls).
+export async function buildEdgeWallCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; kind: EdgeWallKind; now: Date },
+): Promise<EdgeWall> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: input.kind === 'gate' ? 'built a gatehouse' : 'built a wall', villageId: village.id });
+    return buildEdgeWall(client, deps.data, world, village.id, input.a, input.b, input.kind, input.now);
+  });
+}
+
+// Tears down one of the caller's walls.
+export async function tearDownEdgeWallCommand(
+  db: Db,
+  deps: SchedulerDeps,
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
+): Promise<void> {
+  const worldId = await worldOfVillage(db, input.villageId);
+  return withWorld(db, worldId, input.now, deps, async (client, world) => {
+    const village = await loadVillage(client, input.villageId);
+    await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'tore down a wall', villageId: village.id });
+    await tearDownEdgeWall(client, world, village.id, input.a, input.b);
   });
 }
 

@@ -15,6 +15,8 @@ import {
   buildSupplyPointCommand,
   stockStoreCommand,
   buildRoadCommand,
+  buildEdgeWallCommand,
+  tearDownEdgeWallCommand,
   terraformCommand,
   payShipyardCommand,
   disbandArmyCommand,
@@ -210,6 +212,7 @@ const takeBountyBody = z.object({ villageId: z.number().int().positive() });
 const rerouteBody = z.union([z.object({ home: z.literal(true) }), z.object({ villageId: z.number().int().positive().nullable() })]);
 const hexBody = z.object({ q: z.number().int().min(-999).max(999), r: z.number().int().min(-999).max(999) });
 const crossingBody = z.object({ a: hexBody, b: hexBody });
+const edgeWallBody = crossingBody.extend({ kind: z.enum(['wall', 'gate']) });
 const terraformBody = z.object({ q: z.number().int(), r: z.number().int(), action: z.string(), toward: z.object({ q: z.number().int(), r: z.number().int() }).optional() });
 const heroMoveBody = z.object({ villageId: z.number().int().positive() });
 const heroSkillBody = z.object({ skill: z.string().min(1).max(64) });
@@ -1071,6 +1074,26 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     const { id } = idParams.parse(request.params);
     const body = crossingBody.parse(request.body);
     await buildRoadCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  // A wall or gatehouse along an edge (field.json edgeWalls): the first
+  // tier, or the next on one standing.
+  app.post('/v1/villages/:id/walls', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = edgeWallBody.parse(request.body);
+    await buildEdgeWallCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, kind: body.kind, now: clock() });
+    const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
+    return fullWorldView(Number(worldId));
+  });
+
+  app.post('/v1/villages/:id/walls/tear', async (request) => {
+    const account = await authenticate(db, request);
+    const { id } = idParams.parse(request.params);
+    const body = crossingBody.parse(request.body);
+    await tearDownEdgeWallCommand(db, scheduler, { accountId: account.id, villageId: id, a: body.a, b: body.b, now: clock() });
     const worldId = (await db.query<{ world_id: number }>('SELECT world_id FROM villages WHERE id = $1', [id])).rows[0]!.world_id;
     return fullWorldView(Number(worldId));
   });

@@ -154,6 +154,8 @@ var _army_stack: Array = []
 var _army_stack_at := 0
 
 var _road_village := 0
+## With _road_from: a wall ("wall" or "gate") being laid instead of a road.
+var _wall_kind := ""
 
 ## Caravan form: destination village id (0: the Holy City vault) and load.
 ## Where it goes: {kind: "vault"}, or {kind: "village" | "fort" |
@@ -974,6 +976,7 @@ func _select(cell: Vector2i) -> void:
 	_sheet_folded = false
 	_side.erase("hex")
 	_road_from = Vector2i.MAX
+	_wall_kind = ""
 	hex_map.show_road_targets([])
 	var village := Game.village_at(cell)
 	if not village.is_empty() and Game.commands(village):
@@ -1043,6 +1046,7 @@ func _rebuild_panel() -> void:
 	# A road being laid is dropped once the sheet shows something else.
 	if _road_from != Vector2i.MAX and _panel_mode != "hex":
 		_road_from = Vector2i.MAX
+		_wall_kind = ""
 		hex_map.show_road_targets([])
 		_status.text = ""
 	# Likewise an army waiting to be told where to march.
