@@ -56,6 +56,8 @@ export type WorldSet = {
   mountainCity?: { q: number; r: number; front: string; raiders: Record<string, number> };
   // A bandit camp or lair rises at a hex (camps.json), as one would after a wave.
   camp?: { q: number; r: number; kind: 'bandit' | 'lair'; front: string; units: Record<string, number> };
+  // A front's enemy lands seen this many bands deep (as an army reaching them would).
+  enemySight?: { front: string; bands: number };
   // A fort's buildings (forts.json plots), grain and defenders, by id; as
   // a muster would, newly manned it stands in the way of hordes on the march.
   fort?: { id: number; plots: Record<string, { kind: string; level: number }>; grain: number; defenders?: Record<string, number> };
@@ -170,6 +172,9 @@ export function scenario(fixture: string, start: ScenarioStart, script: (session
               } finally {
                 client.release();
               }
+            }
+            if (step.set.enemySight) {
+              await db.query('UPDATE worlds SET enemy_sight = enemy_sight || jsonb_build_object($2::text, $3::int) WHERE id = $1', [world.id, step.set.enemySight.front, step.set.enemySight.bands]);
             }
             if (step.set.fort) {
               const f = step.set.fort;

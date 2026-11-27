@@ -18,6 +18,8 @@ export interface EdgeWall {
   builtBy: number | null;
   ownerAccountId: number | null;
   completesAt: Date | null;
+  // The enemy front that raised it in its lands (null: a player's).
+  front: string | null;
 }
 
 interface Row {
@@ -31,6 +33,7 @@ interface Row {
   built_by: string | number | null;
   owner_account_id: string | number | null;
   completes_at: Date | null;
+  front: string | null;
 }
 
 function ordered(a: Hex, b: Hex): [Hex, Hex] {
@@ -48,6 +51,7 @@ export async function listEdgeWalls(client: DbClient, worldId: number): Promise<
     builtBy: r.built_by === null ? null : Number(r.built_by),
     ownerAccountId: r.owner_account_id === null ? null : Number(r.owner_account_id),
     completesAt: r.completes_at,
+    front: r.front,
   }));
 }
 
@@ -56,7 +60,7 @@ export async function edgeWallAt(client: DbClient, worldId: number, a: Hex, b: H
   return (await listEdgeWalls(client, worldId)).find((w) => edgeKey(w.a, w.b) === key) ?? null;
 }
 
-export async function insertEdgeWall(client: DbClient, worldId: number, w: Omit<EdgeWall, 'tier' | 'status'>): Promise<void> {
+export async function insertEdgeWall(client: DbClient, worldId: number, w: Omit<EdgeWall, 'tier' | 'status' | 'front'>): Promise<void> {
   const [p, q] = ordered(w.a, w.b);
   await client.query(
     "INSERT INTO edge_walls (world_id, aq, ar, bq, br, kind, tier, status, built_by, owner_account_id, completes_at) VALUES ($1, $2, $3, $4, $5, $6, 0, 'building', $7, $8, $9)",
@@ -69,6 +73,15 @@ export async function saveEdgeWall(client: DbClient, worldId: number, w: EdgeWal
   await client.query(
     'UPDATE edge_walls SET kind = $6, tier = $7, status = $8, built_by = $9, completes_at = $10 WHERE world_id = $1 AND aq = $2 AND ar = $3 AND bq = $4 AND br = $5',
     [worldId, p.q, p.r, q.q, q.r, w.kind, w.tier, w.status, w.builtBy, w.completesAt],
+  );
+}
+
+// A wall the enemy raised in its lands (no owner), standing at once.
+export async function insertEnemyWall(client: DbClient, worldId: number, a: Hex, b: Hex, front: string): Promise<void> {
+  const [p, q] = ordered(a, b);
+  await client.query(
+    "INSERT INTO edge_walls (world_id, aq, ar, bq, br, kind, tier, status, front) VALUES ($1, $2, $3, $4, $5, 'wall', 1, 'standing', $6)",
+    [worldId, p.q, p.r, q.q, q.r, front],
   );
 }
 

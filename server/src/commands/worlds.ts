@@ -11,6 +11,7 @@ import { ensureHeroes } from '../db/heroes.js';
 import { ensureDigests, tell } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
 import { applySeason, ensureSeasons } from '../scheduler/seasons.js';
+import { ensureEnemyLands } from '../scheduler/enemySettlements.js';
 import { ensurePrune } from '../scheduler/prune.js';
 import { insertVillage, listVillages, loadVillage } from '../db/villages.js';
 import { placeStarterCamps } from '../scheduler/camps.js';
@@ -215,6 +216,7 @@ export async function startWorldCommand(
     await ensureDigests(client, started, input.now);
     await ensureMapEvents(client, deps.data, started, input.now);
     await ensureSeasons(client, deps.data, started, input.now);
+    await ensureEnemyLands(client, deps.data, started, input.now);
     await ensurePrune(client, started, input.now);
     await record(client, world.id, 'run_start', { players: members.length, difficulty: started.difficulty, speed: started.speed, fronts: map.activeFronts }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });

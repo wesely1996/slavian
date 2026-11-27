@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "The enemy lands beyond the map's edge (docs/enemy-lands.md): rings past the heartland's radius, only on the sides of active fronts, four bands deep. Each front paints its own terrain: a noise value (about -1..1) plus shift for each band past the first picks the first palette entry whose upTo it is below. Where two fronts' lands meet, a seam of impassable terrain keeps them apart. Bands deeper than sight start in fog; an army that reaches a hex sees one band past it.",
+  "_comment": "The enemy lands beyond the map's edge (docs/enemy-lands.md): rings past the heartland's radius, only on the sides of active fronts, four bands deep. Each front paints its own terrain: a noise value (about -1..1) plus shift for each band past the first picks the first palette entry whose upTo it is below. Where two fronts' lands meet, a seam of impassable terrain keeps them apart. Bands deeper than sight start in fog; an army that reaches a hex sees one band past it. Settlements: each active front founds one when the run starts and another every everyDays game days, the deepest band first (its seat, then towns, then border forts, then war camps; the North's are all monster lairs, by the lairs list), on open land inside its lands (not on their outer rim) at least minApart hexes from any other. Every worksEveryHours game hours each settlement that builds does one work: palisades on its own edges (a gatehouse where its road leaves), then its road one edge at a time to the nearest older settlement of its front (bridging rivers on the way), then a moat (river edges round its ring of neighbours, bridged where its road runs), then raising its walls a tier at a time up to its kind's wallTier. A settlement grows a level every growHours game hours from its founding, up to maxLevel; its walls rise no higher than tier 1 + (level - 1) / levelsPerWallTier (rounded down), and its level sets the strength of its garrison. Monster lairs build nothing. Rivers: perFront rivers per front run along edges from deep inside towards the edge, a ford every fordEvery edges; one shorter than minLength edges is dropped.",
   "bands": [
     { "id": "march",     "name": "The March",     "rings": 3 },
     { "id": "forts",     "name": "The Forts",     "rings": 2 },
@@ -27,5 +27,33 @@
       { "terrain": "mill_meadow",  "upTo": -0.05 },
       { "terrain": "abbey_orchard", "upTo": 0.2 },
       { "terrain": "hallowed",     "upTo": 99 } ] }
-  }
+  },
+  "settlements": {
+    "everyDays": 2,
+    "minApart": 3,
+    "worksEveryHours": 6,
+    "growHours": 24,
+    "maxLevel": 10,
+    "levelsPerWallTier": 3,
+    "kinds": {
+      "seat": { "band": 4, "max": 1, "wallTier": 3, "moat": true,  "builds": true },
+      "town": { "band": 3, "max": 3, "wallTier": 3, "moat": true,  "builds": true },
+      "fort": { "band": 2, "max": 3, "wallTier": 2, "moat": true,  "builds": true },
+      "camp": { "band": 1, "max": 4, "wallTier": 1, "moat": false, "builds": true },
+      "lair": { "band": 0, "max": 0, "wallTier": 0, "moat": false, "builds": false }
+    },
+    "lairs": [
+      { "band": 4, "max": 3 },
+      { "band": 3, "max": 3 },
+      { "band": 2, "max": 2 },
+      { "band": 1, "max": 2 }
+    ],
+    "names": {
+      "north": { "lair": "Monster lair" },
+      "east":  { "seat": "Khan's Ordu",      "town": "Steppe town", "fort": "Border yurt-fort", "camp": "Nomad war camp" },
+      "south": { "seat": "Grand Preceptory", "town": "Vineyard town", "fort": "Order castle",  "camp": "Crusader camp" },
+      "west":  { "seat": "Templar Keep",     "town": "Abbey town",    "fort": "Commandery",    "camp": "Pilgrim war camp" }
+    }
+  },
+  "rivers": { "perFront": 2, "fordEvery": 5, "minLength": 4 }
 }

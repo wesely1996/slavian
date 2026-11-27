@@ -70,6 +70,12 @@ export async function insertRoad(client: DbClient, worldId: number, a: Hex, b: H
   );
 }
 
+// A road the enemy laid in its lands: standing at once, by nobody's village.
+export async function insertEnemyRoad(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<void> {
+  const [p, q] = ordered(a, b);
+  await client.query("INSERT INTO road_edges (world_id, aq, ar, bq, br, status) VALUES ($1, $2, $3, $4, $5, 'standing') ON CONFLICT DO NOTHING", [worldId, p.q, p.r, q.q, q.r]);
+}
+
 // The work on a road is done: built, improved a level, or repaired (or a
 // fire undid a repair: `damaged`).
 export async function markRoadStanding(client: DbClient, worldId: number, a: Hex, b: Hex, level: number, damaged = false): Promise<void> {

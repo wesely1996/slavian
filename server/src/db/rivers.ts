@@ -117,7 +117,7 @@ export async function loadLand(client: DbClient, worldId: number): Promise<Land>
   const forts = (await listForts(client, worldId)).filter((f) => f.kind === 'fort' && f.status === 'standing' && (held.has(`${f.q},${f.r}`) || manned(f))).map((f) => `${f.q},${f.r}`);
   // Walls standing along edges (being raised to the next tier still stand).
   const walls = new Map(
-    (await listEdgeWalls(client, worldId)).filter((w) => w.status !== 'building').map((w) => [edgeKey(w.a, w.b), { gate: w.kind === 'gate', tier: w.tier }] as const),
+    (await listEdgeWalls(client, worldId)).filter((w) => w.status !== 'building').map((w) => [edgeKey(w.a, w.b), { gate: w.kind === 'gate', tier: w.tier, enemy: w.front !== null }] as const),
   );
   const land = withWalls(landOf(terrain, blocked, roads, lanes, burning, damaged, forts), walls);
   // Blessed by the water god: every river's banks are travelled the faster.

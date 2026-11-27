@@ -85,6 +85,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	LocalInbox.ensure_digests(self, world, now)
 	LocalEvents.ensure(self, world, now)
 	LocalSeasons.ensure(self, world, now)
+	LocalEnemySettlements.ensure(self, world, now)
 	LocalPrune.ensure(self, world, now)
 	world.hexes = _by_row(world.hexes)
 	_hex_views.erase(int(world.id))
@@ -1125,6 +1126,7 @@ func drain(world: Dictionary, until: int, changed: Array) -> int:
 	# Worlds saved before daily map events: the next day's planned.
 	LocalEvents.ensure(self, world, until)
 	LocalSeasons.ensure(self, world, until)
+	LocalEnemySettlements.ensure(self, world, until)
 	LocalPrune.ensure(self, world, until)
 	# A finished run (won or lost) stands still.
 	while processed < 10000 and not world.status in ["won", "lost"]:
@@ -1331,6 +1333,14 @@ func _on_road_built(world: Dictionary, event: Dictionary, changed: Array) -> voi
 	LocalArmies.on_road_built(self, world, event, changed)
 
 
+func _on_enemy_found(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEnemySettlements.on_enemy_found(self, world, event, changed)
+
+
+func _on_enemy_works(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEnemySettlements.on_enemy_works(self, world, event, changed)
+
+
 func _on_edge_wall_built(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalEdgeWalls.on_edge_wall_built(self, world, event, changed)
 
@@ -1508,7 +1518,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"bounties": [],
-		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads, "walls": LocalEdgeWalls.view(world), "terraforms": LocalTerraform.view(world), "enemy": LocalEnemyLands.view(data, world)},
+		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads, "walls": LocalEdgeWalls.view(world), "terraforms": LocalTerraform.view(world), "enemy": LocalEnemyLands.view(data, world), "settlements": LocalEnemySettlements.view(data, world, now)},
 		"serverTime": LocalTime.iso(now),
 	}
 

@@ -52,6 +52,9 @@ func _hex_panel() -> void:
 		parts.append(["horde", "icon/threat", tr("Hordes here"), func() -> void:
 			for wave in here:
 				_wave_entry(wave)])
+	var settlement := Game.settlement_at(cell)
+	if not settlement.is_empty():
+		parts.append(["enemy", WaveMath.front_icon(String(settlement.front)), tr(String(settlement.name)), _settlement_panel.bind(settlement)])
 	var village := Game.village_at(cell)
 	if village.is_empty():
 		parts.append_array(_terrain_panel())
@@ -926,6 +929,24 @@ func _road_section(cell: Vector2i) -> void:
 		var have := Ledger.amounts_at(current.resources, Game.server_now())
 		build.disabled = not Ledger.can_afford(have, cost)
 		return tr("A road: %s · %s") % [UI.costs(cost, 30, have), road_time])
+
+
+## An enemy settlement: what it is, how grown, and what it builds.
+func _settlement_panel(s: Dictionary) -> void:
+	var rules: Dictionary = Game.data.enemyLands.settlements
+	var level := int(s.get("level", 1))
+	var band: Dictionary = Game.data.enemyLands.bands[clampi(int(s.band) - 1, 0, Game.data.enemyLands.bands.size() - 1)]
+	_panel_body.add_child(UI.label(tr("%s, level %d") % [tr(String(s.name)), level], UI.HEADING_SIZE))
+	_panel_body.add_child(UI.label(tr("In %s, band %d of the enemy lands.") % [tr(String(band.name)), int(s.band)], UI.SMALL_SIZE, UI.MUTED))
+	var kind: Dictionary = rules.kinds.get(String(s.kind), {})
+	if not kind.get("builds", false):
+		_panel_body.add_child(UI.label(tr("Monsters build nothing: the lair only grows."), UI.SMALL_SIZE))
+	else:
+		var cap := LocalEnemySettlements.wall_tier_cap(Game.data, String(s.kind), level)
+		_panel_body.add_child(UI.label(tr("It walls its hex, runs a road to the nearest older settlement of its front, bridging rivers on the way%s, and raises its walls to a %s (a %s at most).") % [
+			tr(", and digs a moat round it") if kind.get("moat", false) else "", EdgeWallText.tier_name(Game.data, cap).to_lower(), EdgeWallText.tier_name(Game.data, int(kind.wallTier)).to_lower()], UI.SMALL_SIZE))
+	if level < int(rules.maxLevel):
+		_panel_body.add_child(UI.label(tr("It grows a level every %s (up to level %d).") % [TimeUtil.format_duration(float(rules.growHours) * 3600.0 / float(Game.world.speed)), int(rules.maxLevel)], UI.SMALL_SIZE, UI.MUTED))
 
 
 ## Walls along the selected hex's edges (field.json edgeWalls): those

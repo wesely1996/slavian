@@ -7,6 +7,7 @@ import { WALL_PLOT } from '../sim/walls.js';
 import { ensureDigests } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
 import { ensureSeasons } from '../scheduler/seasons.js';
+import { ensureEnemyLands } from '../scheduler/enemySettlements.js';
 import { ensurePrune } from '../scheduler/prune.js';
 import { ensureSites } from '../scheduler/sites.js';
 import { assignHeroKinds, ensureHeroes } from './heroes.js';
@@ -101,6 +102,8 @@ export async function upgradeMapEvents(db: Db, data: GameData, now: Date): Promi
       await ensureMapEvents(client, data, world, now);
       // And the seasons.
       await ensureSeasons(client, data, world, now);
+      // And the enemy's settlements.
+      await ensureEnemyLands(client, data, world, now);
       // And daily pruning.
       await ensurePrune(client, world, now);
     }

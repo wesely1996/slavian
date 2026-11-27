@@ -977,6 +977,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("fort-siege-scenario.json", "local fort siege: the Garrison's defenders and the wall rings")
 	_replay_scenario("walls-scenario.json", "local walls: tiers, gatehouse, tear-down and a horde breaking through")
 	_replay_scenario("gatehouse-fort-scenario.json", "local fort with a gatehouse as its outermost ring")
+	_replay_scenario("enemy-settlements-scenario.json", "local enemy settlements: founding, walls, roads, moats, rivers, growth")
 	_replay_scenario("expedition-scenario.json", "local expeditions: raids, strikes and camps from the field")
 
 
@@ -1158,6 +1159,10 @@ func _replay_scenario(file: String, name: String) -> void:
 				var c: Dictionary = step.set.camp
 				LocalBattles.create_camp(local, world, {"kind": String(c.kind), "front": String(c.front), "q": int(c.q), "r": int(c.r),
 					"units": LocalServer._decode(c.units), "waveId": null}, now)
+			if step.set.has("enemySight"):
+				var sight: Dictionary = world.get("enemySight", {})
+				sight[String(step.set.enemySight.front)] = int(step.set.enemySight.bands)
+				world.enemySight = sight
 			if step.set.has("fort"):
 				var held := LocalArmies.find_fort(world, int(step.set.fort.id))
 				held.plots = step.set.fort.plots.duplicate(true)
