@@ -68,6 +68,7 @@ func _hex_panel() -> void:
 	if Game.enemy_band(cell) == 0:
 		parts.append(["river", "feature/reeds", tr("Rivers"), _river_section.bind(cell)])
 		parts.append(["road", "icon/map", tr("Roads"), _road_section.bind(cell)])
+		parts.append(["walls", "icon/defense", tr("Walls"), _wall_section.bind(cell)])
 	parts = parts.filter(func(part: Array) -> bool: return _has_content(part[3]))
 	if parts.size() == 1:
 		parts[0][3].call()
@@ -693,6 +694,12 @@ func _fort_buildings(fort: Dictionary) -> void:
 		_fort_plot = plot
 		_rebuild_panel())
 	_panel_body.add_child(view)
+	# Merged with a gatehouse on its hex's edge: the outermost ring.
+	var gate := EdgeWallText.fort_gatehouse(Game.walls, fort)
+	if not gate.is_empty():
+		var level := LocalEdgeWalls.gate_ring_level(Game.data, int(gate.tier))
+		_panel_body.add_child(UI.with_info(UI.label(tr("Gatehouse: the outermost ring, a level %d wall (%s)") % [level, EdgeWallText.tier_name(Game.data, int(gate.tier)).to_lower()], UI.SMALL_SIZE, UI.GOOD),
+			tr("A horde attacking the fort batters the gatehouse first, as a wall of level %d, %d to batter down. Battered down, it loses a tier, and the last tier is gone. Raise it at the edge's Walls tab.") % [level, WallText.integrity(Game.data, level)]))
 	var plots: Dictionary = fort.get("plots", {})
 	var work: Variant = fort.get("work")
 	if work != null:
@@ -919,6 +926,108 @@ func _road_section(cell: Vector2i) -> void:
 		var have := Ledger.amounts_at(current.resources, Game.server_now())
 		build.disabled = not Ledger.can_afford(have, cost)
 		return tr("A road: %s · %s") % [UI.costs(cost, 30, have), road_time])
+
+
+## Walls along the selected hex's edges (field.json edgeWalls): those
+## standing, raising one a tier, tearing one down, and building more.
+func _wall_section(cell: Vector2i) -> void:
+	if not Game.terrain.has(cell):
+		return
+	var home := _my_village()
+	var walls := EdgeWallText.walls_at(Game.walls, cell)
+	var rules: Dictionary = Game.data.field.edgeWalls
+	var names := ["E", "NE", "NW", "W", "SW", "SE"]  # tr
+	var open: Array = []
+	var mine: Array[int] = []
+	var built := PackedStringArray()
+	for i in 6:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		var buildable: bool = not home.is_empty() and EdgeWallText.problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other,
+			LocalForts.in_zone(Game.data, Game.forts, int(home.id), cell) or LocalForts.in_zone(Game.data, Game.forts, int(home.id), other)) == ""
+		if walls.has(other):
+			var w: Dictionary = walls[other]
+			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being raised)")}.get(w.status, "")
+			built.append("%s: %s%s" % [tr(names[i]), EdgeWallText.kind_name(Game.data, w.kind, int(w.tier)) if w.status != "building" else (tr("Gatehouse") if w.kind == "gate" else tr("Wall")), state])
+			if w.ownerAccountId == Game.my_account_id():
+				mine.append(i)
+		elif buildable:
+			open.append(other)
+	if built.is_empty() and open.is_empty():
+		return
+	var hours: Array = rules.tiers.map(func(t: Dictionary) -> String: return "%s h" % str(t.breakHours))
+	_panel_body.add_child(UI.with_info(UI.label(tr("Walls"), UI.HEADING_SIZE),
+		tr("A wall along an edge stops every army, caravan and scout. A gatehouse lets the players' own through. A horde tears a wall down if going round would take longer: %s for a palisade, timber-and-stone or stone wall, %d%% longer for a gatehouse. A gatehouse on the edge of your fort's hex becomes the fort's outermost wall ring.") % [
+			", ".join(hours), roundi((float(rules.gatehouse.breakFactor) - 1.0) * 100.0)]))
+	if not built.is_empty():
+		_panel_body.add_child(UI.label(tr("Walls stand %s.") % "; ".join(built), UI.SMALL_SIZE))
+	var village_id := int(home.id) if not home.is_empty() else 0
+	for i in mine:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
+		var w: Dictionary = walls[other]
+		var row := UI.hbox()
+		var line := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(line)
+		var direction := tr(names[i])
+		if w.status == "standing" and int(w.tier) < rules.tiers.size() and village_id != 0:
+			var step := EdgeWallText.tier_cost(Game.data, w.kind, int(w.tier) + 1)
+			var raise := UI.button(tr("Raise"), func() -> void: _build_wall(village_id, cell, other, String(w.kind)))
+			raise.custom_minimum_size.x = 110
+			row.add_child(raise)
+			var next := EdgeWallText.tier_name(Game.data, int(w.tier) + 1).to_lower()
+			var step_time := TimeUtil.format_duration(float(step.seconds) / float(Game.world.speed))
+			_tick(line, func() -> String:
+				var current: Dictionary = Game.villages.get(village_id, home)
+				var have := Ledger.amounts_at(current.resources, Game.server_now())
+				raise.disabled = not Ledger.can_afford(have, step.cost)
+				return tr("%s to a %s: %s · %s") % [direction, next, UI.costs(step.cost, 30, have), step_time])
+		else:
+			line.text = direction
+		var tear := UI.button(tr("Tear down"), func() -> void: _tear_wall(village_id, cell, other))
+		tear.custom_minimum_size.x = 110
+		tear.disabled = village_id == 0
+		row.add_child(tear)
+		_panel_body.add_child(row)
+	if open.is_empty() or village_id == 0:
+		return
+	# One button for each kind; then the hex across the edge is tapped on the map.
+	for kind: String in ["wall", "gate"]:
+		var first := EdgeWallText.tier_cost(Game.data, kind, 1)
+		var info := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
+		_panel_body.add_child(info)
+		var what: String = kind
+		var build := UI.button(tr("Build a wall") if kind == "wall" else tr("Build a gatehouse"), func() -> void:
+			_road_from = cell
+			_road_village = village_id
+			_wall_kind = what
+			hex_map.show_road_targets(open)
+			_status.text = tr("Tap the hex across the edge the wall goes along."), "icon/defense")
+		_panel_body.add_child(build)
+		var time := TimeUtil.format_duration(float(first.seconds) / float(Game.world.speed))
+		var label := tr("A palisade") if kind == "wall" else tr("A gatehouse")
+		_tick(info, func() -> String:
+			var current: Dictionary = Game.villages.get(village_id, home)
+			var have := Ledger.amounts_at(current.resources, Game.server_now())
+			build.disabled = not Ledger.can_afford(have, first.cost)
+			return tr("%s: %s · %s") % [label, UI.costs(first.cost, 30, have), time])
+
+
+func _build_wall(village_id: int, a: Vector2i, b: Vector2i, kind: String) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/walls" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}, "kind": kind})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
+
+
+func _tear_wall(village_id: int, a: Vector2i, b: Vector2i) -> void:
+	_status.text = ""
+	var response := await Api.post_json("/v1/villages/%d/walls/tear" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}})
+	if not response.ok:
+		_status.text = response.error
+		return
+	Game.set_world(response.data)
 
 
 func _build_road(village_id: int, a: Vector2i, b: Vector2i) -> void:
@@ -1449,10 +1558,15 @@ func _on_map_tapped(world_position: Vector2) -> void:
 		var from := _road_from
 		_road_from = Vector2i.MAX
 		var picked: bool = hex_map.road_targets.has(cell)
+		var kind := _wall_kind
+		_wall_kind = ""
 		hex_map.show_road_targets([])
 		_status.text = ""
 		if picked:
-			_build_road(_road_village, from, cell)
+			if kind != "":
+				_build_wall(_road_village, from, cell, kind)
+			else:
+				_build_road(_road_village, from, cell)
 			return
 	# An army's marker: its own sheet. Armies on one spot open one after
 	# another, tap by tap, until something else is tapped.

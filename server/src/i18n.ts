@@ -221,6 +221,9 @@ const SERBIAN: Record<string, string> = {
 	'Armies standing there fill up from its grain; supply routes keep it stocked.': 'Vojske koje tamo stoje uzimaju njeno žito; putevi snabdevanja je drže punom.',
 	'A horde burned the supply point at ({q}, {r})': 'Horda je spalila žitnicu na ({q}, {r})',
 	'Its {grain} grain burned with it.': 'Njenih {grain} žita izgorelo je s njom.',
+	'A horde broke down your gatehouse': 'Horda je razbila vašu kapiju',
+	'A horde tore down your wall': 'Horda je srušila vaš zid',
+	'Between ({aq}, {ar}) and ({bq}, {br}).': 'Između ({aq}, {ar}) i ({bq}, {br}).',
 	// Bridge, settlers, sites, delegation
 	'Next: {stage}.': 'Sledeće: {stage}.',
 	'The builders send {wood} wood, {stone} stone, {grain} grain and {iron} iron, and the {blessing} is on every village of the group. Next: {stage}.': 'Graditelji šalju {wood} drveta, {stone} kamena, {grain} žita i {iron} gvožđa, a {blessing} je nad svakim selom grupe. Sledeće: {stage}.',

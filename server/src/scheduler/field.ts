@@ -17,6 +17,8 @@ import type { GameData, Stance } from '../data/index.js';
 import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, saveSetup, type Battle, type BattleSetup, type RoundLog } from '../db/battles.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, wallFactors, wallIntegrity } from '../sim/walls.js';
+import { GATE_RING, gateRingPlots } from '../sim/edgeWalls.js';
+import { breachGatehouse, fortGatehouse } from './edgeWalls.js';
 import { inFortZone, levelOf, ringPlots, standingRings, startingPlots } from '../sim/forts.js';
 import { fortAt, insertFort, listForts, loadFort, manned, setFortDefenders, saveFortBuildings, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
 import { campAt } from '../db/camps.js';
@@ -119,7 +121,7 @@ export async function interceptAt(client: DbClient, _data: GameData, world: Worl
 export async function cancelPlans(client: DbClient, worldId: number, waveId: number): Promise<void> {
   await client.query(
     `UPDATE scheduled_events SET status = 'done', processed_at = now(), error = 'superseded'
-     WHERE world_id = $1 AND status = 'pending' AND type IN ('outpost_raid', 'supply_raid', 'field_intercept') AND payload @> $2::jsonb`,
+     WHERE world_id = $1 AND status = 'pending' AND type IN ('outpost_raid', 'supply_raid', 'field_intercept', 'wall_breach') AND payload @> $2::jsonb`,
     [worldId, JSON.stringify({ waveId })],
   );
 }
@@ -159,10 +161,16 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
   if (ring > 0) setup = { ...setup, wagonFort: ring };
   // Its wall rings, outer to inner, each to be battered down in turn.
   if (fort) {
-    const rings = standingRings(fort.plots).map((r) => {
+    const rings: NonNullable<BattleSetup['rings']> = standingRings(fort.plots).map((r) => {
       const integrity = wallIntegrity(data, ringPlots(fort.plots, r));
       return { ring: r, integrity, max: integrity };
     });
+    // A gatehouse merged with it stands outermost.
+    const gate = await fortGatehouse(client, world.id, cell, fort.ownerAccountId);
+    if (gate) {
+      const integrity = wallIntegrity(data, gateRingPlots(data, gate.tier));
+      rings.unshift({ ring: GATE_RING, integrity, max: integrity, tier: gate.tier, edge: { aq: gate.a.q, ar: gate.a.r, bq: gate.b.q, br: gate.b.r } });
+    }
     setup = { ...setup, fortId: fort.id, ...(rings.length ? { rings } : {}), ...(guard ? { guard } : {}) };
   }
   await markBattling(client, wave.id);
@@ -281,7 +289,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
   // horde's fighters come to grips only where climbers carry them over.
   const rings = battle.setup.rings ?? [];
   const ringAt = fort ? rings.find((r) => r.integrity > 0) : undefined;
-  const wallPlots = ringAt ? ringPlots(fort!.plots, ringAt.ring) : null;
+  const wallPlots = ringAt ? (ringAt.ring === GATE_RING ? gateRingPlots(data, ringAt.tier ?? 1) : ringPlots(fort!.plots, ringAt.ring)) : null;
   const smashed = wallPlots ? ballistaKills(data, wave.front, wave.composition, wallPlots, rng) : {};
   const assault = subtractUnits(wave.composition, smashed);
   const shooters = [...(guard ? [guard] : []), ...engaged.map((a) => a.units)].reduce(
@@ -459,6 +467,11 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       const plots = { ...fort.plots };
       for (const r of ringsNow) {
         if (r.integrity > 0) continue;
+        // A gatehouse battered down loses a tier (the last: it is gone).
+        if (r.ring === GATE_RING && r.edge) {
+          await breachGatehouse(client, world.id, hex(r.edge.aq, r.edge.ar), hex(r.edge.bq, r.edge.br));
+          continue;
+        }
         const level = levelOf(plots, `w${r.ring}`) - data.walls.breachLevelsLost;
         if (level > 0) plots[`w${r.ring}`] = { kind: 'wall', level };
         else delete plots[`w${r.ring}`];

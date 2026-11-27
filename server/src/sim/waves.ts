@@ -5,7 +5,8 @@
 // When it spawns it picks a hex in its front's spawn zone and marches to its
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
-import { canCross, edgeKey, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
+import { edgeKey, fastestRoad, hordeCanCross, roadFactor, roadLevel, type Land } from './land.js';
+import { breakHours } from './edgeWalls.js';
 import { frontWeight, seasonAt } from './seasons.js';
 import type { GameData, Season, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
@@ -251,9 +252,17 @@ export function routeFrom(
   };
   // Human hordes take the roads; the Monsters of the North keep off them.
   const roads = input.front !== 'north';
+  // A wall in the way (data/field.json edgeWalls) is torn down: the hours
+  // that takes, in road cost at the horde's pace.
+  const pace = marchSpeed(data, input.front, input.composition);
+  const wallCost = (from: Hex, to: Hex): number => {
+    const wall = terrain.walls?.get(edgeKey(from, to));
+    return wall ? breakHours(data, wall) * pace : 0;
+  };
   const stepCost = (from: Hex, to: Hex): number | null => {
-    const cost = canCross(terrain, from, to) ? moveCost(to) : null;
-    return cost !== null && roads ? cost * roadFactor(data, roadLevel(terrain, from, to), !!terrain.damaged?.has(edgeKey(from, to))) : cost;
+    const cost = hordeCanCross(terrain, from, to) ? moveCost(to) : null;
+    const walked = cost !== null && roads ? cost * roadFactor(data, roadLevel(terrain, from, to), !!terrain.damaged?.has(edgeKey(from, to))) : cost;
+    return walked === null ? null : walked + wallCost(from, to);
   };
   const searchCost = (from: Hex, to: Hex): number | null => {
     const cost = stepCost(from, to);
@@ -337,7 +346,7 @@ export function routeFrom(
     }
     best = { ...best, path: [...head, ...rest.slice(1)] };
   }
-  const hoursPerCost = 1 / marchSpeed(data, input.front, input.composition);
+  const hoursPerCost = 1 / pace;
   let atMs = input.startMs;
   const path = best.path.map((cell, i) => {
     if (i > 0) atMs += (stepCost(best!.path[i - 1]!, cell)! * hoursPerCost * MS_PER_HOUR) / input.worldSpeed;

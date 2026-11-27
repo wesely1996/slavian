@@ -20,7 +20,7 @@ balance changes land there first.
 | 4 | [Economy and logistics](04-economy-and-logistics.md) | Resources, production, storage, grain upkeep, outposts, the Market and bounty board, caravans, merchants, the vault, standing orders |
 | 5 | [Units and training](05-units-and-training.md) | Unit families and tiers, the full unit list, training queues and speed, army slots, special units (healers, wagons, siege engines, scouts, settlers) |
 | 6 | [Battles](06-battles.md) | Rounds, the damage formula, terrain, stances, counters, matchups, breaking, champions, burn and poison, loot |
-| 7 | [Walls and sieges](07-walls-and-sieges.md) | Wall tiers, towers, manning, escalade, siege engines, volley rounds, breaching, charging out, the hospital |
+| 7 | [Walls and sieges](07-walls-and-sieges.md) | Wall tiers, towers, manning, escalade, siege engines, volley rounds, breaching, charging out, the hospital, walls and gatehouses along hex edges |
 | 8 | [Armies in the field](08-armies-and-field.md) | Armies on the map, orders, army groups (a set make-up recruited by itself), grain and quarters, attrition, reinforcements (pincer, hammer, harassment), field setups, forts, supply points, wagon forts |
 | 9 | [Hordes and threats](09-hordes-and-threats.md) | Fronts and factions, the wave schedule, wave size, enemy tiers, the horde AI, fear, raiding and razing, enemy leaders, hatred, camps and lairs |
 | 10 | [Heroes, generals and clans](10-heroes-generals-clans.md) | The hero roster, skills, gear, wounds, quests and army quests, generals, the ten clans |
@@ -30,7 +30,7 @@ balance changes land there first.
 | 14 | [The Kalinov Bridge and the endgame](14-bridge-and-endgame.md) | The five bridge stages, their quests, construction raids, Ritual Night, winning and losing, achievements |
 | 15 | [Player against player](15-player-vs-player.md) | PvP worlds: protection, attacking and razing other players' villages, the fight, rivals |
 | 16 | [Battle lines and maneuvers](16-battle-lines.md) | The line's width, the opening volley, flank, pincer, encirclement, breakthrough, Shield Bearer, bridges, roads and forts |
-| 17 | [Forts](17-forts.md) | A fort's Keep, Storage, Fort Garrison, wall rings and towers, its defenders, ring-by-ring sieges, the zone of influence, grain upkeep and bandit takeover, sharing a hex, the rally point, tearing down |
+| 17 | [Forts](17-forts.md) | A fort's Keep, Storage, Fort Garrison, wall rings and towers, its defenders, ring-by-ring sieges, the gatehouse ring, the zone of influence, grain upkeep and bandit takeover, sharing a hex, the rally point, tearing down |
 | 18 | [The enemy lands](18-enemy-lands.md) | The lands beyond the edge: four bands per active front, their terrain, rifts between fronts, fog and sight, marching in |
 
 ## Reading the numbers

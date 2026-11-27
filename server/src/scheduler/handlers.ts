@@ -33,6 +33,7 @@ import { scoutingHandlers } from './scouting.js';
 import { smithingHandlers } from './smithing.js';
 import { waveHandlers } from './waves.js';
 import { fortHandlers } from './forts.js';
+import { edgeWallHandlers } from './edgeWalls.js';
 
 export const buildCompletePayload = z.object({
   villageId: z.number().int(),
@@ -122,6 +123,7 @@ export const handlers: HandlerRegistry = {
   ...fieldHandlers,
   ...terraformHandlers,
   ...fortHandlers,
+  ...edgeWallHandlers,
   ...hordeHandlers,
   ...campHandlers,
   ...mapEventHandlers,

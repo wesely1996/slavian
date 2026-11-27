@@ -771,9 +771,9 @@ static func abandon_village(server: LocalServer, world: Dictionary, village: Dic
 	world.caravans = world.caravans.filter(func(c: Dictionary) -> bool: return other.call("villageId").call(c) and other.call("destinationVillageId").call(c))
 	world.expeditions = world.expeditions.filter(other.call("villageId"))
 	world.armies = world.armies.filter(func(a: Dictionary) -> bool: return other.call("homeVillageId").call(a) and other.call("targetVillageId").call(a))
-	for pair in [["expeditions", "foundedVillageId"], ["research", "villageId"], ["forts", "villageId"], ["rivers", "builtBy"], ["roads", "builtBy"],
+	for pair in [["expeditions", "foundedVillageId"], ["research", "villageId"], ["forts", "villageId"], ["rivers", "builtBy"], ["roads", "builtBy"], ["walls", "builtBy"],
 			["leaders", "grudgeVillageId"], ["waves", "targetVillageId"]]:
-		for row in world[pair[0]]:
+		for row in world.get(pair[0], []):
 			if row.get(pair[1]) != null and int(row[pair[1]]) == id:
 				row[pair[1]] = null
 	return {}

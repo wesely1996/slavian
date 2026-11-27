@@ -35,6 +35,10 @@ const RIVER_BANK := Color(0.1, 0.16, 0.12, 0.45)
 const RIVER_GLINT := Color(0.75, 0.88, 0.92, 0.45)
 const PLANK_COLOR := Color("#b07a45")
 const LANE_COLOR := Color(0.95, 0.8, 0.35, 0.85)
+## Walls along edges, by tier: a palisade of stakes, timber on stone, stone.
+const WALL_COLORS := [Color("#7a5230"), Color("#8f8578"), Color("#b3ada3")]
+const WALL_DARK := Color("#2b2118")
+const GATE_IRON := Color("#3d3a38")
 ## Each front's emblem (art id "faction/<emblem>").
 const EMBLEMS := {"north": "north", "east": "east", "south": "order", "west": "order"}
 
@@ -209,6 +213,8 @@ func _draw() -> void:
 	for edge in Game.rivers:
 		_draw_river(edge)
 	_draw_lake_lanes()
+	for wall in Game.walls:
+		_draw_wall(wall)
 
 	if Game.terrain.has(Vector2i.ZERO):
 		if not _draw_art("settlement/holy_city", Vector2.ZERO, hex_size * 1.5):
@@ -820,7 +826,85 @@ func _draw_fort(fort: Dictionary) -> void:
 		c += Vector2(hex_size * 0.45, hex_size * 0.3)
 	if fort.status == "standing":
 		_draw_grain_bar(c + Vector2(0, hex_size * 0.62), float(fort.get("grain", 0)) / maxf(1.0, FieldRules.grain_capacity(Game.data, fort)))
+	if fort.get("kind", "fort") == "fort":
+		_draw_fort_curtain(fort, c)
 	_draw_fort_body(fort, c)
+
+
+## A wall along an edge: stakes for a palisade, timber on a stone footing,
+## or crenellated stone, faded while the first tier is built. A gatehouse
+## leaves a gap in the middle, iron gates between two towers.
+func _draw_wall(row: Array) -> void:
+	var a := Vector2i(int(row[0]), int(row[1]))
+	var b := Vector2i(int(row[2]), int(row[3]))
+	var dir := RiverText.direction(a, b)
+	if dir < 0:
+		return
+	var w := EdgeWallText.entry(row)
+	var ends := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
+	var tier := clampi(maxi(1, int(w.tier)), 1, WALL_COLORS.size())
+	var fade := Color(1, 1, 1, 0.45) if w.status == "building" else Color.WHITE
+	var color: Color = WALL_COLORS[tier - 1] * fade
+	var dark := WALL_DARK * fade
+	var thick := hex_size * (0.12 + 0.03 * tier)
+	# Which side is out (away from a's centre), for the battlements.
+	var out := (HexMath.to_pixel(b, hex_size) - HexMath.to_pixel(a, hex_size)).normalized()
+	var gate: bool = w.kind == "gate"
+	var spans: Array = [[0.0, 0.36], [0.64, 1.0]] if gate else [[0.0, 1.0]]
+	for span in spans:
+		var p: Vector2 = ends[0].lerp(ends[1], span[0])
+		var q: Vector2 = ends[0].lerp(ends[1], span[1])
+		draw_line(p, q, dark, thick + 3.0, true)
+		draw_line(p, q, color, thick, true)
+		var n := maxi(1, roundi((q - p).length() / (hex_size * 0.16)))
+		for i in n + 1:
+			var at := p.lerp(q, float(i) / float(n))
+			match tier:
+				1:
+					# Sharpened stakes.
+					draw_circle(at, thick * 0.42, color.darkened(0.25))
+				2:
+					# Timber posts on the stone.
+					if i % 2 == 0:
+						draw_line(at - out * thick * 0.5, at + out * thick * 0.5, WALL_COLORS[0] * fade, thick * 0.35)
+				_:
+					# Battlements.
+					if i % 2 == 0:
+						var m := at + out * thick * 0.45
+						draw_rect(Rect2(m - Vector2.ONE * thick * 0.22, Vector2.ONE * thick * 0.44), color.lightened(0.15))
+	draw_circle(ends[0], thick * 0.55, dark)
+	draw_circle(ends[1], thick * 0.55, dark)
+	if gate:
+		var g0: Vector2 = ends[0].lerp(ends[1], 0.36)
+		var g1: Vector2 = ends[0].lerp(ends[1], 0.64)
+		# The gates (shut), then a tower each side.
+		draw_line(g0, g1, GATE_IRON * fade, thick * 0.55, true)
+		draw_line(g0.lerp(g1, 0.5) - out * thick * 0.3, g0.lerp(g1, 0.5) + out * thick * 0.3, dark, 2.0)
+		for t in [g0, g1]:
+			var side := thick * 1.7
+			draw_rect(Rect2(t - Vector2.ONE * side * 0.5, Vector2.ONE * side), dark)
+			draw_rect(Rect2(t - Vector2.ONE * side * 0.38, Vector2.ONE * side * 0.76), color.lightened(0.1))
+
+
+## A fort merged with a gatehouse (EdgeWallText.fort_gatehouse): a curtain
+## wall all round its hex at the gatehouse's tier, a tower at each corner.
+func _draw_fort_curtain(fort: Dictionary, c: Vector2) -> void:
+	var gate := EdgeWallText.fort_gatehouse(Game.walls, fort)
+	if gate.is_empty():
+		return
+	var tier := clampi(int(gate.tier), 1, WALL_COLORS.size())
+	var color: Color = WALL_COLORS[tier - 1]
+	var ring := HexMath.corners(c, hex_size * 0.78)
+	var closed := ring.duplicate()
+	closed.append(ring[0])
+	draw_polyline(closed, WALL_DARK, hex_size * 0.11 + 3.0, true)
+	draw_polyline(closed, color, hex_size * 0.11, true)
+	# A tower at every corner, larger for stone.
+	for corner in ring:
+		var side := hex_size * (0.12 + 0.025 * tier)
+		draw_rect(Rect2(corner - Vector2.ONE * side * 0.5, Vector2.ONE * side), WALL_DARK)
+		draw_rect(Rect2(corner - Vector2.ONE * side * 0.36, Vector2.ONE * side * 0.72), color.lightened(0.15))
+	# (The gatehouse itself stands on its edge, drawn with the walls.)
 
 
 ## A grain gauge under a store: gold for what it holds.

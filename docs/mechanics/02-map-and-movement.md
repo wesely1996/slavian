@@ -56,6 +56,8 @@ where speed is hexes per hour on plains.
 - **Hungry armies** march at 75% speed ([page 8](08-armies-and-field.md#attrition)).
 - **Caravans** move at 5 hexes an hour, faster with `caravanSpeed` bonuses.
 - **Heroes and generals** travel at 6 hexes an hour on their own.
+- **Walls** along edges can't be crossed, except through a gatehouse; hordes
+  tear them down ([page 7](07-walls-and-sieges.md#walls-along-the-edges)).
 
 ## Roads
 

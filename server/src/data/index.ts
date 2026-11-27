@@ -830,6 +830,19 @@ const fieldFileSchema = z.object({
       .array(z.object({ factor: z.number().positive().max(1), cost: resourcesSchema, buildSeconds: z.number().positive(), outpostBonus: z.number().min(0) }))
       .min(1),
   }),
+  // Walls along hex edges: their tiers, and the gatehouse (a wall with a gate).
+  edgeWalls: z.object({
+    range: z.number().int().positive(),
+    tiers: z.array(z.object({ name: z.string(), cost: resourcesSchema, buildSeconds: z.number().positive(), breakHours: z.number().positive() })).min(1),
+    gatehouse: z.object({
+      costFactor: z.number().positive(),
+      iron: z.array(z.number().nonnegative()).min(1),
+      timeFactor: z.number().positive(),
+      breakFactor: z.number().positive(),
+      // The fort wall ring level a gatehouse on a fort's hex counts as, by tier.
+      fortRingLevels: z.array(z.number().int().positive()).min(1),
+    }),
+  }),
 });
 
 export type BuildingDef = z.infer<typeof buildingSchema>;
