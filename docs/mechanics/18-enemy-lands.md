@@ -1,9 +1,10 @@
 # 18. The enemy lands
 
 Past the map's edge lie the enemy's own lands. They are being built in
-phases (the plan is [`docs/enemy-lands.md`](../enemy-lands.md)). For now
-the land itself is there: armies can march in and look around. Raids still
-work as before ([page 13](13-events-and-raids.md#raids-beyond-the-edge)).
+phases (the plan is [`docs/enemy-lands.md`](../enemy-lands.md)). The land,
+its rivers and the enemy's settlements are there: armies can march in and
+look around. Raids still work as before
+([page 13](13-events-and-raids.md#raids-beyond-the-edge)).
 
 ## Where they lie
 
@@ -30,8 +31,7 @@ Each front's lands are four bands deep, counted outward from the edge:
 | 3 | The Heartland | 3 |
 | 4 | The Seat | 2 |
 
-The bands are empty for now. Camps, border forts, towns and each front's
-seat come in a later phase.
+Each front's settlements stand in these bands ([below](#settlements)).
 
 ## Terrain
 
@@ -77,3 +77,63 @@ settled or built on, and no road runs into them.
   home. No supply point or fort can be built there.
 - **Hordes keep to the heartland.** They still set out from the edge belt,
   as before ([page 9](09-hordes-and-threats.md)).
+
+## Rivers
+
+- **Two rivers a front.** Each runs along hex edges from the deepest band
+  towards the heartland, ending at the band nearest it, a rift or an earlier
+  river.
+- **Fords.** Every 5th edge of a river can be crossed, as can every bridge the
+  enemy builds. Elsewhere a river stops armies as in the heartland
+  ([page 2](02-map-and-movement.md#rivers-and-bridges)). Players can't build
+  bridges here.
+
+## Settlements
+
+Each active front founds settlements in its lands over the run, the
+**deepest band first**, creeping towards the heartland.
+
+- **When.** One per front when the run starts, then one more every **2 game
+  days**.
+- **Where.** A hex of the band whose turn it is, open land inside the lands
+  (not on their outer rim), at least **3 hexes** from any other settlement.
+- **Kinds, in order.** The settlements show their front's names:
+
+| Kind | Band | How many | Walls up to | Moat | East | South | West |
+|---|---|---|---|---|---|---|---|
+| Seat | 4 | 1 | Stone wall | yes | Khan's Ordu | Grand Preceptory | Templar Keep |
+| Town | 3 | 3 | Stone wall | yes | Steppe town | Vineyard town | Abbey town |
+| Border fort | 2 | 3 | Timber-and-stone wall | yes | Border yurt-fort | Order castle | Commandery |
+| War camp | 1 | 4 | Palisade | no | Nomad war camp | Crusader camp | Pilgrim war camp |
+
+- **The North** founds only **monster lairs**: 3 in band 4, 3 in band 3, 2 in
+  band 2 and 2 in band 1. Lairs build nothing.
+- **Growth.** A settlement starts at **level 1** and grows a level every **24
+  game hours**, up to **level 10**. Its walls rise no higher than tier
+  1 + (level − 1) / 3, rounded down: a palisade until level 4, timber and
+  stone until level 7, stone from level 7. Its level will also set the
+  strength of its garrison.
+- **Fog.** A settlement shows on the map once its band is seen
+  ([above](#fog-and-sight)), with its level on a badge in its front's colour.
+  Tap its hex for what it is and builds.
+
+### What they build
+
+Every **6 game hours** each settlement that builds does one work, in this
+order:
+
+1. **Palisades** on each of its hex's edges (not across a river).
+2. **Its road**, one edge at a time, to the nearest older settlement of its
+   front (the seat has none). The road goes round walls, and bridges a river
+   in its way first. Where the road meets a settlement's wall, that wall
+   becomes a **gatehouse**.
+3. **A moat** (seat, towns and border forts): river edges round its ring of
+   neighbours, one at a time, already bridged where its road runs.
+4. **Raising its walls** a tier at a time, the lowest first, as high as its
+   level and kind allow.
+
+The enemy's works stand at once. Its roads speed anyone who uses them, and
+its bridges carry anyone across. Its walls stop players' armies like any
+wall ([page 7](07-walls-and-sieges.md#walls-along-the-edges)), and **its
+gatehouses don't open for them**. On the map the enemy's walls are outlined
+in their front's colour.

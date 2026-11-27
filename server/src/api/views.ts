@@ -7,6 +7,8 @@ import { listLeaders, type EnemyLeader } from '../db/leaders.js';
 import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
 import { listEdgeWalls } from '../db/edgeWalls.js';
+import { listEnemySettlements } from '../db/enemySettlements.js';
+import { settlementLevel, settlementName } from '../sim/enemySettlements.js';
 import { listShipyards } from '../db/shipyards.js';
 import { listAchievements } from '../db/achievements.js';
 import { listRiverEdges } from '../db/rivers.js';
@@ -768,15 +770,23 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
           // [aq, ar, bq, br, status, level]: roads ('building', 'standing',
           // or 'upgrading': standing at `level` while improved to the next).
           roads: (await listRoadEdges(client, world.id)).map((e) => [e.a.q, e.a.r, e.b.q, e.b.r, e.status, e.level, ...(e.damaged ? [true] : [])]),
-          // [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt]:
+          // [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt, front]:
           // walls ('wall') and gatehouses ('gate') along edges (field.json
           // edgeWalls); 'building' (tier 0), 'standing', or 'upgrading':
-          // standing at `tier` while raised to the next.
-          walls: (await listEdgeWalls(client, world.id)).map((w) => [w.a.q, w.a.r, w.b.q, w.b.r, w.kind, w.status, w.tier, w.ownerAccountId, w.completesAt?.toISOString() ?? null]),
+          // standing at `tier` while raised to the next. `front`: the enemy
+          // front's, in its lands (null: a player's).
+          walls: (await listEdgeWalls(client, world.id)).map((w) => [w.a.q, w.a.r, w.b.q, w.b.r, w.kind, w.status, w.tier, w.ownerAccountId, w.completesAt?.toISOString() ?? null, w.front]),
           // [q, r, action, villageId, completesAt]: land being reshaped (field.json terraform).
           terraforms: (await listTerraforms(client, world.id)).map((t) => [t.cell.q, t.cell.r, t.action, t.villageId, t.completesAt.toISOString()]),
           // The enemy lands beyond the edge: their seed and each front's bands seen.
           enemy: enemyView(data, world),
+          // The enemy's settlements in the bands seen (sim/enemySettlements.ts).
+          settlements: (await listEnemySettlements(client, world.id))
+            .filter((s) => s.band <= sightOf(data, world, s.front))
+            .map((s) => ({
+              id: s.id, front: s.front, kind: s.kind, name: settlementName(data, s.front, s.kind), band: s.band, q: s.cell.q, r: s.cell.r, status: s.status,
+              level: settlementLevel(data, s.foundedAt, at, world.speed), foundedAt: s.foundedAt.toISOString(),
+            })),
         };
   // Each member's army slots (sim/slots.ts): used and given.
   const slots = new Map<number, { used: number; cap: number }>();

@@ -271,6 +271,8 @@ func _draw() -> void:
 			_draw_fort(fort)
 	for camp in Game.camps:
 		_draw_camp(camp)
+	for settlement in Game.settlements:
+		_draw_settlement(settlement)
 	for yard in Game.shipyards:
 		_draw_shipyard(yard)
 	for site in Game.sites:
@@ -797,6 +799,30 @@ func _draw_site(site: Dictionary) -> void:
 	draw_polyline(stone, VILLAGE_OUTLINE_COLOR, 2.0)
 
 
+## An enemy settlement: its kind's look on its front's ring, with its level.
+const SETTLEMENT_ART := {"seat": "settlement/village_5", "town": "settlement/village_3", "fort": "map/fort", "camp": "map/camp_bandit", "lair": "map/camp_lair"}
+
+
+func _draw_settlement(s: Dictionary) -> void:
+	var c := HexMath.to_pixel(Vector2i(int(s.q), int(s.r)), hex_size)
+	var color := WaveMath.front_color(String(s.front))
+	var big: bool = s.kind == "seat"
+	_draw_ring(c + Vector2(0, hex_size * 0.42), hex_size * (1.35 if big else 1.15), color)
+	var art: String = SETTLEMENT_ART.get(String(s.kind), "map/camp_bandit")
+	if not _draw_art(art, c, hex_size * (1.4 if big else 1.1), Color(1.0, 0.82, 0.78)):
+		draw_circle(c, hex_size * 0.35, color.darkened(0.2))
+		draw_arc(c, hex_size * 0.35, 0, TAU, 24, VILLAGE_OUTLINE_COLOR, 2.0)
+	# Its level, on a shield in its front's colour.
+	var badge := c + Vector2(hex_size * 0.5, -hex_size * 0.45)
+	draw_circle(badge, hex_size * 0.2, VILLAGE_OUTLINE_COLOR)
+	draw_circle(badge, hex_size * 0.16, color)
+	var font := ThemeDB.fallback_font
+	var text := str(int(s.get("level", 1)))
+	var size := int(hex_size * 0.26)
+	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, size).x
+	draw_string(font, badge + Vector2(-w / 2.0, size * 0.36), text, HORIZONTAL_ALIGNMENT_CENTER, -1, size, Color.WHITE)
+
+
 ## A bandit camp or monster lair: a tent in its faction's colour.
 func _draw_camp(camp: Dictionary) -> void:
 	var c := HexMath.to_pixel(Vector2i(int(camp.q), int(camp.r)), hex_size)
@@ -845,7 +871,9 @@ func _draw_wall(row: Array) -> void:
 	var tier := clampi(maxi(1, int(w.tier)), 1, WALL_COLORS.size())
 	var fade := Color(1, 1, 1, 0.45) if w.status == "building" else Color.WHITE
 	var color: Color = WALL_COLORS[tier - 1] * fade
-	var dark := WALL_DARK * fade
+	# The enemy's walls in its lands: outlined in its front's colour.
+	var front: Variant = row[9] if row.size() > 9 else null
+	var dark := (WaveMath.front_color(String(front)).darkened(0.35) if front != null else WALL_DARK) * fade
 	var thick := hex_size * (0.12 + 0.03 * tier)
 	# Which side is out (away from a's centre), for the battlements.
 	var out := (HexMath.to_pixel(b, hex_size) - HexMath.to_pixel(a, hex_size)).normalized()

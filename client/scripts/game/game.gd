@@ -85,6 +85,8 @@ var roads: Array = []
 ## Walls along edges (map.walls: [aq, ar, bq, br, kind, status, tier,
 ## ownerAccountId, completesAt]; EdgeWallText).
 var walls: Array = []
+## The enemy's settlements in the bands seen (map.settlements).
+var settlements: Array = []
 ## Land being reshaped (field.json terraform): {Vector2i: {action, villageId,
 ## completesAt}}; a burning forest is the work "burn".
 var terraforms: Dictionary = {}
@@ -161,6 +163,7 @@ func set_world(new_world: Dictionary) -> void:
 	rivers = world_map.get("rivers", []) if world_map is Dictionary else []
 	roads = world_map.get("roads", []) if world_map is Dictionary else []
 	walls = world_map.get("walls", []) if world_map is Dictionary else []
+	settlements = world_map.get("settlements", []) if world_map is Dictionary else []
 	terraforms.clear()
 	if world_map is Dictionary:
 		for t in world_map.get("terraforms", []):
@@ -687,3 +690,11 @@ func member_name(account_id: int) -> String:
 		if int(member.accountId) == account_id:
 			return member.displayName
 	return "?"
+
+
+## The enemy settlement on `cell` ({} if none is seen there).
+func settlement_at(cell: Vector2i) -> Dictionary:
+	for s in settlements:
+		if int(s.q) == cell.x and int(s.r) == cell.y:
+			return s
+	return {}

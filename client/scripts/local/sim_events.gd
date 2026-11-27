@@ -31,8 +31,9 @@ static func plan(data: Dictionary, world: Dictionary, villages: Array, day: int)
 		kind = "shipyard"
 	elif pick < float(captives.weight) + float(ruin.weight) + float(shipyard.weight) + float(ritual.weight):
 		kind = "ritual"
-	# Each bank hex's river edges, in edge-key order.
-	var rivers: Array = world.rivers.duplicate()
+	# Each bank hex's river edges, in edge-key order (the heartland's: not
+	# those of the enemy lands).
+	var rivers: Array = world.rivers.filter(func(e: Dictionary) -> bool: return world.hexes.has(LocalLand.key(e.a)) and world.hexes.has(LocalLand.key(e.b)))
 	rivers.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return LocalLand.edge_key(x.a, x.b) < LocalLand.edge_key(y.a, y.b))
 	var banks := {}
 	for e in rivers:

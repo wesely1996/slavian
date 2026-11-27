@@ -257,7 +257,9 @@ Each phase is one or two PRs, playable on its own, behind no flag.
    - Generate the outer bands and seams with per-front terrain; draw them
      with chunked rendering; fog.
    - Nothing lives there yet, but armies and scouts can walk in.
-2. **Places.**
+2. **Places.** (Begun: settlements are founded deepest band first, grow a
+   level a game day and build walls, roads, moats and bridges; the lands
+   have rivers. See `docs/mechanics/18-enemy-lands.md`.)
    - War camps, watch posts, border forts, towns and the capital; the
      North's lairs in every band.
    - Garrisons scaled by group power, difficulty and band.

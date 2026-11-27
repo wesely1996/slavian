@@ -93,14 +93,14 @@ static func land_walls(world: Dictionary) -> Dictionary:
 	var out := {}
 	for w in listed(world):
 		if w.status != "building":
-			out[LocalLand.edge_key(w.a, w.b)] = {"gate": w.kind == "gate", "tier": int(w.tier)}
+			out[LocalLand.edge_key(w.a, w.b)] = {"gate": w.kind == "gate", "tier": int(w.tier), "enemy": w.get("front") != null}
 	return out
 
 
-## map.walls: [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt].
+## map.walls: [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt, front].
 static func view(world: Dictionary) -> Array:
 	return listed(world).map(func(w: Dictionary) -> Array:
-		return [w.a.x, w.a.y, w.b.x, w.b.y, w.kind, w.status, int(w.tier), w.ownerAccountId, LocalTime.iso(w.completesAt) if w.completesAt != null else null])
+		return [w.a.x, w.a.y, w.b.x, w.b.y, w.kind, w.status, int(w.tier), w.ownerAccountId, LocalTime.iso(w.completesAt) if w.completesAt != null else null, w.get("front")])
 
 
 ## scheduler/edgeWalls.ts buildEdgeWall.
@@ -140,7 +140,7 @@ static func build(server: LocalServer, world: Dictionary, village: Dictionary, a
 	var wall := existing
 	if wall.is_empty():
 		var ends := LocalServer._ordered(a, b)
-		wall = {"a": ends[0], "b": ends[1], "kind": kind, "tier": 0, "status": "building", "builtBy": village.id, "ownerAccountId": village.ownerAccountId, "completesAt": completes_at}
+		wall = {"a": ends[0], "b": ends[1], "kind": kind, "tier": 0, "status": "building", "builtBy": village.id, "ownerAccountId": village.ownerAccountId, "completesAt": completes_at, "front": null}
 		if not world.has("walls"):
 			world.walls = []
 		world.walls.append(wall)

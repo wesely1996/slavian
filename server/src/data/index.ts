@@ -192,6 +192,27 @@ const enemyLandsFileSchema = z.object({
       palette: z.array(z.object({ terrain: z.enum(TERRAIN_IDS), upTo: z.number() })).min(1),
     }),
   ),
+  // The enemy's settlements (sim/enemySettlements.ts): founded the deepest
+  // band first, each building its walls, road and moat in turn.
+  settlements: z.object({
+    everyDays: z.number().positive(),
+    minApart: z.number().int().positive(),
+    worksEveryHours: z.number().positive(),
+    // A level every growHours game hours, up to maxLevel; walls a tier
+    // higher every levelsPerWallTier levels.
+    growHours: z.number().positive(),
+    maxLevel: z.number().int().positive(),
+    levelsPerWallTier: z.number().int().positive(),
+    kinds: z.record(
+      z.string(),
+      z.object({ band: z.number().int().nonnegative(), max: z.number().int().nonnegative(), wallTier: z.number().int().nonnegative(), moat: z.boolean(), builds: z.boolean() }),
+    ),
+    // The North's lairs, deepest first: how many in each band.
+    lairs: z.array(z.object({ band: z.number().int().positive(), max: z.number().int().positive() })),
+    names: z.record(z.string(), z.record(z.string(), z.string())),
+  }),
+  // Rivers through each front's lands, from deep inside towards the edge.
+  rivers: z.object({ perFront: z.number().int().nonnegative(), fordEvery: z.number().int().positive(), minLength: z.number().int().positive() }),
 });
 export type EnemyLandsData = z.infer<typeof enemyLandsFileSchema>;
 

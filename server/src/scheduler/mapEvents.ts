@@ -9,7 +9,7 @@ import { achieveAll } from './achievements.js';
 import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
 import { combatants, withIntel } from '../sim/scouting.js';
-import type { GameData } from '../data/index.js';
+import type { GameData, TerrainId } from '../data/index.js';
 import { armiesHolding, saveArmy } from '../db/armies.js';
 import { deleteCamp, loadCamp } from '../db/camps.js';
 import { insertNeutralSupply } from '../db/forts.js';
@@ -24,7 +24,7 @@ import { playerStats, total } from '../sim/battle.js';
 import { repelRaid } from '../sim/camps.js';
 import { listMembers, loadHexes, setHexTerrain, type World } from '../db/worlds.js';
 import { eventFront, planMapEvent } from '../sim/events.js';
-import { hex, hexDistance } from '../sim/hex.js';
+import { hex, hexKey, hexDistance } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
 import { amountsAt, mapResources, RESOURCE_KINDS, spend, type Resources } from '../sim/resources.js';
 import { armyLosses, sendHome } from './armies.js';
@@ -66,14 +66,16 @@ export const mapEventHandlers: HandlerRegistry = {
     const { day } = mapEventPayload.parse(event.payload);
     if (world.status !== 'running') return;
     const at = event.dueAt;
+    const terrain = new Map<string, TerrainId>((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const));
     const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin && v.ownerAccountId !== null);
     const plan = planMapEvent(data, {
-      terrain: new Map((await loadHexes(client, world.id)).map(([q, r, t]) => [`${q},${r}`, t] as const)),
+      terrain,
       radius: world.radius ?? 0,
       villages: villages.map((v) => hex(v.q, v.r)),
       taken: await takenHexes(client, world.id),
       sites: (await listSites(client, world.id)).map((s) => hex(s.q, s.r)),
-      rivers: await listRiverEdges(client, world.id),
+      // (The heartland's: not those of the enemy lands.)
+      rivers: (await listRiverEdges(client, world.id)).filter((e) => terrain.has(hexKey(e.a)) && terrain.has(hexKey(e.b))),
       shipyards: (await listShipyards(client, world.id)).map((s) => ({ cell: hex(s.q, s.r), edge: s.edge })),
       activeFronts: world.activeFronts,
       seed: world.seed,
