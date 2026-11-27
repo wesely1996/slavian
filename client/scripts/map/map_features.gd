@@ -35,6 +35,21 @@ const FEATURES := {
 	"abbey_orchard": [["feature/blossom", 3, 0.3, 0.6], ["feature/oak", 2, 0.36, 0.72]],
 }
 
+## The season's colour for each kind of feature (data/seasons.json; the
+## map's ground changes in shaders/ground.gdshader): golden grass in summer,
+## rust leaves in autumn, bare boughs and snow on the hills in winter. Pines
+## keep their green.
+const SEASON_TINTS := {
+	"summer": {"feature/grass": Color(1.12, 1.04, 0.72), "feature/bush": Color(1.08, 1.03, 0.8), "feature/oak": Color(1.06, 1.02, 0.84), "feature/hill": Color(1.1, 1.03, 0.8)},
+	"autumn": {"feature/oak": Color(1.4, 0.82, 0.42), "feature/bush": Color(1.35, 0.78, 0.4), "feature/blossom": Color(1.3, 0.8, 0.45),
+		"feature/grass": Color(1.2, 0.95, 0.55), "feature/hill": Color(1.15, 0.95, 0.62), "feature/reeds": Color(1.15, 0.95, 0.6), "feature/pine": Color(1.0, 0.95, 0.85)},
+	"winter": {"feature/oak": Color(0.72, 0.66, 0.62), "feature/bush": Color(0.75, 0.7, 0.66), "feature/blossom": Color(0.8, 0.76, 0.74),
+		"feature/grass": Color(1.25, 1.27, 1.3), "feature/hill": Color(1.3, 1.33, 1.38), "feature/reeds": Color(1.1, 1.1, 1.15),
+		"feature/pine": Color(1.08, 1.12, 1.16), "feature/dark_pine": Color(1.08, 1.12, 1.16), "feature/mountain": Color(1.12, 1.15, 1.2), "feature/peak": Color(1.12, 1.15, 1.2)},
+}
+## The season the features are drawn in (set_season).
+static var season := "spring"
+
 var hex_size := 48.0
 ## [y, art id, rect] for every feature, sorted back to front.
 var _placed: Array = []
@@ -51,10 +66,20 @@ class Strip extends Node2D:
 	func _draw() -> void:
 		if not grid.is_empty():
 			draw_multiline(grid, MapFeatures.GRID, 1.2, true)
+		var tints: Dictionary = MapFeatures.SEASON_TINTS.get(MapFeatures.season, {})
 		for entry in placed:
 			var texture := Art.texture(entry[1])
 			if texture != null:
-				draw_texture_rect(texture, entry[2], false)
+				draw_texture_rect(texture, entry[2], false, tints.get(entry[1], Color.WHITE))
+
+
+## Draws every strip again in the colours of `name`'s season.
+func set_season(name: String) -> void:
+	if name == season:
+		return
+	season = name
+	for strip in get_children():
+		(strip as CanvasItem).queue_redraw()
 
 
 func build(terrain: Dictionary, size: float, occupied: Dictionary) -> void:

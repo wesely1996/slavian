@@ -4,6 +4,7 @@
 // point, fort). Win, and the horde is beaten in the open; lose, and the
 // holders fall back while the horde marches on, late. Forts are built
 // from a village (fort_complete).
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { achieve } from './achievements.js';
 import { WATER } from '../sim/mapgen.js';
 import { insertRoad, markRoadRepairing, markRoadStanding, markRoadUpgrading, roadEdge, type RoadEdge } from '../db/roads.js';
@@ -344,6 +345,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
       round,
       battle.setup.lines,
     ),
+    seasonDefense(data, seasonAt(data, world, at).season),
   );
   const attackerLosses = addUnits(result.attackerLosses, smashed);
   const attackerNow = subtractUnits(wave.composition, attackerLosses);

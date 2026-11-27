@@ -152,6 +152,29 @@ const terrainFileSchema = z.object({
   terrain: z.record(z.enum(TERRAIN_IDS), terrainSchema),
 });
 
+// Seasons (data/seasons.json): one game day each, in turn.
+const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
+export type Season = (typeof SEASONS)[number];
+const seasonsFileSchema = z.object({
+  version: z.number().int(),
+  dayHours: z.number().positive(),
+  order: z.array(z.enum(SEASONS)).length(4),
+  seasons: z.record(
+    z.enum(SEASONS),
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      // Added to the grain production factor (1: twice, -1: none).
+      grain: z.number().min(-1),
+      // Added to every unit's defense in every battle.
+      defense: z.number().min(-0.9),
+      // How likely each front is to send the day's horde (default 1).
+      fronts: z.partialRecord(z.enum(FRONTS), z.number().nonnegative()),
+    }),
+  ),
+});
+export type SeasonsData = z.infer<typeof seasonsFileSchema>;
+
 // The enemy lands beyond the map's edge (docs/enemy-lands.md).
 const enemyLandsFileSchema = z.object({
   version: z.number().int(),
@@ -1282,6 +1305,7 @@ export interface GameData {
   onboarding: OnboardingData;
   forts: FortsData;
   enemyLands: EnemyLandsData;
+  seasons: SeasonsData;
 }
 
 export function loadGameData(dir: string = DATA_DIR): GameData {
@@ -1320,6 +1344,7 @@ export function loadGameData(dir: string = DATA_DIR): GameData {
     onboarding: onboardingFileSchema.parse(read('onboarding.json')),
     forts: fortsFileSchema.parse(read('forts.json')),
     enemyLands: enemyLandsFileSchema.parse(read('enemy-lands.json')),
+    seasons: seasonsFileSchema.parse(read('seasons.json')),
   };
   for (const front of data.waves.enabledFronts) {
     if (!data.enemies.fronts[front]) throw new Error(`Front "${front}" is enabled for waves but has no enemies`);

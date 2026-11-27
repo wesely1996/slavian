@@ -210,7 +210,9 @@ static func production_per_hour(data: Dictionary, plots: Dictionary, world_speed
 			var gathered := outpost_yield(def, plot.get("terrain"), int(plot.level), world_speed)
 			for kind in KINDS:
 				rates[kind] += gathered[kind] * (outpost_factor + float(plot.get("road", 0.0)))
-	return resources(func(kind: String) -> float: return rates[kind] * production_factor(bonuses, kind))
+	# The season's grain (sim/seasons.ts): twice in summer, none in winter.
+	var season_grain := maxf(0.0, 1.0 + bonus(bonuses, "season.grain"))
+	return resources(func(kind: String) -> float: return rates[kind] * production_factor(bonuses, kind) * (season_grain if kind == "grain" else 1.0))
 
 
 ## Net rates: production minus grain upkeep for every unit fed.
@@ -283,9 +285,23 @@ static func new_village(data: Dictionary, at: int, world_speed: float, founded: 
 
 
 ## The owner's bonuses changed: new rates and capacity from `at`.
+## sim/village.ts withSeason: the season's bonuses in place of the last
+## season's, the village's rates from `at`.
+static func with_season(data: Dictionary, state: Dictionary, season: Dictionary, at: int, world_speed: float) -> Dictionary:
+	var next := state.duplicate(true)
+	next.bonuses.erase("season.grain")
+	next.bonuses.merge(season, true)
+	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), state.ledger.capacity)
+	return next
+
+
 static func with_bonuses(data: Dictionary, state: Dictionary, bonuses: Dictionary, at: int, world_speed: float) -> Dictionary:
 	var next := state.duplicate(true)
 	next.bonuses = bonuses
+	# The season's part stays until the season turns (with_season).
+	if state.bonuses.has("season.grain"):
+		next.bonuses = bonuses.duplicate()
+		next.bonuses["season.grain"] = state.bonuses["season.grain"]
 	next.ledger = LocalLedger.with_rates(state.ledger, at, village_rates(data, next, world_speed), capacity(data, state.plots, bonuses))
 	return next
 

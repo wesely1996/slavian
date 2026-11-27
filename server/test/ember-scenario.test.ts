@@ -5,7 +5,7 @@
 // on this map its own chance would have missed).
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
-const START = { seed: 4244, at: '2026-06-01T08:00:00.000Z', name: 'Embers', displayName: 'You', speed: 50, difficulty: 'baron' };
+const START = { seed: 4245, at: '2026-06-01T08:00:00.000Z', name: 'Embers', displayName: 'You', speed: 50, difficulty: 'baron' };
 
 scenario('ember-scenario.json', START, async ({ started, now, play }) => {
   const world = '/v1/worlds/-1';
@@ -40,7 +40,12 @@ scenario('ember-scenario.json', START, async ({ started, now, play }) => {
   await play({ method: 'POST', path: `${world}/bridge/donate`, body: { resources: { wood: 10, stone: 0, grain: 0, iron: 0 }, embers: 0 } });
   // Raised: the Iron Span wants an Ember the group lacks.
   await play({ advance: (data.bridge.buildHours * 60 * MINUTE) / START.speed + MINUTE });
-  const view = (await play({ method: 'GET', path: world })).body;
+  let view = (await play({ method: 'GET', path: world })).body;
+  // A horde at the gates first: the army sets out once it is gone.
+  for (let i = 0; i < 30 && view.villages[0].besieged; i++) {
+    await play({ advance: 10 * MINUTE });
+    view = (await play({ method: 'GET', path: world })).body;
+  }
   const lair = view.camps.find((c: { kind: string }) => c.kind === 'lair');
   // Every spearman at home, with the hero.
   const spearmen = view.villages[0].garrison.spearman;

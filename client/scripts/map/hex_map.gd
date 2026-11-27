@@ -64,6 +64,15 @@ func _ready() -> void:
 	add_child(_clashes)
 
 
+## The map dressed for the season (data/seasons.json): the ground's colours
+## (shaders/ground.gdshader) and the features' (MapFeatures.SEASON_TINTS).
+func set_season(season: String) -> void:
+	var index := maxi(0, SeasonText.ORDER.find(season))
+	(_ground.material as ShaderMaterial).set_shader_parameter("season", index)
+	_features.set_season(season)
+	_ground.queue_redraw()
+
+
 ## Battles under way are drawn by a layer of their own (Clashes), so their
 ## swords can swing every frame without the whole map being drawn again.
 class Clashes extends Node2D:

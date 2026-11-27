@@ -371,7 +371,7 @@ static func on_shipyard_raid(server: LocalServer, world: Dictionary, event: Dict
 			LocalGround.at(data, world, Vector2i(int(yard.q), int(yard.r))),
 			{"attacker": LocalLines.no_command(), "defender": LocalLines.command_of(data, String(army.get("maneuver", "encircle")),
 				[{"hero": LocalArmies.hero_with_army(world, int(army.id)), "general": LocalGenerals.general_with_army(world, int(army.id))}],
-				LocalGround.road_at(world, Vector2i(int(yard.q), int(yard.r))))})
+				LocalGround.road_at(world, Vector2i(int(yard.q), int(yard.r))))}, LocalSeasons.defense_at(data, world, at))
 		var lost := {}
 		for unit in fighting:
 			var n := int(fighting[unit]) - int(result.armyNow.get(unit, 0))

@@ -4,6 +4,7 @@
 // siege of the front's stronghold. Battles won bring loot (as much as it
 // can carry), the North's rare finds, and the front's hatred; a raid beaten,
 // or done, comes home with what it carries.
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { achieve } from './achievements.js';
 import { bridgeQuest } from './bridge.js';
 import { villageBonuses } from '../sim/clans.js';
@@ -229,6 +230,7 @@ async function strikeBattle(client: DbClient, data: GameData, world: World, army
     stage,
     front: wave.front,
     seed: world.seed,
+    season: seasonDefense(data, seasonAt(data, world, at).season),
     id: army.id * 8 + 1,
     lines: { attacker: commandOf(data, army.maneuver, [{ hero, general }]), defender: commandOf(data, 'encircle', []) },
   });
@@ -343,6 +345,7 @@ export const raidHandlers: HandlerRegistry = {
       stage,
       front,
       seed: world.seed,
+      season: seasonDefense(data, seasonAt(data, world, at).season),
       id: army.id * 8 + payload.stage,
       lines: { attacker: commandOf(data, army.maneuver, [{ hero, general }]), defender: commandOf(data, 'encircle', []) },
     });

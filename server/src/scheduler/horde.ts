@@ -64,6 +64,7 @@ import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { cancelPlans, planIntercepts } from './field.js';
 import { planWaveWarning, tell } from './notices.js';
 import { outpostSites, planRaids } from './outposts.js';
+import { seasonAt, seasonBonuses } from '../sim/seasons.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -277,7 +278,8 @@ export async function ruinVillage(client: DbClient, data: GameData, world: World
         state: newVillage(data, at, world.speed, {
           startingResources: data.buildings.village.startingResources,
           adminUpkeep: 0,
-          bonuses: await playerBonuses(client, data, world.id, owner),
+          // Its owner's bonuses, and the season's.
+          bonuses: { ...(await playerBonuses(client, data, world.id, owner)), ...seasonBonuses(data, seasonAt(data, world, at).season) },
         }),
       });
       await markRefuge(client, camp.id);

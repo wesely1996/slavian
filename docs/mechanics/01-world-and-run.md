@@ -145,12 +145,41 @@ Winning a run earns that title's achievement, from *Baron of the Bridge* to
 | | |
 |---|---|
 | First horde | sets out after 5 days (120 game hours) of grace |
-| Afterwards | one horde a day (every 24 game hours), the fronts taking turns |
+| Afterwards | one horde a day (every 24 game hours), its front drawn by the season ([below](#seasons)) |
 | Known ahead | the next 2 hordes are always on the schedule |
 | Warning push | a horde due at your village within 6 game hours, plus 1 hour per Watchtower level |
 
 The whole schedule is public. What a horde is made of stays hidden until it
 is scouted ([page 12](12-scouting-and-expansion.md#scouting-a-horde)).
+
+## Seasons
+
+Every game day (24 game hours) is a season, in turn from the run's start:
+spring, summer, autumn, winter, then spring again. The run begins in spring;
+the first horde sets out on day 5, a summer. The season and how long it
+lasts yet show under your Embers, and the map wears it: golden grass in
+summer, rust leaves in autumn, snow in winter. Every turn of the season is
+pushed to every player.
+
+| Season | Grain | Battles | The day's horde comes from |
+|---|---|---|---|
+| Spring | as it is | as they are | every front alike |
+| Summer | ×2 | as they are | the East ×2, the South and West ×0.5 |
+| Autumn | as it is | every unit +20% defense | the South and West ×1.5, never the East |
+| Winter | none | as they are | the North ×2 |
+
+- **Grain.** The season's factor multiplies every settlement's grain
+  production (fields, outposts, Fisherman's Huts, Ranches,
+  Granary-Temples) on top of all other bonuses: twice in summer, nothing at
+  all in winter. Troops eat as ever, so the granary must carry them through
+  the winter day ([page 4](04-economy-and-logistics.md#production)).
+- **Battles.** In autumn every unit in every battle, players' and hordes'
+  alike, defends 20% better ([page 6](06-battles.md#attack-and-defense-bonuses)).
+- **Hordes.** Each horde's front is drawn at random among the active fronts,
+  weighted by the season it sets out in (a front not named counts ×1). With
+  only fronts weighted 0 active, they take turns. Ritual Night's hordes come
+  one from every front whatever the season.
+- **Numbers** are in `data/seasons.json`.
 
 ## Quiet hours
 

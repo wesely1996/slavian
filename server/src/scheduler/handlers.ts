@@ -5,6 +5,7 @@ import { completeBuild, completeTraining, outpostHex } from '../sim/village.js';
 import type { HandlerRegistry } from './events.js';
 import { armyHandlers, rallyTrained } from './armies.js';
 import { groupHandlers, groupTrained, joinGroup } from './armyGroups.js';
+import { seasonHandlers } from './seasons.js';
 import { loadArmy } from '../db/armies.js';
 import { batchCompletesAt } from '../sim/training.js';
 import { battleHandlers } from './battles.js';
@@ -117,6 +118,7 @@ export const handlers: HandlerRegistry = {
     if (due && before.groupId !== null) await joinGroup(context.client, context.data, context.world, await loadArmy(context.client, armyId), event.dueAt);
   },
   ...groupHandlers,
+  ...seasonHandlers,
   ...fieldHandlers,
   ...terraformHandlers,
   ...fortHandlers,

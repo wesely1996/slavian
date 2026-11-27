@@ -74,6 +74,8 @@ health  = base × (1 + forged health)
 - **The Blacksmith's** forged levels count per unit ([page 11](11-research-faith-smithing.md#the-blacksmith)).
 - **Situational:** walls, field setups, pincer and hammer bonuses multiply on
   top.
+- **Autumn:** every unit in every battle, players' and hordes', defends 20%
+  better ([page 1](01-world-and-run.md#seasons)).
 - **Enemy units** are scaled by their leader's skills, their front's hatred
   and their own conditions (a river, ambush, choke point).
 

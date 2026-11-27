@@ -162,15 +162,38 @@ static func wave_stance(data: Dictionary, front: String, seed_value: int, index:
 	return stances.keys()[-1]
 
 
-static func plan_wave(data: Dictionary, ctx: Dictionary, index: int, previous_spawn_at: Variant) -> Dictionary:
+## sim/waves.ts pickFront: the front of a horde setting out in `season`,
+## drawn by the season's weights; were they all nothing, in turn.
+static func pick_front(data: Dictionary, fronts: Array, season: String, rng: LocalRng, index: int) -> String:
+	var weights: Array = fronts.map(func(f: String) -> float: return LocalSeasons.front_weight(data, season, f))
+	var sum := 0.0
+	for w in weights:
+		sum += float(w)
+	if sum <= 0.0:
+		return fronts[index % fronts.size()]
+	var roll := rng.next() * sum
+	for i in fronts.size():
+		roll -= float(weights[i])
+		if roll < 0.0 and float(weights[i]) > 0.0:
+			return fronts[i]
+	for i in range(fronts.size() - 1, -1, -1):
+		if float(weights[i]) > 0.0:
+			return fronts[i]
+	return fronts[0]
+
+
+## `forced`: from that front, whatever the season (Ritual Night's hordes).
+static func plan_wave(data: Dictionary, ctx: Dictionary, index: int, previous_spawn_at: Variant, forced := "") -> Dictionary:
 	var fronts := wave_fronts(data, ctx.activeFronts)
-	var front: String = fronts[index % fronts.size()]
+	var spawn_at := spawn_time(data, ctx, index, previous_spawn_at)
+	var season := String(LocalSeasons.season_at(data, {"startedAt": ctx.startedAt, "speed": ctx.worldSpeed}, spawn_at).season)
+	var front := forced if forced != "" else pick_front(data, fronts, season, rng_for(int(ctx.seed), index, 0x5e), index)
 	var size := maxi(1, js_round(wave_size(data, index, int(ctx.playerCount)) * float(ctx.get("sizeFactor", 1.0))))
 	var composition := compose_wave(data, front, index, size, int(ctx.seed), int(ctx.playerCount))
 	return {
 		"index": index,
 		"front": front,
-		"spawnAt": spawn_time(data, ctx, index, previous_spawn_at),
+		"spawnAt": spawn_at,
 		"composition": composition,
 		"threat": threat_of(data, composition),
 		"stance": wave_stance(data, front, int(ctx.seed), index),

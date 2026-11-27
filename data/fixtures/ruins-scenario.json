@@ -594,6 +594,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -606,13 +607,13 @@
       "amounts": {
        "wood": 530,
        "stone": 504,
-       "grain": 596.1666666666666,
+       "grain": 676.1666666666666,
        "iron": 326
       },
       "ratesPerHour": {
        "wood": 450,
        "stone": 300,
-       "grain": 251.5,
+       "grain": 651.5,
        "iron": 150
       },
       "capacity": {
@@ -853,6 +854,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -865,13 +867,13 @@
        "amounts": {
         "iron": 326,
         "wood": 530,
-        "grain": 596.1666666666666,
+        "grain": 676.1666666666666,
         "stone": 504
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 251.5,
+        "grain": 651.5,
         "stone": 300
        },
        "capacity": {
@@ -888,7 +890,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:24:00.000Z",
@@ -906,63 +908,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         14400
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          28800
         ],
         [
-         6,
-         -6,
-         43200
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          57600
         ],
         [
-         4,
-         -4,
-         72000
-        ],
-        [
-         3,
-         -3,
-         100800
-        ],
-        [
-         2,
          -2,
+         9,
+         86400
+        ],
+        [
+         -2,
+         8,
+         115200
+        ],
+        [
+         -3,
+         8,
          129600
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          158400
         ],
         [
-         0,
-         0,
-         172800
+         -3,
+         6,
+         187200
+        ],
+        [
+         -3,
+         5,
+         216000
+        ],
+        [
+         -3,
+         4,
+         230400
+        ],
+        [
+         -2,
+         3,
+         244800
+        ],
+        [
+         -2,
+         2,
+         259200
         ]
        ],
-       "arrivesAt": "2026-06-01T10:26:52.800Z"
+       "arrivesAt": "2026-06-01T10:28:19.200Z"
       }
      },
      {
@@ -3431,6 +3443,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -3443,13 +3456,13 @@
        "amounts": {
         "iron": 326,
         "wood": 530,
-        "grain": 596.1666666666666,
+        "grain": 676.1666666666666,
         "stone": 504
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 251.5,
+        "grain": 651.5,
         "stone": 300
        },
        "capacity": {
@@ -3466,7 +3479,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:24:00.000Z",
@@ -3484,63 +3497,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         14400
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          28800
         ],
         [
-         6,
-         -6,
-         43200
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          57600
         ],
         [
-         4,
-         -4,
-         72000
-        ],
-        [
-         3,
-         -3,
-         100800
-        ],
-        [
-         2,
          -2,
+         9,
+         86400
+        ],
+        [
+         -2,
+         8,
+         115200
+        ],
+        [
+         -3,
+         8,
          129600
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          158400
         ],
         [
-         0,
-         0,
-         172800
+         -3,
+         6,
+         187200
+        ],
+        [
+         -3,
+         5,
+         216000
+        ],
+        [
+         -3,
+         4,
+         230400
+        ],
+        [
+         -2,
+         3,
+         244800
+        ],
+        [
+         -2,
+         2,
+         259200
         ]
        ],
-       "arrivesAt": "2026-06-01T10:26:52.800Z"
+       "arrivesAt": "2026-06-01T10:28:19.200Z"
       }
      },
      {
@@ -5948,6 +5971,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -5960,13 +5984,13 @@
       "amounts": {
        "wood": 642.5,
        "stone": 579,
-       "grain": 668.4916666666666,
+       "grain": 848.4916666666667,
        "iron": 363.5
       },
       "ratesPerHour": {
        "wood": 450,
        "stone": 300,
-       "grain": 130,
+       "grain": 530,
        "iron": 150
       },
       "capacity": {
@@ -6161,7 +6185,7 @@
       "amounts": {
        "wood": 755,
        "stone": 654,
-       "grain": 724.6166666666666,
+       "grain": 917.9499999999999,
        "iron": 401
       },
       "ratesPerHour": {
@@ -6362,7 +6386,7 @@
       "amounts": {
        "wood": 867.5,
        "stone": 729,
-       "grain": 780.7416666666666,
+       "grain": 974.0749999999999,
        "iron": 438.5
       },
       "ratesPerHour": {
@@ -6551,6 +6575,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -6563,13 +6588,13 @@
       "amounts": {
        "wood": 980,
        "stone": 804,
-       "grain": 836.8666666666666,
+       "grain": 936.8666666666666,
        "iron": 476
       },
       "ratesPerHour": {
        "wood": 450,
        "stone": 300,
-       "grain": 130,
+       "grain": -270,
        "iron": 150
       },
       "capacity": {
@@ -6803,6 +6828,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -6815,13 +6841,13 @@
        "amounts": {
         "iron": 478.5,
         "wood": 987.5,
-        "grain": 839.0333333333332,
+        "grain": 932.3666666666666,
         "stone": 809
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 332.5,
+        "grain": -67.5,
         "stone": 300
        },
        "capacity": {
@@ -6838,7 +6864,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:24:00.000Z",
@@ -6856,63 +6882,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         14400
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          28800
         ],
         [
-         6,
-         -6,
-         43200
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          57600
         ],
         [
-         4,
-         -4,
-         72000
-        ],
-        [
-         3,
-         -3,
-         100800
-        ],
-        [
-         2,
          -2,
+         9,
+         86400
+        ],
+        [
+         -2,
+         8,
+         115200
+        ],
+        [
+         -3,
+         8,
          129600
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          158400
         ],
         [
-         0,
-         0,
-         172800
+         -3,
+         6,
+         187200
+        ],
+        [
+         -3,
+         5,
+         216000
+        ],
+        [
+         -3,
+         4,
+         230400
+        ],
+        [
+         -2,
+         3,
+         244800
+        ],
+        [
+         -2,
+         2,
+         259200
         ]
        ],
-       "arrivesAt": "2026-06-01T10:26:52.800Z"
+       "arrivesAt": "2026-06-01T10:28:19.200Z"
       }
      },
      {
@@ -9256,7 +9292,7 @@
    "response": {
     "notifications": [
      {
-      "id": 13,
+      "id": 16,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
@@ -9265,7 +9301,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 15,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9274,7 +9310,16 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 14,
+      "kind": "season",
+      "tier": "push",
+      "title": "Winter has come",
+      "body": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, -2)",
@@ -9283,7 +9328,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 12,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (-5, 0) sank back into the earth",
@@ -9292,7 +9337,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 11,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9301,7 +9346,7 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 10,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9310,7 +9355,16 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 9,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (3, -4)",
@@ -9319,12 +9373,21 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
       "createdAt": "2026-06-01T08:48:24.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
@@ -9373,7 +9436,7 @@
       "read": false
      }
     ],
-    "unread": 13,
+    "unread": 16,
     "serverTime": "2026-06-01T09:55:00.000Z"
    }
   },
@@ -9384,7 +9447,7 @@
    "response": {
     "notifications": [
      {
-      "id": 13,
+      "id": 16,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found a forgotten ruin",
@@ -9393,7 +9456,7 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 15,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9402,7 +9465,16 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 14,
+      "kind": "season",
+      "tier": "push",
+      "title": "Winter has come",
+      "body": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, -2)",
@@ -9411,7 +9483,7 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 12,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (-5, 0) sank back into the earth",
@@ -9420,7 +9492,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 11,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9429,7 +9501,7 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 10,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
@@ -9438,7 +9510,16 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 9,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 8,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (3, -4)",
@@ -9447,12 +9528,21 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "site",
       "tier": "digest",
       "title": "Scouts from Mirogost found no ruins",
       "body": "They searched the land around it and came back empty-handed.",
       "createdAt": "2026-06-01T08:48:24.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
@@ -9501,7 +9591,7 @@
       "read": false
      }
     ],
-    "unread": 13,
+    "unread": 16,
     "serverTime": "2026-06-01T09:55:00.000Z"
    }
   }

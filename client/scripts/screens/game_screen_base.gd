@@ -88,6 +88,9 @@ var _view_button: Button
 var _inbox_button: Button
 var _ember_chip: HBoxContainer
 var _ember_label: Label
+## The season and how long it lasts yet (SeasonText), under the embers.
+var _season_label: Label
+var _shown_season := ""
 
 ## Which of the inbox and the chat the shared button opened last.
 var _messages_tab := "inbox"
@@ -430,6 +433,22 @@ func _process(delta: float) -> void:
 		hex_map.queue_redraw()
 	for entry in _ticking:
 		entry[0].text = (entry[1] as Callable).call()
+	_update_season()
+
+
+## The season under the embers, and the map dressed for it when it turns.
+func _update_season() -> void:
+	if _season_label == null:
+		return
+	var now := Game.server_now()
+	var at := SeasonText.at(Game.data, Game.world, now)
+	_season_label.text = SeasonText.line(Game.data, Game.world, now)
+	var season: String = at.get("season", "spring")
+	if season == _shown_season:
+		return
+	_shown_season = season
+	_season_label.tooltip_text = SeasonText.description(Game.data, season) if not at.is_empty() else ""
+	hex_map.set_season(season)
 
 
 func _build_ui() -> void:
@@ -490,6 +509,11 @@ func _build_ui() -> void:
 	_ember_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_ember_chip.add_child(_ember_label)
 	whose.add_child(_ember_chip)
+	_season_label = UI.label("", 14, UiTheme.ON_WOOD)
+	_season_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_season_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_season_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	whose.add_child(_season_label)
 	_resources.add_child(whose)
 	for kind in Ledger.KINDS:
 		var cell := UI.hbox(8)

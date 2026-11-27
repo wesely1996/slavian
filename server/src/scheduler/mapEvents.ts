@@ -4,6 +4,7 @@
 // for a shipyard, someone has sent resources), and the horde hates the more
 // for it (scheduler/eventOutcomes.ts). A paid-for shipyard builds
 // its boat (shipyard_done), struck by raiders (shipyard_raid) on the way.
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { achieveAll } from './achievements.js';
 import { villageBonuses } from '../sim/clans.js';
 import { z } from 'zod';
@@ -166,6 +167,7 @@ export const mapEventHandlers: HandlerRegistry = {
         raiderStance: rules.raiderStance,
         front: shipyard.front as Front,
         seed: world.seed,
+        season: seasonDefense(data, seasonAt(data, world, at).season),
         id: shipyard.id * 64 + shipyard.raids * 8 + i,
         ground: await groundOf(client, data, world.id, where),
         lines: {

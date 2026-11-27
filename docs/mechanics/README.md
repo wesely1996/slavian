@@ -14,7 +14,7 @@ balance changes land there first.
 
 | # | Page | What it covers |
 |---|---|---|
-| 1 | [The world and the run](01-world-and-run.md) | The goal, the Holy City and its Sanctity, map size, fronts, difficulty titles, world speed, quiet hours, solo and co-op, the getting-started quests |
+| 1 | [The world and the run](01-world-and-run.md) | The goal, the Holy City and its Sanctity, map size, fronts, difficulty titles, world speed, seasons, quiet hours, solo and co-op, the getting-started quests |
 | 2 | [Map, movement and terrain](02-map-and-movement.md) | Terrain, move costs, roads and mountain passes, rivers and bridges, the river boat lanes, terraforming, fire |
 | 3 | [Villages and buildings](03-villages-and-buildings.md) | Plots and slots, the Elder's Hall, build costs and times, every building, cancelling, demolishing, ruins |
 | 4 | [Economy and logistics](04-economy-and-logistics.md) | Resources, production, storage, grain upkeep, outposts, the Market and bounty board, caravans, merchants, the vault, standing orders |

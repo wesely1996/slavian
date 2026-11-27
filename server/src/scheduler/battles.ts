@@ -1,6 +1,7 @@
 // Battles on the scheduler: a horde reaching a village starts a battle; each
 // battle_round event fights one round, applies losses to the horde and the
 // garrison, and either schedules the next round or settles the outcome.
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { SETTLER } from '../sim/expansion.js';
 import { addBought } from '../db/worlds.js';
 import { achieve } from './achievements.js';
@@ -234,6 +235,7 @@ export const battleHandlers: HandlerRegistry = {
         round,
         battle.setup.lines,
       ),
+      seasonDefense(data, seasonAt(data, world, at).season),
     );
     const attackerLosses = addUnits(result.attackerLosses, smashed);
     const attackerNow = subtractUnits(wave.composition, attackerLosses);

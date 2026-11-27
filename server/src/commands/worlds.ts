@@ -10,6 +10,7 @@ import { inTransaction, type Db, type DbClient } from '../db/pool.js';
 import { ensureHeroes } from '../db/heroes.js';
 import { ensureDigests, tell } from '../scheduler/notices.js';
 import { ensureMapEvents } from '../scheduler/mapEvents.js';
+import { applySeason, ensureSeasons } from '../scheduler/seasons.js';
 import { ensurePrune } from '../scheduler/prune.js';
 import { insertVillage, listVillages, loadVillage } from '../db/villages.js';
 import { placeStarterCamps } from '../scheduler/camps.js';
@@ -153,6 +154,8 @@ async function lateJoin(
   await insertVillage(client, { worldId: world.id, ownerAccountId: input.account.id, name, q: site.q, r: site.r, state: newVillage(data, input.now, world.speed) });
   await ensureHeroes(client, data, world.id);
   await refreshBonuses(client, data, world, [input.account.id], input.now);
+  // Its village on today's season.
+  await applySeason(client, data, world, input.now);
   await ensureDigests(client, world, input.now);
   for (const member of members) {
     await tell(client, world, member.accountId, {
@@ -211,6 +214,7 @@ export async function startWorldCommand(
     await openStage(client, deps.data, started, 0, input.now);
     await ensureDigests(client, started, input.now);
     await ensureMapEvents(client, deps.data, started, input.now);
+    await ensureSeasons(client, deps.data, started, input.now);
     await ensurePrune(client, started, input.now);
     await record(client, world.id, 'run_start', { players: members.length, difficulty: started.difficulty, speed: started.speed, fronts: map.activeFronts }, input.now);
     await notifyWorld(client, { worldId: world.id, type: 'world' });

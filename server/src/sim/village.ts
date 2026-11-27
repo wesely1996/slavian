@@ -250,7 +250,8 @@ export function productionPerHour(
       for (const kind of Object.keys(rates) as (keyof Resources)[]) rates[kind] += gathered[kind] * (outpostFactor + (plot.road ?? 0));
     }
   }
-  return mapResources((kind) => rates[kind] * productionFactor(bonuses, kind));
+  // The season's grain (sim/seasons.ts): twice in summer, none in winter.
+  return mapResources((kind) => rates[kind] * productionFactor(bonuses, kind) * (kind === 'grain' ? Math.max(0, 1 + bonus(bonuses, 'season.grain')) : 1));
 }
 
 // Every unit the village feeds: at home, in training and away.
@@ -337,8 +338,18 @@ export function newVillage(
 
 // The owner's research changed: new rates and capacity from `at`.
 export function withBonuses(data: GameData, state: VillageState, bonuses: Bonuses, at: Date, worldSpeed: number): VillageState {
-  const next = { ...state, bonuses };
+  // The season's part stays until the season turns (withSeason).
+  const season = state.bonuses['season.grain'];
+  const next = { ...state, bonuses: season === undefined ? bonuses : { ...bonuses, 'season.grain': season } };
   return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), capacity(data, state.plots, bonuses)) };
+}
+
+// The season has turned: the village's season bonuses (sim/seasons.ts
+// seasonBonuses) in place of the last season's, its rates from `at`.
+export function withSeason(data: GameData, state: VillageState, season: Bonuses, at: Date, worldSpeed: number): VillageState {
+  const { 'season.grain': _old, ...rest } = state.bonuses;
+  const next = { ...state, bonuses: { ...rest, ...season } };
+  return { ...next, ledger: withRates(state.ledger, at, villageRates(data, next, worldSpeed), state.ledger.capacity) };
 }
 
 // What a plot will hold once everything already queued completes.

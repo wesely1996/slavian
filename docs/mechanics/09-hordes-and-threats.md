@@ -54,7 +54,7 @@ added after it, so later hordes are mostly the newest troops.
 |---|---|
 | Grace | 5 days (120 game hours) before the first horde sets out |
 | Rhythm | One horde every 24 game hours after that |
-| Fronts | The active fronts take turns |
+| Fronts | Each horde's front is drawn by the season it sets out in ([page 1](01-world-and-run.md#seasons)) |
 | Known ahead | The next 2 hordes, with their front, target, size class and arrival time |
 | Quiet hours | A horde that would arrive inside them waits until they end |
 

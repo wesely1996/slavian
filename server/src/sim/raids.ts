@@ -98,6 +98,8 @@ export function raidBattle(
     statsWithoutHero?: (unit: string) => UnitStats;
     // Fought in lines (battle.json lines); nobody maneuvers at a stronghold's walls.
     lines?: LineSetup;
+    // The season's toughness for everyone (sim/seasons.ts seasonDefense).
+    season?: number;
   },
 ): { won: boolean; rounds: { round: number; maneuver?: { by: SideId; kind: Move }; breakthrough?: { by: SideId; kind: Move }; attackerLosses: Units; defenderLosses: Units; attackerLeft: number; defenderLeft: number }[]; armyNow: Units; enemyNow: Units; fallen: string[] } {
   const rules = data.raids;
@@ -136,6 +138,7 @@ export function raidBattle(
       afflictions,
       undefined,
       lines ? linesFor(lines, round, lineState) : undefined,
+      input.season ?? 1,
     );
     afflictions = result.afflictions;
     lineState = result.lines?.state;

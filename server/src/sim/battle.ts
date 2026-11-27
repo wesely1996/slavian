@@ -171,6 +171,8 @@ interface Plight {
   from?: SideLine | undefined;
   to?: SideLine | undefined;
   opening?: boolean | undefined;
+  // The season's toughness for everyone (sim/seasons.ts seasonDefense).
+  season: number;
 }
 
 // Kills `from` inflicts on `to` this round, by unit type, for each of
@@ -261,7 +263,7 @@ function kills(
     // Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
     // Each of the target's health that lands (hardened by its stance and by
     // fighting at home) fells one.
-    const held = champion ? 1 : groundFactors(data, plight.ground, stats.family, stats.terrain).defense;
+    const held = (champion ? 1 : groundFactors(data, plight.ground, stats.family, stats.terrain).defense) * plight.season;
     const lands = battle.armorConstant / (battle.armorConstant + Math.max(0, stats.defense * held * plight.toWeak) * guard);
     const toughness = Math.max(1, stats.health) * battle.stances[group.stance].defense * (to.home ? battle.homeBonus : 1);
     const expected = (damage * share * battle.casualtyScale * lands) / toughness;
@@ -315,6 +317,8 @@ export function resolveRound(
   afflictions: Afflictions = NO_AFFLICTIONS,
   ground?: Ground,
   lines?: LinesInput,
+  // Every unit's defense, both sides (sim/seasons.ts seasonDefense).
+  season = 1,
 ): RoundResult {
   const weak = (side: SideAfflictions) => (side.poisoned > 0 ? data.battle.afflictions.poison.factor : 1);
   const drawn = lines ? battleLines(data, { ...lines, ground }, familyCounts(attacker), familyCounts(defender)) : undefined;
@@ -328,6 +332,7 @@ export function resolveRound(
     from: drawn?.defender,
     to: drawn?.attacker,
     opening,
+    season,
   });
   const byGroup = kills(data, attacker, defender, rng, {
     fromWeak: weak(afflictions.attacker),
@@ -337,6 +342,7 @@ export function resolveRound(
     from: drawn?.attacker,
     to: drawn?.defender,
     opening,
+    season,
   });
   return {
     afflictions: {

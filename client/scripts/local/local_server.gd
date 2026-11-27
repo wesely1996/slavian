@@ -84,6 +84,7 @@ func start_world(params: Dictionary, account_id: int, now: int) -> Dictionary:
 	LocalBridgeCommands.open_stage(self, world, 0, now)
 	LocalInbox.ensure_digests(self, world, now)
 	LocalEvents.ensure(self, world, now)
+	LocalSeasons.ensure(self, world, now)
 	LocalPrune.ensure(self, world, now)
 	world.hexes = _by_row(world.hexes)
 	_hex_views.erase(int(world.id))
@@ -1112,6 +1113,7 @@ func drain(world: Dictionary, until: int, changed: Array) -> int:
 	var processed := 0
 	# Worlds saved before daily map events: the next day's planned.
 	LocalEvents.ensure(self, world, until)
+	LocalSeasons.ensure(self, world, until)
 	LocalPrune.ensure(self, world, until)
 	# A finished run (won or lost) stands still.
 	while processed < 10000 and not world.status in ["won", "lost"]:
@@ -1284,6 +1286,10 @@ func _on_army_arrive(world: Dictionary, event: Dictionary, changed: Array) -> vo
 	# An army marching to join an army group joins it once it stands.
 	if group != null:
 		LocalArmyGroups.join_group(self, world, army, int(event.dueAt))
+
+
+func _on_season_turn(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalSeasons.on_season_turn(self, world, event, changed)
 
 
 func _on_group_check(world: Dictionary, event: Dictionary, changed: Array) -> void:

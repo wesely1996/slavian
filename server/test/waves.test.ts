@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../src/data/index.js';
+import { seasonAt } from '../src/sim/seasons.js';
 import { hex, hexDistance, hexKey } from '../src/sim/hex.js';
 import { frontOf, generateMap } from '../src/sim/mapgen.js';
 import {
@@ -7,8 +8,10 @@ import {
   hatredCrossings,
   marchSpeed,
   planMarch,
+  pickFront,
   planWave,
   raidsAlong,
+  rngFor,
   spawnTime,
   splitBand,
   threatOf,
@@ -107,9 +110,35 @@ describe('wave schedule', () => {
     );
   });
 
-  it('rotates the active fronts', () => {
-    const fronts = [0, 1, 2, 3, 4].map((index) => planWave(data, { ...ctx, activeFronts: ['north', 'east', 'south', 'west'] }, index, T0).front);
-    expect(fronts).toEqual(['north', 'east', 'south', 'west', 'north']);
+  it('draws each horde\'s front by its season\'s weights (data/seasons.json)', () => {
+    const all = ['north', 'east', 'south', 'west'] as const;
+    const draws = (season: 'spring' | 'summer' | 'autumn' | 'winter') => {
+      const counts: Record<string, number> = { north: 0, east: 0, south: 0, west: 0 };
+      for (let i = 0; i < 4000; i++) counts[pickFront(data, all, season, rngFor(1, i, 0x5e), i)]! += 1;
+      return counts;
+    };
+    // Spring: every front alike.
+    for (const n of Object.values(draws('spring'))) expect(n).toBeGreaterThan(850);
+    // Summer: the East twice, the South and West half as often as the North.
+    const summer = draws('summer');
+    expect(summer.east! / summer.north!).toBeGreaterThan(1.7);
+    expect(summer.south! / summer.north!).toBeLessThan(0.6);
+    // Autumn: no East at all.
+    expect(draws('autumn').east).toBe(0);
+    // Winter: the North twice as often as the others.
+    const winter = draws('winter');
+    expect(winter.north! / winter.south!).toBeGreaterThan(1.7);
+    // All weights nothing (only the East active, in autumn): in turn.
+    expect(pickFront(data, ['east'], 'autumn', () => 0.5, 3)).toBe('east');
+  });
+
+  it('plans a horde\'s front for the season it sets out in', () => {
+    // Day 2 of a run is autumn: no East horde then.
+    const autumnSpawn = new Date(T0.getTime() + 2 * 24 * 3_600_000 + 3_600_000);
+    for (let index = 1; index < 40; index++) {
+      const planned = planWave(data, { ...ctx, startedAt: T0, activeFronts: ['north', 'east', 'south', 'west'] }, index, new Date(autumnSpawn.getTime() - 24 * 3_600_000));
+      if (seasonAt(data, { startedAt: T0, speed: ctx.worldSpeed }, planned.spawnAt).season === 'autumn') expect(planned.front).not.toBe('east');
+    }
   });
 
   it('labels threat by size', () => {
@@ -141,9 +170,10 @@ describe('wave march', () => {
   it('marches from every active front of a full map', () => {
     const big = generateMap(data, 2026, 4);
     const sites = big.startSites.map((site, i) => ({ id: i + 1, q: site.q, r: site.r }));
-    for (const [index, front] of (['north', 'east', 'south', 'west'] as const).entries()) {
-      const planned = planWave(data, { ...ctx, activeFronts: big.activeFronts, playerCount: 4 }, index, T0);
-      expect(planned.front).toBe(front);
+    for (const front of ['north', 'east', 'south', 'west'] as const) {
+      // The first horde of that front (they are drawn by season).
+      const planned = Array.from({ length: 200 }, (_, index) => planWave(data, { ...ctx, activeFronts: big.activeFronts, playerCount: 4 }, index, T0)).find((w) => w.front === front)!;
+      expect(planned).toBeDefined();
       const m = planMarch(data, { terrain: big.terrain, radius: big.radius, wave: planned, villages: sites, seed: 2026, departAt: T0, worldSpeed: 1 });
       expect(frontOf(m.spawn)).toBe(front);
       expect(data.enemies.fronts[front]!.spawnTerrain).toContain(big.terrain.get(hexKey(m.spawn)));

@@ -240,7 +240,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -258,63 +258,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -444,7 +454,7 @@
        {
         "id": "0:ambush",
         "kind": "ambush",
-        "front": "north",
+        "front": "south",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -2592,7 +2602,7 @@
       {
        "id": "0:ambush",
        "kind": "ambush",
-       "front": "north",
+       "front": "south",
        "siteId": null,
        "distance": 5,
        "hours": 5.666666666666667,
@@ -2847,7 +2857,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -2865,63 +2875,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -3052,7 +3072,7 @@
        {
         "id": "0:ambush",
         "kind": "ambush",
-        "front": "north",
+        "front": "south",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -5392,7 +5412,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -5410,63 +5430,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -5586,7 +5616,7 @@
        {
         "id": "0:ambush",
         "kind": "ambush",
-        "front": "north",
+        "front": "south",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -8353,7 +8383,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -8371,63 +8401,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -10988,7 +11028,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -11006,63 +11046,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -13655,7 +13705,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -13673,63 +13723,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -16287,6 +16347,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -16305,7 +16366,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -16314,7 +16375,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:34:36.000Z"
+       "settledAt": "2026-06-01T10:24:00.000Z"
       }
      }
     ],
@@ -16322,7 +16383,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -16340,63 +16401,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -18965,6 +19036,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -18983,7 +19055,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -18992,7 +19064,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:34:36.000Z"
+       "settledAt": "2026-06-01T10:24:00.000Z"
       }
      }
     ],
@@ -19000,7 +19072,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -19018,63 +19090,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -21687,6 +21769,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -21705,7 +21788,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -21714,7 +21797,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T09:34:36.000Z"
+       "settledAt": "2026-06-01T10:24:00.000Z"
       }
      }
     ],
@@ -21722,7 +21805,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -21740,63 +21823,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -24435,6 +24528,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -24453,7 +24547,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -24470,7 +24564,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -24488,63 +24582,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -27210,6 +27314,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -27228,7 +27333,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -27245,7 +27350,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -27263,63 +27368,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -29985,6 +30100,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -30003,7 +30119,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -30020,7 +30136,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -30038,63 +30154,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -32757,6 +32883,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -32775,7 +32902,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -32792,7 +32919,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -32810,63 +32937,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -35658,6 +35795,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -35676,7 +35814,7 @@
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": 119.5,
         "stone": 60
        },
        "capacity": {
@@ -35693,7 +35831,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -35711,63 +35849,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -38445,6 +38593,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -38457,13 +38606,13 @@
        "amounts": {
         "iron": 1200,
         "wood": 1400,
-        "grain": 271.60000000000076,
+        "grain": 187.60000000000076,
         "stone": 1400
        },
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 39.5,
+        "grain": -40.5,
         "stone": 60
        },
        "capacity": {
@@ -38480,7 +38629,7 @@
      {
       "id": 1,
       "index": 0,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T20:00:00.000Z",
@@ -38498,63 +38647,73 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 9,
-        "r": -8
+        "q": 0,
+        "r": 10
        },
-       "targetVillageId": null,
+       "targetVillageId": 1,
        "path": [
         [
-         9,
-         -8,
+         0,
+         10,
          0
         ],
         [
-         8,
-         -8,
-         72000
-        ],
-        [
-         7,
-         -7,
+         -1,
+         10,
          144000
         ],
         [
-         6,
-         -6,
-         216000
-        ],
-        [
-         5,
-         -5,
+         -2,
+         10,
          288000
         ],
         [
-         4,
-         -4,
-         360000
-        ],
-        [
-         3,
-         -3,
-         504000
-        ],
-        [
-         2,
          -2,
+         9,
+         432000
+        ],
+        [
+         -2,
+         8,
+         576000
+        ],
+        [
+         -3,
+         8,
          648000
         ],
         [
-         1,
-         -1,
+         -3,
+         7,
          792000
         ],
         [
-         0,
-         0,
-         864000
+         -3,
+         6,
+         936000
+        ],
+        [
+         -3,
+         5,
+         1080000
+        ],
+        [
+         -3,
+         4,
+         1152000
+        ],
+        [
+         -2,
+         3,
+         1224000
+        ],
+        [
+         -2,
+         2,
+         1296000
         ]
        ],
-       "arrivesAt": "2026-06-01T20:14:24.000Z"
+       "arrivesAt": "2026-06-01T20:21:36.000Z"
       }
      },
      {
@@ -41068,7 +41227,7 @@
    "response": {
     "notifications": [
      {
-      "id": 19,
+      "id": 22,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya failed: Storm the haunted barrow",
@@ -41077,7 +41236,16 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 21,
+      "kind": "season",
+      "tier": "push",
+      "title": "Winter has come",
+      "body": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "createdAt": "2026-06-01T15:12:00.000Z",
+      "read": false
+     },
+     {
+      "id": 20,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (-5, -2)",
@@ -41086,7 +41254,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 19,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (-5, 0) sank back into the earth",
@@ -41095,7 +41263,16 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 18,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T12:48:00.000Z",
+      "read": false
+     },
+     {
+      "id": 17,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (3, -4)",
@@ -41104,7 +41281,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 16,
       "kind": "event",
       "tier": "push",
       "title": "You searched the forbidding ruin at (-7, 1)",
@@ -41113,7 +41290,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 15,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya has done: Storm the haunted barrow",
@@ -41122,7 +41299,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 14,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Grave Goods",
@@ -41131,12 +41308,21 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 13,
       "kind": "site",
       "tier": "digest",
       "title": "The Kurgan at (-7, 1) gave up 4590 resources",
       "body": "Explored and done.",
       "createdAt": "2026-06-01T10:58:36.000Z",
+      "read": false
+     },
+     {
+      "id": 12,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
      {
@@ -41239,7 +41425,7 @@
       "read": false
      }
     ],
-    "unread": 19,
+    "unread": 22,
     "serverTime": "2026-06-01T16:21:00.000Z"
    }
   }
