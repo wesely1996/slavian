@@ -223,7 +223,7 @@ const enemyLandsFileSchema = z.object({
     scouts: z.object({ perLevels: z.number().int().positive(), hordeUnitsPerScout: z.number().int().positive() }),
     garrison: z.object({ baseUnits: z.number().positive(), perLevel: z.number().nonnegative(), kinds: z.record(z.string(), z.number().positive()) }),
     sally: z.object({ share: z.number().positive(), cooldownHours: z.number().nonnegative(), chaseRange: z.number().int().nonnegative() }),
-    patrols: z.object({ perFront: z.number().int().nonnegative(), everyHours: z.number().positive(), share: z.number().positive(), scouts: z.number().int().nonnegative() }),
+    patrols: z.object({ perFront: z.number().int().nonnegative(), everyHours: z.number().positive(), share: z.number().positive(), scouts: z.number().int().nonnegative(), restHours: z.number().nonnegative() }),
   }),
 });
 export type EnemyLandsData = z.infer<typeof enemyLandsFileSchema>;

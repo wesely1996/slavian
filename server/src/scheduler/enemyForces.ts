@@ -71,7 +71,7 @@ export function bandHexAt(band: EnemyBand, at: Date): Hex {
 
 const levelOf = (data: GameData, world: World, s: EnemySettlement, at: Date) => settlementLevel(data, s.foundedAt, at, world.speed);
 
-// Sets a band on a new road from `at`, and plans its arrival.
+// Sets a band on a new road, leaving at `at`, and plans its arrival.
 async function march(client: DbClient, world: World, band: EnemyBand, path: PathStep[], at: Date): Promise<EnemyBand> {
   const next = { ...band, path, departsAt: at, arrivesAt: new Date(at.getTime() + path.at(-1)!.atMs) };
   await saveEnemyBand(client, next);
@@ -95,7 +95,8 @@ async function arrivedHome(client: DbClient, data: GameData, world: World, band:
   await nextLeg(client, data, world, band, at);
 }
 
-// A patrol on to another settlement of its front (none left: it disbands).
+// A patrol on to another settlement of its front, once it has rested
+// (none left: it disbands).
 async function nextLeg(client: DbClient, data: GameData, world: World, band: EnemyBand, at: Date): Promise<void> {
   const cell = bandHexAt(band, at);
   const others = (await listEnemySettlements(client, world.id)).filter((s) => s.front === band.front && hexDistance(s.cell, cell) > 0);
@@ -104,7 +105,8 @@ async function nextLeg(client: DbClient, data: GameData, world: World, band: Ene
   const to = others[Math.floor(rng() * others.length)]!;
   const path = bandRoute(data, bandLand(await armyLand(client, data, world)), world, cell, to.cell);
   if (!path) return deleteEnemyBand(client, band.id);
-  await march(client, world, { ...band, status: 'patrolling', settlementId: to.id, targetArmyId: null }, path, at);
+  const leaves = new Date(at.getTime() + hoursMs(data.enemyLands.forces.patrols.restHours, world));
+  await march(client, world, { ...band, status: 'patrolling', settlementId: to.id, targetArmyId: null }, path, leaves);
 }
 
 // The band catches the army: a battle where it stands. The army holds its
@@ -186,9 +188,17 @@ export const enemyForceHandlers: HandlerRegistry = {
     const at = event.dueAt;
     const rules = data.enemyLands.forces;
     await scheduleEvent(client, world.id, new Date(at.getTime() + hoursMs(rules.watchHours, world)), 'enemy_watch', {});
+    // Only armies in the enemy lands are looked for.
+    const armies = (await listArmies(client, world.id))
+      .filter((a) => a.status !== 'done' && !a.raid)
+      .filter((a) => {
+        const cell = armyHexAt(a, at);
+        return !!cell && !!enemyHexAt(data, cell, world);
+      })
+      .sort((x, y) => x.id - y.id);
+    if (!armies.length) return;
     const settlements = await listEnemySettlements(client, world.id);
     let bands = await listEnemyBands(client, world.id);
-    const armies = (await listArmies(client, world.id)).filter((a) => a.status !== 'done' && !a.raid).sort((x, y) => x.id - y.id);
     const players = (await listMembers(client, world.id)).length;
     let land: Land | null = null;
     for (const army of armies) {

@@ -179,7 +179,7 @@ don't) to where the army was spotted.
 - **Chase.** An army that moved off is followed up to **3 hexes** further,
   while it is still in the enemy lands. Otherwise the band goes home.
 - **Patrols.** Each front keeps up to **2 patrols** marching between its
-  settlements, 35% of a garrison each. One more sets out every **8 game
+  settlements, 35% of a garrison each, resting **6 game hours** at each. One more sets out every **8 game
   hours** once a front has two settlements.
 - **On the map,** war bands show as pennants in their front's colour with
   their strength, a hunting band's road dotted red. Those deeper than the

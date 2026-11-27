@@ -977,14 +977,16 @@ func _draw_band(band: Dictionary, now: float) -> void:
 	var p := CaravanMath.progress({"status": "outbound", "departsAt": band.departsAt, "path": steps}, now)
 	var pos: Vector2
 	if p.is_empty():
-		pos = HexMath.to_pixel(Vector2i(int(steps[-1].q), int(steps[-1].r)), hex_size)
+		# Resting before it sets out, or at the end of its road.
+		var at: Dictionary = steps[0] if now < TimeUtil.parse_iso(String(band.departsAt)) else steps[-1]
+		pos = HexMath.to_pixel(Vector2i(int(at.q), int(at.r)), hex_size)
 	else:
 		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
 	var color := WaveMath.front_color(String(band.front))
 	if band.status == "hunting":
 		var ahead := PackedVector2Array([pos])
 		for s in steps:
-			if int(s.atMs) > now - TimeUtil.parse_iso(String(band.departsAt)) * 1000.0:
+			if int(s.atMs) > (now - TimeUtil.parse_iso(String(band.departsAt))) * 1000.0:
 				ahead.append(HexMath.to_pixel(Vector2i(int(s.q), int(s.r)), hex_size))
 		if ahead.size() > 1:
 			_draw_dots(ahead, HORDE_PATH_COLOR, hex_size * 0.07)

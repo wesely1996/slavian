@@ -194,6 +194,10 @@ static func _go_home(server: LocalServer, world: Dictionary, band: Dictionary, a
 	_march(server, world, band, path, at)
 
 
+static func data_rest(server: LocalServer) -> float:
+	return float(server.data.enemyLands.forces.patrols.restHours)
+
+
 static func _arrived_home(server: LocalServer, world: Dictionary, band: Dictionary, at: int) -> void:
 	if band.kind == "sally":
 		_delete(world, band)
@@ -216,7 +220,8 @@ static func _next_leg(server: LocalServer, world: Dictionary, band: Dictionary, 
 	band.status = "patrolling"
 	band.settlementId = to.id
 	band.targetArmyId = null
-	_march(server, world, band, path, at)
+	# It rests at the settlement first.
+	_march(server, world, band, path, LocalTime.ms(at + _hours(float(data_rest(server)), world)))
 
 
 static func _band_battle(server: LocalServer, world: Dictionary, band: Dictionary, army: Dictionary, cell: Vector2i, at: int) -> void:
