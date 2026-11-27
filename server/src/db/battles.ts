@@ -56,6 +56,8 @@ export interface BattleSetup {
   // Another player's attack (armies.json pvp): who attacked, with which army, to raze.
   pvp?: { attackerAccountId: number | null; armyId: number; raze: boolean };
   ambush?: boolean;
+  // The horde's scouts found the ambush (sim/enemyForces.ts).
+  ambushFound?: boolean;
   choke?: boolean;
   fort?: boolean;
   holyCity?: boolean;
@@ -69,7 +71,7 @@ export interface BattleSetup {
   // The defenders charged out: the walls play no part any more.
   sally?: boolean;
   // A battle of a raid beyond the map's edge: the front, the field (or stronghold) and the stage.
-  raid?: { front: string; name: string; stronghold: boolean; stage: number; strike?: boolean };
+  raid?: { front: string; name: string; stronghold: boolean; stage: number; strike?: boolean; band?: boolean };
   // The horde crossed a river (over a bridge) into the fight.
   river?: boolean;
   // The defense a wagon fort gives the holders (sim/field.ts).

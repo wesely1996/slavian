@@ -174,6 +174,11 @@ holds matters:
 | **Fort** | A fort on the hex | +30% defense and +30% attack for armies holding it; easier maneuvers ([page 16](16-battle-lines.md#ground-that-shapes-the-line)) |
 | **Wagon fort** | The army circled its wagons ([below](#wagon-fort)) | Up to +30% defense |
 
+**The horde's scouts** may find an ambush. A horde has 1 scout for every 20
+troops. Each scout of the holders cancels one of them, and each scout left
+finds the ambush with a 15% chance. A found ambush gives no surprise: the
+battle report says so ([page 18](18-enemy-lands.md#enemy-forces)).
+
 ### Forts
 
 - **Building.** A village builds a fort within **4 hexes** of it, on open

@@ -8,6 +8,8 @@ import { leaderEffects, leaderTitle, leaderXpToNext } from '../sim/leaders.js';
 import { listRoadEdges } from '../db/roads.js';
 import { listEdgeWalls } from '../db/edgeWalls.js';
 import { listEnemySettlements } from '../db/enemySettlements.js';
+import { listEnemyBands } from '../db/enemyBands.js';
+import { bandsView } from '../scheduler/enemyForces.js';
 import { settlementLevel, settlementName } from '../sim/enemySettlements.js';
 import { listShipyards } from '../db/shipyards.js';
 import { listAchievements } from '../db/achievements.js';
@@ -787,6 +789,8 @@ export async function worldView(base: DbClient, data: GameData, world: World, at
               id: s.id, front: s.front, kind: s.kind, name: settlementName(data, s.front, s.kind), band: s.band, q: s.cell.q, r: s.cell.r, status: s.status,
               level: settlementLevel(data, s.foundedAt, at, world.speed), foundedAt: s.foundedAt.toISOString(),
             })),
+          // The enemy's war bands seen (scheduler/enemyForces.ts bandsView).
+          bands: bandsView(data, world, await listEnemyBands(client, world.id), at),
         };
   // Each member's army slots (sim/slots.ts): used and given.
   const slots = new Map<number, { used: number; cap: number }>();

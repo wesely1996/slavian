@@ -51,6 +51,9 @@ static func setup_text(battle: Dictionary) -> String:
 	for key in ["ambush", "choke", "fort", "river"]:
 		if setup.get(key, false):
 			parts.append({"ambush": UI.t("ambush"), "choke": UI.t("choke point"), "fort": UI.t("fort"), "river": UI.t("river crossing")}[key])
+	# The horde's scouts found the ambush: no surprise.
+	if setup.get("ambushFound", false):
+		parts.append(UI.t("ambush found by the horde's scouts"))
 	return ", ".join(parts).capitalize() if not parts.is_empty() else ""
 
 

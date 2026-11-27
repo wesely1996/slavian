@@ -741,19 +741,23 @@ msgstr "utvrda"
 msgid "river crossing"
 msgstr "prelaz preko reke"
 
-#: client/scripts/game/battle_text.gd:59
+#: client/scripts/game/battle_text.gd:56
+msgid "ambush found by the horde's scouts"
+msgstr "zasedu su otkrili hordini izviđači"
+
+#: client/scripts/game/battle_text.gd:62
 msgid "nothing"
 msgstr "ništa"
 
-#: client/scripts/game/battle_text.gd:70
+#: client/scripts/game/battle_text.gd:73
 msgid "to ruins"
 msgstr "u ruševine"
 
-#: client/scripts/game/battle_text.gd:70
+#: client/scripts/game/battle_text.gd:73
 msgid "down to level %d"
 msgstr "dole na nivo %d"
 
-#: client/scripts/game/battle_text.gd:71
+#: client/scripts/game/battle_text.gd:74
 msgid "A horde burned the outpost of %s at (%d, %d) %s."
 msgstr "Horda je spalila ispostavu %s na (%d, %d) %s."
 
@@ -1231,7 +1235,7 @@ msgstr "Ovde nijedna utvrda ne može stajati."
 msgid "Something already stands here."
 msgstr "Ovde već nešto stoji."
 
-#: client/scripts/game/game.gd:569
+#: client/scripts/game/game.gd:572
 msgid "a village"
 msgstr "selo"
 

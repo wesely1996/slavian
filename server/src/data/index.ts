@@ -213,6 +213,18 @@ const enemyLandsFileSchema = z.object({
   }),
   // Rivers through each front's lands, from deep inside towards the edge.
   rivers: z.object({ perFront: z.number().int().nonnegative(), fordEvery: z.number().int().positive(), minLength: z.number().int().positive() }),
+  // The enemy's forces (sim/enemyForces.ts): garrisons, scouts, sallies and patrols.
+  forces: z.object({
+    watchHours: z.number().positive(),
+    sightRange: z.number().int().positive(),
+    pullRange: z.number().int().positive(),
+    scoutChance: z.number().min(0).max(1),
+    speed: z.number().positive(),
+    scouts: z.object({ perLevels: z.number().int().positive(), hordeUnitsPerScout: z.number().int().positive() }),
+    garrison: z.object({ baseUnits: z.number().positive(), perLevel: z.number().nonnegative(), kinds: z.record(z.string(), z.number().positive()) }),
+    sally: z.object({ share: z.number().positive(), cooldownHours: z.number().nonnegative(), chaseRange: z.number().int().nonnegative() }),
+    patrols: z.object({ perFront: z.number().int().nonnegative(), everyHours: z.number().positive(), share: z.number().positive(), scouts: z.number().int().nonnegative() }),
+  }),
 });
 export type EnemyLandsData = z.infer<typeof enemyLandsFileSchema>;
 

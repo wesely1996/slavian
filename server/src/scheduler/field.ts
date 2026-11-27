@@ -18,6 +18,8 @@ import { armiesHolding, armiesInBattle, saveArmy, type Army } from '../db/armies
 import { insertBattle, recordRound, saveSetup, type Battle, type BattleSetup, type RoundLog } from '../db/battles.js';
 import { ballistaKills, heldBack, overTheWalls, siegeDamage, wallFactors, wallIntegrity } from '../sim/walls.js';
 import { GATE_RING, gateRingPlots } from '../sim/edgeWalls.js';
+import { createRng } from '../sim/rng.js';
+import { forceSeed, hordeScouts, scoutsIn, spotChance } from '../sim/enemyForces.js';
 import { breachGatehouse, fortGatehouse } from './edgeWalls.js';
 import { inFortZone, levelOf, ringPlots, standingRings, startingPlots } from '../sim/forts.js';
 import { fortAt, insertFort, listForts, loadFort, manned, setFortDefenders, saveFortBuildings, markFortStanding, type Fort, type FortKind } from '../db/forts.js';
@@ -157,6 +159,13 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     fort: fort !== null,
     river: cameOverRiver(wave.path ?? [], cell, await riverKeys(client, world.id)),
   });
+  // The horde's scouts may find the ambush (enemy-lands.json forces): each
+  // the holders' scouts don't cancel, one for one, has scoutChance.
+  if (setup.ambush) {
+    const guards = holders.reduce((n, a) => n + scoutsIn(data, a.units), 0);
+    const chance = spotChance(data, hordeScouts(data, wave.composition), guards);
+    if (chance > 0 && createRng(forceSeed(world.seed, wave.id, 0xa3b))() < chance) setup = { ...setup, ambush: false, ambushFound: true };
+  }
   const ring = wagonFortBonus(data, holders, at);
   if (ring > 0) setup = { ...setup, wagonFort: ring };
   // Its wall rings, outer to inner, each to be battered down in turn.

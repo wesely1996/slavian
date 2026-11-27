@@ -13,6 +13,8 @@ export interface EnemySettlement {
   status: EnemySettlementStatus;
   garrison: Record<string, number>;
   foundedAt: Date;
+  // When it may sally again (null: now).
+  sallyReadyAt: Date | null;
 }
 
 interface Row {
@@ -25,11 +27,12 @@ interface Row {
   status: EnemySettlementStatus;
   garrison: Record<string, number>;
   founded_at: Date;
+  sally_ready_at: Date | null;
 }
 
 export async function listEnemySettlements(client: DbClient, worldId: number): Promise<EnemySettlement[]> {
   const { rows } = await client.query<Row>('SELECT * FROM enemy_settlements WHERE world_id = $1 ORDER BY id', [worldId]);
-  return rows.map((r) => ({ id: Number(r.id), front: r.front, kind: r.kind, band: r.band, cell: hex(r.q, r.r), status: r.status, garrison: r.garrison, foundedAt: r.founded_at }));
+  return rows.map((r) => ({ id: Number(r.id), front: r.front, kind: r.kind, band: r.band, cell: hex(r.q, r.r), status: r.status, garrison: r.garrison, foundedAt: r.founded_at, sallyReadyAt: r.sally_ready_at }));
 }
 
 export async function insertEnemySettlement(client: DbClient, worldId: number, s: { front: string; kind: string; band: number; cell: Hex; foundedAt: Date }): Promise<number> {
@@ -38,4 +41,8 @@ export async function insertEnemySettlement(client: DbClient, worldId: number, s
     [worldId, s.front, s.kind, s.band, s.cell.q, s.cell.r, s.foundedAt],
   );
   return Number(rows[0]!.id);
+}
+
+export async function setSallyReady(client: DbClient, id: number, at: Date): Promise<void> {
+  await client.query('UPDATE enemy_settlements SET sally_ready_at = $2 WHERE id = $1', [id, at]);
 }
