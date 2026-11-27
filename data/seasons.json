@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "_comment": "Seasons (docs/mechanics/01-world-and-run.md#seasons): each lasts `dayHours` game hours (one game day), in `order`, from the run's start, then round again. A season's `grain` is added to the grain production factor (1: twice the grain, -1: none at all), on top of every other bonus, in every settlement, while it lasts. `defense` is added to every unit's defense in every battle, players' and hordes' alike (0.2: 20% better). `fronts` multiplies how likely each front is to send the day's horde (a front not named: 1; 0: none from it); the horde's front is drawn by these weights, for the season it sets out in. `art` names how the map looks (the client).",
+  "dayHours": 24,
+  "order": ["spring", "summer", "autumn", "winter"],
+  "seasons": {
+    "spring": {
+      "name": "Spring",
+      "description": "The thaw: the land wakes, and every front stirs alike.",
+      "grain": 0,
+      "defense": 0,
+      "fronts": {}
+    },
+    "summer": {
+      "name": "Summer",
+      "description": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "grain": 1,
+      "defense": 0,
+      "fronts": { "east": 2, "south": 0.5, "west": 0.5 }
+    },
+    "autumn": {
+      "name": "Autumn",
+      "description": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "grain": 0,
+      "defense": 0.2,
+      "fronts": { "east": 0, "south": 1.5, "west": 1.5 }
+    },
+    "winter": {
+      "name": "Winter",
+      "description": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "grain": -1,
+      "defense": 0,
+      "fronts": { "north": 2 }
+    }
+  }
+}

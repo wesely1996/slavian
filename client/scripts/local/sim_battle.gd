@@ -246,7 +246,7 @@ static func _kills(data: Dictionary, from: Dictionary, to: Dictionary, rng: Loca
 		# Defense is armor, as in an RPG: k / (k + armor) of the damage lands.
 		# Each of the target's health that lands (hardened by its stance and
 		# by fighting at home) fells one.
-		var held := 1.0 if champion != null else float(LocalGround.factors(data, plight.get("ground"), stats.family, stats.get("terrain")).defense)
+		var held := (1.0 if champion != null else float(LocalGround.factors(data, plight.get("ground"), stats.family, stats.get("terrain")).defense)) * float(plight.get("season", 1.0))
 		var lands := float(battle.armorConstant) / (float(battle.armorConstant) + maxf(0.0, float(stats.defense) * held * float(plight.toWeak)) * guard)
 		var toughness := maxf(1.0, float(stats.health)) * float(battle.stances[group.stance].defense) * (float(battle.homeBonus) if to.home else 1.0)
 		var expected := (damage * share * float(battle.casualtyScale) * lands) / toughness
@@ -303,7 +303,7 @@ static func family_counts(side: Dictionary) -> Dictionary:
 
 ## `ground`: where it is fought (LocalGround.at; null beyond the map's edge);
 ## `lines`: fought in lines (LocalLines.lines_for), the result carrying them.
-static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng, afflictions: Variant = null, ground: Variant = null, lines: Variant = null) -> Dictionary:
+static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dictionary, rng: LocalRng, afflictions: Variant = null, ground: Variant = null, lines: Variant = null, season := 1.0) -> Dictionary:
 	var now: Dictionary = afflictions if afflictions is Dictionary else no_afflictions()
 	var drawn: Variant = null
 	if lines is Dictionary:
@@ -313,10 +313,10 @@ static func resolve_round(data: Dictionary, attacker: Dictionary, defender: Dict
 	var opening: bool = drawn.opening if drawn is Dictionary else false
 	var struck := _kills(data, defender, attacker, rng, {"fromWeak": _weak(data, now.defender), "toWeak": _weak(data, now.attacker),
 		"burning": float(now.attacker.burn[0]) if not now.attacker.burn.is_empty() else 0.0, "ground": ground,
-		"from": drawn.defender if drawn is Dictionary else null, "to": drawn.attacker if drawn is Dictionary else null, "opening": opening})
+		"from": drawn.defender if drawn is Dictionary else null, "to": drawn.attacker if drawn is Dictionary else null, "opening": opening, "season": season})
 	var by_group := _kills(data, attacker, defender, rng, {"fromWeak": _weak(data, now.attacker), "toWeak": _weak(data, now.defender),
 		"burning": float(now.defender.burn[0]) if not now.defender.burn.is_empty() else 0.0, "ground": ground,
-		"from": drawn.attacker if drawn is Dictionary else null, "to": drawn.defender if drawn is Dictionary else null, "opening": opening})
+		"from": drawn.attacker if drawn is Dictionary else null, "to": drawn.defender if drawn is Dictionary else null, "opening": opening, "season": season})
 	var result := {"attackerLosses": _merged(struck.losses), "defenderLosses": _merged(by_group.losses),
 		"attackerFallen": struck.fallen, "defenderFallen": by_group.fallen,
 		"afflictions": {"attacker": _carried(data, now.attacker, struck.burnHit, struck.poisons), "defender": _carried(data, now.defender, by_group.burnHit, by_group.poisons)}}

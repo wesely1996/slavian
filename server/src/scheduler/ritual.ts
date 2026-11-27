@@ -33,11 +33,11 @@ export async function callRitualNight(client: DbClient, data: GameData, world: W
   const ctx = await waveContext(client, world);
   const fronts = waveFronts(data, world.activeFronts);
   const first = ((await lastWave(client, world.id))?.index ?? -1) + 1;
-  // Consecutive indexes take every front once (planWave picks index % fronts).
+  // Every front sends one.
   for (let i = 0; i < fronts.length; i++) {
     const index = first + i;
     const sizeFactor = waveFactor(data, world.difficulty, await groupPower(client, data, world, index)) * rules.sizeFactor;
-    const wave = await insertWave(client, world.id, { ...planWave(data, { ...ctx, sizeFactor }, index, null), spawnAt }, true);
+    const wave = await insertWave(client, world.id, { ...planWave(data, { ...ctx, sizeFactor }, index, null, fronts[i]), spawnAt }, true);
     const payload: WavePayload = { waveId: wave.id };
     await scheduleEvent(client, world.id, spawnAt, 'wave_spawn', payload);
   }

@@ -344,7 +344,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-07T08:00:00.000Z",
@@ -362,53 +362,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          1440000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          2160000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          2880000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          3600000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          4320000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          5040000
         ],
         [
+         0,
          -2,
-         2,
+         5760000
+        ],
+        [
+         0,
+         -1,
          6480000
+        ],
+        [
+         0,
+         0,
+         7200000
         ]
        ],
-       "arrivesAt": "2026-06-07T09:48:00.000Z"
+       "arrivesAt": "2026-06-07T10:00:00.000Z"
       }
      }
     ],
@@ -2919,7 +2929,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-07T08:00:00.000Z",
@@ -2937,53 +2947,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          1440000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          2160000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          2880000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          3600000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          4320000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          5040000
         ],
         [
+         0,
          -2,
-         2,
+         5760000
+        ],
+        [
+         0,
+         -1,
          6480000
+        ],
+        [
+         0,
+         0,
+         7200000
         ]
        ],
-       "arrivesAt": "2026-06-07T09:48:00.000Z"
+       "arrivesAt": "2026-06-07T10:00:00.000Z"
       }
      }
     ],
@@ -5454,6 +5474,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -5464,15 +5485,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 325.8,
-        "wood": 550.4,
-        "grain": 261.8,
-        "stone": 548.6
+        "iron": 396,
+        "wood": 761,
+        "grain": 449,
+        "stone": 689
        },
        "ratesPerHour": {
         "iron": 3,
         "wood": 9,
-        "grain": 8,
+        "grain": 16,
         "stone": 6
        },
        "capacity": {
@@ -5481,7 +5502,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:00.000Z"
+       "settledAt": "2026-06-02T08:00:00.000Z"
       }
      }
     ],
@@ -5584,7 +5605,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-07T08:00:00.000Z",
@@ -5602,53 +5623,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          1440000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          2160000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          2880000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          3600000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          4320000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          5040000
         ],
         [
+         0,
          -2,
-         2,
+         5760000
+        ],
+        [
+         0,
+         -1,
          6480000
+        ],
+        [
+         0,
+         0,
+         7200000
         ]
        ],
-       "arrivesAt": "2026-06-07T09:48:00.000Z"
+       "arrivesAt": "2026-06-07T10:00:00.000Z"
       }
      }
     ],
@@ -8102,10 +8133,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 325.8,
-        "wood": 550.4,
-        "grain": 261.8,
-        "stone": 548.6
+        "iron": 468,
+        "wood": 977,
+        "grain": 833,
+        "stone": 833
        },
        "ratesPerHour": {
         "iron": 3,
@@ -8119,7 +8150,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T08:36:00.000Z"
+       "settledAt": "2026-06-03T08:00:00.000Z"
       }
      }
     ],
@@ -8222,7 +8253,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-07T08:00:00.000Z",
@@ -8240,53 +8271,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          1440000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          2160000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          2880000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          3600000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          4320000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          5040000
         ],
         [
+         0,
          -2,
-         2,
+         5760000
+        ],
+        [
+         0,
+         -1,
          6480000
+        ],
+        [
+         0,
+         0,
+         7200000
         ]
        ],
-       "arrivesAt": "2026-06-07T09:48:00.000Z"
+       "arrivesAt": "2026-06-07T10:00:00.000Z"
       }
      }
     ],
@@ -10497,7 +10538,16 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 10,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-03T08:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -10506,12 +10556,21 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
       "body": "With no food left it scattered; none of them will come back.",
       "createdAt": "2026-06-03T04:07:38.182Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-02T08:00:00.000Z",
       "read": false
      },
      {
@@ -10524,7 +10583,7 @@
       "read": false
      }
     ],
-    "unread": 3,
+    "unread": 5,
     "serverTime": "2026-06-03T09:00:00.000Z"
    }
   },
@@ -10535,7 +10594,16 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 10,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-03T08:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -10544,12 +10612,21 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "battle_result",
       "tier": "push",
       "title": "An army from Vruchiy starved",
       "body": "With no food left it scattered; none of them will come back.",
       "createdAt": "2026-06-03T04:07:38.182Z",
+      "read": false
+     },
+     {
+      "id": 7,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-02T08:00:00.000Z",
       "read": false
      },
      {
@@ -10562,7 +10639,7 @@
       "read": false
      }
     ],
-    "unread": 3,
+    "unread": 5,
     "serverTime": "2026-06-03T09:00:00.000Z"
    }
   }

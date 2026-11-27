@@ -146,6 +146,8 @@ export function assault(
     ground?: Ground;
     // Fought in lines (battle.json lines): the army attacks.
     lines?: LineSetup;
+    // The season's toughness for everyone (sim/seasons.ts seasonDefense).
+    season?: number;
   },
 ): { cleared: boolean; rounds: AssaultRound[]; armyNow: Units; campNow: Units; fallen: string[] } {
   const campStats = enemyStats(data, input.front);
@@ -168,6 +170,7 @@ export function assault(
       afflictions,
       input.ground,
       input.lines ? linesFor(input.lines, round, lineState) : undefined,
+      input.season ?? 1,
     );
     afflictions = result.afflictions;
     lineState = result.lines?.state;
@@ -236,6 +239,8 @@ export function repelRaid(
     ground?: Ground;
     // Fought in lines: the raiders attack.
     lines?: LineSetup;
+    // The season's toughness for everyone (sim/seasons.ts seasonDefense).
+    season?: number;
   },
 ): { held: boolean; armyNow: Units; raidersNow: Units } {
   const raiderStats = enemyStats(data, input.front);
@@ -253,6 +258,7 @@ export function repelRaid(
       afflictions,
       input.ground,
       input.lines ? linesFor(input.lines, round, lineState) : undefined,
+      input.season ?? 1,
     );
     afflictions = result.afflictions;
     lineState = result.lines?.state;

@@ -76,6 +76,8 @@ export function pvpAssault(
     ground?: Ground;
     // Fought in lines (battle.json lines).
     lines?: LineSetup;
+    // The season's toughness for everyone (sim/seasons.ts seasonDefense).
+    season?: number;
   },
 ): {
   won: boolean;
@@ -123,6 +125,7 @@ export function pvpAssault(
       afflictions,
       input.ground,
       input.lines ? linesFor(input.lines, round, lineState) : undefined,
+      input.season ?? 1,
     );
     afflictions = result.afflictions;
     lineState = result.lines?.state;

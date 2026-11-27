@@ -1849,7 +1849,7 @@ static func on_crossing_built(server: LocalServer, world: Dictionary, event: Dic
 ## campNow, fallen}. `champions`: its hero and general fighting in its ranks;
 ## `stats_without_hero`: its stats once the hero has fallen.
 static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, camp: Dictionary, front: String, seed_value: int, id: int,
-		champions: Array = [], stats_without_hero: Callable = Callable(), ground: Variant = null, lines: Variant = null) -> Dictionary:
+		champions: Array = [], stats_without_hero: Callable = Callable(), ground: Variant = null, lines: Variant = null, season := 1.0) -> Dictionary:
 	var camp_stats := LocalBattle.enemy_stats(data, front)
 	var stance: String = data.camps.assault.stance
 	var fallen: Array = []
@@ -1865,7 +1865,7 @@ static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, ar
 	for round in range(1, int(data.battle.maxRounds) + 1):
 		var result := LocalBattle.resolve_round(data, {"units": army_now, "stance": army_stance, "stats": stats_now, "home": false, "champions": fighting},
 			{"units": camp_now, "stance": stance, "stats": camp_stats, "home": true}, LocalBattle.battle_rng(seed_value, id + 0x10000, round), afflictions, ground,
-			LocalLines.lines_for(lines, round, line_state) if lines is Dictionary else null)
+			LocalLines.lines_for(lines, round, line_state) if lines is Dictionary else null, season)
 		afflictions = result.afflictions
 		line_state = result.lines.state if result.has("lines") else null
 		for c in result.attackerFallen[0]:
@@ -1888,7 +1888,7 @@ static func assault(data: Dictionary, army: Dictionary, army_stats: Callable, ar
 ## sim/camps.ts repelRaid: raiders strike an army standing guard; held
 ## when the raiders broke. {held, armyNow, raidersNow}.
 static func repel_raid(data: Dictionary, army: Dictionary, army_stats: Callable, army_stance: String, raiders: Dictionary, raider_stance: String,
-		front: String, seed_value: int, id: int, ground: Variant = null, lines: Variant = null) -> Dictionary:
+		front: String, seed_value: int, id: int, ground: Variant = null, lines: Variant = null, season := 1.0) -> Dictionary:
 	var raider_stats := LocalBattle.enemy_stats(data, front)
 	var army_now := army.duplicate()
 	var raiders_now := raiders.duplicate()
@@ -1898,7 +1898,7 @@ static func repel_raid(data: Dictionary, army: Dictionary, army_stats: Callable,
 	for round in range(1, int(data.battle.maxRounds) + 1):
 		var result := LocalBattle.resolve_round(data, {"units": raiders_now, "stance": raider_stance, "stats": raider_stats, "home": false},
 			{"units": army_now, "stance": army_stance, "stats": army_stats, "home": false}, LocalBattle.battle_rng(seed_value, id + 0x20000, round), afflictions, ground,
-			LocalLines.lines_for(lines, round, line_state) if lines is Dictionary else null)
+			LocalLines.lines_for(lines, round, line_state) if lines is Dictionary else null, season)
 		afflictions = result.afflictions
 		line_state = result.lines.state if result.has("lines") else null
 		raiders_now = LocalCamps.subtract_units(raiders_now, result.attackerLosses)
@@ -1954,7 +1954,7 @@ static func storm_camp(server: LocalServer, world: Dictionary, army: Dictionary,
 		LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
 		LocalGround.at(data, world, Vector2i(int(camp.q), int(camp.r))),
 		{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(camp.q), int(camp.r)))),
-			"defender": LocalLines.no_command()})
+			"defender": LocalLines.no_command()}, LocalSeasons.defense_at(data, world, at))
 	var battle := _assault_battle(world, {"waveId": null, "campId": camp.id, "villageId": null, "q": camp.q, "r": camp.r,
 		"attackerStance": data.camps.assault.stance, "attackerInitial": camp.units, "defenderInitial": army.units, "startedAt": at},
 		result, at, "cleared" if result.cleared else "repelled", camp_loot(data, camp.units) if result.cleared else null)
@@ -2089,7 +2089,7 @@ static func arrive_at_site(server: LocalServer, world: Dictionary, army: Diction
 			LocalChampions.champions_of(data, hero, general, LocalVillage.village_bonuses(data, home.state)), LocalScouting.with_intel(data, army.units, LocalBattle.player_stats(data, succession, false)),
 			LocalGround.at(data, world, Vector2i(int(site.q), int(site.r))),
 			{"attacker": LocalLines.command_of(data, String(army.get("maneuver", "encircle")), [{"hero": hero, "general": general}], LocalGround.road_at(world, Vector2i(int(site.q), int(site.r)))),
-				"defender": LocalLines.no_command()})
+				"defender": LocalLines.no_command()}, LocalSeasons.defense_at(data, world, at))
 		var battle := _assault_battle(world, {"waveId": null, "siteId": site.id, "villageId": null, "q": site.q, "r": site.r,
 			"attackerStance": data.camps.assault.stance, "attackerInitial": site.guardians, "defenderInitial": army.units, "startedAt": at},
 			result, at, "cleared" if result.cleared else "repelled", null)

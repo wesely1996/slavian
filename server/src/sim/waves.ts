@@ -6,7 +6,8 @@
 // target: the cheapest by road, fear and faction (routeFrom; the Holy City
 // is always one). What it does there is the horde AI (horde.ts).
 import { canCross, edgeKey, fastestRoad, roadFactor, roadLevel, type Land } from './land.js';
-import type { GameData, Stance, TerrainId } from '../data/index.js';
+import { frontWeight, seasonAt } from './seasons.js';
+import type { GameData, Season, Stance, TerrainId } from '../data/index.js';
 import { waveStance } from './battle.js';
 import { findPath, hex, hexDistance, hexKey, neighbors, type Hex } from './hex.js';
 import { frontOf, type Front } from './mapgen.js';
@@ -164,15 +165,33 @@ export function threatOf(data: GameData, composition: Composition): string {
   return (level ?? data.waves.threatLevels.at(-1)!).name;
 }
 
-export function planWave(data: GameData, ctx: WaveContext, index: number, previousSpawnAt: Date | null): PlannedWave {
+// The front a horde setting out in `season` comes from: drawn by the
+// season's weights (data/seasons.json fronts); were they all nothing, the
+// fronts in turn.
+export function pickFront(data: GameData, fronts: readonly Front[], season: Season, rng: () => number, index: number): Front {
+  const weights = fronts.map((front) => frontWeight(data, season, front));
+  const sum = weights.reduce((a, b) => a + b, 0);
+  if (sum <= 0) return fronts[index % fronts.length]!;
+  let roll = rng() * sum;
+  for (const [i, front] of fronts.entries()) {
+    roll -= weights[i]!;
+    if (roll < 0 && weights[i]! > 0) return front;
+  }
+  return fronts[weights.findLastIndex((w) => w > 0)]!;
+}
+
+// `front`: from that front, whatever the season (Ritual Night's hordes).
+export function planWave(data: GameData, ctx: WaveContext, index: number, previousSpawnAt: Date | null, front?: Front): PlannedWave {
   const fronts = waveFronts(data, ctx.activeFronts);
-  const front = fronts[index % fronts.length]!;
+  const spawnAt = spawnTime(data, ctx, index, previousSpawnAt);
+  const { season } = seasonAt(data, { startedAt: ctx.startedAt, speed: ctx.worldSpeed }, spawnAt);
+  front ??= pickFront(data, fronts, season, rngFor(ctx.seed, index, 0x5e), index);
   const size = Math.max(1, Math.round(waveSize(data, index, ctx.playerCount) * (ctx.sizeFactor ?? 1)));
   const composition = composeWave(data, front, index, size, ctx.seed, ctx.playerCount);
   return {
     index,
     front,
-    spawnAt: spawnTime(data, ctx, index, previousSpawnAt),
+    spawnAt,
     composition,
     threat: threatOf(data, composition),
     stance: waveStance(data, front, ctx.seed, index),

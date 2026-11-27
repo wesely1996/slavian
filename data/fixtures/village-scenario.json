@@ -1387,7 +1387,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -1405,59 +1405,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          1008000
         ]
        ],
@@ -4435,6 +4440,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -4447,13 +4453,13 @@
        "amounts": {
         "iron": 557.8333333333334,
         "wood": 915,
-        "grain": 1005.8333333333333,
+        "grain": 1055.6666666666665,
         "stone": 859
        },
        "ratesPerHour": {
         "iron": 130,
         "wood": 290,
-        "grain": 230,
+        "grain": 460,
         "stone": 220
        },
        "capacity": {
@@ -4550,7 +4556,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -4568,59 +4574,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          1008000
         ]
        ],
@@ -4679,7 +4690,7 @@
        {
         "id": "3:ambush",
         "kind": "ambush",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -6928,6 +6939,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -6940,13 +6952,13 @@
       "amounts": {
        "wood": 915,
        "stone": 859,
-       "grain": 1005.8333333333333,
+       "grain": 1055.6666666666665,
        "iron": 557.8333333333334
       },
       "ratesPerHour": {
        "wood": 240,
        "stone": 180,
-       "grain": 230,
+       "grain": 460,
        "iron": 110
       },
       "capacity": {
@@ -7175,6 +7187,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -7187,13 +7200,13 @@
        "amounts": {
         "iron": 867.8333333333334,
         "wood": 1400,
-        "grain": 1205.8333333333333,
+        "grain": 1255.6666666666665,
         "stone": 1400
        },
        "ratesPerHour": {
         "iron": 110,
         "wood": 240,
-        "grain": 230,
+        "grain": 460,
         "stone": 180
        },
        "capacity": {
@@ -7290,7 +7303,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -7308,59 +7321,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          1008000
         ]
        ],
@@ -9694,6 +9712,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -9706,13 +9725,13 @@
        "amounts": {
         "iron": 867.8333333333334,
         "wood": 1400,
-        "grain": 1205.8333333333333,
+        "grain": 1255.6666666666665,
         "stone": 1400
        },
        "ratesPerHour": {
         "iron": 110,
         "wood": 240,
-        "grain": 230,
+        "grain": 460,
         "stone": 180
        },
        "capacity": {
@@ -9809,7 +9828,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -9827,59 +9846,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          1008000
         ]
        ],
@@ -12043,11 +12067,11 @@
    "status": 400,
    "response": {
     "error": "insufficient_resources",
-    "message": "Insufficient resources: missing {\"wood\":350,\"stone\":0,\"grain\":294.16666666666674,\"iron\":632.1666666666666}",
+    "message": "Insufficient resources: missing {\"wood\":350,\"stone\":0,\"grain\":244.33333333333348,\"iron\":632.1666666666666}",
     "missing": {
      "wood": 350,
      "stone": 0,
-     "grain": 294.16666666666674,
+     "grain": 244.33333333333348,
      "iron": 632.1666666666666
     }
    }
@@ -12263,6 +12287,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -12275,13 +12300,13 @@
        "amounts": {
         "iron": 867.8333333333334,
         "wood": 1400,
-        "grain": 1205.8333333333333,
+        "grain": 1255.6666666666665,
         "stone": 1400
        },
        "ratesPerHour": {
         "iron": 110,
         "wood": 240,
-        "grain": 230,
+        "grain": 460,
         "stone": 180
        },
        "capacity": {
@@ -12378,7 +12403,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -12396,59 +12421,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          1008000
         ]
        ],
@@ -14747,6 +14777,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -14759,13 +14790,13 @@
       "amounts": {
        "iron": 902.3333333333334,
        "wood": 1184,
-       "grain": 1157.8333333333333,
+       "grain": 1207.6666666666665,
        "stone": 1040
       },
       "ratesPerHour": {
        "iron": 110,
        "wood": 240,
-       "grain": 230,
+       "grain": 460,
        "stone": 180
       },
       "capacity": {
@@ -14961,7 +14992,7 @@
       "amounts": {
        "iron": 928,
        "wood": 992,
-       "grain": 1121.8333333333333,
+       "grain": 1171.6666666666665,
        "stone": 896
       },
       "ratesPerHour": {
@@ -15172,7 +15203,7 @@
       "amounts": {
        "iron": 888,
        "wood": 842,
-       "grain": 1041.8333333333333,
+       "grain": 1091.6666666666665,
        "stone": 796
       },
       "ratesPerHour": {
@@ -15380,7 +15411,7 @@
       "amounts": {
        "iron": 932,
        "wood": 745,
-       "grain": 905.8333333333333,
+       "grain": 955.6666666666665,
        "stone": 830
       },
       "ratesPerHour": {
@@ -15646,7 +15677,7 @@
        "amounts": {
         "iron": 932,
         "wood": 745,
-        "grain": 905.8333333333333,
+        "grain": 955.6666666666665,
         "stone": 830
        },
        "ratesPerHour": {
@@ -15749,7 +15780,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -15767,59 +15798,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -15858,7 +15894,7 @@
        {
         "id": "7:ambush",
         "kind": "ambush",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -18214,7 +18250,7 @@
        "amounts": {
         "iron": 932,
         "wood": 745,
-        "grain": 905.8333333333333,
+        "grain": 955.6666666666665,
         "stone": 830
        },
        "ratesPerHour": {
@@ -18317,7 +18353,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -18335,59 +18371,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -18426,7 +18467,7 @@
        {
         "id": "7:ambush",
         "kind": "ambush",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
@@ -20748,7 +20789,7 @@
       "amounts": {
        "iron": 884,
        "wood": 553,
-       "grain": 785.8333333333333,
+       "grain": 835.6666666666665,
        "stone": 686
       },
       "ratesPerHour": {
@@ -20951,7 +20992,7 @@
       "amounts": {
        "wood": 606.1666666666666,
        "stone": 802.5333333333334,
-       "grain": 900.8333333333333,
+       "grain": 950.6666666666665,
        "iron": 992.2666666666667
       },
       "ratesPerHour": {
@@ -21225,7 +21266,7 @@
       "amounts": {
        "wood": 702.1666666666666,
        "stone": 874.5333333333334,
-       "grain": 960.8333333333333,
+       "grain": 1000,
        "iron": 1000
       },
       "ratesPerHour": {
@@ -21450,7 +21491,7 @@
       "amounts": {
        "iron": 976,
        "wood": 558.1666666666666,
-       "grain": 912.8333333333333,
+       "grain": 952,
        "stone": 754.5333333333334
       },
       "ratesPerHour": {
@@ -21663,7 +21704,7 @@
       "amounts": {
        "iron": 952,
        "wood": 414.16666666666663,
-       "grain": 864.8333333333333,
+       "grain": 904,
        "stone": 634.5333333333334
       },
       "ratesPerHour": {
@@ -21923,6 +21964,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -21933,15 +21975,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 952,
-        "wood": 414.16666666666663,
-        "grain": 864.8333333333333,
-        "stone": 634.5333333333334
+        "iron": 997.6666666666666,
+        "wood": 516.6666666666666,
+        "grain": 980.6666666666666,
+        "stone": 712.5333333333334
        },
        "ratesPerHour": {
         "iron": 137,
         "wood": 307.5,
-        "grain": 230,
+        "grain": 0,
         "stone": 234
        },
        "capacity": {
@@ -21950,7 +21992,7 @@
         "grain": 1600,
         "stone": 1600
        },
-       "settledAt": "2026-06-01T14:52:37.000Z"
+       "settledAt": "2026-06-01T15:12:00.000Z"
       }
      }
     ],
@@ -22038,7 +22080,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -22056,59 +22098,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -24437,6 +24484,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -24449,13 +24497,13 @@
       "amounts": {
        "iron": 1051,
        "wood": 644.6666666666666,
-       "grain": 1036.8333333333333,
+       "grain": 922.6666666666666,
        "stone": 753.5333333333334
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -24650,6 +24698,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -24662,13 +24711,13 @@
       "amounts": {
        "iron": 1027,
        "wood": 596.6666666666666,
-       "grain": 1000.8333333333333,
+       "grain": 886.6666666666666,
        "stone": 681.5333333333334
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -24870,6 +24919,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -24882,13 +24932,13 @@
       "amounts": {
        "iron": 989,
        "wood": 519.6666666666666,
-       "grain": 942.8333333333333,
+       "grain": 828.6666666666666,
        "stone": 566.5333333333334
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -25097,6 +25147,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -25109,13 +25160,13 @@
       "amounts": {
        "iron": 965,
        "wood": 471.66666666666663,
-       "grain": 906.8333333333333,
+       "grain": 792.6666666666666,
        "stone": 494.5333333333334
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -25382,6 +25433,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -25394,13 +25446,13 @@
        "amounts": {
         "iron": 965,
         "wood": 471.66666666666663,
-        "grain": 906.8333333333333,
+        "grain": 792.6666666666666,
         "stone": 494.5333333333334
        },
        "ratesPerHour": {
         "iron": 137,
         "wood": 307.5,
-        "grain": 230,
+        "grain": 0,
         "stone": 234
        },
        "capacity": {
@@ -25497,7 +25549,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -25515,59 +25567,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -27914,6 +27971,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -27926,13 +27984,13 @@
       "amounts": {
        "wood": 571.6666666666666,
        "stone": 643.5333333333334,
-       "grain": 981.8333333333333,
+       "grain": 867.6666666666666,
        "iron": 1014
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -28127,6 +28185,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -28139,13 +28198,13 @@
       "amounts": {
        "wood": 632.6666666666666,
        "stone": 735.5333333333334,
-       "grain": 1027.8333333333333,
+       "grain": 913.6666666666666,
        "iron": 1044
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 307.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -28392,6 +28451,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -28404,13 +28464,13 @@
        "amounts": {
         "iron": 1044,
         "wood": 632.6666666666666,
-        "grain": 1027.8333333333333,
+        "grain": 913.6666666666666,
         "stone": 735.5333333333334
        },
        "ratesPerHour": {
         "iron": 137,
         "wood": 457.5,
-        "grain": 230,
+        "grain": 0,
         "stone": 234
        },
        "capacity": {
@@ -28507,7 +28567,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -28525,59 +28585,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -28626,12 +28691,12 @@
        {
         "id": "10:ambush",
         "kind": "ambush",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 64,
-        "risk": 0.37
+        "xp": 40,
+        "risk": 0.25
        },
        {
         "id": "10:tribute",
@@ -30895,6 +30960,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -30907,13 +30973,13 @@
       "amounts": {
        "wood": 933.4166666666666,
        "stone": 912.5333333333334,
-       "grain": 1166.8333333333333,
+       "grain": 937.6666666666666,
        "iron": 1124.5
       },
       "ratesPerHour": {
        "wood": 457.5,
        "stone": 234,
-       "grain": 230,
+       "grain": 0,
        "iron": 137
       },
       "capacity": {
@@ -31160,6 +31226,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": -1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -31172,13 +31239,13 @@
       "amounts": {
        "iron": 1084.5,
        "wood": 753.4166666666666,
-       "grain": 1046.8333333333333,
+       "grain": 817.6666666666666,
        "stone": 832.5333333333334
       },
       "ratesPerHour": {
        "iron": 137,
        "wood": 457.5,
-       "grain": 230,
+       "grain": 0,
        "stone": 234
       },
       "capacity": {
@@ -31434,6 +31501,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -31446,13 +31514,13 @@
        "amounts": {
         "iron": 1964.5,
         "wood": 1963.4166666666665,
-        "grain": 2311.833333333333,
+        "grain": 2082.6666666666665,
         "stone": 1987.5333333333333
        },
        "ratesPerHour": {
         "iron": 137,
         "wood": 457.5,
-        "grain": 230,
+        "grain": 0,
         "stone": 234
        },
        "capacity": {
@@ -31549,7 +31617,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -31567,59 +31635,64 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -5,
-        "r": 10
+        "q": 5,
+        "r": -10
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -5,
-         10,
+         5,
+         -10,
          0
         ],
         [
-         -4,
-         9,
-         144000
-        ],
-        [
-         -4,
-         8,
+         5,
+         -9,
          216000
         ],
         [
-         -3,
-         7,
+         5,
+         -8,
          288000
         ],
         [
-         -2,
-         6,
-         360000
-        ],
-        [
-         -2,
-         5,
-         504000
-        ],
-        [
-         -2,
          4,
+         -7,
+         432000
+        ],
+        [
+         3,
+         -6,
+         576000
+        ],
+        [
+         3,
+         -5,
          648000
         ],
         [
-         -1,
          3,
+         -4,
+         720000
+        ],
+        [
+         2,
+         -3,
          792000
         ],
         [
+         1,
          -2,
-         3,
+         864000
+        ],
+        [
+         0,
+         -1,
          936000
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          27360000
         ]
        ],
@@ -31668,12 +31741,12 @@
        {
         "id": "10:ambush",
         "kind": "ambush",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 5,
         "hours": 5.666666666666667,
-        "xp": 64,
-        "risk": 0.37
+        "xp": 40,
+        "risk": 0.25
        },
        {
         "id": "10:tribute",
@@ -33811,7 +33884,7 @@
    "response": {
     "notifications": [
      {
-      "id": 21,
+      "id": 24,
       "kind": "build_done",
       "tier": "digest",
       "title": "Woodcutter level 1 in Kitezh",
@@ -33820,7 +33893,16 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 23,
+      "kind": "season",
+      "tier": "push",
+      "title": "Winter has come",
+      "body": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "createdAt": "2026-06-01T15:12:00.000Z",
+      "read": false
+     },
+     {
+      "id": 22,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (-3, 8)",
@@ -33829,7 +33911,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (-1, 7) were taken away",
@@ -33838,7 +33920,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 20,
       "kind": "build_done",
       "tier": "digest",
       "title": "Storehouse level 1 in Kitezh",
@@ -33847,7 +33929,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 19,
       "kind": "build_done",
       "tier": "digest",
       "title": "Storehouse level 1 in Kitezh",
@@ -33856,7 +33938,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 18,
       "kind": "build_done",
       "tier": "digest",
       "title": "Market level 1 in Kitezh",
@@ -33865,7 +33947,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 17,
       "kind": "build_done",
       "tier": "digest",
       "title": "Outpost level 2 in Kitezh",
@@ -33874,7 +33956,7 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 16,
       "kind": "build_done",
       "tier": "digest",
       "title": "Outpost level 1 in Kitezh",
@@ -33883,7 +33965,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 15,
       "kind": "build_done",
       "tier": "digest",
       "title": "Archer Tower level 1 in Kitezh",
@@ -33892,7 +33974,16 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 14,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T12:48:00.000Z",
+      "read": false
+     },
+     {
+      "id": 13,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 0)",
@@ -33901,12 +33992,21 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 12,
       "kind": "build_done",
       "tier": "digest",
       "title": "Walls level 1 in Kitezh",
       "body": "Finished.",
       "createdAt": "2026-06-01T12:22:41.000Z",
+      "read": false
+     },
+     {
+      "id": 11,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
      {
@@ -34000,7 +34100,7 @@
       "read": false
      }
     ],
-    "unread": 21,
+    "unread": 24,
     "serverTime": "2026-06-01T16:22:17.000Z"
    }
   }

@@ -36,7 +36,8 @@ all multiplied by:
 1 + production.<resource> + production.all     (bonuses, added together)
 ```
 
-then by world speed.
+then by world speed. Grain is multiplied once more by the season: ×2 in
+summer, ×0 in winter ([page 1](01-world-and-run.md#seasons)).
 
 Where production bonuses come from:
 - **Research** ([page 11](11-research-faith-smithing.md#research)).

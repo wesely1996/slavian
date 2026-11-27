@@ -2,6 +2,7 @@
 // fights the site's guardians on arrival, searches for a while
 // (site_explored) and comes home with what it found. Lore scrolls serve the
 // whole group (research.ts refreshBonuses).
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { bonus } from '../sim/research.js';
 import { achieve } from './achievements.js';
 import { parseArmyQuestMark } from '../sim/quests.js';
@@ -133,6 +134,7 @@ export async function arriveAtSite(client: DbClient, data: GameData, world: Worl
       camp: site.guardians,
       front: 'north',
       seed: world.seed,
+      season: seasonDefense(data, seasonAt(data, world, at).season),
       id: site.id + 0x5000,
       ground: await groundOf(client, data, world.id, { q: site.q, r: site.r }),
       lines: {

@@ -366,7 +366,7 @@ static func on_battle_round(server: LocalServer, world: Dictionary, event: Dicti
 			"attacker": LocalLines.command_of(data, "encircle", [], false, int(led.level)),
 			"defender": LocalLines.command_of(data, String(state.get("maneuver", "encircle")), [{"hero": hero, "general": general}] + army_leaders.map(func(l: Array) -> Dictionary: return {"hero": l[0], "general": l[1]}),
 				LocalGround.road_at(world, Vector2i(int(village.q), int(village.r)))),
-			"still": standing}, round, battle.setup.get("lines")))
+			"still": standing}, round, battle.setup.get("lines")), LocalSeasons.defense_at(data, world, at))
 	# Burning and poison carry into the next round, and so do the lines.
 	battle.setup = LocalLines.with_lines(LocalBattle.with_afflictions(battle.setup, result.afflictions), result.get("lines"))
 	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
@@ -707,7 +707,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 			"bridge": battle.setup.get("river", false),
 			"noOpening": battle.setup.get("ambush", false),
 			# Nobody maneuvers while a ring stands.
-			"still": wall_plots != null}, round, battle.setup.get("lines")))
+			"still": wall_plots != null}, round, battle.setup.get("lines")), LocalSeasons.defense_at(data, world, at))
 	# Burning and poison carry into the next round, and so do the lines.
 	battle.setup = LocalLines.with_lines(LocalBattle.with_afflictions(battle.setup, result.afflictions), result.get("lines"))
 	var attacker_losses := LocalCamps.add_units(result.attackerLosses, smashed)
@@ -1091,7 +1091,7 @@ static func ruin_village(server: LocalServer, world: Dictionary, village: Dictio
 		var name := String(data.horde.refugeeCamp.name).replace("{owner}", member.get("displayName", "Refugees"))
 		var camp := server.insert_village(world, owner, name, site,
 			LocalVillage.new_village(data, at, world.speed, {"startingResources": data.buildings.village.startingResources, "adminUpkeep": 0,
-				"bonuses": server.player_bonuses(world, owner)}))
+				"bonuses": _with_season(server.player_bonuses(world, owner), LocalSeasons.bonuses(data, String(LocalSeasons.season_at(data, world, at).season)))}))
 		camp.refuge = true
 		LocalInbox.tell(server, world, owner, {"kind": "refuge", "tier": "push", "title": "A refuge by the Holy City",
 			"body": "{camp} takes in your people at ({q}, {r}).", "vars": {"camp": camp.name, "q": site.x, "r": site.y}}, at)
@@ -1425,3 +1425,10 @@ static func on_hero_recover(server: LocalServer, world: Dictionary, event: Dicti
 		hero.status = "home"
 		hero.woundedUntil = null
 		changed.append(["world"])
+
+
+## Its owner's bonuses, and the season's (scheduler/horde.ts refugee camp).
+static func _with_season(bonuses: Dictionary, season: Dictionary) -> Dictionary:
+	var out := bonuses.duplicate()
+	out.merge(season, true)
+	return out

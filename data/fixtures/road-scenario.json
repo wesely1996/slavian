@@ -709,6 +709,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -727,7 +728,7 @@
       "ratesPerHour": {
        "iron": 150,
        "wood": 450,
-       "grain": 373,
+       "grain": 773,
        "stone": 300
       },
       "capacity": {
@@ -955,6 +956,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -973,7 +975,7 @@
        "ratesPerHour": {
         "iron": 350,
         "wood": 450,
-        "grain": 373,
+        "grain": 773,
         "stone": 600
        },
        "capacity": {
@@ -1085,7 +1087,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:52:48.000Z",
@@ -1103,53 +1105,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          28800
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          43200
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          57600
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          72000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          86400
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          100800
         ],
         [
+         0,
          -2,
-         2,
+         115200
+        ],
+        [
+         0,
+         -1,
          129600
+        ],
+        [
+         0,
+         0,
+         144000
         ]
        ],
-       "arrivesAt": "2026-06-01T10:54:57.600Z"
+       "arrivesAt": "2026-06-01T10:55:12.000Z"
       }
      }
     ],
@@ -1194,7 +1206,7 @@
        {
         "id": "4:scout",
         "kind": "scout",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 6,
         "hours": 5,
@@ -3538,6 +3550,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -3550,13 +3563,13 @@
        "amounts": {
         "iron": 993.3333333333334,
         "wood": 775,
-        "grain": 932.1666666666666,
+        "grain": 950,
         "stone": 750
        },
        "ratesPerHour": {
         "iron": 350,
         "wood": 450,
-        "grain": 373,
+        "grain": 773,
         "stone": 600
        },
        "capacity": {
@@ -3668,7 +3681,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:52:48.000Z",
@@ -3686,53 +3699,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          28800
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          43200
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          57600
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          72000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          86400
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          100800
         ],
         [
+         0,
          -2,
-         2,
+         115200
+        ],
+        [
+         0,
+         -1,
          129600
+        ],
+        [
+         0,
+         0,
+         144000
         ]
        ],
-       "arrivesAt": "2026-06-01T10:54:57.600Z"
+       "arrivesAt": "2026-06-01T10:55:12.000Z"
       }
      }
     ],
@@ -3777,7 +3800,7 @@
        {
         "id": "4:scout",
         "kind": "scout",
-        "front": "south",
+        "front": "north",
         "siteId": null,
         "distance": 6,
         "hours": 5,
@@ -6287,6 +6310,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -6299,13 +6323,13 @@
        "amounts": {
         "iron": 975,
         "wood": 800,
-        "grain": 925,
+        "grain": 914.2,
         "stone": 650
        },
        "ratesPerHour": {
         "iron": 450,
         "wood": 450,
-        "grain": 373,
+        "grain": -27,
         "stone": 750
        },
        "capacity": {
@@ -6417,7 +6441,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:52:48.000Z",
@@ -6435,54 +6459,59 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          28800
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          43200
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          57600
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          72000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          86400
         ],
         [
-         -1,
-         3,
+         0,
+         -3,
          100800
         ],
         [
+         0,
+         -2,
+         115200
+        ],
+        [
+         0,
          -1,
-         2,
          129600
         ],
         [
-         -2,
-         2,
+         0,
+         0,
          144000
         ]
        ],
@@ -8974,6 +9003,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": -1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -8986,13 +9016,13 @@
        "amounts": {
         "iron": 975,
         "wood": 800,
-        "grain": 925,
+        "grain": 914.2,
         "stone": 650
        },
        "ratesPerHour": {
         "iron": 550,
         "wood": 450,
-        "grain": 373,
+        "grain": -27,
         "stone": 900
        },
        "capacity": {
@@ -9104,7 +9134,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T10:52:48.000Z",
@@ -9122,58 +9152,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          28800
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          43200
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          57600
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          72000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          86400
         ],
         [
-         -1,
-         3,
+         0,
+         -3,
          100800
         ],
         [
+         0,
+         -2,
+         115200
+        ],
+        [
+         0,
          -1,
-         2,
          129600
         ],
         [
-         -2,
-         2,
-         139680
+         0,
+         0,
+         144000
         ]
        ],
-       "arrivesAt": "2026-06-01T10:55:07.680Z"
+       "arrivesAt": "2026-06-01T10:55:12.000Z"
       }
      }
     ],
@@ -11583,9 +11618,7 @@
     "startedAt": "2026-06-01T08:00:00.000Z",
     "sanctity": 100,
     "embers": 0,
-    "hatred": {
-     "north": 0.2
-    },
+    "hatred": {},
     "blessings": {
      "water": null,
      "forge": null,
@@ -11759,7 +11792,7 @@
        "o-1,2": {
         "peak": 1,
         "road": 1,
-        "level": 0,
+        "level": 1,
         "terrain": "hills",
         "building": "outpost"
        }
@@ -11816,7 +11849,7 @@
      {
       "id": 3,
       "index": 2,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T11:21:36.000Z",
@@ -11834,78 +11867,68 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 0,
-        "r": -10
+        "q": -9,
+        "r": 8
        },
        "targetVillageId": 1,
        "path": [
         [
-         0,
-         -10,
+         -9,
+         8,
          0
         ],
         [
-         0,
-         -9,
-         43200
-        ],
-        [
-         0,
          -8,
-         72000
+         8,
+         28800
         ],
         [
-         0,
          -7,
+         7,
+         57600
+        ],
+        [
+         -6,
+         7,
          86400
         ],
         [
-         0,
-         -6,
+         -5,
+         7,
          100800
         ],
         [
-         0,
-         -5,
+         -4,
+         6,
          115200
         ],
         [
-         0,
-         -4,
+         -3,
+         5,
          129600
         ],
         [
-         -1,
-         -3,
+         -2,
+         4,
          144000
         ],
         [
-         -1,
          -2,
+         3,
          158400
         ],
         [
-         -2,
          -1,
-         172800
-        ],
-        [
-         -2,
-         0,
+         2,
          187200
         ],
         [
          -2,
-         1,
-         201600
-        ],
-        [
-         -2,
          2,
-         230400
+         197280
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:53.280Z"
       }
      },
      {
@@ -12065,15 +12088,15 @@
       "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
-       "zealot": 9,
-       "crossbowman": 3,
-       "sergeant_rider": 1,
+       "rusalka": 4,
+       "grey_wolf": 6,
+       "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 9,
-       "crossbowman": 3,
-       "sergeant_rider": 1,
+       "rusalka": 4,
+       "grey_wolf": 6,
+       "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
@@ -12178,17 +12201,7 @@
       "endedAt": "2026-06-01T10:47:36.000Z"
      }
     ],
-    "raids": [
-     {
-      "id": 1,
-      "waveId": 2,
-      "villageId": 1,
-      "q": -1,
-      "r": 2,
-      "levelAfter": 0,
-      "at": "2026-06-01T10:54:57.600Z"
-     }
-    ],
+    "raids": [],
     "expeditions": [],
     "research": [],
     "heroes": [
@@ -12271,31 +12284,6 @@
       "losses": 1,
       "razed": 0,
       "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": null
-     },
-     {
-      "id": 2,
-      "front": "south",
-      "name": "Lothar",
-      "title": "Brother Lothar",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "alive",
-      "woundedUntil": null,
-      "battles": 0,
-      "wins": 0,
-      "losses": 0,
-      "razed": 0,
-      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -12453,7 +12441,7 @@
       "front": "south",
       "q": -2,
       "r": 5,
-      "size": 6,
+      "size": 9,
       "waveId": null,
       "reward": null,
       "endsAt": null,
@@ -12465,7 +12453,7 @@
       "front": "north",
       "q": 6,
       "r": -8,
-      "size": 6,
+      "size": 4,
       "waveId": 1,
       "reward": null,
       "endsAt": null,
@@ -12584,7 +12572,7 @@
      {
       "accountId": 1,
       "achievement": "hordes_united",
-      "earnedAt": "2026-06-01T10:55:07.680Z"
+      "earnedAt": "2026-06-01T10:55:55.200Z"
      }
     ],
     "shipyards": [
@@ -14600,9 +14588,7 @@
     "startedAt": "2026-06-01T08:00:00.000Z",
     "sanctity": 100,
     "embers": 0,
-    "hatred": {
-     "north": 0.2
-    },
+    "hatred": {},
     "blessings": {
      "water": null,
      "forge": null,
@@ -14776,7 +14762,7 @@
        "o-1,2": {
         "peak": 1,
         "road": 2,
-        "level": 0,
+        "level": 1,
         "terrain": "hills",
         "building": "outpost"
        }
@@ -14833,7 +14819,7 @@
      {
       "id": 3,
       "index": 2,
-      "front": "north",
+      "front": "south",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T11:21:36.000Z",
@@ -14851,78 +14837,68 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": 0,
-        "r": -10
+        "q": -9,
+        "r": 8
        },
        "targetVillageId": 1,
        "path": [
         [
-         0,
-         -10,
+         -9,
+         8,
          0
         ],
         [
-         0,
-         -9,
-         43200
-        ],
-        [
-         0,
          -8,
-         72000
+         8,
+         28800
         ],
         [
-         0,
          -7,
+         7,
+         57600
+        ],
+        [
+         -6,
+         7,
          86400
         ],
         [
-         0,
-         -6,
+         -5,
+         7,
          100800
         ],
         [
-         0,
-         -5,
+         -4,
+         6,
          115200
         ],
         [
-         0,
-         -4,
+         -3,
+         5,
          129600
         ],
         [
-         -1,
-         -3,
+         -2,
+         4,
          144000
         ],
         [
-         -1,
          -2,
+         3,
          158400
         ],
         [
-         -2,
          -1,
-         172800
-        ],
-        [
-         -2,
-         0,
+         2,
          187200
         ],
         [
          -2,
-         1,
-         201600
-        ],
-        [
-         -2,
          2,
-         230400
+         194400
         ]
        ],
-       "arrivesAt": "2026-06-01T11:25:26.400Z"
+       "arrivesAt": "2026-06-01T11:24:50.400Z"
       }
      },
      {
@@ -15052,9 +15028,19 @@
          -2,
          2,
          187200
+        ],
+        [
+         -1,
+         2,
+         194400
+        ],
+        [
+         -2,
+         2,
+         201600
         ]
        ],
-       "arrivesAt": "2026-06-01T11:53:31.200Z"
+       "arrivesAt": "2026-06-01T11:53:45.600Z"
       }
      }
     ],
@@ -15082,15 +15068,15 @@
       "round": 1,
       "attackerStance": "offensive",
       "attackerInitial": {
-       "zealot": 9,
-       "crossbowman": 3,
-       "sergeant_rider": 1,
+       "rusalka": 4,
+       "grey_wolf": 6,
+       "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
       "attackerNow": {
-       "zealot": 9,
-       "crossbowman": 3,
-       "sergeant_rider": 1,
+       "rusalka": 4,
+       "grey_wolf": 6,
+       "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
       "defenderInitial": {
@@ -15195,17 +15181,7 @@
       "endedAt": "2026-06-01T10:47:36.000Z"
      }
     ],
-    "raids": [
-     {
-      "id": 1,
-      "waveId": 2,
-      "villageId": 1,
-      "q": -1,
-      "r": 2,
-      "levelAfter": 0,
-      "at": "2026-06-01T10:54:57.600Z"
-     }
-    ],
+    "raids": [],
     "expeditions": [],
     "research": [],
     "heroes": [
@@ -15288,31 +15264,6 @@
       "losses": 1,
       "razed": 0,
       "kills": 1,
-      "grudgeVillageId": null,
-      "diedAt": null
-     },
-     {
-      "id": 2,
-      "front": "south",
-      "name": "Lothar",
-      "title": "Brother Lothar",
-      "level": 1,
-      "xp": 0,
-      "xpToNext": 20,
-      "skills": {},
-      "effects": {
-       "attack": 0,
-       "defense": 0,
-       "nerve": 0,
-       "loot": 0
-      },
-      "status": "alive",
-      "woundedUntil": null,
-      "battles": 0,
-      "wins": 0,
-      "losses": 0,
-      "razed": 0,
-      "kills": 0,
       "grudgeVillageId": null,
       "diedAt": null
      }
@@ -15470,7 +15421,7 @@
       "front": "south",
       "q": -2,
       "r": 5,
-      "size": 6,
+      "size": 9,
       "waveId": null,
       "reward": null,
       "endsAt": null,
@@ -15482,7 +15433,7 @@
       "front": "north",
       "q": 6,
       "r": -8,
-      "size": 6,
+      "size": 4,
       "waveId": 1,
       "reward": null,
       "endsAt": null,
@@ -15601,7 +15552,7 @@
      {
       "accountId": 1,
       "achievement": "hordes_united",
-      "earnedAt": "2026-06-01T10:55:07.680Z"
+      "earnedAt": "2026-06-01T10:55:55.200Z"
      }
     ],
     "shipyards": [
@@ -17716,7 +17667,7 @@
    "response": {
     "notifications": [
      {
-      "id": 28,
+      "id": 33,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -17725,7 +17676,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 32,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Carried Home",
@@ -17734,7 +17685,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 31,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -17743,43 +17694,43 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 30,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Many Banners",
       "body": "Stand against two hordes in one battle.",
-      "createdAt": "2026-06-01T10:55:07.680Z",
+      "createdAt": "2026-06-01T10:55:55.200Z",
       "read": false
      },
      {
-      "id": 24,
+      "id": 29,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
-      "body": "13 more from the south fight alongside the horde already there.",
-      "createdAt": "2026-06-01T10:55:07.680Z",
+      "body": "12 more from the north fight alongside the horde already there.",
+      "createdAt": "2026-06-01T10:55:55.200Z",
       "read": false
      },
      {
-      "id": 23,
-      "kind": "outpost_raided",
-      "tier": "push",
-      "title": "A horde burned an outpost of Vruchiy",
-      "body": "The outpost at (-1, 2) lies in ruins; its supplies feed the horde.",
-      "createdAt": "2026-06-01T10:54:57.600Z",
-      "read": false
-     },
-     {
-      "id": 22,
+      "id": 28,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
-      "body": "The low south horde arrives within the hour. Check the garrison and its stance.",
+      "body": "The low north horde arrives within the hour. Check the garrison and its stance.",
       "createdAt": "2026-06-01T10:52:48.000Z",
       "read": false
      },
      {
-      "id": 21,
+      "id": 27,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T10:52:48.000Z",
+      "read": false
+     },
+     {
+      "id": 26,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -17788,7 +17739,7 @@
       "read": false
      },
      {
-      "id": 20,
+      "id": 25,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -17797,7 +17748,7 @@
       "read": false
      },
      {
-      "id": 19,
+      "id": 24,
       "kind": "under_attack",
       "tier": "push",
       "title": "Vruchiy is under attack",
@@ -17806,7 +17757,7 @@
       "read": false
      },
      {
-      "id": 18,
+      "id": 23,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -17815,7 +17766,7 @@
       "read": false
      },
      {
-      "id": 17,
+      "id": 22,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: The Black God Walks",
@@ -17824,7 +17775,7 @@
       "read": false
      },
      {
-      "id": 16,
+      "id": 21,
       "kind": "event",
       "tier": "push",
       "title": "The Avatar of Černobog walks at (1, -3)",
@@ -17833,7 +17784,7 @@
       "read": false
      },
      {
-      "id": 15,
+      "id": 20,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -17842,7 +17793,16 @@
       "read": false
      },
      {
-      "id": 14,
+      "id": 19,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
+      "read": false
+     },
+     {
+      "id": 18,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-8, 2)",
@@ -17851,7 +17811,7 @@
       "read": false
      },
      {
-      "id": 13,
+      "id": 17,
       "kind": "event",
       "tier": "push",
       "title": "The forbidding ruin at (2, 2) sank back into the earth",
@@ -17860,7 +17820,16 @@
       "read": false
      },
      {
-      "id": 12,
+      "id": 16,
+      "kind": "season",
+      "tier": "push",
+      "title": "Spring has come",
+      "body": "The thaw: the land wakes, and every front stirs alike.",
+      "createdAt": "2026-06-01T09:55:12.000Z",
+      "read": false
+     },
+     {
+      "id": 15,
       "kind": "event",
       "tier": "push",
       "title": "Cultists of Černobog gather at (1, -3)",
@@ -17869,7 +17838,7 @@
       "read": false
      },
      {
-      "id": 11,
+      "id": 14,
       "kind": "event",
       "tier": "push",
       "title": "The boatwrights at (-6, 4) gave up and left",
@@ -17878,7 +17847,16 @@
       "read": false
      },
      {
-      "id": 10,
+      "id": 13,
+      "kind": "season",
+      "tier": "push",
+      "title": "Winter has come",
+      "body": "Snow on the fields: no grain at all, the stores must last. The Monsters of the North come twice as often.",
+      "createdAt": "2026-06-01T09:26:24.000Z",
+      "read": false
+     },
+     {
+      "id": 12,
       "kind": "event",
       "tier": "push",
       "title": "A forbidding ruin rises at (2, 2)",
@@ -17887,7 +17865,7 @@
       "read": false
      },
      {
-      "id": 9,
+      "id": 11,
       "kind": "event",
       "tier": "push",
       "title": "The captives at (2, 0) were taken away",
@@ -17896,7 +17874,16 @@
       "read": false
      },
      {
-      "id": 8,
+      "id": 10,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T08:57:36.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -17905,7 +17892,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "build_done",
       "tier": "digest",
       "title": "Outpost level 1 in Vruchiy",
@@ -17914,12 +17901,21 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Claim an outpost",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T08:34:00.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T08:28:48.000Z",
       "read": false
      },
      {
@@ -17968,7 +17964,7 @@
       "read": false
      }
     ],
-    "unread": 28,
+    "unread": 33,
     "serverTime": "2026-06-01T11:04:00.000Z"
    }
   }

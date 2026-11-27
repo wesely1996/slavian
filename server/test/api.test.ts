@@ -329,7 +329,9 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
 
     const announced = started.body.waves;
     expect(announced.map((w: { index: number }) => w.index)).toEqual([0, 1]);
-    expect(announced[0]).toMatchObject({ front: 'north', status: 'scheduled', path: null, targetVillageId: null });
+    expect(announced[0]).toMatchObject({ status: 'scheduled', path: null, targetVillageId: null });
+    // Its front is drawn by the season it sets out in (data/seasons.json).
+    expect(['north', 'south']).toContain(announced[0].front);
     expect(['Low', 'Moderate', 'High', 'Severe']).toContain(announced[0].threat);
     // Composition stays secret.
     expect(JSON.stringify(started.body)).not.toMatch(/composition|grey_wolf|leshy/);
@@ -371,13 +373,13 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(raided).toMatchObject({ status: 'raided', round: 1 });
     expect(world.villages[0].queue).toEqual([]);
     // It carried off 30% of what was stored, scaled by its faction's greed
-    // (monsters care little for loot) and by how much of it survived (the
-    // hero fights at home, a champion in the ranks).
+    // and by how much of it survived (the hero fights at home, a champion in
+    // the ranks).
     const left = world.villages[0].resources;
     expect(left.settledAt).toBe(now.toISOString());
     const startedWith = Object.values(raided.attackerInitial as Record<string, number>).reduce((a, b) => a + b, 0);
     const surviving = raided.rounds[0].attackerLeft / startedWith;
-    const share = 0.3 * scheduler.data.enemies.fronts.north!.personality.lootFactor * surviving;
+    const share = 0.3 * scheduler.data.enemies.fronts[marching.front as 'north']!.personality.lootFactor * surviving;
     for (const kind of ['wood', 'stone', 'grain', 'iron']) {
       const stored = left.amounts[kind] + raided.loot[kind];
       expect(Math.abs(raided.loot[kind] - Math.floor(stored * share))).toBeLessThanOrEqual(1);
@@ -475,6 +477,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     await tick(db, now, scheduler);
 
     let world = (await call('GET', `/v1/worlds/${worldId}`, dobran.token)).body;
+    // The grain as the battle starts, with all 20 spearmen (in this season).
+    const fedAll = world.villages[0].resources.ratesPerHour.grain;
     let battle = world.battles[0];
     expect(battle.defenderInitial).toEqual({ spearman: 20 });
     expect(battle.attackerNow).toEqual(battle.attackerInitial);
@@ -498,7 +502,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.waves.map((w: { index: number }) => w.index)).toEqual([1, 2]);
     // Fallen spearmen stop eating.
     const fallen = 20 - (world.villages[0].garrison.spearman ?? 0);
-    expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(started.body.villages[0].resources.ratesPerHour.grain - (20 - fallen) * DOBRYNYA_UPKEEP);
+    expect(world.villages[0].resources.ratesPerHour.grain).toBeCloseTo(fedAll + fallen * DOBRYNYA_UPKEEP);
   }));
 
   it('builds on plots: fields, free slots and the Elder\'s Hall', async () => {
@@ -1411,6 +1415,8 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const [q, r, atMs] = holdable(marching.path);
     const meetAt = new Date(new Date(marching.spawnAt).getTime() + atMs);
 
+    // (Winter ate the grain since the start: the stores filled again.)
+    await db.query(`UPDATE villages SET amounts = '{"wood": 5000, "stone": 5000, "grain": 5000, "iron": 5000}', settled_at = $2 WHERE id = $1`, [home.id, now]);
     // A fort first: not on the village, not too far, then on the hex.
     const fort = (body: object) => call('POST', `/v1/villages/${home.id}/forts`, mira.token, body);
     expect((await fort({ q: home.q, r: home.r })).body.message).toMatch(/within/);

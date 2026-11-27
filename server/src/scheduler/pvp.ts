@@ -1,6 +1,7 @@
 // Player against player (armies.json pvp, sim/pvp.ts): an army sent to
 // attack another player's village arrives and fights at once. Won, it
 // plunders the stores or razes the village; then it comes home.
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import type { GameData } from '../data/index.js';
 import { armiesAt, type Army } from '../db/armies.js';
 import { insertBattle, recordRound, type RoundLog } from '../db/battles.js';
@@ -89,6 +90,7 @@ export async function attackVillage(client: DbClient, data: GameData, world: Wor
     statsWithoutHero: withIntel(data, army.units, playerStats(data, commandBonuses(data, owned, null, general), false)),
     defenders: forces,
     seed: world.seed,
+    season: seasonDefense(data, seasonAt(data, world, at).season),
     id: army.id,
     ground: await groundOf(client, data, world.id, { q: target.q, r: target.r }),
     // In lines; nobody maneuvers at standing walls.

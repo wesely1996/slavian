@@ -585,6 +585,7 @@
       "upkeep": 0.08,
       "attack.all": 0.1,
       "homeDefense": 0.06,
+      "season.grain": 1,
       "attack.cavalry": 0.06,
       "maneuver.flank": 0.2,
       "maneuver.encircle": -0.1
@@ -606,13 +607,13 @@
       "amounts": {
        "iron": 185,
        "wood": 48,
-       "grain": 46,
+       "grain": 94,
        "stone": 101
       },
       "ratesPerHour": {
        "iron": 30,
        "wood": 90,
-       "grain": 69.2,
+       "grain": 149.2,
        "stone": 60
       },
       "capacity": {
@@ -846,6 +847,7 @@
        "upkeep": 0.08,
        "attack.all": 0.1,
        "homeDefense": 0.06,
+       "season.grain": 1,
        "attack.cavalry": 0.06,
        "maneuver.flank": 0.2,
        "maneuver.encircle": -0.1
@@ -858,13 +860,13 @@
        "amounts": {
         "iron": 185,
         "wood": 48,
-        "grain": 46,
+        "grain": 94,
         "stone": 101
        },
        "ratesPerHour": {
         "iron": 30,
         "wood": 90,
-        "grain": 69.2,
+        "grain": 149.2,
         "stone": 60
        },
        "capacity": {
@@ -976,7 +978,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -994,53 +996,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          144000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          216000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          288000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          360000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          432000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          504000
         ],
         [
+         0,
          -2,
-         2,
+         576000
+        ],
+        [
+         0,
+         -1,
          648000
+        ],
+        [
+         0,
+         0,
+         720000
         ]
        ],
-       "arrivesAt": "2026-06-01T22:34:48.000Z"
+       "arrivesAt": "2026-06-01T22:36:00.000Z"
       }
      }
     ],
@@ -3453,10 +3465,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 218.5,
-        "wood": 148.5,
-        "grain": 119.73333333333335,
-        "stone": 168
+        "iron": 239,
+        "wood": 210,
+        "grain": 359.02,
+        "stone": 209
        },
        "ratesPerHour": {
         "iron": 30,
@@ -3470,7 +3482,7 @@
         "grain": 1000,
         "stone": 1000
        },
-       "settledAt": "2026-06-01T12:07:12.000Z"
+       "settledAt": "2026-06-01T12:48:00.000Z"
       }
      }
     ],
@@ -3573,7 +3585,7 @@
      {
       "id": 2,
       "index": 1,
-      "front": "south",
+      "front": "north",
       "status": "scheduled",
       "threat": "Low",
       "spawnAt": "2026-06-01T22:24:00.000Z",
@@ -3591,53 +3603,63 @@
       "errand": null,
       "forecast": {
        "spawn": {
-        "q": -7,
-        "r": 9
+        "q": 2,
+        "r": -9
        },
-       "targetVillageId": 1,
+       "targetVillageId": null,
        "path": [
         [
-         -7,
-         9,
+         2,
+         -9,
          0
         ],
         [
-         -6,
-         8,
+         2,
+         -8,
          144000
         ],
         [
-         -5,
-         7,
+         1,
+         -7,
          216000
         ],
         [
-         -4,
-         6,
+         0,
+         -6,
          288000
         ],
         [
-         -3,
-         5,
+         0,
+         -5,
          360000
         ],
         [
-         -2,
-         4,
+         0,
+         -4,
          432000
         ],
         [
-         -2,
-         3,
+         0,
+         -3,
          504000
         ],
         [
+         0,
          -2,
-         2,
+         576000
+        ],
+        [
+         0,
+         -1,
          648000
+        ],
+        [
+         0,
+         0,
+         720000
         ]
        ],
-       "arrivesAt": "2026-06-01T22:34:48.000Z"
+       "arrivesAt": "2026-06-01T22:36:00.000Z"
       }
      }
     ],
@@ -5897,7 +5919,16 @@
    "response": {
     "notifications": [
      {
-      "id": 8,
+      "id": 10,
+      "kind": "season",
+      "tier": "push",
+      "title": "Autumn has come",
+      "body": "The harvest is in and the ground is firm: every soldier holds 20% better. The Order marches half as often again; the nomads go home to winter.",
+      "createdAt": "2026-06-01T12:48:00.000Z",
+      "read": false
+     },
+     {
+      "id": 9,
       "kind": "event",
       "tier": "push",
       "title": "Boatwrights wait at (-6, 4)",
@@ -5906,7 +5937,7 @@
       "read": false
      },
      {
-      "id": 7,
+      "id": 8,
       "kind": "battle_result",
       "tier": "digest",
       "title": "Your army was driven off from the bandit camp at (-2, 5)",
@@ -5915,12 +5946,21 @@
       "read": false
      },
      {
-      "id": 6,
+      "id": 7,
       "kind": "onboarding",
       "tier": "digest",
       "title": "Done: Train defenders",
       "body": "Claim its reward from the quest card.",
       "createdAt": "2026-06-01T11:00:00.000Z",
+      "read": false
+     },
+     {
+      "id": 6,
+      "kind": "season",
+      "tier": "push",
+      "title": "Summer has come",
+      "body": "The fields ripen: twice the grain. The steppe riders ride twice as often; the Order's armies, slow in the heat, half as often.",
+      "createdAt": "2026-06-01T10:24:00.000Z",
       "read": false
      },
      {
@@ -5969,7 +6009,7 @@
       "read": false
      }
     ],
-    "unread": 8,
+    "unread": 10,
     "serverTime": "2026-06-01T14:00:00.000Z"
    }
   }

@@ -186,7 +186,7 @@ static func call_ritual_night(server: LocalServer, world: Dictionary, at: int) -
 		var index := first + i
 		var ctx := {"seed": world.seed, "activeFronts": world.activeFronts, "playerCount": world.members.size(), "startedAt": world.startedAt,
 			"worldSpeed": world.speed, "sizeFactor": LocalWaves.wave_factor(data, world.difficulty, server._group_power(world, index)) * float(rules.sizeFactor)}
-		var planned := LocalWaves.plan_wave(data, ctx, index, null)
+		var planned := LocalWaves.plan_wave(data, ctx, index, null, String(fronts[i]))
 		var wave := {"id": world.next.wave, "index": planned.index, "front": planned.front, "status": "scheduled", "threat": planned.threat,
 			"stance": planned.stance, "composition": planned.composition, "initial": planned.composition.duplicate(), "spawnAt": spawn_at,
 			"spawn": null, "targetVillageId": null, "path": null, "arrivesAt": null, "endsAt": null, "rampageEndsAt": null, "struck": [],

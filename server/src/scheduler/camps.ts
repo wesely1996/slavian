@@ -3,6 +3,7 @@
 // send part of themselves with the next wave of their front, ambush
 // caravans passing close (caravan_ambush), and fall to armies sent to clear
 // them, which carry their loot home.
+import { seasonAt, seasonDefense } from '../sim/seasons.js';
 import { achieve } from './achievements.js';
 import { parseArmyQuestMark } from '../sim/quests.js';
 import { armyQuestDone } from './quests.js';
@@ -259,6 +260,7 @@ export async function stormCamp(client: DbClient, data: GameData, world: World, 
     camp: camp.units,
     front: camp.front as Front,
     seed: world.seed,
+    season: seasonDefense(data, seasonAt(data, world, at).season),
     id: camp.id,
     ground: await groundOf(client, data, world.id, { q: camp.q, r: camp.r }),
     lines: {
