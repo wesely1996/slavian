@@ -966,6 +966,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("prune-scenario.json", "local daily pruning")
 	_replay_scenario("quarters-scenario.json", "local quarters, floors, merging, splitting and answering battles")
 	_replay_scenario("army-groups-scenario.json", "local army groups: recruited at home, gathered, kept up from a fort")
+	_replay_scenario("outpost-raids-scenario.json", "local hordes going out of their way to outposts for supplies")
 	_replay_scenario("heroquest-scenario.json", "local hero quests and army quests")
 	_replay_scenario("market-scenario.json", "local bounty board and caravans bringing back")
 	_replay_scenario("smithing-scenario.json", "local Blacksmith: forging, refusals and a faster march")

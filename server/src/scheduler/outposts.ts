@@ -1,20 +1,23 @@
 // Outpost raids on the scheduler: when a horde sets out (or an outpost is
-// finished while one is on the march), every outpost near its route gets an
-// outpost_raid event for when the horde comes close. Supply points near its
-// route get a supply_raid: unless an army stands on one then, the horde
-// burns it with all its grain.
+// finished while one is on the march), every outpost on its route gets an
+// outpost_raid event for when the horde marches onto it: it burns a level,
+// and its supplies swell the horde (horde.json outposts; hordes plan their
+// roads through outposts worth the detour, sim/waves.ts routeFrom). Supply
+// points on its route get a supply_raid: unless an army stands on one then,
+// the horde burns it with all its grain.
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { insertRaid } from '../db/raids.js';
 import { listVillages, loadVillage, saveVillageState, type Village } from '../db/villages.js';
-import { listActiveWaves, loadWave, type Wave } from '../db/waves.js';
+import { listActiveWaves, loadWave, setWaveStrength, type Wave } from '../db/waves.js';
+import { outpostRecruits } from '../sim/horde.js';
 import { loadHexes, type World } from '../db/worlds.js';
 import { outpostHex, outpostPlots, raidOutpost, withRoadLinks } from '../sim/village.js';
 import { roadLink } from '../sim/land.js';
 import { damagedRoads, standingRoads } from '../db/roads.js';
-import { raidsAlong, type OutpostTarget } from '../sim/waves.js';
+import { raidsAlong, type OutpostSite, type OutpostTarget } from '../sim/waves.js';
 import { tell } from './notices.js';
 import { armiesHolding } from '../db/armies.js';
 import { deleteFort, listForts, loadFort, type Fort } from '../db/forts.js';
@@ -54,6 +57,15 @@ function standingOutposts(villages: readonly Village[]): OutpostTarget[] {
   );
 }
 
+// Every standing outpost, at its level, for hordes planning their roads.
+export function outpostSites(villages: readonly Village[]): OutpostSite[] {
+  return villages.flatMap((village) =>
+    outpostPlots(village.state.plots)
+      .filter((plot) => village.state.plots[plot]!.level > 0)
+      .map((plot) => ({ cell: outpostHex(plot)!, level: village.state.plots[plot]!.level })),
+  );
+}
+
 async function scheduleRaids(
   client: DbClient,
   data: GameData,
@@ -63,7 +75,7 @@ async function scheduleRaids(
   fromMs: number,
 ): Promise<void> {
   if (!wave.path) return;
-  for (const raid of raidsAlong(wave.path, outposts, data.enemies.fronts[wave.front]!.personality.raidReach, fromMs)) {
+  for (const raid of raidsAlong(wave.path, outposts, 0, fromMs)) {
     const payload: OutpostRaidPayload = { waveId: wave.id, villageId: raid.villageId, plot: raid.plot };
     const { rows } = await client.query(
       `SELECT 1 FROM scheduled_events
@@ -78,7 +90,7 @@ async function scheduleRaids(
 async function scheduleSupplyRaids(client: DbClient, data: GameData, world: World, wave: Wave, points: readonly Fort[], fromMs: number): Promise<void> {
   if (!wave.path) return;
   const targets = points.filter((f) => f.kind === 'supply' && !f.neutral).map((f) => ({ fortId: f.id, cell: hex(f.q, f.r) }));
-  for (const raid of raidsAlong(wave.path, targets, data.enemies.fronts[wave.front]!.personality.raidReach, fromMs)) {
+  for (const raid of raidsAlong(wave.path, targets, 0, fromMs)) {
     const payload: SupplyRaidPayload = { waveId: wave.id, fortId: raid.fortId };
     const { rows } = await client.query(
       `SELECT 1 FROM scheduled_events
@@ -151,6 +163,11 @@ export const outpostHandlers: HandlerRegistry = {
     const after = state.plots[payload.plot];
     if (!before || !after || after.level === before.level) return;
     await saveVillageState(client, village.id, state);
+    // Its supplies swell a horde on the march.
+    if (wave.status === 'marching') {
+      await setWaveStrength(client, wave.id, outpostRecruits(data, wave.initial, wave.composition, before.level));
+      await notifyWorld(client, { worldId: world.id, type: 'waves' });
+    }
     const cell = outpostHex(payload.plot)!;
     await insertRaid(client, {
       worldId: world.id,
@@ -168,8 +185,8 @@ export const outpostHandlers: HandlerRegistry = {
       tier: 'push',
       title: 'A horde burned an outpost of {village}',
       body: after.level > 0
-        ? 'The outpost at ({q}, {r}) is down to level {level}.'
-        : 'The outpost at ({q}, {r}) lies in ruins.',
+        ? 'The outpost at ({q}, {r}) is down to level {level}; its supplies feed the horde.'
+        : 'The outpost at ({q}, {r}) lies in ruins; its supplies feed the horde.',
       vars: { village: village.name, q: cell.q, r: cell.r, level: after.level },
     }, event.dueAt);
   },

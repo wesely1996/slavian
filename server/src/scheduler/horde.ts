@@ -63,7 +63,7 @@ import { terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { cancelPlans, planIntercepts } from './field.js';
 import { planWaveWarning, tell } from './notices.js';
-import { planRaids } from './outposts.js';
+import { outpostSites, planRaids } from './outposts.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -208,6 +208,9 @@ export async function moveOn(client: DbClient, data: GameData, world: World, wav
     rng: rngFor(world.seed, wave.index, 0x90 + wave.struck.length),
     startMs: sinceSpawn,
     worldSpeed: world.speed,
+    // A horde on its rampage may go out of its way for outposts' supplies
+    // (not the Avatar or the Leshen, nor a band after the bridge's builders).
+    ...(avatar || bridgeBand ? {} : { outposts: outpostSites(await listVillages(client, world.id)) }),
   });
   if (!route) return settle(client, data, world, wave, from, at);
   const march = holdForQuiet(world, wave.spawnAt, { path: route.path, arrivesAt: new Date(wave.spawnAt.getTime() + route.arrivesMs) });

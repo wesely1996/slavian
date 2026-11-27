@@ -960,9 +960,8 @@ func _draw_horde(wave: Dictionary, now: float) -> void:
 				trail.append(HexMath.to_pixel(cell, hex_size))
 		if trail.size() >= 2:
 			_draw_route(trail, HORDE_PATH_COLOR)
-		# Outposts it will burn on the way are targets too.
-		var reach := int(Game.data.enemies.fronts[String(wave.get("front", "north"))].personality.raidReach)
-		for cell in WaveMath.raided_outposts(wave, _standing_outposts(), reach, now):
+		# Outposts it will march onto and burn on the way are targets too.
+		for cell in WaveMath.raided_outposts(wave, _standing_outposts(), 0, now):
 			_draw_crosshair(HexMath.to_pixel(cell, hex_size), HORDE_PATH_COLOR, 0.7)
 	else:
 		# Camped at the gates: sit beside the village so both stay visible.

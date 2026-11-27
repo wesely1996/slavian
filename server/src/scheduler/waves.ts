@@ -26,7 +26,7 @@ import { startBattle } from './battles.js';
 import { beginRampage, joinHordeBattle, moveOn, startHolyCityBattle } from './horde.js';
 import { campsJoin } from './camps.js';
 import { planWaveWarning } from './notices.js';
-import { planRaids } from './outposts.js';
+import { outpostSites, planRaids } from './outposts.js';
 import { planIntercepts } from './field.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { afterErrand } from './bridgeQuests.js';
@@ -131,7 +131,9 @@ export async function forecastMarches(client: DbClient, data: GameData, world: W
   const scheduled = waves.filter((w) => w.status === 'scheduled');
   if (scheduled.length === 0) return forecasts;
   const terrain = await loadLand(client, world.id);
-  const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
+  const all = await listVillages(client, world.id);
+  const villages = all.filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
+  const outposts = outpostSites(all);
   const fear = await fearOf(client, data, world);
   for (const wave of scheduled) {
     try {
@@ -144,6 +146,7 @@ export async function forecastMarches(client: DbClient, data: GameData, world: W
         departAt: wave.spawnAt,
         worldSpeed: world.speed,
         fear,
+        outposts,
       });
       forecasts.set(wave.id, holdForQuiet(world, wave.spawnAt, march));
     } catch {
@@ -311,7 +314,8 @@ export const waveHandlers: HandlerRegistry = {
     // Old memories fade as a new horde sets out.
     await decayFear(client, world.id, data.horde.fear.decayPerWave, data.horde.fear.minimum);
     const terrain = await loadLand(client, world.id);
-    const villages = (await listVillages(client, world.id)).filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
+    const all = await listVillages(client, world.id);
+    const villages = all.filter((v) => !v.ruin).map((v) => ({ id: v.id, q: v.q, r: v.r }));
     const march = planMarch(data, {
       terrain,
       radius: world.radius ?? 0,
@@ -321,6 +325,7 @@ export const waveHandlers: HandlerRegistry = {
       departAt: event.dueAt,
       worldSpeed: world.speed,
       fear: await fearOf(client, data, world),
+      outposts: outpostSites(all),
     });
     await markMarching(client, wave.id, holdForQuiet(world, wave.spawnAt, march));
     const payload: WavePayload = { waveId: wave.id };

@@ -1020,8 +1020,11 @@ static func move_on(server: LocalServer, world: Dictionary, wave: Dictionary, fr
 	var bridge_band: bool = wave.get("errand") is Dictionary and wave.errand.kind == "bridge"
 	var targets: Array = (avatar_targets(standing) if avatar else [LocalBridge.next_construction_target(from, owned)] if bridge_band else LocalHordes.targets_of(villages)).filter(func(t: Dictionary) -> bool: return t.cell != from)
 	var since_spawn := at - int(wave.spawnAt)
+	# A horde on its rampage may go out of its way for outposts' supplies
+	# (not the Avatar or the Leshen, nor a band after the bridge's builders).
 	var route: Variant = LocalHordes.route_from(data, LocalHordes.land_of(world), from, targets, wave.front, wave.composition,
-		LocalHordes.fear_of(server, world), LocalWaves.rng_for(int(world.seed), int(wave.index), 0x90 + wave.struck.size()), since_spawn, world.speed)
+		LocalHordes.fear_of(server, world), LocalWaves.rng_for(int(world.seed), int(wave.index), 0x90 + wave.struck.size()), since_spawn, world.speed,
+		[] if avatar or bridge_band else LocalHordes.outpost_sites(world))
 	if route == null:
 		settle(server, world, wave, from, at, changed)
 		return
@@ -1172,12 +1175,15 @@ static func on_outpost_raid(server: LocalServer, world: Dictionary, event: Dicti
 	if before == null or after == null or int(after.level) == int(before.level):
 		return
 	village.state = state
+	# Its supplies swell a horde on the march.
+	if wave.status == "marching":
+		wave.composition = LocalHorde.outpost_recruits(server.data, wave.initial, wave.composition, int(before.level))
 	var cell := LocalVillage.outpost_hex(p.plot)
 	world.raids.append({"id": world.next.raid, "waveId": wave.id, "villageId": village.id, "q": cell.x, "r": cell.y,
 		"levelAfter": after.level, "at": int(event.dueAt)})
 	world.next.raid += 1
 	LocalInbox.tell(server, world, village.ownerAccountId, {"kind": "outpost_raided", "tier": "push", "title": "A horde burned an outpost of {village}",
-		"body": "The outpost at ({q}, {r}) is down to level {level}." if int(after.level) > 0 else "The outpost at ({q}, {r}) lies in ruins.",
+		"body": "The outpost at ({q}, {r}) is down to level {level}; its supplies feed the horde." if int(after.level) > 0 else "The outpost at ({q}, {r}) lies in ruins; its supplies feed the horde.",
 		"vars": {"village": village.name, "q": cell.x, "r": cell.y, "level": int(after.level)}}, int(event.dueAt))
 	changed.append(["village", village.id])
 	changed.append(["world"])

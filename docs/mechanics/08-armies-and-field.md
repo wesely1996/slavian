@@ -205,8 +205,8 @@ holds matters:
 - **Building.** A grain store with no walls, built within **5 hexes** of a
   village. Cost: 300 / 150 / 100 / 0. It takes 30 game minutes.
 - **Grain.** It keeps up to **6,000 grain**.
-- **No defense.** It gives no defense. A horde passing within its raid reach
-  **burns it with all its grain**, unless an army stands on it.
+- **No defense.** It gives no defense. A horde marching onto it **burns it
+  with all its grain**, unless an army stands on it.
 - **Restocking.** Supply routes ([page 4](04-economy-and-logistics.md#standing-orders))
   keep forts and supply points stocked.
 - **Filling armies.** An army arriving at or standing on a fort or supply point

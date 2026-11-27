@@ -303,7 +303,6 @@ const enemiesFileSchema = z.object({
       signature: z.string(),
       personality: z.object({
         lootFactor: z.number().nonnegative(),
-        raidReach: z.number().int().nonnegative(),
         nerve: z.number().positive(),
         razeBias: z.number(),
         erratic: z.number().min(0).max(1),
@@ -828,6 +827,18 @@ const hordeFileSchema = z.object({
   holyCityExtraCost: z.number().nonnegative(),
   rampageHours: z.number().positive(),
   raid: z.object({ recruitShare: z.number().nonnegative() }),
+  // Outposts: a horde burns one only by marching onto it, and takes its
+  // supplies: each unit of its starting strength x recruitPerLevel x the
+  // outpost's level (rounded down) joins it. It goes out of its way for one
+  // within searchReach hexes of its road when level x valuePerLevel x its
+  // faction's greed is more than the detour adds to its road (at most
+  // maxDetours on one march).
+  outposts: z.object({
+    recruitPerLevel: z.number().nonnegative(),
+    valuePerLevel: z.number().nonnegative(),
+    searchReach: z.number().int().nonnegative(),
+    maxDetours: z.number().int().nonnegative(),
+  }),
   raze: z.object({
     graceWaves: z.number().int().nonnegative(),
     hours: z.number().positive(),

@@ -1534,7 +1534,7 @@ func _forecasts(world: Dictionary) -> Dictionary:
 			villages.append({"id": v.id, "q": v.q, "r": v.r})
 	var fear := LocalHordes.fear_of(self, world)
 	for w in scheduled:
-		var march := LocalHordes.plan_march(data, land, w, villages, int(world.seed), int(w.spawnAt), world.speed, fear)
+		var march := LocalHordes.plan_march(data, land, w, villages, int(world.seed), int(w.spawnAt), world.speed, fear, null, LocalHordes.outpost_sites(world))
 		if not march.is_empty():
 			out[w.id] = LocalHordes.hold_for_quiet(world, int(w.spawnAt), march)
 	return out

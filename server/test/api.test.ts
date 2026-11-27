@@ -567,9 +567,14 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     expect(world.villages[0].plots[`o${q1},${r1}`].level).toBe(1);
     expect(world.villages[0].levels.outpost).toBeUndefined();
 
+    // A rich outpost (level 5) is worth a horde's detour (horde.json outposts).
+    await db.query(`UPDATE villages SET plots = jsonb_set(plots, ARRAY[$2, 'level'], '5') WHERE id = $1`, [village.id, `o${q1},${r1}`]);
     // The first horde sets out; a second outpost goes up while it marches.
     now = new Date(world.waves[0].spawnAt);
     await tick(db, now, scheduler);
+    const { rows: [spawned] } = await db.query<{ initial: Record<string, number>; path: { q: number; r: number }[] }>('SELECT initial, path FROM waves WHERE world_id = $1 ORDER BY index LIMIT 1', [worldId]);
+    const onRoad = (q: number, r: number) => spawned!.path.some((step) => step.q === q && step.r === r);
+    expect(onRoad(q1, r1)).toBe(true);
     const second = await claim(q2, r2);
     now = new Date(second.body.village.queue[0].completesAt);
     await tick(db, now, scheduler);
@@ -577,14 +582,22 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     const rates = world.villages[0].resources.ratesPerHour;
     expect(world.villages[0].plots[`o${q2},${r2}`].level).toBe(1);
 
-    // It burns both as it reaches the village, then lays siege.
+    // It burns what it marches onto, takes the rich one's supplies, and lays siege.
     now = new Date(world.waves[0].arrivesAt);
     await tick(db, now, scheduler);
     world = (await call('GET', `/v1/worlds/${worldId}`, zora.token)).body;
-    expect(world.villages[0].plots[`o${q1},${r1}`].level).toBe(0);
-    expect(world.villages[0].plots[`o${q2},${r2}`].level).toBe(0);
-    expect(world.raids.map((r: { q: number; r: number }) => `${r.q},${r.r}`).sort()).toEqual([`${q1},${r1}`, `${q2},${r2}`].sort());
-    expect(world.raids[0]).toMatchObject({ villageId: village.id, waveId: world.waves[0].id, levelAfter: 0 });
+    expect(world.villages[0].plots[`o${q1},${r1}`].level).toBe(4);
+    expect(world.villages[0].plots[`o${q2},${r2}`].level).toBe(onRoad(q2, r2) ? 0 : 1);
+    const burned = [`${q1},${r1}`, ...(onRoad(q2, r2) ? [`${q2},${r2}`] : [])];
+    expect(world.raids.map((r: { q: number; r: number }) => `${r.q},${r.r}`).sort()).toEqual(burned.sort());
+    expect(world.raids.find((r: { q: number }) => r.q === q1)).toMatchObject({ villageId: village.id, waveId: world.waves[0].id, levelAfter: 4 });
+    const { rows: [fed] } = await db.query<{ composition: Record<string, number> }>('SELECT composition FROM waves WHERE world_id = $1 ORDER BY index LIMIT 1', [worldId]);
+    // Each unit of its first strength x 2% x the level it burned.
+    const share = scheduler.data.horde.outposts.recruitPerLevel;
+    for (const [unit, n] of Object.entries(spawned!.initial)) {
+      const extra = Math.floor(n * share * 5) + (onRoad(q2, r2) ? Math.floor(n * share * 1) : 0);
+      expect(fed!.composition[unit]).toBe(n + extra);
+    }
     expect(world.villages[0].besieged).toBe(true);
     expect(world.villages[0].resources.ratesPerHour.grain).toBeLessThanOrEqual(rates.grain);
 
@@ -595,7 +608,7 @@ describe.skipIf(!TEST_DATABASE_URL)('api (postgres)', () => {
     }
     expect(world.villages[0].besieged).toBe(false);
 
-    // Ruins can be abandoned.
+    // Outposts can be abandoned.
     const abandoned = await call('POST', `/v1/villages/${village.id}/outposts/abandon`, zora.token, { q: q1, r: r1 });
     expect(abandoned.body.village.plots[`o${q1},${r1}`]).toBeUndefined();
   }));

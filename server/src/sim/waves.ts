@@ -190,11 +190,24 @@ export interface Target {
   readonly cell: Hex;
 }
 
+// A standing outpost a horde may go out of its way to plunder (horde.json
+// outposts), at its level.
+export interface OutpostSite {
+  readonly cell: Hex;
+  readonly level: number;
+}
+
 // The cheapest target from `from` for this horde: road cost (terrain plus
 // fear along the way) plus fear at the target, plus extra for the Holy City
 // (always a target, taken when it is cheaper than every village). Erratic
 // factions jitter the costs of villages against each other. Steps are timed
 // by terrain alone, from `startMs` (ms after spawn).
+// With `outposts`, the horde then weighs going out of its way through them
+// for their supplies (horde.json outposts): an outpost within `searchReach`
+// hexes of its road is worth its level x `valuePerLevel` x the faction's
+// greed (lootFactor), in road cost; it takes the one worth most above what
+// the detour adds, if any is, and again from there, at most `maxDetours`
+// times. Outposts on its road it takes anyway.
 export function routeFrom(
   data: GameData,
   input: {
@@ -207,6 +220,7 @@ export function routeFrom(
     rng: () => number;
     startMs: number;
     worldSpeed: number;
+    outposts?: readonly OutpostSite[];
   },
 ): { targetVillageId: number | null; path: PathStep[]; arrivesMs: number } | null {
   const { terrain, fear } = input;
@@ -274,6 +288,36 @@ export function routeFrom(
   }
   if (holy && holy.cost < cheapestVillage) best = { id: null, path: holy.path, score: holy.cost };
   if (!best) return null;
+  if (input.outposts?.length) {
+    const rules = data.horde.outposts;
+    const worth = rules.valuePerLevel * data.enemies.fronts[input.front]!.personality.lootFactor;
+    // The legs of a detour keep out of the forts' zones, as its road does.
+    const goal = best.path.at(-1)!;
+    const legCost = (from: Hex, to: Hex): number | null => (zone.has(hexKey(to)) && hexKey(to) !== hexKey(goal) ? null : searchCost(from, to));
+    const taken = new Set<string>();
+    let head: Hex[] = [best.path[0]!];
+    let rest = best.path;
+    for (let n = 0; n < rules.maxDetours; n++) {
+      const onRoad = new Set(rest.map(hexKey));
+      const restCost = costOf(rest);
+      let pick: { gain: number; key: string; toIt: Hex[]; onward: Hex[] } | null = null;
+      for (const site of input.outposts) {
+        const key = hexKey(site.cell);
+        if (site.level <= 0 || taken.has(key) || onRoad.has(key)) continue;
+        if (!rest.some((cell) => hexDistance(cell, site.cell) <= rules.searchReach)) continue;
+        const toIt = findPath(rest[0]!, site.cell, legCost, minStep);
+        const onward = toIt ? findPath(site.cell, goal, legCost, minStep) : null;
+        if (!toIt || !onward) continue;
+        const gain = site.level * worth - (costOf(toIt) + costOf(onward) - restCost);
+        if (gain > 0 && (!pick || gain > pick.gain || (gain === pick.gain && key < pick.key))) pick = { gain, key, toIt, onward };
+      }
+      if (!pick) break;
+      taken.add(pick.key);
+      head = [...head, ...pick.toIt.slice(1)];
+      rest = pick.onward;
+    }
+    best = { ...best, path: [...head, ...rest.slice(1)] };
+  }
   const hoursPerCost = 1 / marchSpeed(data, input.front, input.composition);
   let atMs = input.startMs;
   const path = best.path.map((cell, i) => {
@@ -301,6 +345,8 @@ export function planMarch(
     fear?: ReadonlyMap<string, number>;
     // Where it may go (default: the villages and the Holy City).
     targets?: readonly Target[];
+    // Outposts it may go out of its way to plunder (routeFrom).
+    outposts?: readonly OutpostSite[];
   },
 ): March {
   const { terrain, wave } = input;
@@ -333,6 +379,7 @@ export function planMarch(
       rng: rngFor(input.seed, wave.index, 0x7a),
       startMs: 0,
       worldSpeed: input.worldSpeed,
+      ...(input.outposts ? { outposts: input.outposts } : {}),
     });
     if (!route) continue;
     return {
