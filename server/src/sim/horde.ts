@@ -71,6 +71,19 @@ export function recruit(data: GameData, initial: Record<string, number>, now: Re
   return next;
 }
 
+// An outpost's supplies swell the horde that burns it (horde.json
+// outposts): each unit of its first strength x recruitPerLevel x the
+// outpost's level, rounded down.
+export function outpostRecruits(data: GameData, initial: Record<string, number>, now: Record<string, number>, level: number): Record<string, number> {
+  const share = data.horde.outposts.recruitPerLevel * level;
+  const next: Record<string, number> = { ...now };
+  for (const [unit, n] of Object.entries(initial)) {
+    const extra = Math.floor(n * share);
+    if (extra > 0) next[unit] = (next[unit] ?? 0) + extra;
+  }
+  return next;
+}
+
 // Everything burned: buildings and fields stand at level 0.
 export function ruinPlots(plots: Readonly<Record<string, Plot>>): Record<string, Plot> {
   return Object.fromEntries(Object.entries(plots).map(([id, plot]) => [id, { ...plot, level: 0 }]));

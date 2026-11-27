@@ -70,8 +70,9 @@ On top of that:
 - **Roads.** The road bonus adds up to +200%, twice that through a mountain pass, half that over roads a fire damaged ([page 2](02-map-and-movement.md#roads)).
 - **Research.** `outpostYield`: Frontier Steadings +20%, Frontier Tithes +25%.
 - **Sieges.** Outposts produce nothing while their village is besieged.
-- **Hordes.** A marching horde **burns every outpost within its raid reach of
-  its road down a level**: 1 hex for most fronts, 2 for the East's nomads.
+- **Hordes.** A marching horde **burns an outpost down a level by marching
+  onto it**, and its supplies swell the horde. Hordes go out of their way for
+  outposts worth it ([page 9](09-hordes-and-threats.md#outposts-and-supplies)).
 - **Fire** burns outposts to ruins ([page 2](02-map-and-movement.md#fire)).
 - **Rebuilding.** A standing order can rebuild raided outposts
   ([below](#standing-orders)).

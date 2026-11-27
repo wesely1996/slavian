@@ -65,7 +65,7 @@ static func land_of(world: Dictionary) -> Dictionary:
 ## Holy City; erratic fronts jitter villages against each other. Null when
 ## nothing can be reached. `targets`: [{id (or null), cell}].
 static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targets: Array, front: String, composition: Dictionary,
-		fear: Dictionary, rng: LocalRng, start_ms: float, world_speed: float) -> Variant:
+		fear: Dictionary, rng: LocalRng, start_ms: float, world_speed: float, outposts: Array = []) -> Variant:
 	var rules: Dictionary = data.horde
 	var roads := front != "north"
 	var step_cost := func(a: Vector2i, b: Vector2i) -> float:
@@ -142,6 +142,44 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		best = {"id": null, "path": holy.path, "score": holy.cost}
 	if best == null:
 		return null
+	# sim/waves.ts routeFrom: out of its way through outposts worth the detour
+	# (horde.json outposts), the best first, at most maxDetours.
+	if not outposts.is_empty():
+		var orules: Dictionary = data.horde.outposts
+		var worth := float(orules.valuePerLevel) * float(data.enemies.fronts[front].personality.lootFactor)
+		var goal: Vector2i = best.path[-1]
+		var goal_key := LocalLand.key(goal)
+		var leg_cost := func(a: Vector2i, b: Vector2i) -> float:
+			var kb := LocalLand.key(b)
+			return -1.0 if zone.has(kb) and kb != goal_key else float(search_cost.call(a, b))
+		var taken := {}
+		var head: Array = [best.path[0]]
+		var rest: Array = best.path
+		for n in int(orules.maxDetours):
+			var on_road := {}
+			for cell in rest:
+				on_road[LocalLand.key(cell)] = true
+			var rest_cost: float = cost_of.call(rest)
+			var pick: Variant = null
+			for site in outposts:
+				var key := LocalLand.key(site.cell)
+				if int(site.level) <= 0 or taken.has(key) or on_road.has(key):
+					continue
+				if not rest.any(func(cell: Vector2i) -> bool: return HexMath.distance(cell, site.cell) <= int(orules.searchReach)):
+					continue
+				var to_it: Variant = LocalLand.find_path(rest[0], site.cell, leg_cost, min_step)
+				var onward: Variant = LocalLand.find_path(site.cell, goal, leg_cost, min_step) if to_it != null else null
+				if to_it == null or onward == null:
+					continue
+				var gain := int(site.level) * worth - (float(cost_of.call(to_it)) + float(cost_of.call(onward)) - rest_cost)
+				if gain > 0 and (pick == null or gain > pick.gain or (gain == pick.gain and key < pick.key)):
+					pick = {"gain": gain, "key": key, "toIt": to_it, "onward": onward}
+			if pick == null:
+				break
+			taken[pick.key] = true
+			head = head + pick.toIt.slice(1)
+			rest = pick.onward
+		best = {"id": best.id, "path": head + rest.slice(1), "score": best.score}
 	var hours_per_cost := 1.0 / march_speed(data, front, composition)
 	var at_ms := start_ms
 	var steps: Array = []
@@ -162,7 +200,7 @@ static func targets_of(villages: Array) -> Array:
 	return out
 
 
-static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, villages: Array, seed_value: int, depart_at: int, world_speed: float, fear: Dictionary, targets_override: Variant = null) -> Dictionary:
+static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, villages: Array, seed_value: int, depart_at: int, world_speed: float, fear: Dictionary, targets_override: Variant = null, outposts: Array = []) -> Dictionary:
 	var spawn_terrain: Array = data.enemies.fronts[wave.front].spawnTerrain
 	var candidates: Array = []
 	for key in land.terrain:
@@ -181,7 +219,7 @@ static func plan_march(data: Dictionary, land: Dictionary, wave: Dictionary, vil
 	var targets: Array = targets_override if targets_override != null else targets_of(villages)
 	for spawn in candidates.slice(0, MAX_SPAWN_CANDIDATES):
 		var route: Variant = route_from(data, land, spawn, targets, wave.front, wave.composition, fear,
-			LocalWaves.rng_for(seed_value, int(wave.index), 0x7a), 0.0, world_speed)
+			LocalWaves.rng_for(seed_value, int(wave.index), 0x7a), 0.0, world_speed, outposts)
 		if route == null:
 			continue
 		return {"spawn": spawn, "targetVillageId": route.targetVillageId, "path": route.path, "arrivesAt": depart_at + int(route.arrivesMs)}
@@ -379,7 +417,7 @@ static func on_wave_spawn(server: LocalServer, world: Dictionary, event: Diction
 		if v.ruin == null:
 			villages.append({"id": v.id, "q": v.q, "r": v.r})
 	var weighted := fear_of(server, world)
-	var march := hold_for_quiet(world, int(wave.spawnAt), plan_march(data, land_of(world), wave, villages, int(world.seed), at, world.speed, weighted))
+	var march := hold_for_quiet(world, int(wave.spawnAt), plan_march(data, land_of(world), wave, villages, int(world.seed), at, world.speed, weighted, null, outpost_sites(world)))
 	wave.status = "marching"
 	wave.spawn = {"q": march.spawn.x, "r": march.spawn.y}
 	wave.targetVillageId = march.targetVillageId
@@ -545,6 +583,16 @@ static func fear_of(server: LocalServer, world: Dictionary) -> Dictionary:
 
 ## Raids on every standing outpost and every supply point near the rest
 ## of a march.
+## scheduler/outposts.ts outpostSites: every standing outpost, at its level.
+static func outpost_sites(world: Dictionary) -> Array:
+	var out: Array = []
+	for v in world.villages:
+		for plot in LocalVillage.outpost_plots(v.state.plots):
+			if int(v.state.plots[plot].level) > 0:
+				out.append({"cell": LocalVillage.outpost_hex(plot), "level": int(v.state.plots[plot].level)})
+	return out
+
+
 static func plan_raids(server: LocalServer, world: Dictionary, wave: Dictionary, from_ms: int) -> void:
 	var outposts: Array = []
 	for v in world.villages:
@@ -570,8 +618,7 @@ static func schedule_supply_raids(server: LocalServer, world: Dictionary, wave: 
 	for f in points:
 		if f.get("kind", "fort") == "supply" and not f.get("neutral", false):
 			targets.append({"fortId": f.id, "cell": Vector2i(f.q, f.r)})
-	var reach := int(server.data.enemies.fronts[wave.front].personality.raidReach)
-	for raid in raids_along(wave.path, targets, reach, from_ms):
+	for raid in raids_along(wave.path, targets, 0, from_ms):
 		var payload := {"waveId": wave.id, "fortId": raid.fortId}
 		if not server.pending(world, "supply_raid", payload):
 			server.schedule(world, int(wave.spawnAt) + int(raid.atMs), "supply_raid", payload)
@@ -588,8 +635,7 @@ static func outpost_standing(server: LocalServer, world: Dictionary, target: Dic
 static func schedule_raids(server: LocalServer, world: Dictionary, wave: Dictionary, outposts: Array, from_ms: int) -> void:
 	if wave.path == null:
 		return
-	var reach := int(server.data.enemies.fronts[wave.front].personality.raidReach)
-	for raid in raids_along(wave.path, outposts, reach, from_ms):
+	for raid in raids_along(wave.path, outposts, 0, from_ms):
 		var payload := {"waveId": wave.id, "villageId": raid.villageId, "plot": raid.plot}
 		if not server.pending(world, "outpost_raid", payload):
 			server.schedule(world, int(wave.spawnAt) + int(raid.atMs), "outpost_raid", payload)

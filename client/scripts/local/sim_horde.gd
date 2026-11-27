@@ -59,6 +59,19 @@ static func recruit(data: Dictionary, initial: Dictionary, now: Dictionary) -> D
 	return next
 
 
+## sim/horde.ts outpostRecruits: an outpost's supplies swell the horde
+## that burns it: each unit of its first strength x recruitPerLevel x the
+## outpost's level, rounded down.
+static func outpost_recruits(data: Dictionary, initial: Dictionary, now: Dictionary, level: int) -> Dictionary:
+	var share := float(data.horde.outposts.recruitPerLevel) * level
+	var next := now.duplicate()
+	for unit in initial:
+		var extra := floori(int(initial[unit]) * share)
+		if extra > 0:
+			next[unit] = int(next.get(unit, 0)) + extra
+	return next
+
+
 ## Everything burned: buildings and fields stand at level 0.
 static func ruin_plots(plots: Dictionary) -> Dictionary:
 	var out := {}

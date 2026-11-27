@@ -96,7 +96,7 @@ active depends on the group's size:
 | Front | Faction | Character |
 |---|---|---|
 | North | Monsters of the North | Beasts from Slavic folklore. Erratic targets, fight on past reason, never build siege engines, keep off roads |
-| East | Nomad Horde | Fast horse archers. Raid rather than raze, carry off half again as much, burn outposts up to 2 hexes from their road |
+| East | Nomad Horde | Fast horse archers. Raid rather than raze, carry off half again as much, go far out of their way for outposts |
 | South | Order of the One Throne | Disciplined zealots with crossbows. Slow, hard to break, build siege rams |
 | West | Order of the One Throne (western host) | Knights and crossbows. Build siege towers |
 

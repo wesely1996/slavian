@@ -10,8 +10,7 @@ Each front has its own faction and personality:
 |---|---|---|---|---|
 | Faction | Monsters of the North | Nomad Horde | Order of the One Throne | Order (western host) |
 | Spawns in | Dark forest, ice | Steppe | Hallowed lands | Hallowed lands |
-| Greed (loot) | ×0.6 | ×1.5 | ×0.8 | ×0.8 |
-| Raid reach (outposts burned) | 1 hex | 2 hexes | 1 hex | 1 hex |
+| Greed (loot, and outposts' worth) | ×0.6 | ×1.5 | ×0.8 | ×0.8 |
 | Nerve | ×1.15 | ×0.85 | ×1.25 | ×1.25 |
 | Raze bias | +0.5 | −2.5 | +1 | +1 |
 | Erratic targeting | 0.6 | 0.15 | 0.05 | 0.05 |
@@ -108,8 +107,32 @@ Once it reaches its first target, the horde's **rampage clock** starts:
 hasn't hit. Then it settles into a bandit camp. A horde also ends when wiped
 out, or when it reaches the Holy City.
 
-**On the road,** a marching horde burns every outpost within its raid reach
-of its road down one level, and burns supply points nobody stands on.
+**On the road,** a marching horde burns an outpost it marches onto down one
+level, and a supply point it marches onto that nobody stands on
+([below](#outposts-and-supplies)).
+
+## Outposts and supplies
+
+A horde burns an outpost only by marching onto its hex, and it does so for
+the supplies:
+
+- **Supplies.** Burning an outpost of level *L* swells the horde: each unit of
+  its first strength × 2% × *L* joins it, rounded down (a level-5 outpost: as
+  much as a raided village, 10%). Only a horde on the march takes them.
+- **Worth a detour?** When a horde plans its road (setting out, or moving on
+  to its next village), it weighs every standing outpost within 3 hexes of
+  that road. An outpost is worth its level × 1.5 × the faction's greed, in
+  road cost (about one plains hex each). The horde takes the outpost worth
+  most above what the detour adds, if any is; then weighs again from there, at
+  most 2 detours on one march. Otherwise it goes straight for its target.
+- **Who detours.** The greedy nomads (×1.5) go well out of their way, even
+  for small outposts; the monsters (×0.6) rarely leave their road.
+- **On the road anyway.** An outpost that lies on the road it takes is burned
+  too.
+- **Not the errand bands,** the Avatar or the Leshen: they keep to their
+  errand's road (and burn what lies on it).
+- **The forecast** of a coming horde's road already counts the detours for
+  today's outposts.
 
 ## Fear
 

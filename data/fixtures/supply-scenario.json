@@ -10672,13 +10672,13 @@
       "arrivesAt": "2026-06-01T10:48:19.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 72,
-      "supplyAt": "2026-06-01T10:27:36.000Z",
+      "supply": 20.200000000000003,
+      "supplyAt": "2026-06-01T10:49:31.200Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
-      "quarteredAt": null,
+      "quarteredAt": "2026-06-01T10:49:31.200Z",
       "respond": true,
       "post": null,
       "groupId": null
@@ -10733,6 +10733,23 @@
     ],
     "armyGroups": [],
     "forts": [
+     {
+      "id": 1,
+      "kind": "supply",
+      "ownerAccountId": 1,
+      "villageId": 1,
+      "q": -1,
+      "r": 2,
+      "status": "standing",
+      "completesAt": "2026-06-01T08:40:36.000Z",
+      "grain": 267.15000000000003,
+      "armyFloor": null,
+      "neutral": false,
+      "plots": {},
+      "work": null,
+      "defenders": {},
+      "mannedAt": "2026-06-01T10:48:19.200Z"
+     },
      {
       "id": 3,
       "kind": "fort",
@@ -13185,7 +13202,7 @@
       "smithWork": null,
       "embers": 0,
       "armySlots": {
-       "used": 7,
+       "used": 10,
        "cap": 50
       },
       "ruinSearchReadyAt": null,
@@ -13500,7 +13517,7 @@
       "worldId": -1,
       "ownerAccountId": 1,
       "name": "You's refuge",
-      "q": -1,
+      "q": 0,
       "r": 2,
       "plots": {
        "w": {
@@ -13712,37 +13729,37 @@
          72000
         ],
         [
-         -1,
+         0,
          -7,
          86400
         ],
         [
-         -1,
+         0,
          -6,
          100800
         ],
         [
-         -1,
+         0,
          -5,
          115200
         ],
         [
-         -1,
+         0,
          -4,
          129600
         ],
         [
-         -1,
+         0,
          -3,
          144000
         ],
         [
-         -1,
+         0,
          -2,
          158400
         ],
         [
-         -1,
+         0,
          -1,
          172800
         ],
@@ -13757,7 +13774,12 @@
          216000
         ],
         [
-         -1,
+         0,
+         1,
+         230400
+        ],
+        [
+         0,
          2,
          244800
         ]
@@ -13847,22 +13869,22 @@
         ],
         [
          -8,
-         6,
-         28800
+         7,
+         43200
         ],
         [
          -7,
-         6,
-         57600
+         7,
+         72000
         ],
         [
          -6,
-         6,
-         86400
+         7,
+         100800
         ],
         [
          -5,
-         6,
+         7,
          115200
         ],
         [
@@ -13876,22 +13898,22 @@
          144000
         ],
         [
-         -3,
+         -2,
          4,
          158400
         ],
         [
-         -2,
+         -1,
          3,
          172800
         ],
         [
-         -1,
+         0,
          2,
-         201600
+         187200
         ]
        ],
-       "arrivesAt": "2026-06-01T11:53:45.600Z"
+       "arrivesAt": "2026-06-01T11:53:31.200Z"
       }
      }
     ],
@@ -13932,14 +13954,14 @@
       },
       "defenderInitial": {
        "archer": 11,
-       "spearman": 25
+       "spearman": 26
       },
       "rounds": [
        {
         "at": "2026-06-01T11:15:36.000Z",
         "round": 1,
         "attackerLeft": 1,
-        "defenderLeft": 34,
+        "defenderLeft": 37,
         "attackerLosses": {},
         "defenderLosses": {}
        }
@@ -14437,9 +14459,11 @@
       "stance": "balanced",
       "maneuver": "encircle",
       "loot": null,
-      "units": {},
-      "status": "done",
-      "battleId": null,
+      "units": {
+       "spearman": 3
+      },
+      "status": "engaged",
+      "battleId": 3,
       "path": [
        [
         -1,
@@ -14449,21 +14473,21 @@
        [
         0,
         1,
-        19200
+        14400
        ],
        [
         0,
         0,
-        38400
+        28800
        ]
       ],
       "departsAt": "2026-06-01T11:05:36.000Z",
-      "arrivesAt": "2026-06-01T11:06:14.400Z",
-      "leavesAt": "2026-06-01T11:08:24.000Z",
-      "returnsAt": "2026-06-01T11:08:24.000Z",
-      "supply": 0,
-      "supplyAt": "2026-06-01T11:08:24.000Z",
-      "hungrySince": "2026-06-01T10:56:24.000Z",
+      "arrivesAt": "2026-06-01T11:06:04.800Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 72,
+      "supplyAt": "2026-06-01T11:05:36.000Z",
+      "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": null,
@@ -14525,7 +14549,25 @@
      }
     ],
     "armyGroups": [],
-    "forts": [],
+    "forts": [
+     {
+      "id": 1,
+      "kind": "supply",
+      "ownerAccountId": 1,
+      "villageId": 1,
+      "q": -1,
+      "r": 2,
+      "status": "standing",
+      "completesAt": "2026-06-01T08:40:36.000Z",
+      "grain": 195.25000000000006,
+      "armyFloor": null,
+      "neutral": false,
+      "plots": {},
+      "work": null,
+      "defenders": {},
+      "mannedAt": "2026-06-01T10:48:19.200Z"
+     }
+    ],
     "camps": [
      {
       "id": 1,
@@ -16704,7 +16746,7 @@
    "response": {
     "notifications": [
      {
-      "id": 38,
+      "id": 36,
       "kind": "camp",
       "tier": "push",
       "title": "Bandits took the fort at (-2, 1)",
@@ -16713,16 +16755,7 @@
       "read": false
      },
      {
-      "id": 37,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "An army from You's refuge starved",
-      "body": "With no food left it scattered; none of them will come back.",
-      "createdAt": "2026-06-01T11:08:24.000Z",
-      "read": false
-     },
-     {
-      "id": 36,
+      "id": 35,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -16731,16 +16764,16 @@
       "read": false
      },
      {
-      "id": 35,
+      "id": 34,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
-      "body": "You's refuge takes in your people at (-1, 2).",
+      "body": "You's refuge takes in your people at (0, 2).",
       "createdAt": "2026-06-01T11:04:24.000Z",
       "read": false
      },
      {
-      "id": 34,
+      "id": 33,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Ashes",
@@ -16749,7 +16782,7 @@
       "read": false
      },
      {
-      "id": 33,
+      "id": 32,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
@@ -16758,7 +16791,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 31,
       "kind": "hero",
       "tier": "digest",
       "title": "Dobrynya is wounded",
@@ -16767,7 +16800,7 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 30,
       "kind": "razing",
       "tier": "push",
       "title": "Vruchiy is being razed",
@@ -16776,7 +16809,7 @@
       "read": false
      },
      {
-      "id": 30,
+      "id": 29,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Many Banners",
@@ -16785,7 +16818,7 @@
       "read": false
      },
      {
-      "id": 29,
+      "id": 28,
       "kind": "under_attack",
       "tier": "push",
       "title": "Another horde joins the battle at (-2, 2)",
@@ -16794,7 +16827,7 @@
       "read": false
      },
      {
-      "id": 28,
+      "id": 27,
       "kind": "wave_soon",
       "tier": "push",
       "title": "A horde is coming to Vruchiy",
@@ -16803,7 +16836,7 @@
       "read": false
      },
      {
-      "id": 27,
+      "id": 26,
       "kind": "event",
       "tier": "push",
       "title": "Captives are held at (0, 7)",
@@ -16812,7 +16845,7 @@
       "read": false
      },
      {
-      "id": 26,
+      "id": 25,
       "kind": "battle_result",
       "tier": "digest",
       "title": "The Holy City held",
@@ -16821,7 +16854,7 @@
       "read": false
      },
      {
-      "id": 25,
+      "id": 24,
       "kind": "leader",
       "tier": "digest",
       "title": "Vyrgan the Hungry has fallen",
@@ -16830,7 +16863,7 @@
       "read": false
      },
      {
-      "id": 24,
+      "id": 23,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Palisade",
@@ -16839,21 +16872,12 @@
       "read": false
      },
      {
-      "id": 23,
+      "id": 22,
       "kind": "build_done",
       "tier": "digest",
       "title": "Fort at (-2, 1) finished",
       "body": "Armies holding it fight from behind its walls.",
       "createdAt": "2026-06-01T10:46:48.000Z",
-      "read": false
-     },
-     {
-      "id": 22,
-      "kind": "outpost_raided",
-      "tier": "push",
-      "title": "A horde burned the supply point at (-1, 2)",
-      "body": "Its 268 grain burned with it.",
-      "createdAt": "2026-06-01T10:40:48.000Z",
       "read": false
      },
      {
@@ -16907,7 +16931,7 @@
       "tier": "push",
       "title": "A horde burned the supply point at (0, -3)",
       "body": "Its 0 grain burned with it.",
-      "createdAt": "2026-06-01T10:26:38.400Z",
+      "createdAt": "2026-06-01T10:26:52.800Z",
       "read": false
      },
      {
@@ -17046,7 +17070,7 @@
       "read": false
      }
     ],
-    "unread": 38,
+    "unread": 36,
     "serverTime": "2026-06-01T11:19:36.000Z"
    }
   }

@@ -16,6 +16,7 @@ import { createCamp } from '../src/scheduler/camps.js';
 import { leshenRises, leshenSeed } from '../src/scheduler/leshen.js';
 import { getWorld } from '../src/db/worlds.js';
 import type { Front } from '../src/sim/mapgen.js';
+import type { TerrainId } from '../src/data/index.js';
 import { loadGameData } from '../src/data/index.js';
 import type { Db } from '../src/db/pool.js';
 import { handlers } from '../src/scheduler/handlers.js';
@@ -78,7 +79,7 @@ export type WorldSet = {
   bought?: Record<string, number>;
   // Buildings standing in the player's (first) village, by plot (its levels
   // follow; its rates and stores only from its next change).
-  plots?: Record<string, { building: string; level: number }>;
+  plots?: Record<string, { building: string; level: number; terrain?: TerrainId }>;
   // Techs the group knows already (in this order), and the research the
   // player's Academies have brought in (as of now).
   known?: string[];
