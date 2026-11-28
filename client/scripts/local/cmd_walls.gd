@@ -67,44 +67,63 @@ static func walls_crossed(path: Array, walls: Dictionary, from_ms := 0) -> Array
 static func listed(world: Dictionary) -> Array:
 	var out: Array = world.get("walls", []).duplicate()
 	out.sort_custom(func(x: Dictionary, y: Dictionary) -> bool:
-		var p := [x.a.x, x.a.y, x.b.x, x.b.y]
-		var q := [y.a.x, y.a.y, y.b.x, y.b.y]
-		for i in 4:
+		var p := [x.a.x, x.a.y, x.b.x, x.b.y, int(x.get("side", 0))]
+		var q := [y.a.x, y.a.y, y.b.x, y.b.y, int(y.get("side", 0))]
+		for i in 5:
 			if p[i] != q[i]:
 				return p[i] < q[i]
 		return false)
 	return out
 
 
-static func wall_at(world: Dictionary, a: Vector2i, b: Vector2i) -> Dictionary:
+static func wall_at(world: Dictionary, a: Vector2i, b: Vector2i, side := 0) -> Dictionary:
 	var key := LocalLand.edge_key(a, b)
 	for w in world.get("walls", []):
-		if LocalLand.edge_key(w.a, w.b) == key:
+		if LocalLand.edge_key(w.a, w.b) == key and int(w.get("side", 0)) == side:
 			return w
 	return {}
+
+
+## db/edgeWalls.ts bankSide: 1 for the bank of the stored first end, 2 the other.
+static func bank_side(a: Vector2i, b: Vector2i, bank: Vector2i) -> int:
+	return 1 if LocalServer._ordered(a, b)[0] == bank else 2
+
+
+## Which side of a|b a wall from `bank` stands on: one on each bank of a
+## river edge, one along a dry edge (scheduler/edgeWalls.ts sideFor).
+static func side_for(world: Dictionary, a: Vector2i, b: Vector2i, bank: Variant) -> int:
+	var key := LocalLand.edge_key(a, b)
+	for e in world.rivers:
+		if LocalLand.edge_key(e.a, e.b) == key:
+			return bank_side(a, b, bank if bank != null else a)
+	return 0
 
 
 static func _remove(world: Dictionary, wall: Dictionary) -> void:
 	world.walls = world.walls.filter(func(w: Dictionary) -> bool: return w != wall)
 
 
-## The land's walls (LocalHordes.land_of): {edge key: {gate, tier}}.
+## The land's walls (LocalHordes.land_of): {edge key: [{gate, tier, enemy}]}
+## (one on each bank of a river edge).
 static func land_walls(world: Dictionary) -> Dictionary:
 	var out := {}
 	for w in listed(world):
 		if w.status != "building":
-			out[LocalLand.edge_key(w.a, w.b)] = {"gate": w.kind == "gate", "tier": int(w.tier), "enemy": w.get("front") != null}
+			var key := LocalLand.edge_key(w.a, w.b)
+			if not out.has(key):
+				out[key] = []
+			out[key].append({"gate": w.kind == "gate", "tier": int(w.tier), "enemy": w.get("front") != null})
 	return out
 
 
-## map.walls: [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt, front].
+## map.walls: [aq, ar, bq, br, kind, status, tier, ownerAccountId, completesAt, front, side].
 static func view(world: Dictionary) -> Array:
 	return listed(world).map(func(w: Dictionary) -> Array:
-		return [w.a.x, w.a.y, w.b.x, w.b.y, w.kind, w.status, int(w.tier), w.ownerAccountId, LocalTime.iso(w.completesAt) if w.completesAt != null else null, w.get("front")])
+		return [w.a.x, w.a.y, w.b.x, w.b.y, w.kind, w.status, int(w.tier), w.ownerAccountId, LocalTime.iso(w.completesAt) if w.completesAt != null else null, w.get("front"), int(w.get("side", 0))])
 
 
 ## scheduler/edgeWalls.ts buildEdgeWall.
-static func build(server: LocalServer, world: Dictionary, village: Dictionary, a: Vector2i, b: Vector2i, kind: String, at: int) -> Dictionary:
+static func build(server: LocalServer, world: Dictionary, village: Dictionary, a: Vector2i, b: Vector2i, kind: String, at: int, bank: Variant = null) -> Dictionary:
 	var data := server.data
 	var rules: Dictionary = data.field.edgeWalls
 	if village.ruin != null:
@@ -115,14 +134,12 @@ static func build(server: LocalServer, world: Dictionary, village: Dictionary, a
 	if mini(HexMath.distance(a, home), HexMath.distance(b, home)) > int(rules.range):
 		if not LocalForts.in_zone(data, world.forts, int(village.id), a) and not LocalForts.in_zone(data, world.forts, int(village.id), b):
 			return LocalVillage.rule("Walls go within %d hexes of the village or in its forts' zones" % int(rules.range))
-	var land := LocalHordes.land_of(world)
 	for end in [a, b]:
 		var type: Variant = world.hexes.get(LocalLand.key(end))
 		if type == null or data.terrain.terrain[type].moveCost == null:
 			return LocalVillage.rule("No wall can stand there")
-	if land.blocked.has(LocalLand.edge_key(a, b)):
-		return LocalVillage.rule("A river already guards that edge")
-	var existing := wall_at(world, a, b)
+	var side := side_for(world, a, b, bank)
+	var existing := wall_at(world, a, b, side)
 	if not existing.is_empty() and existing.kind != kind:
 		return LocalVillage.rule("A gatehouse stands there" if existing.kind == "gate" else "A wall stands there")
 	if not existing.is_empty() and existing.ownerAccountId != village.ownerAccountId:
@@ -140,7 +157,7 @@ static func build(server: LocalServer, world: Dictionary, village: Dictionary, a
 	var wall := existing
 	if wall.is_empty():
 		var ends := LocalServer._ordered(a, b)
-		wall = {"a": ends[0], "b": ends[1], "kind": kind, "tier": 0, "status": "building", "builtBy": village.id, "ownerAccountId": village.ownerAccountId, "completesAt": completes_at, "front": null}
+		wall = {"a": ends[0], "b": ends[1], "kind": kind, "tier": 0, "status": "building", "builtBy": village.id, "ownerAccountId": village.ownerAccountId, "completesAt": completes_at, "front": null, "side": side}
 		if not world.has("walls"):
 			world.walls = []
 		world.walls.append(wall)
@@ -148,13 +165,13 @@ static func build(server: LocalServer, world: Dictionary, village: Dictionary, a
 		wall.status = "upgrading"
 		wall.builtBy = village.id
 		wall.completesAt = completes_at
-	server.schedule(world, completes_at, "edge_wall_built", {"aq": a.x, "ar": a.y, "bq": b.x, "br": b.y})
+	server.schedule(world, completes_at, "edge_wall_built", {"aq": a.x, "ar": a.y, "bq": b.x, "br": b.y, "side": side})
 	return wall
 
 
 ## Tears down a wall of the village's owner (nothing comes back).
-static func tear_down(world: Dictionary, village: Dictionary, a: Vector2i, b: Vector2i) -> Dictionary:
-	var wall := wall_at(world, a, b)
+static func tear_down(world: Dictionary, village: Dictionary, a: Vector2i, b: Vector2i, bank: Variant = null) -> Dictionary:
+	var wall := wall_at(world, a, b, side_for(world, a, b, bank))
 	if wall.is_empty():
 		return LocalVillage.rule("No wall stands there")
 	if wall.ownerAccountId != village.ownerAccountId:
@@ -172,12 +189,16 @@ static func plan_breaches(server: LocalServer, world: Dictionary, wave: Dictiona
 	var walls := {}
 	for w in listed(world):
 		if w.status != "building":
-			walls[LocalLand.edge_key(w.a, w.b)] = w
+			var key := LocalLand.edge_key(w.a, w.b)
+			if not walls.has(key):
+				walls[key] = []
+			walls[key].append(w)
 	for crossed in walls_crossed(wave.path, walls, from_ms):
-		var w: Dictionary = walls[crossed.key]
-		var payload := {"waveId": wave.id, "aq": w.a.x, "ar": w.a.y, "bq": w.b.x, "br": w.b.y}
-		if not server.pending(world, "wall_breach", payload):
-			server.schedule(world, int(wave.spawnAt) + int(crossed.atMs), "wall_breach", payload)
+		# Every wall on the edge (one on each bank of a river) comes down.
+		for w in walls[crossed.key]:
+			var payload := {"waveId": wave.id, "aq": w.a.x, "ar": w.a.y, "bq": w.b.x, "br": w.b.y, "side": int(w.get("side", 0))}
+			if not server.pending(world, "wall_breach", payload):
+				server.schedule(world, int(wave.spawnAt) + int(crossed.atMs), "wall_breach", payload)
 
 
 ## A wall finished across a marching horde's road: it plans its road again
@@ -234,8 +255,8 @@ static func _merged_with_fort(world: Dictionary, wall: Dictionary) -> bool:
 
 
 ## A fort's battle battered its gatehouse down: a tier lower, or gone.
-static func breach_gatehouse(world: Dictionary, a: Vector2i, b: Vector2i) -> void:
-	var wall := wall_at(world, a, b)
+static func breach_gatehouse(world: Dictionary, a: Vector2i, b: Vector2i, side := 0) -> void:
+	var wall := wall_at(world, a, b, side)
 	if wall.is_empty():
 		return
 	if int(wall.tier) <= 1:
@@ -249,7 +270,7 @@ static func breach_gatehouse(world: Dictionary, a: Vector2i, b: Vector2i) -> voi
 
 static func on_edge_wall_built(server: LocalServer, world: Dictionary, event: Dictionary, changed: Array) -> void:
 	var p: Dictionary = event.payload
-	var wall := wall_at(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
+	var wall := wall_at(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)), int(p.get("side", 0)))
 	if wall.is_empty() or wall.status == "standing" or wall.completesAt == null or int(wall.completesAt) != int(event.dueAt):
 		return
 	wall.tier = int(wall.tier) + 1
@@ -266,7 +287,7 @@ static func on_wall_breach(server: LocalServer, world: Dictionary, event: Dictio
 	var wave := server.find_wave(world, int(p.waveId))
 	if wave.is_empty() or not wave.status in THROUGH:
 		return
-	var wall := wall_at(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)))
+	var wall := wall_at(world, Vector2i(int(p.aq), int(p.ar)), Vector2i(int(p.bq), int(p.br)), int(p.get("side", 0)))
 	if wall.is_empty() or wall.status == "building" or _merged_with_fort(world, wall):
 		return
 	_remove(world, wall)

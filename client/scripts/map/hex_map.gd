@@ -870,6 +870,11 @@ func _draw_wall(row: Array) -> void:
 		return
 	var w := EdgeWallText.entry(row)
 	var ends := _edge(HexMath.corners(HexMath.to_pixel(a, hex_size), hex_size), dir)
+	# On a river's bank: drawn off the water, on its own side.
+	if w.bank != null:
+		var mid: Vector2 = (ends[0] + ends[1]) / 2.0
+		var shift: Vector2 = (HexMath.to_pixel(w.bank, hex_size) - mid).normalized() * hex_size * 0.16
+		ends = [ends[0].lerp(ends[1], 0.08) + shift, ends[1].lerp(ends[0], 0.08) + shift]
 	var tier := clampi(maxi(1, int(w.tier)), 1, WALL_COLORS.size())
 	var fade := Color(1, 1, 1, 0.45) if w.status == "building" else Color.WHITE
 	var color: Color = WALL_COLORS[tier - 1] * fade

@@ -26,7 +26,8 @@ export interface Land extends ReadonlyMap<string, TerrainId> {
   // Walls standing along edges (data/field.json edgeWalls), by edge key:
   // nobody crosses a wall, the players' own pass a gatehouse (`gate`);
   // hordes tear them down (sim/edgeWalls.ts).
-  readonly walls?: ReadonlyMap<string, LandWall>;
+  // (A river edge may hold one on each bank.)
+  readonly walls?: ReadonlyMap<string, readonly LandWall[]>;
 }
 
 // A wall along an edge as the land sees it: a gatehouse (`gate`) lets the
@@ -45,8 +46,8 @@ export function edgeKey(a: Hex, b: Hex): string {
 }
 
 export function canCross(land: Land, from: Hex, to: Hex): boolean {
-  const wall = land.walls?.get(edgeKey(from, to));
-  return !land.blocked?.has(edgeKey(from, to)) && !land.burning?.has(hexKey(to)) && (!wall || (wall.gate && !wall.enemy));
+  const walls = land.walls?.get(edgeKey(from, to));
+  return !land.blocked?.has(edgeKey(from, to)) && !land.burning?.has(hexKey(to)) && (!walls || walls.every((w) => w.gate && !w.enemy));
 }
 
 // Whether a horde can cross from `from` to `to` (a wall it tears down:
@@ -56,7 +57,7 @@ export function hordeCanCross(land: Land, from: Hex, to: Hex): boolean {
 }
 
 // The land with these walls standing along its edges.
-export function withWalls(land: Land, walls: ReadonlyMap<string, LandWall>): Land {
+export function withWalls(land: Land, walls: ReadonlyMap<string, readonly LandWall[]>): Land {
   return walls.size === 0 ? land : Object.assign(land, { walls });
 }
 

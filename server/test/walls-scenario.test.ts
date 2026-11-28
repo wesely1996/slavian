@@ -4,7 +4,7 @@
 // another edge (no wall goes where the gatehouse stands). One is torn down.
 // Then every other edge of the village and of the Holy City is walled: the
 // first horde, unable to go round, tears one down on its way in.
-import { hex, neighbors } from '../src/sim/hex.js';
+import { hex, hexDistance, neighbors } from '../src/sim/hex.js';
 import { edgeKey } from '../src/sim/land.js';
 import { MINUTE, scenario, scheduler } from './scenario.js';
 
@@ -60,6 +60,22 @@ scenario('walls-scenario.json', START, async ({ started, now, play }) => {
   // Torn down: nothing comes back.
   await play({ method: 'POST', path: '/v1/villages/1/walls/tear', body: { a: { q: home.q, r: home.r }, b: { q: first!.q, r: first!.r } } });
   await play({ method: 'GET', path: world });
+
+  // A river between two of the village's neighbours: a wall on each bank
+  // (the second refused while it is being raised), one bank's torn down.
+  const [x, y] = (() => {
+    for (const p of edges) for (const q of edges) if (hexDistance(p, q) === 1 && !rivers.has(edgeKey(p, q))) return [p, q];
+    throw new Error('No two neighbouring neighbours');
+  })();
+  await play({ set: { river: { a: { q: x!.q, r: x!.r }, b: { q: y!.q, r: y!.r } } } });
+  const bankWall = (bank: { q: number; r: number }, kind: 'wall' | 'gate') =>
+    play({ method: 'POST', path: '/v1/villages/1/walls', body: { a: { q: x!.q, r: x!.r }, b: { q: y!.q, r: y!.r }, kind, bank: { q: bank.q, r: bank.r } } });
+  await bankWall(x!, 'wall');
+  await bankWall(y!, 'gate');
+  await bankWall(x!, 'wall');
+  await play({ advance: 3 * MINUTE });
+  await play({ method: 'GET', path: world });
+  await play({ method: 'POST', path: '/v1/villages/1/walls/tear', body: { a: { q: x!.q, r: x!.r }, b: { q: y!.q, r: y!.r }, bank: { q: y!.q, r: y!.r } } });
 
   // Walled all round (the gatehouse too stands in a horde's way), and the
   // Holy City too.

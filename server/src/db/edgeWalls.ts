@@ -20,7 +20,11 @@ export interface EdgeWall {
   completesAt: Date | null;
   // The enemy front that raised it in its lands (null: a player's).
   front: string | null;
+  // 0: along a dry edge; 1 or 2: on the bank of `a` or `b` of a river edge.
+  side: WallSide;
 }
+
+export type WallSide = 0 | 1 | 2;
 
 interface Row {
   aq: number;
@@ -34,6 +38,7 @@ interface Row {
   owner_account_id: string | number | null;
   completes_at: Date | null;
   front: string | null;
+  side: WallSide;
 }
 
 function ordered(a: Hex, b: Hex): [Hex, Hex] {
@@ -41,7 +46,7 @@ function ordered(a: Hex, b: Hex): [Hex, Hex] {
 }
 
 export async function listEdgeWalls(client: DbClient, worldId: number): Promise<EdgeWall[]> {
-  const { rows } = await client.query<Row>('SELECT * FROM edge_walls WHERE world_id = $1 ORDER BY aq, ar, bq, br', [worldId]);
+  const { rows } = await client.query<Row>('SELECT * FROM edge_walls WHERE world_id = $1 ORDER BY aq, ar, bq, br, side', [worldId]);
   return rows.map((r) => ({
     a: hex(r.aq, r.ar),
     b: hex(r.bq, r.br),
@@ -52,28 +57,41 @@ export async function listEdgeWalls(client: DbClient, worldId: number): Promise<
     ownerAccountId: r.owner_account_id === null ? null : Number(r.owner_account_id),
     completesAt: r.completes_at,
     front: r.front,
+    side: r.side,
   }));
 }
 
-export async function edgeWallAt(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<EdgeWall | null> {
+export async function edgeWallAt(client: DbClient, worldId: number, a: Hex, b: Hex, side: WallSide = 0): Promise<EdgeWall | null> {
   const key = edgeKey(a, b);
-  return (await listEdgeWalls(client, worldId)).find((w) => edgeKey(w.a, w.b) === key) ?? null;
+  return (await listEdgeWalls(client, worldId)).find((w) => edgeKey(w.a, w.b) === key && w.side === side) ?? null;
+}
+
+// Every wall along a|b (a river edge may hold one on each bank).
+export async function edgeWallsAt(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<EdgeWall[]> {
+  const key = edgeKey(a, b);
+  return (await listEdgeWalls(client, worldId)).filter((w) => edgeKey(w.a, w.b) === key);
 }
 
 export async function insertEdgeWall(client: DbClient, worldId: number, w: Omit<EdgeWall, 'tier' | 'status' | 'front'>): Promise<void> {
   const [p, q] = ordered(w.a, w.b);
   await client.query(
-    "INSERT INTO edge_walls (world_id, aq, ar, bq, br, kind, tier, status, built_by, owner_account_id, completes_at) VALUES ($1, $2, $3, $4, $5, $6, 0, 'building', $7, $8, $9)",
-    [worldId, p.q, p.r, q.q, q.r, w.kind, w.builtBy, w.ownerAccountId, w.completesAt],
+    "INSERT INTO edge_walls (world_id, aq, ar, bq, br, kind, tier, status, built_by, owner_account_id, completes_at, side) VALUES ($1, $2, $3, $4, $5, $6, 0, 'building', $7, $8, $9, $10)",
+    [worldId, p.q, p.r, q.q, q.r, w.kind, w.builtBy, w.ownerAccountId, w.completesAt, w.side],
   );
 }
 
 export async function saveEdgeWall(client: DbClient, worldId: number, w: EdgeWall): Promise<void> {
   const [p, q] = ordered(w.a, w.b);
   await client.query(
-    'UPDATE edge_walls SET kind = $6, tier = $7, status = $8, built_by = $9, completes_at = $10 WHERE world_id = $1 AND aq = $2 AND ar = $3 AND bq = $4 AND br = $5',
-    [worldId, p.q, p.r, q.q, q.r, w.kind, w.tier, w.status, w.builtBy, w.completesAt],
+    'UPDATE edge_walls SET kind = $6, tier = $7, status = $8, built_by = $9, completes_at = $10 WHERE world_id = $1 AND aq = $2 AND ar = $3 AND bq = $4 AND br = $5 AND side = $11',
+    [worldId, p.q, p.r, q.q, q.r, w.kind, w.tier, w.status, w.builtBy, w.completesAt, w.side],
   );
+}
+
+// The side of the edge a|b whose bank is `bank`'s (stored order: a first).
+export function bankSide(a: Hex, b: Hex, bank: Hex): WallSide {
+  const [p] = ordered(a, b);
+  return p.q === bank.q && p.r === bank.r ? 1 : 2;
 }
 
 // A wall the enemy raised in its lands (no owner), standing at once.
@@ -85,7 +103,7 @@ export async function insertEnemyWall(client: DbClient, worldId: number, a: Hex,
   );
 }
 
-export async function deleteEdgeWall(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<void> {
+export async function deleteEdgeWall(client: DbClient, worldId: number, a: Hex, b: Hex, side: WallSide = 0): Promise<void> {
   const [p, q] = ordered(a, b);
-  await client.query('DELETE FROM edge_walls WHERE world_id = $1 AND aq = $2 AND ar = $3 AND bq = $4 AND br = $5', [worldId, p.q, p.r, q.q, q.r]);
+  await client.query('DELETE FROM edge_walls WHERE world_id = $1 AND aq = $2 AND ar = $3 AND bq = $4 AND br = $5 AND side = $6', [worldId, p.q, p.r, q.q, q.r, side]);
 }

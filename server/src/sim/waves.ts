@@ -256,8 +256,9 @@ export function routeFrom(
   // that takes, in road cost at the horde's pace.
   const pace = marchSpeed(data, input.front, input.composition);
   const wallCost = (from: Hex, to: Hex): number => {
-    const wall = terrain.walls?.get(edgeKey(from, to));
-    return wall ? breakHours(data, wall) * pace : 0;
+    // (A wall on each bank: both torn down.)
+    const walls = terrain.walls?.get(edgeKey(from, to)) ?? [];
+    return walls.reduce((sum, w) => sum + breakHours(data, w), 0) * pace;
   };
   const stepCost = (from: Hex, to: Hex): number | null => {
     const cost = hordeCanCross(terrain, from, to) ? moveCost(to) : null;

@@ -1482,7 +1482,7 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		var gate := LocalEdgeWalls.fort_gatehouse(world, cell, fort.ownerAccountId)
 		if not gate.is_empty():
 			var integrity := LocalWalls.wall_integrity(data, LocalEdgeWalls.gate_ring_plots(data, int(gate.tier)))
-			rings.push_front({"ring": LocalEdgeWalls.GATE_RING, "integrity": integrity, "max": integrity, "tier": int(gate.tier), "edge": {"aq": gate.a.x, "ar": gate.a.y, "bq": gate.b.x, "br": gate.b.y}})
+			rings.push_front({"ring": LocalEdgeWalls.GATE_RING, "integrity": integrity, "max": integrity, "tier": int(gate.tier), "edge": {"aq": gate.a.x, "ar": gate.a.y, "bq": gate.b.x, "br": gate.b.y, "side": int(gate.get("side", 0))}})
 		setup.fortId = fort.id
 		if not rings.is_empty():
 			setup.rings = rings
