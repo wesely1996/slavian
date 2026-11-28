@@ -1341,6 +1341,18 @@ func _on_enemy_works(world: Dictionary, event: Dictionary, changed: Array) -> vo
 	LocalEnemySettlements.on_enemy_works(self, world, event, changed)
 
 
+func _on_enemy_watch(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEnemyForces.on_enemy_watch(self, world, event, changed)
+
+
+func _on_enemy_patrol(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEnemyForces.on_enemy_patrol(self, world, event, changed)
+
+
+func _on_band_arrive(world: Dictionary, event: Dictionary, changed: Array) -> void:
+	LocalEnemyForces.on_band_arrive(self, world, event, changed)
+
+
 func _on_edge_wall_built(world: Dictionary, event: Dictionary, changed: Array) -> void:
 	LocalEdgeWalls.on_edge_wall_built(self, world, event, changed)
 
@@ -1518,7 +1530,7 @@ func world_view(world: Dictionary, now: int) -> Dictionary:
 		"bridge": world.bridge, "fear": _fear_view(world), "delegations": [], "delegationLog": [], "run": LocalBridgeCommands.run_summary(world),
 		"caravans": LocalLogistics.caravans_view(world), "vault": LocalLogistics.vault_view(data, world.vault),
 		"bounties": [],
-		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads, "walls": LocalEdgeWalls.view(world), "terraforms": LocalTerraform.view(world), "enemy": LocalEnemyLands.view(data, world), "settlements": LocalEnemySettlements.view(data, world, now)},
+		"map": {"radius": world.radius, "activeFronts": world.activeFronts, "hexes": hexes, "rivers": rivers, "roads": roads, "walls": LocalEdgeWalls.view(world), "terraforms": LocalTerraform.view(world), "enemy": LocalEnemyLands.view(data, world), "settlements": LocalEnemySettlements.view(data, world, now), "bands": LocalEnemyForces.view(data, world, now)},
 		"serverTime": LocalTime.iso(now),
 	}
 

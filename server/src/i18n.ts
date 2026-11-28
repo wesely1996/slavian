@@ -222,6 +222,11 @@ const SERBIAN: Record<string, string> = {
 	'A horde burned the supply point at ({q}, {r})': 'Horda je spalila žitnicu na ({q}, {r})',
 	'Its {grain} grain burned with it.': 'Njenih {grain} žita izgorelo je s njom.',
 	'A horde broke down your gatehouse': 'Horda je razbila vašu kapiju',
+	'Enemy scouts spotted your army at ({q}, {r})': 'Neprijateljski izviđači uočili su vašu vojsku na ({q}, {r})',
+	'{bands} war band(s) of the {faction} march on it.': '{bands} ratnih družina ({faction}) kreće na nju.',
+	'Your army beat off a war band at ({q}, {r})': 'Vaša vojska je odbila ratnu družinu na ({q}, {r})',
+	'A war band mauled your army at ({q}, {r})': 'Ratna družina je izmrcvarila vašu vojsku na ({q}, {r})',
+	'{kills} of them fell, {lost} of ours.': 'Palo je {kills} njihovih i {lost} naših.',
 	'A horde tore down your wall': 'Horda je srušila vaš zid',
 	'Between ({aq}, {ar}) and ({bq}, {br}).': 'Između ({aq}, {ar}) i ({bq}, {br}).',
 	// Bridge, settlers, sites, delegation

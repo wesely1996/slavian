@@ -266,6 +266,7 @@ static func ensure(server: LocalServer, world: Dictionary, now: int) -> void:
 		server.schedule(world, LocalTime.ms(int(world.startedAt) + rounds * every), "enemy_found", {})
 	if not _pending(world, "enemy_works"):
 		server.schedule(world, LocalTime.ms(now + _works_every(data, world)), "enemy_works", {})
+	LocalEnemyForces.ensure(server, world, now)
 
 
 ## Every active front founds its next settlement, if it has one left.

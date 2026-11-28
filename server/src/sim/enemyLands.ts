@@ -83,8 +83,15 @@ export function sightOf(data: GameData, world: { enemySight?: Partial<Record<str
 }
 
 // The front and band of an enemy-lands hex (null: not in them).
+const byKey = new WeakMap<readonly EnemyHex[], Map<string, EnemyHex>>();
+
 export function enemyHexAt(data: GameData, cell: Hex, world: { seed: number; radius: number | null; activeFronts: readonly string[] }): EnemyHex | null {
   if (world.radius === null) return null;
-  const key = hexKey(cell);
-  return enemyLands(data, world.seed, world.radius, world.activeFronts as Front[]).find((e) => hexKey(e.cell) === key) ?? null;
+  const lands = enemyLands(data, world.seed, world.radius, world.activeFronts as Front[]);
+  let known = byKey.get(lands);
+  if (!known) {
+    known = new Map(lands.map((e) => [hexKey(e.cell), e]));
+    byKey.set(lands, known);
+  }
+  return known.get(hexKey(cell)) ?? null;
 }

@@ -22,6 +22,7 @@ const MACHINES: [string, string, RegExp][] = [
   ['Scout mission', 'server/src/db/scouting.ts', /export type MissionStatus = ([^;]+);/],
   ['Ruin search', 'server/src/db/ruinSearches.ts', /status: ('[^;]+);/],
   ['Road', 'server/src/db/roads.ts', /export type RoadStatus = ([^;]+);/],
+  ['Enemy war band', 'server/src/db/enemyBands.ts', /export type EnemyBandStatus = ([^;]+);/],
   ['Edge wall', 'server/src/db/edgeWalls.ts', /export type EdgeWallStatus = ([^;]+);/],
   ['River crossing', 'server/src/db/rivers.ts', /export type Crossing = ([^;]+);/],
   ['Fort and supply point', 'server/src/db/forts.ts', /status: ('[^;]+);/],

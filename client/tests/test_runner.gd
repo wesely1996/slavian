@@ -978,6 +978,7 @@ func _test_local_waves() -> void:
 	_replay_scenario("walls-scenario.json", "local walls: tiers, gatehouse, tear-down and a horde breaking through")
 	_replay_scenario("gatehouse-fort-scenario.json", "local fort with a gatehouse as its outermost ring")
 	_replay_scenario("enemy-settlements-scenario.json", "local enemy settlements: founding, walls, roads, moats, rivers, growth")
+	_replay_scenario("enemy-forces-scenario.json", "local enemy forces: scouts spot an army, sallies and patrols fight it")
 	_replay_scenario("expedition-scenario.json", "local expeditions: raids, strikes and camps from the field")
 
 

@@ -3173,7 +3173,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T08:30:00.000Z"
    }
@@ -6225,7 +6226,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T09:00:00.000Z"
    }
@@ -9355,7 +9357,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T09:30:00.000Z"
    }
@@ -12544,7 +12547,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T10:00:00.000Z"
    }
@@ -16013,7 +16017,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T10:30:00.000Z"
    }
@@ -19669,7 +19674,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T11:00:00.000Z"
    }
@@ -23933,7 +23939,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T11:30:00.000Z"
    }
@@ -28479,7 +28486,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T12:00:00.000Z"
    }
@@ -33287,7 +33295,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T12:30:00.000Z"
    }
@@ -38326,7 +38335,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T13:00:00.000Z"
    }
@@ -43636,7 +43646,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T13:30:00.000Z"
    }
@@ -49118,7 +49129,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T14:00:00.000Z"
    }
@@ -54743,7 +54755,8 @@
        "south": 1
       }
      },
-     "settlements": []
+     "settlements": [],
+     "bands": []
     },
     "serverTime": "2026-06-01T14:30:00.000Z"
    }
@@ -60521,7 +60534,8 @@
        "level": 1,
        "foundedAt": "2026-06-01T14:43:12.000Z"
       }
-     ]
+     ],
+     "bands": []
     },
     "serverTime": "2026-06-01T15:00:00.000Z"
    }
@@ -66461,7 +66475,8 @@
        "level": 2,
        "foundedAt": "2026-06-01T14:43:12.000Z"
       }
-     ]
+     ],
+     "bands": []
     },
     "serverTime": "2026-06-01T15:30:00.000Z"
    }
@@ -72424,6 +72439,59 @@
        "status": "standing",
        "level": 1,
        "foundedAt": "2026-06-01T15:40:48.000Z"
+      }
+     ],
+     "bands": [
+      {
+       "id": 6,
+       "front": "south",
+       "kind": "patrol",
+       "status": "patrolling",
+       "units": {
+        "zealot": 3,
+        "crossbowman": 2,
+        "sergeant_rider": 1
+       },
+       "targetArmyId": null,
+       "departsAt": "2026-06-01T16:06:00.000Z",
+       "arrivesAt": "2026-06-01T16:10:48.000Z",
+       "path": [
+        [
+         -6,
+         12,
+         0
+        ],
+        [
+         -6,
+         13,
+         48000
+        ],
+        [
+         -7,
+         14,
+         96000
+        ],
+        [
+         -7,
+         15,
+         144000
+        ],
+        [
+         -6,
+         14,
+         192000
+        ],
+        [
+         -5,
+         13,
+         240000
+        ],
+        [
+         -5,
+         14,
+         288000
+        ]
+       ]
       }
      ]
     },

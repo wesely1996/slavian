@@ -19,10 +19,17 @@ interface WorldShape {
   readonly activeFronts: readonly string[];
 }
 
-// The enemy-lands hexes of a world by key.
+// The enemy-lands hexes of a world by key (made once per world's lands).
+const byKey = new WeakMap<readonly EnemyHex[], Map<string, EnemyHex>>();
 function landsByKey(data: GameData, world: WorldShape): Map<string, EnemyHex> {
   if (world.radius === null) return new Map();
-  return new Map(enemyLands(data, world.seed, world.radius, world.activeFronts as Front[]).map((e) => [hexKey(e.cell), e]));
+  const lands = enemyLands(data, world.seed, world.radius, world.activeFronts as Front[]);
+  let known = byKey.get(lands);
+  if (!known) {
+    known = new Map(lands.map((e) => [hexKey(e.cell), e]));
+    byKey.set(lands, known);
+  }
+  return known;
 }
 
 // Open land of `front` a settlement, a wall or a river may stand on.

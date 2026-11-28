@@ -14,6 +14,8 @@ export interface Setup {
   readonly river?: boolean;
   // The defense the holders' wagon fort gives (absent: none).
   readonly wagonFort?: number;
+  // The horde's scouts found the ambush (sim/enemyForces.ts): no surprise.
+  readonly ambushFound?: boolean;
 }
 
 export function isChokePoint(data: GameData, terrain: ReadonlyMap<string, TerrainId>, cell: Hex): boolean {

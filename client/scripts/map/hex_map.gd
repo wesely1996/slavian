@@ -282,6 +282,8 @@ func _draw() -> void:
 		_draw_army(army, now)
 	for hero in Game.heroes:
 		_draw_hero(hero, now)
+	for band in Game.bands:
+		_draw_band(band, now)
 	for wave in Game.waves:
 		if wave.status == "scheduled" and wave.get("forecast") is Dictionary:
 			_draw_forecast(wave)
@@ -963,6 +965,43 @@ func _draw_fort_body(fort: Dictionary, c: Vector2) -> void:
 	draw_colored_polygon(tower, FORT_COLOR if fort.status == "standing" else RUINS_COLOR)
 	tower.append(tower[0])
 	draw_polyline(tower, VILLAGE_OUTLINE_COLOR, 2.0)
+
+
+## An enemy war band on the march: a pennant in its front's colour with its
+## strength, its road ahead dotted (red when it hunts one of your armies).
+func _draw_band(band: Dictionary, now: float) -> void:
+	var path: Array = band.get("path", [])
+	if path.is_empty():
+		return
+	var steps: Array = path.map(func(s: Array) -> Dictionary: return {"q": int(s[0]), "r": int(s[1]), "atMs": int(s[2])})
+	var p := CaravanMath.progress({"status": "outbound", "departsAt": band.departsAt, "path": steps}, now)
+	var pos: Vector2
+	if p.is_empty():
+		# Resting before it sets out, or at the end of its road.
+		var at: Dictionary = steps[0] if now < TimeUtil.parse_iso(String(band.departsAt)) else steps[-1]
+		pos = HexMath.to_pixel(Vector2i(int(at.q), int(at.r)), hex_size)
+	else:
+		pos = HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	var color := WaveMath.front_color(String(band.front))
+	if band.status == "hunting":
+		var ahead := PackedVector2Array([pos])
+		for s in steps:
+			if int(s.atMs) > (now - TimeUtil.parse_iso(String(band.departsAt))) * 1000.0:
+				ahead.append(HexMath.to_pixel(Vector2i(int(s.q), int(s.r)), hex_size))
+		if ahead.size() > 1:
+			_draw_dots(ahead, HORDE_PATH_COLOR, hex_size * 0.07)
+	var r := hex_size * 0.2
+	draw_line(pos + Vector2(0, r * 1.2), pos + Vector2(0, -r * 1.6), VILLAGE_OUTLINE_COLOR, 3.0)
+	var flag := PackedVector2Array([pos + Vector2(0, -r * 1.6), pos + Vector2(r * 1.4, -r * 1.15), pos + Vector2(0, -r * 0.7)])
+	draw_colored_polygon(flag, color)
+	flag.append(flag[0])
+	draw_polyline(flag, VILLAGE_OUTLINE_COLOR, 2.0)
+	var count := 0
+	for unit in band.get("units", {}):
+		count += int(band.units[unit])
+	var font := ThemeDB.fallback_font
+	var size := int(hex_size * 0.24)
+	draw_string(font, pos + Vector2(-hex_size * 0.3, r * 1.9), str(count), HORIZONTAL_ALIGNMENT_CENTER, hex_size * 0.6, size, Color.WHITE)
 
 
 ## A hero: a small banner by its village, or on the road between two.

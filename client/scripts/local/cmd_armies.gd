@@ -1461,6 +1461,15 @@ static func start_field_battle(server: LocalServer, world: Dictionary, wave: Dic
 		rivers[LocalLand.edge_key(e.a, e.b)] = true
 	var setup := setup_at(data, world.hexes, cell, ready_since, at, world.speed, not fort.is_empty(),
 		LocalBattles.came_over_river(wave.path if wave.path != null else [], cell, rivers))
+	# The horde's scouts may find the ambush (LocalEnemyForces).
+	if setup.get("ambush", false):
+		var guards := 0
+		for a in holders:
+			guards += LocalEnemyForces.scouts_in(data, a.units)
+		var chance := LocalEnemyForces.spot_chance(data, LocalEnemyForces.horde_scouts(data, wave.composition), guards)
+		if chance > 0.0 and LocalRng.new(LocalEnemyForces.seed_of([int(world.seed), int(wave.id), 0xa3b])).next() < chance:
+			setup.ambush = false
+			setup.ambushFound = true
 	var ring := wagon_fort_bonus(data, holders, at)
 	if ring > 0:
 		setup.wagonFort = ring

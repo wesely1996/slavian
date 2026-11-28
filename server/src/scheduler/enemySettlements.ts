@@ -14,6 +14,7 @@ import type { World } from '../db/worlds.js';
 import { enemyRivers, nextWork, roadTarget, settlementLevel, settlementSite, type EdgeState, type EnemyWork } from '../sim/enemySettlements.js';
 import { edgeKey } from '../sim/land.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
+import { ensureEnemyForces } from './enemyForces.js';
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -45,6 +46,7 @@ export async function ensureEnemyLands(client: DbClient, data: GameData, world: 
   if (!(await pending(client, world.id, 'enemy_works'))) {
     await scheduleEvent(client, world.id, new Date(now.getTime() + worksEveryMs(data, world)), 'enemy_works', {});
   }
+  await ensureEnemyForces(client, data, world, now);
 }
 
 // Every active front founds its next settlement, if it has one left.

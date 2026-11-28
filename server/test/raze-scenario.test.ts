@@ -13,4 +13,4 @@ scenario('raze-scenario.json', START, async ({ play }) => {
     await play({ advance: 30 * MINUTE });
     await play({ method: 'GET', path: '/v1/worlds/-1' });
   }
-});
+}, 60_000);

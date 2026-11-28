@@ -137,3 +137,51 @@ its bridges carry anyone across. Its walls stop players' armies like any
 wall ([page 7](07-walls-and-sieges.md#walls-along-the-edges)), and **its
 gatehouses don't open for them**. On the map the enemy's walls are outlined
 in their front's colour.
+
+## Enemy forces
+
+The enemy guards its lands. Its settlements keep garrisons and scouts, and
+send out war bands.
+
+- **Garrisons.** A settlement's garrison is its front's troops:
+  10 × (1 + 0.3 × (level − 1)) men, times its kind's factor (seat ×2.5,
+  town ×1.6, border fort ×1.4, war camp ×1, monster lair ×1.3).
+- **Scouts.** A settlement keeps 1 scout, +1 every 3 levels. A sally has 1,
+  a patrol 3.
+
+### Being spotted
+
+Every game hour the scouts of each settlement and war band within **3
+hexes** of a player's army in their front's lands look for it (an army on a
+raid beyond the edge isn't there to see).
+
+- **Each scout** spots the army with a **15%** chance.
+- **Your scouts cancel theirs, one for one.** An army with as many scouts as
+  the most-scouted watcher near it is never spotted.
+- **An army already hunted** isn't looked for again until its hunters are
+  done.
+
+### Sallies and patrols
+
+A spotted army draws, and its owner hears of it:
+
+- **A sally:** 60% of the garrison of the nearest settlement within **8
+  hexes** that hasn't sallied in the last **12 game hours**.
+- **Every patrol** of the front within 8 hexes.
+
+They march at **3 hexes an hour** (the players' walls stop them, their own
+don't) to where the army was spotted.
+
+- **Caught.** If the army is within 1 hex when they arrive, they fight it
+  where it stands: a battle like a raid's ([page 13](13-events-and-raids.md#raids-beyond-the-edge)),
+  the army against the band. The army stays on its hex (or falls); what's
+  left of the band goes home.
+- **Chase.** An army that moved off is followed up to **3 hexes** further,
+  while it is still in the enemy lands. Otherwise the band goes home.
+- **Patrols.** Each front keeps up to **2 patrols** marching between its
+  settlements, 35% of a garrison each, resting **6 game hours** at each. One more sets out every **8 game
+  hours** once a front has two settlements.
+- **On the map,** war bands show as pennants in their front's colour with
+  their strength, a hunting band's road dotted red. Those deeper than the
+  bands you've seen aren't shown, unless they hunt your army.
+

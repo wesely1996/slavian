@@ -257,6 +257,21 @@ stateDiagram-v2
 `kind` (`wall` or `gate`) is fixed when it is first built. A wall still
 `building` stands in nobody's way.
 
+## Enemy war band
+
+```mermaid
+stateDiagram-v2
+  [*] --> hunting: enemy_watch spots an army (a sally sets out)
+  [*] --> patrolling: enemy_patrol (a patrol sets out)
+  patrolling --> hunting: enemy_watch spots an army near it
+  hunting --> hunting: band_arrive (the army moved: it gives chase)
+  hunting --> returning: band_arrive (battle won or lost, or the army got away)
+  hunting --> [*]: band_arrive (battle: none of it left)
+  returning --> patrolling: band_arrive home (a patrol: its next leg)
+  patrolling --> patrolling: band_arrive (its next leg)
+  returning --> [*]: band_arrive home (a sally)
+```
+
 ## River crossing
 
 ```mermaid

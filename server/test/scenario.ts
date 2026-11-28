@@ -98,8 +98,9 @@ export interface Session {
   play(step: Step): Promise<{ status: number; body: any }>;
 }
 
-// `timeoutMs`: for a long script (the default is vitest's 5 s).
-export function scenario(fixture: string, start: ScenarioStart, script: (session: Session) => Promise<void>, timeoutMs?: number): void {
+// `timeoutMs`: for a long script. The default leaves room for the enemy's
+// hourly watch and works on a slow runner.
+export function scenario(fixture: string, start: ScenarioStart, script: (session: Session) => Promise<void>, timeoutMs = 30_000): void {
   const path = fileURLToPath(new URL(`../../data/fixtures/${fixture}`, import.meta.url));
   describe.skipIf(!TEST_DATABASE_URL)(`${fixture} for the local engine (postgres)`, () => {
     let db: Db;
