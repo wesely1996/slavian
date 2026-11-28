@@ -18,7 +18,7 @@ import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
 import { addScroll, listScrolls } from '../db/sites.js';
 import { loadVillage } from '../db/villages.js';
-import { addEmbers, getWorld, listMembers, type World } from '../db/worlds.js';
+import { addEmbers, getWorld, listMembers, widenSight, type World } from '../db/worlds.js';
 import { lastingHatred } from './blessings.js';
 import { RuleError } from '../errors.js';
 import { playerStats, total } from '../sim/battle.js';
@@ -27,11 +27,14 @@ import { championsFall, championsOf, commandBonuses } from './champions.js';
 import { generalBonuses } from '../sim/generals.js';
 import { hex } from '../sim/hex.js';
 import type { Front } from '../sim/mapgen.js';
-import { carryHome, northFinds, raidBattle, raidCapacity, raidEdge, raidLoot, raidStage, strikeShare, strikeStage, type RaidFind } from '../sim/raids.js';
+import { carryHome, northFinds, raidBattle, raidCapacity, raidEdge, raidLoot, raidRoad, raidStage, raidStageTimes, strikeShare, strikeStage, type RaidFind } from '../sim/raids.js';
+import { armySpeed } from '../sim/armies.js';
+import { scoutsIn } from '../sim/enemyForces.js';
+import { sightOf } from '../sim/enemyLands.js';
 import { emptyResources, mapResources } from '../sim/resources.js';
 import { createRng } from '../sim/rng.js';
 import { combatants, withIntel } from '../sim/scouting.js';
-import { armyLosses, dispatchArmy, moveArmy, sendHome, terrainOf } from './armies.js';
+import { armyLand, armyLosses, dispatchArmy, moveArmy, sendHome, terrainOf } from './armies.js';
 import { scheduleEvent, type HandlerRegistry } from './events.js';
 import { generalAfterBattle } from './generals.js';
 import { heroAfterBattle } from './heroes.js';
@@ -165,10 +168,27 @@ export async function reachEdge(client: DbClient, data: GameData, world: World, 
     await sendHome(client, world, army, at, data);
     return;
   }
-  await saveArmy(client, { ...army, status: 'stationed' });
-  const payload: RaidStagePayload = { armyId: army.id, stage: army.raid.stage + 1 };
+  let raid = army.raid;
+  // Its road into the front's lands: straight deeper, slower in fog.
+  if (raid.waveId === undefined) {
+    const home = await loadVillage(client, army.homeVillageId);
+    const road = raidRoad(data, {
+      land: await armyLand(client, data, world),
+      world,
+      from: hex(army.targetQ, army.targetR),
+      front: raid.front,
+      toBand: Math.min(raid.depth + 1, data.enemyLands.bands.length),
+      sight: sightOf(data, world, raid.front),
+      scouts: scoutsIn(data, army.units),
+      hexesPerHour: armySpeed(data, army.units, villageBonuses(data, home.state)),
+      worldSpeed: world.speed,
+    });
+    if (road) raid = { ...raid, road, edgeAt: at.toISOString(), stageAt: raidStageTimes(data, world, road, raid.depth) };
+  }
+  await saveArmy(client, { ...army, status: 'stationed', raid });
+  const payload: RaidStagePayload = { armyId: army.id, stage: raid.stage + 1 };
   // A strike falls on the encampment at once.
-  const delay = army.raid.waveId !== undefined ? 0 : stageMs(data, world.speed);
+  const delay = raid.waveId !== undefined ? 0 : raid.stageAt ? raid.stageAt[0]! : stageMs(data, world.speed);
   await scheduleEvent(client, world.id, new Date(at.getTime() + delay), 'raid_stage', payload);
 }
 
@@ -318,6 +338,11 @@ export const raidHandlers: HandlerRegistry = {
     if (army.raid.waveId !== undefined) return strikeBattle(client, data, world, army, at);
     const raid = army.raid;
     const front = raid.front;
+    // Marching its road it sees a band past where it fights.
+    if (raid.stageAt) {
+      const reached = Math.min(payload.stage, data.enemyLands.bands.length);
+      if (await widenSight(client, world.id, front, Math.min(data.enemyLands.bands.length, reached + 1))) await notifyWorld(client, { worldId: world.id, type: 'world' });
+    }
     const stage = raidStage(data, {
       front,
       depth: raid.depth,
@@ -440,7 +465,9 @@ export const raidHandlers: HandlerRegistry = {
     } else {
       await saveArmy(client, after);
       const next: RaidStagePayload = { armyId: army.id, stage: payload.stage + 1 };
-      await scheduleEvent(client, world.id, new Date(at.getTime() + stageMs(data, world.speed)), 'raid_stage', next);
+      // Along its road: when it gets to the next band (or the stronghold).
+      const due = raid.stageAt && raid.edgeAt ? Math.max(at.getTime(), new Date(raid.edgeAt).getTime() + raid.stageAt[payload.stage]!) : at.getTime() + stageMs(data, world.speed);
+      await scheduleEvent(client, world.id, new Date(due), 'raid_stage', next);
     }
     const found = finds.length ? ` and ${finds.join(', ')}` : '';
     await tell(client, world, army.ownerAccountId, {

@@ -99,6 +99,12 @@ export interface ArmyRaid {
   // A strike on a gathering horde (that wave's id): one battle at its
   // encampment, then home.
   waveId?: number;
+  // Its road into the front's lands (sim/raids.ts raidRoad), from when it
+  // stood at the edge (edgeAt), and when each stage comes along it (ms
+  // after edgeAt; stage 1 first).
+  road?: PathStep[];
+  edgeAt?: string;
+  stageAt?: number[];
 }
 
 interface ArmyRow {

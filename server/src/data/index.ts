@@ -962,6 +962,9 @@ const resourceAmounts = z.object({ wood: z.number().nonnegative(), stone: z.numb
 const raidsFileSchema = z.object({
   version: z.literal(1),
   stageHours: z.number().positive(),
+  // The road into the front's lands (sim/raids.ts raidRoad): steps in fog
+  // slower, scouts cutting the extra.
+  road: z.object({ fogFactor: z.number().min(1), scoutCut: z.number().nonnegative() }),
   maxDepth: z.number().int().min(1),
   fieldStance: z.enum(STANCES),
   // Deeper enemies fight harder: attack and defense x (1 + toughnessPerStage x (stage - 1)).

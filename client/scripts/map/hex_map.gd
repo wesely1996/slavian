@@ -698,6 +698,16 @@ func army_position(army: Dictionary, now: float) -> Vector2:
 	var p := ArmyText.progress(army, now)
 	if not p.is_empty():
 		return HexMath.to_pixel(p.from, hex_size).lerp(HexMath.to_pixel(p.to, hex_size), p.t)
+	# A raid on its road into the enemy's lands.
+	var raid: Variant = army.get("raid")
+	if army.status == "stationed" and raid is Dictionary and raid.get("road") is Array and raid.get("edgeAt") != null:
+		var road: Array = raid.road
+		var steps: Array = road.map(func(r: Dictionary) -> Array: return [int(r.q), int(r.r), int(r.atMs)])
+		var on := WaveMath.progress({"status": "marching", "spawnAt": raid.edgeAt, "path": steps}, now)
+		if not on.is_empty():
+			return HexMath.to_pixel(on.from, hex_size).lerp(HexMath.to_pixel(on.to, hex_size), on.t)
+		if now >= TimeUtil.parse_iso(String(raid.edgeAt)) and not road.is_empty():
+			return HexMath.to_pixel(Vector2i(int(road[-1].q), int(road[-1].r)), hex_size)
 	if army.status in ["stationed", "engaged"] and ArmyText.held_hex(army) != Vector2i.MAX:
 		return HexMath.to_pixel(ArmyText.held_hex(army), hex_size) + Vector2(hex_size * 0.36, hex_size * 0.3)
 	if army.status in ["stationed", "engaged"]:

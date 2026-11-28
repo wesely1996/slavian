@@ -270,9 +270,79 @@ static func reach_edge(server: LocalServer, world: Dictionary, army: Dictionary,
 	if army.get("raid") == null:
 		LocalArmies.send_home(server, world, army, at)
 		return
+	var data := server.data
+	# Its road into the front's lands: straight deeper, slower in fog.
+	if army.raid.get("waveId") == null:
+		var home := server.find_village(world, int(army.homeVillageId))
+		var road: Variant = raid_road(data, LocalEnemyLands.army_land(data, world), world, Vector2i(int(army.targetQ), int(army.targetR)), String(army.raid.front),
+			mini(int(army.raid.depth) + 1, data.enemyLands.bands.size()), LocalEnemyLands.sight_of(data, world, String(army.raid.front)),
+			LocalEnemyForces.scouts_in(data, army.units), LocalArmies.army_speed(data, army.units, LocalVillage.village_bonuses(data, home.state)), float(world.speed))
+		if road != null:
+			var raid: Dictionary = army.raid.duplicate()
+			raid.road = road
+			raid.edgeAt = LocalTime.iso(at)
+			raid.stageAt = stage_times(data, world, road, int(raid.depth))
+			army.raid = raid
 	army.status = "stationed"
-	var delay := 0 if army.raid.get("waveId") != null else _stage_ms(server.data, world.speed)
+	var delay: int = 0 if army.raid.get("waveId") != null else (int(army.raid.stageAt[0]) if army.raid.has("stageAt") else _stage_ms(data, world.speed))
 	server.schedule(world, at + delay, "raid_stage", {"armyId": army.id, "stage": int(army.raid.stage) + 1})
+
+
+## sim/raids.ts fogFactor.
+static func fog_factor(data: Dictionary, scouts: int) -> float:
+	var road: Dictionary = data.raids.road
+	return 1.0 + (float(road.fogFactor) - 1.0) * maxf(0.0, 1.0 - float(road.scoutCut) * scouts)
+
+
+## sim/raids.ts raidRoad: straight deeper into the front's lands, slower in fog (null: none).
+static func raid_road(data: Dictionary, land: Dictionary, world: Dictionary, from: Vector2i, front: String, to_band: int, sight: int, scouts: int, hexes_per_hour: float, world_speed: float) -> Variant:
+	if world.get("radius") == null:
+		return null
+	var lands: Array = LocalEnemyLands.of_world(data, world)
+	var band_at := {}
+	for e in lands:
+		band_at[LocalLand.key(e.cell)] = int(e.band)
+	var move_cost := LocalLand.move_cost_on(data, land)
+	var fog := fog_factor(data, scouts)
+	var cost := func(p: Vector2i, q: Vector2i) -> float:
+		var c: float = move_cost.call(p, q)
+		if c < 0.0:
+			return -1.0
+		return c * fog if int(band_at.get(LocalLand.key(q), 0)) > sight else c
+	var goals: Array = []
+	for i in lands.size():
+		var e: Dictionary = lands[i]
+		if e.front == front and int(e.band) == to_band and data.terrain.terrain[e.terrain].moveCost != null:
+			goals.append({"cell": e.cell, "i": i, "d": HexMath.distance(e.cell, from)})
+	goals.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return int(x.d) < int(y.d) or (int(x.d) == int(y.d) and int(x.i) < int(y.i)))
+	for g in goals.slice(0, 8):
+		var path: Variant = LocalLand.find_path(from, g.cell, cost, LocalLand.fastest_step(data, land))
+		if path == null:
+			continue
+		var ms_per_cost := LocalTime.MS_PER_HOUR / hexes_per_hour / world_speed
+		var at_ms := 0.0
+		var steps: Array = []
+		for i in path.size():
+			if i > 0:
+				at_ms += float(cost.call(path[i - 1], path[i])) * ms_per_cost
+			steps.append({"q": path[i].x, "r": path[i].y, "atMs": maxi(i, LocalWaves.js_round(at_ms))})
+		return steps
+	return null
+
+
+## sim/raids.ts raidStageTimes: battle i entering band i, the stronghold at the road's end.
+static func stage_times(data: Dictionary, world: Dictionary, road: Array, depth: int) -> Array:
+	var times: Array = []
+	for stage in range(1, depth + 1):
+		var at_ms := int(road[-1].atMs)
+		for s in road:
+			var band := LocalEnemyLands.band_of(data, Vector2i(int(s.q), int(s.r)), int(world.radius))
+			if band >= stage:
+				at_ms = int(s.atMs)
+				break
+		times.append(at_ms)
+	times.append(int(road[-1].atMs))
+	return times
 
 
 static func _stage_ms(data: Dictionary, world_speed: float) -> int:
@@ -316,6 +386,14 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var raid: Dictionary = army.raid
 	var front := String(raid.front)
 	var stage_no := int(p.stage)
+	# Marching its road it sees a band past where it fights.
+	if raid.has("stageAt"):
+		var bands: int = data.enemyLands.bands.size()
+		var seen := mini(bands, mini(stage_no, bands) + 1)
+		var sight: Dictionary = world.get("enemySight", {})
+		if int(sight.get(front, 0)) < seen:
+			sight[front] = seen
+			world.enemySight = sight
 	var stage := raid_stage(data, front, int(raid.depth), stage_no, _waves_so_far(world, at), int(world.seed), int(army.id), world.members.size())
 	var home := server.find_village(world, int(army.homeVillageId))
 	var hero := LocalArmies.hero_with_army(world, int(army.id))
@@ -384,13 +462,21 @@ static func on_raid_stage(server: LocalServer, world: Dictionary, event: Diction
 	var entry := {"stage": stage_no, "name": stage.name, "stronghold": stage.stronghold, "won": result.won, "battleId": battle.id, "kills": kills, "lost": LocalBattle.total(lost),
 		"army": LocalBattle.total(fighters), "enemy": LocalBattle.total(stage.enemy), "rounds": result.rounds.size(),
 		"loot": LocalVillage.resources(func(kind: String) -> float: return float(taken[kind]) - float(carried[kind]))}
-	after.raid = {"front": front, "depth": raid.depth, "stage": stage_no, "battles": raid.battles + [entry], "finds": raid.finds + finds}
+	var next_raid: Dictionary = raid.duplicate()
+	next_raid.stage = stage_no
+	next_raid.battles = raid.battles + [entry]
+	next_raid.finds = raid.finds + finds
+	after.raid = next_raid
 	after.loot = taken
 	var done: bool = not result.won or stage.stronghold or LocalBattle.total(LocalScouting.combatants(data, after.units)) == 0
 	if done:
 		LocalArmies.send_home(server, world, after, at)
 	else:
-		server.schedule(world, at + _stage_ms(data, world.speed), "raid_stage", {"armyId": army.id, "stage": stage_no + 1})
+		# Along its road: when it gets to the next band (or the stronghold).
+		var due := at + _stage_ms(data, world.speed)
+		if raid.has("stageAt") and raid.has("edgeAt"):
+			due = maxi(at, LocalTime.parse(String(raid.edgeAt)) + int(raid.stageAt[stage_no]))
+		server.schedule(world, due, "raid_stage", {"armyId": army.id, "stage": stage_no + 1})
 	var found := " and %s" % ", ".join(finds) if not finds.is_empty() else ""
 	var title := "Your raid was beaten at the {name}"
 	var body := "It turns for home with {loot} resources; {lost} of its men fell."
