@@ -959,40 +959,51 @@ func _wall_section(cell: Vector2i) -> void:
 	var rules: Dictionary = Game.data.field.edgeWalls
 	var names := ["E", "NE", "NW", "W", "SW", "SE"]  # tr
 	var open: Array = []
-	var mine: Array[int] = []
+	# [direction, the wall] of yours on these edges.
+	var mine: Array = []
 	var built := PackedStringArray()
 	for i in 6:
 		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
 		var buildable: bool = not home.is_empty() and EdgeWallText.problem(Game.data, Game.terrain, Game.rivers, Vector2i(int(home.q), int(home.r)), cell, other,
 			LocalForts.in_zone(Game.data, Game.forts, int(home.id), cell) or LocalForts.in_zone(Game.data, Game.forts, int(home.id), other)) == ""
-		if walls.has(other):
-			var w: Dictionary = walls[other]
+		var river := EdgeWallText.river_edge(Game.rivers, cell, other)
+		var here: Array = walls.get(other, [])
+		for w in here:
 			var state: String = {"building": tr(" (being built)"), "upgrading": tr(" (being raised)")}.get(w.status, "")
-			built.append("%s: %s%s" % [tr(names[i]), EdgeWallText.kind_name(Game.data, w.kind, int(w.tier)) if w.status != "building" else (tr("Gatehouse") if w.kind == "gate" else tr("Wall")), state])
+			var bank := ""
+			if w.bank != null:
+				bank = tr(" on this bank") if w.bank == cell else tr(" on the far bank")
+			built.append("%s: %s%s%s" % [tr(names[i]), EdgeWallText.kind_name(Game.data, w.kind, int(w.tier)) if w.status != "building" else (tr("Gatehouse") if w.kind == "gate" else tr("Wall")), bank, state])
 			if w.ownerAccountId == Game.my_account_id():
-				mine.append(i)
-		elif buildable:
+				mine.append([i, w])
+		# A dry edge holds one wall; a river edge one on each bank (here: this one).
+		var taken: bool = here.any(func(w: Dictionary) -> bool: return not river or w.bank == cell)
+		if buildable and not taken:
 			open.append(other)
 	if built.is_empty() and open.is_empty():
 		return
 	var hours: Array = rules.tiers.map(func(t: Dictionary) -> String: return "%s h" % str(t.breakHours))
 	_panel_body.add_child(UI.with_info(UI.label(tr("Walls"), UI.HEADING_SIZE),
 		tr("A wall along an edge stops every army, caravan and scout. A gatehouse lets the players' own through. A horde tears a wall down if going round would take longer: %s for a palisade, timber-and-stone or stone wall, %d%% longer for a gatehouse. A gatehouse on the edge of your fort's hex becomes the fort's outermost wall ring.") % [
-			", ".join(hours), roundi((float(rules.gatehouse.breakFactor) - 1.0) * 100.0)]))
+			", ".join(hours), roundi((float(rules.gatehouse.breakFactor) - 1.0) * 100.0)]
+		+ " " + tr("Along a river, a wall stands on one bank: each bank can have its own, built from its side.")))
 	if not built.is_empty():
 		_panel_body.add_child(UI.label(tr("Walls stand %s.") % "; ".join(built), UI.SMALL_SIZE))
 	var village_id := int(home.id) if not home.is_empty() else 0
-	for i in mine:
-		var other: Vector2i = cell + HexMath.DIRECTIONS[i]
-		var w: Dictionary = walls[other]
+	for pair in mine:
+		var other: Vector2i = cell + HexMath.DIRECTIONS[int(pair[0])]
+		var w: Dictionary = pair[1]
+		var bank: Variant = w.bank
 		var row := UI.hbox()
 		var line := UI.rich("", UI.SMALL_SIZE, UiTheme.TEXT)
 		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(line)
-		var direction := tr(names[i])
+		var direction := tr(names[int(pair[0])])
+		if bank != null:
+			direction += tr(" on this bank") if bank == cell else tr(" on the far bank")
 		if w.status == "standing" and int(w.tier) < rules.tiers.size() and village_id != 0:
 			var step := EdgeWallText.tier_cost(Game.data, w.kind, int(w.tier) + 1)
-			var raise := UI.button(tr("Raise"), func() -> void: _build_wall(village_id, cell, other, String(w.kind)))
+			var raise := UI.button(tr("Raise"), func() -> void: _build_wall(village_id, cell, other, String(w.kind), bank))
 			raise.custom_minimum_size.x = 110
 			row.add_child(raise)
 			var next := EdgeWallText.tier_name(Game.data, int(w.tier) + 1).to_lower()
@@ -1004,7 +1015,7 @@ func _wall_section(cell: Vector2i) -> void:
 				return tr("%s to a %s: %s · %s") % [direction, next, UI.costs(step.cost, 30, have), step_time])
 		else:
 			line.text = direction
-		var tear := UI.button(tr("Tear down"), func() -> void: _tear_wall(village_id, cell, other))
+		var tear := UI.button(tr("Tear down"), func() -> void: _tear_wall(village_id, cell, other, bank))
 		tear.custom_minimum_size.x = 110
 		tear.disabled = village_id == 0
 		row.add_child(tear)
@@ -1033,18 +1044,25 @@ func _wall_section(cell: Vector2i) -> void:
 			return tr("%s: %s · %s") % [label, UI.costs(first.cost, 30, have), time])
 
 
-func _build_wall(village_id: int, a: Vector2i, b: Vector2i, kind: String) -> void:
+## `bank`: along a river, the hex whose bank it stands on (null: a's).
+func _build_wall(village_id: int, a: Vector2i, b: Vector2i, kind: String, bank: Variant = null) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/walls" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}, "kind": kind})
+	var body := {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}, "kind": kind}
+	if bank is Vector2i:
+		body.bank = {"q": bank.x, "r": bank.y}
+	var response := await Api.post_json("/v1/villages/%d/walls" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
 		return
 	Game.set_world(response.data)
 
 
-func _tear_wall(village_id: int, a: Vector2i, b: Vector2i) -> void:
+func _tear_wall(village_id: int, a: Vector2i, b: Vector2i, bank: Variant = null) -> void:
 	_status.text = ""
-	var response := await Api.post_json("/v1/villages/%d/walls/tear" % village_id, {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}})
+	var body := {"a": {"q": a.x, "r": a.y}, "b": {"q": b.x, "r": b.y}}
+	if bank is Vector2i:
+		body.bank = {"q": bank.x, "r": bank.y}
+	var response := await Api.post_json("/v1/villages/%d/walls/tear" % village_id, body)
 	if not response.ok:
 		_status.text = response.error
 		return
@@ -1585,7 +1603,7 @@ func _on_map_tapped(world_position: Vector2) -> void:
 		_status.text = ""
 		if picked:
 			if kind != "":
-				_build_wall(_road_village, from, cell, kind)
+				_build_wall(_road_village, from, cell, kind, from)
 			else:
 				_build_road(_road_village, from, cell)
 			return

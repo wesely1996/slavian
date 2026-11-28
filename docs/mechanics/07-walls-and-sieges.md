@@ -121,8 +121,12 @@ village builds them out in the land, and raises each one tier by tier.
 - **Where.** On an edge with either hex within **4 hexes** of the village, or
   in the zone of one of its forts ([page 17](17-forts.md#the-keeps-zone-of-influence)).
   Both hexes must be land an army can enter (not mountains, lakes or the
-  enemy lands). There can't already be a river without a bridge on that
-  edge. The Holy City's edges can be walled too.
+  enemy lands). The Holy City's edges can be walled too.
+- **Along a river.** A river edge holds a wall on **each bank**: the wall
+  stands on the bank of the hex it is built from, and the other bank can
+  have its own (a gatehouse on one, a wall on the other, or two of either).
+  Players' armies pass only where every wall on the edge is a gatehouse. A
+  horde crossing there tears down both, the hours of each added together.
 - **Tiers.** Each tier is raised on a standing wall. The first tier is mostly
   wood, the second wood and stone alike, the third mostly stone. Every tier
   needs grain for the workers:

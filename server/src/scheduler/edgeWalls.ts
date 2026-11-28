@@ -6,11 +6,11 @@
 // wall finished in a marching horde's way makes it plan its road again.
 import { z } from 'zod';
 import type { GameData } from '../data/index.js';
-import { deleteEdgeWall, edgeWallAt, insertEdgeWall, listEdgeWalls, saveEdgeWall, type EdgeWall, type EdgeWallKind } from '../db/edgeWalls.js';
+import { bankSide, deleteEdgeWall, edgeWallAt, insertEdgeWall, listEdgeWalls, saveEdgeWall, type EdgeWall, type EdgeWallKind, type WallSide } from '../db/edgeWalls.js';
 import { listForts } from '../db/forts.js';
 import { notifyWorld } from '../db/notify.js';
 import type { DbClient } from '../db/pool.js';
-import { loadLand } from '../db/rivers.js';
+import { loadLand, riverEdge } from '../db/rivers.js';
 import { loadVillage, saveVillageState } from '../db/villages.js';
 import { listActiveWaves, loadWave, marchOnward, type Wave } from '../db/waves.js';
 import type { World } from '../db/worlds.js';
@@ -30,16 +30,23 @@ import { holdForQuiet } from './waves.js';
 
 const THROUGH = new Set<Wave['status']>(['marching', 'battling', 'arrived', 'razing']);
 
-export const edgeWallPayload = z.object({ aq: z.number().int(), ar: z.number().int(), bq: z.number().int(), br: z.number().int() });
+export const edgeWallPayload = z.object({ aq: z.number().int(), ar: z.number().int(), bq: z.number().int(), br: z.number().int(), side: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0) });
 export const wallBreachPayload = edgeWallPayload.extend({ waveId: z.number().int() });
 
-function ends(w: { a: Hex; b: Hex }): { aq: number; ar: number; bq: number; br: number } {
-  return { aq: w.a.q, ar: w.a.r, bq: w.b.q, br: w.b.r };
+function ends(w: { a: Hex; b: Hex; side: WallSide }): { aq: number; ar: number; bq: number; br: number; side: WallSide } {
+  return { aq: w.a.q, ar: w.a.r, bq: w.b.q, br: w.b.r, side: w.side };
+}
+
+// Which side of a|b a wall built (or torn down) from `bank` stands on: a
+// river edge holds one on each bank, a dry edge one along it.
+async function sideFor(client: DbClient, worldId: number, a: Hex, b: Hex, bank: Hex | null): Promise<WallSide> {
+  return (await riverEdge(client, worldId, a, b)) ? bankSide(a, b, bank ?? a) : 0;
 }
 
 // Raises a wall (or a gatehouse) along the edge a|b from `villageId`: the
-// first tier, or the next on one standing.
-export async function buildEdgeWall(client: DbClient, data: GameData, world: World, villageId: number, a: Hex, b: Hex, kind: EdgeWallKind, at: Date): Promise<EdgeWall> {
+// first tier, or the next on one standing. Along a river, it stands on the
+// bank of `bank` (a, unless b is given).
+export async function buildEdgeWall(client: DbClient, data: GameData, world: World, villageId: number, a: Hex, b: Hex, kind: EdgeWallKind, at: Date, bank: Hex | null = null): Promise<EdgeWall> {
   const rules = data.field.edgeWalls;
   const village = await loadVillage(client, villageId);
   if (village.ruin) throw new RuleError('A ruin raises no walls');
@@ -56,8 +63,8 @@ export async function buildEdgeWall(client: DbClient, data: GameData, world: Wor
     const type = land.get(hexKey(end));
     if (!type || data.terrain.terrain[type].moveCost === null) throw new RuleError('No wall can stand there');
   }
-  if (land.blocked?.has(edgeKey(a, b))) throw new RuleError('A river already guards that edge');
-  const existing = await edgeWallAt(client, world.id, a, b);
+  const side = await sideFor(client, world.id, a, b, bank);
+  const existing = await edgeWallAt(client, world.id, a, b, side);
   if (existing && existing.kind !== kind) throw new RuleError(existing.kind === 'gate' ? 'A gatehouse stands there' : 'A wall stands there');
   if (existing && existing.ownerAccountId !== village.ownerAccountId) throw new RuleError('That wall is not yours');
   if (existing?.status === 'building' || existing?.status === 'upgrading') throw new RuleError('That wall is being raised');
@@ -66,20 +73,22 @@ export async function buildEdgeWall(client: DbClient, data: GameData, world: Wor
   await saveVillageState(client, village.id, { ...village.state, ledger: spend(village.state.ledger, at, wallTierCost(data, kind, tier)) });
   const completesAt = new Date(at.getTime() + (wallTierSeconds(data, kind, tier) * 1000) / world.speed);
   if (existing) await saveEdgeWall(client, world.id, { ...existing, status: 'upgrading', builtBy: village.id, completesAt });
-  else await insertEdgeWall(client, world.id, { a, b, kind, builtBy: village.id, ownerAccountId: village.ownerAccountId, completesAt });
-  await scheduleEvent(client, world.id, completesAt, 'edge_wall_built', ends({ a, b }));
+  else await insertEdgeWall(client, world.id, { a, b, kind, builtBy: village.id, ownerAccountId: village.ownerAccountId, completesAt, side });
+  await scheduleEvent(client, world.id, completesAt, 'edge_wall_built', ends({ a, b, side }));
   await notifyWorld(client, { worldId: world.id, type: 'village', villageId: village.id });
   await notifyWorld(client, { worldId: world.id, type: 'world' });
-  return (await edgeWallAt(client, world.id, a, b))!;
+  return (await edgeWallAt(client, world.id, a, b, side))!;
 }
 
-// Tears down a wall of the village's owner along a|b (nothing comes back).
-export async function tearDownEdgeWall(client: DbClient, world: World, villageId: number, a: Hex, b: Hex): Promise<void> {
+// Tears down a wall of the village's owner along a|b (on the bank of
+// `bank`, along a river); nothing comes back.
+export async function tearDownEdgeWall(client: DbClient, world: World, villageId: number, a: Hex, b: Hex, bank: Hex | null = null): Promise<void> {
   const village = await loadVillage(client, villageId);
-  const wall = await edgeWallAt(client, world.id, a, b);
+  const side = await sideFor(client, world.id, a, b, bank);
+  const wall = await edgeWallAt(client, world.id, a, b, side);
   if (!wall) throw new RuleError('No wall stands there');
   if (wall.ownerAccountId !== village.ownerAccountId) throw new RuleError('That wall is not yours');
-  await deleteEdgeWall(client, world.id, a, b);
+  await deleteEdgeWall(client, world.id, a, b, side);
   await notifyWorld(client, { worldId: world.id, type: 'world' });
 }
 
@@ -87,15 +96,21 @@ export async function tearDownEdgeWall(client: DbClient, world: World, villageId
 // planned for every wall on the rest of its road, for when it is through.
 export async function planBreaches(client: DbClient, world: World, wave: Wave, fromMs: number): Promise<void> {
   if (!wave.path) return;
-  const walls = new Map((await listEdgeWalls(client, world.id)).filter((w) => w.status !== 'building').map((w) => [edgeKey(w.a, w.b), w] as const));
+  const walls = new Map<string, EdgeWall[]>();
+  for (const w of await listEdgeWalls(client, world.id)) {
+    if (w.status !== 'building') walls.set(edgeKey(w.a, w.b), [...(walls.get(edgeKey(w.a, w.b)) ?? []), w]);
+  }
   for (const { key, atMs } of wallsCrossed(wave.path, walls, fromMs)) {
-    const payload = { waveId: wave.id, ...ends(walls.get(key)!) };
-    const { rows } = await client.query(
-      `SELECT 1 FROM scheduled_events WHERE world_id = $1 AND type = 'wall_breach' AND status = 'pending' AND payload @> $2::jsonb`,
-      [world.id, JSON.stringify(payload)],
-    );
-    if (rows.length) continue;
-    await scheduleEvent(client, world.id, new Date(wave.spawnAt.getTime() + atMs), 'wall_breach', payload);
+    // Every wall on the edge (one on each bank of a river) comes down.
+    for (const wall of walls.get(key)!) {
+      const payload = { waveId: wave.id, ...ends(wall) };
+      const { rows } = await client.query(
+        `SELECT 1 FROM scheduled_events WHERE world_id = $1 AND type = 'wall_breach' AND status = 'pending' AND payload @> $2::jsonb`,
+        [world.id, JSON.stringify(payload)],
+      );
+      if (rows.length) continue;
+      await scheduleEvent(client, world.id, new Date(wave.spawnAt.getTime() + atMs), 'wall_breach', payload);
+    }
   }
 }
 
@@ -146,18 +161,18 @@ async function mergedWithFort(client: DbClient, worldId: number, wall: EdgeWall)
 }
 
 // A fort's battle battered its gatehouse down: a tier lower, or gone.
-export async function breachGatehouse(client: DbClient, worldId: number, a: Hex, b: Hex): Promise<void> {
-  const wall = await edgeWallAt(client, worldId, a, b);
+export async function breachGatehouse(client: DbClient, worldId: number, a: Hex, b: Hex, side: WallSide = 0): Promise<void> {
+  const wall = await edgeWallAt(client, worldId, a, b, side);
   if (!wall) return;
-  if (wall.tier <= 1) await deleteEdgeWall(client, worldId, a, b);
+  if (wall.tier <= 1) await deleteEdgeWall(client, worldId, a, b, side);
   else await saveEdgeWall(client, worldId, { ...wall, tier: wall.tier - 1, ...(wall.status === 'upgrading' ? { status: 'standing', completesAt: null } : {}) });
   await notifyWorld(client, { worldId, type: 'world' });
 }
 
 export const edgeWallHandlers: HandlerRegistry = {
   async edge_wall_built({ client, data, world }, event) {
-    const { aq, ar, bq, br } = edgeWallPayload.parse(event.payload);
-    const wall = await edgeWallAt(client, world.id, hex(aq, ar), hex(bq, br));
+    const { aq, ar, bq, br, side } = edgeWallPayload.parse(event.payload);
+    const wall = await edgeWallAt(client, world.id, hex(aq, ar), hex(bq, br), side);
     if (!wall || wall.status === 'standing' || wall.completesAt?.getTime() !== event.dueAt.getTime()) return;
     await saveEdgeWall(client, world.id, { ...wall, tier: wall.tier + 1, status: 'standing', completesAt: null });
     await avoidWall(client, data, world, edgeKey(wall.a, wall.b), event.dueAt);
@@ -167,14 +182,14 @@ export const edgeWallHandlers: HandlerRegistry = {
 
   // A horde through a wall on its road: it tore the wall down.
   async wall_breach({ client, world }, event) {
-    const { waveId, aq, ar, bq, br } = wallBreachPayload.parse(event.payload);
+    const { waveId, aq, ar, bq, br, side } = wallBreachPayload.parse(event.payload);
     const wave = await loadWave(client, waveId);
     // A horde that turned since had its breaches called off (cancelPlans);
     // one through it may already be at its target, the same moment.
     if (!THROUGH.has(wave.status)) return;
-    const wall = await edgeWallAt(client, world.id, hex(aq, ar), hex(bq, br));
+    const wall = await edgeWallAt(client, world.id, hex(aq, ar), hex(bq, br), side);
     if (!wall || wall.status === 'building' || (await mergedWithFort(client, world.id, wall))) return;
-    await deleteEdgeWall(client, world.id, wall.a, wall.b);
+    await deleteEdgeWall(client, world.id, wall.a, wall.b, side);
     await notifyWorld(client, { worldId: world.id, type: 'world' });
     await tell(client, world, wall.ownerAccountId, {
       kind: 'outpost_raided',

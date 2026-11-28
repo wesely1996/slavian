@@ -287,7 +287,7 @@ static func _found(server: LocalServer, world: Dictionary, at: int) -> void:
 
 static func _edge_state(world: Dictionary) -> Dictionary:
 	var walls := {}
-	for w in world.get("walls", []):
+	for w in LocalEdgeWalls.listed(world):
 		if w.status != "building":
 			walls[LocalLand.edge_key(w.a, w.b)] = {"tier": int(w.tier), "gate": w.kind == "gate"}
 	var roads := {}
@@ -306,7 +306,7 @@ static func _do_work(world: Dictionary, front: String, work: Dictionary, state: 
 		"wall":
 			if not world.has("walls"):
 				world.walls = []
-			world.walls.append({"a": ends[0], "b": ends[1], "kind": "wall", "tier": 1, "status": "standing", "builtBy": null, "ownerAccountId": null, "completesAt": null, "front": front})
+			world.walls.append({"a": ends[0], "b": ends[1], "kind": "wall", "tier": 1, "status": "standing", "builtBy": null, "ownerAccountId": null, "completesAt": null, "front": front, "side": 0})
 			state.walls[key] = {"tier": 1, "gate": false}
 		"raise":
 			var wall := LocalEdgeWalls.wall_at(world, work.a, work.b)

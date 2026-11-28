@@ -86,8 +86,11 @@ static func route_from(data: Dictionary, land: Dictionary, from: Vector2i, targe
 		if cost == null or data.terrain.terrain[type].get("hordesPass", true) == false:
 			return -1.0
 		var walked: float = float(cost) * LocalLand.road_factor(data, int(land.roads.get(LocalLand.edge_key(a, b), 0)), land.get("damaged", {}).has(LocalLand.edge_key(a, b))) if roads else float(cost)
-		var wall: Variant = walls.get(LocalLand.edge_key(a, b))
-		return walked + (LocalEdgeWalls.break_hours(data, wall) * pace if wall != null else 0.0)
+		# (A wall on each bank: both torn down.)
+		var hours := 0.0
+		for wall in walls.get(LocalLand.edge_key(a, b), []):
+			hours += LocalEdgeWalls.break_hours(data, wall)
+		return walked + hours * pace
 	var search_cost := func(a: Vector2i, b: Vector2i) -> float:
 		var cost: float = step_cost.call(a, b)
 		return -1.0 if cost < 0.0 else cost + float(rules.fear.pathWeight) * float(fear.get(LocalLand.key(b), 0.0))

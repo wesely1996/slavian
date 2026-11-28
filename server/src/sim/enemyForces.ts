@@ -93,7 +93,11 @@ export function armyHexAt(
 
 // The land war bands march on: the players' walls stop them, their own don't.
 export function bandLand(land: Land): Land {
-  const walls = new Map([...(land.walls ?? new Map<string, LandWall>())].filter(([, w]) => !w.enemy));
+  const walls = new Map<string, readonly LandWall[]>();
+  for (const [key, list] of land.walls ?? new Map<string, readonly LandWall[]>()) {
+    const players = list.filter((w) => !w.enemy);
+    if (players.length) walls.set(key, players);
+  }
   const out: Record<string, unknown> = {};
   for (const key of ['blocked', 'roads', 'damaged', 'lanes', 'burning', 'forts', 'blessed', 'banks'] as const) {
     if (land[key] !== undefined) out[key] = land[key];

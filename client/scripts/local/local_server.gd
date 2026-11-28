@@ -865,12 +865,13 @@ func _field_command(world: Dictionary, village: Dictionary, action: String, body
 			var b: Dictionary = body.get("b", {})
 			var from := Vector2i(int(a.get("q", 0)), int(a.get("r", 0)))
 			var to := Vector2i(int(b.get("q", 0)), int(b.get("r", 0)))
+			var bank: Variant = Vector2i(int(body.bank.get("q", 0)), int(body.bank.get("r", 0))) if body.get("bank") is Dictionary else null
 			if action == "walls/tear":
-				result = LocalEdgeWalls.tear_down(world, village, from, to)
+				result = LocalEdgeWalls.tear_down(world, village, from, to, bank)
 			elif not String(body.get("kind", "")) in ["wall", "gate"]:
 				return _fail(400, "invalid_request", "Say which: a wall or a gatehouse")
 			else:
-				result = LocalEdgeWalls.build(self, world, village, from, to, String(body.kind), now)
+				result = LocalEdgeWalls.build(self, world, village, from, to, String(body.kind), now, bank)
 		"terraform":
 			if not body is Dictionary or not (body.get("q") is float or body.get("q") is int) or not (body.get("r") is float or body.get("r") is int) or not body.get("action") is String:
 				return _fail(400, "invalid_request", "Say where and what")

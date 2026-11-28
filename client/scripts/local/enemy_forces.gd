@@ -98,8 +98,9 @@ static func band_land(land: Dictionary) -> Dictionary:
 	var walls := {}
 	var all: Dictionary = land.get("walls", {})
 	for key in all:
-		if not all[key].get("enemy", false):
-			walls[key] = all[key]
+		var players: Array = all[key].filter(func(w: Dictionary) -> bool: return not w.get("enemy", false))
+		if not players.is_empty():
+			walls[key] = players
 	out.walls = walls
 	return out
 

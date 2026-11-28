@@ -845,7 +845,7 @@ static func field_round(server: LocalServer, world: Dictionary, battle: Dictiona
 					continue
 				# A gatehouse battered down loses a tier (the last: it is gone).
 				if int(r.ring) == LocalEdgeWalls.GATE_RING and r.get("edge") != null:
-					LocalEdgeWalls.breach_gatehouse(world, Vector2i(int(r.edge.aq), int(r.edge.ar)), Vector2i(int(r.edge.bq), int(r.edge.br)))
+					LocalEdgeWalls.breach_gatehouse(world, Vector2i(int(r.edge.aq), int(r.edge.ar)), Vector2i(int(r.edge.bq), int(r.edge.br)), int(r.edge.get("side", 0)))
 					continue
 				var level := LocalForts.level_of(fort.plots, "w%d" % int(r.ring)) - int(data.walls.breachLevelsLost)
 				if level > 0:

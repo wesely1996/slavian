@@ -178,7 +178,7 @@ async function startFieldBattle(client: DbClient, data: GameData, world: World, 
     const gate = await fortGatehouse(client, world.id, cell, fort.ownerAccountId);
     if (gate) {
       const integrity = wallIntegrity(data, gateRingPlots(data, gate.tier));
-      rings.unshift({ ring: GATE_RING, integrity, max: integrity, tier: gate.tier, edge: { aq: gate.a.q, ar: gate.a.r, bq: gate.b.q, br: gate.b.r } });
+      rings.unshift({ ring: GATE_RING, integrity, max: integrity, tier: gate.tier, edge: { aq: gate.a.q, ar: gate.a.r, bq: gate.b.q, br: gate.b.r, side: gate.side } });
     }
     setup = { ...setup, fortId: fort.id, ...(rings.length ? { rings } : {}), ...(guard ? { guard } : {}) };
   }
@@ -478,7 +478,7 @@ export async function fieldRound(client: DbClient, data: GameData, world: World,
         if (r.integrity > 0) continue;
         // A gatehouse battered down loses a tier (the last: it is gone).
         if (r.ring === GATE_RING && r.edge) {
-          await breachGatehouse(client, world.id, hex(r.edge.aq, r.edge.ar), hex(r.edge.bq, r.edge.br));
+          await breachGatehouse(client, world.id, hex(r.edge.aq, r.edge.ar), hex(r.edge.bq, r.edge.br), r.edge.side ?? 0);
           continue;
         }
         const level = levelOf(plots, `w${r.ring}`) - data.walls.breachLevelsLost;

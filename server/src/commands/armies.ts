@@ -205,13 +205,13 @@ export async function buildRoadCommand(
 export async function buildEdgeWallCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { accountId: number; villageId: number; a: Hex; b: Hex; kind: EdgeWallKind; now: Date },
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; kind: EdgeWallKind; bank?: Hex | null; now: Date },
 ): Promise<EdgeWall> {
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: input.kind === 'gate' ? 'built a gatehouse' : 'built a wall', villageId: village.id });
-    return buildEdgeWall(client, deps.data, world, village.id, input.a, input.b, input.kind, input.now);
+    return buildEdgeWall(client, deps.data, world, village.id, input.a, input.b, input.kind, input.now, input.bank ?? null);
   });
 }
 
@@ -219,13 +219,13 @@ export async function buildEdgeWallCommand(
 export async function tearDownEdgeWallCommand(
   db: Db,
   deps: SchedulerDeps,
-  input: { accountId: number; villageId: number; a: Hex; b: Hex; now: Date },
+  input: { accountId: number; villageId: number; a: Hex; b: Hex; bank?: Hex | null; now: Date },
 ): Promise<void> {
   const worldId = await worldOfVillage(db, input.villageId);
   return withWorld(db, worldId, input.now, deps, async (client, world) => {
     const village = await loadVillage(client, input.villageId);
     await authorize(client, { worldId, ownerAccountId: village.ownerAccountId, actorAccountId: input.accountId, at: input.now, action: 'tore down a wall', villageId: village.id });
-    await tearDownEdgeWall(client, world, village.id, input.a, input.b);
+    await tearDownEdgeWall(client, world, village.id, input.a, input.b, input.bank ?? null);
   });
 }
 

@@ -89,7 +89,7 @@ export interface BattleSetup {
   fortId?: number;
   // Ring 3: a gatehouse on an edge of the fort's hex (sim/edgeWalls.ts
   // GATE_RING), at its tier, along a|b.
-  rings?: { ring: number; integrity: number; max: number; tier?: number; edge?: { aq: number; ar: number; bq: number; br: number } }[];
+  rings?: { ring: number; integrity: number; max: number; tier?: number; edge?: { aq: number; ar: number; bq: number; br: number; side?: 0 | 1 | 2 } }[];
 }
 
 // What a horde that won decided to do (see sim/horde.ts).
