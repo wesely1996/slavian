@@ -190,8 +190,19 @@ hex or fort where it stands ([expeditions](#expeditions-from-the-field)):
 - **The road in.** It marches to the nearest passable hex of that front on the
   map's last ring. Then it fights its way in: `depth` field battles (1 to 3),
   then the siege of the front's **stronghold**.
-- **The pace.** One battle every **3 game hours**, the first one stage after
-  it reaches the edge.
+- **Its road through the enemy lands.** At the edge the raid gets a road
+  into the front's lands ([page 18](18-enemy-lands.md)), straight **deeper,
+  not wider**: to the nearest hex it can reach of the band past its last
+  field battle (band 2 for one battle, band 4 for three). It marches it at
+  the army's pace (walls and rivers in its way as for any army), and the map
+  shows it on its road.
+- **The pace.** Field battle *i* comes as it enters band *i*, the
+  stronghold at the road's end. A step into a band still in **fog** takes up
+  to **2×** as long; each **scout** in the army cuts 10% of that extra (10
+  scouts: no slower than in sight). As it fights in a band, the front's
+  lands are seen one band past it.
+- **No road.** Where no road leads in (walls, rivers), one battle comes every
+  **3 game hours** instead, the first one stage after it reaches the edge.
 
 | Front | Fields (one per stage, in a seeded order) | Stronghold |
 |---|---|---|
@@ -224,7 +235,8 @@ hex or fort where it stands ([expeditions](#expeditions-from-the-field)):
   North the +5% each blessing of the gods sets for good
   ([Blessings of the gods](#blessings-of-the-gods)). At +60% hatred, a battle
   brings 1.6× the loot. Each battle's loot counts the hatred from before it
-  was won.- **Carrying.** All of it as far as the army can carry: the sum of its units'
+  was won.
+- **Carrying.** All of it as far as the army can carry: the sum of its units'
   `carry` (a Raider 120, a Military Caravan 400, a large one 600).
 
 **Raiding the North** brings only 30% of that in resources, but every battle

@@ -22090,11 +22090,43 @@
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
+       "road": [
+        {
+         "q": -2,
+         "r": -8,
+         "atMs": 0
+        },
+        {
+         "q": -2,
+         "r": -9,
+         "atMs": 43200
+        },
+        {
+         "q": -2,
+         "r": -10,
+         "atMs": 86400
+        },
+        {
+         "q": -2,
+         "r": -11,
+         "atMs": 129600
+        },
+        {
+         "q": -2,
+         "r": -12,
+         "atMs": 187200
+        }
+       ],
        "depth": 1,
        "finds": [],
        "front": "north",
        "stage": 0,
-       "battles": []
+       "edgeAt": "2026-06-01T11:01:13.000Z",
+       "battles": [],
+       "stageAt": [
+        43200,
+        187200
+       ]
       },
       "quarteredAt": null,
       "respond": true,
@@ -25125,7 +25157,7 @@
     "sanctity": 100,
     "embers": 1,
     "hatred": {
-     "north": 0.05
+     "north": 0.25
     },
     "blessings": {
      "water": null,
@@ -25160,7 +25192,7 @@
       "smithWork": null,
       "embers": 1,
       "armySlots": {
-       "used": 40,
+       "used": 36,
        "cap": 50
       },
       "ruinSearchReadyAt": null,
@@ -25311,6 +25343,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
@@ -25464,7 +25497,7 @@
        "capacity": {
         "iron": 1708,
         "wood": 1614,
-        "grain": 1000,
+        "grain": 1100,
         "stone": 1462
        },
        "settledAt": "2026-06-01T11:04:24.000Z"
@@ -25611,6 +25644,7 @@
       "adminUpkeep": 0,
       "bonuses": {
        "upkeep": 0.08,
+       "storage": 0.1,
        "attack.all": 0.1,
        "homeDefense": 0.06,
        "attack.cavalry": 0.06,
@@ -25637,10 +25671,10 @@
         "stone": 300
        },
        "capacity": {
-        "iron": 1000,
-        "wood": 1000,
-        "grain": 1000,
-        "stone": 1000
+        "iron": 1100,
+        "wood": 1100,
+        "grain": 1100,
+        "stone": 1100
        },
        "settledAt": "2026-06-01T11:04:24.000Z"
       }
@@ -25861,6 +25895,105 @@
     "ruinSearches": [],
     "battles": [
      {
+      "id": 4,
+      "front": null,
+      "leaderId": null,
+      "waveId": null,
+      "campId": null,
+      "siteId": null,
+      "villageId": null,
+      "q": -2,
+      "r": -8,
+      "setup": {
+       "raid": {
+        "name": "Monster Lair",
+        "front": "north",
+        "stage": 2,
+        "stronghold": true
+       }
+      },
+      "status": "cleared",
+      "round": 4,
+      "attackerStance": "defensive",
+      "attackerInitial": {
+       "rusalka": 7,
+       "grey_wolf": 16,
+       "leshy_thrall": 7
+      },
+      "attackerNow": {
+       "rusalka": 4,
+       "grey_wolf": 5,
+       "leshy_thrall": 4
+      },
+      "defenderInitial": {
+       "archer": 12,
+       "spearman": 18,
+       "poison_archer": 10
+      },
+      "rounds": [
+       {
+        "at": "2026-06-01T11:04:20.200Z",
+        "round": 1,
+        "attackerLeft": 28,
+        "defenderLeft": 40,
+        "attackerLosses": {
+         "leshy_thrall": 2
+        },
+        "defenderLosses": {}
+       },
+       {
+        "at": "2026-06-01T11:04:20.200Z",
+        "round": 2,
+        "attackerLeft": 22,
+        "defenderLeft": 38,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4,
+         "leshy_thrall": 1
+        },
+        "defenderLosses": {
+         "archer": 1,
+         "poison_archer": 1
+        }
+       },
+       {
+        "at": "2026-06-01T11:04:20.200Z",
+        "round": 3,
+        "attackerLeft": 17,
+        "defenderLeft": 37,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 4
+        },
+        "defenderLosses": {
+         "poison_archer": 1
+        }
+       },
+       {
+        "at": "2026-06-01T11:04:20.200Z",
+        "round": 4,
+        "attackerLeft": 13,
+        "defenderLeft": 36,
+        "attackerLosses": {
+         "rusalka": 1,
+         "grey_wolf": 3
+        },
+        "defenderLosses": {
+         "archer": 1
+        }
+       }
+      ],
+      "loot": {
+       "iron": 143,
+       "wood": 242,
+       "grain": 256,
+       "stone": 185
+      },
+      "decision": null,
+      "startedAt": "2026-06-01T11:04:20.200Z",
+      "endedAt": "2026-06-01T11:04:20.200Z"
+     },
+     {
       "id": 3,
       "front": null,
       "leaderId": null,
@@ -25894,7 +26027,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 1,
         "attackerLeft": 11,
         "defenderLeft": 41,
@@ -25906,7 +26039,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 2,
         "attackerLeft": 0,
         "defenderLeft": 40,
@@ -25927,8 +26060,8 @@
        "stone": 23
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:04:49.000Z",
-      "endedAt": "2026-06-01T11:04:49.000Z"
+      "startedAt": "2026-06-01T11:01:56.200Z",
+      "endedAt": "2026-06-01T11:01:56.200Z"
      },
      {
       "id": 2,
@@ -26113,7 +26246,9 @@
       "skillPoints": 0,
       "skills": {},
       "gear": {},
-      "inventory": [],
+      "inventory": [
+       "mail_shirt"
+      ],
       "bonuses": {},
       "path": null,
       "departsAt": null,
@@ -26189,107 +26324,142 @@
       "id": 1,
       "ownerAccountId": 1,
       "homeVillageId": 2,
-      "targetVillageId": null,
+      "targetVillageId": 2,
       "target": [
-       -2,
-       -8
+       -1,
+       2
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "raid",
+      "orders": "garrison",
       "stance": "balanced",
       "maneuver": "encircle",
       "loot": {
-       "iron": 19,
-       "wood": 33,
-       "grain": 37,
-       "stone": 23
+       "iron": 143,
+       "wood": 242,
+       "grain": 256,
+       "stone": 185
       },
       "units": {
-       "archer": 12,
+       "archer": 10,
        "spearman": 18,
-       "poison_archer": 10
+       "poison_archer": 8
       },
-      "status": "stationed",
+      "status": "marching",
       "battleId": null,
       "path": [
        [
         -2,
-        2,
+        -8,
         0
        ],
        [
-        -2,
-        1,
-        14400
-       ],
-       [
-        -2,
-        0,
-        28800
-       ],
-       [
-        -2,
         -1,
+        -8,
         43200
        ],
        [
         -1,
-        -2,
+        -7,
         57600
        ],
        [
         -1,
-        -3,
+        -6,
         72000
        ],
        [
         -1,
-        -4,
+        -5,
         86400
        ],
        [
         -1,
-        -5,
+        -4,
         100800
        ],
        [
         -1,
-        -6,
+        -3,
         115200
        ],
        [
         -1,
-        -7,
+        -2,
         129600
        ],
        [
         -1,
-        -8,
+        -1,
+        144000
+       ],
+       [
+        -1,
+        0,
+        158400
+       ],
+       [
+        0,
+        0,
         172800
        ],
        [
-        -2,
-        -8,
+        0,
+        1,
+        187200
+       ],
+       [
+        -1,
+        2,
         216000
        ]
       ],
-      "departsAt": "2026-06-01T10:57:37.000Z",
-      "arrivesAt": "2026-06-01T11:01:13.000Z",
+      "departsAt": "2026-06-01T11:04:20.200Z",
+      "arrivesAt": "2026-06-01T11:07:56.200Z",
       "leavesAt": null,
       "returnsAt": null,
-      "supply": 776,
-      "supplyAt": "2026-06-01T11:04:49.000Z",
+      "supply": 796.8,
+      "supplyAt": "2026-06-01T11:04:20.200Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
+       "road": [
+        {
+         "q": -2,
+         "r": -8,
+         "atMs": 0
+        },
+        {
+         "q": -2,
+         "r": -9,
+         "atMs": 43200
+        },
+        {
+         "q": -2,
+         "r": -10,
+         "atMs": 86400
+        },
+        {
+         "q": -2,
+         "r": -11,
+         "atMs": 129600
+        },
+        {
+         "q": -2,
+         "r": -12,
+         "atMs": 187200
+        }
+       ],
        "depth": 1,
        "finds": [
-        "a Svarog's Ember"
+        "a Svarog's Ember",
+        "Mail Shirt",
+        "the scroll \"Weave of Mokosh\""
        ],
        "front": "north",
-       "stage": 1,
+       "stage": 2,
+       "edgeAt": "2026-06-01T11:01:13.000Z",
        "battles": [
         {
          "won": true,
@@ -26308,7 +26478,29 @@
          "rounds": 2,
          "battleId": 3,
          "stronghold": false
+        },
+        {
+         "won": true,
+         "army": 40,
+         "loot": {
+          "iron": 124,
+          "wood": 209,
+          "grain": 219,
+          "stone": 162
+         },
+         "lost": 4,
+         "name": "Monster Lair",
+         "enemy": 30,
+         "kills": 17,
+         "stage": 2,
+         "rounds": 4,
+         "battleId": 4,
+         "stronghold": true
         }
+       ],
+       "stageAt": [
+        43200,
+        187200
        ]
       },
       "quarteredAt": null,
@@ -26447,7 +26639,14 @@
       "quest": "relic"
      }
     ],
-    "lore": [],
+    "lore": [
+     {
+      "scroll": "mokosh_weave",
+      "accountId": 1,
+      "siteId": null,
+      "foundAt": "2026-06-01T11:04:20.200Z"
+     }
+    ],
     "achievements": [
      {
       "accountId": 1,
@@ -26463,6 +26662,11 @@
       "accountId": 1,
       "achievement": "hero_fallen",
       "earnedAt": "2026-06-01T11:00:48.000Z"
+     },
+     {
+      "accountId": 1,
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "accountId": 1,
@@ -29316,12 +29520,162 @@
      "enemy": {
       "seed": 4242,
       "sight": {
-       "north": 1,
+       "north": 3,
        "south": 1
       }
      },
-     "settlements": [],
-     "bands": []
+     "settlements": [
+      {
+       "id": 7,
+       "front": "north",
+       "kind": "lair",
+       "name": "Monster lair",
+       "band": 3,
+       "q": 6,
+       "r": -16,
+       "status": "standing",
+       "level": 1,
+       "foundedAt": "2026-06-01T10:52:48.000Z"
+      }
+     ],
+     "bands": [
+      {
+       "id": 3,
+       "front": "north",
+       "kind": "patrol",
+       "status": "patrolling",
+       "units": {
+        "rusalka": 2,
+        "grey_wolf": 4,
+        "leshy_thrall": 2
+       },
+       "targetArmyId": null,
+       "departsAt": "2026-06-01T10:58:00.000Z",
+       "arrivesAt": "2026-06-01T11:22:48.000Z",
+       "path": [
+        [
+         19,
+         -18,
+         0
+        ],
+        [
+         18,
+         -18,
+         48000
+        ],
+        [
+         17,
+         -18,
+         96000
+        ],
+        [
+         16,
+         -18,
+         144000
+        ],
+        [
+         15,
+         -18,
+         216000
+        ],
+        [
+         14,
+         -18,
+         288000
+        ],
+        [
+         13,
+         -18,
+         360000
+        ],
+        [
+         12,
+         -18,
+         432000
+        ],
+        [
+         11,
+         -18,
+         504000
+        ],
+        [
+         10,
+         -18,
+         552000
+        ],
+        [
+         9,
+         -18,
+         624000
+        ],
+        [
+         8,
+         -18,
+         696000
+        ],
+        [
+         7,
+         -18,
+         768000
+        ],
+        [
+         6,
+         -18,
+         816000
+        ],
+        [
+         5,
+         -17,
+         864000
+        ],
+        [
+         4,
+         -17,
+         936000
+        ],
+        [
+         3,
+         -17,
+         1008000
+        ],
+        [
+         2,
+         -17,
+         1080000
+        ],
+        [
+         1,
+         -17,
+         1152000
+        ],
+        [
+         0,
+         -16,
+         1200000
+        ],
+        [
+         -1,
+         -16,
+         1272000
+        ],
+        [
+         -2,
+         -16,
+         1344000
+        ],
+        [
+         -3,
+         -15,
+         1416000
+        ],
+        [
+         -4,
+         -15,
+         1488000
+        ]
+       ]
+      }
+     ]
     },
     "serverTime": "2026-06-01T11:04:49.000Z"
    }
@@ -29671,10 +30025,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 10,
-        "wood": 30,
-        "grain": 26.666666666666668,
-        "stone": 20
+        "iron": 0,
+        "wood": 0,
+        "grain": 0,
+        "stone": 0
        },
        "ratesPerHour": {
         "iron": 150,
@@ -29688,7 +30042,7 @@
         "grain": 1100,
         "stone": 1462
        },
-       "settledAt": "2026-06-01T11:08:25.000Z"
+       "settledAt": "2026-06-01T11:04:24.000Z"
       }
      },
      {
@@ -29824,7 +30178,11 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "archer": 10,
+       "spearman": 18,
+       "poison_archer": 8
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -29847,15 +30205,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 310,
-        "wood": 530,
-        "grain": 526.6666666666666,
-        "stone": 520
+        "iron": 450.5,
+        "wood": 764.5,
+        "grain": 1100,
+        "stone": 700
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 400,
+        "grain": -86.00000000000006,
         "stone": 300
        },
        "capacity": {
@@ -29864,7 +30222,7 @@
         "grain": 1100,
         "stone": 1100
        },
-       "settledAt": "2026-06-01T11:08:25.000Z"
+       "settledAt": "2026-06-01T11:07:56.200Z"
       }
      }
     ],
@@ -30083,7 +30441,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 4,
+      "id": 5,
       "front": "north",
       "leaderId": null,
       "waveId": 4,
@@ -30131,7 +30489,7 @@
       "endedAt": null
      },
      {
-      "id": 5,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -30168,7 +30526,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 1,
         "attackerLeft": 28,
         "defenderLeft": 40,
@@ -30178,7 +30536,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 2,
         "attackerLeft": 22,
         "defenderLeft": 38,
@@ -30193,7 +30551,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 3,
         "attackerLeft": 17,
         "defenderLeft": 37,
@@ -30206,7 +30564,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 4,
         "attackerLeft": 13,
         "defenderLeft": 36,
@@ -30226,8 +30584,8 @@
        "stone": 185
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:08:25.000Z",
-      "endedAt": "2026-06-01T11:08:25.000Z"
+      "startedAt": "2026-06-01T11:04:20.200Z",
+      "endedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "id": 3,
@@ -30263,7 +30621,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 1,
         "attackerLeft": 11,
         "defenderLeft": 41,
@@ -30275,7 +30633,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 2,
         "attackerLeft": 0,
         "defenderLeft": 40,
@@ -30296,8 +30654,8 @@
        "stone": 23
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:04:49.000Z",
-      "endedAt": "2026-06-01T11:04:49.000Z"
+      "startedAt": "2026-06-01T11:01:56.200Z",
+      "endedAt": "2026-06-01T11:01:56.200Z"
      },
      {
       "id": 2,
@@ -30560,106 +30918,128 @@
       "id": 1,
       "ownerAccountId": 1,
       "homeVillageId": 2,
-      "targetVillageId": null,
+      "targetVillageId": 2,
       "target": [
-       -2,
-       -8
+       -1,
+       2
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "raid",
+      "orders": "garrison",
       "stance": "balanced",
       "maneuver": "encircle",
-      "loot": {
-       "iron": 143,
-       "wood": 242,
-       "grain": 256,
-       "stone": 185
-      },
+      "loot": null,
       "units": {
        "archer": 10,
        "spearman": 18,
        "poison_archer": 8
       },
-      "status": "returning",
+      "status": "done",
       "battleId": null,
       "path": [
        [
-        -1,
-        2,
+        -2,
+        -8,
         0
        ],
        [
-        0,
-        1,
-        14400
-       ],
-       [
-        0,
-        0,
-        28800
-       ],
-       [
-        0,
         -1,
+        -8,
         43200
        ],
        [
-        0,
-        -2,
+        -1,
+        -7,
         57600
        ],
        [
-        0,
-        -3,
+        -1,
+        -6,
         72000
        ],
        [
-        0,
-        -4,
+        -1,
+        -5,
         86400
        ],
        [
-        0,
-        -5,
+        -1,
+        -4,
         100800
        ],
        [
-        0,
-        -6,
+        -1,
+        -3,
         115200
        ],
        [
-        0,
-        -7,
+        -1,
+        -2,
         129600
        ],
        [
         -1,
-        -7,
+        -1,
         144000
        ],
        [
         -1,
-        -8,
+        0,
+        158400
+       ],
+       [
+        0,
+        0,
+        172800
+       ],
+       [
+        0,
+        1,
         187200
        ],
        [
-        -2,
-        -8,
-        230400
+        -1,
+        2,
+        216000
        ]
       ],
-      "departsAt": "2026-06-01T10:57:37.000Z",
-      "arrivesAt": "2026-06-01T11:01:13.000Z",
-      "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:15.400Z",
-      "supply": 656,
-      "supplyAt": "2026-06-01T11:08:25.000Z",
+      "departsAt": "2026-06-01T11:04:20.200Z",
+      "arrivesAt": "2026-06-01T11:07:56.200Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:07:56.200Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
+       "road": [
+        {
+         "q": -2,
+         "r": -8,
+         "atMs": 0
+        },
+        {
+         "q": -2,
+         "r": -9,
+         "atMs": 43200
+        },
+        {
+         "q": -2,
+         "r": -10,
+         "atMs": 86400
+        },
+        {
+         "q": -2,
+         "r": -11,
+         "atMs": 129600
+        },
+        {
+         "q": -2,
+         "r": -12,
+         "atMs": 187200
+        }
+       ],
        "depth": 1,
        "finds": [
         "a Svarog's Ember",
@@ -30668,6 +31048,7 @@
        ],
        "front": "north",
        "stage": 2,
+       "edgeAt": "2026-06-01T11:01:13.000Z",
        "battles": [
         {
          "won": true,
@@ -30702,9 +31083,13 @@
          "kills": 17,
          "stage": 2,
          "rounds": 4,
-         "battleId": 5,
+         "battleId": 4,
          "stronghold": true
         }
+       ],
+       "stageAt": [
+        43200,
+        187200
        ]
       },
       "quarteredAt": null,
@@ -30848,7 +31233,7 @@
       "scroll": "mokosh_weave",
       "accountId": 1,
       "siteId": null,
-      "foundAt": "2026-06-01T11:08:25.000Z"
+      "foundAt": "2026-06-01T11:04:20.200Z"
      }
     ],
     "achievements": [
@@ -30869,13 +31254,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "village_ruined",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "accountId": 1,
-      "achievement": "stronghold_sacked",
-      "earnedAt": "2026-06-01T11:08:25.000Z"
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T11:04:24.000Z"
      }
     ],
     "shipyards": [
@@ -33745,12 +34130,162 @@
      "enemy": {
       "seed": 4242,
       "sight": {
-       "north": 1,
+       "north": 3,
        "south": 1
       }
      },
-     "settlements": [],
-     "bands": []
+     "settlements": [
+      {
+       "id": 7,
+       "front": "north",
+       "kind": "lair",
+       "name": "Monster lair",
+       "band": 3,
+       "q": 6,
+       "r": -16,
+       "status": "standing",
+       "level": 1,
+       "foundedAt": "2026-06-01T10:52:48.000Z"
+      }
+     ],
+     "bands": [
+      {
+       "id": 3,
+       "front": "north",
+       "kind": "patrol",
+       "status": "patrolling",
+       "units": {
+        "rusalka": 2,
+        "grey_wolf": 4,
+        "leshy_thrall": 2
+       },
+       "targetArmyId": null,
+       "departsAt": "2026-06-01T10:58:00.000Z",
+       "arrivesAt": "2026-06-01T11:22:48.000Z",
+       "path": [
+        [
+         19,
+         -18,
+         0
+        ],
+        [
+         18,
+         -18,
+         48000
+        ],
+        [
+         17,
+         -18,
+         96000
+        ],
+        [
+         16,
+         -18,
+         144000
+        ],
+        [
+         15,
+         -18,
+         216000
+        ],
+        [
+         14,
+         -18,
+         288000
+        ],
+        [
+         13,
+         -18,
+         360000
+        ],
+        [
+         12,
+         -18,
+         432000
+        ],
+        [
+         11,
+         -18,
+         504000
+        ],
+        [
+         10,
+         -18,
+         552000
+        ],
+        [
+         9,
+         -18,
+         624000
+        ],
+        [
+         8,
+         -18,
+         696000
+        ],
+        [
+         7,
+         -18,
+         768000
+        ],
+        [
+         6,
+         -18,
+         816000
+        ],
+        [
+         5,
+         -17,
+         864000
+        ],
+        [
+         4,
+         -17,
+         936000
+        ],
+        [
+         3,
+         -17,
+         1008000
+        ],
+        [
+         2,
+         -17,
+         1080000
+        ],
+        [
+         1,
+         -17,
+         1152000
+        ],
+        [
+         0,
+         -16,
+         1200000
+        ],
+        [
+         -1,
+         -16,
+         1272000
+        ],
+        [
+         -2,
+         -16,
+         1344000
+        ],
+        [
+         -3,
+         -15,
+         1416000
+        ],
+        [
+         -4,
+         -15,
+         1488000
+        ]
+       ]
+      }
+     ]
     },
     "serverTime": "2026-06-01T11:08:25.000Z"
    }
@@ -34100,10 +34635,10 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 10,
-        "wood": 30,
-        "grain": 26.666666666666668,
-        "stone": 20
+        "iron": 0,
+        "wood": 0,
+        "grain": 0,
+        "stone": 0
        },
        "ratesPerHour": {
         "iron": 150,
@@ -34117,7 +34652,7 @@
         "grain": 1100,
         "stone": 1462
        },
-       "settledAt": "2026-06-01T11:08:25.000Z"
+       "settledAt": "2026-06-01T11:04:24.000Z"
       }
      },
      {
@@ -34253,7 +34788,11 @@
        "elder_hall": 1
       },
       "queue": [],
-      "garrison": {},
+      "garrison": {
+       "archer": 10,
+       "spearman": 18,
+       "poison_archer": 8
+      },
       "away": {},
       "stance": "balanced",
       "maneuver": "encircle",
@@ -34276,15 +34815,15 @@
       "training": [],
       "resources": {
        "amounts": {
-        "iron": 310,
-        "wood": 530,
-        "grain": 526.6666666666666,
-        "stone": 520
+        "iron": 450.5,
+        "wood": 764.5,
+        "grain": 1100,
+        "stone": 700
        },
        "ratesPerHour": {
         "iron": 150,
         "wood": 450,
-        "grain": 400,
+        "grain": -86.00000000000006,
         "stone": 300
        },
        "capacity": {
@@ -34293,7 +34832,7 @@
         "grain": 1100,
         "stone": 1100
        },
-       "settledAt": "2026-06-01T11:08:25.000Z"
+       "settledAt": "2026-06-01T11:07:56.200Z"
       }
      }
     ],
@@ -34512,7 +35051,7 @@
     "ruinSearches": [],
     "battles": [
      {
-      "id": 4,
+      "id": 5,
       "front": "north",
       "leaderId": null,
       "waveId": 4,
@@ -34560,7 +35099,7 @@
       "endedAt": null
      },
      {
-      "id": 5,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -34597,7 +35136,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 1,
         "attackerLeft": 28,
         "defenderLeft": 40,
@@ -34607,7 +35146,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 2,
         "attackerLeft": 22,
         "defenderLeft": 38,
@@ -34622,7 +35161,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 3,
         "attackerLeft": 17,
         "defenderLeft": 37,
@@ -34635,7 +35174,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 4,
         "attackerLeft": 13,
         "defenderLeft": 36,
@@ -34655,8 +35194,8 @@
        "stone": 185
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:08:25.000Z",
-      "endedAt": "2026-06-01T11:08:25.000Z"
+      "startedAt": "2026-06-01T11:04:20.200Z",
+      "endedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "id": 3,
@@ -34692,7 +35231,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 1,
         "attackerLeft": 11,
         "defenderLeft": 41,
@@ -34704,7 +35243,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 2,
         "attackerLeft": 0,
         "defenderLeft": 40,
@@ -34725,8 +35264,8 @@
        "stone": 23
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:04:49.000Z",
-      "endedAt": "2026-06-01T11:04:49.000Z"
+      "startedAt": "2026-06-01T11:01:56.200Z",
+      "endedAt": "2026-06-01T11:01:56.200Z"
      },
      {
       "id": 2,
@@ -34989,106 +35528,128 @@
       "id": 1,
       "ownerAccountId": 1,
       "homeVillageId": 2,
-      "targetVillageId": null,
+      "targetVillageId": 2,
       "target": [
-       -2,
-       -8
+       -1,
+       2
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "raid",
+      "orders": "garrison",
       "stance": "balanced",
       "maneuver": "encircle",
-      "loot": {
-       "iron": 143,
-       "wood": 242,
-       "grain": 256,
-       "stone": 185
-      },
+      "loot": null,
       "units": {
        "archer": 10,
        "spearman": 18,
        "poison_archer": 8
       },
-      "status": "returning",
+      "status": "done",
       "battleId": null,
       "path": [
        [
-        -1,
-        2,
+        -2,
+        -8,
         0
        ],
        [
-        0,
-        1,
-        14400
-       ],
-       [
-        0,
-        0,
-        28800
-       ],
-       [
-        0,
         -1,
+        -8,
         43200
        ],
        [
-        0,
-        -2,
+        -1,
+        -7,
         57600
        ],
        [
-        0,
-        -3,
+        -1,
+        -6,
         72000
        ],
        [
-        0,
-        -4,
+        -1,
+        -5,
         86400
        ],
        [
-        0,
-        -5,
+        -1,
+        -4,
         100800
        ],
        [
-        0,
-        -6,
+        -1,
+        -3,
         115200
        ],
        [
-        0,
-        -7,
+        -1,
+        -2,
         129600
        ],
        [
         -1,
-        -7,
+        -1,
         144000
        ],
        [
         -1,
-        -8,
+        0,
+        158400
+       ],
+       [
+        0,
+        0,
+        172800
+       ],
+       [
+        0,
+        1,
         187200
        ],
        [
-        -2,
-        -8,
-        230400
+        -1,
+        2,
+        216000
        ]
       ],
-      "departsAt": "2026-06-01T10:57:37.000Z",
-      "arrivesAt": "2026-06-01T11:01:13.000Z",
-      "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:15.400Z",
-      "supply": 656,
-      "supplyAt": "2026-06-01T11:08:25.000Z",
+      "departsAt": "2026-06-01T11:04:20.200Z",
+      "arrivesAt": "2026-06-01T11:07:56.200Z",
+      "leavesAt": null,
+      "returnsAt": null,
+      "supply": 0,
+      "supplyAt": "2026-06-01T11:07:56.200Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
+       "road": [
+        {
+         "q": -2,
+         "r": -8,
+         "atMs": 0
+        },
+        {
+         "q": -2,
+         "r": -9,
+         "atMs": 43200
+        },
+        {
+         "q": -2,
+         "r": -10,
+         "atMs": 86400
+        },
+        {
+         "q": -2,
+         "r": -11,
+         "atMs": 129600
+        },
+        {
+         "q": -2,
+         "r": -12,
+         "atMs": 187200
+        }
+       ],
        "depth": 1,
        "finds": [
         "a Svarog's Ember",
@@ -35097,6 +35658,7 @@
        ],
        "front": "north",
        "stage": 2,
+       "edgeAt": "2026-06-01T11:01:13.000Z",
        "battles": [
         {
          "won": true,
@@ -35131,9 +35693,13 @@
          "kills": 17,
          "stage": 2,
          "rounds": 4,
-         "battleId": 5,
+         "battleId": 4,
          "stronghold": true
         }
+       ],
+       "stageAt": [
+        43200,
+        187200
        ]
       },
       "quarteredAt": null,
@@ -35277,7 +35843,7 @@
       "scroll": "mokosh_weave",
       "accountId": 1,
       "siteId": null,
-      "foundAt": "2026-06-01T11:08:25.000Z"
+      "foundAt": "2026-06-01T11:04:20.200Z"
      }
     ],
     "achievements": [
@@ -35298,13 +35864,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "village_ruined",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "accountId": 1,
-      "achievement": "stronghold_sacked",
-      "earnedAt": "2026-06-01T11:08:25.000Z"
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T11:04:24.000Z"
      }
     ],
     "shipyards": [
@@ -38174,12 +38740,162 @@
      "enemy": {
       "seed": 4242,
       "sight": {
-       "north": 1,
+       "north": 3,
        "south": 1
       }
      },
-     "settlements": [],
-     "bands": []
+     "settlements": [
+      {
+       "id": 7,
+       "front": "north",
+       "kind": "lair",
+       "name": "Monster lair",
+       "band": 3,
+       "q": 6,
+       "r": -16,
+       "status": "standing",
+       "level": 1,
+       "foundedAt": "2026-06-01T10:52:48.000Z"
+      }
+     ],
+     "bands": [
+      {
+       "id": 3,
+       "front": "north",
+       "kind": "patrol",
+       "status": "patrolling",
+       "units": {
+        "rusalka": 2,
+        "grey_wolf": 4,
+        "leshy_thrall": 2
+       },
+       "targetArmyId": null,
+       "departsAt": "2026-06-01T10:58:00.000Z",
+       "arrivesAt": "2026-06-01T11:22:48.000Z",
+       "path": [
+        [
+         19,
+         -18,
+         0
+        ],
+        [
+         18,
+         -18,
+         48000
+        ],
+        [
+         17,
+         -18,
+         96000
+        ],
+        [
+         16,
+         -18,
+         144000
+        ],
+        [
+         15,
+         -18,
+         216000
+        ],
+        [
+         14,
+         -18,
+         288000
+        ],
+        [
+         13,
+         -18,
+         360000
+        ],
+        [
+         12,
+         -18,
+         432000
+        ],
+        [
+         11,
+         -18,
+         504000
+        ],
+        [
+         10,
+         -18,
+         552000
+        ],
+        [
+         9,
+         -18,
+         624000
+        ],
+        [
+         8,
+         -18,
+         696000
+        ],
+        [
+         7,
+         -18,
+         768000
+        ],
+        [
+         6,
+         -18,
+         816000
+        ],
+        [
+         5,
+         -17,
+         864000
+        ],
+        [
+         4,
+         -17,
+         936000
+        ],
+        [
+         3,
+         -17,
+         1008000
+        ],
+        [
+         2,
+         -17,
+         1080000
+        ],
+        [
+         1,
+         -17,
+         1152000
+        ],
+        [
+         0,
+         -16,
+         1200000
+        ],
+        [
+         -1,
+         -16,
+         1272000
+        ],
+        [
+         -2,
+         -16,
+         1344000
+        ],
+        [
+         -3,
+         -15,
+         1416000
+        ],
+        [
+         -4,
+         -15,
+         1488000
+        ]
+       ]
+      }
+     ]
     },
     "serverTime": "2026-06-01T11:12:01.000Z"
    }
@@ -38532,7 +39248,7 @@
        "amounts": {
         "iron": 42.5,
         "wood": 127.5,
-        "grain": 113.33333333333334,
+        "grain": 113.33333333333333,
         "stone": 85
        },
        "ratesPerHour": {
@@ -38713,7 +39429,7 @@
        "amounts": {
         "iron": 493,
         "wood": 892,
-        "grain": 1062.8,
+        "grain": 1055.6333333333334,
         "stone": 785
        },
        "ratesPerHour": {
@@ -39080,7 +39796,7 @@
       "endedAt": null
      },
      {
-      "id": 4,
+      "id": 5,
       "front": "north",
       "leaderId": null,
       "waveId": 4,
@@ -39097,7 +39813,7 @@
         }
        },
        "guard": {
-        "archer": 6,
+        "archer": 7,
         "spearman": 18
        },
        "holyCity": true
@@ -39113,7 +39829,7 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 3,
+       "grey_wolf": 4,
        "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
@@ -39135,14 +39851,14 @@
        {
         "at": "2026-06-01T11:25:36.000Z",
         "round": 2,
-        "attackerLeft": 9,
-        "defenderLeft": 24,
+        "attackerLeft": 10,
+        "defenderLeft": 25,
         "attackerLosses": {
          "rusalka": 1,
-         "grey_wolf": 3
+         "grey_wolf": 2
         },
         "defenderLosses": {
-         "archer": 5,
+         "archer": 4,
          "spearman": 4
         }
        }
@@ -39153,7 +39869,7 @@
       "endedAt": null
      },
      {
-      "id": 5,
+      "id": 4,
       "front": null,
       "leaderId": null,
       "waveId": null,
@@ -39190,7 +39906,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 1,
         "attackerLeft": 28,
         "defenderLeft": 40,
@@ -39200,7 +39916,7 @@
         "defenderLosses": {}
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 2,
         "attackerLeft": 22,
         "defenderLeft": 38,
@@ -39215,7 +39931,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 3,
         "attackerLeft": 17,
         "defenderLeft": 37,
@@ -39228,7 +39944,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:08:25.000Z",
+        "at": "2026-06-01T11:04:20.200Z",
         "round": 4,
         "attackerLeft": 13,
         "defenderLeft": 36,
@@ -39248,8 +39964,8 @@
        "stone": 185
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:08:25.000Z",
-      "endedAt": "2026-06-01T11:08:25.000Z"
+      "startedAt": "2026-06-01T11:04:20.200Z",
+      "endedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "id": 3,
@@ -39285,7 +40001,7 @@
       },
       "rounds": [
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 1,
         "attackerLeft": 11,
         "defenderLeft": 41,
@@ -39297,7 +40013,7 @@
         }
        },
        {
-        "at": "2026-06-01T11:04:49.000Z",
+        "at": "2026-06-01T11:01:56.200Z",
         "round": 2,
         "attackerLeft": 0,
         "defenderLeft": 40,
@@ -39318,8 +40034,8 @@
        "stone": 23
       },
       "decision": null,
-      "startedAt": "2026-06-01T11:04:49.000Z",
-      "endedAt": "2026-06-01T11:04:49.000Z"
+      "startedAt": "2026-06-01T11:01:56.200Z",
+      "endedAt": "2026-06-01T11:01:56.200Z"
      },
      {
       "id": 2,
@@ -39364,7 +40080,7 @@
       },
       "attackerNow": {
        "rusalka": 3,
-       "grey_wolf": 3,
+       "grey_wolf": 4,
        "leshy_thrall": 2,
        "chernobog_avatar": 1
       },
@@ -39607,14 +40323,14 @@
       "id": 1,
       "ownerAccountId": 1,
       "homeVillageId": 2,
-      "targetVillageId": null,
+      "targetVillageId": 2,
       "target": [
-       -2,
-       -8
+       -1,
+       2
       ],
       "heroAccountId": null,
       "generalId": null,
-      "orders": "raid",
+      "orders": "garrison",
       "stance": "balanced",
       "maneuver": "encircle",
       "loot": null,
@@ -39627,81 +40343,108 @@
       "battleId": null,
       "path": [
        [
-        -1,
-        2,
+        -2,
+        -8,
         0
        ],
        [
-        0,
-        1,
-        14400
-       ],
-       [
-        0,
-        0,
-        28800
-       ],
-       [
-        0,
         -1,
+        -8,
         43200
        ],
        [
-        0,
-        -2,
+        -1,
+        -7,
         57600
        ],
        [
-        0,
-        -3,
+        -1,
+        -6,
         72000
        ],
        [
-        0,
-        -4,
+        -1,
+        -5,
         86400
        ],
        [
-        0,
-        -5,
+        -1,
+        -4,
         100800
        ],
        [
-        0,
-        -6,
+        -1,
+        -3,
         115200
        ],
        [
-        0,
-        -7,
+        -1,
+        -2,
         129600
        ],
        [
         -1,
-        -7,
+        -1,
         144000
        ],
        [
         -1,
-        -8,
+        0,
+        158400
+       ],
+       [
+        0,
+        0,
+        172800
+       ],
+       [
+        0,
+        1,
         187200
        ],
        [
-        -2,
-        -8,
-        230400
+        -1,
+        2,
+        216000
        ]
       ],
-      "departsAt": "2026-06-01T10:57:37.000Z",
-      "arrivesAt": "2026-06-01T11:01:13.000Z",
-      "leavesAt": "2026-06-01T11:08:25.000Z",
-      "returnsAt": "2026-06-01T11:12:15.400Z",
+      "departsAt": "2026-06-01T11:04:20.200Z",
+      "arrivesAt": "2026-06-01T11:07:56.200Z",
+      "leavesAt": null,
+      "returnsAt": null,
       "supply": 0,
-      "supplyAt": "2026-06-01T11:12:15.400Z",
+      "supplyAt": "2026-06-01T11:07:56.200Z",
       "hungrySince": null,
       "wagonFortAt": null,
       "returnHome": false,
       "raid": {
+       "road": [
+        {
+         "q": -2,
+         "r": -8,
+         "atMs": 0
+        },
+        {
+         "q": -2,
+         "r": -9,
+         "atMs": 43200
+        },
+        {
+         "q": -2,
+         "r": -10,
+         "atMs": 86400
+        },
+        {
+         "q": -2,
+         "r": -11,
+         "atMs": 129600
+        },
+        {
+         "q": -2,
+         "r": -12,
+         "atMs": 187200
+        }
+       ],
        "depth": 1,
        "finds": [
         "a Svarog's Ember",
@@ -39710,6 +40453,7 @@
        ],
        "front": "north",
        "stage": 2,
+       "edgeAt": "2026-06-01T11:01:13.000Z",
        "battles": [
         {
          "won": true,
@@ -39744,9 +40488,13 @@
          "kills": 17,
          "stage": 2,
          "rounds": 4,
-         "battleId": 5,
+         "battleId": 4,
          "stronghold": true
         }
+       ],
+       "stageAt": [
+        43200,
+        187200
        ]
       },
       "quarteredAt": null,
@@ -39909,7 +40657,7 @@
       "scroll": "mokosh_weave",
       "accountId": 1,
       "siteId": null,
-      "foundAt": "2026-06-01T11:08:25.000Z"
+      "foundAt": "2026-06-01T11:04:20.200Z"
      }
     ],
     "achievements": [
@@ -39930,13 +40678,13 @@
      },
      {
       "accountId": 1,
-      "achievement": "village_ruined",
-      "earnedAt": "2026-06-01T11:04:24.000Z"
+      "achievement": "stronghold_sacked",
+      "earnedAt": "2026-06-01T11:04:20.200Z"
      },
      {
       "accountId": 1,
-      "achievement": "stronghold_sacked",
-      "earnedAt": "2026-06-01T11:08:25.000Z"
+      "achievement": "village_ruined",
+      "earnedAt": "2026-06-01T11:04:24.000Z"
      }
     ],
     "shipyards": [],
@@ -42831,12 +43579,112 @@
      "enemy": {
       "seed": 4242,
       "sight": {
-       "north": 1,
+       "north": 3,
        "south": 1
       }
      },
-     "settlements": [],
-     "bands": []
+     "settlements": [
+      {
+       "id": 7,
+       "front": "north",
+       "kind": "lair",
+       "name": "Monster lair",
+       "band": 3,
+       "q": 6,
+       "r": -16,
+       "status": "standing",
+       "level": 2,
+       "foundedAt": "2026-06-01T10:52:48.000Z"
+      }
+     ],
+     "bands": [
+      {
+       "id": 1,
+       "front": "north",
+       "kind": "patrol",
+       "status": "patrolling",
+       "units": {
+        "rusalka": 2,
+        "grey_wolf": 4,
+        "leshy_thrall": 2
+       },
+       "targetArmyId": null,
+       "departsAt": "2026-06-01T11:31:12.000Z",
+       "arrivesAt": "2026-06-01T11:44:48.000Z",
+       "path": [
+        [
+         6,
+         -16,
+         0
+        ],
+        [
+         7,
+         -16,
+         72000
+        ],
+        [
+         8,
+         -16,
+         144000
+        ],
+        [
+         9,
+         -17,
+         192000
+        ],
+        [
+         10,
+         -18,
+         240000
+        ],
+        [
+         11,
+         -18,
+         312000
+        ],
+        [
+         12,
+         -18,
+         384000
+        ],
+        [
+         13,
+         -18,
+         456000
+        ],
+        [
+         14,
+         -18,
+         528000
+        ],
+        [
+         15,
+         -18,
+         600000
+        ],
+        [
+         16,
+         -18,
+         648000
+        ],
+        [
+         17,
+         -18,
+         696000
+        ],
+        [
+         18,
+         -18,
+         744000
+        ],
+        [
+         19,
+         -18,
+         816000
+        ]
+       ]
+      }
+     ]
     },
     "serverTime": "2026-06-01T11:26:25.000Z"
    }
@@ -42898,29 +43746,11 @@
       "tier": "push",
       "title": "The campaign against the Monsters of the North is over",
       "body": "2 of 2 battles won; 826 resources brought home. The full report is in the Raid tab.",
-      "createdAt": "2026-06-01T11:12:15.400Z",
+      "createdAt": "2026-06-01T11:07:56.200Z",
       "read": false
      },
      {
       "id": 37,
-      "kind": "battle_result",
-      "tier": "push",
-      "title": "Your raid sacked the Monster Lair",
-      "body": "It comes home with 826 resources and Mail Shirt, the scroll \"Weave of Mokosh\".",
-      "createdAt": "2026-06-01T11:08:25.000Z",
-      "read": false
-     },
-     {
-      "id": 36,
-      "kind": "achievement",
-      "tier": "push",
-      "title": "Achievement: To the Heart of Nav",
-      "body": "Sack a stronghold beyond the border.",
-      "createdAt": "2026-06-01T11:08:25.000Z",
-      "read": false
-     },
-     {
-      "id": 35,
       "kind": "under_attack",
       "tier": "push",
       "title": "A horde is at the Holy City",
@@ -42929,16 +43759,7 @@
       "read": false
      },
      {
-      "id": 34,
-      "kind": "battle_result",
-      "tier": "digest",
-      "title": "Your raid won the battle of the Frozen Marsh",
-      "body": "13 of the enemy fell; it carries 112 resources and a Svarog's Ember and marches on.",
-      "createdAt": "2026-06-01T11:04:49.000Z",
-      "read": false
-     },
-     {
-      "id": 33,
+      "id": 36,
       "kind": "refuge",
       "tier": "push",
       "title": "A refuge by the Holy City",
@@ -42947,7 +43768,7 @@
       "read": false
      },
      {
-      "id": 32,
+      "id": 35,
       "kind": "achievement",
       "tier": "push",
       "title": "Achievement: Ashes",
@@ -42956,12 +43777,39 @@
       "read": false
      },
      {
-      "id": 31,
+      "id": 34,
       "kind": "razed",
       "tier": "push",
       "title": "Vruchiy was razed",
       "body": "Only ruins are left. Rebuild them, or start over from what remains.",
       "createdAt": "2026-06-01T11:04:24.000Z",
+      "read": false
+     },
+     {
+      "id": 33,
+      "kind": "battle_result",
+      "tier": "push",
+      "title": "Your raid sacked the Monster Lair",
+      "body": "It comes home with 826 resources and Mail Shirt, the scroll \"Weave of Mokosh\".",
+      "createdAt": "2026-06-01T11:04:20.200Z",
+      "read": false
+     },
+     {
+      "id": 32,
+      "kind": "achievement",
+      "tier": "push",
+      "title": "Achievement: To the Heart of Nav",
+      "body": "Sack a stronghold beyond the border.",
+      "createdAt": "2026-06-01T11:04:20.200Z",
+      "read": false
+     },
+     {
+      "id": 31,
+      "kind": "battle_result",
+      "tier": "digest",
+      "title": "Your raid won the battle of the Frozen Marsh",
+      "body": "13 of the enemy fell; it carries 112 resources and a Svarog's Ember and marches on.",
+      "createdAt": "2026-06-01T11:01:56.200Z",
       "read": false
      },
      {

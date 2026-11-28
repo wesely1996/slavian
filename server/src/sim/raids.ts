@@ -4,12 +4,16 @@
 import type { GameData, Stance, TerrainId } from '../data/index.js';
 import { linesFor, linesLog, type LineSetup, type LineState, type Move, type SideId } from './lines.js';
 import { battleOutcome, battleRng, enemyStats, NO_AFFLICTIONS, resolveRound, subtractUnits, total, type Champion, type UnitStats } from './battle.js';
-import { hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
+import { findPath, hex, hexDistance, hexKey, ring, type Hex } from './hex.js';
+import { bandOf as enemyBand, enemyLands } from './enemyLands.js';
+import { fastestStep, moveCostOn, type Land } from './land.js';
 import { frontOf, type Front } from './mapgen.js';
 import { mapResources, type Resources } from './resources.js';
 import { createRng } from './rng.js';
-import { composeWave } from './waves.js';
+import { composeWave, type PathStep } from './waves.js';
 import type { Units } from './training.js';
+
+const MS_PER_HOUR = 3_600_000;
 
 export interface RaidField {
   name: string;
@@ -204,4 +208,71 @@ export function northFinds(data: GameData, input: { stronghold: boolean; seed: n
   const out: RaidFind[] = [];
   for (const type of ['gear', 'scroll', 'ember'] as const) if (rng() < Math.min(1, rules.finds[type] * factor)) out.push({ type });
   return out;
+}
+
+// How much longer a step into fog takes for an army with `scouts`: up to
+// road.fogFactor, each scout cutting scoutCut of the extra.
+export function fogFactor(data: GameData, scouts: number): number {
+  const road = data.raids.road;
+  return 1 + (road.fogFactor - 1) * Math.max(0, 1 - road.scoutCut * scouts);
+}
+
+// The road a raid marches into the front's lands from the edge hex
+// `from`: straight deeper (to the nearest hex of band `toBand` it can
+// reach), on `land` at `hexesPerHour`, steps into bands beyond `sight`
+// taking fogFactor as long. Null when none leads there.
+export function raidRoad(
+  data: GameData,
+  input: {
+    land: Land;
+    world: { seed: number; radius: number | null; activeFronts: readonly string[] };
+    from: Hex;
+    front: string;
+    toBand: number;
+    sight: number;
+    scouts: number;
+    hexesPerHour: number;
+    worldSpeed: number;
+  },
+): PathStep[] | null {
+  const { world } = input;
+  if (world.radius === null) return null;
+  const lands = enemyLands(data, world.seed, world.radius, world.activeFronts as Front[]);
+  const bandAt = new Map(lands.map((e) => [hexKey(e.cell), e.band]));
+  const moveCost = moveCostOn(data, input.land);
+  const fog = fogFactor(data, input.scouts);
+  const cost = (p: Hex, q: Hex): number | null => {
+    const c = moveCost(p, q);
+    if (c === null) return null;
+    return (bandAt.get(hexKey(q)) ?? 0) > input.sight ? c * fog : c;
+  };
+  const goals = lands
+    .map((e, i) => ({ e, i }))
+    .filter(({ e }) => e.front === input.front && e.band === input.toBand && data.terrain.terrain[e.terrain].moveCost !== null)
+    .sort((x, y) => hexDistance(x.e.cell, input.from) - hexDistance(y.e.cell, input.from) || x.i - y.i)
+    .slice(0, 8);
+  for (const { e } of goals) {
+    const path = findPath(input.from, e.cell, cost, fastestStep(data, input.land));
+    if (!path) continue;
+    const msPerCost = MS_PER_HOUR / input.hexesPerHour / input.worldSpeed;
+    let atMs = 0;
+    return path.map((cell, i) => {
+      if (i > 0) atMs += cost(path[i - 1]!, cell)! * msPerCost;
+      return { q: cell.q, r: cell.r, atMs: Math.max(i, Math.round(atMs)) };
+    });
+  }
+  return null;
+}
+
+// When each stage comes along the road (ms after it set out from the edge):
+// field battle i as it enters band i, the stronghold at the road's end.
+export function raidStageTimes(data: GameData, world: { seed: number; radius: number | null; activeFronts: readonly string[] }, road: readonly PathStep[], depth: number): number[] {
+  const bandOf = (s: PathStep) => (world.radius === null ? 0 : (enemyBand(data, hex(s.q, s.r), world.radius) ?? 0));
+  const times: number[] = [];
+  for (let stage = 1; stage <= depth; stage++) {
+    const step = road.find((s) => bandOf(s) >= stage) ?? road.at(-1)!;
+    times.push(step.atMs);
+  }
+  times.push(road.at(-1)!.atMs);
+  return times;
 }
