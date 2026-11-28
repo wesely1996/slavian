@@ -1,6 +1,6 @@
 # State machines
 
-Documented for version: 0.24.0
+Documented for version: 0.25.0
 
 Most things in a world move through a lifecycle kept in a `status` column
 (server `src/db/*.ts`, mirrored by the solo engine in
@@ -87,7 +87,7 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-  [*] --> ongoing: a horde reaches a village, the Holy City, a holding army or a manned fort; an army storms a camp, a site or a raid stage
+  [*] --> ongoing: a horde reaches a village, the Holy City, a holding army or a manned fort; an army storms a camp, a site or a raid stage; an enemy war band catches an army
   ongoing --> ongoing: battle_round (every 10 real minutes, at most 12)
   ongoing --> defended: the horde breaks (village, field, Holy City)
   ongoing --> raided: the horde wins (then raid or raze)
@@ -101,8 +101,9 @@ stateDiagram-v2
   repelled --> [*]
 ```
 
-Fights resolved at once (camps, sites, raid stages) go from `ongoing` to
-their end in the same handler. A maneuver under way and a breakthrough
+Fights resolved at once (camps, sites, raid stages, war bands) go from
+`ongoing` to their end in the same handler: a war band's is `defended` when
+the army beats it off, `raided` when the band wins. A maneuver under way and a breakthrough
 (battle.json lines) ride in the battle's setup (`lines`), not its status.
 
 ## Army
@@ -125,7 +126,7 @@ stateDiagram-v2
   engaged --> marching: goes back to where it stood (answered a battle)
   returning --> marching: move (turned), shelter after its home is razed
   returning --> done: army_return (troops, grain and loot into the garrison)
-  stationed --> done: army_hunger (24 game hours without food)
+  stationed --> done: army_hunger (24 game hours without food), or none left after a war band's battle
   marching --> done: army_hunger
   done --> [*]
 ```
@@ -143,7 +144,11 @@ stateDiagram-v2
 - **Enemy lands.** An army can march to and hold a hex beyond the map's edge
   (`sim/enemyLands.ts`), with the same states as on the map. Arriving in a
   band of a front's enemy lands reveals the band past it (`enemy_sight` on
-  the world, not a status).
+  the world, not a status). There the enemy's scouts watch for it, and the
+  war bands they send fight it where it stands ([below](#enemy-war-band)).
+- **Raids.** A raiding army stands `stationed` at the map's edge while it
+  marches its road into the enemy lands (`raid.road`, `raid.stageAt`): its
+  stages come along the road, not as a status.
 
 ## Hero
 
@@ -255,7 +260,8 @@ stateDiagram-v2
 ```
 
 `kind` (`wall` or `gate`) is fixed when it is first built. A wall still
-`building` stands in nobody's way.
+`building` stands in nobody's way. A river edge holds one on each bank
+(`side`), each with its own state; a horde crossing tears down both.
 
 ## Enemy war band
 
@@ -271,6 +277,11 @@ stateDiagram-v2
   patrolling --> patrolling: band_arrive (its next leg)
   returning --> [*]: band_arrive home (a sally)
 ```
+
+A patrol rests at each settlement before its next leg (`departs_at` ahead
+of now, still `patrolling`). The settlements themselves (`enemy_settlements`)
+only stand for now: they are founded (`enemy_found`), grow a level a game
+day and build their works (`enemy_works`), with no other state.
 
 ## River crossing
 
